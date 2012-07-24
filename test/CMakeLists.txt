@@ -219,35 +219,9 @@ add_executable(  unit
 )
 
 IF( WIN32 )
-	SET( PSDK_PATH "C:/Program Files/Microsoft Platform SDK/Bin" )
-	SET( PSDK_INC "C:/Program Files/Microsoft Platform SDK/Include" )
-
-	FIND_PATH(DX9_INCLUDE_PATH d3d9.h
-		PATHS
-			"$ENV{DXSDK_DIR}/Include"
-			"$ENV{PROGRAMFILES}/Microsoft DirectX SDK/Include"
-		DOC "The directory where D3D9.h resides")
-
-	FIND_LIBRARY(D3D9_LIBRARY d3d9.lib
-		PATHS
-			"$ENV{DXSDK_DIR}/Lib/x86"
-			"$ENV{PROGRAMFILES}/Microsoft DirectX SDK/Lib/x86"
-		DOC "The directory where d3d9.lib resides")
-
-	FIND_LIBRARY(D3DX9_LIBRARY d3dx9.lib
-		PATHS
-			"$ENV{DXSDK_DIR}/Lib/x86"
-			"$ENV{PROGRAMFILES}/Microsoft DirectX SDK/Lib/x86"
-		DOC "The directory where d3dx9.lib resides")
-
-	SET( DX9_LIBRARIES ${D3D9_LIBRARY} ${D3DX9_LIBRARY} )
-	
-	FIND_LIBRARY( WIN32_COMCTRL comctl32.lib 
-		PATHS 
-			"C:/Programme/Microsoft Platform SDK for Windows Server 2003 R2/Lib" 	
-		DOC "Path to psdk"
-	) 
+	FIND_PACKAGE(DirectX REQUIRED)
 ENDIF( WIN32 )
+SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
 # TODO: Port to non-Windows platforms.
-target_link_libraries ( unit assimp ${DX9_LIBRARIES} comctl32.lib Winmm.lib ) 
+target_link_libraries ( unit assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib Winmm.lib ) 

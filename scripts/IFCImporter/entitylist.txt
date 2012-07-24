@@ -94,6 +94,7 @@ IfcSurfaceStyleRendering
 IfcSurfaceStyleShading
 IfcSurfaceStyleWithTextures
 IfcSweptAreaSolid
+IfcSweptDiskSolid
 IfcTopologicalRepresentationItem
 IfcTrimmedCurve
 IfcUnit

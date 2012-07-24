@@ -1,7 +1,21 @@
+FIND_PACKAGE(OpenGL)
+FIND_PACKAGE(GLUT)
+
+IF ( NOT GLUT_FOUND )
+	IF ( MSVC )
+		SET ( GLUT_FOUND 1 )
+		SET ( GLUT_INCLUDE_DIR ${Assimp_SOURCE_DIR}/samples/glut/ )
+		SET ( GLUT_LIBRARIES ${Assimp_SOURCE_DIR}/samples/glut/glut32.lib )
+	ELSE ( MSVC )
+		MESSAGE( WARNING "Please install glut." )
+	ENDIF ( MSVC )
+ENDIF ( NOT GLUT_FOUND )
+
 INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/include
 	${Assimp_SOURCE_DIR}/code
-	${Assimp_SOURCE_DIR}/samples/glut/
+	${OPENGL_INCLUDE_DIR}
+	${GLUT_INCLUDE_DIR}
 	${Assimp_SOURCE_DIR}/samples/DevIL/include/
 )
 
@@ -17,26 +31,14 @@ ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
 	SimpleTexturedOpenGL/src/model_loading.cpp
 )
 
-SET_PROPERTY(TARGET assimp_simpletexturedogl PROPERTY DEBUG_POSTFIX ${DEBUG_POSTFIX})
+SET_PROPERTY(TARGET assimp_simpletexturedogl PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
-IF( WIN32 )
-	SET( PSDK_PATH "C:/Program Files/Microsoft Platform SDK/Bin" )
-	SET( PSDK_INC "C:/Program Files/Microsoft Platform SDK/Include" )
-	
-	FIND_LIBRARY( WIN32_COMCTRL comctl32.lib 
-		PATHS 
-			"C:/Programme/Microsoft Platform SDK for Windows Server 2003 R2/Lib" 	
-		DOC "Path to psdk"
-	) 
-ENDIF( WIN32 )
-
-
-TARGET_LINK_LIBRARIES( assimp_simpletexturedogl assimp opengl32.lib glu32.lib comctl32.lib devil.lib )
+TARGET_LINK_LIBRARIES( assimp_simpletexturedogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} DevIL.lib )
 
 SET_TARGET_PROPERTIES( assimp_simpletexturedogl PROPERTIES
 	OUTPUT_NAME assimp_simpletexturedogl
 )
 
 INSTALL( TARGETS assimp_simpletexturedogl
-	DESTINATION "${BIN_INSTALL_DIR}" COMPONENT assimp-dev
+	DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-dev
 ) 

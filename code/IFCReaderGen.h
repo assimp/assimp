@@ -1,8 +1,8 @@
 /*
-Open Asset Import Library (assimp)
+Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2010, ASSIMP Development Team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms, 
@@ -18,10 +18,10 @@ following conditions are met:
   following disclaimer in the documentation and/or other
   materials provided with the distribution.
 
-* Neither the name of the assimp team, nor the names of its
+* Neither the name of the ASSIMP team, nor the names of its
   contributors may be used to endorse or promote products
   derived from this software without specific prior
-  written permission of the assimp team.
+  written permission of the ASSIMP Development Team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
@@ -149,8 +149,6 @@ namespace IFC {
     typedef ENUMERATION IfcThermalLoadTypeEnum;
     // C++ wrapper type for IfcIonConcentrationMeasure
     typedef REAL IfcIonConcentrationMeasure;
-    // C++ wrapper type for IfcObjectReferenceSelect
-    typedef SELECT IfcObjectReferenceSelect;
     // C++ wrapper type for IfcClassificationNotationSelect
     typedef SELECT IfcClassificationNotationSelect;
     // C++ wrapper type for IfcBSplineCurveForm
@@ -273,6 +271,8 @@ namespace IFC {
     typedef REAL IfcRadioActivityMeasure;
     // C++ wrapper type for IfcSymbolStyleSelect
     typedef SELECT IfcSymbolStyleSelect;
+    // C++ wrapper type for IfcObjectReferenceSelect
+    typedef SELECT IfcObjectReferenceSelect;
     // C++ wrapper type for IfcRoofTypeEnum
     typedef ENUMERATION IfcRoofTypeEnum;
     // C++ wrapper type for IfcReal
@@ -293,6 +293,8 @@ namespace IFC {
     typedef ENUMERATION IfcTransformerTypeEnum;
     // C++ wrapper type for IfcSurfaceSide
     typedef ENUMERATION IfcSurfaceSide;
+    // C++ wrapper type for IfcSpaceHeaterTypeEnum
+    typedef ENUMERATION IfcSpaceHeaterTypeEnum;
     // C++ wrapper type for IfcThermalTransmittanceMeasure
     typedef REAL IfcThermalTransmittanceMeasure;
     // C++ wrapper type for IfcTubeBundleTypeEnum
@@ -433,8 +435,6 @@ namespace IFC {
     typedef ENUMERATION IfcBeamTypeEnum;
     // C++ wrapper type for IfcStateEnum
     typedef ENUMERATION IfcStateEnum;
-    // C++ wrapper type for IfcSpaceHeaterTypeEnum
-    typedef ENUMERATION IfcSpaceHeaterTypeEnum;
     // C++ wrapper type for IfcSectionTypeEnum
     typedef ENUMERATION IfcSectionTypeEnum;
     // C++ wrapper type for IfcFootingTypeEnum
@@ -719,6 +719,9 @@ namespace IFC {
 	// IFC Entities
 	// ******************************************************************************
 
+	struct IfcProfileDef;
+	struct IfcParameterizedProfileDef;
+	struct IfcZShapeProfileDef;
 	struct IfcRoot;
 	struct IfcObjectDefinition;
 	struct IfcTypeObject;
@@ -803,7 +806,6 @@ namespace IFC {
 	typedef NotImplemented IfcPreDefinedItem; // (not currently used by Assimp)
 	typedef NotImplemented IfcPreDefinedColour; // (not currently used by Assimp)
 	typedef NotImplemented IfcDraughtingPreDefinedColour; // (not currently used by Assimp)
-	struct IfcProfileDef;
 	struct IfcArbitraryClosedProfileDef;
 	struct IfcCurve;
 	struct IfcConic;
@@ -890,6 +892,7 @@ namespace IFC {
 	struct IfcAxis1Placement;
 	typedef NotImplemented IfcLightIntensityDistribution; // (not currently used by Assimp)
 	typedef NotImplemented IfcPreDefinedSymbol; // (not currently used by Assimp)
+	struct IfcColourSpecification;
 	struct IfcStructuralPointAction;
 	struct IfcSpatialStructureElement;
 	struct IfcSpace;
@@ -923,7 +926,6 @@ namespace IFC {
 	struct IfcVertex;
 	struct IfcVertexPoint;
 	struct IfcFlowInstrumentType;
-	struct IfcParameterizedProfileDef;
 	struct IfcUShapeProfileDef;
 	struct IfcRamp;
 	typedef NotImplemented IfcFillAreaStyle; // (not currently used by Assimp)
@@ -1209,7 +1211,6 @@ namespace IFC {
 	struct IfcRelAggregates;
 	struct IfcBoilerType;
 	typedef NotImplemented IfcRelProjectsElement; // (not currently used by Assimp)
-	struct IfcColourSpecification;
 	struct IfcColourRgb;
 	typedef NotImplemented IfcRelConnectsStructuralActivity; // (not currently used by Assimp)
 	struct IfcDoorStyle;
@@ -1221,7 +1222,6 @@ namespace IFC {
 	struct IfcSensorType;
 	struct IfcAirTerminalBoxType;
 	struct IfcAnnotationSurfaceOccurrence;
-	struct IfcZShapeProfileDef;
 	typedef NotImplemented IfcClassificationNotation; // (not currently used by Assimp)
 	struct IfcRationalBezierCurve;
 	struct IfcCartesianTransformationOperator2D;
@@ -1374,6 +1374,27 @@ namespace IFC {
 	struct IfcRepresentationMap;
 
 
+
+    // C++ wrapper for IfcProfileDef
+    struct IfcProfileDef :  ObjectHelper<IfcProfileDef,2> { IfcProfileDef() : Object("IfcProfileDef") {}
+		IfcProfileTypeEnum::Out ProfileType;
+		Maybe< IfcLabel::Out > ProfileName;
+    };
+
+    // C++ wrapper for IfcParameterizedProfileDef
+    struct IfcParameterizedProfileDef : IfcProfileDef, ObjectHelper<IfcParameterizedProfileDef,1> { IfcParameterizedProfileDef() : Object("IfcParameterizedProfileDef") {}
+		Lazy< IfcAxis2Placement2D > Position;
+    };
+
+    // C++ wrapper for IfcZShapeProfileDef
+    struct IfcZShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcZShapeProfileDef,6> { IfcZShapeProfileDef() : Object("IfcZShapeProfileDef") {}
+		IfcPositiveLengthMeasure::Out Depth;
+		IfcPositiveLengthMeasure::Out FlangeWidth;
+		IfcPositiveLengthMeasure::Out WebThickness;
+		IfcPositiveLengthMeasure::Out FlangeThickness;
+		Maybe< IfcPositiveLengthMeasure::Out > FilletRadius;
+		Maybe< IfcPositiveLengthMeasure::Out > EdgeRadius;
+    };
 
     // C++ wrapper for IfcRoot
     struct IfcRoot :  ObjectHelper<IfcRoot,4> { IfcRoot() : Object("IfcRoot") {}
@@ -1652,12 +1673,6 @@ namespace IFC {
     // C++ wrapper for IfcPlacement
     struct IfcPlacement : IfcGeometricRepresentationItem, ObjectHelper<IfcPlacement,1> { IfcPlacement() : Object("IfcPlacement") {}
 		Lazy< IfcCartesianPoint > Location;
-    };
-
-    // C++ wrapper for IfcProfileDef
-    struct IfcProfileDef :  ObjectHelper<IfcProfileDef,2> { IfcProfileDef() : Object("IfcProfileDef") {}
-		IfcProfileTypeEnum::Out ProfileType;
-		Maybe< IfcLabel::Out > ProfileName;
     };
 
     // C++ wrapper for IfcArbitraryClosedProfileDef
@@ -1997,6 +2012,11 @@ namespace IFC {
 		Maybe< Lazy< IfcDirection > > Axis;
     };
 
+    // C++ wrapper for IfcColourSpecification
+    struct IfcColourSpecification :  ObjectHelper<IfcColourSpecification,1> { IfcColourSpecification() : Object("IfcColourSpecification") {}
+		Maybe< IfcLabel::Out > Name;
+    };
+
     // C++ wrapper for IfcStructuralPointAction
     struct IfcStructuralPointAction : IfcStructuralAction, ObjectHelper<IfcStructuralPointAction,0> { IfcStructuralPointAction() : Object("IfcStructuralPointAction") {}
 
@@ -2101,11 +2121,6 @@ namespace IFC {
     // C++ wrapper for IfcFlowInstrumentType
     struct IfcFlowInstrumentType : IfcDistributionControlElementType, ObjectHelper<IfcFlowInstrumentType,1> { IfcFlowInstrumentType() : Object("IfcFlowInstrumentType") {}
 		IfcFlowInstrumentTypeEnum::Out PredefinedType;
-    };
-
-    // C++ wrapper for IfcParameterizedProfileDef
-    struct IfcParameterizedProfileDef : IfcProfileDef, ObjectHelper<IfcParameterizedProfileDef,1> { IfcParameterizedProfileDef() : Object("IfcParameterizedProfileDef") {}
-		Lazy< IfcAxis2Placement2D > Position;
     };
 
     // C++ wrapper for IfcUShapeProfileDef
@@ -3215,11 +3230,6 @@ namespace IFC {
 		IfcBoilerTypeEnum::Out PredefinedType;
     };
 
-    // C++ wrapper for IfcColourSpecification
-    struct IfcColourSpecification :  ObjectHelper<IfcColourSpecification,1> { IfcColourSpecification() : Object("IfcColourSpecification") {}
-		Maybe< IfcLabel::Out > Name;
-    };
-
     // C++ wrapper for IfcColourRgb
     struct IfcColourRgb : IfcColourSpecification, ObjectHelper<IfcColourRgb,3> { IfcColourRgb() : Object("IfcColourRgb") {}
 		IfcNormalisedRatioMeasure::Out Red;
@@ -3268,16 +3278,6 @@ namespace IFC {
     // C++ wrapper for IfcAnnotationSurfaceOccurrence
     struct IfcAnnotationSurfaceOccurrence : IfcAnnotationOccurrence, ObjectHelper<IfcAnnotationSurfaceOccurrence,0> { IfcAnnotationSurfaceOccurrence() : Object("IfcAnnotationSurfaceOccurrence") {}
 
-    };
-
-    // C++ wrapper for IfcZShapeProfileDef
-    struct IfcZShapeProfileDef : IfcParameterizedProfileDef, ObjectHelper<IfcZShapeProfileDef,6> { IfcZShapeProfileDef() : Object("IfcZShapeProfileDef") {}
-		IfcPositiveLengthMeasure::Out Depth;
-		IfcPositiveLengthMeasure::Out FlangeWidth;
-		IfcPositiveLengthMeasure::Out WebThickness;
-		IfcPositiveLengthMeasure::Out FlangeThickness;
-		Maybe< IfcPositiveLengthMeasure::Out > FilletRadius;
-		Maybe< IfcPositiveLengthMeasure::Out > EdgeRadius;
     };
 
     // C++ wrapper for IfcRationalBezierCurve
@@ -3829,6 +3829,9 @@ namespace STEP {
 	
 #define DECL_CONV_STUB(type) template <> size_t GenericFill<IFC::type>(const STEP::DB& db, const EXPRESS::LIST& params, IFC::type* in)
 	
+	DECL_CONV_STUB(IfcProfileDef);
+	DECL_CONV_STUB(IfcParameterizedProfileDef);
+	DECL_CONV_STUB(IfcZShapeProfileDef);
 	DECL_CONV_STUB(IfcRoot);
 	DECL_CONV_STUB(IfcObjectDefinition);
 	DECL_CONV_STUB(IfcTypeObject);
@@ -3880,7 +3883,6 @@ namespace STEP {
 	DECL_CONV_STUB(IfcUnitaryEquipmentType);
 	DECL_CONV_STUB(IfcPort);
 	DECL_CONV_STUB(IfcPlacement);
-	DECL_CONV_STUB(IfcProfileDef);
 	DECL_CONV_STUB(IfcArbitraryClosedProfileDef);
 	DECL_CONV_STUB(IfcCurve);
 	DECL_CONV_STUB(IfcConic);
@@ -3943,6 +3945,7 @@ namespace STEP {
 	DECL_CONV_STUB(IfcDimensionCurve);
 	DECL_CONV_STUB(IfcBoundedCurve);
 	DECL_CONV_STUB(IfcAxis1Placement);
+	DECL_CONV_STUB(IfcColourSpecification);
 	DECL_CONV_STUB(IfcStructuralPointAction);
 	DECL_CONV_STUB(IfcSpatialStructureElement);
 	DECL_CONV_STUB(IfcSpace);
@@ -3963,7 +3966,6 @@ namespace STEP {
 	DECL_CONV_STUB(IfcVertex);
 	DECL_CONV_STUB(IfcVertexPoint);
 	DECL_CONV_STUB(IfcFlowInstrumentType);
-	DECL_CONV_STUB(IfcParameterizedProfileDef);
 	DECL_CONV_STUB(IfcUShapeProfileDef);
 	DECL_CONV_STUB(IfcRamp);
 	DECL_CONV_STUB(IfcCompositeCurve);
@@ -4150,7 +4152,6 @@ namespace STEP {
 	DECL_CONV_STUB(IfcConstructionMaterialResource);
 	DECL_CONV_STUB(IfcRelAggregates);
 	DECL_CONV_STUB(IfcBoilerType);
-	DECL_CONV_STUB(IfcColourSpecification);
 	DECL_CONV_STUB(IfcColourRgb);
 	DECL_CONV_STUB(IfcDoorStyle);
 	DECL_CONV_STUB(IfcDuctSilencerType);
@@ -4159,7 +4160,6 @@ namespace STEP {
 	DECL_CONV_STUB(IfcSensorType);
 	DECL_CONV_STUB(IfcAirTerminalBoxType);
 	DECL_CONV_STUB(IfcAnnotationSurfaceOccurrence);
-	DECL_CONV_STUB(IfcZShapeProfileDef);
 	DECL_CONV_STUB(IfcRationalBezierCurve);
 	DECL_CONV_STUB(IfcCartesianTransformationOperator2D);
 	DECL_CONV_STUB(IfcCartesianTransformationOperator2DnonUniform);

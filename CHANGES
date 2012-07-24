@@ -3,6 +3,36 @@ CHANGELOG
 ----------------------------------------------------------------------
 
 
+3.0 (2012-07-07)
+
+FEATURES:
+   - new export interface similar to the import API. 
+   - Supported export formats: Collada, OBJ, PLY and STL
+   - added new import formats: XGL/ZGL, M3 (experimental)
+   - new postprocessing steps: Debone
+   - vastly improved IFC (Industry Foundation Classes) support
+   - introduced API to query importer meta information (such as supported
+       format versions, full name, maintainer info).
+   - reworked Ogre XML import
+   - C-API now supports per-import properties
+
+FIXES/HOUSEKEEPING:
+
+   - hundreds of bugfixes in all parts of the library
+   - unified naming and cleanup of public headers
+   - improved CMake build system
+   - templatized math library
+   - reduce dependency on boost.thread, only remaining spot
+     is synchronization for the C logging API 
+
+API COMPATIBILITY:
+   - renamed headers, export interface, C API properties and meta data
+     prevent compatibility with code written for 2.0, but in 
+     most cases these can be easily resolved
+   - Note: 3.0 is not binary compatible with 2.0
+
+
+
 
 2.0 (2010-11-21)
 
@@ -41,8 +71,6 @@ API CHANGES:
    - Some Assimp::Importer methods are const now.
  
  
-
-
 
 
 

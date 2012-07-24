@@ -176,8 +176,8 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	}
 	else
 	{
-		DefaultLogger::get()->warn("No skeleton file will be loaded");
-		DefaultLogger::get()->warn(MeshFile->getNodeName());
+		DefaultLogger::get()->debug("No skeleton file will be loaded");
+		DefaultLogger::get()->debug(MeshFile->getNodeName());
 	}
 	//__________________________________________________________________
 

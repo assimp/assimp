@@ -85,14 +85,18 @@ public:
 	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
 
-		a = fmod(a,static_cast<IfcFloat>( 360. ));
-		b = fmod(b,static_cast<IfcFloat>( 360. ));
-		return static_cast<size_t>( abs(ceil(( b-a)) / conv.settings.conicSamplingAngle) );
+		a *= conv.angle_scale;
+		b *= conv.angle_scale;
+
+		a = fmod(a,static_cast<IfcFloat>( AI_MATH_TWO_PI ));
+		b = fmod(b,static_cast<IfcFloat>( AI_MATH_TWO_PI ));
+		const IfcFloat setting = static_cast<IfcFloat>( AI_MATH_PI * conv.settings.conicSamplingAngle / 180.0 );
+		return static_cast<size_t>( ceil(abs( b-a)) / setting);
 	}
 
 	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
-		return std::make_pair(static_cast<IfcFloat>( 0. ), static_cast<IfcFloat>( 360. ));
+		return std::make_pair(static_cast<IfcFloat>( 0. ), static_cast<IfcFloat>( AI_MATH_TWO_PI / conv.angle_scale ));
 	}
 
 protected:
@@ -272,7 +276,7 @@ public:
 		IfcFloat acc = 0;
 		BOOST_FOREACH(const CurveEntry& entry, curves) {
 			const ParamRange& range = entry.first->GetParametricRange();
-			const IfcFloat delta = range.second-range.first;
+			const IfcFloat delta = abs(range.second-range.first);
 			if (u < acc+delta) {
 				return entry.first->Eval( entry.second ? (u-acc) + range.first : range.second-(u-acc));
 			}
@@ -291,7 +295,7 @@ public:
 		IfcFloat acc = 0;
 		BOOST_FOREACH(const CurveEntry& entry, curves) {
 			const ParamRange& range = entry.first->GetParametricRange();
-			const IfcFloat delta = range.second-range.first;
+			const IfcFloat delta = abs(range.second-range.first);
 			if (a <= acc+delta && b >= acc) {
 				const IfcFloat at =  std::max(static_cast<IfcFloat>( 0. ),a-acc), bt = std::min(delta,b-acc);
 				cnt += entry.first->EstimateSampleCount( entry.second ? at + range.first : range.second - bt, entry.second ? bt + range.first : range.second - at );
@@ -425,6 +429,12 @@ public:
 	}
 
 	// --------------------------------------------------
+	void SampleDiscrete(TempMesh& out,IfcFloat a,IfcFloat b) const {
+		ai_assert(InRange(a) && InRange(b));
+		return base->SampleDiscrete(out,TrimParam(a),TrimParam(b));
+	}
+
+	// --------------------------------------------------
 	ParamRange GetParametricRange() const {
 		return std::make_pair(static_cast<IfcFloat>( 0. ),maxval);
 	}
@@ -546,10 +556,12 @@ bool Curve :: InRange(IfcFloat u) const
 {
 	const ParamRange range = GetParametricRange();
 	if (IsClosed()) {
-		ai_assert(range.first != std::numeric_limits<IfcFloat>::infinity() && range.second != std::numeric_limits<IfcFloat>::infinity());
-		u = range.first + fmod(u-range.first,range.second-range.first);
+		return true;
+		//ai_assert(range.first != std::numeric_limits<IfcFloat>::infinity() && range.second != std::numeric_limits<IfcFloat>::infinity());
+		//u = range.first + fmod(u-range.first,range.second-range.first);
 	}
-	return u >= range.first && u <= range.second;
+	const IfcFloat epsilon = 1e-5;
+	return u - range.first > -epsilon && range.second - u > -epsilon;
 }
 #endif 
 
@@ -557,7 +569,7 @@ bool Curve :: InRange(IfcFloat u) const
 IfcFloat Curve :: GetParametricRangeDelta() const
 {
 	const ParamRange& range = GetParametricRange();
-	return range.second - range.first;
+	return abs(range.second - range.first);
 }
 
 // ------------------------------------------------------------------------------------------------

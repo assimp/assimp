@@ -1,8 +1,8 @@
 /*
-Open Asset Import Library (assimp)
+Open Asset Import Library (ASSIMP)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2010, ASSIMP Development Team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms, 
@@ -18,10 +18,10 @@ following conditions are met:
   following disclaimer in the documentation and/or other
   materials provided with the distribution.
 
-* Neither the name of the assimp team, nor the names of its
+* Neither the name of the ASSIMP team, nor the names of its
   contributors may be used to endorse or promote products
   derived from this software without specific prior
-  written permission of the assimp team.
+  written permission of the ASSIMP Development Team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
@@ -96,7 +96,6 @@ namespace {
 ,		SchemaEntry("ifcobjecttypeenum",NULL )
 ,		SchemaEntry("ifcthermalloadtypeenum",NULL )
 ,		SchemaEntry("ifcionconcentrationmeasure",NULL )
-,		SchemaEntry("ifcobjectreferenceselect",NULL )
 ,		SchemaEntry("ifcclassificationnotationselect",NULL )
 ,		SchemaEntry("ifcbsplinecurveform",NULL )
 ,		SchemaEntry("ifcelementcompositionenum",NULL )
@@ -158,6 +157,7 @@ namespace {
 ,		SchemaEntry("ifcidentifier",NULL )
 ,		SchemaEntry("ifcradioactivitymeasure",NULL )
 ,		SchemaEntry("ifcsymbolstyleselect",NULL )
+,		SchemaEntry("ifcobjectreferenceselect",NULL )
 ,		SchemaEntry("ifcrooftypeenum",NULL )
 ,		SchemaEntry("ifcreal",NULL )
 ,		SchemaEntry("ifcroleenum",NULL )
@@ -168,6 +168,7 @@ namespace {
 ,		SchemaEntry("ifcfiltertypeenum",NULL )
 ,		SchemaEntry("ifctransformertypeenum",NULL )
 ,		SchemaEntry("ifcsurfaceside",NULL )
+,		SchemaEntry("ifcspaceheatertypeenum",NULL )
 ,		SchemaEntry("ifcthermaltransmittancemeasure",NULL )
 ,		SchemaEntry("ifctubebundletypeenum",NULL )
 ,		SchemaEntry("ifclightfixturetypeenum",NULL )
@@ -239,7 +240,6 @@ namespace {
 ,		SchemaEntry("ifcvolumemeasure",NULL )
 ,		SchemaEntry("ifcbeamtypeenum",NULL )
 ,		SchemaEntry("ifcstateenum",NULL )
-,		SchemaEntry("ifcspaceheatertypeenum",NULL )
 ,		SchemaEntry("ifcsectiontypeenum",NULL )
 ,		SchemaEntry("ifcfootingtypeenum",NULL )
 ,		SchemaEntry("ifcmonetarymeasure",NULL )
@@ -379,6 +379,9 @@ namespace {
 ,		SchemaEntry("ifcpermeablecoveringoperationenum",NULL )
 ,		SchemaEntry("ifcmagneticfluxdensitymeasure",NULL )
 ,		SchemaEntry("ifcmoisturediffusivitymeasure",NULL )
+,		SchemaEntry("ifcprofiledef",&STEP::ObjectHelper<IfcProfileDef,2>::Construct )
+,		SchemaEntry("ifcparameterizedprofiledef",&STEP::ObjectHelper<IfcParameterizedProfileDef,1>::Construct )
+,		SchemaEntry("ifczshapeprofiledef",&STEP::ObjectHelper<IfcZShapeProfileDef,6>::Construct )
 ,		SchemaEntry("ifcroot",&STEP::ObjectHelper<IfcRoot,4>::Construct )
 ,		SchemaEntry("ifcobjectdefinition",&STEP::ObjectHelper<IfcObjectDefinition,0>::Construct )
 ,		SchemaEntry("ifctypeobject",&STEP::ObjectHelper<IfcTypeObject,2>::Construct )
@@ -463,7 +466,6 @@ namespace {
 ,		SchemaEntry("ifcpredefineditem",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcpredefinedcolour",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcdraughtingpredefinedcolour",&STEP::ObjectHelper<NotImplemented,0>::Construct )
-,		SchemaEntry("ifcprofiledef",&STEP::ObjectHelper<IfcProfileDef,2>::Construct )
 ,		SchemaEntry("ifcarbitraryclosedprofiledef",&STEP::ObjectHelper<IfcArbitraryClosedProfileDef,1>::Construct )
 ,		SchemaEntry("ifccurve",&STEP::ObjectHelper<IfcCurve,0>::Construct )
 ,		SchemaEntry("ifcconic",&STEP::ObjectHelper<IfcConic,1>::Construct )
@@ -550,6 +552,7 @@ namespace {
 ,		SchemaEntry("ifcaxis1placement",&STEP::ObjectHelper<IfcAxis1Placement,1>::Construct )
 ,		SchemaEntry("ifclightintensitydistribution",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcpredefinedsymbol",&STEP::ObjectHelper<NotImplemented,0>::Construct )
+,		SchemaEntry("ifccolourspecification",&STEP::ObjectHelper<IfcColourSpecification,1>::Construct )
 ,		SchemaEntry("ifcstructuralpointaction",&STEP::ObjectHelper<IfcStructuralPointAction,0>::Construct )
 ,		SchemaEntry("ifcspatialstructureelement",&STEP::ObjectHelper<IfcSpatialStructureElement,2>::Construct )
 ,		SchemaEntry("ifcspace",&STEP::ObjectHelper<IfcSpace,2>::Construct )
@@ -583,7 +586,6 @@ namespace {
 ,		SchemaEntry("ifcvertex",&STEP::ObjectHelper<IfcVertex,0>::Construct )
 ,		SchemaEntry("ifcvertexpoint",&STEP::ObjectHelper<IfcVertexPoint,1>::Construct )
 ,		SchemaEntry("ifcflowinstrumenttype",&STEP::ObjectHelper<IfcFlowInstrumentType,1>::Construct )
-,		SchemaEntry("ifcparameterizedprofiledef",&STEP::ObjectHelper<IfcParameterizedProfileDef,1>::Construct )
 ,		SchemaEntry("ifcushapeprofiledef",&STEP::ObjectHelper<IfcUShapeProfileDef,8>::Construct )
 ,		SchemaEntry("ifcramp",&STEP::ObjectHelper<IfcRamp,1>::Construct )
 ,		SchemaEntry("ifcfillareastyle",&STEP::ObjectHelper<NotImplemented,0>::Construct )
@@ -869,7 +871,6 @@ namespace {
 ,		SchemaEntry("ifcrelaggregates",&STEP::ObjectHelper<IfcRelAggregates,0>::Construct )
 ,		SchemaEntry("ifcboilertype",&STEP::ObjectHelper<IfcBoilerType,1>::Construct )
 ,		SchemaEntry("ifcrelprojectselement",&STEP::ObjectHelper<NotImplemented,0>::Construct )
-,		SchemaEntry("ifccolourspecification",&STEP::ObjectHelper<IfcColourSpecification,1>::Construct )
 ,		SchemaEntry("ifccolourrgb",&STEP::ObjectHelper<IfcColourRgb,3>::Construct )
 ,		SchemaEntry("ifcrelconnectsstructuralactivity",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcdoorstyle",&STEP::ObjectHelper<IfcDoorStyle,4>::Construct )
@@ -881,7 +882,6 @@ namespace {
 ,		SchemaEntry("ifcsensortype",&STEP::ObjectHelper<IfcSensorType,1>::Construct )
 ,		SchemaEntry("ifcairterminalboxtype",&STEP::ObjectHelper<IfcAirTerminalBoxType,1>::Construct )
 ,		SchemaEntry("ifcannotationsurfaceoccurrence",&STEP::ObjectHelper<IfcAnnotationSurfaceOccurrence,0>::Construct )
-,		SchemaEntry("ifczshapeprofiledef",&STEP::ObjectHelper<IfcZShapeProfileDef,6>::Construct )
 ,		SchemaEntry("ifcclassificationnotation",&STEP::ObjectHelper<NotImplemented,0>::Construct )
 ,		SchemaEntry("ifcrationalbeziercurve",&STEP::ObjectHelper<IfcRationalBezierCurve,1>::Construct )
 ,		SchemaEntry("ifccartesiantransformationoperator2d",&STEP::ObjectHelper<IfcCartesianTransformationOperator2D,0>::Construct )
@@ -1052,6 +1052,44 @@ template <> size_t GenericFill<NotImplemented>(const STEP::DB& db, const LIST& p
 
 
 
+// -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcProfileDef>(const DB& db, const LIST& params, IfcProfileDef* in)
+{
+	size_t base = 0;
+	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcProfileDef"); }    do { // convert the 'ProfileType' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProfileDef,2>::aux_is_derived[0]=true; break; }
+        try { GenericConvert( in->ProfileType, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcProfileDef to be a `IfcProfileTypeEnum`")); }
+    } while(0);
+    do { // convert the 'ProfileName' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProfileDef,2>::aux_is_derived[1]=true; break; }
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->ProfileName, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcProfileDef to be a `IfcLabel`")); }
+    } while(0);
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcParameterizedProfileDef>(const DB& db, const LIST& params, IfcParameterizedProfileDef* in)
+{
+	size_t base = GenericFill(db,params,static_cast<IfcProfileDef*>(in));
+	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcParameterizedProfileDef"); }    do { // convert the 'Position' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcParameterizedProfileDef,1>::aux_is_derived[0]=true; break; }
+        try { GenericConvert( in->Position, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcParameterizedProfileDef to be a `IfcAxis2Placement2D`")); }
+    } while(0);
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcZShapeProfileDef>(const DB& db, const LIST& params, IfcZShapeProfileDef* in)
+{
+	size_t base = GenericFill(db,params,static_cast<IfcParameterizedProfileDef*>(in));
+// this data structure is not used yet, so there is no code generated to fill its members
+	return base;
+}
 // -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcRoot>(const DB& db, const LIST& params, IfcRoot* in)
 {
@@ -1515,25 +1553,6 @@ template <> size_t GenericFill<IfcPlacement>(const DB& db, const LIST& params, I
         if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcPlacement,1>::aux_is_derived[0]=true; break; }
         try { GenericConvert( in->Location, arg, db ); break; } 
         catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcPlacement to be a `IfcCartesianPoint`")); }
-    } while(0);
-	return base;
-}
-// -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcProfileDef>(const DB& db, const LIST& params, IfcProfileDef* in)
-{
-	size_t base = 0;
-	if (params.GetSize() < 2) { throw STEP::TypeError("expected 2 arguments to IfcProfileDef"); }    do { // convert the 'ProfileType' argument
-        boost::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProfileDef,2>::aux_is_derived[0]=true; break; }
-        try { GenericConvert( in->ProfileType, arg, db ); break; } 
-        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcProfileDef to be a `IfcProfileTypeEnum`")); }
-    } while(0);
-    do { // convert the 'ProfileName' argument
-        boost::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcProfileDef,2>::aux_is_derived[1]=true; break; }
-        if (dynamic_cast<const UNSET*>(&*arg)) break;
-        try { GenericConvert( in->ProfileName, arg, db ); break; } 
-        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcProfileDef to be a `IfcLabel`")); }
     } while(0);
 	return base;
 }
@@ -2068,6 +2087,19 @@ template <> size_t GenericFill<IfcAxis1Placement>(const DB& db, const LIST& para
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
+template <> size_t GenericFill<IfcColourSpecification>(const DB& db, const LIST& params, IfcColourSpecification* in)
+{
+	size_t base = 0;
+	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcColourSpecification"); }    do { // convert the 'Name' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcColourSpecification,1>::aux_is_derived[0]=true; break; }
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->Name, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcColourSpecification to be a `IfcLabel`")); }
+    } while(0);
+	return base;
+}
+// -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcStructuralPointAction>(const DB& db, const LIST& params, IfcStructuralPointAction* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcStructuralAction*>(in));
@@ -2233,18 +2265,6 @@ template <> size_t GenericFill<IfcFlowInstrumentType>(const DB& db, const LIST& 
 {
 	size_t base = GenericFill(db,params,static_cast<IfcDistributionControlElementType*>(in));
 // this data structure is not used yet, so there is no code generated to fill its members
-	return base;
-}
-// -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcParameterizedProfileDef>(const DB& db, const LIST& params, IfcParameterizedProfileDef* in)
-{
-	size_t base = GenericFill(db,params,static_cast<IfcProfileDef*>(in));
-	if (params.GetSize() < 3) { throw STEP::TypeError("expected 3 arguments to IfcParameterizedProfileDef"); }    do { // convert the 'Position' argument
-        boost::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcParameterizedProfileDef,1>::aux_is_derived[0]=true; break; }
-        try { GenericConvert( in->Position, arg, db ); break; } 
-        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcParameterizedProfileDef to be a `IfcAxis2Placement2D`")); }
-    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -3375,7 +3395,32 @@ template <> size_t GenericFill<IfcSubContractResource>(const DB& db, const LIST&
 template <> size_t GenericFill<IfcSweptDiskSolid>(const DB& db, const LIST& params, IfcSweptDiskSolid* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcSolidModel*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
+	if (params.GetSize() < 5) { throw STEP::TypeError("expected 5 arguments to IfcSweptDiskSolid"); }    do { // convert the 'Directrix' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Directrix, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcSweptDiskSolid to be a `IfcCurve`")); }
+    } while(0);
+    do { // convert the 'Radius' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->Radius, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 1 to IfcSweptDiskSolid to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'InnerRadius' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        if (dynamic_cast<const UNSET*>(&*arg)) break;
+        try { GenericConvert( in->InnerRadius, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 2 to IfcSweptDiskSolid to be a `IfcPositiveLengthMeasure`")); }
+    } while(0);
+    do { // convert the 'StartParam' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->StartParam, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 3 to IfcSweptDiskSolid to be a `IfcParameterValue`")); }
+    } while(0);
+    do { // convert the 'EndParam' argument
+        boost::shared_ptr<const DataType> arg = params[base++];
+        try { GenericConvert( in->EndParam, arg, db ); break; } 
+        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 4 to IfcSweptDiskSolid to be a `IfcParameterValue`")); }
+    } while(0);
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -3980,19 +4025,6 @@ template <> size_t GenericFill<IfcBoilerType>(const DB& db, const LIST& params, 
 	return base;
 }
 // -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcColourSpecification>(const DB& db, const LIST& params, IfcColourSpecification* in)
-{
-	size_t base = 0;
-	if (params.GetSize() < 1) { throw STEP::TypeError("expected 1 arguments to IfcColourSpecification"); }    do { // convert the 'Name' argument
-        boost::shared_ptr<const DataType> arg = params[base++];
-        if (dynamic_cast<const ISDERIVED*>(&*arg)) { in->ObjectHelper<Assimp::IFC::IfcColourSpecification,1>::aux_is_derived[0]=true; break; }
-        if (dynamic_cast<const UNSET*>(&*arg)) break;
-        try { GenericConvert( in->Name, arg, db ); break; } 
-        catch (const TypeError& t) { throw TypeError(t.what() + std::string(" - expected argument 0 to IfcColourSpecification to be a `IfcLabel`")); }
-    } while(0);
-	return base;
-}
-// -----------------------------------------------------------------------------------------------------------
 template <> size_t GenericFill<IfcColourRgb>(const DB& db, const LIST& params, IfcColourRgb* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcColourSpecification*>(in));
@@ -4059,13 +4091,6 @@ template <> size_t GenericFill<IfcAirTerminalBoxType>(const DB& db, const LIST& 
 template <> size_t GenericFill<IfcAnnotationSurfaceOccurrence>(const DB& db, const LIST& params, IfcAnnotationSurfaceOccurrence* in)
 {
 	size_t base = GenericFill(db,params,static_cast<IfcAnnotationOccurrence*>(in));
-// this data structure is not used yet, so there is no code generated to fill its members
-	return base;
-}
-// -----------------------------------------------------------------------------------------------------------
-template <> size_t GenericFill<IfcZShapeProfileDef>(const DB& db, const LIST& params, IfcZShapeProfileDef* in)
-{
-	size_t base = GenericFill(db,params,static_cast<IfcParameterizedProfileDef*>(in));
 // this data structure is not used yet, so there is no code generated to fill its members
 	return base;
 }

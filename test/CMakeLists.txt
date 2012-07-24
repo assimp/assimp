@@ -220,7 +220,7 @@ add_executable(  unit
 
 IF( WIN32 )
 	FIND_PACKAGE(DirectX REQUIRED)
-+ENDIF( WIN32 )
+ENDIF( WIN32 )
 SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
 # TODO: Port to non-Windows platforms.

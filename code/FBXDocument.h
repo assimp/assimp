@@ -148,6 +148,60 @@ protected:
 };
 
 
+
+/** DOM class for generic FBX NoteAttribute blocks. NoteAttributes just hold a property table,
+ *  actualy members are added by deriving classes. */
+class NodeAttribute : public Object
+{
+public:
+
+	NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~NodeAttribute();
+
+public:
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+private:
+
+	boost::shared_ptr<const PropertyTable> props;
+};
+
+
+/** DOM base class for FBX camera settings attached to a node */
+class Camera : public NodeAttribute
+{
+public:
+
+	Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Camera();
+
+public:
+
+	int CameraID() const {
+		return cameraId;
+	}
+
+	const std::string& CameraName() const {
+		return cameraName;
+	}
+
+
+	const std::string& CameraIndexName() const {
+		return cameraIndexName;
+	}
+
+private:
+
+	int cameraId;
+	std::string cameraName;
+	std::string cameraIndexName;
+};
+
+
 /** DOM base class for FBX models (even though its semantics are more "node" than "model" */
 class Model : public Object
 {

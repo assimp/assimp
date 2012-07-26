@@ -2108,6 +2108,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\FBXNodeAttribute.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\FBXParser.cpp"
 						>
 					</File>

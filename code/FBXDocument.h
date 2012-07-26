@@ -484,9 +484,10 @@ public:
 		// in the current conversion pattern this will only be needed if
 		// weights are present, so no need to always pre-compute this table
 		if (facesVertexStartIndices.empty()) {
-			facesVertexStartIndices.resize(faces.size());
+			facesVertexStartIndices.resize(faces.size() + 1, 0);
 
-			std::partial_sum(faces.begin(), faces.end(), facesVertexStartIndices.begin());
+			std::partial_sum(faces.begin(), faces.end(), facesVertexStartIndices.begin() + 1);
+			facesVertexStartIndices.pop_back();
 		}
 
 		ai_assert(facesVertexStartIndices.size() == faces.size());

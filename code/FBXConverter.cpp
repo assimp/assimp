@@ -594,6 +594,11 @@ private:
 		}
 	
 		ConvertMaterialForMesh(out_mesh,model,mesh,index);
+
+		if(doc.Settings().readWeights && mesh.DeformerSkin() != NULL) {
+			ConvertWeights(out_mesh, model, mesh, index);
+		}
+
 		return static_cast<unsigned int>(meshes.size() - 1);
 	}
 
@@ -654,6 +659,7 @@ private:
 
 							if (index_out_indices.back() == no_index_sentinel) {
 								index_out_indices.back() = out_indices.size();
+								count_out_indices.push_back(0);
 							}
 
 							out_indices.push_back(out_idx[i]);
@@ -699,6 +705,8 @@ private:
 		bones.push_back(bone);
 
 		bone->mName = FixNodeName(cl.TargetNode()->Name());
+		bone->mOffsetMatrix = cl.TransformLink();
+		bone->mOffsetMatrix.Inverse();
 
 		bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
 		aiVertexWeight* cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];

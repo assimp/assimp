@@ -388,7 +388,7 @@ aiMatrix4x4 ReadMatrix(const Element& element)
 
 	aiMatrix4x4 result;
 
-	// XXX transposed or not, this is the question :-)
+
 	result.a1 = values[0];
 	result.a2 = values[1];
 	result.a3 = values[2];
@@ -409,6 +409,7 @@ aiMatrix4x4 ReadMatrix(const Element& element)
 	result.d3 = values[14];
 	result.d4 = values[15];
 
+	result.Transpose();
 	return result;
 }
 

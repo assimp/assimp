@@ -154,7 +154,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 	cursor = 0;
 	BOOST_FOREACH(int index, tempFaces) {
 		const int absi = index < 0 ? (-index - 1) : index;
-		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor;
+		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor++;
 	}
 	
 	// if settings.readAllLayers is true:

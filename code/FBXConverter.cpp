@@ -1004,6 +1004,8 @@ private:
 				aiNodeAnim* const na = new aiNodeAnim();
 				node_anims.push_back(na);
 
+				na->mNodeName.Set(kv.first);
+
 				const PropertyTable& props = curve_node->TargetNode()->Props();
 
 				// if a particular transformation is not given, grab it from

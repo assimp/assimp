@@ -89,7 +89,7 @@ Model::~Model()
 // ------------------------------------------------------------------------------------------------
 void Model::ResolveLinks(const Element& element, const Document& doc)
 {
-	const char* const arr[] = {"Geometry","Material"};
+	const char* const arr[] = {"Geometry","Material","NodeAttribute"};
 
 	// resolve material
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),arr, 2);
@@ -121,6 +121,11 @@ void Model::ResolveLinks(const Element& element, const Document& doc)
 			continue;
 		}
 
+		const NodeAttribute* const att = dynamic_cast<const NodeAttribute*>(ob);
+		if(att) {
+			attributes.push_back(att);
+			continue;
+		}
 
 		DOMWarning("source object for model link is neither Material or Geometry, ignoring",&element);
 		continue;

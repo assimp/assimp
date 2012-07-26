@@ -149,8 +149,8 @@ protected:
 
 
 
-/** DOM class for generic FBX NoteAttribute blocks. NoteAttributes just hold a property table,
- *  actualy members are added by deriving classes. */
+/** DOM class for generic FBX NoteAttribute blocks. NoteAttribute's just hold a property table,
+ *  fixed members are added by deriving classes. */
 class NodeAttribute : public Object
 {
 public:
@@ -236,6 +236,12 @@ public:
 		return geometry;
 	}
 
+
+	/** Get node attachments */
+	const std::vector<const NodeAttribute*>& GetAttributes() const {
+		return attributes;
+	}
+
 private:
 
 	void ResolveLinks(const Element& element, const Document& doc);
@@ -244,6 +250,7 @@ private:
 
 	std::vector<const Material*> materials;
 	std::vector<const Geometry*> geometry;
+	std::vector<const NodeAttribute*> attributes;
 
 	std::string shading;
 	std::string culling;

@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  FBXModel.cpp
- *  @brief Assimp::FBX::Model implementation
+/** @file  FBXNoteAttribute.cpp
+ *  @brief Assimp::FBX::NodeAttribute (and subclasses) implementation
  */
 #include "AssimpPCH.h"
 
@@ -58,83 +58,99 @@ namespace FBX {
 	using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-Model::Model(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+Deformer::Deformer(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 	: Object(id,element,name)
-	, shading("Y")
 {
 	const Scope& sc = GetRequiredScope(element);
-	const Element* const Shading = sc["Shading"];
-	const Element* const Culling = sc["Culling"];
 
-	if(Shading) {
-		shading = GetRequiredToken(*Shading,0).StringContents();
-	}
-
-	if (Culling) {
-		culling = ParseTokenAsString(GetRequiredToken(*Culling,0));
-	}
-
-	props = GetPropertyTable(doc,"Model.FbxNode",element,sc);
-	ResolveLinks(element,doc);
+	const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
+	props = GetPropertyTable(doc,"Deformer.Fbx" + classname,element,sc);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-Model::~Model()
+Deformer::~Deformer()
 {
 
 }
 
 
 // ------------------------------------------------------------------------------------------------
-void Model::ResolveLinks(const Element& element, const Document& doc)
+Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: Deformer(id,element,doc,name)
 {
-	const char* const arr[] = {"Geometry","Material","NodeAttribute"};
+	const Scope& sc = GetRequiredScope(element);
 
-	// resolve material
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),arr, 2);
+	const Element& Indexes = GetRequiredElement(sc,"Indexes",&element);
+	const Element& Weights = GetRequiredElement(sc,"Weights",&element);
+	const Element& Transform = GetRequiredElement(sc,"Transform",&element);
+	const Element& TransformLink = GetRequiredElement(sc,"TransformLink",&element);
 
-	materials.reserve(conns.size());
-	geometry.reserve(conns.size());
-	attributes.reserve(conns.size());
+	transform = ReadMatrix(Transform);
+	transformLink = ReadMatrix(TransformLink);
+
+	ReadVectorDataArray(indices,Indexes);
+	ReadVectorDataArray(weights,Weights);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Cluster::~Cluster()
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: Deformer(id,element,doc,name)
+{
+	const Scope& sc = GetRequiredScope(element);
+
+	const Element* const Link_DeformAcuracy = sc["Link_DeformAcuracy"];
+	if(Link_DeformAcuracy) {
+		accuracy = ParseTokenAsFloat(GetRequiredToken(*Link_DeformAcuracy,0));
+	}
+
+	const char* const arr[] = {"Deformer"};
+
+	// resolve assigned clusters 
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),arr, 1);
+
+	clusters.reserve(conns.size());
 	BOOST_FOREACH(const Connection* con, conns) {
 
-		// material and geometry links should be Object-Object connections
+		// Cluster -> Skin links should be object-object connections
 		if (con->PropertyName().length()) {
 			continue;
 		}
 
 		const Object* const ob = con->SourceObject();
 		if(!ob) {
-			DOMWarning("failed to read source object for incoming Model link, ignoring",&element);
+			DOMWarning("failed to read source object for incoming Skin link, ignoring",&element);
 			continue;
 		}
 
-		const Material* const mat = dynamic_cast<const Material*>(ob);
-		if(mat) {
-			materials.push_back(mat);
+		const Cluster* const cluster = dynamic_cast<const Cluster*>(ob);
+		if(cluster) {
+			clusters.push_back(cluster);
 			continue;
 		}
 
-		const Geometry* const geo = dynamic_cast<const Geometry*>(ob);
-		if(geo) {
-			geometry.push_back(geo);
-			continue;
-		}
-
-		const NodeAttribute* const att = dynamic_cast<const NodeAttribute*>(ob);
-		if(att) {
-			attributes.push_back(att);
-			continue;
-		}
-
-		DOMWarning("source object for model link is neither Material, NodeAttribute nor Geometry, ignoring",&element);
-		continue;
 	}
 }
 
 
-} //!FBX
-} //!Assimp
+// ------------------------------------------------------------------------------------------------
+Skin::~Skin()
+{
+
+}
+
+
+
+}
+}
 
 #endif
+

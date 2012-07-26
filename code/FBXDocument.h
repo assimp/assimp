@@ -641,6 +641,96 @@ private:
 };
 
 
+/** DOM class for deformers */
+class Deformer : public Object
+{
+public:
+
+	Deformer(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Deformer();
+
+public:
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+private:
+
+	boost::shared_ptr<const PropertyTable> props;
+};
+
+typedef std::vector<float> WeightList;
+typedef std::vector<unsigned int> WeightIndexArray;
+
+
+/** DOM class for skin deformer clusters (aka subdeformers) */
+class Cluster : public Deformer
+{
+public:
+
+	Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Cluster();
+
+public:
+
+	/** get the list of deformer weights associated with this cluster */
+	const WeightList& GetWeights() const {
+		return weights;
+	}
+
+	/** get indices into the vertex data of the geometry associated
+	 *  with this cluster.*/
+	const WeightIndexArray& GetIndices() const {
+		return indices;
+	}
+
+	/** */
+	const aiMatrix4x4& Transform() const {
+		return transform;
+	}
+
+	const aiMatrix4x4& TransformLink() const {
+		return transformLink;
+	}
+
+private:
+
+	WeightList weights;
+	WeightIndexArray indices;
+
+	aiMatrix4x4 transform;
+	aiMatrix4x4 transformLink;
+};
+
+
+
+/** DOM class for skin deformers */
+class Skin : public Deformer
+{
+public:
+
+	Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Skin();
+
+public:
+
+	float DeformAccuracy() const {
+		return accuracy;
+	}
+
+
+	const std::vector<const Cluster*>& Clusters() const {
+		return clusters;
+	}
+
+private:
+
+	float accuracy;
+	std::vector<const Cluster*> clusters;
+};
+
 
 
 /** Represents a link between two FBX objects. */

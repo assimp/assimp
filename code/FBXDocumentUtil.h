@@ -98,6 +98,9 @@ void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 void ReadVectorDataArray(std::vector<uint64_t>& out, const Element& el);
 
 
+// read a 4x4 matrix from an array of 16 floats
+aiMatrix4x4 ReadMatrix(const Element& element);
+
 
 // fetch a property table and the corresponding property template 
 boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 

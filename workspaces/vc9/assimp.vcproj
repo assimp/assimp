@@ -2072,6 +2072,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\FBXDeformer.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\FBXDocument.cpp"
 						>
 					</File>

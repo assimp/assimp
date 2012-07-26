@@ -416,6 +416,7 @@ SET(FBX_SRCS
 	FBXModel.cpp
 	FBXAnimation.cpp
 	FBXNodeAttribute.cpp
+	FBXDeformer.cpp
 )
 SOURCE_GROUP( FBX FILES ${FBX_SRCS})
 

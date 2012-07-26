@@ -377,6 +377,43 @@ void ReadVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 
 
 // ------------------------------------------------------------------------------------------------
+aiMatrix4x4 ReadMatrix(const Element& element)
+{
+	std::vector<float> values;
+	ReadVectorDataArray(values,element);
+
+	if(values.size() != 16) {
+		DOMError("expected 16 matrix elements");
+	}
+
+	aiMatrix4x4 result;
+
+	// XXX transposed or not, this is the question :-)
+	result.a1 = values[0];
+	result.a2 = values[1];
+	result.a3 = values[2];
+	result.a4 = values[3];
+
+	result.b1 = values[4];
+	result.b2 = values[5];
+	result.b3 = values[6];
+	result.b4 = values[7];
+
+	result.c1 = values[8];
+	result.c2 = values[9];
+	result.c3 = values[10];
+	result.c4 = values[11];
+
+	result.d1 = values[12];
+	result.d2 = values[13];
+	result.d3 = values[14];
+	result.d4 = values[15];
+
+	return result;
+}
+
+
+// ------------------------------------------------------------------------------------------------
 // fetch a property table and the corresponding property template 
 boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
 	const std::string& templateName, 
@@ -470,6 +507,14 @@ const Object* LazyObject::Get(bool dieOnError)
 		else if (!strncmp(obtype,"NodeAttribute",length)) {
 			if (!strcmp(classtag.c_str(),"CameraSwitcher")) {
 				object.reset(new CameraSwitcher(id,element,doc,name));
+			}
+		}
+		else if (!strncmp(obtype,"Deformer",length)) {
+			if (!strcmp(classtag.c_str(),"Cluster")) {
+				object.reset(new Cluster(id,element,doc,name));
+			}
+			else if (!strcmp(classtag.c_str(),"Skin")) {
+				object.reset(new Skin(id,element,doc,name));
 			}
 		}
 		else if (!strncmp(obtype,"Model",length)) {

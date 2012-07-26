@@ -58,6 +58,7 @@ struct ImportSettings
 		, readLights(true)
 		, readAnimations(true)
 		, strictMode(true)
+		, readWeights(true)
 	{}
  
 
@@ -96,8 +97,12 @@ struct ImportSettings
 	bool readLights;
 
 	/** import animations (i.e. animation curves, the node
-	 *  skeleton is always imported)? Default value is true. */
+	 *  skeleton is always imported). Default value is true. */
 	bool readAnimations;
+
+	/** read bones (vertex weights and deform info).
+	 *  Default value is true. */
+	bool readWeights;
 };
 
 

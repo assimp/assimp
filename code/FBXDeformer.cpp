@@ -93,6 +93,14 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
 	ReadVectorDataArray(indices,Indexes);
 	ReadVectorDataArray(weights,Weights);
 
+	if(indices.size() != weights.size()) {
+		DOMError("sizes of index and weight array don't match up",&element);
+	}
+
+	if(!indices.size()) {
+		DOMWarning("encountered empty deformer",&element);
+	}
+
 	// read assigned node
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
 	BOOST_FOREACH(const Connection* con, conns) {

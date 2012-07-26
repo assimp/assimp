@@ -414,6 +414,10 @@ private:
 			ConvertMaterialForMesh(out_mesh,model,mesh,mindices[0]);
 		}
 
+		if(doc.Settings().readWeights && mesh.DeformerSkin() != NULL) {
+			ConvertWeights(out_mesh, model, mesh, std::numeric_limits<unsigned int>::max());
+		}
+
 		return static_cast<unsigned int>(meshes.size() - 1);
 	}
 
@@ -591,6 +595,129 @@ private:
 	
 		ConvertMaterialForMesh(out_mesh,model,mesh,index);
 		return static_cast<unsigned int>(meshes.size() - 1);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertWeights(aiMesh* out, const Model& model, const MeshGeometry& geo, unsigned int materialIndex)
+	{
+		ai_assert(geo.DeformerSkin());
+
+		std::vector<size_t> out_indices;
+		std::vector<size_t> index_out_indices;
+		std::vector<size_t> count_out_indices;
+
+		const Skin& sk = *geo.DeformerSkin();
+
+		std::vector<aiBone*> bones;
+		bones.reserve(sk.Clusters().size());
+
+		const bool no_mat_check = materialIndex == std::numeric_limits<unsigned int>::max();
+
+		try {
+
+			BOOST_FOREACH(const Cluster* cluster, sk.Clusters()) {
+				ai_assert(cluster);
+
+				const WeightIndexArray& indices = cluster->GetIndices();
+				const WeightArray& weights = cluster->GetWeights();
+
+				const MatIndexArray& mats = geo.GetMaterialIndices();
+
+				bool ok = false;		
+
+				const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
+
+				count_out_indices.clear();
+				index_out_indices.clear();
+				out_indices.clear();
+
+				// now check if *any* of these weights is contained in the output mesh,
+				// taking notes so we don't need to do it twice.
+				BOOST_FOREACH(WeightIndexArray::value_type index, indices) {
+
+					unsigned int count;
+					const unsigned int* const out_idx = geo.ToOutputVertexIndex(index, count);
+
+					index_out_indices.push_back(no_index_sentinel);
+
+					for(unsigned int i = 0; i < count; ++i) {
+						const unsigned int out_face_idx = geo.FaceForVertexIndex(out_idx[i]);
+						ai_assert(out_face_idx <= mats.size());
+
+						if (no_mat_check || mats[out_face_idx] == materialIndex) {
+							
+
+							if (index_out_indices.back() == no_index_sentinel) {
+								index_out_indices.back() = out_indices.size();
+							}
+
+							out_indices.push_back(out_idx[i]);
+
+							++count_out_indices.back();
+							ok = true;
+						}
+					}		
+				}
+
+				// if we found at least one, generate the output bones
+				// XXX this could be heavily simplified by collecting the bone
+				// data in a single step.
+				if (ok) {
+					ConvertCluster(bones, *cluster, out_indices, index_out_indices, count_out_indices);
+				}
+			}
+		}
+		catch (std::exception&) {
+			std::for_each(bones.begin(),bones.end(),Util::delete_fun<aiBone>());
+			throw;
+		}
+
+		if(bones.empty()) {
+			return;
+		}
+
+		out->mBones = new aiBone*[bones.size()]();
+		out->mNumBones = static_cast<unsigned int>(bones.size());
+
+		std::swap_ranges(bones.begin(),bones.end(),out->mBones);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertCluster(std::vector<aiBone*>& bones, const Cluster& cl, 		
+		std::vector<size_t>& out_indices,
+		std::vector<size_t>& index_out_indices,
+		std::vector<size_t>& count_out_indices
+		)
+	{
+		aiBone* const bone = new aiBone();
+		bones.push_back(bone);
+
+		bone->mName = FixNodeName(cl.TargetNode()->Name());
+
+		bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
+		aiVertexWeight* cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];
+
+		const size_t no_index_sentinel = std::numeric_limits<size_t>::max();
+		const WeightArray& weights = cl.GetWeights();
+
+		const size_t c = index_out_indices.size();
+		for (size_t i = 0; i < c; ++i) {
+			const size_t index_index =  index_out_indices[i];
+
+			if (index_index == no_index_sentinel) {
+				continue;
+			}
+
+			const size_t cc = count_out_indices[i];
+			for (size_t j = 0; j < cc; ++j) {
+				aiVertexWeight& out_weight = *cursor++;
+
+				out_weight.mVertexId = static_cast<unsigned int>(out_indices[index_index + j]);
+				out_weight.mWeight = weights[i];
+			}			
+		}
 	}
 
 

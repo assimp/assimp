@@ -387,6 +387,9 @@ private:
 };
 
 
+typedef std::vector<unsigned int> MatIndexArray;
+
+
 /** DOM class for FBX geometry of type "Mesh"*/
 class MeshGeometry : public Geometry
 {
@@ -451,8 +454,49 @@ public:
 	
 	
 	/** Get per-face-vertex material assignments */
-	const std::vector<unsigned int>& GetMaterialIndices() const {
+	const MatIndexArray& GetMaterialIndices() const {
 		return materials;
+	}
+
+
+	/** Convert from a fbx file vertex index (for example from a #Cluster weight) or NULL
+	  * if the vertex index is not valid. */
+	const unsigned int* ToOutputVertexIndex(unsigned int in_index, unsigned int& count) const {
+		if(in_index >= mapping_counts.size()) {
+			return NULL;
+		}
+
+		ai_assert(mapping_counts.size() == mapping_offsets.size());
+		count = mapping_counts[in_index];
+
+		ai_assert(count != 0);
+		ai_assert(mapping_offsets[in_index] + count <= mappings.size());
+
+		return &mappings[mapping_offsets[in_index]];
+	}
+
+
+	/** Determine the face to which a particular output vertex index belongs.
+	 *  This mapping is always unique. */
+	unsigned int FaceForVertexIndex(unsigned int in_index) const {
+		ai_assert(in_index < vertices.size());
+	
+		// in the current conversion pattern this will only be needed if
+		// weights are present, so no need to always pre-compute this table
+		if (facesVertexStartIndices.empty()) {
+			facesVertexStartIndices.resize(faces.size());
+
+			std::partial_sum(faces.begin(), faces.end(), facesVertexStartIndices.begin());
+		}
+
+		ai_assert(facesVertexStartIndices.size() == faces.size());
+		const std::vector<unsigned int>::const_iterator it = std::upper_bound(
+			facesVertexStartIndices.begin(),
+			facesVertexStartIndices.end(),
+			in_index
+		);
+
+		return *(it - 1);
 	}
 
 public:
@@ -490,9 +534,10 @@ private:
 private:
 
 	// cached data arrays
-	std::vector<unsigned int> materials;
+	MatIndexArray materials;
 	std::vector<aiVector3D> vertices;
 	std::vector<unsigned int> faces;
+	mutable std::vector<unsigned int> facesVertexStartIndices;
 	std::vector<aiVector3D> tangents;
 	std::vector<aiVector3D> binormals;
 	std::vector<aiVector3D> normals;
@@ -680,7 +725,7 @@ private:
 	boost::shared_ptr<const PropertyTable> props;
 };
 
-typedef std::vector<float> WeightList;
+typedef std::vector<float> WeightArray;
 typedef std::vector<unsigned int> WeightIndexArray;
 
 
@@ -695,7 +740,7 @@ public:
 public:
 
 	/** get the list of deformer weights associated with this cluster */
-	const WeightList& GetWeights() const {
+	const WeightArray& GetWeights() const {
 		return weights;
 	}
 
@@ -720,7 +765,7 @@ public:
 
 private:
 
-	WeightList weights;
+	WeightArray weights;
 	WeightIndexArray indices;
 
 	aiMatrix4x4 transform;

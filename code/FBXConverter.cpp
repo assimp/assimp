@@ -129,41 +129,45 @@ private:
 		std::vector<aiNode*> nodes;
 		nodes.reserve(conns.size());
 
-		BOOST_FOREACH(const Connection* con, conns) {
+		try {
+			BOOST_FOREACH(const Connection* con, conns) {
 
-			// ignore object-property links
-			if(con->PropertyName().length()) {
-				continue;
+				// ignore object-property links
+				if(con->PropertyName().length()) {
+					continue;
+				}
+
+				const Object* const object = con->SourceObject();
+				if(!object) {
+					FBXImporter::LogWarn("failed to convert source object for Model link");
+					continue;
+				}
+
+				const Model* const model = dynamic_cast<const Model*>(object);
+
+				if(model) {
+					aiNode* nd = new aiNode();
+					nodes.push_back(nd);
+
+					nd->mName.Set(FixNodeName(model->Name()));
+					nd->mParent = &parent;
+
+					ConvertTransformation(*model,*nd);
+
+					ConvertModel(*model, *nd);
+					ConvertNodes(model->ID(), *nd);
+				}
 			}
 
-			const Object* const object = con->SourceObject();
-			if(!object) {
-				FBXImporter::LogWarn("failed to convert source object for node link");
-				continue;
+			if(nodes.size()) {
+				parent.mChildren = new aiNode*[nodes.size()]();
+				parent.mNumChildren = static_cast<unsigned int>(nodes.size());
+
+				std::swap_ranges(nodes.begin(),nodes.end(),parent.mChildren);
 			}
-
-			const Model* const model = dynamic_cast<const Model*>(object);
-
-		
-			if(model) {
-				aiNode* nd = new aiNode();
-				nodes.push_back(nd);
-
-				nd->mName.Set(FixNodeName(model->Name()));
-				nd->mParent = &parent;
-
-				ConvertTransformation(*model,*nd);
-
-				ConvertModel(*model, *nd);
-				ConvertNodes(model->ID(), *nd);
-			}
-		}
-
-		if(nodes.size()) {
-			parent.mChildren = new aiNode*[nodes.size()]();
-			parent.mNumChildren = static_cast<unsigned int>(nodes.size());
-
-			std::swap_ranges(nodes.begin(),nodes.end(),parent.mChildren);
+		} 
+		catch(std::exception&)	{
+			std::for_each(nodes.begin(),nodes.end(),Util::delete_fun<aiNode>());
 		}
 	}
 
@@ -172,6 +176,8 @@ private:
 	void ConvertTransformation(const Model& model, aiNode& nd)
 	{
 		const PropertyTable& props = model.Props();
+
+		// XXX this is not complete, need to handle rotation and scaling pivots etc
 
 		bool ok;
 		
@@ -640,7 +646,7 @@ private:
 		bones.reserve(sk.Clusters().size());
 
 		const bool no_mat_check = materialIndex == NO_MATERIAL_SEPARATION;
-		ai_assert(!no_mat_check || outputVertStartIndices);
+		ai_assert(no_mat_check || outputVertStartIndices);
 
 		try {
 

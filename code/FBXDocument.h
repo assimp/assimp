@@ -491,13 +491,13 @@ public:
 		}
 
 		ai_assert(facesVertexStartIndices.size() == faces.size());
-		const std::vector<unsigned int>::const_iterator it = std::upper_bound(
+		const std::vector<unsigned int>::iterator it = std::upper_bound(
 			facesVertexStartIndices.begin(),
 			facesVertexStartIndices.end(),
 			in_index
 		);
 
-		return *(it - 1);
+		return static_cast<unsigned int>(std::distance(facesVertexStartIndices.begin(), it - 1)); 
 	}
 
 public:
@@ -619,8 +619,9 @@ public:
 		return curves;
 	}
 
-	/** Model or NodeAttribute the curve is assigned to, this is always non-NULL
-	 *  and never an objects not deriving one of the two aforementioned classes.*/
+	/** Object the curve is assigned to, this can be NULL if the
+	 *  target object has no DOM representation or could not
+	 *  be read for other reasons.*/
 	const Object* Target() const {
 		return target;
 	}

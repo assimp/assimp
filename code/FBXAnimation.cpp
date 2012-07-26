@@ -150,7 +150,8 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 			continue;
 		}
 
-		ai_assert(dynamic_cast<const Model*>(ob) || dynamic_cast<const NodeAttribute*>(ob));
+		// XXX support constraints as DOM class
+		//ai_assert(dynamic_cast<const Model*>(ob) || dynamic_cast<const NodeAttribute*>(ob));
 		target = ob; 
 		if(!target) {
 			continue;
@@ -161,7 +162,7 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 	}
 	}
 	if(!target) {
-		DOMError("failed to resolve target Model/NodeAttribute for AnimationCurveNode",&element);
+		DOMWarning("failed to resolve target Model/NodeAttribute/Constraint for AnimationCurveNode",&element);
 	}
 }
 

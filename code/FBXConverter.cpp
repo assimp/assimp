@@ -415,7 +415,7 @@ private:
 		}
 
 		if(doc.Settings().readWeights && mesh.DeformerSkin() != NULL) {
-			ConvertWeights(out_mesh, model, mesh, std::numeric_limits<unsigned int>::max());
+			ConvertWeights(out_mesh, model, mesh, NO_MATERIAL_SEPARATION);
 		}
 
 		return static_cast<unsigned int>(meshes.size() - 1);
@@ -452,6 +452,8 @@ private:
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
 
+		const bool process_weights = doc.Settings().readWeights && mesh.DeformerSkin() != NULL;
+
 		unsigned int count_faces = 0;
 		unsigned int count_vertices = 0;
 
@@ -467,7 +469,14 @@ private:
 		}
 
 		ai_assert(count_faces);
+		ai_assert(count_vertices);
 
+		// mapping from output indices to DOM indexing, needed to resolve weights
+		std::vector<unsigned int> reverseMapping;
+
+		if (process_weights) {
+			reverseMapping.resize(count_vertices);
+		}
 
 		// allocate output data arrays, but don't fill them yet
 		out_mesh->mNumVertices = count_vertices;
@@ -570,6 +579,10 @@ private:
 			for (unsigned int i = 0; i < pcount; ++i, ++cursor, ++in_cursor) {
 				f.mIndices[i] = cursor;
 
+				if(reverseMapping.size()) {
+					reverseMapping[cursor] = in_cursor;
+				}
+
 				out_mesh->mVertices[cursor] = vertices[in_cursor];
 
 				if(out_mesh->mNormals) {
@@ -595,16 +608,25 @@ private:
 	
 		ConvertMaterialForMesh(out_mesh,model,mesh,index);
 
-		if(doc.Settings().readWeights && mesh.DeformerSkin() != NULL) {
-			ConvertWeights(out_mesh, model, mesh, index);
+		if(process_weights) {
+			ConvertWeights(out_mesh, model, mesh, index, &reverseMapping);
 		}
 
 		return static_cast<unsigned int>(meshes.size() - 1);
 	}
 
+	static const unsigned int NO_MATERIAL_SEPARATION = /* std::numeric_limits<unsigned int>::max() */ 
+		static_cast<unsigned int>(-1);
+
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertWeights(aiMesh* out, const Model& model, const MeshGeometry& geo, unsigned int materialIndex)
+	/** - if materialIndex == NO_MATERIAL_SEPARATION, materials are not taken into
+	 *  account when determining which weights to include. 
+	 *  - outputVertStartIndices is only used when a material index is specified, it gives for
+	 *    each output vertex the DOM index it maps to. */
+	void ConvertWeights(aiMesh* out, const Model& model, const MeshGeometry& geo, 
+		unsigned int materialIndex = NO_MATERIAL_SEPARATION, 
+		std::vector<unsigned int>* outputVertStartIndices = NULL)
 	{
 		ai_assert(geo.DeformerSkin());
 
@@ -617,7 +639,8 @@ private:
 		std::vector<aiBone*> bones;
 		bones.reserve(sk.Clusters().size());
 
-		const bool no_mat_check = materialIndex == std::numeric_limits<unsigned int>::max();
+		const bool no_mat_check = materialIndex == NO_MATERIAL_SEPARATION;
+		ai_assert(!no_mat_check || outputVertStartIndices);
 
 		try {
 
@@ -649,20 +672,29 @@ private:
 					const unsigned int* const out_idx = geo.ToOutputVertexIndex(index, count);
 
 					index_out_indices.push_back(no_index_sentinel);
+					count_out_indices.push_back(0);
 
-					for(unsigned int i = 0; i < count; ++i) {
-						const unsigned int out_face_idx = geo.FaceForVertexIndex(out_idx[i]);
-						ai_assert(out_face_idx <= mats.size());
-
-						if (no_mat_check || mats[out_face_idx] == materialIndex) {
+					for(unsigned int i = 0; i < count; ++i) {					
+						if (no_mat_check || mats[geo.FaceForVertexIndex(out_idx[i])] == materialIndex) {
 							
-
 							if (index_out_indices.back() == no_index_sentinel) {
 								index_out_indices.back() = out_indices.size();
-								count_out_indices.push_back(0);
+								
 							}
 
-							out_indices.push_back(out_idx[i]);
+							if (no_mat_check) {
+								out_indices.push_back(out_idx[i]);
+							}
+							else {
+								// this extra lookup is in O(logn), so the entire algorithm becomes O(nlogn)
+								const std::vector<unsigned int>::iterator it = std::lower_bound(
+									outputVertStartIndices->begin(),
+									outputVertStartIndices->end(),
+									out_idx[i]
+								);
+
+								out_indices.push_back(std::distance(outputVertStartIndices->begin(), it));
+							}
 
 							++count_out_indices.back();
 							ok = true;

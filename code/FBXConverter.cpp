@@ -944,8 +944,11 @@ private:
 			BOOST_FOREACH(const AnimationCurveNode* node, nodes) {
 				ai_assert(node);
 
-				const Model* model = node->TargetNode();
-				ai_assert(model);
+				const Model* const model = dynamic_cast<const Model*>(node->Target());
+				// this can happen - it could also be a NodeAttribute (i.e. for camera animations)
+				if(!model) {
+					continue;
+				}
 
 				const std::string& name = FixNodeName(model->Name());
 				node_map[name].push_back(node);
@@ -1006,7 +1009,8 @@ private:
 
 				na->mNodeName.Set(kv.first);
 
-				const PropertyTable& props = curve_node->TargetNode()->Props();
+				ai_assert(curve_node->TargetAsModel());
+				const PropertyTable& props = curve_node->TargetAsModel()->Props();
 
 				// if a particular transformation is not given, grab it from
 				// the corresponding node to meet the semantics of aiNodeAnim,

@@ -172,12 +172,12 @@ private:
 
 
 /** DOM base class for FBX camera settings attached to a node */
-class Camera : public NodeAttribute
+class CameraSwitcher : public NodeAttribute
 {
 public:
 
-	Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-	~Camera();
+	CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~CameraSwitcher();
 
 public:
 
@@ -554,19 +554,28 @@ public:
 		return curves;
 	}
 
-	/** Model instance the curve is assigned to, this is always non-NULL */
-	const Model* TargetNode() const {
+	/** Model or NodeAttribute the curve is assigned to, this is always non-NULL
+	 *  and never an objects not deriving one of the two aforementioned classes.*/
+	const Object* Target() const {
 		return target;
 	}
 
-	/** Property of TargetNode() that is being animated*/
+	const Model* TargetAsModel() const {
+		return dynamic_cast<const Model*>(target);
+	}
+
+	const NodeAttribute* TargetAsNodeAttribute() const {
+		return dynamic_cast<const NodeAttribute*>(target);
+	}
+
+	/** Property of Target() that is being animated*/
 	const std::string& TargetProperty() const {
 		return prop;
 	}
 
 private:
 
-	const Model* target;
+	const Object* target;
 	boost::shared_ptr<const PropertyTable> props;
 	AnimationCurveMap curves;
 

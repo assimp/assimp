@@ -76,7 +76,7 @@ NodeAttribute::~NodeAttribute()
 
 
 // ------------------------------------------------------------------------------------------------
-Camera::Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+CameraSwitcher::CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 	: NodeAttribute(id,element,doc,name)
 {
 	const Scope& sc = GetRequiredScope(element);
@@ -99,7 +99,7 @@ Camera::Camera(uint64_t id, const Element& element, const Document& doc, const s
 
 
 // ------------------------------------------------------------------------------------------------
-Camera::~Camera()
+CameraSwitcher::~CameraSwitcher()
 {
 
 }

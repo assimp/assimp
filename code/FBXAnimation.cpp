@@ -134,7 +134,8 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 	}{
 
 	// find target node
-	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),"Model");
+	const char* whitelist[] = {"Model","NodeAttribute"};
+	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),whitelist,2);
 
 	BOOST_FOREACH(const Connection* con, conns) {
 
@@ -143,13 +144,14 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 			continue;
 		}
 
-		const Object* ob = con->DestinationObject();
+		const Object* const ob = con->DestinationObject();
 		if(!ob) {
 			DOMWarning("failed to read destination object for AnimationCurveNode->Model link, ignoring",&element);
 			continue;
 		}
 
-		target = dynamic_cast<const Model*>(ob);
+		ai_assert(dynamic_cast<const Model*>(ob) || dynamic_cast<const NodeAttribute*>(ob));
+		target = ob; 
 		if(!target) {
 			continue;
 		}
@@ -159,7 +161,7 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 	}
 	}
 	if(!target) {
-		DOMError("failed to resolve target model for animation node",&element);
+		DOMError("failed to resolve target Model/NodeAttribute for AnimationCurveNode",&element);
 	}
 }
 

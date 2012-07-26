@@ -467,6 +467,11 @@ const Object* LazyObject::Get(bool dieOnError)
 				object.reset(new MeshGeometry(id,element,name,doc));
 			}
 		}
+		else if (!strncmp(obtype,"NodeAttribute",length)) {
+			if (!strcmp(classtag.c_str(),"CameraSwitcher")) {
+				object.reset(new CameraSwitcher(id,element,doc,name));
+			}
+		}
 		else if (!strncmp(obtype,"Model",length)) {
 			object.reset(new Model(id,element,doc,name));
 		}

@@ -718,9 +718,9 @@ private:
 				// be moved, causing trouble when users read only the first
 				// UV channel and ignore UV channel assignments altogether.
 
-				const unsigned int matIndex = std::distance(materials.begin(), 
+				const unsigned int matIndex = static_cast<unsigned int>(std::distance(materials.begin(), 
 					std::find(materials.begin(),materials.end(),out_mat)
-				);
+				));
 
 				uvIndex = -1;
 				BOOST_FOREACH(const MeshMap::value_type& v,meshes_converted) {

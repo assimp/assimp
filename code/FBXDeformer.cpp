@@ -78,6 +78,7 @@ Deformer::~Deformer()
 // ------------------------------------------------------------------------------------------------
 Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : Deformer(id,element,doc,name)
+, node()
 {
 	const Scope& sc = GetRequiredScope(element);
 
@@ -91,6 +92,20 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
 
 	ReadVectorDataArray(indices,Indexes);
 	ReadVectorDataArray(weights,Weights);
+
+	// read assigned node
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
+	BOOST_FOREACH(const Connection* con, conns) {
+		const Model* const mod = ProcessSimpleConnection<Model>(*con, false, "Model -> Cluster", element);
+		if(mod) {
+			node = mod;
+			break;
+		}
+	}
+
+	if (!node) {
+		DOMError("failed to read target Node for Cluster",&element);
+	}
 }
 
 
@@ -112,31 +127,17 @@ Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::
 		accuracy = ParseTokenAsFloat(GetRequiredToken(*Link_DeformAcuracy,0));
 	}
 
-	const char* const arr[] = {"Deformer"};
-
 	// resolve assigned clusters 
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),arr, 1);
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
 
 	clusters.reserve(conns.size());
 	BOOST_FOREACH(const Connection* con, conns) {
 
-		// Cluster -> Skin links should be object-object connections
-		if (con->PropertyName().length()) {
-			continue;
-		}
-
-		const Object* const ob = con->SourceObject();
-		if(!ob) {
-			DOMWarning("failed to read source object for incoming Skin link, ignoring",&element);
-			continue;
-		}
-
-		const Cluster* const cluster = dynamic_cast<const Cluster*>(ob);
+		const Cluster* const cluster = ProcessSimpleConnection<Cluster>(*con, false, "Cluster -> Skin", element);
 		if(cluster) {
 			clusters.push_back(cluster);
 			continue;
 		}
-
 	}
 }
 

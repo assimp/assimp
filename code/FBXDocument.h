@@ -60,6 +60,14 @@ namespace FBX {
 	class Material;
 	class Geometry;
 
+	class AnimationCurve;
+	class AnimationCurveNode;
+	class AnimationLayer;
+	class AnimationStack;
+
+	class Skin;
+	class Cluster;
+
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
  *  are not needed by assimp, so it makes no sense to parse them
@@ -363,8 +371,19 @@ class Geometry : public Object
 {
 public:
 
-	Geometry(uint64_t id, const Element& element, const std::string& name);
+	Geometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
 	~Geometry();
+
+public:
+
+	/** Get the Skin attached to this geometry or NULL */
+	const Skin* const DeformerSkin() const {
+		return skin;
+	}
+
+private:
+
+	const Skin* skin;
 };
 
 
@@ -695,6 +714,10 @@ public:
 		return transformLink;
 	}
 
+	const Model* const TargetNode() const {
+		return node;
+	}
+
 private:
 
 	WeightList weights;
@@ -702,6 +725,8 @@ private:
 
 	aiMatrix4x4 transform;
 	aiMatrix4x4 transformLink;
+
+	const Model* node;
 };
 
 

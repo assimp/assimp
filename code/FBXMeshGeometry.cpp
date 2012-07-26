@@ -57,9 +57,34 @@ namespace FBX {
 
 	using namespace Util;
 
+
+// ------------------------------------------------------------------------------------------------
+Geometry::Geometry(uint64_t id, const Element& element, const std::string& name, const Document& doc)
+	: Object(id, element,name)
+	, skin()
+{
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
+	BOOST_FOREACH(const Connection* con, conns) {
+		const Skin* const sk = ProcessSimpleConnection<Skin>(*con, false, "Skin -> Geometry", element);
+		if(sk) {
+			skin = sk;
+			break;
+		}
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Geometry::~Geometry()
+{
+
+}
+
+
+
 // ------------------------------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc)
-: Geometry(id, element,name)
+: Geometry(id, element,name, doc)
 {
 	const Scope* sc = element.Compound();
 	if (!sc) {

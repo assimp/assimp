@@ -580,21 +580,6 @@ Object::~Object()
 
 
 // ------------------------------------------------------------------------------------------------
-Geometry::Geometry(uint64_t id, const Element& element, const std::string& name)
-: Object(id, element,name)
-{
-
-}
-
-
-// ------------------------------------------------------------------------------------------------
-Geometry::~Geometry()
-{
-
-}
-
-
-// ------------------------------------------------------------------------------------------------
 Document::Document(const Parser& parser, const ImportSettings& settings)
 : settings(settings)
 , parser(parser)

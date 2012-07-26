@@ -914,7 +914,12 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertAnimationStack(const AnimationStack& st)
-	{
+	{				
+		const AnimationLayerList& layers = st.Layers();
+		if(layers.empty()) {
+			return;
+		}
+
 		aiAnimation* const anim = new aiAnimation();
 		animations.push_back(anim);
 
@@ -925,7 +930,6 @@ private:
 		}
 
 		anim->mName.Set(name);
-		const AnimationLayerList& layers = st.Layers();
 		
 		// need to find all nodes for which we need to generate node animations -
 		// it may happen that we need to merge multiple layers, though.
@@ -1065,6 +1069,13 @@ private:
 			anim->mNumChannels = static_cast<unsigned int>(node_anims.size());
 
 			std::swap_ranges(node_anims.begin(),node_anims.end(),anim->mChannels);
+		}
+		else {
+			// empty animations would fail validation, so drop them
+			delete anim;
+			animations.pop_back();
+			FBXImporter::LogInfo("ignoring empty AnimationStack: " + name);
+			return;
 		}
 
 		// for some mysterious reason, mDuration is simply the maximum key -- the

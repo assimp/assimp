@@ -622,6 +622,10 @@ private:
 				const WeightIndexArray& indices = cluster->GetIndices();
 				const WeightArray& weights = cluster->GetWeights();
 
+				if(indices.empty()) {
+					continue;
+				}
+
 				const MatIndexArray& mats = geo.GetMaterialIndices();
 
 				bool ok = false;		

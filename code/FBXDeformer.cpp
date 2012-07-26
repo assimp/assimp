@@ -82,23 +82,27 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
 {
 	const Scope& sc = GetRequiredScope(element);
 
-	const Element& Indexes = GetRequiredElement(sc,"Indexes",&element);
-	const Element& Weights = GetRequiredElement(sc,"Weights",&element);
+	const Element* const Indexes = sc["Indexes"];
+	const Element* const Weights = sc["Weights"];
+
 	const Element& Transform = GetRequiredElement(sc,"Transform",&element);
 	const Element& TransformLink = GetRequiredElement(sc,"TransformLink",&element);
 
 	transform = ReadMatrix(Transform);
 	transformLink = ReadMatrix(TransformLink);
 
-	ReadVectorDataArray(indices,Indexes);
-	ReadVectorDataArray(weights,Weights);
+	// it is actually possible that there be Deformer's with no weights
+	if (!!Indexes != !!Weights) {
+		DOMError("either Indexes or Weights are missing from Cluster",&element);
+	}
+
+	if(Indexes) {
+		ReadVectorDataArray(indices,*Indexes);
+		ReadVectorDataArray(weights,*Weights);
+	}
 
 	if(indices.size() != weights.size()) {
 		DOMError("sizes of index and weight array don't match up",&element);
-	}
-
-	if(!indices.size()) {
-		DOMWarning("encountered empty deformer",&element);
 	}
 
 	// read assigned node

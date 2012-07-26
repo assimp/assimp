@@ -739,13 +739,16 @@ public:
 
 public:
 
-	/** get the list of deformer weights associated with this cluster */
+	/** get the list of deformer weights associated with this cluster.
+	 *  Use #GetIndices() to get the associated vertices. Both arrays
+	 *  have the same size (and may also be empty). */
 	const WeightArray& GetWeights() const {
 		return weights;
 	}
 
 	/** get indices into the vertex data of the geometry associated
-	 *  with this cluster.*/
+	 *  with this cluster. Use #GetWeights() to get the associated weights.
+	 *  Both arrays have the same size (and may also be empty). */
 	const WeightIndexArray& GetIndices() const {
 		return indices;
 	}

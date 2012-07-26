@@ -1074,7 +1074,7 @@ private:
 	}
 
 	// key (time), value, mapto (component index)
-	typedef boost::tuple< KeyTimeList*, KeyValueList*, unsigned int > KeyFrameList;
+	typedef boost::tuple< const KeyTimeList*, const KeyValueList*, unsigned int > KeyFrameList;
 	typedef std::vector<KeyFrameList> KeyFrameListList;
 
 	

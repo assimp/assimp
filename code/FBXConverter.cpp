@@ -282,6 +282,15 @@ private:
 	}
 
 
+	// ------------------------------------------------------------------------------------------------
+	aiVector3D TransformationCompDefaultValue(TransformationComp comp)
+	{
+		// XXX a neat way to solve the never-ending special cases for scaling 
+		// would be to do everything in log space!
+		return comp == TransformationComp_Scaling ? aiVector3D(1.f,1.f,1.f) : aiVector3D();
+	}
+
+
 	enum RotationMode
 	{
 		RotationMode_Euler_XYZ
@@ -1316,10 +1325,6 @@ private:
 	}
 
 
-	// name -> prefix_stripped?
-	typedef std::map<std::string, bool> NodeNameMap;
-	NodeNameMap node_names;
-
 	// ------------------------------------------------------------------------------------------------
 	std::string FixNodeName(const std::string& name)
 	{
@@ -1458,6 +1463,17 @@ private:
 		NodeMap node_property_map;
 		ai_assert(curves.size());
 
+		// sanity check whether the input is ok
+#ifdef _DEBUG
+		{ const Object* target = NULL;
+		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
+			if(!target) {
+				target = node->Target();
+			}
+			ai_assert(node->Target() == target);
+		}}
+#endif
+
 		const AnimationCurveNode* curve_node;
 		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
 			ai_assert(node);
@@ -1477,6 +1493,9 @@ private:
 		}
 
 		ai_assert(curve_node);
+		ai_assert(curve_node->TargetAsModel());
+
+		const Model& target = *curve_node->TargetAsModel();
 
 		// check for all possible transformation components
 		NodeMap::const_iterator chain[TransformationComp_MAXIMUM];
@@ -1495,6 +1514,14 @@ private:
 
 			chain[i] = node_property_map.find(NameTransformationCompProperty(comp));
 			if (chain[i] != node_property_map.end()) {
+
+				// check if this curves contains redundant information by looking
+				// up the corresponding node's transformation chain.
+				if (doc.Settings().optimizeEmptyAnimationCurves && IsRedundantAnimationData(target, comp, (*chain[i]).second)) {
+					FBXImporter::LogDebug("dropping redundant animation channel for node " + target.Name());
+					continue;
+				}
+
 				has_any = true;
 
 				if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling &&
@@ -1510,13 +1537,10 @@ private:
 			return;
 		}
 
-		ai_assert(curve_node->TargetAsModel());
-
 		// this needs to play nicely with GenerateTransformationNodeChain() which will
 		// be invoked _later_ (animations come first). If this node has only rotation,
 		// scaling and translation _and_ there are no animated other components either,
 		// we can use a single node and also a single node animation channel.
-		const Model& target = *curve_node->TargetAsModel();
 		if (!has_complex && !NeedsComplexTransformationChain(target)) {
 
 			aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain, 
@@ -1632,6 +1656,53 @@ private:
 		}
 
 		node_anim_chain_bits[fixed_name] = flags;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	bool IsRedundantAnimationData(const Model& target, 
+		TransformationComp comp, 
+		const std::vector<const AnimationCurveNode*>& curves)
+	{
+		ai_assert(curves.size());
+
+		// look for animation nodes with
+		//  * sub channels for all relevant components set
+		//  * one key/value pair per component
+		//  * combined values match up the corresponding value in the bind pose node transformation
+		// only such nodes are 'redundant' for this function.
+
+		if (curves.size() > 1) {
+			return false;
+		}
+
+		const AnimationCurveNode& nd = *curves.front();
+		const AnimationCurveMap& sub_curves = nd.Curves();
+
+		const AnimationCurveMap::const_iterator dx = sub_curves.find("d|X");
+		const AnimationCurveMap::const_iterator dy = sub_curves.find("d|Y");
+		const AnimationCurveMap::const_iterator dz = sub_curves.find("d|Z");
+
+		if (dx == sub_curves.end() || dy == sub_curves.end() || dz == sub_curves.end()) {
+			return false;
+		}
+
+		const KeyValueList& vx = (*dx).second->GetValues();
+		const KeyValueList& vy = (*dy).second->GetValues();
+		const KeyValueList& vz = (*dz).second->GetValues();
+
+		if(vx.size() != 1 || vy.size() != 1 || vz.size() != 1) {
+			return false;
+		}
+
+		const aiVector3D dyn_val = aiVector3D(vx[0], vy[0], vz[0]);
+		const aiVector3D& static_val = PropertyGet<aiVector3D>(target.Props(), 
+			NameTransformationCompProperty(comp), 
+			TransformationCompDefaultValue(comp)
+		);
+
+		const float epsilon = 1e-6f;
+		return (dyn_val - static_val).SquareLength() < epsilon;
 	}
 
 
@@ -2101,12 +2172,16 @@ private:
 	typedef std::map<const Material*, unsigned int> MaterialMap;
 	MaterialMap materials_converted;
 
-
 	typedef std::map<const Geometry*, std::vector<unsigned int> > MeshMap;
 	MeshMap meshes_converted;
 
+	// fixed node name -> which trafo chain components have animations?
 	typedef std::map<std::string, unsigned int> NodeAnimBitMap;
 	NodeAnimBitMap node_anim_chain_bits;
+
+	// name -> has had its prefix_stripped?
+	typedef std::map<std::string, bool> NodeNameMap;
+	NodeNameMap node_names;
 
 
 	aiScene* const out;

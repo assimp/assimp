@@ -60,6 +60,7 @@ struct ImportSettings
 		, strictMode(true)
 		, readWeights(true)
 		, preservePivots(true)
+		, optimizeEmptyAnimationCurves(true)
 	{}
  
 
@@ -126,6 +127,11 @@ struct ImportSettings
 	 *    Rotation
 	 **/
 	bool preservePivots;
+
+	/** do not import animation curves that specify a constant
+	 *  values matching the corresponding node transformation.
+	 *  The default value is true. */
+	bool optimizeEmptyAnimationCurves;
 };
 
 

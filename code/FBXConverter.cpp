@@ -154,7 +154,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	// collect and assign child nodes
-	void ConvertNodes(uint64_t id, aiNode& parent)
+	void ConvertNodes(uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform = aiMatrix4x4())
 	{
 		const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(id, "Model");
 
@@ -181,6 +181,8 @@ private:
 
 				if(model) {
 					nodes_chain.clear();
+
+					aiMatrix4x4 new_abs_transform = parent_transform;
 
 					// even though there is only a single input node, the design of
 					// assimp (or rather: the complicated transformation chain that
@@ -221,13 +223,15 @@ private:
 
 						prenode->mParent = last_parent;
 						last_parent = prenode;
+
+						new_abs_transform *= prenode->mTransformation;
 					}
 
 					// attach geometry
-					ConvertModel(*model, *nodes_chain.back());
+					ConvertModel(*model, *nodes_chain.back(), new_abs_transform);
 
 					// attach sub-nodes
-					ConvertNodes(model->ID(), *nodes_chain.back());
+					ConvertNodes(model->ID(), *nodes_chain.back(), new_abs_transform);
 
 					nodes.push_back(nodes_chain.front());	
 					nodes_chain.clear();
@@ -527,7 +531,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertModel(const Model& model, aiNode& nd)
+	void ConvertModel(const Model& model, aiNode& nd, const aiMatrix4x4& node_global_transform)
 	{
 		const std::vector<const Geometry*>& geos = model.GetGeometry();
 
@@ -538,7 +542,7 @@ private:
 
 			const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
 			if(mesh) {
-				const std::vector<unsigned int>& indices = ConvertMesh(*mesh, model);
+				const std::vector<unsigned int>& indices = ConvertMesh(*mesh, model, node_global_transform);
 				std::copy(indices.begin(),indices.end(),std::back_inserter(meshes) );
 			}
 			else {
@@ -557,7 +561,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	// MeshGeometry -> aiMesh, return mesh index + 1 or 0 if the conversion failed
-	std::vector<unsigned int> ConvertMesh(const MeshGeometry& mesh, const Model& model)
+	std::vector<unsigned int> ConvertMesh(const MeshGeometry& mesh,const Model& model, const aiMatrix4x4& node_global_transform)
 	{
 		std::vector<unsigned int> temp; 
 
@@ -581,13 +585,13 @@ private:
 			const unsigned int base = mindices[0];
 			BOOST_FOREACH(unsigned int index, mindices) {
 				if(index != base) {
-					return ConvertMeshMultiMaterial(mesh, model);
+					return ConvertMeshMultiMaterial(mesh, model, node_global_transform);
 				}
 			}
 		}
 
 		// faster codepath, just copy the data
-		temp.push_back(ConvertMeshSingleMaterial(mesh, model));
+		temp.push_back(ConvertMeshSingleMaterial(mesh, model, node_global_transform));
 		return temp;
 	}
 
@@ -614,7 +618,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model)	
+	unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model, const aiMatrix4x4& node_global_transform)	
 	{
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
 		aiMesh* const out_mesh = SetupEmptyMesh(mesh,mindices.size() ? mindices[0] : static_cast<unsigned int>(-1)); 
@@ -733,7 +737,7 @@ private:
 		}
 
 		if(doc.Settings().readWeights && mesh.DeformerSkin() != NULL) {
-			ConvertWeights(out_mesh, model, mesh, NO_MATERIAL_SEPARATION);
+			ConvertWeights(out_mesh, model, mesh, node_global_transform, NO_MATERIAL_SEPARATION);
 		}
 
 		return static_cast<unsigned int>(meshes.size() - 1);
@@ -741,7 +745,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	std::vector<unsigned int> ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model)	
+	std::vector<unsigned int> ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, const aiMatrix4x4& node_global_transform)	
 	{
 		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
 		ai_assert(mindices.size());
@@ -752,7 +756,7 @@ private:
 		BOOST_FOREACH(unsigned int index, mindices) {
 			if(had.find(index) == had.end()) {
 
-				indices.push_back(ConvertMeshMultiMaterial(mesh, model, index));
+				indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, node_global_transform));
 				had.insert(index);
 			}
 		}
@@ -762,7 +766,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	unsigned int ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, unsigned int index)	
+	unsigned int ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, unsigned int index, const aiMatrix4x4& node_global_transform)	
 	{
 		aiMesh* const out_mesh = SetupEmptyMesh(mesh, index);
 
@@ -927,7 +931,7 @@ private:
 		ConvertMaterialForMesh(out_mesh,model,mesh,index);
 
 		if(process_weights) {
-			ConvertWeights(out_mesh, model, mesh, index, &reverseMapping);
+			ConvertWeights(out_mesh, model, mesh, node_global_transform, index, &reverseMapping);
 		}
 
 		return static_cast<unsigned int>(meshes.size() - 1);
@@ -943,6 +947,7 @@ private:
 	 *  - outputVertStartIndices is only used when a material index is specified, it gives for
 	 *    each output vertex the DOM index it maps to. */
 	void ConvertWeights(aiMesh* out, const Model& model, const MeshGeometry& geo, 
+		const aiMatrix4x4& node_global_transform = aiMatrix4x4(),
 		unsigned int materialIndex = NO_MATERIAL_SEPARATION, 
 		std::vector<unsigned int>* outputVertStartIndices = NULL)
 	{
@@ -1024,7 +1029,8 @@ private:
 				// XXX this could be heavily simplified by collecting the bone
 				// data in a single step.
 				if (ok) {
-					ConvertCluster(bones, *cluster, out_indices, index_out_indices, count_out_indices);
+					ConvertCluster(bones, model, *cluster, out_indices, index_out_indices, 
+						count_out_indices, node_global_transform);
 				}
 			}
 		}
@@ -1044,19 +1050,24 @@ private:
 	}
 
 
+
 	// ------------------------------------------------------------------------------------------------
-	void ConvertCluster(std::vector<aiBone*>& bones, const Cluster& cl, 		
+	void ConvertCluster(std::vector<aiBone*>& bones, const Model& model, const Cluster& cl, 		
 		std::vector<size_t>& out_indices,
 		std::vector<size_t>& index_out_indices,
-		std::vector<size_t>& count_out_indices
-		)
+		std::vector<size_t>& count_out_indices,
+		const aiMatrix4x4& node_global_transform)
 	{
+
 		aiBone* const bone = new aiBone();
 		bones.push_back(bone);
 
 		bone->mName = FixNodeName(cl.TargetNode()->Name());
+
 		bone->mOffsetMatrix = cl.TransformLink();
 		bone->mOffsetMatrix.Inverse();
+
+		bone->mOffsetMatrix = bone->mOffsetMatrix * node_global_transform;
 
 		bone->mNumWeights = static_cast<unsigned int>(out_indices.size());
 		aiVertexWeight* cursor = bone->mWeights = new aiVertexWeight[out_indices.size()];

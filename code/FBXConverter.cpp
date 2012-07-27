@@ -1329,6 +1329,7 @@ private:
 		// across multiple calls to FixNodeName().
 		if(name.substr(0,7) == "Model::") {
 			std::string temp = name.substr(7);
+			return temp;
 
 			const NodeNameMap::const_iterator it = node_names.find(temp);
 			if (it != node_names.end()) {
@@ -1416,8 +1417,8 @@ private:
 					kv.first, 
 					kv.second, 
 					layer_map, 
-					min_time, 
-					max_time);
+					max_time, 
+					min_time);
 			}
 		}
 		catch(std::exception&) {

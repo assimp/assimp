@@ -340,6 +340,14 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
+	// note: name must be a FixNodeName() result
+	std::string NameTransformationChainNode(const std::string& name, TransformationComp comp)
+	{
+		return name + std::string(MAGIC_NODE_TAG) + "_" + NameTransformationComp(comp);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
 	/** note: memory for output_nodes will be managed by the caller */
 	void GenerateTransformationNodeChain(const Model& model, 
 		std::vector<aiNode*>& output_nodes)
@@ -431,7 +439,6 @@ private:
 		if(is_complex && doc.Settings().preservePivots) {
 			FBXImporter::LogInfo("generating full transformation chain for node: " + name);
 
-			const std::string mid = std::string(MAGIC_NODE_TAG) + "_";
 			for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
 				// XXX this may cause trouble with animations
 				if (chain[i].IsIdentity()) {
@@ -440,8 +447,8 @@ private:
 
 				aiNode* nd = new aiNode();
 				output_nodes.push_back(nd);
-
-				nd->mName.Set(name + mid  + NameTransformationComp(static_cast<TransformationComp>(i)));
+				
+				nd->mName.Set(NameTransformationChainNode(name, static_cast<TransformationComp>(i)));
 				nd->mTransformation = chain[i];
 			}
 
@@ -1466,11 +1473,63 @@ private:
 					continue;
 				}
 
-				// otherwise, things get gruesome.
-				aiNodeAnim* const na = new aiNodeAnim();
+				// otherwise, things get gruesome and we need separate animation channels
+				// for each part of the transformation chain.
+				for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+					const TransformationComp comp = static_cast<TransformationComp>(i);
 
-				// XXX todo
-				ai_assert(false);
+					if (chain[i] != node_property_map.end()) {
+
+						const std::string& chain_name = NameTransformationChainNode(kv.first, comp);
+
+						aiNodeAnim* na;
+						switch(comp) 
+						{
+						case TransformationComp_Rotation:
+						case TransformationComp_PreRotation:
+						case TransformationComp_PostRotation:
+							na = GenerateRotationNodeAnim(chain_name, 
+								target, 
+								(*chain[i]).second,
+								layer_map,
+								max_time,
+								min_time
+							);
+							break;
+
+						case TransformationComp_RotationOffset:
+						case TransformationComp_RotationPivot:
+						case TransformationComp_ScalingOffset:
+						case TransformationComp_ScalingPivot:
+						case TransformationComp_Translation:
+							na = GenerateTranslationNodeAnim(chain_name, 
+								target, 
+								(*chain[i]).second,
+								layer_map,
+								max_time,
+								min_time
+							);
+							break;
+
+						case TransformationComp_Scaling:
+							na = GenerateScalingNodeAnim(chain_name, 
+								target, 
+								(*chain[i]).second,
+								layer_map,
+								max_time,
+								min_time
+							);
+							break;
+
+						default:
+							ai_assert(false);
+						}
+
+						ai_assert(na);
+						node_anims.push_back(na);
+						continue;
+					}
+				}
 			}
 		}
 		catch(std::exception&) {
@@ -1496,6 +1555,99 @@ private:
 		// validator always assumes animations to start at zero.
 		anim->mDuration = max_time /*- min_time */;
 		anim->mTicksPerSecond = 1000.0;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	aiNodeAnim* GenerateRotationNodeAnim(const std::string& name, 
+		const Model& target, 
+		const std::vector<const AnimationCurveNode*>& curves,
+		const LayerMap& layer_map,
+		double& max_time,
+		double& min_time)
+	{
+		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
+		na->mNodeName.Set(name);
+
+		ConvertRotationKeys(na, curves, layer_map, max_time,min_time);
+
+		// dummy scaling key
+		na->mScalingKeys = new aiVectorKey[1];
+		na->mNumScalingKeys = 1;
+
+		na->mScalingKeys[0].mTime = 0.;
+		na->mScalingKeys[0].mValue = aiVector3D(1.0f,1.0f,1.0f);
+
+		// dummy position key
+		na->mPositionKeys = new aiVectorKey[1];
+		na->mNumPositionKeys = 1;
+
+		na->mPositionKeys[0].mTime = 0.;
+		na->mPositionKeys[0].mValue = aiVector3D();
+
+		return na.dismiss();
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	aiNodeAnim* GenerateScalingNodeAnim(const std::string& name, 
+		const Model& target, 
+		const std::vector<const AnimationCurveNode*>& curves,
+		const LayerMap& layer_map,
+		double& max_time,
+		double& min_time)
+	{
+		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
+		na->mNodeName.Set(name);
+
+		ConvertScaleKeys(na, curves, layer_map, max_time,min_time);
+
+		// dummy rotation key
+		na->mRotationKeys = new aiQuatKey[1];
+		na->mNumRotationKeys = 1;
+
+		na->mRotationKeys[0].mTime = 0.;
+		na->mRotationKeys[0].mValue = aiQuaternion();
+
+		// dummy position key
+		na->mPositionKeys = new aiVectorKey[1];
+		na->mNumPositionKeys = 1;
+
+		na->mPositionKeys[0].mTime = 0.;
+		na->mPositionKeys[0].mValue = aiVector3D();
+
+		return na.dismiss();
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	aiNodeAnim* GenerateTranslationNodeAnim(const std::string& name, 
+		const Model& target, 
+		const std::vector<const AnimationCurveNode*>& curves,
+		const LayerMap& layer_map,
+		double& max_time,
+		double& min_time)
+	{
+		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
+		na->mNodeName.Set(name);
+
+		ConvertTranslationKeys(na, curves, layer_map, max_time,min_time);
+
+		// dummy scaling key
+		na->mScalingKeys = new aiVectorKey[1];
+		na->mNumScalingKeys = 1;
+
+		na->mScalingKeys[0].mTime = 0.;
+		na->mScalingKeys[0].mValue = aiVector3D(1.0f,1.0f,1.0f);
+
+		// dummy rotation key
+		na->mRotationKeys = new aiQuatKey[1];
+		na->mNumRotationKeys = 1;
+
+		na->mRotationKeys[0].mTime = 0.;
+		na->mRotationKeys[0].mValue = aiQuaternion();
+
+		return na.dismiss();
 	}
 
 

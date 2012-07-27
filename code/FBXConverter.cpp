@@ -1435,6 +1435,13 @@ private:
 
 				for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
 					const TransformationComp comp = static_cast<TransformationComp>(i);
+
+					// inverse pivots don't exist in the input, we just generate them
+					if (comp == TransformationComp_RotationPivotInverse || comp == TransformationComp_ScalingPivotInverse) {
+						chain[i] = node_property_map.end();
+						continue;
+					}
+
 					chain[i] = node_property_map.find(NameTransformationCompProperty(comp));
 					if (chain[i] != node_property_map.end()) {
 						has_any = true;
@@ -1507,8 +1514,36 @@ private:
 								(*chain[i]).second,
 								layer_map,
 								max_time,
-								min_time
-							);
+								min_time);
+
+							// pivoting requires us to generate an inverse channel to undo the pivot translation
+							if (comp == TransformationComp_RotationPivot) {
+								const std::string& invName = NameTransformationChainNode(kv.first, TransformationComp_RotationPivotInverse);
+								aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
+									target, 
+									(*chain[i]).second,
+									layer_map,
+									max_time,
+									min_time,
+									true);
+
+								ai_assert(inv);
+								node_anims.push_back(inv);
+							}
+							else if (comp == TransformationComp_ScalingPivot) {
+								const std::string& invName = NameTransformationChainNode(kv.first, TransformationComp_ScalingPivotInverse);
+								aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
+									target, 
+									(*chain[i]).second,
+									layer_map,
+									max_time,
+									min_time,
+									true);
+
+								ai_assert(inv);
+								node_anims.push_back(inv);
+							}
+
 							break;
 
 						case TransformationComp_Scaling:
@@ -1626,12 +1661,19 @@ private:
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
 		double& max_time,
-		double& min_time)
+		double& min_time,
+		bool inverse = false)
 	{
 		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
 		na->mNodeName.Set(name);
 
 		ConvertTranslationKeys(na, curves, layer_map, max_time,min_time);
+
+		if (inverse) {
+			for (unsigned int i = 0; i < na->mNumPositionKeys; ++i) {
+				na->mPositionKeys[i].mValue *= -1.0f;
+			}
+		}
 
 		// dummy scaling key
 		na->mScalingKeys = new aiVectorKey[1];

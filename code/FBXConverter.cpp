@@ -68,6 +68,32 @@ namespace FBX {
 /** Dummy class to encapsulate the conversion process */
 class Converter
 {
+public:
+
+	/** the different parts that make up the final local transformation of a fbx node */
+	enum TransformationComp
+	{
+		TransformationComp_Translation = 0,
+		TransformationComp_RotationOffset,
+		TransformationComp_RotationPivot,
+		TransformationComp_PreRotation,
+		TransformationComp_Rotation,
+		TransformationComp_PostRotation,
+		TransformationComp_RotationPivotInverse,
+		TransformationComp_ScalingOffset,
+		TransformationComp_ScalingPivot,
+		TransformationComp_Scaling,
+		TransformationComp_ScalingPivotInverse,
+
+		TransformationComp_MAXIMUM
+	};
+
+
+	/** supported rotation modes */
+	enum RotationMode
+	{
+		RotationMode_Euler_XYZ
+	};
 
 public:
 
@@ -155,9 +181,32 @@ private:
 
 				if(model) {
 					nodes_chain.clear();
+
+					// even though there is only a single input node, the design of
+					// assimp (or rather: the complicated transformation chain that
+					// is employed by fbx) means that we may need multiple aiNode's
+					// to represent a fbx node's transformation.
 					GenerateTransformationNodeChain(*model,nodes_chain);
 
 					ai_assert(nodes_chain.size());
+
+					const std::string& original_name = FixNodeName(model->Name());
+
+					// check if any of the nodes in the chain has the name the fbx node
+					// is supposed to have. If there is none, add another node to 
+					// preserve the name - people might have scripts etc. that rely
+					// on specific node names.
+					bool has_name = false;
+					BOOST_FOREACH(aiNode* prenode, nodes_chain) {
+						if ( !strcmp(prenode->mName.C_Str(), original_name.c_str()) ) {
+							has_name = true;
+							break;
+						}
+					}
+
+					if(!has_name) {
+						nodes_chain.push_back(new aiNode(original_name));
+					}
 
 					// link all nodes in a row
 					aiNode* last_parent = &parent;
@@ -198,24 +247,6 @@ private:
 			std::for_each(nodes_chain.begin(),nodes_chain.end(),deleter);
 		}
 	}
-
-	/** the different parts that make up the final local transformation of a fbx node */
-	enum TransformationComp
-	{
-		TransformationComp_Translation = 0,
-		TransformationComp_RotationOffset,
-		TransformationComp_RotationPivot,
-		TransformationComp_PreRotation,
-		TransformationComp_Rotation,
-		TransformationComp_PostRotation,
-		TransformationComp_RotationPivotInverse,
-		TransformationComp_ScalingOffset,
-		TransformationComp_ScalingPivot,
-		TransformationComp_Scaling,
-		TransformationComp_ScalingPivotInverse,
-
-		TransformationComp_MAXIMUM
-	};
 
 
 	// ------------------------------------------------------------------------------------------------
@@ -298,12 +329,6 @@ private:
 	}
 
 
-	enum RotationMode
-	{
-		RotationMode_Euler_XYZ
-	};
-
-
 	// ------------------------------------------------------------------------------------------------
 	void GetRotationMatrix(RotationMode mode, const aiVector3D& rotation, aiMatrix4x4& out)
 	{
@@ -316,14 +341,14 @@ private:
 		{
 		case RotationMode_Euler_XYZ:
 
-			if(fabs(rotation.x) > angle_epsilon) {
-				out *= aiMatrix4x4::RotationX(rotation.x,temp);
+			if(fabs(rotation.z) > angle_epsilon) {
+				out = aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(rotation.z),temp);
 			}
 			if(fabs(rotation.y) > angle_epsilon) {
-				out *= aiMatrix4x4::RotationY(rotation.y,temp);
+				out = out * aiMatrix4x4::RotationY(AI_DEG_TO_RAD(rotation.y),temp);
 			}
-			if(fabs(rotation.z) > angle_epsilon) {
-				out *= aiMatrix4x4::RotationZ(rotation.z,temp);
+			if(fabs(rotation.x) > angle_epsilon) {
+				out = out * aiMatrix4x4::RotationX(AI_DEG_TO_RAD(rotation.x),temp);
 			}
 
 			return;
@@ -337,6 +362,7 @@ private:
 	/** checks if a node has more than just scaling, rotation and translation components */
 	bool NeedsComplexTransformationChain(const Model& model)
 	{
+		// XXX TEMPORARY
 		return true;
 
 		const PropertyTable& props = model.Props();
@@ -446,6 +472,7 @@ private:
 			GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
 		}
 
+		// XXX TEMPORARY
 		is_complex = true;
 
 		// is_complex needs to be consistent with NeedsComplexTransformationChain()
@@ -472,6 +499,7 @@ private:
 				const TransformationComp comp = static_cast<TransformationComp>(i);
 				
 				if (chain[i].IsIdentity() && (anim_chain_bitmask & bit) == 0) {
+					// XXX TEMPORARY
 					//continue;
 				}
 
@@ -2070,16 +2098,8 @@ private:
 	// euler xyz -> quat
 	aiQuaternion EulerToQuaternion(const aiVector3D& rot) 
 	{
-		aiMatrix4x4 m, mtemp;
-		if(fabs(rot.x) > 1e-6f) {
-			m *= aiMatrix4x4::RotationX(rot.x,mtemp);
-		}
-		if(fabs(rot.y) > 1e-6f) {
-			m *= aiMatrix4x4::RotationY(rot.y,mtemp);
-		}
-		if(fabs(rot.z) > 1e-6f) {
-			m *= aiMatrix4x4::RotationZ(rot.z,mtemp);
-		}
+		aiMatrix4x4 m;
+		GetRotationMatrix(RotationMode_Euler_XYZ, rot, m);
 
 		return aiQuaternion(aiMatrix3x3(m));
 	}

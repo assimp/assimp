@@ -164,6 +164,12 @@ private:
 					BOOST_FOREACH(aiNode* prenode, nodes_chain) {
 						ai_assert(prenode);
 
+						if(last_parent != &parent) {
+							last_parent->mNumChildren = 1;
+							last_parent->mChildren = new aiNode*[1];
+							last_parent->mChildren[0] = prenode;
+						}
+
 						prenode->mParent = last_parent;
 						last_parent = prenode;
 					}
@@ -172,9 +178,10 @@ private:
 					ConvertModel(*model, *nodes_chain.back());
 
 					// attach sub-nodes
-					ConvertNodes(model->ID(), *last_parent);
+					ConvertNodes(model->ID(), *nodes_chain.back());
 
-					nodes.push_back(nodes_chain.front());					
+					nodes.push_back(nodes_chain.front());	
+					nodes_chain.clear();
 				}
 			}
 
@@ -433,7 +440,7 @@ private:
 		}
 
 		const aiVector3D& Rotation = PropertyGet<aiVector3D>(props,"Lcl Rotation",ok);
-		if(ok && Translation.SquareLength() > zero_epsilon) {
+		if(ok && Rotation.SquareLength() > zero_epsilon) {
 			GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
 		}
 

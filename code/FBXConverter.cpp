@@ -189,7 +189,7 @@ private:
 		}
 	}
 
-
+	/** the different parts that make up the final local transformation of a fbx node */
 	enum TransformationComp
 	{
 		TransformationComp_Translation = 0,
@@ -209,6 +209,8 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
+	// this returns unified names usable within assimp identifiers (i.e. no space characters -
+	// while these would be allowed, they are a potential trouble spot so better not use them).
 	const char* NameTransformationComp(TransformationComp comp)
 	{
 		switch(comp)
@@ -238,6 +240,42 @@ private:
 		}
 
 		ai_assert(false);
+		return NULL;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// note: this returns the REAL fbx property names
+	const char* NameTransformationCompProperty(TransformationComp comp)
+	{
+		switch(comp)
+		{
+		case TransformationComp_Translation:
+			return "Lcl Translation";
+		case TransformationComp_RotationOffset:
+			return "RotationOffset";
+		case TransformationComp_RotationPivot:
+			return "RotationPivot";
+		case TransformationComp_PreRotation:
+			return "PreRotation";
+		case TransformationComp_Rotation:
+			return "Lcl Rotation";
+		case TransformationComp_PostRotation:
+			return "PostRotation";
+		case TransformationComp_RotationPivotInverse:
+			return "RotationPivotInverse";
+		case TransformationComp_ScalingOffset:
+			return "ScalingOffset";
+		case TransformationComp_ScalingPivot:
+			return "ScalingPivot";
+		case TransformationComp_Scaling:
+			return "Lcl Scaling";
+		case TransformationComp_ScalingPivotInverse:
+			return "ScalingPivotInverse";
+		}
+
+		ai_assert(false);
+		return NULL;
 	}
 
 
@@ -273,6 +311,31 @@ private:
 		}
 
 		ai_assert(false);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	/** checks if a node has more than just scaling, rotation and translation components */
+	bool NeedsComplexTransformationChain(const Model& model)
+	{
+		const PropertyTable& props = model.Props();
+		bool ok;
+
+		const float zero_epsilon = 1e-6f;
+		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+			const TransformationComp comp = static_cast<TransformationComp>(i);
+
+			if(comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation) {
+				continue;
+			}
+
+			const aiVector3D& v = PropertyGet<aiVector3D>(props,NameTransformationCompProperty(comp),ok);
+			if(ok && v.SquareLength() > zero_epsilon) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 
@@ -353,6 +416,12 @@ private:
 		if(ok && Translation.SquareLength() > zero_epsilon) {
 			GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
 		}
+
+
+		// is_complex needs to be consistent with NeedsComplexTransformationChain()
+		// or the interplay between this code and the animation converter would
+		// not be guaranteed.
+		ai_assert(NeedsComplexTransformationChain(model) == is_complex);
 
 		const std::string& name = FixNodeName(model.Name());
 
@@ -1266,6 +1335,9 @@ private:
 
 	typedef std::map<const AnimationCurveNode*, const AnimationLayer*> LayerMap;
 
+	// XXX: better use multi_map ..
+	typedef std::map<std::string, std::vector<const AnimationCurveNode*> > NodeMap;
+
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertAnimationStack(const AnimationStack& st)
@@ -1288,8 +1360,6 @@ private:
 		
 		// need to find all nodes for which we need to generate node animations -
 		// it may happen that we need to merge multiple layers, though.
-		// XXX: better use multi_map ..
-		typedef std::map<std::string, std::vector<const AnimationCurveNode*> > NodeMap;
 		NodeMap node_map;
 
 		// reverse mapping from curves to layers, much faster than querying 
@@ -1350,68 +1420,57 @@ private:
 
 				ai_assert(curve_node);
 
-				const NodeMap::const_iterator itScale = node_property_map.find("Lcl Scaling");
-				const NodeMap::const_iterator itRotation = node_property_map.find("Lcl Rotation");
-				const NodeMap::const_iterator itTranslation = node_property_map.find("Lcl Translation");
+				// check for all possible transformation components
+				NodeMap::const_iterator chain[TransformationComp_MAXIMUM];
 
-				const bool hasScale = itScale != node_property_map.end();
-				const bool hasRotation = itRotation != node_property_map.end();
-				const bool hasTranslation = itTranslation != node_property_map.end();
+				bool has_any = false;
+				bool has_complex = false;
 
-				if (!hasScale && !hasRotation && !hasTranslation) {
-					FBXImporter::LogWarn("ignoring node animation, did not find transformation key frames");
+				for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+					const TransformationComp comp = static_cast<TransformationComp>(i);
+					chain[i] = node_property_map.find(NameTransformationCompProperty(comp));
+					if (chain[i] != node_property_map.end()) {
+						has_any = true;
+
+						if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling &&
+							comp != TransformationComp_Translation) {
+
+							has_complex = true;
+						}
+					}
+				}
+
+				if (!has_any) {
+					FBXImporter::LogWarn("ignoring node animation, did not find any transformation key frames");
 					continue;
 				}
 
-				aiNodeAnim* const na = new aiNodeAnim();
-				node_anims.push_back(na);
-
-				na->mNodeName.Set(kv.first);
-
 				ai_assert(curve_node->TargetAsModel());
-				const PropertyTable& props = curve_node->TargetAsModel()->Props();
 
-				// if a particular transformation is not given, grab it from
-				// the corresponding node to meet the semantics of aiNodeAnim,
-				// which requires all of rotation, scaling and translation
-				// to be set.
-				if(hasScale) {
-					ConvertScaleKeys(na, (*itScale).second, layer_map, 
-						max_time, min_time);
-				}
-				else {
-					na->mScalingKeys = new aiVectorKey[1];
-					na->mNumScalingKeys = 1;
+				// this needs to play nicely with GenerateTransformationNodeChain() which will
+				// be invoked _later_ (animations come first). If this node has only rotation,
+				// scaling and translation _and_ there are no animated other components either,
+				// we can use a single node and also a single node animation channel.
+				const Model& target = *curve_node->TargetAsModel();
+				if (!has_complex && !NeedsComplexTransformationChain(target)) {
 
-					na->mScalingKeys[0].mTime = 0.;
-					na->mScalingKeys[0].mValue = PropertyGet(props,"Lcl Scaling",aiVector3D(1.f,1.f,1.f));
-				}
-
-				if(hasRotation) {
-					ConvertRotationKeys(na, (*itRotation).second, layer_map, 
-						max_time, min_time);
-				}
-				else {
-					na->mRotationKeys = new aiQuatKey[1];
-					na->mNumRotationKeys = 1;
-
-					na->mRotationKeys[0].mTime = 0.;
-					na->mRotationKeys[0].mValue = EulerToQuaternion(
-						PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f))
+					aiNodeAnim* const nd = GenerateSimpleNodeAnim(kv.first, target, chain, 
+						node_property_map.end(), 
+						layer_map,
+						max_time,
+						min_time
 					);
+
+					ai_assert(nd);
+					node_anims.push_back(nd);
+					continue;
 				}
 
-				if(hasTranslation) {
-					ConvertTranslationKeys(na, (*itTranslation).second, layer_map, 
-						max_time, min_time);
-				}
-				else {
-					na->mPositionKeys = new aiVectorKey[1];
-					na->mNumPositionKeys = 1;
+				// otherwise, things get gruesome.
+				aiNodeAnim* const na = new aiNodeAnim();
 
-					na->mPositionKeys[0].mTime = 0.;
-					na->mPositionKeys[0].mValue = PropertyGet(props,"Lcl Translation",aiVector3D(0.f,0.f,0.f));
-				}
+				// XXX todo
+				ai_assert(false);
 			}
 		}
 		catch(std::exception&) {
@@ -1438,6 +1497,78 @@ private:
 		anim->mDuration = max_time /*- min_time */;
 		anim->mTicksPerSecond = 1000.0;
 	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// generate node anim, extracting only Rotation, Scaling and Translation from the given chain
+	aiNodeAnim* GenerateSimpleNodeAnim(const std::string& name, 
+		const Model& target, 
+		NodeMap::const_iterator chain[TransformationComp_MAXIMUM], 
+		NodeMap::const_iterator iter_end,
+		const LayerMap& layer_map,
+		double& max_time,
+		double& min_time)
+
+	{
+		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
+		na->mNodeName.Set(name);
+
+		const PropertyTable& props = target.Props();
+
+		// if a particular transformation is not given, grab it from
+		// the corresponding node to meet the semantics of aiNodeAnim,
+		// which requires all of rotation, scaling and translation
+		// to be set.
+		if(chain[TransformationComp_Scaling] != iter_end) {
+			ConvertScaleKeys(na, (*chain[TransformationComp_Scaling]).second, 
+				layer_map, 
+				max_time, 
+				min_time);
+		}
+		else {
+			na->mScalingKeys = new aiVectorKey[1];
+			na->mNumScalingKeys = 1;
+
+			na->mScalingKeys[0].mTime = 0.;
+			na->mScalingKeys[0].mValue = PropertyGet(props,"Lcl Scaling",
+				aiVector3D(1.f,1.f,1.f));
+		}
+
+		if(chain[TransformationComp_Rotation] != iter_end) {
+			ConvertRotationKeys(na, (*chain[TransformationComp_Rotation]).second, 
+				layer_map, 
+				max_time,
+				min_time);
+		}
+		else {
+			na->mRotationKeys = new aiQuatKey[1];
+			na->mNumRotationKeys = 1;
+
+			na->mRotationKeys[0].mTime = 0.;
+			na->mRotationKeys[0].mValue = EulerToQuaternion(
+				PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f))
+				);
+		}
+
+		if(chain[TransformationComp_Translation] != iter_end) {
+			ConvertTranslationKeys(na, (*chain[TransformationComp_Translation]).second, 
+				layer_map, 
+				max_time, 
+				min_time);
+		}
+		else {
+			na->mPositionKeys = new aiVectorKey[1];
+			na->mNumPositionKeys = 1;
+
+			na->mPositionKeys[0].mTime = 0.;
+			na->mPositionKeys[0].mValue = PropertyGet(props,"Lcl Translation",
+				aiVector3D(0.f,0.f,0.f));
+		}
+
+		return na.dismiss();
+	}
+
+
 
 	// key (time), value, mapto (component index)
 	typedef boost::tuple< const KeyTimeList*, const KeyValueList*, unsigned int > KeyFrameList;

@@ -1329,7 +1329,6 @@ private:
 		// across multiple calls to FixNodeName().
 		if(name.substr(0,7) == "Model::") {
 			std::string temp = name.substr(7);
-			return temp;
 
 			const NodeNameMap::const_iterator it = node_names.find(temp);
 			if (it != node_names.end()) {

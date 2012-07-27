@@ -1400,171 +1400,13 @@ private:
 		double max_time = -1e10;
 
 		try {
-
-			NodeMap node_property_map;
 			BOOST_FOREACH(const NodeMap::value_type& kv, node_map) {
-				node_property_map.clear();
-
-				ai_assert(kv.second.size());
-
-				const AnimationCurveNode* curve_node;
-				BOOST_FOREACH(const AnimationCurveNode* node, kv.second) {
-					ai_assert(node);
-
-					if (node->TargetProperty().empty()) {
-						FBXImporter::LogWarn("target property for animation curve not set");
-						continue;
-					}
-
-					curve_node = node;
-					if (node->Curves().empty()) {
-						FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode");
-						continue;
-					}
-
-					node_property_map[node->TargetProperty()].push_back(node);
-				}
-
-				ai_assert(curve_node);
-
-				// check for all possible transformation components
-				NodeMap::const_iterator chain[TransformationComp_MAXIMUM];
-
-				bool has_any = false;
-				bool has_complex = false;
-
-				for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
-					const TransformationComp comp = static_cast<TransformationComp>(i);
-
-					// inverse pivots don't exist in the input, we just generate them
-					if (comp == TransformationComp_RotationPivotInverse || comp == TransformationComp_ScalingPivotInverse) {
-						chain[i] = node_property_map.end();
-						continue;
-					}
-
-					chain[i] = node_property_map.find(NameTransformationCompProperty(comp));
-					if (chain[i] != node_property_map.end()) {
-						has_any = true;
-
-						if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling &&
-							comp != TransformationComp_Translation) {
-
-							has_complex = true;
-						}
-					}
-				}
-
-				if (!has_any) {
-					FBXImporter::LogWarn("ignoring node animation, did not find any transformation key frames");
-					continue;
-				}
-
-				ai_assert(curve_node->TargetAsModel());
-
-				// this needs to play nicely with GenerateTransformationNodeChain() which will
-				// be invoked _later_ (animations come first). If this node has only rotation,
-				// scaling and translation _and_ there are no animated other components either,
-				// we can use a single node and also a single node animation channel.
-				const Model& target = *curve_node->TargetAsModel();
-				if (!has_complex && !NeedsComplexTransformationChain(target)) {
-
-					aiNodeAnim* const nd = GenerateSimpleNodeAnim(kv.first, target, chain, 
-						node_property_map.end(), 
-						layer_map,
-						max_time,
-						min_time
-					);
-
-					ai_assert(nd);
-					node_anims.push_back(nd);
-					continue;
-				}
-
-				// otherwise, things get gruesome and we need separate animation channels
-				// for each part of the transformation chain.
-				for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
-					const TransformationComp comp = static_cast<TransformationComp>(i);
-
-					if (chain[i] != node_property_map.end()) {
-
-						const std::string& chain_name = NameTransformationChainNode(kv.first, comp);
-
-						aiNodeAnim* na;
-						switch(comp) 
-						{
-						case TransformationComp_Rotation:
-						case TransformationComp_PreRotation:
-						case TransformationComp_PostRotation:
-							na = GenerateRotationNodeAnim(chain_name, 
-								target, 
-								(*chain[i]).second,
-								layer_map,
-								max_time,
-								min_time
-							);
-							break;
-
-						case TransformationComp_RotationOffset:
-						case TransformationComp_RotationPivot:
-						case TransformationComp_ScalingOffset:
-						case TransformationComp_ScalingPivot:
-						case TransformationComp_Translation:
-							na = GenerateTranslationNodeAnim(chain_name, 
-								target, 
-								(*chain[i]).second,
-								layer_map,
-								max_time,
-								min_time);
-
-							// pivoting requires us to generate an inverse channel to undo the pivot translation
-							if (comp == TransformationComp_RotationPivot) {
-								const std::string& invName = NameTransformationChainNode(kv.first, TransformationComp_RotationPivotInverse);
-								aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
-									target, 
-									(*chain[i]).second,
-									layer_map,
-									max_time,
-									min_time,
-									true);
-
-								ai_assert(inv);
-								node_anims.push_back(inv);
-							}
-							else if (comp == TransformationComp_ScalingPivot) {
-								const std::string& invName = NameTransformationChainNode(kv.first, TransformationComp_ScalingPivotInverse);
-								aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
-									target, 
-									(*chain[i]).second,
-									layer_map,
-									max_time,
-									min_time,
-									true);
-
-								ai_assert(inv);
-								node_anims.push_back(inv);
-							}
-
-							break;
-
-						case TransformationComp_Scaling:
-							na = GenerateScalingNodeAnim(chain_name, 
-								target, 
-								(*chain[i]).second,
-								layer_map,
-								max_time,
-								min_time
-							);
-							break;
-
-						default:
-							ai_assert(false);
-						}
-
-						ai_assert(na);
-						node_anims.push_back(na);
-						continue;
-					}
-				}
+				GenerateNodeAnimations(node_anims, 
+					kv.first, 
+					kv.second, 
+					layer_map, 
+					min_time, 
+					max_time);
 			}
 		}
 		catch(std::exception&) {
@@ -1590,6 +1432,179 @@ private:
 		// validator always assumes animations to start at zero.
 		anim->mDuration = max_time /*- min_time */;
 		anim->mTicksPerSecond = 1000.0;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void GenerateNodeAnimations(std::vector<aiNodeAnim*>& node_anims, 
+		const std::string& fixed_name, 
+		const std::vector<const AnimationCurveNode*>& curves, 
+		const LayerMap& layer_map, 
+		double& max_time,
+		double& min_time)
+	{
+
+		NodeMap node_property_map;
+		ai_assert(curves.size());
+
+		const AnimationCurveNode* curve_node;
+		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
+			ai_assert(node);
+
+			if (node->TargetProperty().empty()) {
+				FBXImporter::LogWarn("target property for animation curve not set");
+				continue;
+			}
+
+			curve_node = node;
+			if (node->Curves().empty()) {
+				FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode");
+				continue;
+			}
+
+			node_property_map[node->TargetProperty()].push_back(node);
+		}
+
+		ai_assert(curve_node);
+
+		// check for all possible transformation components
+		NodeMap::const_iterator chain[TransformationComp_MAXIMUM];
+
+		bool has_any = false;
+		bool has_complex = false;
+
+		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+			const TransformationComp comp = static_cast<TransformationComp>(i);
+
+			// inverse pivots don't exist in the input, we just generate them
+			if (comp == TransformationComp_RotationPivotInverse || comp == TransformationComp_ScalingPivotInverse) {
+				chain[i] = node_property_map.end();
+				continue;
+			}
+
+			chain[i] = node_property_map.find(NameTransformationCompProperty(comp));
+			if (chain[i] != node_property_map.end()) {
+				has_any = true;
+
+				if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling &&
+					comp != TransformationComp_Translation) {
+
+						has_complex = true;
+				}
+			}
+		}
+
+		if (!has_any) {
+			FBXImporter::LogWarn("ignoring node animation, did not find any transformation key frames");
+			return;
+		}
+
+		ai_assert(curve_node->TargetAsModel());
+
+		// this needs to play nicely with GenerateTransformationNodeChain() which will
+		// be invoked _later_ (animations come first). If this node has only rotation,
+		// scaling and translation _and_ there are no animated other components either,
+		// we can use a single node and also a single node animation channel.
+		const Model& target = *curve_node->TargetAsModel();
+		if (!has_complex && !NeedsComplexTransformationChain(target)) {
+
+			aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain, 
+				node_property_map.end(), 
+				layer_map,
+				max_time,
+				min_time
+				);
+
+			ai_assert(nd);
+			node_anims.push_back(nd);
+			return;
+		}
+
+		// otherwise, things get gruesome and we need separate animation channels
+		// for each part of the transformation chain.
+		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+			const TransformationComp comp = static_cast<TransformationComp>(i);
+
+			if (chain[i] != node_property_map.end()) {
+
+				const std::string& chain_name = NameTransformationChainNode(fixed_name, comp);
+
+				aiNodeAnim* na;
+				switch(comp) 
+				{
+				case TransformationComp_Rotation:
+				case TransformationComp_PreRotation:
+				case TransformationComp_PostRotation:
+					na = GenerateRotationNodeAnim(chain_name, 
+						target, 
+						(*chain[i]).second,
+						layer_map,
+						max_time,
+						min_time
+						);
+					break;
+
+				case TransformationComp_RotationOffset:
+				case TransformationComp_RotationPivot:
+				case TransformationComp_ScalingOffset:
+				case TransformationComp_ScalingPivot:
+				case TransformationComp_Translation:
+					na = GenerateTranslationNodeAnim(chain_name, 
+						target, 
+						(*chain[i]).second,
+						layer_map,
+						max_time,
+						min_time);
+
+					// pivoting requires us to generate an inverse channel to undo the pivot translation
+					if (comp == TransformationComp_RotationPivot) {
+						const std::string& invName = NameTransformationChainNode(fixed_name, TransformationComp_RotationPivotInverse);
+						aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
+							target, 
+							(*chain[i]).second,
+							layer_map,
+							max_time,
+							min_time,
+							true);
+
+						ai_assert(inv);
+						node_anims.push_back(inv);
+					}
+					else if (comp == TransformationComp_ScalingPivot) {
+						const std::string& invName = NameTransformationChainNode(fixed_name, TransformationComp_ScalingPivotInverse);
+						aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
+							target, 
+							(*chain[i]).second,
+							layer_map,
+							max_time,
+							min_time,
+							true);
+
+						ai_assert(inv);
+						node_anims.push_back(inv);
+					}
+
+					break;
+
+				case TransformationComp_Scaling:
+					na = GenerateScalingNodeAnim(chain_name, 
+						target, 
+						(*chain[i]).second,
+						layer_map,
+						max_time,
+						min_time
+						);
+					break;
+
+				default:
+					ai_assert(false);
+				}
+
+				ai_assert(na);
+				node_anims.push_back(na);
+				continue;
+			}
+		}
 	}
 
 

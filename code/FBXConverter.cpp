@@ -59,6 +59,9 @@ namespace FBX {
 
 	using namespace Util;
 
+
+#define MAGIC_NODE_TAG "_$AssimpFbx$"
+
 	// XXX vc9's debugger won't step into anonymous namespaces
 //namespace {
 
@@ -129,6 +132,8 @@ private:
 		std::vector<aiNode*> nodes;
 		nodes.reserve(conns.size());
 
+		std::vector<aiNode*> nodes_chain;
+
 		try {
 			BOOST_FOREACH(const Connection* con, conns) {
 
@@ -146,16 +151,27 @@ private:
 				const Model* const model = dynamic_cast<const Model*>(object);
 
 				if(model) {
-					aiNode* nd = new aiNode();
-					nodes.push_back(nd);
+					nodes_chain.clear();
+					GenerateTransformationNodeChain(*model,nodes_chain);
 
-					nd->mName.Set(FixNodeName(model->Name()));
-					nd->mParent = &parent;
+					ai_assert(nodes_chain.size());
 
-					ConvertTransformation(*model,*nd);
+					// link all nodes in a row
+					aiNode* last_parent = &parent;
+					BOOST_FOREACH(aiNode* prenode, nodes_chain) {
+						ai_assert(prenode);
 
-					ConvertModel(*model, *nd);
-					ConvertNodes(model->ID(), *nd);
+						prenode->mParent = last_parent;
+						last_parent = prenode;
+					}
+
+					// attach geometry
+					ConvertModel(*model, *nodes_chain.back());
+
+					// attach sub-nodes
+					ConvertNodes(model->ID(), *last_parent);
+
+					nodes.push_back(nodes_chain.back());					
 				}
 			}
 
@@ -167,50 +183,212 @@ private:
 			}
 		} 
 		catch(std::exception&)	{
-			std::for_each(nodes.begin(),nodes.end(),Util::delete_fun<aiNode>());
+			Util::delete_fun<aiNode> deleter;
+			std::for_each(nodes.begin(),nodes.end(),deleter);
+			std::for_each(nodes_chain.begin(),nodes_chain.end(),deleter);
 		}
 	}
 
 
+	enum TransformationComp
+	{
+		TransformationComp_Translation = 0,
+		TransformationComp_RotationOffset,
+		TransformationComp_RotationPivot,
+		TransformationComp_PreRotation,
+		TransformationComp_Rotation,
+		TransformationComp_PostRotation,
+		TransformationComp_RotationPivotInverse,
+		TransformationComp_ScalingOffset,
+		TransformationComp_ScalingPivot,
+		TransformationComp_Scaling,
+		TransformationComp_ScalingPivotInverse,
+
+		TransformationComp_MAXIMUM
+	};
+
+
 	// ------------------------------------------------------------------------------------------------
-	void ConvertTransformation(const Model& model, aiNode& nd)
+	const char* NameTransformationComp(TransformationComp comp)
+	{
+		switch(comp)
+		{
+		case TransformationComp_Translation:
+			return "Translation";
+		case TransformationComp_RotationOffset:
+			return "RotationOffset";
+		case TransformationComp_RotationPivot:
+			return "RotationPivot";
+		case TransformationComp_PreRotation:
+			return "PreRotation";
+		case TransformationComp_Rotation:
+			return "Rotation";
+		case TransformationComp_PostRotation:
+			return "PostRotation";
+		case TransformationComp_RotationPivotInverse:
+			return "RotationPivotInverse";
+		case TransformationComp_ScalingOffset:
+			return "ScalingOffset";
+		case TransformationComp_ScalingPivot:
+			return "ScalingPivot";
+		case TransformationComp_Scaling:
+			return "Scaling";
+		case TransformationComp_ScalingPivotInverse:
+			return "ScalingPivotInverse";
+		}
+
+		ai_assert(false);
+	}
+
+
+	enum RotationMode
+	{
+		RotationMode_Euler_XYZ
+	};
+
+
+	// ------------------------------------------------------------------------------------------------
+	void GetRotationMatrix(RotationMode mode, const aiVector3D& rotation, aiMatrix4x4& out)
+	{
+		const float angle_epsilon = 1e-6f;
+		aiMatrix4x4 temp;
+
+		out = aiMatrix4x4();
+
+		switch(mode)
+		{
+		case RotationMode_Euler_XYZ:
+
+			if(fabs(rotation.x) > angle_epsilon) {
+				out *= aiMatrix4x4::RotationX(rotation.x,temp);
+			}
+			if(fabs(rotation.y) > angle_epsilon) {
+				out *= aiMatrix4x4::RotationY(rotation.y,temp);
+			}
+			if(fabs(rotation.z) > angle_epsilon) {
+				out *= aiMatrix4x4::RotationZ(rotation.z,temp);
+			}
+
+			return;
+		}
+
+		ai_assert(false);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	/** note: memory for output_nodes will be managed by the caller */
+	void GenerateTransformationNodeChain(const Model& model, 
+		std::vector<aiNode*>& output_nodes)
 	{
 		const PropertyTable& props = model.Props();
 
-		// XXX this is not complete, need to handle rotation and scaling pivots etc
+		// XXX handle different rotation modes
+		const RotationMode rot = RotationMode_Euler_XYZ;
 
 		bool ok;
+
+		aiMatrix4x4 chain[TransformationComp_MAXIMUM];
+		std::fill_n(chain, static_cast<unsigned int>(TransformationComp_MAXIMUM), aiMatrix4x4());
 		
-		aiVector3D Translation = PropertyGet<aiVector3D>(props,"Lcl Translation",ok);
-		if(!ok) {
-			Translation = aiVector3D(0.0f,0.0f,0.0f);
+		// generate transformation matrices for all the different transformation components
+		const float zero_epsilon = 1e-6f;
+		bool is_complex = false;
+
+		const aiVector3D& PreRotation = PropertyGet<aiVector3D>(props,"PreRotation",ok);
+		if(ok && PreRotation.SquareLength() > zero_epsilon) {
+			is_complex = true;
+
+			GetRotationMatrix(rot, PreRotation, chain[TransformationComp_PreRotation]);
 		}
 
-		aiVector3D Scaling = PropertyGet<aiVector3D>(props,"Lcl Scaling",ok);
-		if(!ok) {
-			Scaling = aiVector3D(1.0f,1.0f,1.0f);
+		const aiVector3D& PostRotation = PropertyGet<aiVector3D>(props,"PostRotation",ok);
+		if(ok && PostRotation.SquareLength() > zero_epsilon) {
+			is_complex = true;
+			
+			GetRotationMatrix(rot, PostRotation, chain[TransformationComp_PostRotation]);
 		}
 
-		// XXX euler angles, radians, xyz order?
-		aiVector3D Rotation = PropertyGet<aiVector3D>(props,"Lcl Rotation",ok);
-		if(!ok) {
-			Rotation = aiVector3D(0.0f,0.0f,0.0f);
+		const aiVector3D& RotationPivot = PropertyGet<aiVector3D>(props,"RotationPivot",ok);
+		if(ok && RotationPivot.SquareLength() > zero_epsilon) {
+			is_complex = true;
+			
+			aiMatrix4x4::Translation(RotationPivot,chain[TransformationComp_RotationPivot]);
+			aiMatrix4x4::Translation(-RotationPivot,chain[TransformationComp_RotationPivotInverse]);
 		}
 
-		aiMatrix4x4 temp;
-		nd.mTransformation = aiMatrix4x4::Scaling(Scaling,temp);
-		if(fabs(Rotation.x) > 1e-6f) {
-			nd.mTransformation *= aiMatrix4x4::RotationX(Rotation.x,temp);
+		const aiVector3D& RotationOffset = PropertyGet<aiVector3D>(props,"RotationOffset",ok);
+		if(ok && RotationOffset.SquareLength() > zero_epsilon) {
+			is_complex = true;
+
+			aiMatrix4x4::Translation(RotationOffset,chain[TransformationComp_RotationOffset]);
 		}
-		if(fabs(Rotation.y) > 1e-6f) {
-			nd.mTransformation *= aiMatrix4x4::RotationY(Rotation.y,temp);
+
+		const aiVector3D& ScalingOffset = PropertyGet<aiVector3D>(props,"ScalingOffset",ok);
+		if(ok && ScalingOffset.SquareLength() > zero_epsilon) {
+			is_complex = true;
+			
+			aiMatrix4x4::Translation(ScalingOffset,chain[TransformationComp_ScalingOffset]);
 		}
-		if(fabs(Rotation.z) > 1e-6f) {
-			nd.mTransformation *= aiMatrix4x4::RotationZ(Rotation.z,temp);
+
+		const aiVector3D& ScalingPivot = PropertyGet<aiVector3D>(props,"ScalingPivot",ok);
+		if(ok && ScalingPivot.SquareLength() > zero_epsilon) {
+			is_complex = true;
+
+			aiMatrix4x4::Translation(ScalingPivot,chain[TransformationComp_ScalingPivot]);
+			aiMatrix4x4::Translation(-ScalingPivot,chain[TransformationComp_ScalingPivotInverse]);
 		}
-		nd.mTransformation.a4 = Translation.x;
-		nd.mTransformation.b4 = Translation.y;
-		nd.mTransformation.c4 = Translation.z;
+
+		const aiVector3D& Translation = PropertyGet<aiVector3D>(props,"Lcl Translation",ok);
+		if(ok && Translation.SquareLength() > zero_epsilon) {
+			aiMatrix4x4::Translation(Translation,chain[TransformationComp_Translation]);
+		}
+
+		const aiVector3D& Scaling = PropertyGet<aiVector3D>(props,"Lcl Scaling",ok);
+		if(ok && fabs(Scaling.SquareLength()-1.0f) > zero_epsilon) {
+			aiMatrix4x4::Scaling(Scaling,chain[TransformationComp_Scaling]);
+		}
+
+		const aiVector3D& Rotation = PropertyGet<aiVector3D>(props,"Lcl Rotation",ok);
+		if(ok && Translation.SquareLength() > zero_epsilon) {
+			GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
+		}
+
+		const std::string& name = FixNodeName(model.Name());
+
+		// now, if we have more than just Translation, Scaling and Rotation,
+		// we need to generate a full node chain to accommodate for assimp's
+		// lack to express pivots and offsets.
+		if(is_complex && doc.Settings().preservePivots) {
+			FBXImporter::LogInfo("generating full transformation chain for node: " + name);
+
+			const std::string mid = std::string(MAGIC_NODE_TAG) + "_";
+			for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+				// XXX this may cause trouble with animations
+				if (chain[i].IsIdentity()) {
+					continue;
+				}
+
+				aiNode* nd = new aiNode();
+				output_nodes.push_back(nd);
+
+				nd->mName.Set(name + mid  + NameTransformationComp(static_cast<TransformationComp>(i)));
+				nd->mTransformation = chain[i];
+			}
+
+			ai_assert(output_nodes.size());
+			return;
+		}
+
+		// else, we can just multiply the matrices together
+		aiNode* nd = new aiNode();
+		output_nodes.push_back(nd);
+
+		nd->mName.Set(name);
+
+		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+			nd->mTransformation *= chain[i];
+		}
 	}
 
 

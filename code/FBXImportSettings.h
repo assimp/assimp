@@ -59,6 +59,7 @@ struct ImportSettings
 		, readAnimations(true)
 		, strictMode(true)
 		, readWeights(true)
+		, preservePivots(true)
 	{}
  
 
@@ -103,6 +104,28 @@ struct ImportSettings
 	/** read bones (vertex weights and deform info).
 	 *  Default value is true. */
 	bool readWeights;
+
+	/** preserve transformation pivots and offsets. Since these can
+	 *  not directly be represented in assimp, additional dummy
+	 *  nodes will be generated. Note that settings this to false
+	 *  can make animation import a lot slower. The default value
+	 *  is true.
+	 *
+	 *  The naming scheme for the generated nodes is:
+	 *    <OriginalName>_$AssimpFbx$_<TransformName>
+	 *  
+	 *  where <TransformName> is one of
+	 *    RotationPivot
+	 *    RotationOffset
+	 *    PreRotation
+	 *    PostRotation
+	 *    ScalingPivot
+	 *    ScalingOffset
+	 *    Translation
+	 *    Scaling
+	 *    Rotation
+	 **/
+	bool preservePivots;
 };
 
 

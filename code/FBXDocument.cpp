@@ -519,7 +519,10 @@ const Object* LazyObject::Get(bool dieOnError)
 			}
 		}
 		else if (!strncmp(obtype,"Model",length)) {
-			object.reset(new Model(id,element,doc,name));
+			// do not load IKEffectors yet
+			if (strcmp(classtag.c_str(),"IKEffector")) {
+				object.reset(new Model(id,element,doc,name));
+			}
 		}
 		else if (!strncmp(obtype,"Material",length)) {
 			object.reset(new Material(id,element,doc,name));

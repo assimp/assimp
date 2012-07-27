@@ -75,8 +75,11 @@ public:
 		: out(out) 
 		, doc(doc)
 	{
-		ConvertRootNode();
+		// animations need to be converted first since this will
+		// populate the node_anim_chain_bits map, which is needed
+		// to determine which nodes need to be generated.
 		ConvertAnimations();
+		ConvertRootNode();
 
 		if(doc.Settings().readAllMaterials) {
 			// unfortunately this means we have to evaluate all objects
@@ -439,16 +442,24 @@ private:
 		if(is_complex && doc.Settings().preservePivots) {
 			FBXImporter::LogInfo("generating full transformation chain for node: " + name);
 
-			for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
-				// XXX this may cause trouble with animations
-				if (chain[i].IsIdentity()) {
+			// query the anim_chain_bits dictionary to find out which chain elements
+			// have associated node animation channels. These can not be dropped 
+			// even if they have identity transform in bind pose.
+			NodeAnimBitMap::const_iterator it = node_anim_chain_bits.find(name);
+			const unsigned int anim_chain_bitmask = (it == node_anim_chain_bits.end() ? 0 : (*it).second);
+
+			unsigned int bit = 0x1;
+			for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i, bit <<= 1) {
+				const TransformationComp comp = static_cast<TransformationComp>(i);
+				
+				if (chain[i].IsIdentity() && (anim_chain_bitmask & bit) == 0) {
 					continue;
 				}
 
 				aiNode* nd = new aiNode();
 				output_nodes.push_back(nd);
 				
-				nd->mName.Set(NameTransformationChainNode(name, static_cast<TransformationComp>(i)));
+				nd->mName.Set(NameTransformationChainNode(name, comp));
 				nd->mTransformation = chain[i];
 			}
 
@@ -1489,7 +1500,7 @@ private:
 				if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling &&
 					comp != TransformationComp_Translation) {
 
-						has_complex = true;
+					has_complex = true;
 				}
 			}
 		}
@@ -1521,11 +1532,19 @@ private:
 		}
 
 		// otherwise, things get gruesome and we need separate animation channels
-		// for each part of the transformation chain.
-		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
+		// for each part of the transformation chain. Remember which channels
+		// we generated and pass this information to the node conversion
+		// code to avoid nodes that have identity transform, but non-identity
+		// animations, being dropped.
+		unsigned int flags = 0, bit = 0x1;
+		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i, bit <<= 1) {
 			const TransformationComp comp = static_cast<TransformationComp>(i);
 
 			if (chain[i] != node_property_map.end()) {
+				flags |= bit;
+
+				ai_assert(comp != TransformationComp_RotationPivotInverse);
+				ai_assert(comp != TransformationComp_ScalingPivotInverse);
 
 				const std::string& chain_name = NameTransformationChainNode(fixed_name, comp);
 
@@ -1556,7 +1575,7 @@ private:
 						max_time,
 						min_time);
 
-					// pivoting requires us to generate an inverse channel to undo the pivot translation
+					// pivoting requires us to generate an implicit inverse channel to undo the pivot translation
 					if (comp == TransformationComp_RotationPivot) {
 						const std::string& invName = NameTransformationChainNode(fixed_name, TransformationComp_RotationPivotInverse);
 						aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
@@ -1569,6 +1588,9 @@ private:
 
 						ai_assert(inv);
 						node_anims.push_back(inv);
+
+						ai_assert(TransformationComp_RotationPivotInverse > i);
+						flags |= bit << (TransformationComp_RotationPivotInverse - i);
 					}
 					else if (comp == TransformationComp_ScalingPivot) {
 						const std::string& invName = NameTransformationChainNode(fixed_name, TransformationComp_ScalingPivotInverse);
@@ -1582,6 +1604,9 @@ private:
 
 						ai_assert(inv);
 						node_anims.push_back(inv);
+					
+						ai_assert(TransformationComp_RotationPivotInverse > i);
+						flags |= bit << (TransformationComp_RotationPivotInverse - i);
 					}
 
 					break;
@@ -1605,6 +1630,8 @@ private:
 				continue;
 			}
 		}
+
+		node_anim_chain_bits[fixed_name] = flags;
 	}
 
 
@@ -2077,6 +2104,10 @@ private:
 
 	typedef std::map<const Geometry*, std::vector<unsigned int> > MeshMap;
 	MeshMap meshes_converted;
+
+	typedef std::map<std::string, unsigned int> NodeAnimBitMap;
+	NodeAnimBitMap node_anim_chain_bits;
+
 
 	aiScene* const out;
 	const FBX::Document& doc;

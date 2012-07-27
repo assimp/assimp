@@ -174,7 +174,7 @@ private:
 					// attach sub-nodes
 					ConvertNodes(model->ID(), *last_parent);
 
-					nodes.push_back(nodes_chain.back());					
+					nodes.push_back(nodes_chain.front());					
 				}
 			}
 

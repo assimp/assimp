@@ -337,6 +337,8 @@ private:
 	/** checks if a node has more than just scaling, rotation and translation components */
 	bool NeedsComplexTransformationChain(const Model& model)
 	{
+		return true;
+
 		const PropertyTable& props = model.Props();
 		bool ok;
 
@@ -444,6 +446,7 @@ private:
 			GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
 		}
 
+		is_complex = true;
 
 		// is_complex needs to be consistent with NeedsComplexTransformationChain()
 		// or the interplay between this code and the animation converter would
@@ -469,7 +472,7 @@ private:
 				const TransformationComp comp = static_cast<TransformationComp>(i);
 				
 				if (chain[i].IsIdentity() && (anim_chain_bitmask & bit) == 0) {
-					continue;
+					//continue;
 				}
 
 				aiNode* nd = new aiNode();
@@ -490,7 +493,7 @@ private:
 		nd->mName.Set(name);
 
 		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
-			nd->mTransformation *= chain[i];
+			nd->mTransformation = nd->mTransformation * chain[i];
 		}
 	}
 

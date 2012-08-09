@@ -65,6 +65,9 @@ enum TokenType
 	// further processing happens at a later stage.
 	TokenType_DATA,
 
+	//
+	TokenType_BINARY_DATA,
+
 	// ,
 	TokenType_COMMA,
 
@@ -80,9 +83,18 @@ enum TokenType
 class Token 
 {
 
+private:
+
+	static const unsigned int BINARY_MARKER = static_cast<unsigned int>(-1);
+
 public:
 
+	/** construct a textual token */
 	Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
+
+	/** construct a binary token */
+	Token(const char* sbegin, const char* send, TokenType type, unsigned int offset);
+
 	~Token();
 
 public:
@@ -92,6 +104,10 @@ public:
 	}
 
 public:
+
+	bool IsBinary() const {
+		return column == BINARY_MARKER;
+	}
 
 	const char* begin() const {
 		return sbegin;
@@ -105,11 +121,18 @@ public:
 		return type;
 	}
 
+	unsigned int Offset() const {
+		ai_assert(IsBinary());
+		return offset;
+	}
+
 	unsigned int Line() const {
+		ai_assert(!IsBinary());
 		return line;
 	}
 
 	unsigned int Column() const {
+		ai_assert(!IsBinary());
 		return column;
 	}
 
@@ -126,7 +149,11 @@ private:
 	const char* const send;
 	const TokenType type;
 
-	const unsigned int line, column;
+	union {
+		const unsigned int line;
+		unsigned int offset;
+	};
+	const unsigned int column;
 };
 
 // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
@@ -146,8 +173,18 @@ typedef std::vector< TokenPtr > TokenList;
 void Tokenize(TokenList& output_tokens, const char* input);
 
 
+/** Tokenizer function for binary FBX files.
+ *
+ *  Emits a token list suitable for direct parsing.
+ *
+ * @param output_tokens Receives a list of all tokens in the input data.
+ * @param input_buffer Binary input buffer to be processed.
+ * @param length Length of input buffer, in bytes. There is no 0-terminal.
+ * @throw DeadlyImportError if something goes wrong */
+void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int length);
+
+
 } // ! FBX
 } // ! Assimp
 
 #endif // ! INCLUDED_AI_FBX_PARSER_H
-

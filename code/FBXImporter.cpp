@@ -152,7 +152,13 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 	// syntax elements of FBX (brackets, commas, key:value mappings)
 	TokenList tokens;
 	try {
-		Tokenize(tokens,begin);
+
+		if (!strncmp(begin,"Kaydara FBX Binary",18)) {
+			TokenizeBinary(tokens,begin,contents.size());
+		}
+		else {
+			Tokenize(tokens,begin);
+		}
 
 		// use this information to construct a very rudimentary 
 		// parse-tree representing the FBX scope structure

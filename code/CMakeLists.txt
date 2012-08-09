@@ -417,6 +417,7 @@ SET(FBX_SRCS
 	FBXAnimation.cpp
 	FBXNodeAttribute.cpp
 	FBXDeformer.cpp
+	FBXBinaryTokenizer.cpp
 )
 SOURCE_GROUP( FBX FILES ${FBX_SRCS})
 

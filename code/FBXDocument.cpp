@@ -520,7 +520,7 @@ const Object* LazyObject::Get(bool dieOnError)
 		}
 		else if (!strncmp(obtype,"Model",length)) {
 			// do not load IKEffectors yet
-			if (strcmp(classtag.c_str(),"IKEffector")) {
+			if (strcmp(classtag.c_str(),"IKEffector") && strcmp(classtag.c_str(),"FKEffector")) {
 				object.reset(new Model(id,element,doc,name));
 			}
 		}

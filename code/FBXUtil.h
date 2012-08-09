@@ -68,6 +68,17 @@ struct delete_fun
 const char* TokenTypeString(TokenType t);
 
 
+
+/** Format log/error messages using a given offset in the source binary file
+ *
+ *  @param prefix Message prefix to be preprended to the location info.
+ *  @param text Message text
+ *  @param line Line index, 1-based
+ *  @param column Colum index, 1-based 
+ *  @return A string of the following format: {prefix} (offset 0x{offset}) {text}*/
+std::string AddOffset(const std::string& prefix, const std::string& text, unsigned int offset);
+
+
 /** Format log/error messages using a given line location in the source file.
  *
  *  @param prefix Message prefix to be preprended to the location info.

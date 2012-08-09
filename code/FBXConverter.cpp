@@ -1528,13 +1528,13 @@ private:
 			ai_assert(node);
 
 			if (node->TargetProperty().empty()) {
-				FBXImporter::LogWarn("target property for animation curve not set");
+				FBXImporter::LogWarn("target property for animation curve not set: " + node->Name());
 				continue;
 			}
 
 			curve_node = node;
 			if (node->Curves().empty()) {
-				FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode");
+				FBXImporter::LogWarn("no animation curves assigned to AnimationCurveNode: " + node->Name());
 				continue;
 			}
 
@@ -1632,8 +1632,8 @@ private:
 						(*chain[i]).second,
 						layer_map,
 						max_time,
-						min_time
-						);
+						min_time);
+
 					break;
 
 				case TransformationComp_RotationOffset:
@@ -1690,8 +1690,8 @@ private:
 						(*chain[i]).second,
 						layer_map,
 						max_time,
-						min_time
-						);
+						min_time);
+
 					break;
 
 				default:

@@ -261,10 +261,26 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 			return;
 		}
 
-		ReadVertexDataMaterials(materials,source,
+		std::vector<int> temp_materials;
+
+		ReadVertexDataMaterials(temp_materials,source,
 			MappingInformationType,
 			ReferenceInformationType
 		);
+
+		// sometimes, there will be only negative entries. Drop the material
+		// layer in such a case (I guess it means a default material should
+		// be used). This is what the converter would do anyway, and it
+		// avoids loosing the material if there are more material layers
+		// coming of which at least one contains actual data (did observe
+		// that with one test file).
+		const size_t count_neg = std::count_if(temp_materials.begin(),temp_materials.end(),std::bind2nd(std::less<int>(),0));
+		if(count_neg == temp_materials.size()) {
+			FBXImporter::LogWarn("ignoring dummy material layer (all entries -1)");
+			return;
+		}
+
+		std::swap(temp_materials, materials);
 	}
 	else if (type == "LayerElementNormal") {
 		if (normals.size() > 0) {
@@ -474,7 +490,7 @@ void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_ou
 
 
 // ------------------------------------------------------------------------------------------------
-void MeshGeometry::ReadVertexDataMaterials(std::vector<unsigned int>& materials_out, const Scope& source, 
+void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, const Scope& source, 
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {

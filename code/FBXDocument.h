@@ -387,7 +387,7 @@ private:
 };
 
 
-typedef std::vector<unsigned int> MatIndexArray;
+typedef std::vector<int> MatIndexArray;
 
 
 /** DOM class for FBX geometry of type "Mesh"*/
@@ -528,7 +528,7 @@ private:
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
-	void ReadVertexDataMaterials(std::vector<unsigned int>& materials_out, const Scope& source, 
+	void ReadVertexDataMaterials(MatIndexArray& materials_out, const Scope& source, 
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 

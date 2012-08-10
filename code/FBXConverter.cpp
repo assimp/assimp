@@ -100,6 +100,7 @@ public:
 	Converter(aiScene* out, const Document& doc)
 		: out(out) 
 		, doc(doc)
+		, defaultMaterialIndex()
 	{
 		// animations need to be converted first since this will
 		// populate the node_anim_chain_bits map, which is needed
@@ -561,7 +562,8 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	// MeshGeometry -> aiMesh, return mesh index + 1 or 0 if the conversion failed
-	std::vector<unsigned int> ConvertMesh(const MeshGeometry& mesh,const Model& model, const aiMatrix4x4& node_global_transform)
+	std::vector<unsigned int> ConvertMesh(const MeshGeometry& mesh,const Model& model, 
+		const aiMatrix4x4& node_global_transform)
 	{
 		std::vector<unsigned int> temp; 
 
@@ -580,10 +582,10 @@ private:
 
 		// one material per mesh maps easily to aiMesh. Multiple material 
 		// meshes need to be split.
-		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		const MatIndexArray& mindices = mesh.GetMaterialIndices();
 		if (doc.Settings().readMaterials && !mindices.empty()) {
-			const unsigned int base = mindices[0];
-			BOOST_FOREACH(unsigned int index, mindices) {
+			const MatIndexArray::value_type base = mindices[0];
+			BOOST_FOREACH(MatIndexArray::value_type index, mindices) {
 				if(index != base) {
 					return ConvertMeshMultiMaterial(mesh, model, node_global_transform);
 				}
@@ -597,7 +599,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	aiMesh* SetupEmptyMesh(const MeshGeometry& mesh, unsigned int material_index)
+	aiMesh* SetupEmptyMesh(const MeshGeometry& mesh)
 	{
 		aiMesh* const out_mesh = new aiMesh();
 		meshes.push_back(out_mesh);
@@ -618,10 +620,11 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model, const aiMatrix4x4& node_global_transform)	
+	unsigned int ConvertMeshSingleMaterial(const MeshGeometry& mesh, const Model& model, 
+		const aiMatrix4x4& node_global_transform)	
 	{
-		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
-		aiMesh* const out_mesh = SetupEmptyMesh(mesh,mindices.size() ? mindices[0] : static_cast<unsigned int>(-1)); 
+		const MatIndexArray& mindices = mesh.GetMaterialIndices();
+		aiMesh* const out_mesh = SetupEmptyMesh(mesh); 
 
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
@@ -745,15 +748,16 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	std::vector<unsigned int> ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, const aiMatrix4x4& node_global_transform)	
+	std::vector<unsigned int> ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, 
+		const aiMatrix4x4& node_global_transform)	
 	{
-		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		const MatIndexArray& mindices = mesh.GetMaterialIndices();
 		ai_assert(mindices.size());
 	
-		std::set<unsigned int> had;
+		std::set<MatIndexArray::value_type> had;
 		std::vector<unsigned int> indices;
 
-		BOOST_FOREACH(unsigned int index, mindices) {
+		BOOST_FOREACH(MatIndexArray::value_type index, mindices) {
 			if(had.find(index) == had.end()) {
 
 				indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, node_global_transform));
@@ -766,11 +770,13 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	unsigned int ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, unsigned int index, const aiMatrix4x4& node_global_transform)	
+	unsigned int ConvertMeshMultiMaterial(const MeshGeometry& mesh, const Model& model, 
+		MatIndexArray::value_type index, 
+		const aiMatrix4x4& node_global_transform)	
 	{
-		aiMesh* const out_mesh = SetupEmptyMesh(mesh, index);
+		aiMesh* const out_mesh = SetupEmptyMesh(mesh);
 
-		const std::vector<unsigned int>& mindices = mesh.GetMaterialIndices();
+		const MatIndexArray& mindices = mesh.GetMaterialIndices();
 		const std::vector<aiVector3D>& vertices = mesh.GetVertices();
 		const std::vector<unsigned int>& faces = mesh.GetFaceIndexCounts();
 
@@ -780,8 +786,9 @@ private:
 		unsigned int count_vertices = 0;
 
 		// count faces
-		for(std::vector<unsigned int>::const_iterator it = mindices.begin(), 
-			end = mindices.end(), itf = faces.begin(); it != end; ++it, ++itf) 
+		std::vector<unsigned int>::const_iterator itf = faces.begin();
+		for(MatIndexArray::const_iterator it = mindices.begin(), 
+			end = mindices.end(); it != end; ++it, ++itf) 
 		{	
 			if ((*it) != index) {
 				continue;
@@ -870,8 +877,9 @@ private:
 
 		unsigned int cursor = 0, in_cursor = 0;
 
-		for(std::vector<unsigned int>::const_iterator it = mindices.begin(), 
-			end = mindices.end(), itf = faces.begin(); it != end; ++it, ++itf) 
+		itf = faces.begin();
+		for(MatIndexArray::const_iterator it = mindices.begin(), 
+			end = mindices.end(); it != end; ++it, ++itf) 
 		{	
 			const unsigned int pcount = *itf;
 			if ((*it) != index) {
@@ -1095,11 +1103,12 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertMaterialForMesh(aiMesh* out, const Model& model, const MeshGeometry& geo, unsigned int materialIndex)
+	void ConvertMaterialForMesh(aiMesh* out, const Model& model, const MeshGeometry& geo, 
+		MatIndexArray::value_type materialIndex)
 	{
 		// locate source materials for this mesh
 		const std::vector<const Material*>& mats = model.GetMaterials();
-		if (materialIndex >= mats.size()) {
+		if (materialIndex >= mats.size() || materialIndex < 0) {
 			FBXImporter::LogError("material index out of bounds, setting default material");
 			out->mMaterialIndex = GetDefaultMaterial();
 			return;
@@ -1229,7 +1238,7 @@ private:
 						continue;
 					}
 
-					const std::vector<unsigned int>& mats = mesh->GetMaterialIndices();
+					const MatIndexArray& mats = mesh->GetMaterialIndices();
 					if(std::find(mats.begin(),mats.end(),matIndex) == mats.end()) {
 						continue;
 					}

@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <string>
 
+#include "FBXProperties.h"
+
 namespace Assimp {
 namespace FBX {
 
@@ -207,6 +209,60 @@ private:
 	int cameraId;
 	std::string cameraName;
 	std::string cameraIndexName;
+};
+
+
+#define fbx_stringize(a) #a
+
+#define fbx_simple_property(name, type, default_value) \
+	type name() const { \
+		return PropertyGet(Props(), fbx_stringize(name), (default_value)); \
+	}
+
+
+/** DOM base class for FBX cameras attached to a node */
+class Camera : public NodeAttribute
+{
+public:
+
+	Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Camera();
+
+public:
+
+	fbx_simple_property(Position, aiVector3D, aiVector3D(0,0,0));
+	fbx_simple_property(UpVector, aiVector3D, aiVector3D(0,1,0));
+	fbx_simple_property(InterestPosition, aiVector3D, aiVector3D(0,0,0));
+
+	fbx_simple_property(AspectWidth, float, 1.0f);
+	fbx_simple_property(AspectHeight, float, 1.0f);
+	fbx_simple_property(FilmWidth, float, 1.0f);
+	fbx_simple_property(FilmHeight, float, 1.0f);
+
+	fbx_simple_property(FilmAspectRatio, float, 1.0f);
+	fbx_simple_property(ApertureMode, int, 0);
+
+	fbx_simple_property(FieldOfView, float, 1.0f);
+	fbx_simple_property(FocalLength, float, 1.0f);
+
+private:
+};
+
+
+/** DOM base class for FBX lights attached to a node */
+class Light : public NodeAttribute
+{
+public:
+
+	Light(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Light();
+
+public:
+
+	fbx_simple_property(Color, aiVector3D, aiVector3D(1,1,1));
+	fbx_simple_property(Intensity, float, 1.0f);
+
+private:
 };
 
 

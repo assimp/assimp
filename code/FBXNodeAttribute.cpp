@@ -104,6 +104,34 @@ CameraSwitcher::~CameraSwitcher()
 
 }
 
+
+// ------------------------------------------------------------------------------------------------
+Camera::Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: NodeAttribute(id,element,doc,name)
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Camera::~Camera()
+{
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Light::Light(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: NodeAttribute(id,element,doc,name)
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Light::~Light()
+{
+}
+
 }
 }
 

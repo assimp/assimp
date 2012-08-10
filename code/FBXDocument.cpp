@@ -506,8 +506,14 @@ const Object* LazyObject::Get(bool dieOnError)
 			}
 		}
 		else if (!strncmp(obtype,"NodeAttribute",length)) {
-			if (!strcmp(classtag.c_str(),"CameraSwitcher")) {
+			if (!strcmp(classtag.c_str(),"Camera")) {
+				object.reset(new Camera(id,element,doc,name));
+			}
+			else if (!strcmp(classtag.c_str(),"CameraSwitcher")) {
 				object.reset(new CameraSwitcher(id,element,doc,name));
+			}
+			else if (!strcmp(classtag.c_str(),"Light")) {
+				object.reset(new Light(id,element,doc,name));
 			}
 		}
 		else if (!strncmp(obtype,"Deformer",length)) {

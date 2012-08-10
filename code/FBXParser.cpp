@@ -217,6 +217,21 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
 		return 0L;
 	}
 
+	if(t.IsBinary())
+	{
+		const char* data = t.begin();
+		if (data[0] != 'L') {
+			err_out = "failed to parse ID, unexpected data type, expected L(ong) (binary)";
+			return 0L;
+		}
+
+		ai_assert(t.end() - data == 9);
+
+		BE_NCONST uint64_t id = *reinterpret_cast<const uint64_t*>(data+1);
+		AI_SWAP8(id);
+		return id;
+	}
+
 	// XXX: should use size_t here
 	unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
 	ai_assert(length > 0);
@@ -224,7 +239,7 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
 	const char* out;
 	const uint64_t id = strtoul10_64(t.begin(),&out,&length);
 	if (out > t.end()) {
-		err_out = "failed to parse ID";
+		err_out = "failed to parse ID (text)";
 		return 0L;
 	}
 
@@ -241,6 +256,20 @@ size_t ParseTokenAsDim(const Token& t, const char*& err_out)
 	if (t.Type() != TokenType_DATA) {
 		err_out = "expected TOK_DATA token";
 		return 0;
+	}
+
+	if(t.IsBinary())
+	{
+		const char* data = t.begin();
+		if (data[0] != 'L') {
+			err_out = "failed to parse ID, unexpected data type, expected L(ong) (binary)";
+			return 0;
+		}
+
+		ai_assert(t.end() - data == 9);
+		BE_NCONST uint64_t id = *reinterpret_cast<const uint64_t*>(data+1);
+		AI_SWAP8(id);
+		return id;
 	}
 
 	if(*t.begin() != '*') {
@@ -276,6 +305,25 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
 		return 0.0f;
 	}
 
+	if(t.IsBinary())
+	{
+		const char* data = t.begin();
+		if (data[0] != 'F' && data[0] != 'D') {
+			err_out = "failed to parse F(loat) or D(ouble), unexpected data type (binary)";
+			return 0.0f;
+		}
+
+		if (data[0] == 'F') {
+			ai_assert(t.end() - data == 5);
+			// no byte swapping needed for ieee floats
+			return *reinterpret_cast<const float*>(data+1);
+		}
+		else {
+			ai_assert(t.end() - data == 9);
+			// no byte swapping needed for ieee floats
+			return static_cast<float>(*reinterpret_cast<const double*>(data+1));
+		}
+	}
 
 	// need to copy the input string to a temporary buffer
 	// first - next in the fbx token stream comes ',', 
@@ -300,6 +348,20 @@ int ParseTokenAsInt(const Token& t, const char*& err_out)
 		return 0;
 	}
 
+	if(t.IsBinary())
+	{
+		const char* data = t.begin();
+		if (data[0] != 'I') {
+			err_out = "failed to parse I(nt), unexpected data type (binary)";
+			return 0;
+		}
+
+		ai_assert(t.end() - data == 5);
+		BE_NCONST int32_t ival = *reinterpret_cast<const int32_t*>(data+1);
+		AI_SWAP4(ival);
+		return static_cast<int>(ival);
+	}
+
 	ai_assert(static_cast<size_t>(t.end() - t.begin()) > 0);
 
 	const char* out;
@@ -321,6 +383,24 @@ std::string ParseTokenAsString(const Token& t, const char*& err_out)
 	if (t.Type() != TokenType_DATA) {
 		err_out = "expected TOK_DATA token";
 		return "";
+	}
+
+	if(t.IsBinary())
+	{
+		const char* data = t.begin();
+		if (data[0] != 'S') {
+			err_out = "failed to parse S(tring), unexpected data type (binary)";
+			return "";
+		}
+
+		ai_assert(t.end() - data >= 5);
+
+		// read string length
+		BE_NCONST int32_t len = *reinterpret_cast<const int32_t*>(data+1);
+		AI_SWAP4(len);
+
+		ai_assert(t.end() - data == 5 + len);
+		return std::string(data + 5, len);
 	}
 
 	const size_t length = static_cast<size_t>(t.end() - t.begin());

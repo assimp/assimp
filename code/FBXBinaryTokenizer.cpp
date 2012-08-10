@@ -174,6 +174,11 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 	switch(type)
 	{
+		// 1 bit bool flag (yes/no)
+	case 'C':
+		cursor += 1;
+		break;
+
 		// 32 bit int
 	case 'I':
 		// <- fall thru
@@ -210,6 +215,10 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 	
 		const uint32_t length = ReadWord(input, cursor, end);
 		const uint32_t encoding = ReadWord(input, cursor, end);
+
+		const uint32_t decomp_len = ReadWord(input, cursor, end);
+
+		// compute length based on type and check against the stored value
 		if(encoding == 0) {
 			uint32_t stride;
 			switch(type)
@@ -227,13 +236,15 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 			default:
 				ai_assert(false);
 			};
-			cursor += length * stride;
+			if(length * stride != decomp_len) {
+				TokenizeError("cannot ReadData, calculated data stride differs from what the file claims",input, cursor);
+			}
 		}
-		// zip/deflate algorithm?
-		else if (encoding == 1) {
-			const uint32_t decomp_len = ReadWord(input, cursor, end);
-			cursor += decomp_len;
+		// zip/deflate algorithm (encoding==1)? take given length. anything else? die
+		else if (encoding != 1) {			
+			TokenizeError("cannot ReadData, unknown encoding",input, cursor);
 		}
+		cursor += decomp_len;
 		break;
 	}
 
@@ -258,10 +269,18 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 
 // ------------------------------------------------------------------------------------------------
-void ReadScope(TokenList& output_tokens, const char* input, const char*& cursor, const char* end)
+bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor, const char* end)
 {
 	// the first word contains the offset at which this block ends
 	const uint32_t end_offset = ReadWord(input, cursor, end);
+	
+	// we may get 0 if reading reached the end of the file -
+	// fbx files have a mysterious extra footer which I don't know 
+	// how to extract any information from, but at least it always 
+	// starts with a 0.
+	if(!end_offset) {
+		return false;
+	}
 
 	if(end_offset > Offset(input, end)) {
 		TokenizeError("block offset is out of range",input, cursor);
@@ -328,6 +347,8 @@ void ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 	if (Offset(input, cursor) != end_offset) {
 		TokenizeError("scope length not reached, something is wrong",input, cursor);
 	}
+
+	return true;
 }
 
 
@@ -352,7 +373,9 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
 	const char* cursor = input + 0x1b;
 
 	while (cursor < input + length) {
-		ReadScope(output_tokens, input, cursor, input + length);
+		if(!ReadScope(output_tokens, input, cursor, input + length)) {
+			break;
+		}
 	}
 }
 

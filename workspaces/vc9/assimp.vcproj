@@ -2088,6 +2088,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\FBXDocumentUtil.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\FBXDocumentUtil.h"
 						>
 					</File>

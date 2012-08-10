@@ -341,6 +341,32 @@ public:
 
 public:
 
+	enum RotOrder
+	{ 
+		RotOrder_EulerXYZ = 0, 
+		RotOrder_EulerXZY, 
+		RotOrder_EulerYZX, 
+		RotOrder_EulerYXZ, 
+		RotOrder_EulerZXY, 
+		RotOrder_EulerZYX,
+
+		RotOrder_SphericXYZ,
+
+		RotOrder_MAX // end-of-enum sentinel
+	};
+
+
+	enum TransformInheritance
+	{
+		TransformInheritance_RrSs = 0,
+		TransformInheritance_RSrs,
+		TransformInheritance_Rrs,
+
+		TransformInheritance_MAX // end-of-enum sentinel
+	};
+
+public:
+
 	fbx_simple_property(QuaternionInterpolate, int, 0);
 
 	fbx_simple_property(RotationOffset, aiVector3D, aiVector3D());
@@ -359,7 +385,7 @@ public:
 	fbx_simple_property(TranslationMinZ, bool, false);
 	fbx_simple_property(TranslationMaxZ, bool, false);
 
-	fbx_simple_property(RotationOrder, int, 0);
+	fbx_simple_enum_property(RotationOrder, RotOrder, 0);
 	fbx_simple_property(RotationSpaceForLimitOnly, bool, false);
 	fbx_simple_property(RotationStiffnessX, float, 0.0f);
 	fbx_simple_property(RotationStiffnessY, float, 0.0f);
@@ -379,7 +405,7 @@ public:
 	fbx_simple_property(RotationMaxY, bool, false);
 	fbx_simple_property(RotationMinZ, bool, false);
 	fbx_simple_property(RotationMaxZ, bool, false);
-	fbx_simple_property(InheritType, int, 0);
+	fbx_simple_enum_property(InheritType, TransformInheritance, 0);
 
 	fbx_simple_property(ScalingActive, bool, false);
 	fbx_simple_property(ScalingMin, aiVector3D, aiVector3D());

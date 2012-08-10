@@ -82,7 +82,7 @@ Property* ReadTypedProperty(const Element& element)
 	if (!strcmp(cs,"KString")) {
 		return new TypedProperty<std::string>(ParseTokenAsString(*tok[4]));
 	}
-	else if (!strcmp(cs,"bool")) {
+	else if (!strcmp(cs,"bool") || !strcmp(cs,"Bool")) {
 		return new TypedProperty<bool>(ParseTokenAsInt(*tok[4]) != 0);
 	}
 	else if (!strcmp(cs,"int") || !strcmp(cs,"enum")) {
@@ -105,11 +105,12 @@ Property* ReadTypedProperty(const Element& element)
 			ParseTokenAsFloat(*tok[6]))
 		);
 	}
-	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime")) {
+	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime") || !strcmp(cs,"Float")) {
 		return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
 	}
 	return NULL;
 }
+
 
 // ------------------------------------------------------------------------------------------------
 // peek into an element and check if it contains a FBX property, if so return its name.
@@ -133,6 +134,7 @@ PropertyTable::PropertyTable()
 , element()
 {
 }
+
 
 // ------------------------------------------------------------------------------------------------
 PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps)
@@ -162,6 +164,7 @@ PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const Pro
 	}
 }
 
+
 // ------------------------------------------------------------------------------------------------
 PropertyTable::~PropertyTable()
 {
@@ -169,6 +172,7 @@ PropertyTable::~PropertyTable()
 		delete v.second;
 	}
 }
+
 
 // ------------------------------------------------------------------------------------------------
 const Property* PropertyTable::Get(const std::string& name) const

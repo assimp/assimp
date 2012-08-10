@@ -163,11 +163,12 @@ Scope::~Scope()
 
 
 // ------------------------------------------------------------------------------------------------
-Parser::Parser (const TokenList& tokens)
+Parser::Parser (const TokenList& tokens, bool is_binary)
 : tokens(tokens)
 , last()
 , current()
 , cursor(tokens.begin())
+, is_binary(is_binary)
 {
 	root.reset(new Scope(*this,true));
 }

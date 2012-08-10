@@ -162,13 +162,18 @@ public:
 	
 	/** Parse given a token list. Does not take ownership of the tokens -
 	 *  the objects must persist during the entire parser lifetime */
-	Parser (const TokenList& tokens);
+	Parser (const TokenList& tokens,bool is_binary);
 	~Parser();
 
 public:
 
 	const Scope& GetRootScope() const {
 		return *root.get();
+	}
+
+
+	bool IsBinary() const {
+		return is_binary;
 	}
 
 private:
@@ -181,6 +186,8 @@ private:
 	TokenPtr LastToken() const;
 	TokenPtr CurrentToken() const;
 
+	
+
 private:
 
 	const TokenList& tokens;
@@ -188,6 +195,8 @@ private:
 	TokenPtr last, current;
 	TokenList::const_iterator cursor;
 	boost::scoped_ptr<Scope> root;
+
+	const bool is_binary;
 };
 
 

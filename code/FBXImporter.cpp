@@ -153,7 +153,9 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 	TokenList tokens;
 	try {
 
+		bool is_binary = false;
 		if (!strncmp(begin,"Kaydara FBX Binary",18)) {
+			is_binary = true;
 			TokenizeBinary(tokens,begin,contents.size());
 		}
 		else {
@@ -162,7 +164,7 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 
 		// use this information to construct a very rudimentary 
 		// parse-tree representing the FBX scope structure
-		Parser parser(tokens);
+		Parser parser(tokens, is_binary);
 
 		// take the raw parse-tree and convert it to a FBX DOM
 		Document doc(parser,settings);

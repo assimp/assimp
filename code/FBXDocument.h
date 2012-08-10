@@ -276,6 +276,84 @@ public:
 
 public:
 
+	fbx_simple_property(QuaternionInterpolate, int, 0);
+
+	fbx_simple_property(RotationOffset, aiVector3D, aiVector3D());
+	fbx_simple_property(RotationPivot, aiVector3D, aiVector3D());
+	fbx_simple_property(ScalingOffset, aiVector3D, aiVector3D());
+	fbx_simple_property(ScalingPivot, aiVector3D, aiVector3D());
+	fbx_simple_property(TranslationActive, bool, false);
+
+	fbx_simple_property(TranslationMin, aiVector3D, aiVector3D());
+	fbx_simple_property(TranslationMax, aiVector3D, aiVector3D());
+
+	fbx_simple_property(TranslationMinX, bool, false);
+	fbx_simple_property(TranslationMaxX, bool, false);
+	fbx_simple_property(TranslationMinY, bool, false);
+	fbx_simple_property(TranslationMaxY, bool, false);
+	fbx_simple_property(TranslationMinZ, bool, false);
+	fbx_simple_property(TranslationMaxZ, bool, false);
+
+	fbx_simple_property(RotationOrder, int, 0);
+	fbx_simple_property(RotationSpaceForLimitOnly, bool, false);
+	fbx_simple_property(RotationStiffnessX, float, 0.0f);
+	fbx_simple_property(RotationStiffnessY, float, 0.0f);
+	fbx_simple_property(RotationStiffnessZ, float, 0.0f);
+	fbx_simple_property(AxisLen, float, 0.0f);
+
+	fbx_simple_property(PreRotation, aiVector3D, aiVector3D());
+	fbx_simple_property(PostRotation, aiVector3D, aiVector3D());
+	fbx_simple_property(RotationActive, bool, false);
+
+	fbx_simple_property(RotationMin, aiVector3D, aiVector3D());
+	fbx_simple_property(RotationMax, aiVector3D, aiVector3D());
+
+	fbx_simple_property(RotationMinX, bool, false);
+	fbx_simple_property(RotationMaxX, bool, false);
+	fbx_simple_property(RotationMinY, bool, false);
+	fbx_simple_property(RotationMaxY, bool, false);
+	fbx_simple_property(RotationMinZ, bool, false);
+	fbx_simple_property(RotationMaxZ, bool, false);
+	fbx_simple_property(InheritType, int, 0);
+
+	fbx_simple_property(ScalingActive, bool, false);
+	fbx_simple_property(ScalingMin, aiVector3D, aiVector3D());
+	fbx_simple_property(ScalingMax, aiVector3D, aiVector3D(1.f,1.f,1.f));
+	fbx_simple_property(ScalingMinX, bool, false);
+	fbx_simple_property(ScalingMaxX, bool, false);
+	fbx_simple_property(ScalingMinY, bool, false);
+	fbx_simple_property(ScalingMaxY, bool, false);
+	fbx_simple_property(ScalingMinZ, bool, false);
+	fbx_simple_property(ScalingMaxZ, bool, false);
+
+	fbx_simple_property(GeometricTranslation, aiVector3D, aiVector3D());
+	fbx_simple_property(GeometricRotation, aiVector3D, aiVector3D());
+	fbx_simple_property(GeometricScaling, aiVector3D, aiVector3D(1.f, 1.f, 1.f));
+
+	fbx_simple_property(MinDampRangeX, float, 0.0f);
+	fbx_simple_property(MinDampRangeY, float, 0.0f);
+	fbx_simple_property(MinDampRangeZ, float, 0.0f);
+	fbx_simple_property(MaxDampRangeX, float, 0.0f);
+	fbx_simple_property(MaxDampRangeY, float, 0.0f);
+	fbx_simple_property(MaxDampRangeZ, float, 0.0f);
+
+	fbx_simple_property(MinDampStrengthX, float, 0.0f);
+	fbx_simple_property(MinDampStrengthY, float, 0.0f);
+	fbx_simple_property(MinDampStrengthZ, float, 0.0f);
+	fbx_simple_property(MaxDampStrengthX, float, 0.0f);
+	fbx_simple_property(MaxDampStrengthY, float, 0.0f);
+	fbx_simple_property(MaxDampStrengthZ, float, 0.0f);
+
+	fbx_simple_property(PreferredAngleX, float, 0.0f);
+	fbx_simple_property(PreferredAngleY, float, 0.0f);
+	fbx_simple_property(PreferredAngleZ, float, 0.0f);
+
+	fbx_simple_property(Show, bool, true);
+	fbx_simple_property(LODBox, bool, false);
+	fbx_simple_property(Freeze, bool, false);
+
+public:
+
 	const std::string& Shading() const {
 		return shading;
 	}

@@ -66,8 +66,8 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
 	const Element& KeyTime = GetRequiredElement(sc,"KeyTime");
 	const Element& KeyValueFloat = GetRequiredElement(sc,"KeyValueFloat");
 
-	ReadVectorDataArray(keys, KeyTime);
-	ReadVectorDataArray(values, KeyValueFloat);
+	ParseVectorDataArray(keys, KeyTime);
+	ParseVectorDataArray(values, KeyValueFloat);
 
 	if(keys.size() != values.size()) {
 		DOMError("the number of key times does not match the number of keyframe values",&KeyTime);
@@ -80,12 +80,12 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
 
 	const Element* KeyAttrDataFloat = sc["KeyAttrDataFloat"];
 	if(KeyAttrDataFloat) {
-		ReadVectorDataArray(attributes, *KeyAttrDataFloat);
+		ParseVectorDataArray(attributes, *KeyAttrDataFloat);
 	}
 
 	const Element* KeyAttrFlags = sc["KeyAttrFlags"];
 	if(KeyAttrFlags) {
-		ReadVectorDataArray(flags, *KeyAttrFlags);
+		ParseVectorDataArray(flags, *KeyAttrFlags);
 	}
 }
 

@@ -99,7 +99,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 	const ElementCollection& Layer = sc->GetCollection("Layer");
 
 	std::vector<aiVector3D> tempVerts;
-	ReadVectorDataArray(tempVerts,Vertices);
+	ParseVectorDataArray(tempVerts,Vertices);
 
 	if(tempVerts.empty()) {
 		FBXImporter::LogWarn("encountered mesh with no vertices");
@@ -107,7 +107,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 	}
 
 	std::vector<int> tempFaces;
-	ReadVectorDataArray(tempFaces,PolygonVertexIndex);
+	ParseVectorDataArray(tempFaces,PolygonVertexIndex);
 
 	if(tempFaces.empty()) {
 		FBXImporter::LogWarn("encountered mesh with no faces");
@@ -346,7 +346,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 	const std::vector<unsigned int>& mappings)
 {
 	std::vector<T> tempUV;
-	ReadVectorDataArray(tempUV,GetRequiredElement(source,dataElementName));
+	ParseVectorDataArray(tempUV,GetRequiredElement(source,dataElementName));
 
 	// handle permutations of Mapping and Reference type - it would be nice to
 	// deal with this more elegantly and with less redundancy, but right
@@ -365,7 +365,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		data_out.resize(vertex_count);
 
 		std::vector<int> uvIndices;
-		ReadVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+		ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
 		for (size_t i = 0, e = uvIndices.size(); i < e; ++i) {
 
@@ -392,7 +392,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		data_out.resize(vertex_count);
 
 		std::vector<int> uvIndices;
-		ReadVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
+		ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
 		if (uvIndices.size() != vertex_count) {
 			FBXImporter::LogError("length of input data unexpected for ByPolygonVertex mapping");
@@ -500,7 +500,7 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
 	// materials are handled separately. First of all, they are assigned per-face
 	// and not per polyvert. Secondly, ReferenceInformationType=IndexToDirect
 	// has a slightly different meaning for materials.
-	ReadVectorDataArray(materials_out,GetRequiredElement(source,"Materials"));
+	ParseVectorDataArray(materials_out,GetRequiredElement(source,"Materials"));
 
 	if (MappingInformationType == "AllSame") {
 		// easy - same material for all faces

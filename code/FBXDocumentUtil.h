@@ -48,7 +48,8 @@ namespace Assimp {
 namespace FBX {
 namespace Util {
 
-// does not return
+
+/* DOM/Parse error reporting - does not return */
 void DOMError(const std::string& message, const Token& token);
 void DOMError(const std::string& message, const Element* element = NULL);
 
@@ -56,59 +57,12 @@ void DOMError(const std::string& message, const Element* element = NULL);
 void DOMWarning(const std::string& message, const Token& token);
 void DOMWarning(const std::string& message, const Element* element = NULL);
 
-// extract required compound scope
-const Scope& GetRequiredScope(const Element& el);
-// get token at a particular index
-const Token& GetRequiredToken(const Element& el, unsigned int index);
-
-// wrapper around ParseTokenAsID() with DOMError handling
-uint64_t ParseTokenAsID(const Token& t);
-// wrapper around ParseTokenAsDim() with DOMError handling
-size_t ParseTokenAsDim(const Token& t);
-// wrapper around ParseTokenAsFloat() with DOMError handling
-float ParseTokenAsFloat(const Token& t);
-// wrapper around ParseTokenAsInt() with DOMError handling
-int ParseTokenAsInt(const Token& t);
-// wrapper around ParseTokenAsString() with DOMError handling
-std::string ParseTokenAsString(const Token& t);
-
-
-// extract a required element from a scope, abort if the element cannot be found
-const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL);
-
-// read an array of float3 tuples
-void ReadVectorDataArray(std::vector<aiVector3D>& out, const Element& el);
-
-// read an array of color4 tuples
-void ReadVectorDataArray(std::vector<aiColor4D>& out, const Element& el);
-
-// read an array of float2 tuples
-void ReadVectorDataArray(std::vector<aiVector2D>& out, const Element& el);
-
-// read an array of ints
-void ReadVectorDataArray(std::vector<int>& out, const Element& el);
-
-// read an array of floats
-void ReadVectorDataArray(std::vector<float>& out, const Element& el);
-
-// read an array of uints
-void ReadVectorDataArray(std::vector<unsigned int>& out, const Element& el);
-
-// read an array of uint64_t's
-void ReadVectorDataArray(std::vector<uint64_t>& out, const Element& el);
-
-
-// read a 4x4 matrix from an array of 16 floats
-aiMatrix4x4 ReadMatrix(const Element& element);
-
 
 // fetch a property table and the corresponding property template 
 boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
 	const std::string& templateName, 
 	const Element &element, 
 	const Scope& sc);
-
-
 
 
 // ------------------------------------------------------------------------------------------------

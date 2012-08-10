@@ -97,8 +97,8 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
 	}
 
 	if(Indexes) {
-		ReadVectorDataArray(indices,*Indexes);
-		ReadVectorDataArray(weights,*Weights);
+		ParseVectorDataArray(indices,*Indexes);
+		ParseVectorDataArray(weights,*Weights);
 	}
 
 	if(indices.size() != weights.size()) {

@@ -208,6 +208,38 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out);
 int ParseTokenAsInt(const Token& t, const char*& err_out);
 std::string ParseTokenAsString(const Token& t, const char*& err_out);
 
+
+/* wrapper around ParseTokenAsXXX() with DOMError handling */
+uint64_t ParseTokenAsID(const Token& t);
+size_t ParseTokenAsDim(const Token& t);
+float ParseTokenAsFloat(const Token& t);
+int ParseTokenAsInt(const Token& t);
+std::string ParseTokenAsString(const Token& t);
+
+/* read data arrays */
+void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el);
+void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el);
+void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el);
+void ParseVectorDataArray(std::vector<int>& out, const Element& el);
+void ParseVectorDataArray(std::vector<float>& out, const Element& el);
+void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el);
+void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& e);
+
+
+
+// extract a required element from a scope, abort if the element cannot be found
+const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element = NULL);
+
+// extract required compound scope
+const Scope& GetRequiredScope(const Element& el);
+// get token at a particular index
+const Token& GetRequiredToken(const Element& el, unsigned int index);
+
+
+
+// read a 4x4 matrix from an array of 16 floats
+aiMatrix4x4 ReadMatrix(const Element& element);
+
 } // ! FBX
 } // ! Assimp
 

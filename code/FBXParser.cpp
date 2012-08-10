@@ -57,12 +57,53 @@ using namespace Assimp::FBX;
 
 namespace {
 
-// ------------------------------------------------------------------------------------------------
-// signal parsing error, this is always unrecoverable. Throws DeadlyImportError.
-void ParseError(const std::string& message, TokenPtr token)
-{
-	throw DeadlyImportError(token ? Util::AddTokenText("FBX-Parse",message,token) : ("FBX-Parse " + message));
-}
+
+	// ------------------------------------------------------------------------------------------------
+	// signal parse error, this is always unrecoverable. Throws DeadlyImportError.
+	void ParseError(const std::string& message, const Token& token)
+	{
+		throw DeadlyImportError(Util::AddTokenText("FBX-Parser",message,&token));
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void ParseError(const std::string& message, const Element* element = NULL)
+	{
+		if(element) {
+			ParseError(message,element->KeyToken());
+		}
+		throw DeadlyImportError("FBX-Parser " + message);
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// print warning, do return
+	void ParseWarning(const std::string& message, const Token& token)
+	{
+		if(DefaultLogger::get()) {
+			DefaultLogger::get()->warn(Util::AddTokenText("FBX-Parser",message,&token));
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void ParseWarning(const std::string& message, const Element* element = NULL)
+	{
+		if(element) {
+			ParseWarning(message,element->KeyToken());
+			return;
+		}
+		if(DefaultLogger::get()) {
+			DefaultLogger::get()->warn("FBX-Parser: " + message);
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void ParseError(const std::string& message, TokenPtr token)
+	{
+		if(token) {
+			ParseError(message, *token);
+		}
+		ParseError(message);
+	}
 
 }
 
@@ -130,7 +171,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 
 	TokenPtr n = parser.AdvanceToNextToken();
 	if(n == NULL) {
-		ParseError("unexpected end of file",NULL);
+		ParseError("unexpected end of file");
 	}
 
 	// note: empty scopes are allowed
@@ -418,6 +459,323 @@ std::string ParseTokenAsString(const Token& t, const char*& err_out)
 
 	return std::string(s+1,length-2);
 }
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of float3 tuples
+void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// may throw bad_alloc if the input is rubbish, but this need
+	// not to be prevented - importing would fail but we wouldn't
+	// crash since assimp handles this case properly.
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	if (a.Tokens().size() % 3 != 0) {
+		ParseError("number of floats is not a multiple of three (3)",&el);
+	}
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		aiVector3D v;
+		v.x = ParseTokenAsFloat(**it++);
+		v.y = ParseTokenAsFloat(**it++);
+		v.z = ParseTokenAsFloat(**it++);
+
+		out.push_back(v);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of color4 tuples
+void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	//  see notes in ParseVectorDataArray() above
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	if (a.Tokens().size() % 4 != 0) {
+		ParseError("number of floats is not a multiple of four (4)",&el);
+	}
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		aiColor4D v;
+		v.r = ParseTokenAsFloat(**it++);
+		v.g = ParseTokenAsFloat(**it++);
+		v.b = ParseTokenAsFloat(**it++);
+		v.a = ParseTokenAsFloat(**it++);
+
+		out.push_back(v);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of float2 tuples
+void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ParseVectorDataArray() above
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	if (a.Tokens().size() % 2 != 0) {
+		ParseError("number of floats is not a multiple of two (2)",&el);
+	}
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		aiVector2D v;
+		v.x = ParseTokenAsFloat(**it++);
+		v.y = ParseTokenAsFloat(**it++);
+
+		out.push_back(v);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of ints
+void ParseVectorDataArray(std::vector<int>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ParseVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const int ival = ParseTokenAsInt(**it++);
+		out.push_back(ival);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of floats
+void ParseVectorDataArray(std::vector<float>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ParseVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const float ival = ParseTokenAsFloat(**it++);
+		out.push_back(ival);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of uints
+void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ParseVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const int ival = ParseTokenAsInt(**it++);
+		if(ival < 0) {
+			ParseError("encountered negative integer index");
+		}
+		out.push_back(static_cast<unsigned int>(ival));
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read an array of uint64_ts
+void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ParseVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope,"a",&el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
+		const uint64_t ival = ParseTokenAsID(**it++);
+		
+		out.push_back(ival);
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+aiMatrix4x4 ReadMatrix(const Element& element)
+{
+	std::vector<float> values;
+	ParseVectorDataArray(values,element);
+
+	if(values.size() != 16) {
+		ParseError("expected 16 matrix elements");
+	}
+
+	aiMatrix4x4 result;
+
+
+	result.a1 = values[0];
+	result.a2 = values[1];
+	result.a3 = values[2];
+	result.a4 = values[3];
+
+	result.b1 = values[4];
+	result.b2 = values[5];
+	result.b3 = values[6];
+	result.b4 = values[7];
+
+	result.c1 = values[8];
+	result.c2 = values[9];
+	result.c3 = values[10];
+	result.c4 = values[11];
+
+	result.d1 = values[12];
+	result.d2 = values[13];
+	result.d3 = values[14];
+	result.d4 = values[15];
+
+	result.Transpose();
+	return result;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsString() with ParseError handling
+std::string ParseTokenAsString(const Token& t)
+{
+	const char* err;
+	const std::string& i = ParseTokenAsString(t,err);
+	if(err) {
+		ParseError(err,t);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// extract a required element from a scope, abort if the element cannot be found
+const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element /*= NULL*/) 
+{
+	const Element* el = sc[index];
+	if(!el) {
+		ParseError("did not find required element \"" + index + "\"",element);
+	}
+	return *el;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// extract required compound scope
+const Scope& GetRequiredScope(const Element& el)
+{
+	const Scope* const s = el.Compound();
+	if(!s) {
+		ParseError("expected compound scope",&el);
+	}
+
+	return *s;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// get token at a particular index
+const Token& GetRequiredToken(const Element& el, unsigned int index)
+{
+	const TokenList& t = el.Tokens();
+	if(index >= t.size()) {
+		ParseError(Formatter::format( "missing token at index " ) << index,&el);
+	}
+
+	return *t[index];
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsID() with ParseError handling
+uint64_t ParseTokenAsID(const Token& t) 
+{
+	const char* err;
+	const uint64_t i = ParseTokenAsID(t,err);
+	if(err) {
+		ParseError(err,t);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsDim() with ParseError handling
+size_t ParseTokenAsDim(const Token& t)
+{
+	const char* err;
+	const size_t i = ParseTokenAsDim(t,err);
+	if(err) {
+		ParseError(err,t);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsFloat() with ParseError handling
+float ParseTokenAsFloat(const Token& t)
+{
+	const char* err;
+	const float i = ParseTokenAsFloat(t,err);
+	if(err) {
+		ParseError(err,t);
+	}
+	return i;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsInt() with ParseError handling
+int ParseTokenAsInt(const Token& t)
+{
+	const char* err;
+	const int i = ParseTokenAsInt(t,err);
+	if(err) {
+		ParseError(err,t);
+	}
+	return i;
+}
+
+
 
 } // !FBX
 } // !Assimp

@@ -311,7 +311,7 @@ size_t ParseTokenAsDim(const Token& t, const char*& err_out)
 		ai_assert(t.end() - data == 9);
 		BE_NCONST uint64_t id = *reinterpret_cast<const uint64_t*>(data+1);
 		AI_SWAP8(id);
-		return id;
+		return static_cast<size_t>(id);
 	}
 
 	if(*t.begin() != '*') {

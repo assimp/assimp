@@ -1108,7 +1108,7 @@ private:
 	{
 		// locate source materials for this mesh
 		const std::vector<const Material*>& mats = model.GetMaterials();
-		if (materialIndex >= mats.size() || materialIndex < 0) {
+		if (static_cast<unsigned int>(materialIndex) >= mats.size() || materialIndex < 0) {
 			FBXImporter::LogError("material index out of bounds, setting default material");
 			out->mMaterialIndex = GetDefaultMaterial();
 			return;

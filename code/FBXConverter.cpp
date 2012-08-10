@@ -136,6 +136,8 @@ public:
 		std::for_each(meshes.begin(),meshes.end(),Util::delete_fun<aiMesh>());
 		std::for_each(materials.begin(),materials.end(),Util::delete_fun<aiMaterial>());
 		std::for_each(animations.begin(),animations.end(),Util::delete_fun<aiAnimation>());
+		std::for_each(lights.begin(),lights.end(),Util::delete_fun<aiLight>());
+		std::for_each(cameras.begin(),cameras.end(),Util::delete_fun<aiCamera>());
 	}
 
 
@@ -234,6 +236,9 @@ private:
 					// attach sub-nodes
 					ConvertNodes(model->ID(), *nodes_chain.back(), new_abs_transform);
 
+					ConvertLights(*model);
+					ConvertCameras(*model);
+
 					nodes.push_back(nodes_chain.front());	
 					nodes_chain.clear();
 				}
@@ -251,6 +256,117 @@ private:
 			std::for_each(nodes.begin(),nodes.end(),deleter);
 			std::for_each(nodes_chain.begin(),nodes_chain.end(),deleter);
 		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertLights(const Model& model)
+	{
+		const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
+		BOOST_FOREACH(const NodeAttribute* attr, node_attrs) {
+			const Light* const light = dynamic_cast<const Light*>(attr);
+			if(light) {
+				ConvertLight(model, *light);
+			}
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertCameras(const Model& model)
+	{
+		const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
+		BOOST_FOREACH(const NodeAttribute* attr, node_attrs) {
+			const Camera* const cam = dynamic_cast<const Camera*>(attr);
+			if(cam) {
+				ConvertCamera(model, *cam);
+			}
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertLight(const Model& model, const Light& light)
+	{
+		lights.push_back(new aiLight());
+		aiLight* const out_light = lights.back();
+
+		out_light->mName.Set(FixNodeName(model.Name()));
+
+		const float intensity = light.Intensity();
+		const aiVector3D& col = light.Color();
+
+		out_light->mColorDiffuse = aiColor3D(col.x,col.y,col.z);
+		out_light->mColorDiffuse.r *= intensity;
+		out_light->mColorDiffuse.g *= intensity;
+		out_light->mColorDiffuse.b *= intensity;
+
+		out_light->mColorSpecular = out_light->mColorDiffuse;
+
+		switch(light.LightType())
+		{
+		case Light::Type_Point:
+			out_light->mType = aiLightSource_POINT;
+			break;
+
+		case Light::Type_Directional:
+			out_light->mType = aiLightSource_DIRECTIONAL;
+			break;
+
+		case Light::Type_Spot:
+			out_light->mType = aiLightSource_SPOT;
+			out_light->mAngleOuterCone = AI_DEG_TO_RAD(light.OuterAngle());
+			out_light->mAngleInnerCone = AI_DEG_TO_RAD(light.InnerAngle());
+			break;
+
+		case Light::Type_Area:
+			FBXImporter::LogWarn("cannot represent area light, set to UNDEFINED");
+			out_light->mType = aiLightSource_UNDEFINED;
+			break;
+
+		case Light::Type_Volume:
+			FBXImporter::LogWarn("cannot represent volume light, set to UNDEFINED");
+			out_light->mType = aiLightSource_UNDEFINED;
+			break;
+		default:
+			ai_assert(false);
+		}
+
+		// XXX: how to best convert the near and far decay ranges?
+		switch(light.DecayType())
+		{
+		case Light::Decay_None:
+			out_light->mAttenuationConstant = 1.0f;
+			break;
+		case Light::Decay_Linear:
+			out_light->mAttenuationLinear = 1.0f;
+			break;
+		case Light::Decay_Quadratic:
+			out_light->mAttenuationQuadratic = 1.0f;
+			break;
+		case Light::Decay_Cubic:
+			FBXImporter::LogWarn("cannot represent cubic attenuation, set to Quadratic");
+			out_light->mAttenuationQuadratic = 1.0f;
+			break;
+		default:
+			ai_assert(false);
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertCamera(const Model& model, const Camera& cam)
+	{
+		cameras.push_back(new aiCamera());
+		aiCamera* const out_camera = cameras.back();
+
+		out_camera->mName.Set(FixNodeName(model.Name()));
+
+		out_camera->mAspect = cam.AspectWidth();
+		out_camera->mPosition = cam.Position();
+		out_camera->mLookAt = cam.InterestPosition() - out_camera->mPosition;
+
+		out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
 	}
 
 
@@ -2207,6 +2323,20 @@ private:
 
 			std::swap_ranges(animations.begin(),animations.end(),out->mAnimations);
 		}
+
+		if(lights.size()) {
+			out->mLights = new aiLight*[lights.size()]();
+			out->mNumLights = static_cast<unsigned int>(lights.size());
+
+			std::swap_ranges(lights.begin(),lights.end(),out->mLights);
+		}
+
+		if(cameras.size()) {
+			out->mCameras = new aiCamera*[cameras.size()]();
+			out->mNumCameras = static_cast<unsigned int>(cameras.size());
+
+			std::swap_ranges(cameras.begin(),cameras.end(),out->mCameras);
+		}
 	}
 
 
@@ -2218,6 +2348,8 @@ private:
 	std::vector<aiMesh*> meshes;
 	std::vector<aiMaterial*> materials;
 	std::vector<aiAnimation*> animations;
+	std::vector<aiLight*> lights;
+	std::vector<aiCamera*> cameras;
 
 	typedef std::map<const Material*, unsigned int> MaterialMap;
 	MaterialMap materials_converted;

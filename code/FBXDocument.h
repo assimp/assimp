@@ -216,8 +216,20 @@ private:
 
 #define fbx_simple_property(name, type, default_value) \
 	type name() const { \
-		return PropertyGet(Props(), fbx_stringize(name), (default_value)); \
+		return PropertyGet<type>(Props(), fbx_stringize(name), (default_value)); \
 	}
+
+// XXX improve logging
+#define fbx_simple_enum_property(name, type, default_value) \
+	type name() const { \
+		const int ival = PropertyGet<int>(Props(), fbx_stringize(name), static_cast<int>(default_value)); \
+		if (ival < 0 || ival >= AI_CONCAT(type, _MAX)) { \
+			ai_assert(static_cast<int>(default_value) >= 0 && static_cast<int>(default_value) < AI_CONCAT(type, _MAX)); \
+			return static_cast<type>(default_value); \
+		} \
+		return static_cast<type>(ival); \
+}
+
 
 
 /** DOM base class for FBX cameras attached to a node */
@@ -259,8 +271,61 @@ public:
 
 public:
 
+	enum Type
+	{
+		Type_Point,
+		Type_Directional,
+		Type_Spot,
+		Type_Area,
+		Type_Volume,
+
+		Type_MAX // end-of-enum sentinel
+	};
+
+	enum Decay
+	{
+		Decay_None,
+		Decay_Linear,
+		Decay_Quadratic,
+		Decay_Cubic,
+
+		Decay_MAX // end-of-enum sentinel
+	};
+
+public:
+
 	fbx_simple_property(Color, aiVector3D, aiVector3D(1,1,1));
+	fbx_simple_enum_property(LightType, Type, 0);
+	fbx_simple_property(CastLightOnObject, bool, false);
+	fbx_simple_property(DrawVolumetricLight, bool, true);
+	fbx_simple_property(DrawGroundProjection, bool, true);
+	fbx_simple_property(DrawFrontFacingVolumetricLight, bool, false);
 	fbx_simple_property(Intensity, float, 1.0f);
+	fbx_simple_property(InnerAngle, float, 0.0f);
+	fbx_simple_property(OuterAngle, float, 45.0f);
+	fbx_simple_property(Fog, int, 50);
+	fbx_simple_enum_property(DecayType, Decay, 0);
+	fbx_simple_property(DecayStart, int, 0);
+	fbx_simple_property(FileName, std::string, "");
+
+	fbx_simple_property(EnableNearAttenuation, bool, false);
+	fbx_simple_property(NearAttenuationStart, float, 0.0f);
+	fbx_simple_property(NearAttenuationEnd, float, 0.0f);
+	fbx_simple_property(EnableFarAttenuation, bool, false);
+	fbx_simple_property(FarAttenuationStart, float, 0.0f);
+	fbx_simple_property(FarAttenuationEnd, float, 0.0f);
+
+	fbx_simple_property(CastShadows, bool, true);
+	fbx_simple_property(ShadowColor, aiVector3D, aiVector3D(0,0,0));
+
+	fbx_simple_property(AreaLightShape, int, 0);
+
+	fbx_simple_property(LeftBarnDoor, float, 20.0f);
+	fbx_simple_property(RightBarnDoor, float, 20.0f);
+	fbx_simple_property(TopBarnDoor, float, 20.0f);
+	fbx_simple_property(BottomBarnDoor, float, 20.0f);
+	fbx_simple_property(EnableBarnDoor, bool, true);
+
 
 private:
 };

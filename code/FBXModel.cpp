@@ -92,7 +92,7 @@ void Model::ResolveLinks(const Element& element, const Document& doc)
 	const char* const arr[] = {"Geometry","Material","NodeAttribute"};
 
 	// resolve material
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),arr, 2);
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),arr, 3);
 
 	materials.reserve(conns.size());
 	geometry.reserve(conns.size());

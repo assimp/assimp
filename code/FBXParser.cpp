@@ -848,9 +848,9 @@ void ParseVectorDataArray(std::vector<int>& out, const Element& el)
 
 		out.reserve(count);
 
-		const uint32_t* ip = reinterpret_cast<const uint32_t*>(&buff[0]);
+		const int32_t* ip = reinterpret_cast<const int32_t*>(&buff[0]);
 		for (unsigned int i = 0; i < count; ++i, ++ip) {
-			BE_NCONST uint32_t val = *ip;
+			BE_NCONST int32_t val = *ip;
 			AI_SWAP4(val);
 			out.push_back(val);
 		}
@@ -946,8 +946,40 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 	}
 
 	if(tok[0]->IsBinary()) {
-		// XXX don't think we need this - there is no special type sign for unsigned ints in the binary encoding
-		ParseError("feature not implemented",&el);
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if(!count) {
+			return;
+		}
+
+		if (type != 'i') {
+			ParseError("expected (u)int array (binary)",&el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * 4);
+
+		out.reserve(count);
+
+		const int32_t* ip = reinterpret_cast<const int32_t*>(&buff[0]);
+		for (unsigned int i = 0; i < count; ++i, ++ip) {
+			BE_NCONST int32_t val = *ip;
+			if(val < 0) {
+				ParseError("encountered negative integer index (binary)");
+			}
+
+			AI_SWAP4(val);
+			out.push_back(val);
+		}
+
+		return;
 	}
 
 	const size_t dim = ParseTokenAsDim(*tok[0]);

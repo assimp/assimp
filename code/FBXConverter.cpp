@@ -89,11 +89,6 @@ public:
 	};
 
 
-	/** supported rotation modes */
-	enum RotationMode
-	{
-		RotationMode_Euler_XYZ
-	};
 
 public:
 
@@ -451,31 +446,90 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void GetRotationMatrix(RotationMode mode, const aiVector3D& rotation, aiMatrix4x4& out)
+	void GetRotationMatrix(Model::RotOrder mode, const aiVector3D& rotation, aiMatrix4x4& out)
 	{
-		const float angle_epsilon = 1e-6f;
-		aiMatrix4x4 temp;
-
-		out = aiMatrix4x4();
-
-		switch(mode)
-		{
-		case RotationMode_Euler_XYZ:
-
-			if(fabs(rotation.z) > angle_epsilon) {
-				out = aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(rotation.z),temp);
-			}
-			if(fabs(rotation.y) > angle_epsilon) {
-				out = out * aiMatrix4x4::RotationY(AI_DEG_TO_RAD(rotation.y),temp);
-			}
-			if(fabs(rotation.x) > angle_epsilon) {
-				out = out * aiMatrix4x4::RotationX(AI_DEG_TO_RAD(rotation.x),temp);
-			}
-
+		if(mode == Model::RotOrder_SphericXYZ) {
+			FBXImporter::LogError("Unsupported RotationMode: SphericXYZ");
+			out = aiMatrix4x4();
 			return;
 		}
 
-		ai_assert(false);
+		const float angle_epsilon = 1e-6f;
+
+		out = aiMatrix4x4();
+
+		bool is_id[3] = { true, true, true };
+
+		aiMatrix4x4 temp[3];
+		if(fabs(rotation.z) > angle_epsilon) {
+			aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(rotation.z),temp[2]);
+			is_id[2] = false;
+		}
+		if(fabs(rotation.y) > angle_epsilon) {
+			aiMatrix4x4::RotationY(AI_DEG_TO_RAD(rotation.y),temp[1]);
+			is_id[1] = false;
+		}
+		if(fabs(rotation.x) > angle_epsilon) {
+			aiMatrix4x4::RotationX(AI_DEG_TO_RAD(rotation.x),temp[0]);
+			is_id[0] = false;
+		}
+
+		int order[3] = {-1, -1, -1};
+
+		// note: rotation order is inverted since we're left multiplying as is usual in assimp
+		switch(mode)
+		{
+		case Model::RotOrder_EulerXYZ:
+			order[0] = 2;
+			order[1] = 1;
+			order[2] = 0;
+			break;
+
+		case Model::RotOrder_EulerXZY: 
+			order[0] = 1;
+			order[1] = 2;
+			order[2] = 0;
+			break;
+
+		case Model::RotOrder_EulerYZX:
+			order[0] = 0;
+			order[1] = 2;
+			order[2] = 1;
+			break;
+
+		case Model::RotOrder_EulerYXZ: 
+			order[0] = 2;
+			order[1] = 0;
+			order[2] = 1;
+			break;
+
+		case Model::RotOrder_EulerZXY: 
+			order[0] = 1;
+			order[1] = 0;
+			order[2] = 2;
+			break;
+
+		case Model::RotOrder_EulerZYX:
+			order[0] = 0;
+			order[1] = 1;
+			order[2] = 2;
+			break;
+
+			default:
+				ai_assert(false);
+		}
+
+		if(!is_id[order[0]]) {
+			out = temp[order[0]];
+		}
+
+		if(!is_id[order[1]]) {
+			out = out * temp[order[1]];
+		}
+
+		if(!is_id[order[2]]) {
+			out = out * temp[order[2]];
+		}
 	}
 
 
@@ -521,9 +575,7 @@ private:
 		std::vector<aiNode*>& output_nodes)
 	{
 		const PropertyTable& props = model.Props();
-
-		// XXX handle different rotation modes
-		const RotationMode rot = RotationMode_Euler_XYZ;
+		const Model::RotOrder rot = model.RotationOrder();
 
 		bool ok;
 
@@ -1891,7 +1943,7 @@ private:
 		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
 		na->mNodeName.Set(name);
 
-		ConvertRotationKeys(na, curves, layer_map, max_time,min_time);
+		ConvertRotationKeys(na, curves, layer_map, max_time,min_time, target.RotationOrder());
 
 		// dummy scaling key
 		na->mScalingKeys = new aiVectorKey[1];
@@ -2019,7 +2071,8 @@ private:
 			ConvertRotationKeys(na, (*chain[TransformationComp_Rotation]).second, 
 				layer_map, 
 				max_time,
-				min_time);
+				min_time,
+				target.RotationOrder());
 		}
 		else {
 			na->mRotationKeys = new aiQuatKey[1];
@@ -2027,8 +2080,8 @@ private:
 
 			na->mRotationKeys[0].mTime = 0.;
 			na->mRotationKeys[0].mValue = EulerToQuaternion(
-				PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f))
-				);
+				PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f)),
+				target.RotationOrder());
 		}
 
 		if(chain[TransformationComp_Translation] != iter_end) {
@@ -2214,7 +2267,8 @@ private:
 	// ------------------------------------------------------------------------------------------------
 	void InterpolateKeys(aiQuatKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom,
 		double& maxTime,
-		double& minTime)
+		double& minTime,
+		Model::RotOrder order)
 	{
 		ai_assert(keys.size());
 		ai_assert(valOut);
@@ -2225,17 +2279,17 @@ private:
 		for (size_t i = 0, c = keys.size(); i < c; ++i) {
 
 			valOut[i].mTime = temp[i].mTime;
-			valOut[i].mValue = EulerToQuaternion(temp[i].mValue); 
+			valOut[i].mValue = EulerToQuaternion(temp[i].mValue, order); 
 		}
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
 	// euler xyz -> quat
-	aiQuaternion EulerToQuaternion(const aiVector3D& rot) 
+	aiQuaternion EulerToQuaternion(const aiVector3D& rot, Model::RotOrder order) 
 	{
 		aiMatrix4x4 m;
-		GetRotationMatrix(RotationMode_Euler_XYZ, rot, m);
+		GetRotationMatrix(order, rot, m);
 
 		return aiQuaternion(aiMatrix3x3(m));
 	}
@@ -2262,7 +2316,8 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers,
+	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
+		const LayerMap& layers,
 		double& maxTime,
 		double& minTime)
 	{
@@ -2279,9 +2334,11 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers, 
+	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
+		const LayerMap& layers, 
 		double& maxTime,
-		double& minTime)
+		double& minTime,
+		Model::RotOrder order)
 	{
 		ai_assert(nodes.size());
 
@@ -2291,7 +2348,7 @@ private:
 
 		na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
 		na->mRotationKeys = new aiQuatKey[keys.size()];
-		InterpolateKeys(na->mRotationKeys, keys, inputs, false, maxTime, minTime);
+		InterpolateKeys(na->mRotationKeys, keys, inputs, false, maxTime, minTime, order);
 	}
 
 

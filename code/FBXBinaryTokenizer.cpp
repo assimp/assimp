@@ -216,7 +216,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 		const uint32_t length = ReadWord(input, cursor, end);
 		const uint32_t encoding = ReadWord(input, cursor, end);
 
-		const uint32_t decomp_len = ReadWord(input, cursor, end);
+		const uint32_t comp_len = ReadWord(input, cursor, end);
 
 		// compute length based on type and check against the stored value
 		if(encoding == 0) {
@@ -236,7 +236,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 			default:
 				ai_assert(false);
 			};
-			if(length * stride != decomp_len) {
+			if(length * stride != comp_len) {
 				TokenizeError("cannot ReadData, calculated data stride differs from what the file claims",input, cursor);
 			}
 		}
@@ -244,7 +244,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 		else if (encoding != 1) {			
 			TokenizeError("cannot ReadData, unknown encoding",input, cursor);
 		}
-		cursor += decomp_len;
+		cursor += comp_len;
 		break;
 	}
 

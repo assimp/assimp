@@ -45,6 +45,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
+
+#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#	include <zlib.h>
+#else
+#	include "../contrib/zlib/zlib.h"
+#endif
+
+
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
 #include "FBXUtil.h"
@@ -461,12 +469,173 @@ std::string ParseTokenAsString(const Token& t, const char*& err_out)
 }
 
 
+namespace {
+
+// ------------------------------------------------------------------------------------------------
+// read the type code and element count of a binary data array and stop there
+void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uint32_t& count, 
+	const Element& el)
+{
+	if (static_cast<size_t>(end-data) < 5) {
+		ParseError("binary data array is too short, need five (5) bytes for type signature and element count",&el);
+	}
+
+	// data type
+	type = *data;
+
+	// read number of elements
+	BE_NCONST uint32_t len = *reinterpret_cast<const uint32_t*>(data+1);
+	AI_SWAP4(len);
+
+	count = len;
+	data += 5;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// read binary data array, assume cursor points to the 'compression mode' field (i.e. behind the header)
+void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const char* end, 
+	std::vector<char>& buff, 
+	const Element& el)
+{
+	ai_assert(static_cast<size_t>(end-data) >= 4); // runtime check for this happens at tokenization stage
+
+	BE_NCONST uint32_t encmode = *reinterpret_cast<const uint32_t*>(data);
+	AI_SWAP4(encmode);
+	data += 4;
+
+	// next comes the compressed length
+	BE_NCONST uint32_t comp_len = *reinterpret_cast<const uint32_t*>(data);
+	AI_SWAP4(comp_len);
+	data += 4;
+
+	ai_assert(data + comp_len == end);
+
+	// determine the length of the uncompressed data by looking at the type signature
+	uint32_t stride;
+	switch(type)
+	{
+	case 'f':
+	case 'i':
+		stride = 4;
+		break;
+
+	case 'd':
+	case 'l':
+		stride = 8;
+		break;
+
+	default:
+		ai_assert(false);
+	};
+
+	const uint32_t full_length = stride * count;
+	buff.resize(full_length);
+
+	if(encmode == 0) {
+		ai_assert(full_length == comp_len);
+
+		// plain data, no compression
+		std::copy(data, end, buff.begin());
+	}
+	else if(encmode == 1) {
+		// zlib/deflate, next comes ZIP head (0x78 0x01)
+		// see http://www.ietf.org/rfc/rfc1950.txt
+		
+		z_stream zstream;
+		zstream.opaque = Z_NULL;
+		zstream.zalloc = Z_NULL;
+		zstream.zfree  = Z_NULL;
+		zstream.data_type = Z_BINARY;
+
+		// http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
+		inflateInit(&zstream);
+
+		zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
+		zstream.avail_in  = comp_len;
+
+		zstream.avail_out = buff.size();
+		zstream.next_out = reinterpret_cast<Bytef*>(&*buff.begin());
+		const int ret = inflate(&zstream, Z_FINISH);
+
+		if (ret != Z_STREAM_END && ret != Z_OK) {
+			ParseError("failure decompressing compressed data section");
+		}
+
+		// terminate zlib
+		inflateEnd(&zstream);
+	}
+#ifdef _DEBUG
+	else {
+		// runtime check for this happens at tokenization stage
+		ai_assert(false);
+	}
+#endif
+
+	data += comp_len;
+	ai_assert(data == end);
+}
+
+} // !anon
+
+
 // ------------------------------------------------------------------------------------------------
 // read an array of float3 tuples
 void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 {
 	out.clear();
+
 	const TokenList& tok = el.Tokens();
+	if(tok.empty()) {
+		ParseError("unexpected empty element",&el);
+	}
+	
+	if(tok[0]->IsBinary()) {
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if(count % 3 != 0) {
+			ParseError("number of floats is not a multiple of three (3) (binary)",&el);
+		}
+
+		if(!count) {
+			return;
+		}
+
+		if (type != 'd' && type != 'f') {
+			ParseError("expected float or double array (binary)",&el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+		
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+
+		const uint32_t count3 = count / 3;
+		out.reserve(count3);
+
+		if (type != 'd') {
+			const double* d = reinterpret_cast<const double*>(&buff[0]);
+			for (unsigned int i = 0; i < count3; ++i, d += 3) {
+				out.push_back(aiVector3D(static_cast<float>(d[0]),
+					static_cast<float>(d[1]),
+					static_cast<float>(d[2])));
+			}
+		}
+		else if (type != 'f') {
+			const float* f = reinterpret_cast<const float*>(&buff[0]);
+			for (unsigned int i = 0; i < count3; ++i, f += 3) {
+				out.push_back(aiVector3D(f[0],f[1],f[2]));
+			}
+		}
+
+		return;
+	}
+
 	const size_t dim = ParseTokenAsDim(*tok[0]);
 
 	// may throw bad_alloc if the input is rubbish, but this need
@@ -497,6 +666,56 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 {
 	out.clear();
 	const TokenList& tok = el.Tokens();
+	if(tok.empty()) {
+		ParseError("unexpected empty element",&el);
+	}
+
+	if(tok[0]->IsBinary()) {
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if(count % 4 != 0) {
+			ParseError("number of floats is not a multiple of four (4) (binary)",&el);
+		}
+
+		if(!count) {
+			return;
+		}
+
+		if (type != 'd' && type != 'f') {
+			ParseError("expected float or double array (binary)",&el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+
+		const uint32_t count4 = count / 4;
+		out.reserve(count4);
+
+		if (type != 'd') {
+			const double* d = reinterpret_cast<const double*>(&buff[0]);
+			for (unsigned int i = 0; i < count4; ++i, d += 4) {
+				out.push_back(aiColor4D(static_cast<float>(d[0]),
+					static_cast<float>(d[1]),
+					static_cast<float>(d[2]),
+					static_cast<float>(d[3])));
+			}
+		}
+		else if (type != 'f') {
+			const float* f = reinterpret_cast<const float*>(&buff[0]);
+			for (unsigned int i = 0; i < count4; ++i, f += 4) {
+				out.push_back(aiColor4D(f[0],f[1],f[2],f[3]));
+			}
+		}
+		return;
+	}
+
 	const size_t dim = ParseTokenAsDim(*tok[0]);
 
 	//  see notes in ParseVectorDataArray() above
@@ -526,6 +745,55 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 {
 	out.clear();
 	const TokenList& tok = el.Tokens();
+	if(tok.empty()) {
+		ParseError("unexpected empty element",&el);
+	}
+
+	if(tok[0]->IsBinary()) {
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if(count % 2 != 0) {
+			ParseError("number of floats is not a multiple of two (2) (binary)",&el);
+		}
+
+		if(!count) {
+			return;
+		}
+
+		if (type != 'd' && type != 'f') {
+			ParseError("expected float or double array (binary)",&el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+
+		const uint32_t count2 = count / 2;
+		out.reserve(count2);
+
+		if (type != 'd') {
+			const double* d = reinterpret_cast<const double*>(&buff[0]);
+			for (unsigned int i = 0; i < count2; ++i, d += 2) {
+				out.push_back(aiVector2D(static_cast<float>(d[0]),
+					static_cast<float>(d[1])));
+			}
+		}
+		else if (type != 'f') {
+			const float* f = reinterpret_cast<const float*>(&buff[0]);
+			for (unsigned int i = 0; i < count2; ++i, f += 2) {
+				out.push_back(aiVector2D(f[0],f[1]));
+			}
+		}
+
+		return;
+	}
+
 	const size_t dim = ParseTokenAsDim(*tok[0]);
 
 	// see notes in ParseVectorDataArray() above
@@ -553,6 +821,43 @@ void ParseVectorDataArray(std::vector<int>& out, const Element& el)
 {
 	out.clear();
 	const TokenList& tok = el.Tokens();
+	if(tok.empty()) {
+		ParseError("unexpected empty element",&el);
+	}
+
+	if(tok[0]->IsBinary()) {
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if(!count) {
+			return;
+		}
+
+		if (type != 'i') {
+			ParseError("expected int array (binary)",&el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * 4);
+
+		out.reserve(count);
+
+		const uint32_t* ip = reinterpret_cast<const uint32_t*>(&buff[0]);
+		for (unsigned int i = 0; i < count; ++i, ++ip) {
+			BE_NCONST uint32_t val = *ip;
+			AI_SWAP4(val);
+			out.push_back(val);
+		}
+
+		return;
+	}
+
 	const size_t dim = ParseTokenAsDim(*tok[0]);
 
 	// see notes in ParseVectorDataArray()
@@ -574,6 +879,47 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 {
 	out.clear();
 	const TokenList& tok = el.Tokens();
+	if(tok.empty()) {
+		ParseError("unexpected empty element",&el);
+	}
+
+	if(tok[0]->IsBinary()) {
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if(!count) {
+			return;
+		}
+
+		if (type != 'd' && type != 'f') {
+			ParseError("expected float or double array (binary)",&el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
+
+		if (type != 'd') {
+			const double* d = reinterpret_cast<const double*>(&buff[0]);
+			for (unsigned int i = 0; i < count; ++i, ++d) {
+				out.push_back(static_cast<float>(*d));
+			}
+		}
+		else if (type != 'f') {
+			const float* f = reinterpret_cast<const float*>(&buff[0]);
+			for (unsigned int i = 0; i < count; ++i, ++f) {
+				out.push_back(*f);
+			}
+		}
+
+		return;
+	}
+
 	const size_t dim = ParseTokenAsDim(*tok[0]);
 
 	// see notes in ParseVectorDataArray()
@@ -595,6 +941,15 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 {
 	out.clear();
 	const TokenList& tok = el.Tokens();
+	if(tok.empty()) {
+		ParseError("unexpected empty element",&el);
+	}
+
+	if(tok[0]->IsBinary()) {
+		// XXX don't think we need this - there is no special type sign for unsigned ints in the binary encoding
+		ParseError("feature not implemented",&el);
+	}
+
 	const size_t dim = ParseTokenAsDim(*tok[0]);
 
 	// see notes in ParseVectorDataArray()
@@ -619,6 +974,43 @@ void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 {
 	out.clear();
 	const TokenList& tok = el.Tokens();
+	if(tok.empty()) {
+		ParseError("unexpected empty element",&el);
+	}
+
+	if(tok[0]->IsBinary()) {
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if(!count) {
+			return;
+		}
+
+		if (type != 'l') {
+			ParseError("expected long array (binary)",&el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * 8);
+
+		out.reserve(count);
+
+		const uint64_t* ip = reinterpret_cast<const uint64_t*>(&buff[0]);
+		for (unsigned int i = 0; i < count; ++i, ++ip) {
+			BE_NCONST uint64_t val = *ip;
+			AI_SWAP8(val);
+			out.push_back(val);
+		}
+
+		return;
+	}
+
 	const size_t dim = ParseTokenAsDim(*tok[0]);
 
 	// see notes in ParseVectorDataArray()

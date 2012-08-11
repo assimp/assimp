@@ -231,8 +231,13 @@ private:
 					// attach sub-nodes
 					ConvertNodes(model->ID(), *nodes_chain.back(), new_abs_transform);
 
-					ConvertLights(*model);
-					ConvertCameras(*model);
+					if(doc.Settings().readLights) {
+						ConvertLights(*model);
+					}
+
+					if(doc.Settings().readCameras) {
+						ConvertCameras(*model);
+					}
 
 					nodes.push_back(nodes_chain.front());	
 					nodes_chain.clear();

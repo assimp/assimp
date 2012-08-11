@@ -618,7 +618,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 		const uint32_t count3 = count / 3;
 		out.reserve(count3);
 
-		if (type != 'd') {
+		if (type == 'd') {
 			const double* d = reinterpret_cast<const double*>(&buff[0]);
 			for (unsigned int i = 0; i < count3; ++i, d += 3) {
 				out.push_back(aiVector3D(static_cast<float>(d[0]),
@@ -626,7 +626,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 					static_cast<float>(d[2])));
 			}
 		}
-		else if (type != 'f') {
+		else if (type == 'f') {
 			const float* f = reinterpret_cast<const float*>(&buff[0]);
 			for (unsigned int i = 0; i < count3; ++i, f += 3) {
 				out.push_back(aiVector3D(f[0],f[1],f[2]));
@@ -698,7 +698,7 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 		const uint32_t count4 = count / 4;
 		out.reserve(count4);
 
-		if (type != 'd') {
+		if (type == 'd') {
 			const double* d = reinterpret_cast<const double*>(&buff[0]);
 			for (unsigned int i = 0; i < count4; ++i, d += 4) {
 				out.push_back(aiColor4D(static_cast<float>(d[0]),
@@ -707,7 +707,7 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 					static_cast<float>(d[3])));
 			}
 		}
-		else if (type != 'f') {
+		else if (type == 'f') {
 			const float* f = reinterpret_cast<const float*>(&buff[0]);
 			for (unsigned int i = 0; i < count4; ++i, f += 4) {
 				out.push_back(aiColor4D(f[0],f[1],f[2],f[3]));
@@ -777,14 +777,14 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 		const uint32_t count2 = count / 2;
 		out.reserve(count2);
 
-		if (type != 'd') {
+		if (type == 'd') {
 			const double* d = reinterpret_cast<const double*>(&buff[0]);
 			for (unsigned int i = 0; i < count2; ++i, d += 2) {
 				out.push_back(aiVector2D(static_cast<float>(d[0]),
 					static_cast<float>(d[1])));
 			}
 		}
-		else if (type != 'f') {
+		else if (type == 'f') {
 			const float* f = reinterpret_cast<const float*>(&buff[0]);
 			for (unsigned int i = 0; i < count2; ++i, f += 2) {
 				out.push_back(aiVector2D(f[0],f[1]));
@@ -904,13 +904,13 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 		ai_assert(data == end);
 		ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
 
-		if (type != 'd') {
+		if (type == 'd') {
 			const double* d = reinterpret_cast<const double*>(&buff[0]);
 			for (unsigned int i = 0; i < count; ++i, ++d) {
 				out.push_back(static_cast<float>(*d));
 			}
 		}
-		else if (type != 'f') {
+		else if (type == 'f') {
 			const float* f = reinterpret_cast<const float*>(&buff[0]);
 			for (unsigned int i = 0; i < count; ++i, ++f) {
 				out.push_back(*f);

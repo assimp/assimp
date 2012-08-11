@@ -547,7 +547,9 @@ private:
 		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
 			const TransformationComp comp = static_cast<TransformationComp>(i);
 
-			if(comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation) {
+			if(comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || 
+				comp == TransformationComp_Translation) {
+
 				continue;
 			}
 
@@ -1355,7 +1357,9 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures, const std::string& propName, aiTextureType target)
+	void TrySetTextureProperties(aiMaterial* out_mat, const TextureMap& textures, 
+		const std::string& propName, 
+		aiTextureType target)
 	{
 		TextureMap::const_iterator it = textures.find(propName);
 		if(it == textures.end()) {
@@ -1464,7 +1468,8 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	aiColor3D GetColorPropertyFromMaterial(const PropertyTable& props,const std::string& baseName, bool& result)
+	aiColor3D GetColorPropertyFromMaterial(const PropertyTable& props, const std::string& baseName, 
+		bool& result)
 	{
 		result = true;
 
@@ -1743,7 +1748,9 @@ private:
 
 				// check if this curves contains redundant information by looking
 				// up the corresponding node's transformation chain.
-				if (doc.Settings().optimizeEmptyAnimationCurves && IsRedundantAnimationData(target, comp, (*chain[i]).second)) {
+				if (doc.Settings().optimizeEmptyAnimationCurves && 
+					IsRedundantAnimationData(target, comp, (*chain[i]).second)) {
+
 					FBXImporter::LogDebug("dropping redundant animation channel for node " + target.Name());
 					continue;
 				}
@@ -1827,7 +1834,9 @@ private:
 
 					// pivoting requires us to generate an implicit inverse channel to undo the pivot translation
 					if (comp == TransformationComp_RotationPivot) {
-						const std::string& invName = NameTransformationChainNode(fixed_name, TransformationComp_RotationPivotInverse);
+						const std::string& invName = NameTransformationChainNode(fixed_name, 
+							TransformationComp_RotationPivotInverse);
+
 						aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
 							target, 
 							(*chain[i]).second,
@@ -1843,7 +1852,9 @@ private:
 						flags |= bit << (TransformationComp_RotationPivotInverse - i);
 					}
 					else if (comp == TransformationComp_ScalingPivot) {
-						const std::string& invName = NameTransformationChainNode(fixed_name, TransformationComp_ScalingPivotInverse);
+						const std::string& invName = NameTransformationChainNode(fixed_name, 
+							TransformationComp_ScalingPivotInverse);
+
 						aiNodeAnim* const inv = GenerateTranslationNodeAnim(invName, 
 							target, 
 							(*chain[i]).second,
@@ -2199,7 +2210,8 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void InterpolateKeys(aiVectorKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom, 
+	void InterpolateKeys(aiVectorKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, 
+		const bool geom, 
 		double& maxTime,
 		double& minTime)
 

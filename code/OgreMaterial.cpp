@@ -148,12 +148,22 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 				}
 			}
 		}
+		//Fill the stream
 		boost::scoped_ptr<IOStream> MaterialFile(MatFilePtr);
-		vector<char> FileData(MaterialFile->FileSize());
-		MaterialFile->Read(&FileData[0], MaterialFile->FileSize(), 1);
-		BaseImporter::ConvertToUTF8(FileData);
+		if(MaterialFile->FileSize()>0)
+		{
+			vector<char> FileData(MaterialFile->FileSize());
+			MaterialFile->Read(&FileData[0], MaterialFile->FileSize(), 1);
+			BaseImporter::ConvertToUTF8(FileData);
 
-		ss << &FileData[0];
+			FileData.push_back('\0');//terminate the string with zero, so that the ss can parse it correctly
+			ss << &FileData[0];
+		}
+		else
+		{
+			DefaultLogger::get()->warn("Material " + MaterialName + " seams to be empty");
+			return NULL;
+		}
 	}
 
 	//create the material

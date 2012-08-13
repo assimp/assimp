@@ -82,7 +82,7 @@ ELSE ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 		MESSAGE( FATAL_ERROR
 			"Boost libraries (http://www.boost.org/) not found. "
 			"You can build a non-boost version of Assimp with slightly reduced "
-			"functionality by specifying -DENABLE_BOOST_WORKAROUND=ON."
+			"functionality by specifying -DASSIMP_ENABLE_BOOST_WORKAROUND=ON."
 		)
 	ENDIF ( NOT Boost_FOUND )
 

@@ -174,6 +174,11 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 	switch(type)
 	{
+		// 16 bit int
+	case 'Y':
+		cursor += 2;
+		break;
+
 		// 1 bit bool flag (yes/no)
 	case 'C':
 		cursor += 1;

@@ -542,9 +542,6 @@ private:
 	/** checks if a node has more than just scaling, rotation and translation components */
 	bool NeedsComplexTransformationChain(const Model& model)
 	{
-		// XXX TEMPORARY
-		return true;
-
 		const PropertyTable& props = model.Props();
 		bool ok;
 
@@ -652,9 +649,6 @@ private:
 			GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
 		}
 
-		// XXX TEMPORARY
-		is_complex = true;
-
 		// is_complex needs to be consistent with NeedsComplexTransformationChain()
 		// or the interplay between this code and the animation converter would
 		// not be guaranteed.
@@ -679,8 +673,7 @@ private:
 				const TransformationComp comp = static_cast<TransformationComp>(i);
 				
 				if (chain[i].IsIdentity() && (anim_chain_bitmask & bit) == 0) {
-					// XXX TEMPORARY
-					//continue;
+					continue;
 				}
 
 				aiNode* nd = new aiNode();
@@ -1785,7 +1778,8 @@ private:
 				node_property_map.end(), 
 				layer_map,
 				max_time,
-				min_time
+				min_time,
+				true // input is TRS order, assimp is SRT
 				);
 
 			ai_assert(nd);
@@ -2056,7 +2050,8 @@ private:
 		NodeMap::const_iterator iter_end,
 		const LayerMap& layer_map,
 		double& max_time,
-		double& min_time)
+		double& min_time,
+		bool reverse_order = false)
 
 	{
 		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
@@ -2064,57 +2059,98 @@ private:
 
 		const PropertyTable& props = target.Props();
 
-		// if a particular transformation is not given, grab it from
-		// the corresponding node to meet the semantics of aiNodeAnim,
-		// which requires all of rotation, scaling and translation
-		// to be set.
-		if(chain[TransformationComp_Scaling] != iter_end) {
-			ConvertScaleKeys(na, (*chain[TransformationComp_Scaling]).second, 
-				layer_map, 
-				max_time, 
-				min_time);
-		}
-		else {
-			na->mScalingKeys = new aiVectorKey[1];
-			na->mNumScalingKeys = 1;
+		if(reverse_order) {
 
-			na->mScalingKeys[0].mTime = 0.;
-			na->mScalingKeys[0].mValue = PropertyGet(props,"Lcl Scaling",
-				aiVector3D(1.f,1.f,1.f));
-		}
+			// need to convert from TRS order to SRT?
+			const KeyFrameListList& scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second);
+			const KeyFrameListList& translation = GetKeyframeList((*chain[TransformationComp_Translation]).second);
+			const KeyFrameListList& rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second);
 
-		if(chain[TransformationComp_Rotation] != iter_end) {
-			ConvertRotationKeys(na, (*chain[TransformationComp_Rotation]).second, 
-				layer_map, 
+			KeyFrameListList joined;
+			joined.insert(joined.end(), scaling.begin(), scaling.end());
+			joined.insert(joined.end(), translation.begin(), translation.end());
+			joined.insert(joined.end(), rotation.begin(), rotation.end());
+
+			const KeyTimeList& times = GetKeyTimeList(joined);
+
+			aiQuatKey* out_quat = new aiQuatKey[times.size()];
+			aiVectorKey* out_scale = new aiVectorKey[times.size()];
+			aiVectorKey* out_translation = new aiVectorKey[times.size()];
+
+			ConvertTransformOrder_TRStoSRT(out_quat, out_scale, out_translation, 
+				scaling, 
+				translation, 
+				rotation, 
+				times,
 				max_time,
 				min_time,
 				target.RotationOrder());
+
+			// XXX remove duplicates / redundant keys which this operation did
+			// likely produce if not all three channels were equally dense.
+
+			na->mNumScalingKeys = static_cast<unsigned int>(times.size());
+			na->mNumRotationKeys = na->mNumScalingKeys;
+			na->mNumPositionKeys = na->mNumScalingKeys;
+
+			na->mScalingKeys = out_scale;
+			na->mRotationKeys = out_quat;
+			na->mPositionKeys = out_translation;
 		}
 		else {
-			na->mRotationKeys = new aiQuatKey[1];
-			na->mNumRotationKeys = 1;
 
-			na->mRotationKeys[0].mTime = 0.;
-			na->mRotationKeys[0].mValue = EulerToQuaternion(
-				PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f)),
-				target.RotationOrder());
+			// if a particular transformation is not given, grab it from
+			// the corresponding node to meet the semantics of aiNodeAnim,
+			// which requires all of rotation, scaling and translation
+			// to be set.
+			if(chain[TransformationComp_Scaling] != iter_end) {
+				ConvertScaleKeys(na, (*chain[TransformationComp_Scaling]).second, 
+					layer_map, 
+					max_time, 
+					min_time);
+			}
+			else {
+				na->mScalingKeys = new aiVectorKey[1];
+				na->mNumScalingKeys = 1;
+
+				na->mScalingKeys[0].mTime = 0.;
+				na->mScalingKeys[0].mValue = PropertyGet(props,"Lcl Scaling",
+					aiVector3D(1.f,1.f,1.f));
+			}
+
+			if(chain[TransformationComp_Rotation] != iter_end) {
+				ConvertRotationKeys(na, (*chain[TransformationComp_Rotation]).second, 
+					layer_map, 
+					max_time,
+					min_time,
+					target.RotationOrder());
+			}
+			else {
+				na->mRotationKeys = new aiQuatKey[1];
+				na->mNumRotationKeys = 1;
+
+				na->mRotationKeys[0].mTime = 0.;
+				na->mRotationKeys[0].mValue = EulerToQuaternion(
+					PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f)),
+					target.RotationOrder());
+			}
+
+			if(chain[TransformationComp_Translation] != iter_end) {
+				ConvertTranslationKeys(na, (*chain[TransformationComp_Translation]).second, 
+					layer_map, 
+					max_time, 
+					min_time);
+			}
+			else {
+				na->mPositionKeys = new aiVectorKey[1];
+				na->mNumPositionKeys = 1;
+
+				na->mPositionKeys[0].mTime = 0.;
+				na->mPositionKeys[0].mValue = PropertyGet(props,"Lcl Translation",
+					aiVector3D(0.f,0.f,0.f));
+			}
+
 		}
-
-		if(chain[TransformationComp_Translation] != iter_end) {
-			ConvertTranslationKeys(na, (*chain[TransformationComp_Translation]).second, 
-				layer_map, 
-				max_time, 
-				min_time);
-		}
-		else {
-			na->mPositionKeys = new aiVectorKey[1];
-			na->mNumPositionKeys = 1;
-
-			na->mPositionKeys[0].mTime = 0.;
-			na->mPositionKeys[0].mValue = PropertyGet(props,"Lcl Translation",
-				aiVector3D(0.f,0.f,0.f));
-		}
-
 		return na.dismiss();
 	}
 
@@ -2282,7 +2318,8 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void InterpolateKeys(aiQuatKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, const bool geom,
+	void InterpolateKeys(aiQuatKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, 
+		const bool geom,
 		double& maxTime,
 		double& minTime,
 		Model::RotOrder order)
@@ -2297,6 +2334,37 @@ private:
 
 			valOut[i].mTime = temp[i].mTime;
 			valOut[i].mValue = EulerToQuaternion(temp[i].mValue, order); 
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	void ConvertTransformOrder_TRStoSRT(aiQuatKey* out_quat, aiVectorKey* out_scale,
+		aiVectorKey* out_translation, 
+		const KeyFrameListList& scaling, 
+		const KeyFrameListList& translation, 
+		const KeyFrameListList& rotation, 
+		const KeyTimeList& times,
+		double& maxTime,
+		double& minTime,
+		Model::RotOrder order)
+	{
+		InterpolateKeys(out_quat, times, rotation, false, maxTime, minTime, order);
+		InterpolateKeys(out_scale, times, scaling, true, maxTime, minTime);
+		InterpolateKeys(out_translation, times, translation, false, maxTime, minTime);
+
+		const size_t count = times.size();
+		for (size_t i = 0; i < count; ++i) {
+			aiQuaternion& r = out_quat[i].mValue;
+			aiVector3D& s = out_scale[i].mValue;
+			aiVector3D& t = out_translation[i].mValue;
+
+			aiMatrix4x4 mat, temp;
+			aiMatrix4x4::Translation(t, mat);
+			mat *= aiMatrix4x4( r.GetMatrix() );
+			mat *= aiMatrix4x4::Scaling(s, temp);
+
+			mat.Decompose(s, r, t);
 		}
 	}
 

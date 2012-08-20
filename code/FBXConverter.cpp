@@ -2059,12 +2059,37 @@ private:
 
 		const PropertyTable& props = target.Props();
 
+		// need to convert from TRS order to SRT?
 		if(reverse_order) {
+		
+			aiVector3D def_scale, def_translate;
+			aiQuaternion def_rot;
 
-			// need to convert from TRS order to SRT?
-			const KeyFrameListList& scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second);
-			const KeyFrameListList& translation = GetKeyframeList((*chain[TransformationComp_Translation]).second);
-			const KeyFrameListList& rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second);
+			KeyFrameListList scaling;
+			KeyFrameListList translation;
+			KeyFrameListList rotation;
+			
+			if(chain[TransformationComp_Scaling] != iter_end) {
+				scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second);
+			}
+			else {
+				def_scale = PropertyGet(props,"Lcl Scaling",aiVector3D(1.f,1.f,1.f));
+			}
+
+			if(chain[TransformationComp_Translation] != iter_end) {
+				translation = GetKeyframeList((*chain[TransformationComp_Translation]).second);
+			}
+			else {
+				def_translate = PropertyGet(props,"Lcl Translation",aiVector3D(0.f,0.f,0.f));
+			}
+			
+			if(chain[TransformationComp_Rotation] != iter_end) {
+				rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second);
+			}
+			else {
+				def_rot = EulerToQuaternion(PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f)),
+					target.RotationOrder());
+			}
 
 			KeyFrameListList joined;
 			joined.insert(joined.end(), scaling.begin(), scaling.end());
@@ -2084,7 +2109,10 @@ private:
 				times,
 				max_time,
 				min_time,
-				target.RotationOrder());
+				target.RotationOrder(),
+				def_scale,
+				def_translate,
+				def_rot);
 
 			// XXX remove duplicates / redundant keys which this operation did
 			// likely produce if not all three channels were equally dense.
@@ -2347,11 +2375,40 @@ private:
 		const KeyTimeList& times,
 		double& maxTime,
 		double& minTime,
-		Model::RotOrder order)
+		Model::RotOrder order,
+		const aiVector3D& def_scale,
+		const aiVector3D& def_translate,
+		const aiQuaternion& def_rotation)
 	{
-		InterpolateKeys(out_quat, times, rotation, false, maxTime, minTime, order);
-		InterpolateKeys(out_scale, times, scaling, true, maxTime, minTime);
-		InterpolateKeys(out_translation, times, translation, false, maxTime, minTime);
+		if (rotation.size()) {
+			InterpolateKeys(out_quat, times, rotation, false, maxTime, minTime, order);
+		}
+		else {
+			for (size_t i = 0; i < times.size(); ++i) {
+				out_quat[i].mTime = times[i];
+				out_quat[i].mValue = def_rotation;
+			}
+		}
+
+		if (scaling.size()) {
+			InterpolateKeys(out_scale, times, scaling, true, maxTime, minTime);
+		}
+		else {
+			for (size_t i = 0; i < times.size(); ++i) {
+				out_scale[i].mTime = times[i];
+				out_scale[i].mValue = def_scale;
+			}
+		}
+
+		if (translation.size()) {
+			InterpolateKeys(out_translation, times, translation, false, maxTime, minTime);
+		}
+		else {
+			for (size_t i = 0; i < times.size(); ++i) {
+				out_translation[i].mTime = times[i];
+				out_translation[i].mValue = def_translate;
+			}
+		}
 
 		const size_t count = times.size();
 		for (size_t i = 0; i < count; ++i) {

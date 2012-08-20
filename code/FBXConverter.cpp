@@ -61,6 +61,7 @@ namespace FBX {
 
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
+#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158
 
 	// XXX vc9's debugger won't step into anonymous namespaces
 //namespace {
@@ -2331,7 +2332,7 @@ private:
 			}
 
 			// magic value to convert fbx times to milliseconds
-			valOut->mTime = static_cast<double>(time) / 46186158;
+			valOut->mTime = CONVERT_FBX_TIME(time);
 
 			minTime = std::min(minTime, valOut->mTime);
 			maxTime = std::max(maxTime, valOut->mTime);
@@ -2385,7 +2386,7 @@ private:
 		}
 		else {
 			for (size_t i = 0; i < times.size(); ++i) {
-				out_quat[i].mTime = times[i];
+				out_quat[i].mTime = CONVERT_FBX_TIME(times[i]);
 				out_quat[i].mValue = def_rotation;
 			}
 		}
@@ -2395,7 +2396,7 @@ private:
 		}
 		else {
 			for (size_t i = 0; i < times.size(); ++i) {
-				out_scale[i].mTime = times[i];
+				out_scale[i].mTime = CONVERT_FBX_TIME(times[i]);
 				out_scale[i].mValue = def_scale;
 			}
 		}
@@ -2405,7 +2406,7 @@ private:
 		}
 		else {
 			for (size_t i = 0; i < times.size(); ++i) {
-				out_translation[i].mTime = times[i];
+				out_translation[i].mTime = CONVERT_FBX_TIME(times[i]);
 				out_translation[i].mValue = def_translate;
 			}
 		}

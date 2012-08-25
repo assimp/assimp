@@ -216,6 +216,22 @@ Object::~Object()
 
 
 // ------------------------------------------------------------------------------------------------
+FileGlobalSettings::FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props)
+: doc(doc)
+, props(props)
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+FileGlobalSettings::~FileGlobalSettings()
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
 Document::Document(const Parser& parser, const ImportSettings& settings)
 : settings(settings)
 , parser(parser)
@@ -227,6 +243,8 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 
 	ReadHeader();
 	ReadPropertyTemplates();
+
+	ReadGlobalSettings();
 
 	// this order is important, connections need parsed objects to check
 	// whether connections are ok or not. Objects may not be evaluated yet,
@@ -281,6 +299,25 @@ void Document::ReadHeader()
 		creationTimeStamp[5] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Second"),0));
 		creationTimeStamp[6] = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(stimestamp,"Millisecond"),0));
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void Document::ReadGlobalSettings()
+{
+	const Scope& sc = parser.GetRootScope();
+	const Element* const ehead = sc["GlobalSettings"];
+	if(!ehead || !ehead->Compound()) {
+		DOMError("no GlobalSettings dictionary found");
+	}
+
+	const Element* Properties70 = (*ehead->Compound())["Properties70"];
+	if(!Properties70) {
+		DOMError("GlobalSettings dictionary contains no property table");
+	}
+
+	globals.reset(new FileGlobalSettings(*this, boost::make_shared<const PropertyTable>(
+		*Properties70,boost::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
+	)));
 }
 
 
@@ -456,7 +493,8 @@ LazyObject* Document::GetObject(uint64_t id) const
 #define MAX_CLASSNAMES 6
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, const ConnectionMap& conns) const
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, 
+	const ConnectionMap& conns) const
 {
 	std::vector<const Connection*> temp;
 
@@ -475,7 +513,11 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, co
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src, const ConnectionMap& conns, const char* const* classnames, size_t count) const
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src, 
+	const ConnectionMap& conns, 
+	const char* const* classnames, 
+	size_t count) const
+
 {
 	ai_assert(classnames);
 	ai_assert(count != 0 && count <= MAX_CLASSNAMES);
@@ -530,7 +572,8 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t dest, const char* classname) const
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t dest, 
+	const char* classname) const
 {
 	const char* arr[] = {classname};
 	return GetConnectionsBySourceSequenced(dest, arr,1);
@@ -539,14 +582,16 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, const char* const* classnames, size_t count) const
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, 
+	const char* const* classnames, size_t count) const
 {
 	return GetConnectionsSequenced(source, true, ConnectionsBySource(),classnames, count);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, const char* classname) const
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, 
+	const char* classname) const
 {
 	const char* arr[] = {classname};
 	return GetConnectionsByDestinationSequenced(dest, arr,1);
@@ -561,14 +606,18 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, const char* const* classnames, size_t count) const
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, 
+	const char* const* classnames, size_t count) const
+
 {
 	return GetConnectionsSequenced(dest, false, ConnectionsByDestination(),classnames, count);
 }
 
 
 // ------------------------------------------------------------------------------------------------
-Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, const Document& doc)
+Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, 
+	const Document& doc)
+
 : insertionOrder(insertionOrder)
 , prop(prop)
 , src(src)

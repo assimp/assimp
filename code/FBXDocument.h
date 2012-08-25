@@ -1099,6 +1099,77 @@ public:
 	typedef std::multimap<uint64_t, const Connection*> ConnectionMap;
 
 
+/** DOM class for global document settings, a single instance per document can
+ *  be accessed via Document.Globals(). */
+class FileGlobalSettings
+{
+public:
+
+	FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props);
+	~FileGlobalSettings();
+
+public:
+
+	const PropertyTable& Props() const {
+		ai_assert(props.get());
+		return *props.get();
+	}
+
+	const Document& GetDocument() const {
+		return doc;
+	}
+
+
+	fbx_simple_property(UpAxis, int, 1);
+	fbx_simple_property(UpAxisSign, int, 1);
+	fbx_simple_property(FrontAxis, int, 2);
+	fbx_simple_property(FrontAxisSign, int, 1);
+	fbx_simple_property(CoordAxis, int, 0);
+	fbx_simple_property(CoordAxisSign, int, 1);
+	fbx_simple_property(OriginalUpAxis, int, 0);
+	fbx_simple_property(OriginalUpAxisSign, int, 1);
+	fbx_simple_property(UnitScaleFactor, double, 1);
+	fbx_simple_property(OriginalUnitScaleFactor, double, 1);
+	fbx_simple_property(AmbientColor, aiVector3D, aiVector3D(0,0,0));
+	fbx_simple_property(DefaultCamera, std::string, "");
+
+
+	enum FrameRate {
+		FrameRate_DEFAULT = 0,
+		FrameRate_120 = 1,
+		FrameRate_100 = 2,
+		FrameRate_60 = 3,
+		FrameRate_50 = 4,
+		FrameRate_48 = 5,
+		FrameRate_30 = 6,
+		FrameRate_30_DROP = 7,
+		FrameRate_NTSC_DROP_FRAME = 8,
+		FrameRate_NTSC_FULL_FRAME = 9,
+		FrameRate_PAL = 10,
+		FrameRate_CINEMA = 11,
+		FrameRate_1000 = 12,
+		FrameRate_CINEMA_ND = 13,
+		FrameRate_CUSTOM = 14,
+		FrameRate_TIME_MODE_COUNT = 15,
+
+		FrameRate_MAX// end-of-enum sentinel
+	};
+
+	fbx_simple_enum_property(TimeMode, FrameRate, FrameRate_DEFAULT);
+	fbx_simple_property(TimeSpanStart, uint64_t, 0L);
+	fbx_simple_property(TimeSpanStop, uint64_t, 0L);
+	fbx_simple_property(CustomFrameRate, float, -1.0f);
+
+
+private:
+
+	boost::shared_ptr<const PropertyTable> props;
+	const Document& doc;
+};
+
+
+
+
 /** DOM root for a FBX file */
 class Document 
 {
@@ -1126,6 +1197,11 @@ public:
 	// elements (in this order): Uear, Month, Day, Hour, Second, Millisecond
 	const unsigned int* CreationTimeStamp() const {
 		return creationTimeStamp;
+	}
+
+	const FileGlobalSettings& GlobalSettings() const {
+		ai_assert(globals.get());
+		return *globals.get();
 	}
 
 	const PropertyTemplateMap& Templates() const {
@@ -1182,6 +1258,7 @@ private:
 	void ReadObjects();
 	void ReadPropertyTemplates();
 	void ReadConnections();
+	void ReadGlobalSettings();
 
 private:
 
@@ -1200,6 +1277,8 @@ private:
 
 	std::vector<uint64_t> animationStacks;
 	mutable std::vector<const AnimationStack*> animationStacksResolved;
+
+	boost::scoped_ptr<FileGlobalSettings> globals;
 };
 
 }

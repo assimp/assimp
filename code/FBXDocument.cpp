@@ -87,6 +87,14 @@ const Object* LazyObject::Get(bool dieOnError)
 		return object.get();
 	}
 
+	// if this is the root object, we return a dummy since there
+	// is no root object int he fbx file - it is just referenced
+	// with id 0.
+	if(id == 0L) {
+		object.reset(new Object(id, element, "Model::RootNode"));
+		return object.get();
+	}
+
 	const Token& key = element.KeyToken();
 	const TokenList& tokens = element.Tokens();
 
@@ -331,6 +339,10 @@ void Document::ReadObjects()
 		DOMError("no Objects dictionary found");
 	}
 
+	// add a dummy entry to represent the Model::RootNode object (id 0),
+	// which is only indirectly defined in the input file
+	objects[0] = new LazyObject(0L, *eobjects, *this);
+
 	const Scope& sobjects = *eobjects->Compound();
 	BOOST_FOREACH(const ElementMap::value_type& el, sobjects.Elements()) {
 		
@@ -348,10 +360,19 @@ void Document::ReadObjects()
 			DOMError(err,el.second);
 		}
 
+		// id=0 is normally implicit
+		if(id == 0L) {
+			DOMError("encountered object with implicitly defined id 0",el.second);
+		}
+
+		if(objects.find(id) != objects.end()) {
+			DOMWarning("encountered duplicate object id, ignoring first occurrence",el.second);
+		}
+
 		objects[id] = new LazyObject(id, *el.second, *this);
 
 		// grab all animation stacks upfront since there is no listing of them
-		if(el.first == "AnimationStack") {
+		if(!strcmp(el.first.c_str(),"AnimationStack")) {
 			animationStacks.push_back(id);
 		}
 	}
@@ -447,8 +468,8 @@ void Document::ReadConnections()
 			continue;
 		}
 
-		// dest may be 0 (root node)
-		if(dest && objects.find(dest) == objects.end()) {
+		// dest may be 0 (root node) but we added a dummy object before
+		if(objects.find(dest) == objects.end()) {
 			DOMWarning("destination object for connection does not exist",&el);
 			continue;
 		}

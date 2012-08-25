@@ -134,6 +134,22 @@ void Model::ResolveLinks(const Element& element, const Document& doc)
 }
 
 
+// ------------------------------------------------------------------------------------------------
+bool Model::IsNull() const
+{
+	const std::vector<const NodeAttribute*>& attrs = GetAttributes();
+	BOOST_FOREACH(const NodeAttribute* att, attrs) {
+		
+		const Null* null_tag = dynamic_cast<const Null*>(att);
+		if(null_tag) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 } //!FBX
 } //!Assimp
 

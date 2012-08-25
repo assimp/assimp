@@ -61,6 +61,8 @@ namespace FBX {
 
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
+#define MAGIC_NULL_TAG "_$AssimpFbxNull$"
+
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
 	// XXX vc9's debugger won't step into anonymous namespaces
@@ -204,16 +206,17 @@ private:
 					// is supposed to have. If there is none, add another node to 
 					// preserve the name - people might have scripts etc. that rely
 					// on specific node names.
-					bool has_name = false;
+					aiNode* name_carrier = NULL;
 					BOOST_FOREACH(aiNode* prenode, nodes_chain) {
 						if ( !strcmp(prenode->mName.C_Str(), original_name.c_str()) ) {
-							has_name = true;
+							name_carrier = prenode;
 							break;
 						}
 					}
 
-					if(!has_name) {
+					if(!name_carrier) {
 						nodes_chain.push_back(new aiNode(original_name));
+						name_carrier = nodes_chain.back();
 					}
 
 					// link all nodes in a row
@@ -245,6 +248,14 @@ private:
 
 					if(doc.Settings().readCameras) {
 						ConvertCameras(*model);
+					}
+
+					// preserve the info that a node was marked as Null node
+					// in the original file.
+					if(model->IsNull()) {
+						const std::string& new_name = original_name + MAGIC_NULL_TAG;
+						RenameNode(original_name, new_name);
+						name_carrier->mName.Set( new_name.c_str() );
 					}
 
 					nodes.push_back(nodes_chain.front());	
@@ -1620,6 +1631,54 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
+	// rename a node already partially converted. fixed_name is a string previously returned by 
+	// FixNodeName, new_name specifies the string FixNodeName should return on all further invocations 
+	// which would previously have returned the old value.
+	//
+	// this also updates names in node animations, cameras and light sources and is thus slow.
+	//
+	// NOTE: the caller is responsible for ensuring that the new name is unique and does
+	// not collide with any other identifiers. The best way to ensure this is to only
+	// append to the old name, which is guaranteed to match these requirements.
+	void RenameNode(const std::string& fixed_name, const std::string& new_name)
+	{
+		ai_assert(node_names.find(fixed_name) != node_names.end());
+		ai_assert(node_names.find(new_name) == node_names.end());
+
+		renamed_nodes[fixed_name] = new_name;
+
+		const aiString fn(fixed_name);
+
+		BOOST_FOREACH(aiCamera* cam, cameras) {
+			if (cam->mName == fn) {
+				cam->mName.Set(new_name);
+				break;
+			}
+		}
+
+		BOOST_FOREACH(aiLight* light, lights) {
+			if (light->mName == fn) {
+				light->mName.Set(new_name);
+				break;
+			}
+		}
+
+		BOOST_FOREACH(aiAnimation* anim, animations) {
+			for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
+				aiNodeAnim* const na = anim->mChannels[i];
+				if (na->mNodeName == fn) {
+					na->mNodeName.Set(new_name);
+					break;
+				}
+			}
+		}
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
+	// takes a fbx node name and returns the identifier to be used in the assimp output scene.
+	// the function is guaranteed to provide consistent results over multiple invocations
+	// UNLESS RenameNode() is called for a particular node name.
 	std::string FixNodeName(const std::string& name)
 	{
 		// strip Model:: prefix, avoiding ambiguities (i.e. don't strip if 
@@ -1636,7 +1695,9 @@ private:
 				}
 			}
 			node_names[temp] = true;
-			return temp;
+
+			const NameNameMap::const_iterator rit = renamed_nodes.find(temp);
+			return rit == renamed_nodes.end() ? temp : (*rit).second;
 		}
 
 		const NodeNameMap::const_iterator it = node_names.find(name);
@@ -1646,7 +1707,9 @@ private:
 			}
 		}
 		node_names[name] = false;
-		return name;
+
+		const NameNameMap::const_iterator rit = renamed_nodes.find(name);
+		return rit == renamed_nodes.end() ? name : (*rit).second;
 	}
 
 
@@ -2630,6 +2693,9 @@ private:
 	// name -> has had its prefix_stripped?
 	typedef std::map<std::string, bool> NodeNameMap;
 	NodeNameMap node_names;
+
+	typedef std::map<std::string, std::string> NameNameMap;
+	NameNameMap renamed_nodes;
 
 	double anim_fps;
 

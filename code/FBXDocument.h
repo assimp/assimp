@@ -485,6 +485,12 @@ public:
 		return attributes;
 	}
 
+public:
+
+	/** convenience method to check if the node has a Null node marker */
+	bool IsNull() const;
+
+
 private:
 
 	void ResolveLinks(const Element& element, const Document& doc);

@@ -124,6 +124,13 @@ public:
 		}
 
 		TransferDataToScene();
+
+		// if we didn't read any meshes set the AI_SCENE_FLAGS_INCOMPLETE
+		// to make sure the scene passes assimp's validation. FBX files
+		// need not contain geometry (i.e. camera animations, raw armatures).
+		if (out->mNumMeshes == 0) {
+			out->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+		}
 	}
 
 
@@ -2561,11 +2568,13 @@ private:
 		// note: the trailing () ensures initialization with NULL - not
 		// many C++ users seem to know this, so pointing it out to avoid
 		// confusion why this code works.
-		out->mMeshes = new aiMesh*[meshes.size()]();
-		out->mNumMeshes = static_cast<unsigned int>(meshes.size());
 
-		std::swap_ranges(meshes.begin(),meshes.end(),out->mMeshes);
+		if(meshes.size()) {
+			out->mMeshes = new aiMesh*[meshes.size()]();
+			out->mNumMeshes = static_cast<unsigned int>(meshes.size());
 
+			std::swap_ranges(meshes.begin(),meshes.end(),out->mMeshes);
+		}
 
 		if(materials.size()) {
 			out->mMaterials = new aiMaterial*[materials.size()]();

@@ -915,6 +915,13 @@ public:
 
 public:
 
+	fbx_simple_property(LocalStart, uint64_t, 0L);
+	fbx_simple_property(LocalStop, uint64_t, 0L);
+	fbx_simple_property(ReferenceStart, uint64_t, 0L);
+	fbx_simple_property(ReferenceStop, uint64_t, 0L);
+
+
+
 	const PropertyTable& Props() const {
 		ai_assert(props.get());
 		return *props.get();

@@ -318,14 +318,13 @@ void Document::ReadGlobalSettings()
 		DOMError("no GlobalSettings dictionary found");
 	}
 
-	const Element* Properties70 = (*ehead->Compound())["Properties70"];
-	if(!Properties70) {
+	boost::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);
+
+	if(!props) {
 		DOMError("GlobalSettings dictionary contains no property table");
 	}
 
-	globals.reset(new FileGlobalSettings(*this, boost::make_shared<const PropertyTable>(
-		*Properties70,boost::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
-	)));
+	globals.reset(new FileGlobalSettings(*this, props));
 }
 
 

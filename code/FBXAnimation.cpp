@@ -103,7 +103,7 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 , target()
 {
 	const Scope& sc = GetRequiredScope(element);
-	props = GetPropertyTable(doc,"AnimationCurveNode.FbxAnimCurveNode",element,sc);
+	props = GetPropertyTable(doc,"AnimationCurveNode.FbxAnimCurveNode",element,sc,false);
 
 	{
 	// resolve attached animation curves
@@ -179,7 +179,9 @@ AnimationLayer::AnimationLayer(uint64_t id, const Element& element, const std::s
 : Object(id, element, name)
 {
 	const Scope& sc = GetRequiredScope(element);
-	props = GetPropertyTable(doc,"AnimationLayer.FbxAnimLayer",element,sc);
+
+	// note: the props table here bears little importance and is usually absent
+	props = GetPropertyTable(doc,"AnimationLayer.FbxAnimLayer",element,sc, true);
 
 	// resolve attached animation nodes
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurveNode");
@@ -219,7 +221,9 @@ AnimationStack::AnimationStack(uint64_t id, const Element& element, const std::s
 : Object(id, element, name)
 {
 	const Scope& sc = GetRequiredScope(element);
-	props = GetPropertyTable(doc,"AnimationStack.FbxAnimStack",element,sc);
+
+	// note: we don't currently use any of these properties so we shouldn't bother if it is missing
+	props = GetPropertyTable(doc,"AnimationStack.FbxAnimStack",element,sc, true);
 
 	// resolve attached animation layers
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationLayer");

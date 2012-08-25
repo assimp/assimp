@@ -99,7 +99,8 @@ void DOMWarning(const std::string& message, const Element* element /*= NULL*/)
 boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
 	const std::string& templateName, 
 	const Element &element, 
-	const Scope& sc)
+	const Scope& sc,
+	bool no_warn /*= false*/)
 {
 	const Element* const Properties70 = sc["Properties70"];
 	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(
@@ -113,7 +114,9 @@ boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
 	}
 
 	if(!Properties70) {
-		DOMWarning("material property table (Properties70) not found",&element);
+		if(!no_warn) {
+			DOMWarning("property table (Properties70) not found",&element);
+		}
 		if(templateProps) {
 			return templateProps;
 		}

@@ -1150,7 +1150,6 @@ public:
 		FrameRate_1000 = 12,
 		FrameRate_CINEMA_ND = 13,
 		FrameRate_CUSTOM = 14,
-		FrameRate_TIME_MODE_COUNT = 15,
 
 		FrameRate_MAX// end-of-enum sentinel
 	};

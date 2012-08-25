@@ -1545,9 +1545,66 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
+	// get the number of fps for a FrameRate enumerated value
+	static double FrameRateToDouble(FileGlobalSettings::FrameRate fp, double customFPSVal = -1.0)
+	{
+		switch(fp) {
+			case FileGlobalSettings::FrameRate_DEFAULT:
+				return 1.0;
+
+			case FileGlobalSettings::FrameRate_120:
+				return 120.0;
+
+			case FileGlobalSettings::FrameRate_100:
+				return 100.0;
+
+			case FileGlobalSettings::FrameRate_60:
+				return 60.0;
+
+			case FileGlobalSettings::FrameRate_50:
+				return 50.0;
+
+			case FileGlobalSettings::FrameRate_48:
+				return 48.0;
+
+			case FileGlobalSettings::FrameRate_30:
+			case FileGlobalSettings::FrameRate_30_DROP:
+				return 30.0;
+
+			case FileGlobalSettings::FrameRate_NTSC_DROP_FRAME:
+			case FileGlobalSettings::FrameRate_NTSC_FULL_FRAME:
+				return 29.9700262;
+
+			case FileGlobalSettings::FrameRate_PAL:
+				return 25.0;
+
+			case FileGlobalSettings::FrameRate_CINEMA:
+				return 24.0;
+
+			case FileGlobalSettings::FrameRate_1000:
+				return 1000.0;
+
+			case FileGlobalSettings::FrameRate_CINEMA_ND:
+				return 23.976;
+
+			case FileGlobalSettings::FrameRate_CUSTOM:
+				return customFPSVal;
+		}
+
+		ai_assert(false);
+		return -1.0f;
+	}
+
+
+	// ------------------------------------------------------------------------------------------------
 	// convert animation data to aiAnimation et al
 	void ConvertAnimations() 
 	{
+		// first of all determine framerate
+		const FileGlobalSettings::FrameRate fps = doc.GlobalSettings().TimeMode();
+		const float custom = doc.GlobalSettings().CustomFrameRate();
+		anim_fps = FrameRateToDouble(fps, custom);
+
 		const std::vector<const AnimationStack*>& animations = doc.AnimationStacks();
 		BOOST_FOREACH(const AnimationStack* stack, animations) {
 			ConvertAnimationStack(*stack);
@@ -1677,7 +1734,7 @@ private:
 		// for some mysterious reason, mDuration is simply the maximum key -- the
 		// validator always assumes animations to start at zero.
 		anim->mDuration = max_time /*- min_time */;
-		anim->mTicksPerSecond = 1.0;
+		anim->mTicksPerSecond = anim_fps;
 	}
 
 
@@ -2282,8 +2339,8 @@ private:
 	// ------------------------------------------------------------------------------------------------
 	void InterpolateKeys(aiVectorKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs, 
 		const bool geom, 
-		double& maxTime,
-		double& minTime)
+		double& max_time,
+		double& min_time)
 
 	{
 		ai_assert(keys.size());
@@ -2331,11 +2388,11 @@ private:
 				}
 			}
 
-			// magic value to convert fbx times to milliseconds
-			valOut->mTime = CONVERT_FBX_TIME(time);
+			// magic value to convert fbx times to seconds
+			valOut->mTime = CONVERT_FBX_TIME(time) * anim_fps;
 
-			minTime = std::min(minTime, valOut->mTime);
-			maxTime = std::max(maxTime, valOut->mTime);
+			min_time = std::min(min_time, valOut->mTime);
+			max_time = std::max(max_time, valOut->mTime);
 
 			valOut->mValue.x = result[0];
 			valOut->mValue.y = result[1];
@@ -2386,7 +2443,7 @@ private:
 		}
 		else {
 			for (size_t i = 0; i < times.size(); ++i) {
-				out_quat[i].mTime = CONVERT_FBX_TIME(times[i]);
+				out_quat[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
 				out_quat[i].mValue = def_rotation;
 			}
 		}
@@ -2396,7 +2453,7 @@ private:
 		}
 		else {
 			for (size_t i = 0; i < times.size(); ++i) {
-				out_scale[i].mTime = CONVERT_FBX_TIME(times[i]);
+				out_scale[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
 				out_scale[i].mValue = def_scale;
 			}
 		}
@@ -2406,7 +2463,7 @@ private:
 		}
 		else {
 			for (size_t i = 0; i < times.size(); ++i) {
-				out_translation[i].mTime = CONVERT_FBX_TIME(times[i]);
+				out_translation[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
 				out_translation[i].mValue = def_translate;
 			}
 		}
@@ -2565,6 +2622,7 @@ private:
 	typedef std::map<std::string, bool> NodeNameMap;
 	NodeNameMap node_names;
 
+	double anim_fps;
 
 	aiScene* const out;
 	const FBX::Document& doc;

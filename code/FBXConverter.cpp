@@ -61,7 +61,7 @@ namespace FBX {
 
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
-#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158
+#define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
 	// XXX vc9's debugger won't step into anonymous namespaces
 //namespace {
@@ -1677,7 +1677,7 @@ private:
 		// for some mysterious reason, mDuration is simply the maximum key -- the
 		// validator always assumes animations to start at zero.
 		anim->mDuration = max_time /*- min_time */;
-		anim->mTicksPerSecond = 1000.0;
+		anim->mTicksPerSecond = 1.0;
 	}
 
 

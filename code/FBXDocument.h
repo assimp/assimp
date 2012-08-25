@@ -261,6 +261,16 @@ private:
 };
 
 
+/** DOM base class for FBX null markers attached to a node */
+class Null : public NodeAttribute
+{
+public:
+
+	Null(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~Null();
+};
+
+
 /** DOM base class for FBX lights attached to a node */
 class Light : public NodeAttribute
 {

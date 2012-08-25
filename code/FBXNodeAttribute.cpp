@@ -64,7 +64,12 @@ NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document
 	const Scope& sc = GetRequiredScope(element);
 
 	const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
-	props = GetPropertyTable(doc,"NodeAttribute.Fbx" + classname,element,sc);
+
+	// hack on the deriving type but Null attributes are the only case in which
+	// the property table is by design absent and no warning should be generated
+	// for it.
+	const bool is_null = !strcmp(classname.c_str(), "Null");
+	props = GetPropertyTable(doc,"NodeAttribute.Fbx" + classname,element,sc, is_null);
 }
 
 
@@ -130,6 +135,21 @@ Light::Light(uint64_t id, const Element& element, const Document& doc, const std
 // ------------------------------------------------------------------------------------------------
 Light::~Light()
 {
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Null::Null(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: NodeAttribute(id,element,doc,name)
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+Null::~Null()
+{
+
 }
 
 }

@@ -1797,7 +1797,7 @@ private:
 			// empty animations would fail validation, so drop them
 			delete anim;
 			animations.pop_back();
-			FBXImporter::LogInfo("ignoring empty AnimationStack: " + name);
+			FBXImporter::LogInfo("ignoring empty AnimationStack (using IK?): " + name);
 			return;
 		}
 

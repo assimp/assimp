@@ -162,7 +162,7 @@ const Object* LazyObject::Get(bool dieOnError)
 			}
 		}
 		else if (!strncmp(obtype,"Model",length)) {
-			// do not load IKEffectors yet
+			// FK and IK effectors are not supported
 			if (strcmp(classtag.c_str(),"IKEffector") && strcmp(classtag.c_str(),"FKEffector")) {
 				object.reset(new Model(id,element,doc,name));
 			}
@@ -318,7 +318,10 @@ void Document::ReadGlobalSettings()
 	const Scope& sc = parser.GetRootScope();
 	const Element* const ehead = sc["GlobalSettings"];
 	if(!ehead || !ehead->Compound()) {
-		DOMError("no GlobalSettings dictionary found");
+		DOMWarning("no GlobalSettings dictionary found");
+
+		globals.reset(new FileGlobalSettings(*this, boost::make_shared<const PropertyTable>()));
+		return;
 	}
 
 	boost::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);

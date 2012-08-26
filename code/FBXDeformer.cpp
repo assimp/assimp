@@ -64,7 +64,7 @@ Deformer::Deformer(uint64_t id, const Element& element, const Document& doc, con
 	const Scope& sc = GetRequiredScope(element);
 
 	const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
-	props = GetPropertyTable(doc,"Deformer.Fbx" + classname,element,sc);
+	props = GetPropertyTable(doc,"Deformer.Fbx" + classname,element,sc,true);
 }
 
 

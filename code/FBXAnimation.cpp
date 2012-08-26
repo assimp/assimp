@@ -98,41 +98,14 @@ AnimationCurve::~AnimationCurve()
 
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc)
+AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc, 
+	const char* const * target_prop_whitelist /*= NULL*/, size_t whitelist_size /*= 0*/)
 : Object(id, element, name)
 , target()
+, doc(doc)
 {
 	const Scope& sc = GetRequiredScope(element);
-	props = GetPropertyTable(doc,"AnimationCurveNode.FbxAnimCurveNode",element,sc,false);
-
-	{
-	// resolve attached animation curves
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurve");
-
-	BOOST_FOREACH(const Connection* con, conns) {
-
-		// link should go for a property
-		if (!con->PropertyName().length()) {
-			continue;
-		}
-
-		const Object* const ob = con->SourceObject();
-		if(!ob) {
-			DOMWarning("failed to read source object for AnimationCurve->AnimationCurveNode link, ignoring",&element);
-			continue;
-		}
-
-		const AnimationCurve* const anim = dynamic_cast<const AnimationCurve*>(ob);
-		if(!anim) {
-			DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve",&element);
-			continue;
-		}
-		
-		curves[con->PropertyName()] = anim;
-	}
-
-	}{
-
+	
 	// find target node
 	const char* whitelist[] = {"Model","NodeAttribute"};
 	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),whitelist,2);
@@ -142,6 +115,21 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 		// link should go for a property
 		if (!con->PropertyName().length()) {
 			continue;
+		}
+
+		if(target_prop_whitelist) {
+			const char* const s = con->PropertyName().c_str();
+			bool ok = false;
+			for (size_t i = 0; i < whitelist_size; ++i) {
+				if (!strcmp(s, target_prop_whitelist[i])) {
+					ok = true;
+					break;
+				}
+			}
+
+			if (!ok) {
+				throw std::range_error("AnimationCurveNode target property is not in whitelist");
+			}
 		}
 
 		const Object* const ob = con->DestinationObject();
@@ -160,10 +148,12 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 		prop = con->PropertyName();
 		break;
 	}
-	}
+
 	if(!target) {
 		DOMWarning("failed to resolve target Model/NodeAttribute/Constraint for AnimationCurveNode",&element);
 	}
+
+	props = GetPropertyTable(doc,"AnimationCurveNode.FbxAnimCurveNode",element,sc,false);
 }
 
 
@@ -175,13 +165,63 @@ AnimationCurveNode::~AnimationCurveNode()
 
 
 // ------------------------------------------------------------------------------------------------
+const AnimationCurveMap& AnimationCurveNode::Curves() const
+{
+	if(curves.empty()) {
+		// resolve attached animation curves
+		const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurve");
+
+		BOOST_FOREACH(const Connection* con, conns) {
+
+			// link should go for a property
+			if (!con->PropertyName().length()) {
+				continue;
+			}
+
+			const Object* const ob = con->SourceObject();
+			if(!ob) {
+				DOMWarning("failed to read source object for AnimationCurve->AnimationCurveNode link, ignoring",&element);
+				continue;
+			}
+
+			const AnimationCurve* const anim = dynamic_cast<const AnimationCurve*>(ob);
+			if(!anim) {
+				DOMWarning("source object for ->AnimationCurveNode link is not an AnimationCurve",&element);
+				continue;
+			}
+
+			curves[con->PropertyName()] = anim;
+		}
+	}
+
+	return curves;
+}
+
+
+// ------------------------------------------------------------------------------------------------
 AnimationLayer::AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc)
 : Object(id, element, name)
+, doc(doc)
 {
 	const Scope& sc = GetRequiredScope(element);
 
 	// note: the props table here bears little importance and is usually absent
 	props = GetPropertyTable(doc,"AnimationLayer.FbxAnimLayer",element,sc, true);
+}
+
+
+// ------------------------------------------------------------------------------------------------
+AnimationLayer::~AnimationLayer()
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+AnimationCurveNodeList AnimationLayer::Nodes(const char* const * target_prop_whitelist /*= NULL*/, 
+	size_t whitelist_size /*= 0*/) const
+{
+	AnimationCurveNodeList nodes;
 
 	// resolve attached animation nodes
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurveNode");
@@ -205,15 +245,24 @@ AnimationLayer::AnimationLayer(uint64_t id, const Element& element, const std::s
 			DOMWarning("source object for ->AnimationLayer link is not an AnimationCurveNode",&element);
 			continue;
 		}
+
+		if(target_prop_whitelist) {
+			const char* s = anim->TargetProperty().c_str();
+			bool ok = false;
+			for (size_t i = 0; i < whitelist_size; ++i) {
+				if (!strcmp(s, target_prop_whitelist[i])) {
+					ok = true;
+					break;
+				}
+			}
+			if(!ok) {
+				continue;
+			}
+		}
 		nodes.push_back(anim);
 	}
-}
 
-
-// ------------------------------------------------------------------------------------------------
-AnimationLayer::~AnimationLayer()
-{
-
+	return nodes; // pray for NRVO
 }
 
 // ------------------------------------------------------------------------------------------------

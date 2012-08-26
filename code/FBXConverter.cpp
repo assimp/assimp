@@ -1745,11 +1745,17 @@ private:
 		// reverse mapping from curves to layers, much faster than querying 
 		// the FBX DOM for it.
 		LayerMap layer_map;
+
+		const char* prop_whitelist[] = {
+			"Lcl Scaling",
+			"Lcl Rotation",
+			"Lcl Translation"
+		};
 		
 		BOOST_FOREACH(const AnimationLayer* layer, layers) {
 			ai_assert(layer);
 
-			const AnimationCurveNodeList& nodes = layer->Nodes();
+			const AnimationCurveNodeList& nodes = layer->Nodes(prop_whitelist, 3);
 			BOOST_FOREACH(const AnimationCurveNode* node, nodes) {
 				ai_assert(node);
 

@@ -845,7 +845,12 @@ class AnimationCurveNode : public Object
 {
 public:
 
-	AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc);
+	/* the optional whitelist specifies a list of property names for which the caller
+	wants animations for. If the curve node does not match one of these, std::range_error
+	will be thrown. */
+	AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc,
+		const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0);
+
 	~AnimationCurveNode();
 
 public:
@@ -856,9 +861,7 @@ public:
 	}
 
 
-	const AnimationCurveMap Curves() const {
-		return curves;
-	}
+	const AnimationCurveMap& Curves() const;
 
 	/** Object the curve is assigned to, this can be NULL if the
 	 *  target object has no DOM representation or could not
@@ -884,9 +887,10 @@ private:
 
 	const Object* target;
 	boost::shared_ptr<const PropertyTable> props;
-	AnimationCurveMap curves;
+	mutable AnimationCurveMap curves;
 
 	std::string prop;
+	const Document& doc;
 };
 
 typedef std::vector<const AnimationCurveNode*> AnimationCurveNodeList;
@@ -897,6 +901,7 @@ class AnimationLayer : public Object
 {
 public:
 
+	
 	AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc);
 	~AnimationLayer();
 
@@ -907,14 +912,15 @@ public:
 		return *props.get();
 	}
 
-	const AnimationCurveNodeList& Nodes() const {
-		return nodes;
-	}
+	/* the optional whitelist specifies a list of property names for which the caller
+	wants animations for. Curves not matching this list will not be added to the
+	animation layer. */
+	AnimationCurveNodeList Nodes(const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0) const;
 
 private:
 
 	boost::shared_ptr<const PropertyTable> props;
-	AnimationCurveNodeList nodes;
+	const Document& doc;
 };
 
 

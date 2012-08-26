@@ -152,6 +152,9 @@ const Object* LazyObject::Get(bool dieOnError)
 			else if (!strcmp(classtag.c_str(),"Null")) {
 				object.reset(new Null(id,element,doc,name));
 			}
+			else if (!strcmp(classtag.c_str(),"LimbNode")) {
+				object.reset(new LimbNode(id,element,doc,name));
+			}
 		}
 		else if (!strncmp(obtype,"Deformer",length)) {
 			if (!strcmp(classtag.c_str(),"Cluster")) {

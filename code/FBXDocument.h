@@ -271,6 +271,16 @@ public:
 };
 
 
+/** DOM base class for FBX limb node markers attached to a node */
+class LimbNode : public NodeAttribute
+{
+public:
+
+	LimbNode(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~LimbNode();
+};
+
+
 /** DOM base class for FBX lights attached to a node */
 class Light : public NodeAttribute
 {

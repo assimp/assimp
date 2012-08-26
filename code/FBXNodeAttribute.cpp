@@ -65,11 +65,11 @@ NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document
 
 	const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
 
-	// hack on the deriving type but Null attributes are the only case in which
+	// hack on the deriving type but Null/LimbNode attributes are the only case in which
 	// the property table is by design absent and no warning should be generated
 	// for it.
-	const bool is_null = !strcmp(classname.c_str(), "Null");
-	props = GetPropertyTable(doc,"NodeAttribute.Fbx" + classname,element,sc, is_null);
+	const bool is_null_or_limb = !strcmp(classname.c_str(), "Null") || !strcmp(classname.c_str(), "LimbNode");
+	props = GetPropertyTable(doc,"NodeAttribute.Fbx" + classname,element,sc, is_null_or_limb);
 }
 
 
@@ -148,6 +148,21 @@ Null::Null(uint64_t id, const Element& element, const Document& doc, const std::
 
 // ------------------------------------------------------------------------------------------------
 Null::~Null()
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+LimbNode::LimbNode(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: NodeAttribute(id,element,doc,name)
+{
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+LimbNode::~LimbNode()
 {
 
 }

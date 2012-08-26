@@ -2492,10 +2492,30 @@ private:
 		boost::scoped_array<aiVectorKey> temp(new aiVectorKey[keys.size()]);
 		InterpolateKeys(temp.get(),keys,inputs,geom,maxTime, minTime);
 
+		aiMatrix4x4 m;
+
+		aiQuaternion lastq;
+
 		for (size_t i = 0, c = keys.size(); i < c; ++i) {
 
 			valOut[i].mTime = temp[i].mTime;
-			valOut[i].mValue = EulerToQuaternion(temp[i].mValue, order); 
+
+			
+			GetRotationMatrix(order, temp[i].mValue, m);
+			aiQuaternion quat = aiQuaternion(aiMatrix3x3(m));
+
+			// take shortest path by checking the inner product
+			// http://www.3dkingdoms.com/weekly/weekly.php?a=36
+			if (quat.x * lastq.x + quat.y * lastq.y + quat.z * lastq.z + quat.w * lastq.w < 0)
+			{
+				quat.x = -quat.x;
+				quat.y = -quat.y;
+				quat.z = -quat.z;
+				quat.w = -quat.w;
+			} 
+			lastq = quat;
+
+			valOut[i].mValue = quat; 
 		}
 	}
 

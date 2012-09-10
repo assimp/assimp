@@ -664,6 +664,16 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 			result.verts.push_back(points[ (i+1) * cnt_segments + ((seg + 1 + best_pair_offset) % cnt_segments)]);
 			result.verts.push_back(points[ (i+1) * cnt_segments + ((seg + best_pair_offset) % cnt_segments)]);
 
+			IfcVector3& v1 = *(result.verts.end()-1);
+			IfcVector3& v2 = *(result.verts.end()-2);
+			IfcVector3& v3 = *(result.verts.end()-3);
+			IfcVector3& v4 = *(result.verts.end()-4);
+
+			if (((v4-v3) ^ (v4-v1)) * (v4 - curve_points[i]) < 0.0f) {			
+				std::swap(v4, v1);
+				std::swap(v3, v2);
+			} 
+
 			result.vertcnt.push_back(4);
 		}
 	}
@@ -1835,6 +1845,7 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 // ------------------------------------------------------------------------------------------------
 bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
 {
+	bool fix_orientation = true;
 	TempMesh meshtmp; 
 	if(const IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IfcShellBasedSurfaceModel>()) {
 		BOOST_FOREACH(boost::shared_ptr<const IfcShell> shell,shellmod->SbsmBoundary) {
@@ -1857,6 +1868,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	}   
 	else  if(const IfcSweptDiskSolid* disk = geo.ToPtr<IfcSweptDiskSolid>()) {
 		ProcessSweptDiskSolid(*disk,meshtmp,conv);
+		fix_orientation = false;
 	}   
 	else if(const IfcManifoldSolidBrep* brep = geo.ToPtr<IfcManifoldSolidBrep>()) {
 		ProcessConnectedFaceSet(brep->Outer,meshtmp,conv);
@@ -1879,7 +1891,10 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	}
 
 	meshtmp.RemoveAdjacentDuplicates();
-	FixupFaceOrientation(meshtmp);
+
+	if(fix_orientation) {
+		FixupFaceOrientation(meshtmp);
+	}
 
 	aiMesh* const mesh = meshtmp.ToMesh();
 	if(mesh) {

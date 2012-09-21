@@ -1795,14 +1795,13 @@ void ColladaParser::ReadAccessor( const std::string& pID)
 				SkipElement();
 			} else
 			{
-				ThrowException( "Unexpected sub element in tag \"accessor\".");
+				ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <accessor>") % mReader->getNodeName()));
 			}
 		} 
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
 		{
 			if( strcmp( mReader->getNodeName(), "accessor") != 0)
-				ThrowException( "Expected end of \"accessor\" element.");
-
+				ThrowException( "Expected end of <accessor> element.");
 			break;
 		}
 	}
@@ -1826,13 +1825,13 @@ void ColladaParser::ReadVertexData( Mesh* pMesh)
 				ReadInputChannel( pMesh->mPerVertexData);
 			} else
 			{
-				ThrowException( "Unexpected sub element in tag \"vertices\".");
+				ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <vertices>") % mReader->getNodeName()));
 			}
 		} 
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
 		{
 			if( strcmp( mReader->getNodeName(), "vertices") != 0)
-				ThrowException( "Expected end of \"vertices\" element.");
+				ThrowException( "Expected end of <vertices> element.");
 
 			break;
 		}
@@ -1919,13 +1918,13 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 				}
 			} else
 			{
-				ThrowException( "Unexpected sub element in tag \"vertices\".");
+				ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <%s>") % mReader->getNodeName() % elementName));
 			}
 		} 
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
 		{
 			if( mReader->getNodeName() != elementName)
-				ThrowException( boost::str( boost::format( "Expected end of \"%s\" element.") % elementName));
+				ThrowException( boost::str( boost::format( "Expected end of <%s> element.") % elementName));
 
 			break;
 		}
@@ -2063,7 +2062,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		{
 			// warn if the vertex channel does not refer to the <vertices> element in the same mesh
 			if( input.mAccessor != pMesh->mVertexID)
-				ThrowException( "Unsupported vertex referencing scheme. I fucking hate Collada.");
+				ThrowException( "Unsupported vertex referencing scheme.");
 			continue;
 		}
 

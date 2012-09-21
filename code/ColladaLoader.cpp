@@ -504,7 +504,8 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
 				// assign the material index
 				dstMesh->mMaterialIndex = matIdx;
-			}
+        dstMesh->mName = mid.mMeshOrController;			
+      }
 		}
 	}
 

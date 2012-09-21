@@ -460,7 +460,7 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
 		Face& face = pMesh->mPosFaces[a];
 		for( unsigned int b = 0; b < numIndices; b++)
 			face.mIndices.push_back( ReadInt());
-		CheckForSeparator();
+		TestForSeparator();
 	}
 
 	// here, other data objects may follow
@@ -583,7 +583,7 @@ void XFileParser::ParseDataObjectMeshNormals( Mesh* pMesh)
 		for( unsigned int b = 0; b < numIndices; b++)
 			face.mIndices.push_back( ReadInt());
 
-		CheckForSeparator();
+		TestForSeparator();
 	}
 
 	CheckForClosingBrace();

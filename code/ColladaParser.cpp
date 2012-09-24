@@ -1370,8 +1370,9 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
 				pSampler.mName = mReader->getAttributeValue( attrTex);
 
 				// get name of UV source channel
-				attrTex = GetAttribute( "texcoord");
-				pSampler.mUVChannel = mReader->getAttributeValue( attrTex);
+				attrTex = TestAttribute( "texcoord");
+        if( attrTex >= 0 )
+  				pSampler.mUVChannel = mReader->getAttributeValue( attrTex);
 				//SkipElement();
 			}
 			else if( IsElement( "technique"))

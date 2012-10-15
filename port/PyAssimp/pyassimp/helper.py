@@ -17,6 +17,7 @@ additional_dirs, ext_whitelist = [],[]
 # populate search directories and lists of allowed file extensions
 # depending on the platform we're running on.
 if os.name=='posix':
+    additional_dirs.append('/usr/lib/')
     additional_dirs.append('/usr/local/lib/')
 
     # note - this won't catch libassimp.so.N.n, but 
@@ -27,7 +28,7 @@ if os.name=='posix':
 elif os.name=='nt':
     ext_whitelist.append('.dll')
 
-print(additional_dirs)
+#print(additional_dirs)
 def vec2tuple(x):
     """ Converts a VECTOR3D to a Tuple """
     return (x.x, x.y, x.z)
@@ -88,7 +89,7 @@ def search_library():
                 continue
 
             library = os.path.join(curfolder, filename)
-            print 'Try ',library
+            #print 'Try ',library
             try:
                 dll = ctypes.cdll.LoadLibrary(library)
             except:
@@ -105,7 +106,7 @@ def search_library():
         # get the newest library
         candidates = map(lambda x: (os.lstat(x[0])[-2], x), candidates)
         res = max(candidates, key=operator.itemgetter(0))[1]
-        print 'Taking ',res[0]
+        #print 'Taking ',res[0]
 
         # XXX: if there are 1000 dll/so files containing 'assimp'
         # in their name, do we have all of them in our address

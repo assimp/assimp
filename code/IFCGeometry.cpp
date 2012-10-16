@@ -1143,7 +1143,6 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
 void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 	const std::vector< std::vector<IfcVector2> >& contours,
 	const std::vector<TempOpening>& openings,
-	const std::vector<IfcVector3>& nors, 
 	const IfcMatrix3& minv,
 	const IfcVector2& scale,
 	const IfcVector2& offset,
@@ -1272,7 +1271,9 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 }
 
 // ------------------------------------------------------------------------------------------------
-void MergeContours (const std::vector<IfcVector2>& a, const std::vector<IfcVector2>& b, ClipperLib::ExPolygons& out) 
+void MergeWindowContours (const std::vector<IfcVector2>& a, 
+	const std::vector<IfcVector2>& b, 
+	ClipperLib::ExPolygons& out) 
 {
 	ClipperLib::Clipper clipper;
 	ClipperLib::Polygon clip;
@@ -1301,7 +1302,137 @@ void MergeContours (const std::vector<IfcVector2>& a, const std::vector<IfcVecto
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, TempMesh& curmesh)
+void CleanupWindowContours(std::vector< std::vector<IfcVector2> >& contours)
+{
+	std::vector<IfcVector2> scratch;
+
+	// use polyclipper to clean up window contours as well
+	try {
+		BOOST_FOREACH(std::vector<IfcVector2>& contour, contours) {
+			ClipperLib::Polygon subject;
+			ClipperLib::Clipper clipper;
+			ClipperLib::ExPolygons clipped;
+
+			BOOST_FOREACH(const IfcVector2& pip, contour) {
+				subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+			}
+
+			clipper.AddPolygon(subject,ClipperLib::ptSubject);
+			clipper.Execute(ClipperLib::ctUnion,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
+
+			// this should yield only one polygon or something went wrong 
+			if (clipped.size() != 1) {
+
+				// empty polygon? drop the contour altogether
+				if(clipped.empty()) {
+					contour.clear();
+					continue;
+				}
+
+				// else: take only the first ...
+				IFCImporter::LogError("error during polygon clipping, window contour is not convex");
+			}
+
+			scratch.clear();
+			BOOST_FOREACH(const ClipperLib::IntPoint& point, clipped[0].outer) {
+				scratch.push_back( IfcVector2(from_int64(point.X), from_int64(point.Y)));
+			}
+			contour.swap(scratch);
+		}
+	}
+	catch (const char* sx) {
+		IFCImporter::LogError("error during polygon clipping, window shape may be wrong: (Clipper: " 
+			+ std::string(sx) + ")");
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& curmesh, 
+	const IfcMatrix3& minv, 
+	const IfcVector2& vmin, 
+	const IfcVector2& vmax,
+	IfcFloat coord,
+	const std::vector<IfcVector2>& outflat)
+{
+	std::vector<IfcVector3> vold;
+	std::vector<unsigned int> iold;
+
+	vold.reserve(outflat.size());
+	iold.reserve(outflat.size() / 4);
+
+	// Fix the outer contour using polyclipper
+	try {
+
+		ClipperLib::Polygon subject;
+		ClipperLib::Clipper clipper;
+		ClipperLib::ExPolygons clipped;
+
+		ClipperLib::Polygon clip;
+		clip.reserve(contour_flat.size());
+		BOOST_FOREACH(const IfcVector2& pip, contour_flat) {
+			clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+		}
+
+		if (!ClipperLib::Orientation(clip)) {
+			std::reverse(clip.begin(), clip.end());
+		}
+
+		// We need to run polyclipper on every single quad -- we can't run it one all
+		// of them at once or it would merge them all together which would undo all
+		// previous steps
+		subject.reserve(4);
+		size_t cnt = 0;
+		BOOST_FOREACH(const IfcVector2& pip, outflat) {
+			subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+			if (!(++cnt % 4)) {
+				if (!ClipperLib::Orientation(subject)) {
+					std::reverse(subject.begin(), subject.end());
+				}
+
+				clipper.AddPolygon(subject,ClipperLib::ptSubject);
+				clipper.AddPolygon(clip,ClipperLib::ptClip);
+
+				clipper.Execute(ClipperLib::ctIntersection,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
+
+				BOOST_FOREACH(const ClipperLib::ExPolygon& ex, clipped) {
+					iold.push_back(ex.outer.size());
+					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
+						vold.push_back( minv * IfcVector3(
+							vmin.x + from_int64(point.X) * vmax.x, 
+							vmin.y + from_int64(point.Y) * vmax.y,
+							coord));
+					}
+				}
+
+				subject.clear();
+				clipped.clear();
+				clipper.Clear();
+			}
+		}
+
+		assert(!(cnt % 4));
+	}
+	catch (const char* sx) {
+		IFCImporter::LogError("Ifc: error during polygon clipping, wall contour line may be wrong: (Clipper: " 
+			+ std::string(sx) + ")");
+
+		iold.resize(outflat.size()/4,4);
+
+		BOOST_FOREACH(const IfcVector2& vproj, outflat) {
+			const IfcVector3 v3 = minv * IfcVector3(vmin.x + vproj.x * vmax.x, vmin.y + vproj.y * vmax.y,coord);
+			vold.push_back(v3);
+		}
+	}
+
+	// undo the projection, generate output quads
+	std::swap(vold,curmesh.verts);
+	std::swap(iold,curmesh.vertcnt);
+}
+
+// ------------------------------------------------------------------------------------------------
+bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
+	const std::vector<IfcVector3>& nors, 
+	TempMesh& curmesh)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
 
@@ -1360,12 +1491,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 	BOOST_FOREACH(const TempOpening& t,openings) {
 		const IfcVector3& outernor = nors[c++];
 		const IfcFloat dot = nor * outernor;
-		if (fabs(dot)<1.f-1e-6f) {
-			continue;
-		}
 
-		const std::vector<IfcVector3>& va = t.profileMesh->verts;
-		if(va.size() <= 2) {
+		std::vector<IfcVector3> profile_verts = t.profileMesh->verts;
+		std::vector<unsigned int> profile_vertcnts = t.profileMesh->vertcnt;
+		if(profile_verts.size() <= 2) {
 			continue;	
 		}
 
@@ -1373,22 +1502,38 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
 
 		std::vector<IfcVector2> contour;
+		for (size_t f = 0, vi_total = 0, fend = profile_vertcnts.size(); f < fend; ++f) {
 
-		BOOST_FOREACH(const IfcVector3& x, t.profileMesh->verts) {
-			const IfcVector3 v = m * x;
-			
-			IfcVector2 vv(v.x, v.y);
+			const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
+				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
-			// rescale
-			vv.x  = (vv.x - vmin.x) / vmax.x;
-			vv.y  = (vv.y - vmin.y) / vmax.y;
+			const IfcFloat dot_face_nor = nor * face_nor;
+			if (fabs(dot_face_nor) < 0.5) {
+				vi_total += profile_vertcnts[f];
+				continue;
+			}
 
-			vpmin = std::min(vpmin,vv);
-			vpmax = std::max(vpmax,vv);
+			for (unsigned int vi = 0, vend = profile_vertcnts[f]; vi < vend; ++vi, ++vi_total) {
+				const IfcVector3& x = profile_verts[vi_total];
 
-			contour.push_back(vv);
+				const IfcVector3 v = m * x;
+				IfcVector2 vv(v.x, v.y);
+
+				// rescale
+				vv.x  = (vv.x - vmin.x) / vmax.x;
+				vv.y  = (vv.y - vmin.y) / vmax.y;
+
+				vpmin = std::min(vpmin,vv);
+				vpmax = std::max(vpmax,vv);
+
+				contour.push_back(vv);
+			}
 		}
-	
+
+		if(contour.size() <= 2) {
+			continue;
+		}
+
 		BoundingBox bb = BoundingBox(vpmin,vpmax);
 
 		// see if this BB intersects any other, in which case we could not use the Quadrify()
@@ -1405,11 +1550,11 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 				const std::vector<IfcVector2>& other = contours[std::distance(bbs.begin(),it)];
 
 				ClipperLib::ExPolygons poly;
-				MergeContours(contour, other, poly);
+				MergeWindowContours(contour, other, poly);
 
 				if (poly.size() > 1) {
 					IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
-						"bounding box overlaps, using poly2tri fallback");
+						"bounding box overlaps, using poly2tri fallback method");
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
 				}
 				else if (poly.size() == 0) {
@@ -1459,81 +1604,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,const st
 	QuadrifyPart(IfcVector2(0.f,0.f),IfcVector2(1.f,1.f),field,bbs,outflat);
 	ai_assert(!(outflat.size() % 4));
 
-	std::vector<IfcVector3> vold;
-	std::vector<unsigned int> iold;
+	CleanupOuterContour(contour_flat, curmesh, minv, vmin, vmax, coord, outflat);
+	CleanupWindowContours(contours);
 
-	vold.reserve(outflat.size());
-	iold.reserve(outflat.size() / 4);
-
-	// Fix the outer contour using polyclipper
-	try {
-		
-		ClipperLib::Polygon subject;
-		ClipperLib::Clipper clipper;
-		ClipperLib::ExPolygons clipped;
-
-		ClipperLib::Polygon clip;
-		clip.reserve(contour_flat.size());
-		BOOST_FOREACH(const IfcVector2& pip, contour_flat) {
-			clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
-		}
-
-		if (!ClipperLib::Orientation(clip)) {
-			std::reverse(clip.begin(), clip.end());
-		}
-
-		// We need to run polyclipper on every single quad -- we can't run it one all
-		// of them at once or it would merge them all together which would undo all
-		// previous steps
-		subject.reserve(4);
-		size_t cnt = 0;
-		BOOST_FOREACH(const IfcVector2& pip, outflat) {
-			subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
-			if (!(++cnt % 4)) {
-				if (!ClipperLib::Orientation(subject)) {
-					std::reverse(subject.begin(), subject.end());
-				}
-				
-				clipper.AddPolygon(subject,ClipperLib::ptSubject);
-				clipper.AddPolygon(clip,ClipperLib::ptClip);
-
-				clipper.Execute(ClipperLib::ctIntersection,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
-
-				BOOST_FOREACH(const ClipperLib::ExPolygon& ex, clipped) {
-					iold.push_back(ex.outer.size());
-					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
-						vold.push_back( minv * IfcVector3(
-							vmin.x + from_int64(point.X) * vmax.x, 
-							vmin.y + from_int64(point.Y) * vmax.y,
-							coord));
-					}
-				}
-
-				subject.clear();
-				clipped.clear();
-				clipper.Clear();
-			}
-		}
-
-		assert(!(cnt % 4));
-	}
-	catch (const char* sx) {
-		IFCImporter::LogError("Ifc: error during polygon clipping, contour line may be wrong: (Clipper: " 
-			+ std::string(sx) + ")");
-
-		iold.resize(outflat.size()/4,4);
-
-		BOOST_FOREACH(const IfcVector2& vproj, outflat) {
-			const IfcVector3 v3 = minv * IfcVector3(vmin.x + vproj.x * vmax.x, vmin.y + vproj.y * vmax.y,coord);
-			vold.push_back(v3);
-		}
-	}
-
-	// undo the projection, generate output quads
-	std::swap(vold,curmesh.verts);
-	std::swap(iold,curmesh.vertcnt);
-
-	InsertWindowContours(bbs,contours,openings, nors,minv,vmax, vmin, coord, curmesh);
+	InsertWindowContours(bbs,contours,openings, minv,vmax, vmin, coord, curmesh);
 	return true;
 }
 
@@ -1672,6 +1746,9 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, Co
 		// In this case we don't extrude the surface yet, just keep the profile and transform it correctly
 		if(conv.collect_openings) {
 			boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
+			ProcessExtrudedAreaSolid(*solid,*meshtmp,conv);
+
+			/*
 			ProcessProfile(swept.SweptArea,*meshtmp,conv);
 
 			IfcMatrix4 m;
@@ -1679,8 +1756,9 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, Co
 			meshtmp->Transform(m);
 
 			IfcVector3 dir;
-			ConvertDirection(dir,solid->ExtrudedDirection);
-			conv.collect_openings->push_back(TempOpening(solid, IfcMatrix3(m) * (dir*static_cast<IfcFloat>(solid->Depth)),meshtmp));
+			ConvertDirection(dir,solid->ExtrudedDirection); */
+			conv.collect_openings->push_back(TempOpening(solid,IfcVector3(0,0,0) 
+				/* IfcMatrix3(m) * (dir*static_cast<IfcFloat>(solid->Depth)) */,meshtmp));
 			return;
 		}
 

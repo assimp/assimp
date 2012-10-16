@@ -1049,7 +1049,8 @@ typedef std::map<IfcVector2,size_t,XYSorter> XYSortedField;
 
 
 // ------------------------------------------------------------------------------------------------
-void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField& field, const std::vector< BoundingBox >& bbs, 
+void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField& field, 
+	const std::vector< BoundingBox >& bbs, 
 	std::vector<IfcVector2>& out)
 {
 	if (!(pmin.x-pmax.x) || !(pmin.y-pmax.y)) {
@@ -1108,7 +1109,7 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
 
 			found = true;
 			const IfcFloat ys = std::max(bb.first.y,pmin.y), ye = std::min(bb.second.y,pmax.y);
-			if (ys - ylast) {
+			if (ys - ylast > 0.0f) {
 				QuadrifyPart( IfcVector2(xs,ylast), IfcVector2(xe,ys) ,field,bbs,out);
 			}
 
@@ -1439,7 +1440,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
 	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh);
-	const IfcMatrix3 minv = IfcMatrix3(m).Inverse();
+	const IfcMatrix3& minv = IfcMatrix3(m).Inverse();
 	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
 
 	IfcFloat coord = -1;
@@ -1453,11 +1454,9 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 	// Move all points into the new coordinate system, collecting min/max verts on the way
 	BOOST_FOREACH(IfcVector3& x, out) {
 		const IfcVector3& vv = m * x;
-
 		// keep Z offset in the plane coordinate system. Ignoring precision issues
 		// (which  are present, of course), this should be the same value for
 		// all polygon vertices (assuming the polygon is planar).
-
 
 		// XXX this should be guarded, but we somehow need to pick a suitable
 		// epsilon
@@ -1505,8 +1504,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 			const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
 				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
-			const IfcFloat dot_face_nor = nor * face_nor;
-			if (fabs(dot_face_nor) < 0.5) {
+			const IfcFloat abs_dot_face_nor = fabs(nor * face_nor);
+			if (abs_dot_face_nor < 0.5) {
 				vi_total += profile_vertcnts[f];
 				continue;
 			}
@@ -1658,6 +1657,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	
 	// Compute the normal vectors for all opening polygons as a prerequisite
 	// to TryAddOpenings_Poly2Tri()
+	// XXX this belongs into the aforementioned function
 	if (openings) {
 
 		if (!conv.settings.useCustomTriangulation) {	         

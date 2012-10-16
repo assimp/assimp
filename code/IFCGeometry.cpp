@@ -1349,8 +1349,8 @@ void CleanupWindowContours(std::vector< std::vector<IfcVector2> >& contours)
 // ------------------------------------------------------------------------------------------------
 void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& curmesh, 
 	const IfcMatrix3& minv, 
-	const IfcVector2& vmin, 
-	const IfcVector2& vmax,
+	const IfcVector2& scale, 
+	const IfcVector2& offset,
 	IfcFloat coord,
 	const std::vector<IfcVector2>& outflat)
 {
@@ -1398,8 +1398,8 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 					iold.push_back(ex.outer.size());
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
 						vold.push_back( minv * IfcVector3(
-							vmin.x + from_int64(point.X) * vmax.x, 
-							vmin.y + from_int64(point.Y) * vmax.y,
+							offset.x + from_int64(point.X) * scale.x, 
+							offset.y + from_int64(point.Y) * scale.y,
 							coord));
 					}
 				}
@@ -1419,7 +1419,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 		iold.resize(outflat.size()/4,4);
 
 		BOOST_FOREACH(const IfcVector2& vproj, outflat) {
-			const IfcVector3 v3 = minv * IfcVector3(vmin.x + vproj.x * vmax.x, vmin.y + vproj.y * vmax.y,coord);
+			const IfcVector3 v3 = minv * IfcVector3(offset.x + vproj.x * scale.x, offset.y + vproj.y * scale.y,coord);
 			vold.push_back(v3);
 		}
 	}
@@ -1452,7 +1452,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 
 	// Move all points into the new coordinate system, collecting min/max verts on the way
 	BOOST_FOREACH(IfcVector3& x, out) {
-		const IfcVector3 vv = m * x;
+		const IfcVector3& vv = m * x;
 
 		// keep Z offset in the plane coordinate system. Ignoring precision issues
 		// (which  are present, of course), this should be the same value for
@@ -1464,7 +1464,6 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		// if(coord != -1.0f) {
 		//	assert(fabs(coord - vv.z) < 1e-3f);
 		// }
-
 		coord = vv.z;
 		vmin = std::min(IfcVector2(vv.x, vv.y), vmin);
 		vmax = std::max(IfcVector2(vv.x, vv.y), vmax);
@@ -1474,7 +1473,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 
 	// With the current code in DerivePlaneCoordinateSpace, 
 	// vmin,vmax should always be the 0...1 rectangle (+- numeric inaccuracies) 
-	// but here we won't rely on this.
+	// but here we really need this to be accurate, so normalize again.
 
 	vmax -= vmin;
 	BOOST_FOREACH(IfcVector2& vv, contour_flat) {
@@ -1482,16 +1481,13 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		vv.y  = (vv.y - vmin.y) / vmax.y;
 	}
 
-	// project all points into the coordinate system defined by the p+sv*tu plane
+	// project all openings into the coordinate system defined by the p+sv*tu plane
 	// and compute bounding boxes for them
 	std::vector< BoundingBox > bbs;
 	std::vector< std::vector<IfcVector2> > contours;
 
 	size_t c = 0;
 	BOOST_FOREACH(const TempOpening& t,openings) {
-		const IfcVector3& outernor = nors[c++];
-		const IfcFloat dot = nor * outernor;
-
 		std::vector<IfcVector3> profile_verts = t.profileMesh->verts;
 		std::vector<unsigned int> profile_vertcnts = t.profileMesh->vertcnt;
 		if(profile_verts.size() <= 2) {
@@ -1501,6 +1497,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		IfcVector2 vpmin,vpmax;
 		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
 
+		// the opening meshes are real 3D meshes so skip over all faces
+		// clearly facing into the wrong direction.
 		std::vector<IfcVector2> contour;
 		for (size_t f = 0, vi_total = 0, fend = profile_vertcnts.size(); f < fend; ++f) {
 
@@ -1516,7 +1514,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 			for (unsigned int vi = 0, vend = profile_vertcnts[f]; vi < vend; ++vi, ++vi_total) {
 				const IfcVector3& x = profile_verts[vi_total];
 
-				const IfcVector3 v = m * x;
+				const IfcVector3& v = m * x;
 				IfcVector2 vv(v.x, v.y);
 
 				// rescale
@@ -1563,7 +1561,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 					break;
 				}
 				else {
-					IFCImporter::LogDebug("merging oberlapping openings, this should not happen");
+					IFCImporter::LogDebug("merging overlapping openings, this should not happen");
 
 					contour.clear();
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
@@ -1581,7 +1579,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 			++it;
 		}
 
-		if(contour.size()) {
+		if(!contour.empty()) {
 			contours.push_back(contour);
 			bbs.push_back(bb);
 		}
@@ -1604,10 +1602,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 	QuadrifyPart(IfcVector2(0.f,0.f),IfcVector2(1.f,1.f),field,bbs,outflat);
 	ai_assert(!(outflat.size() % 4));
 
-	CleanupOuterContour(contour_flat, curmesh, minv, vmin, vmax, coord, outflat);
+	CleanupOuterContour(contour_flat, curmesh, minv, vmax, vmin, coord, outflat);
 	CleanupWindowContours(contours);
-
 	InsertWindowContours(bbs,contours,openings, minv,vmax, vmin, coord, curmesh);
+
 	return true;
 }
 

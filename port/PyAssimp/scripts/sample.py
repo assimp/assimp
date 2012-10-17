@@ -44,9 +44,9 @@ def main(filename=None):
         print "  MESH", index+1
         print "    material id:", mesh.materialindex+1
         print "    vertices:", len(mesh.vertices)
-        print "    first 3 verts:", mesh.vertices[:3]
-        if mesh.normals:
-                print "    first 3 normals:", mesh.normals[:3]
+        print "    first 3 verts:\n", mesh.vertices[:3]
+        if mesh.normals.any():
+                print "    first 3 normals:\n", mesh.normals[:3]
         else:
                 print "    no normals"
         print "    colors:", len(mesh.colors)
@@ -58,7 +58,7 @@ def main(filename=None):
         else:
             print "    no texture coordinates"
         print "    uv-component-count:", len(mesh.numuvcomponents)
-        print "    faces:", len(mesh.faces), "first:", [f.indices for f in mesh.faces[:3]]
+        print "    faces:", len(mesh.faces), "first:\n", mesh.faces[:3]
         print "    bones:", len(mesh.bones), "first:", [str(b) for b in mesh.bones[:3]]
         print
 

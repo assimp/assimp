@@ -20,6 +20,8 @@ import structs
 
 import logging; logger = logging.getLogger("pyassimp")
 
+import numpy
+
 #logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig()
 
@@ -34,8 +36,18 @@ assimp_structs_as_tuple = (
         structs.Plane, 
         structs.Texel)
 
-def make_tuple(ai_obj):
-    return tuple([getattr(ai_obj, e[0]) for e in ai_obj._fields_])
+def make_tuple(ai_obj, type = None):
+    res = None
+
+    if isinstance(ai_obj, structs.Matrix4x4):
+        res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((4,4))
+        #import pdb;pdb.set_trace()
+    elif isinstance(ai_obj, structs.Matrix3x3):
+        res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((3,3))
+    else:
+        res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_])
+
+    return res
 
 def call_init(obj, caller = None):
         # init children
@@ -127,7 +139,7 @@ def _init(self, target = None):
 
                 try:
                     if obj._type_ in assimp_structs_as_tuple:
-                        setattr(target, name, [make_tuple(obj[i]) for i in xrange(length)])
+                        setattr(target, name, numpy.array([make_tuple(obj[i]) for i in xrange(length)], dtype=numpy.float32))
 
                         logger.debug(str(self) + ": Added a list data (type "+ str(type(obj)) + ") as self." + name)
 
@@ -251,7 +263,7 @@ def release(scene):
 
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)
-    data = [make_tuple(getattr(tex, pcData)[i]) for i in xrange(tex.mWidth * tex.mHeight)]
+    data = numpy.array([make_tuple(getattr(tex, pcData)[i]) for i in xrange(tex.mWidth * tex.mHeight)])
     setattr(target, "data", data)
 
 
@@ -270,7 +282,7 @@ def _finalize_mesh(mesh, target):
     def fill(name):
         mAttr = getattr(mesh, name)
         if mAttr:
-            data = [make_tuple(getattr(mesh, name)[i]) for i in xrange(nb_vertices)]
+            data = numpy.array([make_tuple(getattr(mesh, name)[i]) for i in xrange(nb_vertices)], dtype=numpy.float32)
             setattr(target, name[1:].lower(), data)
         else:
             setattr(target, name[1:].lower(), [])
@@ -281,9 +293,9 @@ def _finalize_mesh(mesh, target):
         data = []
         for index, mSubAttr in enumerate(mAttr):
             if mSubAttr:
-                data.append([make_tuple(getattr(mesh, name)[index][i]) for i in xrange(nb_vertices)])
+                data.append([make_tuple(getattr(mesh, name)[index][i]) for i in xrange(nb_vertices)], dtype=numpy.float32)
 
-        setattr(target, name[1:].lower(), data)
+        setattr(target, name[1:].lower(), numpy.array(data))
 
     fill("mNormals")
     fill("mTangents")
@@ -291,6 +303,10 @@ def _finalize_mesh(mesh, target):
 
     fillarray("mColors")
     fillarray("mTextureCoords")
+    
+    # prepare faces
+    faces = numpy.array([f.indices for f in target.faces], dtype=numpy.int32)
+    setattr(target, 'faces', faces)
 
 def _get_properties(properties, length): 
     """
@@ -308,12 +324,12 @@ def _get_properties(properties, length):
         from ctypes import POINTER, cast, c_int, c_float, sizeof
         if p.mType == 1:
             arr = cast(p.mData, POINTER(c_float*(p.mDataLength/sizeof(c_float)) )).contents
-            value = [x for x in arr]
+            value = numpy.array([x for x in arr])
         elif p.mType == 3: #string can't be an array
             value = cast(p.mData, POINTER(structs.String)).contents.data
         elif p.mType == 4:
             arr = cast(p.mData, POINTER(c_int*(p.mDataLength/sizeof(c_int)) )).contents
-            value = [x for x in arr]
+            value = numpy.array([x for x in arr])
         else:
             value = p.mData[:p.mDataLength]
 

@@ -205,6 +205,7 @@ def pythonize_assimp(type, obj, scene):
 
     Supported operations:
      - MESH: replace a list of mesh IDs by reference to these meshes
+     - ADDTRANSFORMATION: add a reference to an object's transformation taken from their associated node.
 
     :param type: the type of modification to operate (cf above)
     :param obj: the input object to modify
@@ -217,6 +218,19 @@ def pythonize_assimp(type, obj, scene):
             meshes.append(scene.meshes[i])
         return meshes
 
+    if type == "ADDTRANSFORMATION":
+	
+	def getnode(node, name):
+	    if node.name == name: return node
+	    for child in node.children:
+		n = getnode(child, name)
+		if n: return n
+
+	node = getnode(scene.rootnode, obj.name)
+	if not node:
+		raise AssimpError("Object " + str(obj) + " has no associated node!")
+	setattr(obj, "transformation", node.transformation)
+
 
 def recur_pythonize(node, scene):
     """ Recursively call pythonize_assimp on
@@ -225,6 +239,15 @@ def recur_pythonize(node, scene):
     """
 
     node.meshes = pythonize_assimp("MESH", node.meshes, scene)
+
+    for mesh in node.meshes:
+        mesh.material = scene.materials[mesh.materialindex]
+
+    for cam in scene.cameras:
+        pythonize_assimp("ADDTRANSFORMATION", cam, scene)
+
+    #for light in scene.lights:
+    #    pythonize_assimp("ADDTRANSFORMATION", light, scene)
 
     for c in node.children:
         recur_pythonize(c, scene)
@@ -293,9 +316,9 @@ def _finalize_mesh(mesh, target):
         data = []
         for index, mSubAttr in enumerate(mAttr):
             if mSubAttr:
-                data.append([make_tuple(getattr(mesh, name)[index][i]) for i in xrange(nb_vertices)], dtype=numpy.float32)
+                data.append([make_tuple(getattr(mesh, name)[index][i]) for i in xrange(nb_vertices)])
 
-        setattr(target, name[1:].lower(), numpy.array(data))
+        setattr(target, name[1:].lower(), numpy.array(data, dtype=numpy.float32))
 
     fill("mNormals")
     fill("mTangents")

@@ -64,6 +64,7 @@ namespace Assimp {
 		//#define to_int64(p)  (static_cast<ulong64>( std::max( 0., std::min( static_cast<IfcFloat>((p)), 1.) ) * max_ulong64 ))
 #define to_int64(p)  (static_cast<ulong64>(static_cast<IfcFloat>((p) ) * max_ulong64 ))
 #define from_int64(p) (static_cast<IfcFloat>((p)) / max_ulong64)
+#define one_vec (IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)))
 
 // ------------------------------------------------------------------------------------------------
 bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
@@ -1326,6 +1327,7 @@ void CleanupWindowContours(std::vector< std::vector<IfcVector2> >& contours)
 
 				// empty polygon? drop the contour altogether
 				if(clipped.empty()) {
+					IFCImporter::LogError("error during polygon clipping, window contour is degenerate");
 					contour.clear();
 					continue;
 				}
@@ -1336,7 +1338,10 @@ void CleanupWindowContours(std::vector< std::vector<IfcVector2> >& contours)
 
 			scratch.clear();
 			BOOST_FOREACH(const ClipperLib::IntPoint& point, clipped[0].outer) {
-				scratch.push_back( IfcVector2(from_int64(point.X), from_int64(point.Y)));
+				IfcVector2 vv = IfcVector2(from_int64(point.X), from_int64(point.Y));
+				vv = std::max(vv,IfcVector2());
+				vv = std::min(vv,one_vec);
+				scratch.push_back( vv );
 			}
 			contour.swap(scratch);
 		}
@@ -1436,8 +1441,6 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 	TempMesh& curmesh)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
-
-	const IfcVector2 one_vec = IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0));
 
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
@@ -2059,7 +2062,7 @@ bool ProcessRepresentationItem(const IfcRepresentationItem& item,
 
 #undef to_int64
 #undef from_int64
-#undef from_int64_f
+#undef one_vec
 
 } // ! IFC
 } // ! Assimp

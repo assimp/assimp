@@ -1223,7 +1223,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 						if ((contour[a] - edge).SquareLength() > diag*diag*0.7) {
 							continue;
 						}
-						const IfcVector3 v3 = minv * IfcVector3(offset.x + contour[a].x * scale.x, offset.y + contour[a].y * scale.y,coord);
+						const IfcVector3 v3 = minv * IfcVector3(offset.x + contour[a].x * scale.x, offset.y + contour[a].y * scale.y, coord);
 						curmesh.verts.push_back(v3);
 					}
 
@@ -1504,7 +1504,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 			const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
 				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
-			const IfcFloat abs_dot_face_nor = fabs(nor * face_nor);
+			const IfcFloat abs_dot_face_nor = abs(nor * face_nor);
 			if (abs_dot_face_nor < 0.5) {
 				vi_total += profile_vertcnts[f];
 				continue;
@@ -1519,6 +1519,9 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 				// rescale
 				vv.x  = (vv.x - vmin.x) / vmax.x;
 				vv.y  = (vv.y - vmin.y) / vmax.y;
+
+				vv = std::max(vv,IfcVector2());
+				vv = std::min(vv,IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)));
 
 				vpmin = std::min(vpmin,vv);
 				vpmax = std::max(vpmax,vv);
@@ -1610,7 +1613,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 
 
 // ------------------------------------------------------------------------------------------------
-void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result, ConversionData& conv)
+void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result, 
+	ConversionData& conv)
 {
 	TempMesh meshout;
 	
@@ -1737,7 +1741,8 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 
 // ------------------------------------------------------------------------------------------------
-void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, ConversionData& conv)
+void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, 
+	ConversionData& conv)
 {
 	if(const IfcExtrudedAreaSolid* const solid = swept.ToPtr<IfcExtrudedAreaSolid>()) {
 		// Do we just collect openings for a parent element (i.e. a wall)? 
@@ -1779,7 +1784,9 @@ enum Intersect {
 };
 
 // ------------------------------------------------------------------------------------------------
-Intersect IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const IfcVector3& e0, const IfcVector3& e1, IfcVector3& out) 
+Intersect IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const IfcVector3& e0, 
+	const IfcVector3& e1, 
+	IfcVector3& out) 
 {
 	const IfcVector3 pdelta = e0 - p, seg = e1-e0;
 	const IfcFloat dotOne = n*seg, dotTwo = -(n*pdelta);
@@ -1919,7 +1926,8 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
+bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, 
+	ConversionData& conv)
 {
 	bool fix_orientation = true;
 	TempMesh meshtmp; 
@@ -1983,7 +1991,8 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 }
 
 // ------------------------------------------------------------------------------------------------
-void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/)
+void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
+	ConversionData& /*conv*/)
 {
 	if (!mesh_indices.empty()) {
 
@@ -2002,7 +2011,9 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,Conver
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryQueryMeshCache(const IfcRepresentationItem& item, std::vector<unsigned int>& mesh_indices, ConversionData& conv) 
+bool TryQueryMeshCache(const IfcRepresentationItem& item, 
+	std::vector<unsigned int>& mesh_indices, 
+	ConversionData& conv) 
 {
 	ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(&item);
 	if (it != conv.cached_meshes.end()) {
@@ -2013,13 +2024,17 @@ bool TryQueryMeshCache(const IfcRepresentationItem& item, std::vector<unsigned i
 }
 
 // ------------------------------------------------------------------------------------------------
-void PopulateMeshCache(const IfcRepresentationItem& item, const std::vector<unsigned int>& mesh_indices, ConversionData& conv)
+void PopulateMeshCache(const IfcRepresentationItem& item, 
+	const std::vector<unsigned int>& mesh_indices, 
+	ConversionData& conv)
 {
 	conv.cached_meshes[&item] = mesh_indices;
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessRepresentationItem(const IfcRepresentationItem& item, std::vector<unsigned int>& mesh_indices, ConversionData& conv)
+bool ProcessRepresentationItem(const IfcRepresentationItem& item, 
+	std::vector<unsigned int>& mesh_indices, 
+	ConversionData& conv)
 {
 	if (!TryQueryMeshCache(item,mesh_indices,conv)) {
 		if(ProcessGeometricItem(item,mesh_indices,conv)) {

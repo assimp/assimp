@@ -1,10 +1,10 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  4.6.3                                                           *
-* Date      :  11 November 2011                                                *
+* Version   :  4.8.8                                                           *
+* Date      :  30 August 2012                                                  *
 * Website   :  http://www.angusj.com                                           *
-* Copyright :  Angus Johnson 2010-2011                                         *
+* Copyright :  Angus Johnson 2010-2012                                         *
 *                                                                              *
 * License:                                                                     *
 * Use, modification & distribution is subject to Boost Software License Ver 1. *
@@ -73,18 +73,21 @@ struct ExPolygon {
 };
 typedef std::vector< ExPolygon > ExPolygons;
 
-enum JoinType { jtSquare, jtMiter, jtRound };
+enum JoinType { jtSquare, jtRound, jtMiter };
 
 bool Orientation(const Polygon &poly);
 double Area(const Polygon &poly);
 void OffsetPolygons(const Polygons &in_polys, Polygons &out_polys,
   double delta, JoinType jointype = jtSquare, double MiterLimit = 2);
+void SimplifyPolygon(const Polygon &in_poly, Polygons &out_polys, PolyFillType fillType = pftEvenOdd);
+void SimplifyPolygons(const Polygons &in_polys, Polygons &out_polys, PolyFillType fillType = pftEvenOdd);
+void SimplifyPolygons(Polygons &polys, PolyFillType fillType = pftEvenOdd);
 
-void ReversePoints(Polygon& p);
-void ReversePoints(Polygons& p);
+void ReversePolygon(Polygon& p);
+void ReversePolygons(Polygons& p);
 
 //used internally ...
-enum EdgeSide { esLeft, esRight };
+enum EdgeSide { esNeither = 0, esLeft = 1, esRight = 2, esBoth = 3 };
 enum IntersectProtects { ipNone = 0, ipLeft = 1, ipRight = 2, ipBoth = 3 };
 
 struct TEdge {
@@ -139,8 +142,8 @@ struct OutRec {
   OutRec *AppendLink;
   OutPt  *pts;
   OutPt  *bottomPt;
-  TEdge  *bottomE1;
-  TEdge  *bottomE2;
+  OutPt  *bottomFlag;
+  EdgeSide sides;
 };
 
 struct OutPt {
@@ -256,9 +259,10 @@ private:
   void IntersectEdges(TEdge *e1, TEdge *e2,
     const IntPoint &pt, IntersectProtects protects);
   OutRec* CreateOutRec();
-  void AddOutPt(TEdge *e, TEdge *altE, const IntPoint &pt);
+  void AddOutPt(TEdge *e, const IntPoint &pt);
+  void DisposeBottomPt(OutRec &outRec);
   void DisposeAllPolyPts();
-  void DisposeOutRec(PolyOutList::size_type index, bool ignorePts = false);
+  void DisposeOutRec(PolyOutList::size_type index);
   bool ProcessIntersections(const long64 botY, const long64 topY);
   void AddIntersectNode(TEdge *e1, TEdge *e2, const IntPoint &pt);
   void BuildIntersectList(const long64 botY, const long64 topY);

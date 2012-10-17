@@ -1437,6 +1437,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
 
+	const IfcVector2 one_vec = IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0));
+
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
 	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh);
@@ -1478,6 +1480,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 	BOOST_FOREACH(IfcVector2& vv, contour_flat) {
 		vv.x  = (vv.x - vmin.x) / vmax.x;
 		vv.y  = (vv.y - vmin.y) / vmax.y;
+
+		// sanity rounding
+		vv = std::max(vv,IfcVector2());
+		vv = std::min(vv,one_vec);
 	}
 
 	// project all openings into the coordinate system defined by the p+sv*tu plane
@@ -1521,7 +1527,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 				vv.y  = (vv.y - vmin.y) / vmax.y;
 
 				vv = std::max(vv,IfcVector2());
-				vv = std::min(vv,IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)));
+				vv = std::min(vv,one_vec);
 
 				vpmin = std::min(vpmin,vv);
 				vpmax = std::max(vpmax,vv);
@@ -1567,7 +1573,11 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 
 					contour.clear();
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
-						contour.push_back( IfcVector2( from_int64(point.X), from_int64(point.Y)));
+						IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
+						vv = std::max(vv,IfcVector2());
+						vv = std::min(vv,one_vec);
+
+						contour.push_back( vv );
 					}
 
 					bb.first = std::min(bb.first, ibb.first);

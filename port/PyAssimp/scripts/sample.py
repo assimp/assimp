@@ -50,12 +50,11 @@ def main(filename=None):
         else:
                 print "    no normals"
         print "    colors:", len(mesh.colors)
-        tc = mesh.texturecoords
-        if tc:
-            print "    texture-coords 1:", len(tc[0]), "first3:", tc[0][:3]
-            print "    texture-coords 2:", len(tc[1]), "first3:", tc[1][:3]
-            print "    texture-coords 3:", len(tc[2]), "first3:", tc[2][:3]
-            print "    texture-coords 4:", len(tc[3]), "first3:", tc[3][:3]
+        tcs = mesh.texturecoords
+        if tcs:
+            for index, tc in enumerate(tcs):
+                print "    texture-coords "+ str(index) + ":", len(tcs[index]), "first3:", tcs[index][:3]
+
         else:
             print "    no texture coordinates"
         print "    uv-component-count:", len(mesh.numuvcomponents)

@@ -12,6 +12,8 @@ import operator
 from errors import AssimpError
 from ctypes import POINTER
 
+import numpy
+
 additional_dirs, ext_whitelist = [],[]
 
 # populate search directories and lists of allowed file extensions
@@ -32,6 +34,38 @@ elif os.name=='nt':
 def vec2tuple(x):
     """ Converts a VECTOR3D to a Tuple """
     return (x.x, x.y, x.z)
+
+def transform(vector3, matrix4x4):
+    """ Apply a transformation matrix on a 3D vector.
+
+    :param vector3: a numpy array with 3 elements
+    :param matrix4x4: a numpy 4x4 matrix
+    """
+    return numpy.dot(matrix4x4, numpy.append(vector3, 1.))
+
+   
+def get_bounding_box(scene):
+    bb_min = [1e10, 1e10, 1e10] # x,y,z
+    bb_max = [-1e10, -1e10, -1e10] # x,y,z
+    return get_bounding_box_for_node(scene.rootnode, bb_min, bb_max)
+
+def get_bounding_box_for_node(node, bb_min, bb_max):
+    for mesh in node.meshes:
+        for v in mesh.vertices:
+            v = transform(v, node.transformation)
+            bb_min[0] = min(bb_min[0], v[0])
+            bb_min[1] = min(bb_min[1], v[1])
+            bb_min[2] = min(bb_min[2], v[2])
+            bb_max[0] = max(bb_max[0], v[0])
+            bb_max[1] = max(bb_max[1], v[1])
+            bb_max[2] = max(bb_max[2], v[2])
+
+
+    for child in node.children:
+        bb_min, bb_max = get_bounding_box_for_node(child, bb_min, bb_max)
+
+    return bb_min, bb_max
+
 
 
 def try_load_functions(library,dll,candidates):

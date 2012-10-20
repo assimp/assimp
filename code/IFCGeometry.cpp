@@ -66,6 +66,12 @@ namespace Assimp {
 #define from_int64(p) (static_cast<IfcFloat>((p)) / max_ulong64)
 #define one_vec (IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)))
 
+
+		bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
+			const std::vector<IfcVector3>& nors, 
+			TempMesh& curmesh);
+
+
 // ------------------------------------------------------------------------------------------------
 bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData& /*conv*/)
 {
@@ -173,250 +179,105 @@ void FixupFaceOrientation(TempMesh& result)
 }
 
 // ------------------------------------------------------------------------------------------------
-void RecursiveMergeBoundaries(TempMesh& final_result, const TempMesh& in, const TempMesh& boundary, std::vector<IfcVector3>& normals, const IfcVector3& nor_boundary)
+void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = (size_t)-1) 
 {
-	ai_assert(in.vertcnt.size() >= 1);
-	ai_assert(boundary.vertcnt.size() == 1);
-	std::vector<unsigned int>::const_iterator end = in.vertcnt.end(), begin=in.vertcnt.begin(), iit, best_iit;
-
-	TempMesh out;
-
-	// iterate through all other bounds and find the one for which the shortest connection
-	// to the outer boundary is actually the shortest possible.
-	size_t vidx = 0, best_vidx_start = 0;
-	size_t best_ofs, best_outer = boundary.verts.size();
-	IfcFloat best_dist = 1e10;
-	for(std::vector<unsigned int>::const_iterator iit = begin; iit != end; vidx += *iit++) {
-		
-		for(size_t vofs = 0; vofs < *iit; ++vofs) {
-			const IfcVector3& v = in.verts[vidx+vofs];
-
-			for(size_t outer = 0; outer < boundary.verts.size(); ++outer) {
-				const IfcVector3& o = boundary.verts[outer];
-				const IfcFloat d = (o-v).SquareLength();
-
-				if (d < best_dist) {
-					best_dist = d;
-					best_ofs = vofs;
-					best_outer = outer;
-					best_iit = iit;
-					best_vidx_start = vidx;
-				}
-			}		
-		}
+	// handle all trivial cases
+	if(inmesh.vertcnt.empty()) {
+		return;
 	}
-
-	ai_assert(best_outer != boundary.verts.size());
-
-
-	// now that we collected all vertex connections to be added, build the output polygon
-	const size_t cnt = boundary.verts.size() + *best_iit+2;
-	out.verts.reserve(cnt);
-
-	for(size_t outer = 0; outer < boundary.verts.size(); ++outer) {
-		const IfcVector3& o = boundary.verts[outer];
-		out.verts.push_back(o);
-
-		if (outer == best_outer) {
-			for(size_t i = best_ofs; i < *best_iit; ++i) {
-				out.verts.push_back(in.verts[best_vidx_start + i]);
-			}
-
-			// we need the first vertex of the inner polygon twice as we return to the
-			// outer loop through the very same connection through which we got there.
-			for(size_t i = 0; i <= best_ofs; ++i) {
-				out.verts.push_back(in.verts[best_vidx_start + i]);
-			}
-
-			// reverse face winding if the normal of the sub-polygon points in the
-			// same direction as the normal of the outer polygonal boundary
-			if (normals[std::distance(begin,best_iit)] * nor_boundary > 0) {
-				std::reverse(out.verts.rbegin(),out.verts.rbegin()+*best_iit+1);
-			}
-
-			// also append a copy of the initial insertion point to be able to continue the outer polygon
-			out.verts.push_back(o);
-		}
-	}
-	out.vertcnt.push_back(cnt);
-	ai_assert(out.verts.size() == cnt);
-
-	if (in.vertcnt.size()-std::count(begin,end,0) > 1) {
-		// Recursively apply the same algorithm if there are more boundaries to merge. The
-		// current implementation is relatively inefficient, though.
-		
-		TempMesh temp;
-		
-		// drop the boundary that we just processed
-		const size_t dist = std::distance(begin, best_iit);
-		TempMesh remaining = in;
-		remaining.vertcnt.erase(remaining.vertcnt.begin() + dist);
-		remaining.verts.erase(remaining.verts.begin()+best_vidx_start,remaining.verts.begin()+best_vidx_start+*best_iit);
-
-		normals.erase(normals.begin() + dist);
-		RecursiveMergeBoundaries(temp,remaining,out,normals,nor_boundary);
-
-		final_result.Append(temp);
-	}
-	else final_result.Append(out);
-}
-
-// ------------------------------------------------------------------------------------------------
-void MergePolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = -1) 
-{
-	// standard case - only one boundary, just copy it to the result vector
-	if (inmesh.vertcnt.size() <= 1) {
+	if(inmesh.vertcnt.size() == 1) {
 		result.Append(inmesh);
 		return;
 	}
 
-	result.vertcnt.reserve(inmesh.vertcnt.size()+result.vertcnt.size());
+	ai_assert(std::count(inmesh.vertcnt.begin(), inmesh.vertcnt.end(), 0) == 0);
 
-	// XXX get rid of the extra copy if possible
-	TempMesh meshout = inmesh;
+	typedef std::vector<unsigned int>::const_iterator face_iter;
 
-	// handle polygons with holes. Our built in triangulation won't handle them as is, but
-	// the ear cutting algorithm is solid enough to deal with them if we join the inner
-	// holes with the outer boundaries by dummy connections.
-	IFCImporter::LogDebug("fixing polygon with holes for triangulation via ear-cutting");
-	std::vector<unsigned int>::iterator outer_polygon = meshout.vertcnt.end(), begin=meshout.vertcnt.begin(), end=outer_polygon,  iit;
+	face_iter begin = inmesh.vertcnt.begin(), end = inmesh.vertcnt.end(), iit;
+	std::vector<unsigned int>::const_iterator outer_polygon_it = end;
 
-	// each hole results in two extra vertices
-	result.verts.reserve(meshout.verts.size()+meshout.vertcnt.size()*2+result.verts.size());
-	size_t outer_polygon_start = 0;
+	// major task here: given a list of nested polygon boundaries (one of which
+	// is the outer contour), reduce the triangulation task arising here to
+	// one that can be solved using the "quadrulation" algorithm which we use
+	// for pouring windows out of walls. The algorithm does not handle all
+	// cases but at least it is numerically stable and gives "nice" triangles.
 
+	// first compute newell normals for all polygons
 	// do not normalize 'normals', we need the original length for computing the polygon area
 	std::vector<IfcVector3> normals;
-	ComputePolygonNormals(meshout,normals,false);
+	ComputePolygonNormals(inmesh,normals,false);
 
-	// see if one of the polygons is a IfcFaceOuterBound (in which case `master_bounds` is its index).
-	// sadly we can't rely on it, the docs say 'At most one of the bounds shall be of the type IfcFaceOuterBound' 
+	// One of the polygons might be a IfcFaceOuterBound (in which case `master_bounds` 
+	// is its index). Sadly we can't rely on it, the docs say 'At most one of the bounds 
+	// shall be of the type IfcFaceOuterBound' 
 	IfcFloat area_outer_polygon = 1e-10f;
 	if (master_bounds != (size_t)-1) {
-		outer_polygon = begin + master_bounds;
-		outer_polygon_start = std::accumulate(begin,outer_polygon,0);
-		area_outer_polygon = normals[master_bounds].SquareLength();
+		ai_assert(master_bounds < inmesh.vertcnt.size());
+		outer_polygon_it = begin + master_bounds;
 	}
 	else {
-		size_t vidx = 0;
-		for(iit = begin; iit != meshout.vertcnt.end(); vidx += *iit++) {
-			// find the polygon with the largest area, it must be the outer bound. 
+		for(iit = begin; iit != end; iit++) {
+			// find the polygon with the largest area and take it as the outer bound. 
 			IfcVector3& n = normals[std::distance(begin,iit)];
 			const IfcFloat area = n.SquareLength();
 			if (area > area_outer_polygon) {
 				area_outer_polygon = area;
-				outer_polygon = iit;
-				outer_polygon_start = vidx;
+				outer_polygon_it = iit;
 			}
 		}
 	}
 
-	ai_assert(outer_polygon != meshout.vertcnt.end());	
-	std::vector<IfcVector3>& in = meshout.verts;
+	ai_assert(outer_polygon_it != end);
 
-	// skip over extremely small boundaries - this is a workaround to fix cases
-	// in which the number of holes is so extremely large that the
-	// triangulation code fails.
-#define IFC_VERTICAL_HOLE_SIZE_THRESHOLD 0.000001f
-	size_t vidx = 0, removed = 0, index = 0;
-	const IfcFloat threshold = area_outer_polygon * IFC_VERTICAL_HOLE_SIZE_THRESHOLD;
-	for(iit = begin; iit != end ;++index) {
-		const IfcFloat sqlen = normals[index].SquareLength();
-		if (sqlen < threshold) {
-			std::vector<IfcVector3>::iterator inbase = in.begin()+vidx;
-			in.erase(inbase,inbase+*iit);
-			
-			outer_polygon_start -= outer_polygon_start>vidx ? *iit : 0;
-			*iit++ = 0;
-			++removed;
+	const size_t outer_polygon_size = *outer_polygon_it;
+	const IfcVector3& master_normal = normals[std::distance(begin, outer_polygon_it)];
 
-			IFCImporter::LogDebug("skip small hole below threshold");
-		}
-		else {
-			normals[index] /= sqrt(sqlen);
-			vidx += *iit++;
-		}
-	}
+	// generate fake openings to meet the interface for the quadrulate
+	// algorithm. It boils down to generating small boxes given the
+	// inner polygon and the surface normal of the outer contour.
+	// It is important that we use the outer contour's normal because
+	// this is the plane onto which the quadrulate algorithm will
+	// project the entire mesh.
+	std::vector<TempOpening> fake_openings;
+	fake_openings.reserve(inmesh.vertcnt.size()-1);
 
-	// see if one or more of the hole has a face that lies directly on an outer bound.
-	// this happens for doors, for example.
-	vidx = 0;
-	for(iit = begin; ; vidx += *iit++) {
-next_loop:
-		if (iit == end) {
-			break;
-		}
-		if (iit == outer_polygon) {
+	std::vector<IfcVector3>::const_iterator vit = inmesh.verts.begin(), outer_vit;
+
+	for(iit = begin; iit != end; vit += *iit++) {
+		if (iit == outer_polygon_it) {
+			outer_vit = vit;
 			continue;
 		}
 
-		for(size_t vofs = 0; vofs < *iit; ++vofs) {
-			if (!*iit) {
-				continue;
-			}
-			const size_t next = (vofs+1)%*iit;
-			const IfcVector3& v = in[vidx+vofs], &vnext = in[vidx+next],&vd = (vnext-v).Normalize();
+		fake_openings.push_back(TempOpening());
+		TempOpening& opening = fake_openings.back();
 
-			for(size_t outer = 0; outer < *outer_polygon; ++outer) {
-				const IfcVector3& o = in[outer_polygon_start+outer], &onext = in[outer_polygon_start+(outer+1)%*outer_polygon], &od = (onext-o).Normalize();
+		opening.extrusionDir = master_normal;
+		opening.solid = NULL;
 
-				if (fabs(vd * od) > 1.f-1e-6f && (onext-v).Normalize() * vd > 1.f-1e-6f && (onext-v)*(o-v) < 0) {
-					IFCImporter::LogDebug("got an inner hole that lies partly on the outer polygonal boundary, merging them to a single contour");
+		opening.profileMesh = boost::make_shared<TempMesh>();
+		opening.profileMesh->verts.reserve(*iit);
+		opening.profileMesh->vertcnt.push_back(*iit);
 
-					// in between outer and outer+1 insert all vertices of this loop, then drop the original altogether.
-					std::vector<IfcVector3> tmp(*iit);
-
-					const size_t start = (v-o).SquareLength() > (vnext-o).SquareLength() ? vofs :  next;
-					std::vector<IfcVector3>::iterator inbase = in.begin()+vidx, it = std::copy(inbase+start, inbase+*iit,tmp.begin());
-					std::copy(inbase, inbase+start,it);
-					std::reverse(tmp.begin(),tmp.end());
-
-					in.insert(in.begin()+outer_polygon_start+(outer+1)%*outer_polygon,tmp.begin(),tmp.end());
-					vidx += outer_polygon_start<vidx ? *iit : 0;
-
-					inbase = in.begin()+vidx;
-					in.erase(inbase,inbase+*iit);
-
-					outer_polygon_start -= outer_polygon_start>vidx ? *iit : 0;
-					
-					*outer_polygon += tmp.size();
-					*iit++ = 0;
-					++removed;
-					goto next_loop;
-				}
-			}
-		}
+		std::copy(vit, vit + *iit, std::back_inserter(opening.profileMesh->verts));
 	}
 
-	if ( meshout.vertcnt.size() - removed <= 1) {
-		result.Append(meshout);
-		return;
-	}
+	// fill a mesh with ONLY the main polygon 
+	TempMesh temp;
+	temp.verts.reserve(outer_polygon_size);
+	temp.vertcnt.push_back(outer_polygon_size);
+	std::copy(outer_vit, outer_vit+outer_polygon_size,
+		std::back_inserter(temp.verts));
 
-	// extract the outer boundary and move it to a separate mesh
-	TempMesh boundary;
-	boundary.vertcnt.resize(1,*outer_polygon);
-	boundary.verts.resize(*outer_polygon);
-
-	std::vector<IfcVector3>::iterator b = in.begin()+outer_polygon_start;
-	std::copy(b,b+*outer_polygon,boundary.verts.begin());
-	in.erase(b,b+*outer_polygon);
-
-	std::vector<IfcVector3>::iterator norit = normals.begin()+std::distance(meshout.vertcnt.begin(),outer_polygon);
-	const IfcVector3 nor_boundary = *norit;
-	normals.erase(norit);
-	meshout.vertcnt.erase(outer_polygon);
-
-	// keep merging the closest inner boundary with the outer boundary until no more boundaries are left
-	RecursiveMergeBoundaries(result,meshout,boundary,normals,nor_boundary);
+	TryAddOpenings_Quadrulate(fake_openings, normals, temp);
+	result.Append(temp);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, ConversionData& conv)
 {
 	BOOST_FOREACH(const IfcFace& face, fset.CfsFaces) {
-
 		// size_t ob = -1, cnt = 0;
 		TempMesh meshout;
 		BOOST_FOREACH(const IfcFaceBound& bound, face.Bounds) {
@@ -446,11 +307,9 @@ void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, 
 			}*/
 
 		}
-		MergePolygonBoundaries(result,meshout);
+		ProcessPolygonBoundaries(result, meshout);
 	}
 }
-
-
 
 // ------------------------------------------------------------------------------------------------
 void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& result, ConversionData& conv)
@@ -1430,7 +1289,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 		}
 	}
 
-	// undo the projection, generate output quads
+	// swap data arrays
 	std::swap(vold,curmesh.verts);
 	std::swap(iold,curmesh.vertcnt);
 }
@@ -1550,8 +1409,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end();) {
 			const BoundingBox& ibb = *it;
 
-			if (ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
-				ibb.first.y < bb.second.y && ibb.second.y > bb.second.x) {
+			if (ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x &&
+				ibb.first.y <= bb.second.y && ibb.second.y >= bb.second.x) {
 
 				// take these two contours and try to merge them. If they overlap (which 
 				// should not happen, but in fact happens-in-the-real-world [tm] ),
@@ -1668,6 +1527,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	
 	IfcVector3 min = in[0];
 	dir *= IfcMatrix3(trafo);
+
 
 	std::vector<IfcVector3> nors;
 	const bool openings = !!conv.apply_openings && conv.apply_openings->size();

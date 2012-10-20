@@ -81,6 +81,14 @@ struct TempOpening
 	boost::shared_ptr<TempMesh> profileMesh;
 
 	// ------------------------------------------------------------------------------
+	TempOpening()
+		: solid()
+		, extrusionDir()
+		, profileMesh()
+	{
+	}
+
+	// ------------------------------------------------------------------------------
 	TempOpening(const IFC::IfcExtrudedAreaSolid* solid,IfcVector3 extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
 		: solid(solid)
 		, extrusionDir(extrusionDir)

@@ -67,7 +67,7 @@ namespace Assimp {
 #define one_vec (IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)))
 
 
-		bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
+		bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 			const std::vector<IfcVector3>& nors, 
 			TempMesh& curmesh);
 
@@ -1004,10 +1004,7 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
 void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 	const std::vector< std::vector<IfcVector2> >& contours,
 	const std::vector<TempOpening>& openings,
-	const IfcMatrix3& minv,
-	const IfcVector2& scale,
-	const IfcVector2& offset,
-	IfcFloat coord,
+	const IfcMatrix4& minv,
 	TempMesh& curmesh)
 {
 	ai_assert(contours.size() == bbs.size());
@@ -1083,7 +1080,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 						if ((contour[a] - edge).SquareLength() > diag*diag*0.7) {
 							continue;
 						}
-						const IfcVector3 v3 = minv * IfcVector3(offset.x + contour[a].x * scale.x, offset.y + contour[a].y * scale.y, coord);
+						const IfcVector3 v3 = minv * IfcVector3(contour[a].x, contour[a].y, 0.0f);
 						curmesh.verts.push_back(v3);
 					}
 
@@ -1105,7 +1102,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 							corner.y = bb.second.y;
 						}
 
-						const IfcVector3 v3 = minv * IfcVector3(offset.x + corner.x * scale.x, offset.y + corner.y * scale.y,coord);
+						const IfcVector3 v3 = minv * IfcVector3(corner.x, corner.y, 0.0f);
 						curmesh.verts.push_back(v3);
 					}
 					else if (cnt == 1) {
@@ -1213,10 +1210,7 @@ void CleanupWindowContours(std::vector< std::vector<IfcVector2> >& contours)
 
 // ------------------------------------------------------------------------------------------------
 void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& curmesh, 
-	const IfcMatrix3& minv, 
-	const IfcVector2& scale, 
-	const IfcVector2& offset,
-	IfcFloat coord,
+	const IfcMatrix4& minv,
 	const std::vector<IfcVector2>& outflat)
 {
 	std::vector<IfcVector3> vold;
@@ -1263,9 +1257,9 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 					iold.push_back(ex.outer.size());
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
 						vold.push_back( minv * IfcVector3(
-							offset.x + from_int64(point.X) * scale.x, 
-							offset.y + from_int64(point.Y) * scale.y,
-							coord));
+							from_int64(point.X), 
+							from_int64(point.Y),
+							0.0f));
 					}
 				}
 
@@ -1284,7 +1278,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 		iold.resize(outflat.size()/4,4);
 
 		BOOST_FOREACH(const IfcVector2& vproj, outflat) {
-			const IfcVector3 v3 = minv * IfcVector3(offset.x + vproj.x * scale.x, offset.y + vproj.y * scale.y,coord);
+			const IfcVector3 v3 = minv * IfcVector3(vproj.x, vproj.y, static_cast<IfcFloat>(0.0));
 			vold.push_back(v3);
 		}
 	}
@@ -1295,16 +1289,16 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
+bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	const std::vector<IfcVector3>& nors, 
 	TempMesh& curmesh)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
+	std::vector<std::vector<TempOpening*> > contours_to_openings;
 
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
-	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh);
-	const IfcMatrix3& minv = IfcMatrix3(m).Inverse();
+	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(curmesh));
 	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
 
 	IfcFloat coord = -1;
@@ -1334,10 +1328,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		contour_flat.push_back(IfcVector2(vv.x,vv.y));
 	}
 
-	// With the current code in DerivePlaneCoordinateSpace, 
-	// vmin,vmax should always be the 0...1 rectangle (+- numeric inaccuracies) 
-	// but here we really need this to be accurate, so normalize again.
-
+	// Further improve the projection by mapping the entire working set into
+	// [0,1] range
 	vmax -= vmin;
 	BOOST_FOREACH(IfcVector2& vv, contour_flat) {
 		vv.x  = (vv.x - vmin.x) / vmax.x;
@@ -1348,15 +1340,26 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		vv = std::min(vv,one_vec);
 	}
 
-	// project all openings into the coordinate system defined by the p+sv*tu plane
-	// and compute bounding boxes for them
+	IfcMatrix4 mult;
+	mult.a1 = static_cast<IfcFloat>(1.0) / vmax.x;
+	mult.b2 = static_cast<IfcFloat>(1.0) / vmax.y;
+
+	mult.a4 = -vmin.x * mult.a1;
+	mult.b4 = -vmin.y * mult.b2;
+	mult.c4 = -coord;
+	m = mult * m;
+
+	// Obtain inverse transform for getting back
+	const IfcMatrix4& minv = IfcMatrix4(m).Inverse();
+
+	// Compute bounding boxes for the projections of all openings
 	std::vector< BoundingBox > bbs;
 	std::vector< std::vector<IfcVector2> > contours;
 
 	size_t c = 0;
-	BOOST_FOREACH(const TempOpening& t,openings) {
-		std::vector<IfcVector3> profile_verts = t.profileMesh->verts;
-		std::vector<unsigned int> profile_vertcnts = t.profileMesh->vertcnt;
+	BOOST_FOREACH(TempOpening& opening,openings) {
+		std::vector<IfcVector3> profile_verts = opening.profileMesh->verts;
+		std::vector<unsigned int> profile_vertcnts = opening.profileMesh->vertcnt;
 		if(profile_verts.size() <= 2) {
 			continue;	
 		}
@@ -1385,8 +1388,8 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 				IfcVector2 vv(v.x, v.y);
 
 				// rescale
-				vv.x  = (vv.x - vmin.x) / vmax.x;
-				vv.y  = (vv.y - vmin.y) / vmax.y;
+				//vv.x  = (vv.x - vmin.x) / vmax.x;
+				//vv.y  = (vv.y - vmin.y) / vmax.y;
 
 				vv = std::max(vv,IfcVector2());
 				vv = std::min(vv,one_vec);
@@ -1403,6 +1406,7 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		}
 
 		BoundingBox bb = BoundingBox(vpmin,vpmax);
+		std::vector<TempOpening*> joined_openings(1, &opening);
 
 		// see if this BB intersects any other, in which case we could not use the Quadrify()
 		// algorithm and would revert to Poly2Tri only.
@@ -1445,6 +1449,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 					bb.first = std::min(bb.first, ibb.first);
 					bb.second = std::max(bb.second, ibb.second);
 
+					std::vector<TempOpening*>& t = contours_to_openings[std::distance(bbs.begin(),it)]; 
+					joined_openings.insert(joined_openings.end(), t.begin(), t.end());
+
+					contours_to_openings.erase(contours_to_openings.begin() + std::distance(bbs.begin(),it));
 					contours.erase(contours.begin() + std::distance(bbs.begin(),it));
 					it = bbs.erase(it);
 					continue;
@@ -1454,6 +1462,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 		}
 
 		if(!contour.empty()) {
+			contours_to_openings.push_back(std::vector<TempOpening*>(
+				joined_openings.begin(),
+				joined_openings.end()));
+
 			contours.push_back(contour);
 			bbs.push_back(bb);
 		}
@@ -1476,10 +1488,10 @@ bool TryAddOpenings_Quadrulate(const std::vector<TempOpening>& openings,
 	QuadrifyPart(IfcVector2(0.f,0.f),IfcVector2(1.f,1.f),field,bbs,outflat);
 	ai_assert(!(outflat.size() % 4));
 
-	CleanupOuterContour(contour_flat, curmesh, minv, vmax, vmin, coord, outflat);
+	CleanupOuterContour(contour_flat, curmesh, minv,outflat);
 	CleanupWindowContours(contours);
-	InsertWindowContours(bbs,contours,openings, minv,vmax, vmin, coord, curmesh);
-
+	InsertWindowContours(bbs,contours,openings, minv,curmesh);
+	//CloseWindows(contours, minv,contours_to_openings, curmesh);
 	return true;
 }
 

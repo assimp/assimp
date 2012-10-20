@@ -80,6 +80,13 @@ struct TempOpening
 	IfcVector3 extrusionDir;
 	boost::shared_ptr<TempMesh> profileMesh;
 
+	// list of points generated for this opening. This is used to
+	// create connections between two opposing holes created
+	// from a single opening instance (two because walls tend to
+	// have two sides). If !empty(), the other side of the wall
+	// has already been processed.
+	std::vector<IfcVector3> wallPoints;
+
 	// ------------------------------------------------------------------------------
 	TempOpening()
 		: solid()

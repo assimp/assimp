@@ -123,7 +123,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	// for pouring windows out of walls. The algorithm does not handle all
 	// cases but at least it is numerically stable and gives "nice" triangles.
 
-	// first compute newell normals for all polygons
+	// first compute normals for all polygons using Newell's algorithm
 	// do not normalize 'normals', we need the original length for computing the polygon area
 	std::vector<IfcVector3> normals;
 	inmesh.ComputePolygonNormals(normals,false);
@@ -153,7 +153,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	const size_t outer_polygon_size = *outer_polygon_it;
 	const IfcVector3& master_normal = normals[std::distance(begin, outer_polygon_it)];
 
-	// generate fake openings to meet the interface for the quadrulate
+	// Generate fake openings to meet the interface for the quadrulate
 	// algorithm. It boils down to generating small boxes given the
 	// inner polygon and the surface normal of the outer contour.
 	// It is important that we use the outer contour's normal because
@@ -167,6 +167,14 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	for(iit = begin; iit != end; vit += *iit++) {
 		if (iit == outer_polygon_it) {
 			outer_vit = vit;
+			continue;
+		}
+
+		// Filter degenerate polygons to keep them from causing trouble later on
+		IfcVector3& n = normals[std::distance(begin,iit)];
+		const IfcFloat area = n.SquareLength();
+		if (area < 1e-5f) {
+			IFCImporter::LogWarn("skipping degenerate polygon (ProcessPolygonBoundaries)");
 			continue;
 		}
 
@@ -1853,6 +1861,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 		// length of the normal is the area of the polygon.
 		const IfcVector3& normal = temp.ComputeLastPolygonNormal(false);
 		if (normal.SquareLength() < static_cast<IfcFloat>(1e-5)) {
+			IFCImporter::LogWarn("skipping degenerate polygon (ProcessBooleanExtrudedAreaSolidDifference)");
 			continue;
 		}
 

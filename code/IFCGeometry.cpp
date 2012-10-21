@@ -1448,6 +1448,12 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		}
 
 		BoundingBox bb = BoundingBox(vpmin,vpmax);
+
+		// Skip over very small openings - these are likely projection errors
+		// (i.e. they don't belong to this side of the wall)
+		if(fabs(vpmax.x - vpmin.x) * fabs(vpmax.y - vpmin.y) < static_cast<IfcFloat>(1e-5)) {
+			continue;
+		}
 		std::vector<TempOpening*> joined_openings(1, &opening);
 
 		// See if this BB intersects any other, in which case we could not use the Quadrify()
@@ -1477,7 +1483,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 					break;
 				}
 				else {
-					IFCImporter::LogDebug("merging overlapping openings, this should not happen");
+					IFCImporter::LogDebug("merging overlapping openings");
 
 					contour.clear();
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {

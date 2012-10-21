@@ -282,9 +282,11 @@ void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, 
 		TempMesh meshout;
 		BOOST_FOREACH(const IfcFaceBound& bound, face.Bounds) {
 			
-			// XXX implement proper merging for polygonal loops
 			if(const IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IfcPolyLoop>()) {
 				if(ProcessPolyloop(*polyloop, meshout,conv)) {
+
+					// The outer boundary is better determined by checking which
+					// polygon covers the largest area.
 
 					//if(bound.ToPtr<IfcFaceOuterBound>()) {
 					//	ob = cnt;
@@ -298,6 +300,9 @@ void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, 
 				continue;
 			}
 
+			// And this, even though it is sometimes TRUE and sometimes FALSE,
+			// does not really improve results.
+
 			/*if(!IsTrue(bound.Orientation)) {
 				size_t c = 0;
 				BOOST_FOREACH(unsigned int& c, meshout.vertcnt) {
@@ -305,7 +310,6 @@ void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, 
 					cnt += c;
 				}
 			}*/
-
 		}
 		ProcessPolygonBoundaries(result, meshout);
 	}
@@ -1902,6 +1906,17 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 
 		temp.verts.insert(temp.verts.end(), vit, vit + pcount);
 		temp.vertcnt.push_back(pcount);
+
+		// The algorithms used to generate mesh geometry sometimes
+		// spit out lines or other degenerates which must be
+		// filtered to avoid running into assertions later on.
+
+		// ComputePolygonNormal returns the Newell normal, so the
+		// length of the normal is the area of the polygon.
+		const IfcVector3& normal = ComputePolygonNormal(temp, false);
+		if (normal.SquareLength() < static_cast<IfcFloat>(1e-5)) {
+			continue;
+		}
 
 		TryAddOpenings_Quadrulate(openings, std::vector<IfcVector3>(1,IfcVector3(1,0,0)), temp);
 		result.Append(temp);

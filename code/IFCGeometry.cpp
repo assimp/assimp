@@ -99,86 +99,6 @@ bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData&
 }
 
 // ------------------------------------------------------------------------------------------------
-void ComputePolygonNormals(const TempMesh& meshout, std::vector<IfcVector3>& normals, bool normalize = true, size_t ofs = 0) 
-{
-	size_t max_vcount = 0;
-	std::vector<unsigned int>::const_iterator begin=meshout.vertcnt.begin()+ofs, end=meshout.vertcnt.end(),  iit;
-	for(iit = begin; iit != end; ++iit) {
-		max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
-	}
-
-	std::vector<IfcFloat> temp((max_vcount+2)*4);
-	normals.reserve( normals.size() + meshout.vertcnt.size()-ofs );
-
-	// `NewellNormal()` currently has a relatively strange interface and need to 
-	// re-structure things a bit to meet them.
-	size_t vidx = std::accumulate(meshout.vertcnt.begin(),begin,0);
-	for(iit = begin; iit != end; vidx += *iit++) {
-		if (!*iit) {
-			normals.push_back(IfcVector3());
-			continue;
-		}
-		for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
-			const IfcVector3& v = meshout.verts[vidx+vofs];
-			temp[cnt++] = v.x;
-			temp[cnt++] = v.y;
-			temp[cnt++] = v.z;
-#ifdef _DEBUG
-			temp[cnt] = std::numeric_limits<IfcFloat>::quiet_NaN();
-#endif
-			++cnt;
-		}
-
-		normals.push_back(IfcVector3());
-		NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
-	}
-
-	if(normalize) {
-		BOOST_FOREACH(IfcVector3& n, normals) {
-			n.Normalize();
-		}
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
-// Compute the normal of the last polygon in the given mesh
-IfcVector3 ComputePolygonNormal(const TempMesh& inmesh, bool normalize = true) 
-{
-	size_t total = inmesh.vertcnt.back(), vidx = inmesh.verts.size() - total;
-	std::vector<IfcFloat> temp((total+2)*3);
-	for(size_t vofs = 0, cnt = 0; vofs < total; ++vofs) {
-		const IfcVector3& v = inmesh.verts[vidx+vofs];
-		temp[cnt++] = v.x;
-		temp[cnt++] = v.y;
-		temp[cnt++] = v.z;
-	}
-	IfcVector3 nor;
-	NewellNormal<3,3,3>(nor,total,&temp[0],&temp[1],&temp[2]);
-	return normalize ? nor.Normalize() : nor;
-}
-
-// ------------------------------------------------------------------------------------------------
-void FixupFaceOrientation(TempMesh& result)
-{
-	const IfcVector3 vavg = result.Center();
-
-	std::vector<IfcVector3> normals;
-	ComputePolygonNormals(result,normals);
-
-	size_t c = 0, ofs = 0;
-	BOOST_FOREACH(unsigned int cnt, result.vertcnt) {
-		if (cnt>2){
-			const IfcVector3& thisvert = result.verts[c];
-			if (normals[ofs]*(thisvert-vavg) < 0) {
-				std::reverse(result.verts.begin()+c,result.verts.begin()+cnt+c);
-			}
-		}
-		c += cnt;
-		++ofs;
-	}
-}
-
-// ------------------------------------------------------------------------------------------------
 void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = (size_t)-1) 
 {
 	// handle all trivial cases
@@ -206,7 +126,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	// first compute newell normals for all polygons
 	// do not normalize 'normals', we need the original length for computing the polygon area
 	std::vector<IfcVector3> normals;
-	ComputePolygonNormals(inmesh,normals,false);
+	inmesh.ComputePolygonNormals(normals,false);
 
 	// One of the polygons might be a IfcFaceOuterBound (in which case `master_bounds` 
 	// is its index). Sadly we can't rely on it, the docs say 'At most one of the bounds 
@@ -1931,7 +1851,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 
 		// ComputePolygonNormal returns the Newell normal, so the
 		// length of the normal is the area of the polygon.
-		const IfcVector3& normal = ComputePolygonNormal(temp, false);
+		const IfcVector3& normal = temp.ComputeLastPolygonNormal(false);
 		if (normal.SquareLength() < static_cast<IfcFloat>(1e-5)) {
 			continue;
 		}
@@ -2048,7 +1968,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	meshtmp.RemoveAdjacentDuplicates();
 
 	if(fix_orientation) {
-		FixupFaceOrientation(meshtmp);
+		meshtmp.FixupFaceOrientation();
 	}
 
 	aiMesh* const mesh = meshtmp.ToMesh();

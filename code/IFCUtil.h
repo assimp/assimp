@@ -183,7 +183,15 @@ struct TempMesh
 	void Transform(const IfcMatrix4& mat);
 	IfcVector3 Center() const;
 	void Append(const TempMesh& other);
+
 	void RemoveAdjacentDuplicates();
+	void RemoveDegenerates();
+
+	void FixupFaceOrientation();
+	IfcVector3 ComputeLastPolygonNormal(bool normalize = true) const;
+	void ComputePolygonNormals(std::vector<IfcVector3>& normals, 
+		bool normalize = true, 
+		size_t ofs = 0) const;
 };
 
 

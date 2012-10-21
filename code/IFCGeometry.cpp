@@ -546,10 +546,12 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 }
 
 // ------------------------------------------------------------------------------------------------
-IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh) {
-
+IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok) 
+{
 	const std::vector<IfcVector3>& out = curmesh.verts;
 	IfcMatrix3 m;
+
+	ok = true;
 
 	const size_t s = out.size();
 	assert(curmesh.vertcnt.size() == 1 && curmesh.vertcnt.back() == s);
@@ -557,29 +559,35 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh) {
 	const IfcVector3 any_point = out[s-1];
 	IfcVector3 nor; 
 
-	// The input polygon is arbitrarily shaped, so we might need some tries
-	// until we find a suitable normal (and it does not even need to be
-	// right in all cases, Newell's algorithm would be the correct one ... ).
+	// The input polygon is arbitrarily shaped, therefore we might need some tries
+	// until we find a suitable normal. Note that Newells algorithm would give
+	// a more robust result, but this variant also gives us a suitable first
+	// axis for the 2D coordinate space on the polygon plane, exploiting the
+	// fact that the input polygon is nearly always a quad.
+	bool done = false;
 	size_t base = s-curmesh.vertcnt.back(), i, j;
-	for (i = base; i < s-1; ++i) {
+	for (i = base; !done && i < s-1; !done && ++i) {
 		for (j = i+1; j < s; ++j) {
 			nor = -((out[i]-any_point)^(out[j]-any_point));
 			if(fabs(nor.Length()) > 1e-8f) {
-				goto out;
+				done = true;
+				break;
 			}
 		}
 	}
 
-	assert(0);
-
-out:
+	if(!done) {
+		ok = false;
+		return m;
+	}
 
 	nor.Normalize();
 
 	IfcVector3 r = (out[i]-any_point);
 	r.Normalize();
 
-	// reconstruct orthonormal basis
+	// Reconstruct orthonormal basis
+	// XXX use Gram Schmidt for increased robustness
 	IfcVector3 u = r ^ nor;
 	u.Normalize();
 
@@ -599,7 +607,8 @@ out:
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, TempMesh& curmesh)
+bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, 
+	TempMesh& curmesh)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
 
@@ -607,7 +616,12 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
-	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh);
+	bool ok;
+	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh, ok);
+	if (!ok) {
+		return false;
+	}
+
 	const IfcMatrix3 minv = IfcMatrix3(m).Inverse();
 	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
 
@@ -1397,7 +1411,11 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
-	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(curmesh));
+	bool ok;
+	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(curmesh,ok));
+	if(!ok) {
+		return false;
+	}
 	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
 
 	IfcFloat coord = -1;
@@ -1923,8 +1941,6 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 
 		vit += pcount;
 	}
-
-	
 
 	IFCImporter::LogDebug("generating CSG geometry by geometric difference to a solid (IfcExtrudedAreaSolid)");
 }

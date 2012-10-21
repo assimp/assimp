@@ -1000,9 +1000,11 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
 	}
 }
 
+typedef std::vector< std::vector<IfcVector2> > ContourVector;
+
 // ------------------------------------------------------------------------------------------------
 void InsertWindowContours(const std::vector< BoundingBox >& bbs,
-	const std::vector< std::vector<IfcVector2> >& contours,
+	const ContourVector& contours,
 	const std::vector<TempOpening>& openings,
 	const IfcMatrix4& minv,
 	TempMesh& curmesh)
@@ -1013,6 +1015,9 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 	for(size_t i = 0; i < contours.size();++i) {
 		const BoundingBox& bb = bbs[i];
 		const std::vector<IfcVector2>& contour = contours[i];
+		if(contour.empty()) {
+			continue;
+		}
 
 		// check if we need to do it at all - many windows just fit perfectly into their quadratic holes,
 		// i.e. their contours *are* already their bounding boxes.
@@ -1160,7 +1165,7 @@ void MergeWindowContours (const std::vector<IfcVector2>& a,
 }
 
 // ------------------------------------------------------------------------------------------------
-void CleanupWindowContours(std::vector< std::vector<IfcVector2> >& contours)
+void CleanupWindowContours(ContourVector& contours)
 {
 	std::vector<IfcVector2> scratch;
 
@@ -1288,13 +1293,103 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 	std::swap(iold,curmesh.vertcnt);
 }
 
+typedef std::vector<TempOpening*> OpeningRefs;
+typedef std::vector<OpeningRefs > OpeningRefVector;
+
+// ------------------------------------------------------------------------------------------------
+void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv, 
+	OpeningRefVector contours_to_openings, 
+	TempMesh& curmesh)
+{
+	// For all contour points, check if one of the assigned openings does
+	// already have points assigned to it. In this case, assume this is
+	// the second side of the wall and generate connections between
+	// the two holes in order to close the window margin. 
+
+	// All this gets complicated by the fact that contours may pertain to
+	// multiple openings. The code is based on the assumption that this
+	// relationship is identical on both sides of the wall. If this is
+	// not the case, wrong geometry may be generated.
+	for (ContourVector::const_iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
+		if ((*it).empty()) {
+			continue;
+		}
+		OpeningRefs& refs = contours_to_openings[std::distance(contours.begin(), it)];
+
+		bool has_other_side = false;
+		BOOST_FOREACH(const TempOpening* opening, refs) {
+			if(!opening->wallPoints.empty()) {
+				has_other_side = true;
+				break;
+			}
+		}
+
+		const ContourVector::value_type::const_iterator cbegin = (*it).begin(), cend = (*it).end();
+
+		if (has_other_side) {
+			// XXX this algorithm is really a bit inefficient - both in terms
+			// of constant factor and of asymptotic runtime.
+			std::vector<IfcVector3>::const_iterator vstart;
+			for (ContourVector::value_type::const_iterator cit = cbegin; cit != cend; ++cit) {
+
+				const IfcVector2& proj_point = *cit;
+				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
+
+				unsigned int i = 0;
+				IfcFloat best = static_cast<IfcFloat>(1e10);
+				IfcVector3 bestv;
+
+				BOOST_FOREACH(const TempOpening* opening, refs) {
+					BOOST_FOREACH(const IfcVector3& other, opening->wallPoints) {
+						const IfcFloat sqdist = (world_point - other).SquareLength();
+						if (sqdist < best) {
+							bestv = other;
+							best = sqdist;
+						}
+						++i;
+					}
+				}
+
+				curmesh.verts.push_back(world_point);
+				curmesh.verts.push_back(bestv);
+
+				curmesh.vertcnt.push_back(4);
+
+				if (cit != cbegin) {
+
+					curmesh.verts.push_back(world_point);
+					curmesh.verts.push_back(bestv);
+
+					if (cit == cend - 1) {
+						curmesh.verts.push_back(*(vstart));
+						curmesh.verts.push_back(*(vstart+1));
+					}
+				}
+				else {
+					vstart = curmesh.verts.end() - 2;
+				}
+			}
+		}
+		else {
+			BOOST_FOREACH(TempOpening* opening, refs) {
+				opening->wallPoints.reserve(opening->wallPoints.capacity() + (*it).size());
+				for (ContourVector::value_type::const_iterator cit = cbegin; cit != cend; ++cit) {
+
+					const IfcVector2& proj_point = *cit;
+					opening->wallPoints.push_back(minv * IfcVector3(proj_point.x,proj_point.y,0.0f));
+				}
+			}
+		}
+	}
+}
+
 // ------------------------------------------------------------------------------------------------
 bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	const std::vector<IfcVector3>& nors, 
 	TempMesh& curmesh)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
-	std::vector<std::vector<TempOpening*> > contours_to_openings;
+	OpeningRefVector contours_to_openings;
 
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
@@ -1354,7 +1449,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 
 	// Compute bounding boxes for the projections of all openings
 	std::vector< BoundingBox > bbs;
-	std::vector< std::vector<IfcVector2> > contours;
+	ContourVector contours;
 
 	size_t c = 0;
 	BOOST_FOREACH(TempOpening& opening,openings) {
@@ -1387,10 +1482,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 				const IfcVector3& v = m * x;
 				IfcVector2 vv(v.x, v.y);
 
-				// rescale
-				//vv.x  = (vv.x - vmin.x) / vmax.x;
-				//vv.y  = (vv.y - vmin.y) / vmax.y;
-
+				// sanity rounding
 				vv = std::max(vv,IfcVector2());
 				vv = std::min(vv,one_vec);
 
@@ -1491,7 +1583,12 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	CleanupOuterContour(contour_flat, curmesh, minv,outflat);
 	CleanupWindowContours(contours);
 	InsertWindowContours(bbs,contours,openings, minv,curmesh);
-	//CloseWindows(contours, minv,contours_to_openings, curmesh);
+	
+	// this should connect the window openings on both sides of the wall,
+	// but it produces lots of artifacts which are not resolved yet.
+	// Most of all, it makes all cases in which adjacent openings are
+	// not correctly merged together glaringly obvious.
+	//CloseWindows(contours, minv, contours_to_openings, curmesh);
 	return true;
 }
 
@@ -1614,7 +1711,6 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 			}
 		}
 	}
-
 
 	if(openings && ((sides_with_openings != 2 && sides_with_openings) || (sides_with_v_openings != 2 && sides_with_v_openings))) {
 		IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");

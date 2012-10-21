@@ -137,20 +137,29 @@ void TempMesh::RemoveDegenerates()
 	// of the polygons, which is close to zero for lines.
 
 	std::vector<IfcVector3> normals;
-	ComputePolygonNormals(normals);
+	ComputePolygonNormals(normals, false);
+
+	bool drop = false;
+	size_t inor = 0;
 
 	std::vector<IfcVector3>::const_iterator vit = verts.begin();
-	for (std::vector<unsigned int>::const_iterator it = vertcnt.begin(); it != vertcnt.end();) {
+	for (std::vector<unsigned int>::const_iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
 		const unsigned int pcount = *it;
 		
-		if (normals[std::distance(static_cast<std::vector<unsigned int>::const_iterator>(vertcnt.begin()),it)].SquareLength() < 1e-5f) {
+		if (normals[inor].SquareLength() < 1e-5f) {
 			it = vertcnt.erase(it);
 			vit = verts.erase(vit, vit + pcount);
+
+			drop = true;
 			continue;
 		}
 
 		vit += pcount;
 		++it;
+	}
+
+	if(drop) {
+		IFCImporter::LogDebug("removing degenerate faces");
 	}
 }
 
@@ -298,7 +307,7 @@ void TempMesh::RemoveAdjacentDuplicates()
 		base += cnt;
 	}
 	if(drop) {
-		IFCImporter::LogDebug("removed duplicate vertices");
+		IFCImporter::LogDebug("removing duplicate vertices");
 	}
 }
 

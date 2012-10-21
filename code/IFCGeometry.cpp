@@ -1975,6 +1975,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	}
 
 	meshtmp.RemoveAdjacentDuplicates();
+	meshtmp.RemoveDegenerates();
 
 	if(fix_orientation) {
 		meshtmp.FixupFaceOrientation();

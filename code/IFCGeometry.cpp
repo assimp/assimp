@@ -1462,7 +1462,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		IfcVector2 vpmin,vpmax;
 		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
 
-		// the opening meshes are real 3D meshes so skip over all faces
+		// The opening meshes are real 3D meshes so skip over all faces
 		// clearly facing into the wrong direction.
 		std::vector<IfcVector2> contour;
 		for (size_t f = 0, vi_total = 0, fend = profile_vertcnts.size(); f < fend; ++f) {
@@ -1500,7 +1500,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		BoundingBox bb = BoundingBox(vpmin,vpmax);
 		std::vector<TempOpening*> joined_openings(1, &opening);
 
-		// see if this BB intersects any other, in which case we could not use the Quadrify()
+		// See if this BB intersects any other, in which case we could not use the Quadrify()
 		// algorithm and would revert to Poly2Tri only.
 		for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end();) {
 			const BoundingBox& ibb = *it;
@@ -1508,7 +1508,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 			if (ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x &&
 				ibb.first.y <= bb.second.y && ibb.second.y >= bb.second.x) {
 
-				// take these two contours and try to merge them. If they overlap (which 
+				// Take these two contours and try to merge them. If they overlap (which 
 				// should not happen, but in fact happens-in-the-real-world [tm] ),
 				// resume using a single contour and a single bounding box.
 				const std::vector<IfcVector2>& other = contours[std::distance(bbs.begin(),it)];
@@ -1584,11 +1584,12 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	CleanupWindowContours(contours);
 	InsertWindowContours(bbs,contours,openings, minv,curmesh);
 	
-	// this should connect the window openings on both sides of the wall,
+	// This should connect the window openings on both sides of the wall,
 	// but it produces lots of artifacts which are not resolved yet.
 	// Most of all, it makes all cases in which adjacent openings are
 	// not correctly merged together glaringly obvious.
-	//CloseWindows(contours, minv, contours_to_openings, curmesh);
+
+	// CloseWindows(contours, minv, contours_to_openings, curmesh);
 	return true;
 }
 
@@ -1719,30 +1720,20 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	IFCImporter::LogDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
 }
 
-
-
 // ------------------------------------------------------------------------------------------------
 void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, 
 	ConversionData& conv)
 {
 	if(const IfcExtrudedAreaSolid* const solid = swept.ToPtr<IfcExtrudedAreaSolid>()) {
 		// Do we just collect openings for a parent element (i.e. a wall)? 
-		// In this case we don't extrude the surface yet, just keep the profile and transform it correctly
+		// In such a case, we generate the polygonal extrusion mesh as usual,
+		// but attach it to a TempOpening instance which will later be applied
+		// to the wall it pertains to.
 		if(conv.collect_openings) {
 			boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
 			ProcessExtrudedAreaSolid(*solid,*meshtmp,conv);
 
-			/*
-			ProcessProfile(swept.SweptArea,*meshtmp,conv);
-
-			IfcMatrix4 m;
-			ConvertAxisPlacement(m,solid->Position);
-			meshtmp->Transform(m);
-
-			IfcVector3 dir;
-			ConvertDirection(dir,solid->ExtrudedDirection); */
-			conv.collect_openings->push_back(TempOpening(solid,IfcVector3(0,0,0) 
-				/* IfcMatrix3(m) * (dir*static_cast<IfcFloat>(solid->Depth)) */,meshtmp));
+			conv.collect_openings->push_back(TempOpening(solid,IfcVector3(0,0,0),meshtmp));
 			return;
 		}
 
@@ -1755,7 +1746,6 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 		IFCImporter::LogWarn("skipping unknown IfcSweptAreaSolid entity, type is " + swept.GetClassName());
 	}
 }
-
 
 // ------------------------------------------------------------------------------------------------
 enum Intersect {
@@ -1786,125 +1776,194 @@ Intersect IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const I
 }
 
 // ------------------------------------------------------------------------------------------------
+void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& result, 
+	const TempMesh& first_operand, 
+	ConversionData& conv)
+{
+	ai_assert(hs != NULL);
+
+	const IfcPlane* const plane = hs->BaseSurface->ToPtr<IfcPlane>();
+	if(!plane) {
+		IFCImporter::LogError("expected IfcPlane as base surface for the IfcHalfSpaceSolid");
+		return;
+	}
+
+	// extract plane base position vector and normal vector
+	IfcVector3 p,n(0.f,0.f,1.f);
+	if (plane->Position->Axis) {
+		ConvertDirection(n,plane->Position->Axis.Get());
+	}
+	ConvertCartesianPoint(p,plane->Position->Location);
+
+	if(!IsTrue(hs->AgreementFlag)) {
+		n *= -1.f;
+	}
+
+	// clip the current contents of `meshout` against the plane we obtained from the second operand
+	const std::vector<IfcVector3>& in = first_operand.verts;
+	std::vector<IfcVector3>& outvert = result.verts;
+
+	std::vector<unsigned int>::const_iterator begin = first_operand.vertcnt.begin(), 
+		end = first_operand.vertcnt.end(), iit;
+
+	outvert.reserve(in.size());
+	result.vertcnt.reserve(first_operand.vertcnt.size());
+
+	unsigned int vidx = 0;
+	for(iit = begin; iit != end; vidx += *iit++) {
+
+		unsigned int newcount = 0;
+		for(unsigned int i = 0; i < *iit; ++i) {
+			const IfcVector3& e0 = in[vidx+i], e1 = in[vidx+(i+1)%*iit];
+
+			// does the next segment intersect the plane?
+			IfcVector3 isectpos;
+			const Intersect isect = IntersectSegmentPlane(p,n,e0,e1,isectpos);
+			if (isect == Intersect_No || isect == Intersect_LiesOnPlane) {
+				if ( (e0-p).Normalize()*n > 0 ) {
+					outvert.push_back(e0);
+					++newcount;
+				}
+			}
+			else if (isect == Intersect_Yes) {
+				if ( (e0-p).Normalize()*n > 0 ) {
+					// e0 is on the right side, so keep it 
+					outvert.push_back(e0);
+					outvert.push_back(isectpos);
+					newcount += 2;
+				}
+				else {
+					// e0 is on the wrong side, so drop it and keep e1 instead
+					outvert.push_back(isectpos);
+					++newcount;
+				}
+			}
+		}	
+
+		if (!newcount) {
+			continue;
+		}
+
+		IfcVector3 vmin,vmax;
+		ArrayBounds(&*(outvert.end()-newcount),newcount,vmin,vmax);
+
+		// filter our IfcFloat points - those may happen if a point lies
+		// directly on the intersection line. However, due to IfcFloat
+		// precision a bitwise comparison is not feasible to detect
+		// this case.
+		const IfcFloat epsilon = (vmax-vmin).SquareLength() / 1e6f;
+		FuzzyVectorCompare fz(epsilon);
+
+		std::vector<IfcVector3>::iterator e = std::unique( outvert.end()-newcount, outvert.end(), fz );
+
+		if (e != outvert.end()) {
+			newcount -= static_cast<unsigned int>(std::distance(e,outvert.end()));
+			outvert.erase(e,outvert.end());
+		}
+		if (fz(*( outvert.end()-newcount),outvert.back())) {
+			outvert.pop_back();
+			--newcount;
+		}
+		if(newcount > 2) {
+			result.vertcnt.push_back(newcount);
+		}
+		else while(newcount-->0) {
+			result.verts.pop_back();
+		}
+
+	}
+	IFCImporter::LogDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
+}
+
+// ------------------------------------------------------------------------------------------------
+void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result, 
+   const TempMesh& first_operand, 
+   ConversionData& conv)
+{
+	ai_assert(as != NULL);
+
+	// This case is handled by reduction to an instance of the quadrify() algorithm.
+	// Obviously, this won't work for arbitrarily complex cases. In fact, the first
+	// operand should be near-planar. Luckily, this is usually the case in Ifc 
+	// buildings.
+
+	boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
+	ProcessExtrudedAreaSolid(*as,*meshtmp,conv);
+
+	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp));
+
+	result = first_operand;
+
+	TempMesh temp;
+
+	std::vector<IfcVector3>::const_iterator vit = first_operand.verts.begin();
+	BOOST_FOREACH(unsigned int pcount, first_operand.vertcnt) {
+		temp.Clear();
+
+		temp.verts.insert(temp.verts.end(), vit, vit + pcount);
+		temp.vertcnt.push_back(pcount);
+
+		TryAddOpenings_Quadrulate(openings, std::vector<IfcVector3>(1,IfcVector3(1,0,0)), temp);
+		result.Append(temp);
+
+		vit += pcount;
+	}
+
+	
+
+	IFCImporter::LogDebug("generating CSG geometry by geometric difference to a solid (IfcExtrudedAreaSolid)");
+}
+
+// ------------------------------------------------------------------------------------------------
 void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv)
 {
+	// supported CSG operations:
+	//   DIFFERENCE
 	if(const IfcBooleanResult* const clip = boolean.ToPtr<IfcBooleanResult>()) {
 		if(clip->Operator != "DIFFERENCE") {
 			IFCImporter::LogWarn("encountered unsupported boolean operator: " + (std::string)clip->Operator);
 			return;
 		}
 
-		TempMesh meshout;
+		// supported cases (1st operand):
+		//  IfcBooleanResult -- call ProcessBoolean recursively
+		//  IfcSweptAreaSolid -- obtain polygonal geometry first
+
+		// supported cases (2nd operand):
+		//  IfcHalfSpaceSolid -- easy, clip against plane
+		//  IfcExtrudedAreaSolid -- reduce to an instance of the quadrify() algorithm
+
+		
 		const IfcHalfSpaceSolid* const hs = clip->SecondOperand->ResolveSelectPtr<IfcHalfSpaceSolid>(conv.db);
-		if(!hs) {
-			IFCImporter::LogError("expected IfcHalfSpaceSolid as second clipping operand");
+		const IfcExtrudedAreaSolid* const as = clip->SecondOperand->ResolveSelectPtr<IfcExtrudedAreaSolid>(conv.db);
+		if(!hs && !as) {
+			IFCImporter::LogError("expected IfcHalfSpaceSolid or IfcExtrudedAreaSolid as second clipping operand");
 			return;
 		}
 
-		const IfcPlane* const plane = hs->BaseSurface->ToPtr<IfcPlane>();
-		if(!plane) {
-			IFCImporter::LogError("expected IfcPlane as base surface for the IfcHalfSpaceSolid");
-			return;
-		}
-
+		TempMesh first_operand;
 		if(const IfcBooleanResult* const op0 = clip->FirstOperand->ResolveSelectPtr<IfcBooleanResult>(conv.db)) {
-			ProcessBoolean(*op0,meshout,conv);
+			ProcessBoolean(*op0,first_operand,conv);
 		}
 		else if (const IfcSweptAreaSolid* const swept = clip->FirstOperand->ResolveSelectPtr<IfcSweptAreaSolid>(conv.db)) {
-			ProcessSweptAreaSolid(*swept,meshout,conv);
+			ProcessSweptAreaSolid(*swept,first_operand,conv);
 		}
 		else {
 			IFCImporter::LogError("expected IfcSweptAreaSolid or IfcBooleanResult as first clipping operand");
 			return;
 		}
 
-		// extract plane base position vector and normal vector
-		IfcVector3 p,n(0.f,0.f,1.f);
-		if (plane->Position->Axis) {
-			ConvertDirection(n,plane->Position->Axis.Get());
+		if(hs) {
+			ProcessBooleanHalfSpaceDifference(hs, result, first_operand, conv);
 		}
-		ConvertCartesianPoint(p,plane->Position->Location);
-
-		if(!IsTrue(hs->AgreementFlag)) {
-			n *= -1.f;
+		else {
+			ProcessBooleanExtrudedAreaSolidDifference(as, result, first_operand, conv);
 		}
-
-		// clip the current contents of `meshout` against the plane we obtained from the second operand
-		const std::vector<IfcVector3>& in = meshout.verts;
-		std::vector<IfcVector3>& outvert = result.verts;
-		std::vector<unsigned int>::const_iterator begin=meshout.vertcnt.begin(), end=meshout.vertcnt.end(), iit;
-
-		outvert.reserve(in.size());
-		result.vertcnt.reserve(meshout.vertcnt.size());
-
-		unsigned int vidx = 0;
-		for(iit = begin; iit != end; vidx += *iit++) {
-
-			unsigned int newcount = 0;
-			for(unsigned int i = 0; i < *iit; ++i) {
-				const IfcVector3& e0 = in[vidx+i], e1 = in[vidx+(i+1)%*iit];
-
-				// does the next segment intersect the plane?
-				IfcVector3 isectpos;
-				const Intersect isect = IntersectSegmentPlane(p,n,e0,e1,isectpos);
-				if (isect == Intersect_No || isect == Intersect_LiesOnPlane) {
-					if ( (e0-p).Normalize()*n > 0 ) {
-						outvert.push_back(e0);
-						++newcount;
-					}
-				}
-				else if (isect == Intersect_Yes) {
-					if ( (e0-p).Normalize()*n > 0 ) {
-						// e0 is on the right side, so keep it 
-						outvert.push_back(e0);
-						outvert.push_back(isectpos);
-						newcount += 2;
-					}
-					else {
-						// e0 is on the wrong side, so drop it and keep e1 instead
-						outvert.push_back(isectpos);
-						++newcount;
-					}
-				}
-			}	
-
-			if (!newcount) {
-				continue;
-			}
-
-			IfcVector3 vmin,vmax;
-			ArrayBounds(&*(outvert.end()-newcount),newcount,vmin,vmax);
-
-			// filter our IfcFloat points - those may happen if a point lies
-			// directly on the intersection line. However, due to IfcFloat
-			// precision a bitwise comparison is not feasible to detect
-			// this case.
-			const IfcFloat epsilon = (vmax-vmin).SquareLength() / 1e6f;
-			FuzzyVectorCompare fz(epsilon);
-
-			std::vector<IfcVector3>::iterator e = std::unique( outvert.end()-newcount, outvert.end(), fz );
-			if (e != outvert.end()) {
-				newcount -= static_cast<unsigned int>(std::distance(e,outvert.end()));
-				outvert.erase(e,outvert.end());
-			}
-			if (fz(*( outvert.end()-newcount),outvert.back())) {
-				outvert.pop_back();
-				--newcount;
-			}
-			if(newcount > 2) {
-				result.vertcnt.push_back(newcount);
-			}
-			else while(newcount-->0)result.verts.pop_back();
-
-		}
-		IFCImporter::LogDebug("generating CSG geometry by plane clipping (IfcBooleanClippingResult)");
 	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcBooleanResult entity, type is " + boolean.GetClassName());
 	}
 }
-
-
 
 // ------------------------------------------------------------------------------------------------
 bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, 

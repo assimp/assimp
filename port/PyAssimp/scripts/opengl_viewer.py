@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 import math
 import numpy
 
-import pyassimp
+from pyassimp import core as pyassimp
 from pyassimp.postprocess import *
 from pyassimp.helper import *
 
@@ -35,28 +35,28 @@ height = 400
 width = 708
 
 zup = numpy.matrix([[1, 0, 0, 0],
-		    [0, 1, 0, 0],
-		    [0, 0, 1, 0],
-		    [0, 0, 0, 1]])
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]])
 
 class GLRenderer():
     def __init__(self):
-	self.scene = None
-	 
-	self.auto_rotate = False
-        self.viewangle_h = self.viewangle_v = 0.0
-	self.current_cam_index = 0
+        self.scene = None
 
-	# for FPS calculation
+        self.auto_rotate = False
+        self.viewangle_h = self.viewangle_v = 0.0
+        self.current_cam_index = 0
+
+        # for FPS calculation
         self.prev_time = 0
         self.prev_fps_time = 0
         self.frames = 0
- 
+
     def onkeypress(self, key, x, y):
         if key == 'a':
-    	     self.auto_rotate = not self.auto_rotate
-    	     self.viewangle_h = 0.
-    	     self.viewangle_v = 0.
+             self.auto_rotate = not self.auto_rotate
+             self.viewangle_h = 0.
+             self.viewangle_v = 0.
         if key == 'z':
             self.viewangle_v = -0.04
         if key == 's':

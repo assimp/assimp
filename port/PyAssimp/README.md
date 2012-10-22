@@ -2,9 +2,9 @@ PyAssimp Readme
 ===============
 
 -- a simple Python wrapper for Assimp using ctypes to access
-the library. Tested for Python 2.6. Known not to work with
-Python 2.4.
+the library. Requires Python >= 2.6.
 
+Python 3 support is mostly here, but not well tested.
 
 Note that pyassimp is not complete. Many ASSIMP features are missing. In
 particular, only loading of models is currently supported (no export).
@@ -25,8 +25,8 @@ substituted by assertions ...):
 
 ```python
 
-import pyassimp
-scene = pyassimp.load('hello.3ds')
+from pyassimp.core import *
+scene = load('hello.3ds')
 
 assert len(scene.meshes)
 mesh = scene.meshes[0]
@@ -35,7 +35,7 @@ assert len(mesh.vertices)
 print(mesh.vertices[0])
 
 # don't forget this one, or you will leak!
-pyassimp.release(scene)
+release(scene)
 
 ```
 
@@ -44,13 +44,13 @@ scene:
 
 ```python
 
-import pyassimp
-scene = pyassimp.load('hello.3ds')
+from pyassimp.core import *
+scene = load('hello.3ds')
 
 for c in scene.rootnode.children:
     print(str(c))
 
-pyassimp.release(scene)
+release(scene)
 
 ```
 

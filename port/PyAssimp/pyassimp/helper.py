@@ -6,19 +6,20 @@ Some fancy helper functions.
 
 import os
 import ctypes
-import structs
-import operator
-
-from errors import AssimpError
 from ctypes import POINTER
-
+import operator
 import numpy
+
+import logging;logger = logging.getLogger("pyassimp")
+
+from .errors import AssimpError
 
 additional_dirs, ext_whitelist = [],[]
 
 # populate search directories and lists of allowed file extensions
 # depending on the platform we're running on.
 if os.name=='posix':
+    additional_dirs.append('/home/skadge/openrobots/lib/')
     additional_dirs.append('/usr/lib/')
     additional_dirs.append('/usr/local/lib/')
 
@@ -89,7 +90,8 @@ def try_load_functions(library,dll,candidates):
         pass
     else:
         #Library found!
-        load.restype = POINTER(structs.Scene)
+        from .structs import Scene
+        load.restype = POINTER(Scene)
         
         candidates.append((library, load, release, dll))
 
@@ -123,10 +125,11 @@ def search_library():
                 continue
 
             library = os.path.join(curfolder, filename)
-            #print 'Try ',library
+            logger.debug('Try ' + library)
             try:
                 dll = ctypes.cdll.LoadLibrary(library)
-            except:
+            except Exception as e:
+                logger.warning(str(e))
                 # OK, this except is evil. But different OSs will throw different
                 # errors. So just ignore any errors.
                 continue
@@ -135,12 +138,12 @@ def search_library():
     
     if not candidates:
         # no library found
-        raise AssimpError, "assimp library not found"
+        raise AssimpError("assimp library not found")
     else:
         # get the newest library
         candidates = map(lambda x: (os.lstat(x[0])[-2], x), candidates)
         res = max(candidates, key=operator.itemgetter(0))[1]
-        #print 'Taking ',res[0]
+        logger.debug('Using assimp library located at ' + res[0])
 
         # XXX: if there are 1000 dll/so files containing 'assimp'
         # in their name, do we have all of them in our address

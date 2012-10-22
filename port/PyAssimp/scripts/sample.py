@@ -6,13 +6,8 @@ This module demonstrates the functionality of PyAssimp.
 """
 
 
-import pyassimp
+from pyassimp import core as pyassimp
 import os, sys
-
-#get a model out of assimp's test-data if none is provided on the command line
-DEFAULT_MODEL = os.path.join(os.path.dirname(__file__),
-                     "..", "..",
-                     "test", "models", "MDL", "MDL3 (3DGS A4)", "minigun.MDL")
 
 def recur_node(node,level = 0):
     print("  " + "\t" * level + "- " + str(node))
@@ -21,61 +16,61 @@ def recur_node(node,level = 0):
 
 
 def main(filename=None):
-    filename = filename or DEFAULT_MODEL
+
     scene = pyassimp.load(filename)
     
     #the model we load
-    print "MODEL:", filename
+    print("MODEL:" + filename)
     print
     
     #write some statistics
-    print "SCENE:"
-    print "  meshes:", len(scene.meshes)
-    print "  materials:", len(scene.materials)
-    print "  textures:", len(scene.textures)
+    print("SCENE:")
+    print("  meshes:" + str(len(scene.meshes)))
+    print("  materials:" + str(len(scene.materials)))
+    print("  textures:" + str(len(scene.textures)))
     print
     
-    print "NODES:"
+    print("NODES:")
     recur_node(scene.rootnode)
 
     print
-    print "MESHES:"
+    print("MESHES:")
     for index, mesh in enumerate(scene.meshes):
-        print "  MESH", index+1
-        print "    material id:", mesh.materialindex+1
-        print "    vertices:", len(mesh.vertices)
-        print "    first 3 verts:\n", mesh.vertices[:3]
+        print("  MESH" + str(index+1))
+        print("    material id:" + str(mesh.materialindex+1))
+        print("    vertices:" + str(len(mesh.vertices)))
+        print("    first 3 verts:\n" + str(mesh.vertices[:3]))
         if mesh.normals.any():
-                print "    first 3 normals:\n", mesh.normals[:3]
+                print("    first 3 normals:\n" + str(mesh.normals[:3]))
         else:
-                print "    no normals"
-        print "    colors:", len(mesh.colors)
+                print("    no normals")
+        print("    colors:" + str(len(mesh.colors)))
         tcs = mesh.texturecoords
         if tcs:
             for index, tc in enumerate(tcs):
-                print "    texture-coords "+ str(index) + ":", len(tcs[index]), "first3:", tcs[index][:3]
+                print("    texture-coords "+ str(index) + ":" + str(len(tcs[index])) + "first3:" + str(tcs[index][:3]))
 
         else:
-            print "    no texture coordinates"
-        print "    uv-component-count:", len(mesh.numuvcomponents)
-        print "    faces:", len(mesh.faces), "first:\n", mesh.faces[:3]
-        print "    bones:", len(mesh.bones), "first:", [str(b) for b in mesh.bones[:3]]
+            print("    no texture coordinates")
+        print("    uv-component-count:" + str(len(mesh.numuvcomponents)))
+        print("    faces:" + str(len(mesh.faces)) + " -> first:\n" + str(mesh.faces[:3]))
+        print("    bones:" + str(len(mesh.bones)) + " -> first:" + str([str(b) for b in mesh.bones[:3]]))
         print
 
-    print "MATERIALS:"
+    print("MATERIALS:")
     for index, material in enumerate(scene.materials):
         print("  MATERIAL (id:" + str(index+1) + ")")
         for key, value in material.properties.items():
-            print "    %s: %s" % (key, value)
+            print("    %s: %s" % (key, value))
     print
     
-    print "TEXTURES:"
+    print("TEXTURES:")
     for index, texture in enumerate(scene.textures):
-        print "  TEXTURE", index+1
-        print "    width:", texture.width
-        print "    height:", texture.height
-        print "    hint:", texture.achformathint
-        print "    data (size):", len(texture.data)
+        print("  TEXTURE" + str(index+1))
+        print("    width:" + str(texture.width))
+        print("    height:" + str(texture.height))
+        print("    hint:" + str(texture.achformathint))
+        print("    data (size):" + str(len(texture.data)))
    
     # Finally release the model
     pyassimp.release(scene)

@@ -13,19 +13,25 @@ if sys.version_info < (2,6):
 
 import ctypes
 import os
-
+import numpy
 
 import logging; logger = logging.getLogger("pyassimp")
 
-import numpy
+# Attach a default, null handler, to the logger.
+# applications can easily get log messages from pyassimp
+# by calling for instance
+# >>> logging.basicConfig(level=logging.DEBUG)
+# before importing pyassimp
+class NullHandler(logging.Handler):
+    def emit(self, record):
+        pass
+h = NullHandler()
+logger.addHandler(h)
 
 from . import structs
 from .errors import AssimpError
 from . import helper
 
-
-#logging.basicConfig(level=logging.DEBUG)
-logging.basicConfig()
 
 assimp_structs_as_tuple = (
         structs.Matrix4x4, 
@@ -54,16 +60,12 @@ def make_tuple(ai_obj, type = None):
 def call_init(obj, caller = None):
         # init children
         if hasattr(obj, '_init'):
-            logger.debug("Init of children: ")
             obj._init()
-            logger.debug("Back to " + str(caller))
 
         # pointers
         elif hasattr(obj, 'contents'):
             if hasattr(obj.contents, '_init'):
-                logger.debug("Init of children (pointer): ")
                 obj.contents._init(target = obj)
-                logger.debug("Back to " + str(caller))
 
 
 
@@ -75,22 +77,16 @@ def _init(self, target = None):
     pointers, to skip the intermediate 'contents' deferencing.
     """
     if hasattr(self, '_is_init'):
-        logger.debug("" + str(self.__class__) + " already initialized.")
         return self
     self._is_init = True
     
     if not target:
         target = self
 
-    #for m in self.__class__.__dict__.keys():
-
-
     for m in dir(self):
 
         name = m[1:].lower()
- 
-        #if 'normals' in name : import pdb;pdb.set_trace()
-        
+
         if m.startswith("_"):
             continue
 
@@ -107,7 +103,7 @@ def _init(self, target = None):
         # Create tuples
         if isinstance(obj, assimp_structs_as_tuple):
             setattr(target, name, make_tuple(obj))
-            logger.debug(str(self) + ": Added tuple " + str(getattr(target, name)) +  " as self." + name.lower())
+            logger.debug(str(self) + ": Added array " + str(getattr(target, name)) +  " as self." + name.lower())
             continue
 
 
@@ -132,8 +128,7 @@ def _init(self, target = None):
                     continue
 
 
-                #import pdb;pdb.set_trace()
-                if not obj: # empty!
+                if not length: # empty!
                     setattr(target, name, [])
                     logger.debug(str(self) + ": " + name + " is an empty list.")
                     continue
@@ -143,7 +138,7 @@ def _init(self, target = None):
                     if obj._type_ in assimp_structs_as_tuple:
                         setattr(target, name, numpy.array([make_tuple(obj[i]) for i in range(length)], dtype=numpy.float32))
 
-                        logger.debug(str(self) + ": Added a list data (type "+ str(type(obj)) + ") as self." + name)
+                        logger.debug(str(self) + ": Added an array of numpy arrays (type "+ str(type(obj)) + ") as self." + name)
 
                     else:
                         setattr(target, name, [obj[i] for i in range(length)]) #TODO: maybe not necessary to recreate an array?
@@ -156,10 +151,19 @@ def _init(self, target = None):
 
 
                 except IndexError:
-                    logger.warning("in " + str(self) +" : mismatch between mNum" + name + " and the actual amount of data in m" + name + ". This may be due to version mismatch between libassimp and pyassimp. Skipping this field.")
+                    logger.error("in " + str(self) +" : mismatch between mNum" + name + " and the actual amount of data in m" + name + ". This may be due to version mismatch between libassimp and pyassimp. Quitting now.")
+                    sys.exit(1)
+
                 except ValueError as e:
-                    logger.warning(str(e))
-                    logger.warning("in " + str(self) +" : table of " + name + " not initialized (NULL pointer). Skipping this field.")
+                    
+                    logger.error("In " + str(self) +  "->" + name + ": " + str(e) + ". Quitting now.")
+                    if "setting an array element with a sequence" in str(e):
+                        logger.error("Note that pyassimp does not currently "
+                                     "support meshes with mixed triangles "
+                                     "and quads. Try to load your mesh with"
+                                     " a post-processing to triangulate your"
+                                     " faces.")
+                    sys.exit(1)
 
 
             else: # starts with 'm' but not iterable
@@ -188,7 +192,6 @@ Python magic to add the _init() function to all C struct classes.
 for struct in dir(structs):
     if not (struct.startswith('_') or struct.startswith('c_') or struct == "Structure" or struct == "POINTER") and not isinstance(getattr(structs, struct),int):
 
-        logger.debug("Adding _init to class " +  struct)
         setattr(getattr(structs, struct), '_init', _init)
 
 
@@ -274,7 +277,6 @@ def load(filename, processing=0):
         #Uhhh, something went wrong!
         raise AssimpError("could not import file: %s" % filename)
 
-    logger.debug("Initializing recursively objects")
     scene = model.contents._init()
 
     recur_pythonize(scene.rootnode, scene)

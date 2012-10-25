@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 static const aiImporterDesc desc = {
-	"Collada Importer",
+	"Direct3D XFile Importer",
 	"",
 	"",
 	"",
@@ -594,8 +594,9 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, const std::vector<XFile::
 
 		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
 		// material colours
-		// FIX: Setup this as ambient not as emissive color
-		mat->AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_AMBIENT);
+    // Unclear: there's no ambient colour, but emissive. What to put for ambient?
+    // Probably nothing at all, let the user select a suitable default.
+		mat->AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 		mat->AddProperty( &oldMat.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
 		mat->AddProperty( &oldMat.mSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
 		mat->AddProperty( &oldMat.mSpecularExponent, 1, AI_MATKEY_SHININESS);

@@ -87,7 +87,7 @@ inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 			// print all future zeroes from now
 			mustPrint = true;	
 
-			*out++ = '0'+digit;
+			*out++ = '0'+static_cast<char>(digit);
 
 			++written;
 			number -= digit*cur;

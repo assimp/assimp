@@ -203,7 +203,7 @@ void STLImporter::LoadASCIIFile()
 	pMesh->mNormals  = new aiVector3D[pMesh->mNumVertices];
 	
 	unsigned int curFace = 0, curVertex = 3;
-	while (true)
+	for ( ;; )
 	{
 		// go to the next token
 		if(!SkipSpacesAndLineEnd(&sz))

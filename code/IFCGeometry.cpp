@@ -1461,7 +1461,17 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 				vpmin = std::min(vpmin,vv);
 				vpmax = std::max(vpmax,vv);
 
-				contour.push_back(vv);
+				// usually there won't be too many elements so the linear time check is ok
+				bool found = false;
+				for (std::vector<IfcVector2>::const_iterator it = contour.begin(); it != contour.end(); ++it) {
+					if (((*it)-vv).SquareLength() < 1e-5f) {
+						found = true;
+						break;
+					}
+				}
+				if(!found) {
+					contour.push_back(vv);
+				}
 			}
 		}
 

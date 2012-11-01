@@ -69,7 +69,8 @@ namespace Assimp {
 
 		bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 			const std::vector<IfcVector3>& nors, 
-			TempMesh& curmesh);
+			TempMesh& curmesh,
+			bool check_intersection = true);
 
 
 // ------------------------------------------------------------------------------------------------
@@ -152,6 +153,8 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 
 	const size_t outer_polygon_size = *outer_polygon_it;
 	const IfcVector3& master_normal = normals[std::distance(begin, outer_polygon_it)];
+	const IfcVector3& master_normal_norm = IfcVector3(master_normal).Normalize();
+
 
 	// Generate fake openings to meet the interface for the quadrulate
 	// algorithm. It boils down to generating small boxes given the
@@ -188,7 +191,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 		opening.profileMesh->verts.reserve(*iit);
 		opening.profileMesh->vertcnt.push_back(*iit);
 
-		std::copy(vit, vit + *iit, std::back_inserter(opening.profileMesh->verts));
+		std::copy(vit, vit + *iit, std::back_inserter(opening.profileMesh->verts)); 
 	}
 
 	// fill a mesh with ONLY the main polygon 
@@ -198,7 +201,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	std::copy(outer_vit, outer_vit+outer_polygon_size,
 		std::back_inserter(temp.verts));
 
-	TryAddOpenings_Quadrulate(fake_openings, normals, temp);
+	TryAddOpenings_Quadrulate(fake_openings, normals, temp, false);
 	result.Append(temp);
 }
 
@@ -474,7 +477,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 }
 
 // ------------------------------------------------------------------------------------------------
-IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok) 
+IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcFloat* d = NULL) 
 {
 	const std::vector<IfcVector3>& out = curmesh.verts;
 	IfcMatrix3 m;
@@ -513,6 +516,10 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok)
 
 	IfcVector3 r = (out[i]-any_point);
 	r.Normalize();
+
+	if(d) {
+		*d = -any_point * nor;
+	}
 
 	// Reconstruct orthonormal basis
 	// XXX use Gram Schmidt for increased robustness
@@ -1332,7 +1339,8 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 // ------------------------------------------------------------------------------------------------
 bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	const std::vector<IfcVector3>& nors, 
-	TempMesh& curmesh)
+	TempMesh& curmesh,
+	bool check_intersection)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
 	OpeningRefVector contours_to_openings;
@@ -1340,7 +1348,8 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
 	bool ok;
-	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(curmesh,ok));
+	IfcFloat base_d;
+	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(curmesh,ok,&base_d));
 	if(!ok) {
 		return false;
 	}
@@ -1412,11 +1421,18 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		IfcVector2 vpmin,vpmax;
 		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
 
+
 		// The opening meshes are real 3D meshes so skip over all faces
-		// clearly facing into the wrong direction.
+		// clearly facing into the wrong direction. Also, we need to check
+		// whether the meshes do actually intersect the base surface plane.
+		// This is done by recording minimum and maximum values for the
+		// d component of the plane equation for all polys and checking
+		// against the surface d.
+		IfcFloat dmin, dmax;
+		MinMaxChooser<IfcFloat>()(dmin,dmax);
+
 		std::vector<IfcVector2> contour;
 		for (size_t f = 0, vi_total = 0, fend = profile_vertcnts.size(); f < fend; ++f) {
-
 			const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
 				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
@@ -1428,6 +1444,12 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 
 			for (unsigned int vi = 0, vend = profile_vertcnts[f]; vi < vend; ++vi, ++vi_total) {
 				const IfcVector3& x = profile_verts[vi_total];
+
+				if(check_intersection) {
+					const IfcFloat vert_d = -(x * nor);
+					dmin = std::min(dmin, vert_d);
+					dmax = std::max(dmax, vert_d);
+				}
 
 				const IfcVector3& v = m * x;
 				IfcVector2 vv(v.x, v.y);
@@ -1447,6 +1469,12 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 			continue;
 		}
 
+		// TODO: This epsilon may be too large
+		const IfcFloat epsilon = fabs(dmax-dmin) * 0.01;
+		if (check_intersection && (base_d < dmin-epsilon || base_d > dmax+epsilon)) {
+			continue;
+		}
+
 		BoundingBox bb = BoundingBox(vpmin,vpmax);
 
 		// Skip over very small openings - these are likely projection errors
@@ -1461,8 +1489,8 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end();) {
 			const BoundingBox& ibb = *it;
 
-			if (ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x &&
-				ibb.first.y <= bb.second.y && ibb.second.y >= bb.second.x) {
+			if (ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
+				ibb.first.y < bb.second.y && ibb.second.y > bb.second.x) {
 
 				// Take these two contours and try to merge them. If they overlap (which 
 				// should not happen, but in fact happens-in-the-real-world [tm] ),
@@ -1472,7 +1500,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 				ClipperLib::ExPolygons poly;
 				MergeWindowContours(contour, other, poly);
 
-				if (poly.size() > 1) {
+				if (false && poly.size() > 1) {
 					IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
 						"bounding box overlaps, using poly2tri fallback method");
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
@@ -1502,7 +1530,9 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 
 					contours_to_openings.erase(contours_to_openings.begin() + std::distance(bbs.begin(),it));
 					contours.erase(contours.begin() + std::distance(bbs.begin(),it));
-					it = bbs.erase(it);
+					bbs.erase(it);
+
+					it = bbs.begin();
 					continue;
 				}
 			}
@@ -1545,7 +1575,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	// Most of all, it makes all cases in which adjacent openings are
 	// not correctly merged together glaringly obvious.
 
-	// CloseWindows(contours, minv, contours_to_openings, curmesh);
+	//CloseWindows(contours, minv, contours_to_openings, curmesh);
 	return true;
 }
 

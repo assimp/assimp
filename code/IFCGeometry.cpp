@@ -67,10 +67,11 @@ namespace Assimp {
 #define one_vec (IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)))
 
 
-		bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
+		bool GenerateOpenings(std::vector<TempOpening>& openings,
 			const std::vector<IfcVector3>& nors, 
 			TempMesh& curmesh,
-			bool check_intersection = true);
+			bool check_intersection = true,
+			bool generate_connection_geometry = true);
 
 
 // ------------------------------------------------------------------------------------------------
@@ -201,7 +202,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	std::copy(outer_vit, outer_vit+outer_polygon_size,
 		std::back_inserter(temp.verts));
 
-	TryAddOpenings_Quadrulate(fake_openings, normals, temp, false);
+	GenerateOpenings(fake_openings, normals, temp, false, false);
 	result.Append(temp);
 }
 
@@ -1251,13 +1252,14 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 {
 	// For all contour points, check if one of the assigned openings does
 	// already have points assigned to it. In this case, assume this is
-	// the second side of the wall and generate connections between
-	// the two holes in order to close the window margin. 
+	// the other side of the wall and generate connections between
+	// the two holes in order to close the window. 
 
 	// All this gets complicated by the fact that contours may pertain to
-	// multiple openings. The code is based on the assumption that this
-	// relationship is identical on both sides of the wall. If this is
-	// not the case, wrong geometry may be generated.
+	// multiple openings(due to merging of adjacent or overlapping openings). 
+	// The code is based on the assumption that this happens symmetrically
+	// on both sides of the wall. If it doesn't (which would be a bug anyway)
+	// wrong geometry may be generated.
 	for (ContourVector::const_iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
 		if ((*it).empty()) {
 			continue;
@@ -1275,15 +1277,17 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 		const ContourVector::value_type::const_iterator cbegin = (*it).begin(), cend = (*it).end();
 
 		if (has_other_side) {
+			curmesh.verts.reserve(curmesh.verts.size() + (*it).size() * 4);
+			curmesh.vertcnt.reserve(curmesh.vertcnt.size() + (*it).size());
+
 			// XXX this algorithm is really a bit inefficient - both in terms
 			// of constant factor and of asymptotic runtime.
-			std::vector<IfcVector3>::const_iterator vstart;
+			size_t vstart;
 			for (ContourVector::value_type::const_iterator cit = cbegin; cit != cend; ++cit) {
 
 				const IfcVector2& proj_point = *cit;
 				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
 
-				unsigned int i = 0;
 				IfcFloat best = static_cast<IfcFloat>(1e10);
 				IfcVector3 bestv;
 
@@ -1294,8 +1298,11 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 							bestv = other;
 							best = sqdist;
 						}
-						++i;
 					}
+				}
+
+				if (cit == cbegin) {
+					vstart = curmesh.verts.size();
 				}
 
 				curmesh.verts.push_back(world_point);
@@ -1305,16 +1312,13 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 
 				if (cit != cbegin) {
 
-					curmesh.verts.push_back(world_point);
 					curmesh.verts.push_back(bestv);
+					curmesh.verts.push_back(world_point);
 
 					if (cit == cend - 1) {
-						curmesh.verts.push_back(*(vstart));
-						curmesh.verts.push_back(*(vstart+1));
+						curmesh.verts.push_back(curmesh.verts[vstart]);
+						curmesh.verts.push_back(curmesh.verts[vstart+1]);
 					}
-				}
-				else {
-					vstart = curmesh.verts.end() - 2;
 				}
 			}
 		}
@@ -1361,10 +1365,11 @@ void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
+bool GenerateOpenings(std::vector<TempOpening>& openings,
 	const std::vector<IfcVector3>& nors, 
 	TempMesh& curmesh,
-	bool check_intersection)
+	bool check_intersection,
+	bool generate_connection_geometry)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
 	OpeningRefVector contours_to_openings;
@@ -1407,7 +1412,8 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	}
 
 	// Further improve the projection by mapping the entire working set into
-	// [0,1] range
+	// [0,1] range. This gives us a consistent data range so all epsilons
+	// used below can be constants.
 	vmax -= vmin;
 	BOOST_FOREACH(IfcVector2& vv, contour_flat) {
 		vv.x  = (vv.x - vmin.x) / vmax.x;
@@ -1430,7 +1436,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	// Obtain inverse transform for getting back to world space later on
 	const IfcMatrix4& minv = IfcMatrix4(m).Inverse();
 
-	// Compute bounding boxes for all 2D openings in projection space
+	// Compute bounding boxes for all 2D openings in projection space:
 	std::vector< BoundingBox > bbs;
 	ContourVector contours;
 
@@ -1487,7 +1493,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 				vpmin = std::min(vpmin,vv);
 				vpmax = std::max(vpmax,vv);
 
-				// usually there won't be too many elements so the linear time check is ok
+				// sanity check for duplicate vertices
 				bool found = false; 
 				BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
 					if ((cp-vv).SquareLength() < 1e-5f) {
@@ -1525,8 +1531,8 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end();) {
 			const BoundingBox& ibb = *it;
 
-			if (ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
-				ibb.first.y < bb.second.y && ibb.second.y > bb.second.x) {
+			if (ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x &&
+				ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) {
 
 				// Take these two contours and try to merge them. If they overlap (which 
 				// should not happen, but in fact happens-in-the-real-world [tm] ),
@@ -1557,19 +1563,35 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 						vv = std::max(vv,IfcVector2());
 						vv = std::min(vv,one_vec);
 
-						temp_contour.push_back( vv );
+						// sanity check for duplicate vertices
+						bool found = false; 
+						BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
+							if ((cp-vv).SquareLength() < 1e-5f) {
+								found = true;
+								break;
+							}
+						}  
+						if(!found) {
+							temp_contour.push_back(vv);
+						}
 					}
 
 					bb.first = std::min(bb.first, ibb.first);
 					bb.second = std::max(bb.second, ibb.second);
 
-					std::vector<TempOpening*>& t = contours_to_openings[std::distance(bbs.begin(),it)]; 
-					joined_openings.insert(joined_openings.end(), t.begin(), t.end());
+					if (generate_connection_geometry) {
+						std::vector<TempOpening*>& t = contours_to_openings[std::distance(bbs.begin(),it)]; 
+						joined_openings.insert(joined_openings.end(), t.begin(), t.end());
 
-					contours_to_openings.erase(contours_to_openings.begin() + std::distance(bbs.begin(),it));
+						contours_to_openings.erase(contours_to_openings.begin() + std::distance(bbs.begin(),it));
+					}
+
 					contours.erase(contours.begin() + std::distance(bbs.begin(),it));
 					bbs.erase(it);
 
+					// restart from scratch because the newly formed BB might now
+					// overlap any other BB which its constituent BBs didn't
+					// previously overlap.
 					it = bbs.begin();
 					continue;
 				}
@@ -1578,9 +1600,11 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		}
 
 		if(!temp_contour.empty()) {
-			contours_to_openings.push_back(std::vector<TempOpening*>(
-				joined_openings.begin(),
-				joined_openings.end()));
+			if (generate_connection_geometry) {
+				contours_to_openings.push_back(std::vector<TempOpening*>(
+					joined_openings.begin(),
+					joined_openings.end()));
+			}
 
 			contours.push_back(temp_contour);
 			bbs.push_back(bb);
@@ -1625,8 +1649,9 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	// but it produces lots of artifacts which are not resolved yet.
 	// Most of all, it makes all cases in which adjacent openings are
 	// not correctly merged together glaringly obvious.
-
-	//CloseWindows(contours, minv, contours_to_openings, curmesh);
+	if (generate_connection_geometry) {
+		CloseWindows(contours, minv, contours_to_openings, curmesh);
+	}
 	return true;
 }
 
@@ -1721,7 +1746,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(TryAddOpenings_Quadrulate(*conv.apply_openings,nors,temp)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp)) {
 				++sides_with_openings;
 			}
 			
@@ -1740,7 +1765,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 			curmesh.vertcnt.push_back(size);
 			if(openings && size > 2) {
-				if(TryAddOpenings_Quadrulate(*conv.apply_openings,nors,temp)) {
+				if(GenerateOpenings(*conv.apply_openings,nors,temp)) {
 					++sides_with_v_openings;
 				}
 
@@ -1750,7 +1775,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		}
 	}
 
-	if(openings && ((sides_with_openings != 2 && sides_with_openings) || (sides_with_v_openings != 2 && sides_with_v_openings))) {
+	if(openings && ((sides_with_openings == 1 && sides_with_openings) || (sides_with_v_openings == 2 && sides_with_v_openings))) {
 		IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
 	}
 
@@ -1940,7 +1965,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 			continue;
 		}
 
-		TryAddOpenings_Quadrulate(openings, std::vector<IfcVector3>(1,IfcVector3(1,0,0)), temp);
+		GenerateOpenings(openings, std::vector<IfcVector3>(1,IfcVector3(1,0,0)), temp);
 		result.Append(temp);
 
 		vit += pcount;

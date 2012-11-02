@@ -1721,18 +1721,6 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 	ConversionData& conv)
 {
 	if(const IfcExtrudedAreaSolid* const solid = swept.ToPtr<IfcExtrudedAreaSolid>()) {
-		// Do we just collect openings for a parent element (i.e. a wall)? 
-		// In such a case, we generate the polygonal extrusion mesh as usual,
-		// but attach it to a TempOpening instance which will later be applied
-		// to the wall it pertains to.
-		if(conv.collect_openings) {
-			boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
-			ProcessExtrudedAreaSolid(*solid,*meshtmp,conv);
-
-			conv.collect_openings->push_back(TempOpening(solid,IfcVector3(0,0,0),meshtmp));
-			return;
-		}
-
 		ProcessExtrudedAreaSolid(*solid,meshout,conv);
 	}
 	else if(const IfcRevolvedAreaSolid* const rev = swept.ToPtr<IfcRevolvedAreaSolid>()) {
@@ -1976,14 +1964,14 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	ConversionData& conv)
 {
 	bool fix_orientation = true;
-	TempMesh meshtmp; 
+	boost::shared_ptr< TempMesh > meshtmp = boost::make_shared<TempMesh>(); 
 	if(const IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IfcShellBasedSurfaceModel>()) {
 		BOOST_FOREACH(boost::shared_ptr<const IfcShell> shell,shellmod->SbsmBoundary) {
 			try {
 				const EXPRESS::ENTITY& e = shell->To<ENTITY>();
 				const IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<IfcConnectedFaceSet>(); 
 
-				ProcessConnectedFaceSet(fs,meshtmp,conv);
+				ProcessConnectedFaceSet(fs,*meshtmp.get(),conv);
 			}
 			catch(std::bad_cast&) {
 				IFCImporter::LogWarn("unexpected type error, IfcShell ought to inherit from IfcConnectedFaceSet");
@@ -1991,25 +1979,25 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 		}
 	}
 	else  if(const IfcConnectedFaceSet* fset = geo.ToPtr<IfcConnectedFaceSet>()) {
-		ProcessConnectedFaceSet(*fset,meshtmp,conv);
+		ProcessConnectedFaceSet(*fset,*meshtmp.get(),conv);
 	}	
 	else  if(const IfcSweptAreaSolid* swept = geo.ToPtr<IfcSweptAreaSolid>()) {
-		ProcessSweptAreaSolid(*swept,meshtmp,conv);
+		ProcessSweptAreaSolid(*swept,*meshtmp.get(),conv);
 	}   
 	else  if(const IfcSweptDiskSolid* disk = geo.ToPtr<IfcSweptDiskSolid>()) {
-		ProcessSweptDiskSolid(*disk,meshtmp,conv);
+		ProcessSweptDiskSolid(*disk,*meshtmp.get(),conv);
 		fix_orientation = false;
 	}   
 	else if(const IfcManifoldSolidBrep* brep = geo.ToPtr<IfcManifoldSolidBrep>()) {
-		ProcessConnectedFaceSet(brep->Outer,meshtmp,conv);
+		ProcessConnectedFaceSet(brep->Outer,*meshtmp.get(),conv);
 	} 
 	else if(const IfcFaceBasedSurfaceModel* surf = geo.ToPtr<IfcFaceBasedSurfaceModel>()) {
 		BOOST_FOREACH(const IfcConnectedFaceSet& fc, surf->FbsmFaces) {
-			ProcessConnectedFaceSet(fc,meshtmp,conv);
+			ProcessConnectedFaceSet(fc,*meshtmp.get(),conv);
 		}
 	}  
 	else  if(const IfcBooleanResult* boolean = geo.ToPtr<IfcBooleanResult>()) {
-		ProcessBoolean(*boolean,meshtmp,conv);
+		ProcessBoolean(*boolean,*meshtmp.get(),conv);
 	}
 	else if(geo.ToPtr<IfcBoundingBox>()) {
 		// silently skip over bounding boxes
@@ -2020,14 +2008,23 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 		return false;
 	}
 
-	meshtmp.RemoveAdjacentDuplicates();
-	meshtmp.RemoveDegenerates();
+	meshtmp->RemoveAdjacentDuplicates();
+	meshtmp->RemoveDegenerates();
+
+	// Do we just collect openings for a parent element (i.e. a wall)? 
+	// In such a case, we generate the polygonal extrusion mesh as usual,
+	// but attach it to a TempOpening instance which will later be applied
+	// to the wall it pertains to.
+	if(conv.collect_openings) {
+		conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),IfcVector3(0,0,0),meshtmp));
+		return true;
+	} 
 
 	if(fix_orientation) {
-		meshtmp.FixupFaceOrientation();
+		meshtmp->FixupFaceOrientation();
 	}
 
-	aiMesh* const mesh = meshtmp.ToMesh();
+	aiMesh* const mesh = meshtmp->ToMesh();
 	if(mesh) {
 		mesh->mMaterialIndex = ProcessMaterials(geo,conv);
 		mesh_indices.push_back(conv.meshes.size());

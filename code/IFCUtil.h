@@ -76,7 +76,7 @@ struct delete_fun
 struct TempMesh;
 struct TempOpening 
 {
-	const IFC::IfcExtrudedAreaSolid* solid;
+	const IFC::IfcSolidModel* solid;
 	IfcVector3 extrusionDir;
 	boost::shared_ptr<TempMesh> profileMesh;
 
@@ -96,7 +96,7 @@ struct TempOpening
 	}
 
 	// ------------------------------------------------------------------------------
-	TempOpening(const IFC::IfcExtrudedAreaSolid* solid,IfcVector3 extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
+	TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
 		: solid(solid)
 		, extrusionDir(extrusionDir)
 		, profileMesh(profileMesh)

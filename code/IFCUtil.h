@@ -184,6 +184,10 @@ struct TempMesh
 	IfcVector3 Center() const;
 	void Append(const TempMesh& other);
 
+	bool IsEmpty() const {
+		return verts.empty() && vertcnt.empty();
+	}
+
 	void RemoveAdjacentDuplicates();
 	void RemoveDegenerates();
 

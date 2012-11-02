@@ -959,7 +959,6 @@ typedef std::vector< std::vector<IfcVector2> > ContourVector;
 void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 	const ContourVector& contours,
 	const std::vector<TempOpening>& openings,
-	const IfcMatrix4& minv,
 	TempMesh& curmesh)
 {
 	ai_assert(contours.size() == bbs.size());
@@ -1038,8 +1037,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 						if ((contour[a] - edge).SquareLength() > diag*diag*0.7) {
 							continue;
 						}
-						const IfcVector3 v3 = minv * IfcVector3(contour[a].x, contour[a].y, 0.0f);
-						curmesh.verts.push_back(v3);
+						curmesh.verts.push_back(IfcVector3(contour[a].x, contour[a].y, 0.0f));
 					}
 
 					if (edge != contour[last_hit]) {
@@ -1060,8 +1058,7 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 							corner.y = bb.second.y;
 						}
 
-						const IfcVector3 v3 = minv * IfcVector3(corner.x, corner.y, 0.0f);
-						curmesh.verts.push_back(v3);
+						curmesh.verts.push_back(IfcVector3(corner.x, corner.y, 0.0f));
 					}
 					else if (cnt == 1) {
 						// avoid degenerate polygons (also known as lines or points)
@@ -1167,15 +1164,13 @@ void CleanupWindowContours(ContourVector& contours)
 }
 
 // ------------------------------------------------------------------------------------------------
-void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& curmesh, 
-	const IfcMatrix4& minv,
-	const std::vector<IfcVector2>& outflat)
+void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& curmesh)
 {
 	std::vector<IfcVector3> vold;
 	std::vector<unsigned int> iold;
 
-	vold.reserve(outflat.size());
-	iold.reserve(outflat.size() / 4);
+	vold.reserve(curmesh.verts.size());
+	iold.reserve(curmesh.vertcnt.size());
 
 	// Fix the outer contour using polyclipper
 	try {
@@ -1194,14 +1189,21 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 			std::reverse(clip.begin(), clip.end());
 		}
 
-		// We need to run polyclipper on every single quad -- we can't run it one all
+		// We need to run polyclipper on every single polygon -- we can't run it one all
 		// of them at once or it would merge them all together which would undo all
 		// previous steps
 		subject.reserve(4);
-		size_t cnt = 0;
-		BOOST_FOREACH(const IfcVector2& pip, outflat) {
+		size_t index = 0;
+		size_t countdown = 0;
+		BOOST_FOREACH(const IfcVector3& pip, curmesh.verts) {
+			if (!countdown) {
+				countdown = curmesh.vertcnt[index++];
+				if (!countdown) {
+					continue;
+				}
+			}
 			subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
-			if (!(++cnt % 4)) {
+			if (--countdown == 0) {
 				if (!ClipperLib::Orientation(subject)) {
 					std::reverse(subject.begin(), subject.end());
 				}
@@ -1214,7 +1216,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 				BOOST_FOREACH(const ClipperLib::ExPolygon& ex, clipped) {
 					iold.push_back(ex.outer.size());
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
-						vold.push_back( minv * IfcVector3(
+						vold.push_back(IfcVector3(
 							from_int64(point.X), 
 							from_int64(point.Y),
 							0.0f));
@@ -1226,19 +1228,12 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 				clipper.Clear();
 			}
 		}
-
-		assert(!(cnt % 4));
 	}
 	catch (const char* sx) {
 		IFCImporter::LogError("Ifc: error during polygon clipping, wall contour line may be wrong: (Clipper: " 
 			+ std::string(sx) + ")");
 
-		iold.resize(outflat.size()/4,4);
-
-		BOOST_FOREACH(const IfcVector2& vproj, outflat) {
-			const IfcVector3 v3 = minv * IfcVector3(vproj.x, vproj.y, static_cast<IfcFloat>(0.0));
-			vold.push_back(v3);
-		}
+		return;
 	}
 
 	// swap data arrays
@@ -1337,6 +1332,35 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 }
 
 // ------------------------------------------------------------------------------------------------
+void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
+{
+	ai_assert(curmesh.IsEmpty());
+
+	std::vector<IfcVector2> quads;
+	quads.reserve(bbs.size()*4);
+
+	// sort openings by x and y axis as a preliminiary to the QuadrifyPart() algorithm
+	XYSortedField field;
+	for (std::vector<BoundingBox>::const_iterator it = bbs.begin(); it != bbs.end(); ++it) {
+		if (field.find((*it).first) != field.end()) {
+			IFCImporter::LogWarn("constraint failure during generation of wall openings, results may be faulty");
+		}
+		field[(*it).first] = std::distance(bbs.begin(),it);
+	}
+
+	QuadrifyPart(IfcVector2(),IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)),
+		field,bbs,quads);
+
+	ai_assert(!(quads.size() % 4));
+
+	curmesh.vertcnt.resize(quads.size()/4,4);
+	curmesh.verts.reserve(quads.size());
+	BOOST_FOREACH(const IfcVector2& v2, quads) {
+		curmesh.verts.push_back(IfcVector3(v2.x, v2.y, static_cast<IfcFloat>(0.0)));
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	const std::vector<IfcVector3>& nors, 
 	TempMesh& curmesh,
@@ -1363,7 +1387,7 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	IfcVector2 vmin, vmax;
 	MinMaxChooser<IfcVector2>()(vmin, vmax);
 
-	// Move all points into the new coordinate system, collecting min/max verts on the way
+	// Project all points into the new coordinate system, collect min/max verts on the way
 	BOOST_FOREACH(IfcVector3& x, out) {
 		const IfcVector3& vv = m * x;
 		// keep Z offset in the plane coordinate system. Ignoring precision issues
@@ -1403,12 +1427,14 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 	mult.c4 = -coord;
 	m = mult * m;
 
-	// Obtain inverse transform for getting back
+	// Obtain inverse transform for getting back to world space later on
 	const IfcMatrix4& minv = IfcMatrix4(m).Inverse();
 
-	// Compute bounding boxes for the projections of all openings
+	// Compute bounding boxes for all 2D openings in projection space
 	std::vector< BoundingBox > bbs;
 	ContourVector contours;
+
+	std::vector<IfcVector2> temp_contour;
 
 	size_t c = 0;
 	BOOST_FOREACH(TempOpening& opening,openings) {
@@ -1427,11 +1453,11 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 		// whether the meshes do actually intersect the base surface plane.
 		// This is done by recording minimum and maximum values for the
 		// d component of the plane equation for all polys and checking
-		// against the surface d.
+		// against surface d.
 		IfcFloat dmin, dmax;
 		MinMaxChooser<IfcFloat>()(dmin,dmax);
 
-		std::vector<IfcVector2> contour;
+		temp_contour.clear();
 		for (size_t f = 0, vi_total = 0, fend = profile_vertcnts.size(); f < fend; ++f) {
 			const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
 				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
@@ -1462,20 +1488,20 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 				vpmax = std::max(vpmax,vv);
 
 				// usually there won't be too many elements so the linear time check is ok
-				bool found = false;
-				for (std::vector<IfcVector2>::const_iterator it = contour.begin(); it != contour.end(); ++it) {
-					if (((*it)-vv).SquareLength() < 1e-5f) {
+				bool found = false; 
+				BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
+					if ((cp-vv).SquareLength() < 1e-5f) {
 						found = true;
 						break;
 					}
-				}
+				}  
 				if(!found) {
-					contour.push_back(vv);
+					temp_contour.push_back(vv);
 				}
 			}
 		}
 
-		if(contour.size() <= 2) {
+		if(temp_contour.size() <= 2) {
 			continue;
 		}
 
@@ -1508,8 +1534,10 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 				const std::vector<IfcVector2>& other = contours[std::distance(bbs.begin(),it)];
 
 				ClipperLib::ExPolygons poly;
-				MergeWindowContours(contour, other, poly);
+				MergeWindowContours(temp_contour, other, poly);
 
+				// TODO: Commented because it causes more visible artifacts than
+				// it solves.
 				if (false && poly.size() > 1) {
 					IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
 						"bounding box overlaps, using poly2tri fallback method");
@@ -1517,19 +1545,19 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 				}
 				else if (poly.size() == 0) {
 					IFCImporter::LogWarn("ignoring duplicate opening");
-					contour.clear();
+					temp_contour.clear();
 					break;
 				}
 				else {
 					IFCImporter::LogDebug("merging overlapping openings");
 
-					contour.clear();
+					temp_contour.clear();
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
 						IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
 						vv = std::max(vv,IfcVector2());
 						vv = std::min(vv,one_vec);
 
-						contour.push_back( vv );
+						temp_contour.push_back( vv );
 					}
 
 					bb.first = std::min(bb.first, ibb.first);
@@ -1549,37 +1577,50 @@ bool TryAddOpenings_Quadrulate(std::vector<TempOpening>& openings,
 			++it;
 		}
 
-		if(!contour.empty()) {
+		if(!temp_contour.empty()) {
 			contours_to_openings.push_back(std::vector<TempOpening*>(
 				joined_openings.begin(),
 				joined_openings.end()));
 
-			contours.push_back(contour);
+			contours.push_back(temp_contour);
 			bbs.push_back(bb);
 		}
 	}
 
+	// Check if we still have any openings left - it may well be that this is
+	// not the cause, for example if all the opening candidates don't intersect
+	// this surface or point into a direction perpendicular to it.
 	if (bbs.empty()) {
 		return false;
 	}
 
-	XYSortedField field;
-	for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end(); ++it) {
-		if (field.find((*it).first) != field.end()) {
-			IFCImporter::LogWarn("constraint failure during generation of wall openings, results may be faulty");
-		}
-		field[(*it).first] = std::distance(bbs.begin(),it);
-	}
+	curmesh.Clear();
 
-	std::vector<IfcVector2> outflat;
-	outflat.reserve(openings.size()*4);
-	QuadrifyPart(IfcVector2(0.f,0.f),IfcVector2(1.f,1.f),field,bbs,outflat);
-	ai_assert(!(outflat.size() % 4));
+	// Generate a base subdivision into quads to accommodate the given list
+	// of window bounding boxes.
+	Quadrify(bbs,curmesh);
 
-	CleanupOuterContour(contour_flat, curmesh, minv,outflat);
+	// Run a sanity cleanup pass on the window contours to avoid generating
+	// artifacts during the contour generation phase later on.
 	CleanupWindowContours(contours);
-	InsertWindowContours(bbs,contours,openings, minv,curmesh);
+
+	// Previously we reduced all windows to rectangular AABBs in projection
+	// space, now it is time to fill the gaps between the BBs and the real
+	// window openings.
+	InsertWindowContours(bbs,contours,openings, curmesh);
+
+	// Clip the entire outer contour of our current result against the real
+	// outer contour of the surface. This is necessary because the result
+	// of the Quadrify() algorithm is always a square area spanning
+	// over [0,1]^2 (i.e. entire projection space).
+	CleanupOuterContour(contour_flat, curmesh);
+
+	// Undo the projection and get back to world (or local object) space
+	BOOST_FOREACH(IfcVector3& v3, curmesh.verts) {
+		v3 = minv * v3;
+	}
 	
+	// TODO:
 	// This should connect the window openings on both sides of the wall,
 	// but it produces lots of artifacts which are not resolved yet.
 	// Most of all, it makes all cases in which adjacent openings are

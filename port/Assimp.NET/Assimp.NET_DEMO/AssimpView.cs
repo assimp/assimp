@@ -184,7 +184,7 @@ namespace Assimp.Viewer
                 (aiPostProcessSteps)0);
 
             // default model
-            var path = "../../../../../../test/models/3DS/test1.3ds";
+            var path = "../../../../../test/models/3DS/test1.3ds";
 
             importer = new Importer();
             string[] args = Environment.GetCommandLineArgs();

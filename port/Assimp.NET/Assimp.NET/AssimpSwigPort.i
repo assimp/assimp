@@ -43,38 +43,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %include "carrays.i"
 %include "typemaps.i"
 %{
-#include "..\..\..\include\aiDefines.h"
-#include "..\..\..\include\aiConfig.h"
-#include "..\..\..\include\aiTypes.h"
-#include "..\..\..\include\aiVersion.h"
-#include "..\..\..\include\aiPostProcess.h"
-#include "..\..\..\include\aiVector2D.h"
-#include "..\..\..\include\aiVector3D.h"
-#include "..\..\..\include\aiColor4D.h"
-#include "..\..\..\include\aiMatrix3x3.h"
-#include "..\..\..\include\aiMatrix4x4.h"
-#include "..\..\..\include\aiCamera.h"
-#include "..\..\..\include\aiLight.h"
-#include "..\..\..\include\aiAnim.h"
-#include "..\..\..\include\aiMesh.h"
-#include "..\..\..\include\aiFileIO.h"
-#include "..\..\..\include\aiMaterial.h"
-#include "..\..\..\include\aiQuaternion.h"
-#include "..\..\..\include\aiScene.h"
-#include "..\..\..\include\aiTexture.h"
-#include "..\..\..\include\assimp.hpp"
-#include "..\..\..\include\IOSystem.h"
-#include "..\..\..\include\IOStream.h"
-#include "..\..\..\include\Logger.h"
-#include "..\..\..\include\LogStream.h"
-#include "..\..\..\include\NullLogger.h"
-#include "..\..\..\include\ProgressHandler.h"
+#include "..\..\..\include\assimp\defs.h"
+#include "..\..\..\include\assimp\config.h"
+#include "..\..\..\include\assimp\types.h"
+#include "..\..\..\include\assimp\version.h"
+#include "..\..\..\include\assimp\postprocess.h"
+#include "..\..\..\include\assimp\vector2.h"
+#include "..\..\..\include\assimp\vector3.h"
+#include "..\..\..\include\assimp\color4.h"
+#include "..\..\..\include\assimp\matrix3x3.h"
+#include "..\..\..\include\assimp\matrix4x4.h"
+#include "..\..\..\include\assimp\camera.h"
+#include "..\..\..\include\assimp\light.h"
+#include "..\..\..\include\assimp\anim.h"
+#include "..\..\..\include\assimp\mesh.h"
+#include "..\..\..\include\assimp\cfileio.h"
+#include "..\..\..\include\assimp\material.h"
+#include "..\..\..\include\assimp\quaternion.h"
+#include "..\..\..\include\assimp\scene.h"
+#include "..\..\..\include\assimp\texture.h"
+#include "..\..\..\include\assimp\Importer.hpp"
+#include "..\..\..\include\assimp\IOSystem.hpp"
+#include "..\..\..\include\assimp\IOStream.hpp"
+#include "..\..\..\include\assimp\Logger.hpp"
+#include "..\..\..\include\assimp\LogStream.hpp"
+#include "..\..\..\include\assimp\NullLogger.hpp"
+#include "..\..\..\include\assimp\ProgressHandler.hpp"
 %}
 
 #define C_STRUCT
 #define C_ENUM
 #define ASSIMP_API
 #define PACK_STRUCT
+#define AI_FORCE_INLINE
 
 %rename(__add__) operator+;
 %rename(__addnset__) operator+=;
@@ -504,32 +505,42 @@ ASSIMP_POINTER_POINTER(aiScene,aiTexture,mTextures,$self->mNumTextures);
 %ignore ::aiGetMaterialTexture;
 
 
-%include "..\..\..\include\aiDefines.h"
-%include "..\..\..\include\aiConfig.h"
-%include "..\..\..\include\aiTypes.h"
-%include "..\..\..\include\aiVersion.h"
-%include "..\..\..\include\aiPostProcess.h"
-%include "..\..\..\include\aiVector2D.h"
-%include "..\..\..\include\aiVector3D.h"
-%include "..\..\..\include\aiColor4D.h"
-%include "..\..\..\include\aiMatrix3x3.h"
-%include "..\..\..\include\aiMatrix4x4.h"
-%include "..\..\..\include\aiCamera.h"
-%include "..\..\..\include\aiLight.h"
-%include "..\..\..\include\aiAnim.h"
-%include "..\..\..\include\aiMesh.h"
-%include "..\..\..\include\aiFileIO.h"
-%include "..\..\..\include\aiMaterial.h"
-%include "..\..\..\include\aiQuaternion.h"
-%include "..\..\..\include\aiScene.h"
-%include "..\..\..\include\aiTexture.h"
-%include "..\..\..\include\assimp.hpp"
-%include "..\..\..\include\ProgressHandler.h"
+%include "..\..\..\include\assimp\defs.h"
+%include "..\..\..\include\assimp\config.h"
+%include "..\..\..\include\assimp\types.h"
+%include "..\..\..\include\assimp\version.h"
+%include "..\..\..\include\assimp\postprocess.h"
+%include "..\..\..\include\assimp\vector2.h"
+%include "..\..\..\include\assimp\vector3.h"
+%include "..\..\..\include\assimp\color4.h"
+%include "..\..\..\include\assimp\matrix3x3.h"
+%include "..\..\..\include\assimp\matrix4x4.h"
+%include "..\..\..\include\assimp\camera.h"
+%include "..\..\..\include\assimp\light.h"
+%include "..\..\..\include\assimp\anim.h"
+%include "..\..\..\include\assimp\mesh.h"
+%include "..\..\..\include\assimp\cfileio.h"
+%include "..\..\..\include\assimp\material.h"
+%include "..\..\..\include\assimp\quaternion.h"
+%include "..\..\..\include\assimp\scene.h"
+%include "..\..\..\include\assimp\texture.h"
+%include "..\..\..\include\assimp\Importer.hpp"
+%include "..\..\..\include\assimp\ProgressHandler.hpp"
 //%include "..\..\..\include\IOSystem.h"
 //%include "..\..\..\include\IOStream.h"
 //%include "..\..\..\include\Logger.h"
 //%include "..\..\..\include\LogStream.h"
 //%include "..\..\..\include\NullLogger.h"
+
+
+%template(aiColor4D) aiColor4t<float>;
+
+%template(aiVector3D) aiVector3t<float>;
+%template(aiVector2D) aiVector2t<float>;
+
+%template(aiQuaternion) aiQuaterniont<float>;
+%template(aiMatrix3x3) aiMatrix3x3t<float>;
+%template(aiMatrix4x4) aiMatrix4x4t<float>;
 
 %template(FloatVector) std::vector<float>;
 %template(UintVector) std::vector<unsigned int>;

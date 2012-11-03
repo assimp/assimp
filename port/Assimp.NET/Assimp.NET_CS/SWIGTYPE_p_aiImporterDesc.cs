@@ -10,18 +10,18 @@
 using System;
 using System.Runtime.InteropServices;
 
-public class SWIGTYPE_p_std__string {
+public class SWIGTYPE_p_aiImporterDesc {
   private HandleRef swigCPtr;
 
-  internal SWIGTYPE_p_std__string(IntPtr cPtr, bool futureUse) {
+  internal SWIGTYPE_p_aiImporterDesc(IntPtr cPtr, bool futureUse) {
     swigCPtr = new HandleRef(this, cPtr);
   }
 
-  protected SWIGTYPE_p_std__string() {
+  protected SWIGTYPE_p_aiImporterDesc() {
     swigCPtr = new HandleRef(null, IntPtr.Zero);
   }
 
-  internal static HandleRef getCPtr(SWIGTYPE_p_std__string obj) {
+  internal static HandleRef getCPtr(SWIGTYPE_p_aiImporterDesc obj) {
     return (obj == null) ? new HandleRef(null, IntPtr.Zero) : obj.swigCPtr;
   }
 }

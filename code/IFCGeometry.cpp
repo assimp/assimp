@@ -1282,14 +1282,24 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 
 			// XXX this algorithm is really a bit inefficient - both in terms
 			// of constant factor and of asymptotic runtime.
-			size_t vstart;
+			size_t vstart = curmesh.verts.size();
+			bool outer_border = false;
+			IfcVector2 last_proj_point;
+
+			const IfcFloat border_epsilon_upper = static_cast<IfcFloat>(1-1e-4);
+			const IfcFloat border_epsilon_lower = static_cast<IfcFloat>(1e-4);
+
+			bool start_is_outer_border = false;
+
 			for (ContourVector::value_type::const_iterator cit = cbegin; cit != cend; ++cit) {
-
 				const IfcVector2& proj_point = *cit;
-				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
 
+				// Locate the closest opposite point. This should be a good heuristic to
+				// connect only the points that are really intended to be connected.
 				IfcFloat best = static_cast<IfcFloat>(1e10);
 				IfcVector3 bestv;
+
+				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
 
 				BOOST_FOREACH(const TempOpening* opening, refs) {
 					BOOST_FOREACH(const IfcVector3& other, opening->wallPoints) {
@@ -1301,23 +1311,59 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 					}
 				}
 
-				if (cit == cbegin) {
-					vstart = curmesh.verts.size();
+				// Check if this connection is along the outer boundary of the projection
+				// plane. In such a case we better drop it because such 'edges' should
+				// not have any geometry to close them (think of door openings).
+				bool drop_this_edge = false;
+				if (proj_point.x <= border_epsilon_lower || proj_point.x >= border_epsilon_upper ||
+					proj_point.y <= border_epsilon_lower || proj_point.y >= border_epsilon_upper) {
+
+					if (outer_border) {
+						ai_assert(cit != cbegin);
+						if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < 1e-5f) {
+							drop_this_edge = true;
+
+							curmesh.verts.pop_back();
+							curmesh.verts.pop_back();
+						}
+					}
+					else if (cit == cbegin) {
+						start_is_outer_border = true;
+					}
+					outer_border = true;
+				}
+				else {
+					outer_border = false;
 				}
 
-				curmesh.verts.push_back(world_point);
-				curmesh.verts.push_back(bestv);
+				last_proj_point = proj_point;
 
-				curmesh.vertcnt.push_back(4);
-
-				if (cit != cbegin) {
-
+				if (!drop_this_edge) {
 					curmesh.verts.push_back(bestv);
 					curmesh.verts.push_back(world_point);
 
+					curmesh.vertcnt.push_back(4);
+				}
+
+				if (cit != cbegin) {
+					curmesh.verts.push_back(world_point);
+					curmesh.verts.push_back(bestv);
+
 					if (cit == cend - 1) {
-						curmesh.verts.push_back(curmesh.verts[vstart]);
-						curmesh.verts.push_back(curmesh.verts[vstart+1]);
+
+						// Check if the final connection (last to first element) is itself
+						// a border edge that needs to be dropped.
+						if (start_is_outer_border && outer_border &&
+							fabs((proj_point.x - (*cbegin).x) * (proj_point.y - (*cbegin).y)) < 1e-5f) {
+
+							curmesh.vertcnt.pop_back();
+							curmesh.verts.pop_back();
+							curmesh.verts.pop_back();
+						}
+						else {
+							curmesh.verts.push_back(curmesh.verts[vstart]);
+							curmesh.verts.push_back(curmesh.verts[vstart+1]);
+						}
 					}
 				}
 			}

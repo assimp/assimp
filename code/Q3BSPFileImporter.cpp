@@ -640,6 +640,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 	std::vector<std::string> supportedExtensions;
 	supportedExtensions.push_back( ".jpg" );
 	supportedExtensions.push_back( ".png" );
+	supportedExtensions.push_back( ".tga" );
 	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper )
 	{
 		return false;

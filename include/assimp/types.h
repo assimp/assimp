@@ -314,7 +314,7 @@ struct aiString
 
 	/** Append a string to the string */
 	void Append (const char* app)	{
-		const size_t len = strlen(app);
+		const size_t len = ::strlen(app);
 		if (!len) {
 			return;
 		}

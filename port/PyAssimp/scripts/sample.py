@@ -7,9 +7,9 @@ This module demonstrates the functionality of PyAssimp.
 
 import os, sys
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
-from pyassimp import core as pyassimp
+import pyassimp
 
 def recur_node(node,level = 0):
     print("  " + "\t" * level + "- " + str(node))

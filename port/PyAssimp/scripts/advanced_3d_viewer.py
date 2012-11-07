@@ -15,7 +15,7 @@ Based on:
 import sys
 
 import logging
-logger = logging.getLogger("underworlds.3d_viewer")
+logger = logging.getLogger("pyassimp")
 gllogger = logging.getLogger("OpenGL")
 gllogger.setLevel(logging.WARNING)
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +38,7 @@ import math, random
 import numpy
 from numpy import linalg
 
-from pyassimp import core as pyassimp
+import pyassimp
 from pyassimp.postprocess import *
 from pyassimp.helper import *
 

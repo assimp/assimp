@@ -35,7 +35,7 @@ logging.basicConfig(level=logging.INFO)
 import math
 import numpy
 
-from pyassimp import core as pyassimp
+import pyassimp
 from pyassimp.postprocess import *
 from pyassimp.helper import *
 

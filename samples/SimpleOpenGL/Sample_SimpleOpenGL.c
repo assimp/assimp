@@ -11,6 +11,7 @@
 // ----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <GL/glut.h>
 
@@ -235,10 +236,22 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 void do_motion (void)
 {
 	static GLint prev_time = 0;
+	static GLint prev_fps_time = 0;
+	static int frames = 0;
 
 	int time = glutGet(GLUT_ELAPSED_TIME);
 	angle += (time-prev_time)*0.01;
 	prev_time = time;
+
+	frames += 1;
+	if ((time - prev_fps_time) > 1000) // update every seconds
+    {
+        int current_fps = frames * 1000 / (time - prev_fps_time);
+        printf("%d fps\n", current_fps);
+        frames = 0;
+        prev_fps_time = time;
+    }
+
 
 	glutPostRedisplay ();
 }

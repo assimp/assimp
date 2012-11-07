@@ -60,16 +60,16 @@ def make_tuple(ai_obj, type = None):
 def call_init(obj, caller = None):
         # init children
         if hasattr(obj, '_init'):
-            obj._init()
+            obj._init(parent = caller)
 
         # pointers
         elif hasattr(obj, 'contents'):
             if hasattr(obj.contents, '_init'):
-                obj.contents._init(target = obj)
+                obj.contents._init(target = obj, parent = caller)
 
 
 
-def _init(self, target = None):
+def _init(self, target = None, parent = None):
     """
     Custom initialize() for C structs, adds safely accessable member functionality.
 
@@ -116,6 +116,10 @@ def _init(self, target = None):
 
         if m.startswith('m'):
 
+            if name == "parent":
+                setattr(target, name, parent)
+                logger.debug("Added a parent as self." + name)
+                continue
 
             if hasattr(self, 'mNum' + m[1:]):
 
@@ -147,7 +151,7 @@ def _init(self, target = None):
 
                         # initialize array elements
                         for e in getattr(target, name):
-                            call_init(e, caller = self)
+                            call_init(e, caller = target)
 
 
                 except IndexError:
@@ -171,8 +175,8 @@ def _init(self, target = None):
                 setattr(target, name, obj)
                 logger.debug("Added " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
 
-                if name not in ["parent"]: # do not re-initialize my parent
-                    call_init(obj, caller = self)
+                call_init(obj, caller = target)
+
 
 
 

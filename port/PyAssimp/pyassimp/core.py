@@ -370,41 +370,6 @@ def _get_properties(properties, length):
 
     return result
 
-def aiGetMaterialFloatArray(material, key):
-    AI_SUCCESS = 0
-    from ctypes import byref, pointer, cast, c_float, POINTER, sizeof, c_uint
-    out = structs.Color4D()
-    max = c_uint(sizeof(structs.Color4D))
-    r=_assimp_lib.dll.aiGetMaterialFloatArray(pointer(material), 
-                                            key[0], 
-                                            key[1], 
-                                            key[2], 
-                                            byref(out), 
-                                            byref(max))
-                                            
-    if (r != AI_SUCCESS):    
-        raise AssimpError("aiGetMaterialFloatArray failed!")
-      
-    out._init()
-    return [out[i] for i in range(max.value)]
-    
-def aiGetMaterialString(material, key):
-    AI_SUCCESS = 0
-    from ctypes import byref, pointer, cast, c_float, POINTER, sizeof, c_uint
-    out = structs.String()
-    r=_assimp_lib.dll.aiGetMaterialString(pointer(material), 
-                                            key[0], 
-                                            key[1], 
-                                            key[2], 
-                                            byref(out))
-                                            
-    if (r != AI_SUCCESS):    
-        raise AssimpError("aiGetMaterialString failed!")
-        
-    return str(out.data)
-
-    
-    
 def decompose_matrix(matrix):
     if not isinstance(matrix, structs.Matrix4x4):
         raise AssimpError("pyassimp.decompose_matrix failed: Not a Matrix4x4!")

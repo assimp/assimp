@@ -41,7 +41,11 @@
 # ---------------------------------------------------------------------------
 
 """Update PyAssimp's data structures to keep up with the
-C/C++ headers."""
+C/C++ headers.
+
+This script is meant to be executed in the source tree, directly from
+port/PyAssimp/gen
+"""
 
 import os
 import re
@@ -96,7 +100,7 @@ def GetType(type, prefix='c_'):
            return None
 
     t = t.strip()
-    types = {'unsigned int':'uint', 'unsigned char':'ubyte', 'size_t':'uint',}
+    types = {'unsigned int':'uint', 'unsigned char':'ubyte',}
     if t in types:
         t = types[t]
     t = prefix + t
@@ -210,9 +214,11 @@ def Structify(fileName):
 
         # Restructure
         text = RErestruc.sub(restructure, text)
-
         # Replace comments
-        text = RErpcom.sub('#\g<line>', text)
+        text = RErpcom.sub('# \g<line>', text)
+        text = text.replace("),#", "),\n#")
+        text = text.replace("#", "\n#")
+        text = "".join([l for l in text.splitlines(True) if not l.strip().endswith("#")]) # remove empty comment lines
         
         # Whether it's selfreferencing: ex. struct Node { Node* parent; };
         selfreferencing = text.find('POINTER('+name+')') != -1
@@ -245,20 +251,21 @@ def Structify(fileName):
             text = text.replace('$DEFINES$', defines)
         else:
             text = text.replace('$DEFINES$', '')
+
         
         result.append((primitive, selfreferencing, complex, text))
              
     return result   
 
 text = "#-*- coding: UTF-8 -*-\n\n"
-text += "from ctypes import POINTER, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte\n\n"
+text += "from ctypes import POINTER, c_int, c_uint, c_size_t, c_char, c_float, Structure, c_char_p, c_double, c_ubyte\n\n"
 
 structs1 = ""
 structs2 = ""
 structs3 = ""
 structs4 = ""
 
-path = '../include/'
+path = '../../../include/assimp'
 files = os.listdir (path)
 #files = ["aiScene.h", "aiTypes.h"]
 for fileName in files:
@@ -276,6 +283,8 @@ for fileName in files:
 
 text += structs1 + structs2 + structs3 + structs4
 
-file = open('structs.txt', 'w')
+file = open('structs.py', 'w')
 file.write(text)
 file.close()
+
+print("Generation done. You can now review the file 'structs.py' and merge it.")

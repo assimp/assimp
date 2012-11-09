@@ -6,17 +6,20 @@ Some fancy helper functions.
 
 import os
 import ctypes
-import structs
-import operator
-
-from errors import AssimpError
 from ctypes import POINTER
+import operator
+import numpy
+
+import logging;logger = logging.getLogger("pyassimp")
+
+from .errors import AssimpError
 
 additional_dirs, ext_whitelist = [],[]
 
 # populate search directories and lists of allowed file extensions
 # depending on the platform we're running on.
 if os.name=='posix':
+    additional_dirs.append('/usr/lib/')
     additional_dirs.append('/usr/local/lib/')
 
     # note - this won't catch libassimp.so.N.n, but 
@@ -27,10 +30,42 @@ if os.name=='posix':
 elif os.name=='nt':
     ext_whitelist.append('.dll')
 
-print(additional_dirs)
+#print(additional_dirs)
 def vec2tuple(x):
     """ Converts a VECTOR3D to a Tuple """
     return (x.x, x.y, x.z)
+
+def transform(vector3, matrix4x4):
+    """ Apply a transformation matrix on a 3D vector.
+
+    :param vector3: a numpy array with 3 elements
+    :param matrix4x4: a numpy 4x4 matrix
+    """
+    return numpy.dot(matrix4x4, numpy.append(vector3, 1.))
+
+   
+def get_bounding_box(scene):
+    bb_min = [1e10, 1e10, 1e10] # x,y,z
+    bb_max = [-1e10, -1e10, -1e10] # x,y,z
+    return get_bounding_box_for_node(scene.rootnode, bb_min, bb_max)
+
+def get_bounding_box_for_node(node, bb_min, bb_max):
+    for mesh in node.meshes:
+        for v in mesh.vertices:
+            v = transform(v, node.transformation)
+            bb_min[0] = min(bb_min[0], v[0])
+            bb_min[1] = min(bb_min[1], v[1])
+            bb_min[2] = min(bb_min[2], v[2])
+            bb_max[0] = max(bb_max[0], v[0])
+            bb_max[1] = max(bb_max[1], v[1])
+            bb_max[2] = max(bb_max[2], v[2])
+
+
+    for child in node.children:
+        bb_min, bb_max = get_bounding_box_for_node(child, bb_min, bb_max)
+
+    return bb_min, bb_max
+
 
 
 def try_load_functions(library,dll,candidates):
@@ -54,7 +89,8 @@ def try_load_functions(library,dll,candidates):
         pass
     else:
         #Library found!
-        load.restype = POINTER(structs.Scene)
+        from .structs import Scene
+        load.restype = POINTER(Scene)
         
         candidates.append((library, load, release, dll))
 
@@ -88,10 +124,11 @@ def search_library():
                 continue
 
             library = os.path.join(curfolder, filename)
-            print 'Try ',library
+            logger.debug('Try ' + library)
             try:
                 dll = ctypes.cdll.LoadLibrary(library)
-            except:
+            except Exception as e:
+                logger.warning(str(e))
                 # OK, this except is evil. But different OSs will throw different
                 # errors. So just ignore any errors.
                 continue
@@ -100,12 +137,12 @@ def search_library():
     
     if not candidates:
         # no library found
-        raise AssimpError, "assimp library not found"
+        raise AssimpError("assimp library not found")
     else:
         # get the newest library
         candidates = map(lambda x: (os.lstat(x[0])[-2], x), candidates)
         res = max(candidates, key=operator.itemgetter(0))[1]
-        print 'Taking ',res[0]
+        logger.debug('Using assimp library located at ' + res[0])
 
         # XXX: if there are 1000 dll/so files containing 'assimp'
         # in their name, do we have all of them in our address

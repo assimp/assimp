@@ -200,13 +200,13 @@ class GLRenderer():
 
         if not hasattr(mat, "gl_mat"): # evaluate once the mat properties, and cache the values in a glDisplayList.
     
-            diffuse = mat.properties.get("$clr.diffuse", numpy.array([0.8, 0.8, 0.8, 1.0]))
-            specular = mat.properties.get("$clr.specular", numpy.array([0., 0., 0., 1.0]))
-            ambient = mat.properties.get("$clr.ambient", numpy.array([0.2, 0.2, 0.2, 1.0]))
-            emissive = mat.properties.get("$clr.emissive", numpy.array([0., 0., 0., 1.0]))
-            shininess = min(mat.properties.get("$mat.shininess", 1.0), 128)
-            wireframe = mat.properties.get("$mat.wireframe", 0)
-            twosided = mat.properties.get("$mat.twosided", 1)
+            diffuse = numpy.array(mat.properties.get("diffuse", [0.8, 0.8, 0.8, 1.0]))
+            specular = numpy.array(mat.properties.get("specular", [0., 0., 0., 1.0]))
+            ambient = numpy.array(mat.properties.get("ambient", [0.2, 0.2, 0.2, 1.0]))
+            emissive = numpy.array(mat.properties.get("emissive", [0., 0., 0., 1.0]))
+            shininess = min(mat.properties.get("shininess", 1.0), 128)
+            wireframe = mat.properties.get("wireframe", 0)
+            twosided = mat.properties.get("twosided", 1)
     
             from OpenGL.raw import GL
             setattr(mat, "gl_mat", GL.GLuint(0))

@@ -348,20 +348,23 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        key = str(p.mKey.data)
+        key = str(p.mKey.data).split('.')[1]
 
         #the data
         from ctypes import POINTER, cast, c_int, c_float, sizeof
         if p.mType == 1:
             arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
-            value = numpy.array([x for x in arr])
+            value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
             value = cast(p.mData, POINTER(structs.String)).contents.data
         elif p.mType == 4:
             arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents
-            value = numpy.array([x for x in arr])
+            value = [x for x in arr]
         else:
             value = p.mData[:p.mDataLength]
+
+        if len(value) == 1:
+            [value] = value
 
         result[key] = value
 

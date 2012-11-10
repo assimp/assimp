@@ -204,7 +204,6 @@ class GLRenderer():
         """
 
         if not hasattr(mat, "gl_mat"): # evaluate once the mat properties, and cache the values in a glDisplayList.
-
             diffuse = numpy.array(mat.properties.get("diffuse", [0.8, 0.8, 0.8, 1.0]))
             specular = numpy.array(mat.properties.get("specular", [0., 0., 0., 1.0]))
             ambient = numpy.array(mat.properties.get("ambient", [0.2, 0.2, 0.2, 1.0]))
@@ -212,8 +211,9 @@ class GLRenderer():
             shininess = min(mat.properties.get("shininess", 1.0), 128)
             wireframe = mat.properties.get("wireframe", 0)
             twosided = mat.properties.get("twosided", 1)
-
-            setattr(mat, "gl_mat", glGenLists(1))
+            from OpenGL.raw import GL
+            setattr(mat, "gl_mat", GL.GLuint(0))
+            mat.gl_mat = glGenLists(1)
             glNewList(mat.gl_mat, GL_COMPILE)
     
             glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse)
@@ -234,15 +234,7 @@ class GLRenderer():
 
         gl_time = glutGet(GLUT_ELAPSED_TIME)
 
-        # Compute the new position of the camera and set it
-        self.x += self.dp * self.lx * 0.01 * (gl_time-self.prev_time)
-        self.z += self.dp * self.lz * 0.01 * (gl_time-self.prev_time)
-        self.angle += self.drot * 0.1 *  (gl_time-self.prev_time)
-        self.lx = math.sin(self.angle)
-        self.lz = -math.cos(self.angle)
-        self.set_default_camera()
-
-        self.angle = (gl_time - self.prev_time) * 0.1
+        self.angle += (gl_time - self.prev_time) * 0.01
 
         self.prev_time = gl_time
 

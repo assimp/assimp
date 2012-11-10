@@ -211,9 +211,8 @@ class GLRenderer():
             shininess = min(mat.properties.get("shininess", 1.0), 128)
             wireframe = mat.properties.get("wireframe", 0)
             twosided = mat.properties.get("twosided", 1)
-            from OpenGL.raw import GL
-            setattr(mat, "gl_mat", GL.GLuint(0))
-            mat.gl_mat = glGenLists(1)
+
+            setattr(mat, "gl_mat", glGenLists(1))
             glNewList(mat.gl_mat, GL_COMPILE)
     
             glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse)
@@ -234,7 +233,7 @@ class GLRenderer():
 
         gl_time = glutGet(GLUT_ELAPSED_TIME)
 
-        self.angle += (gl_time - self.prev_time) * 0.01
+        self.angle = (gl_time - self.prev_time) * 0.1
 
         self.prev_time = gl_time
 

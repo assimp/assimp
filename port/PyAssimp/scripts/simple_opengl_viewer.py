@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 #-*- coding: UTF-8 -*-
 
-""" This program demonstrate the use of pyassimp to render
-objects in OpenGL.
+""" This program demonstrates the use of pyassimp to load and
+render objects with OpenGL.
 
-It loads a 3D model with ASSIMP and display it.
+'c' cycles between cameras (if any available)
+'q' to quit
+
+This example mixes 'old' OpenGL fixed-function pipeline with 
+Vertex Buffer Objects.
 
 Materials are supported but textures are currently ignored.
 
-Half-working keyboard + mouse navigation is supported.
+For a more advanced example (with shaders + keyboard/mouse 
+controls), check scripts/sdl_viewer.py
+
+Author: Séverin Lemaignan, 2012
 
 This sample is based on several sources, including:
  - http://www.lighthouse3d.com/tutorials
@@ -21,9 +28,8 @@ import os, sys
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
-from OpenGL.arrays import ArrayDatatype
 
-import logging;logger = logging.getLogger("assimp_opengl")
+import logging;logger = logging.getLogger("pyassimp_opengl")
 logging.basicConfig(level=logging.INFO)
 
 import math
@@ -40,20 +46,14 @@ width = 900
 
 class GLRenderer():
     def __init__(self):
+
         self.scene = None
 
-        self.drot = 0.0
-        self.dp = 0.0
-
-        self.angle = 0.0
-        self.x = 1.0
-        self.z = 3.0
-        self.lx = 0.0
-        self.lz = 0.0
         self.using_fixed_cam = False
         self.current_cam_index = 0
 
-        self.x_origin = -1 # x position of the mouse when pressing left btn
+        # store the global scene rotation
+        self.angle = 0.
 
         # for FPS calculation
         self.prev_time = 0
@@ -61,6 +61,10 @@ class GLRenderer():
         self.frames = 0
 
     def prepare_gl_buffers(self, mesh):
+        """ Creates 3 buffer objets for each mesh, 
+        to store the vertices, the normals, and the faces
+        indices.
+        """
 
         mesh.gl = {}
 
@@ -90,8 +94,7 @@ class GLRenderer():
         glBindBuffer(GL_ARRAY_BUFFER,0)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0)
 
-    
-    def load_dae(self, path, postprocess = None):
+    def load_model(self, path, postprocess = None):
         logger.info("Loading model:" + path + "...")
 
         if postprocess:
@@ -129,9 +132,11 @@ class GLRenderer():
 
         if not self.using_fixed_cam:
             glLoadIdentity()
-            gluLookAt(self.x ,1., self.z, # pos
-                    self.x + self.lx - 1.0, 1., self.z + self.lz - 3.0, # look at
-                    0.,1.,0.) # up vector
+
+            gluLookAt(0.,0.,3.,
+                      0.,0.,-5.,
+                      0.,1.,0.)
+
 
 
     def set_camera(self, camera):
@@ -178,13 +183,13 @@ class GLRenderer():
         tmp = max(x_max, y_max)
         z_max = self.bb_max[2] - self.bb_min[2]
         tmp = max(z_max, tmp)
-        
+
         if not restore:
             tmp = 1. / tmp
 
         logger.info("Scaling the scene by %.03f" % tmp)
         glScalef(tmp, tmp, tmp)
-    
+
         # center the model
         direction = -1 if not restore else 1
         glTranslatef( direction * self.scene_center[0], 
@@ -192,14 +197,14 @@ class GLRenderer():
                       direction * self.scene_center[2] )
 
         return x_max, y_max, z_max
- 
+
     def apply_material(self, mat):
-        """ Apply an OpenGL, using one OpenGL list per material to cache 
+        """ Apply an OpenGL, using one OpenGL display list per material to cache 
         the operation.
         """
 
         if not hasattr(mat, "gl_mat"): # evaluate once the mat properties, and cache the values in a glDisplayList.
-    
+
             diffuse = numpy.array(mat.properties.get("diffuse", [0.8, 0.8, 0.8, 1.0]))
             specular = numpy.array(mat.properties.get("specular", [0., 0., 0., 1.0]))
             ambient = numpy.array(mat.properties.get("ambient", [0.2, 0.2, 0.2, 1.0]))
@@ -207,10 +212,8 @@ class GLRenderer():
             shininess = min(mat.properties.get("shininess", 1.0), 128)
             wireframe = mat.properties.get("wireframe", 0)
             twosided = mat.properties.get("twosided", 1)
-    
-            from OpenGL.raw import GL
-            setattr(mat, "gl_mat", GL.GLuint(0))
-            mat.gl_mat = glGenLists(1)
+
+            setattr(mat, "gl_mat", glGenLists(1))
             glNewList(mat.gl_mat, GL_COMPILE)
     
             glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse)
@@ -238,6 +241,8 @@ class GLRenderer():
         self.lx = math.sin(self.angle)
         self.lz = -math.cos(self.angle)
         self.set_default_camera()
+
+        self.angle = (gl_time - self.prev_time) * 0.1
 
         self.prev_time = gl_time
 
@@ -290,9 +295,10 @@ class GLRenderer():
         """ GLUT callback to redraw OpenGL surface
         """
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-    
+
+        glRotatef(self.angle,0.,1.,0.)
         self.recursive_render(self.scene.rootnode)
-    
+
         glutSwapBuffers()
         self.do_motion()
         return
@@ -306,42 +312,6 @@ class GLRenderer():
             self.set_camera(self.cycle_cameras())
         if key == 'q':
             sys.exit(0)
-
-    def onspecialkeypress(self, key, x, y):
-
-        fraction = 0.05
-
-        if key == GLUT_KEY_UP:
-            self.dp = 0.5
-        if key == GLUT_KEY_DOWN:
-            self.dp = -0.5
-        if key == GLUT_KEY_LEFT:
-            self.drot = -0.01
-        if key == GLUT_KEY_RIGHT:
-            self.drot = 0.01
-
-    def onspecialkeyrelease(self, key, x, y):
-
-        if key == GLUT_KEY_UP:
-            self.dp = 0.
-        if key == GLUT_KEY_DOWN:
-            self.dp = 0.
-        if key == GLUT_KEY_LEFT:
-            self.drot = 0.0
-        if key == GLUT_KEY_RIGHT:
-            self.drot = 0.0
-
-    def onclick(self, button, state, x, y):
-        if button == GLUT_LEFT_BUTTON:
-            if state == GLUT_UP:
-                self.drot = 0
-                self.x_origin = -1
-            else: # GLUT_DOWN
-                self.x_origin = x
-
-    def onmousemove(self, x, y):
-        if self.x_origin >= 0:
-            self.drot = (x - self.x_origin) * 0.001
 
     def render(self, filename=None, fullscreen = False, autofit = True, postprocess = None):
         """
@@ -364,7 +334,8 @@ class GLRenderer():
                 print("Fullscreen mode not available!")
                 sys.exit(1)
 
-        self.load_dae(filename, postprocess = postprocess)
+        self.load_model(filename, postprocess = postprocess)
+
 
         glClearColor(0.1,0.1,0.1,1.)
         #glShadeModel(GL_SMOOTH)
@@ -374,16 +345,10 @@ class GLRenderer():
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
 
-        #lightZeroPosition = [10.,4.,10.,1.]
-        #lightZeroColor = [0.8,1.0,0.8,1.0] #green tinged
-        #glLightfv(GL_LIGHT0, GL_POSITION, lightZeroPosition)
-        #glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor)
-        #glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1)
-        #glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05)
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE)
         glEnable(GL_NORMALIZE)
         glEnable(GL_LIGHT0)
-    
+
         glutDisplayFunc(self.display)
 
 
@@ -399,14 +364,8 @@ class GLRenderer():
 
         glPushMatrix()
 
-        # Register GLUT callbacks for keyboard and mouse
         glutKeyboardFunc(self.onkeypress)
-        glutSpecialFunc(self.onspecialkeypress)
         glutIgnoreKeyRepeat(1)
-        glutSpecialUpFunc(self.onspecialkeyrelease)
-
-        glutMouseFunc(self.onclick)
-        glutMotionFunc(self.onmousemove)
 
         glutMainLoop()
 

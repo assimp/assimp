@@ -1089,6 +1089,8 @@ void MergeWindowContours (const std::vector<IfcVector2>& a,
 	const std::vector<IfcVector2>& b, 
 	ClipperLib::ExPolygons& out) 
 {
+	out.clear();
+
 	ClipperLib::Clipper clipper;
 	ClipperLib::Polygon clip;
 
@@ -1113,6 +1115,40 @@ void MergeWindowContours (const std::vector<IfcVector2>& a,
 
 	clipper.AddPolygon(clip, ClipperLib::ptSubject);
 	clipper.Execute(ClipperLib::ctUnion, out,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Subtract a from b
+void MakeDisjunctWindowContours (const std::vector<IfcVector2>& a, 
+	const std::vector<IfcVector2>& b, 
+	ClipperLib::ExPolygons& out) 
+{
+	out.clear();
+
+	ClipperLib::Clipper clipper;
+	ClipperLib::Polygon clip;
+
+	BOOST_FOREACH(const IfcVector2& pip, a) {
+		clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+	}
+
+	if (ClipperLib::Orientation(clip)) {
+		std::reverse(clip.begin(), clip.end());
+	}
+
+	clipper.AddPolygon(clip, ClipperLib::ptClip);
+	clip.clear();
+
+	BOOST_FOREACH(const IfcVector2& pip, b) {
+		clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+	}
+
+	if (ClipperLib::Orientation(clip)) {
+		std::reverse(clip.begin(), clip.end());
+	}
+
+	clipper.AddPolygon(clip, ClipperLib::ptSubject);
+	clipper.Execute(ClipperLib::ctDifference, out,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1580,17 +1616,53 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 			if (ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x &&
 				ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) {
 
-				// Take these two contours and try to merge them. If they overlap (which 
-				// should not happen, but in fact happens-in-the-real-world [tm] ),
-				// resume using a single contour and a single bounding box.
 				const std::vector<IfcVector2>& other = contours[std::distance(bbs.begin(),it)];
-
 				ClipperLib::ExPolygons poly;
+
+				// First check whether subtracting the old contour (to which ibb belongs)
+				// from the new contour (to which bb belongs) yields an updated bb which
+				// no longer overlaps ibb
+				MakeDisjunctWindowContours(other, temp_contour, poly);
+				if(poly.size() == 1) {
+					IfcVector2 newbb_min, newbb_max;
+					MinMaxChooser<IfcVector2>()(newbb_min, newbb_max);
+
+					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
+						IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
+	
+						// sanity rounding
+						vv = std::max(vv,IfcVector2());
+						vv = std::min(vv,one_vec);
+
+						newbb_min = std::min(newbb_min,vv);
+						newbb_max = std::max(newbb_max,vv);
+					}
+
+					if (!(ibb.first.x <= newbb_max.x && ibb.second.x >= newbb_min.x &&
+						 ibb.first.y <= newbb_max.y && ibb.second.y >= newbb_min.y)) {
+
+						 // Good guy bounding box
+						 bb = BoundingBox(newbb_min,newbb_max);
+
+						 temp_contour.clear();
+						 BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
+							 const IfcVector2& vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
+
+							 temp_contour.push_back(vv);
+						 }
+						 continue;
+					}
+				}
+
+				// Take these two overlapping contours and try to merge them. If they 
+				// overlap (which should not happen, but in fact happens-in-the-real-
+				// world [tm] ), resume using a single contour and a single bounding box.
 				MergeWindowContours(temp_contour, other, poly);
 
 				// TODO: Commented because it causes more visible artifacts than
 				// it solves.
-				if (false && poly.size() > 1) {
+				if (poly.size() > 1) { 
+				
 					IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
 						"bounding box overlaps, using poly2tri fallback method");
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);

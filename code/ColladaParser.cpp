@@ -2231,7 +2231,13 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
           pMesh->mColors[pInput.mIndex].insert( pMesh->mColors[pInput.mIndex].end(), 
             pMesh->mPositions.size() - pMesh->mColors[pInput.mIndex].size() - 1, aiColor4D( 0, 0, 0, 1));
 
-				pMesh->mColors[pInput.mIndex].push_back( aiColor4D( obj[0], obj[1], obj[2], obj[3])); 
+				//pMesh->mColors[pInput.mIndex].push_back( aiColor4D( obj[0], obj[1], obj[2], obj[3])); 
+		aiColor4D result(0, 0, 0, 1);
+		for (size_t i = 0; i < pInput.mResolved->mSize; ++i)
+		{
+			result[i] = obj[pInput.mResolved->mSubOffset[i]];
+		}
+		pMesh->mColors[pInput.mIndex].push_back(result); 
       } else 
       {
 				DefaultLogger::get()->error("Collada: too many vertex color sets. Skipping.");

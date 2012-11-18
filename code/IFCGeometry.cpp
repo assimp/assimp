@@ -955,11 +955,88 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
 	}
 }
 
-typedef std::vector< std::vector<IfcVector2> > ContourVector;
+typedef std::vector<IfcVector2> Contour;
+
+struct ProjectedWindowContour
+{
+	Contour contour;
+	BoundingBox bb;
+
+
+	ProjectedWindowContour(const Contour& contour, const BoundingBox& bb)
+		: contour(contour)
+		, bb(bb)
+	{}
+
+
+	bool IsInvalid() const {
+		return contour.empty();
+	}
+
+	void FlagInvalid() {
+		contour.clear();
+	}
+};
+
+typedef std::vector< ProjectedWindowContour > ContourVector;
 
 // ------------------------------------------------------------------------------------------------
-void InsertWindowContours(const std::vector< BoundingBox >& bbs,
-	const ContourVector& contours,
+bool BoundingBoxesOverlapping( const BoundingBox &ibb, const BoundingBox &bb ) 
+{
+	// count the '=' case as non-overlapping but as adjacent to each other
+	return ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
+		ibb.first.y < bb.second.y && ibb.second.y > bb.first.y;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool IsDuplicateVertex(const IfcVector2& vv, const std::vector<IfcVector2>& temp_contour)
+{
+	// sanity check for duplicate vertices
+	BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
+		if ((cp-vv).SquareLength() < 1e-5f) {
+			return true;
+		}
+	}  
+	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void ExtractVerticesFromClipper(const ClipperLib::Polygon& poly, std::vector<IfcVector2>& temp_contour, 
+	bool filter_duplicates = false)
+{
+	temp_contour.clear();
+	BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
+		IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
+		vv = std::max(vv,IfcVector2());
+		vv = std::min(vv,one_vec);
+
+		if (!filter_duplicates || !IsDuplicateVertex(vv, temp_contour)) {
+			temp_contour.push_back(vv);
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+BoundingBox GetBoundingBox(const ClipperLib::Polygon& poly)
+{
+	IfcVector2 newbb_min, newbb_max;
+	MinMaxChooser<IfcVector2>()(newbb_min, newbb_max);
+
+	BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
+		IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
+
+		// sanity rounding
+		vv = std::max(vv,IfcVector2());
+		vv = std::min(vv,one_vec);
+
+		newbb_min = std::min(newbb_min,vv);
+		newbb_max = std::max(newbb_max,vv);
+	}
+	return BoundingBox(newbb_min, newbb_max);
+}
+
+// ------------------------------------------------------------------------------------------------
+void InsertWindowContours(const ContourVector& contours,
 	const std::vector<TempOpening>& openings,
 	TempMesh& curmesh)
 {
@@ -967,8 +1044,8 @@ void InsertWindowContours(const std::vector< BoundingBox >& bbs,
 
 	// fix windows - we need to insert the real, polygonal shapes into the quadratic holes that we have now
 	for(size_t i = 0; i < contours.size();++i) {
-		const BoundingBox& bb = bbs[i];
-		const std::vector<IfcVector2>& contour = contours[i];
+		const BoundingBox& bb = contours[i].bb;
+		const std::vector<IfcVector2>& contour = contours[i].contour;
 		if(contour.empty()) {
 			continue;
 		}
@@ -1153,46 +1230,47 @@ void MakeDisjunctWindowContours (const std::vector<IfcVector2>& a,
 }
 
 // ------------------------------------------------------------------------------------------------
-void CleanupWindowContours(ContourVector& contours)
+void CleanupWindowContour(ProjectedWindowContour& window)
 {
 	std::vector<IfcVector2> scratch;
+	std::vector<IfcVector2>& contour = window.contour;
 
-	// use polyclipper to clean up window contours as well
+	ClipperLib::Polygon subject;
+	ClipperLib::Clipper clipper;
+	ClipperLib::ExPolygons clipped;
+
+	BOOST_FOREACH(const IfcVector2& pip, contour) {
+		subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
+	}
+
+	clipper.AddPolygon(subject,ClipperLib::ptSubject);
+	clipper.Execute(ClipperLib::ctUnion,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
+
+	// This should yield only one polygon or something went wrong 
+	if (clipped.size() != 1) {
+
+		// Empty polygon? drop the contour altogether
+		if(clipped.empty()) {
+			IFCImporter::LogError("error during polygon clipping, window contour is degenerate");
+			window.FlagInvalid();
+			return;
+		}
+
+		// Else: take the first only
+		IFCImporter::LogError("error during polygon clipping, window contour is not convex");
+	}
+
+	ExtractVerticesFromClipper(clipped[0].outer, scratch);
+	// Assume the bounding box doesn't change during this operation
+}
+
+// ------------------------------------------------------------------------------------------------
+void CleanupWindowContours(ContourVector& contours)
+{
+	// Use PolyClipper to clean up window contours
 	try {
-		BOOST_FOREACH(std::vector<IfcVector2>& contour, contours) {
-			ClipperLib::Polygon subject;
-			ClipperLib::Clipper clipper;
-			ClipperLib::ExPolygons clipped;
-
-			BOOST_FOREACH(const IfcVector2& pip, contour) {
-				subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
-			}
-
-			clipper.AddPolygon(subject,ClipperLib::ptSubject);
-			clipper.Execute(ClipperLib::ctUnion,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
-
-			// this should yield only one polygon or something went wrong 
-			if (clipped.size() != 1) {
-
-				// empty polygon? drop the contour altogether
-				if(clipped.empty()) {
-					IFCImporter::LogError("error during polygon clipping, window contour is degenerate");
-					contour.clear();
-					continue;
-				}
-
-				// else: take only the first ...
-				IFCImporter::LogError("error during polygon clipping, window contour is not convex");
-			}
-
-			scratch.clear();
-			BOOST_FOREACH(const ClipperLib::IntPoint& point, clipped[0].outer) {
-				IfcVector2 vv = IfcVector2(from_int64(point.X), from_int64(point.Y));
-				vv = std::max(vv,IfcVector2());
-				vv = std::min(vv,one_vec);
-				scratch.push_back( vv );
-			}
-			contour.swap(scratch);
+		BOOST_FOREACH(ProjectedWindowContour& window, contours) {
+			CleanupWindowContour(window);
 		}
 	}
 	catch (const char* sx) {
@@ -1282,8 +1360,21 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 typedef std::vector<TempOpening*> OpeningRefs;
 typedef std::vector<OpeningRefs > OpeningRefVector;
 
+typedef std::vector<std::pair<
+	ContourVector::const_iterator, 
+	Contour::const_iterator> 
+> ContourRefVector; 
+
+
 // ------------------------------------------------------------------------------------------------
-void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv, 
+void FindAdjacentContours(const ContourVector::const_iterator current, const ContourVector& contours)
+{
+
+}
+
+// ------------------------------------------------------------------------------------------------
+void CloseWindows(const ContourVector& contours, 		  
+	const IfcMatrix4& minv, 
 	OpeningRefVector contours_to_openings, 
 	TempMesh& curmesh)
 {
@@ -1298,7 +1389,7 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 	// on both sides of the wall. If it doesn't (which would be a bug anyway)
 	// wrong geometry may be generated.
 	for (ContourVector::const_iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
-		if ((*it).empty()) {
+		if ((*it).IsInvalid()) {
 			continue;
 		}
 		OpeningRefs& refs = contours_to_openings[std::distance(contours.begin(), it)];
@@ -1311,11 +1402,14 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 			}
 		}
 
-		const ContourVector::value_type::const_iterator cbegin = (*it).begin(), cend = (*it).end();
+		ContourRefVector adjacent_contours;
+//		FindAdjacentContours(*it, contours);
+
+		const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 
 		if (has_other_side) {
-			curmesh.verts.reserve(curmesh.verts.size() + (*it).size() * 4);
-			curmesh.vertcnt.reserve(curmesh.vertcnt.size() + (*it).size());
+			curmesh.verts.reserve(curmesh.verts.size() + (*it).contour.size() * 4);
+			curmesh.vertcnt.reserve(curmesh.vertcnt.size() + (*it).contour.size());
 
 			// XXX this algorithm is really a bit inefficient - both in terms
 			// of constant factor and of asymptotic runtime.
@@ -1329,7 +1423,7 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 
 			bool start_is_outer_border = false;
 
-			for (ContourVector::value_type::const_iterator cit = cbegin; cit != cend; ++cit) {
+			for (Contour::const_iterator cit = cbegin; cit != cend; ++cit) {
 				const IfcVector2& proj_point = *cit;
 
 				// Locate the closest opposite point. This should be a good heuristic to
@@ -1413,8 +1507,8 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 		}
 		else {
 			BOOST_FOREACH(TempOpening* opening, refs) {
-				opening->wallPoints.reserve(opening->wallPoints.capacity() + (*it).size());
-				for (ContourVector::value_type::const_iterator cit = cbegin; cit != cend; ++cit) {
+				opening->wallPoints.reserve(opening->wallPoints.capacity() + (*it).contour.size());
+				for (Contour::const_iterator cit = cbegin; cit != cend; ++cit) {
 
 					const IfcVector2& proj_point = *cit;
 					opening->wallPoints.push_back(minv * IfcVector3(proj_point.x,proj_point.y,0.0f));
@@ -1441,9 +1535,7 @@ void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
 		field[(*it).first] = std::distance(bbs.begin(),it);
 	}
 
-	QuadrifyPart(IfcVector2(),IfcVector2(static_cast<IfcFloat>(1.0),static_cast<IfcFloat>(1.0)),
-		field,bbs,quads);
-
+	QuadrifyPart(IfcVector2(),one_vec,field,bbs,quads);
 	ai_assert(!(quads.size() % 4));
 
 	curmesh.vertcnt.resize(quads.size()/4,4);
@@ -1454,58 +1546,16 @@ void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool BoundingBoxesOverlapping( const BoundingBox &ibb, const BoundingBox &bb ) 
+void Quadrify(const ContourVector& contours, TempMesh& curmesh)
 {
-	// count the '=' case as non-overlapping but as adjacent to each other
-	return ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
-		ibb.first.y < bb.second.y && ibb.second.y > bb.first.y;
-}
+	std::vector<BoundingBox> bbs;
+	bbs.reserve(contours.size());
 
-// ------------------------------------------------------------------------------------------------
-bool IsDuplicateVertex(const IfcVector2& vv, const std::vector<IfcVector2>& temp_contour)
-{
-	// sanity check for duplicate vertices
-	BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
-		if ((cp-vv).SquareLength() < 1e-5f) {
-			return true;
-		}
-	}  
-	return false;
-}
-
-// ------------------------------------------------------------------------------------------------
-void ExtractVerticesFromClipper(const ClipperLib::Polygon& poly, std::vector<IfcVector2>& temp_contour, 
-	bool filter_duplicates = false)
-{
-	temp_contour.clear();
-	BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
-		IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
-		vv = std::max(vv,IfcVector2());
-		vv = std::min(vv,one_vec);
-
-		if (!filter_duplicates || !IsDuplicateVertex(vv, temp_contour)) {
-			temp_contour.push_back(vv);
-		}
+	BOOST_FOREACH(const ContourVector::value_type& val, contours) {
+		bbs.push_back(val.bb);
 	}
-}
 
-// ------------------------------------------------------------------------------------------------
-BoundingBox GetBoundingBox(const ClipperLib::Polygon& poly)
-{
-	IfcVector2 newbb_min, newbb_max;
-	MinMaxChooser<IfcVector2>()(newbb_min, newbb_max);
-
-	BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
-		IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
-
-		// sanity rounding
-		vv = std::max(vv,IfcVector2());
-		vv = std::min(vv,one_vec);
-
-		newbb_min = std::min(newbb_min,vv);
-		newbb_max = std::max(newbb_max,vv);
-	}
-	return BoundingBox(newbb_min, newbb_max);
+	Quadrify(bbs, curmesh);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1601,7 +1651,6 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	const IfcMatrix4& minv = IfcMatrix4(m).Inverse();
 
 	// Compute bounding boxes for all 2D openings in projection space
-	std::vector< BoundingBox > bbs;
 	ContourVector contours;
 
 	std::vector<IfcVector2> temp_contour;
@@ -1682,12 +1731,12 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		std::vector<TempOpening*> joined_openings(1, &opening);
 
 		// See if this BB intersects or is in close adjacency to any other BB we have so far.
-		for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end();) {
-			const BoundingBox& ibb = *it;
+		for (ContourVector::iterator it = contours.begin(); it != contours.end(); ) {
+			const BoundingBox& ibb = (*it).bb;
 
 			if (BoundingBoxesOverlapping(ibb, bb)) {
 
-				const std::vector<IfcVector2>& other = contours[std::distance(bbs.begin(),it)];
+				const std::vector<IfcVector2>& other = (*it).contour;
 				ClipperLib::ExPolygons poly;
 
 				// First check whether subtracting the old contour (to which ibb belongs)
@@ -1729,19 +1778,18 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 					// Update contour-to-opening tables accordingly
 					if (generate_connection_geometry) {
-						std::vector<TempOpening*>& t = contours_to_openings[std::distance(bbs.begin(),it)]; 
+						std::vector<TempOpening*>& t = contours_to_openings[std::distance(contours.begin(),it)]; 
 						joined_openings.insert(joined_openings.end(), t.begin(), t.end());
 
-						contours_to_openings.erase(contours_to_openings.begin() + std::distance(bbs.begin(),it));
+						contours_to_openings.erase(contours_to_openings.begin() + std::distance(contours.begin(),it));
 					}
 
-					contours.erase(contours.begin() + std::distance(bbs.begin(),it));
-					bbs.erase(it);
+					contours.erase(it);
 
 					// Restart from scratch because the newly formed BB might now
 					// overlap any other BB which its constituent BBs didn't
 					// previously overlap.
-					it = bbs.begin();
+					it = contours.begin();
 					continue;
 				}
 			}
@@ -1755,15 +1803,14 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					joined_openings.end()));
 			}
 
-			contours.push_back(temp_contour);
-			bbs.push_back(bb);
+			contours.push_back(ProjectedWindowContour(temp_contour, bb));
 		}
 	}
 
 	// Check if we still have any openings left - it may well be that this is
 	// not the cause, for example if all the opening candidates don't intersect
 	// this surface or point into a direction perpendicular to it.
-	if (bbs.empty()) {
+	if (contours.empty()) {
 		return false;
 	}
 
@@ -1771,7 +1818,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 	// Generate a base subdivision into quads to accommodate the given list
 	// of window bounding boxes.
-	Quadrify(bbs,curmesh);
+	Quadrify(contours,curmesh);
 
 	// Run a sanity cleanup pass on the window contours to avoid generating
 	// artifacts during the contour generation phase later on.
@@ -1780,7 +1827,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	// Previously we reduced all windows to rectangular AABBs in projection
 	// space, now it is time to fill the gaps between the BBs and the real
 	// window openings.
-	InsertWindowContours(bbs,contours,openings, curmesh);
+	InsertWindowContours(contours,openings, curmesh);
 
 	// Clip the entire outer contour of our current result against the real
 	// outer contour of the surface. This is necessary because the result

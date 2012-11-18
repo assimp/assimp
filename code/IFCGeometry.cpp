@@ -546,6 +546,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcFloa
 bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, 
 	TempMesh& curmesh)
 {
+	IFCImporter::LogWarn("forced to use poly2tri fallback method to generate wall openings");
 	std::vector<IfcVector3>& out = curmesh.verts;
 
 	bool result = false;
@@ -1321,6 +1322,7 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 			size_t vstart = curmesh.verts.size();
 			bool outer_border = false;
 			IfcVector2 last_proj_point;
+			IfcVector3 last_diff;
 
 			const IfcFloat border_epsilon_upper = static_cast<IfcFloat>(1-1e-4);
 			const IfcFloat border_epsilon_lower = static_cast<IfcFloat>(1e-4);
@@ -1374,12 +1376,17 @@ void CloseWindows(const ContourVector& contours, const IfcMatrix4& minv,
 
 				last_proj_point = proj_point;
 
+				IfcVector3 diff = bestv - world_point;
+				diff.Normalize();
+
 				if (!drop_this_edge) {
 					curmesh.verts.push_back(bestv);
 					curmesh.verts.push_back(world_point);
 
 					curmesh.vertcnt.push_back(4);
 				}
+
+				last_diff = diff;
 
 				if (cit != cbegin) {
 					curmesh.verts.push_back(world_point);
@@ -1447,35 +1454,81 @@ void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool GenerateOpenings(std::vector<TempOpening>& openings,
-	const std::vector<IfcVector3>& nors, 
-	TempMesh& curmesh,
-	bool check_intersection,
-	bool generate_connection_geometry)
+bool BoundingBoxesOverlapping( const BoundingBox &ibb, const BoundingBox &bb ) 
 {
-	std::vector<IfcVector3>& out = curmesh.verts;
-	OpeningRefVector contours_to_openings;
+	// count the '=' case as non-overlapping but as adjacent to each other
+	return ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
+		ibb.first.y < bb.second.y && ibb.second.y > bb.first.y;
+}
 
-	// Try to derive a solid base plane within the current surface for use as 
-	// working coordinate system. 
-	bool ok;
-	IfcFloat base_d;
-	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(curmesh,ok,&base_d));
-	if(!ok) {
-		return false;
+// ------------------------------------------------------------------------------------------------
+bool IsDuplicateVertex(const IfcVector2& vv, const std::vector<IfcVector2>& temp_contour)
+{
+	// sanity check for duplicate vertices
+	BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
+		if ((cp-vv).SquareLength() < 1e-5f) {
+			return true;
+		}
+	}  
+	return false;
+}
+
+// ------------------------------------------------------------------------------------------------
+void ExtractVerticesFromClipper(const ClipperLib::Polygon& poly, std::vector<IfcVector2>& temp_contour, 
+	bool filter_duplicates = false)
+{
+	temp_contour.clear();
+	BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
+		IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
+		vv = std::max(vv,IfcVector2());
+		vv = std::min(vv,one_vec);
+
+		if (!filter_duplicates || !IsDuplicateVertex(vv, temp_contour)) {
+			temp_contour.push_back(vv);
+		}
 	}
-	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
+}
+
+// ------------------------------------------------------------------------------------------------
+BoundingBox GetBoundingBox(const ClipperLib::Polygon& poly)
+{
+	IfcVector2 newbb_min, newbb_max;
+	MinMaxChooser<IfcVector2>()(newbb_min, newbb_max);
+
+	BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
+		IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
+
+		// sanity rounding
+		vv = std::max(vv,IfcVector2());
+		vv = std::min(vv,one_vec);
+
+		newbb_min = std::min(newbb_min,vv);
+		newbb_max = std::max(newbb_max,vv);
+	}
+	return BoundingBox(newbb_min, newbb_max);
+}
+
+// ------------------------------------------------------------------------------------------------
+IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh& in_mesh, 
+	IfcFloat& out_base_d, bool &ok)
+{
+	const std::vector<IfcVector3>& in_verts = in_mesh.verts;
+	ok = true;
+
+	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(in_mesh, ok, &out_base_d));
+	if(!ok) {
+		return IfcMatrix4();
+	}
+
 
 	IfcFloat coord = -1;
-
-	std::vector<IfcVector2> contour_flat;
-	contour_flat.reserve(out.size());
+	out_contour.reserve(in_verts.size());
 
 	IfcVector2 vmin, vmax;
 	MinMaxChooser<IfcVector2>()(vmin, vmax);
 
 	// Project all points into the new coordinate system, collect min/max verts on the way
-	BOOST_FOREACH(IfcVector3& x, out) {
+	BOOST_FOREACH(const IfcVector3& x, in_verts) {
 		const IfcVector3& vv = m * x;
 		// keep Z offset in the plane coordinate system. Ignoring precision issues
 		// (which  are present, of course), this should be the same value for
@@ -1490,14 +1543,14 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		vmin = std::min(IfcVector2(vv.x, vv.y), vmin);
 		vmax = std::max(IfcVector2(vv.x, vv.y), vmax);
 
-		contour_flat.push_back(IfcVector2(vv.x,vv.y));
+		out_contour.push_back(IfcVector2(vv.x,vv.y));
 	}
 
 	// Further improve the projection by mapping the entire working set into
 	// [0,1] range. This gives us a consistent data range so all epsilons
 	// used below can be constants.
 	vmax -= vmin;
-	BOOST_FOREACH(IfcVector2& vv, contour_flat) {
+	BOOST_FOREACH(IfcVector2& vv, out_contour) {
 		vv.x  = (vv.x - vmin.x) / vmax.x;
 		vv.y  = (vv.y - vmin.y) / vmax.y;
 
@@ -1515,10 +1568,39 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	mult.c4 = -coord;
 	m = mult * m;
 
+	return m;
+}
+
+// ------------------------------------------------------------------------------------------------
+bool GenerateOpenings(std::vector<TempOpening>& openings,
+	const std::vector<IfcVector3>& nors, 
+	TempMesh& curmesh,
+	bool check_intersection,
+	bool generate_connection_geometry)
+{
+	std::vector<IfcVector3>& out = curmesh.verts;
+	OpeningRefVector contours_to_openings;
+
+	// Try to derive a solid base plane within the current surface for use as 
+	// working coordinate system. Map all vertices onto this plane and 
+	// rescale them to [0,1] range. This normalization means all further
+	// epsilons need not be scaled.
+	bool ok = true;
+
+	std::vector<IfcVector2> contour_flat;
+	IfcFloat base_d;
+
+	const IfcMatrix4& m = ProjectOntoPlane(contour_flat, curmesh, base_d, ok);
+	if(!ok) {
+		return false;
+	}
+
+	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
+
 	// Obtain inverse transform for getting back to world space later on
 	const IfcMatrix4& minv = IfcMatrix4(m).Inverse();
 
-	// Compute bounding boxes for all 2D openings in projection space:
+	// Compute bounding boxes for all 2D openings in projection space
 	std::vector< BoundingBox > bbs;
 	ContourVector contours;
 
@@ -1534,7 +1616,6 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 		IfcVector2 vpmin,vpmax;
 		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
-
 
 		// The opening meshes are real 3D meshes so skip over all faces
 		// clearly facing into the wrong direction. Also, we need to check
@@ -1575,17 +1656,9 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				vpmin = std::min(vpmin,vv);
 				vpmax = std::max(vpmax,vv);
 
-				// sanity check for duplicate vertices
-				bool found = false; 
-				BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
-					if ((cp-vv).SquareLength() < 1e-5f) {
-						found = true;
-						break;
-					}
-				}  
-				if(!found) {
+				if (!IsDuplicateVertex(vv, temp_contour)) {
 					temp_contour.push_back(vv);
-				}
+				}		
 			}
 		}
 
@@ -1608,13 +1681,11 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		}
 		std::vector<TempOpening*> joined_openings(1, &opening);
 
-		// See if this BB intersects any other, in which case we could not use the Quadrify()
-		// algorithm and would revert to Poly2Tri only.
+		// See if this BB intersects or is in close adjacency to any other BB we have so far.
 		for (std::vector<BoundingBox>::iterator it = bbs.begin(); it != bbs.end();) {
 			const BoundingBox& ibb = *it;
 
-			if (ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x &&
-				ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) {
+			if (BoundingBoxesOverlapping(ibb, bb)) {
 
 				const std::vector<IfcVector2>& other = contours[std::distance(bbs.begin(),it)];
 				ClipperLib::ExPolygons poly;
@@ -1624,32 +1695,13 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				// no longer overlaps ibb
 				MakeDisjunctWindowContours(other, temp_contour, poly);
 				if(poly.size() == 1) {
-					IfcVector2 newbb_min, newbb_max;
-					MinMaxChooser<IfcVector2>()(newbb_min, newbb_max);
-
-					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
-						IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
-	
-						// sanity rounding
-						vv = std::max(vv,IfcVector2());
-						vv = std::min(vv,one_vec);
-
-						newbb_min = std::min(newbb_min,vv);
-						newbb_max = std::max(newbb_max,vv);
-					}
-
-					if (!(ibb.first.x <= newbb_max.x && ibb.second.x >= newbb_min.x &&
-						 ibb.first.y <= newbb_max.y && ibb.second.y >= newbb_min.y)) {
-
+					
+					const BoundingBox& newbb = GetBoundingBox(poly[0].outer);
+					if (!BoundingBoxesOverlapping(ibb, newbb )) {
 						 // Good guy bounding box
-						 bb = BoundingBox(newbb_min,newbb_max);
+						 bb = newbb ;
 
-						 temp_contour.clear();
-						 BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
-							 const IfcVector2& vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
-
-							 temp_contour.push_back(vv);
-						 }
+						 ExtractVerticesFromClipper(poly[0].outer, temp_contour, false);
 						 continue;
 					}
 				}
@@ -1659,12 +1711,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				// world [tm] ), resume using a single contour and a single bounding box.
 				MergeWindowContours(temp_contour, other, poly);
 
-				// TODO: Commented because it causes more visible artifacts than
-				// it solves.
 				if (poly.size() > 1) { 
-				
-					IFCImporter::LogWarn("cannot use quadrify algorithm to generate wall openings due to "  
-						"bounding box overlaps, using poly2tri fallback method");
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
 				}
 				else if (poly.size() == 0) {
@@ -1673,30 +1720,14 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					break;
 				}
 				else {
-					IFCImporter::LogDebug("merging overlapping openings");
+					IFCImporter::LogDebug("merging overlapping openings");				
+					ExtractVerticesFromClipper(poly[0].outer, temp_contour, true);
 
-					temp_contour.clear();
-					BOOST_FOREACH(const ClipperLib::IntPoint& point, poly[0].outer) {
-						IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
-						vv = std::max(vv,IfcVector2());
-						vv = std::min(vv,one_vec);
-
-						// sanity check for duplicate vertices
-						bool found = false; 
-						BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
-							if ((cp-vv).SquareLength() < 1e-5f) {
-								found = true;
-								break;
-							}
-						}  
-						if(!found) {
-							temp_contour.push_back(vv);
-						}
-					}
-
+					// Generate the union of the bounding boxes
 					bb.first = std::min(bb.first, ibb.first);
 					bb.second = std::max(bb.second, ibb.second);
 
+					// Update contour-to-opening tables accordingly
 					if (generate_connection_geometry) {
 						std::vector<TempOpening*>& t = contours_to_openings[std::distance(bbs.begin(),it)]; 
 						joined_openings.insert(joined_openings.end(), t.begin(), t.end());
@@ -1707,7 +1738,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					contours.erase(contours.begin() + std::distance(bbs.begin(),it));
 					bbs.erase(it);
 
-					// restart from scratch because the newly formed BB might now
+					// Restart from scratch because the newly formed BB might now
 					// overlap any other BB which its constituent BBs didn't
 					// previously overlap.
 					it = bbs.begin();

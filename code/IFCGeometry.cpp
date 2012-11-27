@@ -1040,8 +1040,6 @@ void InsertWindowContours(const ContourVector& contours,
 	const std::vector<TempOpening>& openings,
 	TempMesh& curmesh)
 {
-	ai_assert(contours.size() == bbs.size());
-
 	// fix windows - we need to insert the real, polygonal shapes into the quadratic holes that we have now
 	for(size_t i = 0; i < contours.size();++i) {
 		const BoundingBox& bb = contours[i].bb;
@@ -1365,11 +1363,108 @@ typedef std::vector<std::pair<
 	Contour::const_iterator> 
 > ContourRefVector; 
 
+// ------------------------------------------------------------------------------------------------
+bool BoundingBoxesAdjacent(const BoundingBox& bb, const BoundingBox& ibb)
+{
+	// TODO: I'm pretty sure there is a much more compact way to check this
+	const IfcFloat epsilon = 1e-5f;
+	return	(fabs(bb.second.x - ibb.first.x) < epsilon && bb.first.y <= ibb.second.y && bb.second.y >= ibb.first.y) ||
+		(fabs(bb.first.x - ibb.second.x) < epsilon && ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) || 
+		(fabs(bb.second.y - ibb.first.y) < epsilon && bb.first.x <= ibb.second.x && bb.second.x >= ibb.first.x) ||
+		(fabs(bb.first.y - ibb.second.y) < epsilon && ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Check if m0,m1 intersects n0,n1 assuming same ordering of the points in the line segments
+// output the intersection points on n0,n1
+bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1, 
+	const IfcVector2& m0, const IfcVector2& m1,
+	IfcVector2& out0, IfcVector2& out1)
+{
+	const IfcVector2& m0_to_m1 = m1 - m0;
+	const IfcVector2& m0_to_n1 = n1 - m0;
+	const IfcVector2& n0_to_n1 = n1 - n0;
+	const IfcVector2& n0_to_m1 = m1 - n0;
+
+	const IfcFloat m0_to_m1_len = m0_to_m1.SquareLength();
+	const IfcFloat m0_to_n1_len = m0_to_n1.SquareLength();
+	const IfcFloat n0_to_n1_len = n0_to_n1.SquareLength();
+	const IfcFloat n0_to_m1_len = n0_to_m1.SquareLength();
+
+	if (m0_to_m1_len < m0_to_n1_len) {
+		return false;
+	}
+
+	if (n0_to_n1_len < n0_to_m1_len) {
+		return false;
+	}
+
+	const IfcFloat epsilon = 1e-5f;
+	if (fabs((m0_to_m1 * n0_to_n1) - sqrt(m0_to_m1_len) * sqrt(n0_to_n1_len)) > epsilon) {
+		return false;
+	}
+
+	if (fabs((m0_to_m1 * m0_to_n1) - sqrt(m0_to_m1_len) * sqrt(m0_to_n1_len)) > epsilon) {
+		return false;
+	}
+
+	// XXX this condition is probably redundant (or at least a check against > 0 is sufficient)
+	if (fabs((n0_to_n1 * n0_to_m1) - sqrt(n0_to_n1_len) * sqrt(n0_to_m1_len)) > epsilon) {
+		return false;
+	}
+
+	// determine intersection points
+
+	return true;
+}
 
 // ------------------------------------------------------------------------------------------------
 void FindAdjacentContours(const ContourVector::const_iterator current, const ContourVector& contours)
 {
+	const BoundingBox& bb = (*current).bb;
 
+	// First step to find possible adjacent contours is to check for adjacent bounding
+	// boxes. If the bounding boxes are not adjacent, the contours lines cannot possibly be.
+	for (ContourVector::const_iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
+		if ((*it).IsInvalid()) {
+			continue;
+		}
+
+		if(it == current) {
+			continue;
+		}
+
+		const BoundingBox& ibb = (*it).bb;
+
+		// Assumption: the bounding boxes are pairwise disjoint
+		ai_assert(!BoundingBoxesOverlapping(bb, ibb));
+
+		if (BoundingBoxesAdjacent(bb, ibb)) {
+
+			// Now do a each-against-everyone check for intersecting contour
+			// lines. This obviously scales terribly, but in typical real
+			// world Ifc files it will not matter since most windows that
+			// are adjacent to each others are rectangular anyway.
+
+			const Contour& ncontour = (*current).contour;
+			const Contour& mcontour = (*it).contour;
+
+			for (size_t n = 0, nend = ncontour.size(); n < nend; ++n) {
+				const IfcVector2& n0 = ncontour[n];
+				const IfcVector2& n1 = ncontour[(n+1) % ncontour.size()];
+
+				for (size_t m = 0, mend = mcontour.size(); m < nend; ++m) {
+					const IfcVector2& m0 = ncontour[m];
+					const IfcVector2& m1 = ncontour[(m+1) % mcontour.size()];
+
+					IfcVector2 isect0, isect1;
+					if (IntersectingLineSegments(n0,n1, m0, m1, isect0, isect1)) {
+						// Find intersection range
+					}
+				}
+			}
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1403,7 +1498,7 @@ void CloseWindows(const ContourVector& contours,
 		}
 
 		ContourRefVector adjacent_contours;
-//		FindAdjacentContours(*it, contours);
+		FindAdjacentContours(it, contours);
 
 		const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 

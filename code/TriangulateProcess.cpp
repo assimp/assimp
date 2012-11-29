@@ -188,6 +188,8 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 	FILE* fout = fopen(POLY_OUTPUT_FILE,"a");
 #endif
 
+	const aiVector3D* verts = pMesh->mVertices;
+
 	// use boost::scoped_array to avoid slow std::vector<bool> specialiations
 	boost::scoped_array<bool> done(new bool[max_out]); 
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)	{
@@ -216,24 +218,59 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 			face.mIndices = NULL;
 			continue;
-		} /* does not handle concave quads
+		}  
 		// optimized code for quadrilaterals
 		else if ( face.mNumIndices == 4) {
+
+			// quads can have at maximum one concave vertex. Determine
+			// this vertex (if it exists) and start tri-fanning from
+			// it. 
+			unsigned int start_vertex = 0;
+			for (unsigned int i = 0; i < 4; ++i) {
+				const aiVector3D& v0 = verts[face.mIndices[(i+3) % 4]];
+				const aiVector3D& v1 = verts[face.mIndices[(i+2) % 4]];
+				const aiVector3D& v2 = verts[face.mIndices[(i+1) % 4]];
+
+				const aiVector3D& v = verts[face.mIndices[i]];
+
+				aiVector3D left = (v0-v); 
+				aiVector3D diag = (v1-v); 
+				aiVector3D right = (v2-v); 
+
+				left.Normalize();
+				diag.Normalize();
+				right.Normalize();
+
+				const float angle = acos(left*diag) + acos(right*diag);
+				if (angle > AI_MATH_PI_F) {
+					// this is the concave point
+					start_vertex = i;
+					break;
+				}
+			}
+
+			const unsigned int temp[] = {face.mIndices[0], face.mIndices[1], face.mIndices[2], face.mIndices[3]};
+	
 			aiFace& nface = *curOut++;
 			nface.mNumIndices = 3;
 			nface.mIndices = face.mIndices;
+
+			nface.mIndices[0] = temp[start_vertex];
+			nface.mIndices[1] = temp[(start_vertex + 1) % 4];
+			nface.mIndices[2] = temp[(start_vertex + 2) % 4];
 
 			aiFace& sface = *curOut++;
 			sface.mNumIndices = 3;
 			sface.mIndices = new unsigned int[3];
 
-			sface.mIndices[0] = face.mIndices[0];
-			sface.mIndices[1] = face.mIndices[2];
-			sface.mIndices[2] = face.mIndices[3];
-
+			sface.mIndices[0] = temp[start_vertex];
+			sface.mIndices[1] = temp[(start_vertex + 2) % 4];
+			sface.mIndices[2] = temp[(start_vertex + 3) % 4];
+		
+			// prevent double deletion of the indices field
 			face.mIndices = NULL;
 			continue;
-		} */
+		} 
 		else
 		{
 			// A polygon with more than 3 vertices can be either concave or convex.
@@ -246,7 +283,6 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			// We project it onto a plane to get a 2d triangle.
 
 			// Collect all vertices of of the polygon.
-			const aiVector3D* verts = pMesh->mVertices;
 			for (tmp = 0; tmp < max; ++tmp) {
 				temp_verts3d[tmp] = verts[idx[tmp]];
 			}

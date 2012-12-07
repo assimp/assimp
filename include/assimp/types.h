@@ -178,7 +178,7 @@ struct aiColor3D
 
 	/** Component-wise subtraction */
 	aiColor3D operator-(const aiColor3D& c) const {
-		return aiColor3D(r+c.r,g+c.g,b+c.b);
+		return aiColor3D(r-c.r,g-c.g,b-c.b);
 	}
 
 	/** Component-wise multiplication */

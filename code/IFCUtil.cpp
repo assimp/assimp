@@ -142,8 +142,8 @@ void TempMesh::RemoveDegenerates()
 	bool drop = false;
 	size_t inor = 0;
 
-	std::vector<IfcVector3>::const_iterator vit = verts.begin();
-	for (std::vector<unsigned int>::const_iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
+	std::vector<IfcVector3>::iterator vit = verts.begin();
+	for (std::vector<unsigned int>::iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
 		const unsigned int pcount = *it;
 		
 		if (normals[inor].SquareLength() < 1e-5f) {

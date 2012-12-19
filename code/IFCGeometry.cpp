@@ -956,11 +956,13 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
 }
 
 typedef std::vector<IfcVector2> Contour;
+typedef std::vector<bool> SkipList; // should probably use int for performance reasons
 
 struct ProjectedWindowContour
 {
 	Contour contour;
 	BoundingBox bb;
+	SkipList skiplist;
 
 
 	ProjectedWindowContour(const Contour& contour, const BoundingBox& bb)
@@ -975,6 +977,10 @@ struct ProjectedWindowContour
 
 	void FlagInvalid() {
 		contour.clear();
+	}
+
+	void PrepareSkiplist() {
+		skiplist.resize(contour.size(),false);
 	}
 };
 
@@ -1382,46 +1388,64 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 	IfcVector2& out0, IfcVector2& out1)
 {
 	const IfcVector2& m0_to_m1 = m1 - m0;
-	const IfcVector2& m0_to_n1 = n1 - m0;
 	const IfcVector2& n0_to_n1 = n1 - n0;
+
+	const IfcVector2& n0_to_m0 = m0 - n0;
+	const IfcVector2& n1_to_m1 = m1 - n1;
+
 	const IfcVector2& n0_to_m1 = m1 - n0;
 
-	const IfcFloat m0_to_m1_len = m0_to_m1.SquareLength();
-	const IfcFloat m0_to_n1_len = m0_to_n1.SquareLength();
-	const IfcFloat n0_to_n1_len = n0_to_n1.SquareLength();
-	const IfcFloat n0_to_m1_len = n0_to_m1.SquareLength();
+	const IfcFloat e = 1e-5f;
 
-	if (m0_to_m1_len < m0_to_n1_len) {
+	if (!(n0_to_m0.SquareLength() < e*e || fabs(n0_to_m0 * n0_to_n1) / (n0_to_m0.Length() * n0_to_n1.Length()) > 1-1e-5 )) {
 		return false;
 	}
 
-	if (n0_to_n1_len < n0_to_m1_len) {
+	if (!(n1_to_m1.SquareLength() < e*e || fabs(n1_to_m1 * n0_to_n1) / (n1_to_m1.Length() * n0_to_n1.Length()) > 1-1e-5 )) {
 		return false;
 	}
 
-	const IfcFloat epsilon = 1e-5f;
-	if (fabs((m0_to_m1 * n0_to_n1) - sqrt(m0_to_m1_len) * sqrt(n0_to_n1_len)) > epsilon) {
+	IfcFloat s0;
+	IfcFloat s1;
+	if(fabs(n0_to_n1.x) > e) {
+		ai_assert(fabs(n0_to_m0.x) > e);
+		s0 = n0_to_m0.x / n0_to_n1.x;
+		s1 = n0_to_m1.x / n0_to_n1.x;
+	}
+	else {
+		ai_assert(fabs(n0_to_n1.y) > e);
+		s0 = n0_to_m0.y / n0_to_n1.y;
+		s1 = n0_to_m1.y / n0_to_n1.y;
+	}
+
+	if (s1 < s0) {
+		std::swap(s1,s0);
+	}
+
+	s0 = std::max(0.0,s0);
+	s1 = std::max(0.0,s1);
+
+	s0 = std::min(1.0,s0);
+	s1 = std::min(1.0,s1);
+
+	if (fabs(s1-s0) < e) {
 		return false;
 	}
 
-	if (fabs((m0_to_m1 * m0_to_n1) - sqrt(m0_to_m1_len) * sqrt(m0_to_n1_len)) > epsilon) {
-		return false;
-	}
-
-	// XXX this condition is probably redundant (or at least a check against > 0 is sufficient)
-	if (fabs((n0_to_n1 * n0_to_m1) - sqrt(n0_to_n1_len) * sqrt(n0_to_m1_len)) > epsilon) {
-		return false;
-	}
-
-	// determine intersection points
+	out0 = n0 + s0 * n0_to_n1;
+	out1 = n0 + s1 * n0_to_n1;
 
 	return true;
 }
 
 // ------------------------------------------------------------------------------------------------
-void FindAdjacentContours(const ContourVector::const_iterator current, const ContourVector& contours)
+void FindAdjacentContours(ContourVector::iterator current, const ContourVector& contours)
 {
 	const BoundingBox& bb = (*current).bb;
+
+	// What is to be done here is to populate the skip lists for the contour
+	// and to add necessary padding points when needed.
+	SkipList& skiplist = (*current).skiplist;
 
 	// First step to find possible adjacent contours is to check for adjacent bounding
 	// boxes. If the bounding boxes are not adjacent, the contours lines cannot possibly be.
@@ -1446,7 +1470,7 @@ void FindAdjacentContours(const ContourVector::const_iterator current, const Con
 			// world Ifc files it will not matter since most windows that
 			// are adjacent to each others are rectangular anyway.
 
-			const Contour& ncontour = (*current).contour;
+			Contour& ncontour = (*current).contour;
 			const Contour& mcontour = (*it).contour;
 
 			for (size_t n = 0, nend = ncontour.size(); n < nend; ++n) {
@@ -1454,12 +1478,28 @@ void FindAdjacentContours(const ContourVector::const_iterator current, const Con
 				const IfcVector2& n1 = ncontour[(n+1) % ncontour.size()];
 
 				for (size_t m = 0, mend = mcontour.size(); m < nend; ++m) {
-					const IfcVector2& m0 = ncontour[m];
-					const IfcVector2& m1 = ncontour[(m+1) % mcontour.size()];
+					const IfcVector2& m0 = mcontour[m];
+					const IfcVector2& m1 = mcontour[(m+1) % mcontour.size()];
 
 					IfcVector2 isect0, isect1;
 					if (IntersectingLineSegments(n0,n1, m0, m1, isect0, isect1)) {
-						// Find intersection range
+
+						if ((isect0 - n0).SquareLength() > 1e-5) {
+							++n;
+
+							ncontour.insert(ncontour.begin() + n, isect0);	
+							skiplist.insert(skiplist.begin() + n, true);
+						}
+						else {
+							skiplist[n] = true;
+						}
+
+						if ((isect1 - n1).SquareLength() > 1e-5) {
+							++n;
+
+							ncontour.insert(ncontour.begin() + n, isect1);
+							skiplist.insert(skiplist.begin() + n, false);
+						}
 					}
 				}
 			}
@@ -1468,7 +1508,59 @@ void FindAdjacentContours(const ContourVector::const_iterator current, const Con
 }
 
 // ------------------------------------------------------------------------------------------------
-void CloseWindows(const ContourVector& contours, 		  
+void FindBorderContours(ContourVector::iterator current)
+{
+	const IfcFloat border_epsilon_upper = static_cast<IfcFloat>(1-1e-4);
+	const IfcFloat border_epsilon_lower = static_cast<IfcFloat>(1e-4);
+	const IfcFloat dot_point_epsilon = static_cast<IfcFloat>(1e-5);
+
+	bool outer_border = false;
+	bool start_on_outer_border = false;
+
+	SkipList& skiplist = (*current).skiplist;
+	IfcVector2 last_proj_point;
+
+	const Contour::const_iterator cbegin = (*current).contour.begin(), cend = (*current).contour.end();
+
+	for (Contour::const_iterator cit = cbegin; cit != cend; ++cit) {
+		const IfcVector2& proj_point = *cit;
+
+		// Check if this connection is along the outer boundary of the projection
+		// plane. In such a case we better drop it because such 'edges' should
+		// not have any geometry to close them (think of door openings).
+		if (proj_point.x <= border_epsilon_lower || proj_point.x >= border_epsilon_upper ||
+			proj_point.y <= border_epsilon_lower || proj_point.y >= border_epsilon_upper) {
+
+				if (outer_border) {
+					ai_assert(cit != cbegin);
+					if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < dot_point_epsilon) {
+						skiplist[std::distance(cbegin, cit) - 1] = true;
+					}
+				}
+				else if (cit == cbegin) {
+					start_on_outer_border = true;
+				}
+		
+				outer_border = true;
+		}
+		else {
+			outer_border = false;
+		}
+
+		last_proj_point = proj_point;
+	}
+
+	// handle first segment
+	if (outer_border && start_on_outer_border) {
+		const IfcVector2& proj_point = *cbegin;
+		if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < dot_point_epsilon) {
+			skiplist[0] = true;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void CloseWindows(ContourVector& contours, 		  
 	const IfcMatrix4& minv, 
 	OpeningRefVector contours_to_openings, 
 	TempMesh& curmesh)
@@ -1483,7 +1575,7 @@ void CloseWindows(const ContourVector& contours,
 	// The code is based on the assumption that this happens symmetrically
 	// on both sides of the wall. If it doesn't (which would be a bug anyway)
 	// wrong geometry may be generated.
-	for (ContourVector::const_iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
+	for (ContourVector::iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
 		if ((*it).IsInvalid()) {
 			continue;
 		}
@@ -1498,8 +1590,18 @@ void CloseWindows(const ContourVector& contours,
 		}
 
 		ContourRefVector adjacent_contours;
-		FindAdjacentContours(it, contours);
 
+		// prepare a skiplist for this contour. The skiplist is used to
+		// eliminate unwanted contour lines for adjacent windows and
+		// those bordering the outer frame.
+		(*it).PrepareSkiplist();
+
+		FindAdjacentContours(it, contours);
+		FindBorderContours(it);
+
+		ai_assert((*it).skiplist.size() == (*it).contour.size());
+
+		SkipList::const_iterator skipbegin = (*it).skiplist.begin(), skipend = (*it).skiplist.end();
 		const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 
 		if (has_other_side) {
@@ -1509,16 +1611,13 @@ void CloseWindows(const ContourVector& contours,
 			// XXX this algorithm is really a bit inefficient - both in terms
 			// of constant factor and of asymptotic runtime.
 			size_t vstart = curmesh.verts.size();
-			bool outer_border = false;
-			IfcVector2 last_proj_point;
-			IfcVector3 last_diff;
+			std::vector<bool>::const_iterator skipit = skipbegin;
 
-			const IfcFloat border_epsilon_upper = static_cast<IfcFloat>(1-1e-4);
-			const IfcFloat border_epsilon_lower = static_cast<IfcFloat>(1e-4);
+			IfcVector3 start0;
+			IfcVector3 start1;
 
-			bool start_is_outer_border = false;
-
-			for (Contour::const_iterator cit = cbegin; cit != cend; ++cit) {
+			bool drop_this_edge = false;
+			for (Contour::const_iterator cit = cbegin; cit != cend; ++cit, drop_this_edge = *skipit++) {
 				const IfcVector2& proj_point = *cit;
 
 				// Locate the closest opposite point. This should be a good heuristic to
@@ -1538,64 +1637,42 @@ void CloseWindows(const ContourVector& contours,
 					}
 				}
 
-				// Check if this connection is along the outer boundary of the projection
-				// plane. In such a case we better drop it because such 'edges' should
-				// not have any geometry to close them (think of door openings).
-				bool drop_this_edge = false;
-				if (proj_point.x <= border_epsilon_lower || proj_point.x >= border_epsilon_upper ||
-					proj_point.y <= border_epsilon_lower || proj_point.y >= border_epsilon_upper) {
-
-					if (outer_border) {
-						ai_assert(cit != cbegin);
-						if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < 1e-5f) {
-							drop_this_edge = true;
-
-							curmesh.verts.pop_back();
-							curmesh.verts.pop_back();
-						}
-					}
-					else if (cit == cbegin) {
-						start_is_outer_border = true;
-					}
-					outer_border = true;
-				}
-				else {
-					outer_border = false;
-				}
-
-				last_proj_point = proj_point;
-
 				IfcVector3 diff = bestv - world_point;
 				diff.Normalize();
 
-				if (!drop_this_edge) {
-					curmesh.verts.push_back(bestv);
-					curmesh.verts.push_back(world_point);
+				if (drop_this_edge) {
+					curmesh.verts.pop_back();
+					curmesh.verts.pop_back();
+				}
+				else {
+					curmesh.verts.push_back(cit == cbegin ? world_point : bestv);
+					curmesh.verts.push_back(cit == cbegin ? bestv : world_point);
 
 					curmesh.vertcnt.push_back(4);
 				}
 
-				last_diff = diff;
+				if (cit == cbegin) {
+					start0 = world_point;
+					start1 = bestv;
+					continue;
+				}
 
-				if (cit != cbegin) {
-					curmesh.verts.push_back(world_point);
-					curmesh.verts.push_back(bestv);
+				curmesh.verts.push_back(world_point);
+				curmesh.verts.push_back(bestv);
 
-					if (cit == cend - 1) {
+				if (cit == cend - 1) {
+					drop_this_edge = *skipit;
 
-						// Check if the final connection (last to first element) is itself
-						// a border edge that needs to be dropped.
-						if (start_is_outer_border && outer_border &&
-							fabs((proj_point.x - (*cbegin).x) * (proj_point.y - (*cbegin).y)) < 1e-5f) {
-
-							curmesh.vertcnt.pop_back();
-							curmesh.verts.pop_back();
-							curmesh.verts.pop_back();
-						}
-						else {
-							curmesh.verts.push_back(curmesh.verts[vstart]);
-							curmesh.verts.push_back(curmesh.verts[vstart+1]);
-						}
+					// Check if the final connection (last to first element) is itself
+					// a border edge that needs to be dropped.
+					if (drop_this_edge) {
+						curmesh.vertcnt.pop_back();
+						curmesh.verts.pop_back();
+						curmesh.verts.pop_back();
+					}
+					else {
+						curmesh.verts.push_back(start1);
+						curmesh.verts.push_back(start0);
 					}
 				}
 			}

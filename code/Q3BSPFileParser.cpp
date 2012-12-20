@@ -38,6 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 #include "AssimpPCH.h"
+
+#ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
+
 #include "Q3BSPFileParser.h"
 #include "DefaultIOSystem.h"
 #include "Q3BSPFileData.h"
@@ -273,3 +276,5 @@ void Q3BSPFileParser::getEntities()
 // ------------------------------------------------------------------------------------------------
 
 } // Namespace Assimp
+
+#endif // ASSIMP_BUILD_NO_Q3BSP_IMPORTER

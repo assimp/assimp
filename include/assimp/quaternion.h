@@ -56,8 +56,8 @@ class aiQuaterniont
 {
 public:
 	aiQuaterniont() : w(), x(), y(), z() {}
-	aiQuaterniont(TReal w, TReal x, TReal y, TReal z) 
-		: w(w), x(x), y(y), z(z) {}
+	aiQuaterniont(TReal pw, TReal px, TReal py, TReal pz) 
+		: w(pw), x(px), y(py), z(pz) {}
 
 	/** Construct from rotation matrix. Result is undefined if the matrix is not orthonormal. */
 	aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);

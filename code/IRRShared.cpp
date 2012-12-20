@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
+#ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
+
 #include "IRRShared.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
@@ -494,3 +496,5 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 	DefaultLogger::get()->error("IRRMESH: Unexpected end of file. Material is not complete");
 	return mat;
 }
+
+#endif // !! ASSIMP_BUILD_NO_IRR_IMPORTER

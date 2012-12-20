@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
 
 // internal headers
 #include "TextureTransform.h"
@@ -2148,3 +2149,5 @@ void Parser::ParseLV4MeshLong(unsigned int& iOut)
 	// parse the value
 	iOut = strtoul10(filePtr,&filePtr);
 }
+
+#endif // !! ASSIMP_BUILD_NO_BASE_IMPORTER

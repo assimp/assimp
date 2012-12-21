@@ -39,6 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+
+#ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
+
 #include "Q3BSPZipArchive.h"
 #include <algorithm>
 #include <cassert>
@@ -194,3 +197,5 @@ bool Q3BSPZipArchive::mapArchive()
 
 } // Namespace Q3BSP
 } // Namespace Assimp
+
+#endif // ASSIMP_BUILD_NO_Q3BSP_IMPORTER

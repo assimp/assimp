@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssimpPCH.h"
+#ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
 
 #include "LWSLoader.h"
 #include "ParsingUtils.h"
@@ -918,3 +919,5 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	}
 
 }
+
+#endif // !! ASSIMP_BUILD_NO_LWS_IMPORTER

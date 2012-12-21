@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A0CE9ED2-A27E-40AE-95F5-FEF94BB7E131}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -142,7 +142,22 @@
     <Compile Include="FloatVector.cs" />
     <Compile Include="Importer.cs" />
     <Compile Include="ProgressHandler.cs" />
+    <Compile Include="SWIGTYPE_p_aiImporterDesc.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SWIGTYPE_p_Assimp__BaseImporter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SWIGTYPE_p_Assimp__ImporterPimpl.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SWIGTYPE_p_float.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SWIGTYPE_p_std__string.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SWIGTYPE_p_void.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UintVector.cs" />

@@ -640,6 +640,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 	std::vector<std::string> supportedExtensions;
 	supportedExtensions.push_back( ".jpg" );
 	supportedExtensions.push_back( ".png" );
+  supportedExtensions.push_back( ".tga" );
 	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper )
 	{
 		return false;
@@ -670,10 +671,10 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 			(void)readSize;
 			ai_assert( readSize == pTexture->mWidth );
 			pTexture->pcData = reinterpret_cast<aiTexel*>( pData );
-			pTexture->achFormatHint[ 0 ] = ext[ 0 ];
-			pTexture->achFormatHint[ 1 ] = ext[ 1 ];
-			pTexture->achFormatHint[ 2 ] = ext[ 2 ];
-			pTexture->achFormatHint[ 2 ] = '\0';
+			pTexture->achFormatHint[ 0 ] = ext[ 1 ];
+			pTexture->achFormatHint[ 1 ] = ext[ 2 ];
+			pTexture->achFormatHint[ 2 ] = ext[ 3 ];
+			pTexture->achFormatHint[ 3 ] = '\0';
 			res = true;
 
 			aiString name;

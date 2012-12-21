@@ -76,12 +76,27 @@ struct delete_fun
 struct TempMesh;
 struct TempOpening 
 {
-	const IFC::IfcExtrudedAreaSolid* solid;
+	const IFC::IfcSolidModel* solid;
 	IfcVector3 extrusionDir;
 	boost::shared_ptr<TempMesh> profileMesh;
 
+	// list of points generated for this opening. This is used to
+	// create connections between two opposing holes created
+	// from a single opening instance (two because walls tend to
+	// have two sides). If !empty(), the other side of the wall
+	// has already been processed.
+	std::vector<IfcVector3> wallPoints;
+
 	// ------------------------------------------------------------------------------
-	TempOpening(const IFC::IfcExtrudedAreaSolid* solid,IfcVector3 extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
+	TempOpening()
+		: solid()
+		, extrusionDir()
+		, profileMesh()
+	{
+	}
+
+	// ------------------------------------------------------------------------------
+	TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
 		: solid(solid)
 		, extrusionDir(extrusionDir)
 		, profileMesh(profileMesh)
@@ -168,7 +183,19 @@ struct TempMesh
 	void Transform(const IfcMatrix4& mat);
 	IfcVector3 Center() const;
 	void Append(const TempMesh& other);
+
+	bool IsEmpty() const {
+		return verts.empty() && vertcnt.empty();
+	}
+
 	void RemoveAdjacentDuplicates();
+	void RemoveDegenerates();
+
+	void FixupFaceOrientation();
+	IfcVector3 ComputeLastPolygonNormal(bool normalize = true) const;
+	void ComputePolygonNormals(std::vector<IfcVector3>& normals, 
+		bool normalize = true, 
+		size_t ofs = 0) const;
 };
 
 

@@ -310,7 +310,7 @@ struct Model
 		m_Groups.clear();
 
 		for ( std::map<std::string, Material*>::iterator it = m_MaterialMap.begin(); it != m_MaterialMap.end(); ++it ) {
-//			delete it->second;
+			delete it->second;
 		}
 	}
 };

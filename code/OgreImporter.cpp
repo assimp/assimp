@@ -100,7 +100,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 	//Read the Mesh File:
 	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
-	XmlReader* MeshFile = irr::io::createIrrXMLReader(mIOWrapper.get());
+	boost::scoped_ptr<XmlReader> MeshFile(irr::io::createIrrXMLReader(mIOWrapper.get()));
 	if(!MeshFile)//parse the xml file
 		throw DeadlyImportError("Failed to create XML Reader for "+pFile);
 
@@ -108,21 +108,21 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	DefaultLogger::get()->debug("Mesh File opened");
 	
 	//Read root Node:
-	if(!(XmlRead(MeshFile) && string(MeshFile->getNodeName())=="mesh"))
+	if(!(XmlRead(MeshFile.get()) && string(MeshFile->getNodeName())=="mesh"))
 	{
 		throw DeadlyImportError("Root Node is not <mesh>! "+pFile+"  "+MeshFile->getNodeName());
 	}
 
 	//eventually load shared geometry
-	XmlRead(MeshFile);//shared geometry is optional, so we need a reed for the next two if's
+	XmlRead(MeshFile.get());//shared geometry is optional, so we need a reed for the next two if's
 	if(MeshFile->getNodeName()==string("sharedgeometry"))
 	{
-		unsigned int NumVertices=GetAttribute<int>(MeshFile, "vertexcount");;
+		unsigned int NumVertices=GetAttribute<int>(MeshFile.get(), "vertexcount");;
 
-		XmlRead(MeshFile);
+		XmlRead(MeshFile.get());
 		while(MeshFile->getNodeName()==string("vertexbuffer"))
 		{
-			ReadVertexBuffer(m_SharedGeometry, MeshFile, NumVertices);
+			ReadVertexBuffer(m_SharedGeometry, MeshFile.get(), NumVertices);
 		}
 	}
 
@@ -136,13 +136,13 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	//-------------------Read the submeshs and materials:-----------------------
 	std::list<boost::shared_ptr<SubMesh> > SubMeshes;
 	vector<aiMaterial*> Materials;
-	XmlRead(MeshFile);
+	XmlRead(MeshFile.get());
 	while(MeshFile->getNodeName()==string("submesh"))
 	{
 		SubMesh* theSubMesh=new SubMesh();
-		theSubMesh->MaterialName=GetAttribute<string>(MeshFile, "material");
+		theSubMesh->MaterialName=GetAttribute<string>(MeshFile.get(), "material");
 		DefaultLogger::get()->debug("Loading Submehs with Material: "+theSubMesh->MaterialName);
-		ReadSubMesh(*theSubMesh, MeshFile);
+		ReadSubMesh(*theSubMesh, MeshFile.get());
 
 		//just a index in a array, we add a mesh in each loop cycle, so we get indicies like 0, 1, 2 ... n;
 		//so it is important to do this before pushing the mesh in the vector!
@@ -170,9 +170,9 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	vector<Animation> Animations;
 	if(MeshFile->getNodeName()==string("skeletonlink"))
 	{
-		string SkeletonFile=GetAttribute<string>(MeshFile, "name");
+		string SkeletonFile=GetAttribute<string>(MeshFile.get(), "name");
 		LoadSkeleton(SkeletonFile, Bones, Animations);
-		XmlRead(MeshFile);
+		XmlRead(MeshFile.get());
 	}
 	else
 	{
@@ -185,7 +185,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	//now there might be boneassignments for the shared geometry:
 	if(MeshFile->getNodeName()==string("boneassignments"))
 	{
-		ReadBoneWeights(m_SharedGeometry, MeshFile);
+		ReadBoneWeights(m_SharedGeometry, MeshFile.get());
 	}
 
 

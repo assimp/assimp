@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
+#ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
+
 #include "IRRMeshLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
@@ -509,3 +511,5 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	delete reader;
 	AI_DEBUG_INVALIDATE_PTR(reader);
 }
+
+#endif // !! ASSIMP_BUILD_NO_IRR_IMPORTER

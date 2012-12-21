@@ -160,6 +160,30 @@ STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
 }
 
 
+namespace {
+
+// ------------------------------------------------------------------------------------------------
+// check whether the given line contains an entity definition (i.e. starts with "#<number>=")
+bool IsEntityDef(const std::string& snext)
+{
+	if (snext[0] == '#') {
+		// it is only a new entity if it has a '=' after the
+		// entity ID.
+		for(std::string::const_iterator it = snext.begin()+1; it != snext.end(); ++it) {
+			if (*it == '=') {
+				return true;
+			}
+			if (*it < '0' || *it > '9') {
+				break;
+			}
+		}
+	}
+	return false;
+}
+
+}
+
+
 // ------------------------------------------------------------------------------------------------
 void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 	const char* const* types_to_track, size_t len,
@@ -171,8 +195,9 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 
 	const DB::ObjectMap& map = db.GetObjects();
 	LineSplitter& splitter = db.GetSplitter();
-	for(; splitter; ++splitter) {
-		const std::string& s = *splitter;
+	while (splitter) {
+		bool has_next = false;
+		std::string s = *splitter;
 		if (s == "ENDSEC;") {
 			break;
 		}
@@ -184,6 +209,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 		ai_assert(s.length());
 		if (s[0] != '#') {
 			DefaultLogger::get()->warn(AddLineNumber("expected token \'#\'",line));
+			++splitter;
 			continue;
 		}
 
@@ -195,25 +221,75 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 		const std::string::size_type n0 = s.find_first_of('=');
 		if (n0 == std::string::npos) {
 			DefaultLogger::get()->warn(AddLineNumber("expected token \'=\'",line));
+			++splitter;
 			continue;
 		}
 
 		const uint64_t id = strtoul10_64(s.substr(1,n0-1).c_str());
 		if (!id) {
 			DefaultLogger::get()->warn(AddLineNumber("expected positive, numeric entity id",line));
+			++splitter;
 			continue;
 		}
 
-		const std::string::size_type n1 = s.find_first_of('(',n0);
+		std::string::size_type n1 = s.find_first_of('(',n0);
 		if (n1 == std::string::npos) {
-			DefaultLogger::get()->warn(AddLineNumber("expected token \'(\'",line));
-			continue;
+
+			has_next = true;
+			bool ok = false;
+
+			for( ++splitter; splitter; ++splitter) {
+				const std::string& snext = *splitter;
+				if (snext.empty()) {
+					continue;
+				}
+
+				// the next line doesn't start an entity, so maybe it is 
+				// just a continuation  for this line, keep going
+				if (!IsEntityDef(snext)) {
+					s.append(snext);
+					n1 = s.find_first_of('(',n0);
+					ok = (n1 != std::string::npos);
+				}
+				else {
+					break;
+				}
+			}
+
+			if(!ok) {
+				DefaultLogger::get()->warn(AddLineNumber("expected token \'(\'",line));
+				continue;
+			}
 		}
 
-		const std::string::size_type n2 = s.find_last_of(')');
-		if (n2 == std::string::npos || n2 < n1) {
-			DefaultLogger::get()->warn(AddLineNumber("expected token \')\'",line));
-			continue;
+		std::string::size_type n2 = s.find_last_of(')');
+		if (n2 == std::string::npos || n2 < n1 || n2 == s.length() - 1 || s[n2 + 1] != ';') {
+			
+			has_next = true;
+			bool ok = false;
+
+			for( ++splitter; splitter; ++splitter) {
+				const std::string& snext = *splitter;
+				if (snext.empty()) {
+					continue;
+				}
+
+				// the next line doesn't start an entity, so maybe it is 
+				// just a continuation  for this line, keep going
+				if (!IsEntityDef(snext)) {
+					s.append(snext);
+					n2 = s.find_last_of(')');
+					ok = !(n2 == std::string::npos || n2 < n1 || n2 == s.length() - 1 || s[n2 + 1] != ';');
+				}
+				else {
+					break;
+				}
+			}
+
+			if(!ok) {
+				DefaultLogger::get()->warn(AddLineNumber("expected token \')\'",line));
+				continue;
+			}
 		}
 
 		if (map.find(id) != map.end()) {
@@ -238,6 +314,10 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 			copysz[len] = '\0';
 
 			db.InternInsert(new LazyObject(db,id,line,sz,copysz));
+		}
+
+		if(!has_next) {
+			++splitter;
 		}
 	}
 

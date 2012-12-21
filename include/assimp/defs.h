@@ -135,6 +135,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	/* Tells the compiler that a function never returns. Used in code analysis
 	 * to skip dead paths (e.g. after an assertion evaluated to false). */
 #	define AI_WONT_RETURN __declspec(noreturn)
+
+#elif defined(SWIG)
+
+	/* Do nothing, the relevant defines are all in AssimpSwigPort.i */
+
 #else
 	
 #	define AI_WONT_RETURN

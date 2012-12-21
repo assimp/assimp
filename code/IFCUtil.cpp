@@ -45,7 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
+
 #include "IFCUtil.h"
+#include "PolyTools.h"
 #include "ProcessHelper.h"
 
 namespace Assimp {
@@ -128,6 +130,122 @@ void TempMesh::Append(const TempMesh& other)
 }
 
 // ------------------------------------------------------------------------------------------------
+void TempMesh::RemoveDegenerates()
+{
+	// The strategy is simple: walk the mesh and compute normals using
+	// Newell's algorithm. The length of the normals gives the area
+	// of the polygons, which is close to zero for lines.
+
+	std::vector<IfcVector3> normals;
+	ComputePolygonNormals(normals, false);
+
+	bool drop = false;
+	size_t inor = 0;
+
+	std::vector<IfcVector3>::iterator vit = verts.begin();
+	for (std::vector<unsigned int>::iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
+		const unsigned int pcount = *it;
+		
+		if (normals[inor].SquareLength() < 1e-5f) {
+			it = vertcnt.erase(it);
+			vit = verts.erase(vit, vit + pcount);
+
+			drop = true;
+			continue;
+		}
+
+		vit += pcount;
+		++it;
+	}
+
+	if(drop) {
+		IFCImporter::LogDebug("removing degenerate faces");
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals, 
+	bool normalize, 
+	size_t ofs) const
+{
+	size_t max_vcount = 0;
+	std::vector<unsigned int>::const_iterator begin = vertcnt.begin()+ofs, end = vertcnt.end(),  iit;
+	for(iit = begin; iit != end; ++iit) {
+		max_vcount = std::max(max_vcount,static_cast<size_t>(*iit));
+	}
+
+	std::vector<IfcFloat> temp((max_vcount+2)*4);
+	normals.reserve( normals.size() + vertcnt.size()-ofs );
+
+	// `NewellNormal()` currently has a relatively strange interface and need to 
+	// re-structure things a bit to meet them.
+	size_t vidx = std::accumulate(vertcnt.begin(),begin,0);
+	for(iit = begin; iit != end; vidx += *iit++) {
+		if (!*iit) {
+			normals.push_back(IfcVector3());
+			continue;
+		}
+		for(size_t vofs = 0, cnt = 0; vofs < *iit; ++vofs) {
+			const IfcVector3& v = verts[vidx+vofs];
+			temp[cnt++] = v.x;
+			temp[cnt++] = v.y;
+			temp[cnt++] = v.z;
+#ifdef _DEBUG
+			temp[cnt] = std::numeric_limits<IfcFloat>::quiet_NaN();
+#endif
+			++cnt;
+		}
+
+		normals.push_back(IfcVector3());
+		NewellNormal<4,4,4>(normals.back(),*iit,&temp[0],&temp[1],&temp[2]);
+	}
+
+	if(normalize) {
+		BOOST_FOREACH(IfcVector3& n, normals) {
+			n.Normalize();
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Compute the normal of the last polygon in the given mesh
+IfcVector3 TempMesh::ComputeLastPolygonNormal(bool normalize) const
+{
+	size_t total = vertcnt.back(), vidx = verts.size() - total;
+	std::vector<IfcFloat> temp((total+2)*3);
+	for(size_t vofs = 0, cnt = 0; vofs < total; ++vofs) {
+		const IfcVector3& v = verts[vidx+vofs];
+		temp[cnt++] = v.x;
+		temp[cnt++] = v.y;
+		temp[cnt++] = v.z;
+	}
+	IfcVector3 nor;
+	NewellNormal<3,3,3>(nor,total,&temp[0],&temp[1],&temp[2]);
+	return normalize ? nor.Normalize() : nor;
+}
+
+// ------------------------------------------------------------------------------------------------
+void TempMesh::FixupFaceOrientation()
+{
+	const IfcVector3 vavg = Center();
+
+	std::vector<IfcVector3> normals;
+	ComputePolygonNormals(normals);
+
+	size_t c = 0, ofs = 0;
+	BOOST_FOREACH(unsigned int cnt, vertcnt) {
+		if (cnt>2){
+			const IfcVector3& thisvert = verts[c];
+			if (normals[ofs]*(thisvert-vavg) < 0) {
+				std::reverse(verts.begin()+c,verts.begin()+cnt+c);
+			}
+		}
+		c += cnt;
+		++ofs;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 void TempMesh::RemoveAdjacentDuplicates() 
 {
 
@@ -189,7 +307,7 @@ void TempMesh::RemoveAdjacentDuplicates()
 		base += cnt;
 	}
 	if(drop) {
-		IFCImporter::LogDebug("removed duplicate vertices");
+		IFCImporter::LogDebug("removing duplicate vertices");
 	}
 }
 

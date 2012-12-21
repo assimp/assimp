@@ -684,7 +684,7 @@ void SMDImporter::ParseFile()
 	const char* szCurrent = mBuffer;
 
 	// read line per line ...
-	while (true)
+	for ( ;; )
 	{
 		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
@@ -750,7 +750,7 @@ unsigned int SMDImporter::GetTextureIndex(const std::string& filename)
 void SMDImporter::ParseNodesSection(const char* szCurrent,
 	const char** szCurrentOut)
 {
-	while (true)
+	for ( ;; )
 	{
 		// "end\n" - Ends the nodes section
 		if (0 == ASSIMP_strincmp(szCurrent,"end",3) &&
@@ -772,7 +772,7 @@ void SMDImporter::ParseTrianglesSection(const char* szCurrent,
 {
 	// Parse a triangle, parse another triangle, parse the next triangle ...
 	// and so on until we reach a token that looks quite similar to "end"
-	while (true)
+	for ( ;; )
 	{
 		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
@@ -790,7 +790,7 @@ void SMDImporter::ParseVASection(const char* szCurrent,
 	const char** szCurrentOut)
 {
 	unsigned int iCurIndex = 0;
-	while (true)
+	for ( ;; )
 	{
 		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
@@ -833,7 +833,7 @@ void SMDImporter::ParseSkeletonSection(const char* szCurrent,
 	const char** szCurrentOut)
 {
 	int iTime = 0;
-	while (true)
+	for ( ;; )
 	{
 		if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
@@ -887,7 +887,7 @@ void SMDImporter::ParseNodeInfo(const char* szCurrent,
 	else ++szCurrent;
 
 	const char* szEnd = szCurrent;
-	while (true)
+	for ( ;; )
 	{
 		if (bQuota && '\"' == *szEnd)
 		{

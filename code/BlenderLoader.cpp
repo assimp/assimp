@@ -1,3 +1,4 @@
+
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
@@ -624,7 +625,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	) 
 {
 	typedef std::pair<const int,size_t> MyPair;
-	if (!mesh->totface || !mesh->totvert) {
+	if ((!mesh->totface && !mesh->totloop) || !mesh->totvert) {
 		return;
 	}
 
@@ -637,12 +638,20 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 		ThrowException("Number of vertices is larger than the corresponding array");
 	}
 
+	if (static_cast<size_t> ( mesh->totloop ) > mesh->mloop.size()) {
+		ThrowException("Number of vertices is larger than the corresponding array");
+	}
+
 	// collect per-submesh numbers
 	std::map<int,size_t> per_mat;
 	for (int i = 0; i < mesh->totface; ++i) {
 
 		const MFace& mf = mesh->mface[i];
 		per_mat[ mf.mat_nr ]++;
+	}
+	for (int i = 0; i < mesh->totpoly; ++i) {
+		const MPoly& mp = mesh->mpoly[i];
+		per_mat[ mp.mat_nr ]++;
 	}
 
 	// ... and allocate the corresponding meshes
@@ -780,6 +789,54 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 		//	}
 	}
 
+	for (int i = 0; i < mesh->totpoly; ++i) {
+		
+		const MPoly& mf = mesh->mpoly[i];
+		
+		aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
+		aiFace& f = out->mFaces[out->mNumFaces++];
+		
+		f.mIndices = new unsigned int[ f.mNumIndices = mf.totloop ];
+		aiVector3D* vo = out->mVertices + out->mNumVertices;
+		aiVector3D* vn = out->mNormals + out->mNumVertices;
+		
+		// XXX we can't fold this easily, because we are restricted
+		// to the member names from the BLEND file (v1,v2,v3,v4)
+		// which are assigned by the genblenddna.py script and
+		// cannot be changed without breaking the entire
+		// import process.
+		for (int j = 0;j < mf.totloop; ++j)
+		{
+			const MLoop& loop = mesh->mloop[mf.loopstart + j];
+
+			if (loop.v >= mesh->totvert) {
+				ThrowException("Vertex index out of range");
+			}
+
+			const MVert& v = mesh->mvert[loop.v];
+			
+			vo->x = v.co[0];
+			vo->y = v.co[1];
+			vo->z = v.co[2];
+			vn->x = v.no[0];
+			vn->y = v.no[1];
+			vn->z = v.no[2];
+			f.mIndices[j] = out->mNumVertices++;
+			
+			++vo;
+			++vn;
+			
+		}
+		if (mf.totloop == 3)
+		{
+			out->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+		}
+		else
+		{
+			out->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+		}
+	}
+	
 	// collect texture coordinates, they're stored in a separate per-face buffer
 	if (mesh->mtface) {
 		if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {

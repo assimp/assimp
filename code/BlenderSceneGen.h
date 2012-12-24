@@ -162,6 +162,12 @@ template <> void Structure :: Convert<ListBase> (
     ) const
 ;
 
+template <> void Structure :: Convert<MLoop> (
+    MLoop& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<ModifierData> (
     ModifierData& dest,
     const FileDatabase& db
@@ -180,8 +186,8 @@ template <> void Structure :: Convert<MCol> (
     ) const
 ;
 
-template <> void Structure :: Convert<Image> (
-    Image& dest,
+template <> void Structure :: Convert<MPoly> (
+    MPoly& dest,
     const FileDatabase& db
     ) const
 ;
@@ -212,6 +218,12 @@ template <> void Structure :: Convert<Camera> (
 
 template <> void Structure :: Convert<MirrorModifierData> (
     MirrorModifierData& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<Image> (
+    Image& dest,
     const FileDatabase& db
     ) const
 ;

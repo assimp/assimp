@@ -316,6 +316,8 @@ template <> void Structure :: Convert<Mesh> (
     ReadField<ErrorPolicy_Fail>(dest.totface,"totface",db);
     ReadField<ErrorPolicy_Fail>(dest.totedge,"totedge",db);
     ReadField<ErrorPolicy_Fail>(dest.totvert,"totvert",db);
+    ReadField<ErrorPolicy_Igno>(dest.totloop,"totloop",db);
+    ReadField<ErrorPolicy_Igno>(dest.totpoly,"totpoly",db);
     ReadField<ErrorPolicy_Igno>(dest.subdiv,"subdiv",db);
     ReadField<ErrorPolicy_Igno>(dest.subdivr,"subdivr",db);
     ReadField<ErrorPolicy_Igno>(dest.subsurftype,"subsurftype",db);
@@ -325,6 +327,8 @@ template <> void Structure :: Convert<Mesh> (
     ReadFieldPtr<ErrorPolicy_Igno>(dest.tface,"*tface",db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.mvert,"*mvert",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.medge,"*medge",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mloop,"*mloop",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mpoly,"*mpoly",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.dvert,"*dvert",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mcol,"*mcol",db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.mat,"**mat",db);
@@ -417,6 +421,19 @@ template <> void Structure :: Convert<ListBase> (
 }
 
 //--------------------------------------------------------------------------------
+template <> void Structure :: Convert<MLoop> (
+    MLoop& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    ReadField<ErrorPolicy_Igno>(dest.v,"v",db);
+    ReadField<ErrorPolicy_Igno>(dest.e,"e",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
 template <> void Structure :: Convert<ModifierData> (
     ModifierData& dest,
     const FileDatabase& db
@@ -461,34 +478,16 @@ template <> void Structure :: Convert<MCol> (
 }
 
 //--------------------------------------------------------------------------------
-template <> void Structure :: Convert<Image> (
-    Image& dest,
+template <> void Structure :: Convert<MPoly> (
+    MPoly& dest,
     const FileDatabase& db
     ) const
 { 
 
-    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
-    ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);
-    ReadField<ErrorPolicy_Igno>(dest.ok,"ok",db);
+    ReadField<ErrorPolicy_Igno>(dest.loopstart,"loopstart",db);
+    ReadField<ErrorPolicy_Igno>(dest.totloop,"totloop",db);
+    ReadField<ErrorPolicy_Igno>(dest.mat_nr,"mat_nr",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
-    ReadField<ErrorPolicy_Igno>(dest.source,"source",db);
-    ReadField<ErrorPolicy_Igno>(dest.type,"type",db);
-    ReadField<ErrorPolicy_Igno>(dest.pad,"pad",db);
-    ReadField<ErrorPolicy_Igno>(dest.pad1,"pad1",db);
-    ReadField<ErrorPolicy_Igno>(dest.lastframe,"lastframe",db);
-    ReadField<ErrorPolicy_Igno>(dest.tpageflag,"tpageflag",db);
-    ReadField<ErrorPolicy_Igno>(dest.totbind,"totbind",db);
-    ReadField<ErrorPolicy_Igno>(dest.xrep,"xrep",db);
-    ReadField<ErrorPolicy_Igno>(dest.yrep,"yrep",db);
-    ReadField<ErrorPolicy_Igno>(dest.twsta,"twsta",db);
-    ReadField<ErrorPolicy_Igno>(dest.twend,"twend",db);
-    ReadFieldPtr<ErrorPolicy_Igno>(dest.packedfile,"*packedfile",db);
-    ReadField<ErrorPolicy_Igno>(dest.lastupdate,"lastupdate",db);
-    ReadField<ErrorPolicy_Igno>(dest.lastused,"lastused",db);
-    ReadField<ErrorPolicy_Igno>(dest.animspeed,"animspeed",db);
-    ReadField<ErrorPolicy_Igno>(dest.gen_x,"gen_x",db);
-    ReadField<ErrorPolicy_Igno>(dest.gen_y,"gen_y",db);
-    ReadField<ErrorPolicy_Igno>(dest.gen_type,"gen_type",db);
 
 	db.reader->IncPtr(size);
 }
@@ -569,6 +568,39 @@ template <> void Structure :: Convert<MirrorModifierData> (
 }
 
 //--------------------------------------------------------------------------------
+template <> void Structure :: Convert<Image> (
+    Image& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);
+    ReadField<ErrorPolicy_Igno>(dest.ok,"ok",db);
+    ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
+    ReadField<ErrorPolicy_Igno>(dest.source,"source",db);
+    ReadField<ErrorPolicy_Igno>(dest.type,"type",db);
+    ReadField<ErrorPolicy_Igno>(dest.pad,"pad",db);
+    ReadField<ErrorPolicy_Igno>(dest.pad1,"pad1",db);
+    ReadField<ErrorPolicy_Igno>(dest.lastframe,"lastframe",db);
+    ReadField<ErrorPolicy_Igno>(dest.tpageflag,"tpageflag",db);
+    ReadField<ErrorPolicy_Igno>(dest.totbind,"totbind",db);
+    ReadField<ErrorPolicy_Igno>(dest.xrep,"xrep",db);
+    ReadField<ErrorPolicy_Igno>(dest.yrep,"yrep",db);
+    ReadField<ErrorPolicy_Igno>(dest.twsta,"twsta",db);
+    ReadField<ErrorPolicy_Igno>(dest.twend,"twend",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.packedfile,"*packedfile",db);
+    ReadField<ErrorPolicy_Igno>(dest.lastupdate,"lastupdate",db);
+    ReadField<ErrorPolicy_Igno>(dest.lastused,"lastused",db);
+    ReadField<ErrorPolicy_Igno>(dest.animspeed,"animspeed",db);
+    ReadField<ErrorPolicy_Igno>(dest.gen_x,"gen_x",db);
+    ReadField<ErrorPolicy_Igno>(dest.gen_y,"gen_y",db);
+    ReadField<ErrorPolicy_Igno>(dest.gen_type,"gen_type",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
 void DNA::RegisterConverters() {
 
     converters["Object"] = DNA::FactoryPair( &Structure::Allocate<Object>, &Structure::Convert<Object> );
@@ -590,15 +622,17 @@ void DNA::RegisterConverters() {
     converters["MEdge"] = DNA::FactoryPair( &Structure::Allocate<MEdge>, &Structure::Convert<MEdge> );
     converters["GroupObject"] = DNA::FactoryPair( &Structure::Allocate<GroupObject>, &Structure::Convert<GroupObject> );
     converters["ListBase"] = DNA::FactoryPair( &Structure::Allocate<ListBase>, &Structure::Convert<ListBase> );
+    converters["MLoop"] = DNA::FactoryPair( &Structure::Allocate<MLoop>, &Structure::Convert<MLoop> );
     converters["ModifierData"] = DNA::FactoryPair( &Structure::Allocate<ModifierData>, &Structure::Convert<ModifierData> );
     converters["ID"] = DNA::FactoryPair( &Structure::Allocate<ID>, &Structure::Convert<ID> );
     converters["MCol"] = DNA::FactoryPair( &Structure::Allocate<MCol>, &Structure::Convert<MCol> );
-    converters["Image"] = DNA::FactoryPair( &Structure::Allocate<Image>, &Structure::Convert<Image> );
+    converters["MPoly"] = DNA::FactoryPair( &Structure::Allocate<MPoly>, &Structure::Convert<MPoly> );
     converters["Scene"] = DNA::FactoryPair( &Structure::Allocate<Scene>, &Structure::Convert<Scene> );
     converters["Library"] = DNA::FactoryPair( &Structure::Allocate<Library>, &Structure::Convert<Library> );
     converters["Tex"] = DNA::FactoryPair( &Structure::Allocate<Tex>, &Structure::Convert<Tex> );
     converters["Camera"] = DNA::FactoryPair( &Structure::Allocate<Camera>, &Structure::Convert<Camera> );
     converters["MirrorModifierData"] = DNA::FactoryPair( &Structure::Allocate<MirrorModifierData>, &Structure::Convert<MirrorModifierData> );
+    converters["Image"] = DNA::FactoryPair( &Structure::Allocate<Image>, &Structure::Convert<Image> );
 }
 
 

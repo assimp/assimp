@@ -157,6 +157,19 @@ struct MEdge : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
+struct MLoop : ElemBase {
+	int v, e;
+};
+
+// -------------------------------------------------------------------------------
+struct MPoly : ElemBase {
+	int loopstart;
+	int totloop;
+	short mat_nr;
+	char flag;
+};
+
+// -------------------------------------------------------------------------------
 struct MCol : ElemBase {
 	char r,g,b,a FAIL;
 };
@@ -235,6 +248,8 @@ struct Mesh : ElemBase {
 	int totface FAIL;
 	int totedge FAIL;
 	int totvert FAIL;
+	int totloop;
+	int totpoly;
 
 	short subdiv;
 	short subdivr;
@@ -246,6 +261,8 @@ struct Mesh : ElemBase {
 	vector<TFace> tface;
 	vector<MVert> mvert FAIL;
 	vector<MEdge> medge WARN;
+	vector<MLoop> mloop;
+	vector<MPoly> mpoly;
 	vector<MDeformVert> dvert;
 	vector<MCol> mcol;
 

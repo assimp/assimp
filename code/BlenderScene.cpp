@@ -306,6 +306,27 @@ template <> void Structure :: Convert<Material> (
 }
 
 //--------------------------------------------------------------------------------
+template <> void Structure :: Convert<MTexPoly> (
+    MTexPoly& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    {
+        boost::shared_ptr<Image> tpage;
+        ReadFieldPtr<ErrorPolicy_Igno>(tpage,"*tpage",db);
+        dest.tpage = tpage.get();
+    }
+    ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
+    ReadField<ErrorPolicy_Igno>(dest.transp,"transp",db);
+    ReadField<ErrorPolicy_Igno>(dest.mode,"mode",db);
+    ReadField<ErrorPolicy_Igno>(dest.tile,"tile",db);
+    ReadField<ErrorPolicy_Igno>(dest.pad,"pad",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
 template <> void Structure :: Convert<Mesh> (
     Mesh& dest,
     const FileDatabase& db
@@ -328,7 +349,10 @@ template <> void Structure :: Convert<Mesh> (
     ReadFieldPtr<ErrorPolicy_Fail>(dest.mvert,"*mvert",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.medge,"*medge",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mloop,"*mloop",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mloopuv,"*mloopuv",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mloopcol,"*mloopcol",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mpoly,"*mpoly",db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.mtpoly,"*mtpoly",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.dvert,"*dvert",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mcol,"*mcol",db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.mat,"**mat",db);
@@ -362,6 +386,21 @@ template <> void Structure :: Convert<World> (
 }
 
 //--------------------------------------------------------------------------------
+template <> void Structure :: Convert<MLoopCol> (
+    MLoopCol& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    ReadField<ErrorPolicy_Igno>(dest.r,"r",db);
+    ReadField<ErrorPolicy_Igno>(dest.g,"g",db);
+    ReadField<ErrorPolicy_Igno>(dest.b,"b",db);
+    ReadField<ErrorPolicy_Igno>(dest.a,"a",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
 template <> void Structure :: Convert<MVert> (
     MVert& dest,
     const FileDatabase& db
@@ -388,6 +427,19 @@ template <> void Structure :: Convert<MEdge> (
     ReadField<ErrorPolicy_Fail>(dest.v2,"v2",db);
     ReadField<ErrorPolicy_Igno>(dest.crease,"crease",db);
     ReadField<ErrorPolicy_Igno>(dest.bweight,"bweight",db);
+    ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
+
+	db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <> void Structure :: Convert<MLoopUV> (
+    MLoopUV& dest,
+    const FileDatabase& db
+    ) const
+{ 
+
+    ReadFieldArray<ErrorPolicy_Igno>(dest.uv,"uv",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
 
 	db.reader->IncPtr(size);
@@ -615,11 +667,14 @@ void DNA::RegisterConverters() {
     converters["Base"] = DNA::FactoryPair( &Structure::Allocate<Base>, &Structure::Convert<Base> );
     converters["MTFace"] = DNA::FactoryPair( &Structure::Allocate<MTFace>, &Structure::Convert<MTFace> );
     converters["Material"] = DNA::FactoryPair( &Structure::Allocate<Material>, &Structure::Convert<Material> );
+    converters["MTexPoly"] = DNA::FactoryPair( &Structure::Allocate<MTexPoly>, &Structure::Convert<MTexPoly> );
     converters["Mesh"] = DNA::FactoryPair( &Structure::Allocate<Mesh>, &Structure::Convert<Mesh> );
     converters["MDeformVert"] = DNA::FactoryPair( &Structure::Allocate<MDeformVert>, &Structure::Convert<MDeformVert> );
     converters["World"] = DNA::FactoryPair( &Structure::Allocate<World>, &Structure::Convert<World> );
+    converters["MLoopCol"] = DNA::FactoryPair( &Structure::Allocate<MLoopCol>, &Structure::Convert<MLoopCol> );
     converters["MVert"] = DNA::FactoryPair( &Structure::Allocate<MVert>, &Structure::Convert<MVert> );
     converters["MEdge"] = DNA::FactoryPair( &Structure::Allocate<MEdge>, &Structure::Convert<MEdge> );
+    converters["MLoopUV"] = DNA::FactoryPair( &Structure::Allocate<MLoopUV>, &Structure::Convert<MLoopUV> );
     converters["GroupObject"] = DNA::FactoryPair( &Structure::Allocate<GroupObject>, &Structure::Convert<GroupObject> );
     converters["ListBase"] = DNA::FactoryPair( &Structure::Allocate<ListBase>, &Structure::Convert<ListBase> );
     converters["MLoop"] = DNA::FactoryPair( &Structure::Allocate<MLoop>, &Structure::Convert<MLoop> );

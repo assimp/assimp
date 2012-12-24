@@ -120,6 +120,12 @@ template <> void Structure :: Convert<Material> (
     ) const
 ;
 
+template <> void Structure :: Convert<MTexPoly> (
+    MTexPoly& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<Mesh> (
     Mesh& dest,
     const FileDatabase& db
@@ -138,6 +144,12 @@ template <> void Structure :: Convert<World> (
     ) const
 ;
 
+template <> void Structure :: Convert<MLoopCol> (
+    MLoopCol& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<MVert> (
     MVert& dest,
     const FileDatabase& db
@@ -146,6 +158,12 @@ template <> void Structure :: Convert<MVert> (
 
 template <> void Structure :: Convert<MEdge> (
     MEdge& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<MLoopUV> (
+    MLoopUV& dest,
     const FileDatabase& db
     ) const
 ;

@@ -838,7 +838,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	}
 	
 	// collect texture coordinates, they're stored in a separate per-face buffer
-	if (mesh->mtface) {
+	if (mesh->mtface || mesh->mloopuv) {
 		if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {
 			ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
 		}
@@ -860,6 +860,20 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 				vo->x = v->uv[i][0];
 				vo->y = v->uv[i][1];
 			}
+		}
+		
+		for (int i = 0; i < mesh->totpoly; ++i) {
+			const MPoly& v = mesh->mpoly[i];
+			aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
+			const aiFace& f = out->mFaces[out->mNumFaces++];
+			
+			aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
+			for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+				const MLoopUV& uv = mesh->mloopuv[v.loopstart + j];
+				vo->x = uv.uv[0];
+				vo->y = uv.uv[1];
+			}
+			
 		}
 	}
 
@@ -890,7 +904,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	}
 
 	// collect vertex colors, stored separately as well
-	if (mesh->mcol) {
+	if (mesh->mcol || mesh->mloopcol) {
 		if (mesh->totface > static_cast<int> ( (mesh->mcol.size()/4)) ) {
 			ThrowException("Number of faces is larger than the corresponding color face array");
 		}
@@ -917,6 +931,23 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 			}
 			for (unsigned int n = f.mNumIndices; n < 4; ++n);
 		}
+		
+		for (int i = 0; i < mesh->totpoly; ++i) {
+			const MPoly& v = mesh->mpoly[i];
+			aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
+			const aiFace& f = out->mFaces[out->mNumFaces++];
+			
+			aiColor4D* vo = &out->mColors[0][out->mNumVertices];
+			for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+				const MLoopCol& col = mesh->mloopcol[v.loopstart + j];
+				vo->r = col.r;
+				vo->g = col.g;
+				vo->b = col.b;
+				vo->a = col.a;
+			}
+			
+		}
+
 	}
 
 	return;

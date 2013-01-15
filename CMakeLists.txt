@@ -21,7 +21,7 @@ set(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPO
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
   ## hide all not-exported symbols
-  add_definitions( -fvisibility=hidden )
+  add_definitions( -fvisibility=hidden -Wall )
 endif()
 
 INCLUDE (FindPkgConfig)

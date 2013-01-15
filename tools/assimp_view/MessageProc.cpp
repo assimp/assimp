@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "stdafx.h"
 #include "assimp_view.h"
+#include <Windowsx.h>
 
 namespace AssimpView {
 
@@ -1815,6 +1816,16 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 				PostQuitMessage(0);
 				DestroyWindow(hwndDlg);
 				}
+			else if (IDC_COMBO1 == LOWORD(wParam))
+			{
+				if(HIWORD(wParam) == CBN_SELCHANGE) {
+					const size_t sel = static_cast<size_t>(ComboBox_GetCurSel(GetDlgItem(hwndDlg,IDC_COMBO1)));
+					if(g_pcAsset) {
+						g_pcAsset->mAnimator->SetAnimIndex(sel);
+						SendDlgItemMessage(hwndDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,0);
+					}
+				}
+			}
 			else if (ID_VIEWER_RESETVIEW == LOWORD(wParam))
 				{
 				g_sCamera.vPos = aiVector3D(0.0f,0.0f,-10.0f);

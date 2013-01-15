@@ -394,6 +394,35 @@ SET( XGL_SRCS
 SOURCE_GROUP( XGL FILES ${XGL_SRCS})
 
 
+SET(FBX_SRCS
+	FBXImporter.cpp
+	FBXCompileConfig.h
+	FBXImporter.h
+	FBXParser.cpp
+	FBXParser.h
+	FBXTokenizer.cpp
+	FBXTokenizer.h
+	FBXImportSettings.h
+	FBXConverter.h
+	FBXConverter.cpp
+	FBXUtil.h
+	FBXUtil.cpp
+	FBXDocument.h
+	FBXDocument.cpp
+	FBXProperties.h
+	FBXProperties.cpp
+	FBXMeshGeometry.cpp
+	FBXMaterial.cpp
+	FBXModel.cpp
+	FBXAnimation.cpp
+	FBXNodeAttribute.cpp
+	FBXDeformer.cpp
+	FBXBinaryTokenizer.cpp
+	FBXDocumentUtil.cpp
+)
+SOURCE_GROUP( FBX FILES ${FBX_SRCS})
+
+
 SET( PostProcessing_SRCS
 	CalcTangentsProcess.cpp
 	CalcTangentsProcess.h
@@ -633,6 +662,7 @@ SET( assim_src
 	${NDO_SRCS}
 	${IFC_SRCS}
 	${XGL_SRCS}
+	${FBX_SRCS}
 	
 	# Third-party libraries
 	${IrrXML_SRCS}

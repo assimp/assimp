@@ -123,10 +123,10 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
 					}
 				}
 			}
-		}
+		} /*
 		else if (const IFC::IfcSurfaceStyleWithTextures* tex = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleWithTextures>(conv.db)) {
 			// XXX
-		}
+		} */
 	}
 
 }

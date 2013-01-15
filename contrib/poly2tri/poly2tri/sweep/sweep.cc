@@ -754,7 +754,7 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
 Sweep::~Sweep() {
 
     // Clean up memory
-    for(int i = 0; i < nodes_.size(); i++) {
+    for(unsigned int i = 0; i < nodes_.size(); i++) {
         delete nodes_[i];
     }
 

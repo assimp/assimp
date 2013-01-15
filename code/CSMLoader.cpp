@@ -71,6 +71,7 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 CSMImporter::CSMImporter()
+: noSkeletonMesh()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -104,9 +105,9 @@ const aiImporterDesc* CSMImporter::GetInfo () const
 
 // ------------------------------------------------------------------------------------------------
 // Setup configuration properties for the loader
-void CSMImporter::SetupProperties(const Importer* /*pImp*/)
+void CSMImporter::SetupProperties(const Importer* pImp)
 {
-	// nothing to be done for the moment
+	noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -289,7 +290,10 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
 	// mark the scene as incomplete and run SkeletonMeshBuilder on it
 	pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
-	SkeletonMeshBuilder maker(pScene,pScene->mRootNode,true);
+	
+	if (!noSkeletonMesh) {
+		SkeletonMeshBuilder maker(pScene,pScene->mRootNode,true);
+	}
 }
 
 #endif // !! ASSIMP_BUILD_NO_CSM_IMPORTER

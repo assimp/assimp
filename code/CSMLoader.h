@@ -79,6 +79,9 @@ protected:
 		IOSystem* pIOHandler);
 
 private:
+
+	bool noSkeletonMesh;
+
 }; // end of class CSMImporter
 } // end of namespace Assimp
 #endif // AI_AC3DIMPORTER_H_INC

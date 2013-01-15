@@ -94,6 +94,7 @@ public:
 	 * See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const;
 
+	void SetupProperties(const Importer* pImp);
 	const aiImporterDesc* GetInfo () const;
 
 protected:
@@ -159,6 +160,8 @@ protected:
 	/** basic Animation parameters */
 	float mAnimTickDuration;
 	unsigned int mAnimNumFrames;
+
+	bool noSkeletonMesh;
 };
 
 } // end of namespace Assimp

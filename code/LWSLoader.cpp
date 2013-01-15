@@ -124,6 +124,7 @@ void LWS::Element::Parse (const char*& buffer)
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 LWSImporter::LWSImporter()
+: noSkeletonMesh()
 {
 	// nothing to do here
 }
@@ -178,6 +179,8 @@ void LWSImporter::SetupProperties(const Importer* pImp)
 	if (last < first) {
 		std::swap(last,first);
 	}
+
+	noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -909,7 +912,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	if (!pScene->mNumMeshes || !pScene->mNumMaterials) {
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 
-		if (pScene->mNumAnimations) {
+		if (pScene->mNumAnimations && !noSkeletonMesh) {
 			// construct skeleton mesh
 			SkeletonMeshBuilder builder(pScene);
 		}

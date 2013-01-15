@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the Collada loader */
 
 #include "AssimpPCH.h"
-#ifndef ASSIMP_BUILD_NO_DAE_IMPORTER
+#ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include "../include/assimp/anim.h"
 #include "ColladaLoader.h"
@@ -73,6 +73,7 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
+: noSkeletonMesh()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -102,6 +103,13 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
 	}
 	return false;
 }
+
+// ------------------------------------------------------------------------------------------------
+void ColladaLoader::SetupProperties(const Importer* pImp)
+{
+	noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
+}
+
 
 // ------------------------------------------------------------------------------------------------
 // Get file extension list
@@ -180,7 +188,9 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	// If no meshes have been loaded, it's probably just an animated skeleton.
 	if (!pScene->mNumMeshes) {
 	
-		SkeletonMeshBuilder hero(pScene);
+		if (!noSkeletonMesh) {
+			SkeletonMeshBuilder hero(pScene);
+		}
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 	}
 }

@@ -77,6 +77,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CONFIG_GLOB_MEASURE_TIME  \
 	"GLOB_MEASURE_TIME"
 
+
+// ---------------------------------------------------------------------------
+/** @brief Global setting to disable generation of skeleton dummy meshes
+ *
+ * Skeleton dummy meshes are generated as a visualization aid in cases which
+ * the input data contains no geometry, but only animation data.
+ * Property data type: bool. Default value: false
+ */
+// ---------------------------------------------------------------------------
+#define AI_CONFIG_IMPORT_NO_SKELETON_MESHES \
+	"IMPORT_NO_SKELETON_MESHES"
+
+
+
 # if 0 // not implemented yet
 // ---------------------------------------------------------------------------
 /** @brief Set Assimp's multithreading policy.
@@ -157,6 +171,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE \
 	"PP_GSN_MAX_SMOOTHING_ANGLE"
+
 
 // ---------------------------------------------------------------------------
 /** @brief Sets the colormap (= palette) to be used to decode embedded
@@ -497,6 +512,100 @@ enum aiComponent
 
 
 // ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will merge all geometry layers present
+ *    in the source file or take only the first.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS \
+	"IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read all materials present in the
+ *    source file or take only the referenced materials.
+ *
+ * This is void unless IMPORT_FBX_READ_MATERIALS=1.
+ *
+ * The default value is false (0)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_ALL_MATERIALS \
+	"IMPORT_FBX_READ_ALL_MATERIALS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read materials.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_MATERIALS \
+	"IMPORT_FBX_READ_MATERIALS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read cameras.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_CAMERAS \
+	"IMPORT_FBX_READ_CAMERAS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read light sources.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_LIGHTS \
+	"IMPORT_FBX_READ_LIGHTS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read animations.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS \
+	"IMPORT_FBX_READ_ANIMATIONS"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will act in strict mode in which only
+ *    FBX 2013 is supported and any other sub formats are rejected. FBX 2013
+ *    is the primary target for the importer, so this format is best
+ *    supported and well-tested.
+ *
+ * The default value is false (0)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_STRICT_MODE \
+	"IMPORT_FBX_STRICT_MODE"
+
+// ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will preserve pivot points for
+ *    transformations (as extra nodes). If set to false, pivots and offsets
+ *    will be evaluated whenever possible.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS \
+	"IMPORT_FBX_PRESERVE_PIVOTS"
+
+// ---------------------------------------------------------------------------
+/** @brief Specifies whether the importer will drop empty animation curves or
+ *    animation curves which match the bind pose transformation over their
+ *    entire defined range.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES \
+	"IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES"
+
+
+
+// ---------------------------------------------------------------------------
 /** @brief  Set the vertex animation keyframe to be imported
  *
  * ASSIMP does not support vertex keyframes (only bone animation is supported).
@@ -697,9 +806,6 @@ enum aiComponent
  */
 #define AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME "IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME"
 
-
-
-// ---------------------------------------------------------------------------
 /** @brief Specifies whether the IFC loader skips over IfcSpace elements.
  *
  * IfcSpace elements (and their geometric representations) are used to

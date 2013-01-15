@@ -233,6 +233,8 @@ private:
 	IOSystem* io;
 
 	double first,last,fps;
+
+	bool noSkeletonMesh; 
 };
 
 } // end of namespace Assimp

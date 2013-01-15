@@ -599,7 +599,7 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
 		{
 			// Input channels for weight data. Two possible semantics: "JOINT" and "WEIGHT"
-			if( IsElement( "input"))
+			if( IsElement( "input") && vertexCount > 0 )
 			{
 				InputChannel channel;
 
@@ -628,7 +628,7 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 				if( !mReader->isEmptyElement())
 					SkipElement();
 			}
-			else if( IsElement( "vcount"))
+			else if( IsElement( "vcount") && vertexCount > 0 )
 			{
 				// read weight count per vertex
 				const char* text = GetTextContent();
@@ -648,7 +648,7 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 				// reserve weight count 
 				pController.mWeights.resize( numWeights);
 			}
-			else if( IsElement( "v"))
+			else if( IsElement( "v") && vertexCount > 0 )
 			{
 				// read JointIndex - WeightIndex pairs
 				const char* text = GetTextContent();
@@ -1656,6 +1656,7 @@ void ColladaParser::ReadDataArray()
 	std::string id = mReader->getAttributeValue( indexID);
 	int indexCount = GetAttribute( "count");
 	unsigned int count = (unsigned int) mReader->getAttributeValueAsInt( indexCount);
+	if (count == 0) { return; } // some exporters write empty data arrays with count="0"
 	const char* content = TestTextContent();
 
   // read values and store inside an array in the data library

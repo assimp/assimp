@@ -69,12 +69,12 @@ bool aiQuaterniont<TReal>::operator!= (const aiQuaterniont& o) const
 template<typename TReal>
 inline aiQuaterniont<TReal>::aiQuaterniont( const aiMatrix3x3t<TReal> &pRotMatrix)
 {
-	TReal t = 1 + pRotMatrix.a1 + pRotMatrix.b2 + pRotMatrix.c3;
+	TReal t = pRotMatrix.a1 + pRotMatrix.b2 + pRotMatrix.c3;
 
 	// large enough
-	if( t > static_cast<TReal>(0.001))
+	if( t > static_cast<TReal>(0))
 	{
-		TReal s = sqrt( t) * static_cast<TReal>(2.0);
+		TReal s = sqrt(1 + t) * static_cast<TReal>(2.0);
 		x = (pRotMatrix.c2 - pRotMatrix.b3) / s;
 		y = (pRotMatrix.a3 - pRotMatrix.c1) / s;
 		z = (pRotMatrix.b1 - pRotMatrix.a2) / s;

@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 #if (!defined ASSIMP_BUILD_NO_LWO_IMPORTER) && (!defined ASSIMP_BUILD_NO_LWS_IMPORTER)
 
+#include <functional>
+
 // internal headers
 #include "LWOFileData.h"
 

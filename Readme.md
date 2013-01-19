@@ -1,4 +1,4 @@
-Open Asset Import Library (_assimp_) 
+Open Asset Import Library (assimp) 
 ========
 
 

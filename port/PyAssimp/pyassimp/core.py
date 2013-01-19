@@ -293,10 +293,8 @@ def release(scene):
 
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)
-    data = numpy.array([make_tuple(getattr(tex, pcData)[i]) for i in range(tex.mWidth * tex.mHeight)])
+    data = numpy.array([make_tuple(getattr(tex, "pcData")[i]) for i in range(tex.mWidth * tex.mHeight)])
     setattr(target, "data", data)
-
-
 
 def _finalize_mesh(mesh, target):
     """ Building of meshes is a bit specific.

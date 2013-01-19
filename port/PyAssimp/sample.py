@@ -5,8 +5,7 @@
 This module demonstrates the functionality of PyAssimp.
 """
 
-
-import pyassimp
+import pyassimp.core as pyassimp
 import os, sys
 
 #get a model out of assimp's test-data if none is provided on the command line
@@ -22,6 +21,8 @@ def recur_node(node,level = 0):
 
 def main(filename=None):
     filename = filename or DEFAULT_MODEL
+    
+    print "Reading model", filename
     scene = pyassimp.load(filename)
     
     #the model we load
@@ -45,21 +46,23 @@ def main(filename=None):
         print "    material id:", mesh.materialindex+1
         print "    vertices:", len(mesh.vertices)
         print "    first 3 verts:", mesh.vertices[:3]
-        if mesh.normals:
+        if len(mesh.normals) > 0:
                 print "    first 3 normals:", mesh.normals[:3]
         else:
                 print "    no normals"
         print "    colors:", len(mesh.colors)
         tc = mesh.texturecoords
-        if tc:
+        if len(tc) >= 4:
             print "    texture-coords 1:", len(tc[0]), "first3:", tc[0][:3]
             print "    texture-coords 2:", len(tc[1]), "first3:", tc[1][:3]
             print "    texture-coords 3:", len(tc[2]), "first3:", tc[2][:3]
             print "    texture-coords 4:", len(tc[3]), "first3:", tc[3][:3]
-        else:
+        elif len(tc) == 0:
             print "    no texture coordinates"
+        else:
+            print "    tc is an unexpected number of elements (expect 4, got", len(tc), ")"
         print "    uv-component-count:", len(mesh.numuvcomponents)
-        print "    faces:", len(mesh.faces), "first:", [f.indices for f in mesh.faces[:3]]
+        print "    faces:", len(mesh.faces), "first:", [f for f in mesh.faces[:3]]
         print "    bones:", len(mesh.bones), "first:", [str(b) for b in mesh.bones[:3]]
         print
 
@@ -81,5 +84,7 @@ def main(filename=None):
     # Finally release the model
     pyassimp.release(scene)
 
+    print "Finished parsing the model."
+    
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv)>1 else None)

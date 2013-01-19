@@ -159,6 +159,7 @@ struct Material
 	aiString textureBump;
 	aiString textureSpecularity;
 	aiString textureOpacity;
+	aiString textureDisp;
 
 	//!	Ambient color 
 	aiColor3D ambient;

@@ -346,60 +346,28 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        key = str(p.mKey.data)
+        key = str(p.mKey.data).split('.')[1]
 
         #the data
         from ctypes import POINTER, cast, c_int, c_float, sizeof
         if p.mType == 1:
             arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
-            value = numpy.array([x for x in arr])
+            value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
             value = cast(p.mData, POINTER(structs.String)).contents.data
         elif p.mType == 4:
             arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents
-            value = numpy.array([x for x in arr])
+            value = [x for x in arr]
         else:
             value = p.mData[:p.mDataLength]
+
+        if len(value) == 1:
+            [value] = value
 
         result[key] = value
 
     return result
 
-def aiGetMaterialFloatArray(material, key):
-    AI_SUCCESS = 0
-    from ctypes import byref, pointer, cast, c_float, POINTER, sizeof, c_uint
-    out = structs.Color4D()
-    max = c_uint(sizeof(structs.Color4D))
-    r=_assimp_lib.dll.aiGetMaterialFloatArray(pointer(material), 
-                                            key[0], 
-                                            key[1], 
-                                            key[2], 
-                                            byref(out), 
-                                            byref(max))
-                                            
-    if (r != AI_SUCCESS):    
-        raise AssimpError("aiGetMaterialFloatArray failed!")
-      
-    out._init()
-    return [out[i] for i in range(max.value)]
-    
-def aiGetMaterialString(material, key):
-    AI_SUCCESS = 0
-    from ctypes import byref, pointer, cast, c_float, POINTER, sizeof, c_uint
-    out = structs.String()
-    r=_assimp_lib.dll.aiGetMaterialString(pointer(material), 
-                                            key[0], 
-                                            key[1], 
-                                            key[2], 
-                                            byref(out))
-                                            
-    if (r != AI_SUCCESS):    
-        raise AssimpError("aiGetMaterialString failed!")
-        
-    return str(out.data)
-
-    
-    
 def decompose_matrix(matrix):
     if not isinstance(matrix, structs.Matrix4x4):
         raise AssimpError("pyassimp.decompose_matrix failed: Not a Matrix4x4!")

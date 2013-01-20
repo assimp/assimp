@@ -1,10 +1,10 @@
 prefix=@CMAKE_INSTALL_PREFIX@
-exec_prefix=@CMAKE_INSTALL_PREFIX@/@BIN_INSTALL_DIR@
-libdir=@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@
-includedir=@CMAKE_INSTALL_PREFIX@/@INCLUDE_INSTALL_DIR@/assimp
+exec_prefix=@CMAKE_INSTALL_PREFIX@/@ASSIMP_BIN_INSTALL_DIR@
+libdir=@CMAKE_INSTALL_PREFIX@/@ASSIMP_LIB_INSTALL_DIR@
+includedir=@CMAKE_INSTALL_PREFIX@/@ASSIMP_INCLUDE_INSTALL_DIR@/assimp
 
 Name: @CMAKE_PROJECT_NAME@
 Description: Import various well-known 3D model formats in an uniform manner.
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -lassimp@ASSIMP_LIBRARY_SUFFIX@
-Cflags: -I${includedir} 
+Cflags: -I${includedir}

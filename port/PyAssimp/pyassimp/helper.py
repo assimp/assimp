@@ -9,6 +9,7 @@ import ctypes
 from ctypes import POINTER
 import operator
 import numpy
+from numpy import linalg
 
 import logging;logger = logging.getLogger("pyassimp")
 
@@ -47,12 +48,14 @@ def transform(vector3, matrix4x4):
 def get_bounding_box(scene):
     bb_min = [1e10, 1e10, 1e10] # x,y,z
     bb_max = [-1e10, -1e10, -1e10] # x,y,z
-    return get_bounding_box_for_node(scene.rootnode, bb_min, bb_max)
+    return get_bounding_box_for_node(scene.rootnode, bb_min, bb_max, linalg.inv(scene.rootnode.transformation))
 
-def get_bounding_box_for_node(node, bb_min, bb_max):
+def get_bounding_box_for_node(node, bb_min, bb_max, transformation):
+
+    transformation = numpy.dot(transformation, node.transformation)
     for mesh in node.meshes:
         for v in mesh.vertices:
-            v = transform(v, node.transformation)
+            v = transform(v, transformation)
             bb_min[0] = min(bb_min[0], v[0])
             bb_min[1] = min(bb_min[1], v[1])
             bb_min[2] = min(bb_min[2], v[2])
@@ -62,7 +65,7 @@ def get_bounding_box_for_node(node, bb_min, bb_max):
 
 
     for child in node.children:
-        bb_min, bb_max = get_bounding_box_for_node(child, bb_min, bb_max)
+        bb_min, bb_max = get_bounding_box_for_node(child, bb_min, bb_max, transformation)
 
     return bb_min, bb_max
 

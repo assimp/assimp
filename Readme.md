@@ -1,4 +1,4 @@
-Open Asset Import Library (_assimp_) 
+Open Asset Import Library (assimp) 
 ========
 
 
@@ -29,8 +29,9 @@ __Note__: this `README` refers to the file structure used by release packages, w
 The library provides importers for a lot of file formats, including:
 
 - 3DS
-- BLEND 
+- BLEND (Blender 3D)
 - DAE (Collada)
+- FBX
 - IFC-STEP 
 - ASE
 - DXF
@@ -121,5 +122,3 @@ For the formal details, see the `LICENSE` file.
 
 
 ------------------------------
-
-(This repository is a mirror of the SVN repository located [here](https://assimp.svn.sourceforge.net/svnroot/assimp). Thanks to [klickverbot](https://github.com/klickverbot) for setting this up!)

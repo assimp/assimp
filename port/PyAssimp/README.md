@@ -1,8 +1,8 @@
 PyAssimp Readme
 ===============
 
--- a simple Python wrapper for Assimp using ctypes to access
-the library. Requires Python >= 2.6.
+A simple Python wrapper for Assimp using `ctypes` to access the library.
+Requires Python >= 2.6.
 
 Python 3 support is mostly here, but not well tested.
 
@@ -12,10 +12,10 @@ particular, only loading of models is currently supported (no export).
 USAGE
 -----
 
-To get started with pyAssimp, examine the sample.py script in scripts/, which
-illustrates the basic usage. All Assimp data structures are wrapped using
+To get started with pyAssimp, examine the `sample.py` script in `scripts/`,
+which illustrates the basic usage. All Assimp data structures are wrapped using
 ctypes. All the data+length fields in Assimp's data structures (such as
-'aiMesh::mNumVertices','aiMesh::mVertices') are replaced by simple python
+`aiMesh::mNumVertices`, `aiMesh::mVertices`) are replaced by simple python
 lists, so you can call len() on them to get their respective size and access
 members using [].
 
@@ -57,18 +57,18 @@ release(scene)
 INSTALL
 -------
 
-Install pyassimp by running:
+Install `pyassimp` by running:
 
 > python setup.py install
 
-PyAssimp requires a assimp dynamic library (DLL on windows,
-so on linux :-) in order to work. The default search directories 
+PyAssimp requires a assimp dynamic library (`DLL` on windows,
+`.so` on linux :-) in order to work. The default search directories 
 are:
 
 - the current directory
-- on linux additionally: /usr/lib and /usr/local/lib
+- on linux additionally: `/usr/lib` and `/usr/local/lib`
 
 To build that library, refer to the Assimp master INSTALL
-instructions. To look in more places, edit ./pyassimp/helper.py.
-There's an 'additional_dirs' list waiting for your entries.
+instructions. To look in more places, edit `./pyassimp/helper.py`.
+There's an `additional_dirs` list waiting for your entries.
 

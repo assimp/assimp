@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_view.h"
 
 #include <map>
+#include <functional>
 
 namespace AssimpView {
 

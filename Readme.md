@@ -49,17 +49,26 @@ The library provides importers for a lot of file formats, including:
 - SMD
 - LWO 
 - LXO 
-- LWS 
-- XML 
+- LWS  
 - TER 
 - AC3D 
 - MS3D 
+- COB
+- Q3BSP
+- XGL
+- CSM
+- BVH
+- B3D
+- NDO
+- Ogre XML
+- Q3D
 
 Exporters include:
 
 - DAE (Collada)
 - STL
 - OBJ
+- PLY
 	
 See [the full list here](http://assimp.sourceforge.net/main_features_formats.html).
 

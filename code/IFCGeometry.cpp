@@ -1396,6 +1396,9 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 	const IfcVector2& n0_to_m1 = m1 - n0;
 
 	const IfcFloat e = 1e-5f;
+	const IfcFloat smalle = 1e-9f;
+
+	static const IfcFloat inf = std::numeric_limits<IfcFloat>::infinity();
 
 	if (!(n0_to_m0.SquareLength() < e*e || fabs(n0_to_m0 * n0_to_n1) / (n0_to_m0.Length() * n0_to_n1.Length()) > 1-1e-5 )) {
 		return false;
@@ -1407,14 +1410,33 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 
 	IfcFloat s0;
 	IfcFloat s1;
-	if(fabs(n0_to_n1.x) > e) {
+
+	// pick the axis with the higher absolute difference so the result
+	// is more accurate. Since we cannot guarantee that the axis with
+	// the higher absolute difference is big enough as to avoid
+	// divisions by zero, the case 0/0 ~ infinity is detected and
+	// handled separately.
+	if(fabs(n0_to_n1.x) > fabs(n0_to_n1.y)) {
 		s0 = n0_to_m0.x / n0_to_n1.x;
 		s1 = n0_to_m1.x / n0_to_n1.x;
+
+		if (fabs(s0) == inf && fabs(n0_to_m0.x) < smalle) {
+			s0 = 0.;
+		}
+		if (fabs(s1) == inf && fabs(n0_to_m1.x) < smalle) {
+			s1 = 0.;
+		}
 	}
 	else {
-		ai_assert(fabs(n0_to_n1.y) > e);
 		s0 = n0_to_m0.y / n0_to_n1.y;
 		s1 = n0_to_m1.y / n0_to_n1.y;
+
+		if (fabs(s0) == inf && fabs(n0_to_m0.y) < smalle) {
+			s0 = 0.;
+		}
+		if (fabs(s1) == inf && fabs(n0_to_m1.y) < smalle) {
+			s1 = 0.;
+		}
 	}
 
 	if (s1 < s0) {
@@ -1472,11 +1494,13 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 			Contour& ncontour = (*current).contour;
 			const Contour& mcontour = (*it).contour;
 
-			for (size_t n = 0, nend = ncontour.size(); n < nend; ++n) {
+			for (size_t n = 0; n < ncontour.size(); ++n) {
 				const IfcVector2& n0 = ncontour[n];
 				const IfcVector2& n1 = ncontour[(n+1) % ncontour.size()];
 
-				for (size_t m = 0, mend = mcontour.size(); m < nend; ++m) {
+				for (size_t m = 0, mend = mcontour.size(); m < mend; ++m) {
+					ai_assert(&mcontour != &ncontour);
+
 					const IfcVector2& m0 = mcontour[m];
 					const IfcVector2& m1 = mcontour[(m+1) % mcontour.size()];
 

@@ -1577,7 +1577,7 @@ void FindBorderContours(ContourVector::iterator current)
 	if (outer_border && start_on_outer_border) {
 		const IfcVector2& proj_point = *cbegin;
 		if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < dot_point_epsilon) {
-			skiplist[0] = true;
+			skiplist[skiplist.size()-1] = true;
 		}
 	}
 }

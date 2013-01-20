@@ -1408,7 +1408,6 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 	IfcFloat s0;
 	IfcFloat s1;
 	if(fabs(n0_to_n1.x) > e) {
-		ai_assert(fabs(n0_to_m0.x) > e);
 		s0 = n0_to_m0.x / n0_to_n1.x;
 		s1 = n0_to_m1.x / n0_to_n1.x;
 	}

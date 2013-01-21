@@ -1531,11 +1531,17 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 }
 
 // ------------------------------------------------------------------------------------------------
+AI_FORCE_INLINE bool LikelyBorder(const IfcVector2& vdelta)
+{
+	const IfcFloat dot_point_epsilon = static_cast<IfcFloat>(1e-5);
+	return fabs(vdelta.x * vdelta.y) < dot_point_epsilon;
+}
+
+// ------------------------------------------------------------------------------------------------
 void FindBorderContours(ContourVector::iterator current)
 {
 	const IfcFloat border_epsilon_upper = static_cast<IfcFloat>(1-1e-4);
 	const IfcFloat border_epsilon_lower = static_cast<IfcFloat>(1e-4);
-	const IfcFloat dot_point_epsilon = static_cast<IfcFloat>(1e-5);
 
 	bool outer_border = false;
 	bool start_on_outer_border = false;
@@ -1556,7 +1562,7 @@ void FindBorderContours(ContourVector::iterator current)
 
 				if (outer_border) {
 					ai_assert(cit != cbegin);
-					if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < dot_point_epsilon) {
+					if (LikelyBorder(proj_point - last_proj_point)) {
 						skiplist[std::distance(cbegin, cit) - 1] = true;
 					}
 				}
@@ -1576,14 +1582,14 @@ void FindBorderContours(ContourVector::iterator current)
 	// handle last segment
 	if (outer_border && start_on_outer_border) {
 		const IfcVector2& proj_point = *cbegin;
-		if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < dot_point_epsilon) {
+		if (LikelyBorder(proj_point - last_proj_point)) {
 			skiplist[skiplist.size()-1] = true;
 		}
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-bool LikelyDiagonal(IfcVector2 vdelta)
+AI_FORCE_INLINE bool LikelyDiagonal(IfcVector2 vdelta)
 {
 	vdelta.x = fabs(vdelta.x);
 	vdelta.y = fabs(vdelta.y);

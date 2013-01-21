@@ -1957,7 +1957,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 
 		// TODO: This epsilon may be too large
-		const IfcFloat epsilon = fabs(dmax-dmin) * 0.01;
+		const IfcFloat epsilon = fabs(dmax-dmin) * 0.001;
 		if (check_intersection && (base_d < dmin-epsilon || base_d > dmax+epsilon)) {
 			continue;
 		}
@@ -1966,7 +1966,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 		// Skip over very small openings - these are likely projection errors
 		// (i.e. they don't belong to this side of the wall)
-		if(fabs(vpmax.x - vpmin.x) * fabs(vpmax.y - vpmin.y) < static_cast<IfcFloat>(1e-5)) {
+		if(fabs(vpmax.x - vpmin.x) * fabs(vpmax.y - vpmin.y) < static_cast<IfcFloat>(1e-10)) {
 			continue;
 		}
 		std::vector<TempOpening*> joined_openings(1, &opening);
@@ -2003,6 +2003,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 				if (poly.size() > 1) { 
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
+					break;
 				}
 				else if (poly.size() == 0) {
 					IFCImporter::LogWarn("ignoring duplicate opening");

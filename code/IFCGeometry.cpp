@@ -1462,6 +1462,7 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 // ------------------------------------------------------------------------------------------------
 void FindAdjacentContours(ContourVector::iterator current, const ContourVector& contours)
 {
+	const IfcFloat sqlen_epsilon = static_cast<IfcFloat>(1e-8);
 	const BoundingBox& bb = (*current).bb;
 
 	// What is to be done here is to populate the skip lists for the contour
@@ -1507,7 +1508,7 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 					IfcVector2 isect0, isect1;
 					if (IntersectingLineSegments(n0,n1, m0, m1, isect0, isect1)) {
 
-						if ((isect0 - n0).SquareLength() > 1e-5) {
+						if ((isect0 - n0).SquareLength() > sqlen_epsilon) {
 							++n;
 
 							ncontour.insert(ncontour.begin() + n, isect0);	
@@ -1517,7 +1518,7 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 							skiplist[n] = true;
 						}
 
-						if ((isect1 - n1).SquareLength() > 1e-5) {
+						if ((isect1 - n1).SquareLength() > sqlen_epsilon) {
 							++n;
 
 							ncontour.insert(ncontour.begin() + n, isect1);

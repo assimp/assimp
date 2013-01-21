@@ -1573,12 +1573,46 @@ void FindBorderContours(ContourVector::iterator current)
 		last_proj_point = proj_point;
 	}
 
-	// handle first segment
+	// handle last segment
 	if (outer_border && start_on_outer_border) {
 		const IfcVector2& proj_point = *cbegin;
 		if (fabs((proj_point.x - last_proj_point.x) * (proj_point.y - last_proj_point.y)) < dot_point_epsilon) {
 			skiplist[skiplist.size()-1] = true;
 		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+bool LikelyDiagonal(IfcVector2 vdelta)
+{
+	vdelta.x = fabs(vdelta.x);
+	vdelta.y = fabs(vdelta.y);
+	return (fabs(vdelta.x-vdelta.y) < 0.8 * std::max(vdelta.x, vdelta.y));
+}
+
+// ------------------------------------------------------------------------------------------------
+void FindLikelyCrossingLines(ContourVector::iterator current)
+{
+	SkipList& skiplist = (*current).skiplist;
+	IfcVector2 last_proj_point;
+
+	const Contour::const_iterator cbegin = (*current).contour.begin(), cend = (*current).contour.end();
+	for (Contour::const_iterator cit = cbegin; cit != cend; ++cit) {
+		const IfcVector2& proj_point = *cit;
+
+		if (cit != cbegin) {
+			IfcVector2 vdelta = proj_point - last_proj_point;
+			if (LikelyDiagonal(vdelta)) {
+				skiplist[std::distance(cbegin, cit) - 1] = true;
+			}
+		} 
+
+		last_proj_point = proj_point;
+	}
+
+	// handle last segment
+	if (LikelyDiagonal(*cbegin - last_proj_point)) {
+		skiplist[skiplist.size()-1] = true;
 	}
 }
 
@@ -1621,6 +1655,7 @@ void CloseWindows(ContourVector& contours,
 
 		FindAdjacentContours(it, contours);
 		FindBorderContours(it);
+		FindLikelyCrossingLines(it);
 
 		ai_assert((*it).skiplist.size() == (*it).contour.size());
 
@@ -2003,7 +2038,6 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 				if (poly.size() > 1) { 
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
-					break;
 				}
 				else if (poly.size() == 0) {
 					IFCImporter::LogWarn("ignoring duplicate opening");

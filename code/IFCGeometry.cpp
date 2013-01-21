@@ -1639,6 +1639,9 @@ void CloseWindows(ContourVector& contours,
 			IfcVector3 start0;
 			IfcVector3 start1;
 
+			IfcVector2 last_proj; 
+			//const IfcVector2& first_proj; 
+
 			bool drop_this_edge = false;
 			for (Contour::const_iterator cit = cbegin; cit != cend; ++cit, drop_this_edge = *skipit++) {
 				const IfcVector2& proj_point = *cit;
@@ -1648,7 +1651,16 @@ void CloseWindows(ContourVector& contours,
 				IfcFloat best = static_cast<IfcFloat>(1e10);
 				IfcVector3 bestv;
 
+				/* debug code to check for unwanted diagonal lines in window contours
+				if (cit != cbegin) {
+					const IfcVector2& vdelta = proj_point - last_proj;
+					if (fabs(vdelta.x-vdelta.y) < 0.5 * std::max(vdelta.x, vdelta.y)) {
+						//continue;
+					}
+				} */
+
 				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
+				last_proj = proj_point;
 
 				BOOST_FOREACH(const TempOpening* opening, refs) {
 					BOOST_FOREACH(const IfcVector3& other, opening->wallPoints) {
@@ -1849,6 +1861,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	ContourVector contours;
 
 	std::vector<IfcVector2> temp_contour;
+	std::vector<IfcVector2> temp_contour2;
 
 	size_t c = 0;
 	BOOST_FOREACH(TempOpening& opening,openings) {
@@ -1856,10 +1869,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		std::vector<unsigned int> profile_vertcnts = opening.profileMesh->vertcnt;
 		if(profile_verts.size() <= 2) {
 			continue;	
-		}
-
-		IfcVector2 vpmin,vpmax;
-		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
+		}	
 
 		// The opening meshes are real 3D meshes so skip over all faces
 		// clearly facing into the wrong direction. Also, we need to check
@@ -1867,10 +1877,25 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		// This is done by recording minimum and maximum values for the
 		// d component of the plane equation for all polys and checking
 		// against surface d.
+
+		// Use the sign of the dot product of the face normal to the plane
+		// normal to determine to which side of the difference mesh a
+		// triangle belongs. Get independent bounding boxes and vertex
+		// sets for both sides and take the better one (we can't just
+		// take both - this would likely cause major screwup of vertex
+		// winding, producing errors as late as in CloseWindows()).
 		IfcFloat dmin, dmax;
 		MinMaxChooser<IfcFloat>()(dmin,dmax);
 
 		temp_contour.clear();
+		temp_contour2.clear();
+
+		IfcVector2 vpmin,vpmax;
+		MinMaxChooser<IfcVector2>()(vpmin,vpmax);
+
+		IfcVector2 vpmin2,vpmax2;
+		MinMaxChooser<IfcVector2>()(vpmin2,vpmax2);
+
 		for (size_t f = 0, vi_total = 0, fend = profile_vertcnts.size(); f < fend; ++f) {
 			const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
 				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
@@ -1880,6 +1905,8 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				vi_total += profile_vertcnts[f];
 				continue;
 			}
+
+			const bool side_flag = nor * face_nor > 0;
 
 			for (unsigned int vi = 0, vend = profile_vertcnts[f]; vi < vend; ++vi, ++vi_total) {
 				const IfcVector3& x = profile_verts[vi_total];
@@ -1897,18 +1924,37 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				vv = std::max(vv,IfcVector2());
 				vv = std::min(vv,one_vec);
 
-				vpmin = std::min(vpmin,vv);
-				vpmax = std::max(vpmax,vv);
+				if(side_flag) {
+					vpmin = std::min(vpmin,vv);
+					vpmax = std::max(vpmax,vv);
+				}
+				else {
+					vpmin2 = std::min(vpmin2,vv);
+					vpmax2 = std::max(vpmax2,vv);
+				}
 
-				if (!IsDuplicateVertex(vv, temp_contour)) {
-					temp_contour.push_back(vv);
+				std::vector<IfcVector2>& store = side_flag ? temp_contour : temp_contour2;
+
+				if (!IsDuplicateVertex(vv, store)) {
+					store.push_back(vv);
 				}		
 			}
 		}
 
+		if (temp_contour2.size() > 2) {
+			const IfcVector2 area = vpmax-vpmin;
+			const IfcVector2 area2 = vpmax2-vpmin2;
+			if (temp_contour.size() <= 2 || fabs(area2.x * area2.y) > fabs(area.x * area.y)) {
+				temp_contour.swap(temp_contour2);
+
+				vpmax = vpmax2;
+				vpmin = vpmin2;			
+			}
+		}
 		if(temp_contour.size() <= 2) {
 			continue;
 		}
+
 
 		// TODO: This epsilon may be too large
 		const IfcFloat epsilon = fabs(dmax-dmin) * 0.01;
@@ -1965,7 +2011,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				}
 				else {
 					IFCImporter::LogDebug("merging overlapping openings");				
-					ExtractVerticesFromClipper(poly[0].outer, temp_contour, true);
+					ExtractVerticesFromClipper(poly[0].outer, temp_contour, false);
 
 					// Generate the union of the bounding boxes
 					bb.first = std::min(bb.first, ibb.first);

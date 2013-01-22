@@ -2245,7 +2245,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp, i >= size/2)) {
 				++sides_with_openings;
 			}
 			
@@ -2264,7 +2264,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 			curmesh.vertcnt.push_back(size);
 			if(openings && size > 2) {
-				if(GenerateOpenings(*conv.apply_openings,nors,temp)) {
+				if(GenerateOpenings(*conv.apply_openings,nors,temp, true)) {
 					++sides_with_v_openings;
 				}
 

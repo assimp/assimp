@@ -1478,16 +1478,21 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 			continue;
 		}
 
-		if(it == current) {
-			continue;
-		}
+		// this left here to make clear we also run on the current contour
+		// to check for overlapping contour segments (which can happen due
+		// to projection artifacts).
+		//if(it == current) {
+		//	continue;
+		//}
+
+		const bool is_me = it == current;
 
 		const BoundingBox& ibb = (*it).bb;
 
-		// Assumption: the bounding boxes are pairwise disjoint
-		ai_assert(!BoundingBoxesOverlapping(bb, ibb));
+		// Assumption: the bounding boxes are pairwise disjoint or identical
+		ai_assert(is_me || !BoundingBoxesOverlapping(bb, ibb));
 
-		if (BoundingBoxesAdjacent(bb, ibb)) {
+		if (is_me || BoundingBoxesAdjacent(bb, ibb)) {
 
 			// Now do a each-against-everyone check for intersecting contour
 			// lines. This obviously scales terribly, but in typical real
@@ -1501,8 +1506,8 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 				const IfcVector2& n0 = ncontour[n];
 				const IfcVector2& n1 = ncontour[(n+1) % ncontour.size()];
 
-				for (size_t m = 0, mend = mcontour.size(); m < mend; ++m) {
-					ai_assert(&mcontour != &ncontour);
+				for (size_t m = 0, mend = (is_me ? n : mcontour.size()); m < mend; ++m) {
+					ai_assert(&mcontour != &ncontour || m < n);
 
 					const IfcVector2& m0 = mcontour[m];
 					const IfcVector2& m1 = mcontour[(m+1) % mcontour.size()];
@@ -2138,13 +2143,10 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	BOOST_FOREACH(IfcVector3& v3, curmesh.verts) {
 		v3 = minv * v3;
 	}
-	
-	// TODO:
-	// This should connect the window openings on both sides of the wall,
-	// but it produces lots of artifacts which are not resolved yet.
-	// Most of all, it makes all cases in which adjacent openings are
-	// not correctly merged together glaringly obvious.
-	if (generate_connection_geometry) {
+
+	// Generate window caps to connect the symmetric openings on both sides
+	// of the wall.
+ 	if (generate_connection_geometry) {
 		CloseWindows(contours, minv, contours_to_openings, curmesh);
 	}
 	return true;

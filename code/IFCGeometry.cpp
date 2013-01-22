@@ -1835,7 +1835,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 	}
 
 
-	IfcFloat coord = -1;
+	IfcFloat coord = 0;
 	out_contour.reserve(in_verts.size());
 
 	IfcVector2 vmin, vmax;
@@ -1853,12 +1853,14 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 		// if(coord != -1.0f) {
 		//	assert(fabs(coord - vv.z) < 1e-3f);
 		// }
-		coord = vv.z;
+		coord += vv.z;
 		vmin = std::min(IfcVector2(vv.x, vv.y), vmin);
 		vmax = std::max(IfcVector2(vv.x, vv.y), vmax);
 
 		out_contour.push_back(IfcVector2(vv.x,vv.y));
 	}
+
+	coord /= in_verts.size();
 
 	// Further improve the projection by mapping the entire working set into
 	// [0,1] range. This gives us a consistent data range so all epsilons

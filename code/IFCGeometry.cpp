@@ -963,11 +963,13 @@ struct ProjectedWindowContour
 	Contour contour;
 	BoundingBox bb;
 	SkipList skiplist;
+	bool is_rectangular;
 
 
-	ProjectedWindowContour(const Contour& contour, const BoundingBox& bb)
+	ProjectedWindowContour(const Contour& contour, const BoundingBox& bb, bool is_rectangular)
 		: contour(contour)
 		, bb(bb)
+		, is_rectangular(is_rectangular)
 	{}
 
 
@@ -1662,7 +1664,15 @@ void CloseWindows(ContourVector& contours,
 
 		FindAdjacentContours(it, contours);
 		FindBorderContours(it);
-		FindLikelyCrossingLines(it);
+
+		// if the window is the result of a finite union or intersection of rectangles,
+		// there shouldn't be any crossing or diagonal lines in it. Such lines would
+		// be artifacts caused by numerical inaccuracies or other bugs in polyclipper
+		// and our own code. Since rectangular openings are by far the most frequent
+		// case, it is worth filtering for this corner case.
+		if((*it).is_rectangular) {
+			FindLikelyCrossingLines(it);
+		}
 
 		ai_assert((*it).skiplist.size() == (*it).contour.size());
 
@@ -2013,11 +2023,17 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		}
 		std::vector<TempOpening*> joined_openings(1, &opening);
 
+		bool is_rectangle = temp_contour.size() == 4;
+
 		// See if this BB intersects or is in close adjacency to any other BB we have so far.
 		for (ContourVector::iterator it = contours.begin(); it != contours.end(); ) {
 			const BoundingBox& ibb = (*it).bb;
 
 			if (BoundingBoxesOverlapping(ibb, bb)) {
+
+				if (!(*it).is_rectangular) {
+					is_rectangle = false;
+				}
 
 				const std::vector<IfcVector2>& other = (*it).contour;
 				ClipperLib::ExPolygons poly;
@@ -2086,7 +2102,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					joined_openings.end()));
 			}
 
-			contours.push_back(ProjectedWindowContour(temp_contour, bb));
+			contours.push_back(ProjectedWindowContour(temp_contour, bb, is_rectangle));
 		}
 	}
 

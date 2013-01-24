@@ -44,8 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "AssimpPCH.h"
 #include "STEPFileReader.h"
+#include "STEPFileEncoding.h"
 #include "TinyFormatter.h"
 #include "fast_atof.h"
+
 
 using namespace Assimp;
 namespace EXPRESS = STEP::EXPRESS;
@@ -331,7 +333,6 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 	}
 }
 
-
 // ------------------------------------------------------------------------------------------------
 boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*& inout,uint64_t line, const EXPRESS::ConversionSchema* schema /*= NULL*/)
 {
@@ -419,34 +420,12 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
 
 		inout = cur + 1;
 
-		// very basic handling for escaped string sequences
-		// http://doc.spatial.com/index.php?title=InterOp:Connect/STEP&redirect=no
-		// UTF16: \X2\ ... \X0\
-		// UTF32: \X4\ ... \X0\
-		// Mac: \X8\xx (xx is a hex sequence)
-		// cp1252: \S\X (X is the character remapped to [0,127])
-		// ? more of them ?
-
-		// Note: assimp is supposed to output UTF8 strings
-
+		// assimp is supposed to output UTF8 strings, so we have to deal
+		// with foreign encodings.
 		std::string stemp = std::string(start, static_cast<size_t>(cur - start));
-		for (size_t i = 0; i < stemp.size(); ++i) {
-			if (stemp[i] == '\\') {
-				if (i+3 < stemp.size() && stemp[i+1] == 'S' && stemp[i+2] == '\\') {
-					// http://stackoverflow.com/questions/5586214/how-to-convert-char-from-iso-8859-1-to-utf-8-in-c-multiplatformly
-					ai_assert((uint8_t)stemp[i+3] < 0x80);
-					const uint8_t ch = stemp[i+3] + 0x80;
-
-					stemp[i] = 0xc0 | (ch & 0xc0) >> 6;
-					stemp[i+1] =  0x80 | (ch & 0x3f);
-
-					stemp.erase(i + 2,2);
-					++i;
-				}
-				else if (i+2 < stemp.size() && stemp[i+1] == 'X' && IsNumeric(stemp[i+2])) {
-					// TODO: warn
-				}
-			}
+		if(!StringToUTF8(stemp)) {
+			// TODO: route this to a correct logger with line numbers etc., better error messages
+			DefaultLogger::get()->error("an error occurred reading escape sequences in ASCII text");
 		}
 
 		return boost::make_shared<EXPRESS::STRING>(stemp);

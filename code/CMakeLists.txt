@@ -384,6 +384,8 @@ SET(IFC_SRCS
 	STEPFile.h
 	STEPFileReader.h
 	STEPFileReader.cpp
+	STEPFileEncoding.cpp
+	STEPFileEncoding.h
 )
 SOURCE_GROUP( IFC FILES ${IFC_SRCS})
 

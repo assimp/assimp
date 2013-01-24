@@ -206,11 +206,18 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 		// note: do not write cursor += ReadWord(...cursor) as this would be UB
 
 		// raw binary data
-	case 'R':	{
+	case 'R':	
+	{
 		const uint32_t length = ReadWord(input, cursor, end);
 		cursor += length;
 		break;
 	}
+
+	case 'b': 
+		// TODO: what is the 'b' type code? Right now we just skip over it /
+		// take the full range we could get
+		cursor = end;
+		break;
 
 		// array of *
 	case 'f':

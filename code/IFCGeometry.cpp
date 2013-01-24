@@ -1970,14 +1970,13 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 			for (unsigned int vi = 0, vend = profile_vertcnts[f]; vi < vend; ++vi, ++vi_total) {
 				const IfcVector3& x = profile_verts[vi_total];
 
-				if(check_intersection) {
-					const IfcFloat vert_d = -(x * nor);
-					dmin = std::min(dmin, vert_d);
-					dmax = std::max(dmax, vert_d);
-				}
-
 				const IfcVector3& v = m * x;
 				IfcVector2 vv(v.x, v.y);
+
+				if(check_intersection) {
+					dmin = std::min(dmin, v.z);
+					dmax = std::max(dmax, v.z);
+				}
 
 				// sanity rounding
 				vv = std::max(vv,IfcVector2());
@@ -2245,7 +2244,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp, i >= size/2)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
 				++sides_with_openings;
 			}
 			
@@ -2264,7 +2263,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 			curmesh.vertcnt.push_back(size);
 			if(openings && size > 2) {
-				if(GenerateOpenings(*conv.apply_openings,nors,temp, true)) {
+				if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
 					++sides_with_v_openings;
 				}
 

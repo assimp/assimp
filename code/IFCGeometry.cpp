@@ -1884,6 +1884,21 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 	mult.c4 = -coord;
 	m = mult * m;
 
+	// debug code to verify correctness
+#ifdef _DEBUG
+	std::vector<IfcVector2> out_contour2;
+	BOOST_FOREACH(const IfcVector3& x, in_verts) {
+		const IfcVector3& vv = m * x;
+
+		out_contour2.push_back(IfcVector2(vv.x,vv.y));
+		ai_assert(fabs(vv.z) < 1e-5);
+	} 
+
+	for(size_t i = 0; i < out_contour.size(); ++i) {
+		ai_assert((out_contour[i]-out_contour2[i]).SquareLength() < 1e-6);
+	}
+#endif
+
 	return m;
 }
 
@@ -2016,7 +2031,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 		// TODO: This epsilon may be too large
 		const IfcFloat epsilon = fabs(dmax-dmin) * 0.001;
-		if (check_intersection && (base_d < dmin-epsilon || base_d > dmax+epsilon)) {
+		if (check_intersection && (0 < dmin-epsilon || 0 > dmax+epsilon)) {
 			continue;
 		}
 

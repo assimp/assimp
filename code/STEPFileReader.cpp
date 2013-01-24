@@ -419,7 +419,37 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
 
 		inout = cur + 1;
 
-		return boost::make_shared<EXPRESS::STRING>(std::string(start, static_cast<size_t>(cur - start)));
+		// very basic handling for escaped string sequences
+		// http://doc.spatial.com/index.php?title=InterOp:Connect/STEP&redirect=no
+		// UTF16: \X2\ ... \X0\
+		// UTF32: \X4\ ... \X0\
+		// Mac: \X8\xx (xx is a hex sequence)
+		// cp1252: \S\X (X is the character remapped to [0,127])
+		// ? more of them ?
+
+		// Note: assimp is supposed to output UTF8 strings
+
+		std::string stemp = std::string(start, static_cast<size_t>(cur - start));
+		for (size_t i = 0; i < stemp.size(); ++i) {
+			if (stemp[i] == '\\') {
+				if (i+3 < stemp.size() && stemp[i+1] == 'S' && stemp[i+2] == '\\') {
+					// http://stackoverflow.com/questions/5586214/how-to-convert-char-from-iso-8859-1-to-utf-8-in-c-multiplatformly
+					ai_assert((uint8_t)stemp[i+3] < 0x80);
+					const uint8_t ch = stemp[i+3] + 0x80;
+
+					stemp[i] = 0xc0 | (ch & 0xc0) >> 6;
+					stemp[i+1] =  0x80 | (ch & 0x3f);
+
+					stemp.erase(i + 2,2);
+					++i;
+				}
+				else if (i+2 < stemp.size() && stemp[i+1] == 'X' && IsNumeric(stemp[i+2])) {
+					// TODO: warn
+				}
+			}
+		}
+
+		return boost::make_shared<EXPRESS::STRING>(stemp);
 	}
 	else if (*cur == '\"' ) {
 		throw STEP::SyntaxError("binary data not supported yet",line);

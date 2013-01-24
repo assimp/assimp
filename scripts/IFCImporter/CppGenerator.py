@@ -44,6 +44,10 @@
 
 import sys, os, re
 
+if sys.version_info < (3, 0):
+    print("must use python 3.0 or greater")
+    sys.exit(-2)
+
 input_template_h = 'IFCReaderGen.h.template'
 input_template_cpp = 'IFCReaderGen.cpp.template'
 

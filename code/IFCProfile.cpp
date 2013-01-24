@@ -129,6 +129,27 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
 
 		meshout.vertcnt.push_back(segments);
 	}
+	else if( const IfcIShapeProfileDef* const ishape = def.ToPtr<IfcIShapeProfileDef>()) {
+		// construct simplified IBeam shape
+		const IfcFloat offset = (ishape->OverallWidth - ishape->WebThickness) / 2;
+		const IfcFloat inner_height = ishape->OverallDepth - ishape->FlangeThickness * 2;
+
+		meshout.verts.reserve(12);
+		meshout.verts.push_back(IfcVector3(0,0,0));
+		meshout.verts.push_back(IfcVector3(0,ishape->FlangeThickness,0));
+		meshout.verts.push_back(IfcVector3(offset,ishape->FlangeThickness,0));
+		meshout.verts.push_back(IfcVector3(offset,ishape->FlangeThickness + inner_height,0));
+		meshout.verts.push_back(IfcVector3(0,ishape->FlangeThickness + inner_height,0));
+		meshout.verts.push_back(IfcVector3(0,ishape->OverallDepth,0));
+		meshout.verts.push_back(IfcVector3(ishape->OverallWidth,ishape->OverallDepth,0));
+		meshout.verts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness + inner_height,0));
+		meshout.verts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness + inner_height,0));
+		meshout.verts.push_back(IfcVector3(offset+ishape->WebThickness,ishape->FlangeThickness,0));
+		meshout.verts.push_back(IfcVector3(ishape->OverallWidth,ishape->FlangeThickness,0));
+		meshout.verts.push_back(IfcVector3(ishape->OverallWidth,0,0));
+
+		meshout.vertcnt.push_back(12);
+	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcParameterizedProfileDef entity, type is " + def.GetClassName());
 		return;

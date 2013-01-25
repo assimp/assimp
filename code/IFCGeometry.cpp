@@ -1631,11 +1631,12 @@ void FindLikelyCrossingLines(ContourVector::iterator current)
 }
 
 // ------------------------------------------------------------------------------------------------
-void CloseWindows(ContourVector& contours, 		  
+size_t CloseWindows(ContourVector& contours, 		  
 	const IfcMatrix4& minv, 
 	OpeningRefVector& contours_to_openings, 
 	TempMesh& curmesh)
 {
+	size_t closed = 0;
 	// For all contour points, check if one of the assigned openings does
 	// already have points assigned to it. In this case, assume this is
 	// the other side of the wall and generate connections between
@@ -1747,6 +1748,7 @@ void CloseWindows(ContourVector& contours,
 					curmesh.verts.push_back(cit == cbegin ? bestv : world_point);
 
 					curmesh.vertcnt.push_back(4);
+					++closed;
 				}
 
 				if (cit == cbegin) {
@@ -1764,6 +1766,7 @@ void CloseWindows(ContourVector& contours,
 					// Check if the final connection (last to first element) is itself
 					// a border edge that needs to be dropped.
 					if (drop_this_edge) {
+						--closed;
 						curmesh.vertcnt.pop_back();
 						curmesh.verts.pop_back();
 						curmesh.verts.pop_back();
@@ -1774,6 +1777,11 @@ void CloseWindows(ContourVector& contours,
 					}
 				}
 			}
+
+			BOOST_FOREACH(TempOpening* opening, refs) {
+				opening->wallPoints.clear();
+			}
+
 		}
 		else {
 			
@@ -1789,6 +1797,7 @@ void CloseWindows(ContourVector& contours,
 			}
 		}
 	}
+	return closed;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2001,10 +2010,10 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				const IfcVector3& v = m * x;
 				IfcVector2 vv(v.x, v.y);
 
-				if(check_intersection) {
+				//if(check_intersection) {
 					dmin = std::min(dmin, v.z);
 					dmax = std::max(dmax, v.z);
-				}
+				//}
 
 				// sanity rounding
 				vv = std::max(vv,IfcVector2());
@@ -2040,7 +2049,6 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		if(temp_contour.size() <= 2) {
 			continue;
 		}
-
 
 		// TODO: This epsilon may be too large
 		const IfcFloat epsilon = fabs(dmax-dmin) * 0.0001;
@@ -2176,6 +2184,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	// Generate window caps to connect the symmetric openings on both sides
 	// of the wall.
  	if (generate_connection_geometry) {
+		
 		CloseWindows(contours, minv, contours_to_openings, curmesh);
 	}
 	return true;
@@ -2197,6 +2206,9 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	ConvertDirection(dir,solid.ExtrudedDirection);
 
 	dir *= solid.Depth;
+	if(conv.collect_openings) {
+		dir *= 1000.0;
+	}
 
 	// Outline: assuming that `meshout.verts` is now a list of vertex points forming 
 	// the underlying profile, extrude along the given axis, forming new
@@ -2272,7 +2284,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp,false, true)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
 				++sides_with_openings;
 			}
 			
@@ -2283,6 +2295,9 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 	if(openings) {
 		BOOST_FOREACH(TempOpening& opening, *conv.apply_openings) {
+			if (!opening.wallPoints.empty()) {
+				IFCImporter::LogError("failed to generate all window caps");
+			}
 			opening.wallPoints.clear();
 		}
 	}

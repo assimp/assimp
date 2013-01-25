@@ -535,9 +535,9 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcFloa
 	m.b2 = u.y;
 	m.b3 = u.z;
 
-	m.c1 = nor.x;
-	m.c2 = nor.y;
-	m.c3 = nor.z;
+	m.c1 = -nor.x;
+	m.c2 = -nor.y;
+	m.c3 = -nor.z;
 
 	return m;
 }
@@ -1648,7 +1648,7 @@ void CloseWindows(ContourVector& contours,
 	// wrong geometry may be generated.
 	for (ContourVector::iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
 		if ((*it).IsInvalid()) {
-			continue;
+			//continue;
 		}
 		OpeningRefs& refs = contours_to_openings[std::distance(contours.begin(), it)];
 
@@ -1701,6 +1701,8 @@ void CloseWindows(ContourVector& contours,
 			IfcVector2 last_proj; 
 			//const IfcVector2& first_proj; 
 
+			IfcVector3 perp;
+
 			bool drop_this_edge = false;
 			for (Contour::const_iterator cit = cbegin; cit != cend; ++cit, drop_this_edge = *skipit++) {
 				const IfcVector2& proj_point = *cit;
@@ -1719,6 +1721,7 @@ void CloseWindows(ContourVector& contours,
 				} */
 
 				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
+				
 				last_proj = proj_point;
 
 				BOOST_FOREACH(const TempOpening* opening, refs) {
@@ -1726,14 +1729,16 @@ void CloseWindows(ContourVector& contours,
 						const IfcFloat sqdist = (world_point - other).SquareLength();
 						
 						if (sqdist < best) {
+							// avoid self-connections
+							if(best < 1e-5) {
+								continue;
+							}
+
 							bestv = other;
-							best = sqdist;
+							best = sqdist;							
 						}
 					}
 				}
-
-				IfcVector3 diff = bestv - world_point;
-				diff.Normalize();
 
 				if (drop_this_edge) {
 					curmesh.verts.pop_back();
@@ -1836,7 +1841,10 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 	if(!ok) {
 		return IfcMatrix4();
 	}
-
+#ifdef _DEBUG
+	const IfcFloat det = m.Determinant();
+	ai_assert(fabs(det-1) < 1e-5);
+#endif
 
 	IfcFloat coord = 0;
 	out_contour.reserve(in_verts.size());
@@ -2263,7 +2271,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp,false, true)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
 				++sides_with_openings;
 			}
 			

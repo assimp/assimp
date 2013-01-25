@@ -1926,7 +1926,8 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		return false;
 	}
 
-	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
+	IfcVector3 nor = IfcVector3(m.c1, m.c2, m.c3);
+	nor.Normalize();
 
 	// Obtain inverse transform for getting back to world space later on
 	const IfcMatrix4& minv = IfcMatrix4(m).Inverse();
@@ -1975,7 +1976,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
 			const IfcFloat abs_dot_face_nor = abs(nor * face_nor);
-			if (abs_dot_face_nor < 0.5) {
+			if (abs_dot_face_nor < 0.9) {
 				vi_total += profile_vertcnts[f];
 				continue;
 			}
@@ -2030,7 +2031,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 
 		// TODO: This epsilon may be too large
-		const IfcFloat epsilon = fabs(dmax-dmin) * 0.001;
+		const IfcFloat epsilon = fabs(dmax-dmin) * 0.0001;
 		if (check_intersection && (0 < dmin-epsilon || 0 > dmax+epsilon)) {
 			continue;
 		}

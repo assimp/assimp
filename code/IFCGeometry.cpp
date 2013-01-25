@@ -1724,6 +1724,7 @@ void CloseWindows(ContourVector& contours,
 				BOOST_FOREACH(const TempOpening* opening, refs) {
 					BOOST_FOREACH(const IfcVector3& other, opening->wallPoints) {
 						const IfcFloat sqdist = (world_point - other).SquareLength();
+						
 						if (sqdist < best) {
 							bestv = other;
 							best = sqdist;
@@ -2262,12 +2263,18 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp,false, true)) {
 				++sides_with_openings;
 			}
 			
 			result.Append(temp);
 			temp.Clear();
+		}
+	}
+
+	if(openings) {
+		BOOST_FOREACH(TempOpening& opening, *conv.apply_openings) {
+			opening.wallPoints.clear();
 		}
 	}
 	

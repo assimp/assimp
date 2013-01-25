@@ -1660,31 +1660,33 @@ void CloseWindows(ContourVector& contours,
 			}
 		}
 
-		ContourRefVector adjacent_contours;
-
-		// prepare a skiplist for this contour. The skiplist is used to
-		// eliminate unwanted contour lines for adjacent windows and
-		// those bordering the outer frame.
-		(*it).PrepareSkiplist();
-
-		FindAdjacentContours(it, contours);
-		FindBorderContours(it);
-
-		// if the window is the result of a finite union or intersection of rectangles,
-		// there shouldn't be any crossing or diagonal lines in it. Such lines would
-		// be artifacts caused by numerical inaccuracies or other bugs in polyclipper
-		// and our own code. Since rectangular openings are by far the most frequent
-		// case, it is worth filtering for this corner case.
-		if((*it).is_rectangular) {
-			FindLikelyCrossingLines(it);
-		}
-
-		ai_assert((*it).skiplist.size() == (*it).contour.size());
-
-		SkipList::const_iterator skipbegin = (*it).skiplist.begin(), skipend = (*it).skiplist.end();
 		const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 
 		if (has_other_side) {
+
+			ContourRefVector adjacent_contours;
+
+			// prepare a skiplist for this contour. The skiplist is used to
+			// eliminate unwanted contour lines for adjacent windows and
+			// those bordering the outer frame.
+			(*it).PrepareSkiplist();
+
+			FindAdjacentContours(it, contours);
+			FindBorderContours(it);
+
+			// if the window is the result of a finite union or intersection of rectangles,
+			// there shouldn't be any crossing or diagonal lines in it. Such lines would
+			// be artifacts caused by numerical inaccuracies or other bugs in polyclipper
+			// and our own code. Since rectangular openings are by far the most frequent
+			// case, it is worth filtering for this corner case.
+			if((*it).is_rectangular) {
+				FindLikelyCrossingLines(it);
+			}
+
+			ai_assert((*it).skiplist.size() == (*it).contour.size());
+
+			SkipList::const_iterator skipbegin = (*it).skiplist.begin(), skipend = (*it).skiplist.end();
+
 			curmesh.verts.reserve(curmesh.verts.size() + (*it).contour.size() * 4);
 			curmesh.vertcnt.reserve(curmesh.vertcnt.size() + (*it).contour.size());
 

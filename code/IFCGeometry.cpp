@@ -1729,7 +1729,7 @@ size_t CloseWindows(ContourVector& contours,
 						
 						if (sqdist < best) {
 							// avoid self-connections
-							if(best < 1e-5) {
+							if(sqdist < 1e-5) {
 								continue;
 							}
 
@@ -2205,10 +2205,10 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	IfcVector3 dir;
 	ConvertDirection(dir,solid.ExtrudedDirection);
 
-	dir *= solid.Depth;
-	if(conv.collect_openings) {
+	dir *= solid.Depth; /*
+	if(conv.collect_openings && !conv.apply_openings) {
 		dir *= 1000.0;
-	}
+	} */
 
 	// Outline: assuming that `meshout.verts` is now a list of vertex points forming 
 	// the underlying profile, extrude along the given axis, forming new
@@ -2218,7 +2218,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	const size_t size=in.size();
 
 	const bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
-	if(solid.Depth < 1e-3) {
+	if(solid.Depth < 1e-6) {
 		if(has_area) {
 			meshout = result;
 		}
@@ -2284,7 +2284,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp,false, true)) {
 				++sides_with_openings;
 			}
 			

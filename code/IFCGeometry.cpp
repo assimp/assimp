@@ -1633,7 +1633,7 @@ void FindLikelyCrossingLines(ContourVector::iterator current)
 // ------------------------------------------------------------------------------------------------
 void CloseWindows(ContourVector& contours, 		  
 	const IfcMatrix4& minv, 
-	OpeningRefVector contours_to_openings, 
+	OpeningRefVector& contours_to_openings, 
 	TempMesh& curmesh)
 {
 	// For all contour points, check if one of the assigned openings does
@@ -1648,7 +1648,7 @@ void CloseWindows(ContourVector& contours,
 	// wrong geometry may be generated.
 	for (ContourVector::iterator it = contours.begin(), end = contours.end(); it != end; ++it) {
 		if ((*it).IsInvalid()) {
-			//continue;
+			continue;
 		}
 		OpeningRefs& refs = contours_to_openings[std::distance(contours.begin(), it)];
 
@@ -1659,8 +1659,6 @@ void CloseWindows(ContourVector& contours,
 				break;
 			}
 		}
-
-		const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 
 		if (has_other_side) {
 
@@ -1701,7 +1699,7 @@ void CloseWindows(ContourVector& contours,
 			IfcVector2 last_proj; 
 			//const IfcVector2& first_proj; 
 
-			IfcVector3 perp;
+			const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 
 			bool drop_this_edge = false;
 			for (Contour::const_iterator cit = cbegin; cit != cend; ++cit, drop_this_edge = *skipit++) {
@@ -1778,7 +1776,10 @@ void CloseWindows(ContourVector& contours,
 			}
 		}
 		else {
+			
+			const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 			BOOST_FOREACH(TempOpening* opening, refs) {
+				ai_assert(opening->wallPoints.empty());
 				opening->wallPoints.reserve(opening->wallPoints.capacity() + (*it).contour.size());
 				for (Contour::const_iterator cit = cbegin; cit != cend; ++cit) {
 
@@ -1941,7 +1942,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	nor.Normalize();
 
 	// Obtain inverse transform for getting back to world space later on
-	const IfcMatrix4& minv = IfcMatrix4(m).Inverse();
+	const IfcMatrix4 minv = IfcMatrix4(m).Inverse();
 
 	// Compute bounding boxes for all 2D openings in projection space
 	ContourVector contours;
@@ -2271,7 +2272,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
+			if(GenerateOpenings(*conv.apply_openings,nors,temp,false, true)) {
 				++sides_with_openings;
 			}
 			

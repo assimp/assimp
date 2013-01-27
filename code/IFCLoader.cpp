@@ -599,7 +599,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 
 	// add an output node for this spatial structure
 	std::auto_ptr<aiNode> nd(new aiNode());
-	nd->mName.Set(el.GetClassName()+"_"+(el.Name?el.Name:el.GlobalId));
+	nd->mName.Set(el.GetClassName()+"_"+(el.Name?el.Name.Get():"Unnamed")+"_"+el.GlobalId);
 	nd->mParent = parent;
 
 	if(el.ObjectPlacement) {

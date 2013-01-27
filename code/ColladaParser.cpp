@@ -2157,7 +2157,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
 
 	// get a pointer to the start of the data object referred to by the accessor and the local index
 	const float* dataObject = &(acc.mData->mValues[0]) + acc.mOffset + pLocalIndex* acc.mStride;
-	
+
 	// assemble according to the accessors component sub-offset list. We don't care, yet,
 	// what kind of object exactly we're extracting here
 	float obj[4];
@@ -2174,80 +2174,79 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
 				DefaultLogger::get()->error("Collada: just one vertex position stream supported");
 			break;
 		case IT_Normal: 
-      // pad to current vertex count if necessary
-      if( pMesh->mNormals.size() < pMesh->mPositions.size()-1)
-        pMesh->mNormals.insert( pMesh->mNormals.end(), pMesh->mPositions.size() - pMesh->mNormals.size() - 1, aiVector3D( 0, 1, 0));
+			// pad to current vertex count if necessary
+			if( pMesh->mNormals.size() < pMesh->mPositions.size()-1)
+				pMesh->mNormals.insert( pMesh->mNormals.end(), pMesh->mPositions.size() - pMesh->mNormals.size() - 1, aiVector3D( 0, 1, 0));
 
-      // ignore all normal streams except 0 - there can be only one normal
-      if( pInput.mIndex == 0)
+			// ignore all normal streams except 0 - there can be only one normal
+			if( pInput.mIndex == 0)
 				pMesh->mNormals.push_back( aiVector3D( obj[0], obj[1], obj[2])); 
 			else 
 				DefaultLogger::get()->error("Collada: just one vertex normal stream supported");
 			break;
 		case IT_Tangent: 
-      // pad to current vertex count if necessary
-      if( pMesh->mTangents.size() < pMesh->mPositions.size()-1)
-        pMesh->mTangents.insert( pMesh->mTangents.end(), pMesh->mPositions.size() - pMesh->mTangents.size() - 1, aiVector3D( 1, 0, 0));
+			// pad to current vertex count if necessary
+			if( pMesh->mTangents.size() < pMesh->mPositions.size()-1)
+				pMesh->mTangents.insert( pMesh->mTangents.end(), pMesh->mPositions.size() - pMesh->mTangents.size() - 1, aiVector3D( 1, 0, 0));
 
-      // ignore all tangent streams except 0 - there can be only one tangent
-      if( pInput.mIndex == 0)
+			// ignore all tangent streams except 0 - there can be only one tangent
+			if( pInput.mIndex == 0)
 				pMesh->mTangents.push_back( aiVector3D( obj[0], obj[1], obj[2])); 
 			else 
 				DefaultLogger::get()->error("Collada: just one vertex tangent stream supported");
 			break;
 		case IT_Bitangent: 
-      // pad to current vertex count if necessary
-      if( pMesh->mBitangents.size() < pMesh->mPositions.size()-1)
-        pMesh->mBitangents.insert( pMesh->mBitangents.end(), pMesh->mPositions.size() - pMesh->mBitangents.size() - 1, aiVector3D( 0, 0, 1));
+			// pad to current vertex count if necessary
+			if( pMesh->mBitangents.size() < pMesh->mPositions.size()-1)
+				pMesh->mBitangents.insert( pMesh->mBitangents.end(), pMesh->mPositions.size() - pMesh->mBitangents.size() - 1, aiVector3D( 0, 0, 1));
 
-      // ignore all bitangent streams except 0 - there can be only one bitangent
-      if( pInput.mIndex == 0)
+			// ignore all bitangent streams except 0 - there can be only one bitangent
+			if( pInput.mIndex == 0)
 				pMesh->mBitangents.push_back( aiVector3D( obj[0], obj[1], obj[2])); 
 			else 
 				DefaultLogger::get()->error("Collada: just one vertex bitangent stream supported");
 			break;
 		case IT_Texcoord: 
-      // up to 4 texture coord sets are fine, ignore the others
+			// up to 4 texture coord sets are fine, ignore the others
 			if( pInput.mIndex < AI_MAX_NUMBER_OF_TEXTURECOORDS) 
-      {
-        // pad to current vertex count if necessary
-        if( pMesh->mTexCoords[pInput.mIndex].size() < pMesh->mPositions.size()-1)
-          pMesh->mTexCoords[pInput.mIndex].insert( pMesh->mTexCoords[pInput.mIndex].end(), 
-            pMesh->mPositions.size() - pMesh->mTexCoords[pInput.mIndex].size() - 1, aiVector3D( 0, 0, 0));
+			{
+				// pad to current vertex count if necessary
+				if( pMesh->mTexCoords[pInput.mIndex].size() < pMesh->mPositions.size()-1)
+					pMesh->mTexCoords[pInput.mIndex].insert( pMesh->mTexCoords[pInput.mIndex].end(), 
+						pMesh->mPositions.size() - pMesh->mTexCoords[pInput.mIndex].size() - 1, aiVector3D( 0, 0, 0));
 
 				pMesh->mTexCoords[pInput.mIndex].push_back( aiVector3D( obj[0], obj[1], obj[2]));
 				if (0 != acc.mSubOffset[2] || 0 != acc.mSubOffset[3]) /* hack ... consider cleaner solution */
 					pMesh->mNumUVComponents[pInput.mIndex]=3;
 			}	else 
-      {
+			{
 				DefaultLogger::get()->error("Collada: too many texture coordinate sets. Skipping.");
-      }
+			}
 			break;
 		case IT_Color: 
-      // up to 4 color sets are fine, ignore the others
+			// up to 4 color sets are fine, ignore the others
 			if( pInput.mIndex < AI_MAX_NUMBER_OF_COLOR_SETS)
-      {
-        // pad to current vertex count if necessary
-        if( pMesh->mColors[pInput.mIndex].size() < pMesh->mPositions.size()-1)
-          pMesh->mColors[pInput.mIndex].insert( pMesh->mColors[pInput.mIndex].end(), 
-            pMesh->mPositions.size() - pMesh->mColors[pInput.mIndex].size() - 1, aiColor4D( 0, 0, 0, 1));
+			{
+				// pad to current vertex count if necessary
+				if( pMesh->mColors[pInput.mIndex].size() < pMesh->mPositions.size()-1)
+					pMesh->mColors[pInput.mIndex].insert( pMesh->mColors[pInput.mIndex].end(), 
+						pMesh->mPositions.size() - pMesh->mColors[pInput.mIndex].size() - 1, aiColor4D( 0, 0, 0, 1));
 
-				//pMesh->mColors[pInput.mIndex].push_back( aiColor4D( obj[0], obj[1], obj[2], obj[3])); 
-		aiColor4D result(0, 0, 0, 1);
-		for (size_t i = 0; i < pInput.mResolved->mSize; ++i)
-		{
-			result[i] = obj[pInput.mResolved->mSubOffset[i]];
-		}
-		pMesh->mColors[pInput.mIndex].push_back(result); 
-      } else 
-      {
+				aiColor4D result(0, 0, 0, 1);
+				for (size_t i = 0; i < pInput.mResolved->mSize; ++i)
+				{
+					result[i] = obj[pInput.mResolved->mSubOffset[i]];
+				}
+				pMesh->mColors[pInput.mIndex].push_back(result); 
+			} else 
+			{
 				DefaultLogger::get()->error("Collada: too many vertex color sets. Skipping.");
-      }
+			}
 
 			break;
-	default:
-		// IT_Invalid and IT_Vertex 
-		ai_assert(false && "shouldn't ever get here");
+		default:
+			// IT_Invalid and IT_Vertex 
+			ai_assert(false && "shouldn't ever get here");
 	}
 }
 

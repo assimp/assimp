@@ -49,6 +49,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
+// Material specific token
+static const std::string DiffuseTexture      = "map_kd";
+static const std::string AmbientTexture      = "map_ka";
+static const std::string SpecularTexture     = "map_ks";
+static const std::string OpacityTexture      = "map_d";
+static const std::string BumpTexture1        = "map_bump";
+static const std::string BumpTexture2        = "map_Bump";
+static const std::string BumpTexture3        = "bump";
+static const std::string NormalTexture       = "map_Kn";
+static const std::string DisplacementTexture = "disp";
+static const std::string SpecularityTexture  = "map_ns";
+
 // -------------------------------------------------------------------
 //	Constructor
 ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer, 
@@ -249,46 +261,40 @@ void ObjFileMtlImporter::createMaterial()
 
 // -------------------------------------------------------------------
 //	Gets a texture name from data.
-void ObjFileMtlImporter::getTexture()
-{
-	aiString *out = NULL;
+void ObjFileMtlImporter::getTexture() {
+	aiString *out( NULL );
 
-	// FIXME: just a quick'n'dirty hack, consider cleanup later
-
-	// Diffuse texture
-	if (!ASSIMP_strincmp(&(*m_DataIt),"map_kd",6))
+	const char *pPtr( &(*m_DataIt) );
+	if ( !ASSIMP_strincmp( pPtr, DiffuseTexture.c_str(), DiffuseTexture.size() ) ) {
+		// Diffuse texture
 		out = & m_pModel->m_pCurrentMaterial->texture;
-
-	// Ambient texture
-	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ka",6))
+	} else if ( !ASSIMP_strincmp( pPtr,AmbientTexture.c_str(),AmbientTexture.size() ) ) {
+		// Ambient texture
 		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
-
-	// Specular texture
-	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ks",6))
+	} else if (!ASSIMP_strincmp( pPtr, SpecularTexture.c_str(), SpecularTexture.size())) {
+		// Specular texture
 		out = & m_pModel->m_pCurrentMaterial->textureSpecular;
-
-	// Opacity texture
-	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_d",5))
+	} else if ( !ASSIMP_strincmp( pPtr, OpacityTexture.c_str(), OpacityTexture.size() ) ) {
+		// Opacity texture
 		out = & m_pModel->m_pCurrentMaterial->textureOpacity;
-
-	// Ambient texture
-	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ka",6))
+	} else if (!ASSIMP_strincmp( pPtr,"map_ka",6)) {
+		// Ambient texture
 		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
-
-	// Bump texture
-	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_bump",8) || !ASSIMP_strincmp(&(*m_DataIt),"bump",4))
+	} else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), BumpTexture1.size() ) ||
+		        !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) || 
+		        !ASSIMP_strincmp( pPtr, BumpTexture3.c_str(), BumpTexture3.size() ) ) {
+		// Bump texture 
 		out = & m_pModel->m_pCurrentMaterial->textureBump;
-
-	// Displacement texture
-	else if (!ASSIMP_strincmp(&(*m_DataIt),"disp",4))
+	} else if (!ASSIMP_strincmp( pPtr,NormalTexture.c_str(), NormalTexture.size())) { 
+		// Normal map
+		out = & m_pModel->m_pCurrentMaterial->textureNormal;
+	} else if (!ASSIMP_strincmp( pPtr, DisplacementTexture.c_str(), DisplacementTexture.size() ) ) {
+		// Displacement texture
 		out = &m_pModel->m_pCurrentMaterial->textureDisp;
-
-	// Specularity scaling (glossiness)
-	else if (!ASSIMP_strincmp(&(*m_DataIt),"map_ns",6))
+	} else if (!ASSIMP_strincmp( pPtr, SpecularityTexture.c_str(),SpecularityTexture.size() ) ) {
+		// Specularity scaling (glossiness)
 		out = & m_pModel->m_pCurrentMaterial->textureSpecularity;
-
-	else
-	{
+	} else {
 		DefaultLogger::get()->error("OBJ/MTL: Encountered unknown texture type");
 		return;
 	}

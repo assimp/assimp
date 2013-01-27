@@ -71,7 +71,8 @@ namespace Assimp {
 			const std::vector<IfcVector3>& nors, 
 			TempMesh& curmesh,
 			bool check_intersection = true,
-			bool generate_connection_geometry = true);
+			bool generate_connection_geometry = true,
+			const IfcVector3& wall_extrusion_axis = IfcVector3(0,1,0));
 
 
 // ------------------------------------------------------------------------------------------------
@@ -478,13 +479,14 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 }
 
 // ------------------------------------------------------------------------------------------------
-IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcFloat* d = NULL) 
+IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut) 
 {
 	const std::vector<IfcVector3>& out = curmesh.verts;
 	IfcMatrix3 m;
 
 	ok = true;
 
+	// The input "mesh" must be a single polygon
 	const size_t s = out.size();
 	assert(curmesh.vertcnt.size() == 1 && curmesh.vertcnt.back() == s);
 
@@ -497,9 +499,9 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcFloa
 	// axis for the 2D coordinate space on the polygon plane, exploiting the
 	// fact that the input polygon is nearly always a quad.
 	bool done = false;
-	size_t base = s-curmesh.vertcnt.back(), i, j;
-	for (i = base; !done && i < s-1; !done && ++i) {
-		for (j = i+1; j < s; ++j) {
+	size_t base = 0, i, j;
+	for (i = 0; !done && i < s-2; done || ++i) {
+		for (j = i+1; j < s-1; ++j) {
 			nor = -((out[i]-any_point)^(out[j]-any_point));
 			if(fabs(nor.Length()) > 1e-8f) {
 				done = true;
@@ -514,13 +516,14 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcFloa
 	}
 
 	nor.Normalize();
+	norOut = nor;
 
 	IfcVector3 r = (out[i]-any_point);
 	r.Normalize();
 
-	if(d) {
-		*d = -any_point * nor;
-	}
+	//if(d) {
+	//	*d = -any_point * nor;
+	//}
 
 	// Reconstruct orthonormal basis
 	// XXX use Gram Schmidt for increased robustness
@@ -554,13 +557,14 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 	// Try to derive a solid base plane within the current surface for use as 
 	// working coordinate system. 
 	bool ok;
-	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh, ok);
+	IfcVector3 nor;
+	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh, ok, nor);
 	if (!ok) {
 		return false;
 	}
 
 	const IfcMatrix3 minv = IfcMatrix3(m).Inverse();
-	const IfcVector3& nor = IfcVector3(m.c1, m.c2, m.c3);
+
 
 	IfcFloat coord = -1;
 
@@ -1779,7 +1783,7 @@ size_t CloseWindows(ContourVector& contours,
 			}
 
 			BOOST_FOREACH(TempOpening* opening, refs) {
-				opening->wallPoints.clear();
+				//opening->wallPoints.clear();
 			}
 
 		}
@@ -1842,12 +1846,12 @@ void Quadrify(const ContourVector& contours, TempMesh& curmesh)
 
 // ------------------------------------------------------------------------------------------------
 IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh& in_mesh, 
-	IfcFloat& out_base_d, bool &ok)
+	bool &ok, IfcVector3& nor_out)
 {
 	const std::vector<IfcVector3>& in_verts = in_mesh.verts;
 	ok = true;
 
-	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(in_mesh, ok, &out_base_d));
+	IfcMatrix4 m = IfcMatrix4(DerivePlaneCoordinateSpace(in_mesh, ok, nor_out));
 	if(!ok) {
 		return IfcMatrix4();
 	}
@@ -1856,11 +1860,12 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 	ai_assert(fabs(det-1) < 1e-5);
 #endif
 
-	IfcFloat coord = 0;
+	IfcFloat zcoord = 0;
 	out_contour.reserve(in_verts.size());
 
-	IfcVector2 vmin, vmax;
-	MinMaxChooser<IfcVector2>()(vmin, vmax);
+
+	IfcVector3 vmin, vmax;
+	MinMaxChooser<IfcVector3>()(vmin, vmax);
 
 	// Project all points into the new coordinate system, collect min/max verts on the way
 	BOOST_FOREACH(const IfcVector3& x, in_verts) {
@@ -1874,14 +1879,14 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 		// if(coord != -1.0f) {
 		//	assert(fabs(coord - vv.z) < 1e-3f);
 		// }
-		coord += vv.z;
-		vmin = std::min(IfcVector2(vv.x, vv.y), vmin);
-		vmax = std::max(IfcVector2(vv.x, vv.y), vmax);
+		zcoord += vv.z;
+		vmin = std::min(vv, vmin);
+		vmax = std::max(vv, vmax);
 
 		out_contour.push_back(IfcVector2(vv.x,vv.y));
 	}
 
-	coord /= in_verts.size();
+	zcoord /= in_verts.size();
 
 	// Further improve the projection by mapping the entire working set into
 	// [0,1] range. This gives us a consistent data range so all epsilons
@@ -1902,7 +1907,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 
 	mult.a4 = -vmin.x * mult.a1;
 	mult.b4 = -vmin.y * mult.b2;
-	mult.c4 = -coord;
+	mult.c4 = -zcoord;
 	m = mult * m;
 
 	// debug code to verify correctness
@@ -1912,7 +1917,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 		const IfcVector3& vv = m * x;
 
 		out_contour2.push_back(IfcVector2(vv.x,vv.y));
-		ai_assert(fabs(vv.z) < 1e-5);
+		ai_assert(fabs(vv.z) < vmax.z + 1e-8);
 	} 
 
 	for(size_t i = 0; i < out_contour.size(); ++i) {
@@ -1928,7 +1933,8 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	const std::vector<IfcVector3>& nors, 
 	TempMesh& curmesh,
 	bool check_intersection,
-	bool generate_connection_geometry)
+	bool generate_connection_geometry,
+	const IfcVector3& wall_extrusion_axis)
 {
 	std::vector<IfcVector3>& out = curmesh.verts;
 	OpeningRefVector contours_to_openings;
@@ -1940,15 +1946,12 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	bool ok = true;
 
 	std::vector<IfcVector2> contour_flat;
-	IfcFloat base_d;
 
-	const IfcMatrix4& m = ProjectOntoPlane(contour_flat, curmesh, base_d, ok);
+	IfcVector3 nor;
+	const IfcMatrix4& m = ProjectOntoPlane(contour_flat, curmesh,  ok, nor);
 	if(!ok) {
 		return false;
 	}
-
-	IfcVector3 nor = IfcVector3(m.c1, m.c2, m.c3);
-	nor.Normalize();
 
 	// Obtain inverse transform for getting back to world space later on
 	const IfcMatrix4 minv = IfcMatrix4(m).Inverse();
@@ -1959,10 +1962,46 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	std::vector<IfcVector2> temp_contour;
 	std::vector<IfcVector2> temp_contour2;
 
+	IfcVector3 wall_extrusion_axis_norm = wall_extrusion_axis;
+	wall_extrusion_axis_norm.Normalize();
+
 	size_t c = 0;
 	BOOST_FOREACH(TempOpening& opening,openings) {
-		std::vector<IfcVector3> profile_verts = opening.profileMesh->verts;
-		std::vector<unsigned int> profile_vertcnts = opening.profileMesh->vertcnt;
+
+		// extrusionDir may be 0,0,0 on case where the opening mesh is not an
+		// IfcExtrudedAreaSolid but something else (i.e. a brep)
+		IfcVector3 norm_extrusion_dir = opening.extrusionDir;
+		if (norm_extrusion_dir.SquareLength() > 1e-10) {
+			norm_extrusion_dir.Normalize();
+		}
+		else {
+			norm_extrusion_dir = IfcVector3();
+		}
+
+		TempMesh* profile_data =  opening.profileMesh;
+		bool is_2d_source = false;
+		if (opening.profileMesh2D && norm_extrusion_dir.SquareLength() > 0) {
+			
+			if(fabs(norm_extrusion_dir * wall_extrusion_axis_norm) < 0.1) {
+				// horizontal extrusion
+				if (fabs(norm_extrusion_dir * nor) > 0.9) {
+					profile_data = opening.profileMesh2D;
+					is_2d_source = true;
+				}
+				else {
+					//continue;
+				}
+			}
+			else {
+				// vertical extrusion
+				if (fabs(norm_extrusion_dir * nor) > 0.9) {
+					continue;
+				}
+				continue;
+			}
+		}
+		std::vector<IfcVector3> profile_verts = profile_data->verts;
+		std::vector<unsigned int> profile_vertcnts = profile_data->vertcnt;
 		if(profile_verts.size() <= 2) {
 			continue;	
 		}	
@@ -1993,16 +2032,20 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		MinMaxChooser<IfcVector2>()(vpmin2,vpmax2);
 
 		for (size_t f = 0, vi_total = 0, fend = profile_vertcnts.size(); f < fend; ++f) {
-			const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
-				(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
-			const IfcFloat abs_dot_face_nor = abs(nor * face_nor);
-			if (abs_dot_face_nor < 0.9) {
-				vi_total += profile_vertcnts[f];
-				continue;
+			bool side_flag = true;
+			if (!is_2d_source) {
+				const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
+					(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
+
+				const IfcFloat abs_dot_face_nor = abs(nor * face_nor);
+				if (abs_dot_face_nor < 0.9) {
+					vi_total += profile_vertcnts[f];
+					continue;
+				}
+
+				side_flag = nor * face_nor > 0;
 			}
-
-			const bool side_flag = nor * face_nor > 0;
 
 			for (unsigned int vi = 0, vend = profile_vertcnts[f]; vi < vend; ++vi, ++vi_total) {
 				const IfcVector3& x = profile_verts[vi_total];
@@ -2037,6 +2080,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		}
 
 		if (temp_contour2.size() > 2) {
+			ai_assert(!is_2d_source);
 			const IfcVector2 area = vpmax-vpmin;
 			const IfcVector2 area2 = vpmax2-vpmin2;
 			if (temp_contour.size() <= 2 || fabs(area2.x * area2.y) > fabs(area.x * area.y)) {
@@ -2052,7 +2096,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 		// TODO: This epsilon may be too large
 		const IfcFloat epsilon = fabs(dmax-dmin) * 0.0001;
-		if (check_intersection && (0 < dmin-epsilon || 0 > dmax+epsilon)) {
+		if (!is_2d_source && check_intersection && (0 < dmin-epsilon || 0 > dmax+epsilon)) {
 			continue;
 		}
 
@@ -2184,7 +2228,6 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	// Generate window caps to connect the symmetric openings on both sides
 	// of the wall.
  	if (generate_connection_geometry) {
-		
 		CloseWindows(contours, minv, contours_to_openings, curmesh);
 	}
 	return true;
@@ -2193,7 +2236,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 // ------------------------------------------------------------------------------------------------
 void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result, 
-	ConversionData& conv)
+	ConversionData& conv, bool collect_openings)
 {
 	TempMesh meshout;
 	
@@ -2220,7 +2263,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	const bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
 	if(solid.Depth < 1e-6) {
 		if(has_area) {
-			meshout = result;
+			result = meshout;
 		}
 		return;
 	}
@@ -2231,13 +2274,21 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	// First step: transform all vertices into the target coordinate space
 	IfcMatrix4 trafo;
 	ConvertAxisPlacement(trafo, solid.Position);
+
+	IfcVector3 vmin, vmax;
+	MinMaxChooser<IfcVector3>()(vmin, vmax);
 	BOOST_FOREACH(IfcVector3& v,in) {
 		v *= trafo;
+
+		vmin = std::min(vmin, v);
+		vmax = std::max(vmax, v);
 	}
+
+	vmax -= vmin;
+	const IfcFloat diag = vmax.Length();
 	
 	IfcVector3 min = in[0];
 	dir *= IfcMatrix3(trafo);
-
 
 	std::vector<IfcVector3> nors;
 	const bool openings = !!conv.apply_openings && conv.apply_openings->size();
@@ -2284,7 +2335,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		out.push_back(in[next]);
 
 		if(openings) {
-			if(GenerateOpenings(*conv.apply_openings,nors,temp,false, true)) {
+			if((in[i]-in[next]).Length() > diag * 0.1 && GenerateOpenings(*conv.apply_openings,nors,temp,true, true, dir)) {
 				++sides_with_openings;
 			}
 			
@@ -2312,7 +2363,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 			curmesh.vertcnt.push_back(size);
 			if(openings && size > 2) {
-				if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true)) {
+				if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true, dir)) {
 					++sides_with_v_openings;
 				}
 
@@ -2327,6 +2378,20 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	}
 
 	IFCImporter::LogDebug("generate mesh procedurally by extrusion (IfcExtrudedAreaSolid)");
+
+	// If this is an opening element, store both the extruded mesh and the 2D profile mesh
+	// it was created from. Return an empty mesh to the caller.
+	if(collect_openings && !result.IsEmpty()) {
+		ai_assert(conv.collect_openings);
+		boost::shared_ptr<TempMesh> profile = boost::shared_ptr<TempMesh>(new TempMesh());
+		profile->Swap(result);
+
+		boost::shared_ptr<TempMesh> profile2D = boost::shared_ptr<TempMesh>(new TempMesh());
+		profile2D->Swap(meshout);
+		conv.collect_openings->push_back(TempOpening(&solid,dir,profile, profile2D));
+
+		ai_assert(result.IsEmpty());
+	} 
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2334,7 +2399,7 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 	ConversionData& conv)
 {
 	if(const IfcExtrudedAreaSolid* const solid = swept.ToPtr<IfcExtrudedAreaSolid>()) {
-		ProcessExtrudedAreaSolid(*solid,meshout,conv);
+		ProcessExtrudedAreaSolid(*solid,meshout,conv, !!conv.collect_openings);
 	}
 	else if(const IfcRevolvedAreaSolid* const rev = swept.ToPtr<IfcRevolvedAreaSolid>()) {
 		ProcessRevolvedAreaSolid(*rev,meshout,conv);
@@ -2485,9 +2550,9 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 	// buildings.
 
 	boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
-	ProcessExtrudedAreaSolid(*as,*meshtmp,conv);
+	ProcessExtrudedAreaSolid(*as,*meshtmp,conv,false);
 
-	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp));
+	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,boost::shared_ptr<TempMesh>(NULL)));
 
 	result = first_operand;
 
@@ -2512,7 +2577,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 			continue;
 		}
 
-		GenerateOpenings(openings, std::vector<IfcVector3>(1,IfcVector3(1,0,0)), temp);
+		GenerateOpenings(openings, std::vector<IfcVector3>(1,IfcVector3(1,0,0)), temp, false, true);
 		result.Append(temp);
 
 		vit += pcount;
@@ -2621,17 +2686,27 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 		return false;
 	}
 
-	meshtmp->RemoveAdjacentDuplicates();
-	meshtmp->RemoveDegenerates();
+	if (meshtmp->IsEmpty()) {
+		return false;
+	}
 
 	// Do we just collect openings for a parent element (i.e. a wall)? 
-	// In such a case, we generate the polygonal extrusion mesh as usual,
+	// In such a case, we generate the polygonal mesh as usual,
 	// but attach it to a TempOpening instance which will later be applied
 	// to the wall it pertains to.
+
+	// Note: swep area solids are added in ProcessExtrudedAreaSolid(),
+	// which returns an empty mesh.
 	if(conv.collect_openings) {
-		conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),IfcVector3(0,0,0),meshtmp));
+		conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),
+			IfcVector3(0,0,0),
+			meshtmp,
+			boost::shared_ptr<TempMesh>(NULL)));
 		return true;
 	} 
+
+	meshtmp->RemoveAdjacentDuplicates();
+	meshtmp->RemoveDegenerates();
 
 	if(fix_orientation) {
 		meshtmp->FixupFaceOrientation();

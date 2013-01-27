@@ -59,6 +59,9 @@ void TempOpening::Transform(const IfcMatrix4& mat)
 	if(profileMesh) {
 		profileMesh->Transform(mat);
 	}
+	if(profileMesh2D) {
+		profileMesh2D->Transform(mat);
+	}
 	extrusionDir *= IfcMatrix3(mat);
 }
 
@@ -309,6 +312,13 @@ void TempMesh::RemoveAdjacentDuplicates()
 	if(drop) {
 		IFCImporter::LogDebug("removing duplicate vertices");
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void TempMesh::Swap(TempMesh& other)
+{
+	vertcnt.swap(other.vertcnt);
+	verts.swap(other.verts);
 }
 
 // ------------------------------------------------------------------------------------------------

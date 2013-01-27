@@ -78,7 +78,9 @@ struct TempOpening
 {
 	const IFC::IfcSolidModel* solid;
 	IfcVector3 extrusionDir;
+	
 	boost::shared_ptr<TempMesh> profileMesh;
+	boost::shared_ptr<TempMesh> profileMesh2D;
 
 	// list of points generated for this opening. This is used to
 	// create connections between two opposing holes created
@@ -96,10 +98,13 @@ struct TempOpening
 	}
 
 	// ------------------------------------------------------------------------------
-	TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,boost::shared_ptr<TempMesh> profileMesh)
+	TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,
+		boost::shared_ptr<TempMesh> profileMesh, 
+		boost::shared_ptr<TempMesh> profileMesh2D)
 		: solid(solid)
 		, extrusionDir(extrusionDir)
 		, profileMesh(profileMesh)
+		, profileMesh2D(profileMesh2D)
 	{
 	}
 
@@ -196,6 +201,8 @@ struct TempMesh
 	void ComputePolygonNormals(std::vector<IfcVector3>& normals, 
 		bool normalize = true, 
 		size_t ofs = 0) const;
+
+	void Swap(TempMesh& other);
 };
 
 

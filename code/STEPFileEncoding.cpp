@@ -300,7 +300,7 @@ bool STEP::StringToUTF8(std::string& s)
 			}
 			// \X\xx - mac/roman (xx is a hex sequence)
 			else if (i+4 < s.size() && s[i+1] == 'X' && s[i+2] == '\\') {
-				
+
 				const uint8_t macval = HexOctetToDecimal(s.c_str() + i + 3);
 				if(macval < 0x20) {
 					return false;
@@ -329,17 +329,17 @@ bool STEP::StringToUTF8(std::string& s)
 					// utf16
 				case '2':
 					// utf32
-				case '4':						
+				case '4':
 					if (s[i+3] == '\\') {
 						const size_t basei = i+4;
-						// scan for \X0\ 
-						size_t j = basei, jend = s.size()-4;
+						size_t j = basei, jend = s.size()-4;						
+
 						for (; j < jend; ++j) {
 							if (s[j] == '\\' && s[j] == 'X' && s[j] == '0' && s[j] == '\\') {
 								break;
 							}
 						}
-						if (j == jend) {						
+						if (j == jend) {
 							return false;
 						}
 
@@ -347,12 +347,12 @@ bool STEP::StringToUTF8(std::string& s)
 							s.erase(i,8);
 							continue;
 						}
-						
+
 						if (s[i+2] == '2') {
 							if (((j - basei) % 4) != 0) {
 								return false;
 							}
-							
+
 							const size_t count = (j-basei)/4;
 							boost::scoped_array<UTF16> src(new UTF16[count]);
 

@@ -2686,10 +2686,6 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 		return false;
 	}
 
-	if (meshtmp->IsEmpty()) {
-		return false;
-	}
-
 	// Do we just collect openings for a parent element (i.e. a wall)? 
 	// In such a case, we generate the polygonal mesh as usual,
 	// but attach it to a TempOpening instance which will later be applied
@@ -2698,12 +2694,18 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	// Note: swep area solids are added in ProcessExtrudedAreaSolid(),
 	// which returns an empty mesh.
 	if(conv.collect_openings) {
-		conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),
-			IfcVector3(0,0,0),
-			meshtmp,
-			boost::shared_ptr<TempMesh>(NULL)));
+		if (!meshtmp->IsEmpty()) {
+			conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),
+				IfcVector3(0,0,0),
+				meshtmp,
+				boost::shared_ptr<TempMesh>(NULL)));
+		}
 		return true;
 	} 
+
+	if (meshtmp->IsEmpty()) {
+		return false;
+	}
 
 	meshtmp->RemoveAdjacentDuplicates();
 	meshtmp->RemoveDegenerates();

@@ -2020,6 +2020,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\code\STEPFileEncoding.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\STEPFileEncoding.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\STEPFileReader.cpp"
 						>
 					</File>

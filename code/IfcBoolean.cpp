@@ -184,14 +184,19 @@ void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& re
 
 // ------------------------------------------------------------------------------------------------
 // Check if e0-e1 intersects a sub-segment of the given boundary line.
-// note: this method works on 3D vectors, but performs its intersection checks solely in xy.
+// note: this functions works on 3D vectors, but performs its intersection checks solely in xy.
 bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, const std::vector<IfcVector3>& boundary,
 	std::vector<size_t>& intersected_boundary_segments,
 	std::vector<IfcVector3>& intersected_boundary_points,
-	bool half_open = false)
+	bool half_open = false,
+	bool* e0_hits_border = NULL)
 {
 	ai_assert(intersected_boundary_segments.empty());
 	ai_assert(intersected_boundary_points.empty());
+
+	if(e0_hits_border) {
+		*e0_hits_border = false;
+	}
 
 	const IfcVector3& e = e1 - e0;
 
@@ -203,7 +208,7 @@ bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, cons
 		const IfcVector3& b = b1 - b0;
 
 		// segment-segment intersection
-		// solve b0 + b*s = e0 + e*s for (s,t)
+		// solve b0 + b*s = e0 + e*t for (s,t)
 		const IfcFloat det = (-b.x * e.y + e.x * b.y);
 		if(fabs(det) < 1e-6) {
 			// no solutions (parallel lines)
@@ -221,17 +226,26 @@ bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, cons
 		ai_assert((IfcVector2(check.x,check.y)).SquareLength() < 1e-5);
 #endif
 
-		// for a valid intersection, s-t should be in range [0,1]
-		if (s >= 0.0 && (s <= 1.0 || half_open) && t >= 0.0 && t <= 1.0) {
+		// for a valid intersection, s-t should be in range [0,1].
+		// note that for t (i.e. the segment point) we only use a
+		// half-sided epsilon because the next segment should catch
+		// this case.
+		const IfcFloat epsilon = 1e-6;
+		if (t >= -epsilon && (t <= 1.0+epsilon || half_open) && s >= -epsilon && s <= 1.0) {
+
+			if (e0_hits_border && !*e0_hits_border) {
+				*e0_hits_border = fabs(t) < 1e-5f;
+			}
 	
-			const IfcVector3& p = b0 + b*s;
+			const IfcVector3& p = e0 + e*t;
 
 			// only insert the point into the list if it is sufficiently
 			// far away from the previous intersection point. This way,
 			// we avoid duplicate detection if the intersection is
 			// directly on the vertex between two segments.
-			if (!intersected_boundary_points.empty() && intersected_boundary_segments.back()==(i==0?bcount-1:i-1) ) {
-				if((intersected_boundary_points.back() - p).SquareLength() < 1e-5) {
+			if (!intersected_boundary_points.empty() && intersected_boundary_segments.back()==i-1 ) {
+				const IfcVector3 diff = intersected_boundary_points.back() - p;
+				if(IfcVector3((diff.x, diff.y)).SquareLength() < 1e-7) {
 					continue;
 				}
 			}
@@ -240,11 +254,12 @@ bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, cons
 		}
 	}
 
-	return false;
+	return !intersected_boundary_segments.empty();
 }
 
 
 // ------------------------------------------------------------------------------------------------
+// note: this functions works on 3D vectors, but performs its intersection checks solely in xy.
 bool PointInPoly(const IfcVector3& p, const std::vector<IfcVector3>& boundary)
 {
 	// even-odd algorithm: take a random vector that extends from p to infinite
@@ -253,13 +268,22 @@ bool PointInPoly(const IfcVector3& p, const std::vector<IfcVector3>& boundary)
 	// or double detections (i.e. when hitting multiple adjacent segments at their
 	// shared vertices) we do it thrice with different rays and vote on it.
 
+	// the even-odd algorithm doesn't work for points which lie directly on
+	// the border of the polygon. If any of our attempts produces this result,
+	// we return false immediately.
+
 	std::vector<size_t> intersected_boundary_segments;
 	std::vector<IfcVector3> intersected_boundary_points;
 	size_t votes = 0;
 
+	bool is_border;
 	IntersectsBoundaryProfile(p, p + IfcVector3(1.0,0,0), boundary, 
 		intersected_boundary_segments, 
-		intersected_boundary_points, true);
+		intersected_boundary_points, true, &is_border);
+
+	if(is_border) {
+		return false;
+	}
 
 	votes += intersected_boundary_segments.size() % 2;
 
@@ -268,18 +292,27 @@ bool PointInPoly(const IfcVector3& p, const std::vector<IfcVector3>& boundary)
 
 	IntersectsBoundaryProfile(p, p + IfcVector3(0,1.0,0), boundary, 
 		intersected_boundary_segments, 
-		intersected_boundary_points, true);
+		intersected_boundary_points, true, &is_border);
+
+	if(is_border) {
+		return false;
+	}
 
 	votes += intersected_boundary_segments.size() % 2;
 
 	intersected_boundary_segments.clear();
 	intersected_boundary_points.clear();
 
-	IntersectsBoundaryProfile(p, p + IfcVector3(0,0,1.0), boundary, 
+	IntersectsBoundaryProfile(p, p + IfcVector3(0.6,-0.6,0.0), boundary, 
 		intersected_boundary_segments, 
-		intersected_boundary_points, true);
+		intersected_boundary_points, true, &is_border);
+
+	if(is_border) {
+		return false;
+	}
 
 	votes += intersected_boundary_segments.size() % 2;
+	//ai_assert(votes == 3 || votes == 0);
 	return votes > 1;
 }
 
@@ -324,13 +357,14 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 	// project the profile onto the plane (orthogonally along the plane normal)
 	IfcVector3 r;
 	bool have_r = false;
-	BOOST_FOREACH(IfcVector3& vec, profile->verts) {
-		vec = vec + ((p - vec) * n) * n;
-		ai_assert(fabs((vec-p) * n) < 1e-6);
+	BOOST_FOREACH(const IfcVector3& vec, profile->verts) {
+		const IfcVector3 vv = vec + ((p - vec) * n) * n;
+		ai_assert(fabs((vv-p) * n) < 1e-6);
 
-		if (!have_r && (vec-p).SquareLength() > 1e-8) {
-			r = vec-p;
+		if ((vv-p).SquareLength() > 1e-8) {
+			r = vv-p;
 			have_r = true;
+			break;
 		}
 	}
 
@@ -377,6 +411,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 	std::vector<size_t> intersected_boundary_segments;
 	std::vector<IfcVector3> intersected_boundary_points;
 
+	// TODO: the following algorithm doesn't handle all cases. 
 	unsigned int vidx = 0;
 	for(iit = begin; iit != end; vidx += *iit++) {
 		if (!*iit) {
@@ -384,7 +419,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		}
 
 		unsigned int newcount = 0;
-		bool was_outside_boundary = !PointInPoly(in[vidx], profile->verts);
+		bool was_outside_boundary = !PointInPoly(proj * in[vidx], profile->verts);
 
 		size_t last_intersected_boundary_segment;
 		IfcVector3 last_intersected_boundary_point;
@@ -404,57 +439,67 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 			intersected_boundary_segments.clear();
 			intersected_boundary_points.clear();
 
-			const bool is_boundary_intersection = IntersectsBoundaryProfile(e0_plane, e1_plane, profile->verts, 
+			const bool is_outside_boundary = !PointInPoly(e1_plane, profile->verts);
+			const bool is_boundary_intersection = is_outside_boundary != was_outside_boundary;
+			
+			IntersectsBoundaryProfile(e0_plane, e1_plane, profile->verts, 
 				intersected_boundary_segments, 
 				intersected_boundary_points);
-
-			const bool is_outside_boundary = is_boundary_intersection ? !was_outside_boundary : was_outside_boundary;
+		
+			ai_assert(!is_boundary_intersection || !intersected_boundary_segments.empty());
 
 			// does the current segment intersect the plane?
 			// (no extra check if this is an extra point)
 			IfcVector3 isectpos;
-			const Intersect isect = extra_point_flag ? Intersect_No : IntersectSegmentPlane(p,n,e0,e1,isectpos);
+			const Intersect isect =  extra_point_flag ? Intersect_No : IntersectSegmentPlane(p,n,e0,e1,isectpos);
 
 			// is it on the side of the plane that we keep?
-			const bool is_white_side =(e0-p).Normalize()*n > 0;
+			const bool is_white_side = (e0-p).Normalize()*n > 0;
 
-			// e0 on good side of plane? (i.e. we should keep geometry on this side)
+			// e0 on good side of plane? (i.e. we should keep all geometry on this side)
 			if (is_white_side) {
 				// but is there an intersection in e0-e1 and is e1 in the clipping
 				// boundary? In this case, generate a line that only goes to the
 				// intersection point.
-				if (isect == Intersect_Yes && PointInPoly(e1, profile->verts)) {
+				if (isect == Intersect_Yes && PointInPoly(e1_plane, profile->verts)) {
 					outvert.push_back(e0);
 					++newcount;
 
 					outvert.push_back(isectpos);
 					++newcount;
-
+					/*
 					// this is, however, only a line that goes to the plane, but not
 					// necessarily to the point where the bounding volume on the
 					// black side of the plane is hit. So basically, we need another 
-					// check for [isectpos-e1], which should give an intersection
-					// point and also set the last_intersected_boundary_*'s.
+					// check for [isectpos-e1], which should yield an intersection
+					// point.
 					extra_point_flag = true;
 					extra_point = isectpos;
-					continue;
+
+					was_outside_boundary = true; */
+					//continue;
 				}
 				else {
 					outvert.push_back(e0);
 					++newcount;
 				}
 			}
-			// e0 on bad side of plane (i.e. we should remove geometry on this side,
+			// e0 on bad side of plane, e1 on good (i.e. we should remove geometry on this side,
 			// but only if it is within the bounding volume).
 			else if (isect == Intersect_Yes) {
-				if (is_boundary_intersection) {}
-				// drop it and keep e1 instead
-				outvert.push_back(isectpos);
+				// is e0 within the clipping volume? Insert the intersection point
+				// between [e0,e1] and the plane.
+				if(is_outside_boundary) {
+					outvert.push_back(e0);
+				}
+				else {
+					outvert.push_back(isectpos);
+				}
 				++newcount;
 			}
-			else {
-
-				// did we just pass the boundary line?
+			else { // no intersection with plane or parallel; e0,e1 are on the bad side
+			
+				// did we just pass the boundary line to the poly bounding?
 				if (is_boundary_intersection) {
 
 					// and are now outside the clipping boundary?
@@ -474,19 +519,19 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 						outvert.push_back(proj_inv * intersected_boundary_points.back());
 						++newcount;
 
-						outvert.push_back(e1);
-						++newcount;
+						//outvert.push_back(e1);
+						//++newcount;
 					}
 					else {
 						// we just entered the clipping boundary. Record the point
 						// and the segment where we entered and also generate this point.
-						last_intersected_boundary_segment = intersected_boundary_segments.front();
-						last_intersected_boundary_point = intersected_boundary_points.front();
+						//last_intersected_boundary_segment = intersected_boundary_segments.front();
+						//last_intersected_boundary_point = intersected_boundary_points.front();
 
 						outvert.push_back(e0);
 						++newcount;
 
-						outvert.push_back(proj_inv * last_intersected_boundary_point);
+						outvert.push_back(proj_inv * intersected_boundary_points.front());
 						++newcount;
 					}
 				}				
@@ -504,7 +549,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		if (!newcount) {
 			continue;
 		}
-
+		/*
 		IfcVector3 vmin,vmax;
 		ArrayBounds(&*(outvert.end()-newcount),newcount,vmin,vmax);
 
@@ -524,7 +569,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		if (fz(*( outvert.end()-newcount),outvert.back())) {
 			outvert.pop_back();
 			--newcount;
-		}
+		} */
 		if(newcount > 2) {
 			result.vertcnt.push_back(newcount);
 		}

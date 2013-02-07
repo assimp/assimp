@@ -570,6 +570,7 @@ void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationO
 	out = locm * out * s;
 }
 
+
 } // ! IFC
 } // ! Assimp
 

@@ -299,6 +299,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					  const IfcVector3& wall_extrusion_axis = IfcVector3(0,1,0));
 
 
+
 // IFCCurve.cpp
 
 // ------------------------------------------------------------------------------------------------
@@ -403,7 +404,6 @@ public:
 
 // IfcProfile.cpp
 bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv);
-
 }
 }
 

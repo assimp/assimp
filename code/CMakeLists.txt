@@ -381,6 +381,8 @@ SET(IFC_SRCS
 	IFCMaterial.cpp
 	IFCProfile.cpp
 	IFCCurve.cpp
+	IFCBoolean.cpp
+	IFCOpenings.cpp
 	STEPFile.h
 	STEPFileReader.h
 	STEPFileReader.cpp

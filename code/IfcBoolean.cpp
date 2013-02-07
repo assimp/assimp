@@ -352,49 +352,17 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
 	IfcMatrix4 mat;
 	ConvertAxisPlacement(mat,hs->Position);
-	profile->Transform(mat);
+	//profile->Transform(mat);
 
-	// project the profile onto the plane (orthogonally along the plane normal)
-	IfcVector3 r;
-	bool have_r = false;
-	BOOST_FOREACH(const IfcVector3& vec, profile->verts) {
-		const IfcVector3 vv = vec + ((p - vec) * n) * n;
-		ai_assert(fabs((vv-p) * n) < 1e-6);
-
-		if ((vv-p).SquareLength() > 1e-8) {
-			r = vv-p;
-			have_r = true;
-			break;
-		}
-	}
-
-	if (!have_r) {
-		IFCImporter::LogError("polyline for boundary of boolean halfspace is degenerate");
-		return;
-	}
 
 	// and map everything into a plane coordinate space so all intersection
 	// tests can be done in 2D space.
-	IfcMatrix4 proj;
+	IfcMatrix4 proj = mat;
+	proj.Inverse();
 
-	r.Normalize();
-
-	IfcVector3 u = n ^ r;
-	u.Normalize();
-
-	proj.a1 = r.x;
-	proj.a2 = r.y;
-	proj.a3 = r.z;
-	proj.b1 = u.x;
-	proj.b2 = u.y;
-	proj.b3 = u.z;
-	proj.c1 = n.x;
-	proj.c2 = n.y;
-	proj.c3 = n.z;
 	
-	BOOST_FOREACH(IfcVector3& vec, profile->verts) {
-		vec *= proj;
-	}
+	//profile->Transform(proj);
+	//proj = 
 
 	const IfcMatrix4 proj_inv = IfcMatrix4(proj).Inverse();
 
@@ -453,15 +421,21 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 			IfcVector3 isectpos;
 			const Intersect isect =  extra_point_flag ? Intersect_No : IntersectSegmentPlane(p,n,e0,e1,isectpos);
 
-			// is it on the side of the plane that we keep?
-			const bool is_white_side = (e0-p).Normalize()*n > 0;
+#ifdef _DEBUG
+			if (isect == Intersect_Yes) {
+				const IfcFloat f = fabs((isectpos - p)*n);
+				ai_assert(f < 1e-5);
+			}
+#endif
+
+			const bool is_white_side = (e0-p)*n >= -1e-6;
 
 			// e0 on good side of plane? (i.e. we should keep all geometry on this side)
 			if (is_white_side) {
 				// but is there an intersection in e0-e1 and is e1 in the clipping
 				// boundary? In this case, generate a line that only goes to the
 				// intersection point.
-				if (isect == Intersect_Yes && PointInPoly(e1_plane, profile->verts)) {
+				if (isect == Intersect_Yes  && !is_outside_boundary) {
 					outvert.push_back(e0);
 					++newcount;
 
@@ -488,8 +462,8 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 			// but only if it is within the bounding volume).
 			else if (isect == Intersect_Yes) {
 				// is e0 within the clipping volume? Insert the intersection point
-				// between [e0,e1] and the plane.
-				if(is_outside_boundary) {
+				// of [e0,e1] and the plane instead of e0.
+				if(was_outside_boundary) {
 					outvert.push_back(e0);
 				}
 				else {
@@ -549,7 +523,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		if (!newcount) {
 			continue;
 		}
-		/*
+		
 		IfcVector3 vmin,vmax;
 		ArrayBounds(&*(outvert.end()-newcount),newcount,vmin,vmax);
 
@@ -569,7 +543,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		if (fz(*( outvert.end()-newcount),outvert.back())) {
 			outvert.pop_back();
 			--newcount;
-		} */
+		} 
 		if(newcount > 2) {
 			result.vertcnt.push_back(newcount);
 		}

@@ -433,7 +433,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
 					outvert.push_back(isectpos);
 					++newcount;
-					/*
+					
 					// this is, however, only a line that goes to the plane, but not
 					// necessarily to the point where the bounding volume on the
 					// black side of the plane is hit. So basically, we need another 
@@ -442,7 +442,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 					extra_point_flag = true;
 					extra_point = isectpos;
 
-					was_outside_boundary = true; */
+					was_outside_boundary = true; 
 					//continue;
 				}
 				else {

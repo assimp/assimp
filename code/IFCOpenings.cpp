@@ -1188,14 +1188,14 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 			norm_extrusion_dir = IfcVector3();
 		}
 
-		TempMesh* profile_data =  opening.profileMesh;
+		TempMesh* profile_data =  opening.profileMesh.get();
 		bool is_2d_source = false;
 		if (opening.profileMesh2D && norm_extrusion_dir.SquareLength() > 0) {
 			
 			if(fabs(norm_extrusion_dir * wall_extrusion_axis_norm) < 0.1) {
 				// horizontal extrusion
 				if (fabs(norm_extrusion_dir * nor) > 0.9) {
-					profile_data = opening.profileMesh2D;
+					profile_data = opening.profileMesh2D.get();
 					is_2d_source = true;
 				}
 				else {

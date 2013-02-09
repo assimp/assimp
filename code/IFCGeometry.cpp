@@ -764,7 +764,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 			conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),
 				IfcVector3(0,0,0),
 				meshtmp,
-				boost::shared_ptr<TempMesh>((TempMesh*)NULL)));
+				boost::shared_ptr<TempMesh>()));
 		}
 		return true;
 	} 

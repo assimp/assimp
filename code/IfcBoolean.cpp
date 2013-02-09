@@ -582,8 +582,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 	boost::shared_ptr<TempMesh> meshtmp = boost::shared_ptr<TempMesh>(new TempMesh());
 	ProcessExtrudedAreaSolid(*as,*meshtmp,conv,false);
 
-	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,
-		boost::shared_ptr<TempMesh>((TempMesh*)NULL)));
+	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,boost::shared_ptr<TempMesh>()));
 
 	result = first_operand;
 

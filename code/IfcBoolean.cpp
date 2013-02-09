@@ -350,21 +350,13 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		return;
 	}
 
-	IfcMatrix4 mat;
-	ConvertAxisPlacement(mat,hs->Position);
-	//profile->Transform(mat);
-
+	IfcMatrix4 proj_inv;
+	ConvertAxisPlacement(proj_inv,hs->Position);
 
 	// and map everything into a plane coordinate space so all intersection
 	// tests can be done in 2D space.
-	IfcMatrix4 proj = mat;
+	IfcMatrix4 proj = proj_inv;
 	proj.Inverse();
-
-	
-	//profile->Transform(proj);
-	//proj = 
-
-	const IfcMatrix4 proj_inv = IfcMatrix4(proj).Inverse();
 
 	// clip the current contents of `meshout` against the plane we obtained from the second operand
 	const std::vector<IfcVector3>& in = first_operand.verts;

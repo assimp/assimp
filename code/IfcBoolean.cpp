@@ -442,8 +442,8 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 					extra_point_flag = true;
 					extra_point = isectpos;
 
-					was_outside_boundary = true; 
-					//continue;
+					//was_outside_boundary = true; 
+					//continue; 
 				}
 				else {
 					outvert.push_back(e0);
@@ -482,7 +482,17 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
 						// ...
 
-						outvert.push_back(proj_inv * intersected_boundary_points.back());
+						IfcFloat d = 1e10;
+						IfcVector3 vclosest;
+						BOOST_FOREACH(const IfcVector3& v, intersected_boundary_points) {
+							const IfcFloat dn = (v-e1_plane).SquareLength();
+							if (dn < d) {
+								d = dn;
+								vclosest = v;
+							}
+						}
+
+						outvert.push_back(proj_inv * vclosest);
 						++newcount;
 
 						//outvert.push_back(e1);
@@ -497,7 +507,17 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 						outvert.push_back(e0);
 						++newcount;
 
-						outvert.push_back(proj_inv * intersected_boundary_points.front());
+						IfcFloat d = 1e10;
+						IfcVector3 vclosest;
+						BOOST_FOREACH(const IfcVector3& v, intersected_boundary_points) {
+							const IfcFloat dn = (v-e0_plane).SquareLength();
+							if (dn < d) {
+								d = dn;
+								vclosest = v;
+							}
+						}
+
+						outvert.push_back(proj_inv * vclosest);
 						++newcount;
 					}
 				}				
@@ -559,7 +579,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 	// operand should be near-planar. Luckily, this is usually the case in Ifc 
 	// buildings.
 
-	boost::shared_ptr<TempMesh> meshtmp(new TempMesh());
+	boost::shared_ptr<TempMesh> meshtmp = boost::shared_ptr<TempMesh>(new TempMesh());
 	ProcessExtrudedAreaSolid(*as,*meshtmp,conv,false);
 
 	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,boost::shared_ptr<TempMesh>(NULL)));

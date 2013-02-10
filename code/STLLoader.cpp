@@ -382,7 +382,7 @@ bool STLImporter::LoadBinaryFile()
 
 				DefaultLogger::get()->info("STL: Mesh has vertex colors");
 			}
-			aiColor4D* clr = &pMesh->mColors[0][pMesh->mNumFaces*3];
+			aiColor4D* clr = &pMesh->mColors[0][i*3];
 			clr->a = 1.0f;
 			if (bIsMaterialise) // fuck, this is reversed
 			{

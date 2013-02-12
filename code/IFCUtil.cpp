@@ -59,6 +59,9 @@ void TempOpening::Transform(const IfcMatrix4& mat)
 	if(profileMesh) {
 		profileMesh->Transform(mat);
 	}
+	if(profileMesh2D) {
+		profileMesh2D->Transform(mat);
+	}
 	extrusionDir *= IfcMatrix3(mat);
 }
 
@@ -312,6 +315,13 @@ void TempMesh::RemoveAdjacentDuplicates()
 }
 
 // ------------------------------------------------------------------------------------------------
+void TempMesh::Swap(TempMesh& other)
+{
+	vertcnt.swap(other.vertcnt);
+	verts.swap(other.verts);
+}
+
+// ------------------------------------------------------------------------------------------------
 bool IsTrue(const EXPRESS::BOOLEAN& in)
 {
 	return (std::string)in == "TRUE" || (std::string)in == "T";
@@ -559,6 +569,7 @@ void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationO
 
 	out = locm * out * s;
 }
+
 
 } // ! IFC
 } // ! Assimp

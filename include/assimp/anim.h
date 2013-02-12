@@ -457,7 +457,7 @@ struct Interpolator	 <aiVectorKey>	{
 
 template <>
 struct Interpolator <aiQuatKey>		{
-	void operator () (aiQuaternion& out, const aiQuatKey a,
+	void operator () (aiQuaternion& out, const aiQuatKey& a,
 		const aiQuatKey& b, float d) const
 	{
 		Interpolator<aiQuaternion> ipl;
@@ -467,7 +467,7 @@ struct Interpolator <aiQuatKey>		{
 
 template <>
 struct Interpolator <aiMeshKey>		{
-	void operator () (unsigned int& out, const aiMeshKey a,
+	void operator () (unsigned int& out, const aiMeshKey& a,
 		const aiMeshKey& b, float d) const
 	{
 		Interpolator<unsigned int> ipl;

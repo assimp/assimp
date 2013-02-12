@@ -157,6 +157,7 @@ struct Material
 	aiString textureSpecular;
 	aiString textureAmbient;
 	aiString textureBump;
+	aiString textureNormal;
 	aiString textureSpecularity;
 	aiString textureOpacity;
 	aiString textureDisp;

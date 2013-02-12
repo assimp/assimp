@@ -1968,6 +1968,10 @@
 					Name="ifc"
 					>
 					<File
+						RelativePath="..\..\code\IfcBoolean.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\IFCCurve.cpp"
 						>
 					</File>
@@ -1985,6 +1989,10 @@
 					</File>
 					<File
 						RelativePath="..\..\code\IFCMaterial.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\IFCOpenings.cpp"
 						>
 					</File>
 					<File
@@ -2017,6 +2025,14 @@
 					</File>
 					<File
 						RelativePath="..\..\code\STEPFile.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\STEPFileEncoding.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\STEPFileEncoding.h"
 						>
 					</File>
 					<File

@@ -74,7 +74,7 @@ public:
 	~XFileParser();
 
 	/** Returns the temporary representation of the imported data */
-	const XFile::Scene* GetImportedData() const { return mScene; }
+	XFile::Scene* GetImportedData() const { return mScene; }
 
 protected:
 	void ParseFile();

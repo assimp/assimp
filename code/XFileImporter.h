@@ -99,8 +99,7 @@ protected:
 	 * @param pData The imported data in the internal temporary 
 	 *   representation.
 	 */
-	void CreateDataRepresentationFromImport( aiScene* pScene, 
-		const XFile::Scene* pData);
+	void CreateDataRepresentationFromImport( aiScene* pScene, XFile::Scene* pData);
 
 	// -------------------------------------------------------------------
 	/** Recursively creates scene nodes from the imported hierarchy.
@@ -139,15 +138,11 @@ protected:
 	 * @param pScene The scene to hold the converted materials.
 	 * @param pMaterials The material array to convert.
 	 */
-	void ConvertMaterials( aiScene* pScene, 
-		const std::vector<XFile::Material>& pMaterials);
+	void ConvertMaterials( aiScene* pScene, std::vector<XFile::Material>& pMaterials);
 
 protected:
 	/** Buffer to hold the loaded file */
 	std::vector<char> mBuffer;
-
-	/** Imported materials: index in the scene's material list by name */
-	std::map<std::string, unsigned int> mImportedMats;
 };
 
 } // end of namespace Assimp

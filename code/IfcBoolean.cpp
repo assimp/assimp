@@ -387,6 +387,9 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		bool extra_point_flag = false;
 		IfcVector3 extra_point;
 
+		IfcVector3 enter_volume;
+		bool entered_volume_flag = false;
+
 		for(unsigned int i = 0; i < *iit; ++i) {
 			// current segment: [i,i+1 mod size] or [*extra_point,i] if extra_point_flag is set
 			const IfcVector3& e0 = extra_point_flag ? extra_point : in[vidx+i];
@@ -434,6 +437,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 					outvert.push_back(isectpos);
 					++newcount;
 					
+					/*
 					// this is, however, only a line that goes to the plane, but not
 					// necessarily to the point where the bounding volume on the
 					// black side of the plane is hit. So basically, we need another 
@@ -442,8 +446,30 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 					extra_point_flag = true;
 					extra_point = isectpos;
 
-					//was_outside_boundary = true; 
-					//continue; 
+					was_outside_boundary = true; 
+					continue; */
+
+					// [isectpos, enter_volume] potentially needs extra points.
+					// For this, we determine the intersection point with the
+					// bounding volume and project it onto the plane. 
+					/*
+					const IfcVector3& enter_volume_proj = proj * enter_volume;
+					const IfcVector3& enter_isectpos = proj * isectpos;
+
+					intersected_boundary_segments.clear();
+					intersected_boundary_points.clear();
+
+					IntersectsBoundaryProfile(enter_volume_proj, enter_isectpos, profile->verts, 
+						intersected_boundary_segments, 
+						intersected_boundary_points);
+
+					if(!intersected_boundary_segments.empty()) {
+
+						vec = vec + ((p - vec) * n) * n;
+					}
+					*/				
+
+					//entered_volume_flag = true;
 				}
 				else {
 					outvert.push_back(e0);
@@ -459,8 +485,15 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 					outvert.push_back(e0);
 				}
 				else {
-					outvert.push_back(isectpos);
+					if(entered_volume_flag) {
+						const IfcVector3& fix_point = enter_volume + ((p - enter_volume) * n) * n;
+						outvert.push_back(fix_point);
+						++newcount;
+					}
+
+					outvert.push_back(isectpos);	
 				}
+				entered_volume_flag = false;
 				++newcount;
 			}
 			else { // no intersection with plane or parallel; e0,e1 are on the bad side
@@ -482,7 +515,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
 						// ...
 
-						IfcFloat d = 1e10;
+						IfcFloat d = 1e20;
 						IfcVector3 vclosest;
 						BOOST_FOREACH(const IfcVector3& v, intersected_boundary_points) {
 							const IfcFloat dn = (v-e1_plane).SquareLength();
@@ -492,13 +525,24 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 							}
 						}
 
-						outvert.push_back(proj_inv * vclosest);
+						vclosest = proj_inv * vclosest;
+						if(entered_volume_flag) {
+							const IfcVector3& fix_point = vclosest + ((p - vclosest) * n) * n;
+							outvert.push_back(fix_point);
+							++newcount;
+
+							entered_volume_flag = false;
+						}
+
+						outvert.push_back(vclosest);
 						++newcount;
 
 						//outvert.push_back(e1);
 						//++newcount;
 					}
 					else {
+						entered_volume_flag = true;
+
 						// we just entered the clipping boundary. Record the point
 						// and the segment where we entered and also generate this point.
 						//last_intersected_boundary_segment = intersected_boundary_segments.front();
@@ -507,7 +551,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 						outvert.push_back(e0);
 						++newcount;
 
-						IfcFloat d = 1e10;
+						IfcFloat d = 1e20;
 						IfcVector3 vclosest;
 						BOOST_FOREACH(const IfcVector3& v, intersected_boundary_points) {
 							const IfcFloat dn = (v-e0_plane).SquareLength();
@@ -517,7 +561,8 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 							}
 						}
 
-						outvert.push_back(proj_inv * vclosest);
+						enter_volume = proj_inv * vclosest;
+						outvert.push_back(enter_volume);
 						++newcount;
 					}
 				}				
@@ -525,6 +570,8 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 				else if (is_outside_boundary) {
 					outvert.push_back(e0);
 					++newcount;
+
+					entered_volume_flag = false;
 				}
 			}
 

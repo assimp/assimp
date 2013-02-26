@@ -696,6 +696,7 @@ TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${ASSIMP_VERSION}
 	SOVERSION ${ASSIMP_SOVERSION} # use full version 
+    OUTPUT_NAME assimp${ASSIMP_LIBRARY_SUFFIX}
 )
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"

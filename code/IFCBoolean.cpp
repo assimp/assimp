@@ -381,7 +381,8 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		unsigned int newcount = 0;
 		bool was_outside_boundary = !PointInPoly(proj * in[vidx], profile->verts);
 
-		size_t last_intersected_boundary_segment;
+		// used any more?
+		//size_t last_intersected_boundary_segment;
 		IfcVector3 last_intersected_boundary_point;
 
 		bool extra_point_flag = false;

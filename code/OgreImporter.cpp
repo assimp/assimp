@@ -165,6 +165,15 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	//____________________________________________________________
 
 
+	//skip submeshnames (stupid irrxml)
+	if(MeshFile->getNodeName()==string("submeshnames"))
+	{
+		XmlRead(MeshFile.get());
+		while(MeshFile->getNodeName()==string("submesh"))
+			XmlRead(MeshFile.get());
+	}
+
+
 	//----------------Load the skeleton: -------------------------------
 	vector<Bone> Bones;
 	vector<Animation> Animations;

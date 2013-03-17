@@ -175,7 +175,7 @@ namespace boost	{
 		// Get a specific tuple element
 		template <unsigned N>
 		typename detail::type_getter<T0,0,typename very_long::next_type, N>::type& get ()	{
-			return m.get<N>();
+			return m.template get<N>();
 		}
 
 		// ... and the const version

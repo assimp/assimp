@@ -985,7 +985,7 @@ void OpenAsset()
 void SetupPPUIState()
 {
 	
-	// fucking hell, that's ugly. anyone willing to rewrite me from scratch?
+	// that's ugly. anyone willing to rewrite me from scratch?
 	HMENU hMenu = GetMenu(g_hDlg);
 	CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hMenu,ID_VIEWER_PP_CTS,ppsteps & aiProcess_CalcTangentSpace ? MF_CHECKED : MF_UNCHECKED);
@@ -1916,7 +1916,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 					}
 				}
 
-			// fucking hell, this is ugly. anyone willing to rewrite it from scratch using wxwidgets or similar?
+			// this is ugly. anyone willing to rewrite it from scratch using wxwidgets or similar?
 			else if (ID_VIEWER_PP_JIV == LOWORD(wParam))	{
 				ppsteps ^= aiProcess_JoinIdenticalVertices;
 				CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);

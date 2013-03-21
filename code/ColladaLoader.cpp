@@ -325,11 +325,11 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 			
 			out->mAngleInnerCone = AI_DEG_TO_RAD( srcLight->mFalloffAngle );
 
-			// ... some extension magic. O
-			if (srcLight->mOuterAngle == 10e10f) 
+			// ... some extension magic. 
+			if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
 			{
 				// ... some deprecation magic. 
-				if (srcLight->mPenumbraAngle == 10e10f) 
+				if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
 				{
 					// Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
 					// epsilon chosen to be 0.1

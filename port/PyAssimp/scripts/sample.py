@@ -48,7 +48,7 @@ def main(filename=None):
                 print("    no normals")
         print("    colors:" + str(len(mesh.colors)))
         tcs = mesh.texturecoords
-        if tcs:
+        if tcs.any():
             for index, tc in enumerate(tcs):
                 print("    texture-coords "+ str(index) + ":" + str(len(tcs[index])) + "first3:" + str(tcs[index][:3]))
 

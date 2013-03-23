@@ -6,11 +6,13 @@
 It make a large use of shaders to illustrate a 'modern' OpenGL pipeline.
 
 Based on:
-- pygame + mouselook code from http://3dengine.org/Spectator_%28PyOpenGL%29
+ - pygame + mouselook code from http://3dengine.org/Spectator_%28PyOpenGL%29
  - http://www.lighthouse3d.com/tutorials
  - http://www.songho.ca/opengl/gl_transform.html
  - http://code.activestate.com/recipes/325391/
  - ASSIMP's C++ SimpleOpenGL viewer
+
+Authors: Séverin Lemaignan, 2012-2013
 """
 import sys
 
@@ -21,8 +23,8 @@ gllogger.setLevel(logging.WARNING)
 logging.basicConfig(level=logging.INFO)
 
 import OpenGL
-#OpenGL.ERROR_CHECKING=False
-#OpenGL.ERROR_LOGGING = False
+OpenGL.ERROR_CHECKING=False
+OpenGL.ERROR_LOGGING = False
 #OpenGL.ERROR_ON_COPY = True
 #OpenGL.FULL_LOGGING = True
 from OpenGL.GL import *
@@ -403,8 +405,6 @@ if __name__ == '__main__':
         app.render()
         app.controls_3d(0)
         if pygame.K_f in app.keys: pygame.display.toggle_fullscreen()
-        if pygame.K_s in app.keys: app.screenshot()
-        if pygame.K_v in app.keys: app.check_visibility()
         if pygame.K_TAB in app.keys: app.cycle_cameras()
         if pygame.K_ESCAPE in app.keys:
             break

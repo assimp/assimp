@@ -19,7 +19,7 @@ Open Asset Import Library (assimp)
 
 Open Asset Import Library is a Open Source library designed to load various 3d file formats and convert them into a shared, in-memory format. It supports more than 30 file formats. It also supports exporting files to a few selected file formats.
 
-Its short name is _assimp_, which is an unintended joke (the abbreviation is derived from _Asset Importer_). 
+Its abbreviated name is _assimp_. 
 
 __Note__: this `README` refers to the file structure used by release packages, which differs in some points from the development trunk.
 
@@ -129,5 +129,3 @@ The license of the Asset Import Library is based on the modified, __3-clause BSD
 Note that, unlike LGPLed code, you may link statically to Assimp.
 For the formal details, see the `LICENSE` file. 
 
-
-------------------------------

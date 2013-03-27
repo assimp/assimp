@@ -175,7 +175,7 @@ namespace boost	{
 		// Get a specific tuple element
 		template <unsigned N>
 		typename detail::type_getter<T0,0,typename very_long::next_type, N>::type& get ()	{
-			return m.get<N>();
+			return m.template get<N>();
 		}
 
 		// ... and the const version
@@ -255,7 +255,7 @@ namespace boost	{
 		return t;
 	}
 
-	// Constructs a tuple with 2 elements (fucking idiot, use std::pair instead!)
+	// Constructs a tuple with 2 elements 
 	template <typename T0,typename T1>
 	inline tuple <T0,T1> make_tuple (const T0& t0,
 		const T1& t1) {
@@ -265,7 +265,7 @@ namespace boost	{
 		return t;
 	}
 
-	// Constructs a tuple with 1 elements (no comment ...)
+	// Constructs a tuple with 1 elements (well ...)
 	template <typename T0>
 	inline tuple <T0> make_tuple (const T0& t0) {
 		tuple <T0> t;
@@ -273,7 +273,7 @@ namespace boost	{
 		return t;
 	}
 
-	// Constructs a tuple with 0 elements (ehm? Try http://www.promillerechner.net)
+	// Constructs a tuple with 0 elements (well ...)
 	inline tuple <> make_tuple () {
 		tuple <> t;
 		return t;

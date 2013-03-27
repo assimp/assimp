@@ -119,6 +119,7 @@ struct Camera
 };
 
 #define aiLightSource_AMBIENT 0xdeaddead
+#define ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET 1e9f
 
 /** A collada light source. */
 struct Light
@@ -129,8 +130,8 @@ struct Light
 		,	mAttQuadratic    (0.f)
 		,	mFalloffAngle    (180.f)
 		,	mFalloffExponent (0.f)
-		,	mPenumbraAngle	 (10e10f)
-		,	mOuterAngle		 (10e10f)
+		,	mPenumbraAngle	 (ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET)
+		,	mOuterAngle		 (ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET)
 		,	mIntensity		 (1.f)
 	{}
 

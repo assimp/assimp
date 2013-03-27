@@ -707,7 +707,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 	if (0 == mRootNode->mChildren.size())
 	{
 		//////////////////////////////////////////////////////////////////////////////
-		// It seems the file is so fucked up that it has not even a hierarchy.
+		// It seems the file is so messed up that it has not even a hierarchy.
 		// generate a flat hiearachy which looks like this:
 		//
 		//                ROOT_NODE

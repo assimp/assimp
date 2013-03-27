@@ -99,7 +99,7 @@ void ColladaExporter::WriteFile()
 
 	WriteSceneLibrary();
 
-	// useless Collada bullshit at the end, just in case we haven't had enough indirections, yet. 
+	// useless Collada fu at the end, just in case we haven't had enough indirections, yet. 
 	mOutput << startstr << "<scene>" << endstr;
 	PushTag();
 	mOutput << startstr << "<instance_visual_scene url=\"#myScene\" />" << endstr;
@@ -495,7 +495,7 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
 	mOutput << "</float_array>" << endstr; 
 	PopTag();
 
-	// the usual Collada bullshit. Let's bloat it even more!
+	// the usual Collada fun. Let's bloat it even more!
 	mOutput << startstr << "<technique_common>" << endstr;
 	PushTag();
 	mOutput << startstr << "<accessor count=\"" << pElementCount << "\" offset=\"0\" source=\"#" << arrayId << "\" stride=\"" << floatsPerElement << "\">" << endstr;

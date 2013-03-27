@@ -2,10 +2,9 @@ cmake_minimum_required( VERSION 2.6 )
 PROJECT( Assimp )
 
 # Define here the needed parameters
-set (ASSIMP_SV_REVISION 1264)
 set (ASSIMP_VERSION_MAJOR 3)
 set (ASSIMP_VERSION_MINOR 0)
-set (ASSIMP_VERSION_PATCH ${ASSIMP_SV_REVISION}) # subversion revision?
+set (ASSIMP_VERSION_PATCH 1) # subversion revision?
 set (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
 set (ASSIMP_SOVERSION 3)
 SET ( PROJECT_VERSION "${ASSIMP_VERSION}" )
@@ -14,9 +13,10 @@ set(ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used f
 
 option(ASSIMP_OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
-set(LIBASSIMP_COMPONENT libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}-r${ASSIMP_SV_REVISION})
-set(LIBASSIMP-DEV_COMPONENT libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}-r${ASSIMP_SV_REVISION}-dev)
+set(LIBASSIMP_COMPONENT libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
+set(LIBASSIMP-DEV_COMPONENT libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH}-dev)
 set(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
+set(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....

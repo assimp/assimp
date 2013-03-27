@@ -472,7 +472,7 @@ void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const
 		return;
 	}
 	
-	// We can't support most of the texture types because the're mostly procedural.
+	// We can't support most of the texture types because they're mostly procedural.
 	// These are substituted by a dummy texture.
 	const char* dispnam = "";
 	switch( rtex->type ) 

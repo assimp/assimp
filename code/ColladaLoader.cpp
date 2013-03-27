@@ -1445,13 +1445,16 @@ void ColladaLoader::ConvertPath (aiString& ss)
     ss.data[ss.length] = 0;
   }
 
-  // find and convert all %xyz special chars
+  // find and convert all %xy special chars
   char* out = ss.data;
   for( const char* it = ss.data; it != ss.data + ss.length; /**/ )
   {
-    if( *it == '%' )
+    if( *it == '%' && (it + 3) < ss.data + ss.length )
     {
-      size_t nbr = strtoul16( ++it, &it);
+      // separate the number to avoid dragging in chars from behind into the parsing
+      char mychar[3] = { it[1], it[2], 0 };
+      size_t nbr = strtoul16( mychar);
+      it += 3;
       *out++ = (char)(nbr & 0xFF);
     } else
     {

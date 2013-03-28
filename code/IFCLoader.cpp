@@ -251,7 +251,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 
 	// tell the reader for which types we need to simulate STEPs reverse indices
 	static const char* const inverse_indices_to_track[] = {
-		"ifcrelcontainedinspatialstructure", "ifcrelaggregates", "ifcrelvoidselement", "ifcstyleditem"
+		"ifcrelcontainedinspatialstructure", "ifcrelaggregates", "ifcrelvoidselement", "ifcreldefinesbyproperties", "ifcpropertyset", "ifcstyleditem"
 	};
 
 	// feed the IFC schema into the reader and pre-parse all lines
@@ -584,6 +584,69 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 	AssignAddedMeshes(meshes,nd,conv);
 }
 
+typedef std::map<std::string, std::string> Metadata;
+void ProcessMetadata(uint64_t relDefinesByPropertiesID, ConversionData& conv, Metadata& properties);
+
+// ------------------------------------------------------------------------------------------------
+void ProcessMetadata(uint64_t relDefinesByPropertiesID, ConversionData& conv, Metadata& properties) 
+{
+	if (const IfcRelDefinesByProperties* const pset = conv.db.GetObject(relDefinesByPropertiesID)->ToPtr<IfcRelDefinesByProperties>()) {
+		if (const IfcPropertySet* const set = conv.db.GetObject(pset->RelatingPropertyDefinition->GetID())->ToPtr<IfcPropertySet>()) {
+			BOOST_FOREACH(const IfcProperty& property, set->HasProperties) {
+				if (const IfcPropertySingleValue* const singleValue = property.ToPtr<IfcPropertySingleValue>()) {
+					if (singleValue->NominalValue) {
+						if (const EXPRESS::STRING* str = singleValue->NominalValue.Get()->ToPtr<EXPRESS::STRING>()) {
+							std::string value = static_cast<std::string>(*str);
+							properties[property.Name]=value;
+						}
+						else if (const EXPRESS::REAL* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::REAL>()) {
+							float value = static_cast<float>(*val);
+							std::stringstream s;
+							s << value;
+							properties[property.Name]=s.str();
+						}
+						else if (const EXPRESS::INTEGER* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::INTEGER>()) {
+							int64_t value = static_cast<int64_t>(*val);
+							std::stringstream s;
+							s << value;
+							properties[property.Name]=s.str();
+						}
+					}
+				}
+				else if (const IfcPropertyListValue* const listValue = property.ToPtr<IfcPropertyListValue>()) {
+					std::stringstream ss;
+					ss << "[";
+					unsigned index=0;
+					BOOST_FOREACH(const IfcValue::Out& v, listValue->ListValues) {
+						if (!v) continue;
+						if (const EXPRESS::STRING* str = v->ToPtr<EXPRESS::STRING>()) {
+							std::string value = static_cast<std::string>(*str);
+							ss << "'" << value << "'";
+						}
+						else if (const EXPRESS::REAL* val = v->ToPtr<EXPRESS::REAL>()) {
+							float value = static_cast<float>(*val);
+							ss << value;
+						}
+						else if (const EXPRESS::INTEGER* val = v->ToPtr<EXPRESS::INTEGER>()) {
+							int64_t value = static_cast<int64_t>(*val);
+							ss << value;
+						}
+						if (index+1<listValue->ListValues.size()) {
+							ss << ",";
+						}
+						index++;
+					}
+					ss << "]";
+					properties[property.Name]=ss.str();
+				}
+				else {
+					properties[property.Name]="";
+				}
+			}
+		}
+	}
+}
+
 // ------------------------------------------------------------------------------------------------
 aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, ConversionData& conv, std::vector<TempOpening>* collect_openings = NULL)
 {
@@ -608,6 +671,40 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 	std::auto_ptr<aiNode> nd(new aiNode());
 	nd->mName.Set(el.GetClassName()+"_"+(el.Name?el.Name.Get():"Unnamed")+"_"+el.GlobalId);
 	nd->mParent = parent;
+
+	// check for node metadata
+	STEP::DB::RefMapRange children = refs.equal_range(el.GetID());
+	if (children.first!=refs.end()) {
+		Metadata properties;
+		if (children.first==children.second) {
+			// handles single property set
+			ProcessMetadata((*children.first).second, conv, properties);
+		} 
+		else {
+			// handles multiple property sets (currently all propertysets are merged,
+			// which may not be the best solution in the long run)
+			for (STEP::DB::RefMap::const_iterator it=children.first; it!=children.second; ++it) {
+				ProcessMetadata((*it).second, conv, properties);
+			}
+		}
+
+		if (!properties.empty()) {
+			aiMetadata* data = new aiMetadata();
+			data->mNumProperties = properties.size();
+			data->mKeys = new aiString*[data->mNumProperties]();
+			data->mValues = new aiString*[data->mNumProperties]();
+
+			unsigned int i = 0;
+			BOOST_FOREACH(const Metadata::value_type& kv, properties) {
+				data->mKeys[i] = new aiString(kv.first);
+				if (kv.second.length() > 0) {
+					data->mValues[i] = new aiString(kv.second);
+				}				
+				++i;
+			}
+			nd->mMetaData = data;
+		}
+	}
 
 	if(el.ObjectPlacement) {
 		ResolveObjectPlacement(nd->mTransformation,el.ObjectPlacement.Get(),conv);

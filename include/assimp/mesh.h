@@ -160,8 +160,13 @@ struct aiFace
 
 		delete[] mIndices;
 		mNumIndices = o.mNumIndices;
-		mIndices = new unsigned int[mNumIndices];
-		::memcpy( mIndices, o.mIndices, mNumIndices * sizeof( unsigned int));
+		if (mNumIndices) {
+			mIndices = new unsigned int[mNumIndices];
+			::memcpy( mIndices, o.mIndices, mNumIndices * sizeof( unsigned int));
+		}
+		else {
+			mIndices = NULL;
+		}
 		return *this;
 	}
 

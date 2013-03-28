@@ -48,7 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <boost/tuple/tuple.hpp>
 
-#include "../contrib/unzip/unzip.h"
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
+#	include "../contrib/unzip/unzip.h"
+#endif
 
 #include "IFCLoader.h"
 #include "STEPFileReader.h"
@@ -169,8 +171,10 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 		ThrowException("Could not open file for reading");
 	}
 
+
 	// if this is a ifczip file, decompress its contents first
 	if(GetExtension(pFile) == "ifczip") {
+#ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
 		unzFile zip = unzOpen( pFile.c_str() );
 		if(zip == NULL) {
 			ThrowException("Could not open ifczip file for reading, unzip failed");
@@ -214,6 +218,9 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 		}
 
 		unzClose(zip);
+#else
+		ThrowException("Could not open ifczip file for reading, assimp was built without ifczip support");
+#endif
 	}
 
 	boost::scoped_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));

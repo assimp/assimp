@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "AssimpPCH.h"
-#ifndef AI_BUILD_NO_NDO_IMPORTER
+#ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
 #include "NDOLoader.h"
 
 using namespace Assimp;

@@ -325,11 +325,11 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 			
 			out->mAngleInnerCone = AI_DEG_TO_RAD( srcLight->mFalloffAngle );
 
-			// ... some extension magic. FUCKING COLLADA. 
-			if (srcLight->mOuterAngle == 10e10f) 
+			// ... some extension magic. 
+			if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
 			{
-				// ... some deprecation magic. FUCKING FCOLLADA.
-				if (srcLight->mPenumbraAngle == 10e10f) 
+				// ... some deprecation magic. 
+				if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
 				{
 					// Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
 					// epsilon chosen to be 0.1
@@ -382,7 +382,7 @@ void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Col
 		out->mClipPlaneNear = srcCamera->mZNear;
 
 		// ... but for the rest some values are optional 
-		// and we need to compute the others in any combination. FUCKING COLLADA.
+		// and we need to compute the others in any combination. 
 		 if (srcCamera->mAspect != 10e10f)
 			out->mAspect = srcCamera->mAspect;
 
@@ -545,7 +545,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	std::copy( pSrcMesh->mPositions.begin() + pStartVertex, pSrcMesh->mPositions.begin() + 
 		pStartVertex + numVertices, dstMesh->mVertices);
 
-	// normals, if given. HACK: (thom) Due to the fucking Collada spec we never 
+	// normals, if given. HACK: (thom) Due to the glorious Collada spec we never 
 	// know if we have the same number of normals as there are positions. So we 
 	// also ignore any vertex attribute if it has a different count
 	if( pSrcMesh->mNormals.size() >= pStartVertex + numVertices)
@@ -636,7 +636,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 			throw DeadlyImportError( "Data type mismatch while resolving mesh joints");
 		// sanity check: we rely on the vertex weights always coming as pairs of BoneIndex-WeightIndex
 		if( pSrcController->mWeightInputJoints.mOffset != 0 || pSrcController->mWeightInputWeights.mOffset != 1)
-			throw DeadlyImportError( "Unsupported vertex_weight adresssing scheme. Fucking collada spec.");
+			throw DeadlyImportError( "Unsupported vertex_weight adressing scheme. ");
 
 		// create containers to collect the weights for each bone
 		size_t numBones = jointNames.mStrings.size();
@@ -1445,13 +1445,16 @@ void ColladaLoader::ConvertPath (aiString& ss)
     ss.data[ss.length] = 0;
   }
 
-  // find and convert all %xyz special chars
+  // find and convert all %xy special chars
   char* out = ss.data;
   for( const char* it = ss.data; it != ss.data + ss.length; /**/ )
   {
-    if( *it == '%' )
+    if( *it == '%' && (it + 3) < ss.data + ss.length )
     {
-      size_t nbr = strtoul16( ++it, &it);
+      // separate the number to avoid dragging in chars from behind into the parsing
+      char mychar[3] = { it[1], it[2], 0 };
+      size_t nbr = strtoul16( mychar);
+      it += 3;
       *out++ = (char)(nbr & 0xFF);
     } else
     {

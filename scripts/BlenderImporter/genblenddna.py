@@ -105,7 +105,8 @@ def main():
     # Parse structure definitions from BlenderScene.h
     input = open(inputfile,"rt").read()
 
-    flags = re.ASCII|re.DOTALL|re.MULTILINE
+    #flags = re.ASCII|re.DOTALL|re.MULTILINE
+    flags = re.DOTALL|re.MULTILINE
     #stripcoms = re.compile(r"/\*(.*?)*\/",flags)
     getstruct = re.compile(r"struct\s+(\w+?)\s*(:\s*ElemBase)?\s*\{(.*?)^\}\s*;",flags)
     getsmartx = re.compile(r"(std\s*::\s*)?(vector)\s*<\s*(boost\s*::\s*)?shared_(ptr)\s*<\s*(\w+)\s*>\s*>\s*",flags)
@@ -143,7 +144,8 @@ def main():
 
         input = input[match.end():]
 
-    [print ("Enum: "+e) for e in enums]
+	for e in enums:
+		print("Enum: "+e)
     for k,v in hits.items():
         out = []
         for line in v:
@@ -177,7 +179,8 @@ def main():
                 
         v[:] = out
         print("Structure {0}".format(k))
-        [print("\t"+"\t".join(elem)) for elem in out]
+        for elem in out:
+			print("\t"+"\t".join(elem))
         print("")
 
    

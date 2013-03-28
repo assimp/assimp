@@ -1045,9 +1045,9 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
 		v.y = reader.GetF4();
 	}
 
-	const size_t numfuck = reader.GetI4();
-	msh.faces.reserve(numfuck);
-	for(size_t i = 0; i < numfuck; ++i) {
+	const size_t numf = reader.GetI4();
+	msh.faces.reserve(numf);
+	for(size_t i = 0; i < numf; ++i) {
 		// XXX backface culling flag is 0x10 in flags
 
 		// hole?

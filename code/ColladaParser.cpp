@@ -487,7 +487,7 @@ void ColladaParser::ReadController( Collada::Controller& pController)
 			else if( IsElement( "skin"))
 			{
 				// read the mesh it refers to. According to the spec this could also be another
-				// controller, but I refuse to implement every bullshit idea they've come up with
+				// controller, but I refuse to implement every single idea they've come up with
 				int sourceIndex = GetAttribute( "source");
 				pController.mMeshId = mReader->getAttributeValue( sourceIndex) + 1;
 			} 
@@ -1097,9 +1097,6 @@ void ColladaParser::ReadEffectLibrary()
 			if( IsElement( "effect"))
 			{
 				// read ID. Do I have to repeat my ranting about "optional" attributes?
-				// Alex: .... no, not necessary. Please shut up and leave more space for 
-				// me to complain about the fucking Collada spec with its fucking
-				// 'optional' attributes ...
 				int attrID = GetAttribute( "id");
 				std::string id = mReader->getAttributeValue( attrID);
 
@@ -1613,7 +1610,7 @@ void ColladaParser::ReadSource()
 			}
 			else if( IsElement( "technique_common"))
 			{
-				// I don't fucking care for your profiles bullshit
+				// I don't care for your profiles 
 			}
 			else if( IsElement( "accessor"))
 			{

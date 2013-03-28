@@ -94,6 +94,7 @@ namespace Assimp	{
 
 struct Object;
 struct MTex;
+struct Image;
 
 #define AI_BLEND_MESH_MAX_VERTS 2000000000L
 
@@ -154,6 +155,38 @@ struct MEdge : ElemBase {
       int v1, v2 FAIL;
       char crease, bweight;
       short flag;
+};
+
+// -------------------------------------------------------------------------------
+struct MLoop : ElemBase {
+	int v, e;
+};
+
+// -------------------------------------------------------------------------------
+struct MLoopUV : ElemBase {
+	float uv[2];
+	int flag;
+};
+
+// -------------------------------------------------------------------------------
+// Note that red and blue are not swapped, as with MCol
+struct MLoopCol : ElemBase {
+	char r, g, b, a;
+};
+
+// -------------------------------------------------------------------------------
+struct MPoly : ElemBase {
+	int loopstart;
+	int totloop;
+	short mat_nr;
+	char flag;
+};
+
+// -------------------------------------------------------------------------------
+struct MTexPoly : ElemBase {
+	Image* tpage;
+	char flag, transp;
+	short mode, tile, pad;
 };
 
 // -------------------------------------------------------------------------------
@@ -235,6 +268,8 @@ struct Mesh : ElemBase {
 	int totface FAIL;
 	int totedge FAIL;
 	int totvert FAIL;
+	int totloop;
+	int totpoly;
 
 	short subdiv;
 	short subdivr;
@@ -246,6 +281,11 @@ struct Mesh : ElemBase {
 	vector<TFace> tface;
 	vector<MVert> mvert FAIL;
 	vector<MEdge> medge WARN;
+	vector<MLoop> mloop;
+	vector<MLoopUV> mloopuv;
+	vector<MLoopCol> mloopcol;
+	vector<MPoly> mpoly;
+	vector<MTexPoly> mtpoly;
 	vector<MDeformVert> dvert;
 	vector<MCol> mcol;
 

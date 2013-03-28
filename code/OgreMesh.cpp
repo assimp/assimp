@@ -182,7 +182,7 @@ void OgreImporter::ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsi
 	XmlRead(Reader);
 
 	/*it might happen, that we have more than one attribute per vertex (they are not splitted to different buffers)
-	so the break condition is a bit tricky (well, IrrXML just sucks :( )*/
+	so the break condition is a bit tricky */
 	while(Reader->getNodeName()==string("vertex")
 		||Reader->getNodeName()==string("position")
 		||Reader->getNodeName()==string("normal")

@@ -585,64 +585,74 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 }
 
 typedef std::map<std::string, std::string> Metadata;
-void ProcessMetadata(uint64_t relDefinesByPropertiesID, ConversionData& conv, Metadata& properties);
+
+// ------------------------------------------------------------------------------------------------
+void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionData& conv, Metadata& properties, const std::string& prefix = "") 
+{
+	BOOST_FOREACH(const IfcProperty& property, set) {
+		const std::string& key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
+		if (const IfcPropertySingleValue* const singleValue = property.ToPtr<IfcPropertySingleValue>()) {
+			if (singleValue->NominalValue) {
+				if (const EXPRESS::STRING* str = singleValue->NominalValue.Get()->ToPtr<EXPRESS::STRING>()) {
+					std::string value = static_cast<std::string>(*str);
+					properties[key]=value;
+				}
+				else if (const EXPRESS::REAL* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::REAL>()) {
+					float value = static_cast<float>(*val);
+					std::stringstream s;
+					s << value;
+					properties[key]=s.str();
+				}
+				else if (const EXPRESS::INTEGER* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::INTEGER>()) {
+					int64_t value = static_cast<int64_t>(*val);
+					std::stringstream s;
+					s << value;
+					properties[key]=s.str();
+				}
+			}
+		}
+		else if (const IfcPropertyListValue* const listValue = property.ToPtr<IfcPropertyListValue>()) {
+			std::stringstream ss;
+			ss << "[";
+			unsigned index=0;
+			BOOST_FOREACH(const IfcValue::Out& v, listValue->ListValues) {
+				if (!v) continue;
+				if (const EXPRESS::STRING* str = v->ToPtr<EXPRESS::STRING>()) {
+					std::string value = static_cast<std::string>(*str);
+					ss << "'" << value << "'";
+				}
+				else if (const EXPRESS::REAL* val = v->ToPtr<EXPRESS::REAL>()) {
+					float value = static_cast<float>(*val);
+					ss << value;
+				}
+				else if (const EXPRESS::INTEGER* val = v->ToPtr<EXPRESS::INTEGER>()) {
+					int64_t value = static_cast<int64_t>(*val);
+					ss << value;
+				}
+				if (index+1<listValue->ListValues.size()) {
+					ss << ",";
+				}
+				index++;
+			}
+			ss << "]";
+			properties[key]=ss.str();
+		}
+		else if (const IfcComplexProperty* const complexProp = property.ToPtr<IfcComplexProperty>()) {
+			ProcessMetadata(complexProp->HasProperties, conv, properties, property.Name);
+		}
+		else {
+			properties[key]="";
+		}
+	}
+}
+
 
 // ------------------------------------------------------------------------------------------------
 void ProcessMetadata(uint64_t relDefinesByPropertiesID, ConversionData& conv, Metadata& properties) 
 {
 	if (const IfcRelDefinesByProperties* const pset = conv.db.GetObject(relDefinesByPropertiesID)->ToPtr<IfcRelDefinesByProperties>()) {
 		if (const IfcPropertySet* const set = conv.db.GetObject(pset->RelatingPropertyDefinition->GetID())->ToPtr<IfcPropertySet>()) {
-			BOOST_FOREACH(const IfcProperty& property, set->HasProperties) {
-				if (const IfcPropertySingleValue* const singleValue = property.ToPtr<IfcPropertySingleValue>()) {
-					if (singleValue->NominalValue) {
-						if (const EXPRESS::STRING* str = singleValue->NominalValue.Get()->ToPtr<EXPRESS::STRING>()) {
-							std::string value = static_cast<std::string>(*str);
-							properties[property.Name]=value;
-						}
-						else if (const EXPRESS::REAL* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::REAL>()) {
-							float value = static_cast<float>(*val);
-							std::stringstream s;
-							s << value;
-							properties[property.Name]=s.str();
-						}
-						else if (const EXPRESS::INTEGER* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::INTEGER>()) {
-							int64_t value = static_cast<int64_t>(*val);
-							std::stringstream s;
-							s << value;
-							properties[property.Name]=s.str();
-						}
-					}
-				}
-				else if (const IfcPropertyListValue* const listValue = property.ToPtr<IfcPropertyListValue>()) {
-					std::stringstream ss;
-					ss << "[";
-					unsigned index=0;
-					BOOST_FOREACH(const IfcValue::Out& v, listValue->ListValues) {
-						if (!v) continue;
-						if (const EXPRESS::STRING* str = v->ToPtr<EXPRESS::STRING>()) {
-							std::string value = static_cast<std::string>(*str);
-							ss << "'" << value << "'";
-						}
-						else if (const EXPRESS::REAL* val = v->ToPtr<EXPRESS::REAL>()) {
-							float value = static_cast<float>(*val);
-							ss << value;
-						}
-						else if (const EXPRESS::INTEGER* val = v->ToPtr<EXPRESS::INTEGER>()) {
-							int64_t value = static_cast<int64_t>(*val);
-							ss << value;
-						}
-						if (index+1<listValue->ListValues.size()) {
-							ss << ",";
-						}
-						index++;
-					}
-					ss << "]";
-					properties[property.Name]=ss.str();
-				}
-				else {
-					properties[property.Name]="";
-				}
-			}
+			ProcessMetadata(set->HasProperties, conv, properties);			
 		}
 	}
 }

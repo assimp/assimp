@@ -513,7 +513,7 @@ struct RateRepresentationPredicate {
 			return -3;
 		}
 		
-		// give strong preference to extruded geometry
+		// give strong preference to extruded geometry.
 		if (r == "SweptSolid") {
 			return -10;
 		}
@@ -672,6 +672,8 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 	nd->mName.Set(el.GetClassName()+"_"+(el.Name?el.Name.Get():"Unnamed")+"_"+el.GlobalId);
 	nd->mParent = parent;
 
+	conv.already_processed.insert(el.GetID());
+
 	// check for node metadata
 	STEP::DB::RefMapRange children = refs.equal_range(el.GetID());
 	if (children.first!=refs.end()) {
@@ -681,7 +683,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 			ProcessMetadata((*children.first).second, conv, properties);
 		} 
 		else {
-			// handles multiple property sets (currently all propertysets are merged,
+			// handles multiple property sets (currently all property sets are merged,
 			// which may not be the best solution in the long run)
 			for (STEP::DB::RefMap::const_iterator it=children.first; it!=children.second; ++it) {
 				ProcessMetadata((*it).second, conv, properties);
@@ -724,15 +726,24 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 		STEP::DB::RefMapRange range = refs.equal_range(el.GetID());
 
 		for(STEP::DB::RefMapRange range2 = range; range2.first != range.second; ++range2.first) {
+			// skip over meshes that have already been processed before. This is strictly necessary
+			// because the reverse indices also include references contained in argument lists and
+			// therefore every element has a back-reference hold by its parent.
+			if (conv.already_processed.find((*range2.first).second) != conv.already_processed.end()) {
+				continue;
+			}
 			const STEP::LazyObject& obj = conv.db.MustGetObject((*range2.first).second);
 
 			// handle regularly-contained elements
 			if(const IfcRelContainedInSpatialStructure* const cont = obj->ToPtr<IfcRelContainedInSpatialStructure>()) {
+				if(cont->RelatingStructure->GetID() != el.GetID()) {
+					continue;
+				}
 				BOOST_FOREACH(const IfcProduct& pro, cont->RelatedElements) {		
 					if(const IfcOpeningElement* const open = pro.ToPtr<IfcOpeningElement>()) {
 						// IfcOpeningElement is handled below. Sadly we can't use it here as is:
-						// The docs say that opening elements are USUALLY attached to building storeys
-						// but we want them for the building elements to which they belong to.
+						// The docs say that opening elements are USUALLY attached to building storey,
+						// but we want them for the building elements to which they belong.
 						continue;
 					}
 					
@@ -783,7 +794,14 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 		}
 
 		for(;range.first != range.second; ++range.first) {
+			// see note in loop above
+			if (conv.already_processed.find((*range.first).second) != conv.already_processed.end()) {
+				continue;
+			}
 			if(const IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<IfcRelAggregates>()) {
+				if(aggr->RelatingObject->GetID() != el.GetID()) {
+					continue;
+				}
 
 				// move aggregate elements to a separate node since they are semantically different than elements that are just 'contained'
 				std::auto_ptr<aiNode> nd_aggr(new aiNode());
@@ -829,6 +847,8 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 		throw;
 	}
 
+	ai_assert(conv.already_processed.find(el.GetID()) != conv.already_processed.end());
+	conv.already_processed.erase(conv.already_processed.find(el.GetID()));
 	return nd.release();
 }
 

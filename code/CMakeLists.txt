@@ -34,6 +34,7 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/quaternion.h
 	${HEADER_PATH}/quaternion.inl
 	${HEADER_PATH}/scene.h
+	${HEADER_PATH}/metadata.h
 	${HEADER_PATH}/texture.h
 	${HEADER_PATH}/types.h
 	${HEADER_PATH}/vector2.h

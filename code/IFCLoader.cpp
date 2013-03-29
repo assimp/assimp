@@ -251,7 +251,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 
 	// tell the reader for which types we need to simulate STEPs reverse indices
 	static const char* const inverse_indices_to_track[] = {
-		"ifcrelcontainedinspatialstructure", "ifcrelaggregates", "ifcrelvoidselement", "ifcstyleditem"
+		"ifcrelcontainedinspatialstructure", "ifcrelaggregates", "ifcrelvoidselement", "ifcreldefinesbyproperties", "ifcpropertyset", "ifcstyleditem"
 	};
 
 	// feed the IFC schema into the reader and pre-parse all lines
@@ -513,7 +513,7 @@ struct RateRepresentationPredicate {
 			return -3;
 		}
 		
-		// give strong preference to extruded geometry
+		// give strong preference to extruded geometry.
 		if (r == "SweptSolid") {
 			return -10;
 		}
@@ -584,6 +584,86 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 	AssignAddedMeshes(meshes,nd,conv);
 }
 
+typedef std::map<std::string, std::string> Metadata;
+
+// ------------------------------------------------------------------------------------------------
+void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionData& conv, Metadata& properties, 
+	const std::string& prefix = "", 
+	unsigned int nest = 0) 
+{
+	BOOST_FOREACH(const IfcProperty& property, set) {
+		const std::string& key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
+		if (const IfcPropertySingleValue* const singleValue = property.ToPtr<IfcPropertySingleValue>()) {
+			if (singleValue->NominalValue) {
+				if (const EXPRESS::STRING* str = singleValue->NominalValue.Get()->ToPtr<EXPRESS::STRING>()) {
+					std::string value = static_cast<std::string>(*str);
+					properties[key]=value;
+				}
+				else if (const EXPRESS::REAL* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::REAL>()) {
+					float value = static_cast<float>(*val);
+					std::stringstream s;
+					s << value;
+					properties[key]=s.str();
+				}
+				else if (const EXPRESS::INTEGER* val = singleValue->NominalValue.Get()->ToPtr<EXPRESS::INTEGER>()) {
+					int64_t value = static_cast<int64_t>(*val);
+					std::stringstream s;
+					s << value;
+					properties[key]=s.str();
+				}
+			}
+		}
+		else if (const IfcPropertyListValue* const listValue = property.ToPtr<IfcPropertyListValue>()) {
+			std::stringstream ss;
+			ss << "[";
+			unsigned index=0;
+			BOOST_FOREACH(const IfcValue::Out& v, listValue->ListValues) {
+				if (!v) continue;
+				if (const EXPRESS::STRING* str = v->ToPtr<EXPRESS::STRING>()) {
+					std::string value = static_cast<std::string>(*str);
+					ss << "'" << value << "'";
+				}
+				else if (const EXPRESS::REAL* val = v->ToPtr<EXPRESS::REAL>()) {
+					float value = static_cast<float>(*val);
+					ss << value;
+				}
+				else if (const EXPRESS::INTEGER* val = v->ToPtr<EXPRESS::INTEGER>()) {
+					int64_t value = static_cast<int64_t>(*val);
+					ss << value;
+				}
+				if (index+1<listValue->ListValues.size()) {
+					ss << ",";
+				}
+				index++;
+			}
+			ss << "]";
+			properties[key]=ss.str();
+		}
+		else if (const IfcComplexProperty* const complexProp = property.ToPtr<IfcComplexProperty>()) {
+			if(nest > 2) { // mostly arbitrary limit to prevent stack overflow vulnerabilities
+				IFCImporter::LogError("maximum nesting level for IfcComplexProperty reached, skipping this property.");
+			}
+			else {
+				ProcessMetadata(complexProp->HasProperties, conv, properties, key, nest + 1);
+			}
+		}
+		else {
+			properties[key]="";
+		}
+	}
+}
+
+
+// ------------------------------------------------------------------------------------------------
+void ProcessMetadata(uint64_t relDefinesByPropertiesID, ConversionData& conv, Metadata& properties) 
+{
+	if (const IfcRelDefinesByProperties* const pset = conv.db.GetObject(relDefinesByPropertiesID)->ToPtr<IfcRelDefinesByProperties>()) {
+		if (const IfcPropertySet* const set = conv.db.GetObject(pset->RelatingPropertyDefinition->GetID())->ToPtr<IfcPropertySet>()) {
+			ProcessMetadata(set->HasProperties, conv, properties);			
+		}
+	}
+}
+
 // ------------------------------------------------------------------------------------------------
 aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, ConversionData& conv, std::vector<TempOpening>* collect_openings = NULL)
 {
@@ -609,6 +689,42 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 	nd->mName.Set(el.GetClassName()+"_"+(el.Name?el.Name.Get():"Unnamed")+"_"+el.GlobalId);
 	nd->mParent = parent;
 
+	conv.already_processed.insert(el.GetID());
+
+	// check for node metadata
+	STEP::DB::RefMapRange children = refs.equal_range(el.GetID());
+	if (children.first!=refs.end()) {
+		Metadata properties;
+		if (children.first==children.second) {
+			// handles single property set
+			ProcessMetadata((*children.first).second, conv, properties);
+		} 
+		else {
+			// handles multiple property sets (currently all property sets are merged,
+			// which may not be the best solution in the long run)
+			for (STEP::DB::RefMap::const_iterator it=children.first; it!=children.second; ++it) {
+				ProcessMetadata((*it).second, conv, properties);
+			}
+		}
+
+		if (!properties.empty()) {
+			aiMetadata* data = new aiMetadata();
+			data->mNumProperties = properties.size();
+			data->mKeys = new aiString*[data->mNumProperties]();
+			data->mValues = new aiString*[data->mNumProperties]();
+
+			unsigned int i = 0;
+			BOOST_FOREACH(const Metadata::value_type& kv, properties) {
+				data->mKeys[i] = new aiString(kv.first);
+				if (kv.second.length() > 0) {
+					data->mValues[i] = new aiString(kv.second);
+				}				
+				++i;
+			}
+			nd->mMetaData = data;
+		}
+	}
+
 	if(el.ObjectPlacement) {
 		ResolveObjectPlacement(nd->mTransformation,el.ObjectPlacement.Get(),conv);
 	}
@@ -627,15 +743,24 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 		STEP::DB::RefMapRange range = refs.equal_range(el.GetID());
 
 		for(STEP::DB::RefMapRange range2 = range; range2.first != range.second; ++range2.first) {
+			// skip over meshes that have already been processed before. This is strictly necessary
+			// because the reverse indices also include references contained in argument lists and
+			// therefore every element has a back-reference hold by its parent.
+			if (conv.already_processed.find((*range2.first).second) != conv.already_processed.end()) {
+				continue;
+			}
 			const STEP::LazyObject& obj = conv.db.MustGetObject((*range2.first).second);
 
 			// handle regularly-contained elements
 			if(const IfcRelContainedInSpatialStructure* const cont = obj->ToPtr<IfcRelContainedInSpatialStructure>()) {
+				if(cont->RelatingStructure->GetID() != el.GetID()) {
+					continue;
+				}
 				BOOST_FOREACH(const IfcProduct& pro, cont->RelatedElements) {		
 					if(const IfcOpeningElement* const open = pro.ToPtr<IfcOpeningElement>()) {
 						// IfcOpeningElement is handled below. Sadly we can't use it here as is:
-						// The docs say that opening elements are USUALLY attached to building storeys
-						// but we want them for the building elements to which they belong to.
+						// The docs say that opening elements are USUALLY attached to building storey,
+						// but we want them for the building elements to which they belong.
 						continue;
 					}
 					
@@ -686,7 +811,14 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 		}
 
 		for(;range.first != range.second; ++range.first) {
+			// see note in loop above
+			if (conv.already_processed.find((*range.first).second) != conv.already_processed.end()) {
+				continue;
+			}
 			if(const IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<IfcRelAggregates>()) {
+				if(aggr->RelatingObject->GetID() != el.GetID()) {
+					continue;
+				}
 
 				// move aggregate elements to a separate node since they are semantically different than elements that are just 'contained'
 				std::auto_ptr<aiNode> nd_aggr(new aiNode());
@@ -732,6 +864,8 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 		throw;
 	}
 
+	ai_assert(conv.already_processed.find(el.GetID()) != conv.already_processed.end());
+	conv.already_processed.erase(conv.already_processed.find(el.GetID()));
 	return nd.release();
 }
 

@@ -156,6 +156,7 @@ struct Material
 	aiString texture;
 	aiString textureSpecular;
 	aiString textureAmbient;
+	aiString textureEmissive;
 	aiString textureBump;
 	aiString textureNormal;
 	aiString textureSpecularity;
@@ -166,6 +167,7 @@ struct Material
 		TextureDiffuseType = 0,
 		TextureSpecularType,
 		TextureAmbientType,
+		TextureEmissiveType,
 		TextureBumpType,
 		TextureNormalType,
 		TextureSpecularityType,

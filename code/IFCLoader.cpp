@@ -587,7 +587,9 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 typedef std::map<std::string, std::string> Metadata;
 
 // ------------------------------------------------------------------------------------------------
-void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionData& conv, Metadata& properties, const std::string& prefix = "") 
+void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionData& conv, Metadata& properties, 
+	const std::string& prefix = "", 
+	unsigned int nest = 0) 
 {
 	BOOST_FOREACH(const IfcProperty& property, set) {
 		const std::string& key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
@@ -638,7 +640,12 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
 			properties[key]=ss.str();
 		}
 		else if (const IfcComplexProperty* const complexProp = property.ToPtr<IfcComplexProperty>()) {
-			ProcessMetadata(complexProp->HasProperties, conv, properties, property.Name);
+			if(nest > 2) { // mostly arbitrary limit to prevent stack overflow vulnerabilities
+				IFCImporter::LogError("maximum nesting level for IfcComplexProperty reached, skipping this property.");
+			}
+			else {
+				ProcessMetadata(complexProp->HasProperties, conv, properties, key, nest + 1);
+			}
 		}
 		else {
 			properties[key]="";

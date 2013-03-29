@@ -208,6 +208,8 @@ struct ConversionData
 	// for later processing by a parent, which is a wall. 
 	std::vector<TempOpening>* apply_openings;
 	std::vector<TempOpening>* collect_openings;
+
+	std::set<uint64_t> already_processed;
 };
 
 

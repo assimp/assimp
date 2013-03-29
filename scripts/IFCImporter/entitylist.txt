@@ -101,3 +101,10 @@ IfcUnit
 IfcUnitAssignment
 IfcVector
 IfcIShapeProfileDef
+IfcPropertyListValue
+IfcRelDefinesByProperties
+IfcPropertySet
+IfcPropertySingleValue
+IfcProperty
+IfcComplexProperty
+IfcElementQuantity

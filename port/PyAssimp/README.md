@@ -25,7 +25,7 @@ substituted by assertions ...):
 
 ```python
 
-from pyassimp.core import *
+from pyassimp import *
 scene = load('hello.3ds')
 
 assert len(scene.meshes)
@@ -44,7 +44,7 @@ scene:
 
 ```python
 
-from pyassimp.core import *
+from pyassimp import *
 scene = load('hello.3ds')
 
 for c in scene.rootnode.children:

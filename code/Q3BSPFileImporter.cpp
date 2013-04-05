@@ -171,11 +171,22 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 //	Returns true, if the loader can read this.
 bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* pIOHandler, bool checkSig ) const
 {
-	if(!checkSig) {
+	if(checkSig) {
+    char signature[5];
+    std::string expected = "IBSP";
+    Assimp::IOStream *pStream = pIOHandler.Open(rFile, "r");
+    if (pStream.Read(signature, 1, 4) == 4) {
+      signature[4] = '\0';
+      if (expected == signature) {
+        delete pStream;
+        return true;
+      }
+    }
+    delete pStream;
+	} else {
 		return SimpleExtensionCheck( rFile, "bsp" );
-	}
-	// TODO perhaps add keyword based detection
-	return false;
+  }
+  return false;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -174,8 +174,8 @@ bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* pIOHandler,
 	if(checkSig) {
     char signature[5];
     std::string expected = "IBSP";
-    Assimp::IOStream *pStream = pIOHandler.Open(rFile, "r");
-    if (pStream.Read(signature, 1, 4) == 4) {
+    Assimp::IOStream *pStream = pIOHandler->Open(rFile, "r");
+    if (pStream->Read(signature, 1, 4) == 4) {
       signature[4] = '\0';
       if (expected == signature) {
         delete pStream;

@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#include <windows.h> 
 #include "DefaultIOSystem.h"
 #include "Q3BSPFileImporter.h"
-#include "Q3BSPZipArchive.h"
 #include "Q3BSPFileParser.h"
 #include "Q3BSPFileData.h"
 
@@ -68,7 +67,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"pk3"
+	"bsp"
 };
 
 namespace Assimp
@@ -170,13 +169,24 @@ Q3BSPFileImporter::~Q3BSPFileImporter()
 
 // ------------------------------------------------------------------------------------------------
 //	Returns true, if the loader can read this.
-bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* /*pIOHandler*/, bool checkSig ) const
+bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* pIOHandler, bool checkSig ) const
 {
-	if(!checkSig) {
-		return SimpleExtensionCheck( rFile, "pk3" );
-	}
-	// TODO perhaps add keyword based detection
-	return false;
+	if(checkSig) {
+    char signature[5];
+    std::string expected = "IBSP";
+    Assimp::IOStream *pStream = pIOHandler->Open(rFile, "r");
+    if (pStream->Read(signature, 1, 4) == 4) {
+      signature[4] = '\0';
+      if (expected == signature) {
+        delete pStream;
+        return true;
+      }
+    }
+    delete pStream;
+	} else {
+		return SimpleExtensionCheck( rFile, "bsp" );
+  }
+  return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -188,86 +198,20 @@ const aiImporterDesc* Q3BSPFileImporter::GetInfo () const
 
 // ------------------------------------------------------------------------------------------------
 //	Import method.
-void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* pScene, IOSystem* /*pIOHandler*/)
+void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-	Q3BSPZipArchive Archive( rFile );
-	if ( !Archive.isOpen() )
-	{
-		throw DeadlyImportError( "Failed to open file " + rFile + "." );
-	}
-
-	std::string archiveName( "" ), mapName( "" );
-	separateMapName( rFile, archiveName, mapName );
-
-	if ( mapName.empty() )
-	{
-		if ( !findFirstMapInArchive( Archive, mapName ) )
-		{
-			return;
-		}
-	}
-
-	Q3BSPFileParser fileParser( mapName, &Archive );
+	Q3BSPFileParser fileParser( rFile, pIOHandler );
 	Q3BSPModel *pBSPModel = fileParser.getModel();
 	if ( NULL != pBSPModel )
 	{
-		CreateDataFromImport( pBSPModel, pScene, &Archive );
+		CreateDataFromImport( pBSPModel, pScene, pIOHandler );
 	}
-}
-
-// ------------------------------------------------------------------------------------------------
-//	Separates the map name from the import name.
-void Q3BSPFileImporter::separateMapName( const std::string &rImportName, std::string &rArchiveName, 
-										std::string &rMapName )
-{
-	rArchiveName = "";
-	rMapName = "";
-	if ( rImportName.empty() )
-		return;
-
-	std::string::size_type pos = rImportName.rfind( "," );
-	if ( std::string::npos == pos )
-	{
-		rArchiveName = rImportName;
-		return;
-	}
-
-	rArchiveName = rImportName.substr( 0, pos );
-	rMapName = rImportName.substr( pos, rImportName.size() - pos - 1 );
-}
-
-// ------------------------------------------------------------------------------------------------
-//	Returns the first map in the map archive.
-bool Q3BSPFileImporter::findFirstMapInArchive( Q3BSPZipArchive &rArchive, std::string &rMapName )
-{
-	rMapName = "";
-	std::vector<std::string> fileList;
-	rArchive.getFileList( fileList );
-	if ( fileList.empty() )  
-		return false;
-
-	for ( std::vector<std::string>::iterator it = fileList.begin(); it != fileList.end();
-		++it )
-	{
-		std::string::size_type pos = (*it).find( "maps/" );
-		if ( std::string::npos != pos )
-		{
-			std::string::size_type extPos = (*it).find( ".bsp" );
-			if ( std::string::npos != extPos )
-			{
-				rMapName = *it;
-				return true;
-			}
-		}
-	}
-	
-	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 //	Creates the assimp specific data.
 void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, 
-											 Q3BSPZipArchive *pArchive )
+											 IOSystem* pIOHandler )
 {
 	if ( NULL == pModel || NULL == pScene )
 		return;
@@ -285,7 +229,7 @@ void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, a
 	CreateNodes( pModel, pScene, pScene->mRootNode );
 	
 	// Create the assigned materials
-	createMaterials( pModel, pScene, pArchive );
+	createMaterials( pModel, pScene, pIOHandler );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -473,7 +417,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
 // ------------------------------------------------------------------------------------------------
 //	Creates all referenced materials.
 void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
-										Q3BSPZipArchive *pArchive )
+										IOSystem *pIOHandler )
 {
 	if ( m_MaterialLookupMap.empty() )
 	{
@@ -497,7 +441,7 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 		pMatHelper->AddProperty( &aiMatName, AI_MATKEY_NAME );
 
 		extractIds( matName, textureId, lightmapId );
-		
+
 		// Adding the texture
 		if ( -1 != textureId )
 		{
@@ -508,8 +452,8 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 				tmp += pTexture->strName;
 				tmp += ".jpg";
 				normalizePathName( tmp, texName );
-				
-				if ( !importTextureFromArchive( pModel, pArchive, pScene, pMatHelper, textureId ) )
+
+				if ( !importTextureFromArchive( pModel, pIOHandler, pScene, pMatHelper, textureId ) )
 				{
 				}
 			}
@@ -634,14 +578,14 @@ aiFace *Q3BSPFileImporter::getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx )
 // ------------------------------------------------------------------------------------------------
 //	Imports a texture file.
 bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel,
-												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene* /*pScene*/,
+												 IOSystem *pIOHandler, aiScene* /*pScene*/,
 												 aiMaterial *pMatHelper, int textureId )
 {
 	std::vector<std::string> supportedExtensions;
 	supportedExtensions.push_back( ".jpg" );
 	supportedExtensions.push_back( ".png" );
   supportedExtensions.push_back( ".tga" );
-	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper )
+	if ( NULL == pIOHandler || NULL == pMatHelper )
 	{
 		return false;
 	}
@@ -657,9 +601,9 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 		return false;
 
 	std::string textureName, ext;
-	if ( expandFile( pArchive, pTexture->strName, supportedExtensions, textureName, ext ) )
+	if ( expandFile( pIOHandler, pTexture->strName, supportedExtensions, textureName, ext ) )
 	{
-		IOStream *pTextureStream = pArchive->Open( textureName.c_str() );
+		IOStream *pTextureStream = pIOHandler->Open( textureName.c_str() );
 		if ( NULL != pTextureStream )
 		{
 			size_t texSize = pTextureStream->FileSize();
@@ -681,7 +625,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 			name.data[ 0 ] = '*';
 			name.length = 1 + ASSIMP_itoa10( name.data + 1, MAXLEN-1, mTextures.size() );
 
-			pArchive->Close( pTextureStream );
+			pIOHandler->Close( pTextureStream );
 
 			pMatHelper->AddProperty( &name, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
 			mTextures.push_back( pTexture );
@@ -750,11 +694,11 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 
 // ------------------------------------------------------------------------------------------------
 //	Will search for a supported extension.
-bool Q3BSPFileImporter::expandFile(  Q3BSP::Q3BSPZipArchive *pArchive, const std::string &rFilename, 
+bool Q3BSPFileImporter::expandFile(  IOSystem *pIOHandler, const std::string &rFilename, 
 								   const std::vector<std::string> &rExtList, std::string &rFile,
 								   std::string &rExt )
 {
-	ai_assert( NULL != pArchive );
+	ai_assert( NULL != pIOHandler );
 	ai_assert( !rFilename.empty() );
 
 	if ( rExtList.empty() )
@@ -768,7 +712,7 @@ bool Q3BSPFileImporter::expandFile(  Q3BSP::Q3BSPZipArchive *pArchive, const std
 	for ( std::vector<std::string>::const_iterator it = rExtList.begin(); it != rExtList.end(); ++it )
 	{
 		const std::string textureName = rFilename + *it;
-		if ( pArchive->Exists( textureName.c_str() ) )
+		if ( pIOHandler->Exists( textureName.c_str() ) )
 		{
 			rExt = *it;
 			rFile = textureName;

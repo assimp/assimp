@@ -49,7 +49,6 @@ namespace Assimp
 namespace Q3BSP
 {
 
-class Q3BSPZipArchive;
 struct Q3BSPModel;
 class ZipFile;
 
@@ -60,7 +59,7 @@ class ZipFile;
 class Q3BSPFileParser
 {
 public:
-	Q3BSPFileParser( const std::string &rMapName, Q3BSP::Q3BSPZipArchive *pZipArchive );
+	Q3BSPFileParser( const std::string &rMapName, IOSystem *pIOHandler );
 	~Q3BSPFileParser();
 	Q3BSP::Q3BSPModel *getModel() const;
 
@@ -81,7 +80,7 @@ private:
 	size_t m_sOffset;
 	std::vector<char> m_Data;
 	Q3BSP::Q3BSPModel *m_pModel;
-	Q3BSP::Q3BSPZipArchive *m_pZipArchive;
+	IOSystem *m_pIOHandler;
 };
 
 } // Namespace Assimp

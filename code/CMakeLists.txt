@@ -497,8 +497,6 @@ SET( Q3BSP_SRCS
 	Q3BSPFileParser.cpp
 	Q3BSPFileImporter.h
 	Q3BSPFileImporter.cpp
-	Q3BSPZipArchive.h
-	Q3BSPZipArchive.cpp
 )
 SOURCE_GROUP( Q3BSP FILES ${Q3BSP_SRCS})
 

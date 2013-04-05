@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Q3BSPFileParser.h"
 #include "DefaultIOSystem.h"
 #include "Q3BSPFileData.h"
-#include "Q3BSPZipArchive.h"
 #include <vector>
 
 namespace Assimp
@@ -53,13 +52,13 @@ namespace Assimp
 using namespace Q3BSP;
 
 // ------------------------------------------------------------------------------------------------
-Q3BSPFileParser::Q3BSPFileParser( const std::string &rMapName, Q3BSPZipArchive *pZipArchive ) :
+Q3BSPFileParser::Q3BSPFileParser( const std::string &rMapName, IOSystem *pIOHandler ) :
 	m_sOffset( 0 ),
 	m_Data(),
 	m_pModel( NULL ),
-	m_pZipArchive( pZipArchive )
+	m_pIOHandler( pIOHandler )
 {
-	ai_assert( NULL != m_pZipArchive );
+	ai_assert( NULL != m_pIOHandler );
 	ai_assert( !rMapName.empty() );
 
 	if ( !readData( rMapName ) )
@@ -90,10 +89,10 @@ Q3BSP::Q3BSPModel *Q3BSPFileParser::getModel() const
 // ------------------------------------------------------------------------------------------------
 bool Q3BSPFileParser::readData( const std::string &rMapName )
 {
-	if ( !m_pZipArchive->Exists( rMapName.c_str() ) )
+	if ( !m_pIOHandler->Exists( rMapName.c_str() ) )
 		return false;
 
-	IOStream *pMapFile = m_pZipArchive->Open( rMapName.c_str() );
+	IOStream *pMapFile = m_pIOHandler->Open( rMapName.c_str() );
 	if ( NULL == pMapFile )
 		return false;
 		
@@ -106,7 +105,7 @@ bool Q3BSPFileParser::readData( const std::string &rMapName )
 		m_Data.clear();
 		return false;
 	}
-	m_pZipArchive->Close( pMapFile );
+	m_pIOHandler->Close( pMapFile );
 
 	return true;
 }

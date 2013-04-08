@@ -97,9 +97,9 @@ public:
 public:
 
 	Converter(aiScene* out, const Document& doc)
-		: out(out) 
+		: defaultMaterialIndex()
+		, out(out) 
 		, doc(doc)
-		, defaultMaterialIndex()
 	{
 		// animations need to be converted first since this will
 		// populate the node_anim_chain_bits map, which is needed
@@ -1171,7 +1171,6 @@ private:
 				ai_assert(cluster);
 
 				const WeightIndexArray& indices = cluster->GetIndices();
-				const WeightArray& weights = cluster->GetWeights();
 
 				if(indices.empty()) {
 					continue;
@@ -1198,7 +1197,7 @@ private:
 					count_out_indices.push_back(0);
 
 					for(unsigned int i = 0; i < count; ++i) {					
-						if (no_mat_check || mats[geo.FaceForVertexIndex(out_idx[i])] == materialIndex) {
+						if (no_mat_check || static_cast<size_t>(mats[geo.FaceForVertexIndex(out_idx[i])]) == materialIndex) {
 							
 							if (index_out_indices.back() == no_index_sentinel) {
 								index_out_indices.back() = out_indices.size();

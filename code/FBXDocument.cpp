@@ -231,8 +231,8 @@ Object::~Object()
 
 // ------------------------------------------------------------------------------------------------
 FileGlobalSettings::FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props)
-: doc(doc)
-, props(props)
+: props(props)
+, doc(doc) 
 {
 
 }
@@ -579,7 +579,7 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
 
 		for (size_t i = 0; i < c; ++i) {
 			ai_assert(classnames[i]);
-			if(std::distance(key.begin(),key.end()) == lenghts[i] && !strncmp(classnames[i],obtype,lenghts[i])) {
+			if(static_cast<size_t>(std::distance(key.begin(),key.end())) == lenghts[i] && !strncmp(classnames[i],obtype,lenghts[i])) {
 				obtype = NULL;
 				break;
 			}

@@ -380,7 +380,7 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
 	}
 
 
-	uint32_t offset = 0x1b;
+	//uint32_t offset = 0x1b;
 
 	const char* cursor = input + 0x1b;
 

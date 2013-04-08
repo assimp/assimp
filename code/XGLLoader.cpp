@@ -77,7 +77,10 @@ struct free_it
 	void* free;
 };
 
+namespace Assimp { // this has to be in here because LogFunctions is in ::Assimp
 template<> const std::string LogFunctions<XGLImporter>::log_prefix = "XGL: ";
+
+}
 
 static const aiImporterDesc desc = {
 	"XGL Importer",

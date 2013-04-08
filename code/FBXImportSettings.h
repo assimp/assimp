@@ -51,13 +51,13 @@ namespace FBX {
 struct ImportSettings 
 {
 	ImportSettings()
-		: readAllLayers(true)
+		: strictMode(true)
+		, readAllLayers(true)
 		, readAllMaterials()
 		, readMaterials(true)
 		, readCameras(true)
 		, readLights(true)
 		, readAnimations(true)
-		, strictMode(true)
 		, readWeights(true)
 		, preservePivots(true)
 		, optimizeEmptyAnimationCurves(true)

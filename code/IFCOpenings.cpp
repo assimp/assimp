@@ -603,7 +603,6 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 	const IfcVector2& m0, const IfcVector2& m1,
 	IfcVector2& out0, IfcVector2& out1)
 {
-	const IfcVector2& m0_to_m1 = m1 - m0;
 	const IfcVector2& n0_to_n1 = n1 - n0;
 
 	const IfcVector2& n0_to_m0 = m0 - n0;
@@ -898,14 +897,13 @@ size_t CloseWindows(ContourVector& contours,
 
 			ai_assert((*it).skiplist.size() == (*it).contour.size());
 
-			SkipList::const_iterator skipbegin = (*it).skiplist.begin(), skipend = (*it).skiplist.end();
+			SkipList::const_iterator skipbegin = (*it).skiplist.begin();
 
 			curmesh.verts.reserve(curmesh.verts.size() + (*it).contour.size() * 4);
 			curmesh.vertcnt.reserve(curmesh.vertcnt.size() + (*it).contour.size());
 
 			// XXX this algorithm is really a bit inefficient - both in terms
 			// of constant factor and of asymptotic runtime.
-			size_t vstart = curmesh.verts.size();
 			std::vector<bool>::const_iterator skipit = skipbegin;
 
 			IfcVector3 start0;
@@ -991,10 +989,10 @@ size_t CloseWindows(ContourVector& contours,
 					}
 				}
 			}
-
+			/*
 			BOOST_FOREACH(TempOpening* opening, refs) {
 				//opening->wallPoints.clear();
-			}
+			}*/
 
 		}
 		else {
@@ -1146,7 +1144,6 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	bool generate_connection_geometry,
 	const IfcVector3& wall_extrusion_axis)
 {
-	std::vector<IfcVector3>& out = curmesh.verts;
 	OpeningRefVector contours_to_openings;
 
 	// Try to derive a solid base plane within the current surface for use as 
@@ -1175,7 +1172,6 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 	IfcVector3 wall_extrusion_axis_norm = wall_extrusion_axis;
 	wall_extrusion_axis_norm.Normalize();
 
-	size_t c = 0;
 	BOOST_FOREACH(TempOpening& opening,openings) {
 
 		// extrusionDir may be 0,0,0 on case where the opening mesh is not an

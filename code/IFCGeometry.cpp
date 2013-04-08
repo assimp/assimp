@@ -137,8 +137,6 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 
 	const size_t outer_polygon_size = *outer_polygon_it;
 	const IfcVector3& master_normal = normals[std::distance(begin, outer_polygon_it)];
-	const IfcVector3& master_normal_norm = IfcVector3(master_normal).Normalize();
-
 
 	// Generate fake openings to meet the interface for the quadrulate
 	// algorithm. It boils down to generating small boxes given the
@@ -329,8 +327,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 	}
 
 	const std::vector<IfcVector3>& in = result.verts;
-	const size_t size=in.size();
-
+	
 	const unsigned int cnt_segments = 16;
 	const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;
 
@@ -476,12 +473,12 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
 	IfcVector3 nor; 
 
 	// The input polygon is arbitrarily shaped, therefore we might need some tries
-	// until we find a suitable normal. Note that Newells algorithm would give
+	// until we find a suitable normal. Note that Newell's algorithm would give
 	// a more robust result, but this variant also gives us a suitable first
 	// axis for the 2D coordinate space on the polygon plane, exploiting the
 	// fact that the input polygon is nearly always a quad.
 	bool done = false;
-	size_t base = 0, i, j;
+	size_t i, j;
 	for (i = 0; !done && i < s-2; done || ++i) {
 		for (j = i+1; j < s-1; ++j) {
 			nor = -((out[i]-any_point)^(out[j]-any_point));

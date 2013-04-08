@@ -187,7 +187,6 @@ void MD5Importer::LoadFileIntoMemory (IOStream* file)
 	ai_assert(fileSize);
 
 	// allocate storage and copy the contents of the file to a memory buffer
-	pScene = pScene;
 	mBuffer = new char[fileSize+1];
 	file->Read( (void*)mBuffer, 1, fileSize);
 	iLineNumber = 1;

@@ -245,7 +245,7 @@ bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, cons
 			// directly on the vertex between two segments.
 			if (!intersected_boundary_points.empty() && intersected_boundary_segments.back()==i-1 ) {
 				const IfcVector3 diff = intersected_boundary_points.back() - p;
-				if(IfcVector3((diff.x, diff.y)).SquareLength() < 1e-7) {
+				if(IfcVector2(diff.x, diff.y).SquareLength() < 1e-7) {
 					continue;
 				}
 			}

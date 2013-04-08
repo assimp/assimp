@@ -1,0 +1,12 @@
+before_install:
+  - sudo apt-get install cmake
+
+before_script:
+  - cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES
+
+language: cpp
+compiler:
+  - gcc
+  - clang
+script: ./configure && make
+

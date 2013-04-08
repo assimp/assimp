@@ -419,6 +419,8 @@ private:
 			return "Scaling";
 		case TransformationComp_ScalingPivotInverse:
 			return "ScalingPivotInverse";
+		case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+			break;
 		}
 
 		ai_assert(false);
@@ -454,6 +456,8 @@ private:
 			return "Lcl Scaling";
 		case TransformationComp_ScalingPivotInverse:
 			return "ScalingPivotInverse";
+		case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+			break;
 		}
 
 		ai_assert(false);
@@ -1608,6 +1612,9 @@ private:
 
 			case FileGlobalSettings::FrameRate_CUSTOM:
 				return customFPSVal;
+
+			case FileGlobalSettings::FrameRate_MAX: // this is to silence compiler warnings
+				break;
 		}
 
 		ai_assert(false);

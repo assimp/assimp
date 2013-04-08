@@ -72,6 +72,9 @@ const char* TokenTypeString(TokenType t)
 
 		case TokenType_KEY:
 			return "TOK_KEY";
+
+		case TokenType_BINARY_DATA:
+			return "TOK_BINARY_DATA";
 	}
 
 	ai_assert(false);

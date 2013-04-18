@@ -176,8 +176,6 @@ inline aiReturn aiMaterial::Get<aiString>(const char* pKey,unsigned int type,
 }
 
 
-#ifndef ASSIMP_BUILD_NO_EXPORT
-
 // ---------------------------------------------------------------------------
 template<class TYPE>
 aiReturn aiMaterial::AddProperty (const TYPE* pInput,
@@ -268,8 +266,6 @@ inline aiReturn aiMaterial::AddProperty<int> (const int* pInput,
 		pNumValues * sizeof(int),
 		pKey,type,index,aiPTI_Integer);
 }
-
-#endif
 
 //! @endcond
 

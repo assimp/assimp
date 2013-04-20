@@ -58,8 +58,6 @@ SET( PUBLIC_HEADERS
 
 SET( Core_SRCS
 	Assimp.cpp
-	AssimpPCH.cpp
-	AssimpPCH.h
 )
 
 SET( Boost_SRCS
@@ -620,7 +618,7 @@ else (UNZIP_FOUND)
 	SET (unzip_compile_SRCS ${unzip_SRCS})
 endif (UNZIP_FOUND)
 
-SET( assim_src
+SET( assimp_src
 	# Assimp Files
 	${Core_SRCS}
 	${Common_SRCS}
@@ -681,13 +679,16 @@ SET( assim_src
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
 )
+
+ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
+
 IF ( ASSIMP_BUILD_STATIC_LIB )
 	ADD_LIBRARY( assimp STATIC
-		${assim_src}
+		${assimp_src}
 	)
 ELSE ( ASSIMP_BUILD_STATIC_LIB )
 	ADD_LIBRARY( assimp SHARED
-		${assim_src}
+		${assimp_src}
 	)
 ENDIF ( ASSIMP_BUILD_STATIC_LIB )
 

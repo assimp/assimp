@@ -27,6 +27,8 @@ endif()
 INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )
 
+INCLUDE (PrecompiledHeader)
+
 # If this is an in-source build (CMAKE_SOURCE_DIR == CMAKE_BINARY_DIR),
 # write the library/executable files to the respective directories in the
 # source tree. During an out-of-source build, however, do not litter this

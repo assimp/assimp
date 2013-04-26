@@ -467,6 +467,10 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 	for (; begin != end; ++begin)	{
 		aiFace& face = *begin;
 
+		if(face.mNumIndices < 3) {
+			continue;
+		}
+
 		// LWO doc: "the normal is defined as the cross product of the first and last edges"
 		aiVector3D* pV1 = mesh->mVertices + face.mIndices[0];
 		aiVector3D* pV2 = mesh->mVertices + face.mIndices[1];

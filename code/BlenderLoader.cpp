@@ -644,14 +644,18 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
 	// collect per-submesh numbers
 	std::map<int,size_t> per_mat;
+	std::map<int,size_t> per_mat_verts;
 	for (int i = 0; i < mesh->totface; ++i) {
 
 		const MFace& mf = mesh->mface[i];
 		per_mat[ mf.mat_nr ]++;
+		per_mat_verts[ mf.mat_nr ] += mf.v4?4:3;
 	}
+
 	for (int i = 0; i < mesh->totpoly; ++i) {
 		const MPoly& mp = mesh->mpoly[i];
 		per_mat[ mp.mat_nr ]++;
+		per_mat_verts[ mp.mat_nr ] += mp.totloop;
 	}
 
 	// ... and allocate the corresponding meshes
@@ -665,8 +669,8 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 		temp->push_back(new aiMesh());
 
 		aiMesh* out = temp->back();
-		out->mVertices = new aiVector3D[it.second*4];
-		out->mNormals  = new aiVector3D[it.second*4];
+		out->mVertices = new aiVector3D[per_mat_verts[it.first]];
+		out->mNormals  = new aiVector3D[per_mat_verts[it.first]];
 
 		//out->mNumFaces = 0
 		//out->mNumVertices = 0

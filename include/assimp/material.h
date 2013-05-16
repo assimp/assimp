@@ -657,7 +657,11 @@ struct aiMaterialProperty
 *  have to stick with the aiMaterialGetXXX family of unbound functions.
 *  The library defines a set of standard keys (AI_MATKEY_XXX).
 */
+#ifdef __cplusplus
+struct ASSIMP_API aiMaterial
+#else
 struct aiMaterial
+#endif
 {
 
 #ifdef __cplusplus

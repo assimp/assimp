@@ -319,7 +319,7 @@ enum aiPrimitiveType
 	 *  compiler to map this enum to a 32 Bit integer.
 	 */
 #ifndef SWIG
-	_aiPrimitiveType_Force32Bit = 0x9fffffff
+	_aiPrimitiveType_Force32Bit = INT_MAX
 #endif
 }; //! enum aiPrimitiveType
 

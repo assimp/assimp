@@ -291,8 +291,13 @@ class PyAssimp3DViewer:
 
             stride = 24 # 6 * 4 bytes
 
-            glUniform4f( shader.Material_diffuse, *mesh.material.properties["diffuse"] )
-            glUniform4f( shader.Material_ambient, *mesh.material.properties["ambient"] )
+            diffuse = mesh.material.properties["diffuse"]
+            if len(diffuse) == 3: diffuse.append(1.0)
+            ambient = mesh.material.properties["ambient"]
+            if len(ambient) == 3: ambient.append(1.0)
+
+            glUniform4f( shader.Material_diffuse, *diffuse )
+            glUniform4f( shader.Material_ambient, *ambient )
 
             vbo = mesh.gl["vbo"]
             vbo.bind()

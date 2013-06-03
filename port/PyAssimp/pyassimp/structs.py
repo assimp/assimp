@@ -1,6 +1,6 @@
 #-*- coding: UTF-8 -*-
 
-from ctypes import POINTER, c_void_p, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte, c_size_t
+from ctypes import POINTER, c_void_p, c_int, c_uint, c_char, c_float, Structure, c_char_p, c_double, c_ubyte, c_size_t, c_uint32
 
 
 class Vector2D(Structure):
@@ -77,6 +77,26 @@ class String(Structure):
             #  logical length of strings containing UTF-8 multibyte sequences! It's
             #  the number of bytes from the beginning of the string to its end.
             ("length", c_size_t),
+            
+            # String buffer. Size limit is MAXLEN
+            ("data", c_char*MAXLEN),
+        ]
+
+class MaterialPropertyString(Structure):
+    """
+    See 'aiTypes.h' for details.
+    
+    The size of length is truncated to 4 bytes on 64-bit platforms when used as a
+    material property (see MaterialSystem.cpp aiMaterial::AddProperty() for details).
+    """
+
+    MAXLEN = 1024
+
+    _fields_ = [
+            # Binary length of the string excluding the terminal 0. This is NOT the
+            #  logical length of strings containing UTF-8 multibyte sequences! It's
+            #  the number of bytes from the beginning of the string to its end.
+            ("length", c_uint32),
             
             # String buffer. Size limit is MAXLEN
             ("data", c_char*MAXLEN),

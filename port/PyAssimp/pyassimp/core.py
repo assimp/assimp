@@ -59,12 +59,12 @@ def make_tuple(ai_obj, type = None):
 
 def call_init(obj, caller = None):
         # init children
-        if hasattr(obj, '_init'):
+        if helper.hasattr_silent(obj, '_init'):
             obj._init(parent = caller)
 
         # pointers
-        elif hasattr(obj, 'contents'):
-            if hasattr(obj.contents, '_init'):
+        elif helper.hasattr_silent(obj, 'contents'):
+            if helper.hasattr_silent(obj.contents, '_init'):
                 obj.contents._init(target = obj, parent = caller)
 
 
@@ -76,7 +76,7 @@ def _init(self, target = None, parent = None):
     :param target: set the object which receive the added methods. Useful when manipulating
     pointers, to skip the intermediate 'contents' deferencing.
     """
-    if hasattr(self, '_is_init'):
+    if helper.hasattr_silent(self, '_is_init'):
         return self
     self._is_init = True
     
@@ -108,7 +108,7 @@ def _init(self, target = None, parent = None):
 
 
         if isinstance(obj, structs.String):
-            setattr(target, 'name', str(obj.data))
+            setattr(target, 'name', obj.data.decode("utf-8"))
             setattr(target.__class__, '__repr__', lambda x: str(x.__class__) + "(" + x.name + ")")
             setattr(target.__class__, '__str__', lambda x: x.name)
             continue
@@ -121,7 +121,7 @@ def _init(self, target = None, parent = None):
                 logger.debug("Added a parent as self." + name)
                 continue
 
-            if hasattr(self, 'mNum' + m[1:]):
+            if helper.hasattr_silent(self, 'mNum' + m[1:]):
 
                 length =  getattr(self, 'mNum' + m[1:])
     
@@ -346,7 +346,7 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        key = str(p.mKey.data).split('.')[1]
+        key = str(p.mKey.data.decode("utf-8")).split('.')[1]
 
         #the data
         from ctypes import POINTER, cast, c_int, c_float, sizeof
@@ -354,7 +354,7 @@ def _get_properties(properties, length):
             arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
-            value = cast(p.mData, POINTER(structs.String)).contents.data
+            value = cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data.decode("utf-8")
         elif p.mType == 4:
             arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents
             value = [x for x in arr]

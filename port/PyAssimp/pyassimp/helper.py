@@ -154,5 +154,15 @@ def search_library():
         # XXX: take version postfix of the .so on linux?
         return res[1:]
 
-
-
+def hasattr_silent(object, name):
+    """
+        Calls hasttr() with the given parameters and preserves the legacy (pre-Python 3.2)
+        functionality of silently catching exceptions.
+        
+        Returns the result of hasatter() or False if an exception was raised.
+    """
+    
+    try:
+        return hasattr(object, name)
+    except:
+        return False

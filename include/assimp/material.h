@@ -631,9 +631,13 @@ struct aiMaterialProperty
 
 #ifdef __cplusplus
 
-	aiMaterialProperty()	{
-		mData = NULL;
-		mIndex = mSemantic = 0;
+	aiMaterialProperty()
+		: mSemantic( 0 )
+		, mIndex( 0 )
+		, mDataLength( 0 )
+		, mType( aiPTI_Float )
+		, mData( NULL )
+	{
 	}
 
 	~aiMaterialProperty()	{

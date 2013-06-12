@@ -1567,8 +1567,8 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 					unsigned int iIndex = strtoul10(filePtr,&filePtr);
 					if (iIndex >= iNumBones)
 					{
-						continue;
 						LogWarning("Bone index is out of bounds");
+						continue;
 					}
 					if (!ParseString(mesh.mBones[iIndex].mName,"*MESH_BONE_NAME"))						
 						SkipToNextToken();

@@ -403,7 +403,7 @@ enum aiComponent
 	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_LIGHTS = 0x100,
 
-	/** Removes all light sources (aiScene::mCameras).
+	/** Removes all cameras (aiScene::mCameras).
 	 * The corresponding scenegraph nodes are NOT removed.
 	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_CAMERAS = 0x200,

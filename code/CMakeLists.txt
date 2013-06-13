@@ -236,11 +236,7 @@ SET( LWS_SRCS
 )
 SOURCE_GROUP( LWS FILES ${LWS_SRCS})
 
-SET ( M3_SRCS
-	M3Importer.cpp
-	M3Importer.h
-)
-SOURCE_GROUP( M3 FILES ${M3_SRCS} )
+
 
 SET( MD2_SRCS
 	MD2FileData.h
@@ -639,7 +635,6 @@ SET( assimp_src
 	${Irr_SRCS}
 	${LWO_SRCS}
 	${LWS_SRCS}
-	${M3_SRCS}
 	${MD2_SRCS}
 	${MD3_SRCS}
 	${MD5_SRCS}

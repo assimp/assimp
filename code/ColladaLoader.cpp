@@ -472,7 +472,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 			}
 			else 
 			{
-				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup \"%s\" in geometry \"%s\".") % submesh.mMaterial % mid.mMeshOrController));
+				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup <%s> in geometry <%s>.") % submesh.mMaterial % mid.mMeshOrController));
 				if( !mid.mMaterials.empty() )
 					meshMaterial = mid.mMaterials.begin()->second.mMatName;
 			}
@@ -642,7 +642,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 			throw DeadlyImportError( "Data type mismatch while resolving mesh joints");
 		// sanity check: we rely on the vertex weights always coming as pairs of BoneIndex-WeightIndex
 		if( pSrcController->mWeightInputJoints.mOffset != 0 || pSrcController->mWeightInputWeights.mOffset != 1)
-			throw DeadlyImportError( "Unsupported vertex_weight adressing scheme. ");
+			throw DeadlyImportError( "Unsupported vertex_weight addressing scheme. ");
 
 		// create containers to collect the weights for each bone
 		size_t numBones = jointNames.mStrings.size();
@@ -973,7 +973,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 				else if( subElement == "Z")
 					entry.mSubElement = 2;
 				else 
-					DefaultLogger::get()->warn( boost::str( boost::format( "Unknown anim subelement \"%s\". Ignoring") % subElement));
+					DefaultLogger::get()->warn( boost::str( boost::format( "Unknown anim subelement <%s>. Ignoring") % subElement));
 			} else
 			{
 				// no subelement following, transformId is remaining string

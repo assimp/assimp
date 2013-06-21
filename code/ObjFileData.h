@@ -283,6 +283,7 @@ struct Model
 		m_pCurrent(NULL),
 		m_pCurrentMaterial(NULL),
 		m_pDefaultMaterial(NULL),
+        m_pGroupFaceIDs(NULL),
 		m_strActiveGroup(""),
 		m_pCurrentMesh(NULL)
 	{

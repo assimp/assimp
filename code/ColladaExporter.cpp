@@ -58,6 +58,9 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+	if(outfile == NULL) {
+		throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
+	}
 
 	// XXX maybe use a small wrapper around IOStream that behaves like std::stringstream in order to avoid the extra copy.
 	outfile->Write( iDoTheExportThing.mOutput.str().c_str(), static_cast<size_t>(iDoTheExportThing.mOutput.tellp()),1);

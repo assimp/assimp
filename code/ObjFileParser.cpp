@@ -528,17 +528,11 @@ int ObjFileParser::getMaterialIndex( const std::string &strMaterialName )
 //	Getter for a group name.  
 void ObjFileParser::getGroupName()
 {
-	// Get next word from data buffer
-	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
-	m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
+	std::string strGroupName;
+   
+	m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, strGroupName);
 	if ( isEndOfBuffer( m_DataIt, m_DataItEnd ) )
 		return;
-
-	// Store the group name in the group library 
-	char *pStart = &(*m_DataIt);
-	while ( m_DataIt != m_DataItEnd && !isSeparator(*m_DataIt) )
-		m_DataIt++;
-	std::string strGroupName( pStart, &(*m_DataIt) );
 
 	// Change active group, if necessary
 	if ( m_pModel->m_strActiveGroup != strGroupName )

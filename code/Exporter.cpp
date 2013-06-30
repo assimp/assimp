@@ -85,7 +85,8 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
-	Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj),
+	Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj, 
+		aiProcess_GenNormals | aiProcess_PreTransformVertices),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER

@@ -192,29 +192,44 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 		}
 
 		// search file (same name as the IFCZIP except for the file extension) and place file pointer there
-		if ( unzLocateFile( zip, fileName.c_str(), 0 ) == UNZ_OK )
-		{
-			// get file size, etc.
-			unz_file_info fileInfo;
-			unzGetCurrentFileInfo( zip , &fileInfo, 0, 0, 0, 0, 0, 0 );
+		
+		if(UNZ_OK == unzGoToFirstFile(zip)) {
+			do {
+				//
 
-			uint8_t* buff = new uint8_t[fileInfo.uncompressed_size];
+				// get file size, etc.
+				unz_file_info fileInfo;
+				char filename[256];
+				unzGetCurrentFileInfo( zip , &fileInfo, filename, sizeof(filename), 0, 0, 0, 0 );
+				
+				if (GetExtension(filename) != "ifc") {
+					continue;
+				}
 
-			LogInfo("Decompressing IFCZIP file");
+				uint8_t* buff = new uint8_t[fileInfo.uncompressed_size];
 
-			unzOpenCurrentFile( zip  );
-			const int ret = unzReadCurrentFile( zip, buff, fileInfo.uncompressed_size);
-			size_t filesize = fileInfo.uncompressed_size;
-			if ( ret < 0 || size_t(ret) != filesize )
-			{
-				delete[] buff;
-				ThrowException("Failed to decompress IFC ZIP file");
-			}
-			unzCloseCurrentFile( zip );
-			stream.reset(new MemoryIOStream(buff,fileInfo.uncompressed_size,true));
+				LogInfo("Decompressing IFCZIP file");
+
+				unzOpenCurrentFile( zip  );
+				const int ret = unzReadCurrentFile( zip, buff, fileInfo.uncompressed_size);
+				size_t filesize = fileInfo.uncompressed_size;
+				if ( ret < 0 || size_t(ret) != filesize )
+				{
+					delete[] buff;
+					ThrowException("Failed to decompress IFC ZIP file");
+				}
+				unzCloseCurrentFile( zip );
+				stream.reset(new MemoryIOStream(buff,fileInfo.uncompressed_size,true));
+				break;
+
+				if (unzGoToNextFile(zip) == UNZ_END_OF_LIST_OF_FILE) {
+					ThrowException("Found no IFC file member in IFCZIP file (1)");
+				}
+
+			} while(true);
 		}
 		else {
-			ThrowException("Found no IFC file member in IFCZIP file");
+			ThrowException("Found no IFC file member in IFCZIP file (2)");
 		}
 
 		unzClose(zip);

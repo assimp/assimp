@@ -43,7 +43,7 @@ def main(filename=None):
         print("    material id:" + str(mesh.materialindex+1))
         print("    vertices:" + str(len(mesh.vertices)))
         print("    first 3 verts:\n" + str(mesh.vertices[:3]))
-        if mesh.normals:
+        if mesh.normals.any():
                 print("    first 3 normals:\n" + str(mesh.normals[:3]))
         else:
                 print("    no normals")

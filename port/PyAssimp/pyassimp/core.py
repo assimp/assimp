@@ -58,14 +58,14 @@ def make_tuple(ai_obj, type = None):
     return res
 
 def call_init(obj, caller = None):
-        # init children
-        if helper.hasattr_silent(obj, '_init'):
-            obj._init(parent = caller)
+    # init children
+    if helper.hasattr_silent(obj, '_init'):
+        obj._init(parent = caller)
 
-        # pointers
-        elif helper.hasattr_silent(obj, 'contents'):
-            if helper.hasattr_silent(obj.contents, '_init'):
-                obj.contents._init(target = obj, parent = caller)
+    # pointers
+    elif helper.hasattr_silent(obj, 'contents'):
+        if helper.hasattr_silent(obj.contents, '_init'):
+            obj.contents._init(target = obj, parent = caller)
 
 
 
@@ -313,7 +313,7 @@ def _finalize_mesh(mesh, target):
             data = numpy.array([make_tuple(getattr(mesh, name)[i]) for i in range(nb_vertices)], dtype=numpy.float32)
             setattr(target, name[1:].lower(), data)
         else:
-            setattr(target, name[1:].lower(), [])
+            setattr(target, name[1:].lower(), numpy.array([], dtype="float32"))
 
     def fillarray(name):
         mAttr = getattr(mesh, name)

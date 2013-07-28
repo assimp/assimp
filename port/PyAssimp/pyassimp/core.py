@@ -338,7 +338,11 @@ def _finalize_mesh(mesh, target):
 
 
 class PropertyGetter(dict):
-    def __getitem__(self, key, semantic = 0):
+    def __getitem__(self, key):
+        semantic = 0
+        if isinstance(key, tuple):
+            key, semantic = key
+
         return dict.__getitem__(self, (key, semantic))
 
     def keys(self):

@@ -10,6 +10,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 import pyassimp
+import pyassimp.postprocess
 
 def recur_node(node,level = 0):
     print("  " + "\t" * level + "- " + str(node))
@@ -19,7 +20,7 @@ def recur_node(node,level = 0):
 
 def main(filename=None):
 
-    scene = pyassimp.load(filename)
+    scene = pyassimp.load(filename, pyassimp.postprocess.aiProcess_Triangulate)
     
     #the model we load
     print("MODEL:" + filename)
@@ -42,7 +43,7 @@ def main(filename=None):
         print("    material id:" + str(mesh.materialindex+1))
         print("    vertices:" + str(len(mesh.vertices)))
         print("    first 3 verts:\n" + str(mesh.vertices[:3]))
-        if mesh.normals.any():
+        if mesh.normals:
                 print("    first 3 normals:\n" + str(mesh.normals[:3]))
         else:
                 print("    no normals")

@@ -46,6 +46,10 @@ The library provides importers for a lot of file formats, including:
 - NDO
 - Ogre XML
 - Q3D
+ 
+Additionally, the following formats are also supported, but not part of the core library as they depend on proprietary libraries.
+
+- C4D (https://github.com/acgessler/assimp-cinema4d)
 
 Exporters include:
 

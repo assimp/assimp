@@ -82,7 +82,7 @@ protected:
 	/** Report a validation error. This will throw an exception,
 	 *  control won't return.
 	 * @param msg Format string for sprintf().*/
-	AI_WONT_RETURN void ReportError(const char* msg,...);
+	AI_WONT_RETURN void ReportError(const char* msg,...) AI_WONT_RETURN_SUFFIX;
 
 
 	// -------------------------------------------------------------------

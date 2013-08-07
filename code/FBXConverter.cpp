@@ -547,6 +547,10 @@ private:
 			default:
 				ai_assert(false);
 		}
+        
+        ai_assert((order[0] >= 0) && (order[0] <= 2));
+        ai_assert((order[1] >= 0) && (order[1] <= 2));
+        ai_assert((order[2] >= 0) && (order[2] <= 2));
 
 		if(!is_id[order[0]]) {
 			out = temp[order[0]];

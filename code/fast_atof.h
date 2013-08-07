@@ -16,6 +16,7 @@
 #define __FAST_A_TO_F_H_INCLUDED__
 
 #include <math.h>
+#include <limits.h>
 
 namespace Assimp
 {

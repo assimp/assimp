@@ -90,8 +90,7 @@ STLExporter :: STLExporter(const char* _filename, const aiScene* pScene, bool bi
 	const std::locale& l = std::locale("C");
 	mOutput.imbue(l);
 	if (binary) {
-		char buf[80];
-		for(int i = 0; i < 80; ++i) buf[i] = 0;
+		char buf[80] = {0} ;
 		buf[0] = 'A'; buf[1] = 's'; buf[2] = 's'; buf[3] = 'i'; buf[4] = 'm'; buf[5] = 'p';
 		buf[6] = 'S'; buf[7] = 'c'; buf[8] = 'e'; buf[9] = 'n'; buf[10] = 'e';
 		mOutput.write(buf, 80);
@@ -101,6 +100,7 @@ STLExporter :: STLExporter(const char* _filename, const aiScene* pScene, bool bi
 				meshnum++;
 			}
 		}
+		AI_SWAP4(meshnum);
 		mOutput.write((char *)&meshnum, 4);
 		for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
 			WriteMeshBinary(pScene->mMeshes[i]);
@@ -157,13 +157,15 @@ void STLExporter :: WriteMeshBinary(const aiMesh* m)
 			nor.Normalize();
 		}
 		float nx = nor.x, ny = nor.y, nz = nor.z;
+		AI_SWAP4(nx); AI_SWAP4(ny); AI_SWAP4(nz);
 		mOutput.write((char *)&nx, 4); mOutput.write((char *)&ny, 4); mOutput.write((char *)&nz, 4);
 		for(unsigned int a = 0; a < f.mNumIndices; ++a) {
 			const aiVector3D& v  = m->mVertices[f.mIndices[a]];
 			float vx = v.x, vy = v.y, vz = v.z;
+			AI_SWAP4(vx); AI_SWAP4(vy); AI_SWAP4(vz);
 			mOutput.write((char *)&vx, 4); mOutput.write((char *)&vy, 4); mOutput.write((char *)&vz, 4);
 		}
-		char dummy[2];
+		char dummy[2] = {0};
 		mOutput.write(dummy, 2);
 	}
 }

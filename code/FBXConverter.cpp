@@ -1848,7 +1848,7 @@ private:
 		}}
 #endif
 
-		const AnimationCurveNode* curve_node;
+		const AnimationCurveNode* curve_node = NULL;
 		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
 			ai_assert(node);
 

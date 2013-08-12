@@ -234,6 +234,7 @@ protected:
 	std::vector<aiAnimation*> mAnims;
 
 	bool noSkeletonMesh;
+	bool ignoreUpDirection;
 };
 
 } // end of namespace Assimp

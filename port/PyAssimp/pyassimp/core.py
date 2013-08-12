@@ -58,14 +58,14 @@ def make_tuple(ai_obj, type = None):
     return res
 
 def call_init(obj, caller = None):
-        # init children
-        if helper.hasattr_silent(obj, '_init'):
-            obj._init(parent = caller)
+    # init children
+    if helper.hasattr_silent(obj, '_init'):
+        obj._init(parent = caller)
 
-        # pointers
-        elif helper.hasattr_silent(obj, 'contents'):
-            if helper.hasattr_silent(obj.contents, '_init'):
-                obj.contents._init(target = obj, parent = caller)
+    # pointers
+    elif helper.hasattr_silent(obj, 'contents'):
+        if helper.hasattr_silent(obj.contents, '_init'):
+            obj.contents._init(target = obj, parent = caller)
 
 
 
@@ -313,7 +313,7 @@ def _finalize_mesh(mesh, target):
             data = numpy.array([make_tuple(getattr(mesh, name)[i]) for i in range(nb_vertices)], dtype=numpy.float32)
             setattr(target, name[1:].lower(), data)
         else:
-            setattr(target, name[1:].lower(), [])
+            setattr(target, name[1:].lower(), numpy.array([], dtype="float32"))
 
     def fillarray(name):
         mAttr = getattr(mesh, name)
@@ -336,6 +336,27 @@ def _finalize_mesh(mesh, target):
     faces = numpy.array([f.indices for f in target.faces], dtype=numpy.int32)
     setattr(target, 'faces', faces)
 
+
+class PropertyGetter(dict):
+    def __getitem__(self, key):
+        semantic = 0
+        if isinstance(key, tuple):
+            key, semantic = key
+
+        return dict.__getitem__(self, (key, semantic))
+
+    def keys(self):
+        for k in dict.keys(self):
+            yield k[0]
+
+    def __iter__(self):
+        return self.keys()
+
+    def items(self):
+        for k, v in dict.items(self):
+            yield k[0], v
+
+
 def _get_properties(properties, length): 
     """
     Convenience Function to get the material properties as a dict
@@ -346,7 +367,7 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        key = str(p.mKey.data.decode("utf-8")).split('.')[1]
+        key = (str(p.mKey.data.decode("utf-8")).split('.')[1], p.mSemantic)
 
         #the data
         from ctypes import POINTER, cast, c_int, c_float, sizeof
@@ -366,7 +387,7 @@ def _get_properties(properties, length):
 
         result[key] = value
 
-    return result
+    return PropertyGetter(result)
 
 def decompose_matrix(matrix):
     if not isinstance(matrix, structs.Matrix4x4):

@@ -60,6 +60,7 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "BaseProcess.h" 
 #include "Importer.h" // need this for GetPostProcessingStepInstanceList()
 
+#include "JoinVerticesProcess.h"
 #include "MakeVerboseFormat.h"
 #include "ConvertToLHProcess.h"
 
@@ -86,7 +87,7 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
 	Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj, 
-		aiProcess_GenNormals | aiProcess_PreTransformVertices),
+		aiProcess_GenNormals /*| aiProcess_PreTransformVertices */),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER
@@ -260,6 +261,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 
 				// If the input scene is not in verbose format, but there is at least postprocessing step that relies on it,
 				// we need to run the MakeVerboseFormat step first.
+				bool must_join_again = false;
 				if (scenecopy->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
 					
 					bool verbosify = false;
@@ -277,6 +279,10 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 
 						MakeVerboseFormatProcess proc;
 						proc.Execute(scenecopy.get());
+
+						if(!(exp.mEnforcePP & aiProcess_JoinIdenticalVertices)) {
+							must_join_again = true;
+						}
 					}
 				}
 
@@ -319,6 +325,11 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 					ai_assert(privOut);
 
 					privOut->mPPStepsApplied |= pp;
+				}
+
+				if(must_join_again) {
+					JoinVerticesProcess proc;
+					proc.Execute(scenecopy.get());
 				}
 
 				exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get());

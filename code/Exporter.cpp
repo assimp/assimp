@@ -74,6 +74,7 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 void ExportSceneCollada(const char*,IOSystem*, const aiScene*);
 void ExportSceneObj(const char*,IOSystem*, const aiScene*);
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
+void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*);
 void ExportScenePly(const char*,IOSystem*, const aiScene*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*) {}
 
@@ -92,6 +93,9 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER
 	Exporter::ExportFormatEntry( "stl", "Stereolithography", "stl" , &ExportSceneSTL, 
+		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
+	),
+	Exporter::ExportFormatEntry( "stlb", "Stereolithography(binary)", "stlb" , &ExportSceneSTLBinary, 
 		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
 	),
 #endif

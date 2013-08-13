@@ -1,0 +1,14 @@
+       ===============================================
+        The Asset-Importer-Library Coding conventions
+       ===============================================
+
+	If you want to participate to the Asset-Importer_Library please have a look
+	onto these coding conventions and try to follow them. They are more or less
+	some kind of guide line to help others coming into the code and help all
+	the Asset-Importer-Library users.
+	
+	 Tab width
+	===========
+	The tab width shall be 4 spaces.
+	
+	

@@ -51,6 +51,104 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #endif
 
+#ifdef WIN32
+#define LITTLE_ENDIAN_SYSTEM
+namespace {
+    int DecodeUTF8(     const char*  zUTF8String,
+        size_t               nUTF8StringBytes,
+        wchar_t*         pUCS2Buffer,
+        size_t               nUCS2BufferBytes )
+    {
+        unsigned char  c1 = 0,
+            c2 = 0,
+            c3 = 0;
+        char* pIn = (char*)zUTF8String;
+        char* pOut = (char*)pUCS2Buffer;
+        size_t nUsed = 0;
+        size_t nAllowed = nUCS2BufferBytes - sizeof(wchar_t);
+
+        for (register size_t i = 0; i < nUTF8StringBytes; i++, pIn++)
+        {
+            if (*pIn == 0)
+                break;
+
+            if (((nUsed+=2) > nAllowed) && pOut)
+            {
+                *pOut = 0;
+                return -1;
+                //_DWFCORE_THROW( DWFOverflowException, L"Buffer too small." );
+            }
+
+            c1 = *pIn;
+
+            //
+            // one byte
+            //
+            if (c1 < 0x80)
+            {
+
+#ifdef  LITTLE_ENDIAN_SYSTEM
+
+                *(pOut++) = c1;
+                *(pOut++) = 0x00;
+#else
+
+                *(pOut++) = 0x00;
+                *(pOut++) = c1;
+#endif
+
+            }
+            //
+            // three bytes
+            //
+            else if ((c1 & 0xf0) == 0xe0)
+            {
+                c2 = *(pIn+1);
+                c3 = *(pIn+2);
+
+#ifdef  LITTLE_ENDIAN_SYSTEM
+
+                *(pOut++) = (((c2 & 0x03) << 6) |  (c3 & 0x3f));
+                *(pOut++) = (((c1 & 0x0f) << 4) | ((c2 & 0x3c) >> 2));
+#else
+
+                *(pOut++) = (((c1 & 0x0f) << 4) | ((c2 & 0x3c) >> 2));
+                *(pOut++) = (((c2 & 0x03) << 6) |  (c3 & 0x3f));
+#endif
+
+                i += 2;
+                pIn += 2;
+            }
+            //
+            // two bytes
+            //
+            else
+            {
+                c2 = *(pIn+1);
+
+#ifdef  LITTLE_ENDIAN_SYSTEM
+
+                *(pOut++) = (((c1 & 0x03) << 6) | (c2 & 0x3f));
+                *(pOut++) = ((c1 & 0x1c) >> 2);
+#else
+
+                *(pOut++) = ((c1 & 0x1c) >> 2);
+                *(pOut++) = (((c1 & 0x03) << 6) | (c2 & 0x3f));
+#endif
+
+                i++;
+                pIn++;
+            }
+        }
+
+        *(pOut++) = 0;
+        *(pOut++) = 0;
+
+        return (int)nUsed;
+    }
+}
+#endif
+
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
@@ -67,12 +165,28 @@ DefaultIOSystem::~DefaultIOSystem()
 	// nothing to do here
 }
 
+// maximum path length
+// XXX http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html 
+#ifdef PATH_MAX
+#	define PATHLIMIT PATH_MAX
+#else
+#	define PATHLIMIT 4096
+#endif
+
+
 // ------------------------------------------------------------------------------------------------
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists( const char* pFile) const
 {
-	FILE* file = ::fopen( pFile, "rb");
-	if( !file)
+#ifdef WIN32
+    wchar_t pFileW[PATHLIMIT];
+    DecodeUTF8(pFile, strlen(pFile), pFileW, PATHLIMIT);
+    
+    FILE* file = ::_wfopen(pFileW, L"rb");
+#else
+    FILE* file = ::fopen( pFile, "rb");
+#endif
+    if( !file)
 		return false;
 
 	::fclose( file);
@@ -117,14 +231,6 @@ bool IOSystem::ComparePaths (const char* one, const char* second) const
 {
 	return !ASSIMP_stricmp(one,second);
 }
-
-// maximum path length
-// XXX http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html 
-#ifdef PATH_MAX
-#	define PATHLIMIT PATH_MAX
-#else
-#	define PATHLIMIT 4096
-#endif
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path

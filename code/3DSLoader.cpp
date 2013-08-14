@@ -79,6 +79,8 @@ static const aiImporterDesc desc = {
 	Discreet3DS::Chunk chunk;                                            \
 	ReadChunk(&chunk);                                                   \
 	int chunkSize = chunk.Size-sizeof(Discreet3DS::Chunk);	             \
+    if(chunkSize <= 0)                                                   \
+        continue;                                                        \
 	const int oldReadLimit = stream->GetReadLimit();                     \
 	stream->SetReadLimit(stream->GetCurrentPos() + chunkSize);           \
 	

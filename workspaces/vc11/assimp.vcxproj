@@ -1,0 +1,1903 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="debug-dll|Win32">
+      <Configuration>debug-dll</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug-dll|x64">
+      <Configuration>debug-dll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug-noboost-dll|Win32">
+      <Configuration>debug-noboost-dll</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug-noboost-dll|x64">
+      <Configuration>debug-noboost-dll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug-noboost-st|Win32">
+      <Configuration>debug-noboost-st</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug-noboost-st|x64">
+      <Configuration>debug-noboost-st</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug-st|Win32">
+      <Configuration>debug-st</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug-st|x64">
+      <Configuration>debug-st</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug|Win32">
+      <Configuration>debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug|x64">
+      <Configuration>debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-dll|Win32">
+      <Configuration>release-dll</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-dll|x64">
+      <Configuration>release-dll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-noboost-dll|Win32">
+      <Configuration>release-noboost-dll</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-noboost-dll|x64">
+      <Configuration>release-noboost-dll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-noboost-st|Win32">
+      <Configuration>release-noboost-st</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-noboost-st|x64">
+      <Configuration>release-noboost-st</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-st|Win32">
+      <Configuration>release-st</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-st|x64">
+      <Configuration>release-st</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release|Win32">
+      <Configuration>release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release|x64">
+      <Configuration>release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5691E159-2D9B-407F-971F-EA5C592DC524}</ProjectGuid>
+    <RootNamespace>assimp</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-st|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\SingleThreadedShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\SingleThreadedShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\NoBoostShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\NoBoostShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\FastSTL.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-st|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\SingleThreadedShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\SingleThreadedShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\NoBoostShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+    <Import Project="shared\NoBoostShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+    <Import Project="shared\NoBoostShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\DllShared.props" />
+    <Import Project="shared\NoBoostShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared\LibShared.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.60315.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+    <OutDir>./../../lib/$(ProjectName)_$(Configuration)_$(Platform)\</OutDir>
+    <IntDir>./../../obj/$(ProjectName)_$(Configuration)_$(Platform)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)Assimp32.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)Assimp32.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)Assimp32d.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)Assimp32d.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG; _SCL_SECURE_NO_WARNINGS; _CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG; _SCL_SECURE_NO_WARNINGS; _CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)Assimp64.dll</OutputFile>
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)Assimp64d.dll</OutputFile>
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)"
+mkdir "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)"
+
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpview_$(Configuration)_$(Platform)\"
+copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configuration)_$(Platform)\"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;ASSIMP_BUILD_BOOST_WORKAROUND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG; _SCL_SECURE_NO_WARNINGS; _CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>..\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG; _SCL_SECURE_NO_WARNINGS; _CRT_SECURE_NO_WARNINGS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>AssimpPCH.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\assimp\Compiler\poppack1.h" />
+    <ClInclude Include="..\..\include\assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="..\..\include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="..\..\include\assimp\Exporter.hpp" />
+    <ClInclude Include="..\..\include\assimp\Importer.hpp" />
+    <ClInclude Include="..\..\include\assimp\IOStream.hpp" />
+    <ClInclude Include="..\..\include\assimp\IOSystem.hpp" />
+    <ClInclude Include="..\..\include\assimp\Logger.hpp" />
+    <ClInclude Include="..\..\include\assimp\LogStream.hpp" />
+    <ClInclude Include="..\..\include\assimp\NullLogger.hpp" />
+    <ClInclude Include="..\..\include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="..\..\include\assimp\cexport.h" />
+    <ClInclude Include="..\..\include\assimp\cfileio.h" />
+    <ClInclude Include="..\..\include\assimp\cimport.h" />
+    <ClInclude Include="..\..\include\assimp\ai_assert.h" />
+    <ClInclude Include="..\..\include\assimp\anim.h" />
+    <ClInclude Include="..\..\include\assimp\camera.h" />
+    <ClInclude Include="..\..\include\assimp\color4.h" />
+    <ClInclude Include="..\..\include\assimp\config.h" />
+    <ClInclude Include="..\..\include\assimp\defs.h" />
+    <ClInclude Include="..\..\include\assimp\importerdesc.h" />
+    <ClInclude Include="..\..\include\assimp\light.h" />
+    <ClInclude Include="..\..\include\assimp\material.h" />
+    <ClInclude Include="..\..\include\assimp\matrix3x3.h" />
+    <ClInclude Include="..\..\include\assimp\matrix4x4.h" />
+    <ClInclude Include="..\..\include\assimp\mesh.h" />
+    <ClInclude Include="..\..\include\assimp\postprocess.h" />
+    <ClInclude Include="..\..\include\assimp\quaternion.h" />
+    <ClInclude Include="..\..\include\assimp\scene.h" />
+    <ClInclude Include="..\..\include\assimp\texture.h" />
+    <ClInclude Include="..\..\include\assimp\types.h" />
+    <ClInclude Include="..\..\include\assimp\vector2.h" />
+    <ClInclude Include="..\..\include\assimp\vector3.h" />
+    <ClInclude Include="..\..\include\assimp\version.h" />
+    <ClInclude Include="..\..\code\3DSHelper.h" />
+    <ClInclude Include="..\..\code\3DSLoader.h" />
+    <ClInclude Include="..\..\code\ASELoader.h" />
+    <ClInclude Include="..\..\code\ASEParser.h" />
+    <ClInclude Include="..\..\code\HMPFileData.h" />
+    <ClInclude Include="..\..\code\HMPLoader.h" />
+    <ClInclude Include="..\..\code\LWOFileData.h" />
+    <ClInclude Include="..\..\code\LWOLoader.h" />
+    <ClInclude Include="..\..\code\MD3FileData.h" />
+    <ClInclude Include="..\..\code\MD3Loader.h" />
+    <ClInclude Include="..\..\code\MD5Loader.h" />
+    <ClInclude Include="..\..\code\MD5Parser.h" />
+    <ClInclude Include="..\..\code\MDCFileData.h" />
+    <ClInclude Include="..\..\code\MDCLoader.h" />
+    <ClInclude Include="..\..\code\MDCNormalTable.h" />
+    <ClInclude Include="..\..\code\HalfLifeFileData.h" />
+    <ClInclude Include="..\..\code\MDLDefaultColorMap.h" />
+    <ClInclude Include="..\..\code\MDLFileData.h" />
+    <ClInclude Include="..\..\code\MDLLoader.h" />
+    <ClInclude Include="..\..\code\ObjFileData.h" />
+    <ClInclude Include="..\..\code\ObjFileImporter.h" />
+    <ClInclude Include="..\..\code\ObjFileMtlImporter.h" />
+    <ClInclude Include="..\..\code\ObjFileParser.h" />
+    <ClInclude Include="..\..\code\ObjTools.h" />
+    <ClInclude Include="..\..\code\PlyLoader.h" />
+    <ClInclude Include="..\..\code\PlyParser.h" />
+    <ClInclude Include="..\..\code\SMDLoader.h" />
+    <ClInclude Include="..\..\code\STLLoader.h" />
+    <ClInclude Include="..\..\code\XFileHelper.h" />
+    <ClInclude Include="..\..\code\XFileImporter.h" />
+    <ClInclude Include="..\..\code\XFileParser.h" />
+    <ClInclude Include="..\..\code\DXFHelper.h" />
+    <ClInclude Include="..\..\code\DXFLoader.h" />
+    <ClInclude Include="..\..\code\RawLoader.h" />
+    <ClInclude Include="..\..\code\NFFLoader.h" />
+    <ClInclude Include="..\..\code\OFFLoader.h" />
+    <ClInclude Include="..\..\code\ACLoader.h" />
+    <ClInclude Include="..\..\code\LWOAnimation.h" />
+    <ClInclude Include="..\..\code\LWSLoader.h" />
+    <ClInclude Include="..\..\code\BVHLoader.h" />
+    <ClInclude Include="..\..\code\IRRMeshLoader.h" />
+    <ClInclude Include="..\..\code\IRRLoader.h" />
+    <ClInclude Include="..\..\code\IRRShared.h" />
+    <ClInclude Include="..\..\code\Q3DLoader.h" />
+    <ClInclude Include="..\..\code\B3DImporter.h" />
+    <ClInclude Include="..\..\code\ColladaHelper.h" />
+    <ClInclude Include="..\..\code\ColladaLoader.h" />
+    <ClInclude Include="..\..\code\ColladaParser.h" />
+    <ClInclude Include="..\..\code\TerragenLoader.h" />
+    <ClInclude Include="..\..\code\CSMLoader.h" />
+    <ClInclude Include="..\..\code\UnrealLoader.h" />
+    <ClInclude Include="..\..\code\NDOLoader.h" />
+    <ClInclude Include="..\..\code\OgreImporter.hpp" />
+    <ClInclude Include="..\..\code\OgreXmlHelper.h" />
+    <ClInclude Include="..\..\code\OgreXmlHelper.hpp" />
+    <ClInclude Include="..\..\code\MS3DLoader.h" />
+    <ClInclude Include="..\..\code\COBLoader.h" />
+    <ClInclude Include="..\..\code\COBScene.h" />
+    <ClInclude Include="..\..\code\BlenderDNA.h" />
+    <ClInclude Include="..\..\code\BlenderIntermediate.h" />
+    <ClInclude Include="..\..\code\BlenderLoader.h" />
+    <ClInclude Include="..\..\code\BlenderModifier.h" />
+    <ClInclude Include="..\..\code\BlenderScene.h" />
+    <ClInclude Include="..\..\code\BlenderSceneGen.h" />
+    <ClInclude Include="..\..\code\Q3BSPFileData.h" />
+    <ClInclude Include="..\..\code\Q3BSPFileImporter.h" />
+    <ClInclude Include="..\..\code\Q3BSPFileParser.h" />
+    <ClInclude Include="..\..\code\Q3BSPZipArchive.h" />
+    <ClInclude Include="..\..\code\MD2FileData.h" />
+    <ClInclude Include="..\..\code\MD2Loader.h" />
+    <ClInclude Include="..\..\code\MD2NormalTable.h" />
+    <ClInclude Include="..\..\code\IFCLoader.h" />
+    <ClInclude Include="..\..\code\IFCReaderGen.h" />
+    <ClInclude Include="..\..\code\IFCUtil.h" />
+    <ClInclude Include="..\..\code\STEPFile.h" />
+    <ClInclude Include="..\..\code\STEPFileEncoding.h" />
+    <ClInclude Include="..\..\code\STEPFileReader.h" />
+    <ClInclude Include="..\..\code\XGLLoader.h" />
+    <ClInclude Include="..\..\code\FBXCompileConfig.h" />
+    <ClInclude Include="..\..\code\FBXConverter.h" />
+    <ClInclude Include="..\..\code\FBXDocument.h" />
+    <ClInclude Include="..\..\code\FBXDocumentUtil.h" />
+    <ClInclude Include="..\..\code\FBXImporter.h" />
+    <ClInclude Include="..\..\code\FBXImportSettings.h" />
+    <ClInclude Include="..\..\code\FBXParser.h" />
+    <ClInclude Include="..\..\code\FBXProperties.h" />
+    <ClInclude Include="..\..\code\FBXTokenizer.h" />
+    <ClInclude Include="..\..\code\FBXUtil.h" />
+    <ClInclude Include="..\..\code\BaseProcess.h" />
+    <ClInclude Include="..\..\code\CalcTangentsProcess.h" />
+    <ClInclude Include="..\..\code\ComputeUVMappingProcess.h" />
+    <ClInclude Include="..\..\code\ConvertToLHProcess.h" />
+    <ClInclude Include="..\..\code\DeboneProcess.h" />
+    <ClInclude Include="..\..\code\FindDegenerates.h" />
+    <ClInclude Include="..\..\code\FindInstancesProcess.h" />
+    <ClInclude Include="..\..\code\FindInvalidDataProcess.h" />
+    <ClInclude Include="..\..\code\FixNormalsStep.h" />
+    <ClInclude Include="..\..\code\GenFaceNormalsProcess.h" />
+    <ClInclude Include="..\..\code\GenVertexNormalsProcess.h" />
+    <ClInclude Include="..\..\code\ImproveCacheLocality.h" />
+    <ClInclude Include="..\..\code\JoinVerticesProcess.h" />
+    <ClInclude Include="..\..\code\LimitBoneWeightsProcess.h" />
+    <ClInclude Include="..\..\code\MakeVerboseFormat.h" />
+    <ClInclude Include="..\..\code\OptimizeGraph.h" />
+    <ClInclude Include="..\..\code\OptimizeMeshes.h" />
+    <ClInclude Include="..\..\code\PretransformVertices.h" />
+    <ClInclude Include="..\..\code\ProcessHelper.h" />
+    <ClInclude Include="..\..\code\RemoveRedundantMaterials.h" />
+    <ClInclude Include="..\..\code\RemoveVCProcess.h" />
+    <ClInclude Include="..\..\code\SortByPTypeProcess.h" />
+    <ClInclude Include="..\..\code\SplitByBoneCountProcess.h" />
+    <ClInclude Include="..\..\code\SplitLargeMeshes.h" />
+    <ClInclude Include="..\..\code\TextureTransform.h" />
+    <ClInclude Include="..\..\code\TriangulateProcess.h" />
+    <ClInclude Include="..\..\code\ValidateDataStructure.h" />
+    <ClInclude Include="..\..\code\AssimpPCH.h" />
+    <ClInclude Include="..\..\code\ByteSwap.h" />
+    <ClInclude Include="..\..\code\Exceptional.h" />
+    <ClInclude Include="..\..\code\GenericProperty.h" />
+    <ClInclude Include="..\..\code\Hash.h" />
+    <ClInclude Include="..\..\code\LogAux.h" />
+    <ClInclude Include="..\..\code\MaterialSystem.h" />
+    <ClInclude Include="..\..\code\PolyTools.h" />
+    <ClInclude Include="..\..\code\Profiler.h" />
+    <ClInclude Include="..\..\code\qnan.h" />
+    <ClInclude Include="..\..\code\ScenePrivate.h" />
+    <ClInclude Include="..\..\code\StandardShapes.h" />
+    <ClInclude Include="..\..\code\StringComparison.h" />
+    <ClInclude Include="..\..\code\TinyFormatter.h" />
+    <ClInclude Include="..\..\code\Vertex.h" />
+    <ClInclude Include="..\..\code\FileLogStream.h" />
+    <ClInclude Include="..\..\code\StdOStreamLogStream.h" />
+    <ClInclude Include="..\..\code\Win32DebugLogStream.h" />
+    <ClInclude Include="..\..\code\CInterfaceIOWrapper.h" />
+    <ClInclude Include="..\..\code\DefaultIOStream.h" />
+    <ClInclude Include="..\..\code\DefaultIOSystem.h" />
+    <ClInclude Include="..\..\code\FileSystemFilter.h" />
+    <ClInclude Include="..\..\code\MemoryIOWrapper.h" />
+    <ClInclude Include="..\..\code\BaseImporter.h" />
+    <ClInclude Include="..\..\code\DefaultProgressHandler.h" />
+    <ClInclude Include="..\..\code\fast_atof.h" />
+    <ClInclude Include="..\..\code\IFF.h" />
+    <ClInclude Include="..\..\code\Importer.h" />
+    <ClInclude Include="..\..\code\LineSplitter.h" />
+    <ClInclude Include="..\..\code\ParsingUtils.h" />
+    <ClInclude Include="..\..\code\RemoveComments.h" />
+    <ClInclude Include="..\..\code\SceneCombiner.h" />
+    <ClInclude Include="..\..\code\ScenePreprocessor.h" />
+    <ClInclude Include="..\..\code\SGSpatialSort.h" />
+    <ClInclude Include="..\..\code\SkeletonMeshBuilder.h" />
+    <ClInclude Include="..\..\code\SmoothingGroups.h" />
+    <ClInclude Include="..\..\code\SpatialSort.h" />
+    <ClInclude Include="..\..\code\StreamReader.h" />
+    <ClInclude Include="..\..\code\Subdivision.h" />
+    <ClInclude Include="..\..\code\TargetAnimation.h" />
+    <ClInclude Include="..\..\code\VertexTriangleAdjacency.h" />
+    <ClInclude Include="..\..\contrib\irrXML\CXMLReaderImpl.h" />
+    <ClInclude Include="..\..\contrib\irrXML\fast_atof.h" />
+    <ClInclude Include="..\..\contrib\irrXML\heapsort.h" />
+    <ClInclude Include="..\..\contrib\irrXML\irrArray.h" />
+    <ClInclude Include="..\..\contrib\irrXML\irrString.h" />
+    <ClInclude Include="..\..\contrib\irrXML\irrTypes.h" />
+    <ClInclude Include="..\..\contrib\irrXML\irrXML.h" />
+    <ClInclude Include="..\..\code\irrXMLWrapper.h" />
+    <ClInclude Include="..\..\contrib\zlib\crc32.h" />
+    <ClInclude Include="..\..\contrib\unzip\crypt.h" />
+    <ClInclude Include="..\..\contrib\zlib\inffast.h" />
+    <ClInclude Include="..\..\contrib\zlib\inffixed.h" />
+    <ClInclude Include="..\..\contrib\zlib\inflate.h" />
+    <ClInclude Include="..\..\contrib\zlib\inftrees.h" />
+    <ClInclude Include="..\..\contrib\unzip\ioapi.h" />
+    <ClInclude Include="..\..\contrib\unzip\unzip.h" />
+    <ClInclude Include="..\..\contrib\zlib\zconf.h" />
+    <ClInclude Include="..\..\contrib\zlib\zconf.in.h" />
+    <ClInclude Include="..\..\contrib\zlib\zlib.h" />
+    <ClInclude Include="..\..\contrib\zlib\zutil.h" />
+    <ClInclude Include="..\..\contrib\ConvertUTF\ConvertUTF.h" />
+    <ClInclude Include="..\..\contrib\poly2tri\poly2tri\sweep\advancing_front.h" />
+    <ClInclude Include="..\..\contrib\poly2tri\poly2tri\sweep\cdt.h" />
+    <ClInclude Include="..\..\contrib\poly2tri\poly2tri\poly2tri.h" />
+    <ClInclude Include="..\..\contrib\poly2tri\poly2tri\common\shapes.h" />
+    <ClInclude Include="..\..\contrib\poly2tri\poly2tri\sweep\sweep.h" />
+    <ClInclude Include="..\..\contrib\poly2tri\poly2tri\sweep\sweep_context.h" />
+    <ClInclude Include="..\..\contrib\poly2tri\poly2tri\common\utils.h" />
+    <ClInclude Include="..\..\contrib\clipper\clipper.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\foreach.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\format.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\lexical_cast.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\make_shared.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\pointer_cast.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\scoped_array.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\scoped_ptr.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\shared_array.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\shared_ptr.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\static_assert.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\tuple\tuple.hpp" />
+    <ClInclude Include="..\..\code\BoostWorkaround\boost\math\common_factor_rt.hpp" />
+    <ClInclude Include="..\..\code\BlobIOSystem.h" />
+    <ClInclude Include="..\..\code\ColladaExporter.h" />
+    <ClInclude Include="..\..\code\ObjExporter.h" />
+    <ClInclude Include="..\..\code\STLExporter.h" />
+    <ClInclude Include="..\..\code\PlyExporter.h" />
+    <ClInclude Include="..\..\doc\dox.h" />
+    <ClInclude Include="..\..\code\res\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\assimp\color4.inl" />
+    <None Include="..\..\include\assimp\material.inl" />
+    <None Include="..\..\include\assimp\matrix3x3.inl" />
+    <None Include="..\..\include\assimp\matrix4x4.inl" />
+    <None Include="..\..\include\assimp\quaternion.inl" />
+    <None Include="..\..\include\assimp\vector2.inl" />
+    <None Include="..\..\include\assimp\vector3.inl" />
+    <None Include="..\..\code\BlenderDNA.inl" />
+    <None Include="..\..\code\SmoothingGroups.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\3DSConverter.cpp" />
+    <ClCompile Include="..\..\code\3DSLoader.cpp" />
+    <ClCompile Include="..\..\code\ASELoader.cpp" />
+    <ClCompile Include="..\..\code\ASEParser.cpp" />
+    <ClCompile Include="..\..\code\HMPLoader.cpp" />
+    <ClCompile Include="..\..\code\LWOBLoader.cpp" />
+    <ClCompile Include="..\..\code\LWOLoader.cpp" />
+    <ClCompile Include="..\..\code\LWOMaterial.cpp" />
+    <ClCompile Include="..\..\code\MD3Loader.cpp" />
+    <ClCompile Include="..\..\code\MD5Loader.cpp" />
+    <ClCompile Include="..\..\code\MD5Parser.cpp" />
+    <ClCompile Include="..\..\code\MDCLoader.cpp" />
+    <ClCompile Include="..\..\code\MDLLoader.cpp" />
+    <ClCompile Include="..\..\code\MDLMaterialLoader.cpp" />
+    <ClCompile Include="..\..\code\ObjFileImporter.cpp" />
+    <ClCompile Include="..\..\code\ObjFileMtlImporter.cpp" />
+    <ClCompile Include="..\..\code\ObjFileParser.cpp" />
+    <ClCompile Include="..\..\code\PlyLoader.cpp" />
+    <ClCompile Include="..\..\code\PlyParser.cpp" />
+    <ClCompile Include="..\..\code\SMDLoader.cpp" />
+    <ClCompile Include="..\..\code\STLLoader.cpp" />
+    <ClCompile Include="..\..\code\XFileImporter.cpp" />
+    <ClCompile Include="..\..\code\XFileParser.cpp" />
+    <ClCompile Include="..\..\code\DXFLoader.cpp" />
+    <ClCompile Include="..\..\code\RawLoader.cpp" />
+    <ClCompile Include="..\..\code\NFFLoader.cpp" />
+    <ClCompile Include="..\..\code\OFFLoader.cpp" />
+    <ClCompile Include="..\..\code\ACLoader.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">false</PreprocessSuppressLineNumbers>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">false</PreprocessSuppressLineNumbers>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessSuppressLineNumbers>
+    </ClCompile>
+    <ClCompile Include="..\..\code\LWOAnimation.cpp" />
+    <ClCompile Include="..\..\code\LWSLoader.cpp" />
+    <ClCompile Include="..\..\code\BVHLoader.cpp" />
+    <ClCompile Include="..\..\code\IRRMeshLoader.cpp" />
+    <ClCompile Include="..\..\code\IRRLoader.cpp" />
+    <ClCompile Include="..\..\code\IRRShared.cpp" />
+    <ClCompile Include="..\..\code\Q3DLoader.cpp" />
+    <ClCompile Include="..\..\code\B3DImporter.cpp" />
+    <ClCompile Include="..\..\code\ColladaLoader.cpp" />
+    <ClCompile Include="..\..\code\ColladaParser.cpp" />
+    <ClCompile Include="..\..\code\TerragenLoader.cpp" />
+    <ClCompile Include="..\..\code\CSMLoader.cpp" />
+    <ClCompile Include="..\..\code\UnrealLoader.cpp" />
+    <ClCompile Include="..\..\code\NDOLoader.cpp" />
+    <ClCompile Include="..\..\code\OgreImporter.cpp" />
+    <ClCompile Include="..\..\code\OgreMaterial.cpp" />
+    <ClCompile Include="..\..\code\OgreMesh.cpp" />
+    <ClCompile Include="..\..\code\OgreSkeleton.cpp" />
+    <ClCompile Include="..\..\code\MS3DLoader.cpp" />
+    <ClCompile Include="..\..\code\COBLoader.cpp" />
+    <ClCompile Include="..\..\code\BlenderDNA.cpp" />
+    <ClCompile Include="..\..\code\BlenderLoader.cpp" />
+    <ClCompile Include="..\..\code\BlenderModifier.cpp" />
+    <ClCompile Include="..\..\code\BlenderScene.cpp" />
+    <ClCompile Include="..\..\code\Q3BSPFileImporter.cpp" />
+    <ClCompile Include="..\..\code\Q3BSPFileParser.cpp" />
+    <ClCompile Include="..\..\code\Q3BSPZipArchive.cpp" />
+    <ClCompile Include="..\..\code\MD2Loader.cpp" />
+    <ClCompile Include="..\..\code\IfcBoolean.cpp" />
+    <ClCompile Include="..\..\code\IFCCurve.cpp" />
+    <ClCompile Include="..\..\code\IFCGeometry.cpp" />
+    <ClCompile Include="..\..\code\IFCLoader.cpp" />
+    <ClCompile Include="..\..\code\IFCMaterial.cpp" />
+    <ClCompile Include="..\..\code\IFCOpenings.cpp" />
+    <ClCompile Include="..\..\code\IFCProfile.cpp" />
+    <ClCompile Include="..\..\code\IFCReaderGen.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\code\IFCUtil.cpp" />
+    <ClCompile Include="..\..\code\STEPFileEncoding.cpp" />
+    <ClCompile Include="..\..\code\STEPFileReader.cpp" />
+    <ClCompile Include="..\..\code\XGLLoader.cpp" />
+    <ClCompile Include="..\..\code\FBXAnimation.cpp" />
+    <ClCompile Include="..\..\code\FBXBinaryTokenizer.cpp" />
+    <ClCompile Include="..\..\code\FBXConverter.cpp" />
+    <ClCompile Include="..\..\code\FBXDeformer.cpp" />
+    <ClCompile Include="..\..\code\FBXDocument.cpp" />
+    <ClCompile Include="..\..\code\FBXDocumentUtil.cpp" />
+    <ClCompile Include="..\..\code\FBXImporter.cpp" />
+    <ClCompile Include="..\..\code\FBXMaterial.cpp" />
+    <ClCompile Include="..\..\code\FBXMeshGeometry.cpp" />
+    <ClCompile Include="..\..\code\FBXModel.cpp" />
+    <ClCompile Include="..\..\code\FBXNodeAttribute.cpp" />
+    <ClCompile Include="..\..\code\FBXParser.cpp" />
+    <ClCompile Include="..\..\code\FBXProperties.cpp" />
+    <ClCompile Include="..\..\code\FBXTokenizer.cpp" />
+    <ClCompile Include="..\..\code\FBXUtil.cpp" />
+    <ClCompile Include="..\..\code\BaseProcess.cpp" />
+    <ClCompile Include="..\..\code\CalcTangentsProcess.cpp" />
+    <ClCompile Include="..\..\code\ComputeUVMappingProcess.cpp" />
+    <ClCompile Include="..\..\code\ConvertToLHProcess.cpp" />
+    <ClCompile Include="..\..\code\DeboneProcess.cpp" />
+    <ClCompile Include="..\..\code\FindDegenerates.cpp" />
+    <ClCompile Include="..\..\code\FindInstancesProcess.cpp" />
+    <ClCompile Include="..\..\code\FindInvalidDataProcess.cpp" />
+    <ClCompile Include="..\..\code\FixNormalsStep.cpp" />
+    <ClCompile Include="..\..\code\GenFaceNormalsProcess.cpp" />
+    <ClCompile Include="..\..\code\GenVertexNormalsProcess.cpp" />
+    <ClCompile Include="..\..\code\ImproveCacheLocality.cpp" />
+    <ClCompile Include="..\..\code\JoinVerticesProcess.cpp" />
+    <ClCompile Include="..\..\code\LimitBoneWeightsProcess.cpp" />
+    <ClCompile Include="..\..\code\MakeVerboseFormat.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\code\OptimizeGraph.cpp" />
+    <ClCompile Include="..\..\code\OptimizeMeshes.cpp" />
+    <ClCompile Include="..\..\code\PretransformVertices.cpp" />
+    <ClCompile Include="..\..\code\ProcessHelper.cpp" />
+    <ClCompile Include="..\..\code\RemoveRedundantMaterials.cpp" />
+    <ClCompile Include="..\..\code\RemoveVCProcess.cpp" />
+    <ClCompile Include="..\..\code\SortByPTypeProcess.cpp" />
+    <ClCompile Include="..\..\code\SplitByBoneCountProcess.cpp" />
+    <ClCompile Include="..\..\code\SplitLargeMeshes.cpp" />
+    <ClCompile Include="..\..\code\TextureTransform.cpp" />
+    <ClCompile Include="..\..\code\TriangulateProcess.cpp" />
+    <ClCompile Include="..\..\code\ValidateDataStructure.cpp" />
+    <ClCompile Include="..\..\code\AssimpPCH.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='release|Win32'">AssimpPCH.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\code\MaterialSystem.cpp" />
+    <ClCompile Include="..\..\code\StandardShapes.cpp" />
+    <ClCompile Include="..\..\code\DefaultLogger.cpp" />
+    <ClCompile Include="..\..\code\DefaultIOStream.cpp" />
+    <ClCompile Include="..\..\code\DefaultIOSystem.cpp" />
+    <ClCompile Include="..\..\code\Assimp.cpp" />
+    <ClCompile Include="..\..\code\BaseImporter.cpp" />
+    <ClCompile Include="..\..\code\Importer.cpp" />
+    <ClCompile Include="..\..\code\ImporterRegistry.cpp" />
+    <ClCompile Include="..\..\code\PostStepRegistry.cpp" />
+    <ClCompile Include="..\..\code\RemoveComments.cpp" />
+    <ClCompile Include="..\..\code\SceneCombiner.cpp" />
+    <ClCompile Include="..\..\code\ScenePreprocessor.cpp" />
+    <ClCompile Include="..\..\code\SGSpatialSort.cpp" />
+    <ClCompile Include="..\..\code\SkeletonMeshBuilder.cpp" />
+    <ClCompile Include="..\..\code\SpatialSort.cpp" />
+    <ClCompile Include="..\..\code\Subdivision.cpp" />
+    <ClCompile Include="..\..\code\TargetAnimation.cpp" />
+    <ClCompile Include="..\..\code\VertexTriangleAdjacency.cpp" />
+    <ClCompile Include="..\..\contrib\irrXML\irrXML.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\adler32.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\crc32.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\inffast.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\inflate.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\inftrees.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\unzip\ioapi.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\unzip\unzip.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\zutil.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\ConvertUTF\ConvertUTF.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\poly2tri\poly2tri\sweep\advancing_front.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\poly2tri\poly2tri\sweep\cdt.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\poly2tri\poly2tri\common\shapes.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\poly2tri\poly2tri\sweep\sweep.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\poly2tri\poly2tri\sweep\sweep_context.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\clipper\clipper.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-noboost-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release-st|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\code\AssimpCExport.cpp" />
+    <ClCompile Include="..\..\code\Exporter.cpp" />
+    <ClCompile Include="..\..\code\ColladaExporter.cpp" />
+    <ClCompile Include="..\..\code\ObjExporter.cpp" />
+    <ClCompile Include="..\..\code\STLExporter.cpp" />
+    <ClCompile Include="..\..\code\PlyExporter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\doc\datastructure.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\doc\Preamble.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\code\res\assimp.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

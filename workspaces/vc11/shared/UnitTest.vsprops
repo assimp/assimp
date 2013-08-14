@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="UnitTest"
+	OutputDirectory="./../../lib/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="&quot;..\..\contrib\cppunit-1.12.1\include&quot;"
+		PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalLibraryDirectories="&quot;..\..\contrib\cppunit-1.12.1\lib&quot;"
+	/>
+</VisualStudioPropertySheet>

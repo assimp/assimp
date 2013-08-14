@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="resources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="source\zlib">
+      <UniqueIdentifier>{dd884da9-22ce-4aa0-85c2-158e9123d0e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\tools\assimp_cmd\assimp_cmd.rc">
+      <Filter>resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\tools\assimp_cmd\CompareDump.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_cmd\Export.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_cmd\ImageExtractor.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_cmd\Info.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_cmd\Main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_cmd\WriteDumb.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\adler32.c">
+      <Filter>source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\compress.c">
+      <Filter>source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\crc32.c">
+      <Filter>source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\deflate.c">
+      <Filter>source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\trees.c">
+      <Filter>source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\contrib\zlib\zutil.c">
+      <Filter>source\zlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tools\assimp_cmd\Main.h">
+      <Filter>source</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

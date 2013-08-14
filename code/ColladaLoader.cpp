@@ -177,6 +177,15 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 				 0, -1,  0,  0,
 				 0,  0,  0,  1);
         }
+
+    // Convert to meter
+    if( parser.mUnitSize != 1.f )
+        pScene->mRootNode->mTransformation *= aiMatrix4x4( 
+            parser.mUnitSize,  0,  0,  0, 
+            0,  parser.mUnitSize,  0,  0,
+            0,  0,  parser.mUnitSize,  0,
+            0,  0,  0,  1               );
+
 	// store all meshes
 	StoreSceneMeshes( pScene);
 

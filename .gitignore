@@ -6,11 +6,19 @@ build
 *.sln
 *.ncb
 *.vcproj
+*.opensdf
+*.sdf
+*.tlog
+*.dll
+*.pdb
+*.exp
+*.lib
 
 # Output
 bin/
 lib/
 contrib/
+obj/
 
 # Generated
 assimp.pc
@@ -32,3 +40,5 @@ test/results
 
 # Python
 __pycache__
+
+

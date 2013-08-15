@@ -202,7 +202,7 @@ bool Exporter :: IsDefaultIOHandler() const
 
 
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing )
+const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int )
 {
 	if (pimpl->blob) {
 		delete pimpl->blob;

@@ -321,6 +321,8 @@ struct Mesh
 		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
 			mNumUVComponents[i] = 2;
 	}
+    
+    std::string mName;
 
 	// just to check if there's some sophisticated addressing involved...
 	// which we don't support, and therefore should warn about.

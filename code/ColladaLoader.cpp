@@ -521,7 +521,10 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
 				// assign the material index
 				dstMesh->mMaterialIndex = matIdx;
-        dstMesh->mName = mid.mMeshOrController;			
+                if(dstMesh->mName.length == 0)
+                {
+                    dstMesh->mName = mid.mMeshOrController;
+                }
       }
 		}
 	}
@@ -541,6 +544,8 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
 {
 	aiMesh* dstMesh = new aiMesh;
+    
+    dstMesh->mName = pSrcMesh->mName;
 
 	// count the vertices addressed by its faces
 	const size_t numVertices = std::accumulate( pSrcMesh->mFaceSize.begin() + pStartFace,

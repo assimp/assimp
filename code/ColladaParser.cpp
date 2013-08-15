@@ -1492,6 +1492,13 @@ void ColladaParser::ReadGeometryLibrary()
 				// create a mesh and store it in the library under its ID
 				Mesh* mesh = new Mesh;
 				mMeshLibrary[id] = mesh;
+                
+                // read the mesh name if it exists
+                const int nameIndex = TestAttribute("name");
+                if(nameIndex != -1)
+                {
+                    mesh->mName = mReader->getAttributeValue(nameIndex);
+                }
 
 				// read on from there
 				ReadGeometry( mesh);

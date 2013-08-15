@@ -164,6 +164,8 @@ int Triangle::Index(const Point* p)
     return 2;
   }
   assert(0);
+
+  return 0;
 }
 
 int Triangle::EdgeIndex(const Point* p1, const Point* p2)
@@ -223,6 +225,8 @@ Point* Triangle::PointCW(Point& point)
     return points_[1];
   }
   assert(0);
+
+  return 0;
 }
 
 // The point counter-clockwise to given point
@@ -236,6 +240,8 @@ Point* Triangle::PointCCW(Point& point)
     return points_[0];
   }
   assert(0);
+
+  return 0;
 }
 
 // The neighbor clockwise to given point

@@ -200,7 +200,14 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
 	ai_assert(NULL != strFile);
 	ai_assert(NULL != strMode);
 
+#ifdef WIN32
+    wchar_t pFileW[PATHLIMIT];
+    DecodeUTF8(strFile, strlen(strFile), pFileW, PATHLIMIT);
+    
+    FILE* file = ::_wfopen(pFileW, L"rb");
+#else
 	FILE* file = ::fopen( strFile, strMode);
+#endif 
 	if( NULL == file) 
 		return NULL;
 

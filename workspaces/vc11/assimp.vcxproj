@@ -623,6 +623,7 @@ copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configura
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"
@@ -685,6 +686,7 @@ copy "$(OutDir)$(TargetFileName)" "$(SolutionDir)..\..\bin\assimpcmd_$(Configura
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)..\..\lib\$(ProjectName)_$(Configuration)_$(Platform)\assimp.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)..\..\bin\unit_$(Configuration)_$(Platform)"

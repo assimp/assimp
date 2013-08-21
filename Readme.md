@@ -7,7 +7,6 @@ Its abbreviated name under which it is commonly known is __assimp__.
 
 This is the development trunk of assimp containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories. According to [Travis-CI] (https://travis-ci.org/), the current build status of the trunk is [![Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
 
-
 #### 1.1 Supported file formats ####
 
 The library provides importers for a lot of file formats, including:

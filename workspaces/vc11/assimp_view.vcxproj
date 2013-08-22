@@ -393,6 +393,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -421,6 +422,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -486,6 +488,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -509,6 +512,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -536,6 +540,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -560,6 +565,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -586,6 +592,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -611,6 +618,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -640,6 +648,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -666,6 +675,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -684,6 +694,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -710,6 +721,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -787,6 +799,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -815,6 +828,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -833,6 +847,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -859,6 +874,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d9.lib;d3dx9.lib;comdlg32.lib;assimp.lib;winmm.lib;comctl32.lib;user32.lib;advapi32.lib;shell32.lib;Gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>

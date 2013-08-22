@@ -416,6 +416,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunitd.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -443,6 +444,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -507,6 +509,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -529,6 +532,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -555,6 +559,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -578,6 +583,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -601,6 +607,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunitd.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -625,6 +632,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunitd.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -653,6 +661,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -678,6 +687,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -697,6 +707,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -722,6 +733,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -794,6 +806,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunitd.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -821,6 +834,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -840,6 +854,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -865,6 +880,7 @@
       <PrecompiledHeaderFile>UnitTestPCH.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp.lib;cppunit64.lib;%(AdditionalDependencies)</AdditionalDependencies>

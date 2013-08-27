@@ -3,6 +3,8 @@
 #ifndef __AI_BOOST_WORKAROUND_LEXICAL_CAST
 #define __AI_BOOST_WORKAROUND_LEXICAL_CAST
 
+#include <sstream>
+
 namespace boost
 {
 

@@ -25,7 +25,7 @@
 #	pragma pack(push,1)
 #	define PACK_STRUCT
 #elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
+#	define PACK_STRUCT	__attribute__((gcc_struct, __packed__))
 #else
 #	error Compiler not supported
 #endif

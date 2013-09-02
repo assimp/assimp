@@ -144,6 +144,8 @@ ASSIMP_API void aiFreeScene(const C_STRUCT aiScene* pIn);
 *   the #aiProcess_Triangulate flag, most export formats support only
 *   triangulate data so they would run the step anyway.
 * @return a status code indicating the result of the export
+* @note Use aiCopyScene() to get a modifiable copy of a previously
+*   imported scene.
 */
 ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, 
 	const char* pFormatId, 
@@ -163,6 +165,8 @@ ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene,
 * @param pPreprocessing Please see the documentation for #aiExportScene
 * @return a status code indicating the result of the export
 * @note Include <aiFileIO.h> for the definition of #aiFileIO.
+* @note Use aiCopyScene() to get a modifiable copy of a previously
+*   imported scene.
 */
 ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, 
 	const char* pFormatId, 

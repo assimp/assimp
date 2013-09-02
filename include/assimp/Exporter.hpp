@@ -167,7 +167,9 @@ public:
 	* @return the exported data or NULL in case of error.
 	* @note If the Exporter instance did already hold a blob from
 	*   a previous call to #ExportToBlob, it will be disposed. 
-	*   Any IO handlers set via #SetIOHandler are ignored here.*/
+	*   Any IO handlers set via #SetIOHandler are ignored here.
+	* @note Use aiCopyScene() to get a modifiable copy of a previously
+	*   imported scene. */
 	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u );
 	inline const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId, unsigned int pPreprocessing = 0u );
 
@@ -196,7 +198,9 @@ public:
 	 *   is triangulation - whilst you can enforce it by specifying
 	 *   the #aiProcess_Triangulate flag, most export formats support only
 	 *  triangulate data so they would run the step even if it wasn't requested.
-	 * @return AI_SUCCESS if everything was fine. */
+	 * @return AI_SUCCESS if everything was fine. 
+	 * @note Use aiCopyScene() to get a modifiable copy of a previously
+	 *   imported scene.*/
 	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing = 0u);
 	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath,  unsigned int pPreprocessing = 0u);
 

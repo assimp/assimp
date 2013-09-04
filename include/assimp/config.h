@@ -403,7 +403,7 @@ enum aiComponent
 	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_LIGHTS = 0x100,
 
-	/** Removes all light sources (aiScene::mCameras).
+	/** Removes all cameras (aiScene::mCameras).
 	 * The corresponding scenegraph nodes are NOT removed.
 	 * use the #aiProcess_OptimizeGraph step to do this */
 	aiComponent_CAMERAS = 0x200,
@@ -840,5 +840,7 @@ enum aiComponent
  * Property type: Bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION "IMPORT_IFC_CUSTOM_TRIANGULATION"
+
+#define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
 #endif // !! AI_CONFIG_H_INC

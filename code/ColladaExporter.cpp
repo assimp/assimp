@@ -58,6 +58,9 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+	if(outfile == NULL) {
+		throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
+	}
 
 	// XXX maybe use a small wrapper around IOStream that behaves like std::stringstream in order to avoid the extra copy.
 	outfile->Write( iDoTheExportThing.mOutput.str().c_str(), static_cast<size_t>(iDoTheExportThing.mOutput.tellp()),1);
@@ -99,7 +102,7 @@ void ColladaExporter::WriteFile()
 
 	WriteSceneLibrary();
 
-	// useless Collada bullshit at the end, just in case we haven't had enough indirections, yet. 
+	// useless Collada fu at the end, just in case we haven't had enough indirections, yet. 
 	mOutput << startstr << "<scene>" << endstr;
 	PushTag();
 	mOutput << startstr << "<instance_visual_scene url=\"#myScene\" />" << endstr;
@@ -495,7 +498,7 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
 	mOutput << "</float_array>" << endstr; 
 	PopTag();
 
-	// the usual Collada bullshit. Let's bloat it even more!
+	// the usual Collada fun. Let's bloat it even more!
 	mOutput << startstr << "<technique_common>" << endstr;
 	PushTag();
 	mOutput << startstr << "<accessor count=\"" << pElementCount << "\" offset=\"0\" source=\"#" << arrayId << "\" stride=\"" << floatsPerElement << "\">" << endstr;

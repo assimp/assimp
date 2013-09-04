@@ -59,7 +59,7 @@ class STLExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	STLExporter(const char* filename, const aiScene* pScene);
+	STLExporter(const char* filename, const aiScene* pScene, bool binary = false);
 
 public:
 
@@ -69,6 +69,7 @@ public:
 private:
 
 	void WriteMesh(const aiMesh* m);
+	void WriteMeshBinary(const aiMesh* m);
 
 private:
 

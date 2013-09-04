@@ -2045,18 +2045,6 @@
 					</File>
 				</Filter>
 				<Filter
-					Name="m3"
-					>
-					<File
-						RelativePath="..\..\code\M3Importer.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\code\M3Importer.h"
-						>
-					</File>
-				</Filter>
-				<Filter
 					Name="xgl"
 					>
 					<File

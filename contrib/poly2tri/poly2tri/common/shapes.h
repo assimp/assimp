@@ -38,6 +38,7 @@
 #include <stdexcept>
 #include <assert.h>
 #include <cmath>
+#include <string>
 
 namespace p2t {
 
@@ -137,8 +138,8 @@ struct Edge {
         p = &p2;
       } else if (p1.x == p2.x) {
         // Repeat points
-		  // ASSIMP_CHANGE (aramis_acg)
-		  throw std::runtime_error("repeat points");
+        // ASSIMP_CHANGE (aramis_acg)
+        throw std::runtime_error(std::string("repeat points"));
         //assert(false);
       }
     }

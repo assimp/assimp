@@ -77,8 +77,6 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 	if(!SkeletonFile)
 		throw DeadlyImportError(string("Failed to create XML Reader for ")+FileName);
 
-	//Quick note: Whoever read this should know this one thing: irrXml fucking sucks!!!
-
 	XmlRead(SkeletonFile);
 	if(string("skeleton")!=SkeletonFile->getNodeName())
 		throw DeadlyImportError("No <skeleton> node in SkeletonFile: "+FileName);
@@ -169,12 +167,12 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		Bones[ChildId].ParentId=ParentId;
 		Bones[ParentId].Children.push_back(ChildId);
 
-		XmlRead(SkeletonFile);//I once forget this line, which led to an endless loop, did i mentioned, that irrxml sucks??
+		XmlRead(SkeletonFile);
 	}
 	//_____________________________________________________________________________
 
 
-	//--------- Calculate the WorldToBoneSpace Matrix recursivly for all bones: ------------------
+	//--------- Calculate the WorldToBoneSpace Matrix recursively for all bones: ------------------
 	BOOST_FOREACH(Bone &theBone, Bones)
 	{
 		if(-1==theBone.ParentId) //the bone is a root bone

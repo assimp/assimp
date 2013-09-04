@@ -35,7 +35,7 @@ logging.basicConfig(level=logging.INFO)
 import math
 import numpy
 
-from pyassimp import core as pyassimp
+import pyassimp
 from pyassimp.postprocess import *
 from pyassimp.helper import *
 
@@ -204,7 +204,6 @@ class GLRenderer():
         """
 
         if not hasattr(mat, "gl_mat"): # evaluate once the mat properties, and cache the values in a glDisplayList.
-
             diffuse = numpy.array(mat.properties.get("diffuse", [0.8, 0.8, 0.8, 1.0]))
             specular = numpy.array(mat.properties.get("specular", [0., 0., 0., 1.0]))
             ambient = numpy.array(mat.properties.get("ambient", [0.2, 0.2, 0.2, 1.0]))
@@ -233,14 +232,6 @@ class GLRenderer():
     def do_motion(self):
 
         gl_time = glutGet(GLUT_ELAPSED_TIME)
-
-        # Compute the new position of the camera and set it
-        self.x += self.dp * self.lx * 0.01 * (gl_time-self.prev_time)
-        self.z += self.dp * self.lz * 0.01 * (gl_time-self.prev_time)
-        self.angle += self.drot * 0.1 *  (gl_time-self.prev_time)
-        self.lx = math.sin(self.angle)
-        self.lz = -math.cos(self.angle)
-        self.set_default_camera()
 
         self.angle = (gl_time - self.prev_time) * 0.1
 

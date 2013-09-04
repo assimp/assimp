@@ -1,0 +1,17 @@
+before_install:
+  - sudo apt-get install cmake
+
+env:
+  - TRAVIS_NO_EXPORT=YES
+  - TRAVIS_NO_EXPORT=NO
+
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+script: cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT && make
+
+
+

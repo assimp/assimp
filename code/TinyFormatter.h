@@ -90,6 +90,19 @@ public:
 		underlying << sin;
 	}
 
+
+	// The problem described here:
+	// https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462
+	// can also cause trouble here. Apparently, older gcc versions sometimes copy temporaries
+	// being bound to const ref& function parameters. Copying streams is not permitted, though.
+	// This workaround avoids this by manually specifying a copy ctor.
+#if !defined(__GNUC__) || !defined(__APPLE__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+	basic_formatter(const basic_formatter& other) {
+		underlying << (string)other;
+	}
+#endif
+	 
+
 public:
 
 	operator string () const {

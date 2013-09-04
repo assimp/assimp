@@ -379,8 +379,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				light->mColorSpecular = light->mColorDiffuse;
 
 
-				// We don't need the rest, but we need to know where
-				// this fucking chunk ends.
+				// We don't need the rest, but we need to know where this chunk ends.
 				unsigned int temp = (unsigned int)(stream.GetI4() * stream.GetI4());
 
 				// skip the background file name

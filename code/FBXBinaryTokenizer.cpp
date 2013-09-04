@@ -232,7 +232,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 		// compute length based on type and check against the stored value
 		if(encoding == 0) {
-			uint32_t stride;
+			uint32_t stride = 0;
 			switch(type)
 			{
 			case 'f':
@@ -248,6 +248,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 			default:
 				ai_assert(false);
 			};
+            ai_assert(stride > 0);
 			if(length * stride != comp_len) {
 				TokenizeError("cannot ReadData, calculated data stride differs from what the file claims",input, cursor);
 			}
@@ -380,7 +381,7 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
 	}
 
 
-	uint32_t offset = 0x1b;
+	//uint32_t offset = 0x1b;
 
 	const char* cursor = input + 0x1b;
 

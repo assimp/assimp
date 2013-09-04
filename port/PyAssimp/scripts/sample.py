@@ -7,9 +7,10 @@ This module demonstrates the functionality of PyAssimp.
 
 import os, sys
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
-from pyassimp import core as pyassimp
+import pyassimp
+import pyassimp.postprocess
 
 def recur_node(node,level = 0):
     print("  " + "\t" * level + "- " + str(node))
@@ -19,7 +20,7 @@ def recur_node(node,level = 0):
 
 def main(filename=None):
 
-    scene = pyassimp.load(filename)
+    scene = pyassimp.load(filename, pyassimp.postprocess.aiProcess_Triangulate)
     
     #the model we load
     print("MODEL:" + filename)
@@ -48,7 +49,7 @@ def main(filename=None):
                 print("    no normals")
         print("    colors:" + str(len(mesh.colors)))
         tcs = mesh.texturecoords
-        if tcs:
+        if tcs.any():
             for index, tc in enumerate(tcs):
                 print("    texture-coords "+ str(index) + ":" + str(len(tcs[index])) + "first3:" + str(tcs[index][:3]))
 
@@ -77,5 +78,12 @@ def main(filename=None):
     # Finally release the model
     pyassimp.release(scene)
 
+def usage():
+    print("Usage: sample.py <3d model>")
+
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv)>1 else None)
+
+    if len(sys.argv) != 2:
+        usage()
+    else:
+        main(sys.argv[1])

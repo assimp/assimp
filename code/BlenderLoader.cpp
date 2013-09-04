@@ -1,3 +1,4 @@
+
 /*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
@@ -624,7 +625,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	) 
 {
 	typedef std::pair<const int,size_t> MyPair;
-	if (!mesh->totface || !mesh->totvert) {
+	if ((!mesh->totface && !mesh->totloop) || !mesh->totvert) {
 		return;
 	}
 
@@ -637,12 +638,24 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 		ThrowException("Number of vertices is larger than the corresponding array");
 	}
 
+	if (static_cast<size_t> ( mesh->totloop ) > mesh->mloop.size()) {
+		ThrowException("Number of vertices is larger than the corresponding array");
+	}
+
 	// collect per-submesh numbers
 	std::map<int,size_t> per_mat;
+	std::map<int,size_t> per_mat_verts;
 	for (int i = 0; i < mesh->totface; ++i) {
 
 		const MFace& mf = mesh->mface[i];
 		per_mat[ mf.mat_nr ]++;
+		per_mat_verts[ mf.mat_nr ] += mf.v4?4:3;
+	}
+
+	for (int i = 0; i < mesh->totpoly; ++i) {
+		const MPoly& mp = mesh->mpoly[i];
+		per_mat[ mp.mat_nr ]++;
+		per_mat_verts[ mp.mat_nr ] += mp.totloop;
 	}
 
 	// ... and allocate the corresponding meshes
@@ -656,8 +669,8 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 		temp->push_back(new aiMesh());
 
 		aiMesh* out = temp->back();
-		out->mVertices = new aiVector3D[it.second*4];
-		out->mNormals  = new aiVector3D[it.second*4];
+		out->mVertices = new aiVector3D[per_mat_verts[it.first]];
+		out->mNormals  = new aiVector3D[per_mat_verts[it.first]];
 
 		//out->mNumFaces = 0
 		//out->mNumVertices = 0
@@ -780,8 +793,56 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 		//	}
 	}
 
+	for (int i = 0; i < mesh->totpoly; ++i) {
+		
+		const MPoly& mf = mesh->mpoly[i];
+		
+		aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
+		aiFace& f = out->mFaces[out->mNumFaces++];
+		
+		f.mIndices = new unsigned int[ f.mNumIndices = mf.totloop ];
+		aiVector3D* vo = out->mVertices + out->mNumVertices;
+		aiVector3D* vn = out->mNormals + out->mNumVertices;
+		
+		// XXX we can't fold this easily, because we are restricted
+		// to the member names from the BLEND file (v1,v2,v3,v4)
+		// which are assigned by the genblenddna.py script and
+		// cannot be changed without breaking the entire
+		// import process.
+		for (int j = 0;j < mf.totloop; ++j)
+		{
+			const MLoop& loop = mesh->mloop[mf.loopstart + j];
+
+			if (loop.v >= mesh->totvert) {
+				ThrowException("Vertex index out of range");
+			}
+
+			const MVert& v = mesh->mvert[loop.v];
+			
+			vo->x = v.co[0];
+			vo->y = v.co[1];
+			vo->z = v.co[2];
+			vn->x = v.no[0];
+			vn->y = v.no[1];
+			vn->z = v.no[2];
+			f.mIndices[j] = out->mNumVertices++;
+			
+			++vo;
+			++vn;
+			
+		}
+		if (mf.totloop == 3)
+		{
+			out->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+		}
+		else
+		{
+			out->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+		}
+	}
+	
 	// collect texture coordinates, they're stored in a separate per-face buffer
-	if (mesh->mtface) {
+	if (mesh->mtface || mesh->mloopuv) {
 		if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {
 			ThrowException("Number of UV faces is larger than the corresponding UV face array (#1)");
 		}
@@ -803,6 +864,20 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 				vo->x = v->uv[i][0];
 				vo->y = v->uv[i][1];
 			}
+		}
+		
+		for (int i = 0; i < mesh->totpoly; ++i) {
+			const MPoly& v = mesh->mpoly[i];
+			aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
+			const aiFace& f = out->mFaces[out->mNumFaces++];
+			
+			aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
+			for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+				const MLoopUV& uv = mesh->mloopuv[v.loopstart + j];
+				vo->x = uv.uv[0];
+				vo->y = uv.uv[1];
+			}
+			
 		}
 	}
 
@@ -833,7 +908,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	}
 
 	// collect vertex colors, stored separately as well
-	if (mesh->mcol) {
+	if (mesh->mcol || mesh->mloopcol) {
 		if (mesh->totface > static_cast<int> ( (mesh->mcol.size()/4)) ) {
 			ThrowException("Number of faces is larger than the corresponding color face array");
 		}
@@ -860,6 +935,23 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 			}
 			for (unsigned int n = f.mNumIndices; n < 4; ++n);
 		}
+		
+		for (int i = 0; i < mesh->totpoly; ++i) {
+			const MPoly& v = mesh->mpoly[i];
+			aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
+			const aiFace& f = out->mFaces[out->mNumFaces++];
+			
+			aiColor4D* vo = &out->mColors[0][out->mNumVertices];
+			for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
+				const MLoopCol& col = mesh->mloopcol[v.loopstart + j];
+				vo->r = col.r;
+				vo->g = col.g;
+				vo->b = col.b;
+				vo->a = col.a;
+			}
+			
+		}
+
 	}
 
 	return;

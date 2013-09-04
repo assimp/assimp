@@ -6,23 +6,25 @@
 It make a large use of shaders to illustrate a 'modern' OpenGL pipeline.
 
 Based on:
-- pygame + mouselook code from http://3dengine.org/Spectator_%28PyOpenGL%29
+ - pygame + mouselook code from http://3dengine.org/Spectator_%28PyOpenGL%29
  - http://www.lighthouse3d.com/tutorials
  - http://www.songho.ca/opengl/gl_transform.html
  - http://code.activestate.com/recipes/325391/
  - ASSIMP's C++ SimpleOpenGL viewer
+
+Authors: Séverin Lemaignan, 2012-2013
 """
 import sys
 
 import logging
-logger = logging.getLogger("underworlds.3d_viewer")
+logger = logging.getLogger("pyassimp")
 gllogger = logging.getLogger("OpenGL")
 gllogger.setLevel(logging.WARNING)
 logging.basicConfig(level=logging.INFO)
 
 import OpenGL
-#OpenGL.ERROR_CHECKING=False
-#OpenGL.ERROR_LOGGING = False
+OpenGL.ERROR_CHECKING=False
+OpenGL.ERROR_LOGGING = False
 #OpenGL.ERROR_ON_COPY = True
 #OpenGL.FULL_LOGGING = True
 from OpenGL.GL import *
@@ -38,7 +40,7 @@ import math, random
 import numpy
 from numpy import linalg
 
-from pyassimp import core as pyassimp
+import pyassimp
 from pyassimp.postprocess import *
 from pyassimp.helper import *
 
@@ -289,8 +291,13 @@ class PyAssimp3DViewer:
 
             stride = 24 # 6 * 4 bytes
 
-            glUniform4f( shader.Material_diffuse, *mesh.material.properties["diffuse"] )
-            glUniform4f( shader.Material_ambient, *mesh.material.properties["ambient"] )
+            diffuse = mesh.material.properties["diffuse"]
+            if len(diffuse) == 3: diffuse.append(1.0)
+            ambient = mesh.material.properties["ambient"]
+            if len(ambient) == 3: ambient.append(1.0)
+
+            glUniform4f( shader.Material_diffuse, *diffuse )
+            glUniform4f( shader.Material_ambient, *ambient )
 
             vbo = mesh.gl["vbo"]
             vbo.bind()
@@ -403,8 +410,6 @@ if __name__ == '__main__':
         app.render()
         app.controls_3d(0)
         if pygame.K_f in app.keys: pygame.display.toggle_fullscreen()
-        if pygame.K_s in app.keys: app.screenshot()
-        if pygame.K_v in app.keys: app.check_visibility()
         if pygame.K_TAB in app.keys: app.cycle_cameras()
         if pygame.K_ESCAPE in app.keys:
             break

@@ -57,6 +57,23 @@ void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
 	// we're still here - export successfully completed. Write the file.
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+	if(outfile == NULL) {
+		throw DeadlyExportError("could not open output .stl file: " + std::string(pFile));
+	}
+
+	outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
+}
+void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+{
+	// invoke the exporter 
+	STLExporter exporter(pFile, pScene, true);
+
+	// we're still here - export successfully completed. Write the file.
+	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+	if(outfile == NULL) {
+		throw DeadlyExportError("could not open output .stl file: " + std::string(pFile));
+	}
+
 	outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
 }
 
@@ -64,7 +81,7 @@ void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
 
 // ------------------------------------------------------------------------------------------------
-STLExporter :: STLExporter(const char* _filename, const aiScene* pScene)
+STLExporter :: STLExporter(const char* _filename, const aiScene* pScene, bool binary)
 : filename(_filename)
 , pScene(pScene)
 , endl("\n") 
@@ -72,14 +89,31 @@ STLExporter :: STLExporter(const char* _filename, const aiScene* pScene)
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	const std::locale& l = std::locale("C");
 	mOutput.imbue(l);
-
-	const std::string& name = "AssimpScene";
+	if (binary) {
+		char buf[80] = {0} ;
+		buf[0] = 'A'; buf[1] = 's'; buf[2] = 's'; buf[3] = 'i'; buf[4] = 'm'; buf[5] = 'p';
+		buf[6] = 'S'; buf[7] = 'c'; buf[8] = 'e'; buf[9] = 'n'; buf[10] = 'e';
+		mOutput.write(buf, 80);
+		unsigned int meshnum = 0;
+		for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+			for (unsigned int j = 0; j < pScene->mMeshes[i]->mNumFaces; ++j) {
+				meshnum++;
+			}
+		}
+		AI_SWAP4(meshnum);
+		mOutput.write((char *)&meshnum, 4);
+		for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+			WriteMeshBinary(pScene->mMeshes[i]);
+		}
+	} else {
+		const std::string& name = "AssimpScene";
 	
-	mOutput << "solid " << name << endl;
-	for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-		WriteMesh(pScene->mMeshes[i]);
+		mOutput << "solid " << name << endl;
+		for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+			WriteMesh(pScene->mMeshes[i]);
+		}
+		mOutput << "endsolid " << name << endl;
 	}
-	mOutput << "endsolid " << name << endl;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -106,6 +140,33 @@ void STLExporter :: WriteMesh(const aiMesh* m)
 
 		mOutput << "  endloop" << endl; 
 		mOutput << " endfacet" << endl << endl; 
+	}
+}
+
+void STLExporter :: WriteMeshBinary(const aiMesh* m)
+{
+	for (unsigned int i = 0; i < m->mNumFaces; ++i) {
+		const aiFace& f = m->mFaces[i];
+		// we need per-face normals. We specified aiProcess_GenNormals as pre-requisite for this exporter,
+		// but nonetheless we have to expect per-vertex normals.
+		aiVector3D nor;
+		if (m->mNormals) {
+			for(unsigned int a = 0; a < f.mNumIndices; ++a) {
+				nor += m->mNormals[f.mIndices[a]];
+			}
+			nor.Normalize();
+		}
+		float nx = nor.x, ny = nor.y, nz = nor.z;
+		AI_SWAP4(nx); AI_SWAP4(ny); AI_SWAP4(nz);
+		mOutput.write((char *)&nx, 4); mOutput.write((char *)&ny, 4); mOutput.write((char *)&nz, 4);
+		for(unsigned int a = 0; a < f.mNumIndices; ++a) {
+			const aiVector3D& v  = m->mVertices[f.mIndices[a]];
+			float vx = v.x, vy = v.y, vz = v.z;
+			AI_SWAP4(vx); AI_SWAP4(vy); AI_SWAP4(vz);
+			mOutput.write((char *)&vx, 4); mOutput.write((char *)&vy, 4); mOutput.write((char *)&vz, 4);
+		}
+		char dummy[2] = {0};
+		mOutput.write(dummy, 2);
 	}
 }
 

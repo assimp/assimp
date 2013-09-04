@@ -97,9 +97,9 @@ public:
 public:
 
 	Converter(aiScene* out, const Document& doc)
-		: out(out) 
+		: defaultMaterialIndex()
+		, out(out) 
 		, doc(doc)
-		, defaultMaterialIndex()
 	{
 		// animations need to be converted first since this will
 		// populate the node_anim_chain_bits map, which is needed
@@ -419,6 +419,8 @@ private:
 			return "Scaling";
 		case TransformationComp_ScalingPivotInverse:
 			return "ScalingPivotInverse";
+		case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+			break;
 		}
 
 		ai_assert(false);
@@ -454,6 +456,8 @@ private:
 			return "Lcl Scaling";
 		case TransformationComp_ScalingPivotInverse:
 			return "ScalingPivotInverse";
+		case TransformationComp_MAXIMUM: // this is to silence compiler warnings
+			break;
 		}
 
 		ai_assert(false);
@@ -543,6 +547,10 @@ private:
 			default:
 				ai_assert(false);
 		}
+        
+        ai_assert((order[0] >= 0) && (order[0] <= 2));
+        ai_assert((order[1] >= 0) && (order[1] <= 2));
+        ai_assert((order[2] >= 0) && (order[2] <= 2));
 
 		if(!is_id[order[0]]) {
 			out = temp[order[0]];
@@ -1167,7 +1175,6 @@ private:
 				ai_assert(cluster);
 
 				const WeightIndexArray& indices = cluster->GetIndices();
-				const WeightArray& weights = cluster->GetWeights();
 
 				if(indices.empty()) {
 					continue;
@@ -1194,7 +1201,7 @@ private:
 					count_out_indices.push_back(0);
 
 					for(unsigned int i = 0; i < count; ++i) {					
-						if (no_mat_check || mats[geo.FaceForVertexIndex(out_idx[i])] == materialIndex) {
+						if (no_mat_check || static_cast<size_t>(mats[geo.FaceForVertexIndex(out_idx[i])]) == materialIndex) {
 							
 							if (index_out_indices.back() == no_index_sentinel) {
 								index_out_indices.back() = out_indices.size();
@@ -1608,6 +1615,9 @@ private:
 
 			case FileGlobalSettings::FrameRate_CUSTOM:
 				return customFPSVal;
+
+			case FileGlobalSettings::FrameRate_MAX: // this is to silence compiler warnings
+				break;
 		}
 
 		ai_assert(false);
@@ -1838,7 +1848,7 @@ private:
 		}}
 #endif
 
-		const AnimationCurveNode* curve_node;
+		const AnimationCurveNode* curve_node = NULL;
 		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
 			ai_assert(node);
 

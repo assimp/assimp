@@ -1421,6 +1421,10 @@ IFC support is new and considered experimental. Please report any bugs you may e
 - The implementation knows only about IFC2X3 and applies this rule set to all models it encounters, 
   regardless of their actual version. Loading of older or newer files may fail with parsing errors.
 
+@subsection ifc_metadata Metadata
+
+IFC file properties (IfcPropertySet) are kept as per-node metadata, see aiNode::mMetaData. 
+
 <hr>
 @section ogre Ogre
 *ATTENTION*: The Ogre-Loader is currently under development, many things have changed after this documentation was written, but they are not final enough to rewrite the documentation. So things may have changed by now!

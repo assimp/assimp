@@ -80,7 +80,7 @@ enum aiLightSourceType
 	 *  compiler to map this enum to a 32 Bit integer.
 	 */
 #ifndef SWIG
-	_aiLightSource_Force32Bit = 0x9fffffff
+	_aiLightSource_Force32Bit = INT_MAX
 #endif
 };
 

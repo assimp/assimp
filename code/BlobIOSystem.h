@@ -88,9 +88,9 @@ public:
 
 
 	// -------------------------------------------------------------------
-    virtual size_t Read(void* pvBuffer, 
-		size_t pSize, 
-		size_t pCount) 
+    virtual size_t Read( void *, 
+		size_t, 
+		size_t ) 
 	{
 		return 0;
 	}

@@ -34,6 +34,7 @@ SET( PUBLIC_HEADERS
 	${HEADER_PATH}/quaternion.h
 	${HEADER_PATH}/quaternion.inl
 	${HEADER_PATH}/scene.h
+	${HEADER_PATH}/metadata.h
 	${HEADER_PATH}/texture.h
 	${HEADER_PATH}/types.h
 	${HEADER_PATH}/vector2.h
@@ -57,8 +58,6 @@ SET( PUBLIC_HEADERS
 
 SET( Core_SRCS
 	Assimp.cpp
-	AssimpPCH.cpp
-	AssimpPCH.h
 )
 
 SET( Boost_SRCS
@@ -237,11 +236,7 @@ SET( LWS_SRCS
 )
 SOURCE_GROUP( LWS FILES ${LWS_SRCS})
 
-SET ( M3_SRCS
-	M3Importer.cpp
-	M3Importer.h
-)
-SOURCE_GROUP( M3 FILES ${M3_SRCS} )
+
 
 SET( MD2_SRCS
 	MD2FileData.h
@@ -619,7 +614,7 @@ else (UNZIP_FOUND)
 	SET (unzip_compile_SRCS ${unzip_SRCS})
 endif (UNZIP_FOUND)
 
-SET( assim_src
+SET( assimp_src
 	# Assimp Files
 	${Core_SRCS}
 	${Common_SRCS}
@@ -640,7 +635,6 @@ SET( assim_src
 	${Irr_SRCS}
 	${LWO_SRCS}
 	${LWS_SRCS}
-	${M3_SRCS}
 	${MD2_SRCS}
 	${MD3_SRCS}
 	${MD5_SRCS}
@@ -680,13 +674,16 @@ SET( assim_src
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
 )
+
+ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
+
 IF ( ASSIMP_BUILD_STATIC_LIB )
 	ADD_LIBRARY( assimp STATIC
-		${assim_src}
+		${assimp_src}
 	)
 ELSE ( ASSIMP_BUILD_STATIC_LIB )
 	ADD_LIBRARY( assimp SHARED
-		${assim_src}
+		${assimp_src}
 	)
 ENDIF ( ASSIMP_BUILD_STATIC_LIB )
 
@@ -696,6 +693,7 @@ TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${ASSIMP_VERSION}
 	SOVERSION ${ASSIMP_SOVERSION} # use full version 
+    OUTPUT_NAME assimp${ASSIMP_LIBRARY_SUFFIX}
 )
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"

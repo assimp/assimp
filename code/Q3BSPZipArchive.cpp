@@ -74,7 +74,8 @@ Q3BSPZipArchive::~Q3BSPZipArchive()
 {
 	for( std::map<std::string, IOStream*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it )
 	{
-		delete it->second;
+		ZipFile *pZipFile = reinterpret_cast<ZipFile*>(it->second);
+		delete pZipFile;
 	}
 	m_ArchiveMap.clear();
 

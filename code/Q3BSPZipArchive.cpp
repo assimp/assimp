@@ -72,12 +72,19 @@ Q3BSPZipArchive::Q3BSPZipArchive( const std::string& rFile ) :
 //	Destructor.
 Q3BSPZipArchive::~Q3BSPZipArchive()
 {
+	for( std::map<std::string, IOStream*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it )
+	{
+		delete it->second;
+	}
+	m_ArchiveMap.clear();
+
+	m_FileList.clear();
+
 	if ( NULL != m_ZipFileHandle )
 	{
 		unzClose( m_ZipFileHandle );
 	}
 	m_ZipFileHandle = NULL;
-	m_FileList.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -171,20 +178,14 @@ bool Q3BSPZipArchive::mapArchive()
 
 	//	At first ensure file is already open
 	if ( UNZ_OK == unzGoToFirstFile( m_ZipFileHandle ) ) 
-	{
-		char filename[ FileNameSize ];
-		unzGetCurrentFileInfo( m_ZipFileHandle, NULL, filename, FileNameSize, NULL, 0, NULL, 0 );
-		m_FileList.push_back( filename );
-		unzCloseCurrentFile( m_ZipFileHandle );
-			
-		// Loop over all files
-		while ( unzGoToNextFile( m_ZipFileHandle ) != UNZ_END_OF_LIST_OF_FILE )  
-		{
+	{	
+		// Loop over all files  
+		do {
 			char filename[ FileNameSize ];
 			unzGetCurrentFileInfo( m_ZipFileHandle, NULL, filename, FileNameSize, NULL, 0, NULL, 0 );
 			m_FileList.push_back( filename );
 			unzCloseCurrentFile( m_ZipFileHandle );
-		}
+		} while ( unzGoToNextFile( m_ZipFileHandle ) != UNZ_END_OF_LIST_OF_FILE );
 	}
 	
 	std::sort( m_FileList.begin(), m_FileList.end() );

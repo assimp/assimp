@@ -378,10 +378,10 @@ struct aiScene
 #ifdef __cplusplus
 
 	//! Default constructor - set everything to 0/NULL
-	aiScene();
+	ASSIMP_API aiScene();
 
 	//! Destructor
-	~aiScene();
+	ASSIMP_API ~aiScene();
 
 	//! Check whether the scene contains meshes
 	//! Unless no special scene flags are set this will always be true.

@@ -69,7 +69,7 @@ ASSIMP_API unsigned int aiGetVersionRevision ()
 }
 
 // ------------------------------------------------------------------------------------------------
-aiScene::aiScene()
+ASSIMP_API aiScene::aiScene()
 	: mFlags()
 	, mRootNode()
 	, mNumMeshes()
@@ -89,7 +89,7 @@ aiScene::aiScene()
 	}
 
 // ------------------------------------------------------------------------------------------------
-aiScene::~aiScene()
+ASSIMP_API aiScene::~aiScene()
 {
 	// delete all sub-objects recursively
 	delete mRootNode;

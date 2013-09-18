@@ -1,18 +1,16 @@
 FIND_PACKAGE(DirectX REQUIRED)
 
-# Make sure the compiler can find include files from our Hello library.
-include_directories (
+
+INCLUDE_DIRECTORIES (
 	${Assimp_SOURCE_DIR}/include
 	${Assimp_SOURCE_DIR}/code
 	${DirectX_INCLUDE_DIR}
 )
 
-# Make sure the linker can find the Hello library once it is built.
-link_directories (${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib)
+# Make sure the linker can find the Assimp library once it is built.
+LINK_DIRECTORIES (${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib)
 
-# Add executable called "helloDemo" that is built from the source files
-# "demo.cxx" and "demo_b.cxx". The extensions are automatically found.
-add_executable(  assimp_viewer WIN32
+ADD_EXECUTABLE(  assimp_viewer WIN32
 	AnimEvaluator.cpp
 	Background.cpp
 	Display.cpp
@@ -50,8 +48,13 @@ IF( WIN32 )
 	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 ENDIF( WIN32 )
 
-# Link the executable to the Hello library.
-target_link_libraries ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib Winmm.lib  ) 
+#
+ADD_CUSTOM_COMMAND(TARGET assimp_viewer 
+	PRE_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:assimp> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} $<TARGET_FILE_DIR:assimp_viewer>)
+
+# Link the executable to the assimp + dx libs.
+TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib Winmm.lib  ) 
 
 INSTALL( TARGETS assimp_viewer
 	DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-dev

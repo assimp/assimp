@@ -276,14 +276,23 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 	for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
 	{
 		ObjFile::Face* const inp = pObjMesh->m_Faces[ index ];
+	
 		if (inp->m_PrimitiveType == aiPrimitiveType_LINE) {
 			pMesh->mNumFaces += inp->m_pVertices->size() - 1;
+			pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
 		}
 		else if (inp->m_PrimitiveType == aiPrimitiveType_POINT) {
 			pMesh->mNumFaces += inp->m_pVertices->size();
+			pMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
 		}
 		else {
 			++pMesh->mNumFaces;
+			if (inp->m_pVertices->size() > 3) {
+				pMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+			}
+			else {
+				pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+			}
 		}
 	}
 

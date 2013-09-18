@@ -50,7 +50,7 @@ ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 #
 ADD_CUSTOM_COMMAND(TARGET assimp_viewer 
 	PRE_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} $<TARGET_FILE_DIR:assimp_viewer>)
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp> $<TARGET_FILE_DIR:assimp_viewer>)
 
 # Link the executable to the assimp + dx libs.
 TARGET_LINK_LIBRARIES ( assimp_viewer assimp ${DirectX_LIBRARY} ${DirectX_D3DX9_LIBRARY} comctl32.lib Winmm.lib  ) 

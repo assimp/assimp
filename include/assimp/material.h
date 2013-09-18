@@ -691,6 +691,12 @@ public:
     aiReturn Get(const char* pKey,unsigned int type,
 		unsigned int idx, Type* pOut, unsigned int* pMax) const;
 
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, int* pOut, unsigned int* pMax) const;
+
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, float* pOut, unsigned int* pMax) const;
+
     // -------------------------------------------------------------------
     /** @brief Retrieve a Type value with a specific key 
      *  from the material
@@ -704,6 +710,25 @@ public:
 	template <typename Type>
 	aiReturn Get(const char* pKey,unsigned int type,
 		unsigned int idx,Type& pOut) const;
+
+
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, int& pOut) const;
+
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, float& pOut) const;
+
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, aiString& pOut) const;
+
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, aiColor3D& pOut) const;
+
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, aiColor4D& pOut) const;
+
+	aiReturn Get(const char* pKey,unsigned int type,
+		unsigned int idx, aiUVTransform& pOut) const;
 
 	// -------------------------------------------------------------------
 	/** Get the number of textures for a particular texture type.
@@ -792,6 +817,42 @@ public:
 	 *  @param index Set by the AI_MATKEY_XXX macro  */
 	template<class TYPE>
 	aiReturn AddProperty (const TYPE* pInput,
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	aiReturn AddProperty (const aiVector3D* pInput,
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	aiReturn AddProperty (const aiColor3D* pInput,
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	aiReturn AddProperty (const aiColor4D* pInput,
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	aiReturn AddProperty (const int* pInput,
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	aiReturn AddProperty (const float* pInput,
+		unsigned int pNumValues,
+		const char* pKey,
+		unsigned int type  = 0,
+		unsigned int index = 0);
+
+	aiReturn AddProperty (const aiUVTransform* pInput,
 		unsigned int pNumValues,
 		const char* pKey,
 		unsigned int type  = 0,

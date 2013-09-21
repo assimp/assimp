@@ -1487,7 +1487,6 @@
 		B919758A163AEA54009C397B /* version.h in Headers */ = {isa = PBXBuildFile; fileRef = F9BA8B9E1543268400E63FFE /* version.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B919758B163AEA54009C397B /* OgreImporter.hpp in Headers */ = {isa = PBXBuildFile; fileRef = F9BA8C36154328B600E63FFE /* OgreImporter.hpp */; };
 		B919758C163AEA54009C397B /* OgreXmlHelper.hpp in Headers */ = {isa = PBXBuildFile; fileRef = F9BA8C3A154328B600E63FFE /* OgreXmlHelper.hpp */; };
-		B9197595163AEA54009C397B /* M3Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = F99A9F2715436207000682F3 /* M3Importer.h */; };
 		B9197596163AEA54009C397B /* PlyExporter.h in Headers */ = {isa = PBXBuildFile; fileRef = F99A9F3115436269000682F3 /* PlyExporter.h */; };
 		B919759C163AEA54009C397B /* crc32.h in Headers */ = {isa = PBXBuildFile; fileRef = F960704B154366AB004D91DD /* crc32.h */; };
 		B919759D163AEA54009C397B /* deflate.h in Headers */ = {isa = PBXBuildFile; fileRef = F960704D154366AB004D91DD /* deflate.h */; };
@@ -1565,7 +1564,6 @@
 		B919761A163AEA54009C397B /* OgreMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9BA8C37154328B600E63FFE /* OgreMaterial.cpp */; };
 		B919761B163AEA54009C397B /* OgreMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9BA8C38154328B600E63FFE /* OgreMesh.cpp */; };
 		B919761C163AEA54009C397B /* OgreSkeleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9BA8C39154328B600E63FFE /* OgreSkeleton.cpp */; };
-		B919761F163AEA54009C397B /* M3Importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F2615436207000682F3 /* M3Importer.cpp */; };
 		B9197620163AEA54009C397B /* PlyExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F3015436269000682F3 /* PlyExporter.cpp */; };
 		B9197625163AEA54009C397B /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = F9607047154366AB004D91DD /* adler32.c */; };
 		B9197626163AEA54009C397B /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = F9607049154366AB004D91DD /* compress.c */; };
@@ -1830,14 +1828,6 @@
 		F97BA03715439DB3009EB9DD /* ai_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = F97BA03515439DB3009EB9DD /* ai_assert.h */; };
 		F97BA03815439DB3009EB9DD /* ai_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = F97BA03515439DB3009EB9DD /* ai_assert.h */; };
 		F97BA03915439DB3009EB9DD /* ai_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = F97BA03515439DB3009EB9DD /* ai_assert.h */; };
-		F99A9F2815436207000682F3 /* M3Importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F2615436207000682F3 /* M3Importer.cpp */; };
-		F99A9F2915436207000682F3 /* M3Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = F99A9F2715436207000682F3 /* M3Importer.h */; };
-		F99A9F2A15436207000682F3 /* M3Importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F2615436207000682F3 /* M3Importer.cpp */; };
-		F99A9F2B15436207000682F3 /* M3Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = F99A9F2715436207000682F3 /* M3Importer.h */; };
-		F99A9F2C15436207000682F3 /* M3Importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F2615436207000682F3 /* M3Importer.cpp */; };
-		F99A9F2D15436207000682F3 /* M3Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = F99A9F2715436207000682F3 /* M3Importer.h */; };
-		F99A9F2E15436207000682F3 /* M3Importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F2615436207000682F3 /* M3Importer.cpp */; };
-		F99A9F2F15436207000682F3 /* M3Importer.h in Headers */ = {isa = PBXBuildFile; fileRef = F99A9F2715436207000682F3 /* M3Importer.h */; };
 		F99A9F3215436269000682F3 /* PlyExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F3015436269000682F3 /* PlyExporter.cpp */; };
 		F99A9F3315436269000682F3 /* PlyExporter.h in Headers */ = {isa = PBXBuildFile; fileRef = F99A9F3115436269000682F3 /* PlyExporter.h */; };
 		F99A9F3415436269000682F3 /* PlyExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F99A9F3015436269000682F3 /* PlyExporter.cpp */; };
@@ -2369,8 +2359,6 @@
 		F96070DD1543675E004D91DD /* sweep_context.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sweep_context.cc; sourceTree = "<group>"; };
 		F96070DE1543675E004D91DD /* sweep_context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sweep_context.h; sourceTree = "<group>"; };
 		F97BA03515439DB3009EB9DD /* ai_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ai_assert.h; sourceTree = "<group>"; };
-		F99A9F2615436207000682F3 /* M3Importer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = M3Importer.cpp; path = ../../code/M3Importer.cpp; sourceTree = SOURCE_ROOT; };
-		F99A9F2715436207000682F3 /* M3Importer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = M3Importer.h; path = ../../code/M3Importer.h; sourceTree = SOURCE_ROOT; };
 		F99A9F3015436269000682F3 /* PlyExporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlyExporter.cpp; sourceTree = "<group>"; };
 		F99A9F3115436269000682F3 /* PlyExporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlyExporter.h; sourceTree = "<group>"; };
 		F9BA8B751543268400E63FFE /* anim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = anim.h; sourceTree = "<group>"; };
@@ -3173,7 +3161,6 @@
 				F90BAFD40F5DD8F200124155 /* IRR */,
 				3AB8A3A80E50D5F400606590 /* LWO */,
 				7411B15811416D6600BCD793 /* LWS */,
-				F99A9F21154361F8000682F3 /* M3 */,
 				3AF45B870E4B74DA00207D74 /* MD2 */,
 				3AF45B880E4B751000207D74 /* MD3 */,
 				3AF45B8A0E4B755E00207D74 /* MD5 */,
@@ -3307,15 +3294,6 @@
 				2B7F45F41708365100A106A9 /* IFCUtil.h */,
 			);
 			name = IFC;
-			sourceTree = "<group>";
-		};
-		F99A9F21154361F8000682F3 /* M3 */ = {
-			isa = PBXGroup;
-			children = (
-				F99A9F2615436207000682F3 /* M3Importer.cpp */,
-				F99A9F2715436207000682F3 /* M3Importer.h */,
-			);
-			name = M3;
 			sourceTree = "<group>";
 		};
 		F99A9F5315436318000682F3 /* STEP */ = {
@@ -3499,7 +3477,6 @@
 				F9BA8C041543268400E63FFE /* version.h in Headers */,
 				F9BA8C48154328B600E63FFE /* OgreImporter.hpp in Headers */,
 				F9BA8C4C154328B600E63FFE /* OgreXmlHelper.hpp in Headers */,
-				F99A9F2D15436207000682F3 /* M3Importer.h in Headers */,
 				F99A9F3715436269000682F3 /* PlyExporter.h in Headers */,
 				F9607088154366AB004D91DD /* crc32.h in Headers */,
 				F960708A154366AB004D91DD /* deflate.h in Headers */,
@@ -3748,7 +3725,6 @@
 				F9BA8C261543268400E63FFE /* version.h in Headers */,
 				F9BA8C4E154328B600E63FFE /* OgreImporter.hpp in Headers */,
 				F9BA8C52154328B600E63FFE /* OgreXmlHelper.hpp in Headers */,
-				F99A9F2F15436207000682F3 /* M3Importer.h in Headers */,
 				F99A9F3915436269000682F3 /* PlyExporter.h in Headers */,
 				F960709C154366AB004D91DD /* crc32.h in Headers */,
 				F960709E154366AB004D91DD /* deflate.h in Headers */,
@@ -3997,7 +3973,6 @@
 				B919758A163AEA54009C397B /* version.h in Headers */,
 				B919758B163AEA54009C397B /* OgreImporter.hpp in Headers */,
 				B919758C163AEA54009C397B /* OgreXmlHelper.hpp in Headers */,
-				B9197595163AEA54009C397B /* M3Importer.h in Headers */,
 				B9197596163AEA54009C397B /* PlyExporter.h in Headers */,
 				B919759C163AEA54009C397B /* crc32.h in Headers */,
 				B919759D163AEA54009C397B /* deflate.h in Headers */,
@@ -4246,7 +4221,6 @@
 				F9BA8BC01543268400E63FFE /* version.h in Headers */,
 				F9BA8C3C154328B600E63FFE /* OgreImporter.hpp in Headers */,
 				F9BA8C40154328B600E63FFE /* OgreXmlHelper.hpp in Headers */,
-				F99A9F2915436207000682F3 /* M3Importer.h in Headers */,
 				F99A9F3315436269000682F3 /* PlyExporter.h in Headers */,
 				F9607060154366AB004D91DD /* crc32.h in Headers */,
 				F9607062154366AB004D91DD /* deflate.h in Headers */,
@@ -4495,7 +4469,6 @@
 				F9BA8BE21543268400E63FFE /* version.h in Headers */,
 				F9BA8C42154328B600E63FFE /* OgreImporter.hpp in Headers */,
 				F9BA8C46154328B600E63FFE /* OgreXmlHelper.hpp in Headers */,
-				F99A9F2B15436207000682F3 /* M3Importer.h in Headers */,
 				F99A9F3515436269000682F3 /* PlyExporter.h in Headers */,
 				F9607074154366AB004D91DD /* crc32.h in Headers */,
 				F9607076154366AB004D91DD /* deflate.h in Headers */,
@@ -4815,7 +4788,6 @@
 				F9BA8C49154328B600E63FFE /* OgreMaterial.cpp in Sources */,
 				F9BA8C4A154328B600E63FFE /* OgreMesh.cpp in Sources */,
 				F9BA8C4B154328B600E63FFE /* OgreSkeleton.cpp in Sources */,
-				F99A9F2C15436207000682F3 /* M3Importer.cpp in Sources */,
 				F99A9F3615436269000682F3 /* PlyExporter.cpp in Sources */,
 				F9607085154366AB004D91DD /* adler32.c in Sources */,
 				F9607086154366AB004D91DD /* compress.c in Sources */,
@@ -4978,7 +4950,6 @@
 				F9BA8C4F154328B600E63FFE /* OgreMaterial.cpp in Sources */,
 				F9BA8C50154328B600E63FFE /* OgreMesh.cpp in Sources */,
 				F9BA8C51154328B600E63FFE /* OgreSkeleton.cpp in Sources */,
-				F99A9F2E15436207000682F3 /* M3Importer.cpp in Sources */,
 				F99A9F3815436269000682F3 /* PlyExporter.cpp in Sources */,
 				F9607099154366AB004D91DD /* adler32.c in Sources */,
 				F960709A154366AB004D91DD /* compress.c in Sources */,
@@ -5141,7 +5112,6 @@
 				B919761A163AEA54009C397B /* OgreMaterial.cpp in Sources */,
 				B919761B163AEA54009C397B /* OgreMesh.cpp in Sources */,
 				B919761C163AEA54009C397B /* OgreSkeleton.cpp in Sources */,
-				B919761F163AEA54009C397B /* M3Importer.cpp in Sources */,
 				B9197620163AEA54009C397B /* PlyExporter.cpp in Sources */,
 				B9197625163AEA54009C397B /* adler32.c in Sources */,
 				B9197626163AEA54009C397B /* compress.c in Sources */,
@@ -5304,7 +5274,6 @@
 				F9BA8C3D154328B600E63FFE /* OgreMaterial.cpp in Sources */,
 				F9BA8C3E154328B600E63FFE /* OgreMesh.cpp in Sources */,
 				F9BA8C3F154328B600E63FFE /* OgreSkeleton.cpp in Sources */,
-				F99A9F2815436207000682F3 /* M3Importer.cpp in Sources */,
 				F99A9F3215436269000682F3 /* PlyExporter.cpp in Sources */,
 				F960705D154366AB004D91DD /* adler32.c in Sources */,
 				F960705E154366AB004D91DD /* compress.c in Sources */,
@@ -5467,7 +5436,6 @@
 				F9BA8C43154328B600E63FFE /* OgreMaterial.cpp in Sources */,
 				F9BA8C44154328B600E63FFE /* OgreMesh.cpp in Sources */,
 				F9BA8C45154328B600E63FFE /* OgreSkeleton.cpp in Sources */,
-				F99A9F2A15436207000682F3 /* M3Importer.cpp in Sources */,
 				F99A9F3415436269000682F3 /* PlyExporter.cpp in Sources */,
 				F9607071154366AB004D91DD /* adler32.c in Sources */,
 				F9607072154366AB004D91DD /* compress.c in Sources */,

@@ -7,8 +7,8 @@ Copyright (c) 2006-2012, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -57,9 +57,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-aiMatrix4x4t<TReal> ::aiMatrix4x4t () :	
-	a1(1.0f), a2(), a3(), a4(), 
-	b1(), b2(1.0f), b3(), b4(), 
+aiMatrix4x4t<TReal> ::aiMatrix4x4t () :
+	a1(1.0f), a2(), a3(), a4(),
+	b1(), b2(1.0f), b3(), b4(),
 	c1(), c2(), c3(1.0f), c4(),
 	d1(), d2(), d3(), d4(1.0f)
 {
@@ -71,13 +71,13 @@ template <typename TReal>
 aiMatrix4x4t<TReal> ::aiMatrix4x4t (TReal _a1, TReal _a2, TReal _a3, TReal _a4,
 			  TReal _b1, TReal _b2, TReal _b3, TReal _b4,
 			  TReal _c1, TReal _c2, TReal _c3, TReal _c4,
-			  TReal _d1, TReal _d2, TReal _d3, TReal _d4) :	
-	a1(_a1), a2(_a2), a3(_a3), a4(_a4),  
-	b1(_b1), b2(_b2), b3(_b3), b4(_b4), 
+			  TReal _d1, TReal _d2, TReal _d3, TReal _d4) :
+	a1(_a1), a2(_a2), a3(_a3), a4(_a4),
+	b1(_b1), b2(_b2), b3(_b3), b4(_b4),
 	c1(_c1), c2(_c2), c3(_c3), c4(_c4),
 	d1(_d1), d2(_d2), d3(_d3), d4(_d4)
 {
-	
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -100,6 +100,34 @@ inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiMatrix3x3t<TReal>& m)
 	b1 = m.b1; b2 = m.b2; b3 = m.b3; b4 = static_cast<TReal>(0.0);
 	c1 = m.c1; c2 = m.c2; c3 = m.c3; c4 = static_cast<TReal>(0.0);
 	d1 = static_cast<TReal>(0.0); d2 = static_cast<TReal>(0.0); d3 = static_cast<TReal>(0.0); d4 = static_cast<TReal>(1.0);
+}
+
+// ----------------------------------------------------------------------------------------
+template <typename TReal>
+inline aiMatrix4x4t<TReal>::aiMatrix4x4t (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation, aiVector3t<TReal>& position)
+{
+	// build a 3x3 rotation matrix
+	aiMatrix3x3t<TReal> m = rotation.GetMatrix();
+
+	a1 = m.a1 * scaling.x;
+	a2 = m.a2 * scaling.x;
+	a3 = m.a3 * scaling.x;
+	a4 = position.x;
+
+	b1 = m.b1 * scaling.y;
+	b2 = m.b2 * scaling.y;
+	b3 = m.b3 * scaling.y;
+	b4 = position.y;
+	
+	c1 = m.c1 * scaling.z;
+	c2 = m.c2 * scaling.z;
+	c3 = m.c3 * scaling.z;
+	c4= position.z;
+
+	d1 = static_cast<TReal>(0.0);
+	d2 = static_cast<TReal>(0.0);
+	d3 = static_cast<TReal>(0.0);
+	d4 = static_cast<TReal>(1.0);
 }
 
 // ----------------------------------------------------------------------------------------
@@ -155,10 +183,10 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Transpose()
 template <typename TReal>
 inline TReal aiMatrix4x4t<TReal>::Determinant() const
 {
-	return a1*b2*c3*d4 - a1*b2*c4*d3 + a1*b3*c4*d2 - a1*b3*c2*d4 
-		+ a1*b4*c2*d3 - a1*b4*c3*d2 - a2*b3*c4*d1 + a2*b3*c1*d4 
-		- a2*b4*c1*d3 + a2*b4*c3*d1 - a2*b1*c3*d4 + a2*b1*c4*d3 
-		+ a3*b4*c1*d2 - a3*b4*c2*d1 + a3*b1*c2*d4 - a3*b1*c4*d2 
+	return a1*b2*c3*d4 - a1*b2*c4*d3 + a1*b3*c4*d2 - a1*b3*c2*d4
+		+ a1*b4*c2*d3 - a1*b4*c3*d2 - a2*b3*c4*d1 + a2*b3*c1*d4
+		- a2*b4*c1*d3 + a2*b4*c3*d1 - a2*b1*c3*d4 + a2*b1*c4*d3
+		+ a3*b4*c1*d2 - a3*b4*c2*d1 + a3*b1*c2*d4 - a3*b1*c4*d2
 		+ a3*b2*c4*d1 - a3*b2*c1*d4 - a4*b1*c2*d3 + a4*b1*c3*d2
 		- a4*b2*c3*d1 + a4*b2*c1*d3 - a4*b3*c1*d2 + a4*b3*c2*d1;
 }
@@ -169,7 +197,7 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Inverse()
 {
 	// Compute the reciprocal determinant
 	const TReal det = Determinant();
-	if(det == static_cast<TReal>(0.0)) 
+	if(det == static_cast<TReal>(0.0))
 	{
 		// Matrix not invertible. Setting all elements to nan is not really
 		// correct in a mathematical sense but it is easy to debug for the
@@ -202,7 +230,7 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Inverse()
 	res.d1 = -invdet * (b1 * (c2 * d3 - c3 * d2) + b2 * (c3 * d1 - c1 * d3) + b3 * (c1 * d2 - c2 * d1));
 	res.d2 = invdet  * (a1 * (c2 * d3 - c3 * d2) + a2 * (c3 * d1 - c1 * d3) + a3 * (c1 * d2 - c2 * d1));
 	res.d3 = -invdet * (a1 * (b2 * d3 - b3 * d2) + a2 * (b3 * d1 - b1 * d3) + a3 * (b1 * d2 - b2 * d1));
-	res.d4 = invdet  * (a1 * (b2 * c3 - b3 * c2) + a2 * (b3 * c1 - b1 * c3) + a3 * (b1 * c2 - b2 * c1)); 
+	res.d4 = invdet  * (a1 * (b2 * c3 - b3 * c2) + a2 * (b3 * c1 - b1 * c3) + a3 * (b1 * c2 - b2 * c1));
 	*this = res;
 
 	return *this;
@@ -368,9 +396,9 @@ inline bool aiMatrix4x4t<TReal>::IsIdentity() const
 			d1 <= epsilon && d1 >= -epsilon &&
 			d2 <= epsilon && d2 >= -epsilon &&
 			d3 <= epsilon && d3 >= -epsilon &&
-			a1 <= 1.f+epsilon && a1 >= 1.f-epsilon && 
-			b2 <= 1.f+epsilon && b2 >= 1.f-epsilon && 
-			c3 <= 1.f+epsilon && c3 >= 1.f-epsilon && 
+			a1 <= 1.f+epsilon && a1 >= 1.f-epsilon &&
+			b2 <= 1.f+epsilon && b2 >= 1.f-epsilon &&
+			c3 <= 1.f+epsilon && c3 >= 1.f-epsilon &&
 			d4 <= 1.f+epsilon && d4 >= 1.f-epsilon);
 }
 
@@ -472,9 +500,9 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Scaling( const aiVector3t<TReal
  */
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::FromToMatrix(const aiVector3t<TReal>& from, 
+inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::FromToMatrix(const aiVector3t<TReal>& from,
 	const aiVector3t<TReal>& to, aiMatrix4x4t<TReal>& mtx)
-{	
+{
 	aiMatrix3x3t<TReal> m3;
 	aiMatrix3x3t<TReal>::FromToMatrix(from,to,m3);
 	mtx = aiMatrix4x4t<TReal>(m3);

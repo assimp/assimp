@@ -78,6 +78,14 @@ public:
 
 	/** construction from 3x3 matrix, remaining elements are set to identity */
 	explicit aiMatrix4x4t( const aiMatrix3x3t<TReal>& m);
+	
+	/** construction from position, rotation and scaling components
+	 * @param scaling The scaling for the x,y,z axes
+	 * @param rotation The rotation as a hamilton quaternion 
+	 * @param position The position for the x,y,z axes
+	 */
+	aiMatrix4x4t(aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
+		aiVector3t<TReal>& position);
 
 public:
 

@@ -123,13 +123,13 @@ struct aiNode
 	/** Constructor */
 	aiNode() 
 		// set all members to zero by default
-		: mName()
-		, mParent()
-		, mNumChildren()
-		, mChildren()
-		, mNumMeshes()
-		, mMeshes()
-		, mMetaData()
+		: mName("")
+		, mParent(NULL)
+		, mNumChildren(0)
+		, mChildren(NULL)
+		, mNumMeshes(0)
+		, mMeshes(NULL)
+		, mMetaData(NULL)
 	{
 	}
 	
@@ -138,12 +138,12 @@ struct aiNode
 	aiNode(const std::string& name) 
 		// set all members to zero by default
 		: mName(name)
-		, mParent()
-		, mNumChildren()
-		, mChildren()
-		, mNumMeshes()
-		, mMeshes()
-		, mMetaData()
+		, mParent(NULL)
+		, mNumChildren(0)
+		, mChildren(NULL)
+		, mNumMeshes(0)
+		, mMeshes(NULL)
+		, mMetaData(NULL)
 	{
 	}
 

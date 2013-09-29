@@ -86,7 +86,12 @@ bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
 	if (IsBinarySTL(buffer, fileSize))
 		return false;
 
-	if (fileSize < 5)
+	const char* bufferEnd = buffer + fileSize;
+
+	if (!SkipSpaces(&buffer))
+		return false;
+
+	if (buffer + 5 >= bufferEnd)
 		return false;
 
 	return strncmp(buffer, "solid", 5) == 0;
@@ -209,7 +214,11 @@ void STLImporter::LoadASCIIFile()
 {
 	aiMesh* pMesh = pScene->mMeshes[0];
 
-	const char* sz = mBuffer + 5; // skip the "solid"
+	const char* sz = mBuffer;
+	SkipSpaces(&sz);
+	ai_assert(!IsLineEnd(sz));
+
+	sz += 5; // skip the "solid"
 	SkipSpaces(&sz);
 	const char* szMe = sz;
 	while (!::IsSpaceOrNewLine(*sz)) {

@@ -112,7 +112,7 @@ void ObjFileParser::parseFile()
 		case 'v': // Parse a vertex texture coordinate
 			{
 				++m_DataIt;
-				if (*m_DataIt == ' ')
+				if (*m_DataIt == ' ' || *m_DataIt == '\t')
 				{
 					// Read in vertex definition
 					getVector3(m_pModel->m_Vertices);

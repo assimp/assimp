@@ -112,6 +112,21 @@ private:
 	const aiScene* const pScene;
 
 	std::vector<aiVector3D> vp, vn, vt;
+
+	class vecIndexMap
+	{
+		int mNextIndex;
+		std::map<aiVector3D, int> vecMap;
+	public:
+
+		vecIndexMap():mNextIndex(1)
+		{}
+
+		int getIndex(const aiVector3D& vec);
+		void getVectors( std::vector<aiVector3D>& vecs );
+	};
+
+	vecIndexMap vpMap, vnMap, vtMap;
 	std::vector<MeshInstance> meshes;
 
 	// this endl() doesn't flush() the stream

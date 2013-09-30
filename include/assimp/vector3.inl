@@ -149,6 +149,16 @@ AI_FORCE_INLINE bool aiVector3t<TReal>::operator!= (const aiVector3t<TReal>& oth
 }
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
+AI_FORCE_INLINE bool aiVector3t<TReal>::operator< (const aiVector3t<TReal>& other) const {
+	if(x < other.x) return true;
+	if(x > other.x) return false;
+	if(y < other.y) return true;
+	if(y > other.y) return false;
+	if(z < other.z) return true;
+	return false;
+}
+// ------------------------------------------------------------------------------------------------
+template <typename TReal>
 AI_FORCE_INLINE const aiVector3t<TReal> aiVector3t<TReal>::SymMul(const aiVector3t<TReal>& o) {
 	return aiVector3t<TReal>(x*o.x,y*o.y,z*o.z);
 }

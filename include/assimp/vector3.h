@@ -85,6 +85,7 @@ public:
 	// comparison
 	bool operator== (const aiVector3t& other) const;
 	bool operator!= (const aiVector3t& other) const;
+	bool operator< (const aiVector3t& other) const;
 
 	template <typename TOther>
 	operator aiVector3t<TOther> () const;

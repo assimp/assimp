@@ -112,7 +112,7 @@ void ObjFileParser::parseFile()
 		case 'v': // Parse a vertex texture coordinate
 			{
 				++m_DataIt;
-				if (*m_DataIt == ' ')
+				if (*m_DataIt == ' ' || *m_DataIt == '\t')
 				{
 					// Read in vertex definition
 					getVector3(m_pModel->m_Vertices);
@@ -290,6 +290,10 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 	std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
 	bool hasNormal = false;
 
+	const int vSize = m_pModel->m_Vertices.size();
+	const int vtSize = m_pModel->m_TextureCoord.size();
+	const int vnSize = m_pModel->m_Normals.size();
+
 	const bool vt = (!m_pModel->m_TextureCoord.empty());
 	const bool vn = (!m_pModel->m_Normals.empty());
 	int iStep = 0, iPos = 0;
@@ -323,7 +327,11 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 		{
 			//OBJ USES 1 Base ARRAYS!!!!
 			const int iVal = atoi( pPtr );
+
+			// increment iStep position based off of the sign and # of digits
 			int tmp = iVal;
+			if (iVal < 0)
+			    ++iStep;
 			while ( ( tmp = tmp / 10 )!=0 )
 				++iStep;
 
@@ -341,6 +349,27 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 				else if ( 2 == iPos )
 				{
 					pNormalID->push_back( iVal-1 );
+					hasNormal = true;
+				}
+				else
+				{
+					reportErrorTokenInFace();
+				}
+			}
+			else if ( iVal < 0 )
+			{
+				// Store relatively index
+				if ( 0 == iPos )
+				{
+					pIndices->push_back( vSize + iVal );
+				}
+				else if ( 1 == iPos )
+				{
+					pTexID->push_back( vtSize + iVal );
+				}
+				else if ( 2 == iPos )
+				{
+					pNormalID->push_back( vnSize + iVal );
 					hasNormal = true;
 				}
 				else

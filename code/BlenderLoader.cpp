@@ -958,19 +958,41 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 }
 
 // ------------------------------------------------------------------------------------------------
-aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* /*obj*/, const Camera* /*mesh*/, ConversionData& /*conv_data*/)
+aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj, const Camera* camera, ConversionData& /*conv_data*/)
 {
 	ScopeGuard<aiCamera> out(new aiCamera());
-
-	return NULL ; //out.dismiss();
+	out->mName = obj->id.name+2;
+	out->mPosition = aiVector3D(0.f, 0.f, 0.f);
+	out->mUp = aiVector3D(0.f, 1.f, 0.f);
+	out->mLookAt = aiVector3D(0.f, 0.f, -1.f);
+	return out.dismiss();
 }
 
 // ------------------------------------------------------------------------------------------------
-aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* /*obj*/, const Lamp* /*mesh*/, ConversionData& /*conv_data*/)
+aiLight* BlenderImporter::ConvertLight(const Scene& in, const Object* obj, const Lamp* lamp, ConversionData& conv_data)
 {
 	ScopeGuard<aiLight> out(new aiLight());
+	out->mName = obj->id.name+2;
 
-	return NULL ; //out.dismiss();
+	switch (lamp->type)
+	{
+	    case Lamp::Type_Local:
+	        out->mType = aiLightSource_POINT;
+	        break;
+	    case Lamp::Type_Sun:
+	        out->mType = aiLightSource_DIRECTIONAL;
+
+	        // blender orients directional lights as facing toward -z
+	        out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+	        break;
+	    default:
+	        break;
+	}
+
+	out->mColorAmbient = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
+	out->mColorSpecular = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
+	out->mColorDiffuse = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
+	return out.dismiss();
 }
 
 // ------------------------------------------------------------------------------------------------

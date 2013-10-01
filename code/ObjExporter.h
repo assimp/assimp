@@ -113,10 +113,25 @@ private:
 
 	std::vector<aiVector3D> vp, vn, vt;
 
+
+	struct aiVectorCompare
+	{
+		bool operator() (const aiVector3D& a, const aiVector3D& b) const 
+		{
+			if(a.x < b.x) return true;
+			if(a.x > b.x) return false;
+			if(a.y < b.y) return true;
+			if(a.y > b.y) return false;
+			if(a.z < b.z) return true;
+			return false;
+		}
+	};
+
 	class vecIndexMap
 	{
 		int mNextIndex;
-		std::map<aiVector3D, int> vecMap;
+		typedef std::map<aiVector3D, int, aiVectorCompare> dataType;
+		dataType vecMap;
 	public:
 
 		vecIndexMap():mNextIndex(1)

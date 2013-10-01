@@ -103,7 +103,7 @@ PlyExporter :: PlyExporter(const char* _filename, const aiScene* pScene)
 
 	mOutput << "ply" << endl;
 	mOutput << "format ascii 1.0" << endl;
-	mOutput << "Created by Open Asset Import Library - http://assimp.sf.net (v"
+	mOutput << "comment Created by Open Asset Import Library - http://assimp.sf.net (v"
 		<< aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.' 
 		<< aiGetVersionRevision() << ")" << endl;
 
@@ -159,7 +159,7 @@ PlyExporter :: PlyExporter(const char* _filename, const aiScene* pScene)
 	}
 
 	mOutput << "element face " << faces << endl;
-	mOutput << "property list uint uint vertex_indices" << endl;
+	mOutput << "property list uint uint vertex_index" << endl;
 	mOutput << "end_header" << endl;
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {

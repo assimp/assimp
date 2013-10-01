@@ -61,14 +61,14 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 		boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
 		if(outfile == NULL) {
 			throw DeadlyExportError("could not open output .obj file: " + std::string(pFile));
-		}
+		} 
 		outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
 	}
 	{
 		boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(exporter.GetMaterialLibFileName(),"wt"));
 		if(outfile == NULL) {
 			throw DeadlyExportError("could not open output .mtl file: " + std::string(exporter.GetMaterialLibFileName()));
-		}
+		} 
 		outfile->Write( exporter.mOutputMat.str().c_str(), static_cast<size_t>(exporter.mOutputMat.tellp()),1);
 	}
 }
@@ -199,6 +199,7 @@ void ObjExporter :: WriteGeometryFile()
 	AddNode(pScene->mRootNode,mBase);
 
 	// write vertex positions
+	vpMap.getVectors(vp);
 	mOutput << "# " << vp.size() << " vertex positions" << endl;
 	BOOST_FOREACH(const aiVector3D& v, vp) {
 		mOutput << "v  " << v.x << " " << v.y << " " << v.z << endl;
@@ -206,6 +207,7 @@ void ObjExporter :: WriteGeometryFile()
 	mOutput << endl;
 
 	// write uv coordinates
+	vtMap.getVectors(vt);
 	mOutput << "# " << vt.size() << " UV coordinates" << endl;
 	BOOST_FOREACH(const aiVector3D& v, vt) {
 		mOutput << "vt " << v.x << " " << v.y << " " << v.z << endl;
@@ -213,6 +215,7 @@ void ObjExporter :: WriteGeometryFile()
 	mOutput << endl;
 
 	// write vertex normals
+	vnMap.getVectors(vn);
 	mOutput << "# " << vn.size() << " vertex normals" << endl;
 	BOOST_FOREACH(const aiVector3D& v, vn) {
 		mOutput << "vn " << v.x << " " << v.y << " " << v.z << endl;
@@ -252,6 +255,31 @@ void ObjExporter :: WriteGeometryFile()
 	}
 }
 
+
+
+
+
+int ObjExporter::vecIndexMap::getIndex(const aiVector3D& vec)
+{
+	vecIndexMap::dataType::iterator vertIt = vecMap.find(vec); 
+	if(vertIt != vecMap.end()){// vertex already exists, so reference it
+		return vertIt->second;
+	}
+	vecMap[vec] = mNextIndex;
+	int ret = mNextIndex;
+	mNextIndex++;
+	return ret;
+}
+
+void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
+{
+	vecs.resize(vecMap.size());
+	for(vecIndexMap::dataType::iterator it = vecMap.begin(); it != vecMap.end(); it++){
+		vecs[it->second-1] = it->first;
+	}
+}
+
+
 // ------------------------------------------------------------------------------------------------
 void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
 {
@@ -262,6 +290,7 @@ void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatri
 	mesh.matname = GetMaterialName(m->mMaterialIndex);
 
 	mesh.faces.resize(m->mNumFaces);
+
 	for(unsigned int i = 0; i < m->mNumFaces; ++i) {
 		const aiFace& f = m->mFaces[i];
 
@@ -281,21 +310,22 @@ void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatri
 		for(unsigned int a = 0; a < f.mNumIndices; ++a) {
 			const unsigned int idx = f.mIndices[a];
 
-			// XXX need a way to check if this is an unique vertex or if we had it already, 
-			// in which case we should instead reference the previous occurrence.
-			ai_assert(m->mVertices);
-			vp.push_back( mat * m->mVertices[idx] );
-			face.indices[a].vp = vp.size();
+			aiVector3D vert = mat * m->mVertices[idx];
+			face.indices[a].vp = vpMap.getIndex(vert);
 
 			if (m->mNormals) {
-				vn.push_back( m->mNormals[idx] );
+				face.indices[a].vn = vnMap.getIndex(m->mNormals[idx]);
 			}
-			face.indices[a].vn = vn.size();
+			else{
+				face.indices[a].vn = 0;
+			}
 
 			if (m->mTextureCoords[0]) {
-				vt.push_back( m->mTextureCoords[0][idx] );
+				face.indices[a].vt = vtMap.getIndex(m->mTextureCoords[0][idx]);
 			}
-			face.indices[a].vt = vt.size();
+			else{
+				face.indices[a].vt = 0;
+			}
 		}
 	}
 }

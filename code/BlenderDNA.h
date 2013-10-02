@@ -278,19 +278,23 @@ public:
 	// --------------------------------------------------------
 	// field parsing for pointer or dynamic array types 
 	// (boost::shared_ptr or boost::shared_array)
+	// The return value indicates whether the data was already cached.
 	template <int error_policy, template <typename> class TOUT, typename T>
-	void ReadFieldPtr(TOUT<T>& out, const char* name, 
-		const FileDatabase& db) const;
+	bool ReadFieldPtr(TOUT<T>& out, const char* name, 
+		const FileDatabase& db,
+		bool non_recursive = false) const;
 
 	// --------------------------------------------------------
 	// field parsing for static arrays of pointer or dynamic
 	// array types (boost::shared_ptr[] or boost::shared_array[])
+	// The return value indicates whether the data was already cached.
 	template <int error_policy, template <typename> class TOUT, typename T, size_t N>
-	void ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
+	bool ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
 		const FileDatabase& db) const;
 
 	// --------------------------------------------------------
 	// field parsing for `normal` values
+	// The return value indicates whether the data was already cached.
 	template <int error_policy, typename T>
 	void ReadField(T& out, const char* name, 
 		const FileDatabase& db) const;
@@ -299,17 +303,18 @@ private:
 
 	// --------------------------------------------------------
 	template <template <typename> class TOUT, typename T>
-	void ResolvePointer(TOUT<T>& out, const Pointer & ptrval, 
-		const FileDatabase& db, const Field& f) const;
+	bool ResolvePointer(TOUT<T>& out, const Pointer & ptrval, 
+		const FileDatabase& db, const Field& f,
+		bool non_recursive = false) const;
 
 	// --------------------------------------------------------
 	template <template <typename> class TOUT, typename T>
-	void ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, 
-		const FileDatabase& db, const Field& f) const;
+	bool ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, 
+		const FileDatabase& db, const Field& f, bool) const;
 
 	// --------------------------------------------------------
-	void ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
-		const FileDatabase& db, const Field& f) const;
+	bool ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
+		const FileDatabase& db, const Field& f, bool) const;
 
 	// --------------------------------------------------------
 	inline const FileBlockHead* LocateFileBlockForAddress(
@@ -384,10 +389,11 @@ template <> struct Structure :: _defaultInitializer<ErrorPolicy_Fail> {
 };
 
 // -------------------------------------------------------------------------------------------------------
-template <> inline void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
+template <> inline bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
 	const Pointer & ptrval, 
 	const FileDatabase& db, 
-	const Field& f
+	const Field& f,
+	bool
 	) const;
 
 

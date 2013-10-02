@@ -180,7 +180,8 @@ void Structure :: ReadFieldArray2(T (& out)[M][N], const char* name, const FileD
 
 //--------------------------------------------------------------------------------
 template <int error_policy, template <typename> class TOUT, typename T>
-void Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabase& db) const
+bool Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabase& db,
+	bool non_recursive /*= false*/) const
 {
 	const StreamReaderAny::pos old = db.reader->GetCurrentPos();
 	Pointer ptrval;
@@ -203,23 +204,27 @@ void Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabas
 		_defaultInitializer<error_policy>()(out,e.what());
 
 		out.reset();
-		return;
+		return false;
 	}
 
 	// resolve the pointer and load the corresponding structure
-	ResolvePointer(out,ptrval,db,*f);
+	const bool res = ResolvePointer(out,ptrval,db,*f, non_recursive);
 
-	// and recover the previous stream position
-	db.reader->SetCurrentPos(old);
+	if(!non_recursive) {
+		// and recover the previous stream position
+		db.reader->SetCurrentPos(old);
+	}
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	++db.stats().fields_read;
 #endif
+
+	return res;
 }
 
 //--------------------------------------------------------------------------------
 template <int error_policy, template <typename> class TOUT, typename T, size_t N>
-void Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
+bool Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
 	const FileDatabase& db) const
 {
 	// XXX see if we can reduce this to call to the 'normal' ReadFieldPtr
@@ -253,11 +258,13 @@ void Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
 		for(size_t i = 0; i < N; ++i) {
 			out[i].reset();
 		}
-		return;
+		return false;
 	}
+
+	bool res = true;
 	for(size_t i = 0; i < N; ++i) {
 		// resolve the pointer and load the corresponding structure
-		ResolvePointer(out[i],ptrval[i],db,*f);
+		res = ResolvePointer(out[i],ptrval[i],db,*f) && res;
 	}
 
 	// and recover the previous stream position
@@ -266,6 +273,7 @@ void Structure :: ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	++db.stats().fields_read;
 #endif
+	return res;
 }
 
 //--------------------------------------------------------------------------------
@@ -296,11 +304,13 @@ void Structure :: ReadField(T& out, const char* name, const FileDatabase& db) co
 
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT, typename T>
-void Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db, const Field& f) const 
+bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db, 
+	const Field& f, 
+	bool non_recursive /*= false*/) const 
 {
-	out.reset();
+	out.reset(); // ensure null pointers work
 	if (!ptrval.val) { 
-		return;
+		return false;
 	}
 	const Structure& s = db.dna[f.type];
 	// find the file block the pointer is pointing to
@@ -318,7 +328,7 @@ void Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 	// try to retrieve the object from the cache
 	db.cache(out).get(s,out,ptrval); 
 	if (out) {
-		return;
+		return true;
 	}
 
 	// seek to this location, but save the previous stream pointer.
@@ -334,27 +344,36 @@ void Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 	// cache the object before we convert it to avoid cyclic recursion.
 	db.cache(out).set(s,out,ptrval); 
 
-	for (size_t i = 0; i < num; ++i,++o) {
-		s.Convert(*o,db);
-	}
+	// if the non_recursive flag is set, we don't do anything but leave
+	// the cursor at the correct position to resolve the object.
+	if (!non_recursive) {
+		for (size_t i = 0; i < num; ++i,++o) {
+			s.Convert(*o,db);
+		}
 
-	db.reader->SetCurrentPos(pold);
+		db.reader->SetCurrentPos(pold);
+	}
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	if(out) {
 		++db.stats().pointers_resolved;
 	}
 #endif
+	return false;
 }
 
+
 //--------------------------------------------------------------------------------
-inline void Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, const FileDatabase& db, const Field& /*f*/) const
+inline bool Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
+	const FileDatabase& db, 
+	const Field&,
+	bool) const
 {
 	// Currently used exclusively by PackedFile::data to represent
 	// a simple offset into the mapped BLEND file. 
 	out.reset();
 	if (!ptrval.val) { 
-		return;
+		return false;
 	}
 
 	// find the file block the pointer is pointing to
@@ -362,11 +381,15 @@ inline void Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, c
 
 	out =  boost::shared_ptr< FileOffset > (new FileOffset());
 	out->val = block->start+ static_cast<size_t>((ptrval.val - block->address.val) );
+	return false;
 }
 
 //--------------------------------------------------------------------------------
 template <template <typename> class TOUT, typename T>
-void Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, const FileDatabase& db, const Field& f) const 
+bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, 
+	const FileDatabase& db, 
+	const Field& f,
+	bool) const 
 {
 	// This is a function overload, not a template specialization. According to
 	// the partial ordering rules, it should be selected by the compiler
@@ -374,7 +397,7 @@ void Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
 
 	out.reset();
 	if (!ptrval.val) { 
-		return;
+		return false;
 	}
 
 	// find the file block the pointer is pointing to
@@ -385,6 +408,7 @@ void Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
 	const StreamReaderAny::pos pold = db.reader->GetCurrentPos();
 	db.reader->SetCurrentPos(block->start+ static_cast<size_t>((ptrval.val - block->address.val) ));
 
+	bool res = false;
 	// allocate raw storage for the array
 	out.resize(num);
 	for (size_t i = 0; i< num; ++i) {
@@ -392,17 +416,19 @@ void Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
 		Convert(val,db);
 
 		// and resolve the pointees
-		ResolvePointer(out[i],val,db,f); 
+		res = ResolvePointer(out[i],val,db,f) && res; 
 	}
 
 	db.reader->SetCurrentPos(pold);
+	return res;
 }
 
 //--------------------------------------------------------------------------------
-template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
+template <> bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
 	const Pointer & ptrval, 
 	const FileDatabase& db, 
-	const Field& /*f*/
+	const Field&,
+	bool
 ) const 
 {
 	// Special case when the data type needs to be determined at runtime.
@@ -410,7 +436,7 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 
 	out.reset();
 	if (!ptrval.val) { 
-		return;
+		return false;
 	}
 
 	// find the file block the pointer is pointing to
@@ -422,7 +448,7 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 	// try to retrieve the object from the cache
 	db.cache(out).get(s,out,ptrval); 
 	if (out) {
-		return;
+		return true;
 	}
 
 	// seek to this location, but save the previous stream pointer.
@@ -440,7 +466,7 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 		DefaultLogger::get()->warn((Formatter::format(),
 			"Failed to find a converter for the `",s.name,"` structure"
 			));
-		return;
+		return false;
 	}
 
 	// allocate the object hull
@@ -459,11 +485,11 @@ template <> void Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::
 	// to perform additional type checking.
 	out->dna_type = s.name.c_str();
 
-	
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	++db.stats().pointers_resolved;
 #endif
+	return false;
 }
 
 //--------------------------------------------------------------------------------

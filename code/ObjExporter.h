@@ -112,6 +112,36 @@ private:
 	const aiScene* const pScene;
 
 	std::vector<aiVector3D> vp, vn, vt;
+
+
+	struct aiVectorCompare
+	{
+		bool operator() (const aiVector3D& a, const aiVector3D& b) const 
+		{
+			if(a.x < b.x) return true;
+			if(a.x > b.x) return false;
+			if(a.y < b.y) return true;
+			if(a.y > b.y) return false;
+			if(a.z < b.z) return true;
+			return false;
+		}
+	};
+
+	class vecIndexMap
+	{
+		int mNextIndex;
+		typedef std::map<aiVector3D, int, aiVectorCompare> dataType;
+		dataType vecMap;
+	public:
+
+		vecIndexMap():mNextIndex(1)
+		{}
+
+		int getIndex(const aiVector3D& vec);
+		void getVectors( std::vector<aiVector3D>& vecs );
+	};
+
+	vecIndexMap vpMap, vnMap, vtMap;
 	std::vector<MeshInstance> meshes;
 
 	// this endl() doesn't flush() the stream

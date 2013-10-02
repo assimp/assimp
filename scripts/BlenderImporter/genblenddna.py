@@ -5,7 +5,7 @@
 # Open Asset Import Library (ASSIMP)
 # ---------------------------------------------------------------------------
 #
-# Copyright (c) 2006-2010, ASSIMP Development Team
+# Copyright (c) 2006-2013, ASSIMP Development Team
 #
 # All rights reserved.
 #
@@ -54,6 +54,55 @@ outputfile_src = os.path.join("..","..","code","BlenderScene.cpp")
 
 template_gen = "BlenderSceneGen.h.template"
 template_src = "BlenderScene.cpp.template"
+
+# workaround for stackoverflowing when reading the linked list of scene objects
+# with the usual approach. See embedded notes for details.
+Structure_Convert_Base_fullcode = """
+template <> void Structure :: Convert<Base> (
+    Base& dest,
+    const FileDatabase& db
+    ) const
+{ 
+	// note: as per https://github.com/assimp/assimp/issues/128,
+	// reading the Object linked list recursively is prone to stack overflow.
+	// This structure converter is therefore an hand-written exception that
+	// does it iteratively.
+
+	const int initial_pos = db.reader->GetCurrentPos();
+
+	std::pair<Base*, int> todo = std::make_pair(&dest, initial_pos);
+
+	Base* saved_prev = NULL;
+
+	while(true) {
+	
+		Base& cur_dest = *todo.first;
+		db.reader->SetCurrentPos(todo.second);
+
+		// we know that this is a double-linked, circular list which we never
+		// traverse backwards, so don't bother resolving the back links.
+		cur_dest.prev = NULL;
+
+		ReadFieldPtr<ErrorPolicy_Warn>(cur_dest.object,"*object",db);
+
+		// just record the offset of the blob data and allocate storage.
+		// Does _not_ invoke Convert() recursively.
+		const int old = db.reader->GetCurrentPos();
+
+		// the return value of ReadFieldPtr indicates whether the object 
+		// was already cached. In this case, we don't need to resolve
+		// it again.
+		if(!ReadFieldPtr<ErrorPolicy_Warn>(cur_dest.next,"*next",db, true) && cur_dest.next) {
+			todo = std::make_pair(&*cur_dest.next, db.reader->GetCurrentPos());
+			continue;
+		}
+		break;
+	}
+	
+	db.reader->SetCurrentPos(initial_pos + size);
+}
+
+"""
 
 
 Structure_Convert_decl =  """
@@ -201,7 +250,11 @@ def main():
     # -----------------------------------------------------------------------
     # Structure::Convert<T> definitions for all supported structures
     for k,v in hits.items():
-        s += "//" + "-"*80 + Structure_Convert_decl.format(a=k)+ "{ \n";
+    	s += "//" + "-"*80
+    	if k == 'Base':
+    		s += Structure_Convert_Base_fullcode 
+    		continue
+        s += Structure_Convert_decl.format(a=k)+ "{ \n";
 
         for type, name, policy in v:
             splits = name.split("[",1)

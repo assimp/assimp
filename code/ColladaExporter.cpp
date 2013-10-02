@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 #include "ColladaExporter.h"
 
+#include <set>
+
 using namespace Assimp;
 
 namespace Assimp
@@ -97,7 +99,7 @@ void ColladaExporter::WriteFile()
 
 	WriteHeader();
 
-  WriteMaterials();
+	WriteMaterials();
 	WriteGeometryLibrary();
 
 	WriteSceneLibrary();
@@ -225,6 +227,8 @@ void ColladaExporter::WriteMaterials()
 {
   materials.resize( mScene->mNumMaterials);
 
+  std::set<std::string> material_names;
+
   /// collect all materials from the scene
   size_t numTextures = 0;
   for( size_t a = 0; a < mScene->mNumMaterials; ++a )
@@ -234,7 +238,12 @@ void ColladaExporter::WriteMaterials()
     aiString name;
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
-    materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
+	if(material_names.find(name.C_Str()) != material_names.end()) {
+		materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + "_" + name.C_Str();
+		material_names.insert(materials[a].name);
+	} else {
+		materials[a].name = name.C_Str();
+	}
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it )
       if( !isalnum( *it) )
         *it = '_';
@@ -560,48 +569,55 @@ void ColladaExporter::WriteSceneLibrary()
 // Recursively writes the given node
 void ColladaExporter::WriteNode( const aiNode* pNode)
 {
-	mOutput << startstr << "<node id=\"" << pNode->mName.data << "\" name=\"" << pNode->mName.data << "\">" << endstr;
-	PushTag();
+	std::string name(pNode->mName.C_Str());
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
-	// write transformation - we can directly put the matrix there
-	// TODO: (thom) decompose into scale - rot - quad to allow adressing it by animations afterwards
-	const aiMatrix4x4& mat = pNode->mTransformation;
-	mOutput << startstr << "<matrix>";
-	mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
-	mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
-	mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
-	mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
-	mOutput << "</matrix>" << endstr;
-
-	// instance every geometry
-	for( size_t a = 0; a < pNode->mNumMeshes; ++a )
-	{
-		const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
-    // do not instanciate mesh if empty. I wonder how this could happen
-    if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-      continue;
-
-		mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( pNode->mMeshes[a]) << "\">" << endstr;
+	if(name.compare("myscene") != 0) {
+		mOutput << startstr << "<node id=\"" << pNode->mName.data << "\" name=\"" << pNode->mName.data << "\">" << endstr;
 		PushTag();
-    mOutput << startstr << "<bind_material>" << endstr;
-    PushTag();
-    mOutput << startstr << "<technique_common>" << endstr;
-    PushTag();
-    mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
+
+		// write transformation - we can directly put the matrix there
+		// TODO: (thom) decompose into scale - rot - quad to allow adressing it by animations afterwards
+		const aiMatrix4x4& mat = pNode->mTransformation;
+		mOutput << startstr << "<matrix>";
+		mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
+		mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
+		mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
+		mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
+		mOutput << "</matrix>" << endstr;
+
+		// instance every geometry
+		for( size_t a = 0; a < pNode->mNumMeshes; ++a )
+		{
+			const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
+		// do not instanciate mesh if empty. I wonder how this could happen
+		if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+		  continue;
+
+			mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( pNode->mMeshes[a]) << "\">" << endstr;
+			PushTag();
+		mOutput << startstr << "<bind_material>" << endstr;
+		PushTag();
+		mOutput << startstr << "<technique_common>" << endstr;
+		PushTag();
+		mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
+			PopTag();
+		mOutput << startstr << "</technique_common>" << endstr;
 		PopTag();
-    mOutput << startstr << "</technique_common>" << endstr;
-    PopTag();
-    mOutput << startstr << "</bind_material>" << endstr;
-    PopTag();
-		mOutput << startstr << "</instance_geometry>" << endstr;
+		mOutput << startstr << "</bind_material>" << endstr;
+		PopTag();
+			mOutput << startstr << "</instance_geometry>" << endstr;
+		}
 	}
 
 	// recurse into subnodes
 	for( size_t a = 0; a < pNode->mNumChildren; ++a )
 		WriteNode( pNode->mChildren[a]);
 
-	PopTag();
-	mOutput << startstr << "</node>" << endstr;
+	if(name.compare("myscene") != 0) {
+		PopTag();
+		mOutput << startstr << "</node>" << endstr;
+	}
 }
 
 #endif

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 #include "ColladaExporter.h"
 
+#include <ctime>
 #include <set>
 
 using namespace Assimp;
@@ -107,7 +108,7 @@ void ColladaExporter::WriteFile()
 	// useless Collada fu at the end, just in case we haven't had enough indirections, yet. 
 	mOutput << startstr << "<scene>" << endstr;
 	PushTag();
-	mOutput << startstr << "<instance_visual_scene url=\"#myScene\" />" << endstr;
+	mOutput << startstr << "<instance_visual_scene url=\"#" + std::string(mScene->mRootNode->mName.C_Str()) + "\" />" << endstr;
 	PopTag();
 	mOutput << startstr << "</scene>" << endstr;
 	PopTag();
@@ -118,19 +119,63 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
+	static const unsigned int date_nb_chars = 20;
+	char date_str[date_nb_chars];
+	std::time_t date = std::time(NULL);
+	std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
+
+	aiVector3D scaling;
+	aiQuaternion rotation;
+	aiVector3D position;
+	mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
+
+	std::string scene_name = mScene->mRootNode->mName.C_Str();
+
+	float scale = 1.0;
+	if(scaling.x == scaling.y && scaling.x == scaling.z) {
+		scale = scaling.x;
+	} else {
+		DefaultLogger::get()->warn("Collada: Unable to compute the global scale of the scene " + scene_name);
+	}
+
+	aiMatrix3x3 rot_mat = rotation.GetMatrix();
+	std::string up_axis = "Y_UP";
+
+	if(rot_mat == aiMatrix4x4()) {
+		up_axis = "Y_UP";
+	} else if(rot_mat == aiMatrix4x4( 
+			0, -1,  0,  0, 
+			1,  0,  0,  0,
+			0,  0,  1,  0,
+			0,  0,  0,  1)) {
+		up_axis = "X_UP";
+	} else if(rot_mat == aiMatrix4x4( 
+			1,  0,  0,  0, 
+			0,  0,  1,  0,
+			0, -1,  0,  0,
+			0,  0,  0,  1)) {
+		up_axis = "Z_UP";
+	} else {
+		DefaultLogger::get()->warn("Collada: Unable to compute the up axis of the scene " + scene_name);
+	}
+
+	if(position.x != 0 || position.y != 0 || position.z != 0) {
+		DefaultLogger::get()->warn("Collada: Unable to keep the global position of the scene " + scene_name);
+	}
+
 	// Dummy stuff. Nobody actually cares for it anyways
 	mOutput << startstr << "<asset>" << endstr;
 	PushTag();
 	mOutput << startstr << "<contributor>" << endstr;
 	PushTag();
-	mOutput << startstr << "<author>Someone</author>" << endstr;
+	mOutput << startstr << "<author>Assimp</author>" << endstr;
 	mOutput << startstr << "<authoring_tool>Assimp Collada Exporter</authoring_tool>" << endstr;
 	PopTag();
 	mOutput << startstr << "</contributor>" << endstr;
-  mOutput << startstr << "<created>2000-01-01T23:59:59</created>" << endstr;
-  mOutput << startstr << "<modified>2000-01-01T23:59:59</modified>" << endstr;
-	mOutput << startstr << "<unit name=\"centimeter\" meter=\"0.01\" />" << endstr;
-	mOutput << startstr << "<up_axis>Y_UP</up_axis>" << endstr;
+	mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
+	mOutput << startstr << "<modified>" << date_str << "</modified>" << endstr;
+	mOutput << startstr << "<unit name=\"meter\" meter=\"" << scale << "\" />" << endstr;
+	mOutput << startstr << "<up_axis>" << up_axis << "</up_axis>" << endstr;
 	PopTag();
 	mOutput << startstr << "</asset>" << endstr;
 }
@@ -551,13 +596,16 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
 // Writes the scene library
 void ColladaExporter::WriteSceneLibrary()
 {
+	std::string scene_name = mScene->mRootNode->mName.C_Str();
+
 	mOutput << startstr << "<library_visual_scenes>" << endstr;
 	PushTag();
-	mOutput << startstr << "<visual_scene id=\"myScene\" name=\"myScene\">" << endstr;
+	mOutput << startstr << "<visual_scene id=\"" + scene_name + "\" name=\"" + scene_name + "\">" << endstr;
 	PushTag();
 
 	// start recursive write at the root node
-	WriteNode( mScene->mRootNode);
+	for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
+		WriteNode( mScene->mRootNode->mChildren[a]);
 
 	PopTag();
 	mOutput << startstr << "</visual_scene>" << endstr;
@@ -569,55 +617,48 @@ void ColladaExporter::WriteSceneLibrary()
 // Recursively writes the given node
 void ColladaExporter::WriteNode( const aiNode* pNode)
 {
-	std::string name(pNode->mName.C_Str());
-	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+	mOutput << startstr << "<node id=\"" << pNode->mName.data << "\" name=\"" << pNode->mName.data << "\">" << endstr;
+	PushTag();
 
-	if(name.compare("myscene") != 0) {
-		mOutput << startstr << "<node id=\"" << pNode->mName.data << "\" name=\"" << pNode->mName.data << "\">" << endstr;
+	// write transformation - we can directly put the matrix there
+	// TODO: (thom) decompose into scale - rot - quad to allow adressing it by animations afterwards
+	const aiMatrix4x4& mat = pNode->mTransformation;
+	mOutput << startstr << "<matrix>";
+	mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
+	mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
+	mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
+	mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
+	mOutput << "</matrix>" << endstr;
+
+	// instance every geometry
+	for( size_t a = 0; a < pNode->mNumMeshes; ++a )
+	{
+		const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
+	// do not instanciate mesh if empty. I wonder how this could happen
+	if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+		continue;
+
+		mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( pNode->mMeshes[a]) << "\">" << endstr;
 		PushTag();
-
-		// write transformation - we can directly put the matrix there
-		// TODO: (thom) decompose into scale - rot - quad to allow adressing it by animations afterwards
-		const aiMatrix4x4& mat = pNode->mTransformation;
-		mOutput << startstr << "<matrix>";
-		mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
-		mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
-		mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
-		mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
-		mOutput << "</matrix>" << endstr;
-
-		// instance every geometry
-		for( size_t a = 0; a < pNode->mNumMeshes; ++a )
-		{
-			const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
-		// do not instanciate mesh if empty. I wonder how this could happen
-		if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-		  continue;
-
-			mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( pNode->mMeshes[a]) << "\">" << endstr;
-			PushTag();
-		mOutput << startstr << "<bind_material>" << endstr;
-		PushTag();
-		mOutput << startstr << "<technique_common>" << endstr;
-		PushTag();
-		mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
-			PopTag();
-		mOutput << startstr << "</technique_common>" << endstr;
+	mOutput << startstr << "<bind_material>" << endstr;
+	PushTag();
+	mOutput << startstr << "<technique_common>" << endstr;
+	PushTag();
+	mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
 		PopTag();
-		mOutput << startstr << "</bind_material>" << endstr;
-		PopTag();
-			mOutput << startstr << "</instance_geometry>" << endstr;
-		}
+	mOutput << startstr << "</technique_common>" << endstr;
+	PopTag();
+	mOutput << startstr << "</bind_material>" << endstr;
+	PopTag();
+		mOutput << startstr << "</instance_geometry>" << endstr;
 	}
 
 	// recurse into subnodes
 	for( size_t a = 0; a < pNode->mNumChildren; ++a )
 		WriteNode( pNode->mChildren[a]);
 
-	if(name.compare("myscene") != 0) {
-		PopTag();
-		mOutput << startstr << "</node>" << endstr;
-	}
+	PopTag();
+	mOutput << startstr << "</node>" << endstr;
 }
 
 #endif

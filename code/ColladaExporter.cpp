@@ -320,7 +320,7 @@ void ColladaExporter::WriteMaterials()
       WriteImageEntry( mat.ambient, mat.name + "-ambient-image");
       WriteImageEntry( mat.diffuse, mat.name + "-diffuse-image");
       WriteImageEntry( mat.specular, mat.name + "-specular-image");
-      WriteImageEntry( mat.emissive, mat.name + "-emissive-image");
+      WriteImageEntry( mat.emissive, mat.name + "-emission-image");
       WriteImageEntry( mat.reflective, mat.name + "-reflective-image");
       WriteImageEntry( mat.normal, mat.name + "-normal-image");
     }
@@ -343,7 +343,7 @@ void ColladaExporter::WriteMaterials()
       PushTag();
 
       // write sampler- and surface params for the texture entries
-      WriteTextureParamEntry( mat.emissive, "emissive", mat.name);
+      WriteTextureParamEntry( mat.emissive, "emission", mat.name);
       WriteTextureParamEntry( mat.ambient, "ambient", mat.name);
       WriteTextureParamEntry( mat.diffuse, "diffuse", mat.name);
       WriteTextureParamEntry( mat.specular, "specular", mat.name);
@@ -354,7 +354,7 @@ void ColladaExporter::WriteMaterials()
       mOutput << startstr << "<phong>" << endstr;
       PushTag();
 
-      WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emissive-sampler");
+      WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emission-sampler");
       WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "-ambient-sampler");
       WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "-diffuse-sampler");
       WriteTextureColorEntry( mat.specular, "specular", mat.name + "-specular-sampler");

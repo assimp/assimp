@@ -254,6 +254,91 @@ inline aiReturn aiMaterial::AddProperty(const int* pInput,
 		pKey,type,index,aiPTI_Integer);
 }
 
+
+// ---------------------------------------------------------------------------
+// The template specializations below are for backwards compatibility.
+// The recommended way to add material properties is using the non-template
+// overloads.
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+template<>
+inline aiReturn aiMaterial::AddProperty<float>(const float* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(float),
+		pKey,type,index,aiPTI_Float);
+}
+
+// ---------------------------------------------------------------------------
+template<>
+inline aiReturn aiMaterial::AddProperty<aiUVTransform>(const aiUVTransform* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(aiUVTransform),
+		pKey,type,index,aiPTI_Float);
+}
+
+// ---------------------------------------------------------------------------
+template<>
+inline aiReturn aiMaterial::AddProperty<aiColor4D>(const aiColor4D* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(aiColor4D),
+		pKey,type,index,aiPTI_Float);
+}
+
+// ---------------------------------------------------------------------------
+template<>
+inline aiReturn aiMaterial::AddProperty<aiColor3D>(const aiColor3D* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(aiColor3D),
+		pKey,type,index,aiPTI_Float);
+}
+
+// ---------------------------------------------------------------------------
+template<>
+inline aiReturn aiMaterial::AddProperty<aiVector3D>(const aiVector3D* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(aiVector3D),
+		pKey,type,index,aiPTI_Float);
+}
+
+// ---------------------------------------------------------------------------
+template<>
+inline aiReturn aiMaterial::AddProperty<int>(const int* pInput,
+	const unsigned int pNumValues,
+	const char* pKey,
+	unsigned int type,
+	unsigned int index)
+{
+	return AddBinaryProperty((const void*)pInput,
+		pNumValues * sizeof(int),
+		pKey,type,index,aiPTI_Integer);
+}
+
 //! @endcond
 
 #endif //! AI_MATERIAL_INL_INC

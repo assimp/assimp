@@ -393,7 +393,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
 			// Copy all normals 
-			if ( !pSourceFace->m_pNormals->empty() && !pModel->m_Normals.empty())
+			if ( !pModel->m_Normals.empty() && vertexIndex < pSourceFace->m_pNormals->size())
 			{
 				const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
 				if ( normal >= pModel->m_Normals.size() )
@@ -403,21 +403,16 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			}
 			
 			// Copy all texture coordinates
-			if ( !pModel->m_TextureCoord.empty() )
+			if ( !pModel->m_TextureCoord.empty() && vertexIndex < pSourceFace->m_pTexturCoords->size())
 			{
-				if ( !pSourceFace->m_pTexturCoords->empty() )
-				{
-					const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
-					ai_assert( tex < pModel->m_TextureCoord.size() );
-					for ( size_t i=0; i < pMesh->GetNumUVChannels(); i++ )
-					{
-						if ( tex >= pModel->m_TextureCoord.size() )
-							throw DeadlyImportError("OBJ: texture coord index out of range");
+				const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
+				ai_assert( tex < pModel->m_TextureCoord.size() );
+					
+				if ( tex >= pModel->m_TextureCoord.size() )
+					throw DeadlyImportError("OBJ: texture coord index out of range");
 
-						aiVector2D coord2d = pModel->m_TextureCoord[ tex ];
-						pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
-					}
-				}
+				aiVector2D coord2d = pModel->m_TextureCoord[ tex ];
+				pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
 			}
 
 			ai_assert( pMesh->mNumVertices > newIndex );

@@ -289,15 +289,16 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 				const unsigned int nonIdempotentSteps = aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_MakeLeftHanded;
 
 				// Erase all pp steps that were already applied to this scene
-				unsigned int pp = (exp.mEnforcePP | pPreprocessing) & ~(priv 
+				const unsigned int pp = (exp.mEnforcePP | pPreprocessing) & ~(priv 
 					? (priv->mPPStepsApplied & ~nonIdempotentSteps)
 					: 0u);
 
 				// If no extra postprocessing was specified, and we obtained this scene from an
 				// Assimp importer, apply the reverse steps automatically.
-				if (!pPreprocessing && priv) {
-					pp |= (nonIdempotentSteps & priv->mPPStepsApplied);
-				}
+				// TODO: either drop this, or document it. Otherwise it is just a bad surprise.
+				//if (!pPreprocessing && priv) {
+				//	pp |= (nonIdempotentSteps & priv->mPPStepsApplied);
+				//}
 
 				// If the input scene is not in verbose format, but there is at least postprocessing step that relies on it,
 				// we need to run the MakeVerboseFormat step first.

@@ -289,7 +289,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 				const unsigned int nonIdempotentSteps = aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_MakeLeftHanded;
 
 				// Erase all pp steps that were already applied to this scene
-				const unsigned int pp = (exp.mEnforcePP | pPreprocessing) & ~(priv 
+				const unsigned int pp = (exp.mEnforcePP | pPreprocessing) & ~(priv && !priv->mIsCopy
 					? (priv->mPPStepsApplied & ~nonIdempotentSteps)
 					: 0u);
 

@@ -72,7 +72,7 @@ add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/c
 
 # Globally enbale Boost resp. the Boost workaround – it is also needed by the
 # tools which include the Assimp headers.
-SET ( ASSIMP_ENABLE_BOOST_WORKAROUND OFF CACHE BOOL
+SET ( ASSIMP_ENABLE_BOOST_WORKAROUND ON CACHE BOOL
 	"If a simple implementation of the used Boost functions is used. Slightly reduces functionality, but enables builds without Boost available."
 )
 IF ( ASSIMP_ENABLE_BOOST_WORKAROUND )

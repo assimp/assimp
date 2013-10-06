@@ -53,6 +53,7 @@ struct ScenePrivateData {
 	ScenePrivateData()
 		: mOrigImporter()
 		, mPPStepsApplied()
+		, mIsCopy()
 	{}
 
 	// Importer that originally loaded the scene though the C-API
@@ -61,6 +62,13 @@ struct ScenePrivateData {
 
 	// List of postprocessing steps already applied to the scene.
 	unsigned int mPPStepsApplied;
+
+	// true if the scene is a copy made with aiCopyScene()
+	// or the corresponding C++ API. This means that user code
+	// may have made modifications to it, so mPPStepsApplied
+	// and mOrigImporter are no longer safe to rely on and only
+	// serve informative purposes.
+	bool mIsCopy;
 };
 
 // Access private data stored in the scene

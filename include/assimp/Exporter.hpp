@@ -198,7 +198,13 @@ public:
 	 *   redundant as exporters would apply them anyhow. A good example 
 	 *   is triangulation - whilst you can enforce it by specifying
 	 *   the #aiProcess_Triangulate flag, most export formats support only
-	 *  triangulate data so they would run the step even if it wasn't requested.
+	 *   triangulate data so they would run the step even if it wasn't requested.
+	 *
+	 *   If assimp detects that the input scene was directly taken from the importer side of 
+     *   the library (i.e. not copied using aiCopyScene and potetially modified afterwards), 
+     *   any postprocessing steps already applied to the scene will not be applied again, unless
+     *   they show non-idempotent behaviour (#aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and 
+     *   #aiProcess_FlipWindingOrder).
 	 * @return AI_SUCCESS if everything was fine. 
 	 * @note Use aiCopyScene() to get a modifiable copy of a previously
 	 *   imported scene.*/

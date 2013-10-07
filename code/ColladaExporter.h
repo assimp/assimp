@@ -112,20 +112,29 @@ protected:
   // pair of color and texture - texture precedences color
   struct Surface 
   { 
+    bool exist;
     aiColor4D color; 
     std::string texture; 
     size_t channel; 
-    Surface() { channel = 0; }
+    Surface() { exist = false; channel = 0; }
+  };
+
+  struct Property
+  {
+    bool exist;
+	float value;
+	Property() { exist = false; }
   };
 
   // summarize a material in an convinient way. 
   struct Material
   {
     std::string name;
-    Surface ambient, diffuse, specular, emissive, reflective, normal;
-    float shininess; /// specular exponent
+    std::string shading_model;
+    Surface ambient, diffuse, specular, emissive, reflective, transparent, normal;
+   	Property shininess, transparency, index_refraction;
 
-    Material() { shininess = 16.0f; }
+    Material() {}
   };
 
   std::vector<Material> materials;
@@ -140,6 +149,8 @@ protected:
   void WriteTextureParamEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pMatName);
   /// Writes a color-or-texture entry into an effect definition
   void WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName);
+  /// Writes a scalar property
+  void ColladaExporter::WriteFloatEntry( const Property& pProperty, const std::string& pTypeName);
 };
 
 }

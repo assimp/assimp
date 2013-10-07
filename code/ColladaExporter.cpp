@@ -191,10 +191,11 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
     pSrcMat->GetTexture( pTexture, 0, &texfile, NULL, &uvChannel);
     poSurface.texture = texfile.C_Str();
     poSurface.channel = uvChannel;
+	poSurface.exist = true;
   } else
   {
     if( pKey )
-      pSrcMat->Get( pKey, pType, pIndex, poSurface.color);
+      poSurface.exist = pSrcMat->Get( pKey, pType, pIndex, poSurface.color) == aiReturn_SUCCESS;
   }
 }
 
@@ -224,17 +225,19 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
 // Writes a color-or-texture entry into an effect definition
 void ColladaExporter::WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName)
 {
-  mOutput << startstr << "<" << pTypeName << ">" << endstr;
-  PushTag();
-  if( pSurface.texture.empty() )
-  {
-    mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
-  } else
-  {
-    mOutput << startstr << "<texture texture=\"" << pImageName << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
+  if(pSurface.exist) {
+    mOutput << startstr << "<" << pTypeName << ">" << endstr;
+    PushTag();
+    if( pSurface.texture.empty() )
+    {
+      mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
+    } else
+    {
+      mOutput << startstr << "<texture texture=\"" << pImageName << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
+    }
+    PopTag();
+    mOutput << startstr << "</" << pTypeName << ">" << endstr;
   }
-  PopTag();
-  mOutput << startstr << "</" << pTypeName << ">" << endstr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -267,6 +270,19 @@ void ColladaExporter::WriteTextureParamEntry( const Surface& pSurface, const std
 }
 
 // ------------------------------------------------------------------------------------------------
+// Writes a scalar property
+void ColladaExporter::WriteFloatEntry( const Property& pProperty, const std::string& pTypeName)
+{
+	if(pProperty.exist) {
+		mOutput << startstr << "<" << pTypeName << ">" << endstr;
+		PushTag();
+		mOutput << startstr << "<float sid=\"" << pTypeName << "\">" << pProperty.value << "</float>" << endstr;
+		PopTag();
+		mOutput << startstr << "</" << pTypeName << ">" << endstr;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Writes the material setup
 void ColladaExporter::WriteMaterials()
 {
@@ -293,6 +309,20 @@ void ColladaExporter::WriteMaterials()
       if( !isalnum( *it) )
         *it = '_';
 
+	aiShadingMode shading;
+	materials[a].shading_model = "phong";
+	if(mat->Get( AI_MATKEY_SHADING_MODEL, shading) == aiReturn_SUCCESS) {
+		if(shading == aiShadingMode_Phong) {
+			materials[a].shading_model = "phong";
+		} else if(shading == aiShadingMode_Blinn) {
+			materials[a].shading_model = "blinn";
+		} else if(shading == aiShadingMode_NoShading) {
+			materials[a].shading_model = "constant";
+		} else if(shading == aiShadingMode_Gouraud) {
+			materials[a].shading_model = "lambert";
+		}
+	}
+
     ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
     if( !materials[a].ambient.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].diffuse, mat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
@@ -303,10 +333,15 @@ void ColladaExporter::WriteMaterials()
     if( !materials[a].emissive.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].reflective, mat, aiTextureType_REFLECTION, AI_MATKEY_COLOR_REFLECTIVE);
     if( !materials[a].reflective.texture.empty() ) numTextures++;
+	ReadMaterialSurface( materials[a].transparent, mat, aiTextureType_OPACITY, AI_MATKEY_COLOR_TRANSPARENT);
+    if( !materials[a].transparent.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].normal, mat, aiTextureType_NORMALS, NULL, 0, 0);
     if( !materials[a].normal.texture.empty() ) numTextures++;
 
-    mat->Get( AI_MATKEY_SHININESS, materials[a].shininess);
+	materials[a].shininess.exist = mat->Get( AI_MATKEY_SHININESS, materials[a].shininess.value) == aiReturn_SUCCESS;
+	materials[a].transparency.exist = mat->Get( AI_MATKEY_OPACITY, materials[a].transparency.value) == aiReturn_SUCCESS;
+	materials[a].transparency.value = 1 - materials[a].transparency.value;
+	materials[a].index_refraction.exist = mat->Get( AI_MATKEY_REFRACTI, materials[a].index_refraction.value) == aiReturn_SUCCESS;
   }
 
   // output textures if present
@@ -322,6 +357,7 @@ void ColladaExporter::WriteMaterials()
       WriteImageEntry( mat.specular, mat.name + "-specular-image");
       WriteImageEntry( mat.emissive, mat.name + "-emission-image");
       WriteImageEntry( mat.reflective, mat.name + "-reflective-image");
+	  WriteImageEntry( mat.transparent, mat.name + "-transparent-image");
       WriteImageEntry( mat.normal, mat.name + "-normal-image");
     }
     PopTag();
@@ -348,32 +384,30 @@ void ColladaExporter::WriteMaterials()
       WriteTextureParamEntry( mat.diffuse, "diffuse", mat.name);
       WriteTextureParamEntry( mat.specular, "specular", mat.name);
       WriteTextureParamEntry( mat.reflective, "reflective", mat.name);
+	  WriteTextureParamEntry( mat.transparent, "transparent", mat.name);
+	  WriteTextureParamEntry( mat.normal, "normal", mat.name);
 
       mOutput << startstr << "<technique sid=\"standard\">" << endstr;
       PushTag();
-      mOutput << startstr << "<phong>" << endstr;
+	  mOutput << startstr << "<" << mat.shading_model << ">" << endstr;
       PushTag();
 
       WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emission-sampler");
       WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "-ambient-sampler");
       WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "-diffuse-sampler");
       WriteTextureColorEntry( mat.specular, "specular", mat.name + "-specular-sampler");
-
-      mOutput << startstr << "<shininess>" << endstr;
-      PushTag();
-      mOutput << startstr << "<float sid=\"shininess\">" << mat.shininess << "</float>" << endstr;
-      PopTag();
-      mOutput << startstr << "</shininess>" << endstr;
-
+	  WriteFloatEntry(mat.shininess, "shininess");
       WriteTextureColorEntry( mat.reflective, "reflective", mat.name + "-reflective-sampler");
+	  WriteTextureColorEntry( mat.transparent, "transparent", mat.name + "-transparent-sampler");
+	  WriteFloatEntry(mat.transparency, "transparency");
+	  WriteFloatEntry(mat.index_refraction, "index_of_refraction");
 
-  // deactivated because the Collada spec PHONG model does not allow other textures.
-  //    if( !mat.normal.texture.empty() )
-  //      WriteTextureColorEntry( mat.normal, "bump", mat.name + "-normal-sampler");
-
+	  if(! mat.normal.texture.empty()) {
+		WriteTextureColorEntry( mat.normal, "bump", mat.name + "-normal-sampler");
+	  }
 
       PopTag();
-      mOutput << startstr << "</phong>" << endstr;
+      mOutput << startstr << "</" << mat.shading_model << ">" << endstr;
       PopTag();
       mOutput << startstr << "</technique>" << endstr;
       PopTag();

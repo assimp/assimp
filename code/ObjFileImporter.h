@@ -107,9 +107,6 @@ private:
 	//!	\brief	Appends a child node to a parentnode and updates the datastructures.
 	void appendChildToParentNode(aiNode *pParent, aiNode *pChild);
 
-	//!	\brief TODO!
-	void createAnimations();
-
 private:
 	//!	Data buffer
 	std::vector<char> m_Buffer;

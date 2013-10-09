@@ -116,44 +116,58 @@ void ColladaExporter::WriteFile()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Utility function to test equality of scalars and quaternions 
+inline bool equal(double a, double b, double epsilon) {
+	return std::abs(a - b) <= epsilon;
+}
+
+inline bool equal(aiQuaternion a, aiQuaternion b, double epsilon) {
+	return equal(a.x, b.x, epsilon) && equal(a.y, b.y, epsilon) && equal(a.z, b.z, epsilon) && equal(a.w, b.w, epsilon);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
+	static const double epsilon = 0.000001;
+	static const aiQuaternion x_rot(aiMatrix3x3( 
+		0, -1,  0,
+		1,  0,  0,
+		0,  0,  1));
+	static const aiQuaternion y_rot(aiMatrix3x3(
+		1,  0,  0,
+		0,  1,  0,
+		0,  0,  1));
+	static const aiQuaternion z_rot(aiMatrix3x3(
+		1,  0,  0,
+		0,  0,  1,
+		0, -1,  0));
+
 	static const unsigned int date_nb_chars = 20;
 	char date_str[date_nb_chars];
 	std::time_t date = std::time(NULL);
 	std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
+
+	std::string scene_name = mScene->mRootNode->mName.C_Str();
 
 	aiVector3D scaling;
 	aiQuaternion rotation;
 	aiVector3D position;
 	mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
 
-	std::string scene_name = mScene->mRootNode->mName.C_Str();
-
 	float scale = 1.0;
-	if(scaling.x == scaling.y && scaling.x == scaling.z) {
+	if(equal(scaling.x, scaling.y, epsilon) && equal(scaling.x, scaling.z, epsilon) && equal(scaling.y, scaling.z, epsilon)) {
 		scale = scaling.x;
 	} else {
 		DefaultLogger::get()->warn("Collada: Unable to compute the global scale of the scene " + scene_name);
 	}
 
-	aiMatrix3x3 rot_mat = rotation.GetMatrix();
 	std::string up_axis = "Y_UP";
-
-	if(rot_mat == aiMatrix4x4()) {
-		up_axis = "Y_UP";
-	} else if(rot_mat == aiMatrix4x4( 
-			0, -1,  0,  0, 
-			1,  0,  0,  0,
-			0,  0,  1,  0,
-			0,  0,  0,  1)) {
+	if(equal(rotation, x_rot, epsilon)) {
 		up_axis = "X_UP";
-	} else if(rot_mat == aiMatrix4x4( 
-			1,  0,  0,  0, 
-			0,  0,  1,  0,
-			0, -1,  0,  0,
-			0,  0,  0,  1)) {
+	} else if(equal(rotation, y_rot, epsilon)) {
+		up_axis = "Y_UP";
+	} else if(equal(rotation, z_rot, epsilon)) {
 		up_axis = "Z_UP";
 	} else {
 		DefaultLogger::get()->warn("Collada: Unable to compute the up axis of the scene " + scene_name);
@@ -163,7 +177,6 @@ void ColladaExporter::WriteHeader()
 		DefaultLogger::get()->warn("Collada: Unable to keep the global position of the scene " + scene_name);
 	}
 
-	// Dummy stuff. Nobody actually cares for it anyways
 	mOutput << startstr << "<asset>" << endstr;
 	PushTag();
 	mOutput << startstr << "<contributor>" << endstr;

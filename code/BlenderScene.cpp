@@ -100,6 +100,7 @@ template <> void Structure :: Convert<MTex> (
     ) const
 { 
 
+    ReadField<ErrorPolicy_Igno>((short&)dest.mapto,"mapto",db);
     ReadField<ErrorPolicy_Igno>((int&)dest.blendtype,"blendtype",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.object,"*object",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.tex,"*tex",db);
@@ -126,6 +127,7 @@ template <> void Structure :: Convert<MTex> (
     ReadField<ErrorPolicy_Igno>(dest.specfac,"specfac",db);
     ReadField<ErrorPolicy_Igno>(dest.emitfac,"emitfac",db);
     ReadField<ErrorPolicy_Igno>(dest.hardfac,"hardfac",db);
+    ReadField<ErrorPolicy_Igno>(dest.norfac,"norfac",db);
 
 	db.reader->IncPtr(size);
 }
@@ -608,7 +610,7 @@ template <> void Structure :: Convert<Tex> (
     const FileDatabase& db
     ) const
 { 
-
+    ReadField<ErrorPolicy_Igno>((short&)dest.imaflag,"imaflag",db);
     ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.ima,"*ima",db);
 

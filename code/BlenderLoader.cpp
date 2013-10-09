@@ -446,9 +446,43 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
 	else {
 		name = aiString( img->name );
 	}
-	out->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(
-		conv_data.next_texture[aiTextureType_DIFFUSE]++)
-	);
+
+	aiTextureType texture_type = aiTextureType_UNKNOWN;
+	MTex::MapType map_type = tex->mapto;
+
+	if (map_type & MTex::MapType_COL)
+	    texture_type = aiTextureType_DIFFUSE;
+	else if (map_type & MTex::MapType_NORM) {
+	    if (tex->tex->imaflag & Tex::ImageFlags_NORMALMAP) {
+	        texture_type = aiTextureType_NORMALS;
+	    }
+	    else {
+	        texture_type = aiTextureType_HEIGHT;
+	    }
+	    out->AddProperty(&tex->norfac,1,AI_MATKEY_BUMPSCALING);
+	}
+	else if (map_type & MTex::MapType_COLSPEC)
+		texture_type = aiTextureType_SPECULAR;
+	else if (map_type & MTex::MapType_COLMIR)
+		texture_type = aiTextureType_REFLECTION;
+	//else if (map_type & MTex::MapType_REF)
+	else if (map_type & MTex::MapType_SPEC)
+		texture_type = aiTextureType_SHININESS;
+	else if (map_type & MTex::MapType_EMIT)
+		texture_type = aiTextureType_EMISSIVE;
+	//else if (map_type & MTex::MapType_ALPHA)
+	//else if (map_type & MTex::MapType_HAR)
+	//else if (map_type & MTex::MapType_RAYMIRR)
+	//else if (map_type & MTex::MapType_TRANSLU)
+	else if (map_type & MTex::MapType_AMB)
+		texture_type = aiTextureType_AMBIENT;
+	else if (map_type & MTex::MapType_DISPLACE)
+		texture_type = aiTextureType_DISPLACEMENT;
+	//else if (map_type & MTex::MapType_WARP)
+
+	out->AddProperty(&name,AI_MATKEY_TEXTURE(texture_type,
+	    conv_data.next_texture[texture_type]++));
+
 }
 
 // ------------------------------------------------------------------------------------------------

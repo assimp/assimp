@@ -94,8 +94,10 @@ public:
 	const TReal* operator[] (unsigned int p_iIndex) const;
 
 	// comparison operators
-	bool operator== (const aiMatrix4x4t m) const;
-	bool operator!= (const aiMatrix4x4t m) const;
+	bool operator== (const aiMatrix4x4t& m) const;
+	bool operator!= (const aiMatrix4x4t& m) const;
+
+	bool Equal(const aiMatrix4x4t& m, float epsilon = 1e-6) const;
 
 	// matrix multiplication. 
 	aiMatrix4x4t& operator *= (const aiMatrix4x4t& m);

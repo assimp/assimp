@@ -79,6 +79,8 @@ public:
 	bool operator== (const aiQuaterniont& o) const;
 	bool operator!= (const aiQuaterniont& o) const;
 
+	bool Equal(const aiQuaterniont& o, float epsilon = 1e-6) const;
+
 public:
 
 	/** Normalize the quaternion */

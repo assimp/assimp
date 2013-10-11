@@ -116,20 +116,10 @@ void ColladaExporter::WriteFile()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Utility function to test equality of scalars and quaternions 
-inline bool equal(double a, double b, double epsilon) {
-	return std::abs(a - b) <= epsilon;
-}
-
-inline bool equal(aiQuaternion a, aiQuaternion b, double epsilon) {
-	return equal(a.x, b.x, epsilon) && equal(a.y, b.y, epsilon) && equal(a.z, b.z, epsilon) && equal(a.w, b.w, epsilon);
-}
-
-// ------------------------------------------------------------------------------------------------
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-	static const double epsilon = 0.000001;
+	static const float epsilon = 0.000001f;
 	static const aiQuaternion x_rot(aiMatrix3x3( 
 		0, -1,  0,
 		1,  0,  0,
@@ -156,18 +146,18 @@ void ColladaExporter::WriteHeader()
 	mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
 
 	float scale = 1.0;
-	if(equal(scaling.x, scaling.y, epsilon) && equal(scaling.x, scaling.z, epsilon) && equal(scaling.y, scaling.z, epsilon)) {
+	if(std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
 		scale = scaling.x;
 	} else {
 		DefaultLogger::get()->warn("Collada: Unable to compute the global scale of the scene " + scene_name);
 	}
 
 	std::string up_axis = "Y_UP";
-	if(equal(rotation, x_rot, epsilon)) {
+	if(rotation.Equal(x_rot, epsilon)) {
 		up_axis = "X_UP";
-	} else if(equal(rotation, y_rot, epsilon)) {
+	} else if(rotation.Equal(y_rot, epsilon)) {
 		up_axis = "Y_UP";
-	} else if(equal(rotation, z_rot, epsilon)) {
+	} else if(rotation.Equal(z_rot, epsilon)) {
 		up_axis = "Z_UP";
 	} else {
 		DefaultLogger::get()->warn("Collada: Unable to compute the up axis of the scene " + scene_name);

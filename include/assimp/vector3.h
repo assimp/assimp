@@ -86,6 +86,8 @@ public:
 	bool operator== (const aiVector3t& other) const;
 	bool operator!= (const aiVector3t& other) const;
 
+	bool Equal(const aiVector3t& other, float epsilon = 1e-6) const;
+
 	template <typename TOther>
 	operator aiVector3t<TOther> () const;
 

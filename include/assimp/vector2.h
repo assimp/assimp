@@ -83,6 +83,8 @@ public:
 	bool operator== (const aiVector2t& other) const;
 	bool operator!= (const aiVector2t& other) const;
 
+	bool Equal(const aiVector2t& other, float epsilon = 1e-6) const;
+
 	aiVector2t& operator= (TReal f);
 	const aiVector2t SymMul(const aiVector2t& o);
 

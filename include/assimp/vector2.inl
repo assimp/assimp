@@ -131,6 +131,14 @@ bool aiVector2t<TReal>::operator!= (const aiVector2t& other) const {
 	return x != other.x || y != other.y;
 }
 
+// ---------------------------------------------------------------------------
+template<typename TReal>
+bool aiVector2t<TReal>::Equal(const aiVector2t& other, float epsilon) const {
+	return
+		std::abs(x - other.x) <= epsilon &&
+		std::abs(y - other.y) <= epsilon;
+}
+
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
 aiVector2t<TReal>& aiVector2t<TReal>::operator= (TReal f)	{

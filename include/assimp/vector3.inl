@@ -147,6 +147,14 @@ template <typename TReal>
 AI_FORCE_INLINE bool aiVector3t<TReal>::operator!= (const aiVector3t<TReal>& other) const {
 	return x != other.x || y != other.y || z != other.z;
 }
+// ---------------------------------------------------------------------------
+template<typename TReal>
+AI_FORCE_INLINE bool aiVector3t<TReal>::Equal(const aiVector3t<TReal>& other, float epsilon) const {
+	return
+		std::abs(x - other.x) <= epsilon &&
+		std::abs(y - other.y) <= epsilon &&
+		std::abs(z - other.z) <= epsilon;
+}
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
 AI_FORCE_INLINE const aiVector3t<TReal> aiVector3t<TReal>::SymMul(const aiVector3t<TReal>& o) {

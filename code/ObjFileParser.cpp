@@ -50,10 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/types.h"
 #include "DefaultIOSystem.h"
 
-namespace Assimp	
-{
+namespace Assimp {
 
-// -------------------------------------------------------------------
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME; 
 
 // -------------------------------------------------------------------
@@ -71,9 +69,10 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 	m_pModel = new ObjFile::Model();
 	m_pModel->m_ModelName = strModelName;
 	
+    // create default material and store it
 	m_pModel->m_pDefaultMaterial = new ObjFile::Material();
 	m_pModel->m_pDefaultMaterial->MaterialName.Set( DEFAULT_MATERIAL );
-	m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
+    m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
 	m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
 	
 	// Start parsing the file
@@ -84,9 +83,6 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 //	Destructor
 ObjFileParser::~ObjFileParser()
 {
-	/*delete m_pModel->m_pDefaultMaterial;
-	m_pModel->m_pDefaultMaterial = NULL;*/
-
 	delete m_pModel;
 	m_pModel = NULL;
 }

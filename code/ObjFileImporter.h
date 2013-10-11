@@ -87,7 +87,7 @@ private:
 	void CreateDataFromImport(const ObjFile::Model* pModel, aiScene* pScene);
 	
 	//!	\brief	Creates all nodes stored in imported content.
-	aiNode *createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pData, unsigned int uiMeshIndex,
+	aiNode *createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pData,
 		aiNode *pParent, aiScene* pScene, std::vector<aiMesh*> &MeshArray);
 
 	//!	\brief	Creates topology data like faces and meshes for the geometry.

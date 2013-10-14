@@ -61,6 +61,9 @@ public:
 	/// Constructor for a specific scene to export
 	ColladaExporter( const aiScene* pScene);
 
+	/// Destructor
+	virtual ~ColladaExporter();
+
 protected:
 	/// Starts writing the contents
 	void WriteFile();
@@ -103,6 +106,7 @@ public:
 protected:
 	/// The scene to be written
 	const aiScene* mScene;
+	bool mSceneOwned;
 
 	/// current line start string, contains the current indentation for simple stream insertion
 	std::string startstr;
@@ -150,7 +154,7 @@ protected:
   /// Writes a color-or-texture entry into an effect definition
   void WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName);
   /// Writes a scalar property
-  void ColladaExporter::WriteFloatEntry( const Property& pProperty, const std::string& pTypeName);
+  void WriteFloatEntry( const Property& pProperty, const std::string& pTypeName);
 };
 
 }

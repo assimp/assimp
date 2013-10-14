@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 #include "ColladaExporter.h"
 
+#include "SceneCombiner.h" 
+
 #include <ctime>
 #include <set>
 
@@ -80,12 +82,22 @@ ColladaExporter::ColladaExporter( const aiScene* pScene)
 	mOutput.imbue( std::locale("C") );
 
 	mScene = pScene;
+	mSceneOwned = false;
 
 	// set up strings
 	endstr = "\n"; 
 
 	// start writing
 	WriteFile();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor
+ColladaExporter::~ColladaExporter()
+{
+	if(mSceneOwned) {
+		delete mScene;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -145,11 +157,13 @@ void ColladaExporter::WriteHeader()
 	aiVector3D position;
 	mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
 
+	bool add_root_node = false;
+
 	float scale = 1.0;
 	if(std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
 		scale = scaling.x;
 	} else {
-		DefaultLogger::get()->warn("Collada: Unable to compute the global scale of the scene " + scene_name);
+		add_root_node = true;
 	}
 
 	std::string up_axis = "Y_UP";
@@ -160,11 +174,35 @@ void ColladaExporter::WriteHeader()
 	} else if(rotation.Equal(z_rot, epsilon)) {
 		up_axis = "Z_UP";
 	} else {
-		DefaultLogger::get()->warn("Collada: Unable to compute the up axis of the scene " + scene_name);
+		add_root_node = true;
 	}
 
-	if(position.x != 0 || position.y != 0 || position.z != 0) {
-		DefaultLogger::get()->warn("Collada: Unable to keep the global position of the scene " + scene_name);
+	if(! position.Equal(aiVector3D(0, 0, 0))) {
+		add_root_node = true;
+	}
+
+	if(mScene->mRootNode->mNumChildren == 0) {
+		add_root_node = true;
+	}
+
+	if(add_root_node) {
+		aiScene* scene;
+		SceneCombiner::CopyScene(&scene, mScene);
+
+		aiNode* root = new aiNode("Scene");
+
+		root->mNumChildren = 1;
+		root->mChildren = new aiNode*[root->mNumChildren];
+
+		root->mChildren[0] = scene->mRootNode;
+		scene->mRootNode->mParent = root;
+		scene->mRootNode = root;
+
+		mScene = scene;
+		mSceneOwned = true;
+
+		up_axis = "Y_UP";
+		scale = 1.0;
 	}
 
 	mOutput << startstr << "<asset>" << endstr;

@@ -1868,6 +1868,14 @@
 					Name="blend"
 					>
 					<File
+						RelativePath="..\..\code\BlenderBMesh.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderBMesh.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\code\BlenderDNA.cpp"
 						>
 					</File>
@@ -1909,6 +1917,14 @@
 					</File>
 					<File
 						RelativePath="..\..\code\BlenderSceneGen.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderTessellator.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\code\BlenderTessellator.h"
 						>
 					</File>
 				</Filter>

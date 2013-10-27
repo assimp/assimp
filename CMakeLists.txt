@@ -110,7 +110,7 @@ if( NOT ZLIB_FOUND )
   # compile from sources
   add_subdirectory(contrib/zlib)
   set(ZLIB_FOUND 1)
-  set(ZLIB_LIBRARIES zlib)
+  set(ZLIB_LIBRARIES zlibstatic)
   set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib)
 else(NOT ZLIB_FOUND)
   ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)

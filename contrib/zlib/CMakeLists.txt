@@ -84,9 +84,6 @@ configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.cmakein
 configure_file(	${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
 		${CMAKE_CURRENT_BINARY_DIR}/zconf.h @ONLY)
 		
-# (hack) needed for the regular assimp build, which needs to be able to find zconf.h
-configure_file(	${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
-		${CMAKE_CURRENT_SOURCE_DIR}/zconf.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 
 

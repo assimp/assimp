@@ -177,7 +177,7 @@ struct aiColor3D
 	bool operator < (const aiColor3D& other) const {
 		return r < other.r || (
 			r == other.r && (g < other.g ||
-				g == other.g && b < other.b
+				(g == other.g && b < other.b)
 			)
 		);
 	}

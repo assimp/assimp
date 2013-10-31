@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "matrix4x4.h"
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 // ------------------------------------------------------------------------------------------------
@@ -129,7 +130,7 @@ inline bool aiMatrix3x3t<TReal>::operator!= (const aiMatrix4x4t<TReal>& m) const
 
 // ---------------------------------------------------------------------------
 template<typename TReal>
-inline bool aiMatrix3x3t<TReal>::Equal(const aiMatrix4x4t<TReal>& m, float epsilon) const {
+inline bool aiMatrix3x3t<TReal>::Equal(const aiMatrix4x4t<TReal>& m, TReal epsilon) const {
 	return
 		std::abs(a1 - m.a1) <= epsilon &&
 		std::abs(a2 - m.a2) <= epsilon &&

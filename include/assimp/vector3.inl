@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __cplusplus
 #include "vector3.h"
 
+#include <cmath>
+
 // ------------------------------------------------------------------------------------------------
 /** Transformation of a vector by a 3x3 matrix */
 template <typename TReal>
@@ -149,7 +151,7 @@ AI_FORCE_INLINE bool aiVector3t<TReal>::operator!= (const aiVector3t<TReal>& oth
 }
 // ---------------------------------------------------------------------------
 template<typename TReal>
-AI_FORCE_INLINE bool aiVector3t<TReal>::Equal(const aiVector3t<TReal>& other, float epsilon) const {
+AI_FORCE_INLINE bool aiVector3t<TReal>::Equal(const aiVector3t<TReal>& other, TReal epsilon) const {
 	return
 		std::abs(x - other.x) <= epsilon &&
 		std::abs(y - other.y) <= epsilon &&

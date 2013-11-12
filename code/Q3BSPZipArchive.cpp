@@ -60,38 +60,21 @@ ZipFile::~ZipFile() {
 size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount ) {
 	size_t bytes_read = 0;
 
-	DefaultLogger::get()->warn("file: \"" + m_Name + "\".");
-
 	if(m_zipFile != NULL) {
-		DefaultLogger::get()->warn("file: zip exist.");
-
 		// search file and place file pointer there
 		if(unzLocateFile(m_zipFile, m_Name.c_str(), 0) == UNZ_OK) {
-			DefaultLogger::get()->warn("file: file located in the zip archive.");
-
 			// get file size, etc.
 			unz_file_info fileInfo;
 			if(unzGetCurrentFileInfo(m_zipFile, &fileInfo, 0, 0, 0, 0, 0, 0) == UNZ_OK) {
 				const size_t size = pSize * pCount;
 				assert(size <= fileInfo.uncompressed_size);
-
-				std::stringstream size_str;
-				size_str << fileInfo.uncompressed_size;
-				DefaultLogger::get()->warn("file: size = " + size_str.str() + ".");
 			
 				// The file has EXACTLY the size of uncompressed_size. In C
 				// you need to mark the last character with '\0', so add 
 				// another character
 				if(unzOpenCurrentFile(m_zipFile) == UNZ_OK) {
-					DefaultLogger::get()->warn("file: file opened.");
-
 					if(unzReadCurrentFile(m_zipFile, pvBuffer, fileInfo.uncompressed_size) == (long int) fileInfo.uncompressed_size) {
-						std::string file((char*) pvBuffer, ((char*) pvBuffer) + (fileInfo.uncompressed_size < 1000 ? fileInfo.uncompressed_size : 1000));
-						DefaultLogger::get()->warn("file: data = \"" + file + "\".");
-
 						if(unzCloseCurrentFile(m_zipFile) == UNZ_OK) {
-							DefaultLogger::get()->warn("file: file closed.");
-
 							bytes_read = fileInfo.uncompressed_size;
 						}
 					}

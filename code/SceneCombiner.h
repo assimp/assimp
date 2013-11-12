@@ -248,6 +248,20 @@ public:
 	static void MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator it,
 		std::vector<aiMesh*>::const_iterator end);
 
+	// -------------------------------------------------------------------
+	/** Merges two or more materials
+	 *
+	 *  The materials should be complementary as much as possible. In case
+	 *  of a property present in different materials, the first occurence
+	 *  is used.
+	 *
+	 *  @param dest Destination material. Must be empty.
+	 *  @param begin First material to be processed
+	 *  @param end Points to the material after the last material to be processed
+	 */
+	static void MergeMaterials(aiMaterial** dest,
+		std::vector<aiMaterial*>::const_iterator begin,
+		std::vector<aiMaterial*>::const_iterator end);
 
 	// -------------------------------------------------------------------
 	/** Builds a list of uniquely named bones in a mesh list

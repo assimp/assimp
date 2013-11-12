@@ -292,16 +292,16 @@ void Document::ReadHeader()
 
 	// while we maye have some success with newer files, we don't support
 	// the older 6.n fbx format
-	if(fbxVersion < 7200) {
-		DOMError("unsupported, old format version, supported are only FBX 2012 and FBX 2013");
+	if(fbxVersion < 7100) {
+		DOMError("unsupported, old format version, supported are only FBX 2011, FBX 2012 and FBX 2013");
 	}
 	if(fbxVersion > 7300) {
 		if(Settings().strictMode) {
-			DOMError("unsupported, newer format version, supported are only FBX 2012 and FBX 2013"
+			DOMError("unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013"
 				" (turn off strict mode to try anyhow) ");
 		}
 		else {
-			DOMWarning("unsupported, newer format version, supported are only FBX 2012 and FBX 2013,"
+			DOMWarning("unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013,"
 				" trying to read it nevertheless");
 		}
 	}

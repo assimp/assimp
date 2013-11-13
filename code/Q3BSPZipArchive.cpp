@@ -57,7 +57,7 @@ ZipFile::~ZipFile() {
 	m_zipFile = NULL;
 }
 
-size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount ) {
+size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount) {
 	size_t bytes_read = 0;
 
 	if(m_zipFile != NULL) {

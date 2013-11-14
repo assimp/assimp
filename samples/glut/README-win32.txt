@@ -139,7 +139,7 @@ IMPLEMENTATION DEPENDENT DIFFERENCES:
        Specifically, the "window manager" in Win32 uses a "click to
        focus" policy.  That is, in order for a window to receive
        focus, a mouse button must be clicked in it.  Likewise, in
-       order for a window to loose focus, a mouse button must be
+       order for a window to lose focus, a mouse button must be
        clicked outside the window (or in another window).
        Therefore, the Enter and Leave notification provided by GLUT
        may behave differently in the Win32 and in X11 versions.

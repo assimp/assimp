@@ -49,41 +49,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Q3BSP {
 
-ZipFile::ZipFile(const std::string &rFileName, unzFile zipFile) : m_Name(rFileName), m_zipFile(zipFile) {
-	ai_assert(m_zipFile != NULL);
+ZipFile::ZipFile(size_t size) : m_Size(size) {
+	ai_assert(m_Size != 0);
+
+	m_Buffer = std::malloc(m_Size);
 }
 	
 ZipFile::~ZipFile() {
-	m_zipFile = NULL;
+	std::free(m_Buffer);
+	m_Buffer = NULL;
 }
 
 size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount) {
-	size_t bytes_read = 0;
-
-	if(m_zipFile != NULL) {
-		// search file and place file pointer there
-		if(unzLocateFile(m_zipFile, m_Name.c_str(), 0) == UNZ_OK) {
-			// get file size, etc.
-			unz_file_info fileInfo;
-			if(unzGetCurrentFileInfo(m_zipFile, &fileInfo, 0, 0, 0, 0, 0, 0) == UNZ_OK) {
-				const size_t size = pSize * pCount;
-				assert(size <= fileInfo.uncompressed_size);
+	const size_t size = pSize * pCount;
+	assert(size <= m_Size);
 			
-				// The file has EXACTLY the size of uncompressed_size. In C
-				// you need to mark the last character with '\0', so add 
-				// another character
-				if(unzOpenCurrentFile(m_zipFile) == UNZ_OK) {
-					if(unzReadCurrentFile(m_zipFile, pvBuffer, fileInfo.uncompressed_size) == (long int) fileInfo.uncompressed_size) {
-						if(unzCloseCurrentFile(m_zipFile) == UNZ_OK) {
-							bytes_read = fileInfo.uncompressed_size;
-						}
-					}
-				}
-			}
-		}
-	}
+	std::memcpy(pvBuffer, m_Buffer, size);
 
-	return bytes_read;
+	return size;
 }
 
 size_t ZipFile::Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) {
@@ -91,18 +74,7 @@ size_t ZipFile::Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCoun
 }
 
 size_t ZipFile::FileSize() const {
-	size_t size = 0;
-
-	if(m_zipFile != NULL) {
-		if(unzLocateFile(m_zipFile, m_Name.c_str(), 0) == UNZ_OK) {
-			unz_file_info fileInfo;
-			if(unzGetCurrentFileInfo(m_zipFile, &fileInfo, 0, 0, 0, 0, 0, 0) == UNZ_OK) {
-				size = fileInfo.uncompressed_size;
-			}
-		}
-	}
-
-	return size;
+	return m_Size;
 }
 
 aiReturn ZipFile::Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) {
@@ -119,7 +91,7 @@ void ZipFile::Flush() {
 
 // ------------------------------------------------------------------------------------------------
 //	Constructor.
-Q3BSPZipArchive::Q3BSPZipArchive(const std::string& rFile) : m_ZipFileHandle(NULL), m_ArchiveMap(), m_FileList(), m_bDirty(true) {
+Q3BSPZipArchive::Q3BSPZipArchive(const std::string& rFile) : m_ZipFileHandle(NULL), m_ArchiveMap() {
 	if (! rFile.empty()) {
 		m_ZipFileHandle = unzOpen(rFile.c_str());
 		if(m_ZipFileHandle != NULL) {
@@ -131,13 +103,10 @@ Q3BSPZipArchive::Q3BSPZipArchive(const std::string& rFile) : m_ZipFileHandle(NUL
 // ------------------------------------------------------------------------------------------------
 //	Destructor.
 Q3BSPZipArchive::~Q3BSPZipArchive() {
-	for( std::map<IOStream*, std::string>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it ) {
-		ZipFile *pZipFile = reinterpret_cast<ZipFile*>(it->first);
-		delete pZipFile;
+	for( std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it ) {
+		delete it->second;
 	}
 	m_ArchiveMap.clear();
-
-	m_FileList.clear();
 
 	if(m_ZipFileHandle != NULL) {
 		unzClose(m_ZipFileHandle);
@@ -160,9 +129,9 @@ bool Q3BSPZipArchive::Exists(const char* pFile) const {
 
 	if (pFile != NULL) {
 		std::string rFile(pFile);
-		std::set<std::string>::const_iterator it = m_FileList.find(rFile);
+		std::map<std::string, ZipFile*>::const_iterator it = m_ArchiveMap.find(rFile);
 
-		if(it != m_FileList.end()) {
+		if(it != m_ArchiveMap.end()) {
 			exist = true;
 		}
 	}
@@ -187,14 +156,10 @@ IOStream *Q3BSPZipArchive::Open(const char* pFile, const char* /*pMode*/) {
 
 	IOStream* result = NULL;
 
-	std::string rItem(pFile);
-	std::set<std::string>::iterator it = m_FileList.find(rItem);
+	std::map<std::string, ZipFile*>::iterator it = m_ArchiveMap.find(pFile);
 
-	if(it != m_FileList.end()) {
-		ZipFile *pZipFile = new ZipFile(*it, m_ZipFileHandle);
-		m_ArchiveMap[pZipFile] = rItem;
-
-		result = pZipFile;
+	if(it != m_ArchiveMap.end()) {
+		result = (IOStream*) it->second;
 	}
 
 	return result;
@@ -205,21 +170,16 @@ IOStream *Q3BSPZipArchive::Open(const char* pFile, const char* /*pMode*/) {
 void Q3BSPZipArchive::Close(IOStream *pFile) {
 	ai_assert(pFile != NULL);
 
-	std::map<IOStream*, std::string>::iterator it = m_ArchiveMap.find(pFile);
-
-	if(it != m_ArchiveMap.end()) {
-		ZipFile *pZipFile = reinterpret_cast<ZipFile*>((*it).first); 
-		delete pZipFile;
-
-		m_ArchiveMap.erase(it);
-	}
+	// We don't do anything in case the file would be opened again in the future
 }
 // ------------------------------------------------------------------------------------------------
 //	Returns the file-list of the archive.
 void Q3BSPZipArchive::getFileList(std::vector<std::string> &rFileList) {
 	rFileList.clear();
 
-	std::copy(m_FileList.begin(), m_FileList.end(), rFileList.begin());
+	for(std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it) {
+		rFileList.push_back(it->first);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -228,22 +188,30 @@ bool Q3BSPZipArchive::mapArchive() {
 	bool success = false;
 
 	if(m_ZipFileHandle != NULL) {
-		if(m_bDirty) {
-			m_FileList.clear();
-
+		if(m_ArchiveMap.empty()) {
 			//	At first ensure file is already open
 			if(unzGoToFirstFile(m_ZipFileHandle) == UNZ_OK) {	
 				// Loop over all files  
 				do {
 					char filename[FileNameSize];
+					unz_file_info fileInfo;
 
-					if(unzGetCurrentFileInfo(m_ZipFileHandle, NULL, filename, FileNameSize, NULL, 0, NULL, 0) == UNZ_OK) {
-						m_FileList.insert(filename);
+					if(unzGetCurrentFileInfo(m_ZipFileHandle, &fileInfo, filename, FileNameSize, NULL, 0, NULL, 0) == UNZ_OK) {
+						// The file has EXACTLY the size of uncompressed_size. In C
+						// you need to mark the last character with '\0', so add
+						// another character
+						if(unzOpenCurrentFile(m_ZipFileHandle) == UNZ_OK) {
+							std::pair<std::map<std::string, ZipFile*>::iterator, bool> result = m_ArchiveMap.insert(std::make_pair(filename, new ZipFile(fileInfo.uncompressed_size)));
+
+							if(unzReadCurrentFile(m_ZipFileHandle, result.first->second->m_Buffer, fileInfo.uncompressed_size) == (long int) fileInfo.uncompressed_size) {
+								if(unzCloseCurrentFile(m_ZipFileHandle) == UNZ_OK) {
+									// Nothing to do anymore...
+								}
+							}
+						}
 					}
 				} while(unzGoToNextFile(m_ZipFileHandle) != UNZ_END_OF_LIST_OF_FILE);
 			}
-	
-			m_bDirty = false;
 		}
 
 		success = true;

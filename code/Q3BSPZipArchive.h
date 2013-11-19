@@ -59,9 +59,11 @@ namespace Q3BSP {
 // ------------------------------------------------------------------------------------------------
 class ZipFile : public IOStream {
 
+	friend class Q3BSPZipArchive;
+
 	public:
 
-		ZipFile(const std::string &rFileName, unzFile zipFile);
+		ZipFile(size_t size);
 	
 		~ZipFile();
 
@@ -79,9 +81,9 @@ class ZipFile : public IOStream {
 
 	private:
 
-		std::string m_Name;
+		void* m_Buffer;
 
-		unzFile m_zipFile;
+		size_t m_Size;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -123,11 +125,8 @@ class Q3BSPZipArchive : public Assimp::IOSystem {
 
 		unzFile m_ZipFileHandle;
 
-		std::map<IOStream*, std::string> m_ArchiveMap;
+		std::map<std::string, ZipFile*> m_ArchiveMap;
 
-		std::set<std::string> m_FileList;
-
-		bool m_bDirty;
 };
 
 // ------------------------------------------------------------------------------------------------

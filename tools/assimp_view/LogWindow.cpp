@@ -70,7 +70,7 @@ static const char* AI_VIEW_RTF_LOG_HEADER =
 INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
 	WPARAM wParam,LPARAM lParam)
 	{
-	lParam;
+	(void)lParam;
 	switch (uMsg)
 		{
 		case WM_INITDIALOG:

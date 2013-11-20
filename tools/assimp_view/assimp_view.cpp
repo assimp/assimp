@@ -872,12 +872,10 @@ int CreateHUDTexture()
 		g_pcTexture  = NULL;
 		g_szImageMask = NULL;
 
-		UnlockResource(hg);
 		FreeResource(hg);
 		return 0;
 	}
 
-	UnlockResource(hg);
 	FreeResource(hg);
 
 	D3DSURFACE_DESC sDesc;
@@ -909,12 +907,10 @@ int CreateHUDTexture()
 			D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 		g_szImageMask = NULL;
 
-		UnlockResource(hg);
 		FreeResource(hg);
 		return 0;
 	}
 
-	UnlockResource(hg);
 	FreeResource(hg);
 
 	// lock the texture and copy it to get a pointer

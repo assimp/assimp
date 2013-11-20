@@ -44,14 +44,14 @@
 
 #include <d3d9.h>
 #include <d3dx9.h>
-#include <D3DX9Mesh.h>
+#include <d3dx9mesh.h>
 
 // ShellExecute()
 #include <shellapi.h>
 #include <commctrl.h>
 
 // GetOpenFileName()
-#include <Commdlg.h>
+#include <commdlg.h>
 #include <algorithm>
 #include <mmsystem.h>
 

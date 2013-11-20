@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "stdafx.h"
 #include "assimp_view.h"
-#include "RichEdit.h"
+#include "richedit.h"
 
 namespace AssimpView {
 

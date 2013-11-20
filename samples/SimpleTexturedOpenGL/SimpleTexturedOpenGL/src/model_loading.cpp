@@ -17,9 +17,9 @@
 
 #include <windows.h>
 #include <stdio.h>
-#include <gl\GL.h>
-#include <gl\GLU.h>
-#include <IL\il.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <IL/il.h>
 
 #include <fstream>
 
@@ -30,8 +30,8 @@
 
 // assimp include files. These three are usually needed.
 #include "assimp/Importer.hpp"	//OO version Header!
-#include "assimp/PostProcess.h"
-#include "assimp/Scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/LogStream.hpp"
 
@@ -177,7 +177,6 @@ int LoadGLTextures(const aiScene* scene)
 	/* Before calling ilInit() version should be checked. */
 	if (ilGetInteger(IL_VERSION_NUM) < IL_VERSION)
 	{
-		ILint test = ilGetInteger(IL_VERSION_NUM);
 		/// wrong DevIL version ///
 		std::string err_msg = "Wrong DevIL version. Old devil.dll in system32/SysWow64?";
 		char* cErr_msg = (char *) err_msg.c_str();

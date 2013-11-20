@@ -299,7 +299,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 					if( !q ) q=strrchr( tmp2,'\\' ); 
 					if( q ){ 
 						strcpy( q+1,p+1 ); 
-						if(pFile=fopen( tmp2,"r" ) ){ 
+						if((pFile=fopen( tmp2,"r" ))){ 
 							fclose( pFile ); 
 							strcpy(p_szString->data,tmp2);
 							p_szString->length = strlen(tmp2);

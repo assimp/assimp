@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "stdafx.h"
 #include "assimp_view.h"
-#include "RichEdit.h"
+#include "richedit.h"
 
 namespace AssimpView {
 
@@ -70,7 +70,7 @@ static const char* AI_VIEW_RTF_LOG_HEADER =
 INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
 	WPARAM wParam,LPARAM lParam)
 	{
-	lParam;
+	(void)lParam;
 	switch (uMsg)
 		{
 		case WM_INITDIALOG:

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "stdafx.h"
 #include "assimp_view.h"
-#include <Windowsx.h>
+#include <windowsx.h>
 
 namespace AssimpView {
 
@@ -95,16 +95,16 @@ void MakeFileAssociations()
 		ai_assert(sz[0] == '*');
 		sprintf(buf,"Software\\Classes\\%s",sz+1);
 
-		RegCreateKeyEx(HKEY_CURRENT_USER,buf,NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+		RegCreateKeyEx(HKEY_CURRENT_USER,buf,0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 		RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)"ASSIMPVIEW_CLASS",(DWORD)strlen("ASSIMPVIEW_CLASS")+1);
 		RegCloseKey(g_hRegistry);
 	}
-	while (sz = strtok(NULL,";"));
+	while ((sz = strtok(NULL,";")));
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS",0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 	RegCloseKey(g_hRegistry);
 
-	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS\\shell\\open\\command",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\Classes\\ASSIMPVIEW_CLASS\\shell\\open\\command",0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 	RegSetValueEx(g_hRegistry,"",0,REG_SZ,(const BYTE*)szTemp,(DWORD)strlen(szTemp)+1);
 	RegCloseKey(g_hRegistry);
 
@@ -522,7 +522,7 @@ void DisplayColorDialog(D3DCOLOR* pclrResult)
 	clr.lpCustColors = g_aclCustomColors;
 	clr.lpfnHook = NULL;
 	clr.lpTemplateName = NULL;
-	clr.lCustData = NULL;
+	clr.lCustData = 0;
 
 	ChooseColor(&clr);
 
@@ -549,7 +549,7 @@ void DisplayColorDialog(D3DXVECTOR4* pclrResult)
 	clr.lpCustColors = g_aclCustomColors;
 	clr.lpfnHook = NULL;
 	clr.lpTemplateName = NULL;
-	clr.lCustData = NULL;
+	clr.lCustData = 0;
 
 	ChooseColor(&clr);
 
@@ -1120,7 +1120,7 @@ void InitUI()
 
 	// store the key in a global variable for later use
 	RegCreateKeyEx(HKEY_CURRENT_USER,"Software\\ASSIMP\\Viewer",
-		NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+		0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 
 	if(ERROR_SUCCESS != RegQueryValueEx(g_hRegistry,"LastUIState",NULL,NULL,
 		(BYTE*)&dwValue,&dwTemp))
@@ -2411,7 +2411,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		};
 	DWORD dwTemp = MAX_PATH;
 	RegCreateKeyEx(HKEY_CURRENT_USER,
-		"Software\\ASSIMP\\Viewer",NULL,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
+		"Software\\ASSIMP\\Viewer",0,NULL,0,KEY_ALL_ACCESS, NULL, &g_hRegistry,NULL);
 	if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"LastSkyBoxSrc",NULL,NULL,
 		(BYTE*)szFileName,&dwTemp) && '\0' != szFileName[0])
 		{

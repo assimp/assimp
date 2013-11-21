@@ -1838,7 +1838,7 @@ private:
 		ai_assert(curves.size());
 
 		// sanity check whether the input is ok
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		{ const Object* target = NULL;
 		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
 			if(!target) {

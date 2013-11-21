@@ -232,7 +232,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 
 	for(std::set<std::string>::const_iterator it = st.begin(); it != st.end(); ++it) {
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		if (IsExtensionSupported(*it)) {
 			DefaultLogger::get()->warn("The file extension " + *it + " is already in use");
 		}
@@ -558,7 +558,7 @@ void WriteLogOpening(const std::string& file)
 		<< "<unknown compiler>"
 #endif
 
-#ifndef NDEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		<< " debug"
 #endif
 
@@ -749,7 +749,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		}
 	}
 #endif // no validation
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 	if (pimpl->bExtraVerbose)
 	{
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
@@ -783,7 +783,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		if( !pimpl->mScene) {
 			break; 
 		}
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 		continue;

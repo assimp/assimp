@@ -52,7 +52,7 @@ struct FaceWithSmoothingGroup
 	{
 		// let the rest uninitialized for performance - in release builds.
 		// in debug builds set all indices to a common magic value
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		this->mIndices[0] = 0xffffffff;
 		this->mIndices[1] = 0xffffffff;
 		this->mIndices[2] = 0xffffffff;

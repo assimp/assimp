@@ -533,7 +533,7 @@ void BatchLoader::LoadAll()
 	for (std::list<LoadRequest>::iterator it = data->requests.begin();it != data->requests.end(); ++it)	{
 		// force validation in debug builds
 		unsigned int pp = (*it).flags;
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		pp |= aiProcess_ValidateDataStructure;
 #endif
 		// setup config properties if necessary

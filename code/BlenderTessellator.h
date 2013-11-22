@@ -45,8 +45,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BLEND_TESSELLATOR_H
 
 // Use these to toggle between GLU Tessellate or poly2tri
-#define ASSIMP_BLEND_WITH_GLU_TESSELLATE 1
-#define ASSIMP_BLEND_WITH_POLY_2_TRI 1
+// Note (acg) keep GLU Tesselate disabled by default - if it is turned on,
+// assimp needs to be linked against GLU, which is currently not yet 
+// made configurable in CMake and potentially not wanted by most users
+// as it requires a Gl environment.
+#ifndef ASSIMP_BLEND_WITH_GLU_TESSELLATE
+#	define ASSIMP_BLEND_WITH_GLU_TESSELLATE 0
+#endif
+
+#ifndef ASSIMP_BLEND_WITH_POLY_2_TRI
+#	define ASSIMP_BLEND_WITH_POLY_2_TRI 1
+#endif
 
 #include "LogAux.h"
 

@@ -374,10 +374,13 @@ void BlenderTessellatorP2T::ReferencePoints( std::vector< Blender::PointP2T >& p
 
 // ------------------------------------------------------------------------------------------------
 // Yes this is filthy... but we have no choice
-#define OffsetOf( Class, Member ) ( reinterpret_cast< unsigned int >( &( reinterpret_cast< Class* >( NULL )->*( &Class::Member ) ) ) )
+#define OffsetOf( Class, Member ) ( static_cast< unsigned int >( \
+	reinterpret_cast<uint8_t*>(&( reinterpret_cast< Class* >( NULL )->*( &Class::Member ) )) - \
+	static_cast<uint8_t*>(NULL) ) )
+
 inline PointP2T& BlenderTessellatorP2T::GetActualPointStructure( p2t::Point& point ) const
 {
-	int pointOffset = OffsetOf( PointP2T, point2D );
+	unsigned int pointOffset = OffsetOf( PointP2T, point2D );
 	PointP2T& pointStruct = *reinterpret_cast< PointP2T* >( reinterpret_cast< char* >( &point ) - pointOffset );
 	if ( pointStruct.magic != BLEND_TESS_MAGIC )
 	{

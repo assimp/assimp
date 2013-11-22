@@ -362,6 +362,10 @@ SET(BLENDER_SRCS
 	BlenderIntermediate.h
 	BlenderModifier.h
 	BlenderModifier.cpp
+	BlenderBMesh.h
+	BlenderBMesh.cpp
+	BlenderTessellator.h
+	BlenderTessellator.cpp
 )
 SOURCE_GROUP( BLENDER FILES ${BLENDER_SRCS})
 

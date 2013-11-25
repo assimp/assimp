@@ -21,23 +21,23 @@
 namespace Assimp
 {
 
-const float fast_atof_table[16] =	{  // we write [16] here instead of [] to work around a swig bug
-	0.f,
-	0.1f,
-	0.01f,
-	0.001f,
-	0.0001f,
-	0.00001f,
-	0.000001f,
-	0.0000001f,
-	0.00000001f,
-	0.000000001f,
-	0.0000000001f,
-	0.00000000001f,
-	0.000000000001f,
-	0.0000000000001f,
-	0.00000000000001f,
-	0.000000000000001f
+const double fast_atof_table[16] =	{  // we write [16] here instead of [] to work around a swig bug
+	0.0,
+	0.1,
+	0.01,
+	0.001,
+	0.0001,
+	0.00001,
+	0.000001,
+	0.0000001,
+	0.00000001,
+	0.000000001,
+	0.0000000001,
+	0.00000000001,
+	0.000000000001,
+	0.0000000000001,
+	0.00000000000001,
+	0.000000000000001
 };
 
 
@@ -227,7 +227,7 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
 template <typename Real>
-inline const char* fast_atoreal_move( const char* c, Real& out)
+inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma = true)
 {
 	Real f;
 
@@ -237,7 +237,7 @@ inline const char* fast_atoreal_move( const char* c, Real& out)
 	}
 
 	f = static_cast<Real>( strtoul10_64 ( c, &c) );
-	if (*c == '.' || (c[0] == ',' && c[1] >= '0' && c[1] <= '9')) // allow for commas, too
+	if (*c == '.' || (check_comma && c[0] == ',' && c[1] >= '0' && c[1] <= '9')) // allow for commas, too
 	{
 		++c;
 
@@ -273,7 +273,7 @@ inline const char* fast_atoreal_move( const char* c, Real& out)
 		if (einv) {
 			exp = -exp;
 		}
-		f *= pow(static_cast<Real>(10.0f), exp);
+		f *= pow(static_cast<Real>(10.0), exp);
 	}
 
 	if (inv) {

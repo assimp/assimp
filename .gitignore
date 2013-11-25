@@ -1,1 +1,6 @@
 build
+*.tlog
+lib/
+obj/
+*.opensdf
+*.sdf

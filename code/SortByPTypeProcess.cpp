@@ -151,7 +151,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 	std::vector<unsigned int>::iterator meshIdx = replaceMeshIndex.begin();
 	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
 	{
-		aiMesh* mesh = pScene->mMeshes[i];
+		aiMesh* const mesh = pScene->mMeshes[i];
 		ai_assert(0 != mesh->mPrimitiveTypes);
 
 		// if there's just one primitive type in the mesh there's nothing to do for us
@@ -367,6 +367,9 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 
 		// delete the input mesh
 		delete mesh;
+
+        // avoid invalid pointer
+        pScene->mMeshes[i] = NULL;
 	}
 
 	if (outMeshes.empty())

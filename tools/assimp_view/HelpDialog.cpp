@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "stdafx.h"
 #include "assimp_view.h"
 
-#include "RICHEDIT.H"
+#include "richedit.h"
 
 namespace AssimpView {
 
@@ -53,7 +53,7 @@ namespace AssimpView {
 INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg,UINT uMsg,
 	WPARAM wParam,LPARAM lParam)
 	{
-	lParam;
+	(void)lParam;
 	switch (uMsg)
 		{
 		case WM_INITDIALOG:
@@ -70,7 +70,6 @@ INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg,UINT uMsg,
 			SendDlgItemMessage(hwndDlg,IDC_RICHEDIT21,
 				EM_SETTEXTEX,(WPARAM)&sInfo,( LPARAM) pData);
 
-			UnlockResource(hg);
 			FreeResource(hg);
 			return TRUE;
 			}

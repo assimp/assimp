@@ -47,6 +47,7 @@ corresponding preprocessor flag to selectively disable steps.
 */
 
 #include "AssimpPCH.h"
+#include "ProcessHelper.h"
 
 #ifndef ASSIMP_BUILD_NO_CALCTANGENTS_PROCESS
 #	include "CalcTangentsProcess.h"
@@ -215,7 +216,7 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out)
 #if (!defined ASSIMP_BUILD_NO_FLIPWINDINGORDER_PROCESS)
 	out.push_back( new FlipWindingOrderProcess());
 #endif
-#if (!defined ASSIMP_BUILD_DEBONE_PROCESS)
+#if (!defined ASSIMP_BUILD_NO_DEBONE_PROCESS)
 	out.push_back( new DeboneProcess());
 #endif
 #if (!defined ASSIMP_BUILD_NO_LIMITBONEWEIGHTS_PROCESS)

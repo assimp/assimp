@@ -191,7 +191,7 @@ can use a comfortable installer from <a href="http://www.boost-consulting.com/pr
 http://www.boost-consulting.com/products/free</a>. Choose the appropriate version of boost for your runtime of choice.
 
 <b>If you don't want to use boost</b>, you can build against our <i>"Boost-Workaround"</i>. It consists of very small 
-implementations of the various boost utility classes used. However, you'll loose functionality (e.g. threading) by doing this. 
+implementations of the various boost utility classes used. However, you'll lose functionality (e.g. threading) by doing this. 
 So, if you can use boost, you should use boost. Otherwise, See the @link use_noboost NoBoost-Section @endlink 
 later on this page for the details of the workaround.
 

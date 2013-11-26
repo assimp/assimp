@@ -64,6 +64,7 @@ ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex
 	return Exporter().GetExportFormatDescription(pIndex);
 }
 
+
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)
 {
@@ -72,7 +73,18 @@ ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)
 	}
 
 	SceneCombiner::CopyScene(pOut,pIn,true);
+	ScenePriv(*pOut)->mIsCopy = true;
 }
+
+
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiFreeScene(const C_STRUCT aiScene* pIn)
+{
+	// note: aiReleaseImport() is also able to delete scene copies, but in addition
+	// it also handles scenes with import metadata.
+	delete pIn;
+}
+
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName, unsigned int pPreprocessing )

@@ -17,9 +17,9 @@
 
 #include <windows.h>
 #include <stdio.h>
-#include <gl\GL.h>
-#include <gl\GLU.h>
-#include <IL\il.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <IL/il.h>
 
 #include <fstream>
 
@@ -30,15 +30,14 @@
 
 // assimp include files. These three are usually needed.
 #include "assimp/Importer.hpp"	//OO version Header!
-#include "assimp/PostProcess.h"
-#include "assimp/Scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/LogStream.hpp"
 
 
-// currently these are hardcoded
-static const std::string basepath = "../../test/models/OBJ/";
-static const std::string modelname = "spider.obj";
+// The default hardcoded path. Can be overridden by supplying a path through the commandline.
+static std::string modelpath = "../../test/models/OBJ/spider.obj";
 
 
 HGLRC		hRC=NULL;			// Permanent Rendering Context
@@ -165,6 +164,11 @@ void ReSizeGLScene(GLsizei width, GLsizei height)				// Resize And Initialize Th
 }
 
 
+std::string getBasePath(const std::string& path)
+{
+	size_t pos = path.find_last_of("\\/");
+	return (std::string::npos == pos) ? "" : path.substr(0, pos + 1);
+}
 
 int LoadGLTextures(const aiScene* scene)
 {
@@ -173,7 +177,6 @@ int LoadGLTextures(const aiScene* scene)
 	/* Before calling ilInit() version should be checked. */
 	if (ilGetInteger(IL_VERSION_NUM) < IL_VERSION)
 	{
-		ILint test = ilGetInteger(IL_VERSION_NUM);
 		/// wrong DevIL version ///
 		std::string err_msg = "Wrong DevIL version. Old devil.dll in system32/SysWow64?";
 		char* cErr_msg = (char *) err_msg.c_str();
@@ -220,6 +223,7 @@ int LoadGLTextures(const aiScene* scene)
 	/* get iterator */
 	std::map<std::string, GLuint*>::iterator itr = textureIdMap.begin();
 
+	std::string basepath = getBasePath(modelpath);
 	for (int i=0; i<numTextures; i++)
 	{
 
@@ -799,52 +803,52 @@ LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-
 int WINAPI WinMain( HINSTANCE hInstance, // Instance
 				   HINSTANCE hPrevInstance,      // Previous Instance
 				   LPSTR lpCmdLine,              // Command Line Parameters
 				   int nShowCmd )                // Window Show State
 {
-	MSG msg;			// Windows Message Structure
-	BOOL done=FALSE;	// Bool Variable To Exit Loop
+	MSG msg;
+	BOOL done=FALSE;
 
 	createAILogger();
 	logInfo("App fired!");
 
-	// load scene
+	// Check the command line for an override file path.
+	int argc;
+	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	if (argv != NULL && argc > 1)
+	{
+		std::wstring modelpathW(argv[1]);
+		modelpath = std::string(modelpathW.begin(), modelpathW.end());
+	}
 
-	if (!Import3DFromFile(basepath+modelname)) return 0;
+	if (!Import3DFromFile(modelpath)) return 0;
 
 	logInfo("=============== Post Import ====================");
 
-
-	// Ask The User Which Screen Mode They Prefer
 	if (MessageBox(NULL, "Would You Like To Run In Fullscreen Mode?", "Start Fullscreen?", MB_YESNO|MB_ICONEXCLAMATION)==IDNO)
 	{
-		fullscreen=FALSE;		// Windowed Mode
+		fullscreen=FALSE;
 	}
 
-	// Create Our OpenGL Window (also calls GLinit und LoadGLTextures)
 	if (!CreateGLWindow(windowTitle, 640, 480, 16, fullscreen))
 	{
 		return 0;
 	}
 
-
-
-
 	while(!done)	// Game Loop
 	{
-		if (PeekMessage(&msg, NULL, 0,0, PM_REMOVE))	// Is There A Message Waiting
+		if (PeekMessage(&msg, NULL, 0,0, PM_REMOVE))
 		{
-			if (msg.message==WM_QUIT)			// Have we received A Quit Message?
+			if (msg.message==WM_QUIT)
 			{
-				done=TRUE;						// If So done=TRUE
+				done=TRUE;
 			}
 			else
 			{
-				TranslateMessage(&msg);			// Translate The Message
-				DispatchMessage(&msg);			// Dispatch The Message
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
 			}
 		}
 		else
@@ -852,26 +856,25 @@ int WINAPI WinMain( HINSTANCE hInstance, // Instance
 			// Draw The Scene. Watch For ESC Key And Quit Messaged From DrawGLScene()
 			if (active)
 			{
-				if (keys[VK_ESCAPE])	// Was ESC pressed?
+				if (keys[VK_ESCAPE])
 				{
-					done=TRUE;			// ESC signalled A quit
+					done=TRUE;
 				}
 				else
 				{
-					DrawGLScene();		// Draw The Scene
-					SwapBuffers(hDC);	// Swap Buffers (Double Buffering)
+					DrawGLScene();
+					SwapBuffers(hDC);
 				}
 			}
 
-			if (keys[VK_F1])		// Is F1 Being Pressed?
+			if (keys[VK_F1])
 			{
-				keys[VK_F1]=FALSE;	// If so make Key FALSE
-				KillGLWindow();		// Kill Our Current Window
-				fullscreen=!fullscreen;	// Toggle Fullscreen
-				//recreate Our OpenGL Window
+				keys[VK_F1]=FALSE;
+				KillGLWindow();
+				fullscreen=!fullscreen;
 				if (!CreateGLWindow(windowTitle, 640, 480, 16, fullscreen))
 				{
-					return 0;		// Quit if Window Was Not Created
+					return 0;
 				}
 			}
 		}
@@ -879,10 +882,8 @@ int WINAPI WinMain( HINSTANCE hInstance, // Instance
 
 	// *** cleanup ***
 
-	// clear map
 	textureIdMap.clear(); //no need to delete pointers in it manually here. (Pointers point to textureIds deleted in next step)
 
-	// clear texture ids
 	if (textureIds)
 	{
 		delete[] textureIds;
@@ -891,8 +892,7 @@ int WINAPI WinMain( HINSTANCE hInstance, // Instance
 
 	// *** cleanup end ***
 
-	// Shutdown
 	destroyAILogger();
 	KillGLWindow();
-	return (msg.wParam);	// Exit The Program
+	return (msg.wParam);
 }

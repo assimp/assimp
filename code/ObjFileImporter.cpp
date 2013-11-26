@@ -123,8 +123,9 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// Get the file-size and validate it, throwing an exception when fails
 	size_t fileSize = file->FileSize();
-	if( fileSize < 16)
+	if( fileSize < 16) {
 		throw DeadlyImportError( "OBJ-file is too small.");
+    }
 
 	// Allocate buffer and read file into it
 	TextFileToBuffer(file.get(),m_Buffer);
@@ -167,15 +168,15 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 	}
 	else
 	{
-		// This is an error, so break down the application
+		// This is a fatal error, so break down the application
 		ai_assert(false);
-	}
+	} 
 
 	// Create nodes for the whole scene	
 	std::vector<aiMesh*> MeshArray;
 	for (size_t index = 0; index < pModel->m_Objects.size(); index++)
 	{
-		createNodes(pModel, pModel->m_Objects[ index ], index, pScene->mRootNode, pScene, MeshArray);
+		createNodes(pModel, pModel->m_Objects[ index ], pScene->mRootNode, pScene, MeshArray);
 	}
 
 	// Create mesh pointer buffer for this scene
@@ -195,7 +196,6 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 // ------------------------------------------------------------------------------------------------
 //	Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pObject, 
-									 unsigned int /*uiMeshIndex*/,
 									 aiNode *pParent, aiScene* pScene, 
 									 std::vector<aiMesh*> &MeshArray )
 {
@@ -276,14 +276,23 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 	for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
 	{
 		ObjFile::Face* const inp = pObjMesh->m_Faces[ index ];
+	
 		if (inp->m_PrimitiveType == aiPrimitiveType_LINE) {
 			pMesh->mNumFaces += inp->m_pVertices->size() - 1;
+			pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
 		}
 		else if (inp->m_PrimitiveType == aiPrimitiveType_POINT) {
 			pMesh->mNumFaces += inp->m_pVertices->size();
+			pMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
 		}
 		else {
 			++pMesh->mNumFaces;
+			if (inp->m_pVertices->size() > 3) {
+				pMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+			}
+			else {
+				pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+			}
 		}
 	}
 
@@ -384,7 +393,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 			
 			// Copy all normals 
-			if ( !pSourceFace->m_pNormals->empty() && !pModel->m_Normals.empty())
+			if ( !pModel->m_Normals.empty() && vertexIndex < pSourceFace->m_pNormals->size())
 			{
 				const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
 				if ( normal >= pModel->m_Normals.size() )
@@ -394,21 +403,16 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			}
 			
 			// Copy all texture coordinates
-			if ( !pModel->m_TextureCoord.empty() )
+			if ( !pModel->m_TextureCoord.empty() && vertexIndex < pSourceFace->m_pTexturCoords->size())
 			{
-				if ( !pSourceFace->m_pTexturCoords->empty() )
-				{
-					const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
-					ai_assert( tex < pModel->m_TextureCoord.size() );
-					for ( size_t i=0; i < pMesh->GetNumUVChannels(); i++ )
-					{
-						if ( tex >= pModel->m_TextureCoord.size() )
-							throw DeadlyImportError("OBJ: texture coord index out of range");
+				const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
+				ai_assert( tex < pModel->m_TextureCoord.size() );
+					
+				if ( tex >= pModel->m_TextureCoord.size() )
+					throw DeadlyImportError("OBJ: texture coord index out of range");
 
-						aiVector2D coord2d = pModel->m_TextureCoord[ tex ];
-						pMesh->mTextureCoords[ i ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
-					}
-				}
+				aiVector2D coord2d = pModel->m_TextureCoord[ tex ];
+				pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
 			}
 
 			ai_assert( pMesh->mNumVertices > newIndex );
@@ -587,15 +591,12 @@ void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 
 	// Assign parent to child
 	pChild->mParent = pParent;
-	size_t sNumChildren = 0;
-	(void)sNumChildren; // remove warning on release build
 	
 	// If already children was assigned to the parent node, store them in a 
 	std::vector<aiNode*> temp;
 	if (pParent->mChildren != NULL)
 	{
-		sNumChildren = pParent->mNumChildren;
-		ai_assert( 0 != sNumChildren );
+		ai_assert( 0 != pParent->mNumChildren );
 		for (size_t index = 0; index < pParent->mNumChildren; index++)
 		{
 			temp.push_back(pParent->mChildren [ index ] );

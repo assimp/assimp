@@ -47,10 +47,10 @@ class CBackgroundPainter
 	{
 	CBackgroundPainter()
 		: 
-		pcTexture(NULL),
 		clrColor(D3DCOLOR_ARGB(0xFF,100,100,100)),
-		eMode(SIMPLE_COLOR),
-		piSkyBoxEffect(NULL)
+		pcTexture(NULL),
+		piSkyBoxEffect(NULL),
+		eMode(SIMPLE_COLOR)
 		{}
 
 public:

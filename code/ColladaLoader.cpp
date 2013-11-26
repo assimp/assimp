@@ -73,7 +73,7 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-: noSkeletonMesh()
+: noSkeletonMesh(), ignoreUpDirection(false)
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -108,6 +108,7 @@ bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, boo
 void ColladaLoader::SetupProperties(const Importer* pImp)
 {
 	noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
+	ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
 }
 
 
@@ -160,21 +161,21 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
                                                           0,  parser.mUnitSize,  0,  0,
                                                           0,  0,  parser.mUnitSize,  0,
                                                           0,  0,  0,  1);
-
+        if( !ignoreUpDirection ) {
         // Convert to Y_UP, if different orientation
-	if( parser.mUpDirection == ColladaParser::UP_X)
-		pScene->mRootNode->mTransformation *= aiMatrix4x4( 
-			 0, -1,  0,  0, 
-			 1,  0,  0,  0,
-			 0,  0,  1,  0,
-			 0,  0,  0,  1);
-	else if( parser.mUpDirection == ColladaParser::UP_Z)
-		pScene->mRootNode->mTransformation *= aiMatrix4x4( 
-			 1,  0,  0,  0, 
-			 0,  0,  1,  0,
-			 0, -1,  0,  0,
-			 0,  0,  0,  1);
-
+		if( parser.mUpDirection == ColladaParser::UP_X)
+			pScene->mRootNode->mTransformation *= aiMatrix4x4( 
+				 0, -1,  0,  0, 
+				 1,  0,  0,  0,
+				 0,  0,  1,  0,
+				 0,  0,  0,  1);
+		else if( parser.mUpDirection == ColladaParser::UP_Z)
+			pScene->mRootNode->mTransformation *= aiMatrix4x4( 
+				 1,  0,  0,  0, 
+				 0,  0,  1,  0,
+				 0, -1,  0,  0,
+				 0,  0,  0,  1);
+        }
 	// store all meshes
 	StoreSceneMeshes( pScene);
 
@@ -520,7 +521,10 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
 				// assign the material index
 				dstMesh->mMaterialIndex = matIdx;
-        dstMesh->mName = mid.mMeshOrController;			
+                if(dstMesh->mName.length == 0)
+                {
+                    dstMesh->mName = mid.mMeshOrController;
+                }
       }
 		}
 	}
@@ -540,6 +544,8 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
 {
 	aiMesh* dstMesh = new aiMesh;
+    
+    dstMesh->mName = pSrcMesh->mName;
 
 	// count the vertices addressed by its faces
 	const size_t numVertices = std::accumulate( pSrcMesh->mFaceSize.begin() + pStartFace,

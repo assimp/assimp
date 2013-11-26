@@ -45,7 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-#ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
+//This section should be excluded only if both the Irrlicht AND the Irrlicht Mesh importers were omitted.
+#if !(defined(ASSIMP_BUILD_NO_IRR_IMPORTER) && defined(ASSIMP_BUILD_NO_IRRMESH_IMPORTER))
 
 #include "IRRShared.h"
 #include "ParsingUtils.h"
@@ -497,4 +498,4 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 	return mat;
 }
 
-#endif // !! ASSIMP_BUILD_NO_IRR_IMPORTER
+#endif // !(defined(ASSIMP_BUILD_NO_IRR_IMPORTER) && defined(ASSIMP_BUILD_NO_IRRMESH_IMPORTER))

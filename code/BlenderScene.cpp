@@ -100,6 +100,7 @@ template <> void Structure :: Convert<MTex> (
     ) const
 { 
 
+    ReadField<ErrorPolicy_Igno>((short&)dest.mapto,"mapto",db);
     ReadField<ErrorPolicy_Igno>((int&)dest.blendtype,"blendtype",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.object,"*object",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.tex,"*tex",db);
@@ -126,6 +127,7 @@ template <> void Structure :: Convert<MTex> (
     ReadField<ErrorPolicy_Igno>(dest.specfac,"specfac",db);
     ReadField<ErrorPolicy_Igno>(dest.emitfac,"emitfac",db);
     ReadField<ErrorPolicy_Igno>(dest.hardfac,"hardfac",db);
+    ReadField<ErrorPolicy_Igno>(dest.norfac,"norfac",db);
 
 	db.reader->IncPtr(size);
 }
@@ -241,16 +243,43 @@ template <> void Structure :: Convert<Base> (
     const FileDatabase& db
     ) const
 { 
+	// note: as per https://github.com/assimp/assimp/issues/128,
+	// reading the Object linked list recursively is prone to stack overflow.
+	// This structure converter is therefore an hand-written exception that
+	// does it iteratively.
 
-    {
-        boost::shared_ptr<Base> prev;
-        ReadFieldPtr<ErrorPolicy_Warn>(prev,"*prev",db);
-        dest.prev = prev.get();
-    }
-    ReadFieldPtr<ErrorPolicy_Warn>(dest.next,"*next",db);
-    ReadFieldPtr<ErrorPolicy_Warn>(dest.object,"*object",db);
+	const int initial_pos = db.reader->GetCurrentPos();
 
-	db.reader->IncPtr(size);
+	std::pair<Base*, int> todo = std::make_pair(&dest, initial_pos);
+
+	Base* saved_prev = NULL;
+
+	while(true) {
+	
+		Base& cur_dest = *todo.first;
+		db.reader->SetCurrentPos(todo.second);
+
+		// we know that this is a double-linked, circular list which we never
+		// traverse backwards, so don't bother resolving the back links.
+		cur_dest.prev = NULL;
+
+		ReadFieldPtr<ErrorPolicy_Warn>(cur_dest.object,"*object",db);
+
+		// just record the offset of the blob data and allocate storage.
+		// Does _not_ invoke Convert() recursively.
+		const int old = db.reader->GetCurrentPos();
+
+		// the return value of ReadFieldPtr indicates whether the object 
+		// was already cached. In this case, we don't need to resolve
+		// it again.
+		if(!ReadFieldPtr<ErrorPolicy_Warn>(cur_dest.next,"*next",db, true) && cur_dest.next) {
+			todo = std::make_pair(&*cur_dest.next, db.reader->GetCurrentPos());
+			continue;
+		}
+		break;
+	}
+	
+	db.reader->SetCurrentPos(initial_pos + size);
 }
 
 //--------------------------------------------------------------------------------
@@ -581,7 +610,7 @@ template <> void Structure :: Convert<Tex> (
     const FileDatabase& db
     ) const
 { 
-
+    ReadField<ErrorPolicy_Igno>((short&)dest.imaflag,"imaflag",db);
     ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.ima,"*ima",db);
 

@@ -106,7 +106,7 @@ aiVector3D g_vRotateSpeed			= aiVector3D(0.5f,0.5f,0.5f);
 aiVector3D g_avLightDirs[1] = 
 {	aiVector3D(-0.5f,0.6f,0.2f)  };
 
-extern D3DCOLOR g_avLightColors[3] = 
+D3DCOLOR g_avLightColors[3] = 
 {
 	D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF),
 	D3DCOLOR_ARGB(0xFF,0xFF,0x00,0x00),
@@ -872,12 +872,10 @@ int CreateHUDTexture()
 		g_pcTexture  = NULL;
 		g_szImageMask = NULL;
 
-		UnlockResource(hg);
 		FreeResource(hg);
 		return 0;
 	}
 
-	UnlockResource(hg);
 	FreeResource(hg);
 
 	D3DSURFACE_DESC sDesc;
@@ -909,12 +907,10 @@ int CreateHUDTexture()
 			D3DCOLOR_ARGB(0xFF,0xFF,0,0));
 		g_szImageMask = NULL;
 
-		UnlockResource(hg);
 		FreeResource(hg);
 		return 0;
 	}
 
-	UnlockResource(hg);
 	FreeResource(hg);
 
 	// lock the texture and copy it to get a pointer

@@ -61,7 +61,7 @@ int CMeshRenderer::DrawUnsorted(unsigned int iIndex)
 
 	g_piDevice->SetIndices(g_pcAsset->apcMeshes[iIndex]->piIB);
 
-	D3DPRIMITIVETYPE type;
+	D3DPRIMITIVETYPE type = D3DPT_POINTLIST;
 	switch (g_pcAsset->pcScene->mMeshes[iIndex]->mPrimitiveTypes) {
 		case aiPrimitiveType_POINT:
 			type = D3DPT_POINTLIST;break;

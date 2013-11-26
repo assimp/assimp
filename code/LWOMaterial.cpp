@@ -167,19 +167,21 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
 		// The older LWOB format does not use indirect references to clips.
 		// The file name of a texture is directly specified in the tex chunk.
 		if (mIsLWO2)	{
-			// find the corresponding clip
-			ClipList::iterator clip = mClips.begin();
+			// find the corresponding clip (take the last one if multiple
+			// share the same index)
+			ClipList::iterator end = mClips.end(), candidate = end;
 			temp = (*it).mClipIdx;
-			for (ClipList::iterator end = mClips.end(); clip != end; ++clip)	{
-				if ((*clip).idx == temp)
-					break;
+			for (ClipList::iterator clip = mClips.begin(); clip != end; ++clip)	{
+				if ((*clip).idx == temp) {
+					candidate = clip;
+				}
 				
 			}
-			if (mClips.end() == clip)	{
+			if (candidate == end)	{
 				DefaultLogger::get()->error("LWO2: Clip index is out of bounds");
 				temp = 0;
 
-				// fixme: appearently some LWO files shipping with Doom3 don't
+				// fixme: apparently some LWO files shipping with Doom3 don't
 				// have clips at all ... check whether that's true or whether
 				// it's a bug in the loader.
 
@@ -188,16 +190,16 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
 				//continue;
 			}
 			else {
-				if (Clip::UNSUPPORTED == (*clip).type)	{
+				if (Clip::UNSUPPORTED == (*candidate).type)	{
 					DefaultLogger::get()->error("LWO2: Clip type is not supported");
 					continue;
 				}
-				AdjustTexturePath((*clip).path);
-				s.Set((*clip).path);
+				AdjustTexturePath((*candidate).path);
+				s.Set((*candidate).path);
 
 				// Additional image settings
 				int flags = 0;
-				if ((*clip).negate) {
+				if ((*candidate).negate) {
 					flags |= aiTextureFlags_Invert;
 				}
 				pcMat->AddProperty(&flags,1,AI_MATKEY_TEXFLAGS(type,cur));

@@ -50,10 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/types.h"
 #include "DefaultIOSystem.h"
 
-namespace Assimp	
-{
+namespace Assimp {
 
-// -------------------------------------------------------------------
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME; 
 
 // -------------------------------------------------------------------
@@ -71,9 +69,10 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 	m_pModel = new ObjFile::Model();
 	m_pModel->m_ModelName = strModelName;
 	
+    // create default material and store it
 	m_pModel->m_pDefaultMaterial = new ObjFile::Material();
 	m_pModel->m_pDefaultMaterial->MaterialName.Set( DEFAULT_MATERIAL );
-	m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
+    m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
 	m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
 	
 	// Start parsing the file
@@ -84,9 +83,6 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 //	Destructor
 ObjFileParser::~ObjFileParser()
 {
-	/*delete m_pModel->m_pDefaultMaterial;
-	m_pModel->m_pDefaultMaterial = NULL;*/
-
 	delete m_pModel;
 	m_pModel = NULL;
 }
@@ -112,7 +108,7 @@ void ObjFileParser::parseFile()
 		case 'v': // Parse a vertex texture coordinate
 			{
 				++m_DataIt;
-				if (*m_DataIt == ' ')
+				if (*m_DataIt == ' ' || *m_DataIt == '\t')
 				{
 					// Read in vertex definition
 					getVector3(m_pModel->m_Vertices);
@@ -200,6 +196,8 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
 			break;
 		++m_DataIt;
 	}
+
+	ai_assert(index < length);
 	pBuffer[index] = '\0';
 }
 
@@ -207,16 +205,30 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
 // Copy the next line into a temporary buffer
 void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 {
-	size_t index = 0;
-	while (m_DataIt != m_DataItEnd)
-	{
-		if (*m_DataIt == '\n' || *m_DataIt == '\r' || index == length-1)
-			break;
+	size_t index = 0u;
 
-		pBuffer[ index ] = *m_DataIt;
-		++index;
-		++m_DataIt;
+	// some OBJ files have line continuations using \ (such as in C++ et al)
+	bool continuation = false;
+	for (;m_DataIt != m_DataItEnd && index < length-1; ++m_DataIt) 
+	{
+		const char c = *m_DataIt;
+		if (c == '\\') {
+			continuation = true;
+			continue;
+		}
+		
+		if (c == '\n' || c == '\r') {
+			if(continuation) {
+				pBuffer[ index++ ] = ' ';
+				continue;
+			}
+			break;
+		}
+
+		continuation = false;
+		pBuffer[ index++ ] = c;
 	}
+	ai_assert(index < length);
 	pBuffer[ index ] = '\0';
 }
 
@@ -274,6 +286,10 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 	std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
 	bool hasNormal = false;
 
+	const int vSize = m_pModel->m_Vertices.size();
+	const int vtSize = m_pModel->m_TextureCoord.size();
+	const int vnSize = m_pModel->m_Normals.size();
+
 	const bool vt = (!m_pModel->m_TextureCoord.empty());
 	const bool vn = (!m_pModel->m_Normals.empty());
 	int iStep = 0, iPos = 0;
@@ -307,7 +323,11 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 		{
 			//OBJ USES 1 Base ARRAYS!!!!
 			const int iVal = atoi( pPtr );
+
+			// increment iStep position based off of the sign and # of digits
 			int tmp = iVal;
+			if (iVal < 0)
+			    ++iStep;
 			while ( ( tmp = tmp / 10 )!=0 )
 				++iStep;
 
@@ -325,6 +345,27 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 				else if ( 2 == iPos )
 				{
 					pNormalID->push_back( iVal-1 );
+					hasNormal = true;
+				}
+				else
+				{
+					reportErrorTokenInFace();
+				}
+			}
+			else if ( iVal < 0 )
+			{
+				// Store relatively index
+				if ( 0 == iPos )
+				{
+					pIndices->push_back( vSize + iVal );
+				}
+				else if ( 1 == iPos )
+				{
+					pTexID->push_back( vtSize + iVal );
+				}
+				else if ( 2 == iPos )
+				{
+					pNormalID->push_back( vnSize + iVal );
 					hasNormal = true;
 				}
 				else

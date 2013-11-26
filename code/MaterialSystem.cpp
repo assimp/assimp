@@ -102,7 +102,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 	}
 
 	// data is given in floats, simply copy it
-	unsigned int iWrite;
+	unsigned int iWrite = 0;
 	if( aiPTI_Float == prop->mType || aiPTI_Buffer == prop->mType)	{
 		iWrite = prop->mDataLength / sizeof(float);
 		if (pMax) {
@@ -175,7 +175,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 	}
 
 	// data is given in ints, simply copy it
-	unsigned int iWrite;
+	unsigned int iWrite = 0;
 	if( aiPTI_Integer == prop->mType || aiPTI_Buffer == prop->mType)	{
 		iWrite = prop->mDataLength / sizeof(int32_t);
 		if (pMax) {

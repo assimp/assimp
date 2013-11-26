@@ -235,9 +235,13 @@ void ColladaExporter::WriteMaterials()
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
     materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
-    for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it )
-      if( !isalnum( *it) )
+    for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
+		// isalnum on MSVC asserts for code points in [0,255]. Thus prevent unwanted promotion
+		// of char to signed int and take the unsigned char value.
+      if( !isalnum( static_cast<uint8_t>(*it) ) ) {
         *it = '_';
+	  }
+	}
 
     ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
     if( !materials[a].ambient.texture.empty() ) numTextures++;

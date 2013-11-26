@@ -332,6 +332,15 @@ public: // static utilities
 		std::vector<char>& data);
 
 	// -------------------------------------------------------------------
+	/** An utility for all text file loaders. It converts a file from our
+	 *   UTF8 character set back to ISO-8859-1. Errors are reported, but ignored.
+	 *
+	 *  @param data File buffer to be converted from UTF8 to ISO-8859-1. The buffer
+	 *  is resized as appropriate. */
+	static void ConvertUTF8toISO8859_1(
+		std::string& data);
+
+	// -------------------------------------------------------------------
 	/** Utility for text file loaders which copies the contents of the
 	 *  file into a memory buffer and converts it to our UTF8
 	 *  representation.

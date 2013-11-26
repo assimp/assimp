@@ -380,6 +380,43 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Convert to UTF8 data to ISO-8859-1
+void BaseImporter::ConvertUTF8toISO8859_1(std::string& data)
+{
+	unsigned int size = data.size();
+	unsigned int i = 0, j = 0;
+
+	while(i < size) {
+		if((unsigned char) data[i] < 0x80) {
+			data[j] = data[i];
+		} else if(i < size - 1) {
+			if((unsigned char) data[i] == 0xC2) {
+				data[j] = data[++i];
+			} else if((unsigned char) data[i] == 0xC3) {
+				data[j] = ((unsigned char) data[++i] + 0x40);
+			} else {
+				std::stringstream stream;
+
+				stream << "UTF8 code " << std::hex << data[i] << data[i + 1] << " can not be converted into ISA-8859-1.";
+
+				DefaultLogger::get()->error(stream.str());
+
+				data[j++] = data[i++];
+				data[j] = data[i];
+			}
+		} else {
+			DefaultLogger::get()->error("UTF8 code but only one character remaining");
+
+			data[j] = data[i];
+		}
+
+		i++; j++;
+	}
+
+	data.resize(j);
+}
+
+// ------------------------------------------------------------------------------------------------
 void BaseImporter::TextFileToBuffer(IOStream* stream,
 	std::vector<char>& data)
 {

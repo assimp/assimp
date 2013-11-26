@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="tests">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="tests\compile-tests">
+      <UniqueIdentifier>{a7d1dfc6-b87c-4fc9-8c8e-381b70d36881}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="setup">
+      <UniqueIdentifier>{d9cc9268-395f-489e-af29-0051b4622ba8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\test\unit\utExport.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utFindDegenerates.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utFindInvalidData.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utFixInfacingNormals.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utGenNormals.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utImporter.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utImproveCacheLocality.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utJoinVertices.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utLimitBoneWeights.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utMaterialSystem.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utNoBoostTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utPretransformVertices.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utRemoveComments.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utRemoveComponent.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utRemoveRedundantMaterials.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utScenePreprocessor.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utSharedPPData.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utSortByPType.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utSplitLargeMeshes.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utTargetAnimation.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utTextureTransform.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utTriangulate.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\utVertexTriangleAdjacency.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\CCompilerTest.c">
+      <Filter>tests\compile-tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\BoostWorkaround\tupletest.cpp">
+      <Filter>tests\compile-tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\Main.cpp">
+      <Filter>setup</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\unit\UnitTestPCH.cpp">
+      <Filter>setup</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\test\unit\utExport.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utFindDegenerates.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utFindInvalidData.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utGenNormals.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utImporter.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utJoinVertices.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utLimitBoneWeights.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utMaterialSystem.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utNoBoostTest.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utPretransformVertices.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utRemoveComments.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utRemoveComponent.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utRemoveRedundantMaterials.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utScenePreprocessor.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utSharedPPData.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utSortByPType.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utSplitLargeMeshes.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utTargetAnimation.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utTriangulate.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\utVertexTriangleAdjacency.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\unit\UnitTestPCH.h">
+      <Filter>setup</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

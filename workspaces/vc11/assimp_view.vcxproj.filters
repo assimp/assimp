@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\tools\assimp_view\AnimEvaluator.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\assimp_view.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\Background.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\Display.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\HelpDialog.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\Input.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\LogDisplay.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\LogWindow.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\Material.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\MeshRenderer.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\MessageProc.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\Normals.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\SceneAnimator.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\Shaders.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tools\assimp_view\stdafx.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tools\assimp_view\AnimEvaluator.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\AssetHelper.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\assimp_view.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\Background.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\Camera.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\Display.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\LogDisplay.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\LogWindow.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\MaterialManager.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\MeshRenderer.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\RenderOptions.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\Resource.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\SceneAnimator.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\Shaders.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tools\assimp_view\stdafx.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\tools\shared\assimp_tools_icon.ico">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\assimp_view.ico">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\banner.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\base_anim.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\base_display.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\base_inter.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\base_rendering.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\base_stats.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\fx.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\HUD.png">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\HUDMask.png">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\n.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\root.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\small.ico">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\tx.bmp">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="..\..\tools\assimp_view\txi.bmp">
+      <Filter>resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\tools\assimp_view\assimp_view.rc">
+      <Filter>resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\tools\assimp_view\text1.bin">
+      <Filter>resources</Filter>
+    </None>
+  </ItemGroup>
+</Project>

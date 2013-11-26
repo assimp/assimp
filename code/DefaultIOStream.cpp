@@ -110,7 +110,14 @@ size_t DefaultIOStream::FileSize() const
 	
 	if (SIZE_MAX == cachedSize) {
 
-		// TODO: Is that really faster if we're already owning a handle to the file?
+        // Although fseek/ftell would allow us to reuse the exising file handle here,
+        // it is generally unsafe because:
+        //  - For binary streams, it is not technically well-defined
+        //  - For text files the results are meaningless
+        // That's why we use the safer variant fstat here.
+        //
+        // See here for details:
+        // https://www.securecoding.cert.org/confluence/display/seccode/FIO19-C.+Do+not+use+fseek()+and+ftell()+to+compute+the+size+of+a+regular+file
 #if defined _WIN32 && !defined __GNUC__
 		struct __stat64 fileStat; 
 		int err = _stat64(  mFilename.c_str(), &fileStat ); 

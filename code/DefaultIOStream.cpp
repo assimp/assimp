@@ -112,11 +112,11 @@ size_t DefaultIOStream::FileSize() const
 
 		// TODO: Is that really faster if we're already owning a handle to the file?
 #if defined _WIN32 && !defined __GNUC__
-		struct __stat64 fileStat; 
-		int err = _stat64(  mFilename.c_str(), &fileStat ); 
-		if (0 != err) 
-			return 0; 
-		cachedSize = (size_t) (fileStat.st_size); 
+
+        int current = ::ftell(mFile);
+        ::fseek(mFile, 0, SEEK_END);
+        cachedSize = (size_t)::ftell(mFile);
+        ::fseek(mFile, current, SEEK_SET);
 #else
 		struct stat fileStat; 
 		int err = stat(mFilename.c_str(), &fileStat ); 

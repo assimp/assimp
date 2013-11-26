@@ -149,9 +149,12 @@ void ObjFileParser::parseFile()
 			}
 			break;
 
-		case 'm': // Parse a material library
+		case 'm': // Parse a material library or merging group ('mg')
 			{
-				getMaterialLib();
+				if (*(m_DataIt + 1) == 'g')
+					getGroupNumberAndResolution();
+				else
+					getMaterialLib();
 			}
 			break;
 
@@ -603,6 +606,15 @@ void ObjFileParser::getGroupName()
 // -------------------------------------------------------------------
 //	Not supported
 void ObjFileParser::getGroupNumber()
+{
+	// Not used
+
+	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+}
+
+// -------------------------------------------------------------------
+//	Not supported
+void ObjFileParser::getGroupNumberAndResolution()
 {
 	// Not used
 

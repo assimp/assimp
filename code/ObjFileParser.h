@@ -102,6 +102,8 @@ private:
 	void getGroupName();
 	/// Gets the group number from file.
 	void getGroupNumber();
+	/// Gets the group number and resolution from file.
+	void getGroupNumberAndResolution();
 	/// Returns the index of the material. Is -1 if not material was found.
 	int getMaterialIndex( const std::string &strMaterialName );
 	/// Parse object name

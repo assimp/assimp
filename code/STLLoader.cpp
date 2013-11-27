@@ -153,8 +153,8 @@ void STLImporter::InternReadFile( const std::string& pFile,
 	this->pScene = pScene;
 	this->mBuffer = &mBuffer2[0];
 
-	// the default vertex color is white
-	clrColorDefault.r = clrColorDefault.g = clrColorDefault.b = clrColorDefault.a = 1.0f;
+	// the default vertex color is light gray.
+	clrColorDefault.r = clrColorDefault.g = clrColorDefault.b = clrColorDefault.a = 0.6f;
 
 	// allocate one mesh
 	pScene->mNumMeshes = 1;
@@ -189,13 +189,14 @@ void STLImporter::InternReadFile( const std::string& pFile,
 		}
 	}
 
-	// create a single default material - everything white, as we have vertex colors
+	// create a single default material, using a light gray diffuse color for consistency with
+	// other geometric types (e.g., PLY).
 	aiMaterial* pcMat = new aiMaterial();
 	aiString s;
 	s.Set(AI_DEFAULT_MATERIAL_NAME);
 	pcMat->AddProperty(&s, AI_MATKEY_NAME);
 
-	aiColor4D clrDiffuse(1.0f,1.0f,1.0f,1.0f);
+	aiColor4D clrDiffuse(0.6f,0.6f,0.6f,1.0f);
 	if (bMatClr) {
 		clrDiffuse = clrColorDefault;
 	}

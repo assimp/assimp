@@ -92,6 +92,8 @@ private:
 	void createMaterial();
 	///	Get texture name from loaded data.
 	void getTexture();
+	bool getClamp();
+	void skipTextureOption();
 
 private:
 	//!	Absolute pathname

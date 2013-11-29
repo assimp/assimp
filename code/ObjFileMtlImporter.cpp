@@ -263,45 +263,136 @@ void ObjFileMtlImporter::createMaterial()
 //	Gets a texture name from data.
 void ObjFileMtlImporter::getTexture() {
 	aiString *out( NULL );
+	int clampIndex = -1;
 
 	const char *pPtr( &(*m_DataIt) );
 	if ( !ASSIMP_strincmp( pPtr, DiffuseTexture.c_str(), DiffuseTexture.size() ) ) {
 		// Diffuse texture
 		out = & m_pModel->m_pCurrentMaterial->texture;
+		clampIndex = ObjFile::Material::TextureDiffuseType;
 	} else if ( !ASSIMP_strincmp( pPtr,AmbientTexture.c_str(),AmbientTexture.size() ) ) {
 		// Ambient texture
 		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
+		clampIndex = ObjFile::Material::TextureAmbientType;
 	} else if (!ASSIMP_strincmp( pPtr, SpecularTexture.c_str(), SpecularTexture.size())) {
 		// Specular texture
 		out = & m_pModel->m_pCurrentMaterial->textureSpecular;
+		clampIndex = ObjFile::Material::TextureSpecularType;
 	} else if ( !ASSIMP_strincmp( pPtr, OpacityTexture.c_str(), OpacityTexture.size() ) ) {
 		// Opacity texture
 		out = & m_pModel->m_pCurrentMaterial->textureOpacity;
+		clampIndex = ObjFile::Material::TextureOpacityType;
 	} else if (!ASSIMP_strincmp( pPtr,"map_ka",6)) {
 		// Ambient texture
 		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
+		clampIndex = ObjFile::Material::TextureAmbientType;
 	} else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), BumpTexture1.size() ) ||
 		        !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) || 
 		        !ASSIMP_strincmp( pPtr, BumpTexture3.c_str(), BumpTexture3.size() ) ) {
 		// Bump texture 
 		out = & m_pModel->m_pCurrentMaterial->textureBump;
+		clampIndex = ObjFile::Material::TextureBumpType;
 	} else if (!ASSIMP_strincmp( pPtr,NormalTexture.c_str(), NormalTexture.size())) { 
 		// Normal map
 		out = & m_pModel->m_pCurrentMaterial->textureNormal;
+		clampIndex = ObjFile::Material::TextureNormalType;
 	} else if (!ASSIMP_strincmp( pPtr, DisplacementTexture.c_str(), DisplacementTexture.size() ) ) {
 		// Displacement texture
 		out = &m_pModel->m_pCurrentMaterial->textureDisp;
+		clampIndex = ObjFile::Material::TextureDispType;
 	} else if (!ASSIMP_strincmp( pPtr, SpecularityTexture.c_str(),SpecularityTexture.size() ) ) {
 		// Specularity scaling (glossiness)
 		out = & m_pModel->m_pCurrentMaterial->textureSpecularity;
+		clampIndex = ObjFile::Material::TextureSpecularityType;
 	} else {
 		DefaultLogger::get()->error("OBJ/MTL: Encountered unknown texture type");
 		return;
 	}
 
+	m_pModel->m_pCurrentMaterial->clamp[clampIndex] = getClamp();
+	skipTextureOption();
+
 	std::string strTexture;
 	m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
 	out->Set( strTexture );
+}
+
+// -------------------------------------------------------------------
+//	Try to find if there is a "-clamp on" texture option. It doesn't
+//	skip part of stream here, that is, it won't modify m_DataIt here
+bool ObjFileMtlImporter::getClamp()
+{
+	unsigned int uiLine;
+	DataArrayIt itEnd = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, uiLine);
+	if (itEnd != m_DataItEnd)
+		--itEnd;
+
+	std::string line(m_DataIt, itEnd);
+
+	std::vector<std::string> token;
+	const unsigned int numToken = tokenize<std::string>( line, token, " " );
+	for (unsigned int i = 0; i < numToken; ++i)
+	{
+		if (!ASSIMP_stricmp(token[i], "-clamp") && i + 1 < numToken)
+		{
+			if (token[i+1] == "on")
+				return true;
+		}
+	}
+
+	return false;
+}
+
+/* /////////////////////////////////////////////////////////////////////////////
+ * Texture Option
+ * /////////////////////////////////////////////////////////////////////////////
+ * According to http://en.wikipedia.org/wiki/Wavefront_.obj_file#Texture_options
+ * Texture map statement can contains various texture option, for example:
+ *
+ *	map_Ka -o 1 1 1 some.png
+ *	map_Kd -clamp on some.png
+ *
+ * So we need to skip this option, just keep the last part which is the url of
+ * image, otherwise we will get a wrong url like "-clamp on some.png".
+ * Here we also take a special case into account where url contains space:
+ *
+ *	map_Kd -clamp on "url contains space.png"
+ *
+ * /////////////////////////////////////////////////////////////////////////////
+ */
+void ObjFileMtlImporter::skipTextureOption()
+{
+	unsigned int uiLine;
+	DataArrayIt itEnd = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, uiLine);
+	if (itEnd != m_DataItEnd) {
+		--itEnd;
+		--itEnd;
+	}
+
+	char token = ' ';
+	if (*itEnd == '\"')
+	{
+		token = '\"';
+		--itEnd;
+	}
+
+	while (itEnd != m_DataIt)
+	{
+		if (token == '\"' )
+		{
+			if (*itEnd == token)
+				break;
+		}
+		else if (isSeparator(*itEnd))
+		{
+			break;
+		}
+
+		--itEnd;
+	}
+
+	m_DataIt = itEnd;
+
 }
 
 // -------------------------------------------------------------------

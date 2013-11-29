@@ -161,6 +161,19 @@ struct Material
 	aiString textureSpecularity;
 	aiString textureOpacity;
 	aiString textureDisp;
+	enum TextureType
+	{
+		TextureDiffuseType = 0,
+		TextureSpecularType,
+		TextureAmbientType,
+		TextureBumpType,
+		TextureNormalType,
+		TextureSpecularityType,
+		TextureOpacityType,
+		TextureDispType,
+		TextureTypeCount
+	};
+	bool clamp[TextureTypeCount];
 
 	//!	Ambient color 
 	aiColor3D ambient;
@@ -186,6 +199,10 @@ struct Material
 		,	ior		(1.f)
 	{
 		// empty
+		for (size_t i = 0; i < TextureTypeCount; ++i)
+		{
+			clamp[i] = false;
+		}
 	}
 
 	// Destructor

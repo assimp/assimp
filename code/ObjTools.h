@@ -157,7 +157,6 @@ template<class char_t>
 inline char_t getName( char_t it, char_t end, std::string &name )
 {
 	name = "";
-	it = getNextToken<char_t>( it, end );
 	if ( isEndOfBuffer( it, end ) )
 		return end;
 	

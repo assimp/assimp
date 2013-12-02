@@ -61,6 +61,22 @@ static const std::string NormalTexture       = "map_Kn";
 static const std::string DisplacementTexture = "disp";
 static const std::string SpecularityTexture  = "map_ns";
 
+// texture option specific token
+static const std::string BlendUOption		= "-blendu";
+static const std::string BlendVOption		= "-blendv";
+static const std::string BoostOption		= "-boost";
+static const std::string ModifyMapOption	= "-mm";
+static const std::string OffsetOption		= "-o";
+static const std::string ScaleOption		= "-s";
+static const std::string TurbulenceOption	= "-t";
+static const std::string ResolutionOption	= "-texres";
+static const std::string ClampOption		= "-clamp";
+static const std::string BumpOption			= "-bm";
+static const std::string ChannelOption		= "-imfchan";
+static const std::string TypeOption			= "-type";
+
+
+
 // -------------------------------------------------------------------
 //	Constructor
 ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer, 
@@ -309,38 +325,13 @@ void ObjFileMtlImporter::getTexture() {
 		return;
 	}
 
-	m_pModel->m_pCurrentMaterial->clamp[clampIndex] = getClamp();
-	skipTextureOption();
+	bool clamp = false;
+	getTextureOption(clamp);
+	m_pModel->m_pCurrentMaterial->clamp[clampIndex] = clamp;
 
 	std::string strTexture;
 	m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
 	out->Set( strTexture );
-}
-
-// -------------------------------------------------------------------
-//	Try to find if there is a "-clamp on" texture option. It doesn't
-//	skip part of stream here, that is, it won't modify m_DataIt here
-bool ObjFileMtlImporter::getClamp()
-{
-	unsigned int uiLine;
-	DataArrayIt itEnd = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, uiLine);
-	if (itEnd != m_DataItEnd)
-		--itEnd;
-
-	std::string line(m_DataIt, itEnd);
-
-	std::vector<std::string> token;
-	const unsigned int numToken = tokenize<std::string>( line, token, " " );
-	for (unsigned int i = 0; i < numToken; ++i)
-	{
-		if (!ASSIMP_stricmp(token[i], "-clamp") && i + 1 < numToken)
-		{
-			if (token[i+1] == "on")
-				return true;
-		}
-	}
-
-	return false;
 }
 
 /* /////////////////////////////////////////////////////////////////////////////
@@ -352,47 +343,62 @@ bool ObjFileMtlImporter::getClamp()
  *	map_Ka -o 1 1 1 some.png
  *	map_Kd -clamp on some.png
  *
- * So we need to skip this option, just keep the last part which is the url of
- * image, otherwise we will get a wrong url like "-clamp on some.png".
- * Here we also take a special case into account where url contains space:
+ * So we need to parse and skip these options, and leave the last part which is 
+ * the url of image, otherwise we will get a wrong url like "-clamp on some.png".
  *
- *	map_Kd -clamp on "url contains space.png"
- *
+ * Because aiMaterial supports clamp option, so we also want to return it
  * /////////////////////////////////////////////////////////////////////////////
  */
-void ObjFileMtlImporter::skipTextureOption()
+void ObjFileMtlImporter::getTextureOption(bool &clamp)
 {
-	unsigned int uiLine;
-	DataArrayIt itEnd = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, uiLine);
-	if (itEnd != m_DataItEnd) {
-		--itEnd;
-		--itEnd;
-	}
+	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 
-	char token = ' ';
-	if (*itEnd == '\"')
+	//If there is any more texture option
+	while (!isEndOfBuffer(m_DataIt, m_DataItEnd) && *m_DataIt == '-')
 	{
-		token = '\"';
-		--itEnd;
-	}
+		const char *pPtr( &(*m_DataIt) );
+		//skip option key and value
+		int skipToken = 1;
 
-	while (itEnd != m_DataIt)
-	{
-		if (token == '\"' )
+		if (!ASSIMP_strincmp(pPtr, ClampOption.c_str(), ClampOption.size()))
 		{
-			if (*itEnd == token)
-				break;
+			DataArrayIt it = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
+			char value[3];
+			CopyNextWord(it, m_DataItEnd, value, sizeof(value) / sizeof(*value));
+			if (!ASSIMP_strincmp(value, "on", 2))
+			{
+				clamp = true;
+			}
+
+			skipToken = 2;
 		}
-		else if (isSeparator(*itEnd))
+		else if (  !ASSIMP_strincmp(pPtr, BlendUOption.c_str(), BlendUOption.size())
+				|| !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), BlendVOption.size())
+				|| !ASSIMP_strincmp(pPtr, BoostOption.c_str(), BoostOption.size())
+				|| !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), ResolutionOption.size())
+				|| !ASSIMP_strincmp(pPtr, BumpOption.c_str(), BumpOption.size())
+				|| !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), ChannelOption.size())
+				|| !ASSIMP_strincmp(pPtr, TypeOption.c_str(), TypeOption.size()) )
 		{
-			break;
+			skipToken = 2;
+		}
+		else if (!ASSIMP_strincmp(pPtr, ModifyMapOption.c_str(), ModifyMapOption.size()))
+		{
+			skipToken = 3;
+		}
+		else if (  !ASSIMP_strincmp(pPtr, OffsetOption.c_str(), OffsetOption.size())
+				|| !ASSIMP_strincmp(pPtr, ScaleOption.c_str(), ScaleOption.size())
+				|| !ASSIMP_strincmp(pPtr, TurbulenceOption.c_str(), TurbulenceOption.size())
+				)
+		{
+			skipToken = 4;
 		}
 
-		--itEnd;
+		for (int i = 0; i < skipToken; ++i)
+		{
+			m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
+		}
 	}
-
-	m_DataIt = itEnd;
-
 }
 
 // -------------------------------------------------------------------

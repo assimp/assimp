@@ -167,6 +167,12 @@ inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 {
 	return aiGetMaterialString(this,pKey,type,idx,&pOut);
 }
+// ---------------------------------------------------------------------------
+inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
+	unsigned int idx,aiUVTransform& pOut) const
+{
+	return aiGetMaterialUVTransform(this,pKey,type,idx,&pOut);
+}
 
 
 // ---------------------------------------------------------------------------

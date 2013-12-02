@@ -248,6 +248,18 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a aiUVTransform (4 floats) from the material
+aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat, 
+	const char* pKey,
+	unsigned int type,
+	unsigned int index,
+	aiUVTransform* pOut)
+{
+	unsigned int iMax = 4;
+	return  aiGetMaterialFloatArray(pMat,pKey,type,index,(float*)pOut,&iMax);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get a string from the material
 aiReturn aiGetMaterialString(const aiMaterial* pMat, 
 	const char* pKey,

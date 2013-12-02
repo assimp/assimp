@@ -481,6 +481,15 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 }
 
 // ------------------------------------------------------------------------------------------------
+//	 Add clamp mode property to material if necessary 
+void ObjFileImporter::addTextureMappingModeProperty(aiMaterial* mat, aiTextureType type, int clampMode)
+{
+	ai_assert( NULL != mat);
+	mat->AddProperty<int>(&clampMode, 1, AI_MATKEY_MAPPINGMODE_U(type, 0));
+	mat->AddProperty<int>(&clampMode, 1, AI_MATKEY_MAPPINGMODE_V(type, 0));
+}
+
+// ------------------------------------------------------------------------------------------------
 //	Creates the material 
 void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pScene )
 {
@@ -549,9 +558,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->texture, AI_MATKEY_TEXTURE_DIFFUSE(0));
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureDiffuseType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp, 1,  AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0));
-				mat->AddProperty<int>(&bClamp, 1, AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0));
+				addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE);
 			}
 		}
 
@@ -560,9 +567,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->textureAmbient, AI_MATKEY_TEXTURE_AMBIENT(0));
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureAmbientType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_U_AMBIENT(0));
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_V_AMBIENT(0));
+				addTextureMappingModeProperty(mat, aiTextureType_AMBIENT);
 			}
 		}
 
@@ -571,9 +576,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->textureSpecular, AI_MATKEY_TEXTURE_SPECULAR(0));
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_U_SPECULAR(0));
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_V_SPECULAR(0));
+				addTextureMappingModeProperty(mat, aiTextureType_SPECULAR);
 			}
 		}
 
@@ -582,9 +585,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->textureBump, AI_MATKEY_TEXTURE_HEIGHT(0));
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureBumpType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_U_HEIGHT(0));
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_V_HEIGHT(0));
+				addTextureMappingModeProperty(mat, aiTextureType_HEIGHT);
 			}
 		}
 
@@ -593,9 +594,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->textureNormal, AI_MATKEY_TEXTURE_NORMALS(0));
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureNormalType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_U_NORMALS(0));
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_V_NORMALS(0));
+				addTextureMappingModeProperty(mat, aiTextureType_NORMALS);
 			}
 		}
 
@@ -604,9 +603,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->textureDisp, AI_MATKEY_TEXTURE_DISPLACEMENT(0) );
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureDispType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_U_DISPLACEMENT(0));
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_V_DISPLACEMENT(0));
+				addTextureMappingModeProperty(mat, aiTextureType_DISPLACEMENT);
 			}
 		}
 
@@ -615,9 +612,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->textureOpacity, AI_MATKEY_TEXTURE_OPACITY(0));
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureOpacityType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_U_OPACITY(0));
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_V_OPACITY(0));
+				addTextureMappingModeProperty(mat, aiTextureType_OPACITY);
 			}
 		}
 
@@ -626,9 +621,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			mat->AddProperty( &pCurrentMaterial->textureSpecularity, AI_MATKEY_TEXTURE_SHININESS(0));
 			if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularityType])
 			{
-				int bClamp = 1;
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_U_SHININESS(0));
-				mat->AddProperty<int>(&bClamp,1, AI_MATKEY_MAPPINGMODE_V_SHININESS(0));
+				addTextureMappingModeProperty(mat, aiTextureType_SHININESS);
 			}
 		}
 		

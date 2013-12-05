@@ -1084,7 +1084,15 @@ void DoExport(size_t formatId)
 	}
 
 	// export the file
-	const aiReturn res = exp.Export(g_pcAsset->pcScene,e->id,sFinal.c_str());
+	const aiReturn res = exp.Export(g_pcAsset->pcScene,e->id,sFinal.c_str(),
+		ppsteps | /* configurable pp steps */
+		aiProcess_GenSmoothNormals		   | // generate smooth normal vectors if not existing
+		aiProcess_SplitLargeMeshes         | // split large, unrenderable meshes into submeshes
+		aiProcess_Triangulate			   | // triangulate polygons with more than 3 edges
+		aiProcess_ConvertToLeftHanded	   | // convert everything to D3D left handed space
+		aiProcess_SortByPType              | // make 'clean' meshes which consist of a single typ of primitives
+		0
+	);
 	if (res == aiReturn_SUCCESS) {
 		CLogDisplay::Instance().AddEntry("[INFO] Exported file " + sFinal,D3DCOLOR_ARGB(0xFF,0x00,0xFF,0x00));
 		return;

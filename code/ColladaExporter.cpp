@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 #include "ColladaExporter.h"
 
+#include "fast_atof.h"
 #include "SceneCombiner.h" 
 
 #include <ctime>
@@ -58,8 +59,24 @@ namespace Assimp
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
 void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
 {
+	std::string path = "";
+
+	const char* end_path = strrchr(pFile, '/');
+
+	if(end_path != NULL) {
+		path = std::string(pFile, end_path + 1 - pFile);
+	} else {
+		// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
+		// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
+		end_path = strrchr(pFile, '\\');
+
+		if(end_path != NULL) {
+			path = std::string(pFile, end_path + 1 - pFile);
+		}
+	}
+
 	// invoke the exporter 
-	ColladaExporter iDoTheExportThing( pScene);
+	ColladaExporter iDoTheExportThing( pScene, pIOSystem, path);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
@@ -76,7 +93,7 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-ColladaExporter::ColladaExporter( const aiScene* pScene)
+ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path) : mIOSystem(pIOSystem), mPath(path)
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
@@ -110,6 +127,7 @@ void ColladaExporter::WriteFile()
 	mOutput << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">" << endstr;
 	PushTag();
 
+	WriteTextures();
 	WriteHeader();
 
 	WriteMaterials();
@@ -161,7 +179,7 @@ void ColladaExporter::WriteHeader()
 
 	float scale = 1.0;
 	if(std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
-		scale = scaling.x;
+		scale = (float) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
 	} else {
 		add_root_node = true;
 	}
@@ -222,6 +240,41 @@ void ColladaExporter::WriteHeader()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Write the embedded textures
+void ColladaExporter::WriteTextures() {
+	static const unsigned int buffer_size = 1024;
+	char str[buffer_size];
+
+	if(mScene->HasTextures()) {
+		for(unsigned int i = 0; i < mScene->mNumTextures; i++) {
+			// It would be great to be able to create a directory in portable standard C++, but it's not the case,
+			// so we just write the textures in the current directory.
+
+			aiTexture* texture = mScene->mTextures[i];
+
+			ASSIMP_itoa10(str, buffer_size, i);
+
+			std::string name = std::string("Texture_") + str + "." + ((const char*) texture->achFormatHint);
+
+			boost::scoped_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
+			if(outfile == NULL) {
+				throw DeadlyExportError("could not open output texture file: " + mPath + name);
+			}
+
+			if(texture->mHeight == 0) {
+				outfile->Write((void*) texture->pcData, texture->mWidth, 1);
+			} else {
+				//TODO
+			}
+
+			outfile->Flush();
+
+			textures.insert(std::make_pair(i, name));
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads a single surface entry from the given material keys
 void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial* pSrcMat, aiTextureType pTexture, const char* pKey, size_t pType, size_t pIndex)
 {
@@ -230,7 +283,33 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
     aiString texfile;
     unsigned int uvChannel = 0;
     pSrcMat->GetTexture( pTexture, 0, &texfile, NULL, &uvChannel);
-    poSurface.texture = texfile.C_Str();
+
+    std::string index_str(texfile.C_Str());
+
+    if(index_str.size() != 0 && index_str[0] == '*')
+    {
+		unsigned int index;
+
+    	index_str = index_str.substr(1, std::string::npos);
+
+    	try {
+    		index = (unsigned int) strtoul10_64(index_str.c_str());
+    	} catch(std::exception& error) {
+    		throw DeadlyExportError(error.what());
+    	}
+
+    	std::map<unsigned int, std::string>::const_iterator name = textures.find(index);
+
+    	if(name != textures.end()) {
+    		poSurface.texture = name->second;
+    	} else {
+    		throw DeadlyExportError("could not find embedded texture at index " + index_str);
+    	}
+    } else
+    {
+		poSurface.texture = texfile.C_Str();
+    }
+
     poSurface.channel = uvChannel;
 	poSurface.exist = true;
   } else

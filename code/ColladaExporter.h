@@ -59,7 +59,7 @@ class ColladaExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	ColladaExporter( const aiScene* pScene);
+	ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path);
 
 	/// Destructor
 	virtual ~ColladaExporter();
@@ -71,8 +71,11 @@ protected:
 	/// Writes the asset header
 	void WriteHeader();
 
-  /// Writes the material setup
-  void WriteMaterials();
+	/// Writes the embedded textures
+	void WriteTextures();
+
+	/// Writes the material setup
+	void WriteMaterials();
 
 	/// Writes the geometry library
 	void WriteGeometryLibrary();
@@ -104,6 +107,12 @@ public:
 	std::stringstream mOutput;
 
 protected:
+	/// The IOSystem for output
+	IOSystem* mIOSystem;
+
+	/// Path of the directory where the scene will be exported
+	std::string mPath;
+
 	/// The scene to be written
 	const aiScene* mScene;
 	bool mSceneOwned;
@@ -142,6 +151,8 @@ protected:
   };
 
   std::vector<Material> materials;
+
+  std::map<unsigned int, std::string> textures;
 
 protected:
   /// Dammit C++ - y u no compile two-pass? No I have to add all methods below the struct definitions

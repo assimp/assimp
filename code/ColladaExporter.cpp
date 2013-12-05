@@ -61,18 +61,12 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 {
 	std::string path = "";
 
-	const char* end_path = strrchr(pFile, '/');
+	// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
+	// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
+	const char* end_path = std::max(strrchr(pFile, '\\'), strrchr(pFile, '/'));
 
 	if(end_path != NULL) {
 		path = std::string(pFile, end_path + 1 - pFile);
-	} else {
-		// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
-		// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
-		end_path = strrchr(pFile, '\\');
-
-		if(end_path != NULL) {
-			path = std::string(pFile, end_path + 1 - pFile);
-		}
 	}
 
 	// invoke the exporter 

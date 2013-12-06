@@ -140,6 +140,8 @@ SET( Common_SRCS
 	TinyFormatter.h
 	Profiler.h
 	LogAux.h
+	Bitmap.cpp
+	Bitmap.h
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

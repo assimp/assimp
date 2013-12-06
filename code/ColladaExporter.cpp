@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 #include "ColladaExporter.h"
 
+#include "Bitmap.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h" 
 
@@ -258,7 +259,7 @@ void ColladaExporter::WriteTextures() {
 			if(texture->mHeight == 0) {
 				outfile->Write((void*) texture->pcData, texture->mWidth, 1);
 			} else {
-				//TODO
+				Bitmap::Save(texture, outfile.get());
 			}
 
 			outfile->Flush();

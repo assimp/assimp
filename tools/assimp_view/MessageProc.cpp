@@ -1041,27 +1041,35 @@ void DoExport(size_t formatId)
 	char szFileName[MAX_PATH*2];
 	DWORD dwTemp;
 	if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",NULL,NULL,(BYTE*)szFileName,&dwTemp)) {
+		ai_assert(dwTemp == MAX_PATH + 1);
+		ai_assert(strlen(szFileName) <= MAX_PATH);
+
 		// invent a nice default file name 
 		char* sz = std::max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
 		if (sz) {
-			strcpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')));
+			strncpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
 		}
 	}
 	else {
 		// Key was not found. Use the folder where the asset comes from
-		strcpy(szFileName,g_szFileName);
+		strncpy(szFileName,g_szFileName,MAX_PATH);
 	}
 
 	// fix file extension
 	{	char * const sz = strrchr(szFileName,'.');
-		if(sz) strcpy(sz+1,e->fileExtension);
+		if(sz) {
+			ai_assert((sz - &szFileName[0]) + strlen(e->fileExtension) + 1 <= MAX_PATH);
+			strcpy(sz+1,e->fileExtension);
+		}
 	}
 
 	// build the stupid info string for GetSaveFileName() - can't use sprintf() because the string must contain binary zeros.
 	char desc[256] = {0};
 	char* c = strcpy(desc,e->description) + strlen(e->description)+1;
 	c += sprintf(c,"*.%s",e->fileExtension)+1;
-	strcpy(c, "*.*\0");
+	strcpy(c, "*.*\0"); c += 4; 
+
+	ai_assert(c - &desc[0] <= 256);
 
 	const std::string ext = "."+std::string(e->fileExtension);
 	OPENFILENAME sFilename1 = {

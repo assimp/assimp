@@ -61,6 +61,7 @@ namespace Assimp
 void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
 {
 	std::string path = "";
+	std::string file = pFile;
 
 	// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
 	// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
@@ -68,10 +69,16 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 
 	if(end_path != NULL) {
 		path = std::string(pFile, end_path + 1 - pFile);
+		file = file.substr(end_path + 1 - pFile, file.npos);
+
+		std::size_t pos = file.find_last_of('.');
+		if(pos != file.npos) {
+			file = file.substr(0, pos);
+		}
 	}
 
 	// invoke the exporter 
-	ColladaExporter iDoTheExportThing( pScene, pIOSystem, path);
+	ColladaExporter iDoTheExportThing( pScene, pIOSystem, path, file);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
@@ -88,7 +95,7 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path) : mIOSystem(pIOSystem), mPath(path)
+ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
@@ -247,9 +254,9 @@ void ColladaExporter::WriteTextures() {
 
 			aiTexture* texture = mScene->mTextures[i];
 
-			ASSIMP_itoa10(str, buffer_size, i);
+			ASSIMP_itoa10(str, buffer_size, i + 1);
 
-			std::string name = std::string("Texture_") + str + "." + ((const char*) texture->achFormatHint);
+			std::string name = mFile + "_texture_" + (i < 1000 ? "0" : "") + (i < 100 ? "0" : "") + (i < 10 ? "0" : "") + str + "." + ((const char*) texture->achFormatHint);
 
 			boost::scoped_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
 			if(outfile == NULL) {

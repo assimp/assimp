@@ -59,7 +59,7 @@ class ColladaExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path);
+	ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
 
 	/// Destructor
 	virtual ~ColladaExporter();
@@ -111,7 +111,10 @@ protected:
 	IOSystem* mIOSystem;
 
 	/// Path of the directory where the scene will be exported
-	std::string mPath;
+	const std::string mPath;
+
+	/// Name of the file (without extension) where the scene will be exported
+	const std::string mFile;
 
 	/// The scene to be written
 	const aiScene* mScene;

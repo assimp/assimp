@@ -901,6 +901,9 @@ void SceneCombiner::MergeMaterials(aiMaterial** dest,
 		size += (*it)->mNumProperties;
 	}
 
+	out->Clear();
+	delete[] out->mProperties;
+
 	out->mNumAllocated = size;
 	out->mNumProperties = 0;
 	out->mProperties = new aiMaterialProperty*[out->mNumAllocated];
@@ -1062,6 +1065,10 @@ void SceneCombiner::Copy (aiMaterial** _dest, const aiMaterial* src)
 	ai_assert(NULL != _dest && NULL != src);
 
 	aiMaterial* dest = (aiMaterial*) ( *_dest = new aiMaterial() );
+
+	dest->Clear();
+	delete[] dest->mProperties;
+
 	dest->mNumAllocated  =  src->mNumAllocated;
 	dest->mNumProperties =  src->mNumProperties;
 	dest->mProperties    =  new aiMaterialProperty* [dest->mNumAllocated];

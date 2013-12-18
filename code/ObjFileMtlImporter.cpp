@@ -302,6 +302,10 @@ void ObjFileMtlImporter::getTexture() {
 		// Ambient texture
 		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
 		clampIndex = ObjFile::Material::TextureAmbientType;
+	} else if (!ASSIMP_strincmp(&(*m_DataIt),"map_emissive",6)) {
+		// Emissive texture
+		out = & m_pModel->m_pCurrentMaterial->textureEmissive;
+		clampIndex = ObjFile::Material::TextureEmissiveType;
 	} else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), BumpTexture1.size() ) ||
 		        !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) || 
 		        !ASSIMP_strincmp( pPtr, BumpTexture3.c_str(), BumpTexture3.size() ) ) {

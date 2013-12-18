@@ -575,6 +575,9 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 			}
 		}
 
+		if ( 0 != pCurrentMaterial->textureEmissive.length )
+			mat->AddProperty( &pCurrentMaterial->textureEmissive, AI_MATKEY_TEXTURE_EMISSIVE(0));
+
 		if ( 0 != pCurrentMaterial->textureSpecular.length )
 		{
 			mat->AddProperty( &pCurrentMaterial->textureSpecular, AI_MATKEY_TEXTURE_SPECULAR(0));

@@ -1660,7 +1660,6 @@ void ColladaParser::ReadDataArray()
 	std::string id = mReader->getAttributeValue( indexID);
 	int indexCount = GetAttribute( "count");
 	unsigned int count = (unsigned int) mReader->getAttributeValueAsInt( indexCount);
-	if (count == 0) { return; } // some exporters write empty data arrays with count="0"
 	const char* content = TestTextContent();
 
   // read values and store inside an array in the data library

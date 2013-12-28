@@ -219,6 +219,12 @@ SET( Irr_SRCS
 )
 SOURCE_GROUP( Irr FILES ${Irr_SRCS})
 
+SET( LDR_SRCS
+	LDrawImporter.cpp
+	LDrawImporter.h
+)
+SOURCE_GROUP( LDR FILES ${LDR_SRCS})
+
 SET( LWO_SRCS
 	LWOAnimation.cpp
 	LWOAnimation.h
@@ -637,6 +643,7 @@ SET( assimp_src
 	${CSM_SRCS}
 	${HMP_SRCS}
 	${Irr_SRCS}
+	${LDR_SRCS}
 	${LWO_SRCS}
 	${LWS_SRCS}
 	${MD2_SRCS}

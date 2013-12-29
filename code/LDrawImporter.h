@@ -5,6 +5,9 @@
 #define INCLUDED_AI_LDR_IMPORTER_H
 
 #include "AssimpPCH.h"
+#include "ParsingUtils.h"
+#include "fast_atof.h"
+#include "TinyFormatter.h"
 
 namespace Assimp{
 
@@ -30,6 +33,18 @@ namespace Assimp{
 			IOSystem* pIOHandler);
 
 		// -------------------------------------------------------------------
+
+	private:
+
+		// Read num floats from the buffer and store it in the out array
+		bool ReadNumFloats(const char* line, float* &out, unsigned int num);
+
+		// -------------------------------------------------------------------
+
+		//throw an DeadlyImportError with the specified Message
+		void ThrowException(const std::string &Message){
+			throw DeadlyImportError("LDraw: " + Message);
+		}
 
 	}; //end of class LDrawImporter
 

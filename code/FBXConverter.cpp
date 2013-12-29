@@ -88,6 +88,9 @@ public:
 		TransformationComp_ScalingPivot,
 		TransformationComp_Scaling,
 		TransformationComp_ScalingPivotInverse,
+		TransformationComp_GeometricTranslation,
+		TransformationComp_GeometricRotation,
+		TransformationComp_GeometricScaling,
 
 		TransformationComp_MAXIMUM
 	};
@@ -419,6 +422,12 @@ private:
 			return "Scaling";
 		case TransformationComp_ScalingPivotInverse:
 			return "ScalingPivotInverse";
+		case TransformationComp_GeometricScaling:
+			return "GeometricScaling";
+		case TransformationComp_GeometricRotation:
+			return "GeometricRotation";
+		case TransformationComp_GeometricTranslation:
+			return "GeometricTranslation";
 		case TransformationComp_MAXIMUM: // this is to silence compiler warnings
 			break;
 		}
@@ -456,6 +465,12 @@ private:
 			return "Lcl Scaling";
 		case TransformationComp_ScalingPivotInverse:
 			return "ScalingPivotInverse";
+		case TransformationComp_GeometricScaling:
+			return "GeometricScaling";
+		case TransformationComp_GeometricRotation:
+			return "GeometricRotation";
+		case TransformationComp_GeometricTranslation:
+			return "GeometricTranslation";
 		case TransformationComp_MAXIMUM: // this is to silence compiler warnings
 			break;
 		}
@@ -577,9 +592,8 @@ private:
 		for (size_t i = 0; i < TransformationComp_MAXIMUM; ++i) {
 			const TransformationComp comp = static_cast<TransformationComp>(i);
 
-			if(comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || 
-				comp == TransformationComp_Translation) {
-
+			if( comp == TransformationComp_Rotation || comp == TransformationComp_Scaling || comp == TransformationComp_Translation ||
+				comp == TransformationComp_GeometricScaling || comp == TransformationComp_GeometricRotation || comp == TransformationComp_GeometricTranslation ) { 
 				continue;
 			}
 
@@ -675,6 +689,21 @@ private:
 		const aiVector3D& Rotation = PropertyGet<aiVector3D>(props,"Lcl Rotation",ok);
 		if(ok && Rotation.SquareLength() > zero_epsilon) {
 			GetRotationMatrix(rot, Rotation, chain[TransformationComp_Rotation]);
+		}
+		
+		const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>(props, "GeometricScaling", ok);
+		if (ok && fabs(GeometricScaling.SquareLength() - 1.0f) > zero_epsilon) {
+			aiMatrix4x4::Scaling(GeometricScaling, chain[TransformationComp_GeometricScaling]);
+		}
+		
+		const aiVector3D& GeometricRotation = PropertyGet<aiVector3D>(props, "GeometricRotation", ok);
+		if (ok && GeometricRotation.SquareLength() > zero_epsilon) {
+			GetRotationMatrix(rot, GeometricRotation, chain[TransformationComp_GeometricRotation]);
+		}
+
+		const aiVector3D& GeometricTranslation = PropertyGet<aiVector3D>(props, "GeometricTranslation", ok);
+		if (ok && GeometricTranslation.SquareLength() > zero_epsilon){
+			aiMatrix4x4::Translation(GeometricTranslation, chain[TransformationComp_GeometricTranslation]);
 		}
 
 		// is_complex needs to be consistent with NeedsComplexTransformationChain()
@@ -1900,9 +1929,9 @@ private:
 
 				has_any = true;
 
-				if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling &&
-					comp != TransformationComp_Translation) {
-
+				if (comp != TransformationComp_Rotation && comp != TransformationComp_Scaling && comp != TransformationComp_Translation &&
+					comp != TransformationComp_GeometricScaling && comp != TransformationComp_GeometricRotation && comp != TransformationComp_GeometricTranslation )
+				{
 					has_complex = true;
 				}
 			}
@@ -1955,6 +1984,7 @@ private:
 				case TransformationComp_Rotation:
 				case TransformationComp_PreRotation:
 				case TransformationComp_PostRotation:
+				case TransformationComp_GeometricRotation:
 					na = GenerateRotationNodeAnim(chain_name, 
 						target, 
 						(*chain[i]).second,
@@ -1969,6 +1999,7 @@ private:
 				case TransformationComp_ScalingOffset:
 				case TransformationComp_ScalingPivot:
 				case TransformationComp_Translation:
+				case TransformationComp_GeometricTranslation:
 					na = GenerateTranslationNodeAnim(chain_name, 
 						target, 
 						(*chain[i]).second,
@@ -2017,6 +2048,7 @@ private:
 					break;
 
 				case TransformationComp_Scaling:
+				case TransformationComp_GeometricScaling:
 					na = GenerateScalingNodeAnim(chain_name, 
 						target, 
 						(*chain[i]).second,

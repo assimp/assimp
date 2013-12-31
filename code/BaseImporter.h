@@ -301,6 +301,17 @@ public: // static utilities
 		const std::string& pFile);
 
 	// -------------------------------------------------------------------
+	/** @brief Extract folder of the file from a string
+	 *  @param pFile Input file
+	 *  @param osSeparator Directory Separator of the current OS
+	 *  @return path to the files folder
+	 *  @note catch the osSeparator from a IOSystem
+	 */
+	static std::string GetFolderPath(
+		const std::string& pFile,
+		const char& osSeparator);
+
+	// -------------------------------------------------------------------
 	/** @brief Check whether a file starts with one or more magic tokens
 	 *  @param pFile Input file
 	 *  @param pIOHandler IO system to be used

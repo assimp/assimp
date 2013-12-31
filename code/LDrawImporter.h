@@ -8,6 +8,9 @@
 #include "ParsingUtils.h"
 #include "fast_atof.h"
 #include "TinyFormatter.h"
+#include "Importer.h"
+#include "GenericProperty.h"
+#include "SceneCombiner.h"
 
 namespace Assimp{
 
@@ -22,13 +25,16 @@ namespace Assimp{
 		bool CanRead(const std::string& pFile, IOSystem* pIOHandler,
 			bool checkSig) const;
 
-	protected:
 		// -------------------------------------------------------------------
 
 		const aiImporterDesc* GetInfo() const;
 
 		// -------------------------------------------------------------------
 
+		void SetupProperties(const Importer* pImp);
+
+		// -------------------------------------------------------------------
+	protected:
 		void InternReadFile(const std::string& pFile, aiScene* pScene,
 			IOSystem* pIOHandler);
 
@@ -45,6 +51,8 @@ namespace Assimp{
 		void ThrowException(const std::string &Message){
 			throw DeadlyImportError("LDraw: " + Message);
 		}
+
+		std::string _libPath = "";
 
 	}; //end of class LDrawImporter
 

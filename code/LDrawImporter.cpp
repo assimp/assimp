@@ -82,14 +82,22 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 		_libPath += DS;
 	}
 
+	//Load the materials from <LDrawLibRoot>/ldconfig.ldr
+	std::string configPath = FindPath("ldconfig.ldr", pIOHandler);
+	if (configPath == ""){
+		DefaultLogger::get()->info("LDraw: Could not find ldconfig.ldr, using assimp default material");
+	}
+	else
+	{
+		ReadMaterials(configPath, pIOHandler);
+	}
+
 	//setup a batch loader, it's quite probable we will need it
 	BatchLoader loader(pIOHandler);
 	BatchLoader::PropertyMap loaderParams = BatchLoader::PropertyMap();
 	SetGenericProperty(loaderParams.strings, AI_CONFIG_IMPORT_LDRAW_LIB_PATH, _libPath);
 
-	//TODO estimate sizes
-	std::vector<aiVector3D> vertices = std::vector<aiVector3D>();
-	std::vector<aiFace> faces = std::vector<aiFace>();
+	std::map<unsigned int, std::pair<std::vector<aiVector3D>, std::vector<aiFace>>> meshes;
 	std::vector<std::pair<unsigned int, aiMatrix4x4*>> fileIds = std::vector<std::pair<unsigned int, aiMatrix4x4*>>();
 
 	unsigned int primitivesType = 0;
@@ -134,28 +142,7 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 					ThrowException("sub-file reference with empty path/filename");
 				}
 
-				//find the full path of the part
-				std::string fullpath;
-				if (pIOHandler->Exists(subpath)){
-					//we are lucky, file is full path referenced
-					fullpath = subpath;
-				}
-				else
-				{
-					//test the specified directories of the LDraw Library
-					static std::vector<std::string> paths{ "parts", "p", "models" };
-					for (unsigned int i = 0; i < paths.size(); ++i){
-						if (pIOHandler->Exists(_libPath + paths[i] + DS + subpath)){
-							fullpath = _libPath + paths[i] + DS + subpath;
-							break;
-						}
-						else if (pIOHandler->Exists(_libPath + ".." + DS+ paths[i] + DS + subpath))
-						{
-							fullpath = _libPath + ".." + DS + paths[i] + DS + subpath;
-							break;
-						}
-					}
-				}
+				std::string fullpath = FindPath(subpath, pIOHandler);
 				if (fullpath == ""){
 					//we can't find it
 					ThrowException("Unable to find file '" + subpath + "'");
@@ -171,12 +158,14 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 				if (!ReadNumFloats(lp, params, 1 + (command * 3))){
 					ThrowException(Formatter::format("could not read ") << (1 + (command * 3)) <<" command parameter floats from the line '" << line<<"'");
 				}
-				unsigned int index = vertices.size();
 
-				//TODO colour @params[0]
+				std::vector<aiVector3D> *vertices = &meshes[unsigned int(params[0])].first;
+				std::vector<aiFace> *faces = &meshes[unsigned int(params[0])].second;
 
-				vertices.push_back(aiVector3D(params[1], params[2], params[3]));
-				vertices.push_back(aiVector3D(params[4], params[5], params[6]));
+				unsigned int index = vertices->size();
+
+				vertices->push_back(aiVector3D(params[1], params[2], params[3]));
+				vertices->push_back(aiVector3D(params[4], params[5], params[6]));
 
 				aiFace f = aiFace();
 				f.mNumIndices = command;
@@ -185,7 +174,7 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 				f.mIndices[1] = index + 1;
 				if (command == 3 || command == 4){
 
-					vertices.push_back(aiVector3D(params[7], params[8], params[9]));
+					vertices->push_back(aiVector3D(params[7], params[8], params[9]));
 					f.mIndices[2] = index + 2;
 
 					if (command == 3){
@@ -194,7 +183,7 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 					}
 					else if (command == 4){
 						//it's a quad
-						vertices.push_back(aiVector3D(params[10], params[11], params[12]));
+						vertices->push_back(aiVector3D(params[10], params[11], params[12]));
 						f.mIndices[3] = index + 3;
 						primitivesType = primitivesType | aiPrimitiveType_POLYGON;
 					}
@@ -204,7 +193,7 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 					//it's a line
 					primitivesType = primitivesType | aiPrimitiveType_LINE;
 				}
-				faces.push_back(f);
+				faces->push_back(f);
 				continue;
 			}
 			else
@@ -225,25 +214,31 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 	master->mRootNode = new aiNode(pFile);
 	master->mRootNode->mTransformation = aiMatrix4x4();
 
-	if (vertices.size() && faces.size())
+	if (!meshes.empty())
 	{
-		master->mNumMeshes = 1;
+		master->mRootNode->mNumMeshes = master->mNumMeshes = meshes.size();
 		master->mMeshes = new aiMesh*[master->mNumMeshes];
 		//master->mFlags = AI_SCENE_FLAGS_INCOMPLETE;
-
-		aiMesh* mesh = new aiMesh();
-		mesh->mNumFaces = faces.size();
-		mesh->mFaces = new aiFace[mesh->mNumFaces];
-		std::copy(faces.begin(), faces.end(), mesh->mFaces);
-		mesh->mNumVertices = vertices.size();
-		mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-		std::copy(vertices.begin(), vertices.end(), mesh->mVertices);
-		mesh->mPrimitiveTypes = primitivesType;
-		master->mMeshes[0] = mesh;
-
-		master->mRootNode->mNumMeshes = 1;
 		master->mRootNode->mMeshes = new unsigned int[master->mRootNode->mNumMeshes];
-		master->mRootNode->mMeshes[0] = 0;
+
+		unsigned int index = 0;
+		for (std::map<unsigned int, std::pair<std::vector<aiVector3D>, std::vector<aiFace>>>::iterator i = meshes.begin(); i != meshes.end(); ++i, ++index)
+		{
+			std::vector<aiVector3D>* vertices = &i->second.first;
+			std::vector<aiFace>* faces = &i->second.second;
+
+			aiMesh* mesh = new aiMesh();
+			mesh->mNumFaces = faces->size();
+			mesh->mFaces = new aiFace[mesh->mNumFaces];
+			std::copy(faces->begin(), faces->end(), mesh->mFaces);
+			mesh->mNumVertices = vertices->size();
+			mesh->mVertices = new aiVector3D[mesh->mNumVertices];
+			std::copy(vertices->begin(), vertices->end(), mesh->mVertices);
+			mesh->mPrimitiveTypes = primitivesType;
+			
+			master->mMeshes[index] = mesh;	
+			master->mRootNode->mMeshes[index] = index;
+		}
 	}
 
 	if (fileIds.size() != 0){
@@ -296,6 +291,86 @@ bool LDrawImporter::ReadNumFloats(const char* line, float* & out, unsigned int n
 		out[i] = fast_atof(token.c_str());
 	}
 	return true;
+}
+
+void LDrawImporter::ReadMaterials(std::string filename, IOSystem* pIOHandler){
+	if (!pIOHandler->Exists(filename))	return;
+	boost::scoped_ptr<StreamReaderLE> stream(new StreamReaderLE(pIOHandler->Open(filename, "rb")));
+
+	for (LineSplitter splitter(*stream.get()); splitter; ++splitter) {
+		const char* cmd = splitter[0];
+		//only read line type 0 (comments)
+		if (IsNumeric(*cmd) && *cmd == '0'){
+			cmd = splitter[1];
+			if (*cmd != '!') continue;
+			DefaultLogger::get()->debug(*splitter);
+			if (TokenMatchI(cmd,"!colour",7)){
+				//name of the color
+				SkipToken(cmd);
+				SkipSpaces(&cmd);
+				if (TokenMatchI(cmd, "code", 4)){
+					SkipSpaces(&cmd);
+					unsigned int code = strtoul10(cmd, &cmd);
+					SkipSpaces(&cmd);
+					if (TokenMatchI(cmd, "value", 5)){
+						SkipSpaces(&cmd);
+						//skip the # before the hex values
+						++cmd;
+						aiColor3D value;
+						value.r = HexOctetToDecimal(cmd);
+						cmd += 2;
+						value.g = HexOctetToDecimal(cmd);
+						cmd += 2;
+						value.b = HexOctetToDecimal(cmd);
+						cmd += 2; 
+						SkipSpaces(&cmd);
+						if (TokenMatchI(cmd, "edge", 4)){
+							SkipSpaces(&cmd);
+							//skip the # before the hex values
+							++cmd;
+							aiColor3D edge;
+							edge.r = HexOctetToDecimal(cmd);
+							cmd += 2;
+							edge.g = HexOctetToDecimal(cmd);
+							cmd += 2;
+							edge.b = HexOctetToDecimal(cmd);
+							cmd += 2;
+
+							LDraw::LDrawMaterial mat = LDraw::LDrawMaterial(code, value, edge);
+							materials.insert(std::pair<unsigned int, LDraw::LDrawMaterial>(code, mat));
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+std::string LDrawImporter::FindPath(std::string subpath, IOSystem* pIOHandler){
+	char DS = pIOHandler->getOsSeparator();
+	//find the full path of the file
+	std::string fullpath;
+	if (pIOHandler->Exists(subpath)){
+		//we are lucky, file is full path referenced
+		fullpath = subpath;
+	}
+	else
+	{
+		//test the specified directories of the LDraw Library
+		static std::vector<std::string> paths{ "parts", "p", "", "models"};
+		for (unsigned int i = 0; i < paths.size(); ++i){
+			if (pIOHandler->Exists(_libPath + paths[i] + DS + subpath)){
+				fullpath = _libPath + paths[i] + DS + subpath;
+				break;
+			}
+			else if (pIOHandler->Exists(_libPath + ".." + DS + paths[i] + DS + subpath))
+			{
+				fullpath = _libPath + ".." + DS + paths[i] + DS + subpath;
+				break;
+			}
+		}
+	}
+	return fullpath;
 }
 
 #endif // !ASSIMP_BUILD_NO_LDR_IMPORTER

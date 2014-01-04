@@ -216,8 +216,9 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 
 	if (!meshes.empty())
 	{
-		master->mRootNode->mNumMeshes = master->mNumMeshes = meshes.size();
+		master->mNumMaterials = master->mRootNode->mNumMeshes = master->mNumMeshes = meshes.size();
 		master->mMeshes = new aiMesh*[master->mNumMeshes];
+		master->mMaterials = new aiMaterial*[master->mNumMaterials];
 		//master->mFlags = AI_SCENE_FLAGS_INCOMPLETE;
 		master->mRootNode->mMeshes = new unsigned int[master->mRootNode->mNumMeshes];
 
@@ -235,9 +236,26 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 			mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 			std::copy(vertices->begin(), vertices->end(), mesh->mVertices);
 			mesh->mPrimitiveTypes = primitivesType;
-			
+
+			aiMaterial * material = new aiMaterial();
+
+			master->mMaterials[index] = material;
 			master->mMeshes[index] = mesh;	
 			master->mRootNode->mMeshes[index] = index;
+
+			LDraw::LDrawMaterial * rawMaterial;
+			try{
+				rawMaterial = &materials.at(i->first);
+			}
+			catch (std::out_of_range ex){
+				//we don't know that material
+				continue;
+			}
+			material->AddProperty(&rawMaterial->color,1, AI_MATKEY_COLOR_DIFFUSE);
+			if (rawMaterial->alpha != 1.0f)
+				material->AddProperty(&rawMaterial->alpha, 1, AI_MATKEY_OPACITY);
+			if (rawMaterial->luminance != 0.0f)
+				material->AddProperty(&(rawMaterial->color * rawMaterial->luminance), 1, AI_MATKEY_COLOR_EMISSIVE);
 		}
 	}
 
@@ -335,7 +353,7 @@ void LDrawImporter::ReadMaterials(std::string filename, IOSystem* pIOHandler){
 							cmd += 2;
 							edge.b = HexOctetToDecimal(cmd);
 							cmd += 2;
-
+							//TODO ALPHA and LUMINANCE
 							LDraw::LDrawMaterial mat = LDraw::LDrawMaterial(code, value, edge);
 							materials.insert(std::pair<unsigned int, LDraw::LDrawMaterial>(code, mat));
 						}

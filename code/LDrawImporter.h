@@ -16,13 +16,14 @@
 namespace Assimp{
 
 	namespace LDraw{
+		typedef unsigned int ColorIndex;
 		struct LDrawMaterial
 		{
 			LDrawMaterial(unsigned int code, aiColor3D color, aiColor3D edge) :
 			code(code), color(color), edge(edge)
 			{}
 			//identification of the color in LDraw files
-			unsigned int code;
+			ColorIndex code;
 			//the main color of the material
 			aiColor3D color;
 			//the contrast color of the material
@@ -32,7 +33,35 @@ namespace Assimp{
 			//factor of light emmision
 			float luminance = 0.0f;
 		};
+
+		struct LDrawMesh
+		{
+			std::vector<aiVector3D> vertices;
+			std::vector<aiFace> faces;
+			unsigned int primitivesType = 0;
+		};
+
+		struct SubFileReference
+		{
+			aiMatrix4x4 transformation;
+			std::string path;
+			ColorIndex color;
+		};
+
+		struct LDrawNode
+		{
+			SubFileReference file;
+			std::vector<LDrawNode> children;
+		};
+
+		struct LDrawFile
+		{
+			std::map<ColorIndex, LDrawMesh> meshes;
+			LDrawNode subtree;
+		};
 	}
+
+	using namespace LDraw;
 
 	class LDrawImporter : public BaseImporter
 	{
@@ -75,19 +104,34 @@ namespace Assimp{
 		// -------------------------------------------------------------------
 
 		//try to read the LDraw materials from _libPath/ldconfig.ldr
-		void ReadMaterials(std::string filename, IOSystem* pIOHandler);
+		void ReadMaterials(std::string filename);
 
 		// -------------------------------------------------------------------
 
+		//Build up a scene structure tree of LDrawNode 
+		void ProcessNode(std::string file, LDrawNode* current, unsigned int colorindex);
+
+		// -------------------------------------------------------------------
+
+		//Convert the LDrawNode structure to assimps scene structure
+		void ConvertNode(aiNode* node, LDrawNode* current, std::vector<aiMesh*>* aiMeshes);
+
+		// -------------------------------------------------------------------
 		//try to find the full path of file in the LDrawLibrary
 		//returns "" if unsuccessful
-		std::string FindPath(std::string subpath, IOSystem* pIOHandler);
+		std::string FindPath(std::string subpath);
+
+		//IOSystem short reference
+		IOSystem* pIOHandler = NULL;
 
 		//path to the root folder of the library
 		std::string _libPath = "";
 
 		//container for the LDraw color definitions
-		std::map<unsigned int, LDraw::LDrawMaterial> materials = std::map<unsigned int,LDraw::LDrawMaterial>();
+		std::map<ColorIndex, LDraw::LDrawMaterial> materials = std::map<ColorIndex,LDraw::LDrawMaterial>();
+
+		//cache for already loaded files
+		std::map<std::string, LDrawFile> fileCache = std::map<std::string, LDrawFile>();
 
 	}; //end of class LDrawImporter
 

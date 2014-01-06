@@ -178,8 +178,20 @@ void LDrawImporter::ReadMaterials(std::string filename){
 							edge.b = HexOctetToDecimal(cmd);
 							cmd += 2;
 							edge = edge * (1 / 255.0f);
-							//TODO ALPHA and LUMINANCE
-							LDrawMaterial mat = LDrawMaterial(name,code, value, edge);
+
+							LDrawMaterial mat = LDrawMaterial(name, code, value, edge);
+							SkipSpaces(&cmd);
+							if (TokenMatchI(cmd, "alpha", 5)){
+								SkipSpaces(&cmd);
+								unsigned int al = strtoul10(cmd, &cmd);
+								mat.alpha = float(al) / 255.0f;
+							}
+							SkipSpaces(&cmd);
+							if (TokenMatchI(cmd, "luminance", 9)){
+								SkipSpaces(&cmd);
+								unsigned int l = strtoul10(cmd, &cmd);
+								mat.luminance = float(l) / 255.0f;
+							}
 							materials.insert(std::pair<ColorIndex, LDrawMaterial>(code, mat));
 						}
 					}

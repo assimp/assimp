@@ -147,7 +147,7 @@ void LDrawImporter::ReadMaterials(std::string filename){
 			DefaultLogger::get()->debug(*splitter);
 			if (TokenMatchI(cmd,"!colour",7)){
 				//name of the color
-				SkipToken(cmd);
+				std::string name = GetNextToken(cmd);
 				SkipSpaces(&cmd);
 				if (TokenMatchI(cmd, "code", 4)){
 					SkipSpaces(&cmd);
@@ -179,7 +179,7 @@ void LDrawImporter::ReadMaterials(std::string filename){
 							cmd += 2;
 							edge = edge * (1 / 255.0f);
 							//TODO ALPHA and LUMINANCE
-							LDrawMaterial mat = LDrawMaterial(code, value, edge);
+							LDrawMaterial mat = LDrawMaterial(name,code, value, edge);
 							materials.insert(std::pair<ColorIndex, LDrawMaterial>(code, mat));
 						}
 					}
@@ -441,18 +441,38 @@ void LDrawImporter::ConvertNode(aiNode* node, LDrawNode* current, std::vector<ai
 				//we don't know that material
 				continue;
 			}
-			aiMaterial* material = new aiMaterial();
-			if (i->first == 24)
-				material->AddProperty(&rawMaterial->edge, 1, AI_MATKEY_COLOR_DIFFUSE);
+			aiString *name = new aiString((i->first == 24) ? rawMaterial->name + "-edge" : rawMaterial->name);
+			//do we already have such a aiMaterial?
+			unsigned int chachedIndex = 0;
+			for (std::vector<aiMaterial*>::iterator mat = aiMaterials->begin(); mat != aiMaterials->end(); ++mat, ++chachedIndex)
+			{
+				aiMaterial* cached = *mat;
+				aiString cachedName;
+				cached->Get(AI_MATKEY_NAME, cachedName);
+				if (cachedName == *name)
+					break;
+			}
+			if (chachedIndex != aiMaterials->size())
+			{
+				 //we found an already matching
+				mesh->mMaterialIndex = chachedIndex;
+			}
 			else
-				material->AddProperty(&rawMaterial->color, 1, AI_MATKEY_COLOR_DIFFUSE);
-			if (rawMaterial->alpha != 1.0f)
-				material->AddProperty(&rawMaterial->alpha, 1, AI_MATKEY_OPACITY);
-			if (rawMaterial->luminance != 0.0f)
-				material->AddProperty(&(rawMaterial->color * rawMaterial->luminance), 1, AI_MATKEY_COLOR_EMISSIVE);
+			{
+				aiMaterial* material = new aiMaterial();
+				material->AddProperty(name, AI_MATKEY_NAME);
+				if (i->first == 24)
+					material->AddProperty(&rawMaterial->edge, 1, AI_MATKEY_COLOR_DIFFUSE);
+				else
+					material->AddProperty(&rawMaterial->color, 1, AI_MATKEY_COLOR_DIFFUSE);
+				if (rawMaterial->alpha != 1.0f)
+					material->AddProperty(&rawMaterial->alpha, 1, AI_MATKEY_OPACITY);
+				if (rawMaterial->luminance != 0.0f)
+					material->AddProperty(&(rawMaterial->color * rawMaterial->luminance), 1, AI_MATKEY_COLOR_EMISSIVE);
 
-			mesh->mMaterialIndex = aiMaterials->size();
-			aiMaterials->push_back(material);
+				mesh->mMaterialIndex = aiMaterials->size();
+				aiMaterials->push_back(material);
+			}
 		}
 	}
 

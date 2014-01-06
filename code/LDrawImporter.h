@@ -19,9 +19,11 @@ namespace Assimp{
 		typedef unsigned int ColorIndex;
 		struct LDrawMaterial
 		{
-			LDrawMaterial(unsigned int code, aiColor3D color, aiColor3D edge) :
-			code(code), color(color), edge(edge)
+			LDrawMaterial(std::string name, int code, aiColor3D color, aiColor3D edge) :
+			name(name), code(code), color(color), edge(edge)
 			{}
+			//human readable name
+			std::string name;
 			//identification of the color in LDraw files
 			ColorIndex code;
 			//the main color of the material

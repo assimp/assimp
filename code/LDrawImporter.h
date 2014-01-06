@@ -46,6 +46,7 @@ namespace Assimp{
 			aiMatrix4x4 transformation;
 			std::string path;
 			ColorIndex color;
+			bool variableColor = false;
 		};
 
 		struct LDrawNode
@@ -114,7 +115,12 @@ namespace Assimp{
 		// -------------------------------------------------------------------
 
 		//Convert the LDrawNode structure to assimps scene structure
-		void ConvertNode(aiNode* node, LDrawNode* current, std::vector<aiMesh*>* aiMeshes);
+		void ConvertNode(aiNode* node, LDrawNode* current, std::vector<aiMesh*>* aiMeshes, std::vector<aiMaterial*>* aiMaterials);
+
+		// -------------------------------------------------------------------
+
+		//recursive assignment of color value to LDrawNodes
+		void ColorNode(LDrawNode* current, ColorIndex color);
 
 		// -------------------------------------------------------------------
 		//try to find the full path of file in the LDrawLibrary

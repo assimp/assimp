@@ -90,6 +90,7 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 	LDrawNode *root = new LDrawNode();
 	root->file.path = filepath;
 	root->file.transformation = aiMatrix4x4();
+	root->file.color = UINT_MAX;
 	ProcessNode(filepath, root, UINT_MAX);
 
 	//convert the LDrawNode structure into assimps scene structure
@@ -98,13 +99,25 @@ void LDrawImporter::InternReadFile(const std::string& pFile,
 	pScene->mFlags = AI_SCENE_FLAGS_INCOMPLETE;
 
 	std::vector<aiMesh*> aiMeshes;
+	std::vector<aiMaterial*> aiMaterials;
 
-	ConvertNode(pScene->mRootNode, root, &aiMeshes);
+	ConvertNode(pScene->mRootNode, root, &aiMeshes, &aiMaterials);
 
-	//copy the collected meshes
-	pScene->mNumMeshes = aiMeshes.size();
-	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-	std::copy(aiMeshes.begin(), aiMeshes.end(), pScene->mMeshes);
+	if (aiMeshes.size())
+	{
+		//copy the collected meshes
+		pScene->mNumMeshes = aiMeshes.size();
+		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+		std::copy(aiMeshes.begin(), aiMeshes.end(), pScene->mMeshes); 
+	}
+
+	if (aiMaterials.size())
+	{
+		//and the materials
+		pScene->mNumMaterials = aiMaterials.size();
+		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+		std::copy(aiMaterials.begin(), aiMaterials.end(), pScene->mMaterials);
+	}
 }
 
 bool LDrawImporter::ReadNumFloats(const char* line, float* & out, unsigned int num)
@@ -150,7 +163,8 @@ void LDrawImporter::ReadMaterials(std::string filename){
 						value.g = HexOctetToDecimal(cmd);
 						cmd += 2;
 						value.b = HexOctetToDecimal(cmd);
-						cmd += 2; 
+						cmd += 2;
+						value = value * (1 / 255.0f);
 						SkipSpaces(&cmd);
 						if (TokenMatchI(cmd, "edge", 4)){
 							SkipSpaces(&cmd);
@@ -163,6 +177,7 @@ void LDrawImporter::ReadMaterials(std::string filename){
 							cmd += 2;
 							edge.b = HexOctetToDecimal(cmd);
 							cmd += 2;
+							edge = edge * (1 / 255.0f);
 							//TODO ALPHA and LUMINANCE
 							LDrawMaterial mat = LDrawMaterial(code, value, edge);
 							materials.insert(std::pair<ColorIndex, LDrawMaterial>(code, mat));
@@ -255,6 +270,8 @@ void LDrawImporter::ProcessNode(std::string file, LDrawNode* current, ColorIndex
 				SubFileReference ref;
 				ref.transformation = *mat;
 				ref.color = ColorIndex(params[0]);
+				if (ref.color == 16)
+					ref.variableColor = true;
 				ref.path  = FindPath(subpath);
 				if (ref.path == ""){
 					//we can't find it
@@ -341,6 +358,7 @@ void LDrawImporter::ProcessNode(std::string file, LDrawNode* current, ColorIndex
 			ProcessNode(sb->path, child, sb->color);
 			loadedFile = fileCache.at(sb->path);
 		}
+		ColorNode(child, (child->file.variableColor)? colorindex : child->file.color);
 		current->children.push_back(*child);
 
 		////merge the childs meshes with ours
@@ -374,7 +392,7 @@ void LDrawImporter::ProcessNode(std::string file, LDrawNode* current, ColorIndex
 	fileCache.insert(std::pair<std::string, LDrawFile>(file, thisfile));
 }
 
-void LDrawImporter::ConvertNode(aiNode* node, LDrawNode* current, std::vector<aiMesh*>* aiMeshes)
+void LDrawImporter::ConvertNode(aiNode* node, LDrawNode* current, std::vector<aiMesh*>* aiMeshes, std::vector<aiMaterial*>* aiMaterials)
 {
 	node->mTransformation = current->file.transformation;
 	node->mName = current->file.path;
@@ -410,10 +428,31 @@ void LDrawImporter::ConvertNode(aiNode* node, LDrawNode* current, std::vector<ai
 			mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 			std::copy(vertices->begin(), vertices->end(), mesh->mVertices);
 			mesh->mPrimitiveTypes = ldrMesh->primitivesType;
-
-			unsigned int pos = aiMeshes->size();
+			
+			node->mMeshes[index] = aiMeshes->size();
 			aiMeshes->push_back(mesh);
-			node->mMeshes[index] = pos;
+
+			LDrawMaterial * rawMaterial;
+			ColorIndex color = (i->first == 16 || i->first == 24) ? current->file.color : i->first;
+			try{
+				rawMaterial = &materials.at(color);
+			}
+			catch (std::out_of_range ex){
+				//we don't know that material
+				continue;
+			}
+			aiMaterial* material = new aiMaterial();
+			if (i->first == 24)
+				material->AddProperty(&rawMaterial->edge, 1, AI_MATKEY_COLOR_DIFFUSE);
+			else
+				material->AddProperty(&rawMaterial->color, 1, AI_MATKEY_COLOR_DIFFUSE);
+			if (rawMaterial->alpha != 1.0f)
+				material->AddProperty(&rawMaterial->alpha, 1, AI_MATKEY_OPACITY);
+			if (rawMaterial->luminance != 0.0f)
+				material->AddProperty(&(rawMaterial->color * rawMaterial->luminance), 1, AI_MATKEY_COLOR_EMISSIVE);
+
+			mesh->mMaterialIndex = aiMaterials->size();
+			aiMaterials->push_back(material);
 		}
 	}
 
@@ -423,9 +462,21 @@ void LDrawImporter::ConvertNode(aiNode* node, LDrawNode* current, std::vector<ai
 	for (std::vector<LDrawNode>::iterator child = current->children.begin(); child != current->children.end(); ++child, ++nodeIndex)
 	{
 		aiNode * nodeChild = new aiNode();
-		ConvertNode(nodeChild, &(*child), aiMeshes);
+		ConvertNode(nodeChild, &(*child), aiMeshes, aiMaterials);
 		nodeChild->mParent = node;
 		node->mChildren[nodeIndex] = nodeChild;
+	}
+}
+
+void LDrawImporter::ColorNode(LDrawNode* current, ColorIndex color)
+{
+	if (current->file.color == 16 || current->file.variableColor)
+		current->file.color = color;
+
+	//recursive for the children
+	for (std::vector<LDrawNode>::iterator child = current->children.begin(); child != current->children.end(); ++child)
+	{
+		ColorNode(&(*child), color);
 	}
 }
 

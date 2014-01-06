@@ -752,7 +752,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 #ifdef ASSIMP_BUILD_DEBUG
 	if (pimpl->bExtraVerbose)
 	{
-#ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
+#ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 		DefaultLogger::get()->error("Verbose Import is not available due to build settings");
 #endif  // no validation
 		pFlags |= aiProcess_ValidateDataStructure;
@@ -785,7 +785,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		}
 #ifdef ASSIMP_BUILD_DEBUG
 
-#ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
+#ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 		continue;
 #endif  // no validation
 

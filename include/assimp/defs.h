@@ -234,13 +234,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	 * threads then and is itself not threadsafe.
 	 * If this flag is specified boost::threads is *not* required. */
 	//////////////////////////////////////////////////////////////////////////
-#ifndef ASSIMP_BUILD_SINGLETHREADED
-#	define ASSIMP_BUILD_SINGLETHREADED
-#endif
-
-#ifndef ASSIMP_BUILD_SINGLETHREADED
-#	define AI_C_THREADSAFE
-#endif // !! ASSIMP_BUILD_SINGLETHREADED
+//#ifndef ASSIMP_BUILD_SINGLETHREADED
+//#	define ASSIMP_BUILD_SINGLETHREADED
+//#endif
 
 #if defined(_DEBUG) || ! defined(NDEBUG)
 #	define ASSIMP_BUILD_DEBUG

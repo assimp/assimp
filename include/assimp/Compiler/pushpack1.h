@@ -8,6 +8,7 @@
 // MSVC 7,8,9
 // GCC
 // BORLAND (complains about 'pack state changed but not reverted', but works)
+// Clang
 //
 //
 // USAGE:
@@ -25,7 +26,11 @@
 #	pragma pack(push,1)
 #	define PACK_STRUCT
 #elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((gcc_struct, __packed__))
+#	if defined(__clang__)
+#		define PACK_STRUCT	__attribute__((__packed__))
+#	else
+#		define PACK_STRUCT	__attribute__((gcc_struct, __packed__))
+#	endif
 #else
 #	error Compiler not supported
 #endif

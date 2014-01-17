@@ -3,7 +3,7 @@ Open Asset Import Library (assimp)
 
 Open Asset Import Library is a Open Source library designed to load various __3d file formats and convert them into a single, in-memory format__. It supports more than __30 file formats__ for import and a growing selection of file formats for export. Additionally, assimp features various __post processing tools__ to refine the imported data: _normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials_ and many more.
 
-Its abbreviated name under which it is commonly known is __assimp__. 
+Its short name under which it is commonly known is __assimp__. 
 
 This is the development trunk of assimp containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories. According to [Travis-CI] (https://travis-ci.org/), the current build status of the trunk is [![Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
 
@@ -88,7 +88,7 @@ C++ish interface). The directory structure is:
 ### Building ###
 
 
-Take a look into the `INSTALL` file. Or fire up CMake with the usual steps.
+Take a look into the `INSTALL` file. Our build system is CMake, if you already used CMake before there is a good chance you know what to do.
 
 
 ### Where to get help ###

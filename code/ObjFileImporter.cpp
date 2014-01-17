@@ -485,6 +485,15 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 }
 
 // ------------------------------------------------------------------------------------------------
+//	 Add clamp mode property to material if necessary 
+void ObjFileImporter::addTextureMappingModeProperty(aiMaterial* mat, aiTextureType type, int clampMode)
+{
+	ai_assert( NULL != mat);
+	mat->AddProperty<int>(&clampMode, 1, AI_MATKEY_MAPPINGMODE_U(type, 0));
+	mat->AddProperty<int>(&clampMode, 1, AI_MATKEY_MAPPINGMODE_V(type, 0));
+}
+
+// ------------------------------------------------------------------------------------------------
 //	Creates the material 
 void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pScene )
 {
@@ -548,29 +557,77 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 		mat->AddProperty( &pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI );
 
 		// Adding textures
-		if ( 0 != pCurrentMaterial->texture.length )
+		if ( 0 != pCurrentMaterial->texture.length ) 
+		{
 			mat->AddProperty( &pCurrentMaterial->texture, AI_MATKEY_TEXTURE_DIFFUSE(0));
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureDiffuseType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE);
+			}
+		}
 
 		if ( 0 != pCurrentMaterial->textureAmbient.length )
+		{
 			mat->AddProperty( &pCurrentMaterial->textureAmbient, AI_MATKEY_TEXTURE_AMBIENT(0));
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureAmbientType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_AMBIENT);
+			}
+		}
 
 		if ( 0 != pCurrentMaterial->textureSpecular.length )
+		{
 			mat->AddProperty( &pCurrentMaterial->textureSpecular, AI_MATKEY_TEXTURE_SPECULAR(0));
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_SPECULAR);
+			}
+		}
 
 		if ( 0 != pCurrentMaterial->textureBump.length )
+		{
 			mat->AddProperty( &pCurrentMaterial->textureBump, AI_MATKEY_TEXTURE_HEIGHT(0));
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureBumpType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_HEIGHT);
+			}
+		}
 
 		if ( 0 != pCurrentMaterial->textureNormal.length )
+		{
 			mat->AddProperty( &pCurrentMaterial->textureNormal, AI_MATKEY_TEXTURE_NORMALS(0));
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureNormalType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_NORMALS);
+			}
+		}
 
 		if ( 0 != pCurrentMaterial->textureDisp.length )
+		{
 			mat->AddProperty( &pCurrentMaterial->textureDisp, AI_MATKEY_TEXTURE_DISPLACEMENT(0) );
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureDispType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_DISPLACEMENT);
+			}
+		}
 
 		if ( 0 != pCurrentMaterial->textureOpacity.length )
+		{
 			mat->AddProperty( &pCurrentMaterial->textureOpacity, AI_MATKEY_TEXTURE_OPACITY(0));
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureOpacityType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_OPACITY);
+			}
+		}
 
 		if ( 0 != pCurrentMaterial->textureSpecularity.length )
+		{
 			mat->AddProperty( &pCurrentMaterial->textureSpecularity, AI_MATKEY_TEXTURE_SHININESS(0));
+			if (pCurrentMaterial->clamp[ObjFile::Material::TextureSpecularityType])
+			{
+				addTextureMappingModeProperty(mat, aiTextureType_SHININESS);
+			}
+		}
 		
 		// Store material property info in material array in scene
 		pScene->mMaterials[ pScene->mNumMaterials ] = mat;

@@ -620,7 +620,7 @@ struct aiMesh
 		, mBitangents( NULL )
 		, mFaces( NULL )
 		, mNumBones( 0 )
-		, mBones( 0 )
+		, mBones( NULL )
 		, mMaterialIndex( 0 )
 		, mNumAnimMeshes( 0 )
 		, mAnimMeshes( NULL )

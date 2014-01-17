@@ -57,18 +57,33 @@ def make_tuple(ai_obj, type = None):
 
     return res
 
+# It is faster and more correct to have an init function for each assimp class
+def _init_face(aiFace):
+    aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
+    
+assimp_struct_inits = \
+    { structs.Face : _init_face }
+    
 def call_init(obj, caller = None):
-    # init children
-    if helper.hasattr_silent(obj, '_init'):
-        obj._init(parent = caller)
+    if helper.hasattr_silent(obj,'contents'): #pointer
+        _init(obj.contents, obj, caller)
+    else:
+        _init(obj,parent=caller)
 
-    # pointers
-    elif helper.hasattr_silent(obj, 'contents'):
-        if helper.hasattr_silent(obj.contents, '_init'):
-            obj.contents._init(target = obj, parent = caller)
-
-
-
+def _is_init_type(obj):
+    if helper.hasattr_silent(obj,'contents'): #pointer
+        return _is_init_type(obj[0])
+    # null-pointer case that arises when we reach a mesh attribute
+    # like mBitangents which use mNumVertices rather than mNumBitangents
+    # so it breaks the 'is iterable' check.
+    # Basically:
+    # FIXME!
+    elif not bool(obj): 
+        return False
+    tname = obj.__class__.__name__
+    return not (tname[:2] == 'c_' or tname == 'Structure' \
+            or tname == 'POINTER') and not isinstance(obj,int)
+                    
 def _init(self, target = None, parent = None):
     """
     Custom initialize() for C structs, adds safely accessable member functionality.
@@ -76,43 +91,41 @@ def _init(self, target = None, parent = None):
     :param target: set the object which receive the added methods. Useful when manipulating
     pointers, to skip the intermediate 'contents' deferencing.
     """
-    if helper.hasattr_silent(self, '_is_init'):
-        return self
-    self._is_init = True
-    
     if not target:
         target = self
-
-    for m in dir(self):
-
-        name = m[1:].lower()
+    
+    dirself = dir(self) 
+    for m in dirself:
 
         if m.startswith("_"):
             continue
 
-        obj = getattr(self, m)
-
         if m.startswith('mNum'):
-            if 'm' + m[4:] in dir(self):
+            if 'm' + m[4:] in dirself:
                 continue # will be processed later on
             else:
+                name = m[1:].lower()
+
+                obj = getattr(self, m)
                 setattr(target, name, obj)
+                continue
 
+        if m == 'mName':
+            obj = self.mName
+            target.name = str(obj.data.decode("utf-8"))
+            target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + x.name + ")"
+            target.__class__.__str__ = lambda x: x.name
+            continue
+            
+        name = m[1:].lower()
 
+        obj = getattr(self, m)
 
         # Create tuples
         if isinstance(obj, assimp_structs_as_tuple):
             setattr(target, name, make_tuple(obj))
             logger.debug(str(self) + ": Added array " + str(getattr(target, name)) +  " as self." + name.lower())
             continue
-
-
-        if isinstance(obj, structs.String):
-            setattr(target, 'name', obj.data.decode("utf-8"))
-            setattr(target.__class__, '__repr__', lambda x: str(x.__class__) + "(" + x.name + ")")
-            setattr(target.__class__, '__str__', lambda x: x.name)
-            continue
-        
 
         if m.startswith('m'):
 
@@ -150,8 +163,15 @@ def _init(self, target = None, parent = None):
                         logger.debug(str(self) + ": Added list of " + str(obj) + " " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
 
                         # initialize array elements
-                        for e in getattr(target, name):
-                            call_init(e, caller = target)
+                        try:
+                            init = assimp_struct_inits[type(obj[0])]
+                        except KeyError:
+                            if _is_init_type(obj[0]):
+                                for e in getattr(target, name):
+                                    call_init(e, target)
+                        else:
+                            for e in getattr(target, name):
+                                init(e)
 
 
                 except IndexError:
@@ -174,8 +194,9 @@ def _init(self, target = None, parent = None):
 
                 setattr(target, name, obj)
                 logger.debug("Added " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
-
-                call_init(obj, caller = target)
+        
+                if _is_init_type(obj):
+                    call_init(obj, target)
 
 
 
@@ -188,16 +209,6 @@ def _init(self, target = None, parent = None):
 
 
     return self
-
-
-"""
-Python magic to add the _init() function to all C struct classes.
-"""
-for struct in dir(structs):
-    if not (struct.startswith('_') or struct.startswith('c_') or struct == "Structure" or struct == "POINTER") and not isinstance(getattr(structs, struct),int):
-
-        setattr(getattr(structs, struct), '_init', _init)
-
 
 class AssimpLib(object):
     """
@@ -281,7 +292,7 @@ def load(filename, processing=0):
         #Uhhh, something went wrong!
         raise AssimpError("could not import file: %s" % filename)
 
-    scene = model.contents._init()
+    scene = _init(model.contents)
 
     recur_pythonize(scene.rootnode, scene)
 

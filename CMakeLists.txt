@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.6 )
+﻿cmake_minimum_required( VERSION 2.6 )
 PROJECT( Assimp )
 
 # Define here the needed parameters
@@ -110,11 +110,7 @@ if( NOT ZLIB_FOUND )
   # compile from sources
   add_subdirectory(contrib/zlib)
   set(ZLIB_FOUND 1)
-  if( ASSIMP_BUILD_STATIC_LIB )
-    set(ZLIB_LIBRARIES zlibstatic)
-  else( ASSIMP_BUILD_STATIC_LIB )
-    set(ZLIB_LIBRARIES zlib)
-  endif( ASSIMP_BUILD_STATIC_LIB )
+  set(ZLIB_LIBRARIES zlibstatic)
   set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
 else(NOT ZLIB_FOUND)
   ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)

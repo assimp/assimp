@@ -123,8 +123,9 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// Get the file-size and validate it, throwing an exception when fails
 	size_t fileSize = file->FileSize();
-	if( fileSize < 16)
+	if( fileSize < 16) {
 		throw DeadlyImportError( "OBJ-file is too small.");
+    }
 
 	// Allocate buffer and read file into it
 	TextFileToBuffer(file.get(),m_Buffer);
@@ -167,15 +168,15 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 	}
 	else
 	{
-		// This is an error, so break down the application
+		// This is a fatal error, so break down the application
 		ai_assert(false);
-	}
+	} 
 
 	// Create nodes for the whole scene	
 	std::vector<aiMesh*> MeshArray;
 	for (size_t index = 0; index < pModel->m_Objects.size(); index++)
 	{
-		createNodes(pModel, pModel->m_Objects[ index ], index, pScene->mRootNode, pScene, MeshArray);
+		createNodes(pModel, pModel->m_Objects[ index ], pScene->mRootNode, pScene, MeshArray);
 	}
 
 	// Create mesh pointer buffer for this scene
@@ -195,7 +196,6 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 // ------------------------------------------------------------------------------------------------
 //	Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pObject, 
-									 unsigned int /*uiMeshIndex*/,
 									 aiNode *pParent, aiScene* pScene, 
 									 std::vector<aiMesh*> &MeshArray )
 {

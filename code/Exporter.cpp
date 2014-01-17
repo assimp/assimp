@@ -88,7 +88,7 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
 	Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj, 
-		aiProcess_GenNormals /*| aiProcess_PreTransformVertices */),
+		aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER
@@ -228,9 +228,45 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
 
 
 // ------------------------------------------------------------------------------------------------
+bool IsVerboseFormat(const aiMesh* mesh) 
+{
+	// avoid slow vector<bool> specialization
+	std::vector<unsigned int> seen(mesh->mNumVertices,0);
+	for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+		const aiFace& f = mesh->mFaces[i];
+		for(unsigned int j = 0; j < f.mNumIndices; ++j) {
+			if(++seen[f.mIndices[j]] == 2) {
+				// found a duplicate index
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
+// ------------------------------------------------------------------------------------------------
+bool IsVerboseFormat(const aiScene* pScene) 
+{
+	for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+		if(!IsVerboseFormat(pScene->mMeshes[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+// ------------------------------------------------------------------------------------------------
 aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing )
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
+
+	// when they create scenes from scratch, users will likely create them not in verbose
+	// format. They will likely not be aware that there is a flag in the scene to indicate
+	// this, however. To avoid surprises and bug reports, we check for duplicates in
+	// meshes upfront.
+	const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || IsVerboseFormat(pScene);
 
 	pimpl->mError = "";
 	for (size_t i = 0; i < pimpl->mExporters.size(); ++i) {
@@ -253,20 +289,21 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 				const unsigned int nonIdempotentSteps = aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_MakeLeftHanded;
 
 				// Erase all pp steps that were already applied to this scene
-				unsigned int pp = (exp.mEnforcePP | pPreprocessing) & ~(priv 
+				const unsigned int pp = (exp.mEnforcePP | pPreprocessing) & ~(priv && !priv->mIsCopy
 					? (priv->mPPStepsApplied & ~nonIdempotentSteps)
 					: 0u);
 
 				// If no extra postprocessing was specified, and we obtained this scene from an
 				// Assimp importer, apply the reverse steps automatically.
-				if (!pPreprocessing && priv) {
-					pp |= (nonIdempotentSteps & priv->mPPStepsApplied);
-				}
+				// TODO: either drop this, or document it. Otherwise it is just a bad surprise.
+				//if (!pPreprocessing && priv) {
+				//	pp |= (nonIdempotentSteps & priv->mPPStepsApplied);
+				//}
 
 				// If the input scene is not in verbose format, but there is at least postprocessing step that relies on it,
 				// we need to run the MakeVerboseFormat step first.
 				bool must_join_again = false;
-				if (scenecopy->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
+				if (!is_verbose_format) {
 					
 					bool verbosify = false;
 					for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {

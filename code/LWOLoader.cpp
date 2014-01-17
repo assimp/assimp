@@ -1296,6 +1296,11 @@ void LWOImporter::LoadLWO2File()
 		uint8_t* const next = mFileBuffer+head->length;
 		unsigned int iUnnamed = 0;
 
+		if(!head->length) {
+			mFileBuffer = next;
+			continue;
+		}
+
 		switch (head->type)
 		{
 			// new layer

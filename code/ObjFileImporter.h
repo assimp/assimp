@@ -77,7 +77,7 @@ public:
 
 private:
 
-	//! \brief	Appends the supported extention.
+	//! \brief	Appends the supported extension.
 	const aiImporterDesc* GetInfo () const;
 
 	//!	\brief	File import implementation.
@@ -104,18 +104,15 @@ private:
 	//!	\brief	Material creation.
 	void createMaterials(const ObjFile::Model* pModel, aiScene* pScene);
 
-	//!	\brief	Appends a child node to a parentnode and updates the datastructures.
+	//!	\brief	Appends a child node to a parent node and updates the data structures.
 	void appendChildToParentNode(aiNode *pParent, aiNode *pChild);
-
-	//!	\brief TODO!
-	void createAnimations();
 
 private:
 	//!	Data buffer
 	std::vector<char> m_Buffer;
 	//!	Pointer to root object instance
 	ObjFile::Object *m_pRootObject;
-	//!	Absolute pathname of model in filesystem
+	//!	Absolute pathname of model in file system
 	std::string m_strAbsPath;
 };
 

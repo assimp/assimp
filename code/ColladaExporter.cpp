@@ -312,15 +312,14 @@ void ColladaExporter::WriteMaterials()
     aiString name;
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
-	if(material_names.find(name.C_Str()) != material_names.end()) {
-		materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + "_" + name.C_Str();
-		material_names.insert(materials[a].name);
-	} else {
-		materials[a].name = name.C_Str();
-	}
-    for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it )
-      if( !isalnum( *it) )
+    materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
+    for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
+		// isalnum on MSVC asserts for code points in [0,255]. Thus prevent unwanted promotion
+		// of char to signed int and take the unsigned char value.
+      if( !isalnum( static_cast<uint8_t>(*it) ) ) {
         *it = '_';
+	  }
+	}
 
 	aiShadingMode shading;
 	materials[a].shading_model = "phong";

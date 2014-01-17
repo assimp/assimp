@@ -73,6 +73,7 @@ ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)
 	}
 
 	SceneCombiner::CopyScene(pOut,pIn,true);
+	ScenePriv(*pOut)->mIsCopy = true;
 }
 
 

@@ -290,14 +290,19 @@ void Document::ReadHeader()
 	const Scope& shead = *ehead->Compound();
 	fbxVersion = ParseTokenAsInt(GetRequiredToken(GetRequiredElement(shead,"FBXVersion",ehead),0));
 
-	
-	if(fbxVersion < 7200 || fbxVersion > 7300) {
+	// while we maye have some success with newer files, we don't support
+	// the older 6.n fbx format
+	if(fbxVersion < 7200) {
+		DOMError("unsupported, old format version, supported are only FBX 2012 and FBX 2013");
+	}
+	if(fbxVersion > 7300) {
 		if(Settings().strictMode) {
-			DOMError("unsupported format version, supported are only FBX 2012 and FBX 2013"\
-				" in ASCII format (turn off strict mode to try anyhow) ");
+			DOMError("unsupported, newer format version, supported are only FBX 2012 and FBX 2013"
+				" (turn off strict mode to try anyhow) ");
 		}
 		else {
-			DOMWarning("unsupported format version, supported are only FBX 2012 and FBX 2013, trying to read it nevertheless");
+			DOMWarning("unsupported, newer format version, supported are only FBX 2012 and FBX 2013,"
+				" trying to read it nevertheless");
 		}
 	}
 	

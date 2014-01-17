@@ -6,7 +6,8 @@
 //  Copyright __MyCompanyName__ 2010 . All rights reserved.
 //
 
-#import "aiConfig.h"
+#import "cimport.h"
+#import "config.h"
 #import "MyDocument.h"
 #import <OpenGL/CGLMacro.h>
 
@@ -16,7 +17,7 @@
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
 
-static void color4_to_float4(const struct aiColor4D *c, float f[4])
+static void color4_to_float4(const aiColor4D *c, float f[4])
 {
 	f[0] = c->r;
 	f[1] = c->g;
@@ -160,7 +161,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
                 // Load our new path.
                 
                 // only ever give us triangles.
-                aiSetImportPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT );
+                aiPropertyStore* props = aiCreatePropertyStore();
+                aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT );
                 
                 NSUInteger aiPostProccesFlags;
                 
@@ -181,7 +183,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
                 }
                 
                 // aiProcess_FlipUVs is needed for VAO / VBOs,  not sure why.
-                _scene = (aiScene*) aiImportFile([[openPanel filename] cStringUsingEncoding:[NSString defaultCStringEncoding]], aiPostProccesFlags | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_PreTransformVertices | 0 );
+                _scene = (aiScene*) aiImportFileExWithProperties([[openPanel filename] cStringUsingEncoding:[NSString defaultCStringEncoding]], aiPostProccesFlags | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_PreTransformVertices | 0, NULL, props);
+
+                aiReleasePropertyStore(props);
                 
                 if (_scene)
                 {       
@@ -755,9 +759,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
     
 }
 
-- (void) getBoundingBoxWithMinVector:(struct aiVector3D*) min maxVectr:(struct aiVector3D*) max
+- (void) getBoundingBoxWithMinVector:(aiVector3D*) min maxVectr:(aiVector3D*) max
 {
-	struct aiMatrix4x4 trafo;
+	aiMatrix4x4 trafo;
 	aiIdentityMatrix4(&trafo);
     
 	min->x = min->y = min->z =  1e10f;
@@ -766,9 +770,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
     [self getBoundingBoxForNode:_scene->mRootNode minVector:min maxVector:max matrix:&trafo];
 }
 
-- (void) getBoundingBoxForNode:(const struct aiNode*)nd  minVector:(struct aiVector3D*) min maxVector:(struct aiVector3D*) max matrix:(struct aiMatrix4x4*) trafo
+- (void) getBoundingBoxForNode:(const aiNode*)nd  minVector:(aiVector3D*) min maxVector:(aiVector3D*) max matrix:(aiMatrix4x4*) trafo
 {
-	struct aiMatrix4x4 prev;
+	aiMatrix4x4 prev;
 	unsigned int n = 0, t;
     
 	prev = *trafo;
@@ -776,10 +780,10 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
     
 	for (; n < nd->mNumMeshes; ++n)
     {
-		const struct aiMesh* mesh = _scene->mMeshes[nd->mMeshes[n]];
+		const aiMesh* mesh = _scene->mMeshes[nd->mMeshes[n]];
 		for (t = 0; t < mesh->mNumVertices; ++t)
         {
-        	struct aiVector3D tmp = mesh->mVertices[t];
+        	aiVector3D tmp = mesh->mVertices[t];
 			aiTransformVecByMatrix4(&tmp,trafo);
             
 			min->x = aisgl_min(min->x,tmp.x);

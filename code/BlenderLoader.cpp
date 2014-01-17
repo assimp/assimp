@@ -446,9 +446,43 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
 	else {
 		name = aiString( img->name );
 	}
-	out->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(
-		conv_data.next_texture[aiTextureType_DIFFUSE]++)
-	);
+
+	aiTextureType texture_type = aiTextureType_UNKNOWN;
+	MTex::MapType map_type = tex->mapto;
+
+	if (map_type & MTex::MapType_COL)
+	    texture_type = aiTextureType_DIFFUSE;
+	else if (map_type & MTex::MapType_NORM) {
+	    if (tex->tex->imaflag & Tex::ImageFlags_NORMALMAP) {
+	        texture_type = aiTextureType_NORMALS;
+	    }
+	    else {
+	        texture_type = aiTextureType_HEIGHT;
+	    }
+	    out->AddProperty(&tex->norfac,1,AI_MATKEY_BUMPSCALING);
+	}
+	else if (map_type & MTex::MapType_COLSPEC)
+		texture_type = aiTextureType_SPECULAR;
+	else if (map_type & MTex::MapType_COLMIR)
+		texture_type = aiTextureType_REFLECTION;
+	//else if (map_type & MTex::MapType_REF)
+	else if (map_type & MTex::MapType_SPEC)
+		texture_type = aiTextureType_SHININESS;
+	else if (map_type & MTex::MapType_EMIT)
+		texture_type = aiTextureType_EMISSIVE;
+	//else if (map_type & MTex::MapType_ALPHA)
+	//else if (map_type & MTex::MapType_HAR)
+	//else if (map_type & MTex::MapType_RAYMIRR)
+	//else if (map_type & MTex::MapType_TRANSLU)
+	else if (map_type & MTex::MapType_AMB)
+		texture_type = aiTextureType_AMBIENT;
+	else if (map_type & MTex::MapType_DISPLACE)
+		texture_type = aiTextureType_DISPLACEMENT;
+	//else if (map_type & MTex::MapType_WARP)
+
+	out->AddProperty(&name,AI_MATKEY_TEXTURE(texture_type,
+	    conv_data.next_texture[texture_type]++));
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -958,19 +992,41 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 }
 
 // ------------------------------------------------------------------------------------------------
-aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* /*obj*/, const Camera* /*mesh*/, ConversionData& /*conv_data*/)
+aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj, const Camera* camera, ConversionData& /*conv_data*/)
 {
 	ScopeGuard<aiCamera> out(new aiCamera());
-
-	return NULL ; //out.dismiss();
+	out->mName = obj->id.name+2;
+	out->mPosition = aiVector3D(0.f, 0.f, 0.f);
+	out->mUp = aiVector3D(0.f, 1.f, 0.f);
+	out->mLookAt = aiVector3D(0.f, 0.f, -1.f);
+	return out.dismiss();
 }
 
 // ------------------------------------------------------------------------------------------------
-aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* /*obj*/, const Lamp* /*mesh*/, ConversionData& /*conv_data*/)
+aiLight* BlenderImporter::ConvertLight(const Scene& in, const Object* obj, const Lamp* lamp, ConversionData& conv_data)
 {
 	ScopeGuard<aiLight> out(new aiLight());
+	out->mName = obj->id.name+2;
 
-	return NULL ; //out.dismiss();
+	switch (lamp->type)
+	{
+	    case Lamp::Type_Local:
+	        out->mType = aiLightSource_POINT;
+	        break;
+	    case Lamp::Type_Sun:
+	        out->mType = aiLightSource_DIRECTIONAL;
+
+	        // blender orients directional lights as facing toward -z
+	        out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+	        break;
+	    default:
+	        break;
+	}
+
+	out->mColorAmbient = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
+	out->mColorSpecular = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
+	out->mColorDiffuse = aiColor3D(lamp->r, lamp->g, lamp->b) * lamp->energy;
+	return out.dismiss();
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BlenderIntermediate.h"
 #include "BlenderModifier.h"
+#include "BlenderBMesh.h"
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
@@ -658,6 +659,12 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
 	) 
 {
+	BlenderBMeshConverter BMeshConverter( mesh );
+	if ( BMeshConverter.ContainsBMesh( ) )
+	{
+		mesh = BMeshConverter.TriangulateBMesh( );
+	}
+
 	typedef std::pair<const int,size_t> MyPair;
 	if ((!mesh->totface && !mesh->totloop) || !mesh->totvert) {
 		return;

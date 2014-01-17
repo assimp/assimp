@@ -563,7 +563,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// ... add dummy nodes under a single root, each holding a reference to one
-	// mesh. If we didn't do this, we'd loose the group name.
+	// mesh. If we didn't do this, we'd lose the group name.
 	aiNode* rt = pScene->mRootNode = new aiNode("<MS3DRoot>");
 	
 #ifdef ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH

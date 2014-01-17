@@ -60,16 +60,16 @@ class RenderOptions
 			bSuperSample	(false),
 			bRenderMats		(true),
 			bRenderNormals	(false),
-			eDrawMode		(NORMAL),
 			b3Lights		(false),
 			bLightRotate	(false),
 			bRotate			(true),
 			bLowQuality		(false),
 			bNoSpecular		(false),
 			bStereoView		(false),
+			bNoAlphaBlending(false),
+			eDrawMode		(NORMAL),
 			bCulling		(false),
-			bSkeleton		(false),
-			bNoAlphaBlending(false)
+			bSkeleton		(false)
 			
 			{}
 

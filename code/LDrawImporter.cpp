@@ -267,7 +267,7 @@ void LDrawImporter::ProcessNode(std::string file, LDrawNode* current, ColorIndex
 				}
 				aiMatrix4x4 *mat = new aiMatrix4x4(
 					params[4], params[5], params[6], params[1],
-					params[7], params[8], params[9], params[2],
+					params[7], params[8], params[9], -params[2],
 					params[10], params[11], params[12], params[3],
 					0.0f, 0.0f, 0.0f, 1.0f
 					);
@@ -307,8 +307,8 @@ void LDrawImporter::ProcessNode(std::string file, LDrawNode* current, ColorIndex
 
 				unsigned int index = vertices->size();
 
-				vertices->push_back(aiVector3D(params[1], params[2], params[3]));
-				vertices->push_back(aiVector3D(params[4], params[5], params[6]));
+				vertices->push_back(aiVector3D(params[1], -params[2], params[3]));
+				vertices->push_back(aiVector3D(params[4], -params[5], params[6]));
 
 				aiFace f = aiFace();
 				f.mNumIndices = command;
@@ -317,7 +317,7 @@ void LDrawImporter::ProcessNode(std::string file, LDrawNode* current, ColorIndex
 				f.mIndices[1] = index + 1;
 				if (command == 3 || command == 4){
 
-					vertices->push_back(aiVector3D(params[7], params[8], params[9]));
+					vertices->push_back(aiVector3D(params[7], -params[8], params[9]));
 					f.mIndices[2] = index + 2;
 
 					if (command == 3){
@@ -326,7 +326,7 @@ void LDrawImporter::ProcessNode(std::string file, LDrawNode* current, ColorIndex
 					}
 					else if (command == 4){
 						//it's a quad
-						vertices->push_back(aiVector3D(params[10], params[11], params[12]));
+						vertices->push_back(aiVector3D(params[10], -params[11], params[12]));
 						f.mIndices[3] = index + 3;
 						mesh->primitivesType = mesh->primitivesType | aiPrimitiveType_POLYGON;
 					}

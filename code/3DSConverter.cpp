@@ -467,34 +467,41 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 			const unsigned int iIndex = iArray[i];
 			aiMesh* const mesh = pcSOut->mMeshes[iIndex];
 
-			// Transform the vertices back into their local space
-			// fixme: consider computing normals after this, so we don't need to transform them
-			const aiVector3D* const pvEnd = mesh->mVertices+mesh->mNumVertices;
-			aiVector3D* pvCurrent = mesh->mVertices, *t2 = mesh->mNormals;
-
-			for (;pvCurrent != pvEnd;++pvCurrent,++t2) {
-				*pvCurrent = mInv * (*pvCurrent);
-				*t2 = mInvTransposed * (*t2);
-			}
-
-			// Handle negative transformation matrix determinant -> invert vertex x
-			if (imesh->mMat.Determinant() < 0.0f)
+			if (mesh->mColors[1] == NULL)
 			{
-				/* we *must* have normals */
-				for (pvCurrent = mesh->mVertices,t2 = mesh->mNormals;pvCurrent != pvEnd;++pvCurrent,++t2) {
-					pvCurrent->x *= -1.f;
-					t2->x *= -1.f;
-				}
-				DefaultLogger::get()->info("3DS: Flipping mesh X-Axis");
-			}
+				// Transform the vertices back into their local space
+				// fixme: consider computing normals after this, so we don't need to transform them
+				const aiVector3D* const pvEnd = mesh->mVertices + mesh->mNumVertices;
+				aiVector3D* pvCurrent = mesh->mVertices, *t2 = mesh->mNormals;
 
-			// Handle pivot point
-			if(pivot.x || pivot.y || pivot.z)
-			{
-				for (pvCurrent = mesh->mVertices;pvCurrent != pvEnd;++pvCurrent)	{
-					*pvCurrent -= pivot;	
+				for (; pvCurrent != pvEnd; ++pvCurrent, ++t2) {
+					*pvCurrent = mInv * (*pvCurrent);
+					*t2 = mInvTransposed * (*t2);
 				}
+
+				// Handle negative transformation matrix determinant -> invert vertex x
+				if (imesh->mMat.Determinant() < 0.0f)
+				{
+					/* we *must* have normals */
+					for (pvCurrent = mesh->mVertices, t2 = mesh->mNormals; pvCurrent != pvEnd; ++pvCurrent, ++t2) {
+						pvCurrent->x *= -1.f;
+						t2->x *= -1.f;
+					}
+					DefaultLogger::get()->info("3DS: Flipping mesh X-Axis");
+				}
+
+				// Handle pivot point
+				if (pivot.x || pivot.y || pivot.z)
+				{
+					for (pvCurrent = mesh->mVertices; pvCurrent != pvEnd; ++pvCurrent)	{
+						*pvCurrent -= pivot;
+					}
+				}
+
+				mesh->mColors[1] = (aiColor4D*)1;
 			}
+			else
+				mesh->mColors[1] = (aiColor4D*)1;
 
 			// Setup the mesh index
 			pcOut->mMeshes[i] = iIndex;
@@ -502,7 +509,17 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 	}
 
 	// Setup the name of the node
-	pcOut->mName.Set(pcIn->mName);
+	// First instance keeps its name otherwise something might break, all others will be postfixed with their instance number
+	if (pcIn->mInstanceNumber > 1)
+	{
+		char tmp[12];
+		ASSIMP_itoa10(tmp, pcIn->mInstanceNumber);
+		std::string tempStr = pcIn->mName + "_inst_";
+		tempStr += tmp;
+		pcOut->mName.Set(tempStr);
+	}
+	else
+		pcOut->mName.Set(pcIn->mName);
 
 	// Now build the transformation matrix of the node
 	// ROTATION
@@ -784,9 +801,12 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		AddNodeToGraph(pcOut,  pcOut->mRootNode, mRootNode,m);
 	}
 
-	// We used the first vertex color set to store some emporary values so we need to cleanup here
-	for (unsigned int a = 0; a < pcOut->mNumMeshes;++a)
+	// We used the first and second vertex color set to store some temporary values so we need to cleanup here
+	for (unsigned int a = 0; a < pcOut->mNumMeshes; ++a)
+	{
 		pcOut->mMeshes[a]->mColors[0] = NULL;
+		pcOut->mMeshes[a]->mColors[1] = NULL;
+	}
 
 	pcOut->mRootNode->mTransformation = aiMatrix4x4(
 		1.f,0.f,0.f,0.f,

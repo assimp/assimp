@@ -458,7 +458,8 @@ bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut)
 			SkipLine(&pCur);
 		}
 	}
-	SkipSpacesAndLineEnd(pCur,&pCur);
+	// Is this needed ? it can't work as expected, if binary data start with values as space or line end.
+	// SkipSpacesAndLineEnd(pCur,&pCur);
 	*pCurOut = pCur;
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() succeeded");

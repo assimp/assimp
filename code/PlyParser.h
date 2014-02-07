@@ -434,7 +434,7 @@ private:
 
 	// -------------------------------------------------------------------
 	//! Handle the file header and read all element descriptions
-	bool ParseHeader (const char* pCur,const char** pCurOut);
+	bool ParseHeader (const char* pCur,const char** pCurOut, bool p_bBE);
 
 	// -------------------------------------------------------------------
 	//! Read in all element instance lists

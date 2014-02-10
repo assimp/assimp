@@ -916,7 +916,7 @@ void SceneCombiner::MergeMaterials(aiMaterial** dest,
 			const aiMaterialProperty* prop_exist;
 			if(aiGetMaterialProperty(out, sprop->mKey.C_Str(), sprop->mType, sprop->mIndex, &prop_exist) != AI_SUCCESS) {
 				// If not, we add it to the new material
-				aiMaterialProperty* prop = out->mProperties[i] = new aiMaterialProperty();
+				aiMaterialProperty* prop = out->mProperties[out->mNumProperties] = new aiMaterialProperty();
 
 				prop->mDataLength = sprop->mDataLength;
 				prop->mData = new char[prop->mDataLength];

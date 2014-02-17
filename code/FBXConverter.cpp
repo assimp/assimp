@@ -1517,6 +1517,7 @@ private:
 		TrySetTextureProperties(out_mat, textures, "DisplacementColor", aiTextureType_DISPLACEMENT);
 		TrySetTextureProperties(out_mat, textures, "NormalMap", aiTextureType_NORMALS);
 		TrySetTextureProperties(out_mat, textures, "Bump", aiTextureType_HEIGHT);
+		TrySetTextureProperties(out_mat, textures, "ShininessExponent", aiTextureType_SHININESS);
 	}
 
 

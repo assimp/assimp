@@ -223,6 +223,9 @@ private:
 						name_carrier = nodes_chain.back();
 					}
 
+					//setup metadata on newest node
+					SetupNodeMetadata(*model, *nodes_chain.back());
+
 					// link all nodes in a row
 					aiNode* last_parent = &parent;
 					BOOST_FOREACH(aiNode* prenode, nodes_chain) {
@@ -754,7 +757,28 @@ private:
 			nd->mTransformation = nd->mTransformation * chain[i];
 		}
 	}
+	
+	// ------------------------------------------------------------------------------------------------
 
+	void SetupNodeMetadata(const Model& model, aiNode& nd)
+	{
+		const PropertyTable& props = model.Props();
+
+		// find user defined properties
+		const std::string& userProps = PropertyGet<std::string>(props, "UDP3DSMAX", "");
+
+		//setup metadata //TODO: make metadata more friendly (eg. have Add()/Remove() functions to be easier to use)
+		aiMetadata* data = new aiMetadata();
+		data->mNumProperties = 1;
+		data->mKeys = new aiString[data->mNumProperties]();
+		data->mValues = new aiString[data->mNumProperties]();
+
+		//add user properties
+		data->mKeys[0].Set("UserProperties");
+		data->mValues[0].Set(userProps);
+
+		nd.mMetaData = data;
+	}
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertModel(const Model& model, aiNode& nd, const aiMatrix4x4& node_global_transform)

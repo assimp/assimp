@@ -62,7 +62,6 @@ namespace FBX {
 
 
 #define MAGIC_NODE_TAG "_$AssimpFbx$"
-#define MAGIC_NULL_TAG "_$AssimpFbxNull$"
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
@@ -95,7 +94,13 @@ public:
 		TransformationComp_MAXIMUM
 	};
 
+	enum MetadataKeys
+	{
+		MetadataKeys_UserProperties = 0,
+		MetadataKeys_IsNull,
 
+		MetadataKeys_MAXIMUM
+	};
 
 public:
 
@@ -255,14 +260,6 @@ private:
 
 					if(doc.Settings().readCameras) {
 						ConvertCameras(*model);
-					}
-
-					// preserve the info that a node was marked as Null node
-					// in the original file.
-					if(model->IsNull()) {
-						const std::string& new_name = original_name + MAGIC_NULL_TAG;
-						RenameNode(original_name, new_name);
-						name_carrier->mName.Set( new_name.c_str() );
 					}
 
 					nodes.push_back(nodes_chain.front());	
@@ -764,20 +761,20 @@ private:
 	{
 		const PropertyTable& props = model.Props();
 
-		// find user defined properties
-		const std::string& userProps = PropertyGet<std::string>(props, "UDP3DSMAX", "");
-
-		//setup metadata //TODO: make metadata more friendly (eg. have Add()/Remove() functions to be easier to use)
+		//create metadata on node
 		aiMetadata* data = new aiMetadata();
-		data->mNumProperties = 1;
+		data->mNumProperties = MetadataKeys_MAXIMUM;
 		data->mKeys = new aiString[data->mNumProperties]();
 		data->mValues = new aiString[data->mNumProperties]();
-
-		//add user properties
-		data->mKeys[0].Set("UserProperties");
-		data->mValues[0].Set(userProps);
-
 		nd.mMetaData = data;
+
+		// find user defined properties
+		data->mKeys[MetadataKeys_UserProperties].Set("UserProperties");
+		data->mValues[MetadataKeys_UserProperties].Set(PropertyGet<std::string>(props, "UDP3DSMAX", ""));
+
+		// preserve the info that a node was marked as Null node in the original file.
+		data->mKeys[MetadataKeys_IsNull].Set("IsNull");
+		data->mValues[MetadataKeys_IsNull].Set(model.IsNull() ? "true" : "false");
 	}
 
 	// ------------------------------------------------------------------------------------------------

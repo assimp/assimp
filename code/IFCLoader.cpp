@@ -711,14 +711,14 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 		if (!properties.empty()) {
 			aiMetadata* data = new aiMetadata();
 			data->mNumProperties = properties.size();
-			data->mKeys = new aiString*[data->mNumProperties]();
-			data->mValues = new aiString*[data->mNumProperties]();
+			data->mKeys = new aiString[data->mNumProperties]();
+			data->mValues = new aiString[data->mNumProperties]();
 
 			unsigned int i = 0;
 			BOOST_FOREACH(const Metadata::value_type& kv, properties) {
-				data->mKeys[i] = new aiString(kv.first);
+				data->mKeys[i].Set(kv.first);
 				if (kv.second.length() > 0) {
-					data->mValues[i] = new aiString(kv.second);
+					data->mValues[i].Set(kv.second);
 				}				
 				++i;
 			}

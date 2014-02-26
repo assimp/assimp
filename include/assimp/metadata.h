@@ -62,11 +62,11 @@ struct aiMetadata
 	unsigned int mNumProperties;
 
 	/** Arrays of keys, may not be NULL. Entries in this array may not be NULL as well. */
-	C_STRUCT aiString** mKeys;
+	C_STRUCT aiString* mKeys;
 
 	/** Arrays of values, may not be NULL. Entries in this array may be NULL if the
 	  * corresponding property key has no assigned value. */
-	C_STRUCT aiString** mValues;
+	C_STRUCT aiString* mValues;
 
 #ifdef __cplusplus
 
@@ -83,26 +83,18 @@ struct aiMetadata
 	/** Destructor */
 	~aiMetadata()
 	{
-		if (mKeys && mValues) {
-			for (unsigned i=0; i<mNumProperties; ++i) {
-				if (mKeys[i]) {
-					delete mKeys[i];
-				}
-				if (mValues[i]) {
-					delete mValues[i];
-				}
-			}
+		if (mKeys)
 			delete [] mKeys;
+		if (mValues)
 			delete [] mValues;
-		}
 	}
 
 
 	inline bool Get(const aiString& key, aiString& value)
 	{
 		for (unsigned i=0; i<mNumProperties; ++i) {
-			if (mKeys[i] && *mKeys[i]==key) {
-				value=*mValues[i];
+			if (mKeys[i]==key) {
+				value=mValues[i];
 				return true;
 			}
 		}

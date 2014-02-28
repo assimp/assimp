@@ -172,6 +172,7 @@ const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFl
 		pimpl->mIntProperties = pp->ints;
 		pimpl->mFloatProperties = pp->floats;
 		pimpl->mStringProperties = pp->strings;
+		pimpl->mMatrixProperties = pp->matrices;
 	}
 	// setup a custom IO system if necessary
 	if (pFS)	{
@@ -230,6 +231,7 @@ const aiScene* aiImportFileFromMemoryWithProperties(
 		pimpl->mIntProperties = pp->ints;
 		pimpl->mFloatProperties = pp->floats;
 		pimpl->mStringProperties = pp->strings;
+		pimpl->mMatrixProperties = pp->matrices;
 	}
 
 	// and have it read the file from the memory buffer
@@ -501,6 +503,20 @@ ASSIMP_API void aiSetImportPropertyString(aiPropertyStore* p, const char* szName
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
 	SetGenericProperty<std::string>(pp->strings,szName,std::string(st->C_Str()),NULL);
+	ASSIMP_END_EXCEPTION_REGION(void);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Importer::SetPropertyMatrix
+ASSIMP_API void aiSetImportPropertyMatrix(aiPropertyStore* p, const char* szName,
+	const C_STRUCT aiMatrix4x4* mat)
+{
+	if (!mat) {
+		return;
+	}
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
+	SetGenericProperty<aiMatrix4x4>(pp->matrices,szName,*mat,NULL);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 

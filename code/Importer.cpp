@@ -197,6 +197,7 @@ Importer::Importer(const Importer &other)
 	pimpl->mIntProperties    = other.pimpl->mIntProperties;
 	pimpl->mFloatProperties  = other.pimpl->mFloatProperties;
 	pimpl->mStringProperties = other.pimpl->mStringProperties;
+	pimpl->mMatrixProperties = other.pimpl->mMatrixProperties;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -938,6 +939,16 @@ void Importer::SetPropertyString(const char* szName, const std::string& value,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Set a configuration property
+void Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value, 
+	bool* bWasExisting /*= NULL*/)
+{
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+	SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value,bWasExisting);	
+	ASSIMP_END_EXCEPTION_REGION(void);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get a configuration property
 int Importer::GetPropertyInteger(const char* szName, 
 	int iErrorReturn /*= 0xffffffff*/) const
@@ -959,6 +970,14 @@ const std::string& Importer::GetPropertyString(const char* szName,
 	const std::string& iErrorReturn /*= ""*/) const
 {
 	return GetGenericProperty<std::string>(pimpl->mStringProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+const aiMatrix4x4& Importer::GetPropertyMatrix(const char* szName, 
+	const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const
+{
+	return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------

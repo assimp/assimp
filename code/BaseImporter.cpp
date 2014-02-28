@@ -578,6 +578,7 @@ void BatchLoader::LoadAll()
 		pimpl->mFloatProperties  = (*it).map.floats;
 		pimpl->mIntProperties    = (*it).map.ints;
 		pimpl->mStringProperties = (*it).map.strings;
+		pimpl->mMatrixProperties = (*it).map.matrices;
 
 		if (!DefaultLogger::isNullLogger())
 		{

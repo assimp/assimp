@@ -63,11 +63,12 @@ public:
 	// Data type to store the key hash
 	typedef unsigned int KeyType;
 	
-	// typedefs for our three configuration maps.
+	// typedefs for our four configuration maps.
 	// We don't need more, so there is no need for a generic solution
 	typedef std::map<KeyType, int> IntPropertyMap;
 	typedef std::map<KeyType, float> FloatPropertyMap;
 	typedef std::map<KeyType, std::string> StringPropertyMap;
+	typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
 
 public:
 
@@ -99,6 +100,9 @@ public:
 
 	/** List of string properties */
 	StringPropertyMap mStringProperties;
+
+	/** List of Matrix properties */
+	MatrixPropertyMap mMatrixProperties;
 
 	/** Used for testing - extra verbose mode causes the ValidateDataStructure-Step
 	 *  to be executed before and after every single postprocess step */
@@ -135,14 +139,15 @@ public:
 		ImporterPimpl::IntPropertyMap     ints;
 		ImporterPimpl::FloatPropertyMap   floats;
 		ImporterPimpl::StringPropertyMap  strings;
+		ImporterPimpl::MatrixPropertyMap  matrices;
 
 		bool operator == (const PropertyMap& prop) const {
 			// fixme: really isocpp? gcc complains
-			return ints == prop.ints && floats == prop.floats && strings == prop.strings; 
+			return ints == prop.ints && floats == prop.floats && strings == prop.strings && matrices == prop.matrices; 
 		}
 
 		bool empty () const {
-			return ints.empty() && floats.empty() && strings.empty();
+			return ints.empty() && floats.empty() && strings.empty() && matrices.empty();
 		}
 	};
 	//! @endcond

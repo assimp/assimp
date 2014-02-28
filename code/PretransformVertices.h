@@ -152,8 +152,10 @@ private:
 
 
 	//! Configuration option: keep scene hierarchy as long as possible
-	bool configKeepHierarchy, configNormalize;
-
+	bool configKeepHierarchy;
+	bool configNormalize;
+	bool configTransform;
+	aiMatrix4x4 configTransformation;
 };
 
 } // end of namespace Assimp

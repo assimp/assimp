@@ -462,6 +462,7 @@ bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut,bool isBinary)
 	{ // it would occur an error, if binary data start with values as space or line end.
 		SkipSpacesAndLineEnd(pCur,&pCur);
 	}
+	*pCurOut = pCur;
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() succeeded");
 	return true;

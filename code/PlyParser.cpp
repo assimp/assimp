@@ -427,7 +427,7 @@ bool PLY::DOM::SkipComments (const char* pCur,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut)
+bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut,bool isBinary)
 {
 	ai_assert(NULL != pCur && NULL != pCurOut);
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() begin");
@@ -458,7 +458,10 @@ bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut)
 			SkipLine(&pCur);
 		}
 	}
-	SkipSpacesAndLineEnd(pCur,&pCur);
+	if(!isBinary)
+	{ // it would occur an error, if binary data start with values as space or line end.
+		SkipSpacesAndLineEnd(pCur,&pCur);
+	}
 	*pCurOut = pCur;
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseHeader() succeeded");
@@ -527,7 +530,7 @@ bool PLY::DOM::ParseInstanceBinary (const char* pCur,DOM* p_pcOut,bool p_bBE)
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() begin");
 
-	if(!p_pcOut->ParseHeader(pCur,&pCur))
+	if(!p_pcOut->ParseHeader(pCur,&pCur,true))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() failure");
 		return false;
@@ -550,7 +553,7 @@ bool PLY::DOM::ParseInstance (const char* pCur,DOM* p_pcOut)
 	DefaultLogger::get()->debug("PLY::DOM::ParseInstance() begin");
 
 
-	if(!p_pcOut->ParseHeader(pCur,&pCur))
+	if(!p_pcOut->ParseHeader(pCur,&pCur,false))
 	{
 		DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
 		return false;

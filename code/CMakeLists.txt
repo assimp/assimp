@@ -699,6 +699,11 @@ SET_TARGET_PROPERTIES( assimp PROPERTIES
 	SOVERSION ${ASSIMP_SOVERSION} # use full version 
     OUTPUT_NAME assimp${ASSIMP_LIBRARY_SUFFIX}
 )
+
+if (APPLE)
+    SET_TARGET_PROPERTIES( assimp PROPERTIES INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
+endif()
+
 # Build against external unzip, or add ../contrib/unzip so
 # assimp can #include "unzip.h"
 if (UNZIP_FOUND)

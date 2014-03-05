@@ -380,7 +380,7 @@ void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,const aiVector3D&
 }
 
 // ------------------------------------------------------------------------------------------------
-void ComputeUVMappingProcess::ComputeBoxMapping(aiMesh* /*mesh*/, aiVector3D* /*out*/)
+void ComputeUVMappingProcess::ComputeBoxMapping( aiMesh*, aiVector3D* )
 {
 	DefaultLogger::get()->error("Mapping type currently not implemented");
 }

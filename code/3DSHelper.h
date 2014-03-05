@@ -481,6 +481,7 @@ struct Node
 
 		:	mHierarchyPos		(0)
 		,	mHierarchyIndex		(0)
+		,	mInstanceCount		(1)
 
 	{
 		static int iCnt = 0;
@@ -510,6 +511,9 @@ struct Node
 	//! Name of the node
 	std::string mName;
 
+	//! InstanceNumber of the node
+	int32_t mInstanceNumber;
+
 	//! Dummy nodes: real name to be combined with the $$$DUMMY 
 	std::string mDummyName;
 
@@ -538,6 +542,9 @@ struct Node
 
 	//! Pivot position loaded from the file
 	aiVector3D vPivot;
+
+	//instance count, will be kept only for the first node
+	int32_t mInstanceCount;
 
 	//! Add a child node, setup the right parent node for it
 	//! \param pc Node to be 'adopted'

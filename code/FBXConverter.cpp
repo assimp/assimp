@@ -782,17 +782,17 @@ private:
 			bool parse_succeeded = false;
 
 			// Interpret the property as a concrete type
-			if (const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string>>())
+			if (const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >())
 				ss << interpreted->Value();
-			else if (const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool>>())
+			else if (const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >())
 				ss << interpreted->Value();
-			else if (const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int>>())
+			else if (const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int> >())
 				ss << interpreted->Value();
-			else if (const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t>>())
+			else if (const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t> >())
 				ss << interpreted->Value();
-			else if (const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float>>())
+			else if (const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >())
 				ss << interpreted->Value();
-			else if (const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D>>())
+			else if (const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >())
 			{
 				aiVector3D v = interpreted->Value();
 				ss << v.x << ";" << v.y << ";" << v.z;

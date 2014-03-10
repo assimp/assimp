@@ -76,7 +76,6 @@ SOURCE_GROUP(Boost FILES ${Boost_SRCS})
 
 SET( Logging_SRCS
 	${HEADER_PATH}/DefaultLogger.hpp
-	${HEADER_PATH}/IOStream.hpp
 	${HEADER_PATH}/LogStream.hpp
 	${HEADER_PATH}/Logger.hpp
 	${HEADER_PATH}/NullLogger.hpp
@@ -108,6 +107,7 @@ SET( Common_SRCS
 	Hash.h
 	Importer.cpp
 	IFF.h
+	MemoryIOWrapper.h
 	ParsingUtils.h
 	StreamReader.h
 	StringComparison.h

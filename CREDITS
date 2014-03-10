@@ -142,3 +142,6 @@ Rewrite of PyAssimp, distutils and Python3 support
 
 - albert-wang
 Bugfixes for the collada parser
+
+- Ya ping Jin
+Bugfixes for uv-tanget calculation.

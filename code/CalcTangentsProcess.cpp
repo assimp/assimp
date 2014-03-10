@@ -55,8 +55,9 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 CalcTangentsProcess::CalcTangentsProcess()
-{
-	this->configMaxAngle = AI_DEG_TO_RAD(45.f);
+: configMaxAngle( AI_DEG_TO_RAD(45.f) )
+, configSourceUV( 0 ) {
+	// nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -77,6 +78,8 @@ bool CalcTangentsProcess::IsActive( unsigned int pFlags) const
 // Executes the post processing step on the given imported data.
 void CalcTangentsProcess::SetupProperties(const Importer* pImp)
 {
+    ai_assert( NULL != pImp );
+
 	// get the current value of the property
 	configMaxAngle = pImp->GetPropertyFloat(AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE,45.f);
 	configMaxAngle = std::max(std::min(configMaxAngle,45.0f),0.0f);
@@ -89,14 +92,20 @@ void CalcTangentsProcess::SetupProperties(const Importer* pImp)
 // Executes the post processing step on the given imported data.
 void CalcTangentsProcess::Execute( aiScene* pScene)
 {
-	DefaultLogger::get()->debug("CalcTangentsProcess begin");
+    ai_assert( NULL != pScene );
+
+    DefaultLogger::get()->debug("CalcTangentsProcess begin");
 
 	bool bHas = false;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
+	for ( unsigned int a = 0; a < pScene->mNumMeshes; a++ ) {
 		if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
+    }
 
-	if (bHas)DefaultLogger::get()->info("CalcTangentsProcess finished. Tangents have been calculated");
-	else DefaultLogger::get()->debug("CalcTangentsProcess finished");
+	if ( bHas ) {
+        DefaultLogger::get()->info("CalcTangentsProcess finished. Tangents have been calculated");
+    } else {
+        DefaultLogger::get()->debug("CalcTangentsProcess finished");
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -179,9 +188,14 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		float sx = meshTex[p1].x - meshTex[p0].x, sy = meshTex[p1].y - meshTex[p0].y;
         float tx = meshTex[p2].x - meshTex[p0].x, ty = meshTex[p2].y - meshTex[p0].y;
 		float dirCorrection = (tx * sy - ty * sx) < 0.0f ? -1.0f : 1.0f;
+        // when t1, t2, t3 in same position in UV space, just use default UV direction.
+        if ( 0 == sx && 0 ==sy && 0 == tx && 0 == ty ) {
+            sx = 0.0; sy = 1.0;
+            tx = 1.0; ty = 0.0;
+        }
 
-		// tangent points in the direction where to positive X axis of the texture coords would point in model space
-		// bitangents points along the positive Y axis of the texture coords, respectively
+		// tangent points in the direction where to positive X axis of the texture coord's would point in model space
+		// bitangent's points along the positive Y axis of the texture coord's, respectively
 		aiVector3D tangent, bitangent;
 		tangent.x = (w.x * sy - v.x * ty) * dirCorrection;
         tangent.y = (w.y * sy - v.y * ty) * dirCorrection;
@@ -191,8 +205,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         bitangent.z = (w.z * sx - v.z * tx) * dirCorrection;
 
 		// store for every vertex of that face
-		for( unsigned int b = 0; b < face.mNumIndices; b++)
-		{
+		for( unsigned int b = 0; b < face.mNumIndices; ++b ) {
 			unsigned int p = face.mIndices[b];
 
 			// project tangent and bitangent into the plane formed by the vertex' normal
@@ -200,9 +213,22 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			aiVector3D localBitangent = bitangent - meshNorm[p] * (bitangent * meshNorm[p]);
 			localTangent.Normalize(); localBitangent.Normalize();
 
-			// and write it into the mesh.
-			meshTang[p] = localTangent;
-			meshBitang[p] = localBitangent;
+            // reconstruct tangent/bitangent according to normal and bitangent/tangent when it's infinite or NaN.
+            bool invalid_tangent = is_special_float(localTangent.x) || is_special_float(localTangent.y) || is_special_float(localTangent.z);
+            bool invalid_bitangent = is_special_float(localBitangent.x) || is_special_float(localBitangent.y) || is_special_float(localBitangent.z);
+            if (invalid_tangent != invalid_bitangent) {
+                if (invalid_tangent) {
+                    localTangent = meshNorm[p] ^ localBitangent;
+                    localTangent.Normalize();
+                } else {
+                    localBitangent = localTangent ^ meshNorm[p]; 
+                    localBitangent.Normalize();
+                }
+            }
+
+            // and write it into the mesh.
+			meshTang[ p ]   = localTangent;
+			meshBitang[ p ] = localBitangent;
 		}
     }
 

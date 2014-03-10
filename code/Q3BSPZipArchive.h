@@ -52,6 +52,33 @@ namespace Assimp {
 namespace Q3BSP {
 
 // ------------------------------------------------------------------------------------------------
+///	\class		IOSystem2Unzip
+///	\ingroup	Assimp::Q3BSP
+///
+///	\brief
+// ------------------------------------------------------------------------------------------------
+class IOSystem2Unzip {
+
+	public:
+
+		static voidpf open(voidpf opaque, const char* filename, int mode);
+
+		static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
+
+		static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
+
+		static long tell(voidpf opaque, voidpf stream);
+
+		static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
+
+		static int close(voidpf opaque, voidpf stream);
+
+		static int testerror(voidpf opaque, voidpf stream);
+
+		static zlib_filefunc_def get(IOSystem* pIOHandler);
+};
+
+// ------------------------------------------------------------------------------------------------
 ///	\class		ZipFile
 ///	\ingroup	Assimp::Q3BSP
 ///
@@ -101,7 +128,7 @@ class Q3BSPZipArchive : public Assimp::IOSystem {
 
 	public:
 
-		Q3BSPZipArchive(const std::string & rFile);
+		Q3BSPZipArchive(IOSystem* pIOHandler, const std::string & rFile);
 
 		~Q3BSPZipArchive();
 

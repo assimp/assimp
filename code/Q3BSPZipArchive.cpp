@@ -49,6 +49,92 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace Q3BSP {
 
+voidpf IOSystem2Unzip::open(voidpf opaque, const char* filename, int mode) {
+	IOSystem* io_system = (IOSystem*) opaque;
+
+	const char* mode_fopen = NULL;
+	if((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER)==ZLIB_FILEFUNC_MODE_READ) {
+		mode_fopen = "rb";
+	} else {
+		if(mode & ZLIB_FILEFUNC_MODE_EXISTING) {
+			mode_fopen = "r+b";
+		} else {
+			if(mode & ZLIB_FILEFUNC_MODE_CREATE) {
+				mode_fopen = "wb";
+			}
+		}
+	}
+
+	return (voidpf) io_system->Open(filename, mode_fopen);
+}
+
+uLong IOSystem2Unzip::read(voidpf opaque, voidpf stream, void* buf, uLong size) {
+	IOStream* io_stream = (IOStream*) stream;
+
+	return io_stream->Read(buf, 1, size);
+}
+
+uLong IOSystem2Unzip::write(voidpf opaque, voidpf stream, const void* buf, uLong size) {
+	IOStream* io_stream = (IOStream*) stream;
+
+	return io_stream->Write(buf, 1, size);
+}
+
+long IOSystem2Unzip::tell(voidpf opaque, voidpf stream) {
+	IOStream* io_stream = (IOStream*) stream;
+
+	return io_stream->Tell();
+}
+
+long IOSystem2Unzip::seek(voidpf opaque, voidpf stream, uLong offset, int origin) {
+	IOStream* io_stream = (IOStream*) stream;
+
+	aiOrigin assimp_origin;
+	switch (origin) {
+		default:
+		case ZLIB_FILEFUNC_SEEK_CUR:
+			assimp_origin = aiOrigin_CUR;
+			break;
+		case ZLIB_FILEFUNC_SEEK_END:
+			assimp_origin = aiOrigin_END;
+			break;
+		case ZLIB_FILEFUNC_SEEK_SET:
+			assimp_origin = aiOrigin_SET;
+			break;
+	}
+
+	return (io_stream->Seek(offset, assimp_origin) == aiReturn_SUCCESS ? 0 : -1);
+}
+
+int IOSystem2Unzip::close(voidpf opaque, voidpf stream) {
+	IOSystem* io_system = (IOSystem*) opaque;
+	IOStream* io_stream = (IOStream*) stream;
+
+	io_system->Close(io_stream);
+
+	return 0;
+}
+
+int IOSystem2Unzip::testerror(voidpf opaque, voidpf stream) {
+	return 0;
+}
+
+zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
+	zlib_filefunc_def mapping;
+
+	mapping.zopen_file = open;
+	mapping.zread_file = read;
+	mapping.zwrite_file = write;
+	mapping.ztell_file = tell;
+	mapping.zseek_file = seek;
+	mapping.zclose_file = close;
+	mapping.zerror_file = testerror;
+	mapping.opaque = (voidpf) pIOHandler;
+
+	return mapping;
+}
+
+// ------------------------------------------------------------------------------------------------
 ZipFile::ZipFile(size_t size) : m_Size(size) {
 	ai_assert(m_Size != 0);
 
@@ -91,9 +177,9 @@ void ZipFile::Flush() {
 
 // ------------------------------------------------------------------------------------------------
 //	Constructor.
-Q3BSPZipArchive::Q3BSPZipArchive(const std::string& rFile) : m_ZipFileHandle(NULL), m_ArchiveMap() {
+Q3BSPZipArchive::Q3BSPZipArchive(IOSystem* pIOHandler, const std::string& rFile) : m_ZipFileHandle(NULL), m_ArchiveMap() {
 	if (! rFile.empty()) {
-		m_ZipFileHandle = unzOpen(rFile.c_str());
+		m_ZipFileHandle = unzOpen2(rFile.c_str(), &IOSystem2Unzip::get(pIOHandler));
 		if(m_ZipFileHandle != NULL) {
 			mapArchive();
 		}

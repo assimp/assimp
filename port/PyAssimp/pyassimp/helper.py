@@ -27,6 +27,8 @@ if os.name=='posix':
     # currently there's always a symlink called
     # libassimp.so in /usr/local/lib.
     ext_whitelist.append('.so')
+    # libassimp.dylib in /usr/local/lib
+    ext_whitelist.append('.dylib')
 
 elif os.name=='nt':
     ext_whitelist.append('.dll')

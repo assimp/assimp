@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
 #include <iterator>
+#include <sstream>
 #include <boost/tuple/tuple.hpp>
 
 #include "FBXParser.h"
@@ -92,14 +93,6 @@ public:
 		TransformationComp_GeometricScaling,
 
 		TransformationComp_MAXIMUM
-	};
-
-	enum MetadataKeys
-	{
-		MetadataKeys_UserProperties = 0,
-		MetadataKeys_IsNull,
-
-		MetadataKeys_MAXIMUM
 	};
 
 public:
@@ -760,21 +753,56 @@ private:
 	void SetupNodeMetadata(const Model& model, aiNode& nd)
 	{
 		const PropertyTable& props = model.Props();
+		DirectPropertyMap unparsedProperties = props.GetUnparsedProperties();
 
-		//create metadata on node
+		// create metadata on node
+		std::size_t numStaticMetaData = 2;
 		aiMetadata* data = new aiMetadata();
-		data->mNumProperties = MetadataKeys_MAXIMUM;
+		data->mNumProperties = unparsedProperties.size() + numStaticMetaData;
 		data->mKeys = new aiString[data->mNumProperties]();
 		data->mValues = new aiString[data->mNumProperties]();
 		nd.mMetaData = data;
+		int index = 0;
 
-		// find user defined properties
-		data->mKeys[MetadataKeys_UserProperties].Set("UserProperties");
-		data->mValues[MetadataKeys_UserProperties].Set(PropertyGet<std::string>(props, "UDP3DSMAX", ""));
+		// find user defined properties (3ds Max)
+		data->mKeys[index].Set("UserProperties");
+		data->mValues[index].Set(PropertyGet<std::string>(props, "UDP3DSMAX", ""));
+		++index;
 
 		// preserve the info that a node was marked as Null node in the original file.
-		data->mKeys[MetadataKeys_IsNull].Set("IsNull");
-		data->mValues[MetadataKeys_IsNull].Set(model.IsNull() ? "true" : "false");
+		data->mKeys[index].Set("IsNull");
+		data->mValues[index].Set(model.IsNull() ? "true" : "false");
+		++index;
+
+		// add unparsed properties to the node's metadata
+		BOOST_FOREACH(const DirectPropertyMap::value_type& prop, unparsedProperties) {
+
+			// all values are converted to strings using the following stringstream
+			std::stringstream ss;
+			bool parse_succeeded = false;
+
+			// Interpret the property as a concrete type
+			if (const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >())
+				ss << interpreted->Value();
+			else if (const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >())
+				ss << interpreted->Value();
+			else if (const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int> >())
+				ss << interpreted->Value();
+			else if (const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t> >())
+				ss << interpreted->Value();
+			else if (const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >())
+				ss << interpreted->Value();
+			else if (const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >())
+			{
+				aiVector3D v = interpreted->Value();
+				ss << v.x << ";" << v.y << ";" << v.z;
+			}
+
+			// add property to meta data
+			data->mKeys[index].Set(prop.first);
+			data->mValues[index].Set(ss.str());
+			++index;
+		}
 	}
 
 	// ------------------------------------------------------------------------------------------------

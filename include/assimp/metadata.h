@@ -86,6 +86,10 @@ struct aiMetaDataEntry
 
 #ifdef __cplusplus
 
+#include <string>
+
+
+
 // -------------------------------------------------------------------------------
 /**
   * Helper functions to get the aiType enum entry for a type
@@ -217,6 +221,10 @@ struct aiMetadata
 				return Get(i, value);
 		return false;
 	}
+
+	template<typename T>
+	inline bool Get( const std::string& key, T& value )
+	{ return Get(aiString(key), value); }
 
 #endif // __cplusplus
 };

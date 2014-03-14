@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __AI_METADATA_H_INC__
 #define __AI_METADATA_H_INC__
 
+#include <assert.h>
 #include <stdint.h>
 
 
@@ -99,58 +100,6 @@ inline aiType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
 
 
 
-// -------------------------------------------------------------------------------
-/**
-  * Transform
-  *
-  * Applies the callable, c, to the given data of the given type.
-  * The callable, c, is expected to have the following interface
-  *
-  *		c( T* data )
-  *
-  * where T can be any type with a corresponding entry in the aiType enum.
-  */
- // -------------------------------------------------------------------------------
-template<typename callable>
-inline void transform( aiType type, void* data, callable c )
-{
-	switch (type) 
-	{
-	case AI_BOOL:
-		callable(static_cast<bool*>(data));
-		break;
-	case AI_INT:
-		callable(static_cast<int*>(data));
-		break;
-	case AI_UINT64:
-		callable(static_cast<uint64_t*>(data));
-		break;
-	case AI_FLOAT:
-		callable(static_cast<float*>(data));
-		break;
-	case AI_AISTRING:
-		callable(static_cast<aiString*>(data));
-		break;
-	case AI_AIVECTOR3D:
-		callable(static_cast<aiVector3D*>(data));
-		break;
-	default:
-		assert(false);
-		break;
-	}
-}
-
-// -------------------------------------------------------------------------------
-/**
-  * Transform. 
-  * 
-  * This is a convenience overload for aiMetaDataEntry's.
-  */
- // -------------------------------------------------------------------------------
-template<typename callable>
-inline void transform( aiMetaDataEntry entry, callable c )
-{ transform(entry.type, entry.data, c); }
-
 #endif
 
 
@@ -179,9 +128,9 @@ struct aiMetadata
 	/** Constructor */
 	aiMetadata()
 		// set all members to zero by default
-		: mKeys(NULL)
+		: mNumProperties(0)
+		, mKeys(NULL)
 		, mValues(NULL)
-		, mNumProperties(0)
 	{}
 
 
@@ -194,7 +143,34 @@ struct aiMetadata
 		{
 			// Delete each metadata entry
 			for (unsigned i=0; i<mNumProperties; ++i)
-				transform(mValues[i], (void (*)(void*))(operator delete));
+			{
+				void* data = mValues[i].data;
+				switch (mValues[i].type) 
+				{
+				case AI_BOOL:
+					delete static_cast<bool*>(data);
+					break;
+				case AI_INT:
+					delete static_cast<int*>(data);
+					break;
+				case AI_UINT64:
+					delete static_cast<uint64_t*>(data);
+					break;
+				case AI_FLOAT:
+					delete static_cast<float*>(data);
+					break;
+				case AI_AISTRING:
+					delete static_cast<aiString*>(data);
+					break;
+				case AI_AIVECTOR3D:
+					delete static_cast<aiVector3D*>(data);
+					break;
+				default:
+					assert(false);
+					break;
+				}
+			}
+
 			// Delete the metadata array
 			delete [] mValues;
 		}

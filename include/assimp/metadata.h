@@ -90,12 +90,12 @@ struct aiMetaDataEntry
   * Helper functions to get the aiType enum entry for a type
   */
  // -------------------------------------------------------------------------------
-inline aiType GetAiType( bool ) { return aiType::AI_BOOL; }
-inline aiType GetAiType( int ) { return aiType::AI_INT; }
-inline aiType GetAiType( uint64_t ) { return aiType::AI_UINT64; }
-inline aiType GetAiType( float ) { return aiType::AI_FLOAT; }
-inline aiType GetAiType( aiString ) { return aiType::AI_AISTRING; }
-inline aiType GetAiType( aiVector3D ) { return aiType::AI_AIVECTOR3D; }
+inline aiType GetAiType( bool ) { return AI_BOOL; }
+inline aiType GetAiType( int ) { return AI_INT; }
+inline aiType GetAiType( uint64_t ) { return AI_UINT64; }
+inline aiType GetAiType( float ) { return AI_FLOAT; }
+inline aiType GetAiType( aiString ) { return AI_AISTRING; }
+inline aiType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
 
 
 
@@ -116,22 +116,22 @@ inline void transform( aiType type, void* data, callable c )
 {
 	switch (type) 
 	{
-	case aiType::AI_BOOL:
+	case AI_BOOL:
 		callable(static_cast<bool*>(data));
 		break;
-	case aiType::AI_INT:
+	case AI_INT:
 		callable(static_cast<int*>(data));
 		break;
-	case aiType::AI_UINT64:
+	case AI_UINT64:
 		callable(static_cast<uint64_t*>(data));
 		break;
-	case aiType::AI_FLOAT:
+	case AI_FLOAT:
 		callable(static_cast<float*>(data));
 		break;
-	case aiType::AI_AISTRING:
+	case AI_AISTRING:
 		callable(static_cast<aiString*>(data));
 		break;
-	case aiType::AI_AIVECTOR3D:
+	case AI_AIVECTOR3D:
 		callable(static_cast<aiVector3D*>(data));
 		break;
 	default:

@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * Enum used to distinguish data types
   */
  // -------------------------------------------------------------------------------
-enum aiType
+enum aiMetadataType
 {
 	AI_BOOL = 0, 
 	AI_INT = 1, 
@@ -76,10 +76,10 @@ enum aiType
   * The type field uniquely identifies the underlying type of the data field
   */
  // -------------------------------------------------------------------------------
-struct aiMetaDataEntry
+struct aiMetadataEntry
 {
-	aiType type;
-	void* data;
+	aiMetadataType mType;
+	void* mData;
 };
 
 
@@ -95,12 +95,12 @@ struct aiMetaDataEntry
   * Helper functions to get the aiType enum entry for a type
   */
  // -------------------------------------------------------------------------------
-inline aiType GetAiType( bool ) { return AI_BOOL; }
-inline aiType GetAiType( int ) { return AI_INT; }
-inline aiType GetAiType( uint64_t ) { return AI_UINT64; }
-inline aiType GetAiType( float ) { return AI_FLOAT; }
-inline aiType GetAiType( aiString ) { return AI_AISTRING; }
-inline aiType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
+inline aiMetadataType GetAiType( bool ) { return AI_BOOL; }
+inline aiMetadataType GetAiType( int ) { return AI_INT; }
+inline aiMetadataType GetAiType( uint64_t ) { return AI_UINT64; }
+inline aiMetadataType GetAiType( float ) { return AI_FLOAT; }
+inline aiMetadataType GetAiType( aiString ) { return AI_AISTRING; }
+inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
 
 
 
@@ -125,7 +125,7 @@ struct aiMetadata
 
 	/** Arrays of values, may not be NULL. Entries in this array may be NULL if the
 	  * corresponding property key has no assigned value. */
-	C_STRUCT aiMetaDataEntry* mValues;
+	C_STRUCT aiMetadataEntry* mValues;
 
 #ifdef __cplusplus
 
@@ -148,8 +148,8 @@ struct aiMetadata
 			// Delete each metadata entry
 			for (unsigned i=0; i<mNumProperties; ++i)
 			{
-				void* data = mValues[i].data;
-				switch (mValues[i].type) 
+				void* data = mValues[i].mData;
+				switch (mValues[i].mType) 
 				{
 				case AI_BOOL:
 					delete static_cast<bool*>(data);
@@ -193,22 +193,25 @@ struct aiMetadata
 		mKeys[index] = key;
 
 		// Set metadata type
-		mValues[index].type = GetAiType(value);
+		mValues[index].mType = GetAiType(value);
 		// Copy the given value to the dynamic storage
-		mValues[index].data = new T(value);
+		mValues[index].mData = new T(value);
 	}
 
 	template<typename T>
 	inline bool Get( unsigned index, T& value )
 	{
+		// In range assertion
+		assert(index < mNumProperties);
+
 		// Return false if the output data type does 
 		// not match the found value's data type
-		if (GetAiType(value) != mValues[index].type)
+		if (GetAiType(value) != mValues[index].mType)
 			return false;
 
 		// Otherwise, output the found value and 
 		// return true
-		value = *static_cast<T*>(mValues[index].data);
+		value = *static_cast<T*>(mValues[index].mData);
 		return true;
 	}
 

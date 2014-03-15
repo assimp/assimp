@@ -760,7 +760,7 @@ private:
 		aiMetadata* data = new aiMetadata();
 		data->mNumProperties = unparsedProperties.size() + numStaticMetaData;
 		data->mKeys = new aiString[data->mNumProperties]();
-		data->mValues = new aiMetaDataEntry[data->mNumProperties]();
+		data->mValues = new aiMetadataEntry[data->mNumProperties]();
 		nd.mMetaData = data;
 		int index = 0;
 

@@ -726,7 +726,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 			aiMetadata* data = new aiMetadata();
 			data->mNumProperties = properties.size();
 			data->mKeys = new aiString[data->mNumProperties]();
-			data->mValues = new aiMetaDataEntry[data->mNumProperties]();
+			data->mValues = new aiMetadataEntry[data->mNumProperties]();
 
 			unsigned int index = 0;
 			BOOST_FOREACH(const Metadata::value_type& kv, properties)

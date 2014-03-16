@@ -152,6 +152,9 @@ void ObjExporter :: WriteMaterialFile()
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_SPECULAR,c)) {
 			mOutputMat << "ks " << c.r << " " << c.g << " " << c.b << endl;
 		}
+		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_EMISSIVE,c)) {
+			mOutputMat << "ke " << c.r << " " << c.g << " " << c.b << endl;
+		}
 
 		float o;
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {

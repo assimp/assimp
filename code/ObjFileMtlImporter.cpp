@@ -146,6 +146,11 @@ void ObjFileMtlImporter::load()
 					++m_DataIt;
 					getColorRGBA( &m_pModel->m_pCurrentMaterial->specular );
 				}
+				else if (*m_DataIt == 'e')
+				{
+					++m_DataIt;
+					getColorRGBA( &m_pModel->m_pCurrentMaterial->emissive );
+				}
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}
 			break;

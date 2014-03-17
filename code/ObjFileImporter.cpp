@@ -550,6 +550,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 		mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT );
 		mat->AddProperty( &pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
 		mat->AddProperty( &pCurrentMaterial->specular, 1, AI_MATKEY_COLOR_SPECULAR );
+		mat->AddProperty( &pCurrentMaterial->emissive, 1, AI_MATKEY_COLOR_EMISSIVE );
 		mat->AddProperty( &pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS );
 		mat->AddProperty( &pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY );
 

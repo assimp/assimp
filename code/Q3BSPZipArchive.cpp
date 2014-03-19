@@ -179,7 +179,10 @@ void ZipFile::Flush() {
 //	Constructor.
 Q3BSPZipArchive::Q3BSPZipArchive(IOSystem* pIOHandler, const std::string& rFile) : m_ZipFileHandle(NULL), m_ArchiveMap() {
 	if (! rFile.empty()) {
-		m_ZipFileHandle = unzOpen2(rFile.c_str(), &IOSystem2Unzip::get(pIOHandler));
+		zlib_filefunc_def mapping = IOSystem2Unzip::get(pIOHandler);
+
+		m_ZipFileHandle = unzOpen2(rFile.c_str(), &mapping);
+
 		if(m_ZipFileHandle != NULL) {
 			mapArchive();
 		}

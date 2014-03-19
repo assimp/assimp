@@ -183,6 +183,8 @@ struct Material
 	aiColor3D diffuse;
 	//!	Specular color
 	aiColor3D specular;
+	//!	Emissive color
+	aiColor3D emissive;
 	//!	Alpha value
 	float alpha;
 	//!	Shineness factor

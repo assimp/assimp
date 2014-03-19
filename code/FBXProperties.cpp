@@ -201,6 +201,33 @@ const Property* PropertyTable::Get(const std::string& name) const
 	return (*it).second;
 }
 
+DirectPropertyMap PropertyTable::GetUnparsedProperties() const
+{
+	DirectPropertyMap result;
+
+	// Loop through all the lazy properties (which is all the properties)
+	BOOST_FOREACH(const LazyPropertyMap::value_type& element, lazyProps) {
+
+		// Skip parsed properties
+		if (props.end() != props.find(element.first)) continue;
+
+		// Read the element's value.
+		// Wrap the naked pointer (since the call site is required to acquire ownership)
+		// std::unique_ptr from C++11 would be preferred both as a wrapper and a return value.
+		boost::shared_ptr<Property> prop = boost::shared_ptr<Property>(ReadTypedProperty(*element.second));
+			
+		// Element could not be read. Skip it.
+		if (!prop) continue;
+
+		// Add to result
+		result[element.first] = prop;
+	}
+
+	return result;
+}
+
+
+
 } //! FBX
 } //! Assimp
 

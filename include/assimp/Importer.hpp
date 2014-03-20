@@ -277,7 +277,7 @@ public:
 	 *  The return value remains valid until the property is modified.
 	 * @see GetPropertyInteger()
 	 */
-	const std::string& GetPropertyString(const char* szName,
+	const std::string GetPropertyString(const char* szName,
 		const std::string& sErrorReturn = "") const;
 
 	// -------------------------------------------------------------------
@@ -286,7 +286,7 @@ public:
 	 *  The return value remains valid until the property is modified.
 	 * @see GetPropertyInteger()
 	 */
-	const aiMatrix4x4& GetPropertyMatrix(const char* szName,
+	const aiMatrix4x4 GetPropertyMatrix(const char* szName,
 		const aiMatrix4x4& sErrorReturn = aiMatrix4x4()) const;
 
 	// -------------------------------------------------------------------

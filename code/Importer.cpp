@@ -966,7 +966,7 @@ float Importer::GetPropertyFloat(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const std::string& Importer::GetPropertyString(const char* szName, 
+const std::string Importer::GetPropertyString(const char* szName, 
 	const std::string& iErrorReturn /*= ""*/) const
 {
 	return GetGenericProperty<std::string>(pimpl->mStringProperties,szName,iErrorReturn);
@@ -974,7 +974,7 @@ const std::string& Importer::GetPropertyString(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const aiMatrix4x4& Importer::GetPropertyMatrix(const char* szName, 
+const aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, 
 	const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const
 {
 	return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);

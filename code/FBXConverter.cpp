@@ -760,48 +760,33 @@ private:
 		aiMetadata* data = new aiMetadata();
 		data->mNumProperties = unparsedProperties.size() + numStaticMetaData;
 		data->mKeys = new aiString[data->mNumProperties]();
-		data->mValues = new aiString[data->mNumProperties]();
+		data->mValues = new aiMetadataEntry[data->mNumProperties]();
 		nd.mMetaData = data;
 		int index = 0;
 
 		// find user defined properties (3ds Max)
-		data->mKeys[index].Set("UserProperties");
-		data->mValues[index].Set(PropertyGet<std::string>(props, "UDP3DSMAX", ""));
-		++index;
-
+		data->Set(index++, "UserProperties", aiString(PropertyGet<std::string>(props, "UDP3DSMAX", "")));
 		// preserve the info that a node was marked as Null node in the original file.
-		data->mKeys[index].Set("IsNull");
-		data->mValues[index].Set(model.IsNull() ? "true" : "false");
-		++index;
+		data->Set(index++, "IsNull", model.IsNull() ? true : false);
 
 		// add unparsed properties to the node's metadata
 		BOOST_FOREACH(const DirectPropertyMap::value_type& prop, unparsedProperties) {
 
-			// all values are converted to strings using the following stringstream
-			std::stringstream ss;
-			bool parse_succeeded = false;
-
 			// Interpret the property as a concrete type
-			if (const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >())
-				ss << interpreted->Value();
-			else if (const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >())
-				ss << interpreted->Value();
+			if (const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >())
+				data->Set(index++, prop.first, interpreted->Value());
 			else if (const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int> >())
-				ss << interpreted->Value();
+				data->Set(index++, prop.first, interpreted->Value());
 			else if (const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t> >())
-				ss << interpreted->Value();
+				data->Set(index++, prop.first, interpreted->Value());
 			else if (const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >())
-				ss << interpreted->Value();
+				data->Set(index++, prop.first, interpreted->Value());
+			else if (const TypedProperty<aiString>* interpreted = prop.second->As<TypedProperty<aiString> >())
+				data->Set(index++, prop.first, interpreted->Value());
 			else if (const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >())
-			{
-				aiVector3D v = interpreted->Value();
-				ss << v.x << ";" << v.y << ";" << v.z;
-			}
-
-			// add property to meta data
-			data->mKeys[index].Set(prop.first);
-			data->mValues[index].Set(ss.str());
-			++index;
+				data->Set(index++, prop.first, interpreted->Value());
+			else
+				assert(false);
 		}
 	}
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#######################
-# BUILD ASSIMP for iOS and iOS Simulator
-#######################
+#
+# Written and maintained by the.arul@gmail.com (2014)
+#
 
 BUILD_DIR="./lib/iOS"
 
@@ -12,6 +12,7 @@ IOS_SDK_TARGET=6.0
 IOS_SDK_DEVICE=
 
 XCODE_ROOT_DIR=/Applications/Xcode.app/Contents
+TOOLCHAIN=$XCODE_ROOT_DIR//Developer/Toolchains/XcodeDefault.xctoolchain
 
 BUILD_ARCHS_DEVICE="armv7 armv7s arm64"
 BUILD_ARCHS_SIMULATOR="i386 x86_64"
@@ -38,21 +39,11 @@ build_arch()
         echo '[!] Target SDK set to DEVICE.'
     fi
 
-    unset DEVROOT SDKROOT CFLAGS CC LD CPP CXX AR AS NM CXXCPP RANLIB LDFLAGS CPPFLAGS CXXFLAGS
+    unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS
 
-    export TOOLCHAIN=$XCODE_ROOT_DIR//Developer/Toolchains/XcodeDefault.xctoolchain
     export DEVROOT=$XCODE_ROOT_DIR/Developer/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
     export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -$CPP_DEV_TARGET=$IOS_SDK_TARGET -I$SDKROOT/usr/include/"
-    export CPP="$TOOLCHAIN/usr/bin/clang++"
-    export CXX="$TOOLCHAIN/usr/bin/clang++"
-    export CXXCPP="$TOOLCHAIN/usr/bin/clang++"
-    export CC="$TOOLCHAIN/usr/bin/clang"
-    export LD=$TOOLCHAIN/usr/bin/ld
-    export AR=$TOOLCHAIN/usr/bin/ar
-    export AS=$TOOLCHAIN/usr/bin/as
-    export NM=$TOOLCHAIN/usr/bin/nm
-    export RANLIB=$TOOLCHAIN/usr/bin/ranlib
     export LDFLAGS="-L$SDKROOT/usr/lib/"
     export CPPFLAGS=$CFLAGS
     export CXXFLAGS=$CFLAGS
@@ -92,8 +83,9 @@ for i in "$@"; do
         echo "[!] Fat binary will not be created."
     ;;
     -h|--help)
-        echo " - supported architectures: $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"
-        echo " - supported C++ STD libs.: $(echo $(join , ${CPP_STD_LIB_LIST[*]}) | sed 's/,/, /g')"
+        echo " - don't build fat library (--no-fat)."
+        echo " - supported architectures (--archs):  $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"
+        echo " - supported C++ STD libs. (--stdlib): $(echo $(join , ${CPP_STD_LIB_LIST[*]}) | sed 's/,/, /g')"
         exit
     ;;
     *)
@@ -111,13 +103,13 @@ for ARCH_TARGET in $DEPLOY_ARCHS; do
 done
 
 if [[ "$DEPLOY_FAT" -eq 1 ]]; then
-    echo '  creating fat binary ...'
+    echo '[+] Creating fat binary ...'
     for ARCH_TARGET in $DEPLOY_ARCHS; do
         LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.a "
     done
     LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.a"
     lipo $LIPO_ARGS
-    echo "Done! You will find the libaries and fat binary library in $BUILD_DIR"
+    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
 fi
 
 

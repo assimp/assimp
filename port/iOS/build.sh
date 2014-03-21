@@ -72,7 +72,7 @@ for i in "$@"; do
     case $i in
     -l=*|--stdlib=*)
         CPP_STD_LIB=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
-        echo "[!] Selecting c++ std lib: $DEPLOY_STD"
+        echo "[!] Selecting c++ std lib: $CPP_STD_LIB"
     ;;
     -a=*|--archs=*)
         DEPLOY_ARCHS=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`

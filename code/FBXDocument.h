@@ -516,8 +516,6 @@ private:
 	boost::shared_ptr<const PropertyTable> props;
 };
 
-
-
 /** DOM class for generic FBX textures */
 class Texture : public Object
 {
@@ -576,8 +574,73 @@ private:
 	unsigned int crop[4];
 };
 
+/** DOM class for layered FBX textures */
+class LayeredTexture : public Object
+{
+public:
+
+	LayeredTexture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+	~LayeredTexture();
+
+	//Can only be called after construction of the layered texture object due to construction flag.
+	void fillTexture(const Document& doc);
+
+	enum BlendMode
+	{
+		BlendMode_Translucent,
+		BlendMode_Additive,
+		BlendMode_Modulate,
+		BlendMode_Modulate2,
+		BlendMode_Over,
+		BlendMode_Normal,
+		BlendMode_Dissolve,
+		BlendMode_Darken,
+		BlendMode_ColorBurn,
+		BlendMode_LinearBurn,
+		BlendMode_DarkerColor,
+		BlendMode_Lighten,
+		BlendMode_Screen,
+		BlendMode_ColorDodge,
+		BlendMode_LinearDodge,
+		BlendMode_LighterColor,
+		BlendMode_SoftLight,
+		BlendMode_HardLight,
+		BlendMode_VividLight,
+		BlendMode_LinearLight,
+		BlendMode_PinLight,
+		BlendMode_HardMix,
+		BlendMode_Difference,
+		BlendMode_Exclusion,
+		BlendMode_Subtract,
+		BlendMode_Divide,
+		BlendMode_Hue,
+		BlendMode_Saturation,
+		BlendMode_Color,
+		BlendMode_Luminosity,
+		BlendMode_Overlay,
+		BlendMode_BlendModeCount
+	};
+
+	const Texture* getTexture() const
+	{
+		return texture;
+	}
+	BlendMode GetBlendMode()
+	{
+		return blendMode;
+	}
+	float Alpha()
+	{
+		return alpha;
+	}
+private:
+	const Texture* texture;
+	BlendMode blendMode;
+	float alpha;
+};
 
 typedef std::fbx_unordered_map<std::string, const Texture*> TextureMap;
+typedef std::fbx_unordered_map<std::string, const LayeredTexture*> LayeredTextureMap;
 
 
 /** DOM class for generic FBX materials */
@@ -607,6 +670,10 @@ public:
 		return textures;
 	}
 
+	const LayeredTextureMap& LayeredTextures() const {
+		return layeredTextures;
+	}
+
 private:
 
 	std::string shading;
@@ -614,6 +681,7 @@ private:
 	boost::shared_ptr<const PropertyTable> props;
 
 	TextureMap textures;
+	LayeredTextureMap layeredTextures;
 };
 
 

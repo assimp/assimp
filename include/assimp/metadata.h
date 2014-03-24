@@ -64,7 +64,9 @@ enum aiMetadataType
 	AI_AISTRING = 4,
 	AI_AIVECTOR3D = 5,
 
+#ifndef SWIG
 	FORCE_32BIT = INT_MAX
+#endif
 };
 
 

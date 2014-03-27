@@ -141,8 +141,8 @@ struct aiMetadata
 	/** Destructor */
 	~aiMetadata()
 	{
-		if (mKeys)
-			delete [] mKeys;
+        delete[] mKeys;
+        mKeys = NULL;
 		if (mValues)
 		{
 			// Delete each metadata entry
@@ -177,8 +177,8 @@ struct aiMetadata
 
 			// Delete the metadata array
 			delete [] mValues;
+            mValues = NULL;
 		}
-		
 	}
 
 
@@ -206,8 +206,9 @@ struct aiMetadata
 
 		// Return false if the output data type does 
 		// not match the found value's data type
-		if (GetAiType(value) != mValues[index].mType)
-			return false;
+        if ( GetAiType( value ) != mValues[ index ].mType ) {
+            return false;
+        }
 
 		// Otherwise, output the found value and 
 		// return true
@@ -226,10 +227,12 @@ struct aiMetadata
 	}
 
 	template<typename T>
-	inline bool Get( const std::string& key, T& value )
-	{ return Get(aiString(key), value); }
+	inline bool Get( const std::string& key, T& value ) {
+        return Get(aiString(key), value); 
+    }
 
 #endif // __cplusplus
+
 };
 
 #endif // __AI_METADATA_H_INC__

@@ -42,10 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-namespace Assimp
-{
-namespace Q3BSP
-{
+namespace Assimp {
+namespace Q3BSP {
 
 static const unsigned int CE_BSP_LIGHTMAPWIDTH = 128;
 static const unsigned int CE_BSP_LIGHTMAPHEIGHT = 128;
@@ -54,8 +52,7 @@ static const unsigned int CE_BSP_LIGHTMAPSIZE = 128*128*3;	///< = 128( width ) *
 static const int VERION_Q3LEVEL = 46;						///< Supported version.
 
 ///	Geometric type enumeration
-enum Q3BSPGeoType
-{
+enum Q3BSPGeoType {
 	Polygon = 1,
 	Patch, 
 	TriangleMesh,
@@ -63,25 +60,23 @@ enum Q3BSPGeoType
 };
 
 ///	Integer vector.
-struct ceVec3i 
-{
+struct ceVec3i {
     int x, y, z;
 	ceVec3i(): x( 0 ), y( 0 ), z( 0 ) { /* empty */ }
 	ceVec3i( int iX, int iY=0, int iZ=0) : x( iX ), y( iY ), z( iZ ) { /* empty */ }
 };
 
-///	Fileheader
-struct sQ3BSPHeader 
-{
-	char strID[ 4 ];	//!< Should be "IBSP"
-	int iVersion;	//!< 46 for standard levels
+///	the file header
+struct sQ3BSPHeader {
+	char strID[ 4 ]; ///< Should be "IBSP"
+    int iVersion;    ///< 46 for standard levels
 };
 
-///	Descripes an entry.
+///	Describes an entry.
 struct sQ3BSPLump 
 {
-	int iOffset;	///< Offset from startpointer of file
-	int iSize;		///< Size fo part
+	int iOffset;	///< Offset from start pointer of file
+	int iSize;		///< Size of part
 };
 
 struct vec2f
@@ -108,47 +103,42 @@ struct sQ3BSPVertex
 struct sQ3BSPFace 
 {
 	int iTextureID;					///< Index in texture array
-	int iEffect;					///< Index in effectarray (-1 = no effect)
+	int iEffect;					///< Index in effect array (-1 = no effect)
 	int iType;						///< 1=Polygon, 2=Patch, 3=Mesh, 4=Billboard
 	int iVertexIndex;				///< Start index of polygon
 	int iNumOfVerts;				///< Number of vertices
 	int	iFaceVertexIndex;			///< Index of first mesh vertex
-	int iNumOfFaceVerts;			///< Anzahl der Meshvertices
-	int iLightmapID;				///< Index to the lightmap array
-	int iLMapCorner[ 2 ];			///< Die Ecke der Lightmap in der Textur
-	int iLMapSize[ 2 ];				///< Size of the lightmap stored on the texture
-	vec3f vLMapPos;					///< 3D-Ursprung der Lightmap
-	vec3f vLMapVecs[ 2 ];			///< 3D-s-t-Vektoren
-	vec3f vNormal;					///< Polygonnormale
+	int iNumOfFaceVerts;			///< number of mesh vertices
+	int iLightmapID;				///< Index to the light-map array
+	int iLMapCorner[ 2 ];			///< edge of the light-map in texture
+	int iLMapSize[ 2 ];				///< Size of the light-map stored on the texture
+	vec3f vLMapPos;					///< 3D origin of the light-map
+	vec3f vLMapVecs[ 2 ];			///< 3D-s-t-vectors
+	vec3f vNormal;					///< Polygon normals
 	int patchWidth, patchHeight;	///< bezier patch
 };
 
 /// A quake3 texture name.
-struct sQ3BSPTexture 
-{
-	char strName[ 64 ];		///< Name of the texture without extention
+struct sQ3BSPTexture {
+	char strName[ 64 ];		///< Name of the texture without extension
 	int iFlags;				///< Not used
 	int iContents;			///< Not used
 };
 
-///	A lightmap of the level, size 128 x 128, RGB components.
-struct sQ3BSPLightmap 
-{
+///	A light-map of the level, size 128 x 128, RGB components.
+struct sQ3BSPLightmap {
 	unsigned char bLMapData[ CE_BSP_LIGHTMAPSIZE ];
-	sQ3BSPLightmap() 
-	{	
-		memset(bLMapData, 0, CE_BSP_LIGHTMAPSIZE ); 
+	sQ3BSPLightmap() {	
+		::memset(bLMapData, 0, CE_BSP_LIGHTMAPSIZE ); 
 	}
 };
 
-struct SubPatch
-{
+struct SubPatch {
 	std::vector<size_t> indices;
 	int lightmapID;
 };
 
-enum eLumps 
-{
+enum eLumps {
 	kEntities = 0,
 	kTextures,
 	kPlanes,
@@ -169,8 +159,7 @@ enum eLumps
 	kMaxLumps
 };
 
-struct Q3BSPModel
-{
+struct Q3BSPModel {
 	std::vector<unsigned char> m_Data;
 	std::vector<sQ3BSPLump*> m_Lumps;
 	std::vector<sQ3BSPVertex*> m_Vertices;
@@ -195,24 +184,22 @@ struct Q3BSPModel
 		// empty
 	}
 
-	~Q3BSPModel()
-	{
-		for ( unsigned int i=0; i<m_Lumps.size(); i++ )
-			if ( NULL != m_Lumps[i] )
-				delete m_Lumps[i];
-		
-		for ( unsigned int i=0; i<m_Vertices.size(); i++ )
-			if ( NULL != m_Vertices[ i ] )
-				delete m_Vertices[ i ];
-		for ( unsigned int i=0; i<m_Faces.size(); i++ )
-			if ( NULL != m_Faces[ i ] )
-				delete m_Faces[ i ];
-		for ( unsigned int i=0; i<m_Textures.size(); i++ )
-			if ( NULL != m_Textures[ i ] )
-				delete m_Textures[ i ];
-		for ( unsigned int i=0; i<m_Lightmaps.size(); i++ )
-			if ( NULL != m_Lightmaps[ i ] )
-				delete m_Lightmaps[ i ];
+	~Q3BSPModel() {
+		for ( unsigned int i=0; i<m_Lumps.size(); i++ ) {
+            delete m_Lumps[ i ];
+        }
+		for ( unsigned int i=0; i<m_Vertices.size(); i++ ) {
+            delete m_Vertices[ i ];
+        }
+		for ( unsigned int i=0; i<m_Faces.size(); i++ ) {
+            delete m_Faces[ i ];
+        }
+		for ( unsigned int i=0; i<m_Textures.size(); i++ ) {
+            delete m_Textures[ i ];
+        }
+		for ( unsigned int i=0; i<m_Lightmaps.size(); i++ ) {
+            delete m_Lightmaps[ i ];
+        }
 
 		m_Lumps.clear();
 		m_Vertices.clear();

@@ -71,9 +71,14 @@ static const aiImporterDesc desc = {
 	"pk3"
 };
 
-namespace Assimp
-{
+namespace Assimp {
 
+static void getSupportedExtensions(std::vector<std::string> &supportedExtensions) {
+    supportedExtensions.push_back( ".jpg" );
+    supportedExtensions.push_back( ".png" );
+    supportedExtensions.push_back( ".tga" );
+}
+    
 using namespace Q3BSP;
 
 // ------------------------------------------------------------------------------------------------
@@ -86,7 +91,7 @@ static void createKey( int id1, int id2, std::string &rKey )
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Local function to extract the texture ids from a material keyname.
+//	Local function to extract the texture ids from a material key-name.
 static void extractIds( const std::string &rKey, int &rId1, int &rId2 )
 {
 	rId1 = -1;
@@ -146,24 +151,16 @@ Q3BSPFileImporter::Q3BSPFileImporter() :
 
 // ------------------------------------------------------------------------------------------------
 //	Destructor.
-Q3BSPFileImporter::~Q3BSPFileImporter()
-{
-	// For lint
+Q3BSPFileImporter::~Q3BSPFileImporter() {
 	m_pCurrentMesh = NULL;
 	m_pCurrentFace = NULL;
 	
 	// Clear face-to-material map
-	for ( FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end();
-		++it )
-	{
-		const std::string matName = (*it).first;
-		if ( matName.empty() )
-		{
-			continue;
+    for ( FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it ) {
+		const std::string &matName = it->first;
+		if ( !matName.empty() ) {
+            delete it->second;
 		}
-
-		std::vector<Q3BSP::sQ3BSPFace*> *pCurFaceArray = (*it).second;
-		delete pCurFaceArray;
 	}
 	m_MaterialLookupMap.clear();
 }
@@ -566,7 +563,7 @@ size_t Q3BSPFileImporter::countFaces( const std::vector<Q3BSP::sQ3BSPFace*> &rAr
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Counts the number of triangles in a Q3-facearray.
+//	Counts the number of triangles in a Q3-face-array.
 size_t Q3BSPFileImporter::countTriangles( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const
 {
 	size_t numTriangles = 0;
@@ -617,15 +614,10 @@ void Q3BSPFileImporter::createMaterialMap( const Q3BSP::Q3BSPModel *pModel )
 //	Returns the next face.
 aiFace *Q3BSPFileImporter::getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx )
 {
-	aiFace *pFace = NULL;
-	if ( rFaceIdx < pMesh->mNumFaces )
-	{
+	aiFace *pFace( NULL );
+	if ( rFaceIdx < pMesh->mNumFaces ) {
 		pFace = &pMesh->mFaces[ rFaceIdx ];
 		rFaceIdx++;
-	}
-	else
-	{
-		pFace = NULL;
 	}
 
 	return pFace;
@@ -634,34 +626,30 @@ aiFace *Q3BSPFileImporter::getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx )
 // ------------------------------------------------------------------------------------------------
 //	Imports a texture file.
 bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel,
-												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene* /*pScene*/,
-												 aiMaterial *pMatHelper, int textureId )
-{
-	std::vector<std::string> supportedExtensions;
-	supportedExtensions.push_back( ".jpg" );
-	supportedExtensions.push_back( ".png" );
-  supportedExtensions.push_back( ".tga" );
-	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper )
-	{
+												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene*,
+												 aiMaterial *pMatHelper, int textureId ) {
+	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper ) {
 		return false;
 	}
 
-	if ( textureId < 0 || textureId >= static_cast<int>( pModel->m_Textures.size() ) )
-	{
+	if ( textureId < 0 || textureId >= static_cast<int>( pModel->m_Textures.size() ) ) {
 		return false;
 	}
 
 	bool res = true;
 	sQ3BSPTexture *pTexture = pModel->m_Textures[ textureId ];
-	if ( NULL == pTexture )
-		return false;
+	if ( !pTexture ) {
+        return false;
+    }
 
+    std::vector<std::string> supportedExtensions;
+    supportedExtensions.push_back( ".jpg" );
+    supportedExtensions.push_back( ".png" );
+    supportedExtensions.push_back( ".tga" );
 	std::string textureName, ext;
-	if ( expandFile( pArchive, pTexture->strName, supportedExtensions, textureName, ext ) )
-	{
+	if ( expandFile( pArchive, pTexture->strName, supportedExtensions, textureName, ext ) ) {
 		IOStream *pTextureStream = pArchive->Open( textureName.c_str() );
-		if ( NULL != pTextureStream )
-		{
+		if ( !pTextureStream ) {
 			size_t texSize = pTextureStream->FileSize();
 			aiTexture *pTexture = new aiTexture;
 			pTexture->mHeight = 0;
@@ -685,9 +673,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 
 			pMatHelper->AddProperty( &name, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
 			mTextures.push_back( pTexture );
-		}
-		else
-		{
+		} else {
 			// If it doesn't exist in the archive, it is probably just a reference to an external file.
 			// We'll leave it up to the user to figure out which extension the file has.
 			aiString name;

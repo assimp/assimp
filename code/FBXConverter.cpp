@@ -378,10 +378,11 @@ private:
 
 		out_camera->mName.Set(FixNodeName(model.Name()));
 
-		out_camera->mAspect = cam.AspectWidth();
+		out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 		out_camera->mPosition = cam.Position();
 		out_camera->mLookAt = cam.InterestPosition() - out_camera->mPosition;
 
+		// BUG HERE cam.FieldOfView() returns 1.0f every time.  1.0f is default value.
 		out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
 	}
 

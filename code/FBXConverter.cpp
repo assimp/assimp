@@ -23,7 +23,7 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS *
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
@@ -1457,87 +1457,89 @@ private:
 		}
 
 		const Texture* const tex = (*it).second;
-		
-		aiString path;
-		path.Set(tex->RelativeFilename());
+		if(tex !=0 )
+		{
+			aiString path;
+			path.Set(tex->RelativeFilename());
 
-		out_mat->AddProperty(&path,_AI_MATKEY_TEXTURE_BASE,target,0);
+			out_mat->AddProperty(&path,_AI_MATKEY_TEXTURE_BASE,target,0);
 
-		aiUVTransform uvTrafo;
-		// XXX handle all kinds of UV transformations
-		uvTrafo.mScaling = tex->UVScaling();
-		uvTrafo.mTranslation = tex->UVTranslation();
-		out_mat->AddProperty(&uvTrafo,1,_AI_MATKEY_UVTRANSFORM_BASE,target,0);
+			aiUVTransform uvTrafo;
+			// XXX handle all kinds of UV transformations
+			uvTrafo.mScaling = tex->UVScaling();
+			uvTrafo.mTranslation = tex->UVTranslation();
+			out_mat->AddProperty(&uvTrafo,1,_AI_MATKEY_UVTRANSFORM_BASE,target,0);
 
-		const PropertyTable& props = tex->Props();
+			const PropertyTable& props = tex->Props();
 
-		int uvIndex = 0;
+			int uvIndex = 0;
 
-		bool ok;
-		const std::string& uvSet = PropertyGet<std::string>(props,"UVSet",ok);
-		if(ok) {
-			// "default" is the name which usually appears in the FbxFileTexture template
-			if(uvSet != "default" && uvSet.length()) {
-				// this is a bit awkward - we need to find a mesh that uses this
-				// material and scan its UV channels for the given UV name because
-				// assimp references UV channels by index, not by name.
+			bool ok;
+			const std::string& uvSet = PropertyGet<std::string>(props,"UVSet",ok);
+			if(ok) {
+				// "default" is the name which usually appears in the FbxFileTexture template
+				if(uvSet != "default" && uvSet.length()) {
+					// this is a bit awkward - we need to find a mesh that uses this
+					// material and scan its UV channels for the given UV name because
+					// assimp references UV channels by index, not by name.
 
-				// XXX: the case that UV channels may appear in different orders
-				// in meshes is unhandled. A possible solution would be to sort
-				// the UV channels alphabetically, but this would have the side
-				// effect that the primary (first) UV channel would sometimes
-				// be moved, causing trouble when users read only the first
-				// UV channel and ignore UV channel assignments altogether.
+					// XXX: the case that UV channels may appear in different orders
+					// in meshes is unhandled. A possible solution would be to sort
+					// the UV channels alphabetically, but this would have the side
+					// effect that the primary (first) UV channel would sometimes
+					// be moved, causing trouble when users read only the first
+					// UV channel and ignore UV channel assignments altogether.
 
-				const unsigned int matIndex = static_cast<unsigned int>(std::distance(materials.begin(), 
-					std::find(materials.begin(),materials.end(),out_mat)
-				));
+					const unsigned int matIndex = static_cast<unsigned int>(std::distance(materials.begin(), 
+						std::find(materials.begin(),materials.end(),out_mat)
+					));
 
-				uvIndex = -1;
-				BOOST_FOREACH(const MeshMap::value_type& v,meshes_converted) {
-					const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
-					if(!mesh) {
-						continue;
-					}
-
-					const MatIndexArray& mats = mesh->GetMaterialIndices();
-					if(std::find(mats.begin(),mats.end(),matIndex) == mats.end()) {
-						continue;
-					}
-
-					int index = -1;
-					for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
-						if(mesh->GetTextureCoords(i).empty()) {
-							break;
+					uvIndex = -1;
+					BOOST_FOREACH(const MeshMap::value_type& v,meshes_converted) {
+						const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
+						if(!mesh) {
+							continue;
 						}
-						const std::string& name = mesh->GetTextureCoordChannelName(i);
-						if(name == uvSet) {
-							index = static_cast<int>(i);
-							break;
+
+						const MatIndexArray& mats = mesh->GetMaterialIndices();
+						if(std::find(mats.begin(),mats.end(),matIndex) == mats.end()) {
+							continue;
 						}
-					}
-					if(index == -1) {
-						FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
-						continue;
+
+						int index = -1;
+						for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+							if(mesh->GetTextureCoords(i).empty()) {
+								break;
+							}
+							const std::string& name = mesh->GetTextureCoordChannelName(i);
+							if(name == uvSet) {
+								index = static_cast<int>(i);
+								break;
+							}
+						}
+						if(index == -1) {
+							FBXImporter::LogWarn("did not find UV channel named " + uvSet + " in a mesh using this material");
+							continue;
+						}
+
+						if(uvIndex == -1) {
+							uvIndex = index;
+						}
+						else {
+							FBXImporter::LogWarn("the UV channel named " + uvSet + 
+								" appears at different positions in meshes, results will be wrong");
+						}
 					}
 
 					if(uvIndex == -1) {
-						uvIndex = index;
+						FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
+						uvIndex = 0;
 					}
-					else {
-						FBXImporter::LogWarn("the UV channel named " + uvSet + 
-							" appears at different positions in meshes, results will be wrong");
-					}
-				}
-
-				if(uvIndex == -1) {
-					FBXImporter::LogWarn("failed to resolve UV channel " + uvSet + ", using first UV channel");
-					uvIndex = 0;
 				}
 			}
-		}
 
-		out_mat->AddProperty(&uvIndex,1,_AI_MATKEY_UVWSRC_BASE,target,0);
+			out_mat->AddProperty(&uvIndex,1,_AI_MATKEY_UVWSRC_BASE,target,0);
+		}
 	}
 
 	// ------------------------------------------------------------------------------------------------

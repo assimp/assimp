@@ -1258,7 +1258,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 							mesh->mColors[a][n].a);
 					}
 				}
-				fprintf(out,"\t\t</Color>\n");
+				fprintf(out,"\t\t</Colors>\n");
 			}
 			fprintf(out,"\t</Mesh>\n");
 		}

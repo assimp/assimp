@@ -217,10 +217,8 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 				// HACK: if v.x is qnan the dot product will become qnan, too
 				//   therefore the comparison against fLimit should be false
 				//   in every case. 
-				if (v * pMesh->mNormals[i] < fLimit)
-					continue;
-
-				pcNor += v;
+				if (v * pMesh->mNormals[i] >= fLimit)
+					pcNor += v;
 			}
 			pcNew[i] = pcNor.Normalize();
 		}

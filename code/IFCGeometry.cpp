@@ -325,8 +325,6 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 		IFCImporter::LogError("failed to convert Directrix curve (IfcSweptDiskSolid)");
 		return;
 	}
-
-	const std::vector<IfcVector3>& in = result.verts;
 	
 	const unsigned int cnt_segments = 16;
 	const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;

@@ -51,11 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderBMesh.h"
 #include "BlenderTessellator.h"
 
-#define BLEND_TESS_MAGIC ( 0x83ed9ac3 )
+static const unsigned int BLEND_TESS_MAGIC = 0x83ed9ac3;
 
 #if ASSIMP_BLEND_WITH_GLU_TESSELLATE
 
-namespace Assimp
+namspace Assimp
 {
 	template< > const std::string LogFunctions< BlenderTessellatorGL >::log_prefix = "BLEND_TESS_GL: ";
 }
@@ -382,7 +382,7 @@ inline PointP2T& BlenderTessellatorP2T::GetActualPointStructure( p2t::Point& poi
 {
 	unsigned int pointOffset = OffsetOf( PointP2T, point2D );
 	PointP2T& pointStruct = *reinterpret_cast< PointP2T* >( reinterpret_cast< char* >( &point ) - pointOffset );
-	if ( pointStruct.magic != BLEND_TESS_MAGIC )
+	if ( pointStruct.magic != static_cast<int>( BLEND_TESS_MAGIC ) )
 	{
 		ThrowException( "Point returned by poly2tri was probably not one of ours. This indicates we need a new way to store vertex information" );
 	}

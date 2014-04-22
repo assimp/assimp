@@ -92,7 +92,7 @@ AI_FORCE_INLINE TReal aiVector3t<TReal>::SquareLength() const {
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
 AI_FORCE_INLINE TReal aiVector3t<TReal>::Length() const {
-	return sqrt( SquareLength()); 
+	return ::sqrt( SquareLength()); 
 }
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
@@ -217,6 +217,7 @@ AI_FORCE_INLINE  aiVector3t<TReal> operator - ( const aiVector3t<TReal>& v)	{
 	return aiVector3t<TReal>( -v.x, -v.y, -v.z);
 }
 
+// ------------------------------------------------------------------------------------------------
 
 #endif // __cplusplus
 #endif // AI_VECTOR3D_INL_INC

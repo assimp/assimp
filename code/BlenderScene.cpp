@@ -251,10 +251,7 @@ template <> void Structure :: Convert<Base> (
 	const int initial_pos = db.reader->GetCurrentPos();
 
 	std::pair<Base*, int> todo = std::make_pair(&dest, initial_pos);
-
-	Base* saved_prev = NULL;
-
-	while(true) {
+	for ( ;; ) {
 	
 		Base& cur_dest = *todo.first;
 		db.reader->SetCurrentPos(todo.second);
@@ -264,10 +261,6 @@ template <> void Structure :: Convert<Base> (
 		cur_dest.prev = NULL;
 
 		ReadFieldPtr<ErrorPolicy_Warn>(cur_dest.object,"*object",db);
-
-		// just record the offset of the blob data and allocate storage.
-		// Does _not_ invoke Convert() recursively.
-		const int old = db.reader->GetCurrentPos();
 
 		// the return value of ReadFieldPtr indicates whether the object 
 		// was already cached. In this case, we don't need to resolve

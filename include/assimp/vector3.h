@@ -44,6 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_VECTOR3D_H_INC
 #define AI_VECTOR3D_H_INC
 
+#ifdef __cplusplus
+#   include <cmath>
+#else
+#   include <math.h>
+#endif
+
 #include "./Compiler/pushpack1.h"
 
 #ifdef __cplusplus

@@ -109,11 +109,11 @@ void BlenderBMeshConverter::AssertValidMesh( )
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::AssertValidSizes( )
 {
-	if ( BMesh->totpoly != BMesh->mpoly.size( ) )
+	if ( BMesh->totpoly != static_cast<int>( BMesh->mpoly.size( ) ) )
 	{
 		ThrowException( "BMesh poly array has incorrect size" );
 	}
-	if ( BMesh->totloop != BMesh->mloop.size( ) )
+	if ( BMesh->totloop != static_cast<int>( BMesh->mloop.size( ) ) )
 	{
 		ThrowException( "BMesh loop array has incorrect size" );
 	}

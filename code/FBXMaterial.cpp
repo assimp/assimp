@@ -110,16 +110,29 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
 		const Texture* const tex = dynamic_cast<const Texture*>(ob);
 		if(!tex) {
-			DOMWarning("source object for texture link is not a texture, ignoring",&element);
-			continue;
+			const LayeredTexture* const layeredTexture = dynamic_cast<const LayeredTexture*>(ob);
+			if(!layeredTexture) {
+				DOMWarning("source object for texture link is not a texture or layered texture, ignoring",&element);
+				continue;
+			}
+			const std::string& prop = con->PropertyName();
+			if (layeredTextures.find(prop) != layeredTextures.end()) {
+				DOMWarning("duplicate layered texture link: " + prop,&element);
+			}
+
+			layeredTextures[prop] = layeredTexture;
+			((LayeredTexture*)layeredTexture)->fillTexture(doc);
+		}
+		else
+		{
+			const std::string& prop = con->PropertyName();
+			if (textures.find(prop) != textures.end()) {
+				DOMWarning("duplicate texture link: " + prop,&element);
+			}
+
+			textures[prop] = tex;
 		}
 
-		const std::string& prop = con->PropertyName();
-		if (textures.find(prop) != textures.end()) {
-			DOMWarning("duplicate texture link: " + prop,&element);
-		}
-
-		textures[prop] = tex;
 	}
 }
 
@@ -192,6 +205,52 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
 Texture::~Texture()
 {
 
+}
+
+LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+: Object(id,element,name)
+,texture(0)
+,blendMode(BlendMode_Modulate)
+,alpha(1)
+{
+	const Scope& sc = GetRequiredScope(element);
+
+	const Element* const BlendModes = sc["BlendModes"];
+	const Element* const Alphas = sc["Alphas"];
+
+	
+	if(BlendModes!=0)
+	{
+		blendMode = (BlendMode)ParseTokenAsInt(GetRequiredToken(*BlendModes,0));
+	}
+	if(Alphas!=0)
+	{
+		alpha = ParseTokenAsFloat(GetRequiredToken(*Alphas,0));
+	}
+}
+
+LayeredTexture::~LayeredTexture()
+{
+
+}
+
+void LayeredTexture::fillTexture(const Document& doc)
+{
+	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
+	for(size_t i = 0; i < conns.size();++i)
+	{
+		const Connection* con = conns.at(i);
+
+		const Object* const ob = con->SourceObject();
+		if(!ob) {
+			DOMWarning("failed to read source object for texture link, ignoring",&element);
+			continue;
+		}
+
+		const Texture* const tex = dynamic_cast<const Texture*>(ob);
+
+		texture = tex;
+	}
 }
 
 } //!FBX

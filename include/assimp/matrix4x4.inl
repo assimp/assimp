@@ -52,8 +52,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "quaternion.h"
 
 #include <algorithm>
-#include <cmath>
 #include <limits>
+
+#ifdef __cplusplus
+#   include <cmath>
+#else
+#   include <math.h>
+#endif
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>

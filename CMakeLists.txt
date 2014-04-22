@@ -53,9 +53,7 @@ SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
 SET(ASSIMP_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
 
 # Allow the user to build a static library
-SET ( ASSIMP_BUILD_STATIC_LIB OFF CACHE BOOL
-	"Build a static (.a) version of the library"
-)
+option ( BUILD_SHARED_LIB "Build a shared version of the library" ON )
 
 # Generate a pkg-config .pc for the Assimp library.
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )

@@ -809,6 +809,27 @@ const char* TextureTypeToString(aiTextureType in)
 
 
 // -----------------------------------------------------------------------------------
+// Some chuncks of text will need to be encoded for XML
+// http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string#5665377
+static std::string encodeXML(const std::string& data) {
+    std::string buffer;
+    buffer.reserve(data.size());
+    for(size_t pos = 0; pos != data.size(); ++pos) {
+        switch(data[pos]) {
+            case '&':  buffer.append("&amp;");       break;
+            case '\"': buffer.append("&quot;");      break;
+            case '\'': buffer.append("&apos;");      break;
+            case '<':  buffer.append("&lt;");        break;
+            case '>':  buffer.append("&gt;");        break;
+            default:   buffer.append(&data[pos], 1); break;
+        }
+    }
+    return buffer;
+}
+
+
+
+// -----------------------------------------------------------------------------------
 // Write a text model dump
 void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd, bool shortened)
 {
@@ -1014,7 +1035,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 					}
 				}
 				else if (prop->mType == aiPTI_String) {
-					fprintf(out,">\n\t\t\t\"%s\"",prop->mData+4 /* skip length */);
+					fprintf(out,">\n\t\t\t\t\"%s\"",encodeXML(prop->mData+4).c_str() /* skip length */);
 				}
 				fprintf(out,"\n\t\t\t</MatProperty>\n");
 			}

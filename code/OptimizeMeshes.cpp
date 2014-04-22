@@ -74,7 +74,7 @@ bool OptimizeMeshesProcess::IsActive( unsigned int pFlags) const
 	// That's a serious design flaw, consider redesign.
 	if( 0 != (pFlags & aiProcess_OptimizeMeshes) ) {
 		pts = (0 != (pFlags & aiProcess_SortByPType));
-		max_verts = (0 != (pFlags & aiProcess_SplitLargeMeshes)) ? 0xdeadbeef : 0;
+		max_verts = (0 != (pFlags & aiProcess_SplitLargeMeshes)) ? 0xdeadbeef : max_verts;
 		return true;
 	}
 	return false;

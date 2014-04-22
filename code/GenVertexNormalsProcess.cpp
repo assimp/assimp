@@ -142,7 +142,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 		const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
 		const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
 		const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-		const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
+		const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1));
 
 		for (unsigned int i = 0;i < face.mNumIndices;++i) {
 			pMesh->mNormals[face.mIndices[i]] = vNor;
@@ -209,18 +209,19 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 			// Get all vertices that share this one ...
 			vertexFinder->FindPositions( pMesh->mVertices[i] , posEpsilon, verticesFound);
 
+			aiVector3D vr = pMesh->mNormals[i];
+			float vrlen = vr.Length();
+
 			aiVector3D pcNor; 
 			for (unsigned int a = 0; a < verticesFound.size(); ++a)	{
-				const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
+				aiVector3D v = pMesh->mNormals[verticesFound[a]];
 
 				// check whether the angle between the two normals is not too large
 				// HACK: if v.x is qnan the dot product will become qnan, too
 				//   therefore the comparison against fLimit should be false
 				//   in every case. 
-				if (v * pMesh->mNormals[i] < fLimit)
-					continue;
-
-				pcNor += v;
+				if (v * vr >= fLimit * vrlen * v.Length())
+					pcNor += v;
 			}
 			pcNew[i] = pcNor.Normalize();
 		}

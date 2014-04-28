@@ -47,18 +47,16 @@ endif (CMAKE_BUILD_TYPE EQUAL "DEBUG")
 # the boost version assimp was compiled with
 set( ASSIMP_Boost_VERSION "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@")
 
-if( WIN32 )
-  # search for the boost version assimp was compiled with
-  set(Boost_USE_MULTITHREAD ON)
-  set(Boost_USE_STATIC_LIBS OFF)
-  set(Boost_USE_STATIC_RUNTIME OFF)
-  find_package(Boost ${ASSIMP_Boost_VERSION} EXACT COMPONENTS thread date_time)
-  if(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
-    set( ASSIMP_INCLUDE_DIRS "${ASSIMP_INCLUDE_DIRS}" ${Boost_INCLUDE_DIRS})
-  else(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
-    message(WARNING "Failed to find Boost ${ASSIMP_Boost_VERSION} necessary for assimp")
-  endif(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
-endif( WIN32 )
+# search for the boost version assimp was compiled with
+set(Boost_USE_MULTITHREAD ON)
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost ${ASSIMP_Boost_VERSION} EXACT COMPONENTS thread date_time)
+if(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
+	set( ASSIMP_INCLUDE_DIRS "${ASSIMP_INCLUDE_DIRS}" ${Boost_INCLUDE_DIRS})
+else(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
+	message(WARNING "Failed to find Boost ${ASSIMP_Boost_VERSION} necessary for assimp")
+endif(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
 
 # for compatibility wiht pkg-config
 set(ASSIMP_CFLAGS_OTHER "${ASSIMP_CXX_FLAGS}")

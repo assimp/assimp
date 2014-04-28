@@ -290,7 +290,7 @@ struct Model
 	//!	Active group
 	std::string m_strActiveGroup;
 	//!	Vector with generated texture coordinates
-	std::vector<aiVector2D> m_TextureCoord;
+	std::vector<aiVector3D> m_TextureCoord;
 	//!	Current mesh instance
 	Mesh *m_pCurrentMesh;
 	//!	Vector with stored meshes

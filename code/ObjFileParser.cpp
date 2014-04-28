@@ -108,19 +108,14 @@ void ObjFileParser::parseFile()
 		case 'v': // Parse a vertex texture coordinate
 			{
 				++m_DataIt;
-				if (*m_DataIt == ' ' || *m_DataIt == '\t')
-				{
-					// Read in vertex definition
+				if (*m_DataIt == ' ' || *m_DataIt == '\t') {
+					// read in vertex definition
 					getVector3(m_pModel->m_Vertices);
-				}
-				else if (*m_DataIt == 't')
-				{
-					// Read in texture coordinate (2D)
-					++m_DataIt;
-					getVector2(m_pModel->m_TextureCoord);
-				}
-				else if (*m_DataIt == 'n')
-				{
+				} else if (*m_DataIt == 't') {
+					// read in texture coordinate ( 2D or 3D )
+                    ++m_DataIt;
+                    getVector( m_pModel->m_TextureCoord );
+				} else if (*m_DataIt == 'n') {
 					// Read in normal vector definition
 					++m_DataIt;
 					getVector3( m_pModel->m_Normals );
@@ -236,9 +231,42 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 }
 
 // -------------------------------------------------------------------
+void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
+    size_t numComponents( 0 );
+    DataArrayIt tmp( m_DataIt );
+    while( !IsLineEnd( *tmp ) ) {
+        if( *tmp == ' ' ) {
+            ++numComponents;
+        }
+        tmp++;
+    }
+    float x, y, z;
+    if( 2 == numComponents ) {
+        copyNextWord( m_buffer, BUFFERSIZE );
+        x = ( float ) fast_atof( m_buffer );
+
+        copyNextWord( m_buffer, BUFFERSIZE );
+        y = ( float ) fast_atof( m_buffer );
+        z = 0.0;
+    } else if( 3 == numComponents ) {
+        copyNextWord( m_buffer, BUFFERSIZE );
+        x = ( float ) fast_atof( m_buffer );
+
+        copyNextWord( m_buffer, BUFFERSIZE );
+        y = ( float ) fast_atof( m_buffer );
+
+        copyNextWord( m_buffer, BUFFERSIZE );
+        z = ( float ) fast_atof( m_buffer );
+    } else {
+        ai_assert( !"Invalid number of components" );
+    }
+    point3d_array.push_back( aiVector3D( x, y, z ) );
+    m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+}
+
+// -------------------------------------------------------------------
 //	Get values for a new 3D vector instance
-void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array)
-{
+void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
 	float x, y, z;
 	copyNextWord(m_buffer, BUFFERSIZE);
 	x = (float) fast_atof(m_buffer);	
@@ -246,18 +274,16 @@ void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array)
 	copyNextWord(m_buffer, BUFFERSIZE);
 	y = (float) fast_atof(m_buffer);
 
-	copyNextWord(m_buffer, BUFFERSIZE);
-	z = (float) fast_atof(m_buffer);
+    copyNextWord( m_buffer, BUFFERSIZE );
+    z = ( float ) fast_atof( m_buffer );
 
 	point3d_array.push_back( aiVector3D( x, y, z ) );
-	//skipLine();
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
 //	Get values for a new 2D vector instance
-void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array )
-{
+void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
 	float x, y;
 	copyNextWord(m_buffer, BUFFERSIZE);
 	x = (float) fast_atof(m_buffer);	

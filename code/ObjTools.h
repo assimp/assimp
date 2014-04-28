@@ -107,7 +107,7 @@ inline Char_T getNextWord( Char_T pBuffer, Char_T pEnd )
 	return pBuffer;
 }
 
-/**	@brief	Returns ponter a next token
+/**	@brief	Returns pointer a next token
  *	@param	pBuffer	Pointer to data buffer
  *	@param	pEnd	Pointer to end of buffer
  *	@return	Pointer to next token

@@ -60,6 +60,7 @@ static const aiImporterDesc desc = {
 	"obj"
 };
 
+static const unsigned int ObjMinSize = 16;
 
 namespace Assimp	{
 
@@ -80,12 +81,8 @@ ObjFileImporter::ObjFileImporter() :
 //	Destructor.
 ObjFileImporter::~ObjFileImporter()
 {
-	// Release root object instance
-	if (NULL != m_pRootObject)
-	{
-		delete m_pRootObject;
-		m_pRootObject = NULL;
-	}
+	delete m_pRootObject;
+	m_pRootObject = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -118,12 +115,13 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	// Read file into memory
 	const std::string mode = "rb";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
-	if (NULL == file.get())
-		throw DeadlyImportError( "Failed to open file " + pFile + ".");
+    if( !file.get() ) {
+        throw DeadlyImportError( "Failed to open file " + pFile + "." );
+    }
 
 	// Get the file-size and validate it, throwing an exception when fails
 	size_t fileSize = file->FileSize();
-	if( fileSize < 16) {
+    if( fileSize < ObjMinSize ) {
 		throw DeadlyImportError( "OBJ-file is too small.");
     }
 
@@ -154,10 +152,10 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 // ------------------------------------------------------------------------------------------------
 //	Create the data from parsed obj-file
-void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene* pScene)
-{
-	if (0L == pModel)
-		return;
+void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene* pScene) {
+    if( 0L == pModel ) {
+        return;
+    }
 		
 	// Create the root node of the scene
 	pScene->mRootNode = new aiNode;
@@ -200,8 +198,9 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 									 std::vector<aiMesh*> &MeshArray )
 {
 	ai_assert( NULL != pModel );
-	if ( NULL == pObject )
-		return NULL;
+    if( NULL == pObject ) {
+        return NULL;
+    }
 	
 	// Store older mesh size to be able to computes mesh offsets for new mesh instances
 	const size_t oldMeshSize = MeshArray.size();
@@ -210,8 +209,9 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	pNode->mName = pObject->m_strObjName;
 	
 	// If we have a parent node, store it
-	if (pParent != NULL)
-		appendChildToParentNode(pParent, pNode);
+    if( pParent != NULL ) {
+        appendChildToParentNode( pParent, pNode );
+    }
 
 	for ( unsigned int i=0; i< pObject->m_Meshes.size(); i++ )
 	{
@@ -265,8 +265,9 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 {
 	// Checking preconditions
 	ai_assert( NULL != pModel );
-	if (NULL == pData)
-		return;
+    if( NULL == pData ) {
+        return;
+    }
 
 	// Create faces
 	ObjFile::Mesh *pObjMesh = pModel->m_Meshes[ uiMeshIndex ];
@@ -284,8 +285,7 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 		else if (inp->m_PrimitiveType == aiPrimitiveType_POINT) {
 			pMesh->mNumFaces += inp->m_pVertices->size();
 			pMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
-		}
-		else {
+		} else {
 			++pMesh->mNumFaces;
 			if (inp->m_pVertices->size() > 3) {
 				pMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
@@ -409,10 +409,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 				ai_assert( tex < pModel->m_TextureCoord.size() );
 					
 				if ( tex >= pModel->m_TextureCoord.size() )
-					throw DeadlyImportError("OBJ: texture coord index out of range");
+					throw DeadlyImportError("OBJ: texture coordinate index out of range");
 
-				aiVector2D coord2d = pModel->m_TextureCoord[ tex ];
-				pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord2d.x, coord2d.y, 0.0 );
+				const aiVector3D &coord3d = pModel->m_TextureCoord[ tex ];
+                pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
 			}
 
 			ai_assert( pMesh->mNumVertices > newIndex );

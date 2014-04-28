@@ -37,8 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
-
 #ifndef OBJ_FILEPARSER_H_INC
 #define OBJ_FILEPARSER_H_INC
 
@@ -79,26 +77,29 @@ public:
 	ObjFile::Model *GetModel() const;
 
 private:
-	///	Parse the loadedfile
+	///	Parse the loaded file
 	void parseFile();
 	///	Method to copy the new delimited word in the current line.
 	void copyNextWord(char *pBuffer, size_t length);
 	///	Method to copy the new line.
 	void copyNextLine(char *pBuffer, size_t length);
-	///	Stores the following 3d vector.
+    /// Stores the vector 
+    void getVector( std::vector<aiVector3D> &point3d_array );
+    ///	Stores the following 3d vector.
 	void getVector3( std::vector<aiVector3D> &point3d_array );
 	///	Stores the following 3d vector.
 	void getVector2(std::vector<aiVector2D> &point2d_array);
-	///	Stores the following face.
+    ///	Stores the following face.
 	void getFace(aiPrimitiveType type);
-	void getMaterialDesc();
+	/// Reads the material description.
+    void getMaterialDesc();
 	///	Gets a comment.
 	void getComment();
 	/// Gets a a material library.
 	void getMaterialLib();
 	/// Creates a new material.
 	void getNewMaterial();
-	/// Gets the groupname from file.
+	/// Gets the group name from file.
 	void getGroupName();
 	/// Gets the group number from file.
 	void getGroupNumber();

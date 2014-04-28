@@ -365,7 +365,7 @@ public:
 	// and append the result to the mesh
 	virtual void SampleDiscrete(TempMesh& out,IfcFloat start,IfcFloat end) const;
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 	// check if a particular parameter value lies within the well-defined range
 	bool InRange(IfcFloat) const;
 #endif 

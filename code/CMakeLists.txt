@@ -76,13 +76,13 @@ SOURCE_GROUP(Boost FILES ${Boost_SRCS})
 
 SET( Logging_SRCS
 	${HEADER_PATH}/DefaultLogger.hpp
-	${HEADER_PATH}/IOStream.hpp
 	${HEADER_PATH}/LogStream.hpp
 	${HEADER_PATH}/Logger.hpp
 	${HEADER_PATH}/NullLogger.hpp
 	Win32DebugLogStream.h
 	DefaultLogger.cpp
 	FileLogStream.h
+	StdOStreamLogStream.h
 )
 SOURCE_GROUP(Logging FILES ${Logging_SRCS})
 
@@ -107,8 +107,8 @@ SET( Common_SRCS
 	Hash.h
 	Importer.cpp
 	IFF.h
+	MemoryIOWrapper.h
 	ParsingUtils.h
-	StdOStreamLogStream.h
 	StreamReader.h
 	StringComparison.h
 	SGSpatialSort.cpp
@@ -140,6 +140,8 @@ SET( Common_SRCS
 	TinyFormatter.h
 	Profiler.h
 	LogAux.h
+	Bitmap.cpp
+	Bitmap.h
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -461,8 +463,6 @@ SET( PostProcessing_SRCS
 	SortByPTypeProcess.h
 	SplitLargeMeshes.cpp
 	SplitLargeMeshes.h
-	TerragenLoader.cpp
-	TerragenLoader.h
 	TextureTransform.cpp
 	TextureTransform.h
 	TriangulateProcess.cpp
@@ -519,6 +519,12 @@ SET( STL_SRCS
 	STLExporter.cpp
 )
 SOURCE_GROUP( STL FILES ${STL_SRCS})
+
+SET( Terragen_SRCS
+	TerragenLoader.cpp
+	TerragenLoader.h
+)
+SOURCE_GROUP( Terragen FILES ${Terragen_SRCS})
 
 SET( Unreal_SRCS
 	UnrealLoader.cpp
@@ -655,6 +661,7 @@ SET( assimp_src
 	${Raw_SRCS}
 	${SMD_SRCS}
 	${STL_SRCS}
+	${Terragen_SRCS}
 	${Unreal_SRCS}
 	${XFile_SRCS}
 	${Extra_SRCS}
@@ -677,9 +684,14 @@ SET( assimp_src
 
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
+	
+	# Old precompiled header
+	# (removed because the precompiled header is not updated when visual studio switch configuration which leads to failed compilation.
+	# Moreover it's a drag to recompile assimp entirely each time a modification is made to one of the included header, which is definitely counter-productive.)
+	AssimpPCH.cpp
 )
 
-ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
+#ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
 
 ADD_LIBRARY( assimp ${assimp_src} )
 

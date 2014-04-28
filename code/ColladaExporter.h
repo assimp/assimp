@@ -59,7 +59,10 @@ class ColladaExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	ColladaExporter( const aiScene* pScene);
+	ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
+
+	/// Destructor
+	virtual ~ColladaExporter();
 
 protected:
 	/// Starts writing the contents
@@ -68,8 +71,11 @@ protected:
 	/// Writes the asset header
 	void WriteHeader();
 
-  /// Writes the material setup
-  void WriteMaterials();
+	/// Writes the embedded textures
+	void WriteTextures();
+
+	/// Writes the material setup
+	void WriteMaterials();
 
 	/// Writes the geometry library
 	void WriteGeometryLibrary();
@@ -101,8 +107,18 @@ public:
 	std::stringstream mOutput;
 
 protected:
+	/// The IOSystem for output
+	IOSystem* mIOSystem;
+
+	/// Path of the directory where the scene will be exported
+	const std::string mPath;
+
+	/// Name of the file (without extension) where the scene will be exported
+	const std::string mFile;
+
 	/// The scene to be written
 	const aiScene* mScene;
+	bool mSceneOwned;
 
 	/// current line start string, contains the current indentation for simple stream insertion
 	std::string startstr;
@@ -112,23 +128,34 @@ protected:
   // pair of color and texture - texture precedences color
   struct Surface 
   { 
+    bool exist;
     aiColor4D color; 
     std::string texture; 
     size_t channel; 
-    Surface() { channel = 0; }
+    Surface() { exist = false; channel = 0; }
+  };
+
+  struct Property
+  {
+    bool exist;
+	float value;
+	Property() { exist = false; }
   };
 
   // summarize a material in an convinient way. 
   struct Material
   {
     std::string name;
-    Surface ambient, diffuse, specular, emissive, reflective, normal;
-    float shininess; /// specular exponent
+    std::string shading_model;
+    Surface ambient, diffuse, specular, emissive, reflective, transparent, normal;
+   	Property shininess, transparency, index_refraction;
 
-    Material() { shininess = 16.0f; }
+    Material() {}
   };
 
   std::vector<Material> materials;
+
+  std::map<unsigned int, std::string> textures;
 
 protected:
   /// Dammit C++ - y u no compile two-pass? No I have to add all methods below the struct definitions
@@ -140,6 +167,8 @@ protected:
   void WriteTextureParamEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pMatName);
   /// Writes a color-or-texture entry into an effect definition
   void WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName);
+  /// Writes a scalar property
+  void WriteFloatEntry( const Property& pProperty, const std::string& pTypeName);
 };
 
 }

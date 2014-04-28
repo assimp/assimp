@@ -881,6 +881,59 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
 }
 
 // ------------------------------------------------------------------------------------------------
+void SceneCombiner::MergeMaterials(aiMaterial** dest,
+		std::vector<aiMaterial*>::const_iterator begin,
+		std::vector<aiMaterial*>::const_iterator end)
+{
+	ai_assert(NULL != dest);
+
+	if (begin == end)	{
+		*dest = NULL; // no materials ...
+		return;
+	}
+
+	// Allocate the output material
+	aiMaterial* out = *dest = new aiMaterial();
+
+	// Get the maximal number of properties
+	unsigned int size = 0;
+	for (std::vector<aiMaterial*>::const_iterator it = begin; it != end; ++it) {
+		size += (*it)->mNumProperties;
+	}
+
+	out->Clear();
+	delete[] out->mProperties;
+
+	out->mNumAllocated = size;
+	out->mNumProperties = 0;
+	out->mProperties = new aiMaterialProperty*[out->mNumAllocated];
+
+	for (std::vector<aiMaterial*>::const_iterator it = begin; it != end; ++it) {
+		for(unsigned int i = 0; i < (*it)->mNumProperties; ++i) {
+			aiMaterialProperty* sprop = (*it)->mProperties[i];
+
+			// Test if we already have a matching property 
+			const aiMaterialProperty* prop_exist;
+			if(aiGetMaterialProperty(out, sprop->mKey.C_Str(), sprop->mType, sprop->mIndex, &prop_exist) != AI_SUCCESS) {
+				// If not, we add it to the new material
+				aiMaterialProperty* prop = out->mProperties[out->mNumProperties] = new aiMaterialProperty();
+
+				prop->mDataLength = sprop->mDataLength;
+				prop->mData = new char[prop->mDataLength];
+				::memcpy(prop->mData, sprop->mData, prop->mDataLength);
+
+				prop->mIndex    = sprop->mIndex;
+				prop->mSemantic = sprop->mSemantic;
+				prop->mKey      = sprop->mKey;
+				prop->mType		= sprop->mType;
+
+				out->mNumProperties++;
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 template <typename Type>
 inline void CopyPtrArray (Type**& dest, const Type* const * src, unsigned int num)
 {
@@ -1012,6 +1065,10 @@ void SceneCombiner::Copy (aiMaterial** _dest, const aiMaterial* src)
 	ai_assert(NULL != _dest && NULL != src);
 
 	aiMaterial* dest = (aiMaterial*) ( *_dest = new aiMaterial() );
+
+	dest->Clear();
+	delete[] dest->mProperties;
+
 	dest->mNumAllocated  =  src->mNumAllocated;
 	dest->mNumProperties =  src->mNumProperties;
 	dest->mProperties    =  new aiMaterialProperty* [dest->mNumAllocated];

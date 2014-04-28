@@ -550,7 +550,7 @@ Curve* Curve :: Convert(const IFC::IfcCurve& curve,ConversionData& conv)
 	return NULL;
 }
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 // ------------------------------------------------------------------------------------------------
 bool Curve :: InRange(IfcFloat u) const 
 {

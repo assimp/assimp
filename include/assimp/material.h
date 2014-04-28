@@ -1474,6 +1474,18 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat,
 
 
 // ---------------------------------------------------------------------------
+/** @brief Retrieve a aiUVTransform value from the material property table
+*
+* See the sample for aiGetMaterialFloat for more information*/
+// ---------------------------------------------------------------------------
+ASSIMP_API C_ENUM aiReturn aiGetMaterialUVTransform(const C_STRUCT aiMaterial* pMat, 
+    const char* pKey,
+	 unsigned int type,
+    unsigned int index,
+	 C_STRUCT aiUVTransform* pOut);
+
+
+// ---------------------------------------------------------------------------
 /** @brief Retrieve a string from the material property table
 *
 * See the sample for aiGetMaterialFloat for more information.*/

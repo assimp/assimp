@@ -57,7 +57,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PretransformVertices::PretransformVertices()
-:	configKeepHierarchy (false)
+:	configKeepHierarchy (false), configNormalize(false), configTransform(false), configTransformation()
 {
 }
 
@@ -79,9 +79,13 @@ bool PretransformVertices::IsActive( unsigned int pFlags) const
 // Setup import configuration
 void PretransformVertices::SetupProperties(const Importer* pImp)
 {
-	// Get the current value of AI_CONFIG_PP_PTV_KEEP_HIERARCHY and AI_CONFIG_PP_PTV_NORMALIZE
+	// Get the current value of AI_CONFIG_PP_PTV_KEEP_HIERARCHY, AI_CONFIG_PP_PTV_NORMALIZE,
+	// AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION and AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION
 	configKeepHierarchy = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY,0));
 	configNormalize = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_PTV_NORMALIZE,0));
+	configTransform = (0 != pImp->GetPropertyInteger(AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION,0));
+
+	configTransformation = pImp->GetPropertyMatrix(AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -391,6 +395,8 @@ void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in
 				ntz->mBones = reinterpret_cast<aiBone**> (&node->mTransformation);
 
 				out.push_back(ntz);
+
+				node->mMeshes[i] = numIn + out.size() - 1;
 			}
 		}
 	}
@@ -436,6 +442,10 @@ void PretransformVertices::Execute( aiScene* pScene)
 	const unsigned int iOldMeshes = pScene->mNumMeshes;
 	const unsigned int iOldAnimationChannels = pScene->mNumAnimations;
 	const unsigned int iOldNodes = CountNodes(pScene->mRootNode);
+
+	if(configTransform) {
+		pScene->mRootNode->mTransformation = configTransformation;
+	}
 
 	// first compute absolute transformation matrices for all nodes
 	ComputeAbsoluteTransform(pScene->mRootNode);

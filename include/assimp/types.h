@@ -174,6 +174,16 @@ struct aiColor3D
 	bool operator != (const aiColor3D& other) const
 		{return r != other.r || g != other.g || b != other.b;}
 
+	/** Component-wise comparison */
+	// TODO: add epsilon?
+	bool operator < (const aiColor3D& other) const {
+		return r < other.r || (
+			r == other.r && (g < other.g ||
+				(g == other.g && b < other.b)
+			)
+		);
+	}
+
 	/** Component-wise addition */
 	aiColor3D operator+(const aiColor3D& c) const {
 		return aiColor3D(r+c.r,g+c.g,b+c.b);
@@ -247,7 +257,7 @@ struct aiString
 	{
 		data[0] = '\0';
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		// Debug build: overwrite the string on its full length with ESC (27)
 		memset(data+1,27,MAXLEN-1);
 #endif
@@ -334,7 +344,7 @@ struct aiString
 		length  = 0;
 		data[0] = '\0';
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		// Debug build: overwrite the string on its full length with ESC (27)
 		memset(data+1,27,MAXLEN-1);
 #endif

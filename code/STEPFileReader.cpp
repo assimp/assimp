@@ -175,7 +175,7 @@ bool IsEntityDef(const std::string& snext)
 			if (*it == '=') {
 				return true;
 			}
-			if (*it < '0' || *it > '9') {
+			if ((*it < '0' || *it > '9') && *it != ' ') {
 				break;
 			}
 		}
@@ -197,16 +197,17 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 
 	const DB::ObjectMap& map = db.GetObjects();
 	LineSplitter& splitter = db.GetSplitter();
+	
 	while (splitter) {
 		bool has_next = false;
 		std::string s = *splitter;
 		if (s == "ENDSEC;") {
 			break;
 		}
+		s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
 
 		// want one-based line numbers for human readers, so +1
 		const uint64_t line = splitter.get_index()+1;
-
 		// LineSplitter already ignores empty lines
 		ai_assert(s.length());
 		if (s[0] != '#') {
@@ -214,12 +215,10 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 			++splitter;
 			continue;
 		}
-
 		// ---
 		// extract id, entity class name and argument string,
 		// but don't create the actual object yet. 
 		// ---
-
 		const std::string::size_type n0 = s.find_first_of('=');
 		if (n0 == std::string::npos) {
 			DefaultLogger::get()->warn(AddLineNumber("expected token \'=\'",line));
@@ -233,13 +232,10 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 			++splitter;
 			continue;
 		}
-
 		std::string::size_type n1 = s.find_first_of('(',n0);
 		if (n1 == std::string::npos) {
-
 			has_next = true;
 			bool ok = false;
-
 			for( ++splitter; splitter; ++splitter) {
 				const std::string& snext = *splitter;
 				if (snext.empty()) {
@@ -269,13 +265,11 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 			
 			has_next = true;
 			bool ok = false;
-
 			for( ++splitter; splitter; ++splitter) {
 				const std::string& snext = *splitter;
 				if (snext.empty()) {
 					continue;
 				}
-
 				// the next line doesn't start an entity, so maybe it is 
 				// just a continuation  for this line, keep going
 				if (!IsEntityDef(snext)) {
@@ -287,7 +281,6 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 					break;
 				}
 			}
-
 			if(!ok) {
 				DefaultLogger::get()->warn(AddLineNumber("expected token \')\'",line));
 				continue;
@@ -300,24 +293,18 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 
 		std::string::size_type ns = n0;
 		do ++ns; while( IsSpace(s.at(ns)));
-
 		std::string::size_type ne = n1;
 		do --ne; while( IsSpace(s.at(ne)));
-
 		std::string type = s.substr(ns,ne-ns+1);
 		std::transform( type.begin(), type.end(), type.begin(), &Assimp::ToLower<char>  );
-
 		const char* sz = scheme.GetStaticStringForToken(type);
 		if(sz) {
-		
 			const std::string::size_type len = n2-n1+1;
 			char* const copysz = new char[len+1];
 			std::copy(s.c_str()+n1,s.c_str()+n2+1,copysz);
 			copysz[len] = '\0';
-
 			db.InternInsert(new LazyObject(db,id,line,sz,copysz));
 		}
-
 		if(!has_next) {
 			++splitter;
 		}
@@ -327,7 +314,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 		DefaultLogger::get()->warn("STEP: ignoring unexpected EOF");
 	}
 
-	if ( !DefaultLogger::isNullLogger() ){
+	if ( !DefaultLogger::isNullLogger()){
 		DefaultLogger::get()->debug((Formatter::format(),"STEP: got ",map.size()," object records with ",
 			db.GetRefs().size()," inverse index entries"));
 	}
@@ -338,7 +325,6 @@ boost::shared_ptr<const EXPRESS::DataType> EXPRESS::DataType::Parse(const char*&
 {
 	const char* cur = inout;
 	SkipSpaces(&cur);
-
 	if (*cur == ',' || IsSpaceOrNewLine(*cur)) {
 		throw STEP::SyntaxError("unexpected token, expected parameter",line);
 	}

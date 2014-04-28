@@ -115,7 +115,7 @@ AI_FORCE_INLINE bool SkipSpaces( const char_t** inout)
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-inline bool SkipLine( const char_t* in, const char_t** out)
+AI_FORCE_INLINE bool SkipLine( const char_t* in, const char_t** out)
 {
 	while (*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0')in++;
 
@@ -126,13 +126,13 @@ inline bool SkipLine( const char_t* in, const char_t** out)
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-inline bool SkipLine( const char_t** inout)
+AI_FORCE_INLINE bool SkipLine( const char_t** inout)
 {
 	return SkipLine<char_t>(*inout,inout);
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-inline bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
+AI_FORCE_INLINE bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
 {
 	while (*in == (char_t)' ' || *in == (char_t)'\t' ||
 		*in == (char_t)'\r' || *in == (char_t)'\n')in++;
@@ -141,13 +141,13 @@ inline bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-inline bool SkipSpacesAndLineEnd( const char_t** inout)
+AI_FORCE_INLINE bool SkipSpacesAndLineEnd( const char_t** inout)
 {
 	return SkipSpacesAndLineEnd<char_t>(*inout,inout);
 }
 // ---------------------------------------------------------------------------------
 template <class char_t>
-inline bool GetNextLine(const char_t*& buffer, char_t out[4096])
+AI_FORCE_INLINE bool GetNextLine(const char_t*& buffer, char_t out[4096])
 {
 	if ((char_t)'\0' == *buffer)return false;
 

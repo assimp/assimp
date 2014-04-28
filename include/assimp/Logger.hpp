@@ -56,8 +56,11 @@ class LogStream;
  *  Assimp provides a default implementation and uses it for almost all 
  *  logging stuff ('DefaultLogger'). This class defines just basic logging
  *  behaviour and is not of interest for you. Instead, take a look at #DefaultLogger. */
-class ASSIMP_API Logger 
-	: public Intern::AllocateFromAssimpHeap	{
+class ASSIMP_API Logger
+#ifndef SWIG
+	: public Intern::AllocateFromAssimpHeap
+#endif
+{
 public:
 
 	// ----------------------------------------------------------------------

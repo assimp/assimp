@@ -221,7 +221,7 @@ bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, cons
 		const IfcFloat s = (x*e.y - e.x*y)/det;
 		const IfcFloat t = (x*b.y - b.x*y)/det;
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		const IfcVector3 check = b0 + b*s  - (e0 + e*t);
 		ai_assert((IfcVector2(check.x,check.y)).SquareLength() < 1e-5);
 #endif
@@ -417,7 +417,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 			IfcVector3 isectpos;
 			const Intersect isect =  extra_point_flag ? Intersect_No : IntersectSegmentPlane(p,n,e0,e1,isectpos);
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 			if (isect == Intersect_Yes) {
 				const IfcFloat f = fabs((isectpos - p)*n);
 				ai_assert(f < 1e-5);

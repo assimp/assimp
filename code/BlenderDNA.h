@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TinyFormatter.h"
 
 // enable verbose log output. really verbose, so be careful.
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 #	define ASSIMP_BUILD_BLENDER_DEBUG
 #endif
 

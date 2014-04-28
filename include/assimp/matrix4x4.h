@@ -78,6 +78,14 @@ public:
 
 	/** construction from 3x3 matrix, remaining elements are set to identity */
 	explicit aiMatrix4x4t( const aiMatrix3x3t<TReal>& m);
+	
+	/** construction from position, rotation and scaling components
+	 * @param scaling The scaling for the x,y,z axes
+	 * @param rotation The rotation as a hamilton quaternion 
+	 * @param position The position for the x,y,z axes
+	 */
+	aiMatrix4x4t(aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
+		aiVector3t<TReal>& position);
 
 public:
 
@@ -86,8 +94,10 @@ public:
 	const TReal* operator[] (unsigned int p_iIndex) const;
 
 	// comparison operators
-	bool operator== (const aiMatrix4x4t m) const;
-	bool operator!= (const aiMatrix4x4t m) const;
+	bool operator== (const aiMatrix4x4t& m) const;
+	bool operator!= (const aiMatrix4x4t& m) const;
+
+	bool Equal(const aiMatrix4x4t& m, TReal epsilon = 1e-6) const;
 
 	// matrix multiplication. 
 	aiMatrix4x4t& operator *= (const aiMatrix4x4t& m);

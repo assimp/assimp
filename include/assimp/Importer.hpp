@@ -231,6 +231,13 @@ public:
 		bool* bWasExisting = NULL);
 
 	// -------------------------------------------------------------------
+	/** Set a matrix configuration property.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyMatrix(const char* szName, const aiMatrix4x4& sValue, 
+		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
 	/** Get a configuration property.
 	 * @param szName Name of the property. All supported properties
 	 *   are defined in the aiConfig.g header (all constants share the
@@ -270,8 +277,17 @@ public:
 	 *  The return value remains valid until the property is modified.
 	 * @see GetPropertyInteger()
 	 */
-	const std::string& GetPropertyString(const char* szName,
+	const std::string GetPropertyString(const char* szName,
 		const std::string& sErrorReturn = "") const;
+
+	// -------------------------------------------------------------------
+	/** Get a matrix configuration property
+	 *
+	 *  The return value remains valid until the property is modified.
+	 * @see GetPropertyInteger()
+	 */
+	const aiMatrix4x4 GetPropertyMatrix(const char* szName,
+		const aiMatrix4x4& sErrorReturn = aiMatrix4x4()) const;
 
 	// -------------------------------------------------------------------
 	/** Supplies a custom IO handler to the importer to use to open and

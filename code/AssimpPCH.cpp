@@ -69,27 +69,27 @@ ASSIMP_API unsigned int aiGetVersionRevision ()
 }
 
 // ------------------------------------------------------------------------------------------------
-aiScene::aiScene()
-	: mFlags()
-	, mRootNode()
-	, mNumMeshes()
-	, mMeshes()
-	, mNumMaterials()
-	, mMaterials()
-	, mNumAnimations()
-	, mAnimations()
-	, mNumTextures()
-	, mTextures()
-	, mNumLights()
-	, mLights()
-	, mNumCameras()
-	, mCameras()
+ASSIMP_API aiScene::aiScene()
+	: mFlags(0)
+	, mRootNode(NULL)
+	, mNumMeshes(0)
+	, mMeshes(NULL)
+	, mNumMaterials(0)
+	, mMaterials(NULL)
+	, mNumAnimations(0)
+	, mAnimations(NULL)
+	, mNumTextures(0)
+	, mTextures(NULL)
+	, mNumLights(0)
+	, mLights(NULL)
+	, mNumCameras(0)
+	, mCameras(NULL)
 	, mPrivate(new Assimp::ScenePrivateData())
 	{
 	}
 
 // ------------------------------------------------------------------------------------------------
-aiScene::~aiScene()
+ASSIMP_API aiScene::~aiScene()
 {
 	// delete all sub-objects recursively
 	delete mRootNode;

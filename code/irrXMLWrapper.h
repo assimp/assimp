@@ -81,11 +81,21 @@ public:
 		// Map the buffer into memory and convert it to UTF8. IrrXML provides its
 		// own conversion, which is merely a cast from uintNN_t to uint8_t. Thus,
 		// it is not suitable for our purposes and we have to do it BEFORE IrrXML
-		// gets the buffer. Sadly, this forces as to map the whole file into
+		// gets the buffer. Sadly, this forces us to map the whole file into
 		// memory.
 
 		data.resize(stream->FileSize());
 		stream->Read(&data[0],data.size(),1);
+
+		// Remove null characters from the input sequence otherwise the parsing will utterly fail
+		unsigned int size = 0;
+		unsigned int size_max = data.size();
+		for(unsigned int i = 0; i < size_max; i++) {
+			if(data[i] != '\0') {
+				data[size++] = data[i];
+			}
+		}
+		data.resize(size);
 
 		BaseImporter::ConvertToUTF8(data);
 	}

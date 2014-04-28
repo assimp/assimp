@@ -72,7 +72,7 @@ void ScenePreprocessor::ProcessScene ()
 		aiColor3D clr(0.6f,0.6f,0.6f);
 		helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
 
-		// setup the default name to make this material identifyable
+		// setup the default name to make this material identifiable
 		name.Set(AI_DEFAULT_MATERIAL_NAME);
 		helper->AddProperty(&name,AI_MATKEY_NAME);
 

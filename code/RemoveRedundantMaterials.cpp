@@ -142,6 +142,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 			// if the material is not referenced ... remove it
 			if (!abReferenced[i])	{
 				++unreferenced;
+				delete pScene->mMaterials[i];
 				continue;
 			}
 

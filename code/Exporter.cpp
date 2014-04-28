@@ -176,6 +176,8 @@ Exporter :: Exporter()
 Exporter :: ~Exporter()
 {
 	FreeBlob();
+
+	delete pimpl;
 }
 
 

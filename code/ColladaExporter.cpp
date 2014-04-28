@@ -44,6 +44,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 #include "ColladaExporter.h"
 
+#include "Bitmap.h"
+#include "fast_atof.h"
+#include "SceneCombiner.h" 
+
+#include <ctime>
+#include <set>
+
 using namespace Assimp;
 
 namespace Assimp
@@ -53,8 +60,25 @@ namespace Assimp
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
 void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
 {
+	std::string path = "";
+	std::string file = pFile;
+
+	// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
+	// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
+	const char* end_path = std::max(strrchr(pFile, '\\'), strrchr(pFile, '/'));
+
+	if(end_path != NULL) {
+		path = std::string(pFile, end_path + 1 - pFile);
+		file = file.substr(end_path + 1 - pFile, file.npos);
+
+		std::size_t pos = file.find_last_of('.');
+		if(pos != file.npos) {
+			file = file.substr(0, pos);
+		}
+	}
+
 	// invoke the exporter 
-	ColladaExporter iDoTheExportThing( pScene);
+	ColladaExporter iDoTheExportThing( pScene, pIOSystem, path, file);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
@@ -71,18 +95,28 @@ void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pS
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-ColladaExporter::ColladaExporter( const aiScene* pScene)
+ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
 
 	mScene = pScene;
+	mSceneOwned = false;
 
 	// set up strings
 	endstr = "\n"; 
 
 	// start writing
 	WriteFile();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Destructor
+ColladaExporter::~ColladaExporter()
+{
+	if(mSceneOwned) {
+		delete mScene;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -95,9 +129,10 @@ void ColladaExporter::WriteFile()
 	mOutput << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">" << endstr;
 	PushTag();
 
+	WriteTextures();
 	WriteHeader();
 
-  WriteMaterials();
+	WriteMaterials();
 	WriteGeometryLibrary();
 
 	WriteSceneLibrary();
@@ -105,7 +140,7 @@ void ColladaExporter::WriteFile()
 	// useless Collada fu at the end, just in case we haven't had enough indirections, yet. 
 	mOutput << startstr << "<scene>" << endstr;
 	PushTag();
-	mOutput << startstr << "<instance_visual_scene url=\"#myScene\" />" << endstr;
+	mOutput << startstr << "<instance_visual_scene url=\"#" + std::string(mScene->mRootNode->mName.C_Str()) + "\" />" << endstr;
 	PopTag();
 	mOutput << startstr << "</scene>" << endstr;
 	PopTag();
@@ -116,21 +151,129 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-	// Dummy stuff. Nobody actually cares for it anyways
+	static const float epsilon = 0.000001f;
+	static const aiQuaternion x_rot(aiMatrix3x3( 
+		0, -1,  0,
+		1,  0,  0,
+		0,  0,  1));
+	static const aiQuaternion y_rot(aiMatrix3x3(
+		1,  0,  0,
+		0,  1,  0,
+		0,  0,  1));
+	static const aiQuaternion z_rot(aiMatrix3x3(
+		1,  0,  0,
+		0,  0,  1,
+		0, -1,  0));
+
+	static const unsigned int date_nb_chars = 20;
+	char date_str[date_nb_chars];
+	std::time_t date = std::time(NULL);
+	std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
+
+	std::string scene_name = mScene->mRootNode->mName.C_Str();
+
+	aiVector3D scaling;
+	aiQuaternion rotation;
+	aiVector3D position;
+	mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
+
+	bool add_root_node = false;
+
+	float scale = 1.0;
+	if(std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
+		scale = (float) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
+	} else {
+		add_root_node = true;
+	}
+
+	std::string up_axis = "Y_UP";
+	if(rotation.Equal(x_rot, epsilon)) {
+		up_axis = "X_UP";
+	} else if(rotation.Equal(y_rot, epsilon)) {
+		up_axis = "Y_UP";
+	} else if(rotation.Equal(z_rot, epsilon)) {
+		up_axis = "Z_UP";
+	} else {
+		add_root_node = true;
+	}
+
+	if(! position.Equal(aiVector3D(0, 0, 0))) {
+		add_root_node = true;
+	}
+
+	if(mScene->mRootNode->mNumChildren == 0) {
+		add_root_node = true;
+	}
+
+	if(add_root_node) {
+		aiScene* scene;
+		SceneCombiner::CopyScene(&scene, mScene);
+
+		aiNode* root = new aiNode("Scene");
+
+		root->mNumChildren = 1;
+		root->mChildren = new aiNode*[root->mNumChildren];
+
+		root->mChildren[0] = scene->mRootNode;
+		scene->mRootNode->mParent = root;
+		scene->mRootNode = root;
+
+		mScene = scene;
+		mSceneOwned = true;
+
+		up_axis = "Y_UP";
+		scale = 1.0;
+	}
+
 	mOutput << startstr << "<asset>" << endstr;
 	PushTag();
 	mOutput << startstr << "<contributor>" << endstr;
 	PushTag();
-	mOutput << startstr << "<author>Someone</author>" << endstr;
+	mOutput << startstr << "<author>Assimp</author>" << endstr;
 	mOutput << startstr << "<authoring_tool>Assimp Collada Exporter</authoring_tool>" << endstr;
 	PopTag();
 	mOutput << startstr << "</contributor>" << endstr;
-  mOutput << startstr << "<created>2000-01-01T23:59:59</created>" << endstr;
-  mOutput << startstr << "<modified>2000-01-01T23:59:59</modified>" << endstr;
-	mOutput << startstr << "<unit name=\"centimeter\" meter=\"0.01\" />" << endstr;
-	mOutput << startstr << "<up_axis>Y_UP</up_axis>" << endstr;
+	mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
+	mOutput << startstr << "<modified>" << date_str << "</modified>" << endstr;
+	mOutput << startstr << "<unit name=\"meter\" meter=\"" << scale << "\" />" << endstr;
+	mOutput << startstr << "<up_axis>" << up_axis << "</up_axis>" << endstr;
 	PopTag();
 	mOutput << startstr << "</asset>" << endstr;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Write the embedded textures
+void ColladaExporter::WriteTextures() {
+	static const unsigned int buffer_size = 1024;
+	char str[buffer_size];
+
+	if(mScene->HasTextures()) {
+		for(unsigned int i = 0; i < mScene->mNumTextures; i++) {
+			// It would be great to be able to create a directory in portable standard C++, but it's not the case,
+			// so we just write the textures in the current directory.
+
+			aiTexture* texture = mScene->mTextures[i];
+
+			ASSIMP_itoa10(str, buffer_size, i + 1);
+
+			std::string name = mFile + "_texture_" + (i < 1000 ? "0" : "") + (i < 100 ? "0" : "") + (i < 10 ? "0" : "") + str + "." + ((const char*) texture->achFormatHint);
+
+			boost::scoped_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
+			if(outfile == NULL) {
+				throw DeadlyExportError("could not open output texture file: " + mPath + name);
+			}
+
+			if(texture->mHeight == 0) {
+				outfile->Write((void*) texture->pcData, texture->mWidth, 1);
+			} else {
+				Bitmap::Save(texture, outfile.get());
+			}
+
+			outfile->Flush();
+
+			textures.insert(std::make_pair(i, name));
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -142,12 +285,39 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
     aiString texfile;
     unsigned int uvChannel = 0;
     pSrcMat->GetTexture( pTexture, 0, &texfile, NULL, &uvChannel);
-    poSurface.texture = texfile.C_Str();
+
+    std::string index_str(texfile.C_Str());
+
+    if(index_str.size() != 0 && index_str[0] == '*')
+    {
+		unsigned int index;
+
+    	index_str = index_str.substr(1, std::string::npos);
+
+    	try {
+    		index = (unsigned int) strtoul10_64(index_str.c_str());
+    	} catch(std::exception& error) {
+    		throw DeadlyExportError(error.what());
+    	}
+
+    	std::map<unsigned int, std::string>::const_iterator name = textures.find(index);
+
+    	if(name != textures.end()) {
+    		poSurface.texture = name->second;
+    	} else {
+    		throw DeadlyExportError("could not find embedded texture at index " + index_str);
+    	}
+    } else
+    {
+		poSurface.texture = texfile.C_Str();
+    }
+
     poSurface.channel = uvChannel;
+	poSurface.exist = true;
   } else
   {
     if( pKey )
-      pSrcMat->Get( pKey, pType, pIndex, poSurface.color);
+      poSurface.exist = pSrcMat->Get( pKey, pType, pIndex, poSurface.color) == aiReturn_SUCCESS;
   }
 }
 
@@ -177,17 +347,19 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
 // Writes a color-or-texture entry into an effect definition
 void ColladaExporter::WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName)
 {
-  mOutput << startstr << "<" << pTypeName << ">" << endstr;
-  PushTag();
-  if( pSurface.texture.empty() )
-  {
-    mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
-  } else
-  {
-    mOutput << startstr << "<texture texture=\"" << pImageName << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
+  if(pSurface.exist) {
+    mOutput << startstr << "<" << pTypeName << ">" << endstr;
+    PushTag();
+    if( pSurface.texture.empty() )
+    {
+      mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
+    } else
+    {
+      mOutput << startstr << "<texture texture=\"" << pImageName << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
+    }
+    PopTag();
+    mOutput << startstr << "</" << pTypeName << ">" << endstr;
   }
-  PopTag();
-  mOutput << startstr << "</" << pTypeName << ">" << endstr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -220,10 +392,25 @@ void ColladaExporter::WriteTextureParamEntry( const Surface& pSurface, const std
 }
 
 // ------------------------------------------------------------------------------------------------
+// Writes a scalar property
+void ColladaExporter::WriteFloatEntry( const Property& pProperty, const std::string& pTypeName)
+{
+	if(pProperty.exist) {
+		mOutput << startstr << "<" << pTypeName << ">" << endstr;
+		PushTag();
+		mOutput << startstr << "<float sid=\"" << pTypeName << "\">" << pProperty.value << "</float>" << endstr;
+		PopTag();
+		mOutput << startstr << "</" << pTypeName << ">" << endstr;
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Writes the material setup
 void ColladaExporter::WriteMaterials()
 {
   materials.resize( mScene->mNumMaterials);
+
+  std::set<std::string> material_names;
 
   /// collect all materials from the scene
   size_t numTextures = 0;
@@ -243,6 +430,20 @@ void ColladaExporter::WriteMaterials()
 	  }
 	}
 
+	aiShadingMode shading;
+	materials[a].shading_model = "phong";
+	if(mat->Get( AI_MATKEY_SHADING_MODEL, shading) == aiReturn_SUCCESS) {
+		if(shading == aiShadingMode_Phong) {
+			materials[a].shading_model = "phong";
+		} else if(shading == aiShadingMode_Blinn) {
+			materials[a].shading_model = "blinn";
+		} else if(shading == aiShadingMode_NoShading) {
+			materials[a].shading_model = "constant";
+		} else if(shading == aiShadingMode_Gouraud) {
+			materials[a].shading_model = "lambert";
+		}
+	}
+
     ReadMaterialSurface( materials[a].ambient, mat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
     if( !materials[a].ambient.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].diffuse, mat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
@@ -253,10 +454,15 @@ void ColladaExporter::WriteMaterials()
     if( !materials[a].emissive.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].reflective, mat, aiTextureType_REFLECTION, AI_MATKEY_COLOR_REFLECTIVE);
     if( !materials[a].reflective.texture.empty() ) numTextures++;
+	ReadMaterialSurface( materials[a].transparent, mat, aiTextureType_OPACITY, AI_MATKEY_COLOR_TRANSPARENT);
+    if( !materials[a].transparent.texture.empty() ) numTextures++;
     ReadMaterialSurface( materials[a].normal, mat, aiTextureType_NORMALS, NULL, 0, 0);
     if( !materials[a].normal.texture.empty() ) numTextures++;
 
-    mat->Get( AI_MATKEY_SHININESS, materials[a].shininess);
+	materials[a].shininess.exist = mat->Get( AI_MATKEY_SHININESS, materials[a].shininess.value) == aiReturn_SUCCESS;
+	materials[a].transparency.exist = mat->Get( AI_MATKEY_OPACITY, materials[a].transparency.value) == aiReturn_SUCCESS;
+	materials[a].transparency.value = 1 - materials[a].transparency.value;
+	materials[a].index_refraction.exist = mat->Get( AI_MATKEY_REFRACTI, materials[a].index_refraction.value) == aiReturn_SUCCESS;
   }
 
   // output textures if present
@@ -270,8 +476,9 @@ void ColladaExporter::WriteMaterials()
       WriteImageEntry( mat.ambient, mat.name + "-ambient-image");
       WriteImageEntry( mat.diffuse, mat.name + "-diffuse-image");
       WriteImageEntry( mat.specular, mat.name + "-specular-image");
-      WriteImageEntry( mat.emissive, mat.name + "-emissive-image");
+      WriteImageEntry( mat.emissive, mat.name + "-emission-image");
       WriteImageEntry( mat.reflective, mat.name + "-reflective-image");
+	  WriteImageEntry( mat.transparent, mat.name + "-transparent-image");
       WriteImageEntry( mat.normal, mat.name + "-normal-image");
     }
     PopTag();
@@ -293,37 +500,35 @@ void ColladaExporter::WriteMaterials()
       PushTag();
 
       // write sampler- and surface params for the texture entries
-      WriteTextureParamEntry( mat.emissive, "emissive", mat.name);
+      WriteTextureParamEntry( mat.emissive, "emission", mat.name);
       WriteTextureParamEntry( mat.ambient, "ambient", mat.name);
       WriteTextureParamEntry( mat.diffuse, "diffuse", mat.name);
       WriteTextureParamEntry( mat.specular, "specular", mat.name);
       WriteTextureParamEntry( mat.reflective, "reflective", mat.name);
+	  WriteTextureParamEntry( mat.transparent, "transparent", mat.name);
+	  WriteTextureParamEntry( mat.normal, "normal", mat.name);
 
       mOutput << startstr << "<technique sid=\"standard\">" << endstr;
       PushTag();
-      mOutput << startstr << "<phong>" << endstr;
+	  mOutput << startstr << "<" << mat.shading_model << ">" << endstr;
       PushTag();
 
-      WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emissive-sampler");
+      WriteTextureColorEntry( mat.emissive, "emission", mat.name + "-emission-sampler");
       WriteTextureColorEntry( mat.ambient, "ambient", mat.name + "-ambient-sampler");
       WriteTextureColorEntry( mat.diffuse, "diffuse", mat.name + "-diffuse-sampler");
       WriteTextureColorEntry( mat.specular, "specular", mat.name + "-specular-sampler");
-
-      mOutput << startstr << "<shininess>" << endstr;
-      PushTag();
-      mOutput << startstr << "<float sid=\"shininess\">" << mat.shininess << "</float>" << endstr;
-      PopTag();
-      mOutput << startstr << "</shininess>" << endstr;
-
+	  WriteFloatEntry(mat.shininess, "shininess");
       WriteTextureColorEntry( mat.reflective, "reflective", mat.name + "-reflective-sampler");
+	  WriteTextureColorEntry( mat.transparent, "transparent", mat.name + "-transparent-sampler");
+	  WriteFloatEntry(mat.transparency, "transparency");
+	  WriteFloatEntry(mat.index_refraction, "index_of_refraction");
 
-  // deactivated because the Collada spec PHONG model does not allow other textures.
-  //    if( !mat.normal.texture.empty() )
-  //      WriteTextureColorEntry( mat.normal, "bump", mat.name + "-normal-sampler");
-
+	  if(! mat.normal.texture.empty()) {
+		WriteTextureColorEntry( mat.normal, "bump", mat.name + "-normal-sampler");
+	  }
 
       PopTag();
-      mOutput << startstr << "</phong>" << endstr;
+      mOutput << startstr << "</" << mat.shading_model << ">" << endstr;
       PopTag();
       mOutput << startstr << "</technique>" << endstr;
       PopTag();
@@ -546,13 +751,16 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
 // Writes the scene library
 void ColladaExporter::WriteSceneLibrary()
 {
+	std::string scene_name = mScene->mRootNode->mName.C_Str();
+
 	mOutput << startstr << "<library_visual_scenes>" << endstr;
 	PushTag();
-	mOutput << startstr << "<visual_scene id=\"myScene\" name=\"myScene\">" << endstr;
+	mOutput << startstr << "<visual_scene id=\"" + scene_name + "\" name=\"" + scene_name + "\">" << endstr;
 	PushTag();
 
 	// start recursive write at the root node
-	WriteNode( mScene->mRootNode);
+	for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
+		WriteNode( mScene->mRootNode->mChildren[a]);
 
 	PopTag();
 	mOutput << startstr << "</visual_scene>" << endstr;
@@ -581,22 +789,22 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 	for( size_t a = 0; a < pNode->mNumMeshes; ++a )
 	{
 		const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
-    // do not instanciate mesh if empty. I wonder how this could happen
-    if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-      continue;
+	// do not instanciate mesh if empty. I wonder how this could happen
+	if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+		continue;
 
 		mOutput << startstr << "<instance_geometry url=\"#" << GetMeshId( pNode->mMeshes[a]) << "\">" << endstr;
 		PushTag();
-    mOutput << startstr << "<bind_material>" << endstr;
-    PushTag();
-    mOutput << startstr << "<technique_common>" << endstr;
-    PushTag();
-    mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
+	mOutput << startstr << "<bind_material>" << endstr;
+	PushTag();
+	mOutput << startstr << "<technique_common>" << endstr;
+	PushTag();
+	mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
 		PopTag();
-    mOutput << startstr << "</technique_common>" << endstr;
-    PopTag();
-    mOutput << startstr << "</bind_material>" << endstr;
-    PopTag();
+	mOutput << startstr << "</technique_common>" << endstr;
+	PopTag();
+	mOutput << startstr << "</bind_material>" << endstr;
+	PopTag();
 		mOutput << startstr << "</instance_geometry>" << endstr;
 	}
 

@@ -94,6 +94,23 @@ AI_FORCE_INLINE bool aiColor4t<TReal>::operator!= (const aiColor4t<TReal>& other
 }
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
+AI_FORCE_INLINE bool aiColor4t<TReal>::operator< (const aiColor4t<TReal>& other) const {
+	return r < other.r || (
+		r == other.r && (
+			g < other.g || (
+				g == other.g && (
+					b < other.b || (
+						b == other.b && (
+							a < other.a
+						)
+					)
+				)
+			)
+		)
+	);
+}
+// ------------------------------------------------------------------------------------------------
+template <typename TReal>
 AI_FORCE_INLINE aiColor4t<TReal> operator + (const aiColor4t<TReal>& v1, const aiColor4t<TReal>& v2)	{
 	return aiColor4t<TReal>( v1.r + v2.r, v1.g + v2.g, v1.b + v2.b, v1.a + v2.a);
 }

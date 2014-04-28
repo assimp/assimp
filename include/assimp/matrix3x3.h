@@ -90,8 +90,10 @@ public:
 	const TReal* operator[] (unsigned int p_iIndex) const;
 
 	// comparison operators
-	bool operator== (const aiMatrix4x4t<TReal> m) const;
-	bool operator!= (const aiMatrix4x4t<TReal> m) const;
+	bool operator== (const aiMatrix4x4t<TReal>& m) const;
+	bool operator!= (const aiMatrix4x4t<TReal>& m) const;
+
+	bool Equal(const aiMatrix4x4t<TReal>& m, TReal epsilon = 1e-6) const;
 
 	template <typename TOther>
 	operator aiMatrix3x3t<TOther> () const;

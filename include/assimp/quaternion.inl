@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __cplusplus
 #include "quaternion.h"
 
+#include <cmath>
+
 // ---------------------------------------------------------------------------
 template<typename TReal>
 bool aiQuaterniont<TReal>::operator== (const aiQuaterniont& o) const
@@ -62,7 +64,15 @@ bool aiQuaterniont<TReal>::operator!= (const aiQuaterniont& o) const
 	return !(*this == o);
 }
 
-
+// ---------------------------------------------------------------------------
+template<typename TReal>
+inline bool aiQuaterniont<TReal>::Equal(const aiQuaterniont& o, TReal epsilon) const {
+	return
+		std::abs(x - o.x) <= epsilon &&
+		std::abs(y - o.y) <= epsilon &&
+		std::abs(z - o.z) <= epsilon &&
+		std::abs(w - o.w) <= epsilon;
+}
 
 // ---------------------------------------------------------------------------
 // Constructs a quaternion from a rotation matrix

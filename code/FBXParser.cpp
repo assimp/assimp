@@ -565,7 +565,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
 		// terminate zlib
 		inflateEnd(&zstream);
 	}
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 	else {
 		// runtime check for this happens at tokenization stage
 		ai_assert(false);

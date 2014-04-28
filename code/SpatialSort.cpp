@@ -329,7 +329,7 @@ unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill,f
 		++t;
 	}
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 
 	// debug invariant: mPositions[i].mIndex values must range from 0 to mPositions.size()-1
 	for (size_t i = 0; i < fill.size(); ++i) {

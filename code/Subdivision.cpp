@@ -383,7 +383,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 	} 
 	
 	// check the other way round for consistency
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 
 	for (size_t t = 0; t < ofsadjvec.size()-1; ++t) {
 		for (unsigned int m = 0; m <  cntadjfac[t]; ++m) {
@@ -530,7 +530,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 
 							ai_assert(adj[o]-moffsets[nidx].first < mp->mNumFaces);
 							const aiFace& f = mp->mFaces[adj[o]-moffsets[nidx].first];
-#				ifdef _DEBUG
+#				ifdef ASSIMP_BUILD_DEBUG
 							bool haveit = false;
 #				endif
 
@@ -553,7 +553,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 									// fixme: replace with mod face.mNumIndices? 
 									R += c0.midpoint+c1.midpoint;
 
-#						ifdef _DEBUG
+#						ifdef ASSIMP_BUILD_DEBUG
 									haveit = true;
 #						endif
 									break;

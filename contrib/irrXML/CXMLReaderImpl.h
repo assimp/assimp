@@ -215,7 +215,7 @@ private:
 	{
 		char_type* start = P;
 
-		// more forward until '<' found
+		// move forward until '<' found
 		while(*P != L'<' && *P)
 			++P;
 

@@ -192,24 +192,17 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 		}
 
 		// search file (same name as the IFCZIP except for the file extension) and place file pointer there
-		
 		if(UNZ_OK == unzGoToFirstFile(zip)) {
 			do {
-				//
-
 				// get file size, etc.
 				unz_file_info fileInfo;
 				char filename[256];
 				unzGetCurrentFileInfo( zip , &fileInfo, filename, sizeof(filename), 0, 0, 0, 0 );
-				
 				if (GetExtension(filename) != "ifc") {
 					continue;
 				}
-
 				uint8_t* buff = new uint8_t[fileInfo.uncompressed_size];
-
 				LogInfo("Decompressing IFCZIP file");
-
 				unzOpenCurrentFile( zip  );
 				const int ret = unzReadCurrentFile( zip, buff, fileInfo.uncompressed_size);
 				size_t filesize = fileInfo.uncompressed_size;
@@ -271,7 +264,6 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 
 	// feed the IFC schema into the reader and pre-parse all lines
 	STEP::ReadFile(*db, schema, types_to_track, inverse_indices_to_track);
-
 	const STEP::LazyObject* proj =  db->GetObject("ifcproject");
 	if (!proj) {
 		ThrowException("missing IfcProject entity");
@@ -287,9 +279,9 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 	// in a build with no entities disabled. See 
 	//     scripts/IFCImporter/CPPGenerator.py
 	// for more information.
-#ifdef ASSIMP_IFC_TEST
-	db->EvaluateAll();
-#endif
+	#ifdef ASSIMP_IFC_TEST
+		db->EvaluateAll();
+	#endif
 
 	// do final data copying
 	if (conv.meshes.size()) {
@@ -565,21 +557,16 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 	if(!el.Representation) {
 		return;
 	}
-
-
 	std::vector<unsigned int> meshes;
-	
 	// we want only one representation type, so bring them in a suitable order (i.e try those
 	// that look as if we could read them quickly at first). This way of reading
 	// representation is relatively generic and allows the concrete implementations
 	// for the different representation types to make some sensible choices what
 	// to load and what not to load.
 	const STEP::ListOf< STEP::Lazy< IfcRepresentation >, 1, 0 >& src = el.Representation.Get()->Representations;
-
 	std::vector<const IfcRepresentation*> repr_ordered(src.size());
 	std::copy(src.begin(),src.end(),repr_ordered.begin());
 	std::sort(repr_ordered.begin(),repr_ordered.end(),RateRepresentationPredicate());
-
 	BOOST_FOREACH(const IfcRepresentation* repr, repr_ordered) {
 		bool res = false;
 		BOOST_FOREACH(const IfcRepresentationItem& item, repr->Items) {
@@ -595,7 +582,6 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 			break;
 		}
 	}
-
 	AssignAddedMeshes(meshes,nd,conv);
 }
 

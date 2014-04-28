@@ -193,7 +193,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
 			temp[cnt++] = v.x;
 			temp[cnt++] = v.y;
 			temp[cnt++] = v.z;
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 			temp[cnt] = std::numeric_limits<IfcFloat>::quiet_NaN();
 #endif
 			++cnt;

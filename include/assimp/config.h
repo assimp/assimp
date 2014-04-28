@@ -234,6 +234,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	"PP_PTV_NORMALIZE"
 
 // ---------------------------------------------------------------------------
+/** @brief Configures the #aiProcess_PretransformVertices step to use
+ *  a users defined matrix as the scene root node transformation before
+ *  transforming vertices. 
+ *  Property type: bool. Default value: false.
+ */
+#define AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION	\
+	"PP_PTV_ADD_ROOT_TRANSFORMATION"
+
+// ---------------------------------------------------------------------------
+/** @brief Configures the #aiProcess_PretransformVertices step to use
+ *  a users defined matrix as the scene root node transformation before
+ *  transforming vertices. This property correspond to the 'a1' component
+ *  of the transformation matrix.
+ *  Property type: aiMatrix4x4.
+ */
+#define AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION	\
+	"PP_PTV_ROOT_TRANSFORMATION"
+
+// ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_FindDegenerates step to
  *  remove degenerated primitives from the import - immediately.
  *

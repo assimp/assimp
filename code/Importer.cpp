@@ -197,6 +197,7 @@ Importer::Importer(const Importer &other)
 	pimpl->mIntProperties    = other.pimpl->mIntProperties;
 	pimpl->mFloatProperties  = other.pimpl->mFloatProperties;
 	pimpl->mStringProperties = other.pimpl->mStringProperties;
+	pimpl->mMatrixProperties = other.pimpl->mMatrixProperties;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -232,7 +233,7 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 
 	for(std::set<std::string>::const_iterator it = st.begin(); it != st.end(); ++it) {
 
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		if (IsExtensionSupported(*it)) {
 			DefaultLogger::get()->warn("The file extension " + *it + " is already in use");
 		}
@@ -558,7 +559,7 @@ void WriteLogOpening(const std::string& file)
 		<< "<unknown compiler>"
 #endif
 
-#ifndef NDEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 		<< " debug"
 #endif
 
@@ -749,10 +750,10 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		}
 	}
 #endif // no validation
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 	if (pimpl->bExtraVerbose)
 	{
-#ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
+#ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 		DefaultLogger::get()->error("Verbose Import is not available due to build settings");
 #endif  // no validation
 		pFlags |= aiProcess_ValidateDataStructure;
@@ -783,9 +784,9 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		if( !pimpl->mScene) {
 			break; 
 		}
-#ifdef _DEBUG
+#ifdef ASSIMP_BUILD_DEBUG
 
-#ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
+#ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 		continue;
 #endif  // no validation
 
@@ -938,6 +939,16 @@ void Importer::SetPropertyString(const char* szName, const std::string& value,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Set a configuration property
+void Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value, 
+	bool* bWasExisting /*= NULL*/)
+{
+	ASSIMP_BEGIN_EXCEPTION_REGION();
+	SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value,bWasExisting);	
+	ASSIMP_END_EXCEPTION_REGION(void);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get a configuration property
 int Importer::GetPropertyInteger(const char* szName, 
 	int iErrorReturn /*= 0xffffffff*/) const
@@ -955,10 +966,18 @@ float Importer::GetPropertyFloat(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const std::string& Importer::GetPropertyString(const char* szName, 
+const std::string Importer::GetPropertyString(const char* szName, 
 	const std::string& iErrorReturn /*= ""*/) const
 {
 	return GetGenericProperty<std::string>(pimpl->mStringProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+const aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, 
+	const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const
+{
+	return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------

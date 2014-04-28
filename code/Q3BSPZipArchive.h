@@ -48,10 +48,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <cassert>
 
-namespace Assimp
-{
-namespace Q3BSP
-{
+namespace Assimp {
+namespace Q3BSP {
+
+// ------------------------------------------------------------------------------------------------
+///	\class		IOSystem2Unzip
+///	\ingroup	Assimp::Q3BSP
+///
+///	\brief
+// ------------------------------------------------------------------------------------------------
+class IOSystem2Unzip {
+
+	public:
+
+		static voidpf open(voidpf opaque, const char* filename, int mode);
+
+		static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
+
+		static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
+
+		static long tell(voidpf opaque, voidpf stream);
+
+		static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
+
+		static int close(voidpf opaque, voidpf stream);
+
+		static int testerror(voidpf opaque, voidpf stream);
+
+		static zlib_filefunc_def get(IOSystem* pIOHandler);
+};
 
 // ------------------------------------------------------------------------------------------------
 ///	\class		ZipFile
@@ -59,88 +84,33 @@ namespace Q3BSP
 ///
 ///	\brief
 // ------------------------------------------------------------------------------------------------
-class ZipFile : public IOStream
-{
-public:
-	ZipFile( const std::string &rFileName, unzFile zipFile ) :
-		m_Name( rFileName ),
-		m_zipFile( zipFile )
-	{
-		ai_assert( NULL != m_zipFile );
-	}
+class ZipFile : public IOStream {
+
+	friend class Q3BSPZipArchive;
+
+	public:
+
+		ZipFile(size_t size);
 	
-	~ZipFile()
-	{
-		m_zipFile = NULL;
-	}
+		~ZipFile();
 
-	size_t Read(void* pvBuffer, size_t pSize, size_t pCount )
-	{
-		size_t bytes_read = 0;
-		if ( NULL == m_zipFile )
-			return bytes_read;
-		
-		// search file and place file pointer there
-		if ( unzLocateFile( m_zipFile, m_Name.c_str(), 0 ) == UNZ_OK )
-		{
-			// get file size, etc.
-			unz_file_info fileInfo;
-			unzGetCurrentFileInfo( m_zipFile, &fileInfo, 0, 0, 0, 0, 0, 0 );
-			const size_t size = pSize * pCount;
-			assert( size <= fileInfo.uncompressed_size );
-			
-			// The file has EXACTLY the size of uncompressed_size. In C
-			// you need to mark the last character with '\0', so add 
-			// another character
-			unzOpenCurrentFile( m_zipFile );
-			const int ret = unzReadCurrentFile( m_zipFile, pvBuffer, fileInfo.uncompressed_size);
-			size_t filesize = fileInfo.uncompressed_size;
-			if ( ret < 0 || size_t(ret) != filesize )
-			{
-				return 0;
-			}
-			bytes_read = ret;
-			unzCloseCurrentFile( m_zipFile );
-		}
-		return bytes_read;
-	}
+		size_t Read(void* pvBuffer, size_t pSize, size_t pCount );
 
-	size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/)
-	{
-		return 0;
-	}
+		size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/);
 
-	size_t FileSize() const
-	{
-		if ( NULL == m_zipFile )
-			return 0;
-		if ( unzLocateFile( m_zipFile, m_Name.c_str(), 0 ) == UNZ_OK ) 
-		{
-			unz_file_info fileInfo;
-			unzGetCurrentFileInfo( m_zipFile, &fileInfo, 0, 0, 0, 0, 0, 0 );
-			return fileInfo.uncompressed_size;
-		}
-		return 0;
-	}
+		size_t FileSize() const;
 
-	aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/)
-	{
-		return aiReturn_FAILURE;
-	}
+		aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/);
 
-    size_t Tell() const
-	{
-		return 0;
-	}
+		size_t Tell() const;
 
-	void Flush()
-	{
-		// empty
-	}
+		void Flush();
 
-private:
-	std::string m_Name;
-	unzFile m_zipFile;
+	private:
+
+		void* m_Buffer;
+
+		size_t m_Size;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -150,29 +120,40 @@ private:
 ///	\brief	IMplements a zip archive like the WinZip archives. Will be also used to import data 
 ///	from a P3K archive ( Quake level format ).
 // ------------------------------------------------------------------------------------------------
-class Q3BSPZipArchive : public Assimp::IOSystem
-{
-public:
-	static const unsigned int FileNameSize = 256;
+class Q3BSPZipArchive : public Assimp::IOSystem {
 
-public:
-	Q3BSPZipArchive( const std::string & rFile );
-	~Q3BSPZipArchive();
-	bool Exists( const char* pFile) const;
-	char getOsSeparator() const;
-	IOStream* Open(const char* pFile, const char* pMode = "rb");
-	void Close( IOStream* pFile);
-	bool isOpen() const;
-	void getFileList( std::vector<std::string> &rFileList );
+	public:
 
-private:
-	bool mapArchive();
+		static const unsigned int FileNameSize = 256;
 
-private:
-	unzFile m_ZipFileHandle;
-	std::map<std::string, IOStream*> m_ArchiveMap;
-	std::vector<std::string> m_FileList;
-	bool m_bDirty;
+	public:
+
+		Q3BSPZipArchive(IOSystem* pIOHandler, const std::string & rFile);
+
+		~Q3BSPZipArchive();
+
+		bool Exists(const char* pFile) const;
+
+		char getOsSeparator() const;
+
+		IOStream* Open(const char* pFile, const char* pMode = "rb");
+
+		void Close(IOStream* pFile);
+
+		bool isOpen() const;
+
+		void getFileList(std::vector<std::string> &rFileList);
+
+	private:
+
+		bool mapArchive();
+
+	private:
+
+		unzFile m_ZipFileHandle;
+
+		std::map<std::string, ZipFile*> m_ArchiveMap;
+
 };
 
 // ------------------------------------------------------------------------------------------------

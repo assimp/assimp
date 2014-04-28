@@ -103,13 +103,10 @@ public:
 			swallow = false;
 			return *this;
 		}
-		
 		if (!*this) {
 			throw std::logic_error("End of file, no more lines to be retrieved.");
 		}
-
 		char s;
-
 		cur.clear();
 		while(stream.GetRemainingSize() && (s = stream.GetI1(),1)) {
 			if (s == '\n' || s == '\r') {
@@ -124,7 +121,6 @@ public:
 					if (stream.GetRemainingSize() && (s == '\r' && stream.GetI1() != '\n')) {
 						stream.IncPtr(-1);
 					}
-
 					if (trim) {
 						while (stream.GetRemainingSize() && ((s = stream.GetI1()) == ' ' || s == '\t'));
 						if (stream.GetRemainingSize()) {
@@ -132,12 +128,10 @@ public:
 						}
 					}
 				}
-				
 				break;
 			}
 			cur += s;
 		}
-
 		++idx;
 		return *this;
 	}
@@ -174,7 +168,9 @@ public:
 		SkipSpaces(&s);
 		for(size_t i = 0; i < N; ++i) {
 			if(IsLineEnd(*s)) {
+
 				throw std::range_error("Token count out of range, EOL reached");
+
 			}
 			tokens[i] = s;
 

@@ -77,18 +77,18 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 	if(!SkeletonFile)
 		throw DeadlyImportError(string("Failed to create XML Reader for ")+FileName);
 
-	XmlRead(SkeletonFile);
+	NextNode(SkeletonFile);
 	if(string("skeleton")!=SkeletonFile->getNodeName())
 		throw DeadlyImportError("No <skeleton> node in SkeletonFile: "+FileName);
 
 
 
 	//------------------------------------load bones-----------------------------------------
-	XmlRead(SkeletonFile);
+	NextNode(SkeletonFile);
 	if(string("bones")!=SkeletonFile->getNodeName())
 		throw DeadlyImportError("No bones node in skeleton "+FileName);
 
-	XmlRead(SkeletonFile);
+	NextNode(SkeletonFile);
 
 	while(string("bone")==SkeletonFile->getNodeName())
 	{
@@ -100,7 +100,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		NewBone.Name=GetAttribute<string>(SkeletonFile, "name");
 
 		//load the position:
-		XmlRead(SkeletonFile);
+		NextNode(SkeletonFile);
 		if(string("position")!=SkeletonFile->getNodeName())
 			throw DeadlyImportError("Position is not first node in Bone!");
 		NewBone.Position.x=GetAttribute<float>(SkeletonFile, "x");
@@ -108,11 +108,11 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		NewBone.Position.z=GetAttribute<float>(SkeletonFile, "z");
 
 		//Rotation:
-		XmlRead(SkeletonFile);
+		NextNode(SkeletonFile);
 		if(string("rotation")!=SkeletonFile->getNodeName())
 			throw DeadlyImportError("Rotation is not the second node in Bone!");
 		NewBone.RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
-		XmlRead(SkeletonFile);
+		NextNode(SkeletonFile);
 		if(string("axis")!=SkeletonFile->getNodeName())
 			throw DeadlyImportError("No axis specified for bone rotation!");
 		NewBone.RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
@@ -123,7 +123,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		Bones.push_back(NewBone);
 
 		//Proceed to the next bone:
-		XmlRead(SkeletonFile);
+		NextNode(SkeletonFile);
 	}
 	//The bones in the file a not neccesarly ordered by there id's so we do it now:
 	std::sort(Bones.begin(), Bones.end());
@@ -153,7 +153,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		throw DeadlyImportError("no bonehierarchy node in "+FileName);
 
 	DefaultLogger::get()->debug("loading bonehierarchy...");
-	XmlRead(SkeletonFile);
+	NextNode(SkeletonFile);
 	while(string("boneparent")==SkeletonFile->getNodeName())
 	{
 		string Child, Parent;
@@ -167,7 +167,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 		Bones[ChildId].ParentId=ParentId;
 		Bones[ParentId].Children.push_back(ChildId);
 
-		XmlRead(SkeletonFile);
+		NextNode(SkeletonFile);
 	}
 	//_____________________________________________________________________________
 
@@ -187,7 +187,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 	if(string("animations")==SkeletonFile->getNodeName())//animations are optional values
 	{
 		DefaultLogger::get()->debug("Loading Animations");
-		XmlRead(SkeletonFile);
+		NextNode(SkeletonFile);
 		while(string("animation")==SkeletonFile->getNodeName())
 		{
 			Animation NewAnimation;
@@ -195,30 +195,30 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 			NewAnimation.Length=GetAttribute<float>(SkeletonFile, "length");
 			
 			//Load all Tracks
-			XmlRead(SkeletonFile);
+			NextNode(SkeletonFile);
 			if(string("tracks")!=SkeletonFile->getNodeName())
 				throw DeadlyImportError("no tracks node in animation");
-			XmlRead(SkeletonFile);
+			NextNode(SkeletonFile);
 			while(string("track")==SkeletonFile->getNodeName())
 			{
 				Track NewTrack;
 				NewTrack.BoneName=GetAttribute<string>(SkeletonFile, "bone");
 
 				//Load all keyframes;
-				XmlRead(SkeletonFile);
+				NextNode(SkeletonFile);
 				if(string("keyframes")!=SkeletonFile->getNodeName())
 					throw DeadlyImportError("no keyframes node!");
-				XmlRead(SkeletonFile);
+				NextNode(SkeletonFile);
 				while(string("keyframe")==SkeletonFile->getNodeName())
 				{
-					Keyframe NewKeyframe;
+					KeyFrame NewKeyframe;
 					NewKeyframe.Time=GetAttribute<float>(SkeletonFile, "time");
 
 					//loop over the attributes:
 					
 					while(true) //will quit, if a Node is not a animationkey
 					{
-						XmlRead(SkeletonFile);
+						NextNode(SkeletonFile);
 
 						//If any property doesn't show up, it will keep its initialization value
 
@@ -235,7 +235,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 						{
 							float RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
 							aiVector3D RotationAxis;
-							XmlRead(SkeletonFile);
+							NextNode(SkeletonFile);
 							if(string("axis")!=SkeletonFile->getNodeName())
 								throw DeadlyImportError("No axis for keyframe rotation!");
 							RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
@@ -247,7 +247,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 								RotationAxis.x=1.0f;
 								if(0!=RotationAngle)//if we don't rotate at all, the axis does not matter
 								{
-									DefaultLogger::get()->warn("Invalid Rotation Axis in Keyframe!");
+									DefaultLogger::get()->warn("Invalid Rotation Axis in KeyFrame!");
 								}
 							}
 							NewKeyframe.Rotation=aiQuaternion(RotationAxis, RotationAngle);

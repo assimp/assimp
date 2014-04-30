@@ -9,80 +9,84 @@ namespace Ogre
 	
 typedef irr::io::IrrXMLReader XmlReader;
 
-
-//------------Helper Funktion to Get a Attribute Save---------------
-template<typename t> inline t GetAttribute(XmlReader* Reader, std::string Name);
-
-/*
+static void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error = "")
 {
-	BOOST_STATIC_ASSERT(false);
-	return t();
-}
-*/
-
-template<> inline int GetAttribute<int>(XmlReader* Reader, std::string Name)
-{
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-		return atoi(Value);
+	if (!error.empty())
+		throw DeadlyImportError(error + " in node '" + std::string(reader->getNodeName()) + "' and attribute '" + name + "'");
 	else
-		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		throw DeadlyImportError("Attribute '" + name + "' does not exist in node '" + std::string(reader->getNodeName()) + "'");
 }
 
-template<> inline unsigned int GetAttribute<unsigned int>(XmlReader* Reader, std::string Name)
+template<typename T> 
+inline T GetAttribute(const XmlReader* reader, const std::string &name);
+
+template<> 
+inline int GetAttribute<int>(const XmlReader* reader, const std::string &name)
 {
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-		return static_cast<unsigned int>(atoi(Value));//yes, ugly, but pfff
+	const char* value = reader->getAttributeValue(name.c_str());
+	if (value)
+		return atoi(value);
 	else
-		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		ThrowAttibuteError(reader, name);
 }
 
-template<> inline float GetAttribute<float>(XmlReader* Reader, std::string Name)
+template<> 
+inline unsigned int GetAttribute<unsigned int>(const XmlReader* reader, const std::string &name)
 {
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-		return fast_atof(Value);
+	const char* value = reader->getAttributeValue(name.c_str());
+	if (value)
+		return static_cast<unsigned int>(atoi(value)); ///< @todo Find a better way...
 	else
-		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		ThrowAttibuteError(reader, name);
 }
 
-template<> inline std::string GetAttribute<std::string>(XmlReader* Reader, std::string Name)
+template<> 
+inline float GetAttribute<float>(const XmlReader* reader, const std::string &name)
 {
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-		return std::string(Value);
+	const char* value = reader->getAttributeValue(name.c_str());
+	if (value)
+		return fast_atof(value);
 	else
-		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		ThrowAttibuteError(reader, name);
 }
 
-template<> inline bool GetAttribute<bool>(XmlReader* Reader, std::string Name)
+template<> 
+inline std::string GetAttribute<std::string>(const XmlReader* reader, const std::string &name)
 {
-	const char* Value=Reader->getAttributeValue(Name.c_str());
-	if(Value)
-	{
-		if(Value==std::string("true"))
-			return true;
-		else if(Value==std::string("false"))
-			return false;
-		else
-			throw DeadlyImportError(std::string("Bool value has invalid value: "+Name+" / "+Value+" / "+Reader->getNodeName()));
-	}
+	const char* value = reader->getAttributeValue(name.c_str());
+	if (value)
+		return std::string(value);
 	else
-		throw DeadlyImportError(std::string("Attribute "+Name+" does not exist in "+Reader->getNodeName()).c_str());
+		ThrowAttibuteError(reader, name);
 }
-//__________________________________________________________________
 
-inline bool XmlRead(XmlReader* Reader)
+template<> 
+inline bool GetAttribute<bool>(const XmlReader* reader, const std::string &name)
+{
+	std::string value = GetAttribute<std::string>(reader, name);
+	if (ASSIMP_stricmp(value, "true") == 0)
+		return true;
+	else if (ASSIMP_stricmp(value, "false") == 0)
+		return false;
+	else
+		ThrowAttibuteError(reader, name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
+}
+
+inline bool NextNode(XmlReader* reader)
 {
 	do
 	{
-		if(!Reader->read())
+		if (!reader->read())
 			return false;
 	}
-	while(Reader->getNodeType()!=irr::io::EXN_ELEMENT);
+	while(reader->getNodeType() != irr::io::EXN_ELEMENT);
 	return true;
 }
 
-}//namespace Ogre
-}//namespace Assimp
+inline bool CurrentNodeNameEquals(const XmlReader* reader, const std::string &name)
+{
+	return (ASSIMP_stricmp(std::string(reader->getNodeName()), name) == 0);
+}
+
+} // Ogre
+} // Assimp

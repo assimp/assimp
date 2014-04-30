@@ -1,104 +1,126 @@
+
 #include "BaseImporter.h"
-
-#include <vector>
-
 #include "OgreXmlHelper.hpp"
 #include "irrXMLWrapper.h"
 
-/// Ogre Importer TODO
-/*	- Read Vertex Colors
-	- Read multiple TexCoords
+#include <vector>
+
+/** @todo Read Vertex Colors
+    @todo Read multiple TexCoords
 */
-
-
 
 namespace Assimp
 {
 namespace Ogre
 {
 
-
-//Forward declarations:
 struct Face;
-struct Weight;
+struct BoneWeight;
 struct Bone;
 struct Animation;
-struct Track;
-struct Keyframe;
 
-///A submesh from Ogre
+/// Ogre SubMesh
 struct SubMesh
-{	
-	bool SharedData;
+{
+	bool UseSharedGeometry;
+	bool Use32bitIndexes;
 
 	std::string Name;
 	std::string MaterialName;
-	std::vector<Face> FaceList;
 
-	std::vector<aiVector3D> Positions; bool HasPositions;
-	std::vector<aiVector3D> Normals; bool HasNormals;
-	std::vector<aiVector3D> Tangents; bool HasTangents;
-	std::vector<std::vector<aiVector3D> > Uvs;//arbitrary number of texcoords, they are nearly always 2d, but assimp has always 3d texcoords, n vectors(outer) with texcoords for each vertex(inner)
+	bool HasGeometry;
+	bool HasPositions;
+	bool HasNormals;
+	bool HasTangents;
 
-	std::vector< std::vector<Weight> > Weights;//a list(inner) of bones for each vertex(outer)
-	int MaterialIndex;///< The Index in the Assimp Materialarray from the material witch is attached to this submesh
-	unsigned int BonesUsed;//the highest index of a bone from a bone weight, this is needed to create the assimp bone structur (converting from Vertex-Bones to Bone-Vertices)
+	std::vector<Face> Faces;
+	std::vector<aiVector3D> Positions;
+	std::vector<aiVector3D> Normals;
+	std::vector<aiVector3D> Tangents;
 
-	SubMesh(): SharedData(false), HasPositions(false), HasNormals(false), HasTangents(false),
-		MaterialIndex(-1), BonesUsed(0) {}//initialize everything
+	/// Arbitrary number of texcoords, they are nearly always 2d, but Assimp has always 3d texcoords, n vectors(outer) with texcoords for each vertex(inner).
+	std::vector<std::vector<aiVector3D> > Uvs;
+
+	/// A list(inner) of bones for each vertex(outer).
+	std::vector<std::vector<BoneWeight> > Weights;
+
+	/// The Index in the Assimp material array from the material witch is attached to this submesh.
+	int MaterialIndex;
+
+	// The highest index of a bone from a bone weight, this is needed to create the Assimp bone struct. Converting from vertex-bones to bone-vertices.
+	unsigned int BonesUsed;
+
+	SubMesh() :
+		UseSharedGeometry(false),
+		Use32bitIndexes(false),
+		HasGeometry(false),
+		HasPositions(false),
+		HasNormals(false),
+		HasTangents(false),
+		MaterialIndex(-1),
+		BonesUsed(0)
+	{
+	}
 };
 
-
-///The Main Ogre Importer Class
+// ------------------------------------------------------------------------------------------------
+///	\class	OgreImporter
+///	\brief	Importer for Ogre mesh, skeleton and material formats.
+// ------------------------------------------------------------------------------------------------
 class OgreImporter : public BaseImporter
 {
 public:
-	virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
-	virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
-	virtual const aiImporterDesc* GetInfo () const;
-	virtual void SetupProperties(const Importer* pImp);
-private:
-
-
-	//-------------------------------- OgreMesh.cpp -------------------------------
-	/// Helper Functions to read parts of the XML File
-	void ReadSubMesh(SubMesh& theSubMesh, XmlReader* Reader);//the submesh reference is the result value
-
-	/// Reads a single Vertexbuffer and writes its data in the Submesh
-	static void ReadVertexBuffer(SubMesh &theSubMesh, XmlReader *Reader, unsigned int NumVertices);
-
-	/// Reads bone weights are stores them into the given submesh
-	static void ReadBoneWeights(SubMesh &theSubMesh, XmlReader *Reader);
-
-	/// After Loading a SubMehs some work needs to be done (make all Vertexes unique, normalize weights)
-	static void ProcessSubMesh(SubMesh &theSubMesh, SubMesh &theSharedGeometry);
-
-	/// Uses the bone data to convert a SubMesh into a aiMesh which will be created and returned
-	aiMesh* CreateAssimpSubMesh(const SubMesh &theSubMesh, const std::vector<Bone>& Bones) const;
+	/// BaseImporter override.
+	virtual bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 	
+	/// BaseImporter override.
+	virtual void InternReadFile(const std::string &pFile, aiScene* pScene, IOSystem* pIOHandler);
+	
+	/// BaseImporter override.
+	virtual const aiImporterDesc* GetInfo () const;
+	
+	/// BaseImporter override.
+	virtual void SetupProperties(const Importer* pImp);
+
+private:
+	//-------------------------------- OgreMesh.cpp -------------------------------
+
+	/// Helper Functions to read parts of the XML File.
+	void ReadSubMesh(const unsigned int submeshIndex, SubMesh &submesh, XmlReader *reader);
+
+	/// Reads a single Vertexbuffer and writes its data in the Submesh.
+	static void ReadVertexBuffer(SubMesh &submesh, XmlReader *reader, const unsigned int numVertices);
+
+	/// Reads bone weights are stores them into the given submesh.
+	static void ReadBoneWeights(SubMesh &submesh, XmlReader *reader);
+
+	/// After Loading a SubMehs some work needs to be done (make all Vertexes unique, normalize weights).
+	static void ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry);
+
+	/// Uses the bone data to convert a SubMesh into a aiMesh which will be created and returned.
+	aiMesh* CreateAssimpSubMesh(const SubMesh &submesh, const std::vector<Bone>& bones) const;
 
 	//-------------------------------- OgreSkeleton.cpp -------------------------------
+
 	/// Writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
 	void LoadSkeleton(std::string FileName, std::vector<Bone> &Bones, std::vector<Animation> &Animations) const;
 
-	/// Converts the animations in aiAnimations and puts them into the scene
+	/// Converts the animations in aiAnimations and puts them into the scene.
 	void PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
-	/// Creates the aiskeleton in current scene
+	/// Creates the aiSkeleton in current scene.
 	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
-	/// Recursivly creates a filled aiNode from a given root bone
+	/// Recursivly creates a filled aiNode from a given root bone.
 	static aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode);
-	
 
 	//-------------------------------- OgreMaterial.cpp -------------------------------
+
 	aiMaterial* LoadMaterial(const std::string MaterialName) const;
 	void ReadTechnique(std::stringstream &ss, aiMaterial* NewMaterial) const;
-	
 
-
-
-	//Now we don't have to give theses parameters to all functions
+	// Now we don't have to give theses parameters to all functions
+	/// @todo Remove this m_Current* bookkeeping.
 	std::string m_CurrentFilename;
 	std::string m_MaterialLibFilename;
 	bool m_TextureTypeFromFilename;
@@ -107,78 +129,95 @@ private:
 	SubMesh m_SharedGeometry;///< we will just use the vertexbuffers of the submesh
 };
 
-///For the moment just triangles, no other polygon types!
+/// Simplified face.
+/** @todo Support other polygon types than just just triangles. Move to using aiFace. */
 struct Face
 {
 	unsigned int VertexIndices[3];
 };
 
+/// Ogre Bone assignment
 struct BoneAssignment
 {
-	unsigned int BoneId;//this is, what we get from ogre
-	std::string BoneName;//this is, what we need for assimp
+	/// Bone ID from Ogre.
+	unsigned int BoneId;
+	// Bone name for Assimp.
+	std::string BoneName;
 };
 
-///for a vertex->bone structur
-struct Weight
+/// Ogre Bone weight
+struct BoneWeight
 {
-	unsigned int BoneId;
+	/// Bone ID
+	unsigned int Id;
+	/// BoneWeight
 	float Value;
 };
 
 
 /// Helper Class to describe an ogre-bone for the skeleton:
-/** All Id's are signed ints, because than we have -1 as a simple INVALID_ID Value (we start from 0 so 0 is a valid bone ID!*/
+/** All Id's are signed ints, because than we have -1 as a simple INVALID_ID Value (we start from 0 so 0 is a valid bone ID!
+	@todo Cleanup if possible. Seems like this is overly complex for what we are reading. */
 struct Bone
 {
+	std::string Name;
+
 	int Id;
 	int ParentId;
-	std::string Name;
+	
 	aiVector3D Position;
-	float RotationAngle;
 	aiVector3D RotationAxis;
-	std::vector<int> Children;
+	float RotationAngle;
+	
 	aiMatrix4x4 BoneToWorldSpace;
 
-	///ctor
-	Bone(): Id(-1), ParentId(-1), RotationAngle(0.0f) {}
-	///this operator is needed to sort the bones after Id's
-	bool operator<(const Bone& rval) const
-		{return Id<rval.Id; }
-	///this operator is needed to find a bone by its name in a vector<Bone>
-	bool operator==(const std::string& rval) const
-		{return Name==rval; }
-	bool operator==(const aiString& rval) const
-	{return Name==std::string(rval.data); }
+	std::vector<int> Children;
 
-	// implemented in OgreSkeleton.cpp
+	Bone() :
+		Id(-1),
+		ParentId(-1),
+		RotationAngle(0.0f)
+	{
+	}
+
+	/// This operator is needed to sort the bones after Id's
+	bool operator<(const Bone &other) const { return Id < other.Id; }
+
+	/// This operator is needed to find a bone by its name in a vector<Bone>
+	bool operator==(const std::string& other) const { return Name == other; }
+	bool operator==(const aiString& other) const { return Name == std::string(other.data); }
+
+	/// @note Implemented in OgreSkeleton.cpp
 	void CalculateBoneToWorldSpaceMatrix(std::vector<Bone>& Bones);
 };
 
-
-
-///Describes an Ogre Animation
-struct Animation
-{
-	std::string Name;
-	float Length;
-	std::vector<Track> Tracks;
-};
-
-///a track (keyframes for one bone) from an animation
-struct Track
-{
-	std::string BoneName;
-	std::vector<Keyframe> Keyframes;
-};
-
-/// keyframe (bone transformation) from a track from a animation
-struct Keyframe
+/// Ogre animation key frame
+/** Transformations for a frame. */
+struct KeyFrame
 {
 	float Time;
 	aiVector3D Position;
 	aiQuaternion Rotation;
 	aiVector3D Scaling;
+};
+
+/// Ogre animation track
+/** Keyframes for one bone. */
+struct Track
+{
+	std::string BoneName;
+	std::vector<KeyFrame> Keyframes;
+};
+
+/// Ogre animation
+struct Animation
+{
+	/// Name
+	std::string Name;
+	/// Length
+	float Length;
+	/// Tracks
+	std::vector<Track> Tracks;
 };
 
 }//namespace Ogre

@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <sstream>
-using namespace std;
 
 #include "OgreImporter.hpp"
 #include "TinyFormatter.h"
@@ -65,160 +64,153 @@ static const aiImporterDesc desc = {
 	"mesh.xml"
 };
 
+using namespace std;
+
 namespace Assimp
 {
 namespace Ogre
 {
 
-
 bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const
 {
-	if(!checkSig)//Check File Extension
+	if (!checkSig)
 	{
-		std::string extension("mesh.xml");
-		int l=extension.length();
-		return pFile.substr(pFile.length()-l, l)==extension;
+		string ext = "mesh.xml";
+		int len = ext.length();
+		return (ASSIMP_stricmp(pFile.substr(pFile.length()-len, len), ext) == 0);
 	}
-	else//Check file Header
-	{
-		const char* tokens[] = {"<mesh>"};
-		return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
-	}
+	const char* tokens[] = {"<mesh>"};
+	return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 }
-
 
 void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler)
 {
-	m_CurrentFilename=pFile;
-	m_CurrentIOHandler=pIOHandler;
-	m_CurrentScene=pScene;
+	m_CurrentFilename = pFile;
+	m_CurrentIOHandler = pIOHandler;
+	m_CurrentScene = pScene;
 
-	//Open the File:
-	boost::scoped_ptr<IOStream> file(pIOHandler->Open(pFile));
-	if( file.get() == NULL)
-		throw DeadlyImportError("Failed to open file "+pFile+".");
-
-	//Read the Mesh File:
-	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
-	boost::scoped_ptr<XmlReader> MeshFile(irr::io::createIrrXMLReader(mIOWrapper.get()));
-	if(!MeshFile)//parse the xml file
-		throw DeadlyImportError("Failed to create XML Reader for "+pFile);
-
-
-	DefaultLogger::get()->debug("Mesh File opened");
+	// -------------------- Initial file and XML operations --------------------
 	
-	//Read root Node:
-	if(!(XmlRead(MeshFile.get()) && string(MeshFile->getNodeName())=="mesh"))
+	// Open
+	boost::scoped_ptr<IOStream> file(pIOHandler->Open(pFile));
+	if (file.get() == NULL)
+		throw DeadlyImportError("Failed to open file " + pFile);
+
+	// Read
+	boost::scoped_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(file.get()));
+	boost::scoped_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
+	if (!reader)
+		throw DeadlyImportError("Failed to create XML Reader for " + pFile);
+
+	DefaultLogger::get()->debug("Opened a XML reader for " + pFile);
+
+	// Read root node
+	NextNode(reader.get());
+	if (!CurrentNodeNameEquals(reader, "mesh"))
+		throw DeadlyImportError("Root node is not <mesh> but <" + string(reader->getNodeName()) + ">");
+	
+	// Node names
+	string nnSharedGeometry = "sharedgeometry";
+	string nnVertexBuffer   = "vertexbuffer";
+	string nnSubMeshes      = "submeshes";
+	string nnSubMesh        = "submesh";
+	string nnSubMeshNames   = "submeshnames";
+	string nnSkeletonLink   = "skeletonlink";
+
+	// -------------------- Shared Geometry --------------------
+	// This can be used to share geometry between submeshes
+
+	NextNode(reader.get());
+	if (CurrentNodeNameEquals(reader, nnSharedGeometry))
 	{
-		throw DeadlyImportError("Root Node is not <mesh>! "+pFile+"  "+MeshFile->getNodeName());
+		DefaultLogger::get()->debug("Reading shader geometry");
+		unsigned int NumVertices = GetAttribute<unsigned int>(reader.get(), "vertexcount");
+
+		NextNode(reader.get());
+		while(CurrentNodeNameEquals(reader, nnVertexBuffer))
+			ReadVertexBuffer(m_SharedGeometry, reader.get(), NumVertices);
 	}
 
-	//eventually load shared geometry
-	XmlRead(MeshFile.get());//shared geometry is optional, so we need a reed for the next two if's
-	if(MeshFile->getNodeName()==string("sharedgeometry"))
+	// -------------------- Sub Meshes --------------------
+
+	if (!CurrentNodeNameEquals(reader, nnSubMeshes))
+		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
+
+	list<boost::shared_ptr<SubMesh> > subMeshes;
+	vector<aiMaterial*> materials;
+
+	NextNode(reader.get());
+	while(CurrentNodeNameEquals(reader, nnSubMesh))
 	{
-		unsigned int NumVertices=GetAttribute<int>(MeshFile.get(), "vertexcount");;
+		SubMesh* submesh = new SubMesh();
+		ReadSubMesh(subMeshes.size(), *submesh, reader.get());
 
-		XmlRead(MeshFile.get());
-		while(MeshFile->getNodeName()==string("vertexbuffer"))
-		{
-			ReadVertexBuffer(m_SharedGeometry, MeshFile.get(), NumVertices);
-		}
-	}
+		// Just a index in a array, we add a mesh in each loop cycle, so we get indicies like 0, 1, 2 ... n;
+		// so it is important to do this before pushing the mesh in the vector!
+		submesh->MaterialIndex = subMeshes.size();
 
-	//Go to the submeshs:
-	if(MeshFile->getNodeName()!=string("submeshes"))
-	{
-		throw DeadlyImportError("No <submeshes> node in <mesh> node! "+pFile);
-	}
+		subMeshes.push_back(boost::shared_ptr<SubMesh>(submesh));
 
-
-	//-------------------Read the submeshs and materials:-----------------------
-	std::list<boost::shared_ptr<SubMesh> > SubMeshes;
-	vector<aiMaterial*> Materials;
-	XmlRead(MeshFile.get());
-	while(MeshFile->getNodeName()==string("submesh"))
-	{
-		SubMesh* theSubMesh=new SubMesh();
-		theSubMesh->MaterialName=GetAttribute<string>(MeshFile.get(), "material");
-		DefaultLogger::get()->debug("Loading Submehs with Material: "+theSubMesh->MaterialName);
-		ReadSubMesh(*theSubMesh, MeshFile.get());
-
-		//just a index in a array, we add a mesh in each loop cycle, so we get indicies like 0, 1, 2 ... n;
-		//so it is important to do this before pushing the mesh in the vector!
-		theSubMesh->MaterialIndex=SubMeshes.size();
-
-		SubMeshes.push_back(boost::shared_ptr<SubMesh>(theSubMesh));
-
-		//Load the Material:
-		aiMaterial* MeshMat=LoadMaterial(theSubMesh->MaterialName);
+		// Load the Material:
+		aiMaterial* MeshMat = LoadMaterial(submesh->MaterialName);
 		
-		//Set the Material:
-		Materials.push_back(MeshMat);
+		// Set the Material:
+		materials.push_back(MeshMat);
 	}
 
-	if(SubMeshes.empty())
-		throw DeadlyImportError("no submesh loaded!");
-	if(SubMeshes.size()!=Materials.size())
-		throw DeadlyImportError("materialcount doesn't match mesh count!");
+	if (subMeshes.empty())
+		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
 
-	//____________________________________________________________
+	// This is really a internal error if we failed to create dummy materials.
+	if (subMeshes.size() != materials.size())
+		throw DeadlyImportError("Internal Error: Material count does not match the submesh count");
 
-
-	//skip submeshnames (stupid irrxml)
-	if(MeshFile->getNodeName()==string("submeshnames"))
+	// Skip submesh names.
+	/// @todo Should these be read to scene etc. metadata?
+	if (CurrentNodeNameEquals(reader, nnSubMeshNames))
 	{
-		XmlRead(MeshFile.get());
-		while(MeshFile->getNodeName()==string("submesh"))
-			XmlRead(MeshFile.get());
+		NextNode(reader.get());
+		while(CurrentNodeNameEquals(reader, nnSubMesh))
+			NextNode(reader.get());
 	}
 
+	// -------------------- Skeleton --------------------
 
-	//----------------Load the skeleton: -------------------------------
 	vector<Bone> Bones;
 	vector<Animation> Animations;
-	if(MeshFile->getNodeName()==string("skeletonlink"))
+	if (CurrentNodeNameEquals(reader, nnSkeletonLink))
 	{
-		string SkeletonFile=GetAttribute<string>(MeshFile.get(), "name");
-		LoadSkeleton(SkeletonFile, Bones, Animations);
-		XmlRead(MeshFile.get());
+		string SkeletonFile = GetAttribute<string>(reader.get(), "name");
+		if (!SkeletonFile.empty())
+			LoadSkeleton(SkeletonFile, Bones, Animations);
+		else
+			DefaultLogger::get()->debug("Found a unusual <" + nnSkeletonLink + "> with a empty reference");
+		NextNode(reader.get());
 	}
 	else
-	{
-		DefaultLogger::get()->debug("No skeleton file will be loaded");
-		DefaultLogger::get()->debug(MeshFile->getNodeName());
-	}
-	//__________________________________________________________________
+		DefaultLogger::get()->debug("Mesh has no assigned skeleton with <" + nnSkeletonLink + ">");
 
+	// Now there might be <boneassignments> for the shared geometry
+	if (CurrentNodeNameEquals(reader, "boneassignments"))
+		ReadBoneWeights(m_SharedGeometry, reader.get());
 
-	//now there might be boneassignments for the shared geometry:
-	if(MeshFile->getNodeName()==string("boneassignments"))
-	{
-		ReadBoneWeights(m_SharedGeometry, MeshFile.get());
-	}
-
-
-	//----------------- Process Meshs -----------------------
-	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, SubMeshes)
+	// -------------------- Process Results --------------------
+	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, subMeshes)
 	{
 		ProcessSubMesh(*theSubMesh, m_SharedGeometry);
 	}
-	//_______________________________________________________
 
+	// -------------------- Apply to aiScene --------------------
 
-
-	
-	//----------------- Now fill the Assimp scene ---------------------------
-	
 	//put the aiMaterials in the scene:
-	m_CurrentScene->mMaterials=new aiMaterial*[Materials.size()];
-	m_CurrentScene->mNumMaterials=Materials.size();
-	for(unsigned int i=0; i<Materials.size(); ++i)
-		m_CurrentScene->mMaterials[i]=Materials[i];
+	m_CurrentScene->mMaterials=new aiMaterial*[materials.size()];
+	m_CurrentScene->mNumMaterials=materials.size();
+	for(unsigned int i=0; i<materials.size(); ++i)
+		m_CurrentScene->mMaterials[i]=materials[i];
 
 	//create the aiMehs... 
 	vector<aiMesh*> aiMeshes;
-	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, SubMeshes)
+	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, subMeshes)
 	{
 		aiMeshes.push_back(CreateAssimpSubMesh(*theSubMesh, Bones));
 	}
@@ -231,16 +223,14 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	m_CurrentScene->mRootNode=new aiNode("root");
 
 	//link the meshs with the root node:
-	m_CurrentScene->mRootNode->mMeshes=new unsigned int[SubMeshes.size()];
-	m_CurrentScene->mRootNode->mNumMeshes=SubMeshes.size();
-	for(unsigned int i=0; i<SubMeshes.size(); ++i)
-		m_CurrentScene->mRootNode->mMeshes[i]=i;
-
+	m_CurrentScene->mRootNode->mMeshes=new unsigned int[subMeshes.size()];
+	m_CurrentScene->mRootNode->mNumMeshes=subMeshes.size();
 	
+	for(unsigned int i=0; i<subMeshes.size(); ++i)
+		m_CurrentScene->mRootNode->mMeshes[i]=i;
 
 	CreateAssimpSkeleton(Bones, Animations);
 	PutAnimationsInScene(Bones, Animations);
-	//___________________________________________________________
 }
 
 

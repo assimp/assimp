@@ -5,10 +5,6 @@
 
 #include <vector>
 
-/** @todo Read Vertex Colors
-    @todo Read multiple TexCoords
-*/
-
 namespace Assimp
 {
 namespace Ogre
@@ -63,10 +59,9 @@ struct SubMesh
 	}
 };
 
-// ------------------------------------------------------------------------------------------------
-///	\class	OgreImporter
-///	\brief	Importer for Ogre mesh, skeleton and material formats.
-// ------------------------------------------------------------------------------------------------
+/**	Importer for Ogre mesh, skeleton and material formats.
+	@todo Support vertex colors
+	@todo Support multiple TexCoords (this is already done??) */
 class OgreImporter : public BaseImporter
 {
 public:

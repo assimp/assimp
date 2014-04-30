@@ -110,12 +110,12 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		throw DeadlyImportError("Root node is not <mesh> but <" + string(reader->getNodeName()) + ">");
 	
 	// Node names
-	string nnSharedGeometry = "sharedgeometry";
-	string nnVertexBuffer   = "vertexbuffer";
-	string nnSubMeshes      = "submeshes";
-	string nnSubMesh        = "submesh";
-	string nnSubMeshNames   = "submeshnames";
-	string nnSkeletonLink   = "skeletonlink";
+	const string nnSharedGeometry = "sharedgeometry";
+	const string nnVertexBuffer   = "vertexbuffer";
+	const string nnSubMeshes      = "submeshes";
+	const string nnSubMesh        = "submesh";
+	const string nnSubMeshNames   = "submeshnames";
+	const string nnSkeletonLink   = "skeletonlink";
 
 	// -------------------- Shared Geometry --------------------
 	// This can be used to share geometry between submeshes
@@ -123,7 +123,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	NextNode(reader.get());
 	if (CurrentNodeNameEquals(reader, nnSharedGeometry))
 	{
-		DefaultLogger::get()->debug("Reading shader geometry");
+		DefaultLogger::get()->debug("Reading shared geometry");
 		unsigned int NumVertices = GetAttribute<unsigned int>(reader.get(), "vertexcount");
 
 		NextNode(reader.get());
@@ -147,15 +147,16 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 		// Just a index in a array, we add a mesh in each loop cycle, so we get indicies like 0, 1, 2 ... n;
 		// so it is important to do this before pushing the mesh in the vector!
+		/// @todo Not sure if this really is needed, refactor out if possible.
 		submesh->MaterialIndex = subMeshes.size();
 
 		subMeshes.push_back(boost::shared_ptr<SubMesh>(submesh));
 
-		// Load the Material:
-		aiMaterial* MeshMat = LoadMaterial(submesh->MaterialName);
-		
-		// Set the Material:
-		materials.push_back(MeshMat);
+		/** @todo What is the correct way of handling empty ref here.
+			Does Assimp require there to be a valid material index for each mesh,
+			even if its a dummy material. */
+		aiMaterial* material = LoadMaterial(submesh->MaterialName);
+		materials.push_back(material);
 	}
 
 	if (subMeshes.empty())

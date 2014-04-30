@@ -73,11 +73,11 @@ void OgreImporter::ReadSubMesh(const unsigned int submeshIndex, SubMesh &submesh
 	NextNode(reader);
 	string currentNodeName = reader->getNodeName();
 
-	string nnFaces           = "faces";
-	string nnFace            = "face";
-	string nnGeometry        = "geometry";
-	string nnBoneAssignments = "boneassignments";
-	string nnVertexBuffer    = "vertexbuffer";
+	const string nnFaces           = "faces";
+	const string nnFace            = "face";
+	const string nnGeometry        = "geometry";
+	const string nnBoneAssignments = "boneassignments";
+	const string nnVertexBuffer    = "vertexbuffer";
 
 	bool quadWarned = false;
 
@@ -165,14 +165,14 @@ void OgreImporter::ReadVertexBuffer(SubMesh &submesh, XmlReader *reader, const u
 	if (!submesh.HasPositions)
 		throw DeadlyImportError("Vertex buffer does not contain positions!");
 
-	string nnVertex        = "vertex";
-	string nnPosition      = "position";
-	string nnNormal        = "normal";
-	string nnTangent       = "tangent";
-	string nnBinormal      = "binormal";
-	string nnTexCoord      = "texcoord";
-	string nnColorDiffuse  = "colour_diffuse";
-	string nnColorSpecular = "colour_specular";
+	const string nnVertex        = "vertex";
+	const string nnPosition      = "position";
+	const string nnNormal        = "normal";
+	const string nnTangent       = "tangent";
+	const string nnBinormal      = "binormal";
+	const string nnTexCoord      = "texcoord";
+	const string nnColorDiffuse  = "colour_diffuse";
+	const string nnColorSpecular = "colour_specular";
 	
 	bool warnBinormal = true;
 	bool warnColorDiffuse = true;
@@ -299,7 +299,7 @@ void OgreImporter::ReadBoneWeights(SubMesh &submesh, XmlReader *reader)
 	submesh.Weights.resize(submesh.Positions.size());
 
 	unsigned int numRead = 0;
-	string nnVertexBoneAssignment = "vertexboneassignment";
+	const string nnVertexBoneAssignment = "vertexboneassignment";
 
 	NextNode(reader);
 	while(CurrentNodeNameEquals(reader, nnVertexBoneAssignment))

@@ -1,4 +1,9 @@
 
+#ifndef AI_OGREPARSINGUTILS_H_INC
+#define AI_OGREPARSINGUTILS_H_INC
+
+#ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
+
 #include "ParsingUtils.h"
 #include "irrXMLWrapper.h"
 #include "fast_atof.h"
@@ -143,3 +148,6 @@ static inline std::string &Trim(std::string &s, bool newlines = true)
 
 } // Ogre
 } // Assimp
+
+#endif // ASSIMP_BUILD_NO_OGRE_IMPORTER
+#endif // AI_OGREPARSINGUTILS_H_INC

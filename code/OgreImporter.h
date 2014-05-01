@@ -1,4 +1,9 @@
 
+#ifndef AI_OGREIMPORTER_H_INC
+#define AI_OGREIMPORTER_H_INC
+
+#ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
+
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
 #include "OgreParsingUtils.h"
@@ -224,3 +229,6 @@ struct Animation
 
 }//namespace Ogre
 }//namespace Assimp
+
+#endif // ASSIMP_BUILD_NO_OGRE_IMPORTER
+#endif // AI_OGREIMPORTER_H_INC

@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include "OgreImporter.hpp"
+#include "OgreImporter.h"
 #include "TinyFormatter.h"
 
 using namespace std;

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <sstream>
 
-#include "OgreImporter.hpp"
+#include "OgreImporter.h"
 #include "TinyFormatter.h"
 #include "irrXMLWrapper.h"
 
@@ -74,7 +74,8 @@ bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandle
 	{
 		string ext = "mesh.xml";
 		int len = ext.length();
-		return (ASSIMP_stricmp(pFile.substr(pFile.length()-len, len), ext) == 0);
+		string fileExt = ToLower(pFile.substr(pFile.length()-len, len));
+		return (ASSIMP_stricmp(fileExt, ext) == 0);
 	}
 	const char* tokens[] = {"<mesh>"};
 	return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);

@@ -4,6 +4,9 @@
 #include "AssimpPCH.h"
 #include "./../include/assimp/version.h"
 
+static const unsigned int MajorVersion = 3;
+static const unsigned int MinorVersion = 1;
+
 // --------------------------------------------------------------------------------
 // Legal information string - dont't remove this.
 static const char* LEGAL_INFORMATION =
@@ -25,13 +28,13 @@ ASSIMP_API const char*  aiGetLegalString  ()	{
 // ------------------------------------------------------------------------------------------------
 // Get Assimp minor version
 ASSIMP_API unsigned int aiGetVersionMinor ()	{
-	return 0;
+    return MinorVersion;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get Assimp major version
 ASSIMP_API unsigned int aiGetVersionMajor ()	{
-	return 3;
+    return MajorVersion;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -65,7 +68,7 @@ ASSIMP_API unsigned int aiGetCompileFlags ()	{
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API unsigned int aiGetVersionRevision ()
 {
-	return SVNRevision;
+    return GitVersion;
 }
 
 // ------------------------------------------------------------------------------------------------

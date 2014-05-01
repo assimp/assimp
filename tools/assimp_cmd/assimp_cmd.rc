@@ -42,8 +42,8 @@ IDI_ASSIMP_VIEW         ICON                    "../shared/assimp_tools_icon.ico
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,SVNRevision,0
- PRODUCTVERSION 1,1,SVNRevision,1
+ FILEVERSION 1, 1, GitVersion, 0
+ PRODUCTVERSION 1, 1, GitVersion, 1
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L

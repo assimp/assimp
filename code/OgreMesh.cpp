@@ -442,15 +442,9 @@ void OgreImporter::ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry)
 	//_________________________________________________________
 }
 
-
-
-
-aiMesh* OgreImporter::CreateAssimpSubMesh(const SubMesh& submesh, const vector<Bone>& bones) const
+aiMesh* OgreImporter::CreateAssimpSubMesh(aiScene *pScene, const SubMesh& submesh, const vector<Bone>& bones) const
 {
-	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
-	(void)m_CurrentScene;
-
-	aiMesh* NewAiMesh=new aiMesh();
+	aiMesh* NewAiMesh = new aiMesh();
 		
 	//Positions
 	NewAiMesh->mVertices=new aiVector3D[submesh.Positions.size()];

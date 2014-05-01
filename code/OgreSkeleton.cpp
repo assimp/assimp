@@ -52,41 +52,36 @@ namespace Assimp
 namespace Ogre
 {
 
-
-
-void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vector<Animation> &Animations) const
+void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOHandler, const aiScene *pScene,
+							    const std::string &skeletonFile, vector<Bone> &Bones, vector<Animation> &Animations) const
 {
-	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
-	(void)m_CurrentScene;
-
-
 	//most likely the skeleton file will only end with .skeleton
 	//But this is a xml reader, so we need: .skeleton.xml
-	FileName+=".xml";
+	string skeletonPath = skeletonFile + ".xml";
 
-	DefaultLogger::get()->debug(string("Loading Skeleton: ")+FileName);
+	DefaultLogger::get()->debug(string("Loading Skeleton: ")+skeletonFile);
 
 	//Open the File:
-	boost::scoped_ptr<IOStream> File(m_CurrentIOHandler->Open(FileName));
+	boost::scoped_ptr<IOStream> File(pIOHandler->Open(skeletonFile));
 	if(NULL==File.get())
-		throw DeadlyImportError("Failed to open skeleton file "+FileName+".");
+		throw DeadlyImportError("Failed to open skeleton file "+skeletonFile+".");
 
 	//Read the Mesh File:
 	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(File.get()));
 	XmlReader* SkeletonFile = irr::io::createIrrXMLReader(mIOWrapper.get());
 	if(!SkeletonFile)
-		throw DeadlyImportError(string("Failed to create XML Reader for ")+FileName);
+		throw DeadlyImportError(string("Failed to create XML Reader for ")+skeletonFile);
 
 	NextNode(SkeletonFile);
 	if(string("skeleton")!=SkeletonFile->getNodeName())
-		throw DeadlyImportError("No <skeleton> node in SkeletonFile: "+FileName);
+		throw DeadlyImportError("No <skeleton> node in SkeletonFile: "+skeletonFile);
 
 
 
 	//------------------------------------load bones-----------------------------------------
 	NextNode(SkeletonFile);
 	if(string("bones")!=SkeletonFile->getNodeName())
-		throw DeadlyImportError("No bones node in skeleton "+FileName);
+		throw DeadlyImportError("No bones node in skeleton "+skeletonFile);
 
 	NextNode(SkeletonFile);
 
@@ -138,7 +133,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 				IdsOk=false;
 		}
 		if(!IdsOk)
-			throw DeadlyImportError("Bone Ids are not valid!"+FileName);
+			throw DeadlyImportError("Bone Ids are not valid!"+skeletonFile);
 	}
 	DefaultLogger::get()->debug((Formatter::format(),"Number of bones: ",Bones.size()));
 	//________________________________________________________________________________
@@ -150,7 +145,7 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 
 	//----------------------------load bonehierarchy--------------------------------
 	if(string("bonehierarchy")!=SkeletonFile->getNodeName())
-		throw DeadlyImportError("no bonehierarchy node in "+FileName);
+		throw DeadlyImportError("no bonehierarchy node in "+skeletonFile);
 
 	DefaultLogger::get()->debug("loading bonehierarchy...");
 	NextNode(SkeletonFile);
@@ -280,11 +275,11 @@ void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vecto
 }
 
 
-void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &/*Animations*/)
+void OgreImporter::CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &/*Animations*/)
 {
-	if(!m_CurrentScene->mRootNode)
+	if(!pScene->mRootNode)
 		throw DeadlyImportError("No root node exists!!");
-	if(0!=m_CurrentScene->mRootNode->mNumChildren)
+	if(0!=pScene->mRootNode->mNumChildren)
 		throw DeadlyImportError("Root Node already has childnodes!");
 
 
@@ -295,26 +290,27 @@ void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const st
 		if(-1==theBone.ParentId) //the bone is a root bone
 		{
 			//which will recursily add all other nodes
-			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, m_CurrentScene->mRootNode));
+			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, pScene->mRootNode));
 		}
 	}
 	
 	if(RootBoneNodes.size() > 0)
 	{
-		m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();	
-		m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
-		memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
+		pScene->mRootNode->mNumChildren=RootBoneNodes.size();	
+		pScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
+		memcpy(pScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
 	}
 }
 
-
-void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
+void OgreImporter::PutAnimationsInScene(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
 {
-	//-----------------Create the Assimp Animations --------------------
+	// TODO: Auf nicht vorhandene Animationskeys achten!
+	// @todo Pay attention to non-existing animation Keys (google translated from above german comment)
+
 	if(Animations.size()>0)//Maybe the model had only a skeleton and no animations. (If it also has no skeleton, this function would'nt have been called
 	{
-		m_CurrentScene->mNumAnimations=Animations.size();
-		m_CurrentScene->mAnimations=new aiAnimation*[Animations.size()];
+		pScene->mNumAnimations=Animations.size();
+		pScene->mAnimations=new aiAnimation*[Animations.size()];
 		for(unsigned int i=0; i<Animations.size(); ++i)//create all animations
 		{
 			aiAnimation* NewAnimation=new aiAnimation();
@@ -382,12 +378,9 @@ void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const st
 				NewAnimation->mChannels[j]=NewNodeAnim;
 			}
 
-			m_CurrentScene->mAnimations[i]=NewAnimation;
+			pScene->mAnimations[i]=NewAnimation;
 		}
 	}
-//TODO: Auf nicht vorhandene Animationskeys achten!
-//#pragma warning (s.o.)
-	//__________________________________________________________________
 }
 
 

@@ -93,35 +93,42 @@ private:
 	static void ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry);
 
 	/// Uses the bone data to convert a SubMesh into a aiMesh which will be created and returned.
-	aiMesh* CreateAssimpSubMesh(const SubMesh &submesh, const std::vector<Bone>& bones) const;
+	aiMesh* CreateAssimpSubMesh(aiScene *pScene, const SubMesh &submesh, const std::vector<Bone>& bones) const;
 
 	//-------------------------------- OgreSkeleton.cpp -------------------------------
 
 	/// Writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
-	void LoadSkeleton(std::string FileName, std::vector<Bone> &Bones, std::vector<Animation> &Animations) const;
+	void ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOHandler, const aiScene *pScene,
+					  const std::string &skeletonFile, std::vector<Bone> &Bones, std::vector<Animation> &Animations) const;
 
 	/// Converts the animations in aiAnimations and puts them into the scene.
-	void PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
+	void PutAnimationsInScene(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
 	/// Creates the aiSkeleton in current scene.
-	void CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
+	void CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
 	/// Recursivly creates a filled aiNode from a given root bone.
 	static aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode);
 
 	//-------------------------------- OgreMaterial.cpp -------------------------------
 
-	aiMaterial* LoadMaterial(const std::string MaterialName) const;
-	void ReadTechnique(std::stringstream &ss, aiMaterial* NewMaterial) const;
+	/// Reads material
+	aiMaterial* ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string MaterialName);
+
+	// These functions parse blocks from a material file from @c ss. Starting parsing from "{" and ending it to "}".
+	bool ReadTechnique(const std::string &techniqueName, std::stringstream &ss, aiMaterial *material);
+	bool ReadPass(const std::string &passName, std::stringstream &ss, aiMaterial *material);	
+	bool ReadTextureUnit(const std::string &textureUnitName, std::stringstream &ss, aiMaterial *material);
 
 	// Now we don't have to give theses parameters to all functions
 	/// @todo Remove this m_Current* bookkeeping.
-	std::string m_CurrentFilename;
-	std::string m_MaterialLibFilename;
-	bool m_TextureTypeFromFilename;
-	IOSystem* m_CurrentIOHandler;
-	aiScene *m_CurrentScene;
+
+	std::string m_userDefinedMaterialLibFile;
+	bool m_detectTextureTypeFromFilename;
+	
 	SubMesh m_SharedGeometry;///< we will just use the vertexbuffers of the submesh
+	
+	std::map<aiTextureType, unsigned int> m_textures;
 };
 
 /// Simplified face.

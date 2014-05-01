@@ -38,9 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  OgreImporter.cpp
- *  @brief Implementation of the Ogre XML (.mesh.xml) loader.
- */
 #include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
@@ -85,10 +82,6 @@ bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandle
 
 void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler)
 {
-	m_CurrentFilename = pFile;
-	m_CurrentIOHandler = pIOHandler;
-	m_CurrentScene = pScene;
-
 	// -------------------- Initial file and XML operations --------------------
 	
 	// Open
@@ -155,7 +148,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		/** @todo What is the correct way of handling empty ref here.
 			Does Assimp require there to be a valid material index for each mesh,
 			even if its a dummy material. */
-		aiMaterial* material = LoadMaterial(submesh->MaterialName);
+		aiMaterial* material = ReadMaterial(pFile, pIOHandler, submesh->MaterialName);
 		materials.push_back(material);
 	}
 
@@ -179,13 +172,14 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 	vector<Bone> Bones;
 	vector<Animation> Animations;
+
 	if (CurrentNodeNameEquals(reader, nnSkeletonLink))
 	{
-		string SkeletonFile = GetAttribute<string>(reader.get(), "name");
-		if (!SkeletonFile.empty())
-			LoadSkeleton(SkeletonFile, Bones, Animations);
+		string skeletonFile = GetAttribute<string>(reader.get(), "name");
+		if (!skeletonFile.empty())
+			ReadSkeleton(pFile, pIOHandler, pScene, skeletonFile, Bones, Animations);
 		else
-			DefaultLogger::get()->debug("Found a unusual <" + nnSkeletonLink + "> with a empty reference");
+			DefaultLogger::get()->debug("Found a unusual <" + nnSkeletonLink + "> with a empty file reference");
 		NextNode(reader.get());
 	}
 	else
@@ -204,34 +198,34 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	// -------------------- Apply to aiScene --------------------
 
 	//put the aiMaterials in the scene:
-	m_CurrentScene->mMaterials=new aiMaterial*[materials.size()];
-	m_CurrentScene->mNumMaterials=materials.size();
+	pScene->mMaterials=new aiMaterial*[materials.size()];
+	pScene->mNumMaterials=materials.size();
 	for(unsigned int i=0; i<materials.size(); ++i)
-		m_CurrentScene->mMaterials[i]=materials[i];
+		pScene->mMaterials[i]=materials[i];
 
 	//create the aiMehs... 
 	vector<aiMesh*> aiMeshes;
 	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, subMeshes)
 	{
-		aiMeshes.push_back(CreateAssimpSubMesh(*theSubMesh, Bones));
+		aiMeshes.push_back(CreateAssimpSubMesh(pScene, *theSubMesh, Bones));
 	}
 	//... and put them in the scene:
-	m_CurrentScene->mNumMeshes=aiMeshes.size();
-	m_CurrentScene->mMeshes=new aiMesh*[aiMeshes.size()];
-	memcpy(m_CurrentScene->mMeshes, &(aiMeshes[0]), sizeof(aiMeshes[0])*aiMeshes.size());
+	pScene->mNumMeshes=aiMeshes.size();
+	pScene->mMeshes=new aiMesh*[aiMeshes.size()];
+	memcpy(pScene->mMeshes, &(aiMeshes[0]), sizeof(aiMeshes[0])*aiMeshes.size());
 
 	//Create the root node
-	m_CurrentScene->mRootNode=new aiNode("root");
+	pScene->mRootNode=new aiNode("root");
 
 	//link the meshs with the root node:
-	m_CurrentScene->mRootNode->mMeshes=new unsigned int[subMeshes.size()];
-	m_CurrentScene->mRootNode->mNumMeshes=subMeshes.size();
+	pScene->mRootNode->mMeshes=new unsigned int[subMeshes.size()];
+	pScene->mRootNode->mNumMeshes=subMeshes.size();
 	
 	for(unsigned int i=0; i<subMeshes.size(); ++i)
-		m_CurrentScene->mRootNode->mMeshes[i]=i;
+		pScene->mRootNode->mMeshes[i]=i;
 
-	CreateAssimpSkeleton(Bones, Animations);
-	PutAnimationsInScene(Bones, Animations);
+	CreateAssimpSkeleton(pScene, Bones, Animations);
+	PutAnimationsInScene(pScene, Bones, Animations);
 }
 
 
@@ -243,8 +237,8 @@ const aiImporterDesc* OgreImporter::GetInfo () const
 
 void OgreImporter::SetupProperties(const Importer* pImp)
 {
-	m_MaterialLibFilename=pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
-	m_TextureTypeFromFilename=pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
+	m_userDefinedMaterialLibFile = pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
+	m_detectTextureTypeFromFilename = pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
 }
 
 

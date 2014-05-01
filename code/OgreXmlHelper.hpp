@@ -1,4 +1,5 @@
 
+#include "ParsingUtils.h"
 #include "irrXMLWrapper.h"
 #include "fast_atof.h"
 
@@ -6,7 +7,7 @@ namespace Assimp
 {
 namespace Ogre
 {
-	
+
 typedef irr::io::IrrXMLReader XmlReader;
 
 static void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error = "")
@@ -86,6 +87,41 @@ inline bool NextNode(XmlReader* reader)
 inline bool CurrentNodeNameEquals(const XmlReader* reader, const std::string &name)
 {
 	return (ASSIMP_stricmp(std::string(reader->getNodeName()), name) == 0);
+}
+
+/// Returns a lower cased copy of @s.
+static inline std::string ToLower(std::string s)
+{
+	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+	return s;
+}
+
+// ------------------------------------------------------------------------------------------------
+// From http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+
+// trim from start
+static inline std::string &ltrim(std::string &s, bool newlines = true)
+{
+	if (!newlines)
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))));
+	else
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpaceOrNewLine<char>))));
+	return s;
+}
+
+// trim from end
+static inline std::string &rtrim(std::string &s, bool newlines = true)
+{
+	if (!newlines)
+		s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))).base(),s.end());
+	else
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpaceOrNewLine<char>))));
+	return s;
+}
+// trim from both ends
+static inline std::string &trim(std::string &s, bool newlines = true)
+{
+	return ltrim(rtrim(s, newlines), newlines);
 }
 
 } // Ogre

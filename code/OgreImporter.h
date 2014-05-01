@@ -122,9 +122,6 @@ private:
 	bool ReadPass(const std::string &passName, std::stringstream &ss, aiMaterial *material);	
 	bool ReadTextureUnit(const std::string &textureUnitName, std::stringstream &ss, aiMaterial *material);
 
-	// Now we don't have to give theses parameters to all functions
-	/// @todo Remove this m_Current* bookkeeping.
-
 	std::string m_userDefinedMaterialLibFile;
 	bool m_detectTextureTypeFromFilename;
 	
@@ -160,9 +157,7 @@ struct BoneWeight
 };
 
 
-/// Helper Class to describe an ogre-bone for the skeleton:
-/** All Id's are signed ints, because than we have -1 as a simple INVALID_ID Value (we start from 0 so 0 is a valid bone ID!
-	@todo Cleanup if possible. Seems like this is overly complex for what we are reading. */
+/// Ogre Bone
 struct Bone
 {
 	std::string Name;
@@ -228,8 +223,8 @@ struct Animation
 	std::vector<Track> Tracks;
 };
 
-}//namespace Ogre
-}//namespace Assimp
+} // Ogre
+} // Assimp
 
 #endif // ASSIMP_BUILD_NO_OGRE_IMPORTER
 #endif // AI_OGREIMPORTER_H_INC

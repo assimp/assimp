@@ -200,9 +200,9 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		ReadBoneWeights(m_SharedGeometry, reader.get());
 
 	// -------------------- Process Results --------------------
-	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, subMeshes)
+	BOOST_FOREACH(boost::shared_ptr<SubMesh> submesh, subMeshes)
 	{
-		ProcessSubMesh(*theSubMesh, m_SharedGeometry);
+		ProcessSubMesh(*submesh.get(), m_SharedGeometry);
 	}
 
 	// -------------------- Apply to aiScene --------------------

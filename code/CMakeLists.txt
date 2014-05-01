@@ -320,8 +320,8 @@ SET( Obj_SRCS
 SOURCE_GROUP( Obj FILES ${Obj_SRCS})
 
 SET( Ogre_SRCS
-	OgreImporter.hpp
-	OgreXmlHelper.hpp
+	OgreImporter.h
+	OgreParsingUtils.h
 	OgreImporter.cpp
 	OgreMaterial.cpp
 	OgreMesh.cpp

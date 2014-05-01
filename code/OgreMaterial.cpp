@@ -49,11 +49,12 @@ to make it shorter easier to maintain.
 
 #include <vector>
 #include <sstream>
-using namespace std;
 
-#include "OgreImporter.hpp"
+#include "OgreImporter.h"
 #include "irrXMLWrapper.h"
 #include "TinyFormatter.h"
+
+using namespace std;
 
 namespace Assimp
 {
@@ -63,23 +64,6 @@ namespace Ogre
 static const string partComment    = "//";
 static const string partBlockStart = "{";
 static const string partBlockEnd   = "}";
-
-/// Skips a line from current @ss position until a newline. Returns the skipped part.
-std::string SkipLine(stringstream &ss)
-{
-	string skipped;
-	getline(ss, skipped);
-	return skipped;
-}
-
-/// Skips a line and reads next element from @c ss to @c nextElement.
-/** @return Skipped line content until newline. */
-std::string NextAfterNewLine(stringstream &ss, std::string &nextElement)
-{
-	string skipped = SkipLine(ss);
-	ss >> nextElement;
-	return skipped;
-}
 
 aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string materialName)
 {
@@ -216,7 +200,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 					
 			if (linePart == partTechnique)
 			{
-				string techniqueName = trim(SkipLine(ss));
+				string techniqueName = Trim(SkipLine(ss));
 				ReadTechnique(techniqueName, ss, material);
 			}
 
@@ -336,7 +320,7 @@ bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream 
 		/// @todo Techniques have other attributes than just passes.		
 		if (linePart == partPass)
 		{
-			string passName = trim(SkipLine(ss));
+			string passName = Trim(SkipLine(ss));
 			ReadPass(passName, ss, material);
 		}
 	}
@@ -395,7 +379,7 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
 		}
 		else if (linePart == partTextureUnit)
 		{
-			string textureUnitName = trim(SkipLine(ss));
+			string textureUnitName = Trim(SkipLine(ss));
 			ReadTextureUnit(textureUnitName, ss, material);
 		}
 	}

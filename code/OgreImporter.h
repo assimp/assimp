@@ -1,7 +1,7 @@
 
 #include "BaseImporter.h"
-#include "OgreXmlHelper.hpp"
 #include "irrXMLWrapper.h"
+#include "OgreParsingUtils.h"
 
 #include <vector>
 

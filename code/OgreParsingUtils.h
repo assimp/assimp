@@ -89,6 +89,23 @@ inline bool CurrentNodeNameEquals(const XmlReader* reader, const std::string &na
 	return (ASSIMP_stricmp(std::string(reader->getNodeName()), name) == 0);
 }
 
+/// Skips a line from current @ss position until a newline. Returns the skipped part.
+static inline std::string SkipLine(std::stringstream &ss)
+{
+	std::string skipped;
+	getline(ss, skipped);
+	return skipped;
+}
+
+/// Skips a line and reads next element from @c ss to @c nextElement.
+/** @return Skipped line content until newline. */
+static inline std::string NextAfterNewLine(std::stringstream &ss, std::string &nextElement)
+{
+	std::string skipped = SkipLine(ss);
+	ss >> nextElement;
+	return skipped;
+}
+
 /// Returns a lower cased copy of @s.
 static inline std::string ToLower(std::string s)
 {
@@ -100,7 +117,7 @@ static inline std::string ToLower(std::string s)
 // From http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 
 // trim from start
-static inline std::string &ltrim(std::string &s, bool newlines = true)
+static inline std::string &TrimLeft(std::string &s, bool newlines = true)
 {
 	if (!newlines)
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))));
@@ -110,7 +127,7 @@ static inline std::string &ltrim(std::string &s, bool newlines = true)
 }
 
 // trim from end
-static inline std::string &rtrim(std::string &s, bool newlines = true)
+static inline std::string &TrimRight(std::string &s, bool newlines = true)
 {
 	if (!newlines)
 		s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))).base(),s.end());
@@ -119,9 +136,9 @@ static inline std::string &rtrim(std::string &s, bool newlines = true)
 	return s;
 }
 // trim from both ends
-static inline std::string &trim(std::string &s, bool newlines = true)
+static inline std::string &Trim(std::string &s, bool newlines = true)
 {
-	return ltrim(rtrim(s, newlines), newlines);
+	return TrimLeft(TrimRight(s, newlines), newlines);
 }
 
 } // Ogre

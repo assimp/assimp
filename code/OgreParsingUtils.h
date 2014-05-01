@@ -118,10 +118,25 @@ static inline std::string ToLower(std::string s)
 	return s;
 }
 
-// ------------------------------------------------------------------------------------------------
-// From http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+/// Returns if @c s ends with @c suffix. If @c caseSensitive is false, both strings will be lower cased before matching.
+static inline bool EndsWith(const std::string &s, const std::string &suffix, bool caseSensitive = true)
+{
+	if (s.empty() || suffix.empty())
+		return false;
+	else if (s.length() < suffix.length())
+		return false;
 
-// trim from start
+	if (!caseSensitive)
+		return EndsWith(ToLower(s), ToLower(suffix), true);
+
+	size_t len = suffix.length();
+	std::string sSuffix = s.substr(s.length()-len, len);
+	return (ASSIMP_stricmp(sSuffix, suffix) == 0);
+}
+
+// Below trim functions adapted from http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+
+/// Trim from start
 static inline std::string &TrimLeft(std::string &s, bool newlines = true)
 {
 	if (!newlines)
@@ -131,7 +146,7 @@ static inline std::string &TrimLeft(std::string &s, bool newlines = true)
 	return s;
 }
 
-// trim from end
+/// Trim from end
 static inline std::string &TrimRight(std::string &s, bool newlines = true)
 {
 	if (!newlines)
@@ -140,7 +155,8 @@ static inline std::string &TrimRight(std::string &s, bool newlines = true)
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpaceOrNewLine<char>))));
 	return s;
 }
-// trim from both ends
+
+/// Trim from both ends
 static inline std::string &Trim(std::string &s, bool newlines = true)
 {
 	return TrimLeft(TrimRight(s, newlines), newlines);

@@ -38,11 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/**
-This file contains material related code. This is
-spilitted up from the main file OgreImporter.cpp
-to make it shorter easier to maintain.
-*/
 #include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER

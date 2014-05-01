@@ -548,8 +548,7 @@ aiMesh* OgreImporter::CreateAssimpSubMesh(aiScene *pScene, const SubMesh& submes
 	return NewAiMesh;
 }
 
+} // Ogre
+} // Assimp
 
-}//namespace Ogre
-}//namespace Assimp
-
-#endif  // !! ASSIMP_BUILD_NO_OGRE_IMPORTER
+#endif // ASSIMP_BUILD_NO_OGRE_IMPORTER

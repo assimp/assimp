@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include <vector>
@@ -71,14 +72,10 @@ namespace Ogre
 bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const
 {
 	if (!checkSig)
-	{
-		string ext = "mesh.xml";
-		int len = ext.length();
-		string fileExt = ToLower(pFile.substr(pFile.length()-len, len));
-		return (ASSIMP_stricmp(fileExt, ext) == 0);
-	}
-	const char* tokens[] = {"<mesh>"};
-	return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
+		return EndsWith(pFile, ".mesh.xml", false);
+
+	const char* tokens[] = { "<mesh>" };
+	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
 }
 
 void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler)
@@ -101,7 +98,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	// Read root node
 	NextNode(reader.get());
 	if (!CurrentNodeNameEquals(reader, "mesh"))
-		throw DeadlyImportError("Root node is not <mesh> but <" + string(reader->getNodeName()) + ">");
+		throw DeadlyImportError("Root node is not <mesh> but <" + string(reader->getNodeName()) + "> in " + pFile);
 	
 	// Node names
 	const string nnSharedGeometry = "sharedgeometry";
@@ -242,8 +239,7 @@ void OgreImporter::SetupProperties(const Importer* pImp)
 	m_detectTextureTypeFromFilename = pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
 }
 
+} // Ogre
+} // Assimp
 
-}//namespace Ogre
-}//namespace Assimp
-
-#endif  // !! ASSIMP_BUILD_NO_OGRE_IMPORTER
+#endif // ASSIMP_BUILD_NO_OGRE_IMPORTER

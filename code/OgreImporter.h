@@ -155,7 +155,7 @@ struct BoneAssignment
 /// Ogre Bone weight
 struct BoneWeight
 {
-	/// Bone ID
+	/// Bone Id
 	unsigned int Id;
 	/// BoneWeight
 	float Value;
@@ -187,8 +187,11 @@ struct Bone
 	{
 	}
 
-	/// This operator is needed to sort the bones after Id's
-	bool operator<(const Bone &other) const { return Id < other.Id; }
+	/// Returns if this bone is parented.
+	bool IsParented() const { return (ParentId != -1); }
+
+	/// This operator is needed to sort the bones by Id in a vector<Bone>.
+	bool operator<(const Bone &other) const { return (Id < other.Id); }
 
 	/// This operator is needed to find a bone by its name in a vector<Bone>
 	bool operator==(const std::string& other) const { return Name == other; }

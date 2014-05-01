@@ -5,11 +5,11 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
+Redistribution and use of this software in aSource and binary forms, 
 with or without modification, are permitted provided that the 
 following conditions are met:
 
-* Redistributions of source code must retain the above
+* Redistributions of aSource code must retain the above
   copyright notice, this list of conditions and the
   following disclaimer.
 
@@ -254,142 +254,145 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 	}
 }
 
-void OgreImporter::CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &/*Animations*/)
+void OgreImporter::CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &bones, const std::vector<Animation> &animations)
 {
-	if(!pScene->mRootNode)
-		throw DeadlyImportError("No root node exists!!");
-	if(0!=pScene->mRootNode->mNumChildren)
-		throw DeadlyImportError("Root Node already has childnodes!");
+	if (bones.empty())
+		return;
 
+	if (!pScene->mRootNode)
+		throw DeadlyImportError("Creating Assimp skeleton: No root node created!");
+	if (pScene->mRootNode->mNumChildren > 0)
+		throw DeadlyImportError("Creating Assimp skeleton: Root node already has children!");
 
-	//Createt the assimp bone hierarchy
-	vector<aiNode*> RootBoneNodes;
-	BOOST_FOREACH(const Bone &theBone, Bones)
+	// Bones
+	vector<aiNode*> rootBones;
+	BOOST_FOREACH(const Bone &bone, bones)
 	{
-		if(-1==theBone.ParentId) //the bone is a root bone
-		{
-			//which will recursily add all other nodes
-			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, pScene->mRootNode));
-		}
+		if (!bone.IsParented())
+			rootBones.push_back(CreateNodeFromBone(bone.Id, bones, pScene->mRootNode));
 	}
 	
-	if(RootBoneNodes.size() > 0)
+	if (!rootBones.empty())
 	{
-		pScene->mRootNode->mNumChildren=RootBoneNodes.size();	
-		pScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
-		memcpy(pScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
-	}
-}
+		pScene->mRootNode->mChildren = new aiNode*[rootBones.size()];
+		pScene->mRootNode->mNumChildren = rootBones.size();
 
-void OgreImporter::PutAnimationsInScene(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
-{
+		for(size_t i=0, len=rootBones.size(); i<len; ++i)
+			pScene->mRootNode->mChildren[i] = rootBones[i];
+	}
+
 	// TODO: Auf nicht vorhandene Animationskeys achten!
 	// @todo Pay attention to non-existing animation Keys (google translated from above german comment)
-
-	if(Animations.size()>0)//Maybe the model had only a skeleton and no animations. (If it also has no skeleton, this function would'nt have been called
+	
+	// Animations
+	if (!animations.empty())
 	{
-		pScene->mNumAnimations=Animations.size();
-		pScene->mAnimations=new aiAnimation*[Animations.size()];
-		for(unsigned int i=0; i<Animations.size(); ++i)//create all animations
+		pScene->mAnimations = new aiAnimation*[animations.size()];
+		pScene->mNumAnimations = animations.size();
+		
+		for(size_t ai=0, alen=animations.size(); ai<alen; ++ai)
 		{
-			aiAnimation* NewAnimation=new aiAnimation();
-			NewAnimation->mName=Animations[i].Name;
-			NewAnimation->mDuration=Animations[i].Length;
-			NewAnimation->mTicksPerSecond=1.0f;
+			const Animation &aSource = animations[ai];
 
-			//Create all tracks in this animation
-			NewAnimation->mNumChannels=Animations[i].Tracks.size();
-			NewAnimation->mChannels=new aiNodeAnim*[Animations[i].Tracks.size()];
-			for(unsigned int j=0; j<Animations[i].Tracks.size(); ++j)
+			aiAnimation *animation = new aiAnimation();
+			animation->mName = aSource.Name;
+			animation->mDuration = aSource.Length;
+			animation->mTicksPerSecond = 1.0f;
+
+			// Tracks
+			animation->mChannels = new aiNodeAnim*[aSource.Tracks.size()];
+			animation->mNumChannels = aSource.Tracks.size();
+			
+			for(size_t ti=0, tlen=aSource.Tracks.size(); ti<tlen; ++ti)
 			{
-				aiNodeAnim* NewNodeAnim=new aiNodeAnim();
-				NewNodeAnim->mNodeName=Animations[i].Tracks[j].BoneName;
+				const Track &tSource = aSource.Tracks[ti];
 
-				//we need this, to acces the bones default pose, which we need to make keys absolute to the default bone pose
-				vector<Bone>::const_iterator CurBone=find(Bones.begin(), Bones.end(), NewNodeAnim->mNodeName);
-				aiMatrix4x4 t0, t1;
-				aiMatrix4x4 DefBonePose=aiMatrix4x4::Translation(CurBone->Position, t1)
-									 *	aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t0);
-				
+				aiNodeAnim *animationNode = new aiNodeAnim();
+				animationNode->mNodeName = tSource.BoneName;
 
-				//Create the keyframe arrays...
-				unsigned int KeyframeCount=Animations[i].Tracks[j].Keyframes.size();
-				NewNodeAnim->mNumPositionKeys=KeyframeCount;
-				NewNodeAnim->mNumRotationKeys=KeyframeCount;
-				NewNodeAnim->mNumScalingKeys =KeyframeCount;
-				NewNodeAnim->mPositionKeys=new aiVectorKey[KeyframeCount];
-				NewNodeAnim->mRotationKeys=new aiQuatKey[KeyframeCount];
-				NewNodeAnim->mScalingKeys =new aiVectorKey[KeyframeCount];
-				
-				//...and fill them
-				for(unsigned int k=0; k<KeyframeCount; ++k)
+				// We need this, to access the bones default pose. 
+				// Which we need to make keys absolute to the default bone pose.
+				vector<Bone>::const_iterator boneIter = find(bones.begin(), bones.end(), tSource.BoneName);
+				if (boneIter == bones.end())
 				{
-					aiMatrix4x4 t2, t3;
-
-					//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
-					aiMatrix4x4 PoseToKey=
-									  aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3)	//pos
-									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
-									* aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2);		//scale
-									
-
-					//calculate the complete transformation from world space to bone space
-					aiMatrix4x4 CompleteTransform=DefBonePose * PoseToKey;
+					for(unsigned int a=0; a<ai; a++)
+						delete pScene->mAnimations[a];
+					delete [] pScene->mAnimations;
+					pScene->mAnimations = NULL;
+					pScene->mNumAnimations = 0;
 					
-					aiVector3D Pos;
-					aiQuaternion Rot;
-					aiVector3D Scale;
-
-					CompleteTransform.Decompose(Scale, Rot, Pos);
-
-					double Time=Animations[i].Tracks[j].Keyframes[k].Time;
-
-					NewNodeAnim->mPositionKeys[k].mTime=Time;
-					NewNodeAnim->mPositionKeys[k].mValue=Pos;
-					
-					NewNodeAnim->mRotationKeys[k].mTime=Time;
-					NewNodeAnim->mRotationKeys[k].mValue=Rot;
-
-					NewNodeAnim->mScalingKeys[k].mTime=Time;
-					NewNodeAnim->mScalingKeys[k].mValue=Scale;
+					DefaultLogger::get()->error("Failed to find bone for name " + tSource.BoneName + " when creating animation " + aSource.Name + 
+						". This is a serious error, animations wont be imported.");
+					return;
 				}
-				
-				NewAnimation->mChannels[j]=NewNodeAnim;
-			}
 
-			pScene->mAnimations[i]=NewAnimation;
+				aiMatrix4x4 t0, t1;
+				aiMatrix4x4 defaultBonePose = aiMatrix4x4::Translation(boneIter->Position, t1) * aiMatrix4x4::Rotation(boneIter->RotationAngle, boneIter->RotationAxis, t0);
+
+				// Keyframes
+				unsigned int numKeyframes = tSource.Keyframes.size();
+
+				animationNode->mPositionKeys = new aiVectorKey[numKeyframes];				
+				animationNode->mRotationKeys = new aiQuatKey[numKeyframes];
+				animationNode->mScalingKeys = new aiVectorKey[numKeyframes];
+				animationNode->mNumPositionKeys = numKeyframes;
+				animationNode->mNumRotationKeys = numKeyframes;
+				animationNode->mNumScalingKeys  = numKeyframes;
+
+				//...and fill them
+				for(size_t kfi=0; kfi<numKeyframes; ++kfi)
+				{
+					const KeyFrame &kfSource = tSource.Keyframes[kfi];
+
+					// Create a matrix to transform a vector from the bones 
+					// default pose to the bone bones in this animation key
+					aiMatrix4x4 t2, t3;
+					aiMatrix4x4 keyBonePose =
+						aiMatrix4x4::Translation(kfSource.Position, t3) *
+						aiMatrix4x4(kfSource.Rotation.GetMatrix()) *
+						aiMatrix4x4::Scaling(kfSource.Scaling, t2);
+
+					// Calculate the complete transformation from world space to bone space
+					aiMatrix4x4 CompleteTransform = defaultBonePose * keyBonePose;
+
+					aiVector3D kfPos; aiQuaternion kfRot; aiVector3D kfScale;
+					CompleteTransform.Decompose(kfScale, kfRot, kfPos);
+
+					animationNode->mPositionKeys[kfi].mTime = static_cast<double>(kfSource.Time);
+					animationNode->mRotationKeys[kfi].mTime = static_cast<double>(kfSource.Time);
+					animationNode->mScalingKeys[kfi].mTime = static_cast<double>(kfSource.Time);
+
+					animationNode->mPositionKeys[kfi].mValue = kfPos;					
+					animationNode->mRotationKeys[kfi].mValue = kfRot;
+					animationNode->mScalingKeys[kfi].mValue = kfScale;
+				}
+				animation->mChannels[ti] = animationNode;
+			}
+			pScene->mAnimations[ai] = animation;
 		}
 	}
 }
 
-
-aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode)
+aiNode* OgreImporter::CreateNodeFromBone(int boneId, const std::vector<Bone> &bones, aiNode* parent)
 {
-	//----Create the node for this bone and set its values-----
-	aiNode* NewNode=new aiNode(Bones[BoneId].Name);
-	NewNode->mParent=ParentNode;
-
 	aiMatrix4x4 t0,t1;
-	NewNode->mTransformation=
-		aiMatrix4x4::Translation(Bones[BoneId].Position, t0)
-		*aiMatrix4x4::Rotation(Bones[BoneId].RotationAngle, Bones[BoneId].RotationAxis, t1)
-	;
-	//__________________________________________________________
+	const Bone &source = bones[boneId];
 
+	aiNode* boneNode = new aiNode(source.Name);
+	boneNode->mParent = parent;
+	boneNode->mTransformation = aiMatrix4x4::Translation(source.Position, t0) * aiMatrix4x4::Rotation(source.RotationAngle, source.RotationAxis, t1);
 
-	//---------- recursivly create all children Nodes: ----------
-	NewNode->mNumChildren=Bones[BoneId].Children.size();
-	NewNode->mChildren=new aiNode*[Bones[BoneId].Children.size()];
-	for(unsigned int i=0; i<Bones[BoneId].Children.size(); ++i)
+	if (!source.Children.empty())
 	{
-		NewNode->mChildren[i]=CreateAiNodeFromBone(Bones[BoneId].Children[i], Bones, NewNode);
+		boneNode->mChildren = new aiNode*[source.Children.size()];
+		boneNode->mNumChildren = source.Children.size();
+
+		for(size_t i=0, len=source.Children.size(); i<len; ++i)
+			boneNode->mChildren[i] = CreateNodeFromBone(source.Children[i], bones, boneNode);
 	}
-	//____________________________________________________
 
-
-	return NewNode;
+	return boneNode;
 }
-
 
 void Bone::CalculateBoneToWorldSpaceMatrix(vector<Bone> &Bones)
 {

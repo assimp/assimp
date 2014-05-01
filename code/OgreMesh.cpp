@@ -442,110 +442,103 @@ void OgreImporter::ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry)
 	//_________________________________________________________
 }
 
-aiMesh* OgreImporter::CreateAssimpSubMesh(aiScene *pScene, const SubMesh& submesh, const vector<Bone>& bones) const
+aiMesh *OgreImporter::CreateAssimpSubMesh(aiScene *pScene, const SubMesh& submesh, const vector<Bone>& bones) const
 {
-	aiMesh* NewAiMesh = new aiMesh();
-		
-	//Positions
-	NewAiMesh->mVertices=new aiVector3D[submesh.Positions.size()];
-	memcpy(NewAiMesh->mVertices, &submesh.Positions[0], submesh.Positions.size()*sizeof(aiVector3D));
-	NewAiMesh->mNumVertices=submesh.Positions.size();
+	const size_t sizeVector3D = sizeof(aiVector3D);
 
-	//Normals
-	if(submesh.HasNormals)
+	aiMesh *dest = new aiMesh();
+
+	// Material
+	dest->mMaterialIndex = submesh.MaterialIndex;
+
+	// Positions
+	dest->mVertices = new aiVector3D[submesh.Positions.size()];
+	dest->mNumVertices = submesh.Positions.size();
+	memcpy(dest->mVertices, &submesh.Positions[0], submesh.Positions.size() * sizeVector3D);
+	
+	// Normals
+	if (submesh.HasNormals)
 	{
-		NewAiMesh->mNormals=new aiVector3D[submesh.Normals.size()];
-		memcpy(NewAiMesh->mNormals, &submesh.Normals[0], submesh.Normals.size()*sizeof(aiVector3D));
+		dest->mNormals = new aiVector3D[submesh.Normals.size()];
+		memcpy(dest->mNormals, &submesh.Normals[0], submesh.Normals.size() * sizeVector3D);
+	}
+	
+	// Tangents
+	// Until we have support for bitangents, no tangents will be written
+	/// @todo Investigate why the above?
+	if (submesh.HasTangents)
+	{
+		DefaultLogger::get()->warn("Tangents found from Ogre mesh but writing to Assimp mesh not yet supported!");
+		//dest->mTangents = new aiVector3D[submesh.Tangents.size()];
+		//memcpy(dest->mTangents, &submesh.Tangents[0], submesh.Tangents.size() * sizeVector3D);
 	}
 
-
-	//until we have support for bitangents, no tangents will be written
-	/*
-	//Tangents
-	if(submesh.HasTangents)
+	// UVs
+	for (size_t i=0, len=submesh.Uvs.size(); i<len; ++i)
 	{
-		NewAiMesh->mTangents=new aiVector3D[submesh.Tangents.size()];
-		memcpy(NewAiMesh->mTangents, &submesh.Tangents[0], submesh.Tangents.size()*sizeof(aiVector3D));
+		dest->mNumUVComponents[i] = 2;
+		dest->mTextureCoords[i] = new aiVector3D[submesh.Uvs[i].size()];
+		memcpy(dest->mTextureCoords[i], &(submesh.Uvs[i][0]), submesh.Uvs[i].size() * sizeVector3D);
 	}
-	*/
 
-	//Uvs
-	if(submesh.Uvs.size()>0)
+	// Bone weights. Convert internal vertex-to-bone mapping to bone-to-vertex.
+	vector<vector<aiVertexWeight> > assimpWeights(submesh.BonesUsed);
+	for(size_t vertexId=0, len=submesh.Weights.size(); vertexId<len; ++vertexId)
 	{
-		for(unsigned int i=0; i<submesh.Uvs.size(); ++i)
+		const vector<BoneWeight> &vertexWeights = submesh.Weights[vertexId];
+		for (size_t boneId=0, len=vertexWeights.size(); boneId<len; ++boneId)
 		{
-			NewAiMesh->mNumUVComponents[i]=2;
-			NewAiMesh->mTextureCoords[i]=new aiVector3D[submesh.Uvs[i].size()];
-			memcpy(NewAiMesh->mTextureCoords[i], &(submesh.Uvs[i][0]), submesh.Uvs[i].size()*sizeof(aiVector3D));
+			const BoneWeight &ogreWeight = vertexWeights[boneId];
+			assimpWeights[ogreWeight.Id].push_back(aiVertexWeight(vertexId, ogreWeight.Value));
 		}
 	}
 
+	// Bones.
+	vector<aiBone*> assimpBones;
+	assimpBones.reserve(submesh.BonesUsed);
 
-	//---------------------------------------- bones --------------------------------------------
-
-	//Copy the weights in in Bone-Vertices Struktur
-	//(we have them in a Vertex-bones Structur, this is much easier for making them unique, which is required by assimp
-	vector< vector<aiVertexWeight> > aiWeights(submesh.BonesUsed);//now the outer list are the bones, and the inner vector the vertices
-	for(unsigned int VertexId=0; VertexId<submesh.Weights.size(); ++VertexId)//iterate over all vertices
+	for(size_t boneId=0, len=submesh.BonesUsed; boneId<len; ++boneId)
 	{
-		for(unsigned int BoneId=0; BoneId<submesh.Weights[VertexId].size(); ++BoneId)//iterate over all bones
-		{
-			aiVertexWeight NewWeight;
-			NewWeight.mVertexId=VertexId;//the current Vertex, we can't use the Id form the submehs weights, because they are bone id's
-			NewWeight.mWeight=submesh.Weights[VertexId][BoneId].Value;
-			aiWeights[submesh.Weights[VertexId][BoneId].Id].push_back(NewWeight);
-		}
+		const vector<aiVertexWeight> &boneWeights = assimpWeights[boneId];
+		if (boneWeights.size() == 0)
+			continue;
+
+		// @note The bones list is sorted by id's, this was done in LoadSkeleton.
+		aiBone *assimpBone = new aiBone();
+		assimpBone->mName = bones[boneId].Name;
+		assimpBone->mOffsetMatrix = bones[boneId].BoneToWorldSpace;
+		assimpBone->mNumWeights = boneWeights.size();
+		assimpBone->mWeights = new aiVertexWeight[boneWeights.size()];
+		memcpy(assimpBone->mWeights, &boneWeights[0], boneWeights.size() * sizeof(aiVertexWeight));
+
+		assimpBones.push_back(assimpBone);
 	}
 
-	
-
-	vector<aiBone*> aiBones;
-	aiBones.reserve(submesh.BonesUsed);//the vector might be smaller, because there might be empty bones (bones that are not attached to any vertex)
-	
-	//create all the bones and fill them with informations
-	for(unsigned int i=0; i<submesh.BonesUsed; ++i)
+	if (!assimpBones.empty())
 	{
-		if(aiWeights[i].size()>0)
-		{
-			aiBone* NewBone=new aiBone();
-			NewBone->mNumWeights=aiWeights[i].size();
-			NewBone->mWeights=new aiVertexWeight[aiWeights[i].size()];
-			memcpy(NewBone->mWeights, &(aiWeights[i][0]), sizeof(aiVertexWeight)*aiWeights[i].size());
-			NewBone->mName=bones[i].Name;//The bone list should be sorted after its id's, this was done in LoadSkeleton
-			NewBone->mOffsetMatrix=bones[i].BoneToWorldSpace;
-				
-			aiBones.push_back(NewBone);
-		}
-	}
-	NewAiMesh->mNumBones=aiBones.size();
-	
-	// mBones must be NULL if mNumBones is non 0 or the validation fails.
-	if (aiBones.size()) {
-		NewAiMesh->mBones=new aiBone* [aiBones.size()];
-		memcpy(NewAiMesh->mBones, &(aiBones[0]), aiBones.size()*sizeof(aiBone*));
+		dest->mBones = new aiBone*[assimpBones.size()];
+		dest->mNumBones = assimpBones.size();
+
+		for(size_t i=0, len=assimpBones.size(); i<len; ++i)
+			dest->mBones[i] = assimpBones[i];
 	}
 
-	//______________________________________________________________________________________________________
+	// Faces
+	dest->mFaces = new aiFace[submesh.Faces.size()];
+	dest->mNumFaces = submesh.Faces.size();
 
-
-
-	//Faces
-	NewAiMesh->mFaces=new aiFace[submesh.Faces.size()];
-	for(unsigned int i=0; i<submesh.Faces.size(); ++i)
+	for(size_t i=0, len=submesh.Faces.size(); i<len; ++i)
 	{
-		NewAiMesh->mFaces[i].mNumIndices=3;
-		NewAiMesh->mFaces[i].mIndices=new unsigned int[3];
+		dest->mFaces[i].mNumIndices = 3;
+		dest->mFaces[i].mIndices = new unsigned int[3];
 
-		NewAiMesh->mFaces[i].mIndices[0]=submesh.Faces[i].VertexIndices[0];
-		NewAiMesh->mFaces[i].mIndices[1]=submesh.Faces[i].VertexIndices[1];
-		NewAiMesh->mFaces[i].mIndices[2]=submesh.Faces[i].VertexIndices[2];
+		const Face &f = submesh.Faces[i];
+		dest->mFaces[i].mIndices[0] = f.VertexIndices[0];
+		dest->mFaces[i].mIndices[1] = f.VertexIndices[1];
+		dest->mFaces[i].mIndices[2] = f.VertexIndices[2];
 	}
-	NewAiMesh->mNumFaces=submesh.Faces.size();
 
-	//Link the material:
-	NewAiMesh->mMaterialIndex=submesh.MaterialIndex;//the index is set by the function who called ReadSubMesh
-
-	return NewAiMesh;
+	return dest;
 }
 
 } // Ogre

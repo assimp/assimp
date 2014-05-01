@@ -71,16 +71,16 @@ class OgreImporter : public BaseImporter
 {
 public:
 	/// BaseImporter override.
-	virtual bool CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
+	virtual bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
 	
 	/// BaseImporter override.
-	virtual void InternReadFile(const std::string &pFile, aiScene* pScene, IOSystem* pIOHandler);
+	virtual void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
 	
 	/// BaseImporter override.
-	virtual const aiImporterDesc* GetInfo () const;
+	virtual const aiImporterDesc *GetInfo() const;
 	
 	/// BaseImporter override.
-	virtual void SetupProperties(const Importer* pImp);
+	virtual void SetupProperties(const Importer *pImp);
 
 private:
 	//-------------------------------- OgreMesh.cpp -------------------------------
@@ -98,7 +98,7 @@ private:
 	static void ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry);
 
 	/// Uses the bone data to convert a SubMesh into a aiMesh which will be created and returned.
-	aiMesh* CreateAssimpSubMesh(aiScene *pScene, const SubMesh &submesh, const std::vector<Bone>& bones) const;
+	aiMesh *CreateAssimpSubMesh(aiScene *pScene, const SubMesh &submesh, const std::vector<Bone> &bones) const;
 
 	//-------------------------------- OgreSkeleton.cpp -------------------------------
 
@@ -110,10 +110,10 @@ private:
 	void PutAnimationsInScene(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
 
 	/// Creates the aiSkeleton in current scene.
-	void CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
+	void CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &bones, const std::vector<Animation> &animations);
 
-	/// Recursivly creates a filled aiNode from a given root bone.
-	static aiNode* CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode);
+	/// Recursively creates a filled aiNode from a given root bone.
+	static aiNode* CreateNodeFromBone(int boneId, const std::vector<Bone> &bones, aiNode *parent);
 
 	//-------------------------------- OgreMaterial.cpp -------------------------------
 
@@ -131,7 +131,8 @@ private:
 	std::string m_userDefinedMaterialLibFile;
 	bool m_detectTextureTypeFromFilename;
 	
-	SubMesh m_SharedGeometry;///< we will just use the vertexbuffers of the submesh
+	/// VertexBuffer for the sub meshes that use shader geometry.
+	SubMesh m_SharedGeometry;
 	
 	std::map<aiTextureType, unsigned int> m_textures;
 };

@@ -69,6 +69,18 @@ namespace Assimp
 namespace Ogre
 {
 
+const aiImporterDesc* OgreImporter::GetInfo() const
+{
+	return &desc;
+}
+
+
+void OgreImporter::SetupProperties(const Importer* pImp)
+{
+	m_userDefinedMaterialLibFile = pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
+	m_detectTextureTypeFromFilename = pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
+}
+
 bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const
 {
 	if (!checkSig)
@@ -127,7 +139,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	if (!CurrentNodeNameEquals(reader, nnSubMeshes))
 		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
 
-	list<boost::shared_ptr<SubMesh> > subMeshes;
+	vector<boost::shared_ptr<SubMesh> > subMeshes;
 	vector<aiMaterial*> materials;
 
 	NextNode(reader.get());
@@ -195,48 +207,33 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 	// -------------------- Apply to aiScene --------------------
 
-	//put the aiMaterials in the scene:
-	pScene->mMaterials=new aiMaterial*[materials.size()];
-	pScene->mNumMaterials=materials.size();
-	for(unsigned int i=0; i<materials.size(); ++i)
-		pScene->mMaterials[i]=materials[i];
+	// Materials
+	pScene->mMaterials = new aiMaterial*[materials.size()];
+	pScene->mNumMaterials = materials.size();
 
-	//create the aiMehs... 
-	vector<aiMesh*> aiMeshes;
-	BOOST_FOREACH(boost::shared_ptr<SubMesh> theSubMesh, subMeshes)
+	for(size_t i=0, len=materials.size(); i<len; ++i)
+		pScene->mMaterials[i] = materials[i];
+
+	// Meshes
+	pScene->mMeshes = new aiMesh*[subMeshes.size()];
+	pScene->mNumMeshes = subMeshes.size();
+
+	for(size_t i=0, len=subMeshes.size(); i<len; ++i)
 	{
-		aiMeshes.push_back(CreateAssimpSubMesh(pScene, *theSubMesh, Bones));
+		boost::shared_ptr<SubMesh> submesh = subMeshes[i];
+		pScene->mMeshes[i] = CreateAssimpSubMesh(pScene, *(submesh.get()), Bones);
 	}
-	//... and put them in the scene:
-	pScene->mNumMeshes=aiMeshes.size();
-	pScene->mMeshes=new aiMesh*[aiMeshes.size()];
-	memcpy(pScene->mMeshes, &(aiMeshes[0]), sizeof(aiMeshes[0])*aiMeshes.size());
 
-	//Create the root node
-	pScene->mRootNode=new aiNode("root");
-
-	//link the meshs with the root node:
-	pScene->mRootNode->mMeshes=new unsigned int[subMeshes.size()];
-	pScene->mRootNode->mNumMeshes=subMeshes.size();
+	// Create the root node
+	pScene->mRootNode = new aiNode();
+	pScene->mRootNode->mMeshes = new unsigned int[subMeshes.size()];
+	pScene->mRootNode->mNumMeshes = subMeshes.size();
 	
-	for(unsigned int i=0; i<subMeshes.size(); ++i)
-		pScene->mRootNode->mMeshes[i]=i;
+	for(size_t i=0, len=subMeshes.size(); i<len; ++i)
+		pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
 
+	// Skeleton and animations
 	CreateAssimpSkeleton(pScene, Bones, Animations);
-	PutAnimationsInScene(pScene, Bones, Animations);
-}
-
-
-const aiImporterDesc* OgreImporter::GetInfo () const
-{
-	return &desc;
-}
-
-
-void OgreImporter::SetupProperties(const Importer* pImp)
-{
-	m_userDefinedMaterialLibFile = pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
-	m_detectTextureTypeFromFilename = pImp->GetPropertyBool(AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME, false);
 }
 
 } // Ogre

@@ -809,7 +809,7 @@ enum aiComponent
  * order: <material-name>.material, <mesh-filename-base>.material and
  * lastly the material name defined by this config property.
  * <br>
- * Property type: String. Default value: n/a.
+ * Property type: String. Default value: Scene.material.
  */
 #define AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE	\
 	"IMPORT_OGRE_MATERIAL_FILE"

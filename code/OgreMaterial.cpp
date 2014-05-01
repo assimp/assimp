@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 
 #include "OgreImporter.h"
-#include "irrXMLWrapper.h"
 #include "TinyFormatter.h"
 
 using namespace std;
@@ -195,8 +194,8 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 					
 			if (linePart == partTechnique)
 			{
-				string techniqueName = Trim(SkipLine(ss));
-				ReadTechnique(techniqueName, ss, material);
+				string techniqueName = SkipLine(ss);
+				ReadTechnique(Trim(techniqueName), ss, material);
 			}
 
 			// Read informations from a custom material
@@ -315,8 +314,8 @@ bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream 
 		/// @todo Techniques have other attributes than just passes.		
 		if (linePart == partPass)
 		{
-			string passName = Trim(SkipLine(ss));
-			ReadPass(passName, ss, material);
+			string passName = SkipLine(ss);
+			ReadPass(Trim(passName), ss, material);
 		}
 	}
 	return true;
@@ -374,8 +373,8 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
 		}
 		else if (linePart == partTextureUnit)
 		{
-			string textureUnitName = Trim(SkipLine(ss));
-			ReadTextureUnit(textureUnitName, ss, material);
+			string textureUnitName = SkipLine(ss);
+			ReadTextureUnit(Trim(textureUnitName), ss, material);
 		}
 	}
 	return true;

@@ -5,10 +5,7 @@
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "BaseImporter.h"
-#include "irrXMLWrapper.h"
 #include "OgreParsingUtils.h"
-
-#include <vector>
 
 namespace Assimp
 {

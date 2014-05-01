@@ -33,7 +33,10 @@ inline int GetAttribute<int>(const XmlReader* reader, const std::string &name)
 	if (value)
 		return atoi(value);
 	else
+	{
 		ThrowAttibuteError(reader, name);
+		return 0;
+	}
 }
 
 template<> 
@@ -43,7 +46,10 @@ inline unsigned int GetAttribute<unsigned int>(const XmlReader* reader, const st
 	if (value)
 		return static_cast<unsigned int>(atoi(value)); ///< @todo Find a better way...
 	else
+	{
 		ThrowAttibuteError(reader, name);
+		return 0;
+	}
 }
 
 template<> 
@@ -53,7 +59,10 @@ inline float GetAttribute<float>(const XmlReader* reader, const std::string &nam
 	if (value)
 		return fast_atof(value);
 	else
+	{
 		ThrowAttibuteError(reader, name);
+		return 0.f;
+	}
 }
 
 template<> 
@@ -63,7 +72,10 @@ inline std::string GetAttribute<std::string>(const XmlReader* reader, const std:
 	if (value)
 		return std::string(value);
 	else
+	{
 		ThrowAttibuteError(reader, name);
+		return "";
+	}
 }
 
 template<> 
@@ -75,7 +87,10 @@ inline bool GetAttribute<bool>(const XmlReader* reader, const std::string &name)
 	else if (ASSIMP_stricmp(value, "false") == 0)
 		return false;
 	else
+	{
 		ThrowAttibuteError(reader, name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
+		return false;
+	}
 }
 
 inline bool NextNode(XmlReader* reader)

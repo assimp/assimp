@@ -69,53 +69,60 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 	}
 
 	boost::scoped_ptr<IOStream> file(pIOHandler->Open(filename));
-	if (!file.get())
+	if (!file.get()) {
 		throw DeadlyImportError("Failed to open skeleton file " + filename);
+	}
 
 	boost::scoped_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
 	XmlReader* reader = irr::io::createIrrXMLReader(stream.get());
-	if (!reader)
+	if (!reader) {
 		throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
+	}
 
 	DefaultLogger::get()->debug("Reading skeleton '" + filename + "'");
 
 	// Root
 	NextNode(reader);
-	if (!CurrentNodeNameEquals(reader, "skeleton"))
+	if (!CurrentNodeNameEquals(reader, "skeleton")) {
 		throw DeadlyImportError("Root node is not <skeleton> but <" + string(reader->getNodeName()) + "> in " + filename);
+	}
 
 	// Bones
 	NextNode(reader);
-	if (!CurrentNodeNameEquals(reader, "bones"))
+	if (!CurrentNodeNameEquals(reader, "bones")) {
 		throw DeadlyImportError("No <bones> node in skeleton " + skeletonFile);
+	}
 
 	NextNode(reader);
 	while(CurrentNodeNameEquals(reader, "bone"))
 	{
-		//TODO: Maybe we can have bone ids for the errrors, but normaly, they should never appear, so what....
-		/// @todo What does the above mean?
+		/** @todo Fix this mandatory ordering. Some exporters might just write rotation first etc.
+			There is no technical reason this has to be so strict. */
 
 		Bone bone;
 		bone.Id = GetAttribute<int>(reader, "id");
 		bone.Name = GetAttribute<string>(reader, "name");
 
 		NextNode(reader);
-		if (!CurrentNodeNameEquals(reader, "position"))
+		if (!CurrentNodeNameEquals(reader, "position")) {
 			throw DeadlyImportError("Position is not first node in Bone!");
+		}
 
 		bone.Position.x = GetAttribute<float>(reader, "x");
 		bone.Position.y = GetAttribute<float>(reader, "y");
 		bone.Position.z = GetAttribute<float>(reader, "z");
 
 		NextNode(reader);
-		if (!CurrentNodeNameEquals(reader, "rotation"))
+		if (!CurrentNodeNameEquals(reader, "rotation")) {
 			throw DeadlyImportError("Rotation is not the second node in Bone!");
+		}
 		
 		bone.RotationAngle = GetAttribute<float>(reader, "angle");
 		
 		NextNode(reader);
-		if (!CurrentNodeNameEquals(reader, "axis"))
+		if (!CurrentNodeNameEquals(reader, "axis")) {
 			throw DeadlyImportError("No axis specified for bone rotation!");
+		}
 			
 		bone.RotationAxis.x = GetAttribute<float>(reader, "x");
 		bone.RotationAxis.y = GetAttribute<float>(reader, "y");
@@ -133,14 +140,18 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 	/** @note Left this from original authors code, but not sure if this is strictly necessary
 		as per the Ogre skeleton spec. It might be more that other (later) code in this imported does not break. */
 	for (size_t i=0, len=Bones.size(); i<len; ++i)
-		if (static_cast<int>(Bones[i].Id) != static_cast<int>(i))
+	{
+		if (static_cast<int>(Bones[i].Id) != static_cast<int>(i)) {
 			throw DeadlyImportError("Bone Ids are not in sequence in " + skeletonFile);
+		}
+	}
 
 	DefaultLogger::get()->debug(Formatter::format() << "  - Bones " << Bones.size());
 
 	// Bone hierarchy
-	if (!CurrentNodeNameEquals(reader, "bonehierarchy"))
+	if (!CurrentNodeNameEquals(reader, "bonehierarchy")) {
 		throw DeadlyImportError("No <bonehierarchy> node found after <bones> in " + skeletonFile);
+	}
 
 	NextNode(reader);
 	while(CurrentNodeNameEquals(reader, "boneparent"))
@@ -157,7 +168,9 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 			iterParent->Children.push_back(iterChild->Id);
 		}
 		else
+		{
 			DefaultLogger::get()->warn("Failed to find bones for parenting: Child " + childName + " Parent " + parentName);
+		}
 
 		NextNode(reader);
 	}
@@ -165,8 +178,9 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 	// Calculate bone matrices for root bones. Recursively does their children.
 	BOOST_FOREACH(Bone &theBone, Bones)
 	{
-		if (!theBone.IsParented())
+		if (!theBone.IsParented()) {
 			theBone.CalculateBoneToWorldSpaceMatrix(Bones);
+		}
 	}
 	
 	aiVector3D zeroVec(0.f, 0.f, 0.f);
@@ -185,8 +199,9 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 			
 			// Tracks
 			NextNode(reader);
-			if (!CurrentNodeNameEquals(reader, "tracks"))
+			if (!CurrentNodeNameEquals(reader, "tracks")) {
 				throw DeadlyImportError("No <tracks> node found in animation '" + animation.Name + "' in " + skeletonFile);
+			}
 
 			NextNode(reader);
 			while(CurrentNodeNameEquals(reader, "track"))
@@ -196,8 +211,9 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 
 				// Keyframes
 				NextNode(reader);
-				if (!CurrentNodeNameEquals(reader, "keyframes"))
+				if (!CurrentNodeNameEquals(reader, "keyframes")) {
 					throw DeadlyImportError("No <keyframes> node found in a track in animation '" + animation.Name + "' in " + skeletonFile);
+				}
 
 				NextNode(reader);
 				while(CurrentNodeNameEquals(reader, "keyframe"))
@@ -219,8 +235,9 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 							float angle = GetAttribute<float>(reader, "angle");
 
 							NextNode(reader);
-							if(string("axis")!=reader->getNodeName())
-								throw DeadlyImportError("No axis for keyframe rotation!");
+							if (!CurrentNodeNameEquals(reader, "axis")) {
+								throw DeadlyImportError("No axis for keyframe rotation in animation '" + animation.Name + "'");
+							}
 								
 							aiVector3D axis;
 							axis.x = GetAttribute<float>(reader, "x");
@@ -230,8 +247,9 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 							if (axis.Equal(zeroVec))
 							{
 								axis.x = 1.0f;
-								if (angle != 0)
+								if (angle != 0) {
 									DefaultLogger::get()->warn("Found invalid a key frame with a zero rotation axis in animation '" + animation.Name + "'");
+								}
 							}
 							keyFrame.Rotation = aiQuaternion(axis, angle);
 						}
@@ -256,20 +274,24 @@ void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOH
 
 void OgreImporter::CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &bones, const std::vector<Animation> &animations)
 {
-	if (bones.empty())
+	if (bones.empty()) {
 		return;
+	}
 
-	if (!pScene->mRootNode)
+	if (!pScene->mRootNode) {
 		throw DeadlyImportError("Creating Assimp skeleton: No root node created!");
-	if (pScene->mRootNode->mNumChildren > 0)
+	}
+	if (pScene->mRootNode->mNumChildren > 0) {
 		throw DeadlyImportError("Creating Assimp skeleton: Root node already has children!");
+	}
 
 	// Bones
 	vector<aiNode*> rootBones;
 	BOOST_FOREACH(const Bone &bone, bones)
 	{
-		if (!bone.IsParented())
+		if (!bone.IsParented()) {
 			rootBones.push_back(CreateNodeFromBone(bone.Id, bones, pScene->mRootNode));
+		}
 	}
 	
 	if (!rootBones.empty())
@@ -277,8 +299,9 @@ void OgreImporter::CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone>
 		pScene->mRootNode->mChildren = new aiNode*[rootBones.size()];
 		pScene->mRootNode->mNumChildren = rootBones.size();
 
-		for(size_t i=0, len=rootBones.size(); i<len; ++i)
+		for(size_t i=0, len=rootBones.size(); i<len; ++i) {
 			pScene->mRootNode->mChildren[i] = rootBones[i];
+		}
 	}
 
 	// TODO: Auf nicht vorhandene Animationskeys achten!
@@ -315,8 +338,9 @@ void OgreImporter::CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone>
 				vector<Bone>::const_iterator boneIter = find(bones.begin(), bones.end(), tSource.BoneName);
 				if (boneIter == bones.end())
 				{
-					for(unsigned int a=0; a<ai; a++)
-						delete pScene->mAnimations[a];
+					for(size_t createdAnimationIndex=0; createdAnimationIndex<ai; createdAnimationIndex++) {
+						delete pScene->mAnimations[createdAnimationIndex];
+					}
 					delete [] pScene->mAnimations;
 					pScene->mAnimations = NULL;
 					pScene->mNumAnimations = 0;
@@ -387,8 +411,9 @@ aiNode* OgreImporter::CreateNodeFromBone(int boneId, const std::vector<Bone> &bo
 		boneNode->mChildren = new aiNode*[source.Children.size()];
 		boneNode->mNumChildren = source.Children.size();
 
-		for(size_t i=0, len=source.Children.size(); i<len; ++i)
+		for(size_t i=0, len=source.Children.size(); i<len; ++i) {
 			boneNode->mChildren[i] = CreateNodeFromBone(source.Children[i], bones, boneNode);
+		}
 	}
 
 	return boneNode;
@@ -400,9 +425,13 @@ void Bone::CalculateBoneToWorldSpaceMatrix(vector<Bone> &Bones)
 	aiMatrix4x4 transform = aiMatrix4x4::Rotation(-RotationAngle, RotationAxis, t1) * aiMatrix4x4::Translation(-Position, t0);
 
 	if (!IsParented())
+	{
 		BoneToWorldSpace = transform;
+	}
 	else
+	{
 		BoneToWorldSpace = transform * Bones[ParentId].BoneToWorldSpace;
+	}
 
 	// Recursively for all children now that the parent matrix has been calculated.
 	BOOST_FOREACH(int childId, Children)

@@ -54,12 +54,15 @@ namespace Ogre
 
 void OgreImporter::ReadSubMesh(const unsigned int submeshIndex, SubMesh &submesh, XmlReader *reader)
 {
-	if (reader->getAttributeValue("material"))
+	if (reader->getAttributeValue("material")) {
 		submesh.MaterialName = GetAttribute<string>(reader, "material");
-	if (reader->getAttributeValue("use32bitindexes"))
+	}
+	if (reader->getAttributeValue("use32bitindexes")) {
 		submesh.Use32bitIndexes = GetAttribute<bool>(reader, "use32bitindexes");
-	if (reader->getAttributeValue("usesharedvertices"))
+	}
+	if (reader->getAttributeValue("usesharedvertices")) {
 		submesh.UseSharedGeometry = GetAttribute<bool>(reader, "usesharedvertices");
+	}
 
 	DefaultLogger::get()->debug(Formatter::format() << "Reading submesh " << submeshIndex);
 	DefaultLogger::get()->debug(Formatter::format() << "  - Material '" << submesh.MaterialName << "'");
@@ -100,8 +103,9 @@ void OgreImporter::ReadSubMesh(const unsigned int submeshIndex, SubMesh &submesh
 				NewFace.VertexIndices[2] = GetAttribute<int>(reader, "v3");
 
 				/// @todo Support quads
-				if (!quadWarned && reader->getAttributeValue("v4"))
+				if (!quadWarned && reader->getAttributeValue("v4")) {
 					DefaultLogger::get()->warn("Submesh has quads, only triangles are supported at the moment!");
+				}
 
 				submesh.Faces.push_back(NewFace);
 
@@ -111,20 +115,27 @@ void OgreImporter::ReadSubMesh(const unsigned int submeshIndex, SubMesh &submesh
 			}
 
 			if (submesh.Faces.size() == numFaces)
+			{
 				DefaultLogger::get()->debug(Formatter::format() << "  - Faces " << numFaces);
+			}
 			else
+			{
 				throw DeadlyImportError(Formatter::format() << "Read only " << submesh.Faces.size() << " faces when should have read " << numFaces);
+			}
 		}
 		else if (currentNodeName == nnGeometry)
 		{	
 			unsigned int numVertices = GetAttribute<int>(reader, "vertexcount");
 
 			NextNode(reader);
-			while(string(reader->getNodeName()) == nnVertexBuffer)
+			while(string(reader->getNodeName()) == nnVertexBuffer) {
 				ReadVertexBuffer(submesh, reader, numVertices);
+			}
 		}
 		else if (reader->getNodeName() == nnBoneAssignments)
+		{
 			ReadBoneWeights(submesh, reader);
+		}
 			
 		currentNodeName = reader->getNodeName();
 	}
@@ -157,13 +168,15 @@ void OgreImporter::ReadVertexBuffer(SubMesh &submesh, XmlReader *reader, const u
 	if (reader->getAttributeValue("texture_coords"))
 	{
 		submesh.Uvs.resize(GetAttribute<unsigned int>(reader, "texture_coords"));
-		for(size_t i=0, len=submesh.Uvs.size(); i<len; ++i)
+		for(size_t i=0, len=submesh.Uvs.size(); i<len; ++i) {
 			submesh.Uvs[i].reserve(numVertices);
+		}
 		DefaultLogger::get()->debug(Formatter::format() << "  - Has " << submesh.Uvs.size() << " texture coords");
 	}
 
-	if (!submesh.HasPositions)
+	if (!submesh.HasPositions) {
 		throw DeadlyImportError("Vertex buffer does not contain positions!");
+	}
 
 	const string nnVertex        = "vertex";
 	const string nnPosition      = "position";
@@ -227,8 +240,9 @@ void OgreImporter::ReadVertexBuffer(SubMesh &submesh, XmlReader *reader, const u
 		{
 			for(size_t i=0, len=submesh.Uvs.size(); i<len; ++i)
 			{
-				if (currentNodeName != nnTexCoord)
+				if (currentNodeName != nnTexCoord) {
 					throw DeadlyImportError("Vertex buffer declared more UVs than can be found in a vertex");
+				}
 
 				aiVector3D NewUv;
 				NewUv.x = GetAttribute<float>(reader, "u");
@@ -248,26 +262,39 @@ void OgreImporter::ReadVertexBuffer(SubMesh &submesh, XmlReader *reader, const u
 			if (currentNodeName == nnBinormal)
 			{
 				if (warnBinormal)
+				{
 					warnBinormal = false;
+				}
 				else
+				{
 					warn = false;
+				}
 			}
 			else if (currentNodeName == nnColorDiffuse)
 			{
 				if (warnColorDiffuse)
+				{
 					warnColorDiffuse = false;
+				}
 				else
+				{
 					warn = false;
+				}
 			}
 			else if (currentNodeName == nnColorSpecular)
 			{
 				if (warnColorSpecular)
+				{
 					warnColorSpecular = false;
+				}
 				else
+				{
 					warn = false;
+				}
 			}
-			if (warn)
+			if (warn) {
 				DefaultLogger::get()->warn(string("Vertex buffer attribute read not implemented for element: ") + currentNodeName);
+			}
 		}
 
 		// Advance
@@ -282,15 +309,18 @@ void OgreImporter::ReadVertexBuffer(SubMesh &submesh, XmlReader *reader, const u
 		" Tangents "  << submesh.Tangents.size());
 
 	// Sanity checks
-	if (submesh.HasNormals && submesh.Normals.size() != numVertices)
+	if (submesh.HasNormals && submesh.Normals.size() != numVertices) {
 		throw DeadlyImportError(Formatter::format() << "Read only " << submesh.Normals.size() << " normals when should have read " << numVertices);
-	if (submesh.HasTangents && submesh.Tangents.size() != numVertices)
+	}
+	if (submesh.HasTangents && submesh.Tangents.size() != numVertices) {
 		throw DeadlyImportError(Formatter::format() << "Read only " << submesh.Tangents.size() << " tangents when should have read " << numVertices);
+	}
 	for(unsigned int i=0; i<submesh.Uvs.size(); ++i)
 	{
-		if (submesh.Uvs[i].size() != numVertices)
+		if (submesh.Uvs[i].size() != numVertices) {
 			throw DeadlyImportError(Formatter::format() << "Read only " << submesh.Uvs[i].size() 
 				<< " uvs for uv index " << i << " when should have read " << numVertices);
+		}
 	}
 }
 
@@ -335,8 +365,9 @@ void OgreImporter::ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry)
 	vector<vector<BoneWeight> > uniqueWeights(uniqueVertexCount);
 	vector<vector<aiVector3D> > uniqueUvs(submesh.UseSharedGeometry ? sharedGeometry.Uvs.size() : submesh.Uvs.size());
 
-	for(size_t uvi=0; uvi<uniqueUvs.size(); ++uvi)
+	for(size_t uvi=0; uvi<uniqueUvs.size(); ++uvi) {
 		uniqueUvs[uvi].resize(uniqueVertexCount);
+	}
 
 	/* Support for shared geometry.
 	   We can use this loop to copy vertex informations from the shared data pool. In order to do so
@@ -417,13 +448,17 @@ void OgreImporter::ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry)
 		std::vector<BoneWeight> &weights = submesh.Weights[vertexId];
 		
 		float sum = 0.0f;
-		for(size_t boneId=0, blen=weights.size(); boneId<blen; ++boneId)
+		for(size_t boneId=0, blen=weights.size(); boneId<blen; ++boneId) {
 			sum += weights[boneId].Value;
+		}
 		
 		//check if the sum is too far away from 1
 		if ((sum < (1.0f - 0.05f)) || (sum > (1.0f + 0.05f)))
-			for(size_t boneId=0, blen=weights.size(); boneId<blen; ++boneId)
+		{
+			for(size_t boneId=0, blen=weights.size(); boneId<blen; ++boneId) {
 				weights[boneId].Value /= sum;
+			}
+		}
 	}
 }
 
@@ -485,8 +520,9 @@ aiMesh *OgreImporter::CreateAssimpSubMesh(aiScene *pScene, const SubMesh& submes
 	for(size_t boneId=0, len=submesh.BonesUsed; boneId<len; ++boneId)
 	{
 		const vector<aiVertexWeight> &boneWeights = assimpWeights[boneId];
-		if (boneWeights.size() == 0)
+		if (boneWeights.size() == 0) {
 			continue;
+		}
 
 		// @note The bones list is sorted by id's, this was done in LoadSkeleton.
 		aiBone *assimpBone = new aiBone();
@@ -504,8 +540,9 @@ aiMesh *OgreImporter::CreateAssimpSubMesh(aiScene *pScene, const SubMesh& submes
 		dest->mBones = new aiBone*[assimpBones.size()];
 		dest->mNumBones = assimpBones.size();
 
-		for(size_t i=0, len=assimpBones.size(); i<len; ++i)
+		for(size_t i=0, len=assimpBones.size(); i<len; ++i) {
 			dest->mBones[i] = assimpBones[i];
+		}
 	}
 
 	// Faces

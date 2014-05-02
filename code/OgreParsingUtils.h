@@ -18,9 +18,13 @@ typedef irr::io::IrrXMLReader XmlReader;
 static void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error = "")
 {
 	if (!error.empty())
+	{
 		throw DeadlyImportError(error + " in node '" + std::string(reader->getNodeName()) + "' and attribute '" + name + "'");
+	}
 	else
+	{
 		throw DeadlyImportError("Attribute '" + name + "' does not exist in node '" + std::string(reader->getNodeName()) + "'");
+	}
 }
 
 template<typename T> 
@@ -31,7 +35,9 @@ inline int GetAttribute<int>(const XmlReader* reader, const std::string &name)
 {
 	const char* value = reader->getAttributeValue(name.c_str());
 	if (value)
+	{
 		return atoi(value);
+	}
 	else
 	{
 		ThrowAttibuteError(reader, name);
@@ -44,7 +50,9 @@ inline unsigned int GetAttribute<unsigned int>(const XmlReader* reader, const st
 {
 	const char* value = reader->getAttributeValue(name.c_str());
 	if (value)
+	{
 		return static_cast<unsigned int>(atoi(value)); ///< @todo Find a better way...
+	}
 	else
 	{
 		ThrowAttibuteError(reader, name);
@@ -57,7 +65,9 @@ inline float GetAttribute<float>(const XmlReader* reader, const std::string &nam
 {
 	const char* value = reader->getAttributeValue(name.c_str());
 	if (value)
+	{
 		return fast_atof(value);
+	}
 	else
 	{
 		ThrowAttibuteError(reader, name);
@@ -70,7 +80,9 @@ inline std::string GetAttribute<std::string>(const XmlReader* reader, const std:
 {
 	const char* value = reader->getAttributeValue(name.c_str());
 	if (value)
+	{
 		return std::string(value);
+	}
 	else
 	{
 		ThrowAttibuteError(reader, name);
@@ -83,9 +95,13 @@ inline bool GetAttribute<bool>(const XmlReader* reader, const std::string &name)
 {
 	std::string value = GetAttribute<std::string>(reader, name);
 	if (ASSIMP_stricmp(value, "true") == 0)
+	{
 		return true;
+	}
 	else if (ASSIMP_stricmp(value, "false") == 0)
+	{
 		return false;
+	}
 	else
 	{
 		ThrowAttibuteError(reader, name, "Boolean value is expected to be 'true' or 'false', encountered '" + value + "'");
@@ -97,8 +113,9 @@ inline bool NextNode(XmlReader* reader)
 {
 	do
 	{
-		if (!reader->read())
+		if (!reader->read()) {
 			return false;
+		}
 	}
 	while(reader->getNodeType() != irr::io::EXN_ELEMENT);
 	return true;
@@ -137,12 +154,17 @@ static inline std::string ToLower(std::string s)
 static inline bool EndsWith(const std::string &s, const std::string &suffix, bool caseSensitive = true)
 {
 	if (s.empty() || suffix.empty())
+	{
 		return false;
+	}
 	else if (s.length() < suffix.length())
+	{
 		return false;
+	}
 
-	if (!caseSensitive)
+	if (!caseSensitive) {
 		return EndsWith(ToLower(s), ToLower(suffix), true);
+	}
 
 	size_t len = suffix.length();
 	std::string sSuffix = s.substr(s.length()-len, len);
@@ -155,9 +177,13 @@ static inline bool EndsWith(const std::string &s, const std::string &suffix, boo
 static inline std::string &TrimLeft(std::string &s, bool newlines = true)
 {
 	if (!newlines)
+	{
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))));
+	}
 	else
+	{
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpaceOrNewLine<char>))));
+	}
 	return s;
 }
 
@@ -165,9 +191,13 @@ static inline std::string &TrimLeft(std::string &s, bool newlines = true)
 static inline std::string &TrimRight(std::string &s, bool newlines = true)
 {
 	if (!newlines)
+	{
 		s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))).base(),s.end());
+	}
 	else
+	{
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpaceOrNewLine<char>))));
+	}
 	return s;
 }
 

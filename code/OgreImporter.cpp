@@ -74,7 +74,6 @@ const aiImporterDesc* OgreImporter::GetInfo() const
 	return &desc;
 }
 
-
 void OgreImporter::SetupProperties(const Importer* pImp)
 {
 	m_userDefinedMaterialLibFile = pImp->GetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "Scene.material");
@@ -83,8 +82,9 @@ void OgreImporter::SetupProperties(const Importer* pImp)
 
 bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const
 {
-	if (!checkSig)
+	if (!checkSig) {
 		return EndsWith(pFile, ".mesh.xml", false);
+	}
 
 	const char* tokens[] = { "<mesh>" };
 	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
@@ -96,21 +96,24 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	
 	// Open
 	boost::scoped_ptr<IOStream> file(pIOHandler->Open(pFile));
-	if (file.get() == NULL)
+	if (!file.get()) {
 		throw DeadlyImportError("Failed to open file " + pFile);
+	}
 
 	// Read
 	boost::scoped_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(file.get()));
 	boost::scoped_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
-	if (!reader)
+	if (!reader) {
 		throw DeadlyImportError("Failed to create XML Reader for " + pFile);
+	}
 
 	DefaultLogger::get()->debug("Opened a XML reader for " + pFile);
 
 	// Read root node
 	NextNode(reader.get());
-	if (!CurrentNodeNameEquals(reader, "mesh"))
+	if (!CurrentNodeNameEquals(reader, "mesh")) {
 		throw DeadlyImportError("Root node is not <mesh> but <" + string(reader->getNodeName()) + "> in " + pFile);
+	}
 	
 	// Node names
 	const string nnSharedGeometry = "sharedgeometry";
@@ -130,14 +133,16 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		unsigned int NumVertices = GetAttribute<unsigned int>(reader.get(), "vertexcount");
 
 		NextNode(reader.get());
-		while(CurrentNodeNameEquals(reader, nnVertexBuffer))
+		while(CurrentNodeNameEquals(reader, nnVertexBuffer)) {
 			ReadVertexBuffer(m_SharedGeometry, reader.get(), NumVertices);
+		}
 	}
 
 	// -------------------- Sub Meshes --------------------
 
-	if (!CurrentNodeNameEquals(reader, nnSubMeshes))
+	if (!CurrentNodeNameEquals(reader, nnSubMeshes)) {
 		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
+	}
 
 	vector<boost::shared_ptr<SubMesh> > subMeshes;
 	vector<aiMaterial*> materials;
@@ -162,20 +167,23 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		materials.push_back(material);
 	}
 
-	if (subMeshes.empty())
+	if (subMeshes.empty()) {
 		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
+	}
 
 	// This is really a internal error if we failed to create dummy materials.
-	if (subMeshes.size() != materials.size())
+	if (subMeshes.size() != materials.size()) {
 		throw DeadlyImportError("Internal Error: Material count does not match the submesh count");
+	}
 
 	// Skip submesh names.
 	/// @todo Should these be read to scene etc. metadata?
 	if (CurrentNodeNameEquals(reader, nnSubMeshNames))
 	{
 		NextNode(reader.get());
-		while(CurrentNodeNameEquals(reader, nnSubMesh))
+		while(CurrentNodeNameEquals(reader, nnSubMesh)) {
 			NextNode(reader.get());
+		}
 	}
 
 	// -------------------- Skeleton --------------------
@@ -187,17 +195,24 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	{
 		string skeletonFile = GetAttribute<string>(reader.get(), "name");
 		if (!skeletonFile.empty())
+		{
 			ReadSkeleton(pFile, pIOHandler, pScene, skeletonFile, Bones, Animations);
+		}
 		else
+		{
 			DefaultLogger::get()->debug("Found a unusual <" + nnSkeletonLink + "> with a empty file reference");
+		}
 		NextNode(reader.get());
 	}
 	else
+	{
 		DefaultLogger::get()->debug("Mesh has no assigned skeleton with <" + nnSkeletonLink + ">");
+	}
 
 	// Now there might be <boneassignments> for the shared geometry
-	if (CurrentNodeNameEquals(reader, "boneassignments"))
+	if (CurrentNodeNameEquals(reader, "boneassignments")) {
 		ReadBoneWeights(m_SharedGeometry, reader.get());
+	}
 
 	// -------------------- Process Results --------------------
 	BOOST_FOREACH(boost::shared_ptr<SubMesh> submesh, subMeshes)
@@ -211,8 +226,9 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	pScene->mMaterials = new aiMaterial*[materials.size()];
 	pScene->mNumMaterials = materials.size();
 
-	for(size_t i=0, len=materials.size(); i<len; ++i)
+	for(size_t i=0, len=materials.size(); i<len; ++i) {
 		pScene->mMaterials[i] = materials[i];
+	}
 
 	// Meshes
 	pScene->mMeshes = new aiMesh*[subMeshes.size()];
@@ -229,8 +245,9 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	pScene->mRootNode->mMeshes = new unsigned int[subMeshes.size()];
 	pScene->mRootNode->mNumMeshes = subMeshes.size();
 	
-	for(size_t i=0, len=subMeshes.size(); i<len; ++i)
+	for(size_t i=0, len=subMeshes.size(); i<len; ++i) {
 		pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
+	}
 
 	// Skeleton and animations
 	CreateAssimpSkeleton(pScene, Bones, Animations);

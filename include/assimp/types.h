@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_TYPES_H_INC
 
 // Some runtime headers
-#include <cstring>
 #include <sys/types.h>
 #include <memory.h>
 #include <math.h>
@@ -66,6 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "quaternion.h"
 
 #ifdef __cplusplus
+#include <cstring>
 #include <new>		// for std::nothrow_t
 #include <string>	// for aiString::Set(const std::string&)
 

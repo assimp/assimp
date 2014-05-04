@@ -56,7 +56,7 @@ namespace Assimp {
 class ASSIMP_API RemoveVCProcess : public BaseProcess
 {
 public:
-    /// The class constructor.
+    /// The default class constructor.
 	RemoveVCProcess();
 
     /// The class destructor.

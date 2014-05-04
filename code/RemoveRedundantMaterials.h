@@ -57,8 +57,10 @@ namespace Assimp	{
 class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
 {
 public:
-
+    /// The default class constructor.
 	RemoveRedundantMatsProcess();
+
+    /// The class destructor.
 	~RemoveRedundantMatsProcess();
 
 public:

@@ -51,13 +51,12 @@ class FindInvalidDataProcessTest;
 namespace Assimp	{
 
 // ---------------------------------------------------------------------------
-/** The FindInvalidData postprocessing step. It searches the mesh data
+/** The FindInvalidData post-processing step. It searches the mesh data
  *  for parts that are obviously invalid and removes them.
  *
  *  Originally this was a workaround for some models written by Blender
  *  which have zero normal vectors. */
-class FindInvalidDataProcess 
-	: public BaseProcess
+class ASSIMP_API FindInvalidDataProcess : public BaseProcess
 {
 public:
 

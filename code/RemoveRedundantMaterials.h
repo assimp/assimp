@@ -51,10 +51,10 @@ class RemoveRedundantMatsTest;
 namespace Assimp	{
 
 // ---------------------------------------------------------------------------
-/** RemoveRedundantMatsProcess: Postprocessing steo to remove redundant 
+/** RemoveRedundantMatsProcess: Post-processing step to remove redundant 
  *  materials from the imported scene.
  */
-class RemoveRedundantMatsProcess : public BaseProcess
+class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
 {
 public:
 

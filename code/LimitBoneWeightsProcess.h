@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseProcess.h"
 
 struct aiMesh;
+
 class LimitBoneWeightsTest;
 
 namespace Assimp
@@ -69,7 +70,7 @@ namespace Assimp
 * The other weights on this bone are then renormalized to assure the sum weight
 * to be 1.
 */
-class LimitBoneWeightsProcess : public BaseProcess
+class ASSIMP_API LimitBoneWeightsProcess : public BaseProcess
 {
 public:
 

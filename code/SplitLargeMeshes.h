@@ -76,12 +76,12 @@ class SplitLargeMeshesProcess_Vertex;
 #endif
 
 // ---------------------------------------------------------------------------
-/** Postprocessing filter to split large meshes into submeshes
+/** Post-processing filter to split large meshes into sub-meshes
  *
  * Applied BEFORE the JoinVertices-Step occurs.
  * Returns NON-UNIQUE vertices, splits by triangle number.
 */
-class SplitLargeMeshesProcess_Triangle : public BaseProcess
+class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess
 {
 	friend class SplitLargeMeshesProcess_Vertex;
 
@@ -144,12 +144,12 @@ public:
 
 
 // ---------------------------------------------------------------------------
-/** Postprocessing filter to split large meshes into submeshes
+/** Post-processing filter to split large meshes into sub-meshes
  *
  * Applied AFTER the JoinVertices-Step occurs.
  * Returns UNIQUE vertices, splits by vertex number.
 */
-class SplitLargeMeshesProcess_Vertex : public BaseProcess
+class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess
 {
 public:
 

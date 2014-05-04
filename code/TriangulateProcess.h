@@ -49,15 +49,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiMesh;
 
 class TriangulateProcessTest;
-namespace Assimp
-{
+
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** The TriangulateProcess splits up all faces with more than three indices
  * into triangles. You usually want this to happen because the graphics cards
  * need their data as triangles.
  */
-class TriangulateProcess : public BaseProcess
+class ASSIMP_API TriangulateProcess : public BaseProcess
 {
 public:
 

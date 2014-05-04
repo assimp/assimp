@@ -106,7 +106,7 @@ private:
  * imports the given file. ReadFile is not overridable, it just calls 
  * InternReadFile() and catches any ImportErrorException that might occur.
  */
-class BaseImporter
+class ASSIMP_API BaseImporter
 {
 	friend class Importer;
 

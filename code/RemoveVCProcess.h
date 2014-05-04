@@ -46,17 +46,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/mesh.h"
 
 class RemoveVCProcessTest;
-namespace Assimp	{
+
+namespace Assimp {
 
 // ---------------------------------------------------------------------------
 /** RemoveVCProcess: Class to exclude specific parts of the data structure
  *  from further processing by removing them,
 */
-class RemoveVCProcess : public BaseProcess
+class ASSIMP_API RemoveVCProcess : public BaseProcess
 {
 public:
-
+    /// The class constructor.
 	RemoveVCProcess();
+
+    /// The class destructor.
 	~RemoveVCProcess();
 
 public:
@@ -85,7 +88,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Manually setup the configuration flags for the step
 	 *
-	 *  @param Bitwise combintion of the #aiComponent enumerated values.
+	 *  @param Bitwise combination of the #aiComponent enumerated values.
 	*/
 	void SetDeleteFlags(unsigned int f)	
 	{
@@ -112,6 +115,8 @@ private:
 	 */
 	aiScene* mScene;
 };
+
+// ---------------------------------------------------------------------------
 
 } // end of namespace Assimp
 

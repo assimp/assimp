@@ -7,7 +7,7 @@
 #include "ParsingUtils.h"
 #include "irrXMLWrapper.h"
 #include "fast_atof.h"
-
+#include <functional>
 namespace Assimp
 {
 namespace Ogre

@@ -174,7 +174,7 @@ IF ( ASSIMP_BUILD_SAMPLES)
 ENDIF ( ASSIMP_BUILD_SAMPLES )
 
 IF ( WIN32 )
-	SET ( ASSIMP_BUILD_TESTS OFF CACHE BOOL
+	SET ( ASSIMP_BUILD_TESTS ON CACHE BOOL
 		"If the test suite for Assimp is built in addition to the library."
 	)
 	

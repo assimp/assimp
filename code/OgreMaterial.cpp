@@ -38,56 +38,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/**
-This file contains material related code. This is
-spilitted up from the main file OgreImporter.cpp
-to make it shorter easier to maintain.
-*/
 #include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include <vector>
 #include <sstream>
-using namespace std;
 
-#include "OgreImporter.hpp"
-#include "irrXMLWrapper.h"
+#include "OgreImporter.h"
 #include "TinyFormatter.h"
+
+using namespace std;
 
 namespace Assimp
 {
 namespace Ogre
 {
 
+static const string partComment    = "//";
+static const string partBlockStart = "{";
+static const string partBlockEnd   = "}";
 
-
-aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
+aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string materialName)
 {
-	/*For better understanding of the material parser, here is a material example file:
-
-	material Sarg
-	{
-		receive_shadows on
-		technique
-		{
-			pass
-			{
-				ambient 0.500000 0.500000 0.500000 1.000000
-				diffuse 0.640000 0.640000 0.640000 1.000000
-				specular 0.500000 0.500000 0.500000 1.000000 12.500000
-				emissive 0.000000 0.000000 0.000000 1.000000
-				texture_unit
-				{
-					texture SargTextur.tga
-					tex_address_mode wrap
-					filtering linear linear none
-				}
-			}
-		}
+	/// @todo Should we return null ptr here or a empty material?
+	if (materialName.empty()) {
+		return new aiMaterial();
 	}
 
-	*/
+	// Full reference and examples of Ogre Material Script 
+	// can be found from http://www.ogre3d.org/docs/manual/manual_14.html
 
 	/*and here is another one:
 
@@ -112,342 +92,450 @@ aiMaterial* OgreImporter::LoadMaterial(const std::string MaterialName) const
 	}
 	*/
 
-	//Read the file into memory and put it in a stringstream
 	stringstream ss;
-	{// after this block, the temporarly loaded data will be released
 
-		/*
-		We have 3 guesses for the Material filename:
-		- the Material Name
-		- the Name of the mesh file
-		- the DefaultMaterialLib (which you can set before importing)
-		*/
+	// Scope for scopre_ptr auto release
+	{	
+		/* There are three .material options in priority order:
+			1) File with the material name (materialName)
+			2) File with the mesh files base name (pFile)
+			3) Optional user defined material library file (m_userDefinedMaterialLibFile) */
+		std::vector<string> potentialFiles;
+		potentialFiles.push_back(materialName + ".material");
+		potentialFiles.push_back(pFile.substr(0, pFile.rfind(".mesh")) + ".material");
+		if (!m_userDefinedMaterialLibFile.empty())
+			potentialFiles.push_back(m_userDefinedMaterialLibFile);
 		
-		IOStream* MatFilePtr=m_CurrentIOHandler->Open(MaterialName+".material");
-		if(NULL==MatFilePtr)
+		IOStream *materialFile = 0;
+		for(size_t i=0; i<potentialFiles.size(); ++i)
 		{
-			//the filename typically ends with .mesh or .mesh.xml
-			const string MaterialFileName=m_CurrentFilename.substr(0, m_CurrentFilename.rfind(".mesh"))+".material";
-
-			MatFilePtr=m_CurrentIOHandler->Open(MaterialFileName);
-			if(NULL==MatFilePtr)
-			{
-				//try the default mat Library
-				if(NULL==MatFilePtr)
-				{
-				
-					MatFilePtr=m_CurrentIOHandler->Open(m_MaterialLibFilename);
-					if(NULL==MatFilePtr)
-					{
-						DefaultLogger::get()->error(m_MaterialLibFilename+" and "+MaterialFileName + " could not be opened, Material will not be loaded!");
-						return new aiMaterial();
-					}
-				}
+			materialFile = pIOHandler->Open(potentialFiles[i]);
+			if (materialFile) {
+				break;
 			}
+			DefaultLogger::get()->debug(Formatter::format() << "Source file for material '" << materialName << "' " << potentialFiles[i] << " does not exist");
 		}
-		//Fill the stream
-		boost::scoped_ptr<IOStream> MaterialFile(MatFilePtr);
-		if(MaterialFile->FileSize()>0)
+		if (!materialFile)
 		{
-			vector<char> FileData(MaterialFile->FileSize());
-			MaterialFile->Read(&FileData[0], MaterialFile->FileSize(), 1);
-			BaseImporter::ConvertToUTF8(FileData);
+			/// @todo Should we return null ptr here or a empty material?
+			DefaultLogger::get()->error(Formatter::format() << "Failed to find source file for material '" << materialName << "'");
+			return new aiMaterial();
+		}
 
-			FileData.push_back('\0');//terminate the string with zero, so that the ss can parse it correctly
-			ss << &FileData[0];
-		}
-		else
+		boost::scoped_ptr<IOStream> stream(materialFile);
+		if (stream->FileSize() == 0)
 		{
-			DefaultLogger::get()->warn("Material " + MaterialName + " seams to be empty");
-			return NULL;
+			/// @todo Should we return null ptr here or a empty material?
+			DefaultLogger::get()->warn(Formatter::format() << "Source file for material '" << materialName << "' is empty (size is 0 bytes)");
+			return new aiMaterial();
 		}
+
+		// Read bytes
+		vector<char> data(stream->FileSize());
+		stream->Read(&data[0], stream->FileSize(), 1);
+		
+		// Convert to UTF-8 and terminate the string for ss
+		BaseImporter::ConvertToUTF8(data);
+		data.push_back('\0');
+		
+		ss << &data[0];
 	}
+	
+	DefaultLogger::get()->debug("Reading material '" + materialName + "'");
 
-	//create the material
-	aiMaterial *NewMaterial=new aiMaterial();
+	aiMaterial *material = new aiMaterial();
+	m_textures.clear();
+	
+	aiString ts(materialName);
+	material->AddProperty(&ts, AI_MATKEY_NAME);
 
-	aiString ts(MaterialName.c_str());
-	NewMaterial->AddProperty(&ts, AI_MATKEY_NAME);
+	// The stringstream will push words from a line until newline.
+	// It will also trim whitespace from line start and between words.
+	string linePart;
+	ss >> linePart;
+	
+	const string partMaterial   = "material";
+	const string partTechnique  = "technique";
 
-	string Line;
-	ss >> Line;
-//	unsigned int Level=0;//Hierarchielevels in the material file, like { } blocks into another
 	while(!ss.eof())
 	{
-		if(Line=="material")
+		// Skip commented lines
+		if (linePart == partComment)
 		{
-			ss >> Line;
-			if(Line==MaterialName)//Load the next material
-			{
-				string RestOfLine;
-				getline(ss, RestOfLine);//ignore the rest of the line
-				ss >> Line;
-
-				if(Line!="{")
-				{
-					DefaultLogger::get()->warn("empyt material!");
-					return NULL;
-				}
-
-				while(Line!="}")//read until the end of the material
-				{
-					//Proceed to the first technique
-					ss >> Line;
-					if(Line=="technique")
-					{
-						ReadTechnique(ss, NewMaterial);
-					}
-
-					DefaultLogger::get()->info(Line);
-					//read informations from a custom material:
-					if(Line=="set")
-					{
-						ss >> Line;
-						if(Line=="$specular")//todo load this values:
-						{
-						}
-						if(Line=="$diffuse")
-						{
-						}
-						if(Line=="$ambient")
-						{
-						}
-						if(Line=="$colormap")
-						{
-							ss >> Line;
-							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
-						}
-						if(Line=="$normalmap")
-						{
-							ss >> Line;
-							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
-						}
-						
-						if(Line=="$shininess_strength")
-						{
-							ss >> Line;
-							float Shininess=fast_atof(Line.c_str());
-							NewMaterial->AddProperty(&Shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
-						}
-
-						if(Line=="$shininess_exponent")
-						{
-							ss >> Line;
-							float Shininess=fast_atof(Line.c_str());
-							NewMaterial->AddProperty(&Shininess, 1, AI_MATKEY_SHININESS);
-						}
-
-						//Properties from Venetica:
-						if(Line=="$diffuse_map")
-						{
-							ss >> Line;
-							if(Line[0]=='"')// "file" -> file
-								Line=Line.substr(1, Line.size()-2);
-							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
-						}
-						if(Line=="$specular_map")
-						{
-							ss >> Line;
-							if(Line[0]=='"')// "file" -> file
-								Line=Line.substr(1, Line.size()-2);
-							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_SHININESS, 0));
-						}
-						if(Line=="$normal_map")
-						{
-							ss >> Line;
-							if(Line[0]=='"')// "file" -> file
-								Line=Line.substr(1, Line.size()-2);
-							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
-						}
-						if(Line=="$light_map")
-						{
-							ss >> Line;
-							if(Line[0]=='"')// "file" -> file
-								Line=Line.substr(1, Line.size()-2);
-							aiString ts(Line.c_str());
-							NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, 0));
-						}
-					}					
-				}//end of material
-			}
-			else {} //this is the wrong material, proceed the file until we reach the next material
+			string postComment = NextAfterNewLine(ss, linePart);
+			DefaultLogger::get()->debug("//" + postComment + " (comment line ignored)");			
+			continue;
 		}
-		ss >> Line;
-	}
-
-	return NewMaterial;
-}
-
-void OgreImporter::ReadTechnique(stringstream &ss, aiMaterial* NewMaterial) const
-{
-	unsigned int CurrentDiffuseTextureId=0;
-	unsigned int CurrentSpecularTextureId=0;
-	unsigned int CurrentNormalTextureId=0;
-	unsigned int CurrentLightTextureId=0;
-
-
-	string RestOfLine;
-	getline(ss, RestOfLine);//ignore the rest of the line
-
-	string Line;
-	ss >> Line;
-	if(Line!="{")
-	{
-		DefaultLogger::get()->warn("empty technique!");
-		return;
-	}
-	while(Line!="}")//read until the end of the technique
-	{
-		ss >> Line;
-		if(Line=="pass")
+		if (linePart != partMaterial)
 		{
-			getline(ss, RestOfLine);//ignore the rest of the line
+			ss >> linePart;
+			continue;
+		}
 
-			ss >> Line;
-			if(Line!="{")
-			{
-				DefaultLogger::get()->warn("empty pass!");
-				return;
-			}
-			while(Line!="}")//read until the end of the pass
-			{
-				ss >> Line;
-				if(Line=="ambient")
-				{
-					float r,g,b;
-					ss >> r >> g >> b;
-					const aiColor3D Color(r,g,b);
-					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_AMBIENT);
-				}
-				else if(Line=="diffuse")
-				{
-					float r,g,b;
-					ss >> r >> g >> b;
-					const aiColor3D Color(r,g,b);
-					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_DIFFUSE);
-				}
-				else if(Line=="specular")
-				{
-					float r,g,b;
-					ss >> r >> g >> b;
-					const aiColor3D Color(r,g,b);
-					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_SPECULAR);
-				}
-				else if(Line=="emmisive")
-				{
-					float r,g,b;
-					ss >> r >> g >> b;
-					const aiColor3D Color(r,g,b);
-					NewMaterial->AddProperty(&Color, 1, AI_MATKEY_COLOR_EMISSIVE);
-				}
-				else if(Line=="texture_unit")
-				{
-					getline(ss, RestOfLine);//ignore the rest of the line
+		ss >> linePart;
+		if (linePart != materialName)
+		{
+			//DefaultLogger::get()->debug(Formatter::format() << "Found material '" << linePart << "' that does not match at index " << ss.tellg());
+			ss >> linePart;
+			continue;
+		}
 
-					std::string TextureName;
-					int TextureType=-1;
-					int UvSet=0;
+		NextAfterNewLine(ss, linePart);
+		if (linePart != partBlockStart)
+		{
+			DefaultLogger::get()->error(Formatter::format() << "Invalid material: block start missing near index " << ss.tellg());
+			return material;
+		}
+		
+		DefaultLogger::get()->debug("material '" + materialName + "'");
 
-					ss >> Line;
-					if(Line!="{")
-						throw DeadlyImportError("empty texture unit!");
-					while(Line!="}")//read until the end of the texture_unit
-					{
-						ss >> Line;
-						if(Line=="texture")
-						{
-							ss >> Line;
-							TextureName=Line;
-
-							if(m_TextureTypeFromFilename)
-							{
-								if(Line.find("_n.")!=string::npos)// Normalmap
-								{
-									TextureType=aiTextureType_NORMALS;
-								}
-								else if(Line.find("_s.")!=string::npos)// Specularmap
-								{
-									TextureType=aiTextureType_SPECULAR;
-								}
-								else if(Line.find("_l.")!=string::npos)// Lightmap
-								{
-									TextureType=aiTextureType_LIGHTMAP;
-								}
-								else// colormap
-								{
-									TextureType=aiTextureType_DIFFUSE;
-								}
-							}
-							else
-							{
-								TextureType=aiTextureType_DIFFUSE;
-							}
-						}
-						else if(Line=="tex_coord_set")
-						{
-							ss >> UvSet;
-						}
-						else if(Line=="colour_op")//TODO implement this
-						{
-							/*
-							ss >> Line;
-							if("replace"==Line)//I don't think, assimp has something for this...
-							{
-							}
-							else if("modulate"==Line)
-							{
-								//TODO: set value
-								//NewMaterial->AddProperty(aiTextureOp_Multiply)
-							}
-							*/
-						}
-						
-					}//end of texture unit
-					Line="";//clear the } that would end the outer loop
-
-					//give the texture to assimp:
+		while(linePart != partBlockEnd)
+		{
+			// Proceed to the first technique
+			ss >> linePart;
 					
-					aiString ts(TextureName.c_str());
-					switch(TextureType)
-					{
-					case aiTextureType_DIFFUSE:
-						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, CurrentDiffuseTextureId));
-						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentDiffuseTextureId));
-						CurrentDiffuseTextureId++;
-						break;
-					case aiTextureType_NORMALS:
-						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, CurrentNormalTextureId));
-						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentNormalTextureId));
-						CurrentNormalTextureId++;
-						break;
-					case aiTextureType_SPECULAR:
-						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, CurrentSpecularTextureId));
-						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentSpecularTextureId));
-						CurrentSpecularTextureId++;
-						break;
-					case aiTextureType_LIGHTMAP:
-						NewMaterial->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, CurrentLightTextureId));
-						NewMaterial->AddProperty(&UvSet, 1, AI_MATKEY_UVWSRC(0, CurrentLightTextureId));
-						CurrentLightTextureId++;
-						break;
-					default:
-						DefaultLogger::get()->warn("Invalid Texture Type!");
-						break;
-					}
-				}
+			if (linePart == partTechnique)
+			{
+				string techniqueName = SkipLine(ss);
+				ReadTechnique(Trim(techniqueName), ss, material);
 			}
-			Line="";//clear the } that would end the outer loop
+
+			// Read informations from a custom material
+			/** @todo This "set $x y" does not seem to be a official Ogre material system feature.
+				Materials can inherit other materials and override texture units by using the (unique)
+				parent texture unit name in your cloned material.
+				This is not yet supported and below code is probably some hack from the original
+				author of this Ogre importer. Should be removed? */
+			if (linePart=="set")
+			{
+				ss >> linePart;
+				if (linePart=="$specular")//todo load this values:
+				{
+				}
+				else if (linePart=="$diffuse")
+				{
+				}
+				else if (linePart=="$ambient")
+				{
+				}
+				else if (linePart=="$colormap")
+				{
+					ss >> linePart;
+					aiString ts(linePart);
+					material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+				}
+				else if (linePart=="$normalmap")
+				{
+					ss >> linePart;
+					aiString ts(linePart);
+					material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
+				}
+				else if (linePart=="$shininess_strength")
+				{
+					ss >> linePart;
+					float Shininess = fast_atof(linePart.c_str());
+					material->AddProperty(&Shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
+				}
+				else if (linePart=="$shininess_exponent")
+				{
+					ss >> linePart;
+					float Shininess = fast_atof(linePart.c_str());
+					material->AddProperty(&Shininess, 1, AI_MATKEY_SHININESS);
+				}
+				//Properties from Venetica:
+				else if (linePart=="$diffuse_map")
+				{
+					ss >> linePart;
+					if (linePart[0] == '"')// "file" -> file
+						linePart = linePart.substr(1, linePart.size()-2);
+					aiString ts(linePart);
+					material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+				}
+				else if (linePart=="$specular_map")
+				{
+					ss >> linePart;
+					if (linePart[0] == '"')// "file" -> file
+						linePart = linePart.substr(1, linePart.size()-2);
+					aiString ts(linePart);
+					material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_SHININESS, 0));
+				}
+				else if (linePart=="$normal_map")
+				{
+					ss >> linePart;
+					if (linePart[0]=='"')// "file" -> file
+						linePart = linePart.substr(1, linePart.size()-2);
+					aiString ts(linePart);
+					material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_NORMALS, 0));
+				}
+				else if (linePart=="$light_map")
+				{
+					ss >> linePart;
+					if (linePart[0]=='"') {
+						linePart = linePart.substr(1, linePart.size() - 2);
+					}
+					aiString ts(linePart);
+					material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, 0));
+				}
+			}					
 		}
-	}//end of technique
+		ss >> linePart;
+	}
+
+	return material;
 }
 
+bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream &ss, aiMaterial *material)
+{
+	string linePart;
+	ss >> linePart;
 
-}//namespace Ogre
-}//namespace Assimp
+	if (linePart != partBlockStart)
+	{
+		DefaultLogger::get()->error(Formatter::format() << "Invalid material: Technique block start missing near index " << ss.tellg());
+		return false;
+	}
 
-#endif  // !! ASSIMP_BUILD_NO_OGRE_IMPORTER
+	DefaultLogger::get()->debug(" technique '" + techniqueName + "'");
+
+	const string partPass  = "pass";
+
+	while(linePart != partBlockEnd)
+	{
+		ss >> linePart;
+		
+		// Skip commented lines
+		if (linePart == partComment)
+		{
+			string postComment = SkipLine(ss);
+			DefaultLogger::get()->debug("  //" + postComment + " (comment line ignored)");
+			continue;
+		}
+
+		/// @todo Techniques have other attributes than just passes.		
+		if (linePart == partPass)
+		{
+			string passName = SkipLine(ss);
+			ReadPass(Trim(passName), ss, material);
+		}
+	}
+	return true;
+}
+
+bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMaterial *material)
+{
+	string linePart;
+	ss >> linePart;
+
+	if (linePart != partBlockStart)
+	{
+		DefaultLogger::get()->error(Formatter::format() << "Invalid material: Pass block start missing near index " << ss.tellg());
+		return false;
+	}
+
+	DefaultLogger::get()->debug("  pass '" + passName + "'");
+
+	const string partAmbient     = "ambient";
+	const string partDiffuse     = "diffuse";
+	const string partSpecular    = "specular";
+	const string partEmissive    = "emissive";
+	const string partTextureUnit = "texture_unit";
+
+	while(linePart != partBlockEnd)
+	{
+		ss >> linePart;
+		
+		// Skip commented lines
+		if (linePart == partComment)
+		{
+			string postComment = SkipLine(ss);
+			DefaultLogger::get()->debug("   //" + postComment + " (comment line ignored)");
+			continue;
+		}
+
+		// Colors
+		/// @todo Support alpha via aiColor4D.
+		if (linePart == partAmbient || linePart == partDiffuse || linePart == partSpecular || linePart == partEmissive)
+		{
+			float r, g, b;
+			ss >> r >> g >> b;
+			const aiColor3D color(r, g, b);
+			
+			DefaultLogger::get()->debug(Formatter::format() << "   " << linePart << " " << r << " " << g << " " << b);
+			
+			if (linePart == partAmbient)
+			{
+				material->AddProperty(&color, 1, AI_MATKEY_COLOR_AMBIENT);
+			}
+			else if (linePart == partDiffuse)
+			{
+				material->AddProperty(&color, 1, AI_MATKEY_COLOR_DIFFUSE);
+			}
+			else if (linePart == partSpecular)
+			{
+				material->AddProperty(&color, 1, AI_MATKEY_COLOR_SPECULAR);
+			}
+			else if (linePart == partEmissive)
+			{
+				material->AddProperty(&color, 1, AI_MATKEY_COLOR_EMISSIVE);
+			}
+		}
+		else if (linePart == partTextureUnit)
+		{
+			string textureUnitName = SkipLine(ss);
+			ReadTextureUnit(Trim(textureUnitName), ss, material);
+		}
+	}
+	return true;
+}
+
+bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstream &ss, aiMaterial *material)
+{
+	string linePart;
+	ss >> linePart;
+
+	if (linePart != partBlockStart)
+	{
+		DefaultLogger::get()->error(Formatter::format() << "Invalid material: Texture unit block start missing near index " << ss.tellg());
+		return false;
+	}
+
+	DefaultLogger::get()->debug("   texture_unit '" + textureUnitName + "'");
+
+	const string partTexture      = "texture";
+	const string partTextCoordSet = "tex_coord_set";
+	const string partColorOp      = "colour_op";
+
+	aiTextureType textureType = aiTextureType_NONE;
+	std::string textureRef;
+	int uvCoord = 0;
+
+	while(linePart != partBlockEnd)
+	{
+		ss >> linePart;
+
+		// Skip commented lines
+		if (linePart == partComment)
+		{
+			string postComment = SkipLine(ss);
+			DefaultLogger::get()->debug("    //" + postComment + " (comment line ignored)");
+			continue;
+		}
+
+		if (linePart == partTexture)
+		{
+			ss >> linePart;
+			textureRef = linePart;
+
+			// User defined Assimp config property to detect texture type from filename.	
+			if (m_detectTextureTypeFromFilename)
+			{
+				size_t posSuffix = textureRef.find_last_of(".");
+				size_t posUnderscore = textureRef.find_last_of("_");
+				
+				if (posSuffix != string::npos && posUnderscore != string::npos && posSuffix > posUnderscore)
+				{
+					string identifier = Ogre::ToLower(textureRef.substr(posUnderscore, posSuffix - posUnderscore));
+					DefaultLogger::get()->debug(Formatter::format() << "Detecting texture type from filename postfix '" << identifier << "'");
+
+					if (identifier == "_n" || identifier == "_nrm" || identifier == "_nrml" || identifier == "_normal" || identifier == "_normals" || identifier == "_normalmap")
+					{
+						textureType = aiTextureType_NORMALS;
+					}
+					else if (identifier == "_s" || identifier == "_spec" || identifier == "_specular" || identifier == "_specularmap")
+					{
+						textureType = aiTextureType_SPECULAR;
+					}
+					else if (identifier == "_l" || identifier == "_light" || identifier == "_lightmap" || identifier == "_occ" || identifier == "_occlusion")
+					{
+						textureType = aiTextureType_LIGHTMAP;
+					}
+					else if (identifier == "_disp" || identifier == "_displacement")
+					{
+						textureType = aiTextureType_DISPLACEMENT;
+					}
+					else
+					{
+						textureType = aiTextureType_DIFFUSE;
+					}
+				}
+				else
+				{
+					textureType = aiTextureType_DIFFUSE;
+				}
+			}
+			// Detect from texture unit name. This cannot be too broad as 
+			// authors might give names like "LightSaber" or "NormalNinja".
+			else
+			{
+				string unitNameLower = Ogre::ToLower(textureUnitName);
+				if (unitNameLower.find("normalmap") != string::npos)
+				{
+					textureType = aiTextureType_NORMALS;
+				}
+				else if (unitNameLower.find("specularmap") != string::npos)
+				{
+					textureType = aiTextureType_SPECULAR;
+				}
+				else if (unitNameLower.find("lightmap") != string::npos)
+				{
+					textureType = aiTextureType_LIGHTMAP;
+				}
+				else if (unitNameLower.find("displacementmap") != string::npos)
+				{
+					textureType = aiTextureType_DISPLACEMENT;
+				}
+				else
+				{
+					textureType = aiTextureType_DIFFUSE;
+				}
+			}
+		}
+		else if (linePart == partTextCoordSet)
+		{
+			ss >> uvCoord;
+		}
+		/// @todo Implement
+		else if(linePart == partColorOp)
+		{
+			/*
+			ss >> linePart;
+			if("replace"==linePart)//I don't think, assimp has something for this...
+			{
+			}
+			else if("modulate"==linePart)
+			{
+				//TODO: set value
+				//material->AddProperty(aiTextureOp_Multiply)
+			}
+			*/
+		}	
+	}
+	
+	if (textureRef.empty())
+	{
+		DefaultLogger::get()->warn("Texture reference is empty, ignoring texture_unit.");
+		return false;
+	}
+	if (textureType == aiTextureType_NONE)
+	{
+		DefaultLogger::get()->warn("Failed to detect texture type for '" + textureRef  + "', ignoring texture_unit.");
+		return false;
+	}
+
+	unsigned int textureTypeIndex = m_textures[textureType];
+	m_textures[textureType]++;
+	
+	DefaultLogger::get()->debug(Formatter::format() << "    texture '" << textureRef << "' type " << textureType 
+		<< " index " << textureTypeIndex << " UV " << uvCoord);
+	
+	aiString assimpTextureRef(textureRef);
+	material->AddProperty(&assimpTextureRef, AI_MATKEY_TEXTURE(textureType, textureTypeIndex));
+	material->AddProperty(&uvCoord, 1, AI_MATKEY_UVWSRC(textureType, textureTypeIndex));
+	
+	return true;
+}
+
+} // Ogre
+} // Assimp
+
+#endif // ASSIMP_BUILD_NO_OGRE_IMPORTER

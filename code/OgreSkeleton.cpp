@@ -5,11 +5,11 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
+Redistribution and use of this software in aSource and binary forms, 
 with or without modification, are permitted provided that the 
 following conditions are met:
 
-* Redistributions of source code must retain the above
+* Redistributions of aSource code must retain the above
   copyright notice, this list of conditions and the
   following disclaimer.
 
@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include "OgreImporter.hpp"
+#include "OgreImporter.h"
 #include "TinyFormatter.h"
 
 using namespace std;
@@ -52,400 +52,395 @@ namespace Assimp
 namespace Ogre
 {
 
-
-
-void OgreImporter::LoadSkeleton(std::string FileName, vector<Bone> &Bones, vector<Animation> &Animations) const
+void OgreImporter::ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOHandler, const aiScene *pScene,
+							    const std::string &skeletonFile, vector<Bone> &Bones, vector<Animation> &Animations) const
 {
-	const aiScene* const m_CurrentScene=this->m_CurrentScene;//make sure, that we can access but not change the scene
-	(void)m_CurrentScene;
-
-
-	//most likely the skeleton file will only end with .skeleton
-	//But this is a xml reader, so we need: .skeleton.xml
-	FileName+=".xml";
-
-	DefaultLogger::get()->debug(string("Loading Skeleton: ")+FileName);
-
-	//Open the File:
-	boost::scoped_ptr<IOStream> File(m_CurrentIOHandler->Open(FileName));
-	if(NULL==File.get())
-		throw DeadlyImportError("Failed to open skeleton file "+FileName+".");
-
-	//Read the Mesh File:
-	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(File.get()));
-	XmlReader* SkeletonFile = irr::io::createIrrXMLReader(mIOWrapper.get());
-	if(!SkeletonFile)
-		throw DeadlyImportError(string("Failed to create XML Reader for ")+FileName);
-
-	XmlRead(SkeletonFile);
-	if(string("skeleton")!=SkeletonFile->getNodeName())
-		throw DeadlyImportError("No <skeleton> node in SkeletonFile: "+FileName);
-
-
-
-	//------------------------------------load bones-----------------------------------------
-	XmlRead(SkeletonFile);
-	if(string("bones")!=SkeletonFile->getNodeName())
-		throw DeadlyImportError("No bones node in skeleton "+FileName);
-
-	XmlRead(SkeletonFile);
-
-	while(string("bone")==SkeletonFile->getNodeName())
+	string filename = skeletonFile;
+	if (EndsWith(filename, ".skeleton"))
 	{
-		//TODO: Maybe we can have bone ids for the errrors, but normaly, they should never appear, so what....
-
-		//read a new bone:
-		Bone NewBone;
-		NewBone.Id=GetAttribute<int>(SkeletonFile, "id");
-		NewBone.Name=GetAttribute<string>(SkeletonFile, "name");
-
-		//load the position:
-		XmlRead(SkeletonFile);
-		if(string("position")!=SkeletonFile->getNodeName())
-			throw DeadlyImportError("Position is not first node in Bone!");
-		NewBone.Position.x=GetAttribute<float>(SkeletonFile, "x");
-		NewBone.Position.y=GetAttribute<float>(SkeletonFile, "y");
-		NewBone.Position.z=GetAttribute<float>(SkeletonFile, "z");
-
-		//Rotation:
-		XmlRead(SkeletonFile);
-		if(string("rotation")!=SkeletonFile->getNodeName())
-			throw DeadlyImportError("Rotation is not the second node in Bone!");
-		NewBone.RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
-		XmlRead(SkeletonFile);
-		if(string("axis")!=SkeletonFile->getNodeName())
-			throw DeadlyImportError("No axis specified for bone rotation!");
-		NewBone.RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
-		NewBone.RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
-		NewBone.RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
-
-		//append the newly loaded bone to the bone list
-		Bones.push_back(NewBone);
-
-		//Proceed to the next bone:
-		XmlRead(SkeletonFile);
+		DefaultLogger::get()->warn("Mesh is referencing a Ogre binary skeleton. Parsing binary Ogre assets is not supported at the moment. Trying to find .skeleton.xml file instead.");
+		filename += ".xml";
 	}
-	//The bones in the file a not neccesarly ordered by there id's so we do it now:
+
+	if (!pIOHandler->Exists(filename))
+	{
+		DefaultLogger::get()->error("Failed to find skeleton file '" + filename + "', skeleton will be missing.");
+		return;
+	}
+
+	boost::scoped_ptr<IOStream> file(pIOHandler->Open(filename));
+	if (!file.get()) {
+		throw DeadlyImportError("Failed to open skeleton file " + filename);
+	}
+
+	boost::scoped_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
+	XmlReader* reader = irr::io::createIrrXMLReader(stream.get());
+	if (!reader) {
+		throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
+	}
+
+	DefaultLogger::get()->debug("Reading skeleton '" + filename + "'");
+
+	// Root
+	NextNode(reader);
+	if (!CurrentNodeNameEquals(reader, "skeleton")) {
+		throw DeadlyImportError("Root node is not <skeleton> but <" + string(reader->getNodeName()) + "> in " + filename);
+	}
+
+	// Bones
+	NextNode(reader);
+	if (!CurrentNodeNameEquals(reader, "bones")) {
+		throw DeadlyImportError("No <bones> node in skeleton " + skeletonFile);
+	}
+
+	NextNode(reader);
+	while(CurrentNodeNameEquals(reader, "bone"))
+	{
+		/** @todo Fix this mandatory ordering. Some exporters might just write rotation first etc.
+			There is no technical reason this has to be so strict. */
+
+		Bone bone;
+		bone.Id = GetAttribute<int>(reader, "id");
+		bone.Name = GetAttribute<string>(reader, "name");
+
+		NextNode(reader);
+		if (!CurrentNodeNameEquals(reader, "position")) {
+			throw DeadlyImportError("Position is not first node in Bone!");
+		}
+
+		bone.Position.x = GetAttribute<float>(reader, "x");
+		bone.Position.y = GetAttribute<float>(reader, "y");
+		bone.Position.z = GetAttribute<float>(reader, "z");
+
+		NextNode(reader);
+		if (!CurrentNodeNameEquals(reader, "rotation")) {
+			throw DeadlyImportError("Rotation is not the second node in Bone!");
+		}
+		
+		bone.RotationAngle = GetAttribute<float>(reader, "angle");
+		
+		NextNode(reader);
+		if (!CurrentNodeNameEquals(reader, "axis")) {
+			throw DeadlyImportError("No axis specified for bone rotation!");
+		}
+			
+		bone.RotationAxis.x = GetAttribute<float>(reader, "x");
+		bone.RotationAxis.y = GetAttribute<float>(reader, "y");
+		bone.RotationAxis.z = GetAttribute<float>(reader, "z");
+
+		Bones.push_back(bone);
+
+		NextNode(reader);
+	}
+
+	// Order bones by Id
 	std::sort(Bones.begin(), Bones.end());
 
-	//now the id of each bone should be equal to its position in the vector:
-	//so we do a simple check:
+	// Validate that bone indexes are not skipped.
+	/** @note Left this from original authors code, but not sure if this is strictly necessary
+		as per the Ogre skeleton spec. It might be more that other (later) code in this imported does not break. */
+	for (size_t i=0, len=Bones.size(); i<len; ++i)
 	{
-		bool IdsOk=true;
-		for(int i=0; i<static_cast<signed int>(Bones.size()); ++i)//i is signed, because all Id's are also signed!
-		{
-			if(Bones[i].Id!=i)
-				IdsOk=false;
+		if (static_cast<int>(Bones[i].Id) != static_cast<int>(i)) {
+			throw DeadlyImportError("Bone Ids are not in sequence in " + skeletonFile);
 		}
-		if(!IdsOk)
-			throw DeadlyImportError("Bone Ids are not valid!"+FileName);
 	}
-	DefaultLogger::get()->debug((Formatter::format(),"Number of bones: ",Bones.size()));
-	//________________________________________________________________________________
 
+	DefaultLogger::get()->debug(Formatter::format() << "  - Bones " << Bones.size());
 
+	// Bone hierarchy
+	if (!CurrentNodeNameEquals(reader, "bonehierarchy")) {
+		throw DeadlyImportError("No <bonehierarchy> node found after <bones> in " + skeletonFile);
+	}
 
-
-
-
-	//----------------------------load bonehierarchy--------------------------------
-	if(string("bonehierarchy")!=SkeletonFile->getNodeName())
-		throw DeadlyImportError("no bonehierarchy node in "+FileName);
-
-	DefaultLogger::get()->debug("loading bonehierarchy...");
-	XmlRead(SkeletonFile);
-	while(string("boneparent")==SkeletonFile->getNodeName())
+	NextNode(reader);
+	while(CurrentNodeNameEquals(reader, "boneparent"))
 	{
-		string Child, Parent;
-		Child=GetAttribute<string>(SkeletonFile, "bone");
-		Parent=GetAttribute<string>(SkeletonFile, "parent");
+		string childName = GetAttribute<string>(reader, "bone");
+		string parentName = GetAttribute<string>(reader, "parent");
 
-		unsigned int ChildId, ParentId;
-		ChildId=find(Bones.begin(), Bones.end(), Child)->Id;
-		ParentId=find(Bones.begin(), Bones.end(), Parent)->Id;
+		vector<Bone>::iterator iterChild = find(Bones.begin(), Bones.end(), childName);
+		vector<Bone>::iterator iterParent = find(Bones.begin(), Bones.end(), parentName);
+		
+		if (iterChild != Bones.end() && iterParent != Bones.end())
+		{
+			iterChild->ParentId = iterParent->Id;
+			iterParent->Children.push_back(iterChild->Id);
+		}
+		else
+		{
+			DefaultLogger::get()->warn("Failed to find bones for parenting: Child " + childName + " Parent " + parentName);
+		}
 
-		Bones[ChildId].ParentId=ParentId;
-		Bones[ParentId].Children.push_back(ChildId);
-
-		XmlRead(SkeletonFile);
+		NextNode(reader);
 	}
-	//_____________________________________________________________________________
 
-
-	//--------- Calculate the WorldToBoneSpace Matrix recursively for all bones: ------------------
+	// Calculate bone matrices for root bones. Recursively does their children.
 	BOOST_FOREACH(Bone &theBone, Bones)
 	{
-		if(-1==theBone.ParentId) //the bone is a root bone
-		{
+		if (!theBone.IsParented()) {
 			theBone.CalculateBoneToWorldSpaceMatrix(Bones);
 		}
 	}
-	//_______________________________________________________________________
 	
+	aiVector3D zeroVec(0.f, 0.f, 0.f);
 
-	//---------------------------load animations-----------------------------
-	if(string("animations")==SkeletonFile->getNodeName())//animations are optional values
+	// Animations
+	if (CurrentNodeNameEquals(reader, "animations"))
 	{
-		DefaultLogger::get()->debug("Loading Animations");
-		XmlRead(SkeletonFile);
-		while(string("animation")==SkeletonFile->getNodeName())
+		DefaultLogger::get()->debug("  - Animations");
+
+		NextNode(reader);
+		while(CurrentNodeNameEquals(reader, "animation"))
 		{
-			Animation NewAnimation;
-			NewAnimation.Name=GetAttribute<string>(SkeletonFile, "name");
-			NewAnimation.Length=GetAttribute<float>(SkeletonFile, "length");
+			Animation animation;
+			animation.Name = GetAttribute<string>(reader, "name");
+			animation.Length = GetAttribute<float>(reader, "length");
 			
-			//Load all Tracks
-			XmlRead(SkeletonFile);
-			if(string("tracks")!=SkeletonFile->getNodeName())
-				throw DeadlyImportError("no tracks node in animation");
-			XmlRead(SkeletonFile);
-			while(string("track")==SkeletonFile->getNodeName())
+			// Tracks
+			NextNode(reader);
+			if (!CurrentNodeNameEquals(reader, "tracks")) {
+				throw DeadlyImportError("No <tracks> node found in animation '" + animation.Name + "' in " + skeletonFile);
+			}
+
+			NextNode(reader);
+			while(CurrentNodeNameEquals(reader, "track"))
 			{
-				Track NewTrack;
-				NewTrack.BoneName=GetAttribute<string>(SkeletonFile, "bone");
+				Track track;
+				track.BoneName = GetAttribute<string>(reader, "bone");
 
-				//Load all keyframes;
-				XmlRead(SkeletonFile);
-				if(string("keyframes")!=SkeletonFile->getNodeName())
-					throw DeadlyImportError("no keyframes node!");
-				XmlRead(SkeletonFile);
-				while(string("keyframe")==SkeletonFile->getNodeName())
+				// Keyframes
+				NextNode(reader);
+				if (!CurrentNodeNameEquals(reader, "keyframes")) {
+					throw DeadlyImportError("No <keyframes> node found in a track in animation '" + animation.Name + "' in " + skeletonFile);
+				}
+
+				NextNode(reader);
+				while(CurrentNodeNameEquals(reader, "keyframe"))
 				{
-					Keyframe NewKeyframe;
-					NewKeyframe.Time=GetAttribute<float>(SkeletonFile, "time");
-
-					//loop over the attributes:
-					
-					while(true) //will quit, if a Node is not a animationkey
+					KeyFrame keyFrame;
+					keyFrame.Time = GetAttribute<float>(reader, "time");
+				
+					NextNode(reader);
+					while(CurrentNodeNameEquals(reader, "translate") || CurrentNodeNameEquals(reader, "rotate") || CurrentNodeNameEquals(reader, "scale"))
 					{
-						XmlRead(SkeletonFile);
-
-						//If any property doesn't show up, it will keep its initialization value
-
-						//Position:
-						if(string("translate")==SkeletonFile->getNodeName())
+						if (CurrentNodeNameEquals(reader, "translate"))
 						{
-							NewKeyframe.Position.x=GetAttribute<float>(SkeletonFile, "x");
-							NewKeyframe.Position.y=GetAttribute<float>(SkeletonFile, "y");
-							NewKeyframe.Position.z=GetAttribute<float>(SkeletonFile, "z");
+							keyFrame.Position.x = GetAttribute<float>(reader, "x");
+							keyFrame.Position.y = GetAttribute<float>(reader, "y");
+							keyFrame.Position.z = GetAttribute<float>(reader, "z");
 						}
-
-						//Rotation:
-						else if(string("rotate")==SkeletonFile->getNodeName())
+						else if (CurrentNodeNameEquals(reader, "rotate"))
 						{
-							float RotationAngle=GetAttribute<float>(SkeletonFile, "angle");
-							aiVector3D RotationAxis;
-							XmlRead(SkeletonFile);
-							if(string("axis")!=SkeletonFile->getNodeName())
-								throw DeadlyImportError("No axis for keyframe rotation!");
-							RotationAxis.x=GetAttribute<float>(SkeletonFile, "x");
-							RotationAxis.y=GetAttribute<float>(SkeletonFile, "y");
-							RotationAxis.z=GetAttribute<float>(SkeletonFile, "z");
+							float angle = GetAttribute<float>(reader, "angle");
 
-							if(0==RotationAxis.x && 0==RotationAxis.y && 0==RotationAxis.z)//we have an invalid rotation axis
+							NextNode(reader);
+							if (!CurrentNodeNameEquals(reader, "axis")) {
+								throw DeadlyImportError("No axis for keyframe rotation in animation '" + animation.Name + "'");
+							}
+								
+							aiVector3D axis;
+							axis.x = GetAttribute<float>(reader, "x");
+							axis.y = GetAttribute<float>(reader, "y");
+							axis.z = GetAttribute<float>(reader, "z");
+
+							if (axis.Equal(zeroVec))
 							{
-								RotationAxis.x=1.0f;
-								if(0!=RotationAngle)//if we don't rotate at all, the axis does not matter
-								{
-									DefaultLogger::get()->warn("Invalid Rotation Axis in Keyframe!");
+								axis.x = 1.0f;
+								if (angle != 0) {
+									DefaultLogger::get()->warn("Found invalid a key frame with a zero rotation axis in animation '" + animation.Name + "'");
 								}
 							}
-							NewKeyframe.Rotation=aiQuaternion(RotationAxis, RotationAngle);
+							keyFrame.Rotation = aiQuaternion(axis, angle);
 						}
-
-						//Scaling:
-						else if(string("scale")==SkeletonFile->getNodeName())
+						else if (CurrentNodeNameEquals(reader, "scale"))
 						{
-							NewKeyframe.Scaling.x=GetAttribute<float>(SkeletonFile, "x");
-							NewKeyframe.Scaling.y=GetAttribute<float>(SkeletonFile, "y");
-							NewKeyframe.Scaling.z=GetAttribute<float>(SkeletonFile, "z");
-						}
-
-						//we suppose, that we read all attributes and this is a new keyframe or the end of the animation
-						else
-							break;
+							keyFrame.Scaling.x = GetAttribute<float>(reader, "x");
+							keyFrame.Scaling.y = GetAttribute<float>(reader, "y");
+							keyFrame.Scaling.z = GetAttribute<float>(reader, "z");
+						}	
+						NextNode(reader);
 					}
-
-					NewTrack.Keyframes.push_back(NewKeyframe);
+					track.Keyframes.push_back(keyFrame);
 				}
-
-				NewAnimation.Tracks.push_back(NewTrack);
+				animation.Tracks.push_back(track);
 			}
-
-			Animations.push_back(NewAnimation);
+			Animations.push_back(animation);
+			
+			DefaultLogger::get()->debug(Formatter::format() << "      " << animation.Name << " (" << animation.Length << " sec, " << animation.Tracks.size() << " tracks)");
 		}
 	}
-	//_____________________________________________________________________________
-
 }
 
-
-void OgreImporter::CreateAssimpSkeleton(const std::vector<Bone> &Bones, const std::vector<Animation> &/*Animations*/)
+void OgreImporter::CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &bones, const std::vector<Animation> &animations)
 {
-	if(!m_CurrentScene->mRootNode)
-		throw DeadlyImportError("No root node exists!!");
-	if(0!=m_CurrentScene->mRootNode->mNumChildren)
-		throw DeadlyImportError("Root Node already has childnodes!");
+	if (bones.empty()) {
+		return;
+	}
 
+	if (!pScene->mRootNode) {
+		throw DeadlyImportError("Creating Assimp skeleton: No root node created!");
+	}
+	if (pScene->mRootNode->mNumChildren > 0) {
+		throw DeadlyImportError("Creating Assimp skeleton: Root node already has children!");
+	}
 
-	//Createt the assimp bone hierarchy
-	vector<aiNode*> RootBoneNodes;
-	BOOST_FOREACH(const Bone &theBone, Bones)
+	// Bones
+	vector<aiNode*> rootBones;
+	BOOST_FOREACH(const Bone &bone, bones)
 	{
-		if(-1==theBone.ParentId) //the bone is a root bone
-		{
-			//which will recursily add all other nodes
-			RootBoneNodes.push_back(CreateAiNodeFromBone(theBone.Id, Bones, m_CurrentScene->mRootNode));
+		if (!bone.IsParented()) {
+			rootBones.push_back(CreateNodeFromBone(bone.Id, bones, pScene->mRootNode));
 		}
 	}
 	
-	if(RootBoneNodes.size() > 0)
+	if (!rootBones.empty())
 	{
-		m_CurrentScene->mRootNode->mNumChildren=RootBoneNodes.size();	
-		m_CurrentScene->mRootNode->mChildren=new aiNode*[RootBoneNodes.size()];
-		memcpy(m_CurrentScene->mRootNode->mChildren, &RootBoneNodes[0], sizeof(aiNode*)*RootBoneNodes.size());
-	}
-}
+		pScene->mRootNode->mChildren = new aiNode*[rootBones.size()];
+		pScene->mRootNode->mNumChildren = rootBones.size();
 
-
-void OgreImporter::PutAnimationsInScene(const std::vector<Bone> &Bones, const std::vector<Animation> &Animations)
-{
-	//-----------------Create the Assimp Animations --------------------
-	if(Animations.size()>0)//Maybe the model had only a skeleton and no animations. (If it also has no skeleton, this function would'nt have been called
-	{
-		m_CurrentScene->mNumAnimations=Animations.size();
-		m_CurrentScene->mAnimations=new aiAnimation*[Animations.size()];
-		for(unsigned int i=0; i<Animations.size(); ++i)//create all animations
-		{
-			aiAnimation* NewAnimation=new aiAnimation();
-			NewAnimation->mName=Animations[i].Name;
-			NewAnimation->mDuration=Animations[i].Length;
-			NewAnimation->mTicksPerSecond=1.0f;
-
-			//Create all tracks in this animation
-			NewAnimation->mNumChannels=Animations[i].Tracks.size();
-			NewAnimation->mChannels=new aiNodeAnim*[Animations[i].Tracks.size()];
-			for(unsigned int j=0; j<Animations[i].Tracks.size(); ++j)
-			{
-				aiNodeAnim* NewNodeAnim=new aiNodeAnim();
-				NewNodeAnim->mNodeName=Animations[i].Tracks[j].BoneName;
-
-				//we need this, to acces the bones default pose, which we need to make keys absolute to the default bone pose
-				vector<Bone>::const_iterator CurBone=find(Bones.begin(), Bones.end(), NewNodeAnim->mNodeName);
-				aiMatrix4x4 t0, t1;
-				aiMatrix4x4 DefBonePose=aiMatrix4x4::Translation(CurBone->Position, t1)
-									 *	aiMatrix4x4::Rotation(CurBone->RotationAngle, CurBone->RotationAxis, t0);
-				
-
-				//Create the keyframe arrays...
-				unsigned int KeyframeCount=Animations[i].Tracks[j].Keyframes.size();
-				NewNodeAnim->mNumPositionKeys=KeyframeCount;
-				NewNodeAnim->mNumRotationKeys=KeyframeCount;
-				NewNodeAnim->mNumScalingKeys =KeyframeCount;
-				NewNodeAnim->mPositionKeys=new aiVectorKey[KeyframeCount];
-				NewNodeAnim->mRotationKeys=new aiQuatKey[KeyframeCount];
-				NewNodeAnim->mScalingKeys =new aiVectorKey[KeyframeCount];
-				
-				//...and fill them
-				for(unsigned int k=0; k<KeyframeCount; ++k)
-				{
-					aiMatrix4x4 t2, t3;
-
-					//Create a matrix to transfrom a vector from the bones default pose to the bone bones in this animation key
-					aiMatrix4x4 PoseToKey=
-									  aiMatrix4x4::Translation(Animations[i].Tracks[j].Keyframes[k].Position, t3)	//pos
-									* aiMatrix4x4(Animations[i].Tracks[j].Keyframes[k].Rotation.GetMatrix())		//rot
-									* aiMatrix4x4::Scaling(Animations[i].Tracks[j].Keyframes[k].Scaling, t2);		//scale
-									
-
-					//calculate the complete transformation from world space to bone space
-					aiMatrix4x4 CompleteTransform=DefBonePose * PoseToKey;
-					
-					aiVector3D Pos;
-					aiQuaternion Rot;
-					aiVector3D Scale;
-
-					CompleteTransform.Decompose(Scale, Rot, Pos);
-
-					double Time=Animations[i].Tracks[j].Keyframes[k].Time;
-
-					NewNodeAnim->mPositionKeys[k].mTime=Time;
-					NewNodeAnim->mPositionKeys[k].mValue=Pos;
-					
-					NewNodeAnim->mRotationKeys[k].mTime=Time;
-					NewNodeAnim->mRotationKeys[k].mValue=Rot;
-
-					NewNodeAnim->mScalingKeys[k].mTime=Time;
-					NewNodeAnim->mScalingKeys[k].mValue=Scale;
-				}
-				
-				NewAnimation->mChannels[j]=NewNodeAnim;
-			}
-
-			m_CurrentScene->mAnimations[i]=NewAnimation;
+		for(size_t i=0, len=rootBones.size(); i<len; ++i) {
+			pScene->mRootNode->mChildren[i] = rootBones[i];
 		}
 	}
-//TODO: Auf nicht vorhandene Animationskeys achten!
-//#pragma warning (s.o.)
-	//__________________________________________________________________
-}
 
-
-aiNode* OgreImporter::CreateAiNodeFromBone(int BoneId, const std::vector<Bone> &Bones, aiNode* ParentNode)
-{
-	//----Create the node for this bone and set its values-----
-	aiNode* NewNode=new aiNode(Bones[BoneId].Name);
-	NewNode->mParent=ParentNode;
-
-	aiMatrix4x4 t0,t1;
-	NewNode->mTransformation=
-		aiMatrix4x4::Translation(Bones[BoneId].Position, t0)
-		*aiMatrix4x4::Rotation(Bones[BoneId].RotationAngle, Bones[BoneId].RotationAxis, t1)
-	;
-	//__________________________________________________________
-
-
-	//---------- recursivly create all children Nodes: ----------
-	NewNode->mNumChildren=Bones[BoneId].Children.size();
-	NewNode->mChildren=new aiNode*[Bones[BoneId].Children.size()];
-	for(unsigned int i=0; i<Bones[BoneId].Children.size(); ++i)
+	// TODO: Auf nicht vorhandene Animationskeys achten!
+	// @todo Pay attention to non-existing animation Keys (google translated from above german comment)
+	
+	// Animations
+	if (!animations.empty())
 	{
-		NewNode->mChildren[i]=CreateAiNodeFromBone(Bones[BoneId].Children[i], Bones, NewNode);
+		pScene->mAnimations = new aiAnimation*[animations.size()];
+		pScene->mNumAnimations = animations.size();
+		
+		for(size_t ai=0, alen=animations.size(); ai<alen; ++ai)
+		{
+			const Animation &aSource = animations[ai];
+
+			aiAnimation *animation = new aiAnimation();
+			animation->mName = aSource.Name;
+			animation->mDuration = aSource.Length;
+			animation->mTicksPerSecond = 1.0f;
+
+			// Tracks
+			animation->mChannels = new aiNodeAnim*[aSource.Tracks.size()];
+			animation->mNumChannels = aSource.Tracks.size();
+			
+			for(size_t ti=0, tlen=aSource.Tracks.size(); ti<tlen; ++ti)
+			{
+				const Track &tSource = aSource.Tracks[ti];
+
+				aiNodeAnim *animationNode = new aiNodeAnim();
+				animationNode->mNodeName = tSource.BoneName;
+
+				// We need this, to access the bones default pose. 
+				// Which we need to make keys absolute to the default bone pose.
+				vector<Bone>::const_iterator boneIter = find(bones.begin(), bones.end(), tSource.BoneName);
+				if (boneIter == bones.end())
+				{
+					for(size_t createdAnimationIndex=0; createdAnimationIndex<ai; createdAnimationIndex++) {
+						delete pScene->mAnimations[createdAnimationIndex];
+					}
+					delete [] pScene->mAnimations;
+					pScene->mAnimations = NULL;
+					pScene->mNumAnimations = 0;
+					
+					DefaultLogger::get()->error("Failed to find bone for name " + tSource.BoneName + " when creating animation " + aSource.Name + 
+						". This is a serious error, animations wont be imported.");
+					return;
+				}
+
+				aiMatrix4x4 t0, t1;
+				aiMatrix4x4 defaultBonePose = aiMatrix4x4::Translation(boneIter->Position, t1) * aiMatrix4x4::Rotation(boneIter->RotationAngle, boneIter->RotationAxis, t0);
+
+				// Keyframes
+				unsigned int numKeyframes = tSource.Keyframes.size();
+
+				animationNode->mPositionKeys = new aiVectorKey[numKeyframes];				
+				animationNode->mRotationKeys = new aiQuatKey[numKeyframes];
+				animationNode->mScalingKeys = new aiVectorKey[numKeyframes];
+				animationNode->mNumPositionKeys = numKeyframes;
+				animationNode->mNumRotationKeys = numKeyframes;
+				animationNode->mNumScalingKeys  = numKeyframes;
+
+				//...and fill them
+				for(size_t kfi=0; kfi<numKeyframes; ++kfi)
+				{
+					const KeyFrame &kfSource = tSource.Keyframes[kfi];
+
+					// Create a matrix to transform a vector from the bones 
+					// default pose to the bone bones in this animation key
+					aiMatrix4x4 t2, t3;
+					aiMatrix4x4 keyBonePose =
+						aiMatrix4x4::Translation(kfSource.Position, t3) *
+						aiMatrix4x4(kfSource.Rotation.GetMatrix()) *
+						aiMatrix4x4::Scaling(kfSource.Scaling, t2);
+
+					// Calculate the complete transformation from world space to bone space
+					aiMatrix4x4 CompleteTransform = defaultBonePose * keyBonePose;
+
+					aiVector3D kfPos; aiQuaternion kfRot; aiVector3D kfScale;
+					CompleteTransform.Decompose(kfScale, kfRot, kfPos);
+
+					animationNode->mPositionKeys[kfi].mTime = static_cast<double>(kfSource.Time);
+					animationNode->mRotationKeys[kfi].mTime = static_cast<double>(kfSource.Time);
+					animationNode->mScalingKeys[kfi].mTime = static_cast<double>(kfSource.Time);
+
+					animationNode->mPositionKeys[kfi].mValue = kfPos;					
+					animationNode->mRotationKeys[kfi].mValue = kfRot;
+					animationNode->mScalingKeys[kfi].mValue = kfScale;
+				}
+				animation->mChannels[ti] = animationNode;
+			}
+			pScene->mAnimations[ai] = animation;
+		}
 	}
-	//____________________________________________________
-
-
-	return NewNode;
 }
 
+aiNode* OgreImporter::CreateNodeFromBone(int boneId, const std::vector<Bone> &bones, aiNode* parent)
+{
+	aiMatrix4x4 t0,t1;
+	const Bone &source = bones[boneId];
+
+	aiNode* boneNode = new aiNode(source.Name);
+	boneNode->mParent = parent;
+	boneNode->mTransformation = aiMatrix4x4::Translation(source.Position, t0) * aiMatrix4x4::Rotation(source.RotationAngle, source.RotationAxis, t1);
+
+	if (!source.Children.empty())
+	{
+		boneNode->mChildren = new aiNode*[source.Children.size()];
+		boneNode->mNumChildren = source.Children.size();
+
+		for(size_t i=0, len=source.Children.size(); i<len; ++i) {
+			boneNode->mChildren[i] = CreateNodeFromBone(source.Children[i], bones, boneNode);
+		}
+	}
+
+	return boneNode;
+}
 
 void Bone::CalculateBoneToWorldSpaceMatrix(vector<Bone> &Bones)
 {
-	//Calculate the matrix for this bone:
+	aiMatrix4x4 t0, t1;
+	aiMatrix4x4 transform = aiMatrix4x4::Rotation(-RotationAngle, RotationAxis, t1) * aiMatrix4x4::Translation(-Position, t0);
 
-	aiMatrix4x4 t0,t1;
-	aiMatrix4x4 Transf=	aiMatrix4x4::Rotation(-RotationAngle, RotationAxis, t1)
-					*	aiMatrix4x4::Translation(-Position, t0);
-
-	if(-1==ParentId)
+	if (!IsParented())
 	{
-		BoneToWorldSpace=Transf;
+		BoneToWorldSpace = transform;
 	}
 	else
 	{
-		BoneToWorldSpace=Transf*Bones[ParentId].BoneToWorldSpace;
+		BoneToWorldSpace = transform * Bones[ParentId].BoneToWorldSpace;
 	}
-	
 
-	//and recursivly for all children:
-	BOOST_FOREACH(int theChildren, Children)
+	// Recursively for all children now that the parent matrix has been calculated.
+	BOOST_FOREACH(int childId, Children)
 	{
-		Bones[theChildren].CalculateBoneToWorldSpaceMatrix(Bones);
+		Bones[childId].CalculateBoneToWorldSpaceMatrix(Bones);
 	}
 }
 
+} // Ogre
+} // Assimp
 
-}//namespace Ogre
-}//namespace Assimp
-
-#endif  // !! ASSIMP_BUILD_NO_OGRE_IMPORTER
+#endif // ASSIMP_BUILD_NO_OGRE_IMPORTER

@@ -111,7 +111,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 	// Read root node
 	NextNode(reader.get());
-	if (!CurrentNodeNameEquals(reader, "mesh")) {
+	if (!CurrentNodeNameEquals(reader.get(), "mesh")) {
 		throw DeadlyImportError("Root node is not <mesh> but <" + string(reader->getNodeName()) + "> in " + pFile);
 	}
 	
@@ -127,20 +127,20 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	// This can be used to share geometry between submeshes
 
 	NextNode(reader.get());
-	if (CurrentNodeNameEquals(reader, nnSharedGeometry))
+	if (CurrentNodeNameEquals(reader.get(), nnSharedGeometry))
 	{
 		DefaultLogger::get()->debug("Reading shared geometry");
 		unsigned int NumVertices = GetAttribute<unsigned int>(reader.get(), "vertexcount");
 
 		NextNode(reader.get());
-		while(CurrentNodeNameEquals(reader, nnVertexBuffer)) {
+		while(CurrentNodeNameEquals(reader.get(), nnVertexBuffer)) {
 			ReadVertexBuffer(m_SharedGeometry, reader.get(), NumVertices);
 		}
 	}
 
 	// -------------------- Sub Meshes --------------------
 
-	if (!CurrentNodeNameEquals(reader, nnSubMeshes)) {
+	if (!CurrentNodeNameEquals(reader.get(), nnSubMeshes)) {
 		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
 	}
 
@@ -148,7 +148,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	vector<aiMaterial*> materials;
 
 	NextNode(reader.get());
-	while(CurrentNodeNameEquals(reader, nnSubMesh))
+	while(CurrentNodeNameEquals(reader.get(), nnSubMesh))
 	{
 		SubMesh* submesh = new SubMesh();
 		ReadSubMesh(subMeshes.size(), *submesh, reader.get());
@@ -178,10 +178,10 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 
 	// Skip submesh names.
 	/// @todo Should these be read to scene etc. metadata?
-	if (CurrentNodeNameEquals(reader, nnSubMeshNames))
+	if (CurrentNodeNameEquals(reader.get(), nnSubMeshNames))
 	{
 		NextNode(reader.get());
-		while(CurrentNodeNameEquals(reader, nnSubMesh)) {
+		while(CurrentNodeNameEquals(reader.get(), nnSubMesh)) {
 			NextNode(reader.get());
 		}
 	}
@@ -191,7 +191,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	vector<Bone> Bones;
 	vector<Animation> Animations;
 
-	if (CurrentNodeNameEquals(reader, nnSkeletonLink))
+	if (CurrentNodeNameEquals(reader.get(), nnSkeletonLink))
 	{
 		string skeletonFile = GetAttribute<string>(reader.get(), "name");
 		if (!skeletonFile.empty())
@@ -210,7 +210,7 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	}
 
 	// Now there might be <boneassignments> for the shared geometry
-	if (CurrentNodeNameEquals(reader, "boneassignments")) {
+	if (CurrentNodeNameEquals(reader.get(), "boneassignments")) {
 		ReadBoneWeights(m_SharedGeometry, reader.get());
 	}
 

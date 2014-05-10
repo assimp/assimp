@@ -1,3 +1,5 @@
+cmake_minimum_required( VERSION 2.6 )
+
 INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/include
 	${Assimp_SOURCE_DIR}/code

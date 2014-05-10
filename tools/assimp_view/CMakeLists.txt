@@ -1,5 +1,6 @@
-FIND_PACKAGE(DirectX REQUIRED)
+cmake_minimum_required( VERSION 2.6 )
 
+FIND_PACKAGE(DirectX REQUIRED)
 
 INCLUDE_DIRECTORIES (
 	${Assimp_SOURCE_DIR}/include

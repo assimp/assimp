@@ -1,7 +1,7 @@
 FIND_PATH(
 	assimp_INCLUDE_DIRS
 	NAMES postprocess.h scene.h version.h config.h cimport.h
-	PATHS /usr/local/include/btr-headers
+	PATHS /usr/local/include/
 )
 
 FIND_LIBRARY(

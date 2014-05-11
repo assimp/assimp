@@ -211,10 +211,10 @@ struct aiExportDataBlob
 		extension that should be used when writing 
 		the data to disc.
 	 */
-	aiString name;
+    C_STRUCT aiString name;
 
 	/** Pointer to the next blob in the chain or NULL if there is none. */
-	aiExportDataBlob * next;
+	C_STRUCT aiExportDataBlob * next;
 
 #ifdef __cplusplus
 	/// Default constructor
@@ -247,7 +247,7 @@ ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const C_STRUCT 
 * returned by aiExportScene(). 
 * @param pData the data blob returned by #aiExportSceneToBlob
 */
-ASSIMP_API C_STRUCT void aiReleaseExportBlob( const C_STRUCT aiExportDataBlob* pData );
+ASSIMP_API void aiReleaseExportBlob( const C_STRUCT aiExportDataBlob* pData );
 
 #ifdef __cplusplus
 }

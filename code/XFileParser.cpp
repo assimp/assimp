@@ -136,6 +136,9 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 		ThrowException( boost::str( boost::format( "Unknown float size %1% specified in xfile header.")
 			% mBinaryFloatSize));
 
+	// The x format specifies size in bits, but we work in bytes
+	mBinaryFloatSize /= 8;
+
 	P += 16;
 
 	// If this is a compressed X file, apply the inflate algorithm to it

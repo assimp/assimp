@@ -144,7 +144,7 @@ protected:
 protected:
 	unsigned int mMajorVersion, mMinorVersion; ///< version numbers
 	bool mIsBinaryFormat; ///< true if the file is in binary, false if it's in text form
-	unsigned int mBinaryFloatSize; ///< float size, either 32 or 64 bits
+	unsigned int mBinaryFloatSize; ///< float size in bytes, either 4 or 8
 	// counter for number arrays in binary format
 	unsigned int mBinaryNumCount;
 

@@ -95,7 +95,7 @@ Exporter::ExportFormatEntry gExporters[] =
 	Exporter::ExportFormatEntry( "stl", "Stereolithography", "stl" , &ExportSceneSTL, 
 		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
 	),
-	Exporter::ExportFormatEntry( "stlb", "Stereolithography(binary)", "stlb" , &ExportSceneSTLBinary, 
+	Exporter::ExportFormatEntry( "stlb", "Stereolithography (binary)", "stl" , &ExportSceneSTLBinary, 
 		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
 	),
 #endif

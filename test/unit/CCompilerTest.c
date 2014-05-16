@@ -6,3 +6,4 @@
 #include <assimp/version.h>
 #include <assimp/config.h>
 #include <assimp/cimport.h>
+#include <assimp/cexport.h>

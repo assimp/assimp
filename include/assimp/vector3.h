@@ -88,6 +88,7 @@ public:
 	// comparison
 	bool operator== (const aiVector3t& other) const;
 	bool operator!= (const aiVector3t& other) const;
+	bool operator < (const aiVector3t& other) const;
 
 	bool Equal(const aiVector3t& other, TReal epsilon = 1e-6) const;
 

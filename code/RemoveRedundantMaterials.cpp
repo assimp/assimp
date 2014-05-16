@@ -86,7 +86,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("RemoveRedundantMatsProcess begin");
 
-	unsigned int iCnt = 0, unreferenced = 0;
+	unsigned int redundantRemoved = 0, unreferencedRemoved = 0;
 	if (pScene->mNumMaterials)
 	{
 		// Find out which materials are referenced by meshes
@@ -125,9 +125,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 			}
 		}
 
-
 		// TODO: reimplement this algorithm to work in-place
-
 		unsigned int* aiMappingTable = new unsigned int[pScene->mNumMaterials];
 		unsigned int iNewNum = 0;
 
@@ -139,37 +137,42 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		aiHashes = new uint32_t[pScene->mNumMaterials];
 		for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
 		{
-			// if the material is not referenced ... remove it
-			if (!abReferenced[i])	{
-				++unreferenced;
+			// No mesh is referencing this material, remove it.
+			if (!abReferenced[i]) {
+				++unreferencedRemoved;
 				delete pScene->mMaterials[i];
 				continue;
 			}
 
+			// Check all previously mapped materials for a matching hash.
+			// On a match we can delete this material and just make it ref to the same index.
 			uint32_t me = aiHashes[i] = ComputeMaterialHash(pScene->mMaterials[i]);
 			for (unsigned int a = 0; a < i;++a)
 			{
 				if (abReferenced[a] && me == aiHashes[a]) {
-					++iCnt;
+					++redundantRemoved;
 					me = 0;
 					aiMappingTable[i] = aiMappingTable[a];
 					delete pScene->mMaterials[i];
 					break;
 				}
 			}
+			// This is a new material that is referenced, add to the map.
 			if (me)	{
 				aiMappingTable[i] = iNewNum++;
 			}
 		}
-		if (iCnt)	{
-			// build an output material list
+		// If the new material count differs from the original,
+		// we need to rebuild the material list and remap mesh material indexes.
+		if (iNewNum != pScene->mNumMaterials) {
 			aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
 			::memset(ppcMaterials,0,sizeof(void*)*iNewNum); 
 			for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
 			{
 				// if the material is not referenced ... remove it
-				if (!abReferenced[p])
+				if (!abReferenced[p]) {
 					continue;
+				}
 
 				// generate new names for all modified materials
 				const unsigned int idx = aiMappingTable[p]; 
@@ -179,10 +182,11 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 					sz.length = ::sprintf(sz.data,"JoinedMaterial_#%i",p);
 					((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
 				}
-				else ppcMaterials[idx] = pScene->mMaterials[p];
+				else
+					ppcMaterials[idx] = pScene->mMaterials[p];
 			}
 			// update all material indices
-			for (unsigned int p = 0; p < pScene->mNumMeshes;++p)	{
+			for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
 				aiMesh* mesh = pScene->mMeshes[p];
 				mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
 			}
@@ -195,12 +199,15 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		delete[] aiHashes;
 		delete[] aiMappingTable;
 	}
-	if (!iCnt)DefaultLogger::get()->debug("RemoveRedundantMatsProcess finished ");
+	if (redundantRemoved == 0 && unreferencedRemoved == 0)
+	{
+		DefaultLogger::get()->debug("RemoveRedundantMatsProcess finished ");
+	}
 	else 
 	{
 		char szBuffer[128]; // should be sufficiently large
-		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. %i redundant and %i unused materials",
-			iCnt,unreferenced);
+		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %i redundant and %i unused materials.",
+			redundantRemoved,unreferencedRemoved);
 		DefaultLogger::get()->info(szBuffer);
 	}
 }

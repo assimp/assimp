@@ -2,7 +2,7 @@
 #ifndef INCLUDED_AI_BOOST_SHARED_ARRAY
 #define INCLUDED_AI_BOOST_SHARED_ARRAY
 
-#ifndef BOOST_SCOPED_ARRAY_HPP_INCLUDED
+#ifndef BOOST_SHARED_ARRAY_HPP_INCLUDED
 
 // ------------------------------
 // Internal stub

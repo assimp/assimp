@@ -328,6 +328,7 @@ Mesh::~Mesh()
 void Mesh::Reset()
 {
 	OGRE_SAFE_DELETE(sharedVertexData)
+
 	for(size_t i=0, len=subMeshes.size(); i<len; ++i) {
 		OGRE_SAFE_DELETE(subMeshes[i])
 	}

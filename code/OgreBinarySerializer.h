@@ -106,7 +106,7 @@ namespace Ogre
 		std::string ReadString(size_t len);
 		std::string ReadLine();
 
-		void SkipBytes(size_t num);
+		void SkipBytes(size_t numBytes);
 
 		uint32_t m_currentLen;
 		MemoryStreamReader *m_reader;

@@ -43,6 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
+// Define as 1 to get verbose logging.
+#define OGRE_BINARY_SERIALIZER_DEBUG 0
+
 namespace Assimp
 {
 namespace Ogre
@@ -146,8 +149,12 @@ uint16_t OgreBinarySerializer::ReadHeader(bool readLen)
 	uint16_t id = Read<uint16_t>();
 	if (readLen)
 		m_currentLen = Read<uint32_t>();
-	//if (id != HEADER_CHUNK_ID)
-	//	DefaultLogger::get()->debug(Formatter::format() << MeshHeaderToString(static_cast<MeshChunkId>(id)));
+
+#if (OGRE_BINARY_SERIALIZER_DEBUG == 1)
+	if (id != HEADER_CHUNK_ID)
+		DefaultLogger::get()->debug(Formatter::format() << MeshHeaderToString(static_cast<MeshChunkId>(id)));
+#endif
+
 	return id;
 }
 
@@ -156,9 +163,13 @@ void OgreBinarySerializer::RollbackHeader()
 	m_reader->IncPtr(-MSTREAM_OVERHEAD_SIZE);
 }
 
-void OgreBinarySerializer::SkipBytes(size_t num)
+void OgreBinarySerializer::SkipBytes(size_t numBytes)
 {
-	m_reader->IncPtr(num);
+#if (OGRE_BINARY_SERIALIZER_DEBUG == 1)
+	DefaultLogger::get()->debug(Formatter::format() << "Skipping " << numBytes << " bytes");
+#endif
+
+	m_reader->IncPtr(numBytes);
 }
 
 Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream)
@@ -166,9 +177,10 @@ Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream)
 	OgreBinarySerializer serializer(stream);
 	
 	uint16_t id = serializer.ReadHeader(false);
-	if (id != HEADER_CHUNK_ID)
-		throw DeadlyExportError("Invalid Mesh file header");
-	
+	if (id != HEADER_CHUNK_ID) {
+		throw DeadlyExportError("Invalid Ogre Mesh file header.");
+	}
+
 	/// @todo Check what we can actually support.
 	std::string version = serializer.ReadLine();
 	if (version != VERSION_1_8)
@@ -222,35 +234,55 @@ void OgreBinarySerializer::ReadMesh(Mesh *mesh)
 					break;
 				}
 				case M_SUBMESH:
+				{
 					ReadSubMesh(mesh);
 					break;
+				}
 				case M_MESH_SKELETON_LINK:
+				{
 					ReadMeshSkeletonLink(mesh);
 					break;
+				}
 				case M_MESH_BONE_ASSIGNMENT:
+				{
 					ReadBoneAssignment(mesh);
 					break;
+				}
 				case M_MESH_LOD:
+				{
 					ReadMeshLodInfo(mesh);
 					break;
+				}
 				case M_MESH_BOUNDS:
+				{
 					ReadMeshBounds(mesh);
 					break;
+				}
 				case M_SUBMESH_NAME_TABLE:
+				{
 					ReadSubMeshNames(mesh);
 					break;
+				}
 				case M_EDGE_LISTS:
+				{
 					ReadEdgeList(mesh);
 					break;
+				}
 				case M_POSES:
+				{
 					ReadPoses(mesh);
 					break;
+				}
 				case M_ANIMATIONS:
+				{
 					ReadAnimations(mesh);
 					break;
+				}
 				case M_TABLE_EXTREMES:
+				{
 					ReadMeshExtremes(mesh);
 					break;
+				}
 			}
 
 			if (!AtEnd())
@@ -273,16 +305,18 @@ void OgreBinarySerializer::ReadMeshLodInfo(Mesh *mesh)
 	for (size_t i=1; i<numLods; ++i)
 	{
 		uint16_t id = ReadHeader();
-		if (id != M_MESH_LOD_USAGE)
+		if (id != M_MESH_LOD_USAGE) {
 			throw DeadlyImportError("M_MESH_LOD does not contain a M_MESH_LOD_USAGE for each LOD level");
+		}
 
 		m_reader->IncPtr(sizeof(float)); // user value
 
 		if (manual)
 		{
 			id = ReadHeader();
-			if (id != M_MESH_LOD_MANUAL)
+			if (id != M_MESH_LOD_MANUAL) {
 				throw DeadlyImportError("Manual M_MESH_LOD_USAGE does not contain M_MESH_LOD_MANUAL");
+			}
 				
 			ReadLine(); // manual mesh name (ref to another mesh)
 		}
@@ -291,8 +325,9 @@ void OgreBinarySerializer::ReadMeshLodInfo(Mesh *mesh)
 			for(size_t si=0, silen=mesh->NumSubMeshes(); si<silen; ++si)
 			{
 				id = ReadHeader();
-				if (id != M_MESH_LOD_GENERATED)
+				if (id != M_MESH_LOD_GENERATED) {
 					throw DeadlyImportError("Generated M_MESH_LOD_USAGE does not contain M_MESH_LOD_GENERATED");
+				}
 
 				uint32_t indexCount = Read<uint32_t>();
 				bool is32bit = Read<bool>();
@@ -378,8 +413,9 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh)
 	if (!submesh->usesSharedVertexData)
 	{
 		id = ReadHeader();
-		if (id != M_GEOMETRY)
+		if (id != M_GEOMETRY) {
 			throw DeadlyImportError("M_SUBMESH does not contain M_GEOMETRY, but shader geometry is set to false");
+		}
 
 		submesh->vertexData = new VertexData();
 		ReadGeometry(mesh, submesh->vertexData);
@@ -445,14 +481,14 @@ void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh)
 		id = ReadHeader();
 		while (!AtEnd() && id == M_SUBMESH_NAME_TABLE_ELEMENT)
 		{
-			SubMesh2 *submesh = mesh->SubMesh(Read<uint16_t>());
-			if (submesh)
-			{
-				submesh->name = ReadLine();
-				DefaultLogger::get()->debug(Formatter::format() << "  - SubMesh " << submesh->index << " name '" << submesh->name << "'");
+			uint16_t submeshIndex = Read<uint16_t>();
+			SubMesh2 *submesh = mesh->SubMesh(submeshIndex);
+			if (!submesh) {
+				throw DeadlyImportError(Formatter::format() << "Ogre Mesh does not include submesh " << submeshIndex << " referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
 			}
-			else
-				ReadLine();
+
+			submesh->name = ReadLine();
+			DefaultLogger::get()->debug(Formatter::format() << "  - SubMesh " << submesh->index << " name '" << submesh->name << "'");
 			
 			if (!AtEnd())
 				id = ReadHeader();
@@ -751,7 +787,6 @@ void OgreBinarySerializer::ReadAnimationKeyFrames(Animation2 *anim, VertexAnimat
 			RollbackHeader();
 	}
 }
-
 
 } // Ogre
 } // Assimp

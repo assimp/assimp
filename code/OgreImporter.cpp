@@ -38,28 +38,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
-
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
+
+#include "AssimpPCH.h"
 
 #include <vector>
 #include <sstream>
+#include <istream>
 
 #include "OgreImporter.h"
+#include "OgreBinarySerializer.h"
+
 #include "TinyFormatter.h"
 #include "irrXMLWrapper.h"
 
 static const aiImporterDesc desc = {
-	"Ogre XML Mesh Importer",
+	"Ogre3D Mesh Importer",
 	"",
 	"",
 	"",
-	aiImporterFlags_SupportTextFlavour,
+	aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportBinaryFlavour,
 	0,
 	0,
 	0,
 	0,
-	"mesh.xml"
+	"mesh mesh.xml"
 };
 
 using namespace std;
@@ -83,11 +86,18 @@ void OgreImporter::SetupProperties(const Importer* pImp)
 bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandler, bool checkSig) const
 {
 	if (!checkSig) {
-		return EndsWith(pFile, ".mesh.xml", false);
+		return EndsWith(pFile, ".mesh.xml", false) || EndsWith(pFile, ".mesh", false);
 	}
 
-	const char* tokens[] = { "<mesh>" };
-	return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
+	if (EndsWith(pFile, ".mesh.xml", false))
+	{
+		const char* tokens[] = { "<mesh>" };
+		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 1);
+	}
+	else
+	{
+		return EndsWith(pFile, ".mesh", false);
+	}
 }
 
 void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler)
@@ -95,12 +105,30 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	// -------------------- Initial file and XML operations --------------------
 	
 	// Open
-	boost::scoped_ptr<IOStream> file(pIOHandler->Open(pFile));
-	if (!file.get()) {
+	IOStream *f = pIOHandler->Open(pFile, "rb");
+	if (!f) {
 		throw DeadlyImportError("Failed to open file " + pFile);
 	}
 
+	// Binary .mesh import
+	if (EndsWith(pFile, ".mesh", false)) {
+		// Read full data from file
+		/// @note MemoryStreamReader takes ownership of f.
+		MemoryStreamReader reader(f);
+		
+		// Import mesh
+		boost::scoped_ptr<Mesh> mesh = OgreBinarySerializer::ImportMesh(&reader);
+		
+		// Import mesh referenced materials
+		ReadMaterials(pFile, pIOHandler, pScene, mesh.get());
+		
+		// Convert to Assimp.
+		mesh->ConvertToAssimpScene(pScene);
+		return;
+	}
+
 	// Read
+	boost::scoped_ptr<IOStream> file(f);
 	boost::scoped_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(file.get()));
 	boost::scoped_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
 	if (!reader) {
@@ -153,18 +181,19 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		SubMesh* submesh = new SubMesh();
 		ReadSubMesh(subMeshes.size(), *submesh, reader.get());
 
-		// Just a index in a array, we add a mesh in each loop cycle, so we get indicies like 0, 1, 2 ... n;
-		// so it is important to do this before pushing the mesh in the vector!
-		/// @todo Not sure if this really is needed, refactor out if possible.
-		submesh->MaterialIndex = subMeshes.size();
-
-		subMeshes.push_back(boost::shared_ptr<SubMesh>(submesh));
-
 		/** @todo What is the correct way of handling empty ref here.
 			Does Assimp require there to be a valid material index for each mesh,
 			even if its a dummy material. */
 		aiMaterial* material = ReadMaterial(pFile, pIOHandler, submesh->MaterialName);
-		materials.push_back(material);
+		if (!material)
+			material = new aiMaterial();
+		if (material)
+		{
+			submesh->MaterialIndex = materials.size();
+			materials.push_back(material);
+		}
+
+		subMeshes.push_back(boost::shared_ptr<SubMesh>(submesh));
 	}
 
 	if (subMeshes.empty()) {
@@ -223,10 +252,12 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 	// -------------------- Apply to aiScene --------------------
 
 	// Materials
-	pScene->mMaterials = new aiMaterial*[materials.size()];
 	pScene->mNumMaterials = materials.size();
+	if (pScene->mNumMaterials > 0) {
+		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+	}
 
-	for(size_t i=0, len=materials.size(); i<len; ++i) {
+	for(size_t i=0; i<pScene->mNumMaterials; ++i) {
 		pScene->mMaterials[i] = materials[i];
 	}
 

@@ -5,11 +5,11 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in aSource and binary forms, 
+Redistribution and use of this software in source and binary forms, 
 with or without modification, are permitted provided that the 
 following conditions are met:
 
-* Redistributions of aSource code must retain the above
+* Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
   following disclaimer.
 

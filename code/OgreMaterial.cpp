@@ -59,11 +59,40 @@ static const string partComment    = "//";
 static const string partBlockStart = "{";
 static const string partBlockEnd   = "}";
 
+void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, Mesh *mesh)
+{
+	std::vector<aiMaterial*> materials;
+
+	// Create materials that can be found and parsed via the IOSystem.
+	for (size_t i=0, len=mesh->NumSubMeshes(); i<len; ++i)
+	{
+		SubMesh2 *submesh = mesh->SubMesh(i);
+		if (submesh && !submesh->materialRef.empty())
+		{
+			aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
+			if (material)
+			{
+				submesh->materialIndex = materials.size();
+				materials.push_back(material);
+			}
+		}
+	}
+
+	// Assign material to scene
+	pScene->mNumMaterials = materials.size();
+	if (pScene->mNumMaterials > 0)
+	{
+		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+		for(size_t i=0;i<pScene->mNumMaterials; ++i) {
+			pScene->mMaterials[i] = materials[i];
+		}
+	}
+}
+
 aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string materialName)
 {
-	/// @todo Should we return null ptr here or a empty material?
 	if (materialName.empty()) {
-		return new aiMaterial();
+		return 0;
 	}
 
 	// Full reference and examples of Ogre Material Script 
@@ -117,17 +146,15 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 		}
 		if (!materialFile)
 		{
-			/// @todo Should we return null ptr here or a empty material?
 			DefaultLogger::get()->error(Formatter::format() << "Failed to find source file for material '" << materialName << "'");
-			return new aiMaterial();
+			return 0;
 		}
 
 		boost::scoped_ptr<IOStream> stream(materialFile);
 		if (stream->FileSize() == 0)
 		{
-			/// @todo Should we return null ptr here or a empty material?
 			DefaultLogger::get()->warn(Formatter::format() << "Source file for material '" << materialName << "' is empty (size is 0 bytes)");
-			return new aiMaterial();
+			return 0;
 		}
 
 		// Read bytes

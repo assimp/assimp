@@ -469,7 +469,8 @@ aiMesh *OgreImporter::CreateAssimpSubMesh(aiScene *pScene, const SubMesh& submes
 	aiMesh *dest = new aiMesh();
 
 	// Material
-	dest->mMaterialIndex = submesh.MaterialIndex;
+	if (submesh.MaterialIndex != -1)
+		dest->mMaterialIndex = submesh.MaterialIndex;
 
 	// Positions
 	dest->mVertices = new aiVector3D[submesh.Positions.size()];

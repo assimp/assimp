@@ -436,6 +436,7 @@ public:
 
 	aiVector3D position;
 	aiVector3D rotation;
+	aiVector3D scale; ///< @todo Implement taking scale into account in matrix/pose calculations!
 	float rotationAngle;
 	
 	aiMatrix4x4 worldMatrix;

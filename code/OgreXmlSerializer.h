@@ -58,7 +58,13 @@ typedef irr::io::IrrXMLReader XmlReader;
 class OgreXmlSerializer
 {
 public:
+	/// Imports mesh and returns the result.
+	/** @note Fatal unrecoverable errors will throw a DeadlyImportError. */
 	static MeshXml *ImportMesh(XmlReader *reader);
+	
+	/// Imports skeleton to @c mesh into MeshXML::skeleton.
+	/** If mesh does not have a skeleton reference or the skeleton file
+		cannot be found it is not a fatal DeadlyImportError. */
 	static void ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
 
 private:

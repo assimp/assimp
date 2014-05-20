@@ -222,6 +222,8 @@ std::string &OgreXmlSerializer::SkipCurrentNode()
 	return NextNode();
 }
 
+// Mesh XML constants
+
 // <mesh>
 const std::string nnMesh                = "mesh";
 const std::string nnSharedGeometry      = "sharedgeometry";
@@ -259,6 +261,42 @@ const std::string nnColorSpecular       = "colour_specular";
 // <boneassignments>
 const std::string nnVertexBoneAssignment = "vertexboneassignment";
 
+// Skeleton XML constants
+
+// <skeleton>
+const std::string nnSkeleton            = "skeleton";
+const std::string nnBones               = "bones";
+const std::string nnBoneHierarchy       = "bonehierarchy";
+const std::string nnAnimationLinks      = "animationlinks";
+
+// <bones>
+const std::string nnBone                = "bone";
+const std::string nnRotation            = "rotation";
+const std::string nnAxis                = "axis";
+const std::string nnScale               = "scale";
+
+// <bonehierarchy>
+const std::string nnBoneParent          = "boneparent";
+
+// <animations>
+const std::string nnAnimation           = "animation";
+const std::string nnTracks              = "tracks";
+
+// <tracks>
+const std::string nnTrack               = "track";
+const std::string nnKeyFrames           = "keyframes";
+const std::string nnKeyFrame            = "keyframe";
+const std::string nnTranslate           = "translate";
+const std::string nnRotate              = "rotate";
+
+// Common XML constants
+
+const std::string anX = "x";
+const std::string anY = "y";
+const std::string anZ = "z";
+
+// Mesh
+
 MeshXml *OgreXmlSerializer::ImportMesh(XmlReader *reader)
 {
 	OgreXmlSerializer serializer(reader);
@@ -266,284 +304,6 @@ MeshXml *OgreXmlSerializer::ImportMesh(XmlReader *reader)
 	MeshXml *mesh = new MeshXml();
 	serializer.ReadMesh(mesh);
 	return mesh;
-}
-
-void OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh)
-{
-	if (mesh->skeletonRef.empty())
-		return;
-
-	/** @todo Also support referencing a binary skeleton from a XML mesh?
-		This will involves new interfacing to cross ref from MeshXml... */
-
-	std::string filename = mesh->skeletonRef;
-	if (EndsWith(filename, ".skeleton"))
-	{
-		DefaultLogger::get()->warn("Mesh is referencing a Ogre binary skeleton. Parsing binary Ogre assets is not supported at the moment. Trying to find .skeleton.xml file instead.");
-		filename += ".xml";
-	}
-
-	if (!pIOHandler->Exists(filename))
-	{
-		DefaultLogger::get()->error("Failed to find skeleton file '" + filename + "', skeleton will be missing.");
-		return;
-	}
-
-	boost::scoped_ptr<IOStream> file(pIOHandler->Open(filename));
-	if (!file.get()) {
-		throw DeadlyImportError("Failed to open skeleton file " + filename);
-	}
-
-	boost::scoped_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
-	XmlReader* reader = irr::io::createIrrXMLReader(stream.get());
-	if (!reader) {
-		throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
-	}
-	
-	Skeleton *skeleton = new Skeleton();
-
-	OgreXmlSerializer serializer(reader);
-	serializer.ReadSkeleton(skeleton);
-
-	mesh->skeleton = skeleton;
-}
-
-// <skeleton>
-const std::string nnSkeleton        = "skeleton";
-const std::string nnBones           = "bones";
-const std::string nnBoneHierarchy   = "bonehierarchy";
-
-// <bones>
-const std::string nnBone            = "bone";
-const std::string nnRotation        = "rotation";
-const std::string nnAxis            = "axis";
-
-// <bonehierarchy>
-const std::string nnBoneParent      = "boneparent";
-
-// <animations>
-const std::string nnAnimation       = "animation";
-const std::string nnTracks          = "tracks";
-
-// <tracks>
-const std::string nnTrack           = "track";
-const std::string nnKeyFrames       = "keyframes";
-const std::string nnKeyFrame        = "keyframe";
-const std::string nnTranslate       = "translate";
-const std::string nnRotate          = "rotate";
-const std::string nnScale           = "scale";
-
-const std::string anX = "x";
-const std::string anY = "y";
-const std::string anZ = "z";
-
-void OgreXmlSerializer::ReadSkeleton(Skeleton *skeleton)
-{
-	if (NextNode() != nnSkeleton) {
-		throw DeadlyImportError("Root node is <" + m_currentNodeName + "> expecting <skeleton>");
-	}
-	
-	DefaultLogger::get()->debug("Reading Skeleton");
-
-	NextNode();
-
-	// Root level nodes
-	while(m_currentNodeName == nnBones         ||
-		  m_currentNodeName == nnBoneHierarchy ||
-		  m_currentNodeName == nnAnimations)
-	{
-		if (m_currentNodeName == nnBones)
-			ReadBones(skeleton);
-		else if (m_currentNodeName == nnBoneHierarchy)
-			ReadBoneHierarchy(skeleton);
-		else if (m_currentNodeName == nnAnimations)
-			ReadAnimations(skeleton);
-	}
-}
-
-void OgreXmlSerializer::ReadAnimations(Skeleton *skeleton)
-{
-	DefaultLogger::get()->debug("  - Animations");
-	
-	NextNode();
-	while(m_currentNodeName == nnAnimation)
-	{
-		Animation *anim = new Animation(skeleton);
-		anim->name = ReadAttribute<std::string>("name");
-		anim->length = ReadAttribute<float>("length");
-		
-		if (NextNode() != nnTracks) {
-			throw DeadlyImportError(Formatter::format() << "No <tracks> found in <animation> " << anim->name);
-		}
-
-		ReadAnimationTracks(anim);
-		skeleton->animations.push_back(anim);
-
-		DefaultLogger::get()->debug(Formatter::format() << "    " << anim->name << " (" << anim->length << " sec, " << anim->tracks.size() << " tracks)");	
-	}
-}
-
-void OgreXmlSerializer::ReadAnimationTracks(Animation *dest)
-{
-	NextNode();
-	while(m_currentNodeName == nnTrack)
-	{
-		VertexAnimationTrack track;
-		track.type = VertexAnimationTrack::VAT_TRANSFORM;
-		track.boneName = ReadAttribute<std::string>("bone");
-
-		if (NextNode() != nnKeyFrames) {
-			throw DeadlyImportError(Formatter::format() << "No <keyframes> found in <track> " << dest->name);
-		}
-
-		ReadAnimationKeyFrames(dest, &track);
-
-		dest->tracks.push_back(track);
-	}
-}
-
-void OgreXmlSerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest)
-{
-	const aiVector3D zeroVec(0.f, 0.f, 0.f);
-	
-	NextNode();
-	while(m_currentNodeName == nnKeyFrame)
-	{
-		TransformKeyFrame keyframe;
-		keyframe.timePos = ReadAttribute<float>("time");
-		
-		NextNode();
-		while(m_currentNodeName == nnTranslate || m_currentNodeName == nnRotate || m_currentNodeName == nnScale)
-		{
-			if (m_currentNodeName == nnTranslate)
-			{
-				keyframe.position.x = ReadAttribute<float>(anX);
-				keyframe.position.y = ReadAttribute<float>(anY);
-				keyframe.position.z = ReadAttribute<float>(anZ);
-			}
-			else if (m_currentNodeName == nnRotate)
-			{
-				float angle = ReadAttribute<float>("angle");
-
-				if (NextNode() != nnAxis) {
-					throw DeadlyImportError("No axis specified for keyframe rotation in animation " + anim->name);
-				}
-
-				aiVector3D axis;
-				axis.x = ReadAttribute<float>(anX);
-				axis.y = ReadAttribute<float>(anY);
-				axis.z = ReadAttribute<float>(anZ);
-				if (axis.Equal(zeroVec))
-				{
-					axis.x = 1.0f;
-					if (angle != 0) {
-						DefaultLogger::get()->warn("Found invalid a key frame with a zero rotation axis in animation: " + anim->name);
-					}
-				}
-				keyframe.rotation = aiQuaternion(axis, angle);
-			}
-			else if (m_currentNodeName == nnScale)
-			{
-				keyframe.scale.x = ReadAttribute<float>(anX);
-				keyframe.scale.y = ReadAttribute<float>(anY);
-				keyframe.scale.z = ReadAttribute<float>(anZ);
-			}
-
-			NextNode();
-		}
-
-		dest->transformKeyFrames.push_back(keyframe);
-	}
-}
-
-void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton)
-{
-	if (skeleton->bones.empty()) {
-		throw DeadlyImportError("Cannot read <bonehierarchy> for Skeleton without bones");
-	}
-	
-	while(NextNode() == nnBoneParent)
-	{
-		const std::string name = ReadAttribute<std::string>("bone");
-		const std::string parentName = ReadAttribute<std::string>("parent");
-
-		Bone *bone = skeleton->BoneByName(name);
-		Bone *parent = skeleton->BoneByName(parentName);
-
-		if (bone && parent)
-			parent->AddChild(bone);
-		else
-			DefaultLogger::get()->warn("Failed to find bones for parenting: Child " + name + " for parent " + parentName);
-	}
-	
-	// Calculate bone matrices for root bones. Recursively calcutes their children.
-	for (size_t i=0, len=skeleton->bones.size(); i<len; ++i)
-	{
-		Bone *bone = skeleton->bones[i];
-		if (!bone->IsParented())
-			bone->CalculateWorldMatrixAndDefaultPose(skeleton);
-	}
-}
-
-bool BoneCompare(Bone *a, Bone *b)
-{
-	return (a->id < b->id);
-}
-
-void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
-{
-	DefaultLogger::get()->debug("  - Bones");
-	
-	NextNode();
-	while(m_currentNodeName == nnBone)
-	{
-		Bone *bone = new Bone();
-		bone->id = ReadAttribute<uint16_t>("id");
-		bone->name = ReadAttribute<std::string>("name");
-
-		NextNode();
-		while(m_currentNodeName == nnPosition || m_currentNodeName == nnRotation)
-		{
-			if (m_currentNodeName == nnPosition)
-			{
-				bone->position.x = ReadAttribute<float>(anX);
-				bone->position.y = ReadAttribute<float>(anY);
-				bone->position.z = ReadAttribute<float>(anZ);
-			}
-			else if (m_currentNodeName == nnRotation)
-			{
-				bone->rotationAngle = ReadAttribute<float>("angle");
-
-				if (NextNode() != nnAxis) {
-					throw DeadlyImportError(Formatter::format() << "No axis specified for bone rotation in bone " << bone->id);
-				}
-
-				bone->rotation.x = ReadAttribute<float>(anX);
-				bone->rotation.y = ReadAttribute<float>(anY);
-				bone->rotation.z = ReadAttribute<float>(anZ);
-			}
-				
-			NextNode();
-		}
-
-		skeleton->bones.push_back(bone);
-	}
-
-	// Order bones by Id
-	std::sort(skeleton->bones.begin(), skeleton->bones.end(), BoneCompare);
-
-	// Validate that bone indexes are not skipped.
-	/** @note Left this from original authors code, but not sure if this is strictly necessary
-		as per the Ogre skeleton spec. It might be more that other (later) code in this imported does not break. */
-	for (size_t i=0, len=skeleton->bones.size(); i<len; ++i)
-	{
-		Bone *b = skeleton->bones[i];
-		DefaultLogger::get()->debug(Formatter::format() << "    " << b->id << " " << b->name);
-
-		if (b->id != static_cast<uint16_t>(i)) {
-			throw DeadlyImportError(Formatter::format() << "Bone ids are not in sequence starting from 0. Missing index " << i);
-		}
-	}
 }
 
 void OgreXmlSerializer::ReadMesh(MeshXml *mesh)
@@ -909,6 +669,282 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
 	}
 	
 	DefaultLogger::get()->debug(Formatter::format() << "  - " << dest->boneAssignments.size() << " bone assignments");
+}
+
+// Skeleton
+
+void OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh)
+{
+	if (mesh->skeletonRef.empty())
+		return;
+
+	/** @todo Also support referencing a binary skeleton from a XML mesh?
+		This will involves new interfacing to cross ref from MeshXml... */
+
+	std::string filename = mesh->skeletonRef;
+	if (EndsWith(filename, ".skeleton"))
+	{
+		DefaultLogger::get()->warn("Mesh is referencing a Ogre binary skeleton. Parsing binary Ogre assets is not supported at the moment. Trying to find .skeleton.xml file instead.");
+		filename += ".xml";
+	}
+
+	if (!pIOHandler->Exists(filename))
+	{
+		DefaultLogger::get()->error("Failed to find skeleton file '" + filename + "' that is referenced by imported Mesh.");
+		return;
+	}
+
+	boost::scoped_ptr<IOStream> file(pIOHandler->Open(filename));
+	if (!file.get()) {
+		throw DeadlyImportError("Failed to open skeleton file " + filename);
+	}
+
+	boost::scoped_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
+	XmlReader* reader = irr::io::createIrrXMLReader(stream.get());
+	if (!reader) {
+		throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
+	}
+	
+	Skeleton *skeleton = new Skeleton();
+	OgreXmlSerializer serializer(reader);
+	serializer.ReadSkeleton(skeleton);
+	mesh->skeleton = skeleton;
+}
+
+void OgreXmlSerializer::ReadSkeleton(Skeleton *skeleton)
+{
+	if (NextNode() != nnSkeleton) {
+		throw DeadlyImportError("Root node is <" + m_currentNodeName + "> expecting <skeleton>");
+	}
+	
+	DefaultLogger::get()->debug("Reading Skeleton");
+
+	NextNode();
+
+	// Root level nodes
+	while(m_currentNodeName == nnBones         ||
+		  m_currentNodeName == nnBoneHierarchy ||
+		  m_currentNodeName == nnAnimations    ||
+		  m_currentNodeName == nnAnimationLinks)
+	{
+		if (m_currentNodeName == nnBones)
+			ReadBones(skeleton);
+		else if (m_currentNodeName == nnBoneHierarchy)
+			ReadBoneHierarchy(skeleton);
+		else if (m_currentNodeName == nnAnimations)
+			ReadAnimations(skeleton);
+		else
+			SkipCurrentNode();
+	}
+}
+
+void OgreXmlSerializer::ReadAnimations(Skeleton *skeleton)
+{
+	if (skeleton->bones.empty()) {
+		throw DeadlyImportError("Cannot read <animations> for a Skeleton without bones");
+	}
+
+	DefaultLogger::get()->debug("  - Animations");
+	
+	NextNode();
+	while(m_currentNodeName == nnAnimation)
+	{
+		Animation *anim = new Animation(skeleton);
+		anim->name = ReadAttribute<std::string>("name");
+		anim->length = ReadAttribute<float>("length");
+		
+		if (NextNode() != nnTracks) {
+			throw DeadlyImportError(Formatter::format() << "No <tracks> found in <animation> " << anim->name);
+		}
+
+		ReadAnimationTracks(anim);
+		skeleton->animations.push_back(anim);
+
+		DefaultLogger::get()->debug(Formatter::format() << "    " << anim->name << " (" << anim->length << " sec, " << anim->tracks.size() << " tracks)");	
+	}
+}
+
+void OgreXmlSerializer::ReadAnimationTracks(Animation *dest)
+{
+	NextNode();
+	while(m_currentNodeName == nnTrack)
+	{
+		VertexAnimationTrack track;
+		track.type = VertexAnimationTrack::VAT_TRANSFORM;
+		track.boneName = ReadAttribute<std::string>("bone");
+
+		if (NextNode() != nnKeyFrames) {
+			throw DeadlyImportError(Formatter::format() << "No <keyframes> found in <track> " << dest->name);
+		}
+
+		ReadAnimationKeyFrames(dest, &track);
+
+		dest->tracks.push_back(track);
+	}
+}
+
+void OgreXmlSerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest)
+{
+	const aiVector3D zeroVec(0.f, 0.f, 0.f);
+	
+	NextNode();
+	while(m_currentNodeName == nnKeyFrame)
+	{
+		TransformKeyFrame keyframe;
+		keyframe.timePos = ReadAttribute<float>("time");
+		
+		NextNode();
+		while(m_currentNodeName == nnTranslate || m_currentNodeName == nnRotate || m_currentNodeName == nnScale)
+		{
+			if (m_currentNodeName == nnTranslate)
+			{
+				keyframe.position.x = ReadAttribute<float>(anX);
+				keyframe.position.y = ReadAttribute<float>(anY);
+				keyframe.position.z = ReadAttribute<float>(anZ);
+			}
+			else if (m_currentNodeName == nnRotate)
+			{
+				float angle = ReadAttribute<float>("angle");
+
+				if (NextNode() != nnAxis) {
+					throw DeadlyImportError("No axis specified for keyframe rotation in animation " + anim->name);
+				}
+
+				aiVector3D axis;
+				axis.x = ReadAttribute<float>(anX);
+				axis.y = ReadAttribute<float>(anY);
+				axis.z = ReadAttribute<float>(anZ);
+				if (axis.Equal(zeroVec))
+				{
+					axis.x = 1.0f;
+					if (angle != 0) {
+						DefaultLogger::get()->warn("Found invalid a key frame with a zero rotation axis in animation: " + anim->name);
+					}
+				}
+				keyframe.rotation = aiQuaternion(axis, angle);
+			}
+			else if (m_currentNodeName == nnScale)
+			{
+				keyframe.scale.x = ReadAttribute<float>(anX);
+				keyframe.scale.y = ReadAttribute<float>(anY);
+				keyframe.scale.z = ReadAttribute<float>(anZ);
+			}
+
+			NextNode();
+		}
+
+		dest->transformKeyFrames.push_back(keyframe);
+	}
+}
+
+void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton)
+{
+	if (skeleton->bones.empty()) {
+		throw DeadlyImportError("Cannot read <bonehierarchy> for a Skeleton without bones");
+	}
+	
+	while(NextNode() == nnBoneParent)
+	{
+		const std::string name = ReadAttribute<std::string>("bone");
+		const std::string parentName = ReadAttribute<std::string>("parent");
+
+		Bone *bone = skeleton->BoneByName(name);
+		Bone *parent = skeleton->BoneByName(parentName);
+
+		if (bone && parent)
+			parent->AddChild(bone);
+		else
+			DefaultLogger::get()->warn("Failed to find bones for parenting: Child " + name + " for parent " + parentName);
+	}
+	
+	// Calculate bone matrices for root bones. Recursively calcutes their children.
+	for (size_t i=0, len=skeleton->bones.size(); i<len; ++i)
+	{
+		Bone *bone = skeleton->bones[i];
+		if (!bone->IsParented())
+			bone->CalculateWorldMatrixAndDefaultPose(skeleton);
+	}
+}
+
+bool BoneCompare(Bone *a, Bone *b)
+{
+	return (a->id < b->id);
+}
+
+void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
+{
+	DefaultLogger::get()->debug("  - Bones");
+	
+	NextNode();
+	while(m_currentNodeName == nnBone)
+	{
+		Bone *bone = new Bone();
+		bone->id = ReadAttribute<uint16_t>("id");
+		bone->name = ReadAttribute<std::string>("name");
+
+		NextNode();
+		while(m_currentNodeName == nnPosition || 
+			  m_currentNodeName == nnRotation ||
+			  m_currentNodeName == nnScale)
+		{
+			if (m_currentNodeName == nnPosition)
+			{
+				bone->position.x = ReadAttribute<float>(anX);
+				bone->position.y = ReadAttribute<float>(anY);
+				bone->position.z = ReadAttribute<float>(anZ);
+			}
+			else if (m_currentNodeName == nnRotation)
+			{
+				bone->rotationAngle = ReadAttribute<float>("angle");
+
+				if (NextNode() != nnAxis) {
+					throw DeadlyImportError(Formatter::format() << "No axis specified for bone rotation in bone " << bone->id);
+				}
+
+				bone->rotation.x = ReadAttribute<float>(anX);
+				bone->rotation.y = ReadAttribute<float>(anY);
+				bone->rotation.z = ReadAttribute<float>(anZ);
+			}
+			else if (m_currentNodeName == nnScale)
+			{
+				/// @todo Implement taking scale into account in matrix/pose calculations!
+				if (HasAttribute("factor"))
+				{
+					float factor = ReadAttribute<float>("factor");
+					bone->scale.Set(factor, factor, factor);
+				}
+				else
+				{
+					if (HasAttribute(anX))
+						bone->scale.x = ReadAttribute<float>(anX);
+					if (HasAttribute(anY))
+						bone->scale.y = ReadAttribute<float>(anY);
+					if (HasAttribute(anZ))
+						bone->scale.z = ReadAttribute<float>(anZ);
+				}
+			}
+				
+			NextNode();
+		}
+
+		skeleton->bones.push_back(bone);
+	}
+
+	// Order bones by Id
+	std::sort(skeleton->bones.begin(), skeleton->bones.end(), BoneCompare);
+
+	// Validate that bone indexes are not skipped.
+	/** @note Left this from original authors code, but not sure if this is strictly necessary
+		as per the Ogre skeleton spec. It might be more that other (later) code in this imported does not break. */
+	for (size_t i=0, len=skeleton->bones.size(); i<len; ++i)
+	{
+		Bone *b = skeleton->bones[i];
+		DefaultLogger::get()->debug(Formatter::format() << "    " << b->id << " " << b->name);
+
+		if (b->id != static_cast<uint16_t>(i)) {
+			throw DeadlyImportError(Formatter::format() << "Bone ids are not in sequence starting from 0. Missing index " << i);
+		}
+	}
 }
 
 } // Ogre

@@ -995,7 +995,8 @@ Bone::Bone() :
 	id(0),
 	parent(0),
 	parentId(-1),
-	rotationAngle(0.0f)
+	rotationAngle(0.0f),
+	scale(1.0f, 1.0f, 1.0f)
 {
 }
 

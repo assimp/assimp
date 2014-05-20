@@ -57,7 +57,10 @@ namespace Ogre
 
 // Forward decl
 class Mesh;
-class SubMesh2;
+class MeshXml;
+class SubMesh;
+class SubMeshXml;
+class Skeleton;
 
 #define OGRE_SAFE_DELETE(p) delete p; p=0;
 
@@ -156,11 +159,53 @@ public:
 	Type type;
 	Semantic semantic;
 };
-
 typedef std::vector<VertexElement> VertexElementList;
 
+/// Ogre Vertex Bone Assignment
+struct VertexBoneAssignment
+{
+	uint32_t vertexIndex;
+	uint16_t boneIndex;
+	float weight;
+};
+typedef std::vector<VertexBoneAssignment> VertexBoneAssignmentList;
+typedef std::map<uint32_t, VertexBoneAssignmentList > VertexBoneAssignmentsMap;
+typedef std::map<uint16_t, std::vector<aiVertexWeight> > AssimpVertexBoneWeightList;
+
+// Ogre Vertex Data interface, inherited by the binary and XML implementations.
+class IVertexData
+{
+public:
+	IVertexData();
+	
+	/// Returns if bone assignments are available.
+	bool HasBoneAssignments() const;
+	
+	/// Add vertex mapping from old to new index.
+	void AddVertexMapping(uint32_t oldIndex, uint32_t newIndex);
+
+	/// Returns re-mapped bone assignments.
+	/** @note Uses mappings added via AddVertexMapping. */
+	AssimpVertexBoneWeightList AssimpBoneWeights(size_t vertices);
+
+	/// Returns a set of bone indexes that are referenced by bone assignments (weights).
+	std::set<uint16_t> ReferencedBonesByWeights() const;
+
+	/// Vertex count.
+	uint32_t count;
+	
+	/// Bone assignments.
+	VertexBoneAssignmentList boneAssignments;
+	
+private:
+	void BoneAssignmentsForVertex(uint32_t currentIndex, uint32_t newIndex, VertexBoneAssignmentList &dest) const;
+	
+	std::map<uint32_t, std::vector<uint32_t> > vertexIndexMapping;
+	VertexBoneAssignmentsMap boneAssignmentsMap;
+};
+
 // Ogre Vertex Data
-class VertexData
+class VertexData : public IVertexData
 {
 public:
 	VertexData();
@@ -177,9 +222,6 @@ public:
 
 	/// Get vertex element for @c semantic for @c index.
 	VertexElement *GetVertexElement(VertexElement::Semantic semantic, uint16_t index = 0);
-
-	/// Vertex count.
-	uint32_t count;
 
 	/// Vertex elements.
 	VertexElementList vertexElements;
@@ -243,6 +285,7 @@ public:
 	/// Vertex offset and normals.
 	PoseVertexMap vertices;
 };
+typedef std::vector<Pose*> PoseList;
 
 /// Ogre Pose Key Frame Ref
 struct PoseRef
@@ -250,6 +293,7 @@ struct PoseRef
 	uint16_t index;
 	float influence;
 };
+typedef std::vector<PoseRef> PoseRefList;
 
 /// Ogre Pose Key Frame
 struct PoseKeyFrame
@@ -257,8 +301,9 @@ struct PoseKeyFrame
 	/// Time position in the animation.
 	float timePos;
 
-	std::vector<PoseRef> references;
+	PoseRefList references;
 };
+typedef std::vector<PoseKeyFrame> PoseKeyFrameList;
 
 /// Ogre Morph Key Frame
 struct MorphKeyFrame
@@ -268,6 +313,18 @@ struct MorphKeyFrame
 
 	MemoryStreamPtr buffer;
 };
+typedef std::vector<MorphKeyFrame> MorphKeyFrameList;
+
+/// Ogre animation key frame
+struct TransformKeyFrame
+{
+	float timePos;
+	
+	aiQuaternion rotation;
+	aiVector3D position;
+	aiVector3D scale;
+};
+typedef std::vector<TransformKeyFrame> TransformKeyFrameList;
 
 /// Ogre Animation Track
 struct VertexAnimationTrack
@@ -279,59 +336,141 @@ struct VertexAnimationTrack
 		/// Morph animation is made up of many interpolated snapshot keyframes
 		VAT_MORPH = 1,
 		/// Pose animation is made up of a single delta pose keyframe
-		VAT_POSE = 2
+		VAT_POSE = 2,
+		/// Keyframe that has its on pos, rot and scale for a time position
+		VAT_TRANSFORM = 3
 	};
 
+	VertexAnimationTrack();
+	
+	/// Convert to Assimp node animation.
+	aiNodeAnim *ConvertToAssimpAnimationNode(Skeleton *skeleton);
+
+	// Animation type.
+	Type type;
+	
 	/// Vertex data target.
 	/**  0 == shared geometry
 		>0 == submesh index + 1 */
 	uint16_t target;
-	Type type;
 	
-	std::vector<PoseKeyFrame> poseKeyFrames;
-	std::vector<MorphKeyFrame> morphKeyFrames;
+	/// Only valid for VAT_TRANSFORM.
+	std::string boneName;
+
+	/// Only one of these will contain key frames, depending on the type enum.
+	PoseKeyFrameList poseKeyFrames;
+	MorphKeyFrameList morphKeyFrames;
+	TransformKeyFrameList transformKeyFrames;
 };
+typedef std::vector<VertexAnimationTrack> VertexAnimationTrackList;
 
 /// Ogre Animation
-/** @todo Port OgreImporter::Animation to this and rename this to Animation! */
-class Animation2
+class Animation
 {
 public:
-	Animation2(Mesh *_parentMesh);
+	Animation(Skeleton *parent);
+	Animation(Mesh *parent);
 
 	/// Returns the associated vertex data for a track in this animation.
+	/** @note Only valid to call when parent Mesh is set. */
 	VertexData *AssociatedVertexData(VertexAnimationTrack *track) const;
-	
+
+	/// Convert to Assimp animation.
+	aiAnimation *ConvertToAssimpAnimation();
+
 	/// Parent mesh.
+	/** @note Set only when animation is read from a mesh. */
 	Mesh *parentMesh;
-	
+
+	/// Parent skeleton.
+	/** @note Set only when animation is read from a skeleton. */
+	Skeleton *parentSkeleton;
+
 	/// Animation name.
 	std::string name;
-	
+
 	/// Base animation name.
 	std::string baseName;
-	
+
 	/// Length in seconds.
 	float length;
-	
+
 	/// Base animation key time.
 	float baseTime;
 
 	/// Animation tracks.
-	std::vector<VertexAnimationTrack> tracks;
+	VertexAnimationTrackList tracks;
 };
+typedef std::vector<Animation*> AnimationList;
 
-/// Ogre Vertex Bone Assignment
-struct VertexBoneAssignment
+/// Ogre Bone
+class Bone
 {
-	uint32_t vertexIndex;
-	uint16_t boneIndex;
-	float weight;
+public:
+	Bone();
+
+	/// Returns if this bone is parented.
+	bool IsParented() const;
+
+	/// Parent index as uint16_t. Internally int32_t as -1 means unparented.
+	uint16_t ParentId() const;
+
+	/// Add child bone.
+	void AddChild(Bone *bone);
+	
+	/// Calculates the world matrix for bone and its children.
+	void CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton);
+	
+	/// Convert to Assimp node (animation nodes).
+	aiNode *ConvertToAssimpNode(Skeleton *parent, aiNode *parentNode = 0);
+	
+	/// Convert to Assimp bone (mesh bones).
+	aiBone *ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWeight> &boneWeights);
+
+	uint16_t id;
+	std::string name;
+
+	Bone *parent;
+	int32_t parentId;
+	std::vector<uint16_t> children;
+
+	aiVector3D position;
+	aiVector3D rotation;
+	float rotationAngle;
+	
+	aiMatrix4x4 worldMatrix;
+	aiMatrix4x4 defaultPose;
+};
+typedef std::vector<Bone*> BoneList;
+
+/// Ogre Skeleton
+class Skeleton
+{
+public:
+	Skeleton();
+	~Skeleton();
+
+	/// Releases all memory that this data structure owns.
+	void Reset();
+	
+	/// Returns unparented root bones.
+	BoneList RootBones() const;
+	
+	/// Returns number of unparented root bones.
+	size_t NumRootBones() const;
+	
+	/// Get bone by name.
+	Bone *BoneByName(const std::string &name) const;
+	
+	/// Get bone by id.
+	Bone *BoneById(uint16_t id) const;
+	
+	BoneList bones;
+	AnimationList animations;
 };
 
-/// Ogre SubMesh
-/** @todo Port OgreImporter::SubMesh to this and rename this to SubMesh! */
-class SubMesh2
+/// Ogre Sub Mesh interface, inherited by the binary and XML implementations.
+class ISubMesh
 {
 public:
 	/// @note Full list of Ogre types, not all of them are supported and exposed to Assimp.
@@ -351,17 +490,7 @@ public:
 		OT_TRIANGLE_FAN = 6
 	};
 
-	SubMesh2();
-	~SubMesh2();
-
-	/// Releases all memory that this data structure owns.
-	/** @note Vertex and index data contains shared ptrs
-		that are freed automatically. In practice the ref count
-		should be 0 after this reset. */
-	void Reset();
-	
-	/// Covert to Assimp mesh.
-	aiMesh *ConvertToAssimpMesh(Mesh *parent);
+	ISubMesh();
 
 	/// SubMesh index.
 	unsigned int index;
@@ -371,7 +500,7 @@ public:
 
 	/// Material used by this submesh.
 	std::string materialRef;
-	
+
 	/// Texture alias information.
 	std::string textureAliasName;
 	std::string textureAliasRef;
@@ -379,22 +508,37 @@ public:
 	/// Assimp scene material index used by this submesh.
 	/** -1 if no material or material could not be imported. */
 	int materialIndex;
+	
+	/// If submesh uses shared geometry from parent mesh.
+	bool usesSharedVertexData;
+
+	/// Operation type.
+	OperationType operationType;
+};
+
+/// Ogre SubMesh
+class SubMesh : public ISubMesh
+{
+public:
+	SubMesh();
+	~SubMesh();
+	
+	/// Releases all memory that this data structure owns.
+	/** @note Vertex and index data contains shared ptrs
+		that are freed automatically. In practice the ref count
+		should be 0 after this reset. */
+	void Reset();
+	
+	/// Covert to Assimp mesh.
+	aiMesh *ConvertToAssimpMesh(Mesh *parent);
 
 	/// Vertex data.
 	VertexData *vertexData;
 
 	/// Index data.
 	IndexData *indexData;
-
-	/// If submesh uses shared geometry from parent mesh.
-	bool usesSharedVertexData;
-
-	/// Operation type.
-	OperationType operationType;
-	
-	/// Bone assignments.
-	std::vector<VertexBoneAssignment> boneAssignments;
 };
+typedef std::vector<SubMesh*> SubMeshList;
 
 /// Ogre Mesh
 class Mesh
@@ -410,7 +554,7 @@ public:
 	size_t NumSubMeshes() const;
 
 	/// Returns submesh for @c index.
-	SubMesh2 *SubMesh(uint16_t index) const;
+	SubMesh *GetSubMesh(uint16_t index) const;
 
 	/// Convert mesh to Assimp scene.
 	void ConvertToAssimpScene(aiScene* dest);
@@ -421,20 +565,98 @@ public:
 	/// Skeleton reference.
 	std::string skeletonRef;
 
+	/// Skeleton.
+	Skeleton *skeleton;
+
 	/// Vertex data
 	VertexData *sharedVertexData;
 
 	/// Sub meshes.
-	std::vector<SubMesh2*> subMeshes;
+	SubMeshList subMeshes;
 
 	/// Animations
-	std::vector<Animation2*> animations;
-
-	/// Bone assignments.
-	std::vector<VertexBoneAssignment> boneAssignments;
+	AnimationList animations;
 
 	/// Poses
-	std::vector<Pose*> poses;
+	PoseList poses;
+};
+
+/// Ogre XML Vertex Data
+class VertexDataXml : public IVertexData
+{
+public:
+	VertexDataXml();
+	
+	bool HasNormals() const;
+	bool HasTangents() const;
+	bool HasUvs() const;
+	size_t NumUvs() const;
+
+	std::vector<aiVector3D> positions;
+	std::vector<aiVector3D> normals;
+	std::vector<aiVector3D> tangents;
+	std::vector<std::vector<aiVector3D> > uvs;
+};
+
+/// Ogre XML Index Data
+class IndexDataXml
+{
+public:
+	IndexDataXml() : faceCount(0) {}
+
+	/// Face count.
+	uint32_t faceCount;
+
+	std::vector<aiFace> faces;
+};
+
+/// Ogre XML SubMesh
+class SubMeshXml : public ISubMesh
+{
+public:
+	SubMeshXml();
+	~SubMeshXml();
+	
+	/// Releases all memory that this data structure owns.
+	void Reset();
+	
+	aiMesh *ConvertToAssimpMesh(MeshXml *parent);
+
+	IndexDataXml *indexData;
+	VertexDataXml *vertexData;
+};
+typedef std::vector<SubMeshXml*> SubMeshXmlList;
+
+/// Ogre XML Mesh
+class MeshXml
+{
+public:
+	MeshXml();
+	~MeshXml();
+
+	/// Releases all memory that this data structure owns.
+	void Reset();
+
+	/// Returns number of subMeshes.
+	size_t NumSubMeshes() const;
+
+	/// Returns submesh for @c index.
+	SubMeshXml *GetSubMesh(uint16_t index) const;
+
+	/// Convert mesh to Assimp scene.
+	void ConvertToAssimpScene(aiScene* dest);
+
+	/// Skeleton reference.
+	std::string skeletonRef;
+
+	/// Skeleton.
+	Skeleton *skeleton;
+
+	/// Vertex data
+	VertexDataXml *sharedVertexData;
+
+	/// Sub meshes.
+	SubMeshXmlList subMeshes;
 };
 
 } // Ogre

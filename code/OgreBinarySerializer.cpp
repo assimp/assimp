@@ -206,7 +206,7 @@ void OgreBinarySerializer::ReadMesh(Mesh *mesh)
 {
 	mesh->hasSkeletalAnimations = Read<bool>();
 
-	DefaultLogger::get()->debug(Formatter::format() << "Reading Mesh");
+	DefaultLogger::get()->debug("Reading Mesh");
 	DefaultLogger::get()->debug(Formatter::format() << "  - Skeletal animations: " << (mesh->hasSkeletalAnimations ? "true" : "false"));
 	
 	if (!AtEnd())
@@ -230,7 +230,7 @@ void OgreBinarySerializer::ReadMesh(Mesh *mesh)
 				case M_GEOMETRY:
 				{
 					mesh->sharedVertexData = new VertexData();
-					ReadGeometry(mesh, mesh->sharedVertexData);
+					ReadGeometry(mesh->sharedVertexData);
 					break;
 				}
 				case M_SUBMESH:
@@ -245,7 +245,7 @@ void OgreBinarySerializer::ReadMesh(Mesh *mesh)
 				}
 				case M_MESH_BONE_ASSIGNMENT:
 				{
-					ReadBoneAssignment(mesh);
+					ReadBoneAssignment(mesh->sharedVertexData);
 					break;
 				}
 				case M_MESH_LOD:
@@ -291,6 +291,8 @@ void OgreBinarySerializer::ReadMesh(Mesh *mesh)
 		if (!AtEnd())
 			RollbackHeader();
 	}
+
+	NormalizeBoneWeights(mesh->sharedVertexData);
 }
 
 void OgreBinarySerializer::ReadMeshLodInfo(Mesh *mesh)
@@ -361,18 +363,12 @@ void OgreBinarySerializer::ReadMeshExtremes(Mesh *mesh)
 	SkipBytes(numBytes);
 }
 
-void OgreBinarySerializer::ReadBoneAssignment(Mesh *dest)
+void OgreBinarySerializer::ReadBoneAssignment(VertexData *dest)
 {
-	VertexBoneAssignment ba;
-	ba.vertexIndex = Read<uint32_t>();
-	ba.boneIndex = Read<uint16_t>();
-	ba.weight = Read<float>();
-
-	dest->boneAssignments.push_back(ba);
-}
-
-void OgreBinarySerializer::ReadBoneAssignment(SubMesh2 *dest)
-{
+	if (!dest) {
+		throw DeadlyImportError("Cannot read bone assignments, vertex data is null.");
+	}
+		
 	VertexBoneAssignment ba;
 	ba.vertexIndex = Read<uint32_t>();
 	ba.boneIndex = Read<uint16_t>();
@@ -385,7 +381,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh)
 {
 	uint16_t id = 0;
 	
-	SubMesh2 *submesh = new SubMesh2();
+	SubMesh *submesh = new SubMesh();
 	submesh->materialRef = ReadLine();
 	submesh->usesSharedVertexData = Read<bool>();
 
@@ -418,7 +414,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh)
 		}
 
 		submesh->vertexData = new VertexData();
-		ReadGeometry(mesh, submesh->vertexData);
+		ReadGeometry(submesh->vertexData);
 	}
 	
 	// Bone assignment, submesh operation and texture aliases
@@ -439,7 +435,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh)
 				}
 				case M_SUBMESH_BONE_ASSIGNMENT:
 				{
-					ReadBoneAssignment(submesh);
+					ReadBoneAssignment(submesh->vertexData);
 					break;
 				}
 				case M_SUBMESH_TEXTURE_ALIAS:
@@ -455,17 +451,54 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh)
 		if (!AtEnd())
 			RollbackHeader();
 	}
-	
+
+	NormalizeBoneWeights(submesh->vertexData);
+
 	submesh->index = mesh->subMeshes.size();
 	mesh->subMeshes.push_back(submesh);
 }
 
-void OgreBinarySerializer::ReadSubMeshOperation(SubMesh2 *submesh)
+void OgreBinarySerializer::NormalizeBoneWeights(VertexData *vertexData) const
 {
-	submesh->operationType = static_cast<SubMesh2::OperationType>(Read<uint16_t>());
+	if (!vertexData || vertexData->boneAssignments.empty())
+		return;
+
+	std::set<uint32_t> influencedVertices;
+	for (VertexBoneAssignmentList::const_iterator baIter=vertexData->boneAssignments.begin(), baEnd=vertexData->boneAssignments.end(); baIter != baEnd; ++baIter) {
+		influencedVertices.insert(baIter->vertexIndex);
+	}
+
+	/** Normalize bone weights.
+		Some exporters wont care if the sum of all bone weights
+		for a single vertex equals 1 or not, so validate here. */
+	const float epsilon = 0.05f;
+	for(std::set<uint32_t>::const_iterator iter=influencedVertices.begin(), end=influencedVertices.end(); iter != end; ++iter)
+	{
+		const uint32_t vertexIndex = (*iter);
+
+		float sum = 0.0f;
+		for (VertexBoneAssignmentList::const_iterator baIter=vertexData->boneAssignments.begin(), baEnd=vertexData->boneAssignments.end(); baIter != baEnd; ++baIter)
+		{
+			if (baIter->vertexIndex == vertexIndex)
+				sum += baIter->weight;
+		}
+		if ((sum < (1.0f - epsilon)) || (sum > (1.0f + epsilon)))
+		{
+			for (VertexBoneAssignmentList::iterator baIter=vertexData->boneAssignments.begin(), baEnd=vertexData->boneAssignments.end(); baIter != baEnd; ++baIter)
+			{
+				if (baIter->vertexIndex == vertexIndex)
+					baIter->weight /= sum;
+			}
+		}
+	}
 }
 
-void OgreBinarySerializer::ReadSubMeshTextureAlias(SubMesh2 *submesh)
+void OgreBinarySerializer::ReadSubMeshOperation(SubMesh *submesh)
+{
+	submesh->operationType = static_cast<SubMesh::OperationType>(Read<uint16_t>());
+}
+
+void OgreBinarySerializer::ReadSubMeshTextureAlias(SubMesh *submesh)
 {
 	submesh->textureAliasName = ReadLine();
 	submesh->textureAliasRef = ReadLine();
@@ -482,7 +515,7 @@ void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh)
 		while (!AtEnd() && id == M_SUBMESH_NAME_TABLE_ELEMENT)
 		{
 			uint16_t submeshIndex = Read<uint16_t>();
-			SubMesh2 *submesh = mesh->SubMesh(submeshIndex);
+			SubMesh *submesh = mesh->GetSubMesh(submeshIndex);
 			if (!submesh) {
 				throw DeadlyImportError(Formatter::format() << "Ogre Mesh does not include submesh " << submeshIndex << " referenced in M_SUBMESH_NAME_TABLE_ELEMENT. Invalid mesh file.");
 			}
@@ -498,7 +531,7 @@ void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh)
 	}
 }
 
-void OgreBinarySerializer::ReadGeometry(Mesh *mesh, VertexData *dest)
+void OgreBinarySerializer::ReadGeometry(VertexData *dest)
 {
 	dest->count = Read<uint32_t>();
 	
@@ -515,12 +548,12 @@ void OgreBinarySerializer::ReadGeometry(Mesh *mesh, VertexData *dest)
 			{
 				case M_GEOMETRY_VERTEX_DECLARATION:
 				{
-					ReadGeometryVertexDeclaration(mesh, dest);
+					ReadGeometryVertexDeclaration(dest);
 					break;
 				}
 				case M_GEOMETRY_VERTEX_BUFFER:
 				{
-					ReadGeometryVertexBuffer(mesh, dest);
+					ReadGeometryVertexBuffer(dest);
 					break;
 				}
 			}
@@ -533,14 +566,14 @@ void OgreBinarySerializer::ReadGeometry(Mesh *mesh, VertexData *dest)
 	}
 }
 
-void OgreBinarySerializer::ReadGeometryVertexDeclaration(Mesh *mesh, VertexData *dest)
+void OgreBinarySerializer::ReadGeometryVertexDeclaration(VertexData *dest)
 {
 	if (!AtEnd())
 	{
 		uint16_t id = ReadHeader();
 		while (!AtEnd() && id == M_GEOMETRY_VERTEX_ELEMENT)
 		{
-			ReadGeometryVertexElement(mesh, dest);
+			ReadGeometryVertexElement(dest);
 
 			if (!AtEnd())
 				id = ReadHeader();
@@ -550,7 +583,7 @@ void OgreBinarySerializer::ReadGeometryVertexDeclaration(Mesh *mesh, VertexData 
 	}
 }
 
-void OgreBinarySerializer::ReadGeometryVertexElement(Mesh *mesh, VertexData *dest)
+void OgreBinarySerializer::ReadGeometryVertexElement(VertexData *dest)
 {
 	VertexElement element;
 	element.source = Read<uint16_t>();
@@ -565,7 +598,7 @@ void OgreBinarySerializer::ReadGeometryVertexElement(Mesh *mesh, VertexData *des
 	dest->vertexElements.push_back(element);
 }
 
-void OgreBinarySerializer::ReadGeometryVertexBuffer(Mesh *mesh, VertexData *dest)
+void OgreBinarySerializer::ReadGeometryVertexBuffer(VertexData *dest)
 {
 	uint16_t bindIndex = Read<uint16_t>();
 	uint16_t vertexSize = Read<uint16_t>();
@@ -682,7 +715,7 @@ void OgreBinarySerializer::ReadAnimations(Mesh *mesh)
 		uint16_t id = ReadHeader();
 		while (!AtEnd() && id == M_ANIMATION)
 		{
-			Animation2 *anim = new Animation2(mesh);
+			Animation *anim = new Animation(mesh);
 			anim->name = ReadLine();
 			anim->length = Read<float>();
 			
@@ -698,7 +731,7 @@ void OgreBinarySerializer::ReadAnimations(Mesh *mesh)
 	}
 }
 
-void OgreBinarySerializer::ReadAnimation(Animation2 *anim)
+void OgreBinarySerializer::ReadAnimation(Animation *anim)
 {
 	
 	if (!AtEnd())
@@ -731,7 +764,7 @@ void OgreBinarySerializer::ReadAnimation(Animation2 *anim)
 	}
 }
 
-void OgreBinarySerializer::ReadAnimationKeyFrames(Animation2 *anim, VertexAnimationTrack *track)
+void OgreBinarySerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *track)
 {
 	if (!AtEnd())
 	{

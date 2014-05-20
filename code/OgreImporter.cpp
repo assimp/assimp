@@ -42,15 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 
-#include <vector>
-#include <sstream>
-#include <istream>
-
 #include "OgreImporter.h"
 #include "OgreBinarySerializer.h"
-
-#include "TinyFormatter.h"
-#include "irrXMLWrapper.h"
+#include "OgreXmlSerializer.h"
 
 static const aiImporterDesc desc = {
 	"Ogre3D Mesh Importer",
@@ -64,8 +58,6 @@ static const aiImporterDesc desc = {
 	0,
 	"mesh mesh.xml"
 };
-
-using namespace std;
 
 namespace Assimp
 {
@@ -96,192 +88,54 @@ bool OgreImporter::CanRead(const std::string &pFile, Assimp::IOSystem *pIOHandle
 	}
 	else
 	{
+		/// @todo Read and validate first header chunk?
 		return EndsWith(pFile, ".mesh", false);
 	}
 }
 
 void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Assimp::IOSystem *pIOHandler)
 {
-	// -------------------- Initial file and XML operations --------------------
-	
-	// Open
+	// Open source file
 	IOStream *f = pIOHandler->Open(pFile, "rb");
 	if (!f) {
 		throw DeadlyImportError("Failed to open file " + pFile);
 	}
 
 	// Binary .mesh import
-	if (EndsWith(pFile, ".mesh", false)) {
-		// Read full data from file
+	if (EndsWith(pFile, ".mesh", false))
+	{
 		/// @note MemoryStreamReader takes ownership of f.
 		MemoryStreamReader reader(f);
-		
+
 		// Import mesh
 		boost::scoped_ptr<Mesh> mesh = OgreBinarySerializer::ImportMesh(&reader);
-		
+
 		// Import mesh referenced materials
 		ReadMaterials(pFile, pIOHandler, pScene, mesh.get());
-		
-		// Convert to Assimp.
+
+		// Convert to Assimp
 		mesh->ConvertToAssimpScene(pScene);
-		return;
 	}
-
-	// Read
-	boost::scoped_ptr<IOStream> file(f);
-	boost::scoped_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(file.get()));
-	boost::scoped_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
-	if (!reader) {
-		throw DeadlyImportError("Failed to create XML Reader for " + pFile);
-	}
-
-	DefaultLogger::get()->debug("Opened a XML reader for " + pFile);
-
-	// Read root node
-	NextNode(reader.get());
-	if (!CurrentNodeNameEquals(reader.get(), "mesh")) {
-		throw DeadlyImportError("Root node is not <mesh> but <" + string(reader->getNodeName()) + "> in " + pFile);
-	}
-	
-	// Node names
-	const string nnSharedGeometry = "sharedgeometry";
-	const string nnVertexBuffer   = "vertexbuffer";
-	const string nnSubMeshes      = "submeshes";
-	const string nnSubMesh        = "submesh";
-	const string nnSubMeshNames   = "submeshnames";
-	const string nnSkeletonLink   = "skeletonlink";
-
-	// -------------------- Shared Geometry --------------------
-	// This can be used to share geometry between submeshes
-
-	NextNode(reader.get());
-	if (CurrentNodeNameEquals(reader.get(), nnSharedGeometry))
-	{
-		DefaultLogger::get()->debug("Reading shared geometry");
-		unsigned int NumVertices = GetAttribute<unsigned int>(reader.get(), "vertexcount");
-
-		NextNode(reader.get());
-		while(CurrentNodeNameEquals(reader.get(), nnVertexBuffer)) {
-			ReadVertexBuffer(m_SharedGeometry, reader.get(), NumVertices);
-		}
-	}
-
-	// -------------------- Sub Meshes --------------------
-
-	if (!CurrentNodeNameEquals(reader.get(), nnSubMeshes)) {
-		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
-	}
-
-	vector<boost::shared_ptr<SubMesh> > subMeshes;
-	vector<aiMaterial*> materials;
-
-	NextNode(reader.get());
-	while(CurrentNodeNameEquals(reader.get(), nnSubMesh))
-	{
-		SubMesh* submesh = new SubMesh();
-		ReadSubMesh(subMeshes.size(), *submesh, reader.get());
-
-		/** @todo What is the correct way of handling empty ref here.
-			Does Assimp require there to be a valid material index for each mesh,
-			even if its a dummy material. */
-		aiMaterial* material = ReadMaterial(pFile, pIOHandler, submesh->MaterialName);
-		if (!material)
-			material = new aiMaterial();
-		if (material)
-		{
-			submesh->MaterialIndex = materials.size();
-			materials.push_back(material);
-		}
-
-		subMeshes.push_back(boost::shared_ptr<SubMesh>(submesh));
-	}
-
-	if (subMeshes.empty()) {
-		throw DeadlyImportError("Could not find <submeshes> node inside root <mesh> node");
-	}
-
-	// This is really a internal error if we failed to create dummy materials.
-	if (subMeshes.size() != materials.size()) {
-		throw DeadlyImportError("Internal Error: Material count does not match the submesh count");
-	}
-
-	// Skip submesh names.
-	/// @todo Should these be read to scene etc. metadata?
-	if (CurrentNodeNameEquals(reader.get(), nnSubMeshNames))
-	{
-		NextNode(reader.get());
-		while(CurrentNodeNameEquals(reader.get(), nnSubMesh)) {
-			NextNode(reader.get());
-		}
-	}
-
-	// -------------------- Skeleton --------------------
-
-	vector<Bone> Bones;
-	vector<Animation> Animations;
-
-	if (CurrentNodeNameEquals(reader.get(), nnSkeletonLink))
-	{
-		string skeletonFile = GetAttribute<string>(reader.get(), "name");
-		if (!skeletonFile.empty())
-		{
-			ReadSkeleton(pFile, pIOHandler, pScene, skeletonFile, Bones, Animations);
-		}
-		else
-		{
-			DefaultLogger::get()->debug("Found a unusual <" + nnSkeletonLink + "> with a empty file reference");
-		}
-		NextNode(reader.get());
-	}
+	// XML .mesh.xml import
 	else
 	{
-		DefaultLogger::get()->debug("Mesh has no assigned skeleton with <" + nnSkeletonLink + ">");
+		/// @note XmlReader does not take ownership of f, hence the scoped ptr.
+		boost::scoped_ptr<IOStream> scopedFile(f);
+		boost::scoped_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(scopedFile.get()));
+		boost::scoped_ptr<XmlReader> reader(irr::io::createIrrXMLReader(xmlStream.get()));
+
+		// Import mesh
+		boost::scoped_ptr<MeshXml> mesh = OgreXmlSerializer::ImportMesh(reader.get());
+		
+		// Import skeleton
+		OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh);
+
+		// Import mesh referenced materials
+		ReadMaterials(pFile, pIOHandler, pScene, mesh.get());
+
+		// Convert to Assimp
+		mesh->ConvertToAssimpScene(pScene);
 	}
-
-	// Now there might be <boneassignments> for the shared geometry
-	if (CurrentNodeNameEquals(reader.get(), "boneassignments")) {
-		ReadBoneWeights(m_SharedGeometry, reader.get());
-	}
-
-	// -------------------- Process Results --------------------
-	BOOST_FOREACH(boost::shared_ptr<SubMesh> submesh, subMeshes)
-	{
-		ProcessSubMesh(*submesh.get(), m_SharedGeometry);
-	}
-
-	// -------------------- Apply to aiScene --------------------
-
-	// Materials
-	pScene->mNumMaterials = materials.size();
-	if (pScene->mNumMaterials > 0) {
-		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
-	}
-
-	for(size_t i=0; i<pScene->mNumMaterials; ++i) {
-		pScene->mMaterials[i] = materials[i];
-	}
-
-	// Meshes
-	pScene->mMeshes = new aiMesh*[subMeshes.size()];
-	pScene->mNumMeshes = subMeshes.size();
-
-	for(size_t i=0, len=subMeshes.size(); i<len; ++i)
-	{
-		boost::shared_ptr<SubMesh> submesh = subMeshes[i];
-		pScene->mMeshes[i] = CreateAssimpSubMesh(pScene, *(submesh.get()), Bones);
-	}
-
-	// Create the root node
-	pScene->mRootNode = new aiNode();
-	pScene->mRootNode->mMeshes = new unsigned int[subMeshes.size()];
-	pScene->mRootNode->mNumMeshes = subMeshes.size();
-	
-	for(size_t i=0, len=subMeshes.size(); i<len; ++i) {
-		pScene->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
-	}
-
-	// Skeleton and animations
-	CreateAssimpSkeleton(pScene, Bones, Animations);
 }
 
 } // Ogre

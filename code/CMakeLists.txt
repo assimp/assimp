@@ -331,8 +331,6 @@ SET( Ogre_SRCS
 	OgreBinarySerializer.cpp
 	OgreXmlSerializer.cpp
 	OgreMaterial.cpp
-	OgreMesh.cpp
-	OgreSkeleton.cpp
 )
 SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
 

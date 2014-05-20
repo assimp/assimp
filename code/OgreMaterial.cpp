@@ -42,11 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include <vector>
-#include <sstream>
-
 #include "OgreImporter.h"
 #include "TinyFormatter.h"
+
+#include "fast_atof.h"
+
+#include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -66,7 +68,7 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
 	// Create materials that can be found and parsed via the IOSystem.
 	for (size_t i=0, len=mesh->NumSubMeshes(); i<len; ++i)
 	{
-		SubMesh2 *submesh = mesh->SubMesh(i);
+		SubMesh *submesh = mesh->GetSubMesh(i);
 		if (submesh && !submesh->materialRef.empty())
 		{
 			aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
@@ -78,7 +80,33 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
 		}
 	}
 
-	// Assign material to scene
+	AssignMaterials(pScene, materials);
+}
+
+void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, MeshXml *mesh)
+{
+	std::vector<aiMaterial*> materials;
+
+	// Create materials that can be found and parsed via the IOSystem.
+	for (size_t i=0, len=mesh->NumSubMeshes(); i<len; ++i)
+	{
+		SubMeshXml *submesh = mesh->GetSubMesh(i);
+		if (submesh && !submesh->materialRef.empty())
+		{
+			aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
+			if (material)
+			{
+				submesh->materialIndex = materials.size();
+				materials.push_back(material);
+			}
+		}
+	}
+
+	AssignMaterials(pScene, materials);
+}
+
+void OgreImporter::AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials)
+{
 	pScene->mNumMaterials = materials.size();
 	if (pScene->mNumMaterials > 0)
 	{

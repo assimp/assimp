@@ -234,10 +234,68 @@ std::string VertexElement::SemanticToString(Semantic semantic)
 	return "Uknown_VertexElement::Semantic";
 }
 
+// IVertexData
+
+IVertexData::IVertexData() :
+	count(0)
+{
+}
+
+bool IVertexData::HasBoneAssignments() const
+{
+	return !boneAssignments.empty();
+}
+
+void IVertexData::AddVertexMapping(uint32_t oldIndex, uint32_t newIndex)
+{
+	BoneAssignmentsForVertex(oldIndex, newIndex, boneAssignmentsMap[newIndex]);
+	vertexIndexMapping[oldIndex].push_back(newIndex);
+}
+
+void IVertexData::BoneAssignmentsForVertex(uint32_t currentIndex, uint32_t newIndex, VertexBoneAssignmentList &dest) const
+{
+	for (VertexBoneAssignmentList::const_iterator iter=boneAssignments.begin(), end=boneAssignments.end();
+		iter!=end; ++iter)
+	{
+		if (iter->vertexIndex == currentIndex)
+		{
+			VertexBoneAssignment a = (*iter);
+			a.vertexIndex = newIndex;
+			dest.push_back(a);
+		}
+	}
+}
+
+AssimpVertexBoneWeightList IVertexData::AssimpBoneWeights(size_t vertices)
+{
+	AssimpVertexBoneWeightList weights;	
+	for(size_t vi=0; vi<vertices; ++vi)
+	{
+		VertexBoneAssignmentList &vertexWeights = boneAssignmentsMap[vi];
+		for (VertexBoneAssignmentList::const_iterator iter=vertexWeights.begin(), end=vertexWeights.end();
+			iter!=end; ++iter)
+		{
+			std::vector<aiVertexWeight> &boneWeights = weights[iter->boneIndex];
+			boneWeights.push_back(aiVertexWeight(vi, iter->weight));
+		}
+	}
+	return weights;
+}
+
+std::set<uint16_t> IVertexData::ReferencedBonesByWeights() const
+{
+	std::set<uint16_t> referenced;
+	for (VertexBoneAssignmentList::const_iterator iter=boneAssignments.begin(), end=boneAssignments.end();
+		iter!=end; ++iter)
+	{
+		referenced.insert(iter->boneIndex);
+	}
+	return referenced;
+}
+
 // VertexData
 
-VertexData::VertexData() :
-	count(0)
+VertexData::VertexData()
 {
 }
 
@@ -282,6 +340,32 @@ VertexElement *VertexData::GetVertexElement(VertexElement::Semantic semantic, ui
 	return 0;
 }
 
+// VertexDataXml
+
+VertexDataXml::VertexDataXml()
+{
+}
+
+bool VertexDataXml::HasNormals() const
+{
+	return !normals.empty();
+}
+
+bool VertexDataXml::HasTangents() const
+{
+	return !tangents.empty();
+}
+
+bool VertexDataXml::HasUvs() const
+{
+	return !uvs.empty();
+}
+
+size_t VertexDataXml::NumUvs() const
+{
+	return uvs.size();
+}
+
 // IndexData
 
 IndexData::IndexData() :
@@ -316,6 +400,7 @@ size_t IndexData::FaceSize() const
 
 Mesh::Mesh() :
 	sharedVertexData(0),
+	skeleton(0),
 	hasSkeletalAnimations(false)
 {
 }
@@ -327,6 +412,7 @@ Mesh::~Mesh()
 
 void Mesh::Reset()
 {
+	OGRE_SAFE_DELETE(skeleton)
 	OGRE_SAFE_DELETE(sharedVertexData)
 
 	for(size_t i=0, len=subMeshes.size(); i<len; ++i) {
@@ -348,7 +434,7 @@ size_t Mesh::NumSubMeshes() const
 	return subMeshes.size();
 }
 
-SubMesh2 *Mesh::SubMesh(uint16_t index) const
+SubMesh *Mesh::GetSubMesh(uint16_t index) const
 {
 	for(size_t i=0; i<subMeshes.size(); ++i)
 		if (subMeshes[i]->index == index)
@@ -358,7 +444,7 @@ SubMesh2 *Mesh::SubMesh(uint16_t index) const
 
 void Mesh::ConvertToAssimpScene(aiScene* dest)
 {
-	// Export meshes
+	// Setup
 	dest->mNumMeshes = NumSubMeshes();
 	dest->mMeshes = new aiMesh*[dest->mNumMeshes];
 
@@ -367,36 +453,44 @@ void Mesh::ConvertToAssimpScene(aiScene* dest)
 	dest->mRootNode->mNumMeshes = dest->mNumMeshes;
 	dest->mRootNode->mMeshes = new unsigned int[dest->mRootNode->mNumMeshes];
 
-	for(size_t i=0; i<dest->mNumMeshes; ++i) {
+	// Export meshes
+	for(size_t i=0; i<dest->mNumMeshes; ++i)
+	{
 		dest->mMeshes[i] = subMeshes[i]->ConvertToAssimpMesh(this);
 		dest->mRootNode->mMeshes[i] = i;
 	}
 }
 
-// SubMesh2
+// ISubMesh
 
-SubMesh2::SubMesh2() :
+ISubMesh::ISubMesh() :
 	index(0),
-	vertexData(0),
-	indexData(new IndexData()),
+	materialIndex(-1),
 	usesSharedVertexData(false),
-	operationType(OT_POINT_LIST),
-	materialIndex(-1)
+	operationType(OT_POINT_LIST)
 {
 }
 
-SubMesh2::~SubMesh2()
+// SubMesh
+
+SubMesh::SubMesh() :
+	vertexData(0),
+	indexData(new IndexData())
+{
+}
+
+SubMesh::~SubMesh()
 {
 	Reset();
 }
 
-void SubMesh2::Reset()
+void SubMesh::Reset()
 {
 	OGRE_SAFE_DELETE(vertexData)
 	OGRE_SAFE_DELETE(indexData)
 }
 
-aiMesh *SubMesh2::ConvertToAssimpMesh(Mesh *parent)
+aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 {
 	if (operationType != OT_TRIANGLE_LIST) {
 		throw DeadlyImportError(Formatter::format() << "Only mesh operation type OT_TRIANGLE_LIST is supported. Found " << operationType);
@@ -455,6 +549,8 @@ aiMesh *SubMesh2::ConvertToAssimpMesh(Mesh *parent)
 	const size_t vWidthNormal    = (normalsElement ? src->VertexSize(normalsElement->source) : 0);
 	const size_t vWidthUv1       = (uv1Element ? src->VertexSize(uv1Element->source) : 0);
 	const size_t vWidthUv2       = (uv2Element ? src->VertexSize(uv2Element->source) : 0);
+	
+	bool boneAssignments = src->HasBoneAssignments();
 	
 	// Prepare normals
 	if (normals) 
@@ -530,6 +626,7 @@ aiMesh *SubMesh2::ConvertToAssimpMesh(Mesh *parent)
 
 			// Ogres vertex index to ref into the source buffers.
 			const size_t ogreVertexIndex = ogreFace.mIndices[v];
+			src->AddVertexMapping(ogreVertexIndex, newIndex);
 			
 			// Position
 			positions->Seek((vWidthPosition * ogreVertexIndex) + positionsElement->offset, aiOrigin_SET);
@@ -553,29 +650,505 @@ aiMesh *SubMesh2::ConvertToAssimpMesh(Mesh *parent)
 				uv2->Seek((vWidthUv2 * ogreVertexIndex) + uv2Element->offset, aiOrigin_SET);
 				uv2->Read(&uv2Dest[newIndex], sizeUv2, 1);
 			}
-			
-			/// @todo Bones and bone weights.
 		}
-	} 
+	}
+	
+	// Bones and bone weights
+	if (parent->skeleton && boneAssignments)
+	{
+		AssimpVertexBoneWeightList weights = src->AssimpBoneWeights(dest->mNumVertices);
+		std::set<uint16_t> referencedBones = src->ReferencedBonesByWeights();
+
+		dest->mNumBones = referencedBones.size();
+		dest->mBones = new aiBone*[dest->mNumBones];
+
+		size_t assimpBoneIndex = 0;
+		for(std::set<uint16_t>::const_iterator rbIter=referencedBones.begin(), rbEnd=referencedBones.end(); rbIter != rbEnd; ++rbIter, ++assimpBoneIndex)
+		{
+			Bone *bone = parent->skeleton->BoneById((*rbIter));
+			dest->mBones[assimpBoneIndex] = bone->ConvertToAssimpBone(parent->skeleton, weights[bone->id]);
+		}
+	}
+
 	return dest;
 }
 
-// Animation2
+// MeshXml
 
-Animation2::Animation2(Mesh *_parentMesh) : 
-	parentMesh(_parentMesh),
+MeshXml::MeshXml() :
+	sharedVertexData(0),
+	skeleton(0)
+{
+}
+
+MeshXml::~MeshXml()
+{
+	Reset();
+}
+
+void MeshXml::Reset()
+{
+	OGRE_SAFE_DELETE(skeleton)
+	OGRE_SAFE_DELETE(sharedVertexData)
+
+	for(size_t i=0, len=subMeshes.size(); i<len; ++i) {
+		OGRE_SAFE_DELETE(subMeshes[i])
+	}
+	subMeshes.clear();
+}
+
+size_t MeshXml::NumSubMeshes() const
+{
+	return subMeshes.size();
+}
+
+SubMeshXml *MeshXml::GetSubMesh(uint16_t index) const
+{
+	for(size_t i=0; i<subMeshes.size(); ++i)
+		if (subMeshes[i]->index == index)
+			return subMeshes[i];
+	return 0;
+}
+
+void MeshXml::ConvertToAssimpScene(aiScene* dest)
+{
+	// Setup
+	dest->mNumMeshes = NumSubMeshes();
+	dest->mMeshes = new aiMesh*[dest->mNumMeshes];
+
+	// Create root node
+	dest->mRootNode = new aiNode();
+	dest->mRootNode->mNumMeshes = dest->mNumMeshes;
+	dest->mRootNode->mMeshes = new unsigned int[dest->mRootNode->mNumMeshes];
+
+	// Export meshes
+	for(size_t i=0; i<dest->mNumMeshes; ++i)
+	{
+		dest->mMeshes[i] = subMeshes[i]->ConvertToAssimpMesh(this);
+		dest->mRootNode->mMeshes[i] = i;
+	}
+	
+	// Export skeleton
+	if (skeleton)
+	{
+		// Bones
+		if (!skeleton->bones.empty())
+		{
+			BoneList rootBones = skeleton->RootBones();
+			dest->mRootNode->mNumChildren = rootBones.size();
+			dest->mRootNode->mChildren = new aiNode*[dest->mRootNode->mNumChildren];
+			
+			for(size_t i=0, len=rootBones.size(); i<len; ++i)
+			{
+				dest->mRootNode->mChildren[i] = rootBones[i]->ConvertToAssimpNode(skeleton, dest->mRootNode);
+			}
+		}
+
+		// Animations
+		if (!skeleton->animations.empty())
+		{
+			dest->mNumAnimations = skeleton->animations.size();
+			dest->mAnimations = new aiAnimation*[dest->mNumAnimations];
+			
+			for(size_t i=0, len=skeleton->animations.size(); i<len; ++i)
+			{
+				dest->mAnimations[i] = skeleton->animations[i]->ConvertToAssimpAnimation();
+			}
+		}
+	}
+}
+
+// SubMeshXml
+
+SubMeshXml::SubMeshXml() :
+	vertexData(0),
+	indexData(new IndexDataXml())
+{
+}
+
+SubMeshXml::~SubMeshXml()
+{
+	Reset();
+}
+
+void SubMeshXml::Reset()
+{
+	OGRE_SAFE_DELETE(indexData)
+	OGRE_SAFE_DELETE(vertexData)
+}
+
+aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
+{
+	aiMesh *dest = new aiMesh();
+	dest->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
+
+	if (!name.empty())
+		dest->mName = name;
+
+	// Material index	
+	if (materialIndex != -1)
+		dest->mMaterialIndex = materialIndex;
+
+	// Faces
+	dest->mNumFaces = indexData->faceCount;
+	dest->mFaces = new aiFace[dest->mNumFaces];
+
+	// Assimp required unique vertices, we need to convert from Ogres shared indexing.
+	size_t uniqueVertexCount = dest->mNumFaces * 3;
+	dest->mNumVertices = uniqueVertexCount;
+	dest->mVertices = new aiVector3D[dest->mNumVertices];
+
+	VertexDataXml *src = (!usesSharedVertexData ? vertexData : parent->sharedVertexData);
+	bool boneAssignments = src->HasBoneAssignments();
+	bool normals = src->HasNormals();
+	size_t uvs = src->NumUvs();
+	
+	// Prepare normals
+	if (normals) 
+		dest->mNormals = new aiVector3D[dest->mNumVertices];
+
+	// Prepare UVs
+	for(size_t uvi=0; uvi<uvs; ++uvi)
+	{
+		dest->mNumUVComponents[uvi] = 2;
+		dest->mTextureCoords[uvi] = new aiVector3D[dest->mNumVertices];
+	}
+
+	for (size_t fi=0; fi<dest->mNumFaces; ++fi)
+	{
+		// Source Ogre face
+		aiFace &ogreFace = indexData->faces[fi];
+
+		// Destination Assimp face
+		aiFace &face = dest->mFaces[fi];
+		face.mNumIndices = 3;
+		face.mIndices = new unsigned int[3];
+
+		const size_t pos = fi * 3;
+		for (size_t v=0; v<3; ++v)
+		{
+			const size_t newIndex = pos + v;
+
+			// Write face index
+			face.mIndices[v] = newIndex;
+
+			// Ogres vertex index to ref into the source buffers.
+			const size_t ogreVertexIndex = ogreFace.mIndices[v];
+			src->AddVertexMapping(ogreVertexIndex, newIndex);
+			
+			// Position
+			dest->mVertices[newIndex] = src->positions[ogreVertexIndex];
+
+			// Normal
+			if (normals)
+				dest->mNormals[newIndex] = src->normals[ogreVertexIndex];
+				
+			// UVs
+			for(size_t uvi=0; uvi<uvs; ++uvi)
+			{
+				aiVector3D *uvDest = dest->mTextureCoords[uvi];
+				std::vector<aiVector3D> &uvSrc = src->uvs[uvi];
+				uvDest[newIndex] = uvSrc[ogreVertexIndex];
+			}
+		}
+	}
+	
+	// Bones and bone weights
+	if (parent->skeleton && boneAssignments)
+	{
+		AssimpVertexBoneWeightList weights = src->AssimpBoneWeights(dest->mNumVertices);
+		std::set<uint16_t> referencedBones = src->ReferencedBonesByWeights();
+
+		dest->mNumBones = referencedBones.size();
+		dest->mBones = new aiBone*[dest->mNumBones];
+		
+		size_t assimpBoneIndex = 0;
+		for(std::set<uint16_t>::const_iterator rbIter=referencedBones.begin(), rbEnd=referencedBones.end(); rbIter != rbEnd; ++rbIter, ++assimpBoneIndex)
+		{
+			Bone *bone = parent->skeleton->BoneById((*rbIter));
+			dest->mBones[assimpBoneIndex] = bone->ConvertToAssimpBone(parent->skeleton, weights[bone->id]);
+		}
+	}
+
+	return dest;
+}
+
+// Animation
+
+Animation::Animation(Skeleton *parent) :
+	parentSkeleton(parent),
+	parentMesh(0),
 	length(0.0f),
 	baseTime(-1.0f)
 {
 }
 
-VertexData *Animation2::AssociatedVertexData(VertexAnimationTrack *track) const
+Animation::Animation(Mesh *parent) : 
+	parentMesh(parent),
+	parentSkeleton(0),
+	length(0.0f),
+	baseTime(-1.0f)
 {
+}
+
+VertexData *Animation::AssociatedVertexData(VertexAnimationTrack *track) const
+{
+	if (!parentMesh)
+		return 0;
+
 	bool sharedGeom = (track->target == 0);
 	if (sharedGeom)
 		return parentMesh->sharedVertexData;
 	else
-		return parentMesh->SubMesh(track->target-1)->vertexData;
+		return parentMesh->GetSubMesh(track->target-1)->vertexData;
+}
+
+aiAnimation *Animation::ConvertToAssimpAnimation()
+{
+	aiAnimation *anim = new aiAnimation();
+	anim->mName = name;
+	anim->mDuration = static_cast<double>(length);
+	anim->mTicksPerSecond = 1.0;
+
+	// Tracks
+	if (!tracks.empty())
+	{
+		anim->mNumChannels = tracks.size();
+		anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
+		
+		for(size_t i=0, len=tracks.size(); i<len; ++i)
+		{
+			anim->mChannels[i] = tracks[i].ConvertToAssimpAnimationNode(parentSkeleton);
+		}
+	}
+	return anim;
+}
+
+// Skeleton
+
+Skeleton::Skeleton()
+{
+}
+
+Skeleton::~Skeleton()
+{
+	Reset();
+}
+
+void Skeleton::Reset()
+{
+	for(size_t i=0, len=bones.size(); i<len; ++i) {
+		OGRE_SAFE_DELETE(bones[i])
+	}
+	bones.clear();
+	for(size_t i=0, len=animations.size(); i<len; ++i) {
+		OGRE_SAFE_DELETE(animations[i])
+	}
+	animations.clear();
+}
+
+BoneList Skeleton::RootBones() const
+{
+	BoneList rootBones;
+	for(BoneList::const_iterator iter = bones.begin(); iter != bones.end(); ++iter)
+	{
+		if (!(*iter)->IsParented())
+			rootBones.push_back((*iter));
+	}
+	return rootBones;
+}
+
+size_t Skeleton::NumRootBones() const
+{
+	size_t num = 0;
+	for(BoneList::const_iterator iter = bones.begin(); iter != bones.end(); ++iter)
+	{
+		if (!(*iter)->IsParented())
+			num++;
+	}
+	return num;
+}
+
+Bone *Skeleton::BoneByName(const std::string &name) const
+{
+	for(BoneList::const_iterator iter = bones.begin(); iter != bones.end(); ++iter)
+	{
+		if ((*iter)->name == name)
+			return (*iter);
+	}
+	return 0;
+}
+
+Bone *Skeleton::BoneById(uint16_t id) const
+{
+	for(BoneList::const_iterator iter = bones.begin(); iter != bones.end(); ++iter)
+	{
+		if ((*iter)->id == id)
+			return (*iter);
+	}
+	return 0;
+}
+
+// Bone
+
+Bone::Bone() :
+	id(0),
+	parent(0),
+	parentId(-1),
+	rotationAngle(0.0f)
+{
+}
+
+bool Bone::IsParented() const
+{
+	return (parentId != -1 && parent != 0);
+}
+
+uint16_t Bone::ParentId() const
+{
+	return static_cast<uint16_t>(parentId);
+}
+
+void Bone::AddChild(Bone *bone)
+{
+	if (!bone)
+		return;
+	if (bone->IsParented())
+		throw DeadlyImportError("Attaching child Bone that is already parented: " + bone->name);
+		
+	bone->parent = this;
+	bone->parentId = id;
+	children.push_back(bone->id);
+}
+
+void Bone::CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton)
+{
+	aiMatrix4x4 t0, t1;
+	aiMatrix4x4 transform = aiMatrix4x4::Rotation(-rotationAngle, rotation, t1) * aiMatrix4x4::Translation(-position, t0);
+
+	if (!IsParented())
+		worldMatrix = transform;
+	else
+		worldMatrix = transform * parent->worldMatrix;
+
+	aiMatrix4x4 t2, t3; /// @todo t0 and t1 could probably be reused here?
+	defaultPose = aiMatrix4x4::Translation(position, t2) * aiMatrix4x4::Rotation(rotationAngle, rotation, t3);
+
+	// Recursively for all children now that the parent matrix has been calculated.
+	for (size_t i=0, len=children.size(); i<len; ++i)
+	{
+		Bone *child = skeleton->BoneById(children[i]);
+		if (!child) {
+			throw DeadlyImportError(Formatter::format() << "CalculateWorldMatrixAndDefaultPose: Failed to find child bone " << children[i] << " for parent " << id << " " << name);
+		}
+		child->CalculateWorldMatrixAndDefaultPose(skeleton);
+	}
+}
+
+aiNode *Bone::ConvertToAssimpNode(Skeleton *skeleton, aiNode *parentNode)
+{
+	aiMatrix4x4 t0,t1;
+
+	// Bone node
+	aiNode* node = new aiNode(name);
+	node->mParent = parentNode;
+	node->mTransformation = defaultPose;
+
+	// Children
+	if (!children.empty())
+	{
+		node->mNumChildren = children.size();
+		node->mChildren = new aiNode*[node->mNumChildren];
+
+		for(size_t i=0, len=children.size(); i<len; ++i)
+		{
+			Bone *child = skeleton->BoneById(children[i]);
+			if (!child) {
+				throw DeadlyImportError(Formatter::format() << "ConvertToAssimpNode: Failed to find child bone " << children[i] << " for parent " << id << " " << name);
+			}
+			node->mChildren[i] = child->ConvertToAssimpNode(skeleton, node);
+		}
+	}
+	return node;
+}
+
+aiBone *Bone::ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWeight> &boneWeights)
+{
+	aiBone *bone = new aiBone();
+	bone->mName = name;
+	bone->mOffsetMatrix = worldMatrix;
+	
+	if (!boneWeights.empty())
+	{
+		bone->mNumWeights = boneWeights.size();
+		bone->mWeights = new aiVertexWeight[boneWeights.size()];
+		memcpy(bone->mWeights, &boneWeights[0], boneWeights.size() * sizeof(aiVertexWeight));
+	}
+
+	return bone;
+}
+
+// VertexAnimationTrack
+
+VertexAnimationTrack::VertexAnimationTrack() :
+	target(0),
+	type(VAT_NONE)
+{
+}
+
+aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleton)
+{
+	if (boneName.empty() || type != VAT_TRANSFORM) {
+		throw DeadlyImportError("VertexAnimationTrack::ConvertToAssimpAnimationNode: Cannot convert track that has no target bone name or is not type of VAT_TRANSFORM");
+	}
+
+	aiNodeAnim *nodeAnim = new aiNodeAnim();
+	nodeAnim->mNodeName = boneName;
+	
+	Bone *bone = skeleton->BoneByName(boneName);
+	if (!bone) {
+		throw DeadlyImportError("VertexAnimationTrack::ConvertToAssimpAnimationNode: Failed to find bone " + boneName + " from parent Skeleton");
+	}
+
+	// Keyframes
+	size_t numKeyframes = transformKeyFrames.size();
+
+	nodeAnim->mPositionKeys = new aiVectorKey[numKeyframes];				
+	nodeAnim->mRotationKeys = new aiQuatKey[numKeyframes];
+	nodeAnim->mScalingKeys = new aiVectorKey[numKeyframes];
+	nodeAnim->mNumPositionKeys = numKeyframes;
+	nodeAnim->mNumRotationKeys = numKeyframes;
+	nodeAnim->mNumScalingKeys  = numKeyframes;
+
+	for(size_t kfi=0; kfi<numKeyframes; ++kfi)
+	{
+		const TransformKeyFrame &kfSource = transformKeyFrames[kfi];
+
+		// Create a matrix to transform a vector from the bones 
+		// default pose to the bone bones in this animation key
+		aiMatrix4x4 t0, t1;
+		aiMatrix4x4 keyBonePose =
+			aiMatrix4x4::Translation(kfSource.position, t0) *
+			aiMatrix4x4(kfSource.rotation.GetMatrix()) *
+			aiMatrix4x4::Scaling(kfSource.scale, t1);
+
+		// Calculate the complete transformation from world space to bone space
+		aiMatrix4x4 finalTransform = bone->defaultPose * keyBonePose;
+
+		aiVector3D kfPos; aiQuaternion kfRot; aiVector3D kfScale;
+		finalTransform.Decompose(kfScale, kfRot, kfPos);
+
+		double t = static_cast<double>(kfSource.timePos);
+		nodeAnim->mPositionKeys[kfi].mTime = t;
+		nodeAnim->mRotationKeys[kfi].mTime = t;
+		nodeAnim->mScalingKeys[kfi].mTime = t;
+
+		nodeAnim->mPositionKeys[kfi].mValue = kfPos;					
+		nodeAnim->mRotationKeys[kfi].mValue = kfRot;
+		nodeAnim->mScalingKeys[kfi].mValue = kfScale;
+	}
+
+	return nodeAnim;
 }
 
 } // Ogre

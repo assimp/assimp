@@ -38,5 +38,70 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @todo Move XML related serialization from OgreImporter.cpp 
-	here in a similar fashion as OgreBinarySerializer. */
+#ifndef AI_OGREXMLSERIALIZER_H_INC
+#define AI_OGREXMLSERIALIZER_H_INC
+
+#ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
+
+#include "OgreStructs.h"
+#include "OgreParsingUtils.h"
+
+#include "irrXMLWrapper.h"
+
+namespace Assimp
+{
+namespace Ogre
+{
+
+typedef irr::io::IrrXMLReader XmlReader;
+
+class OgreXmlSerializer
+{
+public:
+	static MeshXml *ImportMesh(XmlReader *reader);
+	static void ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
+
+private:
+	OgreXmlSerializer(XmlReader *reader) :
+		m_reader(reader)
+	{
+	}
+
+	// Mesh
+	void ReadMesh(MeshXml *mesh);
+	void ReadSubMesh(MeshXml *mesh);
+	
+	void ReadGeometry(VertexDataXml *dest);
+	void ReadGeometryVertexBuffer(VertexDataXml *dest);
+	
+	void ReadBoneAssignments(VertexDataXml *dest);
+	
+	// Skeleton
+	void ReadSkeleton(Skeleton *skeleton);
+	
+	void ReadBones(Skeleton *skeleton);
+	void ReadBoneHierarchy(Skeleton *skeleton);
+	
+	void ReadAnimations(Skeleton *skeleton);
+	void ReadAnimationTracks(Animation *dest);
+	void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest);
+
+	template<typename T> 
+	T ReadAttribute(const std::string &name) const;
+	bool HasAttribute(const std::string &name) const;
+	
+	std::string &NextNode();
+	std::string &SkipCurrentNode();
+
+	bool CurrentNodeNameEquals(const std::string &name) const;
+	std::string CurrentNodeName(bool forceRead = false);
+		
+	XmlReader *m_reader;
+	std::string m_currentNodeName;
+};
+
+} // Ogre
+} // Assimp
+
+#endif // ASSIMP_BUILD_NO_OGRE_IMPORTER
+#endif // AI_OGREXMLSERIALIZER_H_INC

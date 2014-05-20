@@ -51,7 +51,7 @@ namespace Ogre
 {
 	class OgreBinarySerializer
 	{
-	public:	
+	public:
 		static Mesh *ImportMesh(MemoryStreamReader *reader);
 
 	private:
@@ -68,27 +68,28 @@ namespace Ogre
 		void ReadMeshSkeletonLink(Mesh *mesh);
 		void ReadMeshBounds(Mesh *mesh);
 		void ReadMeshExtremes(Mesh *mesh);
-		
+
 		void ReadSubMesh(Mesh *mesh);
 		void ReadSubMeshNames(Mesh *mesh);
-		void ReadSubMeshOperation(SubMesh2 *submesh);
-		void ReadSubMeshTextureAlias(SubMesh2 *submesh);
-		
-		void ReadBoneAssignment(Mesh *dest);
-		void ReadBoneAssignment(SubMesh2 *dest);
+		void ReadSubMeshOperation(SubMesh *submesh);
+		void ReadSubMeshTextureAlias(SubMesh *submesh);
 
-		void ReadGeometry(Mesh *mesh, VertexData *dest);
-		void ReadGeometryVertexDeclaration(Mesh *mesh, VertexData *dest);
-		void ReadGeometryVertexElement(Mesh *mesh, VertexData *dest);
-		void ReadGeometryVertexBuffer(Mesh *mesh, VertexData *dest);
+		void ReadBoneAssignment(VertexData *dest);
+
+		void ReadGeometry(VertexData *dest);
+		void ReadGeometryVertexDeclaration(VertexData *dest);
+		void ReadGeometryVertexElement(VertexData *dest);
+		void ReadGeometryVertexBuffer(VertexData *dest);
 
 		void ReadEdgeList(Mesh *mesh);
 		void ReadPoses(Mesh *mesh);
 		void ReadPoseVertices(Pose *pose);
 		
 		void ReadAnimations(Mesh *mesh);
-		void ReadAnimation(Animation2 *anim);
-		void ReadAnimationKeyFrames(Animation2 *anim, VertexAnimationTrack *track);
+		void ReadAnimation(Animation *anim);
+		void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *track);
+		
+		void NormalizeBoneWeights(VertexData *vertexData) const;
 
 		uint16_t ReadHeader(bool readLen = true);
 		void RollbackHeader();

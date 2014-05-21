@@ -217,8 +217,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = NextAfterNewLine(ss, linePart);
-			DefaultLogger::get()->debug("//" + postComment + " (comment line ignored)");			
+			NextAfterNewLine(ss, linePart);
 			continue;
 		}
 		if (linePart != partMaterial)
@@ -361,8 +360,7 @@ bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream 
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = SkipLine(ss);
-			DefaultLogger::get()->debug("  //" + postComment + " (comment line ignored)");
+			SkipLine(ss);
 			continue;
 		}
 
@@ -402,8 +400,7 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = SkipLine(ss);
-			DefaultLogger::get()->debug("   //" + postComment + " (comment line ignored)");
+			SkipLine(ss);
 			continue;
 		}
 
@@ -471,8 +468,7 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = SkipLine(ss);
-			DefaultLogger::get()->debug("    //" + postComment + " (comment line ignored)");
+			SkipLine(ss);
 			continue;
 		}
 

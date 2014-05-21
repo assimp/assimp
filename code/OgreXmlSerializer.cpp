@@ -374,12 +374,16 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
 	bool tangents  = (HasAttribute("tangents") && ReadAttribute<bool>("tangents"));
 	uint32_t uvs   = (HasAttribute("texture_coords") ? ReadAttribute<uint32_t>("texture_coords") : 0);
 	
-	if (!positions) {
+	// Not having positions is a error only if a previous vertex buffer did not have them.
+	if (!positions && !dest->HasPositions()) {
 		throw DeadlyImportError("Vertex buffer does not contain positions!");
 	}
-	DefaultLogger::get()->debug("    - Contains positions");
-	dest->positions.reserve(dest->count);
 
+	if (positions)
+	{
+		DefaultLogger::get()->debug("    - Contains positions");
+		dest->positions.reserve(dest->count);
+	}
 	if (normals)
 	{
 		DefaultLogger::get()->debug("    - Contains normals");
@@ -454,7 +458,7 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
 
 				aiVector3D uv;
 				uv.x = ReadAttribute<float>("u");
-				uv.y = ReadAttribute<float>("v") * (-1)+1; //flip the uv vertikal, blender exports them so! (ahem... @todo ????)
+				uv.y = (ReadAttribute<float>("v") * -1) + 1; // Flip UV from Ogre to Assimp form
 				dest->uvs[i].push_back(uv);
 
 				NextNode();

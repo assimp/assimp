@@ -346,6 +346,11 @@ VertexDataXml::VertexDataXml()
 {
 }
 
+bool VertexDataXml::HasPositions() const
+{
+	return !positions.empty();
+}
+
 bool VertexDataXml::HasNormals() const
 {
 	return !normals.empty();
@@ -672,12 +677,14 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 			{
 				uv1->Seek((vWidthUv1 * ogreVertexIndex) + uv1Element->offset, aiOrigin_SET);
 				uv1->Read(&uv1Dest[newIndex], sizeUv1, 1);
+				uv1Dest[newIndex].y = (uv1Dest[newIndex].y * -1) + 1; // Flip UV from Ogre to Assimp form
 			}
 			// UV1
 			if (uv2 && uv2Dest)
 			{
 				uv2->Seek((vWidthUv2 * ogreVertexIndex) + uv2Element->offset, aiOrigin_SET);
 				uv2->Read(&uv2Dest[newIndex], sizeUv2, 1);
+				uv2Dest[newIndex].y = (uv2Dest[newIndex].y * -1) + 1; // Flip UV from Ogre to Assimp form
 			}
 		}
 	}

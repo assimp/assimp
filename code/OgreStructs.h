@@ -601,6 +601,7 @@ class VertexDataXml : public IVertexData
 public:
 	VertexDataXml();
 	
+	bool HasPositions() const;
 	bool HasNormals() const;
 	bool HasTangents() const;
 	bool HasUvs() const;

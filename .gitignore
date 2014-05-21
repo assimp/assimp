@@ -1,3 +1,34 @@
 build
 .project
 *.kdev4*
+
+# Visual Studio
+*.sln
+*.ncb
+*.vcproj
+
+# Output
+bin/
+lib/
+contrib/
+
+# Generated
+assimp.pc
+revision.h
+contrib/zlib/zconf.h
+contrib/zlib/zlib.pc
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+cmake_uninstall.cmake
+*.dir/
+assimp-config.cmake
+assimp-config-version.cmake
+
+# Tests
+test/results
+
+# Python
+__pycache__

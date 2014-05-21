@@ -7,9 +7,36 @@ set (ASSIMP_VERSION_MINOR 0)
 set (ASSIMP_VERSION_PATCH 1) # subversion revision?
 set (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
 set (ASSIMP_SOVERSION 3)
-SET ( PROJECT_VERSION "${ASSIMP_VERSION}" )
+set (PROJECT_VERSION "${ASSIMP_VERSION}")
 
 set(ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources")
+
+# Get the current working branch
+execute_process(
+  COMMAND git rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if(NOT GIT_COMMIT_HASH)
+  set(GIT_COMMIT_HASH 0)
+endif(NOT GIT_COMMIT_HASH)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/revision.h.in
+  ${CMAKE_BINARY_DIR}/revision.h
+)
+
+include_directories(${CMAKE_BINARY_DIR})
 
 option(ASSIMP_OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)
 set(CMAKE_MODULE_PATH       "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules" )

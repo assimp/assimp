@@ -51,7 +51,7 @@ const char* AICMD_MSG_ABOUT =
 " -- Commandline toolchain --\n"
 "------------------------------------------------------ \n\n"
 
-"Version %i.%i %s%s%s%s%s(SVNREV %i)\n\n";
+"Version %i.%i %s%s%s%s%s(GIT commit %x)\n\n";
 
 const char* AICMD_MSG_HELP = 
 "assimp <verb> <parameters>\n\n"

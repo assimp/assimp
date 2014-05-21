@@ -110,6 +110,9 @@ void OgreImporter::InternReadFile(const std::string &pFile, aiScene *pScene, Ass
 		// Import mesh
 		boost::scoped_ptr<Mesh> mesh = OgreBinarySerializer::ImportMesh(&reader);
 
+		// Import skeleton
+		OgreBinarySerializer::ImportSkeleton(pIOHandler, mesh);
+
 		// Import mesh referenced materials
 		ReadMaterials(pFile, pIOHandler, pScene, mesh.get());
 

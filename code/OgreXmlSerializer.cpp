@@ -39,8 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "OgreXmlSerializer.h"
+#include "OgreBinarySerializer.h"
+#include "OgreParsingUtils.h"
 
-#include "irrXMLWrapper.h"
 #include "TinyFormatter.h"
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
@@ -638,9 +639,10 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
 		ba.vertexIndex = ReadAttribute<uint32_t>(anVertexIndex);
 		ba.boneIndex = ReadAttribute<uint16_t>(anBoneIndex);
 		ba.weight = ReadAttribute<float>(anWeight);
+
 		dest->boneAssignments.push_back(ba);
-		
 		influencedVertices.insert(ba.vertexIndex);
+
 		NextNode();
 	}
 
@@ -675,23 +677,61 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
 
 void OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh)
 {
-	if (mesh->skeletonRef.empty())
+	if (!mesh || mesh->skeletonRef.empty())
 		return;
 
-	/** @todo Also support referencing a binary skeleton from a XML mesh?
-		This will involves new interfacing to cross ref from MeshXml... */
-
-	std::string filename = mesh->skeletonRef;
-	if (EndsWith(filename, ".skeleton"))
+	// Highly unusual to see in read world cases but support
+	// XML mesh referencing a binary skeleton file.
+	if (EndsWith(mesh->skeletonRef, ".skeleton", false))
 	{
-		DefaultLogger::get()->warn("Mesh is referencing a Ogre binary skeleton. Parsing binary Ogre assets is not supported at the moment. Trying to find .skeleton.xml file instead.");
-		filename += ".xml";
+		if (OgreBinarySerializer::ImportSkeleton(pIOHandler, mesh))
+			return;
+		
+		/** Last fallback if .skeleton failed to be read.
+			Try reading from .skeleton.xml even if the XML file
+			referenced a binary skeleton.
+			@note This logic was in the previous version and
+			I don't want to break old code that depends on it. */
+		mesh->skeletonRef = mesh->skeletonRef + ".xml";
+	}
+
+	XmlReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
+	if (!reader.get())
+		return;
+
+	Skeleton *skeleton = new Skeleton();
+	OgreXmlSerializer serializer(reader.get());
+	serializer.ReadSkeleton(skeleton);
+	mesh->skeleton = skeleton;
+}
+
+void OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh)
+{
+	if (!mesh || mesh->skeletonRef.empty())
+		return;
+
+	XmlReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
+	if (!reader.get())
+		return;
+
+	Skeleton *skeleton = new Skeleton();
+	OgreXmlSerializer serializer(reader.get());
+	serializer.ReadSkeleton(skeleton);
+	mesh->skeleton = skeleton;
+}
+
+XmlReaderPtr OgreXmlSerializer::OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename)
+{
+	if (!EndsWith(filename, ".skeleton.xml", false))
+	{
+		DefaultLogger::get()->error("Imported Mesh is referencing to unsupported '" + filename + "' skeleton file.");
+		return XmlReaderPtr();
 	}
 
 	if (!pIOHandler->Exists(filename))
 	{
 		DefaultLogger::get()->error("Failed to find skeleton file '" + filename + "' that is referenced by imported Mesh.");
-		return;
+		return XmlReaderPtr();
 	}
 
 	boost::scoped_ptr<IOStream> file(pIOHandler->Open(filename));
@@ -700,15 +740,11 @@ void OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *me
 	}
 
 	boost::scoped_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
-	XmlReader* reader = irr::io::createIrrXMLReader(stream.get());
-	if (!reader) {
+	XmlReaderPtr reader = XmlReaderPtr(irr::io::createIrrXMLReader(stream.get()));
+	if (!reader.get()) {
 		throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);
 	}
-	
-	Skeleton *skeleton = new Skeleton();
-	OgreXmlSerializer serializer(reader);
-	serializer.ReadSkeleton(skeleton);
-	mesh->skeleton = skeleton;
+	return reader;
 }
 
 void OgreXmlSerializer::ReadSkeleton(Skeleton *skeleton)
@@ -718,6 +754,12 @@ void OgreXmlSerializer::ReadSkeleton(Skeleton *skeleton)
 	}
 	
 	DefaultLogger::get()->debug("Reading Skeleton");
+	
+	// Optional blend mode from root node
+	if (HasAttribute("blendmode")) {
+		skeleton->blendMode = (ToLower(ReadAttribute<std::string>("blendmode")) == "cumulative" 
+			? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
+	}
 
 	NextNode();
 
@@ -854,10 +896,10 @@ void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton)
 		if (bone && parent)
 			parent->AddChild(bone);
 		else
-			DefaultLogger::get()->warn("Failed to find bones for parenting: Child " + name + " for parent " + parentName);
+			throw DeadlyImportError("Failed to find bones for parenting: Child " + name + " for parent " + parentName);
 	}
 	
-	// Calculate bone matrices for root bones. Recursively calcutes their children.
+	// Calculate bone matrices for root bones. Recursively calculates their children.
 	for (size_t i=0, len=skeleton->bones.size(); i<len; ++i)
 	{
 		Bone *bone = skeleton->bones[i];
@@ -895,15 +937,18 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
 			}
 			else if (m_currentNodeName == nnRotation)
 			{
-				bone->rotationAngle = ReadAttribute<float>("angle");
+				float angle = ReadAttribute<float>("angle");
 
 				if (NextNode() != nnAxis) {
 					throw DeadlyImportError(Formatter::format() << "No axis specified for bone rotation in bone " << bone->id);
 				}
 
-				bone->rotation.x = ReadAttribute<float>(anX);
-				bone->rotation.y = ReadAttribute<float>(anY);
-				bone->rotation.z = ReadAttribute<float>(anZ);
+				aiVector3D axis;
+				axis.x = ReadAttribute<float>(anX);
+				axis.y = ReadAttribute<float>(anY);
+				axis.z = ReadAttribute<float>(anZ);
+				
+				bone->rotation = aiQuaternion(axis, angle);
 			}
 			else if (m_currentNodeName == nnScale)
 			{

@@ -44,8 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "OgreStructs.h"
-#include "OgreParsingUtils.h"
-
 #include "irrXMLWrapper.h"
 
 namespace Assimp
@@ -54,6 +52,7 @@ namespace Ogre
 {
 
 typedef irr::io::IrrXMLReader XmlReader;
+typedef boost::shared_ptr<XmlReader> XmlReaderPtr;
 
 class OgreXmlSerializer
 {
@@ -62,16 +61,19 @@ public:
 	/** @note Fatal unrecoverable errors will throw a DeadlyImportError. */
 	static MeshXml *ImportMesh(XmlReader *reader);
 	
-	/// Imports skeleton to @c mesh into MeshXML::skeleton.
+	/// Imports skeleton to @c mesh.
 	/** If mesh does not have a skeleton reference or the skeleton file
 		cannot be found it is not a fatal DeadlyImportError. */
 	static void ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
+	static void ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
 
 private:
 	OgreXmlSerializer(XmlReader *reader) :
 		m_reader(reader)
 	{
 	}
+	
+	static XmlReaderPtr OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename);
 
 	// Mesh
 	void ReadMesh(MeshXml *mesh);

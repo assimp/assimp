@@ -459,6 +459,35 @@ void Mesh::ConvertToAssimpScene(aiScene* dest)
 		dest->mMeshes[i] = subMeshes[i]->ConvertToAssimpMesh(this);
 		dest->mRootNode->mMeshes[i] = i;
 	}
+
+	// Export skeleton
+	if (skeleton)
+	{
+		// Bones
+		if (!skeleton->bones.empty())
+		{
+			BoneList rootBones = skeleton->RootBones();
+			dest->mRootNode->mNumChildren = rootBones.size();
+			dest->mRootNode->mChildren = new aiNode*[dest->mRootNode->mNumChildren];
+
+			for(size_t i=0, len=rootBones.size(); i<len; ++i)
+			{
+				dest->mRootNode->mChildren[i] = rootBones[i]->ConvertToAssimpNode(skeleton, dest->mRootNode);
+			}
+		}
+
+		// Animations
+		if (!skeleton->animations.empty())
+		{
+			dest->mNumAnimations = skeleton->animations.size();
+			dest->mAnimations = new aiAnimation*[dest->mNumAnimations];
+
+			for(size_t i=0, len=skeleton->animations.size(); i<len; ++i)
+			{
+				dest->mAnimations[i] = skeleton->animations[i]->ConvertToAssimpAnimation();
+			}
+		}
+	}
 }
 
 // ISubMesh
@@ -652,7 +681,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 			}
 		}
 	}
-	
+
 	// Bones and bone weights
 	if (parent->skeleton && boneAssignments)
 	{
@@ -926,7 +955,8 @@ aiAnimation *Animation::ConvertToAssimpAnimation()
 
 // Skeleton
 
-Skeleton::Skeleton()
+Skeleton::Skeleton() :
+	blendMode(ANIMBLEND_AVERAGE)
 {
 }
 
@@ -995,7 +1025,6 @@ Bone::Bone() :
 	id(0),
 	parent(0),
 	parentId(-1),
-	rotationAngle(0.0f),
 	scale(1.0f, 1.0f, 1.0f)
 {
 }
@@ -1024,16 +1053,12 @@ void Bone::AddChild(Bone *bone)
 
 void Bone::CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton)
 {
-	aiMatrix4x4 t0, t1;
-	aiMatrix4x4 transform = aiMatrix4x4::Rotation(-rotationAngle, rotation, t1) * aiMatrix4x4::Translation(-position, t0);
-
 	if (!IsParented())
-		worldMatrix = transform;
+		worldMatrix = aiMatrix4x4(scale, rotation, position).Inverse();
 	else
-		worldMatrix = transform * parent->worldMatrix;
+		worldMatrix = aiMatrix4x4(scale, rotation, position).Inverse() * parent->worldMatrix;
 
-	aiMatrix4x4 t2, t3; /// @todo t0 and t1 could probably be reused here?
-	defaultPose = aiMatrix4x4::Translation(position, t2) * aiMatrix4x4::Rotation(rotationAngle, rotation, t3);
+	defaultPose = aiMatrix4x4(scale, rotation, position);
 
 	// Recursively for all children now that the parent matrix has been calculated.
 	for (size_t i=0, len=children.size(); i<len; ++i)
@@ -1048,8 +1073,6 @@ void Bone::CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton)
 
 aiNode *Bone::ConvertToAssimpNode(Skeleton *skeleton, aiNode *parentNode)
 {
-	aiMatrix4x4 t0,t1;
-
 	// Bone node
 	aiNode* node = new aiNode(name);
 	node->mParent = parentNode;
@@ -1123,33 +1146,38 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
 
 	for(size_t kfi=0; kfi<numKeyframes; ++kfi)
 	{
-		const TransformKeyFrame &kfSource = transformKeyFrames[kfi];
-
-		// Create a matrix to transform a vector from the bones 
-		// default pose to the bone bones in this animation key
-		aiMatrix4x4 t0, t1;
-		aiMatrix4x4 keyBonePose =
-			aiMatrix4x4::Translation(kfSource.position, t0) *
-			aiMatrix4x4(kfSource.rotation.GetMatrix()) *
-			aiMatrix4x4::Scaling(kfSource.scale, t1);
+		TransformKeyFrame &kfSource = transformKeyFrames[kfi];
 
 		// Calculate the complete transformation from world space to bone space
-		aiMatrix4x4 finalTransform = bone->defaultPose * keyBonePose;
+		aiVector3D pos; aiQuaternion rot; aiVector3D scale;
 
-		aiVector3D kfPos; aiQuaternion kfRot; aiVector3D kfScale;
-		finalTransform.Decompose(kfScale, kfRot, kfPos);
+		aiMatrix4x4 finalTransform = bone->defaultPose * kfSource.Transform();		
+		finalTransform.Decompose(scale, rot, pos);
 
 		double t = static_cast<double>(kfSource.timePos);
 		nodeAnim->mPositionKeys[kfi].mTime = t;
 		nodeAnim->mRotationKeys[kfi].mTime = t;
 		nodeAnim->mScalingKeys[kfi].mTime = t;
 
-		nodeAnim->mPositionKeys[kfi].mValue = kfPos;					
-		nodeAnim->mRotationKeys[kfi].mValue = kfRot;
-		nodeAnim->mScalingKeys[kfi].mValue = kfScale;
+		nodeAnim->mPositionKeys[kfi].mValue = pos;					
+		nodeAnim->mRotationKeys[kfi].mValue = rot;
+		nodeAnim->mScalingKeys[kfi].mValue = scale;
 	}
 
 	return nodeAnim;
+}
+
+// TransformKeyFrame
+
+TransformKeyFrame::TransformKeyFrame() : 
+	timePos(0.0f),
+	scale(1.0f, 1.0f, 1.0f)
+{
+}
+
+aiMatrix4x4 TransformKeyFrame::Transform()
+{
+	return aiMatrix4x4(scale, rotation, position);
 }
 
 } // Ogre

@@ -65,7 +65,6 @@ class Skeleton;
 #define OGRE_SAFE_DELETE(p) delete p; p=0;
 
 // Typedefs
-typedef Assimp::StreamReaderLE MemoryStreamReader;
 typedef Assimp::MemoryIOStream MemoryStream;
 typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
 typedef std::map<uint16_t, MemoryStreamPtr> VertexBufferBindings;
@@ -318,6 +317,10 @@ typedef std::vector<MorphKeyFrame> MorphKeyFrameList;
 /// Ogre animation key frame
 struct TransformKeyFrame
 {
+	TransformKeyFrame();
+	
+	aiMatrix4x4 Transform();
+
 	float timePos;
 	
 	aiQuaternion rotation;
@@ -435,9 +438,8 @@ public:
 	std::vector<uint16_t> children;
 
 	aiVector3D position;
-	aiVector3D rotation;
-	aiVector3D scale; ///< @todo Implement taking scale into account in matrix/pose calculations!
-	float rotationAngle;
+	aiQuaternion rotation;
+	aiVector3D scale;
 	
 	aiMatrix4x4 worldMatrix;
 	aiMatrix4x4 defaultPose;
@@ -448,6 +450,14 @@ typedef std::vector<Bone*> BoneList;
 class Skeleton
 {
 public:
+	enum BlendMode
+	{
+		/// Animations are applied by calculating a weighted average of all animations
+		ANIMBLEND_AVERAGE = 0,
+		/// Animations are applied by calculating a weighted cumulative total
+		ANIMBLEND_CUMULATIVE = 1
+	};
+
 	Skeleton();
 	~Skeleton();
 
@@ -468,6 +478,9 @@ public:
 	
 	BoneList bones;
 	AnimationList animations;
+	
+	/// @todo Take blend mode into account, but where?
+	BlendMode blendMode;
 };
 
 /// Ogre Sub Mesh interface, inherited by the binary and XML implementations.

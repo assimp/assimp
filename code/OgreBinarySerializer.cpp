@@ -39,6 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "OgreBinarySerializer.h"
+#include "OgreXmlSerializer.h"
+#include "OgreParsingUtils.h"
+
 #include "TinyFormatter.h"
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
@@ -51,9 +54,15 @@ namespace Assimp
 namespace Ogre
 {
 
-const std::string		VERSION_1_8				= "[MeshSerializer_v1.8]";
-const unsigned short	HEADER_CHUNK_ID			= 0x1000;
-const long				MSTREAM_OVERHEAD_SIZE	= sizeof(uint16_t) + sizeof(uint32_t);
+const std::string       MESH_VERSION_1_8        = "[MeshSerializer_v1.8]";
+const std::string       SKELETON_VERSION_1_8    = "[Serializer_v1.80]";
+const std::string       SKELETON_VERSION_1_1    = "[Serializer_v1.10]";
+
+const unsigned short    HEADER_CHUNK_ID         = 0x1000;
+
+const long              MSTREAM_OVERHEAD_SIZE               = sizeof(uint16_t) + sizeof(uint32_t);
+const long              MSTREAM_BONE_SIZE_WITHOUT_SCALE     = MSTREAM_OVERHEAD_SIZE + sizeof(unsigned short) + (sizeof(float) * 7);
+const long              MSTREAM_KEYFRAME_SIZE_WITHOUT_SCALE = MSTREAM_OVERHEAD_SIZE + (sizeof(float) * 8);
 
 template<> 
 inline bool OgreBinarySerializer::Read<bool>()
@@ -118,6 +127,16 @@ void OgreBinarySerializer::ReadVector(aiVector3D &vec)
 	m_reader->CopyAndAdvance(&vec.x, sizeof(float)*3);
 }
 
+void OgreBinarySerializer::ReadQuaternion(aiQuaternion &quat)
+{
+	float temp[4];
+	m_reader->CopyAndAdvance(temp, sizeof(float)*4);
+	quat.x = temp[0];
+	quat.y = temp[1];
+	quat.z = temp[2];
+	quat.w = temp[3];
+}
+
 bool OgreBinarySerializer::AtEnd() const
 {
 	return (m_reader->GetRemainingSize() == 0);
@@ -152,7 +171,10 @@ uint16_t OgreBinarySerializer::ReadHeader(bool readLen)
 
 #if (OGRE_BINARY_SERIALIZER_DEBUG == 1)
 	if (id != HEADER_CHUNK_ID)
-		DefaultLogger::get()->debug(Formatter::format() << MeshHeaderToString(static_cast<MeshChunkId>(id)));
+	{
+		DefaultLogger::get()->debug(Formatter::format() << (assetMode == AM_Mesh 
+			? MeshHeaderToString(static_cast<MeshChunkId>(id)) : SkeletonHeaderToString(static_cast<SkeletonChunkId>(id))));
+	}
 #endif
 
 	return id;
@@ -172,9 +194,11 @@ void OgreBinarySerializer::SkipBytes(size_t numBytes)
 	m_reader->IncPtr(numBytes);
 }
 
+// Mesh
+
 Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream)
 {
-	OgreBinarySerializer serializer(stream);
+	OgreBinarySerializer serializer(stream, OgreBinarySerializer::AM_Mesh);
 	
 	uint16_t id = serializer.ReadHeader(false);
 	if (id != HEADER_CHUNK_ID) {
@@ -183,8 +207,11 @@ Mesh *OgreBinarySerializer::ImportMesh(MemoryStreamReader *stream)
 
 	/// @todo Check what we can actually support.
 	std::string version = serializer.ReadLine();
-	if (version != VERSION_1_8)
-		throw DeadlyExportError("Mesh version " + version + " not supported by this importer. Run OgreMeshUpgrader tool on the file and try again.");
+	if (version != MESH_VERSION_1_8)
+	{
+		throw DeadlyExportError(Formatter::format() << "Mesh version " << version << " not supported by this importer. Run OgreMeshUpgrader tool on the file and try again."
+			<< " Supported versions: " << MESH_VERSION_1_8);
+	}
 
 	Mesh *mesh = new Mesh();
 	while (!serializer.AtEnd())
@@ -732,8 +759,7 @@ void OgreBinarySerializer::ReadAnimations(Mesh *mesh)
 }
 
 void OgreBinarySerializer::ReadAnimation(Animation *anim)
-{
-	
+{	
 	if (!AtEnd())
 	{
 		uint16_t id = ReadHeader();
@@ -819,6 +845,263 @@ void OgreBinarySerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimati
 		if (!AtEnd())
 			RollbackHeader();
 	}
+}
+
+// Skeleton
+
+bool OgreBinarySerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh)
+{
+	if (!mesh || mesh->skeletonRef.empty())
+		return false;
+
+	// Highly unusual to see in read world cases but support
+	// binary mesh referencing a XML skeleton file.
+	if (EndsWith(mesh->skeletonRef, ".skeleton.xml", false))
+	{
+		OgreXmlSerializer::ImportSkeleton(pIOHandler, mesh);
+		return false;
+	}
+	
+	MemoryStreamReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
+		
+	Skeleton *skeleton = new Skeleton();
+	OgreBinarySerializer serializer(reader.get(), OgreBinarySerializer::AM_Skeleton);
+	serializer.ReadSkeleton(skeleton);
+	mesh->skeleton = skeleton;
+	return true;
+}
+
+bool OgreBinarySerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh)
+{
+	if (!mesh || mesh->skeletonRef.empty())
+		return false;
+
+	MemoryStreamReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
+	if (!reader.get())
+		return false;
+
+	Skeleton *skeleton = new Skeleton();
+	OgreBinarySerializer serializer(reader.get(), OgreBinarySerializer::AM_Skeleton);
+	serializer.ReadSkeleton(skeleton);
+	mesh->skeleton = skeleton;
+	return true;
+}
+
+MemoryStreamReaderPtr OgreBinarySerializer::OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename)
+{
+	if (!EndsWith(filename, ".skeleton", false))
+	{
+		DefaultLogger::get()->error("Imported Mesh is referencing to unsupported '" + filename + "' skeleton file.");
+		return MemoryStreamReaderPtr();
+	}
+
+	if (!pIOHandler->Exists(filename))
+	{
+		DefaultLogger::get()->error("Failed to find skeleton file '" + filename + "' that is referenced by imported Mesh.");
+		return MemoryStreamReaderPtr();
+	}
+
+	IOStream *f = pIOHandler->Open(filename, "rb");
+	if (!f) {
+		throw DeadlyImportError("Failed to open skeleton file " + filename);
+	}
+
+	return MemoryStreamReaderPtr(new MemoryStreamReader(f));
+}
+
+void OgreBinarySerializer::ReadSkeleton(Skeleton *skeleton)
+{
+	uint16_t id = ReadHeader(false);
+	if (id != HEADER_CHUNK_ID) {
+		throw DeadlyExportError("Invalid Ogre Skeleton file header.");
+	}
+
+	// This deserialization supports both versions of the skeleton spec
+	std::string version = ReadLine();
+	if (version != SKELETON_VERSION_1_8 && version != SKELETON_VERSION_1_1)
+	{
+		throw DeadlyExportError(Formatter::format() << "Skeleton version " << version << " not supported by this importer."
+			<< " Supported versions: " << SKELETON_VERSION_1_8 << " and " << SKELETON_VERSION_1_1);
+	}
+	
+	DefaultLogger::get()->debug("Reading Skeleton");
+	
+	bool firstBone = true;
+	bool firstAnim = true;
+
+	while (!AtEnd())
+	{
+		id = ReadHeader();
+		switch(id)
+		{
+			case SKELETON_BLENDMODE:
+			{
+				skeleton->blendMode = static_cast<Skeleton::BlendMode>(Read<uint16_t>());
+				break;
+			}
+			case SKELETON_BONE:
+			{
+				if (firstBone)
+				{
+					DefaultLogger::get()->debug("  - Bones");
+					firstBone = false;
+				}
+
+				ReadBone(skeleton);
+				break;
+			}
+			case SKELETON_BONE_PARENT:
+			{
+				ReadBoneParent(skeleton);
+				break;
+			}
+			case SKELETON_ANIMATION:
+			{
+				if (firstAnim)
+				{
+					DefaultLogger::get()->debug("  - Animations");
+					firstAnim = false;
+				}
+
+				ReadSkeletonAnimation(skeleton);
+				break;
+			}
+			case SKELETON_ANIMATION_LINK:
+			{
+				ReadSkeletonAnimationLink(skeleton);
+				break;
+			}
+		}
+	}
+	
+	// Calculate bone matrices for root bones. Recursively calculates their children.
+	for (size_t i=0, len=skeleton->bones.size(); i<len; ++i)
+	{
+		Bone *bone = skeleton->bones[i];
+		if (!bone->IsParented())
+			bone->CalculateWorldMatrixAndDefaultPose(skeleton);
+	}
+}
+
+void OgreBinarySerializer::ReadBone(Skeleton *skeleton)
+{
+	Bone *bone = new Bone();
+	bone->name = ReadLine();
+	bone->id = Read<uint16_t>();
+
+	// Pos and rot
+	ReadVector(bone->position);
+	ReadQuaternion(bone->rotation);
+
+	// Scale (optional)
+	if (m_currentLen > MSTREAM_BONE_SIZE_WITHOUT_SCALE)
+		ReadVector(bone->scale);
+
+	// Bone indexes need to start from 0 and be contiguous
+	if (bone->id != skeleton->bones.size()) {
+		throw DeadlyImportError(Formatter::format() << "Ogre Skeleton bone indexes not contiguous. Error at bone index " << bone->id);
+	}
+
+	DefaultLogger::get()->debug(Formatter::format() << "    " << bone->id << " " << bone->name);
+
+	skeleton->bones.push_back(bone);
+}
+
+void OgreBinarySerializer::ReadBoneParent(Skeleton *skeleton)
+{
+	uint16_t childId = Read<uint16_t>();
+	uint16_t parentId = Read<uint16_t>();
+	
+	Bone *child = skeleton->BoneById(childId);
+	Bone *parent = skeleton->BoneById(parentId);
+	
+	if (child && parent)
+		parent->AddChild(child);
+	else
+		throw DeadlyImportError(Formatter::format() << "Failed to find bones for parenting: Child id " << childId << " for parent id " << parentId);
+}
+
+void OgreBinarySerializer::ReadSkeletonAnimation(Skeleton *skeleton)
+{
+	Animation *anim = new Animation(skeleton);
+	anim->name = ReadLine();
+	anim->length = Read<float>();
+	
+	if (!AtEnd())
+	{
+		uint16_t id = ReadHeader();
+		if (id == SKELETON_ANIMATION_BASEINFO)
+		{
+			anim->baseName = ReadLine();
+			anim->baseTime = Read<float>();
+
+			// Advance to first track
+			id = ReadHeader();
+		}
+
+		while (!AtEnd() && id == SKELETON_ANIMATION_TRACK)
+		{
+			ReadSkeletonAnimationTrack(skeleton, anim);
+
+			if (!AtEnd())
+				id = ReadHeader();
+		}
+		if (!AtEnd())
+			RollbackHeader();
+	}
+	
+	skeleton->animations.push_back(anim);
+	
+	DefaultLogger::get()->debug(Formatter::format() << "    " << anim->name << " (" << anim->length << " sec, " << anim->tracks.size() << " tracks)");	
+}
+
+void OgreBinarySerializer::ReadSkeletonAnimationTrack(Skeleton *skeleton, Animation *dest)
+{
+	uint16_t boneId = Read<uint16_t>();
+	Bone *bone = dest->parentSkeleton->BoneById(boneId);
+	if (!bone) {
+		throw DeadlyImportError(Formatter::format() << "Cannot read animation track, target bone " << boneId << " not in target Skeleton");
+	}
+	
+	VertexAnimationTrack track;
+	track.type = VertexAnimationTrack::VAT_TRANSFORM;
+	track.boneName = bone->name;
+	
+	uint16_t id = ReadHeader();
+	while (!AtEnd() && id == SKELETON_ANIMATION_TRACK_KEYFRAME)
+	{
+		ReadSkeletonAnimationKeyFrame(&track);
+
+		if (!AtEnd())
+			id = ReadHeader();
+	}
+	if (!AtEnd())
+		RollbackHeader();
+
+	dest->tracks.push_back(track);
+}
+
+void OgreBinarySerializer::ReadSkeletonAnimationKeyFrame(VertexAnimationTrack *dest)
+{
+	TransformKeyFrame keyframe;
+	keyframe.timePos = Read<float>();
+	
+	// Rot and pos
+	ReadQuaternion(keyframe.rotation);
+	ReadVector(keyframe.position);
+	
+	// Scale (optional)
+	if (m_currentLen > MSTREAM_KEYFRAME_SIZE_WITHOUT_SCALE)
+		ReadVector(keyframe.scale);
+		
+	dest->transformKeyFrames.push_back(keyframe);
+}
+
+void OgreBinarySerializer::ReadSkeletonAnimationLink(Skeleton *skeleton)
+{
+	// Skip bounds, not compatible with Assimp.
+	ReadLine(); // skeleton name
+	SkipBytes(sizeof(float) * 3); // scale
 }
 
 } // Ogre

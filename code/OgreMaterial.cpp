@@ -42,11 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include <vector>
-#include <sstream>
-
 #include "OgreImporter.h"
 #include "TinyFormatter.h"
+
+#include "fast_atof.h"
+
+#include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -59,11 +61,66 @@ static const string partComment    = "//";
 static const string partBlockStart = "{";
 static const string partBlockEnd   = "}";
 
+void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, Mesh *mesh)
+{
+	std::vector<aiMaterial*> materials;
+
+	// Create materials that can be found and parsed via the IOSystem.
+	for (size_t i=0, len=mesh->NumSubMeshes(); i<len; ++i)
+	{
+		SubMesh *submesh = mesh->GetSubMesh(i);
+		if (submesh && !submesh->materialRef.empty())
+		{
+			aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
+			if (material)
+			{
+				submesh->materialIndex = materials.size();
+				materials.push_back(material);
+			}
+		}
+	}
+
+	AssignMaterials(pScene, materials);
+}
+
+void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, MeshXml *mesh)
+{
+	std::vector<aiMaterial*> materials;
+
+	// Create materials that can be found and parsed via the IOSystem.
+	for (size_t i=0, len=mesh->NumSubMeshes(); i<len; ++i)
+	{
+		SubMeshXml *submesh = mesh->GetSubMesh(i);
+		if (submesh && !submesh->materialRef.empty())
+		{
+			aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
+			if (material)
+			{
+				submesh->materialIndex = materials.size();
+				materials.push_back(material);
+			}
+		}
+	}
+
+	AssignMaterials(pScene, materials);
+}
+
+void OgreImporter::AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials)
+{
+	pScene->mNumMaterials = materials.size();
+	if (pScene->mNumMaterials > 0)
+	{
+		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+		for(size_t i=0;i<pScene->mNumMaterials; ++i) {
+			pScene->mMaterials[i] = materials[i];
+		}
+	}
+}
+
 aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string materialName)
 {
-	/// @todo Should we return null ptr here or a empty material?
 	if (materialName.empty()) {
-		return new aiMaterial();
+		return 0;
 	}
 
 	// Full reference and examples of Ogre Material Script 
@@ -117,17 +174,15 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 		}
 		if (!materialFile)
 		{
-			/// @todo Should we return null ptr here or a empty material?
 			DefaultLogger::get()->error(Formatter::format() << "Failed to find source file for material '" << materialName << "'");
-			return new aiMaterial();
+			return 0;
 		}
 
 		boost::scoped_ptr<IOStream> stream(materialFile);
 		if (stream->FileSize() == 0)
 		{
-			/// @todo Should we return null ptr here or a empty material?
 			DefaultLogger::get()->warn(Formatter::format() << "Source file for material '" << materialName << "' is empty (size is 0 bytes)");
-			return new aiMaterial();
+			return 0;
 		}
 
 		// Read bytes
@@ -162,8 +217,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = NextAfterNewLine(ss, linePart);
-			DefaultLogger::get()->debug("//" + postComment + " (comment line ignored)");			
+			NextAfterNewLine(ss, linePart);
 			continue;
 		}
 		if (linePart != partMaterial)
@@ -306,8 +360,7 @@ bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream 
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = SkipLine(ss);
-			DefaultLogger::get()->debug("  //" + postComment + " (comment line ignored)");
+			SkipLine(ss);
 			continue;
 		}
 
@@ -347,8 +400,7 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = SkipLine(ss);
-			DefaultLogger::get()->debug("   //" + postComment + " (comment line ignored)");
+			SkipLine(ss);
 			continue;
 		}
 
@@ -416,8 +468,7 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 		// Skip commented lines
 		if (linePart == partComment)
 		{
-			string postComment = SkipLine(ss);
-			DefaultLogger::get()->debug("    //" + postComment + " (comment line ignored)");
+			SkipLine(ss);
 			continue;
 		}
 

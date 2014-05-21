@@ -46,11 +46,16 @@ test scripts rely on this)
 """
 
 import os
+
 # -------------------------------------------------------------------------------
 # List of file extensions to be excluded from the regression suite
 # File extensions are case insensitive
 # -------------------------------------------------------------------------------
-exclude_extensions = [".lws",".assbin",".assxml",".txt",".jpeg",".jpg",".png",".gif",".tga",".bmp"]
+exclude_extensions = [
+    ".lws", ".assbin", ".assxml", ".txt", ".md",
+    ".jpeg", ".jpg", ".png", ".gif", ".tga", ".bmp",
+    ".skeleton", ".skeleton.xml"
+]
 
 # -------------------------------------------------------------------------------
 # Post processing configurations to be included in the test. The
@@ -93,8 +98,8 @@ database_name = "db"
 # List of directories to be processed. Paths are processed recursively.
 # -------------------------------------------------------------------------------
 model_directories = [
-os.path.join("..","models"),
-os.path.join("..","models-nonbsd")
+    os.path.join("..","models"),
+    os.path.join("..","models-nonbsd")
 ]
 
 # -------------------------------------------------------------------------------
@@ -114,5 +119,8 @@ dump_header_skip = 500
 # -------------------------------------------------------------------------------
 results = os.path.join("..","results")
 
+# Create results directory if it does not exist
+if not os.path.exists(results):
+    os.makedirs(results)
 
 # vim: ai ts=4 sts=4 et sw=4

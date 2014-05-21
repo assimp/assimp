@@ -322,11 +322,15 @@ SOURCE_GROUP( Obj FILES ${Obj_SRCS})
 
 SET( Ogre_SRCS
 	OgreImporter.h
+	OgreStructs.h
 	OgreParsingUtils.h
+	OgreBinarySerializer.h
+	OgreXmlSerializer.h
 	OgreImporter.cpp
+	OgreStructs.cpp
+	OgreBinarySerializer.cpp
+	OgreXmlSerializer.cpp
 	OgreMaterial.cpp
-	OgreMesh.cpp
-	OgreSkeleton.cpp
 )
 SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
 

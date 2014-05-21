@@ -63,9 +63,10 @@ public:
 	
 	/// Imports skeleton to @c mesh.
 	/** If mesh does not have a skeleton reference or the skeleton file
-		cannot be found it is not a fatal DeadlyImportError. */
-	static void ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
-	static void ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
+		cannot be found it is not a fatal DeadlyImportError.
+		@return If skeleton import was successful. */
+	static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
+	static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
 
 private:
 	OgreXmlSerializer(XmlReader *reader) :

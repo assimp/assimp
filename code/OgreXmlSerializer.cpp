@@ -675,49 +675,50 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
 
 // Skeleton
 
-void OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh)
+bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh)
 {
 	if (!mesh || mesh->skeletonRef.empty())
-		return;
+		return false;
 
 	// Highly unusual to see in read world cases but support
 	// XML mesh referencing a binary skeleton file.
 	if (EndsWith(mesh->skeletonRef, ".skeleton", false))
 	{
 		if (OgreBinarySerializer::ImportSkeleton(pIOHandler, mesh))
-			return;
-		
-		/** Last fallback if .skeleton failed to be read.
-			Try reading from .skeleton.xml even if the XML file
-			referenced a binary skeleton.
-			@note This logic was in the previous version and
-			I don't want to break old code that depends on it. */
+			return true;
+
+		/** Last fallback if .skeleton failed to be read. Try reading from
+			.skeleton.xml even if the XML file referenced a binary skeleton.
+			@note This logic was in the previous version and I don't want to break
+			old code that might depends on it. */
 		mesh->skeletonRef = mesh->skeletonRef + ".xml";
 	}
 
 	XmlReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
 	if (!reader.get())
-		return;
+		return false;
 
 	Skeleton *skeleton = new Skeleton();
 	OgreXmlSerializer serializer(reader.get());
 	serializer.ReadSkeleton(skeleton);
 	mesh->skeleton = skeleton;
+	return true;
 }
 
-void OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh)
+bool OgreXmlSerializer::ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh)
 {
 	if (!mesh || mesh->skeletonRef.empty())
-		return;
+		return false;
 
 	XmlReaderPtr reader = OpenReader(pIOHandler, mesh->skeletonRef);
 	if (!reader.get())
-		return;
+		return false;
 
 	Skeleton *skeleton = new Skeleton();
 	OgreXmlSerializer serializer(reader.get());
 	serializer.ReadSkeleton(skeleton);
 	mesh->skeleton = skeleton;
+	return true;
 }
 
 XmlReaderPtr OgreXmlSerializer::OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename)

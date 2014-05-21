@@ -227,7 +227,7 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
 template <typename Real>
-inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma = true)
+inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
 {
 	Real f;
 

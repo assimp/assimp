@@ -41,6 +41,7 @@ The library provides importers for a lot of file formats, including:
 - BVH
 - B3D
 - NDO
+- Ogre Binary
 - Ogre XML
 - Q3D
  

@@ -783,8 +783,8 @@ private:
 				data->Set(index++, prop.first, interpreted->Value());
 			else if (const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >())
 				data->Set(index++, prop.first, interpreted->Value());
-			else if (const TypedProperty<aiString>* interpreted = prop.second->As<TypedProperty<aiString> >())
-				data->Set(index++, prop.first, interpreted->Value());
+			else if (const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >())
+				data->Set(index++, prop.first, aiString(interpreted->Value()));
 			else if (const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >())
 				data->Set(index++, prop.first, interpreted->Value());
 			else

@@ -53,7 +53,7 @@ struct ImportSettings
 	ImportSettings()
 		: strictMode(true)
 		, readAllLayers(true)
-		, readAllMaterials()
+		, readAllMaterials(false)
 		, readMaterials(true)
 		, readCameras(true)
 		, readLights(true)

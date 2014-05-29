@@ -10,7 +10,7 @@ SET( HEADER_PATH ../include/assimp )
 SET( COMPILER_HEADERS
 	${HEADER_PATH}/Compiler/pushpack1.h
 	${HEADER_PATH}/Compiler/poppack1.h
-	pstdint.h
+	${HEADER_PATH}/Compiler/pstdint.h
 )
 SOURCE_GROUP( Compiler FILES ${COMPILER_HEADERS})
 

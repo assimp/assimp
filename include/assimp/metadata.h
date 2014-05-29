@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assert.h>
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1500)
-#include "pstdint.h"
+#include "Compiler/pstdint.h"
 #else
 #include <stdint.h>
 #endif

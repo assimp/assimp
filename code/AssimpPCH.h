@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Include our stdint.h replacement header for MSVC, take the global header for gcc/mingw
 #if defined( _MSC_VER) && (_MSC_VER < 1600)
-#	include "pstdint.h"
+#	include "../include/assimp/Compiler/pstdint.h"
 #else
 #	include <stdint.h>
 #endif

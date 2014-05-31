@@ -84,8 +84,8 @@ public:
 	 * @param rotation The rotation as a hamilton quaternion 
 	 * @param position The position for the x,y,z axes
 	 */
-	aiMatrix4x4t(aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
-		aiVector3t<TReal>& position);
+	aiMatrix4x4t(const aiVector3t<TReal>& scaling, const aiQuaterniont<TReal>& rotation,
+		const aiVector3t<TReal>& position);
 
 public:
 

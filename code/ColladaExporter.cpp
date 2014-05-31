@@ -630,26 +630,83 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 	PopTag();
 	mOutput << startstr << "</vertices>" << endstr;
 
-	// write face setup
-	mOutput << startstr << "<polylist count=\"" << mesh->mNumFaces << "\" material=\"theresonlyone\">" << endstr;
-	PushTag();
-	mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
-	
-	mOutput << startstr << "<vcount>";
-	for( size_t a = 0; a < mesh->mNumFaces; ++a )
-		mOutput << mesh->mFaces[a].mNumIndices << " ";
-	mOutput << "</vcount>" << endstr;
-	
-	mOutput << startstr << "<p>";
+	// count the number of lines, triangles and polygon meshes
+	int countLines = 0;
+	int countTriangles = 0;
+	int countPoly = 0;
 	for( size_t a = 0; a < mesh->mNumFaces; ++a )
 	{
-		const aiFace& face = mesh->mFaces[a];
-		for( size_t b = 0; b < face.mNumIndices; ++b )
-			mOutput << face.mIndices[b] << " ";
+		if (mesh->mFaces[a].mNumIndices == 2) countLines++;
+		else if (mesh->mFaces[a].mNumIndices == 3) countTriangles++;
+		else if (mesh->mFaces[a].mNumIndices > 3) countPoly++;
 	}
-	mOutput << "</p>" << endstr;
-	PopTag();
-	mOutput << startstr << "</polylist>" << endstr;
+
+	// lines
+	if (countLines)
+	{
+		mOutput << startstr << "<lines count=\"" << countLines << "\" material=\"theresonlyone\">" << endstr;
+		PushTag();
+		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
+		mOutput << startstr << "<p>";
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{
+			const aiFace& face = mesh->mFaces[a];
+			if (face.mNumIndices != 2) continue;
+			for( size_t b = 0; b < face.mNumIndices; ++b )
+				mOutput << face.mIndices[b] << " ";
+		}
+		mOutput << "</p>" << endstr;
+		PopTag();
+		mOutput << startstr << "</lines>" << endstr;
+	}
+
+	// triangles
+	if (countTriangles)
+	{
+		mOutput << startstr << "<triangles count=\"" << countTriangles << "\" material=\"theresonlyone\">" << endstr;
+		PushTag();
+		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
+		mOutput << startstr << "<input offset=\"0\" semantic=\"NORMAL\" source=\"#" << idstr << "-normals\" />" << endstr;
+		mOutput << startstr << "<p>";
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{
+			const aiFace& face = mesh->mFaces[a];
+			if (face.mNumIndices != 3) continue;
+			for( size_t b = 0; b < face.mNumIndices; ++b )
+				mOutput << face.mIndices[b] << " ";
+		}
+		mOutput << "</p>" << endstr;
+		PopTag();
+		mOutput << startstr << "</triangles>" << endstr;
+	}
+
+	// polygons
+	if (countPoly)
+	{		
+		mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"theresonlyone\">" << endstr;
+		PushTag();
+		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
+	
+		mOutput << startstr << "<vcount>";
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{
+			if (mesh->mFaces[a].mNumIndices <= 3) continue;
+			mOutput << mesh->mFaces[a].mNumIndices << " ";
+		}
+		mOutput << "</vcount>" << endstr;
+	
+		mOutput << startstr << "<p>";
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{
+			const aiFace& face = mesh->mFaces[a];
+			if (face.mNumIndices <= 3) continue;
+			for( size_t b = 0; b < face.mNumIndices; ++b )
+				mOutput << face.mIndices[b] << " ";
+		}
+		mOutput << "</p>" << endstr;
+		PopTag();
+		mOutput << startstr << "</polylist>" << endstr;
+	}
 
 	// closing tags
 	PopTag();

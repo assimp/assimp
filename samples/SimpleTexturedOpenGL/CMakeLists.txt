@@ -22,6 +22,7 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES( 
 	${Assimp_BINARY_DIR} 
 	${Assimp_BINARY_DIR}/lib/
+	${Assimp_SOURCE_DIR}/samples/DevIL/lib/
 )
 
 ADD_EXECUTABLE( assimp_simpletexturedogl WIN32

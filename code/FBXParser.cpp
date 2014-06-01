@@ -381,7 +381,7 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
 			// Same
 			double out_double;
 			::memcpy(&out_double, data+1, sizeof(double));
-			return out_double;
+			return static_cast<float>(out_double);
 		}
 	}
 

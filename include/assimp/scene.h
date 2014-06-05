@@ -375,6 +375,15 @@ struct aiScene
 	*/
 	C_STRUCT aiCamera** mCameras;
 
+
+	/** a string representing the author
+	*/
+	aiString author;
+
+	/** a string representing the authoringtool
+	*/
+	aiString authoringTool;
+
 #ifdef __cplusplus
 
 	//! Default constructor - set everything to 0/NULL

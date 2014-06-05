@@ -88,6 +88,8 @@ ASSIMP_API aiScene::aiScene()
 	, mNumCameras(0)
 	, mCameras(NULL)
 	, mPrivate(new Assimp::ScenePrivateData())
+	, author("Assimp")
+	, authoringTool("Assimp Importer/Exporter")
 	{
 	}
 

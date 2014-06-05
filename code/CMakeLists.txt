@@ -187,7 +187,7 @@ SET( Collada_SRCS
 	ColladaParser.cpp
 	ColladaParser.h
 	ColladaExporter.h
-	ColladaExporter.cpp
+	ColladaExporter.cpp	
 )
 SOURCE_GROUP( Collada FILES ${Collada_SRCS})
 
@@ -543,6 +543,8 @@ SET( XFile_SRCS
 	XFileImporter.h
 	XFileParser.cpp
 	XFileParser.h
+	XFileExporter.h
+	XFileExporter.cpp
 )
 SOURCE_GROUP( XFile FILES ${XFile_SRCS})
 

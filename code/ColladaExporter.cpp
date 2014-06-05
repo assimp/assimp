@@ -151,7 +151,7 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-	static const float epsilon = 0.000001f;
+	static const float epsilon = 0.00001f;
 	static const aiQuaternion x_rot(aiMatrix3x3( 
 		0, -1,  0,
 		1,  0,  0,
@@ -176,6 +176,7 @@ void ColladaExporter::WriteHeader()
 	aiQuaternion rotation;
 	aiVector3D position;
 	mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
+	rotation.Normalize();
 
 	bool add_root_node = false;
 
@@ -229,8 +230,8 @@ void ColladaExporter::WriteHeader()
 	PushTag();
 	mOutput << startstr << "<contributor>" << endstr;
 	PushTag();
-	mOutput << startstr << "<author>Assimp</author>" << endstr;
-	mOutput << startstr << "<authoring_tool>Assimp Collada Exporter</authoring_tool>" << endstr;
+	mOutput << startstr << "<author>" << mScene->author.C_Str() << "</author>" << endstr;
+	mOutput << startstr << "<authoring_tool>" << mScene->authoringTool.C_Str() << "</authoring_tool>" << endstr;
 	PopTag();
 	mOutput << startstr << "</contributor>" << endstr;
 	mOutput << startstr << "<created>" << date_str << "</created>" << endstr;

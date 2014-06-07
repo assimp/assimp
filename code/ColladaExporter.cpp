@@ -354,7 +354,8 @@ void ColladaExporter::WriteTextureColorEntry( const Surface& pSurface, const std
     if( pSurface.texture.empty() )
     {
       mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
-    } else
+    }
+	else
     {
       mOutput << startstr << "<texture texture=\"" << pImageName << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
     }
@@ -673,8 +674,17 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 		{
 			const aiFace& face = mesh->mFaces[a];
 			if (face.mNumIndices != 3) continue;
+			// write vertix indices
 			for( size_t b = 0; b < face.mNumIndices; ++b )
+			{
 				mOutput << face.mIndices[b] << " ";
+			}
+			// write normal indices
+			for( size_t b = 0; b < face.mNumIndices; ++b )
+			{
+				mOutput << face.mIndices[b] << " ";
+			}
+
 		}
 		mOutput << "</p>" << endstr;
 		PopTag();

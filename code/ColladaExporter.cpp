@@ -124,7 +124,7 @@ ColladaExporter::~ColladaExporter()
 void ColladaExporter::WriteFile()
 {
 	// write the DTD
-	mOutput << "<?xml version=\"1.0\"?>" << endstr;
+	mOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << endstr;
 	// COLLADA element start
 	mOutput << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">" << endstr;
 	PushTag();
@@ -646,7 +646,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 	// lines
 	if (countLines)
 	{
-		mOutput << startstr << "<lines count=\"" << countLines << "\" material=\"theresonlyone\">" << endstr;
+		mOutput << startstr << "<lines count=\"" << countLines << "\" material=\"defaultMaterial\">" << endstr;
 		PushTag();
 		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
 		mOutput << startstr << "<p>";
@@ -662,13 +662,13 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 		mOutput << startstr << "</lines>" << endstr;
 	}
 
-	// triangles
+	// triangles, note for collada, triangles are defined in a right hand system
 	if (countTriangles)
 	{
-		mOutput << startstr << "<triangles count=\"" << countTriangles << "\" material=\"theresonlyone\">" << endstr;
+		mOutput << startstr << "<triangles count=\"" << countTriangles << "\" material=\"defaultMaterial\">" << endstr;
 		PushTag();
 		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
-		mOutput << startstr << "<input offset=\"0\" semantic=\"NORMAL\" source=\"#" << idstr << "-normals\" />" << endstr;
+		mOutput << startstr << "<input offset=\"1\" semantic=\"NORMAL\" source=\"#" << idstr << "-normals\" />" << endstr;
 		mOutput << startstr << "<p>";
 		for( size_t a = 0; a < mesh->mNumFaces; ++a )
 		{
@@ -694,7 +694,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 	// polygons
 	if (countPoly)
 	{		
-		mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"theresonlyone\">" << endstr;
+		mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
 		PushTag();
 		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
 	
@@ -838,8 +838,16 @@ void ColladaExporter::WriteSceneLibrary()
 
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void ColladaExporter::WriteNode( const aiNode* pNode)
+void ColladaExporter::WriteNode(aiNode* pNode)
 {
+	// the must have a name
+	if (pNode->mName.length == 0)
+	{		
+		std::stringstream ss;
+		ss << "Node_" << pNode;
+		pNode->mName.Set(ss.str());
+	}
+
 	mOutput << startstr << "<node id=\"" << pNode->mName.data << "\" name=\"" << pNode->mName.data << "\">" << endstr;
 	PushTag();
 
@@ -867,7 +875,7 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 	PushTag();
 	mOutput << startstr << "<technique_common>" << endstr;
 	PushTag();
-	mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
+	mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
 		PopTag();
 	mOutput << startstr << "</technique_common>" << endstr;
 	PopTag();

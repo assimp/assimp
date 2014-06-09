@@ -92,7 +92,7 @@ protected:
 	void WriteSceneLibrary();
 
 	/// Recursively writes the given node
-	void WriteNode( const aiNode* pNode);
+	void WriteNode( aiNode* pNode);
 
 	/// Enters a new xml element, which increases the indentation
 	void PushTag() { startstr.append( "  "); }

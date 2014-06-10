@@ -58,7 +58,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, aiScene* pScene)
+void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
 {
 	std::string path = "";
 	std::string file = pFile;
@@ -634,13 +634,11 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 
 	// count the number of lines, triangles and polygon meshes
 	int countLines = 0;
-	int countTriangles = 0;
 	int countPoly = 0;
 	for( size_t a = 0; a < mesh->mNumFaces; ++a )
 	{
 		if (mesh->mFaces[a].mNumIndices == 2) countLines++;
-		else if (mesh->mFaces[a].mNumIndices == 3) countTriangles++;
-		else if (mesh->mFaces[a].mNumIndices > 3) countPoly++;
+		else if (mesh->mFaces[a].mNumIndices >= 3) countPoly++;
 	}
 
 	// lines
@@ -662,34 +660,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 		mOutput << startstr << "</lines>" << endstr;
 	}
 
-	// triangles, note for collada, triangles are defined in a right hand system
-	if (countTriangles)
-	{
-		mOutput << startstr << "<triangles count=\"" << countTriangles << "\" material=\"defaultMaterial\">" << endstr;
-		PushTag();
-		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
-		mOutput << startstr << "<input offset=\"1\" semantic=\"NORMAL\" source=\"#" << idstr << "-normals\" />" << endstr;
-		mOutput << startstr << "<p>";
-		for( size_t a = 0; a < mesh->mNumFaces; ++a )
-		{
-			const aiFace& face = mesh->mFaces[a];
-			if (face.mNumIndices != 3) continue;
-			// write vertix indices
-			for( size_t b = 0; b < face.mNumIndices; ++b )
-			{
-				mOutput << face.mIndices[b] << " ";
-			}
-			// write normal indices
-			for( size_t b = 0; b < face.mNumIndices; ++b )
-			{
-				mOutput << face.mIndices[b] << " ";
-			}
-
-		}
-		mOutput << "</p>" << endstr;
-		PopTag();
-		mOutput << startstr << "</triangles>" << endstr;
-	}
+	// triangle - dont use it, because compatibility problems
 
 	// polygons
 	if (countPoly)
@@ -701,7 +672,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 		mOutput << startstr << "<vcount>";
 		for( size_t a = 0; a < mesh->mNumFaces; ++a )
 		{
-			if (mesh->mFaces[a].mNumIndices <= 3) continue;
+			if (mesh->mFaces[a].mNumIndices < 3) continue;
 			mOutput << mesh->mFaces[a].mNumIndices << " ";
 		}
 		mOutput << "</vcount>" << endstr;
@@ -710,7 +681,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 		for( size_t a = 0; a < mesh->mNumFaces; ++a )
 		{
 			const aiFace& face = mesh->mFaces[a];
-			if (face.mNumIndices <= 3) continue;
+			if (face.mNumIndices < 3) continue;
 			for( size_t b = 0; b < face.mNumIndices; ++b )
 				mOutput << face.mIndices[b] << " ";
 		}

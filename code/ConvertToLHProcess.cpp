@@ -140,16 +140,6 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
 			pMesh->mTangents[a].z *= -1.0f;
 			pMesh->mBitangents[a].z *= -1.0f;
 		}
-
-		// texture coords for all channels
-		for (unsigned int c = 0; c < pMesh->GetNumUVChannels(); c++)
-		{
-			if (pMesh->HasTextureCoords(c))
-			{
-				pMesh->mTextureCoords[c][a].y = 1.0f - pMesh->mTextureCoords[c][a].y;
-			}
-		}
-
 	}
 
 	// mirror offset matrices of all bones

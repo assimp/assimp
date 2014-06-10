@@ -59,7 +59,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, aiScene* pScene)
+void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
 {
 	std::string path = "";
 	std::string file = pFile;
@@ -96,7 +96,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-XFileExporter::XFileExporter(aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
+XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
@@ -128,13 +128,6 @@ void XFileExporter::WriteFile()
 	mOutput.setf(_IOSfixed);
 	mOutput.precision(6); // precission for float
 
-	// the scene is already in OpenGL, applying MakeLeftHandedProcess, makes it xFile left handed	
-	MakeLeftHandedProcess convertProcess;
-	FlipWindingOrderProcess flipper;
-
-	convertProcess.Execute(mScene);	
-	flipper.Execute(mScene);
-
 	// entry of writing the file
 	WriteHeader();
 
@@ -149,9 +142,6 @@ void XFileExporter::WriteFile()
 
 	mOutput << startstr << "}" << endstr;
 
-	// and back to OpenGL right handed
-	convertProcess.Execute(mScene);
-	flipper.Execute(mScene);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -289,10 +279,10 @@ void XFileExporter::WriteFrameTransform(aiMatrix4x4& m)
 {
 	mOutput << startstr << "FrameTransformMatrix {" << endstr << " ";
 	PushTag();
-	mOutput << startstr << m.a1 << "," << m.b1 << "," << m.c1 << "," << m.d1 << "," << endstr;
-    mOutput << startstr << m.a2 << "," << m.b2 << "," << m.c2 << "," << m.d2 << "," << endstr;
-	mOutput << startstr << m.a3 << "," << m.b3 << "," << m.c3 << "," << m.d3 << "," << endstr;
-	mOutput << startstr << m.a4 << "," << m.b4 << "," << m.c4 << "," << m.d4 << ";;" << endstr;		
+	mOutput << startstr << m.a1 << ", " << m.b1 << ", " << m.c1 << ", " << m.d1 << "," << endstr;
+    mOutput << startstr << m.a2 << ", " << m.b2 << ", " << m.c2 << ", " << m.d2 << "," << endstr;
+	mOutput << startstr << m.a3 << ", " << m.b3 << ", " << m.c3 << ", " << m.d3 << "," << endstr;
+	mOutput << startstr << m.a4 << ", " << m.b4 << ", " << m.c4 << ", " << m.d4 << ";;" << endstr;		
 	PopTag();
 	mOutput << startstr << "}" << endstr << endstr;
 }
@@ -300,10 +290,15 @@ void XFileExporter::WriteFrameTransform(aiMatrix4x4& m)
 
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void XFileExporter::WriteNode( const aiNode* pNode)
+void XFileExporter::WriteNode( aiNode* pNode)
 {	
-
-	mOutput << startstr << "Frame " << pNode->mName.C_Str() << " {" << "   // " << pNode->mName.C_Str() << endstr;
+	if (pNode->mName.length==0)
+	{
+		std::stringstream ss;
+		ss << "Node_" << pNode;
+		pNode->mName.Set(ss.str());
+	}
+	mOutput << startstr << "Frame " << pNode->mName.C_Str() << " {" << endstr;
 
 	PushTag();
 
@@ -330,7 +325,7 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 	PushTag();
 
 	// write all the vertices
-	mOutput << startstr << mesh->mNumVertices << ";" << endstr;
+	mOutput << startstr << mesh->mNumVertices << ";" << endstr;	
 	for (size_t a = 0; a < mesh->mNumVertices; a++)
 	{
 		aiVector3D &v = mesh->mVertices[a];
@@ -377,11 +372,12 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 		PushTag();
 		mOutput << startstr << "1;" << endstr; // number of materials
 		mOutput << startstr << mesh->mNumFaces << ";" << endstr; // number of faces
+		mOutput << startstr;
 		for( size_t a = 0; a < mesh->mNumFaces; ++a )
 		{		
-			mOutput << startstr << a;
+			mOutput << "0"; // the material index
 			if (a < mesh->mNumFaces - 1)
-				mOutput << "," << endstr;
+				mOutput << ", ";
 			else
 				mOutput << ";" << endstr;
 		}		
@@ -403,15 +399,15 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 	}
 
 	// write normals (every vertex has one)
-	mOutput << endstr;
 	if (mesh->HasNormals())
 	{
-		mOutput << startstr << "MeshNormals {" << endstr;
+		mOutput << endstr << startstr << "MeshNormals {" << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
 		{		
 			aiVector3D &v = mesh->mNormals[a];
-			mOutput << startstr << v[0] << ";"<< v[1] << ";" << v[2] << ";";
+			// because we have a LHS and also changed wth winding, we need to invert the normals again
+			mOutput << startstr << -v[0] << ";"<< -v[1] << ";" << -v[2] << ";";
 			if (a < mesh->mNumVertices - 1)
 				mOutput << "," << endstr;
 			else
@@ -446,7 +442,7 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 	// write texture UVs if available
 	if (mesh->HasTextureCoords(0))
 	{		
-		mOutput << startstr << "MeshTextureCoords {"  << endstr;
+		mOutput << endstr << startstr << "MeshTextureCoords {"  << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
 		//for (int a = (int)mesh->mNumVertices-1; a >=0 ; a--)
@@ -465,7 +461,7 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 	// write color channel if available
 	if (mesh->HasVertexColors(0))
 	{		
-		mOutput << startstr << "MeshVertexColors {"  << endstr;
+		mOutput << endstr << startstr << "MeshVertexColors {"  << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
 		{
@@ -478,15 +474,15 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 		}
 		mOutput << startstr << "}" << endstr;
 	}
-	// test ...
+	/*
 	else
 	{
-		mOutput << startstr << "MeshVertexColors {"  << endstr;
+		mOutput << endstr << startstr << "MeshVertexColors {"  << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
 		{
 			aiColor4D* mColors = mesh->mColors[a];
-			mOutput << startstr << a << ";0.500000;0.000000;0.000000;0.000000;;";
+			mOutput << startstr << a << ";0.500000;0.000000;0.000000;0.500000;;";
 			if (a < mesh->mNumVertices-1)
 				mOutput << "," << endstr;
 			else
@@ -494,7 +490,7 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 		}
 		mOutput << startstr << "}" << endstr;
 	}
-
+	*/
 	PopTag();
 	mOutput << startstr << "}" << endstr << endstr;
 

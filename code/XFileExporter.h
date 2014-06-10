@@ -61,7 +61,7 @@ class XFileExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	XFileExporter(aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
+	XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
 
 	/// Destructor
 	virtual ~XFileExporter();
@@ -77,7 +77,7 @@ protected:
 	void WriteFrameTransform(aiMatrix4x4& m);
 
 	/// Recursively writes the given node
-	void WriteNode( const aiNode* pNode);
+	void WriteNode( aiNode* pNode );
 
 	/// write a mesh entry of the scene
 	void WriteMesh(const aiMesh* mesh);
@@ -107,7 +107,7 @@ protected:
 	const std::string mFile;
 
 	/// The scene to be written
-	aiScene* mScene;
+	const aiScene* mScene;
 	bool mSceneOwned;
 
 	/// current line start string, contains the current indentation for simple stream insertion

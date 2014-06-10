@@ -72,13 +72,13 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 // ------------------------------------------------------------------------------------------------
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
 // do not use const, because some exporter need to convert the scene temporary
-void ExportSceneCollada(const char*,IOSystem*, aiScene*);
-void ExportSceneXFile(const char*,IOSystem*, aiScene*); 
-void ExportSceneObj(const char*,IOSystem*, aiScene*);
-void ExportSceneSTL(const char*,IOSystem*, aiScene*);
-void ExportSceneSTLBinary(const char*,IOSystem*, aiScene*);
-void ExportScenePly(const char*,IOSystem*, aiScene*);
-void ExportScene3DS(const char*, IOSystem*, aiScene*) {}
+void ExportSceneCollada(const char*,IOSystem*, const aiScene*);
+void ExportSceneXFile(const char*,IOSystem*, const aiScene*); 
+void ExportSceneObj(const char*,IOSystem*, const aiScene*);
+void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
+void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*);
+void ExportScenePly(const char*,IOSystem*, const aiScene*);
+void ExportScene3DS(const char*, IOSystem*, const aiScene*) {}
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -89,7 +89,8 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
-	Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile),
+	Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile,
+	aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER

@@ -55,13 +55,13 @@ struct aiNode;
 namespace Assimp	
 {
 
-/// Helper class to export a given scene to a Collada file. Just for my personal
-/// comfort when implementing it.
+/// Helper class to export a given scene to a X-file.
+/// Note: an xFile uses a left hand system. Assimp used a right hand system (OpenGL), therefore we have to transform everything
 class XFileExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	XFileExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
+	XFileExporter(aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
 
 	/// Destructor
 	virtual ~XFileExporter();
@@ -93,6 +93,10 @@ public:
 	std::stringstream mOutput;
 
 protected:
+
+	/// write a path
+	void writePath(aiString path);	
+
 	/// The IOSystem for output
 	IOSystem* mIOSystem;
 
@@ -103,11 +107,12 @@ protected:
 	const std::string mFile;
 
 	/// The scene to be written
-	const aiScene* mScene;
+	aiScene* mScene;
 	bool mSceneOwned;
 
 	/// current line start string, contains the current indentation for simple stream insertion
 	std::string startstr;
+
 	/// current line end string for simple stream insertion
 	std::string endstr;
   

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
 #include "XFileExporter.h"
-
+#include "ConvertToLHProcess.h"
 #include "Bitmap.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h" 
@@ -59,7 +59,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, aiScene* pScene)
 {
 	std::string path = "";
 	std::string file = pFile;
@@ -96,7 +96,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-XFileExporter::XFileExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
+XFileExporter::XFileExporter(aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
@@ -128,6 +128,13 @@ void XFileExporter::WriteFile()
 	mOutput.setf(_IOSfixed);
 	mOutput.precision(6); // precission for float
 
+	// the scene is already in OpenGL, applying MakeLeftHandedProcess, makes it xFile left handed	
+	MakeLeftHandedProcess convertProcess;
+	FlipWindingOrderProcess flipper;
+
+	convertProcess.Execute(mScene);	
+	flipper.Execute(mScene);
+
 	// entry of writing the file
 	WriteHeader();
 
@@ -141,6 +148,10 @@ void XFileExporter::WriteFile()
 	PopTag();
 
 	mOutput << startstr << "}" << endstr;
+
+	// and back to OpenGL right handed
+	convertProcess.Execute(mScene);
+	flipper.Execute(mScene);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -277,11 +288,11 @@ void XFileExporter::WriteHeader()
 void XFileExporter::WriteFrameTransform(aiMatrix4x4& m)
 {
 	mOutput << startstr << "FrameTransformMatrix {" << endstr << " ";
-	PushTag();	
-	mOutput << startstr << m.a1 << "," << m.a2 << "," << m.a3 << "," << m.a4 << ","
-		<< m.b1 << "," << m.b2 << "," << m.b3 << "," << m.b4 << ","
-		<< m.c1 << "," << m.c2 << "," << m.c3 << "," << m.c4 << ","
-		<< m.d1 << "," << m.d2 << "," << m.d3 << "," << m.d4 << ";;" << endstr;	
+	PushTag();
+	mOutput << startstr << m.a1 << "," << m.b1 << "," << m.c1 << "," << m.d1 << "," << endstr;
+    mOutput << startstr << m.a2 << "," << m.b2 << "," << m.c2 << "," << m.d2 << "," << endstr;
+	mOutput << startstr << m.a3 << "," << m.b3 << "," << m.c3 << "," << m.d3 << "," << endstr;
+	mOutput << startstr << m.a4 << "," << m.b4 << "," << m.c4 << "," << m.d4 << ";;" << endstr;		
 	PopTag();
 	mOutput << startstr << "}" << endstr << endstr;
 }
@@ -291,11 +302,12 @@ void XFileExporter::WriteFrameTransform(aiMatrix4x4& m)
 // Recursively writes the given node
 void XFileExporter::WriteNode( const aiNode* pNode)
 {	
-	mOutput << startstr << "Frame " << pNode->mName.C_Str() << " {" << endstr;
+
+	mOutput << startstr << "Frame " << pNode->mName.C_Str() << " {" << "   // " << pNode->mName.C_Str() << endstr;
 
 	PushTag();
 
-	aiMatrix4x4 m;// = pNode->mTransformation;
+	aiMatrix4x4 m = pNode->mTransformation;
 
 	WriteFrameTransform(m);
 
@@ -353,6 +365,43 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 			mOutput << ";" << endstr;
 	}
 
+	mOutput << endstr;
+
+	if (mesh->HasTextureCoords(0))
+	{
+		const aiMaterial* mat = mScene->mMaterials[mesh->mMaterialIndex];
+		aiString relpath;
+		mat->Get(_AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0, relpath);		
+
+		mOutput << startstr << "MeshMaterialList {" << endstr;
+		PushTag();
+		mOutput << startstr << "1;" << endstr; // number of materials
+		mOutput << startstr << mesh->mNumFaces << ";" << endstr; // number of faces
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{		
+			mOutput << startstr << a;
+			if (a < mesh->mNumFaces - 1)
+				mOutput << "," << endstr;
+			else
+				mOutput << ";" << endstr;
+		}		
+		mOutput << startstr << "Material {" << endstr;	
+		PushTag();
+		mOutput << startstr << "1.0; 1.0; 1.0; 1.000000;;" << endstr;
+		mOutput << startstr << "1.000000;" << endstr; // power
+		mOutput << startstr << "0.000000; 0.000000; 0.000000;;" << endstr; // specularity
+		mOutput << startstr << "0.000000; 0.000000; 0.000000;;" << endstr; // emission
+		mOutput << startstr << "TextureFilename { \"";
+
+		writePath(relpath);		
+
+		mOutput << "\"; }" << endstr;	
+		PopTag();
+		mOutput << startstr << "}" << endstr;
+		PopTag();
+		mOutput << startstr << "}" << endstr;	
+	}
+
 	// write normals (every vertex has one)
 	mOutput << endstr;
 	if (mesh->HasNormals())
@@ -400,10 +449,12 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 		mOutput << startstr << "MeshTextureCoords {"  << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
+		//for (int a = (int)mesh->mNumVertices-1; a >=0 ; a--)
 		{
 			aiVector3D& uv = mesh->mTextureCoords[0][a]; // uv of first uv layer for the vertex
-			mOutput << uv.x << ";" << uv.y;
+			mOutput << startstr << uv.x << ";" << uv.y;
 			if (a < mesh->mNumVertices-1)
+			//if (a >0 )
 				mOutput << ";," << endstr;
 			else
 				mOutput << ";;" << endstr;
@@ -447,6 +498,22 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 	PopTag();
 	mOutput << startstr << "}" << endstr << endstr;
 
+}
+
+
+void XFileExporter::writePath(aiString path)
+{
+	std::string str = std::string(path.C_Str());
+	BaseImporter::ConvertUTF8toISO8859_1(str);
+
+	while( str.find( "\\\\") != std::string::npos)
+		str.replace( str.find( "\\\\"), 2, "\\");
+
+	while( str.find( "\\") != std::string::npos)
+		str.replace( str.find( "\\"), 1, "/");
+
+	mOutput << str;
+			
 }
 
 #endif

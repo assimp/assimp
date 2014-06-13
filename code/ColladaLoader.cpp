@@ -133,6 +133,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	mLights.clear();
 	mCameras.clear();
 	mTextures.clear();
+	mAnims.clear();
 
 	// parse the input file
 	ColladaParser parser( pIOHandler, pFile);
@@ -904,6 +905,8 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
 		pScene->mAnimations = new aiAnimation*[mAnims.size()];
 		std::copy( mAnims.begin(), mAnims.end(), pScene->mAnimations);
 	}
+
+	mAnims.clear();
 }
 
 // ------------------------------------------------------------------------------------------------

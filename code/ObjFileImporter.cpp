@@ -139,7 +139,23 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	{
 		strModelName = pFile;
 	}
-	
+
+	// process all '\'
+	std::vector<char> ::iterator iter = m_Buffer.begin();
+	while (iter != m_Buffer.end())
+	{
+		if (*iter == '\\')
+		{
+			// remove '\'
+			iter = m_Buffer.erase(iter);
+			// remove next character
+			while (*iter == '\r' || *iter == '\n')
+				iter = m_Buffer.erase(iter);
+		}
+		else
+			++iter;
+	}
+
 	// parse the file into a temporary representation
 	ObjFileParser parser(m_Buffer, strModelName, pIOHandler);
 

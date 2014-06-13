@@ -325,7 +325,7 @@ uint32_t VertexData::VertexSize(uint16_t source) const
 MemoryStream *VertexData::VertexBuffer(uint16_t source)
 {
 	if (vertexBindings.find(source) != vertexBindings.end())
-		return vertexBindings[source];
+		return vertexBindings[source].get();
 	return 0;
 }
 

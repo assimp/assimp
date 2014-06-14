@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="Windows-1252"?>
-<VisualStudioPropertySheet
-	ProjectType="Visual C++"
-	Version="8.00"
-	Name="LibShared"
-	OutputDirectory="./../../lib/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-	IntermediateDirectory="./../../obj/$(ProjectName)_$(ConfigurationName)_$(PlatformName)"
-	>
-</VisualStudioPropertySheet>

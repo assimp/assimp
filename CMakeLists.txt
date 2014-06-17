@@ -32,11 +32,11 @@ if(NOT GIT_COMMIT_HASH)
 endif(NOT GIT_COMMIT_HASH)
 
 configure_file(
-  ${CMAKE_SOURCE_DIR}/revision.h.in
-  ${CMAKE_BINARY_DIR}/revision.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/revision.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/revision.h
 )
 
-include_directories(${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 option(ASSIMP_OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)
 set(CMAKE_MODULE_PATH       "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules" )

@@ -349,6 +349,7 @@ public:
 	static void Copy  (aiBone** dest, const aiBone* src);
 	static void Copy  (aiLight** dest, const aiLight* src);
 	static void Copy  (aiNodeAnim** dest, const aiNodeAnim* src);
+	static void Copy  (aiMetadata** dest, const aiMetadata* src);
 
 	// recursive, of course
 	static void Copy     (aiNode** dest, const aiNode* src);

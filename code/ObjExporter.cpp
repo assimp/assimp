@@ -199,7 +199,7 @@ void ObjExporter :: WriteGeometryFile()
 
 	// collect mesh geometry
 	aiMatrix4x4 mBase;
-	AddNode(pScene->mRootNode,mBase);
+	AddNode(pScene->mRootNode, mBase);
 
 	// write vertex positions
 	vpMap.getVectors(vp);
@@ -258,14 +258,12 @@ void ObjExporter :: WriteGeometryFile()
 	}
 }
 
-
-
-
-
+// ------------------------------------------------------------------------------------------------
 int ObjExporter::vecIndexMap::getIndex(const aiVector3D& vec)
 {
-	vecIndexMap::dataType::iterator vertIt = vecMap.find(vec); 
-	if(vertIt != vecMap.end()){// vertex already exists, so reference it
+	vecIndexMap::dataType::iterator vertIt = vecMap.find(vec);
+	// vertex already exists, so reference it
+	if(vertIt != vecMap.end()){
 		return vertIt->second;
 	}
 	vecMap[vec] = mNextIndex;
@@ -274,6 +272,7 @@ int ObjExporter::vecIndexMap::getIndex(const aiVector3D& vec)
 	return ret;
 }
 
+// ------------------------------------------------------------------------------------------------
 void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 {
 	vecs.resize(vecMap.size());
@@ -282,14 +281,13 @@ void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 	}
 }
 
-
 // ------------------------------------------------------------------------------------------------
 void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
 {
 	meshes.push_back(MeshInstance());
 	MeshInstance& mesh = meshes.back();
 
-	mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_"+std::string(m->mName.data,m->mName.length) : "");
+	mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_" + std::string(m->mName.data,m->mName.length) : "");
 	mesh.matname = GetMaterialName(m->mMaterialIndex);
 
 	mesh.faces.resize(m->mNumFaces);
@@ -317,7 +315,8 @@ void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatri
 			face.indices[a].vp = vpMap.getIndex(vert);
 
 			if (m->mNormals) {
-				face.indices[a].vn = vnMap.getIndex(m->mNormals[idx]);
+				aiVector3D norm = aiMatrix3x3(mat) * m->mNormals[idx];
+				face.indices[a].vn = vnMap.getIndex(norm);
 			}
 			else{
 				face.indices[a].vn = 0;
@@ -339,11 +338,11 @@ void ObjExporter :: AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
 	const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
 
 	for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
-		AddMesh(nd->mName, pScene->mMeshes[nd->mMeshes[i]],mAbs);
+		AddMesh(nd->mName, pScene->mMeshes[nd->mMeshes[i]], mAbs);
 	}
 
 	for(unsigned int i = 0; i < nd->mNumChildren; ++i) {
-		AddNode(nd->mChildren[i],mAbs);
+		AddNode(nd->mChildren[i], mAbs);
 	}
 }
 

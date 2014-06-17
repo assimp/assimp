@@ -436,6 +436,11 @@ const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex 
 	if (pIndex >= GetExportFormatCount()) {
 		return NULL;
 	}
+	
+	// Return from static storage if the requested index is built-in.
+	if (pIndex < sizeof(gExporters) / sizeof(gExporters[0])) {
+		return &gExporters[pIndex].mDescription;
+	}
 
 	return &pimpl->mExporters[pIndex].mDescription;
 }

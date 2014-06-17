@@ -767,7 +767,6 @@ private:
 
 		// find user defined properties (3ds Max)
 		data->Set(index++, "UserProperties", aiString(PropertyGet<std::string>(props, "UDP3DSMAX", "")));
-		unparsedProperties.erase("UDP3DSMAX");
 		// preserve the info that a node was marked as Null node in the original file.
 		data->Set(index++, "IsNull", model.IsNull() ? true : false);
 

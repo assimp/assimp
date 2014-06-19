@@ -125,7 +125,7 @@ XFileExporter::~XFileExporter()
 void XFileExporter::WriteFile()
 {
 	// note, that all realnumber values must be comma separated in x files
-	mOutput.setf(_IOSfixed);
+	mOutput.setf(std::ios::fixed);
 	mOutput.precision(6); // precission for float
 
 	// entry of writing the file

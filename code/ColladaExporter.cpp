@@ -58,7 +58,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
 {
 	std::string path = "";
 	std::string file = pFile;
@@ -230,8 +230,22 @@ void ColladaExporter::WriteHeader()
 	PushTag();
 	mOutput << startstr << "<contributor>" << endstr;
 	PushTag();
-	mOutput << startstr << "<author>" << mScene->author.C_Str() << "</author>" << endstr;
-	mOutput << startstr << "<authoring_tool>" << mScene->authoringTool.C_Str() << "</authoring_tool>" << endstr;
+
+	aiMetadata* meta = mScene->mRootNode->mMetaData;
+	aiString value;
+	if (!meta || !meta->Get("Author", value))		
+		mOutput << startstr << "<author>" << "Assimp" << "</author>" << endstr;
+	else		
+		mOutput << startstr << "<author>" << value.C_Str() << "</author>" << endstr;
+
+	if (!meta || !meta->Get("AuthoringTool", value))
+		mOutput << startstr << "<authoring_tool>" << "Assimp Exporter" << "</authoring_tool>" << endstr;
+	else		
+		mOutput << startstr << "<authoring_tool>" << value.C_Str() << "</authoring_tool>" << endstr;
+
+	//mOutput << startstr << "<author>" << mScene->author.C_Str() << "</author>" << endstr;
+	//mOutput << startstr << "<authoring_tool>" << mScene->authoringTool.C_Str() << "</authoring_tool>" << endstr;
+	
 	PopTag();
 	mOutput << startstr << "</contributor>" << endstr;
 	mOutput << startstr << "<created>" << date_str << "</created>" << endstr;

@@ -5,6 +5,8 @@ Open Asset Import Library is a Open Source library designed to load various __3d
 
 This is the development trunk of assimp containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories. According to [Travis-CI] (https://travis-ci.org/), the current build status of the trunk is [![Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
 
+[open3mod](https://github.com/acgessler/open3mod) is an Open Source 3D model viewer based off Assimp's import and export abilities.
+
 #### Supported file formats ####
 
 The library provides importers for a lot of file formats, including:
@@ -77,7 +79,7 @@ C++ish interface). The directory structure is:
 	/scripts 	Scripts used to generate the loading code for some formats
 	/port		Ports to other languages and scripts to maintain those.
 	/test		Unit- and regression tests, test suite of models
-	/tools		Tools (viewer, command line `assimp`)
+	/tools		Tools (old assimp viewer, command line `assimp`)
 	/samples	A small number of samples to illustrate possible 
                         use cases for Assimp
 	/workspaces	Build enviroments for vc,xcode,... (deprecated,

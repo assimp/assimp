@@ -228,7 +228,9 @@ void ObjExporter :: WriteGeometryFile()
 	// now write all mesh instances
 	BOOST_FOREACH(const MeshInstance& m, meshes) {
 		mOutput << "# Mesh \'" << m.name << "\' with " << m.faces.size() << " faces" << endl;
-		mOutput << "g " << m.name << endl;
+		if (!m.name.empty()) {
+			mOutput << "g " << m.name << endl;
+		}
 		mOutput << "usemtl " << m.matname << endl;
 
 		BOOST_FOREACH(const Face& f, m.faces) {

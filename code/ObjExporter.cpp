@@ -243,11 +243,8 @@ void ObjExporter :: WriteGeometryFile()
 					if (fv.vt) {
 						mOutput << fv.vt;
 					}
-					if (f.kind == 'f') {
-						mOutput << '/';
-						if (fv.vn) {
-							mOutput << fv.vn;
-						}
+					if (f.kind == 'f' && fv.vn) {
+						mOutput << '/' << fv.vn;
 					}
 				}
 			}

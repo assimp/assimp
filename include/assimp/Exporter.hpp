@@ -81,7 +81,7 @@ class ASSIMP_API Exporter
 public:
 
 	/** Function pointer type of a Export worker function */
-	typedef void (*fpExportFunc)(const char*,IOSystem*,const aiScene*);
+	typedef void (*fpExportFunc)(const char*,IOSystem*, const aiScene*);
 
 	/** Internal description of an Assimp export format option */
 	struct ExportFormatEntry

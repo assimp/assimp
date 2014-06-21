@@ -58,7 +58,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneCollada(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
 {
 	std::string path = "";
 	std::string file = pFile;
@@ -124,7 +124,7 @@ ColladaExporter::~ColladaExporter()
 void ColladaExporter::WriteFile()
 {
 	// write the DTD
-	mOutput << "<?xml version=\"1.0\"?>" << endstr;
+	mOutput << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << endstr;
 	// COLLADA element start
 	mOutput << "<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">" << endstr;
 	PushTag();
@@ -151,7 +151,7 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-	static const float epsilon = 0.000001f;
+	static const float epsilon = 0.00001f;
 	static const aiQuaternion x_rot(aiMatrix3x3( 
 		0, -1,  0,
 		1,  0,  0,
@@ -176,6 +176,7 @@ void ColladaExporter::WriteHeader()
 	aiQuaternion rotation;
 	aiVector3D position;
 	mScene->mRootNode->mTransformation.Decompose(scaling, rotation, position);
+	rotation.Normalize();
 
 	bool add_root_node = false;
 
@@ -229,8 +230,22 @@ void ColladaExporter::WriteHeader()
 	PushTag();
 	mOutput << startstr << "<contributor>" << endstr;
 	PushTag();
-	mOutput << startstr << "<author>Assimp</author>" << endstr;
-	mOutput << startstr << "<authoring_tool>Assimp Collada Exporter</authoring_tool>" << endstr;
+
+	aiMetadata* meta = mScene->mRootNode->mMetaData;
+	aiString value;
+	if (!meta || !meta->Get("Author", value))		
+		mOutput << startstr << "<author>" << "Assimp" << "</author>" << endstr;
+	else		
+		mOutput << startstr << "<author>" << value.C_Str() << "</author>" << endstr;
+
+	if (!meta || !meta->Get("AuthoringTool", value))
+		mOutput << startstr << "<authoring_tool>" << "Assimp Exporter" << "</authoring_tool>" << endstr;
+	else		
+		mOutput << startstr << "<authoring_tool>" << value.C_Str() << "</authoring_tool>" << endstr;
+
+	//mOutput << startstr << "<author>" << mScene->author.C_Str() << "</author>" << endstr;
+	//mOutput << startstr << "<authoring_tool>" << mScene->authoringTool.C_Str() << "</authoring_tool>" << endstr;
+	
 	PopTag();
 	mOutput << startstr << "</contributor>" << endstr;
 	mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
@@ -353,7 +368,8 @@ void ColladaExporter::WriteTextureColorEntry( const Surface& pSurface, const std
     if( pSurface.texture.empty() )
     {
       mOutput << startstr << "<color sid=\"" << pTypeName << "\">" << pSurface.color.r << "   " << pSurface.color.g << "   " << pSurface.color.b << "   " << pSurface.color.a << "</color>" << endstr;
-    } else
+    }
+	else
     {
       mOutput << startstr << "<texture texture=\"" << pImageName << "\" texcoord=\"CHANNEL" << pSurface.channel << "\" />" << endstr;
     }
@@ -630,26 +646,63 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 	PopTag();
 	mOutput << startstr << "</vertices>" << endstr;
 
-	// write face setup
-	mOutput << startstr << "<polylist count=\"" << mesh->mNumFaces << "\" material=\"theresonlyone\">" << endstr;
-	PushTag();
-	mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
-	
-	mOutput << startstr << "<vcount>";
-	for( size_t a = 0; a < mesh->mNumFaces; ++a )
-		mOutput << mesh->mFaces[a].mNumIndices << " ";
-	mOutput << "</vcount>" << endstr;
-	
-	mOutput << startstr << "<p>";
+	// count the number of lines, triangles and polygon meshes
+	int countLines = 0;
+	int countPoly = 0;
 	for( size_t a = 0; a < mesh->mNumFaces; ++a )
 	{
-		const aiFace& face = mesh->mFaces[a];
-		for( size_t b = 0; b < face.mNumIndices; ++b )
-			mOutput << face.mIndices[b] << " ";
+		if (mesh->mFaces[a].mNumIndices == 2) countLines++;
+		else if (mesh->mFaces[a].mNumIndices >= 3) countPoly++;
 	}
-	mOutput << "</p>" << endstr;
-	PopTag();
-	mOutput << startstr << "</polylist>" << endstr;
+
+	// lines
+	if (countLines)
+	{
+		mOutput << startstr << "<lines count=\"" << countLines << "\" material=\"defaultMaterial\">" << endstr;
+		PushTag();
+		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
+		mOutput << startstr << "<p>";
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{
+			const aiFace& face = mesh->mFaces[a];
+			if (face.mNumIndices != 2) continue;
+			for( size_t b = 0; b < face.mNumIndices; ++b )
+				mOutput << face.mIndices[b] << " ";
+		}
+		mOutput << "</p>" << endstr;
+		PopTag();
+		mOutput << startstr << "</lines>" << endstr;
+	}
+
+	// triangle - dont use it, because compatibility problems
+
+	// polygons
+	if (countPoly)
+	{		
+		mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
+		PushTag();
+		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstr << "-vertices\" />" << endstr;
+	
+		mOutput << startstr << "<vcount>";
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{
+			if (mesh->mFaces[a].mNumIndices < 3) continue;
+			mOutput << mesh->mFaces[a].mNumIndices << " ";
+		}
+		mOutput << "</vcount>" << endstr;
+	
+		mOutput << startstr << "<p>";
+		for( size_t a = 0; a < mesh->mNumFaces; ++a )
+		{
+			const aiFace& face = mesh->mFaces[a];
+			if (face.mNumIndices < 3) continue;
+			for( size_t b = 0; b < face.mNumIndices; ++b )
+				mOutput << face.mIndices[b] << " ";
+		}
+		mOutput << "</p>" << endstr;
+		PopTag();
+		mOutput << startstr << "</polylist>" << endstr;
+	}
 
 	// closing tags
 	PopTag();
@@ -770,8 +823,16 @@ void ColladaExporter::WriteSceneLibrary()
 
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void ColladaExporter::WriteNode( const aiNode* pNode)
+void ColladaExporter::WriteNode(aiNode* pNode)
 {
+	// the must have a name
+	if (pNode->mName.length == 0)
+	{		
+		std::stringstream ss;
+		ss << "Node_" << pNode;
+		pNode->mName.Set(ss.str());
+	}
+
 	mOutput << startstr << "<node id=\"" << pNode->mName.data << "\" name=\"" << pNode->mName.data << "\">" << endstr;
 	PushTag();
 
@@ -799,7 +860,7 @@ void ColladaExporter::WriteNode( const aiNode* pNode)
 	PushTag();
 	mOutput << startstr << "<technique_common>" << endstr;
 	PushTag();
-	mOutput << startstr << "<instance_material symbol=\"theresonlyone\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
+	mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << materials[mesh->mMaterialIndex].name << "\" />" << endstr;
 		PopTag();
 	mOutput << startstr << "</technique_common>" << endstr;
 	PopTag();

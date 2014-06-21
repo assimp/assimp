@@ -71,7 +71,9 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 
 // ------------------------------------------------------------------------------------------------
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
+// do not use const, because some exporter need to convert the scene temporary
 void ExportSceneCollada(const char*,IOSystem*, const aiScene*);
+void ExportSceneXFile(const char*,IOSystem*, const aiScene*); 
 void ExportSceneObj(const char*,IOSystem*, const aiScene*);
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*);
@@ -84,6 +86,11 @@ Exporter::ExportFormatEntry gExporters[] =
 {
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 	Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_FXILE_EXPORTER
+	Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile,
+	aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER

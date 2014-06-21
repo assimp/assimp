@@ -88,7 +88,7 @@ Exporter::ExportFormatEntry gExporters[] =
 	Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
 #endif
 
-#ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
+#ifndef ASSIMP_BUILD_NO_FXILE_EXPORTER
 	Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile,
 	aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs),
 #endif

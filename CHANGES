@@ -7,7 +7,7 @@ CHANGELOG
 FEATURES:
    - Support for FBX 2013 and newer, binary and ASCII (this is partly
      work from Google Summer of Code 2012)
-   - Support for OGRE binary mesh format
+   - Support for OGRE binary mesh and skeleton format
    - Updated BLEND support for newer Blender versions
    - Support for arbitrary meta data, used to hold FBX and DAE metadata
    - OBJ Export now produces smaller files

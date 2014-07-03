@@ -172,6 +172,12 @@ def process_dir(d, outfile_results, zipin, result):
                 #print("Didn't find "+fullpath+" (Hash is "+filehash+") in database")
                 continue
 
+            # Ignore extensions via settings.py configured list
+            # todo: Fix for multi dot extensions like .skeleton.xml
+            ext = os.path.splitext(fullpath)[1].lower()
+            if ext != "" and ext in settings.exclude_extensions:
+                continue
+
             print("-"*60 + "\n  " + os.path.realpath(fullpath) + " pp: " + pppreset) 
             
             outfile_actual = mkoutputdir_andgetpath(fullpath, filehash, "ACTUAL")

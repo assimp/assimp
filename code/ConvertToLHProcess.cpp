@@ -134,7 +134,7 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
 	{
 		pMesh->mVertices[a].z *= -1.0f;
 		if( pMesh->HasNormals())
-			pMesh->mNormals[a].z *= -1.0f;
+			pMesh->mNormals[a].z *= -1.0f;		
 		if( pMesh->HasTangentsAndBitangents())
 		{
 			pMesh->mTangents[a].z *= -1.0f;

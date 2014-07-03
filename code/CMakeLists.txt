@@ -10,7 +10,7 @@ SET( HEADER_PATH ../include/assimp )
 SET( COMPILER_HEADERS
 	${HEADER_PATH}/Compiler/pushpack1.h
 	${HEADER_PATH}/Compiler/poppack1.h
-	pstdint.h
+	${HEADER_PATH}/Compiler/pstdint.h
 )
 SOURCE_GROUP( Compiler FILES ${COMPILER_HEADERS})
 
@@ -187,7 +187,7 @@ SET( Collada_SRCS
 	ColladaParser.cpp
 	ColladaParser.h
 	ColladaExporter.h
-	ColladaExporter.cpp
+	ColladaExporter.cpp	
 )
 SOURCE_GROUP( Collada FILES ${Collada_SRCS})
 
@@ -322,11 +322,15 @@ SOURCE_GROUP( Obj FILES ${Obj_SRCS})
 
 SET( Ogre_SRCS
 	OgreImporter.h
+	OgreStructs.h
 	OgreParsingUtils.h
+	OgreBinarySerializer.h
+	OgreXmlSerializer.h
 	OgreImporter.cpp
+	OgreStructs.cpp
+	OgreBinarySerializer.cpp
+	OgreXmlSerializer.cpp
 	OgreMaterial.cpp
-	OgreMesh.cpp
-	OgreSkeleton.cpp
 )
 SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
 
@@ -539,6 +543,8 @@ SET( XFile_SRCS
 	XFileImporter.h
 	XFileParser.cpp
 	XFileParser.h
+	XFileExporter.h
+	XFileExporter.cpp
 )
 SOURCE_GROUP( XFile FILES ${XFile_SRCS})
 

@@ -87,20 +87,28 @@ def find_assimp_or_die():
 
     global assimp_bin_path
     if os.name == "nt":
+        search_x86 = [
+            os.path.join("..","..","bin","assimpcmd_release-dll_Win32","assimp.exe"),
+            os.path.join("..","..","bin","x86","assimp"),
+            os.path.join("..","..","bin","Release","assimp.exe")
+        ]
         if platform.machine() == "x86":
-            search = [os.path.join("..","..","bin","assimpcmd_release-dll_Win32","assimp.exe"),
-                os.path.join("..","..","bin","x86","assimp")]
-            
+            search = search_x86
         else: # amd64, hopefully
-            search = [os.path.join("..","..","bin","assimpcmd_release-dll_x64","assimp.exe"),
-                os.path.join("..","..","bin","x64","assimp")]
+            search = [
+                os.path.join("..","..","bin","assimpcmd_release-dll_x64","assimp.exe"),
+                os.path.join("..","..","bin","x64","assimp")
+            ]
+            # x64 platform does not guarantee a x64 build. Also look for x86 as last paths.
+            search += search_x86
         
         assimp_bin_path = locate_file(search)
         if assimp_bin_path is None:
             print("Can't locate assimp_cmd binary")
+            print("Looked in", search)
             sys.exit(-5)
 
-        print("Located assimp/assimp_cmd binary at ",assimp_bin_path)
+        print("Located assimp/assimp_cmd binary from", assimp_bin_path)
     elif os.name == "posix":
         #search = [os.path.join("..","..","bin","gcc","assimp"),
         #    os.path.join("/usr","local","bin",'assimp')]
@@ -109,8 +117,6 @@ def find_assimp_or_die():
     else:
         print("Unsupported operating system")
         sys.exit(-5)
-
-
 
 if __name__ == '__main__':
     find_assimp_or_die()

@@ -109,7 +109,7 @@ inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiMatrix3x3t<TReal>& m)
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-inline aiMatrix4x4t<TReal>::aiMatrix4x4t (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation, aiVector3t<TReal>& position)
+inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiVector3t<TReal>& scaling, const aiQuaterniont<TReal>& rotation, const aiVector3t<TReal>& position)
 {
 	// build a 3x3 rotation matrix
 	aiMatrix3x3t<TReal> m = rotation.GetMatrix();

@@ -1,3 +1,42 @@
+/*
+Open Asset Import Library (assimp)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2012, assimp team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the 
+following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
 
 #ifndef AI_OGREIMPORTER_H_INC
 #define AI_OGREIMPORTER_H_INC
@@ -5,6 +44,8 @@
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "BaseImporter.h"
+
+#include "OgreStructs.h"
 #include "OgreParsingUtils.h"
 
 namespace Assimp
@@ -12,58 +53,10 @@ namespace Assimp
 namespace Ogre
 {
 
-struct Face;
-struct BoneWeight;
-struct Bone;
-struct Animation;
-
-/// Ogre SubMesh
-struct SubMesh
-{
-	bool UseSharedGeometry;
-	bool Use32bitIndexes;
-
-	std::string Name;
-	std::string MaterialName;
-
-	bool HasGeometry;
-	bool HasPositions;
-	bool HasNormals;
-	bool HasTangents;
-
-	std::vector<Face> Faces;
-	std::vector<aiVector3D> Positions;
-	std::vector<aiVector3D> Normals;
-	std::vector<aiVector3D> Tangents;
-
-	/// Arbitrary number of texcoords, they are nearly always 2d, but Assimp has always 3d texcoords, n vectors(outer) with texcoords for each vertex(inner).
-	std::vector<std::vector<aiVector3D> > Uvs;
-
-	/// A list(inner) of bones for each vertex(outer).
-	std::vector<std::vector<BoneWeight> > Weights;
-
-	/// The Index in the Assimp material array from the material witch is attached to this submesh.
-	int MaterialIndex;
-
-	// The highest index of a bone from a bone weight, this is needed to create the Assimp bone struct. Converting from vertex-bones to bone-vertices.
-	unsigned int BonesUsed;
-
-	SubMesh() :
-		UseSharedGeometry(false),
-		Use32bitIndexes(false),
-		HasGeometry(false),
-		HasPositions(false),
-		HasNormals(false),
-		HasTangents(false),
-		MaterialIndex(-1),
-		BonesUsed(0)
-	{
-	}
-};
-
 /**	Importer for Ogre mesh, skeleton and material formats.
-	@todo Support vertex colors
-	@todo Support multiple TexCoords (this is already done??) */
+	@todo Support vertex colors.
+	@todo Support poses/animations from the mesh file. 
+	Currently only skeleton file animations are supported. */
 class OgreImporter : public BaseImporter
 {
 public:
@@ -80,40 +73,11 @@ public:
 	virtual void SetupProperties(const Importer *pImp);
 
 private:
-	//-------------------------------- OgreMesh.cpp -------------------------------
-
-	/// Helper Functions to read parts of the XML File.
-	void ReadSubMesh(const unsigned int submeshIndex, SubMesh &submesh, XmlReader *reader);
-
-	/// Reads a single Vertexbuffer and writes its data in the Submesh.
-	static void ReadVertexBuffer(SubMesh &submesh, XmlReader *reader, const unsigned int numVertices);
-
-	/// Reads bone weights are stores them into the given submesh.
-	static void ReadBoneWeights(SubMesh &submesh, XmlReader *reader);
-
-	/// After Loading a SubMehs some work needs to be done (make all Vertexes unique, normalize weights).
-	static void ProcessSubMesh(SubMesh &submesh, SubMesh &sharedGeometry);
-
-	/// Uses the bone data to convert a SubMesh into a aiMesh which will be created and returned.
-	aiMesh *CreateAssimpSubMesh(aiScene *pScene, const SubMesh &submesh, const std::vector<Bone> &bones) const;
-
-	//-------------------------------- OgreSkeleton.cpp -------------------------------
-
-	/// Writes the results in Bones and Animations, Filename is not const, because its call-by-value and the function will change it!
-	void ReadSkeleton(const std::string &pFile, Assimp::IOSystem *pIOHandler, const aiScene *pScene,
-					  const std::string &skeletonFile, std::vector<Bone> &Bones, std::vector<Animation> &Animations) const;
-
-	/// Converts the animations in aiAnimations and puts them into the scene.
-	void PutAnimationsInScene(aiScene *pScene, const std::vector<Bone> &Bones, const std::vector<Animation> &Animations);
-
-	/// Creates the aiSkeleton in current scene.
-	void CreateAssimpSkeleton(aiScene *pScene, const std::vector<Bone> &bones, const std::vector<Animation> &animations);
-
-	/// Recursively creates a filled aiNode from a given root bone.
-	static aiNode* CreateNodeFromBone(int boneId, const std::vector<Bone> &bones, aiNode *parent);
-
-	//-------------------------------- OgreMaterial.cpp -------------------------------
-
+	/// Read materials referenced by the @c mesh to @c pScene.
+	void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, Mesh *mesh);
+	void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, MeshXml *mesh);
+	void AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials);
+	
 	/// Reads material
 	aiMaterial* ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string MaterialName);
 
@@ -125,104 +89,8 @@ private:
 	std::string m_userDefinedMaterialLibFile;
 	bool m_detectTextureTypeFromFilename;
 	
-	/// VertexBuffer for the sub meshes that use shader geometry.
-	SubMesh m_SharedGeometry;
-	
 	std::map<aiTextureType, unsigned int> m_textures;
 };
-
-/// Simplified face.
-/** @todo Support other polygon types than just just triangles. Move to using aiFace. */
-struct Face
-{
-	unsigned int VertexIndices[3];
-};
-
-/// Ogre Bone assignment
-struct BoneAssignment
-{
-	/// Bone ID from Ogre.
-	unsigned int BoneId;
-	// Bone name for Assimp.
-	std::string BoneName;
-};
-
-/// Ogre Bone weight
-struct BoneWeight
-{
-	/// Bone Id
-	unsigned int Id;
-	/// BoneWeight
-	float Value;
-};
-
-
-/// Ogre Bone
-struct Bone
-{
-	std::string Name;
-
-	int Id;
-	int ParentId;
-	
-	aiVector3D Position;
-	aiVector3D RotationAxis;
-	float RotationAngle;
-	
-	aiMatrix4x4 BoneToWorldSpace;
-
-	std::vector<int> Children;
-
-	Bone() :
-		Id(-1),
-		ParentId(-1),
-		RotationAngle(0.0f)
-	{
-	}
-
-	/// Returns if this bone is parented.
-	bool IsParented() const { return (ParentId != -1); }
-
-	/// This operator is needed to sort the bones by Id in a vector<Bone>.
-	bool operator<(const Bone &other) const { return (Id < other.Id); }
-
-	/// This operator is needed to find a bone by its name in a vector<Bone>
-	bool operator==(const std::string& other) const { return Name == other; }
-	bool operator==(const aiString& other) const { return Name == std::string(other.data); }
-
-	/// @note Implemented in OgreSkeleton.cpp
-	void CalculateBoneToWorldSpaceMatrix(std::vector<Bone>& Bones);
-};
-
-/// Ogre animation key frame
-/** Transformations for a frame. */
-struct KeyFrame
-{
-	float Time;
-	aiVector3D Position;
-	aiQuaternion Rotation;
-	aiVector3D Scaling;
-};
-
-/// Ogre animation track
-/** Keyframes for one bone. */
-struct Track
-{
-	std::string BoneName;
-	std::vector<KeyFrame> Keyframes;
-};
-
-/// Ogre animation
-struct Animation
-{
-	/// Name
-	std::string Name;
-	/// Length
-	float Length;
-	/// Tracks
-	std::vector<Track> Tracks;
-};
-
 } // Ogre
 } // Assimp
 

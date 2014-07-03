@@ -55,7 +55,7 @@ template <typename TReal>
 class aiQuaterniont
 {
 public:
-	aiQuaterniont() : w(), x(), y(), z() {}
+	aiQuaterniont() : w(1.0), x(), y(), z() {}
 	aiQuaterniont(TReal pw, TReal px, TReal py, TReal pz) 
 		: w(pw), x(px), y(py), z(pz) {}
 

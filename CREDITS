@@ -3,8 +3,8 @@ Open Asset Import Library (Assimp)
 Developers and Contributors
 ===============================================================
 
-The following is the list of all constributors.  
-Thanks for your help!
+The following is a non-exhaustive list of all constributors over the years.
+If you think your name should be listed here, drop us a line and we'll add you.
 
 - Alexander Gessler,
 3DS-, BLEND-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, Assimp-Viewer, assimp-cmd, -noboost, Website (Admin and Design).
@@ -41,7 +41,7 @@ Submitted patches to make Assimp compile with GCC-4, a makefile and the xcode3 w
 - Andreas Nagel
 First Assimp testing & verification under Windows Vista 64 Bit.
 
-- Marius Schröder
+- Marius Schrï¿½der
 Allowed us to use many of his models for screenshots and testing.
 
 - Christian Schubert
@@ -92,7 +92,7 @@ Contributed the 'SimpleTexturedOpenGl' sample.
 - Matthias Fauconneau
 Contributed a fix for the Q3-BSP loader.
 
-- Jørgen P. Tjernø
+- Jï¿½rgen P. Tjernï¿½
 Contributed updated and improved xcode workspaces
 
 - drparallax
@@ -137,7 +137,7 @@ GCC/Linux fixes for the SimpleOpenGL sample.
 - Brian Miller
 Bugfix for a compiler fix for iOS on arm.
 
-- Séverin Lemaignan
+- Sï¿½verin Lemaignan
 Rewrite of PyAssimp, distutils and Python3 support
 
 - albert-wang
@@ -145,3 +145,6 @@ Bugfixes for the collada parser
 
 - Ya ping Jin
 Bugfixes for uv-tanget calculation.
+
+- Jonne Nauha
+Ogre Binary format support

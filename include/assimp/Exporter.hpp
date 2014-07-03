@@ -81,7 +81,7 @@ class ASSIMP_API Exporter
 public:
 
 	/** Function pointer type of a Export worker function */
-	typedef void (*fpExportFunc)(const char*,IOSystem*,const aiScene*);
+	typedef void (*fpExportFunc)(const char*,IOSystem*, const aiScene*);
 
 	/** Internal description of an Assimp export format option */
 	struct ExportFormatEntry
@@ -251,7 +251,11 @@ public:
 	// -------------------------------------------------------------------
 	/** Returns the number of export file formats available in the current
 	 *  Assimp build. Use #Exporter::GetExportFormatDescription to
-	 *  retrieve infos of a specific export format */
+	 *  retrieve infos of a specific export format.
+	 *
+	 *  This includes built-in exporters as well as exporters registered
+	 *  using #RegisterExporter.
+	 **/
 	size_t GetExportFormatCount() const;
 
 
@@ -259,6 +263,12 @@ public:
 	/** Returns a description of the nth export file format. Use #
 	 *  #Exporter::GetExportFormatCount to learn how many export 
 	 *  formats are supported. 
+	 *
+	 * The returned pointer is of static storage duration iff the
+	 * pIndex pertains to a built-in exporter (i.e. one not registered
+	 * via #RegistrerExporter). It is restricted to the life-time of the
+	 * #Exporter instance otherwise.
+	 *
 	 * @param pIndex Index of the export format to retrieve information 
 	 *  for. Valid range is 0 to #Exporter::GetExportFormatCount
 	 * @return A description of that specific export format. 
@@ -269,7 +279,9 @@ public:
 	// -------------------------------------------------------------------
 	/** Register a custom exporter. Custom export formats are limited to
 	 *    to the current #Exporter instance and do not affect the
-	 *    library globally.
+	 *    library globally. The indexes under which the format's
+	 *    export format description can be queried are assigned
+	 *    monotonously.
 	 *  @param desc Exporter description.
 	 *  @return aiReturn_SUCCESS if the export format was successfully
 	 *    registered. A common cause that would prevent an exporter

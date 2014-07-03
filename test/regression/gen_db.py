@@ -188,6 +188,7 @@ if __name__ == "__main__":
             stdout=subprocess.PIPE).communicate()
         ext_list = str(ext_list).lower().split(";")
 
+    # todo: Fix for multi dot extensions like .skeleton.xml
     ext_list = list(filter(lambda f: not f in settings.exclude_extensions,
         map(clean, ext_list)))
 

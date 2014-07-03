@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file ColladaExporter.h
+/** @file ObjExporter.h
  * Declares the exporter class to write a scene to a Collada file
  */
 #ifndef AI_OBJEXPORTER_H_INC

@@ -248,6 +248,15 @@ void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  co
 			}
 		}
 
+		// Only reverse the winding order if an odd number of axes were mirrored.
+		if (xs * ys * zs < 0) {
+			for( unsigned int i = 0; i < mesh->mNumFaces; i++) {
+				aiFace& face = mesh->mFaces[i];
+				for( unsigned int fi = 0; fi < face.mNumIndices / 2; ++fi)
+					std::swap( face.mIndices[fi], face.mIndices[face.mNumIndices - 1 - fi]);
+			}
+		}
+
 		conv_data.meshes->push_back(mesh);
 	}
 	unsigned int* nind = new unsigned int[out.mNumMeshes*2];

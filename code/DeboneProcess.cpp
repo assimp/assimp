@@ -111,7 +111,7 @@ void DeboneProcess::Execute( aiScene* pScene)
 
 	if(numSplits)	{
 		// we need to do something. Let's go.
-		mSubMeshIndices.clear();
+		//mSubMeshIndices.clear(); really needed?
 		mSubMeshIndices.resize(pScene->mNumMeshes);
 
 		// build a new array of meshes for the scene

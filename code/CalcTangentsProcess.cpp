@@ -271,7 +271,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		const aiVector3D& origNorm = pMesh->mNormals[a];
 		const aiVector3D& origTang = pMesh->mTangents[a];
 		const aiVector3D& origBitang = pMesh->mBitangents[a];
-		closeVertices.clear();
+		closeVertices.resize( 0 );
 
 		// find all vertices close to that position
 		vertexFinder->FindPositions( origPos, posEpsilon, verticesFound);

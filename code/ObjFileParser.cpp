@@ -550,13 +550,15 @@ void ObjFileParser::getNewMaterial()
 {
 	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 	m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
-	if ( m_DataIt == m_DataItEnd )
-		return;
+    if( m_DataIt == m_DataItEnd ) {
+        return;
+    }
 
 	char *pStart = &(*m_DataIt);
 	std::string strMat( pStart, *m_DataIt );
-	while ( m_DataIt != m_DataItEnd && isSeparator( *m_DataIt ) )
-		m_DataIt++;
+    while( m_DataIt != m_DataItEnd && isSeparator( *m_DataIt ) ) {
+        ++m_DataIt;
+    }
 	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
 	if ( it == m_pModel->m_MaterialMap.end() )
 	{
@@ -581,8 +583,9 @@ void ObjFileParser::getNewMaterial()
 int ObjFileParser::getMaterialIndex( const std::string &strMaterialName )
 {
 	int mat_index = -1;
-	if ( strMaterialName.empty() )
-		return mat_index;
+    if( strMaterialName.empty() ) {
+        return mat_index;
+    }
 	for (size_t index = 0; index < m_pModel->m_MaterialLib.size(); ++index)
 	{
 		if ( strMaterialName == m_pModel->m_MaterialLib[ index ])
@@ -601,8 +604,9 @@ void ObjFileParser::getGroupName()
 	std::string strGroupName;
    
 	m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, strGroupName);
-	if ( isEndOfBuffer( m_DataIt, m_DataItEnd ) )
-		return;
+    if( isEndOfBuffer( m_DataIt, m_DataItEnd ) ) {
+        return;
+    }
 
 	// Change active group, if necessary
 	if ( m_pModel->m_strActiveGroup != strGroupName )
@@ -653,11 +657,13 @@ void ObjFileParser::getGroupNumberAndResolution()
 void ObjFileParser::getObjectName()
 {
 	m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
-	if (m_DataIt == m_DataItEnd)
-		return;
+    if( m_DataIt == m_DataItEnd ) {
+        return;
+    }
 	char *pStart = &(*m_DataIt);
-	while ( m_DataIt != m_DataItEnd && !isSeparator( *m_DataIt ) )
-		++m_DataIt;
+    while( m_DataIt != m_DataItEnd && !isSeparator( *m_DataIt ) ) {
+        ++m_DataIt;
+    }
 
 	std::string strObjectName(pStart, &(*m_DataIt));
 	if (!strObjectName.empty()) 
@@ -678,8 +684,9 @@ void ObjFileParser::getObjectName()
 		}
 
 		// Allocate a new object, if current one was not found before
-		if ( NULL == m_pModel->m_pCurrent )
-			createObject(strObjectName);
+        if( NULL == m_pModel->m_pCurrent ) {
+            createObject( strObjectName );
+        }
 	}
 	m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
@@ -694,7 +701,6 @@ void ObjFileParser::createObject(const std::string &strObjectName)
 	m_pModel->m_pCurrent->m_strObjName = strObjectName;
 	m_pModel->m_Objects.push_back( m_pModel->m_pCurrent );
 	
-
 	createMesh();
 
 	if( m_pModel->m_pCurrentMaterial )

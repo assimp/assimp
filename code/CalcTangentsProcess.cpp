@@ -115,9 +115,9 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	// we assume that the mesh is still in the verbose vertex format where each face has its own set
 	// of vertices and no vertices are shared between faces. Sadly I don't know any quick test to 
 	// assert() it here.
-    //assert( must be verbose, dammit);
+    // assert( must be verbose, dammit);
 
-	if (pMesh->mTangents) // thisimplies that mBitangents is also there
+	if (pMesh->mTangents) // this implies that mBitangents is also there
 		return false;
 
 	// If the mesh consists of lines and/or points but not of

@@ -75,6 +75,7 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
 } // end of namespace Assimp
 
+static const std::string MaterialExt = ".mtl";
 
 // ------------------------------------------------------------------------------------------------
 ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
@@ -107,7 +108,7 @@ std::string ObjExporter :: GetMaterialLibName()
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter :: GetMaterialLibFileName()
 {	
-	return filename + ".mtl";
+    return filename + MaterialExt;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -132,7 +133,7 @@ std::string ObjExporter :: GetMaterialName(unsigned int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: WriteMaterialFile()
+void ObjExporter::WriteMaterialFile()
 {
 	WriteHeader(mOutputMat);
 
@@ -281,7 +282,7 @@ void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
+void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
 {
 	meshes.push_back(MeshInstance());
 	MeshInstance& mesh = meshes.back();
@@ -332,7 +333,7 @@ void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatri
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
+void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
 {
 	const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
 
@@ -345,5 +346,7 @@ void ObjExporter :: AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
 	}
 }
 
-#endif
-#endif
+// ------------------------------------------------------------------------------------------------
+
+#endif // ASSIMP_BUILD_NO_OBJ_EXPORTER
+#endif // ASSIMP_BUILD_NO_EXPORT

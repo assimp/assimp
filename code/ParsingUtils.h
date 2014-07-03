@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_PARSING_UTILS_H_INC
 
 #include "StringComparison.h"
+
 namespace Assimp {
 
 	// NOTE: the functions below are mostly intended as replacement for

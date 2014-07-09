@@ -185,6 +185,9 @@ void ObjExporter::WriteMaterialFile()
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_OPACITY(0),s)) {
 			mOutputMat << "map_d " << s.data << endl;
 		}
+		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_OPACITY(0),s)) {
+			mOutputMat << "map_d " << s.data << endl;
+		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_HEIGHT(0),s) || AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_NORMALS(0),s)) {
 			// implementations seem to vary here, so write both variants
 			mOutputMat << "bump " << s.data << endl;

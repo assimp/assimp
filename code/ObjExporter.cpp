@@ -145,16 +145,16 @@ void ObjExporter::WriteMaterialFile()
 
 		aiColor4D c;
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE,c)) {
-			mOutputMat << "kd " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Kd " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_AMBIENT,c)) {
-			mOutputMat << "ka " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Ka " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_SPECULAR,c)) {
-			mOutputMat << "ks " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Ks " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_EMISSIVE,c)) {
-			mOutputMat << "ke " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Ke " << c.r << " " << c.g << " " << c.b << endl;
 		}
 
 		float o;
@@ -171,16 +171,16 @@ void ObjExporter::WriteMaterialFile()
 
 		aiString s;
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0),s)) {
-			mOutputMat << "map_kd " << s.data << endl;
+			mOutputMat << "map_Kd " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_AMBIENT(0),s)) {
-			mOutputMat << "map_ka " << s.data << endl;
+			mOutputMat << "map_Ka " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_SPECULAR(0),s)) {
-			mOutputMat << "map_ks " << s.data << endl;
+			mOutputMat << "map_Ks " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_SHININESS(0),s)) {
-			mOutputMat << "map_ns " << s.data << endl;
+			mOutputMat << "map_Ns " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_OPACITY(0),s)) {
 			mOutputMat << "map_d " << s.data << endl;

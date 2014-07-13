@@ -231,13 +231,13 @@ inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma
 {
 	Real f;
 
-	bool inv = (*c=='-');
-	if (inv || *c=='+') {
+	bool inv = (*c == '-');
+	if (inv || *c == '+') {
 		++c;
 	}
 
 	f = static_cast<Real>( strtoul10_64 ( c, &c) );
-	if (*c == '.' || (check_comma && c[0] == ',' && c[1] >= '0' && c[1] <= '9')) // allow for commas, too
+	if ((*c == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')
 	{
 		++c;
 
@@ -254,6 +254,10 @@ inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma
 
 		pl *= fast_atof_table[diff];
 		f += static_cast<Real>( pl );
+	}
+	// For backwards compatibility: eat trailing dots, but not trailing commas.
+	else if (*c == '.') {
+		++c;
 	}
 
 	// A major 'E' must be allowed. Necessary for proper reading of some DXF files.

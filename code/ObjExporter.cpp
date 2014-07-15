@@ -158,7 +158,9 @@ void ObjExporter::WriteMaterialFile()
 		}
 
 		float o;
-		if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
+		aiString t;
+		if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o) && AI_FAILURE == mat->Get(AI_MATKEY_TEXTURE_OPACITY(0),t)) {
+			// Do not write 'd' if 'map_d' is set
 			mOutputMat << "d " << o << endl;
 		}
 

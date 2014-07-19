@@ -131,10 +131,11 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 
 		// and renormalize the weights
 		float sum = 0.0f;
-		for( std::vector<Weight>::const_iterator it = vit->begin(); it != vit->end(); ++it)
-			sum += it->mWeight;
-		const float invSum = 1.0f/sum;
+        for( std::vector<Weight>::const_iterator it = vit->begin(); it != vit->end(); ++it ) {
+            sum += it->mWeight;
+        }
         if( 0.0f != sum ) {
+            const float invSum = 1.0f / sum;
             for( std::vector<Weight>::iterator it = vit->begin(); it != vit->end(); ++it ) {
                 it->mWeight *= invSum;
             }
@@ -161,18 +162,6 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 			const std::vector<aiVertexWeight>& bw = boneWeights[a];
 			aiBone* bone = pMesh->mBones[a];
 
-			// ignore the bone if no vertex weights were removed there
-
-			// FIX (Aramis, 07|22|08)
-			// NO! we can't ignore it in this case ... it is possible that
-			// the number of weights did not change, but the weight values did.
-
-			// if( bw.size() == bone->mNumWeights)
-			//	continue;
-
-			// FIX (Aramis, 07|21|08)
-			// It is possible that all weights of a bone have been removed.
-			// This would naturally cause an exception in &bw[0].
 			if ( bw.empty() )
 			{
 				abNoNeed[a] = bChanged = true;

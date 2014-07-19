@@ -133,8 +133,12 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 		float sum = 0.0f;
 		for( std::vector<Weight>::const_iterator it = vit->begin(); it != vit->end(); ++it)
 			sum += it->mWeight;
-		for( std::vector<Weight>::iterator it = vit->begin(); it != vit->end(); ++it)
-			it->mWeight /= sum;
+		const float invSum = 1.0f/sum;
+        if( 0.0f != sum ) {
+            for( std::vector<Weight>::iterator it = vit->begin(); it != vit->end(); ++it ) {
+                it->mWeight *= invSum;
+            }
+        }
 	}
 
 	if (bChanged)	{
@@ -177,7 +181,7 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 
 			// copy the weight list. should always be less weights than before, so we don't need a new allocation
 			ai_assert( bw.size() <= bone->mNumWeights);
-			bone->mNumWeights = (unsigned int) bw.size();
+			bone->mNumWeights = static_cast<unsigned int>( bw.size() );
 			::memcpy( bone->mWeights, &bw[0], bw.size() * sizeof( aiVertexWeight));
 		}
 

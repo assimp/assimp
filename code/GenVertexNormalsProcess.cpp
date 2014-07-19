@@ -93,7 +93,7 @@ void GenVertexNormalsProcess::Execute( aiScene* pScene)
 	bool bHas = false;
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
 	{
-		if(GenMeshVertexNormals( pScene->mMeshes[a],a))
+        if(GenMeshVertexNormals( pScene->mMeshes[a],a))
 			bHas = true;
 	}
 

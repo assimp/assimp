@@ -113,8 +113,8 @@ void ObjFileParser::parseFile()
 					getVector3(m_pModel->m_Vertices);
 				} else if (*m_DataIt == 't') {
 					// read in texture coordinate ( 2D or 3D )
-                    ++m_DataIt;
-                    getVector( m_pModel->m_TextureCoord );
+                                        ++m_DataIt;
+                                        getVector( m_pModel->m_TextureCoord );
 				} else if (*m_DataIt == 'n') {
 					// Read in normal vector definition
 					++m_DataIt;
@@ -234,11 +234,17 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     size_t numComponents( 0 );
     DataArrayIt tmp( m_DataIt );
-    while( !IsLineEnd( *tmp ) ) {
-        if( *tmp == ' ' ) {
-            ++numComponents;
+    while( true ) {
+        while( isspace(*tmp) && !IsLineEnd(*tmp) ) {
+            tmp++;
         }
-        tmp++;
+        if( IsLineEnd(*tmp) ) {
+            break;
+        }
+        while( !isspace(*tmp) ) {
+            tmp++;
+        }
+        ++numComponents;
     }
     float x, y, z;
     if( 2 == numComponents ) {

@@ -60,10 +60,9 @@ namespace Assimp {
 template <bool SwapEndianess = false, bool RuntimeSwitch = false>
 class StreamWriter
 {
-public:
-	
-	typedef std::size_t diff;
-	typedef std::size_t pos;
+	enum {
+		INITIAL_CAPACITY = 1024
+	};
 
 public:
 
@@ -83,7 +82,7 @@ public:
 		, le(le)
 	{
 		ai_assert(stream); 
-		InternBegin();
+		buffer.reserve(INITIAL_CAPACITY);
 	}
 
 	// ---------------------------------------------------------------------
@@ -92,12 +91,13 @@ public:
 		, le(le)
 	{
 		ai_assert(stream);
-		InternBegin();
+		buffer.reserve(INITIAL_CAPACITY);
 	}
 
 	// ---------------------------------------------------------------------
 	~StreamWriter() {
-		delete[] buffer;
+		stream->Write(&buffer[0], 1, buffer.size());
+		stream->Flush();
 	}
 
 public:
@@ -173,6 +173,16 @@ public:
 		return *this;
 	}
 
+	// ---------------------------------------------------------------------
+	std::size_t GetCurrentPos() const {
+		return cursor;
+	}
+
+	// ---------------------------------------------------------------------
+	void SetCurrentPos(std::size_t new_cursor) {
+		cursor = new_cursor;
+	}
+
 private:
 
 	// ---------------------------------------------------------------------
@@ -180,13 +190,27 @@ private:
 	template <typename T>
 	void Put(T f)	{
 		Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f, le);
-		stream->Write(&f, sizeof(T), 1);
+		
+		if (cursor + sizeof(T) >= buffer.size()) {
+			buffer.resize(cursor + sizeof(T));
+		}
+
+		void* dest = &buffer[cursor];
+
+		// reinterpret_cast + assignment breaks strict aliasing rules
+		// and generally causes trouble on platforms such as ARM that
+		// do not silently ignore alignment faults.
+		::memcpy(dest, &f, sizeof(T));
+		cursor += sizeof(T);
 	}
 
 private:
 
 	boost::shared_ptr<IOStream> stream;
 	bool le;
+
+	std::vector<uint8_t> buffer;
+	std::size_t cursor;
 };
 
 

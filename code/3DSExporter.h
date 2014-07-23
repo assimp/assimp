@@ -70,6 +70,8 @@ private:
 
 	void WriteFaceMaterialChunk(const aiMesh& mesh);
 
+	int WriteHierarchy(const aiNode& node, int level, int sibling_level);
+
 	void WriteString(const std::string& s);
 	void WriteString(const aiString& s);
 	void WriteColor(const aiColor3D& color);

@@ -199,7 +199,65 @@ Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, c
 
 	{
 		ChunkWriter chunk(writer, Discreet3DS::CHUNK_KEYFRAMER);
+		WriteHierarchy(*scene->mRootNode, -1, -1);
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+int Discreet3DSExporter::WriteHierarchy(const aiNode& node, int seq, int sibling_level)
+{
+	// 3DS scene hierarchy is serialized as in http://www.martinreddy.net/gfx/3d/3DS.spec
+	{
+		ChunkWriter chunk(writer, Discreet3DS::CHUNK_TRACKINFO);
+		{
+			ChunkWriter chunk(writer, Discreet3DS::CHUNK_TRACKOBJNAME);
+
+			// Assimp node names are unique and distinct from all mesh-node
+			// names we generate; thus we can use them as-is
+			WriteString(node.mName);
+
+			// Two unknown int16 values - it is even unclear if 0 is a safe value
+			// but luckily importers do not know better either.
+			writer.PutI4(0);
+
+			int16_t hierarchy_pos = static_cast<int16_t>(seq);
+			if (sibling_level != -1) {
+				hierarchy_pos = sibling_level;
+			}
+
+			// Write the hierarchy position
+			writer.PutI2(hierarchy_pos);
+		}
+	}
+
+	// TODO: write transformation chunks
+
+	++seq;
+	sibling_level = seq;
+
+	// Write all children
+	for (unsigned int i = 0; i < node.mNumChildren; ++i) {
+		seq = WriteHierarchy(*node.mChildren[i], seq, i == 0 ? -1 : sibling_level);
+	}
+
+	// Write all meshes as separate nodes to be able to reference the meshes by name
+	for (unsigned int i = 0; i < node.mNumMeshes; ++i) {
+		const bool first_child = node.mNumChildren == 0 && i == 0;
+
+		const unsigned int mesh_idx = node.mMeshes[i];
+		const aiMesh& mesh = *scene->mMeshes[mesh_idx];
+
+		ChunkWriter chunk(writer, Discreet3DS::CHUNK_TRACKINFO);
+		{
+			ChunkWriter chunk(writer, Discreet3DS::CHUNK_TRACKOBJNAME);
+			WriteString(GetMeshName(mesh, mesh_idx, node));
+
+			writer.PutI4(0);
+			writer.PutI2(static_cast<int16_t>(first_child ? seq : sibling_level));
+			++seq;
+		}
+	}
+	return seq;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -111,6 +111,7 @@ SET( Common_SRCS
 	MemoryIOWrapper.h
 	ParsingUtils.h
 	StreamReader.h
+	StreamWriter.h
 	StringComparison.h
 	SGSpatialSort.cpp
 	SGSpatialSort.h
@@ -151,6 +152,8 @@ SET( 3DS_SRCS
 	3DSHelper.h
 	3DSLoader.cpp
 	3DSLoader.h
+	3DSExporter.h
+	3DSExporter.cpp
 )
 SOURCE_GROUP(3DS FILES ${3DS_SRCS})
 

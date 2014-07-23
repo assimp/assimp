@@ -1030,18 +1030,17 @@ void PopulateExportMenu()
 //-------------------------------------------------------------------------------
 void DoExport(size_t formatId)
 {
-	if (!g_szFileName) {
+	if (!g_szFileName[0]) {
+		MessageBox(g_hDlg, "No model loaded", "Export", MB_ICONERROR);
 		return;
 	}
-
 	Exporter exp;
 	const aiExportFormatDesc* const e = exp.GetExportFormatDescription(formatId);
 	ai_assert(e);
 
 	char szFileName[MAX_PATH*2];
-	DWORD dwTemp;
-	if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",NULL,NULL,(BYTE*)szFileName,&dwTemp)) {
-		ai_assert(dwTemp == MAX_PATH + 1);
+	DWORD dwTemp = sizeof(szFileName);
+	if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",NULL,NULL,(BYTE*)szFileName, &dwTemp)) {
 		ai_assert(strlen(szFileName) <= MAX_PATH);
 
 		// invent a nice default file name 

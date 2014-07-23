@@ -181,7 +181,6 @@ Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, c
 : scene(scene)
 , writer(outfile)
 {
-	
 	CollectTrafos(scene->mRootNode, trafos);
 	CollectMeshes(scene->mRootNode, meshes);
 
@@ -191,6 +190,11 @@ Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, c
 		ChunkWriter chunk(writer, Discreet3DS::CHUNK_OBJMESH);
 		WriteMeshes();
 		WriteMaterials();
+
+		{
+			ChunkWriter chunk(writer, Discreet3DS::CHUNK_MASTER_SCALE);
+			writer.PutF4(1.0f);
+		}
 	}
 
 	{
@@ -203,7 +207,6 @@ void Discreet3DSExporter::WriteMaterials()
 {
 	for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
 		ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_MATERIAL);
-
 		const aiMaterial& mat = *scene->mMaterials[i];
 
 		{
@@ -279,10 +282,9 @@ void Discreet3DSExporter::WriteMaterials()
 		int twosided;
 		if (mat.Get(AI_MATKEY_TWOSIDED, twosided) == AI_SUCCESS && twosided != 0) {
 			ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_TWO_SIDE);
-			// Intentionally no more data - if the chunk exists, the TWOSIDED
-			// flag is assumed to be set.
+			writer.PutI2(1);
 		}
-
+		
 		WriteTexture(mat, aiTextureType_DIFFUSE, Discreet3DS::CHUNK_MAT_TEXTURE);
 		WriteTexture(mat, aiTextureType_HEIGHT, Discreet3DS::CHUNK_MAT_BUMPMAP);
 		WriteTexture(mat, aiTextureType_OPACITY, Discreet3DS::CHUNK_MAT_OPACMAP);
@@ -297,9 +299,11 @@ void Discreet3DSExporter::WriteMaterials()
 void Discreet3DSExporter::WriteTexture(const aiMaterial& mat, aiTextureType type, uint16_t chunk_flags) 
 {
 	aiString path;
-	aiTextureMapMode map_mode = aiTextureMapMode_Wrap;
+	aiTextureMapMode map_mode[2] = {
+		aiTextureMapMode_Wrap, aiTextureMapMode_Wrap
+	};
 	float blend = 1.0f;
-	if (mat.GetTexture(type, 0, &path, NULL, NULL, &blend, NULL, &map_mode) != AI_SUCCESS || !path.length) {
+	if (mat.GetTexture(type, 0, &path, NULL, NULL, &blend, NULL, map_mode) != AI_SUCCESS || !path.length) {
 		return;
 	}
 
@@ -309,21 +313,21 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial& mat, aiTextureType type
 		return;
 	}
 
-	ChunkWriter(writer, chunk_flags);
+	ChunkWriter chunk(writer, chunk_flags);
 	{
-		ChunkWriter(writer, Discreet3DS::CHUNK_MAPFILE);
+		ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAPFILE);
 		WriteString(path);
 	}
 
 	WritePercentChunk(blend);
 
 	{
-		ChunkWriter(writer, Discreet3DS::CHUNK_MAT_MAP_TILING);
+		ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_MAP_TILING);
 		uint16_t val = 0; // WRAP
-		if (map_mode == aiTextureMapMode_Mirror) {
+		if (map_mode[0] == aiTextureMapMode_Mirror) {
 			val = 0x2;
 		}
-		else if (map_mode == aiTextureMapMode_Decal) {
+		else if (map_mode[0] == aiTextureMapMode_Decal) {
 			val = 0x10;
 		}
 		writer.PutU2(val);

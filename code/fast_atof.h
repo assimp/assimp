@@ -229,14 +229,26 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 template <typename Real>
 inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma = true)
 {
-	Real f;
+	Real f = 0;
 
 	bool inv = (*c == '-');
 	if (inv || *c == '+') {
 		++c;
 	}
 
-	f = static_cast<Real>( strtoul10_64 ( c, &c) );
+        if (!(c[0] >= '0' && c[0] <= '9') &&
+                !(c[0] == '.' && c[1] >= '0' && c[1] <= '9'))
+        {
+                throw std::invalid_argument("Cannot parse string "
+                        "as real number: does not start with digit "
+                        "or decimal point followed by digit.");
+        }
+
+        if (*c != '.')
+        {
+                f = static_cast<Real>( strtoul10_64 ( c, &c) );
+        }
+
 	if ((*c == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')
 	{
 		++c;

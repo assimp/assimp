@@ -80,6 +80,7 @@ public:
 	StreamWriter(boost::shared_ptr<IOStream> stream, bool le = false)
 		: stream(stream)
 		, le(le)
+		, cursor()
 	{
 		ai_assert(stream); 
 		buffer.reserve(INITIAL_CAPACITY);
@@ -89,6 +90,7 @@ public:
 	StreamWriter(IOStream* stream, bool le = false)
 		: stream(boost::shared_ptr<IOStream>(stream))
 		, le(le)
+		, cursor()
 	{
 		ai_assert(stream);
 		buffer.reserve(INITIAL_CAPACITY);

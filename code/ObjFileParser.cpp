@@ -233,17 +233,12 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
 // -------------------------------------------------------------------
 void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     size_t numComponents( 0 );
-    DataArrayIt tmp( m_DataIt );
-    while( true ) {
-        while( isspace(*tmp) && !IsLineEnd(*tmp) ) {
-            tmp++;
-        }
-        if( IsLineEnd(*tmp) ) {
+    const char* tmp( &m_DataIt[0] );
+    while( !IsLineEnd( *tmp ) ) {
+        if ( !SkipSpaces( &tmp ) ) {
             break;
         }
-        while( !isspace(*tmp) ) {
-            tmp++;
-        }
+        SkipToken( tmp );
         ++numComponents;
     }
     float x, y, z;

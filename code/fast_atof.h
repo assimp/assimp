@@ -236,7 +236,8 @@ inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma
 		++c;
 	}
 
-        if (!isdigit(*c) && !(*c == '.' && isdigit(c[1])))
+        if (!(c[0] >= '0' && c[0] <= '9') &&
+                !(c[0] == '.' && c[1] >= '0' && c[1] <= '9'))
         {
                 throw std::invalid_argument("Cannot parse string "
                         "as real number: does not start with digit "

@@ -57,6 +57,8 @@ Exporters include:
 - STL
 - OBJ
 - PLY
+- X
+- 3DS
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 	
 See [the full list here](http://assimp.sourceforge.net/main_features_formats.html).

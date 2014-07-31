@@ -534,7 +534,6 @@ void OgreBinarySerializer::ReadSubMeshTextureAlias(SubMesh *submesh)
 void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh)
 {
 	uint16_t id = 0;
-	uint16_t submeshIndex = 0;
 
 	if (!AtEnd())
 	{

@@ -75,8 +75,8 @@ private:
 	};
 	
 	OgreBinarySerializer(MemoryStreamReader *reader, AssetMode mode) :
-		m_reader(reader),
 		m_currentLen(0),
+		m_reader(reader),
 		assetMode(mode)
 	{
 	}

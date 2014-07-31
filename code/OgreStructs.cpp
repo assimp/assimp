@@ -963,6 +963,8 @@ aiAnimation *Animation::ConvertToAssimpAnimation()
 // Skeleton
 
 Skeleton::Skeleton() :
+	bones(),
+	animations(),
 	blendMode(ANIMBLEND_AVERAGE)
 {
 }

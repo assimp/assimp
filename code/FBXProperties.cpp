@@ -105,7 +105,7 @@ Property* ReadTypedProperty(const Element& element)
 			ParseTokenAsFloat(*tok[6]))
 		);
 	}
-	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime") || !strcmp(cs,"Float")) {
+	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView")) {
 		return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
 	}
 	return NULL;

@@ -88,6 +88,19 @@ public:
 	virtual bool Update(float percentage = -1.f) = 0;
 
 
+	// -------------------------------------------------------------------
+	/** @brief Progress callback for post-processing steps
+	 *  @param numberOfSteps The number of total post-processing
+	 *   steps
+	 *  @param currentStep The index of the current post-processing
+	 *   step that will run, or equal to numberOfSteps if all of
+	 *   them has finished. This number is always strictly monotone
+	 *   increasing, although not necessarily linearly.
+	 *   */
+	virtual void UpdatePostProcess(int currentStep /*= 0*/, int numberOfSteps /*= 0*/) {
+		float f = currentStep / (float)numberOfSteps;
+		Update( f * 0.5f + 0.5f );
+	};
 
 }; // !class ProgressHandler 
 // ------------------------------------------------------------------------------------

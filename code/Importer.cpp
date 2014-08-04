@@ -768,6 +768,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 	for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)	{
 
 		BaseProcess* process = pimpl->mPostProcessingSteps[a];
+		pimpl->mProgressHandler->UpdatePostProcess( a, pimpl->mPostProcessingSteps.size() );
 		if( process->IsActive( pFlags))	{
 
 			if (profiler) {
@@ -775,7 +776,6 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 			}
 
 			process->ExecuteOnScene	( this );
-			pimpl->mProgressHandler->Update();
 
 			if (profiler) {
 				profiler->EndRegion("postprocess");
@@ -803,6 +803,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		}
 #endif // ! DEBUG
 	}
+	pimpl->mProgressHandler->UpdatePostProcess( pimpl->mPostProcessingSteps.size(), pimpl->mPostProcessingSteps.size() );
 
 	// update private scene flags
   if( pimpl->mScene )

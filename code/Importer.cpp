@@ -678,7 +678,6 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			ScenePreprocessor pre(pimpl->mScene);
 			pre.ProcessScene();
 
-			pimpl->mProgressHandler->Update();
 			if (profiler) {
 				profiler->EndRegion("preprocess");
 			}

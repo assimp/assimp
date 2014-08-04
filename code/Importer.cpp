@@ -642,14 +642,14 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 		// Dispatch the reading to the worker class for this format
 		DefaultLogger::get()->info("Found a matching importer for this file format");
-		pimpl->mProgressHandler->Update();
+		pimpl->mProgressHandler->UpdateFileRead( 0, 1 );
 
 		if (profiler) {
 			profiler->BeginRegion("import");
 		}
 
 		pimpl->mScene = imp->ReadFile( this, pFile, pimpl->mIOHandler);
-		pimpl->mProgressHandler->Update();
+		pimpl->mProgressHandler->UpdateFileRead( 1, 1 );
 
 		if (profiler) {
 			profiler->EndRegion("import");

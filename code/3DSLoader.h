@@ -273,8 +273,8 @@ protected:
 	bool bIsPrj;
 };
 
-#endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER
-
 } // end of namespace Assimp
+
+#endif // !! ASSIMP_BUILD_NO_3DS_IMPORTER
 
 #endif // AI_3DSIMPORTER_H_INC

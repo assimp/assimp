@@ -97,7 +97,7 @@ public:
 	 *   of the file parsing.
 	 *   */
 	virtual void UpdateFileRead(int currentStep /*= 0*/, int numberOfSteps /*= 0*/) {
-		float f = currentStep / (float)numberOfSteps;
+		float f = numberOfSteps ? currentStep / (float)numberOfSteps : 1.0f;
 		Update( f * 0.5f );
 	};
 
@@ -111,7 +111,7 @@ public:
 	 *   increasing, although not necessarily linearly.
 	 *   */
 	virtual void UpdatePostProcess(int currentStep /*= 0*/, int numberOfSteps /*= 0*/) {
-		float f = currentStep / (float)numberOfSteps;
+		float f = numberOfSteps ? currentStep / (float)numberOfSteps : 1.0f;
 		Update( f * 0.5f + 0.5f );
 	};
 

@@ -10,18 +10,18 @@ with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
-	copyright notice, this list of conditions and the
-	following disclaimer.
+  copyright notice, this list of conditions and the
+  following disclaimer.
 
 * Redistributions in binary form must reproduce the above
-	copyright notice, this list of conditions and the
-	following disclaimer in the documentation and/or other
-	materials provided with the distribution.
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
 
 * Neither the name of the assimp team, nor the names of its
-	contributors may be used to endorse or promote products
-	derived from this software without specific prior
-	written permission of the assimp team.
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of the assimp team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
@@ -37,11 +37,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
+/** @file  AssbinExporter.cpp
+ *  ASSBIN exporter main code
+ */
 #include "AssimpPCH.h"
 #include "assbin_chunks.h"
 #include "./../include/assimp/version.h"
 #include "ProcessHelper.h"
+
+#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#	include <zlib.h>
+#else
+#	include "../contrib/zlib/zlib.h"
+#endif
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
@@ -50,6 +58,16 @@ using namespace Assimp;
 
 namespace Assimp	{
 
+	// ----------------------------------------------------------------------------------
+	/**	@class	AssbinChunkWriter
+	 *	@brief	Chunk writer mechanism for the .assbin file structure
+	 *
+	 *  This is a standard in-memory IOStream (most of the code is based on BlobIOStream),
+	 *  the difference being that this takes another IOStream as a "container" in the
+	 *  constructor, and when it is destroyed, it appends the magic number, the chunk size,
+	 *  and the chunk contents to the container stream. This allows relatively easy chunk
+	 *  chunk construction, even recursively.
+	 */
 	class AssbinChunkWriter : public IOStream
 	{
 	private:
@@ -93,13 +111,12 @@ namespace Assimp	{
 			if (buffer) delete[] buffer;
 		}
 
+		void * GetBufferPointer() { return buffer; };
+
 		// -------------------------------------------------------------------
-		virtual size_t Read(void* pvBuffer, 
-			size_t pSize, 
-			size_t pCount) { return 0; };
-		virtual aiReturn Seek(size_t pOffset,
-			aiOrigin pOrigin) { return aiReturn_FAILURE; };
-		virtual size_t Tell() const { return 0; };
+		virtual size_t Read(void* pvBuffer, size_t pSize, size_t pCount) { return 0; };
+		virtual aiReturn Seek(size_t pOffset, aiOrigin pOrigin) { return aiReturn_FAILURE; };
+		virtual size_t Tell() const { return cursor; };
 		virtual void Flush() { };
 
 		virtual size_t FileSize() const
@@ -127,6 +144,7 @@ namespace Assimp	{
 			return Write( &v, sizeof(T), 1 );
 		}
 
+
 		// -----------------------------------------------------------------------------------
 		// Serialize an aiString
 		template <>
@@ -146,7 +164,7 @@ namespace Assimp	{
 			const uint32_t t = (uint32_t)w;
 			if (w > t) {
 				// this shouldn't happen, integers in Assimp data structures never exceed 2^32
-				printf("loss of data due to 64 -> 32 bit integer conversion");
+				throw new DeadlyExportError("loss of data due to 64 -> 32 bit integer conversion");
 			}
 
 			Write(&t,4,1);
@@ -268,43 +286,19 @@ namespace Assimp	{
 			return t + Write<T>(maxc);
 		}
 
-
 	};
 
-/*
-	class AssbinChunkWriter
-	{
-		AssbinStream stream;
-		uint32_t magic;
-	public:
-		AssbinChunkWriter( uint32_t _magic )
-		{
-			magic = _magic;
-		}
-		void AppendToStream( AssbinStream & _stream )
-		{
-			uint32_t s = stream.FileSize();
-			_stream.Write( &magic, sizeof(uint32_t), 1 );
-			_stream.Write( &s, sizeof(uint32_t), 1 );
-			_stream.Write( stream.GetBuffer(), stream.FileSize(), 1 );
-		}
-		void AppendToStream( AssbinChunkWriter & _stream )
-		{
-			uint32_t s = stream.FileSize();
-			_stream.WriteRaw( &magic, sizeof(uint32_t) );
-			_stream.WriteRaw( &s, sizeof(uint32_t) );
-			_stream.WriteRaw( stream.GetBuffer(), stream.FileSize() );
-		}
-
-	};
-*/
-
+	// ----------------------------------------------------------------------------------
+	/**	@class	AssbinExport
+	 *	@brief	Assbin exporter class
+	 *
+	 *  This class performs the .assbin exporting, and is responsible for the file layout.
+	 */
 	class AssbinExport
 	{
 	private:
 		bool shortened;
 		bool compressed;
-		//AssbinStream stream;
 
 	protected:
 		template <typename T> 
@@ -709,8 +703,6 @@ namespace Assimp	{
 			Write<uint16_t>( out, compressed );
 			// ==  20 bytes
 
-			//todo 
-
 			char buff[256]; 
 			strncpy(buff,pFile,256);
 			out->Write(buff,sizeof(char),256);
@@ -729,7 +721,26 @@ namespace Assimp	{
 
 			// Up to here the data is uncompressed. For compressed files, the rest
 			// is compressed using standard DEFLATE from zlib.
-			WriteBinaryScene( out, pScene );
+			if (compressed)
+			{
+				AssbinChunkWriter uncompressedStream( NULL, NULL );
+				WriteBinaryScene( &uncompressedStream, pScene );
+
+				uLongf uncompressedSize = uncompressedStream.Tell();
+				uLongf compressedSize = (uLongf)(uncompressedStream.Tell() * 1.001 + 12.);
+				uint8_t* compressedBuffer = new uint8_t[ compressedSize ];
+
+				compress2( compressedBuffer, &compressedSize, (const Bytef*)uncompressedStream.GetBufferPointer(), uncompressedSize, 9 );
+
+				out->Write( &uncompressedSize, sizeof(uint32_t), 1 );
+				out->Write( compressedBuffer, sizeof(char), compressedSize );
+
+				delete[] compressedBuffer;
+			}
+			else
+			{
+				WriteBinaryScene( out, pScene );
+			}
 
 			pIOSystem->Close( out );
 		}

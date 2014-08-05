@@ -53,19 +53,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-bool Assimp::AssbinImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const
-{
-  return false;
-}
+static const aiImporterDesc desc = {
+  ".assbin Importer",
+  "Gargaj / Conspiracy",
+  "",
+  "",
+  aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_SupportCompressedFlavour,
+  0,
+  0,
+  0,
+  0,
+  "assbin" 
+};
 
 const aiImporterDesc* Assimp::AssbinImporter::GetInfo() const
 {
-  return NULL;
+  return &desc;
+}
+
+bool Assimp::AssbinImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const
+{
+  IOStream * in = pIOHandler->Open(pFile);
+  if (!in)
+    return false;
+
+  char s[32];
+  in->Read( s, sizeof(char), 32 );
+
+  pIOHandler->Close(in);
+
+  return strncmp( s, "ASSIMP.binary-dump.", 19 ) == 0;
 }
 
 void Assimp::AssbinImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler )
 {
-
+  // TODO
 }
 
 #endif // !! ASSIMP_BUILD_NO_ASSBIN_IMPORTER

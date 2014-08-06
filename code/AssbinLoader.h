@@ -78,6 +78,8 @@ public:
   void ReadBinaryNode( IOStream * stream, aiNode** mRootNode );
   void ReadBinaryMesh( IOStream * stream, aiMesh* mesh );
   void ReadBinaryBone( IOStream * stream, aiBone* bone );
+  void ReadBinaryMaterial(IOStream * stream, aiMaterial* mat);
+  void ReadBinaryMaterialProperty(IOStream * stream, aiMaterialProperty* prop);
 };
 
 } // end of namespace Assimp

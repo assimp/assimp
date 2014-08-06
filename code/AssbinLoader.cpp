@@ -298,6 +298,42 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 	}
 }
 
+void AssbinImporter::ReadBinaryMaterialProperty(IOStream * stream, aiMaterialProperty* prop)
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIMATERIALPROPERTY);
+  uint32_t size = Read<uint32_t>(stream);
+
+	prop->mKey = Read<aiString>(stream);
+	prop->mSemantic = Read<unsigned int>(stream);
+	prop->mIndex = Read<unsigned int>(stream);
+
+	prop->mDataLength = Read<unsigned int>(stream);
+	prop->mType = (aiPropertyTypeInfo)Read<unsigned int>(stream);
+  prop->mData = new char [ prop->mDataLength ];
+	stream->Read(prop->mData,1,prop->mDataLength);
+}
+
+// -----------------------------------------------------------------------------------
+void AssbinImporter::ReadBinaryMaterial(IOStream * stream, aiMaterial* mat)
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIMATERIAL);
+  uint32_t size = Read<uint32_t>(stream);
+
+	mat->mNumAllocated = mat->mNumProperties = Read<unsigned int>(stream);
+  if (mat->mNumProperties)
+  {
+    if (mat->mProperties) 
+    {
+      delete[] mat->mProperties;
+    }
+    mat->mProperties = new aiMaterialProperty*[mat->mNumProperties];
+	  for (unsigned int i = 0; i < mat->mNumProperties;++i) {
+      mat->mProperties[i] = new aiMaterialProperty();
+		  ReadBinaryMaterialProperty( stream, mat->mProperties[i]);
+	  }
+  }
+}
+
 void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 {
 	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AISCENE);
@@ -325,12 +361,16 @@ void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 	  }
   }
 
-/*
 	// Read materials
-	for (unsigned int i = 0; i< scene->mNumMaterials; ++i) {
-		const aiMaterial* mat = scene->mMaterials[i];
-		ReadBinaryMaterial(stream,mat);
-	}
+  if (scene->mNumMaterials)
+  {
+    scene->mMaterials = new aiMaterial*[scene->mNumMaterials];
+	  for (unsigned int i = 0; i< scene->mNumMaterials; ++i) {
+		  scene->mMaterials[i] = new aiMaterial();
+		  ReadBinaryMaterial(stream,scene->mMaterials[i]);
+	  }
+  }
+/*
 
 	// Read all animations
 	for (unsigned int i = 0; i < scene->mNumAnimations;++i) {

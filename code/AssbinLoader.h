@@ -57,6 +57,12 @@ namespace Assimp	{
  */
 class AssbinImporter : public BaseImporter
 {
+private:
+  bool shortened;
+  bool compressed;
+protected:
+
+public:
   virtual bool CanRead( 
     const std::string& pFile, 
     IOSystem* pIOHandler, 
@@ -68,6 +74,8 @@ class AssbinImporter : public BaseImporter
     aiScene* pScene, 
     IOSystem* pIOHandler
     );
+  void ReadBinaryScene( IOStream * stream, aiScene* pScene );
+  void ReadBinaryNode( IOStream * stream, aiNode** mRootNode );
 };
 
 } // end of namespace Assimp

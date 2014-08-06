@@ -292,10 +292,10 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 	out.push_back( new XGLImporter() );
 #endif
 #if ( !defined ASSIMP_BUILD_NO_FBX_IMPORTER )
-  out.push_back( new FBXImporter() );
+	out.push_back( new FBXImporter() );
 #endif
 #if ( !defined ASSIMP_BUILD_NO_ASSBIN_IMPORTER )
-  out.push_back( new AssbinImporter() );
+	out.push_back( new AssbinImporter() );
 #endif
 }
 

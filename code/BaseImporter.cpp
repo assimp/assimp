@@ -224,6 +224,19 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get folder of the file from path
+/*static*/ std::string BaseImporter::GetFolderPath(const std::string& pFile, const char& osSeparator)
+{
+	std::string::size_type pos = pFile.find_last_of(osSeparator);
+
+	// no path at all
+	if (pos == std::string::npos)
+		return "";
+	else
+		return pFile.substr(0, pos + 1);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Check for magic bytes at the beginning of the file.
 /* static */ bool BaseImporter::CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile, 
 	const void* _magic, unsigned int num, unsigned int offset, unsigned int size)

@@ -870,4 +870,15 @@ enum aiComponent
 
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
+// ---------------------------------------------------------------------------
+/** @brief LDraw Importer uses this Path to search for parts and subparts
+*
+* LDraw files mostly only refer to the official parts from the LDraw Official
+* Parts Library. If the model is not located in the librarys root or 'model' 
+* folder, you can specify here the absolute path to the libs root folder
+* <br>
+* Property type: String. Default value: </path/to/model/>.
+*/
+#define AI_CONFIG_IMPORT_LDRAW_LIB_PATH "IMPORT_LDRAW_LIB_PATH"
+
 #endif // !! AI_CONFIG_H_INC

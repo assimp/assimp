@@ -83,6 +83,8 @@ public:
   void ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd);
   void ReadBinaryAnim( IOStream * stream, aiAnimation* anim );
   void ReadBinaryTexture(IOStream * stream, aiTexture* tex);
+  void ReadBinaryLight( IOStream * stream, aiLight* l );
+  void ReadBinaryCamera( IOStream * stream, aiCamera* cam );
 };
 
 } // end of namespace Assimp

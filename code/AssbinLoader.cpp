@@ -425,6 +425,48 @@ void AssbinImporter::ReadBinaryTexture(IOStream * stream, aiTexture* tex)
 
 }
 
+// -----------------------------------------------------------------------------------
+void AssbinImporter::ReadBinaryLight( IOStream * stream, aiLight* l )
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AILIGHT);
+  uint32_t size = Read<uint32_t>(stream);
+
+	l->mName = Read<aiString>(stream);
+	l->mType = (aiLightSourceType)Read<unsigned int>(stream);
+
+	if (l->mType != aiLightSource_DIRECTIONAL) { 
+		l->mAttenuationConstant = Read<float>(stream);
+		l->mAttenuationLinear = Read<float>(stream);
+		l->mAttenuationQuadratic = Read<float>(stream);
+	}
+
+	l->mColorDiffuse = Read<aiColor3D>(stream);
+	l->mColorSpecular = Read<aiColor3D>(stream);
+	l->mColorAmbient = Read<aiColor3D>(stream);
+
+	if (l->mType == aiLightSource_SPOT) {
+		l->mAngleInnerCone = Read<float>(stream);
+		l->mAngleOuterCone = Read<float>(stream);
+	}
+
+}
+
+// -----------------------------------------------------------------------------------
+void AssbinImporter::ReadBinaryCamera( IOStream * stream, aiCamera* cam )
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AICAMERA);
+  uint32_t size = Read<uint32_t>(stream);
+
+	cam->mName = Read<aiString>(stream);
+	cam->mPosition = Read<aiVector3D>(stream);
+	cam->mLookAt = Read<aiVector3D>(stream);
+	cam->mUp = Read<aiVector3D>(stream);
+	cam->mHorizontalFOV = Read<float>(stream);
+	cam->mClipPlaneNear = Read<float>(stream);
+	cam->mClipPlaneFar = Read<float>(stream);
+	cam->mAspect = Read<float>(stream);
+}
+
 void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 {
 	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AISCENE);
@@ -482,19 +524,25 @@ void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 	  }
   }
 
-/*
 	// Read lights
-	for (unsigned int i = 0; i < scene->mNumLights;++i) {
-		const aiLight* l = scene->mLights[i];
-		ReadBinaryLight(stream,l);
-	}
+  if (scene->mNumLights)
+  {
+    scene->mLights = new aiLight*[scene->mNumLights];
+	  for (unsigned int i = 0; i < scene->mNumLights;++i) {
+		  scene->mLights[i] = new aiLight();
+		  ReadBinaryLight(stream,scene->mLights[i]);
+	  }
+  }
 
 	// Read cameras
-	for (unsigned int i = 0; i < scene->mNumCameras;++i) {
-		const aiCamera* cam = scene->mCameras[i];
-		ReadBinaryCamera(stream,cam);
-	}
-*/
+  if (scene->mNumCameras)
+  {
+    scene->mCameras = new aiCamera*[scene->mNumCameras];
+	  for (unsigned int i = 0; i < scene->mNumCameras;++i) {
+		  scene->mCameras[i] = new aiCamera();
+		  ReadBinaryCamera(stream,scene->mCameras[i]);
+	  }
+  }
 
 }
 

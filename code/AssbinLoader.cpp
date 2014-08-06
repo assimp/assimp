@@ -115,6 +115,12 @@ aiMatrix4x4 Read<aiMatrix4x4>(IOStream * stream)
 	return m;
 }
 
+template <typename T> void ReadBounds( IOStream * stream, T* p, unsigned int n )
+{
+  // not sure what to do here, the data isn't really useful.
+	stream->Seek( sizeof(T) * n, aiOrigin_CUR );
+}
+
 void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node )
 {
 	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AINODE);
@@ -145,6 +151,153 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node )
 
 }
 
+// -----------------------------------------------------------------------------------
+void AssbinImporter::ReadBinaryBone( IOStream * stream, aiBone* b )
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIBONE );
+  uint32_t size = Read<uint32_t>(stream);
+
+	b->mName = Read<aiString>(stream);
+	b->mNumWeights = Read<unsigned int>(stream);
+	b->mOffsetMatrix = Read<aiMatrix4x4>(stream);
+
+	// for the moment we write dumb min/max values for the bones, too.
+	// maybe I'll add a better, hash-like solution later
+	if (shortened) 
+  {
+		ReadBounds(stream,b->mWeights,b->mNumWeights);
+	} // else write as usual
+	else 
+  {
+    b->mWeights = new aiVertexWeight[b->mNumWeights];
+    stream->Read(b->mWeights,1,b->mNumWeights*sizeof(aiVertexWeight));
+  }
+}
+
+
+void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIMESH);
+  uint32_t size = Read<uint32_t>(stream);
+
+	mesh->mPrimitiveTypes = Read<unsigned int>(stream);
+	mesh->mNumVertices = Read<unsigned int>(stream);
+	mesh->mNumFaces = Read<unsigned int>(stream);
+	mesh->mNumBones = Read<unsigned int>(stream);
+	mesh->mMaterialIndex = Read<unsigned int>(stream);
+
+	// first of all, write bits for all existent vertex components
+	unsigned int c = Read<unsigned int>(stream);
+
+	if (c & ASSBIN_MESH_HAS_POSITIONS) 
+  {
+		if (shortened) {
+			ReadBounds(stream,mesh->mVertices,mesh->mNumVertices);
+		} // else write as usual
+		else 
+    {
+      mesh->mVertices = new aiVector3D[mesh->mNumVertices];
+      stream->Read(mesh->mVertices,1,12*mesh->mNumVertices);
+    }
+	}
+	if (c & ASSBIN_MESH_HAS_NORMALS) 
+  {
+		if (shortened) {
+			ReadBounds(stream,mesh->mNormals,mesh->mNumVertices);
+		} // else write as usual
+		else 
+    {
+      mesh->mNormals = new aiVector3D[mesh->mNumVertices];
+      stream->Read(mesh->mNormals,1,12*mesh->mNumVertices);
+    }
+	}
+	if (c & ASSBIN_MESH_HAS_TANGENTS_AND_BITANGENTS) 
+  {
+		if (shortened) {
+			ReadBounds(stream,mesh->mTangents,mesh->mNumVertices);
+			ReadBounds(stream,mesh->mBitangents,mesh->mNumVertices);
+		} // else write as usual
+		else {
+      mesh->mTangents = new aiVector3D[mesh->mNumVertices];
+			stream->Read(mesh->mTangents,1,12*mesh->mNumVertices);
+      mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
+			stream->Read(mesh->mBitangents,1,12*mesh->mNumVertices);
+		}
+	}
+	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS;++n) 
+  {
+		if (!(c & ASSBIN_MESH_HAS_COLOR(n)))
+			break;
+
+		if (shortened) 
+    {
+			ReadBounds(stream,mesh->mColors[n],mesh->mNumVertices);
+		} // else write as usual
+		else 
+    {
+      mesh->mColors[n] = new aiColor4D[mesh->mNumVertices];
+      stream->Read(mesh->mColors[n],16*mesh->mNumVertices,1);
+    }
+	}
+	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n) 
+  {
+		if (!(c & ASSBIN_MESH_HAS_TEXCOORD(n)))
+			break;
+
+		// write number of UV components
+		mesh->mNumUVComponents[n] = Read<unsigned int>(stream);
+
+		if (shortened) {
+			ReadBounds(stream,mesh->mTextureCoords[n],mesh->mNumVertices);
+		} // else write as usual
+		else 
+    {
+      mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
+      stream->Read(mesh->mTextureCoords[n],12*mesh->mNumVertices,1);
+    }
+	}
+
+	// write faces. There are no floating-point calculations involved
+	// in these, so we can write a simple hash over the face data
+	// to the dump file. We generate a single 32 Bit hash for 512 faces
+	// using Assimp's standard hashing function.
+	if (shortened) {
+		Read<unsigned int>(stream);
+	}
+	else // else write as usual
+	{
+		// if there are less than 2^16 vertices, we can simply use 16 bit integers ...
+    mesh->mFaces = new aiFace[mesh->mNumFaces];
+		for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
+			aiFace& f = mesh->mFaces[i];
+
+			BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
+			f.mNumIndices = Read<uint16_t>(stream);
+      f.mIndices = new unsigned int[f.mNumIndices];
+
+			for (unsigned int a = 0; a < f.mNumIndices;++a) {
+				if (mesh->mNumVertices < (1u<<16)) 
+        {
+					f.mIndices[a] = Read<uint16_t>(stream);
+				}
+				else 
+        {
+          f.mIndices[a] = Read<unsigned int>(stream);
+        }
+			}
+		}
+	}
+
+	// write bones
+	if (mesh->mNumBones) {
+    mesh->mBones = new C_STRUCT aiBone*[mesh->mNumBones];
+		for (unsigned int a = 0; a < mesh->mNumBones;++a) {
+			mesh->mBones[a] = new aiBone();
+			ReadBinaryBone(stream,mesh->mBones[a]);
+		}
+	}
+}
+
 void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 {
 	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AISCENE);
@@ -162,13 +315,17 @@ void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
   scene->mRootNode = new aiNode[1];
 	ReadBinaryNode( stream, &scene->mRootNode );
 
-/*
 	// Read all meshes
-	for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
-		const aiMesh* mesh = scene->mMeshes[i];
-		ReadBinaryMesh( stream,mesh);
-	}
+  if (scene->mNumMeshes)
+  {
+    scene->mMeshes = new aiMesh*[scene->mNumMeshes];
+	  for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
+		  scene->mMeshes[i] = new aiMesh();
+		  ReadBinaryMesh( stream,scene->mMeshes[i]);
+	  }
+  }
 
+/*
 	// Read materials
 	for (unsigned int i = 0; i< scene->mNumMaterials; ++i) {
 		const aiMaterial* mat = scene->mMaterials[i];

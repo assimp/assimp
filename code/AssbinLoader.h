@@ -76,6 +76,8 @@ public:
     );
   void ReadBinaryScene( IOStream * stream, aiScene* pScene );
   void ReadBinaryNode( IOStream * stream, aiNode** mRootNode );
+  void ReadBinaryMesh( IOStream * stream, aiMesh* mesh );
+  void ReadBinaryBone( IOStream * stream, aiBone* bone );
 };
 
 } // end of namespace Assimp

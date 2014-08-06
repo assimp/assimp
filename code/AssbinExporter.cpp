@@ -337,7 +337,7 @@ namespace Assimp	{
 
 			if(!shortened) {
 				if (!tex->mHeight) {
-					chunk.Write(tex->pcData,1,tex->mWidth);
+					chunk.Write(tex->pcData,1,tex->mWidth); // BUG?! should be *4?
 				}
 				else {
 					chunk.Write(tex->pcData,1,tex->mWidth*tex->mHeight*4);
@@ -732,7 +732,7 @@ namespace Assimp	{
 
 				compress2( compressedBuffer, &compressedSize, (const Bytef*)uncompressedStream.GetBufferPointer(), uncompressedSize, 9 );
 
-				out->Write( &uncompressedSize, sizeof(uint32_t), 1 );
+				out->Write( &uncompressedSize, sizeof(uint32_t), 1 ); // BUG?! are we writing compressed or uncompressed size here?
 				out->Write( compressedBuffer, sizeof(char), compressedSize );
 
 				delete[] compressedBuffer;

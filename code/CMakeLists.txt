@@ -174,6 +174,8 @@ SOURCE_GROUP( ASE FILES ${ASE_SRCS})
 SET( ASSBIN_SRCS
 	AssbinExporter.h
 	AssbinExporter.cpp
+	AssbinLoader.h
+	AssbinLoader.cpp
 )
 SOURCE_GROUP( Assbin FILES ${ASSBIN_SRCS})
 

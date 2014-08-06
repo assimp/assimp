@@ -334,6 +334,97 @@ void AssbinImporter::ReadBinaryMaterial(IOStream * stream, aiMaterial* mat)
   }
 }
 
+// -----------------------------------------------------------------------------------
+void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AINODEANIM);
+  uint32_t size = Read<uint32_t>(stream);
+
+	nd->mNodeName = Read<aiString>(stream);
+	nd->mNumPositionKeys = Read<unsigned int>(stream);
+	nd->mNumRotationKeys = Read<unsigned int>(stream);
+	nd->mNumScalingKeys = Read<unsigned int>(stream);
+	nd->mPreState = (aiAnimBehaviour)Read<unsigned int>(stream);
+	nd->mPostState = (aiAnimBehaviour)Read<unsigned int>(stream);
+
+	if (nd->mNumPositionKeys) {
+		if (shortened) {
+			ReadBounds(stream,nd->mPositionKeys,nd->mNumPositionKeys);
+
+		} // else write as usual
+		else {
+      nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
+      stream->Read(nd->mPositionKeys,1,nd->mNumPositionKeys*sizeof(aiVectorKey));
+    }
+	}
+	if (nd->mNumRotationKeys) {
+		if (shortened) {
+			ReadBounds(stream,nd->mRotationKeys,nd->mNumRotationKeys);
+
+		} // else write as usual
+		else 
+    {
+      nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
+      stream->Read(nd->mRotationKeys,1,nd->mNumRotationKeys*sizeof(aiQuatKey));
+    }
+	}
+	if (nd->mNumScalingKeys) {
+		if (shortened) {
+			ReadBounds(stream,nd->mScalingKeys,nd->mNumScalingKeys);
+
+		} // else write as usual
+		else 
+    {
+      nd->mScalingKeys = new aiVectorKey[nd->mNumScalingKeys];
+      stream->Read(nd->mScalingKeys,1,nd->mNumScalingKeys*sizeof(aiVectorKey));
+    }
+	}
+}
+
+
+// -----------------------------------------------------------------------------------
+void AssbinImporter::ReadBinaryAnim( IOStream * stream, aiAnimation* anim )
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIANIMATION);
+  uint32_t size = Read<uint32_t>(stream);
+
+	anim->mName = Read<aiString> (stream);
+	anim->mDuration = Read<double> (stream);
+	anim->mTicksPerSecond = Read<double> (stream);
+	anim->mNumChannels = Read<unsigned int>(stream);
+
+  if (anim->mNumChannels)
+  {
+    anim->mChannels = new aiNodeAnim*[ anim->mNumChannels ];
+	  for (unsigned int a = 0; a < anim->mNumChannels;++a) {
+		  anim->mChannels[a] = new aiNodeAnim();
+		  ReadBinaryNodeAnim(stream,anim->mChannels[a]);
+	  }
+  }
+}
+
+void AssbinImporter::ReadBinaryTexture(IOStream * stream, aiTexture* tex)
+{
+	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AITEXTURE);
+  uint32_t size = Read<uint32_t>(stream);
+
+	tex->mWidth = Read<unsigned int>(stream);
+	tex->mHeight = Read<unsigned int>(stream);
+	stream->Read( tex->achFormatHint, sizeof(char), 4 );
+
+	if(!shortened) {
+		if (!tex->mHeight) {
+      tex->pcData = new aiTexel[ tex->mWidth ];
+			stream->Read(tex->pcData,1,tex->mWidth);
+		}
+		else {
+      tex->pcData = new aiTexel[ tex->mWidth*tex->mHeight ];
+			stream->Read(tex->pcData,1,tex->mWidth*tex->mHeight*4);
+		}
+	}
+
+}
+
 void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 {
 	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AISCENE);
@@ -370,21 +461,28 @@ void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 		  ReadBinaryMaterial(stream,scene->mMaterials[i]);
 	  }
   }
-/*
 
 	// Read all animations
-	for (unsigned int i = 0; i < scene->mNumAnimations;++i) {
-		const aiAnimation* anim = scene->mAnimations[i];
-		ReadBinaryAnim(stream,anim);
-	}
-
+  if (scene->mNumAnimations)
+  {
+    scene->mAnimations = new aiAnimation*[scene->mNumAnimations];
+	  for (unsigned int i = 0; i < scene->mNumAnimations;++i) {
+		  scene->mAnimations[i] = new aiAnimation();
+		  ReadBinaryAnim(stream,scene->mAnimations[i]);
+	  }
+  }
 
 	// Read all textures
-	for (unsigned int i = 0; i < scene->mNumTextures;++i) {
-		const aiTexture* mesh = scene->mTextures[i];
-		ReadBinaryTexture(stream,mesh);
-	}
+  if (scene->mNumTextures)
+  {
+    scene->mTextures = new aiTexture*[scene->mNumTextures];
+	  for (unsigned int i = 0; i < scene->mNumTextures;++i) {
+		  scene->mTextures[i] = new aiTexture();
+		  ReadBinaryTexture(stream,scene->mTextures[i]);
+	  }
+  }
 
+/*
 	// Read lights
 	for (unsigned int i = 0; i < scene->mNumLights;++i) {
 		const aiLight* l = scene->mLights[i];

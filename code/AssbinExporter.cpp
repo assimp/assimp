@@ -161,7 +161,7 @@ inline size_t Write<aiQuaternion>(IOStream * stream, const aiQuaternion& v)
 template <>
 inline size_t Write<aiVertexWeight>(IOStream * stream, const aiVertexWeight& v)
 {
-	uint32_t t = Write<unsigned int>(stream,v.mVertexId);
+	size_t t = Write<unsigned int>(stream,v.mVertexId);
 	return t+Write<float>(stream,v.mWeight);
 }
 

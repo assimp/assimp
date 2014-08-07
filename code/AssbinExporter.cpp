@@ -58,6 +58,154 @@ using namespace Assimp;
 
 namespace Assimp	{
 
+template <typename T> 
+size_t Write(IOStream * stream, const T& v)
+{
+	return stream->Write( &v, sizeof(T), 1 );
+}
+
+
+// -----------------------------------------------------------------------------------
+// Serialize an aiString
+template <>
+inline size_t Write<aiString>(IOStream * stream, const aiString& s)
+{
+	const size_t s2 = (uint32_t)s.length;
+	stream->Write(&s,4,1);
+	stream->Write(s.data,s2,1);
+	return s2+4;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize an unsigned int as uint32_t
+template <>
+inline size_t Write<unsigned int>(IOStream * stream, const unsigned int& w)
+{
+	const uint32_t t = (uint32_t)w;
+	if (w > t) {
+		// this shouldn't happen, integers in Assimp data structures never exceed 2^32
+		throw new DeadlyExportError("loss of data due to 64 -> 32 bit integer conversion");
+	}
+
+	stream->Write(&t,4,1);
+	return 4;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize an unsigned int as uint16_t
+template <>
+inline size_t Write<uint16_t>(IOStream * stream, const uint16_t& w)
+{
+	stream->Write(&w,2,1);
+	return 2;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a float
+template <>
+inline size_t Write<float>(IOStream * stream, const float& f)
+{
+	BOOST_STATIC_ASSERT(sizeof(float)==4);
+	stream->Write(&f,4,1);
+	return 4;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a double
+template <>
+inline size_t Write<double>(IOStream * stream, const double& f)
+{
+	BOOST_STATIC_ASSERT(sizeof(double)==8);
+	stream->Write(&f,8,1);
+	return 8;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a vec3
+template <>
+inline size_t Write<aiVector3D>(IOStream * stream, const aiVector3D& v)
+{
+	size_t t = Write<float>(stream,v.x);
+	t += Write<float>(stream,v.y);
+	t += Write<float>(stream,v.z);
+	return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a color value
+template <>
+inline size_t Write<aiColor4D>(IOStream * stream, const aiColor4D& v)
+{
+	size_t t = Write<float>(stream,v.r);
+	t += Write<float>(stream,v.g);
+	t += Write<float>(stream,v.b);
+	t += Write<float>(stream,v.a);
+	return t;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a quaternion
+template <>
+inline size_t Write<aiQuaternion>(IOStream * stream, const aiQuaternion& v)
+{
+	size_t t = Write<float>(stream,v.w);
+	t += Write<float>(stream,v.x);
+	t += Write<float>(stream,v.y);
+	t += Write<float>(stream,v.z);
+	return 16;
+}
+
+
+// -----------------------------------------------------------------------------------
+// Serialize a vertex weight
+template <>
+inline size_t Write<aiVertexWeight>(IOStream * stream, const aiVertexWeight& v)
+{
+	uint32_t t = Write<unsigned int>(stream,v.mVertexId);
+	return t+Write<float>(stream,v.mWeight);
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize a mat4x4
+template <>
+inline size_t Write<aiMatrix4x4>(IOStream * stream, const aiMatrix4x4& m)
+{
+	for (unsigned int i = 0; i < 4;++i) {
+		for (unsigned int i2 = 0; i2 < 4;++i2) {
+			Write<float>(stream,m[i][i2]);
+		}
+	}
+	return 64;
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize an aiVectorKey
+template <>
+inline size_t Write<aiVectorKey>(IOStream * stream, const aiVectorKey& v)
+{
+	const size_t t = Write<double>(stream,v.mTime);
+	return t + Write<aiVector3D>(stream,v.mValue);
+}
+
+// -----------------------------------------------------------------------------------
+// Serialize an aiQuatKey
+template <>
+inline size_t Write<aiQuatKey>(IOStream * stream, const aiQuatKey& v)
+{
+	const size_t t = Write<double>(stream,v.mTime);
+	return t + Write<aiQuaternion>(stream,v.mValue);
+}
+
+template <typename T>
+inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
+{
+	T minc,maxc;
+	ArrayBounds(in,size,minc,maxc);
+
+	const size_t t = Write<T>(stream,minc);
+	return t + Write<T>(stream,maxc);
+}
+
 	// ----------------------------------------------------------------------------------
 	/**	@class	AssbinChunkWriter
 	 *	@brief	Chunk writer mechanism for the .assbin file structure
@@ -138,154 +286,6 @@ namespace Assimp	{
 			return pCount; 
 		}
 
-		template <typename T> 
-		size_t Write(const T& v)
-		{
-			return Write( &v, sizeof(T), 1 );
-		}
-
-
-		// -----------------------------------------------------------------------------------
-		// Serialize an aiString
-		template <>
-		inline uint32_t Write<aiString>(const aiString& s)
-		{
-			const uint32_t s2 = (uint32_t)s.length;
-			Write(&s,4,1);
-			Write(s.data,s2,1);
-			return s2+4;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize an unsigned int as uint32_t
-		template <>
-		inline uint32_t Write<unsigned int>(const unsigned int& w)
-		{
-			const uint32_t t = (uint32_t)w;
-			if (w > t) {
-				// this shouldn't happen, integers in Assimp data structures never exceed 2^32
-				throw new DeadlyExportError("loss of data due to 64 -> 32 bit integer conversion");
-			}
-
-			Write(&t,4,1);
-			return 4;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize an unsigned int as uint16_t
-		template <>
-		inline uint32_t Write<uint16_t>(const uint16_t& w)
-		{
-			Write(&w,2,1);
-			return 2;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize a float
-		template <>
-		inline uint32_t Write<float>(const float& f)
-		{
-			BOOST_STATIC_ASSERT(sizeof(float)==4);
-			Write(&f,4,1);
-			return 4;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize a double
-		template <>
-		inline uint32_t Write<double>(const double& f)
-		{
-			BOOST_STATIC_ASSERT(sizeof(double)==8);
-			Write(&f,8,1);
-			return 8;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize a vec3
-		template <>
-		inline uint32_t Write<aiVector3D>(const aiVector3D& v)
-		{
-			uint32_t t = Write<float>(v.x);
-			t += Write<float>(v.y);
-			t += Write<float>(v.z);
-			return t;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize a color value
-		template <>
-		inline uint32_t Write<aiColor4D>(const aiColor4D& v)
-		{
-			uint32_t t = Write<float>(v.r);
-			t += Write<float>(v.g);
-			t += Write<float>(v.b);
-			t += Write<float>(v.a);
-			return t;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize a quaternion
-		template <>
-		inline uint32_t Write<aiQuaternion>(const aiQuaternion& v)
-		{
-			uint32_t t = Write<float>(v.w);
-			t += Write<float>(v.x);
-			t += Write<float>(v.y);
-			t += Write<float>(v.z);
-			return 16;
-		}
-
-
-		// -----------------------------------------------------------------------------------
-		// Serialize a vertex weight
-		template <>
-		inline uint32_t Write<aiVertexWeight>(const aiVertexWeight& v)
-		{
-			uint32_t t = Write<unsigned int>(v.mVertexId);
-			return t+Write<float>(v.mWeight);
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize a mat4x4
-		template <>
-		inline uint32_t Write<aiMatrix4x4>(const aiMatrix4x4& m)
-		{
-			for (unsigned int i = 0; i < 4;++i) {
-				for (unsigned int i2 = 0; i2 < 4;++i2) {
-					Write<float>(m[i][i2]);
-				}
-			}
-			return 64;
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize an aiVectorKey
-		template <>
-		inline uint32_t Write<aiVectorKey>(const aiVectorKey& v)
-		{
-			const uint32_t t = Write<double>(v.mTime);
-			return t + Write<aiVector3D>(v.mValue);
-		}
-
-		// -----------------------------------------------------------------------------------
-		// Serialize an aiQuatKey
-		template <>
-		inline uint32_t Write<aiQuatKey>(const aiQuatKey& v)
-		{
-			const uint32_t t = Write<double>(v.mTime);
-			return t + Write<aiQuaternion>(v.mValue);
-		}
-
-		template <typename T>
-		inline uint32_t WriteBounds(const T* in, unsigned int size)
-		{
-			T minc,maxc;
-			ArrayBounds(in,size,minc,maxc);
-
-			const uint32_t t = Write<T>(minc);
-			return t + Write<T>(maxc);
-		}
-
 	};
 
 	// ----------------------------------------------------------------------------------
@@ -301,24 +301,19 @@ namespace Assimp	{
 		bool compressed;
 
 	protected:
-		template <typename T> 
-		size_t Write( IOStream * container, const T& v)
-		{
-			return container->Write( &v, sizeof(T), 1 );
-		}
 
 		// -----------------------------------------------------------------------------------
 		void WriteBinaryNode( IOStream * container, const aiNode* node)
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AINODE );
 
-			chunk.Write<aiString>(node->mName);
-			chunk.Write<aiMatrix4x4>(node->mTransformation);
-			chunk.Write<unsigned int>(node->mNumChildren);
-			chunk.Write<unsigned int>(node->mNumMeshes);
+			Write<aiString>(&chunk,node->mName);
+			Write<aiMatrix4x4>(&chunk,node->mTransformation);
+			Write<unsigned int>(&chunk,node->mNumChildren);
+			Write<unsigned int>(&chunk,node->mNumMeshes);
 
 			for (unsigned int i = 0; i < node->mNumMeshes;++i) {
-				chunk.Write<unsigned int>(node->mMeshes[i]);
+				Write<unsigned int>(&chunk,node->mMeshes[i]);
 			}
 
 			for (unsigned int i = 0; i < node->mNumChildren;++i) {
@@ -331,8 +326,8 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AITEXTURE );
 
-			chunk.Write<unsigned int>(tex->mWidth);
-			chunk.Write<unsigned int>(tex->mHeight);
+			Write<unsigned int>(&chunk,tex->mWidth);
+			Write<unsigned int>(&chunk,tex->mHeight);
 			chunk.Write( tex->achFormatHint, sizeof(char), 4 );
 
 			if(!shortened) {
@@ -351,14 +346,14 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AIBONE );
 
-			chunk.Write<aiString>(b->mName);
-			chunk.Write<unsigned int>(b->mNumWeights);
-			chunk.Write<aiMatrix4x4>(b->mOffsetMatrix);
+			Write<aiString>(&chunk,b->mName);
+			Write<unsigned int>(&chunk,b->mNumWeights);
+			Write<aiMatrix4x4>(&chunk,b->mOffsetMatrix);
 
 			// for the moment we write dumb min/max values for the bones, too.
 			// maybe I'll add a better, hash-like solution later
 			if (shortened) {
-				chunk.WriteBounds(b->mWeights,b->mNumWeights);
+				WriteBounds(&chunk,b->mWeights,b->mNumWeights);
 			} // else write as usual
 			else chunk.Write(b->mWeights,1,b->mNumWeights*sizeof(aiVertexWeight));
 		}
@@ -368,11 +363,11 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AIMESH );
 
-			chunk.Write<unsigned int>(mesh->mPrimitiveTypes);
-			chunk.Write<unsigned int>(mesh->mNumVertices);
-			chunk.Write<unsigned int>(mesh->mNumFaces);
-			chunk.Write<unsigned int>(mesh->mNumBones);
-			chunk.Write<unsigned int>(mesh->mMaterialIndex);
+			Write<unsigned int>(&chunk,mesh->mPrimitiveTypes);
+			Write<unsigned int>(&chunk,mesh->mNumVertices);
+			Write<unsigned int>(&chunk,mesh->mNumFaces);
+			Write<unsigned int>(&chunk,mesh->mNumBones);
+			Write<unsigned int>(&chunk,mesh->mMaterialIndex);
 
 			// first of all, write bits for all existent vertex components
 			unsigned int c = 0;
@@ -397,25 +392,25 @@ namespace Assimp	{
 				}
 				c |= ASSBIN_MESH_HAS_COLOR(n);
 			}
-			chunk.Write<unsigned int>(c);
+			Write<unsigned int>(&chunk,c);
 
 			aiVector3D minVec, maxVec;
 			if (mesh->mVertices) {
 				if (shortened) {
-					chunk.WriteBounds(mesh->mVertices,mesh->mNumVertices);
+					WriteBounds(&chunk,mesh->mVertices,mesh->mNumVertices);
 				} // else write as usual
 				else chunk.Write(mesh->mVertices,1,12*mesh->mNumVertices);
 			}
 			if (mesh->mNormals) {
 				if (shortened) {
-					chunk.WriteBounds(mesh->mNormals,mesh->mNumVertices);
+					WriteBounds(&chunk,mesh->mNormals,mesh->mNumVertices);
 				} // else write as usual
 				else chunk.Write(mesh->mNormals,1,12*mesh->mNumVertices);
 			}
 			if (mesh->mTangents && mesh->mBitangents) {
 				if (shortened) {
-					chunk.WriteBounds(mesh->mTangents,mesh->mNumVertices);
-					chunk.WriteBounds(mesh->mBitangents,mesh->mNumVertices);
+					WriteBounds(&chunk,mesh->mTangents,mesh->mNumVertices);
+					WriteBounds(&chunk,mesh->mBitangents,mesh->mNumVertices);
 				} // else write as usual
 				else {
 					chunk.Write(mesh->mTangents,1,12*mesh->mNumVertices);
@@ -427,7 +422,7 @@ namespace Assimp	{
 					break;
 
 				if (shortened) {
-					chunk.WriteBounds(mesh->mColors[n],mesh->mNumVertices);
+					WriteBounds(&chunk,mesh->mColors[n],mesh->mNumVertices);
 				} // else write as usual
 				else chunk.Write(mesh->mColors[n],16*mesh->mNumVertices,1);
 			}
@@ -436,10 +431,10 @@ namespace Assimp	{
 					break;
 
 				// write number of UV components
-				chunk.Write<unsigned int>(mesh->mNumUVComponents[n]);
+				Write<unsigned int>(&chunk,mesh->mNumUVComponents[n]);
 
 				if (shortened) {
-					chunk.WriteBounds(mesh->mTextureCoords[n],mesh->mNumVertices);
+					WriteBounds(&chunk,mesh->mTextureCoords[n],mesh->mNumVertices);
 				} // else write as usual
 				else chunk.Write(mesh->mTextureCoords[n],12*mesh->mNumVertices,1);
 			}
@@ -464,7 +459,7 @@ namespace Assimp	{
 							hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
 						}
 					}
-					chunk.Write<unsigned int>(hash);
+					Write<unsigned int>(&chunk,hash);
 				}
 			}
 			else // else write as usual
@@ -474,13 +469,13 @@ namespace Assimp	{
 					const aiFace& f = mesh->mFaces[i];
 
 					BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
-					chunk.Write<uint16_t>(f.mNumIndices);
+					Write<uint16_t>(&chunk,f.mNumIndices);
 
 					for (unsigned int a = 0; a < f.mNumIndices;++a) {
 						if (mesh->mNumVertices < (1u<<16)) {
-							chunk.Write<uint16_t>(f.mIndices[a]);
+							Write<uint16_t>(&chunk,f.mIndices[a]);
 						}
-						else chunk.Write<unsigned int>(f.mIndices[a]);
+						else Write<unsigned int>(&chunk,f.mIndices[a]);
 					}
 				}
 			}
@@ -499,12 +494,12 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AIMATERIALPROPERTY );
 
-			chunk.Write<aiString>(prop->mKey);
-			chunk.Write<unsigned int>(prop->mSemantic);
-			chunk.Write<unsigned int>(prop->mIndex);
+			Write<aiString>(&chunk,prop->mKey);
+			Write<unsigned int>(&chunk,prop->mSemantic);
+			Write<unsigned int>(&chunk,prop->mIndex);
 
-			chunk.Write<unsigned int>(prop->mDataLength);
-			chunk.Write<unsigned int>((unsigned int)prop->mType);
+			Write<unsigned int>(&chunk,prop->mDataLength);
+			Write<unsigned int>(&chunk,(unsigned int)prop->mType);
 			chunk.Write(prop->mData,1,prop->mDataLength);
 		}
 
@@ -513,7 +508,7 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AIMATERIAL);
 
-			chunk.Write<unsigned int>(mat->mNumProperties);
+			Write<unsigned int>(&chunk,mat->mNumProperties);
 			for (unsigned int i = 0; i < mat->mNumProperties;++i) {
 				WriteBinaryMaterialProperty( &chunk, mat->mProperties[i]);
 			}
@@ -524,30 +519,30 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AINODEANIM );
 
-			chunk.Write<aiString>(nd->mNodeName);
-			chunk.Write<unsigned int>(nd->mNumPositionKeys);
-			chunk.Write<unsigned int>(nd->mNumRotationKeys);
-			chunk.Write<unsigned int>(nd->mNumScalingKeys);
-			chunk.Write<unsigned int>(nd->mPreState);
-			chunk.Write<unsigned int>(nd->mPostState);
+			Write<aiString>(&chunk,nd->mNodeName);
+			Write<unsigned int>(&chunk,nd->mNumPositionKeys);
+			Write<unsigned int>(&chunk,nd->mNumRotationKeys);
+			Write<unsigned int>(&chunk,nd->mNumScalingKeys);
+			Write<unsigned int>(&chunk,nd->mPreState);
+			Write<unsigned int>(&chunk,nd->mPostState);
 
 			if (nd->mPositionKeys) {
 				if (shortened) {
-					chunk.WriteBounds(nd->mPositionKeys,nd->mNumPositionKeys);
+					WriteBounds(&chunk,nd->mPositionKeys,nd->mNumPositionKeys);
 
 				} // else write as usual
 				else chunk.Write(nd->mPositionKeys,1,nd->mNumPositionKeys*sizeof(aiVectorKey));
 			}
 			if (nd->mRotationKeys) {
 				if (shortened) {
-					chunk.WriteBounds(nd->mRotationKeys,nd->mNumRotationKeys);
+					WriteBounds(&chunk,nd->mRotationKeys,nd->mNumRotationKeys);
 
 				} // else write as usual
 				else chunk.Write(nd->mRotationKeys,1,nd->mNumRotationKeys*sizeof(aiQuatKey));
 			}
 			if (nd->mScalingKeys) {
 				if (shortened) {
-					chunk.WriteBounds(nd->mScalingKeys,nd->mNumScalingKeys);
+					WriteBounds(&chunk,nd->mScalingKeys,nd->mNumScalingKeys);
 
 				} // else write as usual
 				else chunk.Write(nd->mScalingKeys,1,nd->mNumScalingKeys*sizeof(aiVectorKey));
@@ -560,10 +555,10 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AIANIMATION );
 
-			chunk.Write<aiString> (anim->mName);
-			chunk.Write<double> (anim->mDuration);
-			chunk.Write<double> (anim->mTicksPerSecond);
-			chunk.Write<unsigned int>(anim->mNumChannels);
+			Write<aiString>(&chunk,anim->mName);
+			Write<double>(&chunk,anim->mDuration);
+			Write<double>(&chunk,anim->mTicksPerSecond);
+			Write<unsigned int>(&chunk,anim->mNumChannels);
 
 			for (unsigned int a = 0; a < anim->mNumChannels;++a) {
 				const aiNodeAnim* nd = anim->mChannels[a];
@@ -576,22 +571,22 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AILIGHT );
 
-			chunk.Write<aiString>(l->mName);
-			chunk.Write<unsigned int>(l->mType);
+			Write<aiString>(&chunk,l->mName);
+			Write<unsigned int>(&chunk,l->mType);
 
 			if (l->mType != aiLightSource_DIRECTIONAL) { 
-				chunk.Write<float>(l->mAttenuationConstant);
-				chunk.Write<float>(l->mAttenuationLinear);
-				chunk.Write<float>(l->mAttenuationQuadratic);
+				Write<float>(&chunk,l->mAttenuationConstant);
+				Write<float>(&chunk,l->mAttenuationLinear);
+				Write<float>(&chunk,l->mAttenuationQuadratic);
 			}
 
-			chunk.Write<aiVector3D>((const aiVector3D&)l->mColorDiffuse);
-			chunk.Write<aiVector3D>((const aiVector3D&)l->mColorSpecular);
-			chunk.Write<aiVector3D>((const aiVector3D&)l->mColorAmbient);
+			Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorDiffuse);
+			Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorSpecular);
+			Write<aiVector3D>(&chunk,(const aiVector3D&)l->mColorAmbient);
 
 			if (l->mType == aiLightSource_SPOT) {
-				chunk.Write<float>(l->mAngleInnerCone);
-				chunk.Write<float>(l->mAngleOuterCone);
+				Write<float>(&chunk,l->mAngleInnerCone);
+				Write<float>(&chunk,l->mAngleOuterCone);
 			}
 
 		}
@@ -601,14 +596,14 @@ namespace Assimp	{
 		{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AICAMERA );
 
-			chunk.Write<aiString>(cam->mName);
-			chunk.Write<aiVector3D>(cam->mPosition);
-			chunk.Write<aiVector3D>(cam->mLookAt);
-			chunk.Write<aiVector3D>(cam->mUp);
-			chunk.Write<float>(cam->mHorizontalFOV);
-			chunk.Write<float>(cam->mClipPlaneNear);
-			chunk.Write<float>(cam->mClipPlaneFar);
-			chunk.Write<float>(cam->mAspect);
+			Write<aiString>(&chunk,cam->mName);
+			Write<aiVector3D>(&chunk,cam->mPosition);
+			Write<aiVector3D>(&chunk,cam->mLookAt);
+			Write<aiVector3D>(&chunk,cam->mUp);
+			Write<float>(&chunk,cam->mHorizontalFOV);
+			Write<float>(&chunk,cam->mClipPlaneNear);
+			Write<float>(&chunk,cam->mClipPlaneFar);
+			Write<float>(&chunk,cam->mAspect);
 		}
 
 		// -----------------------------------------------------------------------------------
@@ -617,13 +612,13 @@ namespace Assimp	{
 			AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AISCENE );
 
 			// basic scene information
-			chunk.Write<unsigned int>(scene->mFlags);
-			chunk.Write<unsigned int>(scene->mNumMeshes);
-			chunk.Write<unsigned int>(scene->mNumMaterials);
-			chunk.Write<unsigned int>(scene->mNumAnimations);
-			chunk.Write<unsigned int>(scene->mNumTextures);
-			chunk.Write<unsigned int>(scene->mNumLights);
-			chunk.Write<unsigned int>(scene->mNumCameras);
+			Write<unsigned int>(&chunk,scene->mFlags);
+			Write<unsigned int>(&chunk,scene->mNumMeshes);
+			Write<unsigned int>(&chunk,scene->mNumMaterials);
+			Write<unsigned int>(&chunk,scene->mNumAnimations);
+			Write<unsigned int>(&chunk,scene->mNumTextures);
+			Write<unsigned int>(&chunk,scene->mNumLights);
+			Write<unsigned int>(&chunk,scene->mNumCameras);
 
 			// write node graph
 			WriteBinaryNode( &chunk, scene->mRootNode );

@@ -51,6 +51,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "AssbinLoader.h"
 #include "assbin_chunks.h"
+#ifdef ASSIMP_BUILD_NO_OWN_ZLIB
+#	include <zlib.h>
+#else
+#	include "../contrib/zlib/zlib.h"
+#include "MemoryIOWrapper.h"
+#endif
 
 using namespace Assimp;
 
@@ -563,13 +569,31 @@ void AssbinImporter::InternReadFile( const std::string& pFile, aiScene* pScene, 
 	shortened = Read<uint16_t>(stream) > 0;
 	compressed = Read<uint16_t>(stream) > 0;
 
+	if (shortened)
+		throw DeadlyImportError( "Shortened binaries are not supported!" );
+
 	stream->Seek( 256, aiOrigin_CUR ); // original filename
 	stream->Seek( 128, aiOrigin_CUR ); // options
 	stream->Seek( 64, aiOrigin_CUR ); // padding
 
 	if (compressed)
 	{
-		// TODO
+		uLongf uncompressedSize = Read<uint32_t>(stream);
+		uLongf compressedSize = stream->FileSize() - stream->Tell();
+
+		unsigned char * compressedData = new unsigned char[ compressedSize ];
+		stream->Read( compressedData, 1, compressedSize );
+
+		unsigned char * uncompressedData = new unsigned char[ uncompressedSize ];
+
+		uncompress( uncompressedData, &uncompressedSize, compressedData, compressedSize );
+
+		MemoryIOStream io( uncompressedData, uncompressedSize );
+
+		ReadBinaryScene(&io,pScene);
+
+		delete[] uncompressedData;
+		delete[] compressedData;
 	}
 	else
 	{

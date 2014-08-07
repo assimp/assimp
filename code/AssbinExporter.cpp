@@ -223,7 +223,7 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 		uint8_t* buffer;
 		uint32_t magic;
 		IOStream * container;
-		uint32_t cur_size, cursor, initial;
+		size_t cur_size, cursor, initial;
 
 	private:
 		// -------------------------------------------------------------------

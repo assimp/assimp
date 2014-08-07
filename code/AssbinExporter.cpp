@@ -96,6 +96,7 @@ inline size_t Write<unsigned int>(IOStream * stream, const unsigned int& w)
 template <>
 inline size_t Write<uint16_t>(IOStream * stream, const uint16_t& w)
 {
+	BOOST_STATIC_ASSERT(sizeof(uint16_t)==2);
 	stream->Write(&w,2,1);
 	return 2;
 }
@@ -245,7 +246,7 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 	public:
 
 		AssbinChunkWriter( IOStream * container, uint32_t magic, size_t initial = 4096) 
-			: initial(initial), buffer(NULL), cur_size(0), cursor(0), container(container), magic(magic)
+			: buffer(NULL), magic(magic), container(container), cur_size(0), cursor(0), initial(initial)
 		{
 		}
 
@@ -663,10 +664,9 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 		}
 
 	public:
-		AssbinExport()
+		AssbinExport() 
+			: shortened(false), compressed(false) // temporary settings until properties are introduced for exporters
 		{
-			shortened = false;
-			compressed = false;
 		}
 
 		// -----------------------------------------------------------------------------------

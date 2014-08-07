@@ -642,9 +642,10 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 		// Get file size for progress handler
 		IOStream * fileIO = pimpl->mIOHandler->Open( pFile );
+    uint32_t fileSize = 0;
 		if (fileIO)
 		{
-			uint32_t fileSize = fileIO->FileSize();
+			fileSize = fileIO->FileSize();
 			pimpl->mIOHandler->Close( fileIO );
 		}
 

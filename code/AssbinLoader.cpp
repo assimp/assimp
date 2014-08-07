@@ -51,11 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "AssbinLoader.h"
 #include "assbin_chunks.h"
+#include "MemoryIOWrapper.h"
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #	include <zlib.h>
 #else
 #	include "../contrib/zlib/zlib.h"
-#include "MemoryIOWrapper.h"
 #endif
 
 using namespace Assimp;

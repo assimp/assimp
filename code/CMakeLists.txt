@@ -171,6 +171,14 @@ SET( ASE_SRCS
 )
 SOURCE_GROUP( ASE FILES ${ASE_SRCS})
 
+SET( ASSBIN_SRCS
+	AssbinExporter.h
+	AssbinExporter.cpp
+	AssbinLoader.h
+	AssbinLoader.cpp
+)
+SOURCE_GROUP( Assbin FILES ${ASSBIN_SRCS})
+
 SET( B3D_SRCS
 	B3DImporter.cpp
 	B3DImporter.h
@@ -646,6 +654,7 @@ SET( assimp_src
 	${3DS_SRCS}
 	${AC_SRCS}
 	${ASE_SRCS}
+	${ASSBIN_SRCS}
 	${B3D_SRCS}
 	${BVH_SRCS}
 	${Collada_SRCS}

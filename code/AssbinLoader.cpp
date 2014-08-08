@@ -101,12 +101,53 @@ T Read(IOStream * stream)
 }
 
 template <>
+aiVector3D Read<aiVector3D>(IOStream * stream)
+{
+	aiVector3D v;
+	v.x = Read<float>(stream);
+	v.y = Read<float>(stream);
+	v.z = Read<float>(stream);
+	return v;
+}
+
+template <>
+aiColor4D Read<aiColor4D>(IOStream * stream)
+{
+	aiColor4D c;
+	c.r = Read<float>(stream);
+	c.g = Read<float>(stream);
+	c.b = Read<float>(stream);
+	c.a = Read<float>(stream);
+	return c;
+}
+
+template <>
+aiQuaternion Read<aiQuaternion>(IOStream * stream)
+{
+	aiQuaternion v;
+	v.w = Read<float>(stream);
+	v.x = Read<float>(stream);
+	v.y = Read<float>(stream);
+	v.z = Read<float>(stream);
+	return v;
+}
+
+template <>
 aiString Read<aiString>(IOStream * stream)
 {
 	aiString s;
 	stream->Read(&s.length,4,1);
 	stream->Read(s.data,s.length,1);
 	return s;
+}
+
+template <>
+aiVertexWeight Read<aiVertexWeight>(IOStream * stream)
+{
+	aiVertexWeight w;
+	w.mVertexId = Read<unsigned int>(stream);
+	w.mWeight = Read<float>(stream);
+	return w;
 }
 
 template <>

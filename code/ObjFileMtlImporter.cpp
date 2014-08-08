@@ -129,6 +129,7 @@ void ObjFileMtlImporter::load()
 	{
 		switch (*m_DataIt)
 		{
+		case 'k':
 		case 'K':
 			{
 				++m_DataIt;

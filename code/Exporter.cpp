@@ -79,6 +79,7 @@ void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*);
 void ExportScenePly(const char*,IOSystem*, const aiScene*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*);
+void ExportSceneAssbin(const char*, IOSystem*, const aiScene*);
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -116,6 +117,10 @@ Exporter::ExportFormatEntry gExporters[] =
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
 	Exporter::ExportFormatEntry( "3ds", "Autodesk 3DS (legacy)", "3ds" , &ExportScene3DS,
 		aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
+	Exporter::ExportFormatEntry( "assbin", "Assimp Binary", "assbin" , &ExportSceneAssbin, NULL),
 #endif
 };
 

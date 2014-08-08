@@ -207,6 +207,8 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 	return t + Write<T>(stream,maxc);
 }
 
+// We use this to write out non-byte arrays so that we write using the specializations.
+// This way we avoid writing out extra bytes that potentially come from struct alignment.
 template <typename T>
 inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 {

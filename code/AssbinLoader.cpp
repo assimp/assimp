@@ -101,12 +101,53 @@ T Read(IOStream * stream)
 }
 
 template <>
+aiVector3D Read<aiVector3D>(IOStream * stream)
+{
+	aiVector3D v;
+	v.x = Read<float>(stream);
+	v.y = Read<float>(stream);
+	v.z = Read<float>(stream);
+	return v;
+}
+
+template <>
+aiColor4D Read<aiColor4D>(IOStream * stream)
+{
+	aiColor4D c;
+	c.r = Read<float>(stream);
+	c.g = Read<float>(stream);
+	c.b = Read<float>(stream);
+	c.a = Read<float>(stream);
+	return c;
+}
+
+template <>
+aiQuaternion Read<aiQuaternion>(IOStream * stream)
+{
+	aiQuaternion v;
+	v.w = Read<float>(stream);
+	v.x = Read<float>(stream);
+	v.y = Read<float>(stream);
+	v.z = Read<float>(stream);
+	return v;
+}
+
+template <>
 aiString Read<aiString>(IOStream * stream)
 {
 	aiString s;
 	stream->Read(&s.length,4,1);
 	stream->Read(s.data,s.length,1);
 	return s;
+}
+
+template <>
+aiVertexWeight Read<aiVertexWeight>(IOStream * stream)
+{
+	aiVertexWeight w;
+	w.mVertexId = Read<unsigned int>(stream);
+	w.mWeight = Read<float>(stream);
+	return w;
 }
 
 template <>
@@ -119,6 +160,30 @@ aiMatrix4x4 Read<aiMatrix4x4>(IOStream * stream)
 		}
 	}
 	return m;
+}
+
+template <>
+aiVectorKey Read<aiVectorKey>(IOStream * stream)
+{
+	aiVectorKey v;
+	v.mTime = Read<double>(stream);
+	v.mValue = Read<aiVector3D>(stream);
+	return v;
+}
+
+template <>
+aiQuatKey Read<aiQuatKey>(IOStream * stream)
+{
+	aiQuatKey v;
+	v.mTime = Read<double>(stream);
+	v.mValue = Read<aiQuaternion>(stream);
+	return v;
+}
+
+template <typename T>
+void ReadArray(IOStream * stream, T * out, unsigned int size)
+{ 
+	for (unsigned int i=0; i<size; i++) out[i] = Read<T>(stream);
 }
 
 template <typename T> void ReadBounds( IOStream * stream, T* p, unsigned int n )
@@ -176,7 +241,7 @@ void AssbinImporter::ReadBinaryBone( IOStream * stream, aiBone* b )
 	else 
 	{
 		b->mWeights = new aiVertexWeight[b->mNumWeights];
-		stream->Read(b->mWeights,1,b->mNumWeights*sizeof(aiVertexWeight));
+		ReadArray<aiVertexWeight>(stream,b->mWeights,b->mNumWeights);
 	}
 }
 
@@ -203,7 +268,7 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 		else 
 		{
 			mesh->mVertices = new aiVector3D[mesh->mNumVertices];
-			stream->Read(mesh->mVertices,1,12*mesh->mNumVertices);
+			ReadArray<aiVector3D>(stream,mesh->mVertices,mesh->mNumVertices);
 		}
 	}
 	if (c & ASSBIN_MESH_HAS_NORMALS) 
@@ -214,7 +279,7 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 		else 
 		{
 			mesh->mNormals = new aiVector3D[mesh->mNumVertices];
-			stream->Read(mesh->mNormals,1,12*mesh->mNumVertices);
+			ReadArray<aiVector3D>(stream,mesh->mNormals,mesh->mNumVertices);
 		}
 	}
 	if (c & ASSBIN_MESH_HAS_TANGENTS_AND_BITANGENTS) 
@@ -226,9 +291,9 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 		else 
 		{
 			mesh->mTangents = new aiVector3D[mesh->mNumVertices];
-			stream->Read(mesh->mTangents,1,12*mesh->mNumVertices);
+			ReadArray<aiVector3D>(stream,mesh->mTangents,mesh->mNumVertices);
 			mesh->mBitangents = new aiVector3D[mesh->mNumVertices];
-			stream->Read(mesh->mBitangents,1,12*mesh->mNumVertices);
+			ReadArray<aiVector3D>(stream,mesh->mBitangents,mesh->mNumVertices);
 		}
 	}
 	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS;++n) 
@@ -243,7 +308,7 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 		else 
 		{
 			mesh->mColors[n] = new aiColor4D[mesh->mNumVertices];
-			stream->Read(mesh->mColors[n],16*mesh->mNumVertices,1);
+			ReadArray<aiColor4D>(stream,mesh->mColors[n],mesh->mNumVertices);
 		}
 	}
 	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n) 
@@ -260,7 +325,7 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 		else 
 		{
 			mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
-			stream->Read(mesh->mTextureCoords[n],12*mesh->mNumVertices,1);
+			ReadArray<aiVector3D>(stream,mesh->mTextureCoords[n],mesh->mNumVertices);
 		}
 	}
 
@@ -361,7 +426,7 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
 		} // else write as usual
 		else {
 			nd->mPositionKeys = new aiVectorKey[nd->mNumPositionKeys];
-			stream->Read(nd->mPositionKeys,1,nd->mNumPositionKeys*sizeof(aiVectorKey));
+			ReadArray<aiVectorKey>(stream,nd->mPositionKeys,nd->mNumPositionKeys);
 		}
 	}
 	if (nd->mNumRotationKeys) {
@@ -372,7 +437,7 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
 		else 
 		{
 			nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
-			stream->Read(nd->mRotationKeys,1,nd->mNumRotationKeys*sizeof(aiQuatKey));
+			ReadArray<aiQuatKey>(stream,nd->mRotationKeys,nd->mNumRotationKeys);
 		}
 	}
 	if (nd->mNumScalingKeys) {
@@ -383,7 +448,7 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
 		else 
 		{
 			nd->mScalingKeys = new aiVectorKey[nd->mNumScalingKeys];
-			stream->Read(nd->mScalingKeys,1,nd->mNumScalingKeys*sizeof(aiVectorKey));
+			ReadArray<aiVectorKey>(stream,nd->mScalingKeys,nd->mNumScalingKeys);
 		}
 	}
 }

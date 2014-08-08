@@ -207,6 +207,16 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 	return t + Write<T>(stream,maxc);
 }
 
+// We use this to write out non-byte arrays so that we write using the specializations.
+// This way we avoid writing out extra bytes that potentially come from struct alignment.
+template <typename T>
+inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
+{
+	size_t n = 0;
+	for (unsigned int i=0; i<size; i++) n += Write<T>(stream,in[i]);
+	return n;
+}
+
 	// ----------------------------------------------------------------------------------
 	/**	@class	AssbinChunkWriter
 	 *	@brief	Chunk writer mechanism for the .assbin file structure
@@ -356,7 +366,7 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 			if (shortened) {
 				WriteBounds(&chunk,b->mWeights,b->mNumWeights);
 			} // else write as usual
-			else chunk.Write(b->mWeights,1,b->mNumWeights*sizeof(aiVertexWeight));
+			else WriteArray<aiVertexWeight>(&chunk,b->mWeights,b->mNumWeights);
 		}
 
 		// -----------------------------------------------------------------------------------
@@ -400,13 +410,13 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 				if (shortened) {
 					WriteBounds(&chunk,mesh->mVertices,mesh->mNumVertices);
 				} // else write as usual
-				else chunk.Write(mesh->mVertices,1,12*mesh->mNumVertices);
+				else WriteArray<aiVector3D>(&chunk,mesh->mVertices,mesh->mNumVertices);
 			}
 			if (mesh->mNormals) {
 				if (shortened) {
 					WriteBounds(&chunk,mesh->mNormals,mesh->mNumVertices);
 				} // else write as usual
-				else chunk.Write(mesh->mNormals,1,12*mesh->mNumVertices);
+				else WriteArray<aiVector3D>(&chunk,mesh->mNormals,mesh->mNumVertices);
 			}
 			if (mesh->mTangents && mesh->mBitangents) {
 				if (shortened) {
@@ -414,8 +424,8 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 					WriteBounds(&chunk,mesh->mBitangents,mesh->mNumVertices);
 				} // else write as usual
 				else {
-					chunk.Write(mesh->mTangents,1,12*mesh->mNumVertices);
-					chunk.Write(mesh->mBitangents,1,12*mesh->mNumVertices);
+					WriteArray<aiVector3D>(&chunk,mesh->mTangents,mesh->mNumVertices);
+					WriteArray<aiVector3D>(&chunk,mesh->mBitangents,mesh->mNumVertices);
 				}
 			}
 			for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS;++n) {
@@ -425,7 +435,7 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 				if (shortened) {
 					WriteBounds(&chunk,mesh->mColors[n],mesh->mNumVertices);
 				} // else write as usual
-				else chunk.Write(mesh->mColors[n],16*mesh->mNumVertices,1);
+				else WriteArray<aiColor4D>(&chunk,mesh->mColors[n],mesh->mNumVertices);
 			}
 			for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n) {
 				if (!mesh->mTextureCoords[n])
@@ -437,7 +447,7 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 				if (shortened) {
 					WriteBounds(&chunk,mesh->mTextureCoords[n],mesh->mNumVertices);
 				} // else write as usual
-				else chunk.Write(mesh->mTextureCoords[n],12*mesh->mNumVertices,1);
+				else WriteArray<aiVector3D>(&chunk,mesh->mTextureCoords[n],mesh->mNumVertices);
 			}
 
 			// write faces. There are no floating-point calculations involved
@@ -532,21 +542,21 @@ inline size_t WriteBounds(IOStream * stream, const T* in, unsigned int size)
 					WriteBounds(&chunk,nd->mPositionKeys,nd->mNumPositionKeys);
 
 				} // else write as usual
-				else chunk.Write(nd->mPositionKeys,1,nd->mNumPositionKeys*sizeof(aiVectorKey));
+				else WriteArray<aiVectorKey>(&chunk,nd->mPositionKeys,nd->mNumPositionKeys);
 			}
 			if (nd->mRotationKeys) {
 				if (shortened) {
 					WriteBounds(&chunk,nd->mRotationKeys,nd->mNumRotationKeys);
 
 				} // else write as usual
-				else chunk.Write(nd->mRotationKeys,1,nd->mNumRotationKeys*sizeof(aiQuatKey));
+				else WriteArray<aiQuatKey>(&chunk,nd->mRotationKeys,nd->mNumRotationKeys);
 			}
 			if (nd->mScalingKeys) {
 				if (shortened) {
 					WriteBounds(&chunk,nd->mScalingKeys,nd->mNumScalingKeys);
 
 				} // else write as usual
-				else chunk.Write(nd->mScalingKeys,1,nd->mNumScalingKeys*sizeof(aiVectorKey));
+				else WriteArray<aiVectorKey>(&chunk,nd->mScalingKeys,nd->mNumScalingKeys);
 			}
 		}
 

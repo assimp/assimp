@@ -209,8 +209,11 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
 #ifdef WIN32
     wchar_t pFileW[PATHLIMIT];
     DecodeUTF8(strFile, strlen(strFile), pFileW, PATHLIMIT);
+
+    wchar_t strModeW[4];
+    DecodeUTF8(strMode, strlen(strFile), strModeW, 4);
     
-    FILE* file = ::_wfopen(pFileW, L"rb");
+    FILE* file = ::_wfopen(pFileW, strModeW);
 #else
 	FILE* file = ::fopen( strFile, strMode);
 #endif 

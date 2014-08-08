@@ -54,6 +54,7 @@ static const std::string DiffuseTexture      = "map_kd";
 static const std::string AmbientTexture      = "map_ka";
 static const std::string SpecularTexture     = "map_ks";
 static const std::string OpacityTexture      = "map_d";
+static const std::string EmmissiveTexture    = "map_emissive";
 static const std::string BumpTexture1        = "map_bump";
 static const std::string BumpTexture2        = "map_Bump";
 static const std::string BumpTexture3        = "bump";
@@ -128,6 +129,7 @@ void ObjFileMtlImporter::load()
 	{
 		switch (*m_DataIt)
 		{
+		case 'k':
 		case 'K':
 			{
 				++m_DataIt;
@@ -145,6 +147,11 @@ void ObjFileMtlImporter::load()
 				{
 					++m_DataIt;
 					getColorRGBA( &m_pModel->m_pCurrentMaterial->specular );
+				}
+				else if (*m_DataIt == 'e')
+				{
+					++m_DataIt;
+					getColorRGBA( &m_pModel->m_pCurrentMaterial->emissive );
 				}
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}

@@ -167,7 +167,6 @@ struct Material
 		TextureDiffuseType = 0,
 		TextureSpecularType,
 		TextureAmbientType,
-		TextureEmissiveType,
 		TextureBumpType,
 		TextureNormalType,
 		TextureSpecularityType,

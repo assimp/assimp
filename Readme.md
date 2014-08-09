@@ -46,6 +46,7 @@ The library provides importers for a lot of file formats, including:
 - Ogre Binary
 - Ogre XML
 - Q3D
+- ASSBIN (Assimp scene serialization)
  
 Additionally, the following formats are also supported, but not part of the core library as they depend on proprietary libraries.
 
@@ -60,6 +61,7 @@ Exporters include:
 - X
 - 3DS
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
+- ASSBIN
 	
 See [the full list here](http://assimp.sourceforge.net/main_features_formats.html).
 

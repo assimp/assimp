@@ -41,5 +41,6 @@ test/results
 
 # Python
 __pycache__
-
-
+*.cache
+*.log
+*.lastbuildstate

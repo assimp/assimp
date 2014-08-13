@@ -79,7 +79,7 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\Debug\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">./../../../lib/$(ProjectName)_$(Configuration)_$(PlatformName)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">./../../../bin/$(ProjectName)_$(Configuration)_$(PlatformName)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimp.dir\Debug\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">./../../../obj/$(ProjectName)_$(Configuration)_$(PlatformName)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimpd</TargetName>

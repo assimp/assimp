@@ -91,7 +91,7 @@
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\Release\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">./../../../lib/$(ProjectName)_$(Configuration)_$(PlatformName)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">./../../../bin/$(ProjectName)_$(Configuration)_$(PlatformName)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp.dir\Release\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">./../../../obj/$(ProjectName)_$(Configuration)_$(PlatformName)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp</TargetName>
@@ -195,7 +195,7 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\contrib\zlib\Debug\zlibstaticd.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>./../../../lib/$(ProjectName)_$(Configuration)_$(PlatformName)\$(ProjectName).lib</ImportLibrary>
       <ProgramDataBaseFile>$(OutDir)assimp.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
       <Version>
@@ -286,7 +286,7 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\contrib\zlib\Release\zlibstatic.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>./../../../lib/$(ProjectName)_$(Configuration)_$(PlatformName)\$(ProjectName).lib</ImportLibrary>
       <ProgramDataBaseFile>
       </ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>

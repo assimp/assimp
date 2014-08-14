@@ -1,6 +1,9 @@
 build
 .project
 *.kdev4*
+*.tlog
+*.opensdf
+*.sdf
 
 # Visual Studio
 *.sln
@@ -18,14 +21,14 @@ build
 # Output
 bin/
 lib/
-contrib/
 obj/
+contrib/
+.project
+*.kdev4*
+
 
 # Generated
 assimp.pc
-revision.h
-contrib/zlib/zconf.h
-contrib/zlib/zlib.pc
 
 # CMake
 CMakeCache.txt

@@ -211,7 +211,7 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
     DecodeUTF8(strFile, strlen(strFile), pFileW, PATHLIMIT);
 
     wchar_t strModeW[4];
-    DecodeUTF8(strMode, strlen(strFile), strModeW, 4);
+    DecodeUTF8(strMode, strlen(strMode), strModeW, 4);
     
     FILE* file = ::_wfopen(pFileW, strModeW);
 #else

@@ -26,7 +26,6 @@ contrib/
 .project
 *.kdev4*
 
-
 # Generated
 assimp.pc
 

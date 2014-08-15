@@ -5,12 +5,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "code\assimp.vcxpr
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C} = {E9375290-F0B7-49E9-BE86-86B8C79B0E2C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp_viewer", "tools\assimp_view\assimp_viewer.vcxproj", "{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E1AFC127-C771-41E2-A57C-14B3599277DE} = {E1AFC127-C771-41E2-A57C-14B3599277DE}
-		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C} = {E9375290-F0B7-49E9-BE86-86B8C79B0E2C}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstatic", "contrib\zlib\zlibstatic.vcxproj", "{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}"
 EndProject
 Global
@@ -35,18 +29,6 @@ Global
 		{E1AFC127-C771-41E2-A57C-14B3599277DE}.release-noboost-dll|x64.Build.0 = release-noboost-dll|x64
 		{E1AFC127-C771-41E2-A57C-14B3599277DE}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{E1AFC127-C771-41E2-A57C-14B3599277DE}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.Debug|x64.ActiveCfg = Debug|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.Debug|x64.Build.0 = Debug|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.debug-noboost-dll|x64.ActiveCfg = debug-noboost-dll|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.debug-noboost-dll|x64.Build.0 = debug-noboost-dll|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.Release|x64.ActiveCfg = Release|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.Release|x64.Build.0 = Release|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.release-noboost-dll|x64.ActiveCfg = release-noboost-dll|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.release-noboost-dll|x64.Build.0 = release-noboost-dll|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
-		{C0AB85D2-F9BC-4388-A4B2-F0F3A98B8BB5}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.Debug|x64.ActiveCfg = Debug|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.Debug|x64.Build.0 = Debug|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.debug-noboost-dll|x64.ActiveCfg = debug-noboost-dll|x64

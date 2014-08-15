@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="debug-noboost-dll|x64">
+      <Configuration>debug-noboost-dll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-noboost-dll|x64">
+      <Configuration>release-noboost-dll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>zlibstatic</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">$(SolutionDir)contrib\zlib\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">zlibstatic.dir\Debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">zlibstatic.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">zlibstaticd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">zlibstaticd</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">$(SolutionDir)contrib\zlib\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">zlibstatic.dir\Release\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">zlibstatic.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">zlibstatic</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">zlibstatic</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">zlibstatic.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">zlibstatic</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">zlibstatic.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">zlibstatic</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsC</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);./../../../include;./../../../BoostWorkaround;./../../../contrib/zlib;$(SolutionDir)contrib\zlib;./../../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsC</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsC</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);./../../../include;./../../../BoostWorkaround;./../../../contrib/zlib;$(SolutionDir)contrib\zlib;./../../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsC</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>MinSizeRel/</AssemblerListingLocation>
+      <CompileAs>CompileAsC</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>RelWithDebInfo/</AssemblerListingLocation>
+      <CompileAs>CompileAsC</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;NO_FSEEKO;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\..\..\contrib\zlib\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/contrib/zlib/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="zconf.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\zlib.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\crc32.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\deflate.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\gzguts.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\inffast.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\inffixed.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\inflate.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\inftrees.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\trees.h" />
+    <ClInclude Include="..\..\..\..\contrib\zlib\zutil.h" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\adler32.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\compress.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\crc32.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\deflate.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\gzclose.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\gzlib.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\gzread.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\gzwrite.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\inflate.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\infback.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\inftrees.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\inffast.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\trees.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\uncompr.c" />
+    <ClCompile Include="..\..\..\..\contrib\zlib\zutil.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

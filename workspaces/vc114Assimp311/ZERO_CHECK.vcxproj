@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="Windows-1252"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{F6D3DEA4-1208-401A-9C10-08C5BADAC927}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ZERO_CHECK</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+    <PropertyGroup>
+      <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="CMakeFiles\860ba1d4e223c9aaa7d0c9826c9a2df2\generate.stamp.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/generate.stamp.rule;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeParseArguments.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageMessage.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPkgConfig.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\WindowsPaths.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config-version.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp.pc.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindDirectX.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindPkgMacros.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindZLIB.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\PrecompiledHeader.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\cmake_uninstall.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\revision.h.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\test\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_cmd\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_view\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCXXCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeRCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_view\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_cmd\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/generate.stamp.rule;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeParseArguments.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageMessage.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPkgConfig.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\WindowsPaths.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config-version.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp.pc.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindDirectX.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindPkgMacros.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindZLIB.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\PrecompiledHeader.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\cmake_uninstall.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\revision.h.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\test\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_cmd\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_view\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCXXCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeRCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_view\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_cmd\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/generate.stamp.rule;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeParseArguments.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageMessage.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPkgConfig.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\WindowsPaths.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config-version.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp.pc.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindDirectX.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindPkgMacros.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindZLIB.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\PrecompiledHeader.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\cmake_uninstall.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\revision.h.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\test\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_cmd\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_view\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCXXCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeRCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_view\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_cmd\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/generate.stamp.rule;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeParseArguments.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckFunctionExists.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckIncludeFile.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\CheckTypeSize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPackageMessage.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\FindPkgConfig.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.0\Modules\Platform\WindowsPaths.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config-version.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp-config.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\assimp.pc.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindDirectX.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindPkgMacros.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\FindZLIB.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\PrecompiledHeader.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\cmake-modules\cmake_uninstall.cmake.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zconf.h.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib\zlib.pc.cmakein;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\revision.h.in;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\test\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_cmd\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\tools\assimp_view\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeCXXCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeRCCompiler.cmake;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\3.0.0\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_view\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\tools\assimp_cmd\CMakeFiles\generate.stamp;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="CMakeFiles\860ba1d4e223c9aaa7d0c9826c9a2df2\ZERO_CHECK.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"></Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\ZERO_CHECK</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'"></Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\ZERO_CHECK</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'"></Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\ZERO_CHECK</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'"></Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/CMakeFiles/860ba1d4e223c9aaa7d0c9826c9a2df2/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\CMakeFiles\ZERO_CHECK</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CMakeFiles\ZERO_CHECK" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

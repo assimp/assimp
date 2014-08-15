@@ -1,8 +1,16 @@
-﻿<?xml version="1.0" encoding="Windows-1252"?>
+<?xml version="1.0" encoding="us-ascii"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="debug-noboost-dll|x64">
+      <Configuration>debug-noboost-dll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release-noboost-dll|x64">
+      <Configuration>release-noboost-dll</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
@@ -31,7 +39,19 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -53,35 +73,48 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />  </ImportGroup>
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-    <PropertyGroup>
-      <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-      <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\Debug\</OutDir>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimp.dir\Debug\</IntDir>
-      <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimpd</TargetName>
-      <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.dll</TargetExt>
-      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
-      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-      <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\Release\</OutDir>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp.dir\Release\</IntDir>
-      <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp</TargetName>
-      <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.dll</TargetExt>
-      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
-      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-      <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\MinSizeRel\</OutDir>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">assimp.dir\MinSizeRel\</IntDir>
-      <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">assimp</TargetName>
-      <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.dll</TargetExt>
-      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
-      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-      <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\RelWithDebInfo\</OutDir>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">assimp.dir\RelWithDebInfo\</IntDir>
-      <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">assimp</TargetName>
-      <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.dll</TargetExt>
-      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
-      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
-    </PropertyGroup>
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">./../../../bin/$(ProjectName)_$(Configuration)_$(PlatformName)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimp.dir\Debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">./../../../obj/$(ProjectName)_$(Configuration)_$(PlatformName)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">assimpd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">$(ProjectName)</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.dll</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">./../../../lib/$(ProjectName)_$(Configuration)_$(PlatformName)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">./../../../bin/$(ProjectName)_$(Configuration)_$(PlatformName)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp.dir\Release\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">./../../../obj/$(ProjectName)_$(Configuration)_$(PlatformName)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">assimp</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">$(ProjectName)</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.dll</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">assimp.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">assimp</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">assimp.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">assimp</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -120,7 +153,53 @@
       <ImportLibrary>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/Debug/assimpd.lib</ImportLibrary>
       <ProgramDataBaseFile>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/Debug/assimpd.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
-      <Version></Version>
+      <Version>
+      </Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)contrib\zlib;..\..\..\contrib\unzip;..\..\..\code\BoostWorkaround\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;ASSIMP_BUILD_DLL_EXPORT;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";assimp_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;ASSIMP_BUILD_DLL_EXPORT;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\";assimp_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalOptions> /machine:x64 /debug %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\contrib\zlib\Debug\zlibstaticd.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>./../../../lib/$(ProjectName)_$(Configuration)_$(PlatformName)\$(ProjectName).lib</ImportLibrary>
+      <ProgramDataBaseFile>$(OutDir)assimp.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+      <Version>
+      </Version>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -139,7 +218,8 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat></DebugInformationFormat>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;ASSIMP_BUILD_DLL_EXPORT;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";assimp_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
@@ -163,7 +243,53 @@
       <ImportLibrary>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/Release/assimp.lib</ImportLibrary>
       <ProgramDataBaseFile>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/Release/assimp.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
-      <Version></Version>
+      <Version>
+      </Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)contrib\zlib;..\..\..\contrib\unzip;..\..\..\code\BoostWorkaround\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;ASSIMP_BUILD_DLL_EXPORT;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";assimp_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;ASSIMP_BUILD_DLL_EXPORT;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";assimp_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\include;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\BoostWorkaround;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\contrib\zlib;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\..\contrib\unzip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalOptions> /machine:x64 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;..\contrib\zlib\Release\zlibstatic.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ImportLibrary>./../../../lib/$(ProjectName)_$(Configuration)_$(PlatformName)\$(ProjectName).lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/Release/assimp.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+      <Version>
+      </Version>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -182,7 +308,8 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat></DebugInformationFormat>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ASSIMP_BUILD_BOOST_WORKAROUND;ASSIMP_BUILD_DLL_EXPORT;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="MinSizeRel";assimp_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
@@ -206,7 +333,8 @@
       <ImportLibrary>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/MinSizeRel/assimp.lib</ImportLibrary>
       <ProgramDataBaseFile>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/MinSizeRel/assimp.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
-      <Version></Version>
+      <Version>
+      </Version>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -249,7 +377,8 @@
       <ImportLibrary>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/RelWithDebInfo/assimp.lib</ImportLibrary>
       <ProgramDataBaseFile>E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/code/RelWithDebInfo/assimp.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
-      <Version></Version>
+      <Version>
+      </Version>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -258,6 +387,7 @@
   <ItemGroup>
     <CustomBuild Include="..\..\..\code\CMakeLists.txt">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
 "C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
@@ -267,10 +397,23 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
 "C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
@@ -280,9 +423,21 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\code\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/code/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
 "C:\Program Files (x86)\CMake\bin\cmake.exe" -HE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp -BE:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311 --check-stamp-file E:\lehmanc_POT7TZJ022_dracoB\GitSubModules\assimp\workspaces\vc114Assimp311\code\CMakeFiles\generate.stamp
@@ -552,180 +707,183 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\..\..\include\assimp\Compiler\pushpack1.h" />
     <ClInclude Include="..\..\..\include\assimp\Compiler\poppack1.h" />
     <ClInclude Include="..\..\..\include\assimp\Compiler\pstdint.h" />
-    <ClCompile Include="..\..\..\code\Assimp.cpp"  />
-    <ClCompile Include="..\..\..\code\BaseImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\BaseProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\PostStepRegistry.cpp"  />
-    <ClCompile Include="..\..\..\code\ImporterRegistry.cpp"  />
-    <ClCompile Include="..\..\..\code\DefaultIOStream.cpp"  />
-    <ClCompile Include="..\..\..\code\DefaultIOSystem.cpp"  />
-    <ClCompile Include="..\..\..\code\Importer.cpp"  />
-    <ClCompile Include="..\..\..\code\SGSpatialSort.cpp"  />
-    <ClCompile Include="..\..\..\code\VertexTriangleAdjacency.cpp"  />
-    <ClCompile Include="..\..\..\code\SpatialSort.cpp"  />
-    <ClCompile Include="..\..\..\code\SceneCombiner.cpp"  />
-    <ClCompile Include="..\..\..\code\ScenePreprocessor.cpp"  />
-    <ClCompile Include="..\..\..\code\SkeletonMeshBuilder.cpp"  />
-    <ClCompile Include="..\..\..\code\SplitByBoneCountProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\StandardShapes.cpp"  />
-    <ClCompile Include="..\..\..\code\TargetAnimation.cpp"  />
-    <ClCompile Include="..\..\..\code\RemoveComments.cpp"  />
-    <ClCompile Include="..\..\..\code\Subdivision.cpp"  />
-    <ClCompile Include="..\..\..\code\Bitmap.cpp"  />
-    <ClCompile Include="..\..\..\code\DefaultLogger.cpp"  />
-    <ClCompile Include="..\..\..\code\Exporter.cpp"  />
-    <ClCompile Include="..\..\..\code\AssimpCExport.cpp"  />
-    <ClCompile Include="..\..\..\code\CalcTangentsProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\ComputeUVMappingProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\ConvertToLHProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\FindDegenerates.cpp"  />
-    <ClCompile Include="..\..\..\code\FindInstancesProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\FindInvalidDataProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\FixNormalsStep.cpp"  />
-    <ClCompile Include="..\..\..\code\GenFaceNormalsProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\GenVertexNormalsProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\PretransformVertices.cpp"  />
-    <ClCompile Include="..\..\..\code\ImproveCacheLocality.cpp"  />
-    <ClCompile Include="..\..\..\code\JoinVerticesProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\LimitBoneWeightsProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\RemoveRedundantMaterials.cpp"  />
-    <ClCompile Include="..\..\..\code\RemoveVCProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\SortByPTypeProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\SplitLargeMeshes.cpp"  />
-    <ClCompile Include="..\..\..\code\TextureTransform.cpp"  />
-    <ClCompile Include="..\..\..\code\TriangulateProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\ValidateDataStructure.cpp"  />
-    <ClCompile Include="..\..\..\code\OptimizeGraph.cpp"  />
-    <ClCompile Include="..\..\..\code\OptimizeMeshes.cpp"  />
-    <ClCompile Include="..\..\..\code\DeboneProcess.cpp"  />
-    <ClCompile Include="..\..\..\code\ProcessHelper.cpp"  />
-    <ClCompile Include="..\..\..\code\MakeVerboseFormat.cpp"  />
-    <ClCompile Include="..\..\..\code\3DSConverter.cpp"  />
-    <ClCompile Include="..\..\..\code\3DSLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\3DSExporter.cpp"  />
-    <ClCompile Include="..\..\..\code\ACLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\ASELoader.cpp"  />
-    <ClCompile Include="..\..\..\code\ASEParser.cpp"  />
-    <ClCompile Include="..\..\..\code\AssbinExporter.cpp"  />
-    <ClCompile Include="..\..\..\code\AssbinLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\B3DImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\BVHLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\ColladaLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\ColladaParser.cpp"  />
-    <ClCompile Include="..\..\..\code\ColladaExporter.cpp"  />
-    <ClCompile Include="..\..\..\code\DXFLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\CSMLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\HMPLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\IRRLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\IRRMeshLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\IRRShared.cpp"  />
-    <ClCompile Include="..\..\..\code\LWOAnimation.cpp"  />
-    <ClCompile Include="..\..\..\code\LWOBLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\LWOLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\LWOMaterial.cpp"  />
-    <ClCompile Include="..\..\..\code\LWSLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\MD2Loader.cpp"  />
-    <ClCompile Include="..\..\..\code\MD3Loader.cpp"  />
-    <ClCompile Include="..\..\..\code\MD5Loader.cpp"  />
-    <ClCompile Include="..\..\..\code\MD5Parser.cpp"  />
-    <ClCompile Include="..\..\..\code\MDCLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\MDLLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\MDLMaterialLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\MaterialSystem.cpp"  />
-    <ClCompile Include="..\..\..\code\NFFLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\OFFLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\ObjFileImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\ObjFileMtlImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\ObjFileParser.cpp"  />
-    <ClCompile Include="..\..\..\code\ObjExporter.cpp"  />
-    <ClCompile Include="..\..\..\code\OgreImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\OgreStructs.cpp"  />
-    <ClCompile Include="..\..\..\code\OgreBinarySerializer.cpp"  />
-    <ClCompile Include="..\..\..\code\OgreXmlSerializer.cpp"  />
-    <ClCompile Include="..\..\..\code\OgreMaterial.cpp"  />
-    <ClCompile Include="..\..\..\code\PlyLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\PlyParser.cpp"  />
-    <ClCompile Include="..\..\..\code\PlyExporter.cpp"  />
-    <ClCompile Include="..\..\..\code\Q3DLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\Q3BSPFileParser.cpp"  />
-    <ClCompile Include="..\..\..\code\Q3BSPFileImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\Q3BSPZipArchive.cpp"  />
-    <ClCompile Include="..\..\..\code\RawLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\SMDLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\STLLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\STLExporter.cpp"  />
-    <ClCompile Include="..\..\..\code\TerragenLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\UnrealLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\XFileImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\XFileParser.cpp"  />
-    <ClCompile Include="..\..\..\code\XFileExporter.cpp"  />
-    <ClCompile Include="..\..\..\code\MS3DLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\COBLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\BlenderLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\BlenderDNA.cpp"  />
-    <ClCompile Include="..\..\..\code\BlenderScene.cpp"  />
-    <ClCompile Include="..\..\..\code\BlenderModifier.cpp"  />
-    <ClCompile Include="..\..\..\code\BlenderBMesh.cpp"  />
-    <ClCompile Include="..\..\..\code\BlenderTessellator.cpp"  />
-    <ClCompile Include="..\..\..\code\NDOLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCReaderGen.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCUtil.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCGeometry.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCMaterial.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCProfile.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCCurve.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCBoolean.cpp"  />
-    <ClCompile Include="..\..\..\code\IFCOpenings.cpp"  />
-    <ClCompile Include="..\..\..\code\STEPFileReader.cpp"  />
-    <ClCompile Include="..\..\..\code\STEPFileEncoding.cpp"  />
-    <ClCompile Include="..\..\..\code\XGLLoader.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXImporter.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXParser.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXTokenizer.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXConverter.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXUtil.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXDocument.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXProperties.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXMeshGeometry.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXMaterial.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXModel.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXAnimation.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXNodeAttribute.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXDeformer.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXBinaryTokenizer.cpp"  />
-    <ClCompile Include="..\..\..\code\FBXDocumentUtil.cpp"  />
-    <ClCompile Include="..\..\..\contrib\irrXML\irrXML.cpp"  />
-    <ClCompile Include="..\..\..\contrib\ConvertUTF\ConvertUTF.c" >
+    <ClCompile Include="..\..\..\code\Assimp.cpp" />
+    <ClCompile Include="..\..\..\code\BaseImporter.cpp" />
+    <ClCompile Include="..\..\..\code\BaseProcess.cpp" />
+    <ClCompile Include="..\..\..\code\PostStepRegistry.cpp" />
+    <ClCompile Include="..\..\..\code\ImporterRegistry.cpp" />
+    <ClCompile Include="..\..\..\code\DefaultIOStream.cpp" />
+    <ClCompile Include="..\..\..\code\DefaultIOSystem.cpp" />
+    <ClCompile Include="..\..\..\code\Importer.cpp" />
+    <ClCompile Include="..\..\..\code\SGSpatialSort.cpp" />
+    <ClCompile Include="..\..\..\code\VertexTriangleAdjacency.cpp" />
+    <ClCompile Include="..\..\..\code\SpatialSort.cpp" />
+    <ClCompile Include="..\..\..\code\SceneCombiner.cpp" />
+    <ClCompile Include="..\..\..\code\ScenePreprocessor.cpp" />
+    <ClCompile Include="..\..\..\code\SkeletonMeshBuilder.cpp" />
+    <ClCompile Include="..\..\..\code\SplitByBoneCountProcess.cpp" />
+    <ClCompile Include="..\..\..\code\StandardShapes.cpp" />
+    <ClCompile Include="..\..\..\code\TargetAnimation.cpp" />
+    <ClCompile Include="..\..\..\code\RemoveComments.cpp" />
+    <ClCompile Include="..\..\..\code\Subdivision.cpp" />
+    <ClCompile Include="..\..\..\code\Bitmap.cpp" />
+    <ClCompile Include="..\..\..\code\DefaultLogger.cpp" />
+    <ClCompile Include="..\..\..\code\Exporter.cpp" />
+    <ClCompile Include="..\..\..\code\AssimpCExport.cpp" />
+    <ClCompile Include="..\..\..\code\CalcTangentsProcess.cpp" />
+    <ClCompile Include="..\..\..\code\ComputeUVMappingProcess.cpp" />
+    <ClCompile Include="..\..\..\code\ConvertToLHProcess.cpp" />
+    <ClCompile Include="..\..\..\code\FindDegenerates.cpp" />
+    <ClCompile Include="..\..\..\code\FindInstancesProcess.cpp" />
+    <ClCompile Include="..\..\..\code\FindInvalidDataProcess.cpp" />
+    <ClCompile Include="..\..\..\code\FixNormalsStep.cpp" />
+    <ClCompile Include="..\..\..\code\GenFaceNormalsProcess.cpp" />
+    <ClCompile Include="..\..\..\code\GenVertexNormalsProcess.cpp" />
+    <ClCompile Include="..\..\..\code\PretransformVertices.cpp" />
+    <ClCompile Include="..\..\..\code\ImproveCacheLocality.cpp" />
+    <ClCompile Include="..\..\..\code\JoinVerticesProcess.cpp" />
+    <ClCompile Include="..\..\..\code\LimitBoneWeightsProcess.cpp" />
+    <ClCompile Include="..\..\..\code\RemoveRedundantMaterials.cpp" />
+    <ClCompile Include="..\..\..\code\RemoveVCProcess.cpp" />
+    <ClCompile Include="..\..\..\code\SortByPTypeProcess.cpp" />
+    <ClCompile Include="..\..\..\code\SplitLargeMeshes.cpp" />
+    <ClCompile Include="..\..\..\code\TextureTransform.cpp" />
+    <ClCompile Include="..\..\..\code\TriangulateProcess.cpp" />
+    <ClCompile Include="..\..\..\code\ValidateDataStructure.cpp" />
+    <ClCompile Include="..\..\..\code\OptimizeGraph.cpp" />
+    <ClCompile Include="..\..\..\code\OptimizeMeshes.cpp" />
+    <ClCompile Include="..\..\..\code\DeboneProcess.cpp" />
+    <ClCompile Include="..\..\..\code\ProcessHelper.cpp" />
+    <ClCompile Include="..\..\..\code\MakeVerboseFormat.cpp" />
+    <ClCompile Include="..\..\..\code\3DSConverter.cpp" />
+    <ClCompile Include="..\..\..\code\3DSLoader.cpp" />
+    <ClCompile Include="..\..\..\code\3DSExporter.cpp" />
+    <ClCompile Include="..\..\..\code\ACLoader.cpp" />
+    <ClCompile Include="..\..\..\code\ASELoader.cpp" />
+    <ClCompile Include="..\..\..\code\ASEParser.cpp" />
+    <ClCompile Include="..\..\..\code\AssbinExporter.cpp" />
+    <ClCompile Include="..\..\..\code\AssbinLoader.cpp" />
+    <ClCompile Include="..\..\..\code\B3DImporter.cpp" />
+    <ClCompile Include="..\..\..\code\BVHLoader.cpp" />
+    <ClCompile Include="..\..\..\code\ColladaLoader.cpp" />
+    <ClCompile Include="..\..\..\code\ColladaParser.cpp" />
+    <ClCompile Include="..\..\..\code\ColladaExporter.cpp" />
+    <ClCompile Include="..\..\..\code\DXFLoader.cpp" />
+    <ClCompile Include="..\..\..\code\CSMLoader.cpp" />
+    <ClCompile Include="..\..\..\code\HMPLoader.cpp" />
+    <ClCompile Include="..\..\..\code\IRRLoader.cpp" />
+    <ClCompile Include="..\..\..\code\IRRMeshLoader.cpp" />
+    <ClCompile Include="..\..\..\code\IRRShared.cpp" />
+    <ClCompile Include="..\..\..\code\LWOAnimation.cpp" />
+    <ClCompile Include="..\..\..\code\LWOBLoader.cpp" />
+    <ClCompile Include="..\..\..\code\LWOLoader.cpp" />
+    <ClCompile Include="..\..\..\code\LWOMaterial.cpp" />
+    <ClCompile Include="..\..\..\code\LWSLoader.cpp" />
+    <ClCompile Include="..\..\..\code\MD2Loader.cpp" />
+    <ClCompile Include="..\..\..\code\MD3Loader.cpp" />
+    <ClCompile Include="..\..\..\code\MD5Loader.cpp" />
+    <ClCompile Include="..\..\..\code\MD5Parser.cpp" />
+    <ClCompile Include="..\..\..\code\MDCLoader.cpp" />
+    <ClCompile Include="..\..\..\code\MDLLoader.cpp" />
+    <ClCompile Include="..\..\..\code\MDLMaterialLoader.cpp" />
+    <ClCompile Include="..\..\..\code\MaterialSystem.cpp" />
+    <ClCompile Include="..\..\..\code\NFFLoader.cpp" />
+    <ClCompile Include="..\..\..\code\OFFLoader.cpp" />
+    <ClCompile Include="..\..\..\code\ObjFileImporter.cpp" />
+    <ClCompile Include="..\..\..\code\ObjFileMtlImporter.cpp" />
+    <ClCompile Include="..\..\..\code\ObjFileParser.cpp" />
+    <ClCompile Include="..\..\..\code\ObjExporter.cpp" />
+    <ClCompile Include="..\..\..\code\OgreImporter.cpp" />
+    <ClCompile Include="..\..\..\code\OgreStructs.cpp" />
+    <ClCompile Include="..\..\..\code\OgreBinarySerializer.cpp" />
+    <ClCompile Include="..\..\..\code\OgreXmlSerializer.cpp" />
+    <ClCompile Include="..\..\..\code\OgreMaterial.cpp" />
+    <ClCompile Include="..\..\..\code\PlyLoader.cpp" />
+    <ClCompile Include="..\..\..\code\PlyParser.cpp" />
+    <ClCompile Include="..\..\..\code\PlyExporter.cpp" />
+    <ClCompile Include="..\..\..\code\Q3DLoader.cpp" />
+    <ClCompile Include="..\..\..\code\Q3BSPFileParser.cpp" />
+    <ClCompile Include="..\..\..\code\Q3BSPFileImporter.cpp" />
+    <ClCompile Include="..\..\..\code\Q3BSPZipArchive.cpp" />
+    <ClCompile Include="..\..\..\code\RawLoader.cpp" />
+    <ClCompile Include="..\..\..\code\SMDLoader.cpp" />
+    <ClCompile Include="..\..\..\code\STLLoader.cpp" />
+    <ClCompile Include="..\..\..\code\STLExporter.cpp" />
+    <ClCompile Include="..\..\..\code\TerragenLoader.cpp" />
+    <ClCompile Include="..\..\..\code\UnrealLoader.cpp" />
+    <ClCompile Include="..\..\..\code\XFileImporter.cpp" />
+    <ClCompile Include="..\..\..\code\XFileParser.cpp" />
+    <ClCompile Include="..\..\..\code\XFileExporter.cpp" />
+    <ClCompile Include="..\..\..\code\MS3DLoader.cpp" />
+    <ClCompile Include="..\..\..\code\COBLoader.cpp" />
+    <ClCompile Include="..\..\..\code\BlenderLoader.cpp" />
+    <ClCompile Include="..\..\..\code\BlenderDNA.cpp" />
+    <ClCompile Include="..\..\..\code\BlenderScene.cpp" />
+    <ClCompile Include="..\..\..\code\BlenderModifier.cpp" />
+    <ClCompile Include="..\..\..\code\BlenderBMesh.cpp" />
+    <ClCompile Include="..\..\..\code\BlenderTessellator.cpp" />
+    <ClCompile Include="..\..\..\code\NDOLoader.cpp" />
+    <ClCompile Include="..\..\..\code\IFCLoader.cpp" />
+    <ClCompile Include="..\..\..\code\IFCReaderGen.cpp" />
+    <ClCompile Include="..\..\..\code\IFCUtil.cpp" />
+    <ClCompile Include="..\..\..\code\IFCGeometry.cpp" />
+    <ClCompile Include="..\..\..\code\IFCMaterial.cpp" />
+    <ClCompile Include="..\..\..\code\IFCProfile.cpp" />
+    <ClCompile Include="..\..\..\code\IFCCurve.cpp" />
+    <ClCompile Include="..\..\..\code\IFCBoolean.cpp" />
+    <ClCompile Include="..\..\..\code\IFCOpenings.cpp" />
+    <ClCompile Include="..\..\..\code\STEPFileReader.cpp" />
+    <ClCompile Include="..\..\..\code\STEPFileEncoding.cpp" />
+    <ClCompile Include="..\..\..\code\XGLLoader.cpp" />
+    <ClCompile Include="..\..\..\code\FBXImporter.cpp" />
+    <ClCompile Include="..\..\..\code\FBXParser.cpp" />
+    <ClCompile Include="..\..\..\code\FBXTokenizer.cpp" />
+    <ClCompile Include="..\..\..\code\FBXConverter.cpp" />
+    <ClCompile Include="..\..\..\code\FBXUtil.cpp" />
+    <ClCompile Include="..\..\..\code\FBXDocument.cpp" />
+    <ClCompile Include="..\..\..\code\FBXProperties.cpp" />
+    <ClCompile Include="..\..\..\code\FBXMeshGeometry.cpp" />
+    <ClCompile Include="..\..\..\code\FBXMaterial.cpp" />
+    <ClCompile Include="..\..\..\code\FBXModel.cpp" />
+    <ClCompile Include="..\..\..\code\FBXAnimation.cpp" />
+    <ClCompile Include="..\..\..\code\FBXNodeAttribute.cpp" />
+    <ClCompile Include="..\..\..\code\FBXDeformer.cpp" />
+    <ClCompile Include="..\..\..\code\FBXBinaryTokenizer.cpp" />
+    <ClCompile Include="..\..\..\code\FBXDocumentUtil.cpp" />
+    <ClCompile Include="..\..\..\contrib\irrXML\irrXML.cpp" />
+    <ClCompile Include="..\..\..\contrib\ConvertUTF\ConvertUTF.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="..\..\..\contrib\unzip\ioapi.c" >
+    <ClCompile Include="..\..\..\contrib\unzip\ioapi.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="..\..\..\contrib\unzip\unzip.c" >
+    <ClCompile Include="..\..\..\contrib\unzip\unzip.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='debug-noboost-dll|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='release-noboost-dll|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\common\shapes.cc"  />
-    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\advancing_front.cc"  />
-    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\cdt.cc"  />
-    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\sweep.cc"  />
-    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\sweep_context.cc"  />
-    <ClCompile Include="..\..\..\contrib\clipper\clipper.cpp"  />
-    <ClCompile Include="..\..\..\code\AssimpPCH.cpp"  />
+    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\common\shapes.cc" />
+    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\advancing_front.cc" />
+    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\cdt.cc" />
+    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\sweep.cc" />
+    <ClCompile Include="..\..\..\contrib\poly2tri\poly2tri\sweep\sweep_context.cc" />
+    <ClCompile Include="..\..\..\contrib\clipper\clipper.cpp" />
+    <ClCompile Include="..\..\..\code\AssimpPCH.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/ZERO_CHECK.vcxproj">
-      <Project>F6D3DEA4-1208-401A-9C10-08C5BADAC927</Project>
-    </ProjectReference>
     <ProjectReference Include="E:/lehmanc_POT7TZJ022_dracoB/GitSubModules/assimp/workspaces/vc114Assimp311/contrib/zlib/zlibstatic.vcxproj">
       <Project>E9375290-F0B7-49E9-BE86-86B8C79B0E2C</Project>
     </ProjectReference>

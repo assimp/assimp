@@ -223,15 +223,17 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 {
 	ai_assert( NULL != pColor );
 	
-	float r, g, b;
+	float r( 0.0f ), g( 0.0f ), b( 0.0f );
 	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, r );
 	pColor->r = r;
 	
-	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
-	pColor->g = g;
-
-	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
-	pColor->b = b;
+    // we have to check if color is default 0 with only one token
+    if( !isNewLine( *m_DataIt ) ) {
+        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
+        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
+    }
+    pColor->g = g;
+    pColor->b = b;
 }
 
 // -------------------------------------------------------------------

@@ -93,7 +93,7 @@ namespace {
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void ParseWarning(const std::string& message, const Element* element = NULL)
+/*	void ParseWarning(const std::string& message, const Element* element = NULL)
 	{
 		if(element) {
 			ParseWarning(message,element->KeyToken());
@@ -103,7 +103,7 @@ namespace {
 			DefaultLogger::get()->warn("FBX-Parser: " + message);
 		}
 	}
-
+*/
 	// ------------------------------------------------------------------------------------------------
 	void ParseError(const std::string& message, TokenPtr token)
 	{

@@ -147,7 +147,7 @@ namespace {
 void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
 {
 	boost::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
-	if(outfile == NULL) {
+	if(!outfile) {
 		throw DeadlyExportError("Could not open output .3ds file: " + std::string(pFile));
 	} 
 

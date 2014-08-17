@@ -623,7 +623,7 @@ SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 
 # VC2010 fixes
 if(MSVC10)
-	OPTION( VC10_STDINT_FIX "Fix for VC10 Compiler regarding pstdint.h redefinition errors" OFF )
+	option( VC10_STDINT_FIX "Fix for VC10 Compiler regarding pstdint.h redefinition errors" OFF )
 	if( VC10_STDINT_FIX )
 		ADD_DEFINITIONS( -D_STDINT )
 	endif( VC10_STDINT_FIX )

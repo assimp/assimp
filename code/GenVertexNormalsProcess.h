@@ -53,7 +53,7 @@ namespace Assimp {
 // ---------------------------------------------------------------------------
 /** The GenFaceNormalsProcess computes vertex normals for all vertizes
 */
-class ASSIMP_API_WINONLY GenVertexNormalsProcess : public BaseProcess
+class ASSIMP_API GenVertexNormalsProcess : public BaseProcess
 {
 public:
 

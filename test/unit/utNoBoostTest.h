@@ -4,7 +4,7 @@
 namespace noboost {
 
 #define ASSIMP_FORCE_NOBOOST
-#include "..\..\code\BoostWorkaround\boost\format.hpp"
+#include "../../code/BoostWorkaround/boost/format.hpp"
 	using boost::format;
 	using boost::str;
 
@@ -34,4 +34,4 @@ class NoBoostTest : public CPPUNIT_NS :: TestFixture
 	
 };
 
-#endif 
+#endif

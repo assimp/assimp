@@ -15,7 +15,7 @@ SOURCE_GROUP( unit FILES
 	unit/BoostWorkaround/tupletest.cpp
 )
 
-
+if(WIN32)
 SET( CPPUNIT_SRCS
 	../contrib/cppunit-1.12.1/src/cppunit/AdditionalMessage.cpp
 	../contrib/cppunit-1.12.1/src/cppunit/Asserter.cpp
@@ -72,7 +72,9 @@ SET( CPPUNIT_SRCS
 	../contrib/cppunit-1.12.1/src/cppunit/XmlOutputterHook.cpp
 )
 SOURCE_GROUP(cppunit FILES  ${CPPUNIT_SRCS})
-
+else()
+	find_library(CPPUNIT_LIBRARY cppunit)
+endif()
 
 SET( TEST_SRCS
 	unit/utFindDegenerates.cpp
@@ -133,4 +135,4 @@ add_executable(  unit
 
 SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
-target_link_libraries ( unit assimp ) 
+target_link_libraries ( unit assimp ${CPPUNIT_LIBRARY} )

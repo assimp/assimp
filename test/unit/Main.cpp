@@ -26,9 +26,8 @@ int main (int argc, char* argv[])
 
 	// .. and C. They should smoothly work together
 	aiEnableVerboseLogging(AI_TRUE);
-	aiAttachLogStream(&aiGetPredefinedLogStream(
-		aiDefaultLogStream_FILE,
-		"AssimpLog_C.txt"));
+	aiLogStream logstream= aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "AssimpLog_C.txt");
+	aiAttachLogStream(&logstream);
 
 
 	// ............................................................................

@@ -208,11 +208,11 @@ void  ImporterTest :: testMultipleReads (void)
 
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/test.x",flags));
 	//CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
-	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/Testwuson.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/Testwuson.X",flags));
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
 	//CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
 
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
-	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/bcn_epileptic.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/BCN_Epileptic.X",flags));
 	//CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
 }

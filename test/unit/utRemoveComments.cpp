@@ -43,7 +43,7 @@ void RemoveCommentsTest :: testSingleLineComments (void)
 // ------------------------------------------------------------------------------------------------
 void RemoveCommentsTest :: testMultiLineComments (void)
 {
-	char* szTest = 
+	const char* szTest = 
 		"/* comment to be removed */\n"
 		"valid text /* \n "
 		" comment across multiple lines */"

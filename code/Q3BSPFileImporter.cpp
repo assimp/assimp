@@ -73,11 +73,13 @@ static const aiImporterDesc desc = {
 
 namespace Assimp {
 
+/*
 static void getSupportedExtensions(std::vector<std::string> &supportedExtensions) {
     supportedExtensions.push_back( ".jpg" );
     supportedExtensions.push_back( ".png" );
     supportedExtensions.push_back( ".tga" );
 }
+*/
     
 using namespace Q3BSP;
 

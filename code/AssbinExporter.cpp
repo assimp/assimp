@@ -728,7 +728,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 			// is compressed using standard DEFLATE from zlib.
 			if (compressed)
 			{
-				AssbinChunkWriter uncompressedStream( NULL, NULL );
+				AssbinChunkWriter uncompressedStream( NULL, 0 );
 				WriteBinaryScene( &uncompressedStream, pScene );
 
 				uLongf uncompressedSize = uncompressedStream.Tell();

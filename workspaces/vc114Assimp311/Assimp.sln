@@ -1,11 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "code\assimp.vcxproj", "{E1AFC127-C771-41E2-A57C-14B3599277DE}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C} = {E9375290-F0B7-49E9-BE86-86B8C79B0E2C}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstatic", "contrib\zlib\zlibstatic.vcxproj", "{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assimp", "code\assimp.vcxproj", "{E1AFC127-C771-41E2-A57C-14B3599277DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,18 +14,6 @@ Global
 		RelWithDebInfo|x64 = RelWithDebInfo|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Debug|x64.ActiveCfg = Debug|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Debug|x64.Build.0 = Debug|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.debug-noboost-dll|x64.ActiveCfg = debug-noboost-dll|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.debug-noboost-dll|x64.Build.0 = debug-noboost-dll|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Release|x64.ActiveCfg = Release|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Release|x64.Build.0 = Release|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.release-noboost-dll|x64.ActiveCfg = release-noboost-dll|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.release-noboost-dll|x64.Build.0 = release-noboost-dll|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
-		{E1AFC127-C771-41E2-A57C-14B3599277DE}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.Debug|x64.ActiveCfg = Debug|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.Debug|x64.Build.0 = Debug|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.debug-noboost-dll|x64.ActiveCfg = debug-noboost-dll|x64
@@ -41,6 +26,18 @@ Global
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.release-noboost-dll|x64.Build.0 = release-noboost-dll|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{E9375290-F0B7-49E9-BE86-86B8C79B0E2C}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Debug|x64.ActiveCfg = Debug|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Debug|x64.Build.0 = Debug|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.debug-noboost-dll|x64.ActiveCfg = debug-noboost-dll|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.debug-noboost-dll|x64.Build.0 = debug-noboost-dll|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Release|x64.ActiveCfg = Release|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.Release|x64.Build.0 = Release|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.release-noboost-dll|x64.ActiveCfg = release-noboost-dll|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.release-noboost-dll|x64.Build.0 = release-noboost-dll|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{E1AFC127-C771-41E2-A57C-14B3599277DE}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

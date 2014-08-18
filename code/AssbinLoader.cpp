@@ -78,7 +78,7 @@ const aiImporterDesc* AssbinImporter::GetInfo() const
 	return &desc;
 }
 
-bool AssbinImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const
+bool AssbinImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool /*checkSig*/ ) const
 {
 	IOStream * in = pIOHandler->Open(pFile);
 	if (!in)
@@ -186,7 +186,7 @@ void ReadArray(IOStream * stream, T * out, unsigned int size)
 	for (unsigned int i=0; i<size; i++) out[i] = Read<T>(stream);
 }
 
-template <typename T> void ReadBounds( IOStream * stream, T* p, unsigned int n )
+template <typename T> void ReadBounds( IOStream * stream, T* /*p*/, unsigned int n )
 {
 	// not sure what to do here, the data isn't really useful.
 	stream->Seek( sizeof(T) * n, aiOrigin_CUR );

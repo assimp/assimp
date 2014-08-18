@@ -101,7 +101,7 @@ void ProcessOpenProfile(const IfcArbitraryOpenProfileDef& def, TempMesh& meshout
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& conv)
+void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& /*conv*/)
 {
 	if(const IfcRectangleProfileDef* const cprofile = def.ToPtr<IfcRectangleProfileDef>()) {
 		const IfcFloat x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;

@@ -506,7 +506,7 @@ void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uin
 // read binary data array, assume cursor points to the 'compression mode' field (i.e. behind the header)
 void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const char* end, 
 	std::vector<char>& buff, 
-	const Element& el)
+	const Element& /*el*/)
 {
 	ai_assert(static_cast<size_t>(end-data) >= 4); // runtime check for this happens at tokenization stage
 

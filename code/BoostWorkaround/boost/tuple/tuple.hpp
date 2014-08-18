@@ -100,7 +100,7 @@ namespace boost	{
 			};
 
 			// dummy
-			list_elem& operator = (const list_elem& other)	{
+			list_elem& operator = (const list_elem& /*other*/)	{
 				return *this;
 			}
 
@@ -142,7 +142,7 @@ namespace boost	{
 				return me.me;
 			}
 		};
-	};
+	}
 
 	// A very minimal implementation for up to 5 elements
 	template <typename T0  = detail::nulltype,
@@ -278,6 +278,6 @@ namespace boost	{
 		tuple <> t;
 		return t;
 	}
-};
+}
 
 #endif // !! BOOST_TUPLE_INCLUDED

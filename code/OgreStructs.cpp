@@ -1105,7 +1105,7 @@ aiNode *Bone::ConvertToAssimpNode(Skeleton *skeleton, aiNode *parentNode)
 	return node;
 }
 
-aiBone *Bone::ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWeight> &boneWeights)
+aiBone *Bone::ConvertToAssimpBone(Skeleton * /*parent*/, const std::vector<aiVertexWeight> &boneWeights)
 {
 	aiBone *bone = new aiBone();
 	bone->mName = name;

@@ -301,7 +301,7 @@ enum MeshChunkId
 						// unsigned short poseIndex 
 						// float influence
 		// Optional submesh extreme vertex list chink
-		M_TABLE_EXTREMES = 0xE000,
+		M_TABLE_EXTREMES = 0xE000
 		// unsigned short submesh_index;
 		// float extremes [n_extremes][3];
 };

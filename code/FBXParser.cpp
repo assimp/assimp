@@ -498,7 +498,7 @@ void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uin
 // read binary data array, assume cursor points to the 'compression mode' field (i.e. behind the header)
 void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const char* end, 
 	std::vector<char>& buff, 
-	const Element& el)
+	const Element& /*el*/)
 {
 	BE_NCONST uint32_t encmode = SafeParse<uint32_t>(data, end);
 	AI_SWAP4(encmode);

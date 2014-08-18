@@ -1319,7 +1319,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertCluster(std::vector<aiBone*>& bones, const Model& model, const Cluster& cl, 		
+	void ConvertCluster(std::vector<aiBone*>& bones, const Model& /*model*/, const Cluster& cl,
 		std::vector<size_t>& out_indices,
 		std::vector<size_t>& index_out_indices,
 		std::vector<size_t>& count_out_indices,
@@ -2347,7 +2347,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	aiNodeAnim* GenerateScalingNodeAnim(const std::string& name, 
-		const Model& target, 
+		const Model& /*target*/,
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
 		double& max_time,
@@ -2378,7 +2378,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	aiNodeAnim* GenerateTranslationNodeAnim(const std::string& name, 
-		const Model& target, 
+		const Model& /*target*/,
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
 		double& max_time,
@@ -2830,7 +2830,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers,
+	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& /*layers*/,
 		double& maxTime,
 		double& minTime)
 	{
@@ -2851,7 +2851,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
-		const LayerMap& layers,
+		const LayerMap& /*layers*/,
 		double& maxTime,
 		double& minTime)
 	{
@@ -2869,7 +2869,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
-		const LayerMap& layers, 
+		const LayerMap& /*layers*/,
 		double& maxTime,
 		double& minTime,
 		Model::RotOrder order)

@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
 // Simple sample to prove that Assimp is easy to use with OpenGL.
 // It takes a file name as command line parameter, loads it using standard
 // settings and displays it.
@@ -9,29 +9,30 @@
 // The vc8 solution links against assimp-release-dll_win32 - be sure to
 // have this configuration built.
 // ----------------------------------------------------------------------------
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <GL/glut.h>
 
-// assimp include files. These three are usually needed.
+/* assimp include files. These three are usually needed. */
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-// the global Assimp scene object
+/* the global Assimp scene object */
 const struct aiScene* scene = NULL;
 GLuint scene_list = 0;
 struct aiVector3D scene_min, scene_max, scene_center;
 
-// current rotation angle
+/* current rotation angle */
 static float angle = 0.f;
 
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void reshape(int width, int height)
 {
 	const double aspectRatio = (float) width / height, fieldOfView = 45.0;
@@ -43,7 +44,7 @@ void reshape(int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void get_bounding_box_for_node (const struct aiNode* nd, 
 	struct aiVector3D* min, 
 	struct aiVector3D* max, 
@@ -78,7 +79,7 @@ void get_bounding_box_for_node (const struct aiNode* nd,
 	*trafo = prev;
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void get_bounding_box (struct aiVector3D* min, struct aiVector3D* max)
 {
 	struct aiMatrix4x4 trafo;
@@ -89,7 +90,7 @@ void get_bounding_box (struct aiVector3D* min, struct aiVector3D* max)
 	get_bounding_box_for_node(scene->mRootNode,min,max,&trafo);
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void color4_to_float4(const struct aiColor4D *c, float f[4])
 {
 	f[0] = c->r;
@@ -98,7 +99,7 @@ void color4_to_float4(const struct aiColor4D *c, float f[4])
 	f[3] = c->a;
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void set_float4(float f[4], float a, float b, float c, float d)
 {
 	f[0] = a;
@@ -107,7 +108,7 @@ void set_float4(float f[4], float a, float b, float c, float d)
 	f[3] = d;
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void apply_material(const struct aiMaterial *mtl)
 {
 	float c[4];
@@ -173,19 +174,19 @@ void apply_material(const struct aiMaterial *mtl)
 		glEnable(GL_CULL_FACE);
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 {
 	unsigned int i;
 	unsigned int n = 0, t;
 	struct aiMatrix4x4 m = nd->mTransformation;
 
-	// update transform
+	/* update transform */
 	aiTransposeMatrix4(&m);
 	glPushMatrix();
 	glMultMatrixf((float*)&m);
 
-	// draw all meshes assigned to this node
+	/* draw all meshes assigned to this node */
 	for (; n < nd->mNumMeshes; ++n) {
 		const struct aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 
@@ -224,7 +225,7 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 
 	}
 
-	// draw all children
+	/* draw all children */
 	for (n = 0; n < nd->mNumChildren; ++n) {
 		recursive_render(sc, nd->mChildren[n]);
 	}
@@ -232,7 +233,7 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd)
 	glPopMatrix();
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void do_motion (void)
 {
 	static GLint prev_time = 0;
@@ -244,7 +245,7 @@ void do_motion (void)
 	prev_time = time;
 
 	frames += 1;
-	if ((time - prev_fps_time) > 1000) // update every seconds
+	if ((time - prev_fps_time) > 1000) /* update every seconds */
     {
         int current_fps = frames * 1000 / (time - prev_fps_time);
         printf("%d fps\n", current_fps);
@@ -256,7 +257,7 @@ void do_motion (void)
 	glutPostRedisplay ();
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 void display(void)
 {
 	float tmp;
@@ -267,27 +268,27 @@ void display(void)
 	glLoadIdentity();
 	gluLookAt(0.f,0.f,3.f,0.f,0.f,-5.f,0.f,1.f,0.f);
 
-	// rotate it around the y axis
+	/* rotate it around the y axis */
 	glRotatef(angle,0.f,1.f,0.f);
 
-	// scale the whole asset to fit into our view frustum 
+	/* scale the whole asset to fit into our view frustum */
 	tmp = scene_max.x-scene_min.x;
 	tmp = aisgl_max(scene_max.y - scene_min.y,tmp);
 	tmp = aisgl_max(scene_max.z - scene_min.z,tmp);
 	tmp = 1.f / tmp;
 	glScalef(tmp, tmp, tmp);
 
-        // center the model
+        /* center the model */
 	glTranslatef( -scene_center.x, -scene_center.y, -scene_center.z );
 
-        // if the display list has not been made yet, create a new one and
-        // fill it with scene contents
+        /* if the display list has not been made yet, create a new one and
+           fill it with scene contents */
 	if(scene_list == 0) {
 	    scene_list = glGenLists(1);
 	    glNewList(scene_list, GL_COMPILE);
-            // now begin at the root node of the imported data and traverse
-            // the scenegraph by multiplying subsequent local transforms
-            // together on GL's matrix stack.
+            /* now begin at the root node of the imported data and traverse
+               the scenegraph by multiplying subsequent local transforms
+               together on GL's matrix stack. */
 	    recursive_render(scene, scene->mRootNode);
 	    glEndList();
 	}
@@ -299,11 +300,11 @@ void display(void)
 	do_motion();
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 int loadasset (const char* path)
 {
-	// we are taking one of the postprocessing presets to avoid
-	// spelling out 20+ single postprocessing flags here.
+	/* we are taking one of the postprocessing presets to avoid
+	   spelling out 20+ single postprocessing flags here. */
 	scene = aiImportFile(path,aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene) {
@@ -316,7 +317,7 @@ int loadasset (const char* path)
 	return 1;
 }
 
-// ----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------- */
 int main(int argc, char **argv)
 {
 	struct aiLogStream stream;
@@ -330,21 +331,21 @@ int main(int argc, char **argv)
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 
-	// get a handle to the predefined STDOUT log stream and attach
-	// it to the logging system. It remains active for all further
-	// calls to aiImportFile(Ex) and aiApplyPostProcessing.
+	/* get a handle to the predefined STDOUT log stream and attach
+	   it to the logging system. It remains active for all further
+	   calls to aiImportFile(Ex) and aiApplyPostProcessing. */
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
 	aiAttachLogStream(&stream);
 
-	// ... same procedure, but this stream now writes the
-	// log messages to assimp_log.txt
+	/* ... same procedure, but this stream now writes the
+	   log messages to assimp_log.txt */
 	stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"assimp_log.txt");
 	aiAttachLogStream(&stream);
 
-	// the model name can be specified on the command line. If none
-	// is specified, we try to locate one of the more expressive test 
-	// models from the repository (/models-nonbsd may be missing in 
-	// some distributions so we need a fallback from /models!).
+	/* the model name can be specified on the command line. If none
+	  is specified, we try to locate one of the more expressive test 
+	  models from the repository (/models-nonbsd may be missing in 
+	  some distributions so we need a fallback from /models!). */
 	if( 0 != loadasset( argc >= 2 ? argv[1] : "../../test/models-nonbsd/X/dwarf.x")) {
 		if( argc != 1 || (0 != loadasset( "../../../../test/models-nonbsd/X/dwarf.x") && 0 != loadasset( "../../test/models/X/Testwuson.X"))) { 
 			return -1;
@@ -354,14 +355,14 @@ int main(int argc, char **argv)
 	glClearColor(0.1f,0.1f,0.1f,1.f);
 
 	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);    // Uses default lighting parameters
+	glEnable(GL_LIGHT0);    /* Uses default lighting parameters */
 
 	glEnable(GL_DEPTH_TEST);
 
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 	glEnable(GL_NORMALIZE);
 
-	// XXX docs say all polygons are emitted CCW, but tests show that some aren't.
+	/* XXX docs say all polygons are emitted CCW, but tests show that some aren't. */
 	if(getenv("MODEL_IS_BROKEN"))  
 		glFrontFace(GL_CW);
 
@@ -370,14 +371,15 @@ int main(int argc, char **argv)
 	glutGet(GLUT_ELAPSED_TIME);
 	glutMainLoop();
 
-	// cleanup - calling 'aiReleaseImport' is important, as the library 
-	// keeps internal resources until the scene is freed again. Not 
-	// doing so can cause severe resource leaking.
+	/* cleanup - calling 'aiReleaseImport' is important, as the library 
+	   keeps internal resources until the scene is freed again. Not 
+	   doing so can cause severe resource leaking. */
 	aiReleaseImport(scene);
 
-	// We added a log stream to the library, it's our job to disable it
-	// again. This will definitely release the last resources allocated
-	// by Assimp.
+	/* We added a log stream to the library, it's our job to disable it
+	   again. This will definitely release the last resources allocated
+	   by Assimp.*/
 	aiDetachAllLogStreams();
 	return 0;
 }
+

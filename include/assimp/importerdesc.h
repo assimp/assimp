@@ -72,7 +72,7 @@ enum aiImporterFlags
 	  * should be used with care. This only happens for trunk
 	  * (i.e. SVN) versions, experimental code is not included
 	  * in releases. */
-	aiImporterFlags_Experimental = 0x10,
+	aiImporterFlags_Experimental = 0x10
 };
 
 

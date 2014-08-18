@@ -85,7 +85,7 @@ Intersect IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const I
 // ------------------------------------------------------------------------------------------------
 void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& result, 
 									   const TempMesh& first_operand, 
-									   ConversionData& conv)
+									   ConversionData& /*conv*/)
 {
 	ai_assert(hs != NULL);
 

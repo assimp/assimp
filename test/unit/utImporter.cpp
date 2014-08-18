@@ -72,7 +72,7 @@ static const aiImporterDesc desc = {
 
 
 bool TestPlugin :: CanRead( const std::string& pFile, 
-	IOSystem* pIOHandler, bool test) const
+	IOSystem* /*pIOHandler*/, bool /*test*/) const
 {
 	std::string::size_type pos = pFile.find_last_of('.');
 	// no file extension - can't read
@@ -90,8 +90,8 @@ const aiImporterDesc* TestPlugin :: GetInfo() const
 	return & desc;
 }
 
-void TestPlugin :: InternReadFile( const std::string& pFile, 
-	aiScene* pScene, IOSystem* pIOHandler)
+void TestPlugin :: InternReadFile( const std::string& /*pFile*/,
+	aiScene* /*pScene*/, IOSystem* /*pIOHandler*/)
 {
 	throw DeadlyImportError(AIUT_DEF_ERROR_TEXT);
 }

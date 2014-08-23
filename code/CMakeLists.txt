@@ -144,6 +144,7 @@ SET( Common_SRCS
 	LogAux.h
 	Bitmap.cpp
 	Bitmap.h
+	XMLTools.h
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

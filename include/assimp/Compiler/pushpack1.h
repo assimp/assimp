@@ -29,7 +29,7 @@
 #	if defined(__clang__) || defined(__arm__) || defined(__mips__)
 #		define PACK_STRUCT	__attribute__((__packed__))
 #	else
-#		define PACK_STRUCT	__attribute__((gcc_struct, __packed__)) /* truly its a migwin bug? ifdef HOST_MINGW */
+#		define PACK_STRUCT	__attribute__((gcc_struct, __packed__))
 #	endif
 #else
 #	error Compiler not supported

@@ -76,8 +76,7 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
 	"Path the header files are installed to." )
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
 	"Path the tool executables are installed to." )
-SET ( ASSIMP_BUILD_STATIC_LIB OFF CACHE BOOL
-    "Build a static (.a) version of the library" )
+option (ASSIMP_BUILD_STATIC_LIB "Build a static (.a) version of the library" OFF)
 
 SET(ASSIMP_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
 
@@ -102,8 +101,9 @@ ENDIF()
 
 # Globally enable Boost resp. the Boost workaround – it is also needed by the
 # tools which include the Assimp headers.
-SET ( ASSIMP_ENABLE_BOOST_WORKAROUND ON CACHE BOOL
+option ( ASSIMP_ENABLE_BOOST_WORKAROUND
 	"If a simple implementation of the used Boost functions is used. Slightly reduces functionality, but enables builds without Boost available."
+	ON
 )
 IF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 	INCLUDE_DIRECTORIES( code/BoostWorkaround )
@@ -129,8 +129,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${C
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config-version.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" @ONLY IMMEDIATE)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake"             "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" DESTINATION "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}" COMPONENT ${LIBASSIMP-DEV_COMPONENT})
 
-SET ( ASSIMP_NO_EXPORT OFF CACHE BOOL
-	"Disable Assimp's export functionality." 
+option ( ASSIMP_NO_EXPORT
+	"Disable Assimp's export functionality."
+	OFF
 )
 
 # Search for external dependencies, and build them from source if not found
@@ -186,8 +187,9 @@ ENDIF ( ASSIMP_BUILD_COMPILER STREQUAL "")
 MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
 
 ADD_SUBDIRECTORY( code/ )
-SET ( ASSIMP_BUILD_ASSIMP_TOOLS ON CACHE BOOL
+option ( ASSIMP_BUILD_ASSIMP_TOOLS
 	"If the supplementary tools for Assimp are built in addition to the library."
+	ON
 )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 	IF ( WIN32 )
@@ -196,8 +198,9 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 	ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
-SET ( ASSIMP_BUILD_SAMPLES OFF CACHE BOOL
+option ( ASSIMP_BUILD_SAMPLES
 	"If the official samples are built as well (needs Glut)."
+	OFF
 )
 
 IF ( ASSIMP_BUILD_SAMPLES)
@@ -207,19 +210,19 @@ IF ( ASSIMP_BUILD_SAMPLES)
 	ADD_SUBDIRECTORY( samples/SimpleOpenGL/ )
 ENDIF ( ASSIMP_BUILD_SAMPLES )
 
-IF ( WIN32 )
-	SET ( ASSIMP_BUILD_TESTS ON CACHE BOOL
-		"If the test suite for Assimp is built in addition to the library."
-	)
+option ( ASSIMP_BUILD_TESTS
+	"If the test suite for Assimp is built in addition to the library."
+	ON
+)
 	
-	IF ( ASSIMP_BUILD_TESTS )
-		ADD_SUBDIRECTORY( test/ )
-	ENDIF ( ASSIMP_BUILD_TESTS )
-ENDIF ( WIN32 )
+IF ( ASSIMP_BUILD_TESTS )
+	ADD_SUBDIRECTORY( test/ )
+ENDIF ( ASSIMP_BUILD_TESTS )
 
 IF(MSVC)
-	SET ( ASSIMP_INSTALL_PDB ON CACHE BOOL
+	option ( ASSIMP_INSTALL_PDB
 		"Install MSVC debug files."
+		ON
 	)
 ENDIF(MSVC)
 

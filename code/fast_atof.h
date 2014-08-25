@@ -16,7 +16,9 @@
 #define __FAST_A_TO_F_H_INCLUDED__
 
 #include <math.h>
-#include <limits.h>
+#include <limits>
+
+#include "StringComparison.h"
 
 namespace Assimp
 {
@@ -229,15 +231,45 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 template <typename Real>
 inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
 {
-	Real f;
+	Real f = 0;
 
-	bool inv = (*c=='-');
-	if (inv || *c=='+') {
+	bool inv = (*c == '-');
+	if (inv || *c == '+') {
 		++c;
 	}
 
-	f = static_cast<Real>( strtoul10_64 ( c, &c) );
-	if (*c == '.' || (check_comma && c[0] == ',' && c[1] >= '0' && c[1] <= '9')) // allow for commas, too
+	if ((c[0] == 'N' || c[0] == 'n') && ASSIMP_strincmp(c, "nan", 3) == 0)
+	{
+		out = std::numeric_limits<Real>::quiet_NaN();
+		c += 3;
+		return c;
+	}
+
+	if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inf", 3) == 0)
+	{
+		out = std::numeric_limits<Real>::infinity();
+		c += 3;
+		if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inity", 5) == 0)
+		{
+			c += 5;
+		}
+		return c;
+	}
+
+	if (!(c[0] >= '0' && c[0] <= '9') &&
+	    !(c[0] == '.' && c[1] >= '0' && c[1] <= '9'))
+	{
+		throw std::invalid_argument("Cannot parse string "
+		                            "as real number: does not start with digit "
+		                            "or decimal point followed by digit.");
+	}
+
+	if (*c != '.')
+	{
+		f = static_cast<Real>( strtoul10_64 ( c, &c) );
+	}
+
+	if ((*c == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9')
 	{
 		++c;
 
@@ -254,6 +286,10 @@ inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma 
 
 		pl *= fast_atof_table[diff];
 		f += static_cast<Real>( pl );
+	}
+	// For backwards compatibility: eat trailing dots, but not trailing commas.
+	else if (*c == '.') {
+		++c;
 	}
 
 	// A major 'E' must be allowed. Necessary for proper reading of some DXF files.

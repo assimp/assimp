@@ -259,4 +259,4 @@ unsigned int tokenize( const string_type& str, std::vector<string_type>& tokens,
 
 } // Namespace Assimp
 
-#endif
+#endif // OBJ_TOOLS_H_INC

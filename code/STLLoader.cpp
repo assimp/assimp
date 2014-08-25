@@ -348,8 +348,8 @@ bool STLImporter::LoadBinaryFile()
 	bool bIsMaterialise = false;
 
 	// search for an occurence of "COLOR=" in the header
-	const char* sz2 = (const char*)mBuffer;
-	const char* const szEnd = sz2+80;
+	const unsigned char* sz2 = (const unsigned char*)mBuffer;
+	const unsigned char* const szEnd = sz2+80;
 	while (sz2 < szEnd)	{
 
 		if ('C' == *sz2++ && 'O' == *sz2++ && 'L' == *sz2++ &&

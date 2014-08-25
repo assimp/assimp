@@ -72,7 +72,7 @@ static const aiImporterDesc desc = {
 
 
 bool TestPlugin :: CanRead( const std::string& pFile, 
-	IOSystem* pIOHandler, bool test) const
+	IOSystem* /*pIOHandler*/, bool /*test*/) const
 {
 	std::string::size_type pos = pFile.find_last_of('.');
 	// no file extension - can't read
@@ -90,8 +90,8 @@ const aiImporterDesc* TestPlugin :: GetInfo() const
 	return & desc;
 }
 
-void TestPlugin :: InternReadFile( const std::string& pFile, 
-	aiScene* pScene, IOSystem* pIOHandler)
+void TestPlugin :: InternReadFile( const std::string& /*pFile*/,
+	aiScene* /*pScene*/, IOSystem* /*pIOHandler*/)
 {
 	throw DeadlyImportError(AIUT_DEF_ERROR_TEXT);
 }
@@ -208,11 +208,11 @@ void  ImporterTest :: testMultipleReads (void)
 
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/test.x",flags));
 	//CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
-	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/Testwuson.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/Testwuson.X",flags));
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
 	//CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
 
 	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
-	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/bcn_epileptic.x",flags));
+	CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/BCN_Epileptic.X",flags));
 	//CPPUNIT_ASSERT(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
 }

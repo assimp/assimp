@@ -466,8 +466,9 @@ void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
+	const char * str = source.Elements().count( "Tangents" ) > 0 ? "Tangents" : "Tangent";
 	ResolveVertexDataArray(tangents_out,source,MappingInformationType,ReferenceInformationType,
-		"Tangent",
+		str,
 		"TangentIndex",
 		vertices.size(),
 		mapping_counts,
@@ -481,8 +482,9 @@ void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_ou
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
+	const char * str = source.Elements().count( "Binormals" ) > 0 ? "Binormals" : "Binormal";
 	ResolveVertexDataArray(binormals_out,source,MappingInformationType,ReferenceInformationType,
-		"Binormal",
+		str,
 		"BinormalIndex",
 		vertices.size(),
 		mapping_counts,

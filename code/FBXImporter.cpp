@@ -179,6 +179,8 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 
 		// convert the FBX DOM to aiScene
 		ConvertToAssimpScene(pScene,doc);
+
+		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
 	}
 	catch(std::exception&) {
 		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());

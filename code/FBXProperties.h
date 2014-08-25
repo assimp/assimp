@@ -143,8 +143,7 @@ private:
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline T PropertyGet(const PropertyTable& in, const std::string& name, 
-	const T& defaultValue, 
-	bool ignoreTemplate = false)
+	const T& defaultValue)
 {
 	const Property* const prop = in.Get(name);
 	if(!prop) {
@@ -164,8 +163,7 @@ inline T PropertyGet(const PropertyTable& in, const std::string& name,
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline T PropertyGet(const PropertyTable& in, const std::string& name, 
-	bool& result, 
-	bool ignoreTemplate = false)
+	bool& result)
 {
 	const Property* const prop = in.Get(name);
 	if(!prop) {

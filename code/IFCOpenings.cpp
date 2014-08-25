@@ -259,7 +259,7 @@ BoundingBox GetBoundingBox(const ClipperLib::Polygon& poly)
 
 // ------------------------------------------------------------------------------------------------
 void InsertWindowContours(const ContourVector& contours,
-	const std::vector<TempOpening>& openings,
+	const std::vector<TempOpening>& /*openings*/,
 	TempMesh& curmesh)
 {
 	// fix windows - we need to insert the real, polygonal shapes into the quadratic holes that we have now

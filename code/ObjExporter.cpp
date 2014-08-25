@@ -75,6 +75,7 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
 } // end of namespace Assimp
 
+static const std::string MaterialExt = ".mtl";
 
 // ------------------------------------------------------------------------------------------------
 ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
@@ -107,7 +108,7 @@ std::string ObjExporter :: GetMaterialLibName()
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter :: GetMaterialLibFileName()
 {	
-	return filename + ".mtl";
+    return filename + MaterialExt;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -132,7 +133,7 @@ std::string ObjExporter :: GetMaterialName(unsigned int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: WriteMaterialFile()
+void ObjExporter::WriteMaterialFile()
 {
 	WriteHeader(mOutputMat);
 
@@ -144,16 +145,16 @@ void ObjExporter :: WriteMaterialFile()
 
 		aiColor4D c;
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE,c)) {
-			mOutputMat << "kd " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Kd " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_AMBIENT,c)) {
-			mOutputMat << "ka " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Ka " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_SPECULAR,c)) {
-			mOutputMat << "ks " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Ks " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_EMISSIVE,c)) {
-			mOutputMat << "ke " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "Ke " << c.r << " " << c.g << " " << c.b << endl;
 		}
 
 		float o;
@@ -170,16 +171,19 @@ void ObjExporter :: WriteMaterialFile()
 
 		aiString s;
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0),s)) {
-			mOutputMat << "map_kd " << s.data << endl;
+			mOutputMat << "map_Kd " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_AMBIENT(0),s)) {
-			mOutputMat << "map_ka " << s.data << endl;
+			mOutputMat << "map_Ka " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_SPECULAR(0),s)) {
-			mOutputMat << "map_ks " << s.data << endl;
+			mOutputMat << "map_Ks " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_SHININESS(0),s)) {
-			mOutputMat << "map_ns " << s.data << endl;
+			mOutputMat << "map_Ns " << s.data << endl;
+		}
+		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_OPACITY(0),s)) {
+			mOutputMat << "map_d " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_HEIGHT(0),s) || AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_NORMALS(0),s)) {
 			// implementations seem to vary here, so write both variants
@@ -281,7 +285,7 @@ void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
+void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
 {
 	meshes.push_back(MeshInstance());
 	MeshInstance& mesh = meshes.back();
@@ -332,7 +336,7 @@ void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatri
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
+void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
 {
 	const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
 
@@ -345,5 +349,7 @@ void ObjExporter :: AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
 	}
 }
 
-#endif
-#endif
+// ------------------------------------------------------------------------------------------------
+
+#endif // ASSIMP_BUILD_NO_OBJ_EXPORTER
+#endif // ASSIMP_BUILD_NO_EXPORT

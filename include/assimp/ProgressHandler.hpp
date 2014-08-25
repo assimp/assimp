@@ -81,13 +81,39 @@ public:
 	 *   all needed cleanup tasks prior to returning control to the
 	 *   caller). If the loading is aborted, #Importer::ReadFile()
 	 *   returns always NULL.
-	 *
-	 *  @note Currently, percentage is always -1.f because there is 
-	 *   no reliable way to compute it.
 	 *   */
 	virtual bool Update(float percentage = -1.f) = 0;
 
+	// -------------------------------------------------------------------
+	/** @brief Progress callback for file loading steps
+	 *  @param numberOfSteps The number of total post-processing
+	 *   steps
+	 *  @param currentStep The index of the current post-processing
+	 *   step that will run, or equal to numberOfSteps if all of
+	 *   them has finished. This number is always strictly monotone
+	 *   increasing, although not necessarily linearly.
+	 *
+	 *  @note This is currently only used at the start and the end
+	 *   of the file parsing.
+	 *   */
+	virtual void UpdateFileRead(int currentStep /*= 0*/, int numberOfSteps /*= 0*/) {
+		float f = numberOfSteps ? currentStep / (float)numberOfSteps : 1.0f;
+		Update( f * 0.5f );
+	};
 
+	// -------------------------------------------------------------------
+	/** @brief Progress callback for post-processing steps
+	 *  @param numberOfSteps The number of total post-processing
+	 *   steps
+	 *  @param currentStep The index of the current post-processing
+	 *   step that will run, or equal to numberOfSteps if all of
+	 *   them has finished. This number is always strictly monotone
+	 *   increasing, although not necessarily linearly.
+	 *   */
+	virtual void UpdatePostProcess(int currentStep /*= 0*/, int numberOfSteps /*= 0*/) {
+		float f = numberOfSteps ? currentStep / (float)numberOfSteps : 1.0f;
+		Update( f * 0.5f + 0.5f );
+	};
 
 }; // !class ProgressHandler 
 // ------------------------------------------------------------------------------------

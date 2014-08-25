@@ -404,9 +404,9 @@ size_t IndexData::FaceSize() const
 // Mesh
 
 Mesh::Mesh() :
-	sharedVertexData(0),
-	skeleton(0),
-	hasSkeletalAnimations(false)
+	hasSkeletalAnimations(false),
+	skeleton(NULL),
+	sharedVertexData(NULL)
 {
 }
 
@@ -712,8 +712,8 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 // MeshXml
 
 MeshXml::MeshXml() :
-	sharedVertexData(0),
-	skeleton(0)
+	skeleton(0),
+	sharedVertexData(0)
 {
 }
 
@@ -797,8 +797,8 @@ void MeshXml::ConvertToAssimpScene(aiScene* dest)
 // SubMeshXml
 
 SubMeshXml::SubMeshXml() :
-	vertexData(0),
-	indexData(new IndexDataXml())
+	indexData(new IndexDataXml()),
+	vertexData(0)
 {
 }
 
@@ -912,8 +912,8 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 // Animation
 
 Animation::Animation(Skeleton *parent) :
+	parentMesh(NULL),
 	parentSkeleton(parent),
-	parentMesh(0),
 	length(0.0f),
 	baseTime(-1.0f)
 {
@@ -963,6 +963,8 @@ aiAnimation *Animation::ConvertToAssimpAnimation()
 // Skeleton
 
 Skeleton::Skeleton() :
+	bones(),
+	animations(),
 	blendMode(ANIMBLEND_AVERAGE)
 {
 }
@@ -1103,7 +1105,7 @@ aiNode *Bone::ConvertToAssimpNode(Skeleton *skeleton, aiNode *parentNode)
 	return node;
 }
 
-aiBone *Bone::ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWeight> &boneWeights)
+aiBone *Bone::ConvertToAssimpBone(Skeleton * /*parent*/, const std::vector<aiVertexWeight> &boneWeights)
 {
 	aiBone *bone = new aiBone();
 	bone->mName = name;
@@ -1122,8 +1124,8 @@ aiBone *Bone::ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWe
 // VertexAnimationTrack
 
 VertexAnimationTrack::VertexAnimationTrack() :
-	target(0),
-	type(VAT_NONE)
+	type(VAT_NONE),
+	target(0)
 {
 }
 

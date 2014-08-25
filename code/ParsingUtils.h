@@ -46,16 +46,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_PARSING_UTILS_H_INC
 
 #include "StringComparison.h"
+
 namespace Assimp {
 
-	// NOTE: the functions below are mostly intended as replacement for
-	// std::upper, std::lower, std::isupper, std::islower, std::isspace.
-	// we don't bother of locales. We don't want them. We want reliable
-	// (i.e. identical) results across all locales.
+// NOTE: the functions below are mostly intended as replacement for
+// std::upper, std::lower, std::isupper, std::islower, std::isspace.
+// we don't bother of locales. We don't want them. We want reliable
+// (i.e. identical) results across all locales.
 
-	// The functions below accept any character type, but know only
-	// about ASCII. However, UTF-32 is the only safe ASCII superset to
-	// use since it doesn't have multibyte sequences.
+// The functions below accept any character type, but know only
+// about ASCII. However, UTF-32 is the only safe ASCII superset to
+// use since it doesn't have multi-byte sequences.
+
+static const unsigned int BufferSize = 4096;
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
@@ -63,118 +66,145 @@ AI_FORCE_INLINE char_t ToLower( char_t in)
 {
 	return (in >= (char_t)'A' && in <= (char_t)'Z') ? (char_t)(in+0x20) : in;
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE char_t ToUpper( char_t in)
-{
-	return (in >= (char_t)'a' && in <= (char_t)'z') ? (char_t)(in-0x20) : in;
+AI_FORCE_INLINE char_t ToUpper( char_t in) {
+    return (in >= (char_t)'a' && in <= (char_t)'z') ? (char_t)(in-0x20) : in;
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool IsUpper( char_t in)
 {
 	return (in >= (char_t)'A' && in <= (char_t)'Z');
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool IsLower( char_t in)
 {
 	return (in >= (char_t)'a' && in <= (char_t)'z');
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool IsSpace( char_t in)
 {
 	return (in == (char_t)' ' || in == (char_t)'\t');
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool IsLineEnd( char_t in)
 {
 	return (in == (char_t)'\r' || in == (char_t)'\n' || in == (char_t)'\0');
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool IsSpaceOrNewLine( char_t in)
 {
 	return IsSpace<char_t>(in) || IsLineEnd<char_t>(in);
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpaces( const char_t* in, const char_t** out)
 {
-	while (*in == (char_t)' ' || *in == (char_t)'\t')in++;
+    while( *in == ( char_t )' ' || *in == ( char_t )'\t' ) {
+        ++in;
+    }
 	*out = in;
 	return !IsLineEnd<char_t>(*in);
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpaces( const char_t** inout)
 {
 	return SkipSpaces<char_t>(*inout,inout);
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipLine( const char_t* in, const char_t** out)
 {
-	while (*in != (char_t)'\r' && *in != (char_t)'\n' && *in != (char_t)'\0')in++;
+    while( *in != ( char_t )'\r' && *in != ( char_t )'\n' && *in != ( char_t )'\0' ) {
+        ++in;
+    }
 
 	// files are opened in binary mode. Ergo there are both NL and CR
-	while (*in == (char_t)'\r' || *in == (char_t)'\n')in++;
+    while( *in == ( char_t )'\r' || *in == ( char_t )'\n' ) {
+        ++in;
+    }
 	*out = in;
 	return *in != (char_t)'\0';
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipLine( const char_t** inout)
 {
 	return SkipLine<char_t>(*inout,inout);
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpacesAndLineEnd( const char_t* in, const char_t** out)
 {
-	while (*in == (char_t)' ' || *in == (char_t)'\t' ||
-		*in == (char_t)'\r' || *in == (char_t)'\n')in++;
+    while( *in == ( char_t )' ' || *in == ( char_t )'\t' || *in == ( char_t )'\r' || *in == ( char_t )'\n' ) {
+        ++in;
+    }
 	*out = in;
 	return *in != '\0';
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool SkipSpacesAndLineEnd( const char_t** inout)
 {
 	return SkipSpacesAndLineEnd<char_t>(*inout,inout);
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
-AI_FORCE_INLINE bool GetNextLine(const char_t*& buffer, char_t out[4096])
+AI_FORCE_INLINE bool GetNextLine( const char_t*& buffer, char_t out[ BufferSize ] )
 {
-	if ((char_t)'\0' == *buffer)return false;
+    if( ( char_t )'\0' == *buffer ) {
+        return false;
+    }
 
 	char* _out = out;
-	char* const end = _out+4096;
-	while (!IsLineEnd( *buffer ) && _out < end)
-		*_out++ = *buffer++;
+    char* const end = _out + BufferSize;
+    while( !IsLineEnd( *buffer ) && _out < end ) {
+        *_out++ = *buffer++;
+    }
 	*_out = (char_t)'\0';
 
-	while (IsLineEnd( *buffer ) && '\0' != *buffer)++buffer;
-	return true;
+    while( IsLineEnd( *buffer ) && '\0' != *buffer ) {
+        ++buffer;
+    }
+
+    return true;
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool IsNumeric( char_t in)
 {
 	return ( in >= '0' && in <= '9' ) || '-' == in || '+' == in;
 }
+
 // ---------------------------------------------------------------------------------
 template <class char_t>
 AI_FORCE_INLINE bool TokenMatch(char_t*& in, const char* token, unsigned int len)
 {
-	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len]))
-	{
+	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len])) {
 		in += len+1;
 		return true;
 	}
+
 	return false;
 }
 // ---------------------------------------------------------------------------------
@@ -185,8 +215,7 @@ AI_FORCE_INLINE bool TokenMatch(char_t*& in, const char* token, unsigned int len
  */
 AI_FORCE_INLINE bool TokenMatchI(const char*& in, const char* token, unsigned int len)
 {
-	if (!ASSIMP_strincmp(token,in,len) && IsSpaceOrNewLine(in[len]))
-	{
+	if (!ASSIMP_strincmp(token,in,len) && IsSpaceOrNewLine(in[len])) {
 		in += len+1;
 		return true;
 	}
@@ -206,5 +235,9 @@ AI_FORCE_INLINE std::string GetNextToken(const char*& in)
 	while (!IsSpaceOrNewLine(*in))++in;
 	return std::string(cur,(size_t)(in-cur));
 }
+
+// ---------------------------------------------------------------------------------
+
 } // ! namespace Assimp
+
 #endif // ! AI_PARSING_UTILS_H_INC

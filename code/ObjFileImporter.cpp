@@ -407,12 +407,21 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			{
 				const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
 				ai_assert( tex < pModel->m_TextureCoord.size() );
-					
-				if ( tex >= pModel->m_TextureCoord.size() )
-					throw DeadlyImportError("OBJ: texture coordinate index out of range");
 
-				const aiVector3D &coord3d = pModel->m_TextureCoord[ tex ];
-                pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
+				if ( tex >= pModel->m_TextureCoord.size() ){
+					//	throw DeadlyImportError("OBJ: texture coordinate index out of range");
+					DefaultLogger::get()->debug("OBJ: texture coordinate index out of range, data is hidden in the normales?");
+					if ( tex >= pModel->m_Normals.size() ){
+						DefaultLogger::get()->debug("OBJ: texture coordinates seems to be wrong calculated by your exporter?");
+						// pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( 0, 0, 0 );
+					} else {
+						const aiVector3D &coord3d = pModel->m_Normals[ tex ];
+						pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, 0 /*coord3d.z*/ );
+					}
+				} else {
+					const aiVector3D &coord3d = pModel->m_TextureCoord[ tex ];
+					pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
+				}
 			}
 
 			ai_assert( pMesh->mNumVertices > newIndex );

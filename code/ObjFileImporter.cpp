@@ -552,8 +552,8 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 	
 		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 
-		// multiplying the specular exponent with 2 seems to yield better results
-		pCurrentMaterial->shineness *= 4.f;
+		// mtl max value is 1000, opengl has 128...
+		pCurrentMaterial->shineness *= .128f;
 
 		// Adding material colors
 		mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT );

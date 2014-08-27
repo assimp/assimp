@@ -23,7 +23,6 @@ bin/
 lib/
 obj/
 contrib/
-.project
 *.kdev4*
 
 # Generated

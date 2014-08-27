@@ -5,7 +5,7 @@ Rem  VisualStudio-Version: VS2012
 Rem  Solution-Configs:     debug-noboost-dll, release-noboost-dll
 Rem  Project:              assimp (assimpview etc. are not required)
 
-set solutionFile=workspaces\vc11\assimp.sln
+set solutionFile=workspaces\vc114Assimp311\assimp.sln
 
 call MSBuild.exe %solutionFile% /property:Configuration=debug-noboost-dll /property:Platform=x64 /target:assimp
 if errorlevel 1 (

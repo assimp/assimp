@@ -1163,6 +1163,19 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
 				// just syntactic sugar
 			}
 
+			else if( mFormat == FV_1_4_n && IsElement( "image"))
+			{
+				// read ID. Another entry which is "optional" by design but obligatory in reality
+				int attrID = GetAttribute( "id");
+				std::string id = mReader->getAttributeValue( attrID);
+
+				// create an entry and store it in the library under its ID
+				mImageLibrary[id] = Image();
+
+				// read on from there
+				ReadImage( mImageLibrary[id]);
+			}
+
 			/* Shading modes */
 			else if( IsElement( "phong"))
 				pEffect.mShadeType = Shade_Phong;

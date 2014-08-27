@@ -142,6 +142,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 #	include "OgreImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_OPEMGEX_IMPORTER
+#   include "OpenGEXImporter.h"
+#endif
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
 #	include "MS3DLoader.h"
 #endif
@@ -269,6 +272,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #if (!defined ASSIMP_BUILD_NO_OGRE_IMPORTER)
 	out.push_back( new Ogre::OgreImporter());
+#endif
+#if (!defined ASSIMP_BUILD_NO_OPEMGEX_IMPORTER )
+    out.push_back( new OpenGEX::OpenGEXImporter() );
 #endif
 #if (!defined ASSIMP_BUILD_NO_MS3D_IMPORTER)
 	out.push_back( new MS3DImporter());

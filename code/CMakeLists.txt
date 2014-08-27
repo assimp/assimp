@@ -251,8 +251,6 @@ SET( LWS_SRCS
 )
 SOURCE_GROUP( LWS FILES ${LWS_SRCS})
 
-
-
 SET( MD2_SRCS
 	MD2FileData.h
 	MD2Loader.cpp
@@ -345,6 +343,12 @@ SET( Ogre_SRCS
 	OgreMaterial.cpp
 )
 SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
+
+SET( OpenGEX_SRCS
+    OpenGEXImporter.cpp
+    OpenGEXImporter.h
+)
+SOURCE_GROUP( OpenGEX FILES ${OpenGEX_SRCS})
 
 SET( Ply_SRCS
 	PlyLoader.cpp
@@ -675,6 +679,7 @@ SET( assimp_src
 	${OFFFormat_SRCS}
 	${Obj_SRCS}
 	${Ogre_SRCS}
+    ${OpenGEX_SRCS}
 	${Ply_SRCS}
 	${Q3D_SRCS}
 	${Q3BSP_SRCS}

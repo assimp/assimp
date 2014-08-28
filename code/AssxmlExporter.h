@@ -38,11 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file AssbinExporter.h
- * ASSBIN Exporter Main Header
+/** @file AssxmlExporter.h
+ * ASSXML Exporter Main Header
  */
-#ifndef AI_ASSBINEXPORTER_H_INC
-#define AI_ASSBINEXPORTER_H_INC
+#ifndef AI_ASSXMLEXPORTER_H_INC
+#define AI_ASSXMLEXPORTER_H_INC
 
 // nothing really needed here - reserved for future use like properties
 

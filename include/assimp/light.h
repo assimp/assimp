@@ -77,6 +77,7 @@ enum aiLightSourceType
 
 	//! The generic light level of the world, including the bounces
 	//! of all other lightsources.
+	//! Typically, there's at most one ambient light in a scene.
 	//! This light type doesn't have a valid position, direction, or
 	//! other properties, just a color. 
 	aiLightSource_AMBIENT       = 0x4,

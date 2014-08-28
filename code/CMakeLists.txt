@@ -180,6 +180,12 @@ SET( ASSBIN_SRCS
 )
 SOURCE_GROUP( Assbin FILES ${ASSBIN_SRCS})
 
+SET( ASSXML_SRCS
+	AssxmlExporter.h
+	AssxmlExporter.cpp
+)
+SOURCE_GROUP( Assxml FILES ${ASSXML_SRCS})
+
 SET( B3D_SRCS
 	B3DImporter.cpp
 	B3DImporter.h
@@ -656,6 +662,7 @@ SET( assimp_src
 	${AC_SRCS}
 	${ASE_SRCS}
 	${ASSBIN_SRCS}
+	${ASSXML_SRCS}
 	${B3D_SRCS}
 	${BVH_SRCS}
 	${Collada_SRCS}

@@ -67,7 +67,7 @@ int ioprintf( IOStream * io, const char * format, ... )
 	va_start( va, format );
 	int nSize = vsnprintf( sz, 4096, format, va );
   ai_assert( nSize < 4096 );
-	va_end( format );
+	va_end( va );
 
 	io->Write( sz, sizeof(char), nSize );
 

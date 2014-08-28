@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 /** @file  AssxmlExporter.cpp
- *  ASSBIN exporter main code
+ *  ASSXML exporter main code
  */
 #include "AssimpPCH.h"
 #include "./../include/assimp/version.h"
@@ -631,5 +631,5 @@ void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pS
 
 } // end of namespace Assimp
 
-#endif // ASSIMP_BUILD_NO_ASSBIN_EXPORTER
+#endif // ASSIMP_BUILD_NO_ASSXML_EXPORTER
 #endif // ASSIMP_BUILD_NO_EXPORT

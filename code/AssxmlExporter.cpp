@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  AssxmlExporter.cpp
  *  ASSXML exporter main code
  */
+#include <stdarg.h>
 #include "AssimpPCH.h"
 #include "./../include/assimp/version.h"
 #include "ProcessHelper.h"

@@ -119,8 +119,8 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 
 	char line[4096];
 	GetNextLine(buffer,line);
-	if ('O' == line[0]) {
-		GetNextLine(buffer,line); // skip the 'OFF' line
+	while ('O' == line[0] || '#' == line[0]) {
+		GetNextLine(buffer,line); // skip the 'OFF' line  and comment lines (#...)
 	}
 
 	const char* sz = line; SkipSpaces(&sz);

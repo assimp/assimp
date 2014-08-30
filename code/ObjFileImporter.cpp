@@ -140,22 +140,6 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 		strModelName = pFile;
 	}
 
-	// process all '\'
-	std::vector<char> ::iterator iter = m_Buffer.begin();
-	while (iter != m_Buffer.end())
-	{
-		if (*iter == '\\')
-		{
-			// remove '\'
-			iter = m_Buffer.erase(iter);
-			// remove next character
-			while (*iter == '\r' || *iter == '\n')
-				iter = m_Buffer.erase(iter);
-		}
-		else
-			++iter;
-	}
-
 	// parse the file into a temporary representation
 	ObjFileParser parser(m_Buffer, strModelName, pIOHandler);
 
@@ -423,12 +407,21 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 			{
 				const unsigned int tex = pSourceFace->m_pTexturCoords->at( vertexIndex );
 				ai_assert( tex < pModel->m_TextureCoord.size() );
-					
-				if ( tex >= pModel->m_TextureCoord.size() )
-					throw DeadlyImportError("OBJ: texture coordinate index out of range");
 
-				const aiVector3D &coord3d = pModel->m_TextureCoord[ tex ];
-                pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
+				if ( tex >= pModel->m_TextureCoord.size() ){
+					//	throw DeadlyImportError("OBJ: texture coordinate index out of range");
+					DefaultLogger::get()->debug("OBJ: texture coordinate index out of range, data is hidden in the normales?");
+					if ( tex >= pModel->m_Normals.size() ){
+						DefaultLogger::get()->debug("OBJ: texture coordinates seems to be wrong calculated by your exporter?");
+						// pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( 0, 0, 0 );
+					} else {
+						const aiVector3D &coord3d = pModel->m_Normals[ tex ];
+						pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, 0 /*coord3d.z*/ );
+					}
+				} else {
+					const aiVector3D &coord3d = pModel->m_TextureCoord[ tex ];
+					pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
+				}
 			}
 
 			ai_assert( pMesh->mNumVertices > newIndex );
@@ -559,8 +552,8 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 	
 		mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 
-		// multiplying the specular exponent with 2 seems to yield better results
-		pCurrentMaterial->shineness *= 4.f;
+		// mtl max value is 1000, opengl has 128...
+		pCurrentMaterial->shineness *= .128f;
 
 		// Adding material colors
 		mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT );

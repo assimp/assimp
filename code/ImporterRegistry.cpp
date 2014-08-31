@@ -106,9 +106,6 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_OFF_IMPORTER
 #	include "OFFLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_GEO_IMPORTER
-#	include "GEOLoader.h"
-#endif
 #ifndef ASSIMP_BUILD_NO_AC_IMPORTER
 #	include "ACLoader.h"
 #endif
@@ -236,9 +233,6 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #if (!defined ASSIMP_BUILD_NO_OFF_IMPORTER)
 	out.push_back( new OFFImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_GEO_IMPORTER)
-	out.push_back( new GEOImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_AC_IMPORTER)
 	out.push_back( new AC3DImporter());

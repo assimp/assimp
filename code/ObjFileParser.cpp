@@ -526,8 +526,24 @@ void ObjFileParser::getMaterialLib()
 		m_DataIt++;
 
 	// Check for existence
-	const std::string strMatName(pStart, &(*m_DataIt));
+	const std::string sourceString(pStart, &(*m_DataIt));
+	std::string strMatName;
+	// Allocate the destination space
+	strMatName.resize(sourceString.size());
+	// Convert the source string to lower case
+	// some ?broken? obj files has definitions like: mtllib kittykart.MTL
+	std::transform(sourceString.begin(),
+			sourceString.end(),
+			strMatName.begin(),
+			::tolower);
+
 	IOStream *pFile = m_pIO->Open(strMatName);
+
+	if (!pFile ){
+		DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName + " try original name " + sourceString);
+		strMatName.assign(sourceString);
+		pFile = m_pIO->Open(strMatName);
+	}
 
 	if (!pFile )
 	{

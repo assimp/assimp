@@ -895,4 +895,4 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 	}
 }
 
-#endif // !! ASSIMP_BUILD_NO_X_IMPORTER
+#endif // !! ASSIMP_BUILD_NO_LWO_IMPORTER

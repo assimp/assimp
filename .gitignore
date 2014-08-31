@@ -32,3 +32,6 @@ test/results
 
 # Python
 __pycache__
+
+# backup files
+*~

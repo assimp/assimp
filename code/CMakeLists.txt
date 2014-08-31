@@ -323,6 +323,12 @@ SET( OFFFormat_SRCS
 )
 SOURCE_GROUP( OFFFormat FILES ${OFFFormat_SRCS})
 
+SET( GEOFormat_SRCS
+	GEOLoader.cpp
+	GEOLoader.h
+)
+SOURCE_GROUP( GEOFormat FILES ${GEOFormat_SRCS})
+
 SET( Obj_SRCS
 	ObjFileData.h
 	ObjFileImporter.cpp
@@ -680,6 +686,7 @@ SET( assimp_src
 	${MaterialSystem_SRCS}
 	${NFF_SRCS}
 	${OFFFormat_SRCS}
+	${GEOFormat_SRCS}
 	${Obj_SRCS}
 	${Ogre_SRCS}
 	${Ply_SRCS}

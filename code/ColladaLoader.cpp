@@ -308,10 +308,6 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 			continue;
 		}
 		const Collada::Light* srcLight = &srcLightIt->second;
-		if (srcLight->mType == aiLightSource_AMBIENT) {
-			DefaultLogger::get()->error("Collada: Skipping ambient light for the moment");
-			continue;
-		}
 		
 		// now fill our ai data structure
 		aiLight* out = new aiLight();

@@ -144,6 +144,7 @@ SET( Common_SRCS
 	LogAux.h
 	Bitmap.cpp
 	Bitmap.h
+	XMLTools.h
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -178,6 +179,12 @@ SET( ASSBIN_SRCS
 	AssbinLoader.cpp
 )
 SOURCE_GROUP( Assbin FILES ${ASSBIN_SRCS})
+
+SET( ASSXML_SRCS
+	AssxmlExporter.h
+	AssxmlExporter.cpp
+)
+SOURCE_GROUP( Assxml FILES ${ASSXML_SRCS})
 
 SET( B3D_SRCS
 	B3DImporter.cpp
@@ -655,6 +662,7 @@ SET( assimp_src
 	${AC_SRCS}
 	${ASE_SRCS}
 	${ASSBIN_SRCS}
+	${ASSXML_SRCS}
 	${B3D_SRCS}
 	${BVH_SRCS}
 	${Collada_SRCS}

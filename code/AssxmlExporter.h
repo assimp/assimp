@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2013, assimp team
+Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms, 
@@ -38,57 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  BlenderBMesh.h
- *  @brief Conversion of Blender's new BMesh stuff
+/** @file AssxmlExporter.h
+ * ASSXML Exporter Main Header
  */
-#ifndef INCLUDED_AI_BLEND_BMESH_H
-#define INCLUDED_AI_BLEND_BMESH_H
+#ifndef AI_ASSXMLEXPORTER_H_INC
+#define AI_ASSXMLEXPORTER_H_INC
 
-#include "LogAux.h"
+// nothing really needed here - reserved for future use like properties
 
-namespace Assimp
-{
-	// TinyFormatter.h
-	namespace Formatter
-	{
-		template < typename T,typename TR, typename A > class basic_formatter;
-		typedef class basic_formatter< char, std::char_traits< char >, std::allocator< char > > format;
-	}
-
-	// BlenderScene.h
-	namespace Blender
-	{
-		struct Mesh;
-		struct MPoly;
-		struct MLoop;
-	}
-
-	class BlenderBMeshConverter: public LogFunctions< BlenderBMeshConverter >
-	{
-	public:
-		BlenderBMeshConverter( const Blender::Mesh* mesh );
-		~BlenderBMeshConverter( );
-
-		bool ContainsBMesh( ) const;
-
-		const Blender::Mesh* TriangulateBMesh( );
-
-	private:
-		void AssertValidMesh( );
-		void AssertValidSizes( );
-		void PrepareTriMesh( );
-		void DestroyTriMesh( );
-		void ConvertPolyToFaces( const Blender::MPoly& poly );
-		void AddFace( int v1, int v2, int v3, int v4 = 0 );
-		void AddTFace( const float* uv1, const float* uv2, const float *uv3, const float* uv4 = 0 );
-
-		const Blender::Mesh* BMesh;
-		Blender::Mesh* triMesh;
-
-		friend class BlenderTessellatorGL;
-		friend class BlenderTessellatorP2T;
-	};
-
-} // end of namespace Assimp
-
-#endif // INCLUDED_AI_BLEND_BMESH_H
+#endif

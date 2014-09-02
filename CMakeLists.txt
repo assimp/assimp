@@ -212,7 +212,7 @@ ENDIF ( ASSIMP_BUILD_SAMPLES )
 
 option ( ASSIMP_BUILD_TESTS
 	"If the test suite for Assimp is built in addition to the library."
-	ON
+	OFF
 )
 	
 IF ( ASSIMP_BUILD_TESTS )

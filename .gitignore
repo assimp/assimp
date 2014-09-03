@@ -32,3 +32,8 @@ test/results
 
 # Python
 __pycache__
+
+# brain 1.0
+*~
+obj/
+libs/

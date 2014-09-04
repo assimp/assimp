@@ -90,7 +90,8 @@ def try_load_functions(library_path, dll):
         None
     If successful:
         Tuple containing (library_path, 
-                          load function, 
+                          load from filename function,
+                          load from memory function
                           release function, 
                           ctypes handle to assimp library)
     '''
@@ -114,10 +115,10 @@ def search_library():
     Loads the assimp library. 
     Throws exception AssimpError if no library_path is found
     
-    Returns: tuple, (load filename function, 
+    Returns: tuple, (load from filename function, 
+                     load from memory function,
                      release function, 
-                     dll, 
-                     load from memory function)
+                     dll)
     '''
     #this path
     folder = os.path.dirname(__file__)
@@ -148,7 +149,7 @@ def search_library():
                 # OK, this except is evil. But different OSs will throw different
                 # errors. So just ignore any errors.
                 continue
-                
+            # see if the functions we need are in the dll
             loaded = try_load_functions(library_path, dll)
             if loaded: candidates.append(loaded)
 

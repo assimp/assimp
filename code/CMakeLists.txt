@@ -347,6 +347,9 @@ SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
 SET( OpenGEX_SRCS
     OpenGEXImporter.cpp
     OpenGEXImporter.h
+    OpenGEXParser.cpp
+    OpenGEXParser.h
+    OpenGEXStructs.h
 )
 SOURCE_GROUP( OpenGEX FILES ${OpenGEX_SRCS})
 

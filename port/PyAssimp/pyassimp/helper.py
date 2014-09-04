@@ -153,13 +153,13 @@ def search_library():
             if loaded: candidates.append(loaded)
 
     if not candidates:
-        # no library_path found
-        raise AssimpError("assimp library_path not found")
+        # no library found
+        raise AssimpError("assimp library not found")
     else:
         # get the newest library_path
         candidates = map(lambda x: (os.lstat(x[0])[-2], x), candidates)
         res = max(candidates, key=operator.itemgetter(0))[1]
-        logger.debug('Using assimp library_path located at ' + res[0])
+        logger.debug('Using assimp library located at ' + res[0])
 
         # XXX: if there are 1000 dll/so files containing 'assimp'
         # in their name, do we have all of them in our address

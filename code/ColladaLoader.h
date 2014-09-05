@@ -203,7 +203,7 @@ protected:
 	const Collada::Node* FindNodeBySID( const Collada::Node* pNode, const std::string& pSID) const;
 
 	/** Finds a proper name for a node derived from the collada-node's properties */
-	std::string FindNameForNode( const Collada::Node* pNode) const;
+	std::string FindNameForNode( const Collada::Node* pNode);
 
 protected:
 	/** Filename, for a verbose error message */
@@ -235,6 +235,9 @@ protected:
 
 	bool noSkeletonMesh;
 	bool ignoreUpDirection;
+
+	/** Used by FindNameForNode() to generate unique node names */
+	unsigned int mNodeNameCounter;
 };
 
 } // end of namespace Assimp

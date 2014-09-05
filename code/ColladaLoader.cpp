@@ -73,7 +73,7 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-: noSkeletonMesh(), ignoreUpDirection(false)
+: noSkeletonMesh(), ignoreUpDirection(false), mNodeNameCounter()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -1543,7 +1543,7 @@ const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, c
 
 // ------------------------------------------------------------------------------------------------
 // Finds a proper name for a node derived from the collada-node's properties
-std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode) const
+std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
 {
 	// now setup the name of the node. We take the name if not empty, otherwise the collada ID
 	// FIX: Workaround for XSI calling the instanced visual scene 'untitled' by default.
@@ -1557,7 +1557,7 @@ std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode) const
 	{
 		// No need to worry. Unnamed nodes are no problem at all, except
 		// if cameras or lights need to be assigned to them.
-    return boost::str( boost::format( "$ColladaAutoName$_%d") % clock());
+    return boost::str( boost::format( "$ColladaAutoName$_%d") % mNodeNameCounter++);
 	}
 }
 

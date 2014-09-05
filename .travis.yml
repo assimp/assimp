@@ -19,4 +19,7 @@ script:
   - sudo make install
   - cd test/unit
   - ../../bin/unit
+  - cd ../regression
+  - chmod 755 run.py
+  - ./run.py
 

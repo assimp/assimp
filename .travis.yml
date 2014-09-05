@@ -1,5 +1,5 @@
 before_install:
-  - sudo apt-get install cmake libcppunit-dev
+  - sudo apt-get install cmake libcppunit-dev python3
 
 env:
   - TRAVIS_NO_EXPORT=YES

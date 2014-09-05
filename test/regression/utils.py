@@ -88,6 +88,7 @@ def find_assimp_or_die():
     global assimp_bin_path
     if os.name == "nt":
         search_x86 = [
+            os.path.join("assimp.exe"),
             os.path.join("..","..","bin","assimpcmd_release-dll_Win32","assimp.exe"),
             os.path.join("..","..","bin","x86","assimp"),
             os.path.join("..","..","bin","Release","assimp.exe")

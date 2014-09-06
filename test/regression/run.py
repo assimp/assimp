@@ -160,6 +160,10 @@ def process_dir(d, outfile_results, zipin, result):
             process_dir(fullpath, outfile_results, zipin, result)
             continue
 
+        if f in settings.files_to_ignore:
+            print("Ignoring " + f)
+            continue
+
         for pppreset in settings.pp_configs_to_test:
             filehash = utils.hashing(fullpath, pppreset)
             failure = False

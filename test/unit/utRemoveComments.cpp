@@ -49,7 +49,7 @@ void RemoveCommentsTest :: testMultiLineComments (void)
 		" comment across multiple lines */"
 		" / * Incomplete comment */ /* /* multiple comments */ */";
 
-	const char* szTestResult = 
+	const char* szTestResult =
 		"                           \n"
 		"valid text      "
 		"                                 "

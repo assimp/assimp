@@ -23,4 +23,7 @@ script:
   - cd ../regression
   - chmod 755 run.py
   - ./run.py
+  - echo ==========================================================
+  - echo REGRESSION TEST FAILS (results/run_regression_suite_failures.csv)
+  - cat ../results/run_regression_suite_failures.csv
 

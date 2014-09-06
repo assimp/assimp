@@ -262,6 +262,5 @@ def run_test():
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
     run_test()
-    input("Press any key to continue ...")
 
 # vim: ai ts=4 sts=4 et sw=4

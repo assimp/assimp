@@ -124,7 +124,7 @@ SET( TEST_SRCS
 SOURCE_GROUP(tests FILES  ${TEST_SRCS})
 
 
-add_executable(  unit
+add_executable(  unit EXCLUDE_FROM_ALL
 	unit/CCompilerTest.c
 	unit/Main.cpp
 	unit/UnitTestPCH.cpp

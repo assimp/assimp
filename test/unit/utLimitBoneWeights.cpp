@@ -1,12 +1,26 @@
-
 #include "UnitTestPCH.h"
-#include "utLimitBoneWeights.h"
+
+#include <assimp/scene.h>
+#include <LimitBoneWeightsProcess.h>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION (LimitBoneWeightsTest);
+using namespace std;
+using namespace Assimp;
+
+class LimitBoneWeightsTest : public ::testing::Test {
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	LimitBoneWeightsProcess* piProcess;
+	aiMesh* pcMesh;
+};
 
 // ------------------------------------------------------------------------------------------------
-void LimitBoneWeightsTest :: setUp (void)
+void LimitBoneWeightsTest::SetUp()
 {
 	// construct the process
 	this->piProcess = new LimitBoneWeightsProcess();
@@ -35,14 +49,14 @@ void LimitBoneWeightsTest :: setUp (void)
 }
 
 // ------------------------------------------------------------------------------------------------
-void LimitBoneWeightsTest :: tearDown (void)
+void LimitBoneWeightsTest::TearDown()
 {
 	delete pcMesh;
 	delete piProcess;
 }
 
 // ------------------------------------------------------------------------------------------------
-void LimitBoneWeightsTest :: testProcess(void)
+TEST_F(LimitBoneWeightsTest, testProcess)
 {
 	// execute the step on the given data
 	piProcess->ProcessMesh(pcMesh);
@@ -68,7 +82,7 @@ void LimitBoneWeightsTest :: testProcess(void)
 	// now validate the size of the lists and check whether all weights sum to 1.0f
 	for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
 	{
-		CPPUNIT_ASSERT( asWeights[i].size() <= 4 );
+		EXPECT_LE(asWeights[i].size(), 4U);
 		float fSum = 0.0f;
 		for (VertexWeightList::const_iterator
 			iter =  asWeights[i].begin();
@@ -76,7 +90,8 @@ void LimitBoneWeightsTest :: testProcess(void)
 		{
 			fSum += (*iter).mWeight;
 		}
-		CPPUNIT_ASSERT( fSum >= 0.95 && fSum <= 1.04);
+		EXPECT_GE(fSum, 0.95F);
+		EXPECT_LE(fSum, 1.04F);
 	}
 
 	// delete allocated storage

@@ -1,31 +1,21 @@
-
 #include "UnitTestPCH.h"
-#include "utRemoveComments.h"
+
+#include <RemoveComments.h>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION (RemoveCommentsTest);
+using namespace std;
+using namespace Assimp;
+
 
 // ------------------------------------------------------------------------------------------------
-void RemoveCommentsTest :: setUp (void)
-{
-	// nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-void RemoveCommentsTest :: tearDown (void)
-{
-	// nothing to do here
-}
-
-// ------------------------------------------------------------------------------------------------
-void RemoveCommentsTest :: testSingleLineComments (void)
+TEST(RemoveCommentsTest, testSingleLineComments)
 {
 	const char* szTest = "int i = 0; \n"
 		"if (4 == //)\n"
 		"\ttrue) { // do something here \n"
 		"\t// hello ... and bye //\n";
 
-	
+
 	char* szTest2 = new char[::strlen(szTest)+1];
 	::strcpy(szTest2,szTest);
 
@@ -35,21 +25,21 @@ void RemoveCommentsTest :: testSingleLineComments (void)
 		"\t                       \n";
 
 	CommentRemover::RemoveLineComments("//",szTest2,' ');
-	CPPUNIT_ASSERT(0 == ::strcmp(szTest2,szTestResult));
+	EXPECT_STREQ(szTestResult, szTest2);
 
 	delete[] szTest2;
 }
 
 // ------------------------------------------------------------------------------------------------
-void RemoveCommentsTest :: testMultiLineComments (void)
+TEST(RemoveCommentsTest, testMultiLineComments)
 {
-	const char* szTest = 
+	const char* szTest =
 		"/* comment to be removed */\n"
 		"valid text /* \n "
 		" comment across multiple lines */"
 		" / * Incomplete comment */ /* /* multiple comments */ */";
 
-	const char* szTestResult = 
+	const char* szTestResult =
 		"                           \n"
 		"valid text      "
 		"                                 "
@@ -59,7 +49,7 @@ void RemoveCommentsTest :: testMultiLineComments (void)
 	::strcpy(szTest2,szTest);
 
 	CommentRemover::RemoveMultiLineComments("/*","*/",szTest2,' ');
-	CPPUNIT_ASSERT(0 == ::strcmp(szTest2,szTestResult));
+	EXPECT_STREQ(szTestResult, szTest2);
 
 	delete[] szTest2;
 }

@@ -1,9 +1,27 @@
-
 #include "UnitTestPCH.h"
-#include "utRemoveRedundantMaterials.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (RemoveRedundantMatsTest);
+#include <assimp/scene.h>
+#include <RemoveRedundantMaterials.h>
+#include <MaterialSystem.h>
 
+
+using namespace std;
+using namespace Assimp;
+
+class RemoveRedundantMatsTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	RemoveRedundantMatsProcess* piProcess;
+
+	aiScene* pcScene1;
+	aiScene* pcScene2;
+};
 
 // ------------------------------------------------------------------------------------------------
 aiMaterial* getUniqueMaterial1()
@@ -48,7 +66,7 @@ aiMaterial* getUniqueMaterial3()
 }
 
 // ------------------------------------------------------------------------------------------------
-void RemoveRedundantMatsTest :: setUp (void)
+void RemoveRedundantMatsTest::SetUp()
 {
 	// construct the process
 	piProcess = new RemoveRedundantMatsProcess();
@@ -89,44 +107,44 @@ void RemoveRedundantMatsTest :: setUp (void)
 }
 
 // ------------------------------------------------------------------------------------------------
-void RemoveRedundantMatsTest :: tearDown (void)
+void RemoveRedundantMatsTest::TearDown()
 {
 	delete piProcess;
 	delete pcScene1;
 }
 
 // ------------------------------------------------------------------------------------------------
-void  RemoveRedundantMatsTest :: testRedundantMaterials (void)
+TEST_F(RemoveRedundantMatsTest, testRedundantMaterials)
 {
 	piProcess->SetFixedMaterialsString();
 
 	piProcess->Execute(pcScene1);
-	CPPUNIT_ASSERT_EQUAL(pcScene1->mNumMaterials,3u);
-	CPPUNIT_ASSERT(0 != pcScene1->mMaterials && 
+	EXPECT_EQ(3U, pcScene1->mNumMaterials);
+	EXPECT_TRUE(0 != pcScene1->mMaterials &&
 		0 != pcScene1->mMaterials[0] &&
 		0 != pcScene1->mMaterials[1] &&
 		0 != pcScene1->mMaterials[2]);
 
 	aiString sName;
-	CPPUNIT_ASSERT(AI_SUCCESS == aiGetMaterialString(pcScene1->mMaterials[2],AI_MATKEY_NAME,&sName));
-	CPPUNIT_ASSERT(!::strcmp( sName.data, "Complex material name" ));
+	EXPECT_EQ(AI_SUCCESS, aiGetMaterialString(pcScene1->mMaterials[2],AI_MATKEY_NAME,&sName));
+	EXPECT_STREQ("Complex material name", sName.data);
 
 }
 
 // ------------------------------------------------------------------------------------------------
-void  RemoveRedundantMatsTest :: testRedundantMaterialsWithExcludeList (void)
+TEST_F(RemoveRedundantMatsTest, testRedundantMaterialsWithExcludeList)
 {
 	piProcess->SetFixedMaterialsString("\'Unique Mat2\'\t\'Complex material name\' and_another_one_which_we_wont_use");
 
 	piProcess->Execute(pcScene1);
-	CPPUNIT_ASSERT_EQUAL(pcScene1->mNumMaterials,4u);
-	CPPUNIT_ASSERT(0 != pcScene1->mMaterials && 
+	EXPECT_EQ(4U, pcScene1->mNumMaterials);
+	EXPECT_TRUE(0 != pcScene1->mMaterials &&
 		0 != pcScene1->mMaterials[0] &&
 		0 != pcScene1->mMaterials[1] &&
 		0 != pcScene1->mMaterials[2] &&
 		0 != pcScene1->mMaterials[3]);
 
 	aiString sName;
-	CPPUNIT_ASSERT(AI_SUCCESS == aiGetMaterialString(pcScene1->mMaterials[3],AI_MATKEY_NAME,&sName));
-	CPPUNIT_ASSERT(!::strcmp( sName.data, "Complex material name" ));
+	EXPECT_EQ(AI_SUCCESS, aiGetMaterialString(pcScene1->mMaterials[3],AI_MATKEY_NAME,&sName));
+	EXPECT_STREQ("Complex material name", sName.data);
 }

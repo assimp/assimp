@@ -49,8 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp
 {
 
-class JoinVerticesTest;
-
 // ---------------------------------------------------------------------------
 /** The JoinVerticesProcess unites identical vertices in all imported meshes. 
  * By default the importer returns meshes where each face addressed its own 

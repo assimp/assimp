@@ -215,18 +215,10 @@ option ( ASSIMP_BUILD_TESTS
 	ON
 )
 	
-message(STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR})
-set(CPPUNIT_LIBRARY cppunit)
 add_subdirectory(test/)
-# override dependency does not works how expected
-#enable_testing()
-#add_test(UnitTest test/unit)
-#set_tests_properties(UnitTest PROPERTIES DEPENDS unit)
-#message(AUTHOR_WARNING "Make sure that libcppunit is installed on the system! Output is in Testing/Temporary/LastTest.log")
-# poor man's make test
 add_custom_target(test DEPENDS UnitTest)
 add_dependencies(test RegressionTest)
-add_custom_target(UnitTest COMMAND test/unit DEPENDS unit)
+add_custom_target(UnitTest COMMAND unit DEPENDS unit WORKING_DIRECTORY test)
 if(IS_DIRECTORY ../../test/regression)
 	add_custom_target(RegressionTest COMMAND python run.py DEPENDS assimp WORKING_DIRECTORY ../../test/regression)  
 else()

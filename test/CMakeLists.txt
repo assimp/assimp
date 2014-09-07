@@ -6,6 +6,51 @@ INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/contrib/cppunit-1.12.1/include
 )
 
+include(CheckIncludeFiles)
+CHECK_INCLUDE_FILES("sys/param.h;sys/mount.h" HAVE_SYS_MOUNT_H)
+CHECK_INCLUDE_FILES("stdarg.h;stddef.h;errno.h" CPPUNIT_STDC_HEADERS)
+include(CheckIncludeFile)
+CHECK_INCLUDE_FILE(malloc.h HAVE_MALLOC_H)
+CHECK_INCLUDE_FILE(dlfcn.h CPPUNIT_HAVE_DLD)
+CHECK_INCLUDE_FILE(dlfcn.h CPPUNIT_HAVE_DLFCN_H)
+CHECK_INCLUDE_FILE(ieeefp.h CPPUNIT_HAVE_IEEEFP_H)
+CHECK_INCLUDE_FILE(inttypes.h CPPUNIT_HAVE_INTTYPES_H)
+CHECK_INCLUDE_FILE(memory.h CPPUNIT_HAVE_MEMORY_H)
+CHECK_INCLUDE_FILE(stdint.h CPPUNIT_HAVE_STDINT_H)
+CHECK_INCLUDE_FILE(stdlib.h CPPUNIT_HAVE_STDLIB_H)
+CHECK_INCLUDE_FILE(strings.h CPPUNIT_HAVE_STRINGS_H)
+CHECK_INCLUDE_FILE(string.h CPPUNIT_HAVE_STRING_H)
+CHECK_INCLUDE_FILE("sys/stat.h" CPPUNIT_HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILE("sys/types.h" CPPUNIT_HAVE_SYS_TYPES_H)
+CHECK_INCLUDE_FILE(unistd.h CPPUNIT_HAVE_UNISTD_H)
+include(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(std::string::compare CPPUNIT_FUNC_STRING_COMPARE_STRING_FIRST)
+CHECK_FUNCTION_EXISTS(type_info::name CPPUNIT_USE_TYPEINFO_NAME)
+include(CheckLibraryExists)
+CHECK_LIBRARY_EXISTS(dl dlopen "" CPPUNIT_HAVE_LIBDL)
+CHECK_LIBRARY_EXISTS(dl dlerror "" CPPUNIT_HAVE_DLERROR)
+CHECK_LIBRARY_EXISTS(m jnf "" CPPUNIT_HAVE_LIBM)
+CHECK_LIBRARY_EXISTS(dld shl_load "" CPPUNIT_HAVE_SHL_LOAD)
+include(CheckIncludeFileCXX)
+CHECK_INCLUDE_FILE_CXX(strstream CPPUNIT_HAVE_STRSTREAM)
+CHECK_INCLUDE_FILE_CXX(strstream CPPUNIT_HAVE_CLASS_STRSTREAM)
+include(TestForSTDNamespace)
+set(CPPUNIT_HAVE_NAMESPACES ${CMAKE_STD_NAMESPACE})
+	#CHECK_INCLUDE_FILE_CXX(namespaces CPPUNIT_HAVE_NAMESPACES)
+CHECK_INCLUDE_FILE_CXX(cmath CPPUNIT_HAVE_CMATH)
+CHECK_INCLUDE_FILE_CXX(stringstream CPPUNIT_HAVE_SSTREAM)
+include(CheckCXXSymbolExists)
+CHECK_CXX_SYMBOL_EXISTS(finite cmath CPPUNIT_HAVE_FINITE)
+CHECK_CXX_SYMBOL_EXISTS(isfinite cmath CPPUNIT_HAVE_ISFINITE)
+# fake tests, needs better ones...
+set(GCC_ABI_DEMANGLE 1)
+set(CPPUNIT_HAVE_GCC_ABI_DEMANGLE ${GCC_ABI_DEMANGLE})
+set(HAVE_RTTI 1)
+set(CPPUNIT_HAVE_RTTI ${HAVE_RTTI})
+#CHECK_INCLUDE_FILES(malloc.h CPPUNIT_HAVE_GCC_ABI_DEMANGLE)
+#CHECK_INCLUDE_FILE_CXX(string CPPUNIT_HAVE_RTTI)
+CONFIGURE_FILE(${Assimp_SOURCE_DIR}/contrib/config.h.in.cppunit ${Assimp_SOURCE_DIR}/contrib/cppunit-1.12.1/include/cppunit/config-auto.h)
+
 # Add the temporary output directories to the library path to make sure the
 # Assimp library can be found, even if it is not installed system-wide yet.
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
@@ -15,7 +60,6 @@ SOURCE_GROUP( unit FILES
 	unit/BoostWorkaround/tupletest.cpp
 )
 
-if(WIN32)
 SET( CPPUNIT_SRCS
 	../contrib/cppunit-1.12.1/src/cppunit/AdditionalMessage.cpp
 	../contrib/cppunit-1.12.1/src/cppunit/Asserter.cpp
@@ -72,9 +116,10 @@ SET( CPPUNIT_SRCS
 	../contrib/cppunit-1.12.1/src/cppunit/XmlOutputterHook.cpp
 )
 SOURCE_GROUP(cppunit FILES  ${CPPUNIT_SRCS})
-else()
+if(NOT WIN32)
 	find_library(CPPUNIT_LIBRARY cppunit)
-endif()
+	set(CPPUNIT_LIBRARY "dl")
+endif(NOT WIN32)
 
 SET( TEST_SRCS
 	unit/utFindDegenerates.cpp
@@ -124,15 +169,14 @@ SET( TEST_SRCS
 SOURCE_GROUP(tests FILES  ${TEST_SRCS})
 
 
-add_executable(  unit EXCLUDE_FROM_ALL
+add_executable(unit EXCLUDE_FROM_ALL
 	unit/CCompilerTest.c
 	unit/Main.cpp
 	unit/UnitTestPCH.cpp
 	unit/UnitTestPCH.h
 	${TEST_SRCS}
-	${CPPUNIT_SRCS}
-)
+	${CPPUNIT_SRCS})
 
 SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
-target_link_libraries ( unit assimp ${CPPUNIT_LIBRARY} )
+target_link_libraries(unit assimp ${CPPUNIT_LIBRARY})

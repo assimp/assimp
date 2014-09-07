@@ -1,3 +1,5 @@
+#if defined(_WIN32) && defined(CPPUNIT_BUILD_DLL)
+
 #define WIN32_LEAN_AND_MEAN 
 #define NOGDI
 #define NOUSER
@@ -14,3 +16,5 @@ DllMain( HANDLE hModule,
 {
   return TRUE;
 }
+
+#endif // if defined(_WIN32) && defined(CPPUNIT_BUILD_DLL)

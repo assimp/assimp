@@ -6,6 +6,8 @@
 #include <string>
 
 #if CPPUNIT_HAVE_GCC_ABI_DEMANGLE
+// manpage says free is in #include <stdlib.h> btw. try with malloc.h (trouble on windows?)
+#include <malloc.h>
 #include <cxxabi.h>
 #endif
 

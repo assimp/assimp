@@ -232,7 +232,6 @@ if(IS_DIRECTORY ../../test/regression)
 else()
 	add_custom_target(RegressionTest COMMAND echo "nothing to do..." DEPENDS assimp)
 endif(IS_DIRECTORY ../../test/regression)
-message(AUTHOR_WARNING "Make sure that libcppunit is installed on the system!")
 
 IF(MSVC)
 	option ( ASSIMP_INSTALL_PDB

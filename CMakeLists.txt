@@ -214,16 +214,22 @@ option ( ASSIMP_BUILD_TESTS
 	"If the test suite for Assimp is built in addition to the library."
 	ON
 )
-	
+
 add_subdirectory(test/)
-add_custom_target(test DEPENDS UnitTest)
+add_custom_target(test DEPENDS UnitTest WORKING_DIRECTORY code/Debug)
 add_dependencies(test RegressionTest)
-add_custom_target(UnitTest COMMAND unit DEPENDS unit WORKING_DIRECTORY test)
-if(IS_DIRECTORY ../../test/regression)
-	add_custom_target(RegressionTest COMMAND python run.py DEPENDS assimp WORKING_DIRECTORY ../../test/regression)  
+add_custom_target(UnitTest COMMAND unit DEPENDS unit)
+if(IS_DIRECTORY $"{CMAKE_CURRENT_SOURCE_DIR}/test/regression")
+	include(FindPythonInterp)
+	if(NOT PYTHON_EXECUTABLE)
+		message(WARNING "Python Interpreter not found.")
+		add_custom_target(RegressionTest COMMAND echo "Ignored due missing Python")
+	else(NOT PYTHON_EXECUTABLE)
+		add_custom_target(RegressionTest COMMAND ${PYTHON_EXECUTABLE} run.py DEPENDS assimp WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test/regression")
+	endif(NOT PYTHON_EXECUTABLE)
 else()
-	add_custom_target(RegressionTest COMMAND echo "nothing to do..." DEPENDS assimp)
-endif(IS_DIRECTORY ../../test/regression)
+	add_custom_target(RegressionTest COMMAND echo "nothing to do...")
+endif()
 
 IF(MSVC)
 	option ( ASSIMP_INSTALL_PDB

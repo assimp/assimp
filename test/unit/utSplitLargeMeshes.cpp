@@ -1,12 +1,29 @@
-
 #include "UnitTestPCH.h"
-#include "utSplitLargeMeshes.h"
+
+#include <assimp/scene.h>
+#include <SplitLargeMeshes.h>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION (SplitLargeMeshesTest);
+using namespace std;
+using namespace Assimp;
+
+class SplitLargeMeshesTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	SplitLargeMeshesProcess_Triangle* piProcessTriangle;
+	SplitLargeMeshesProcess_Vertex* piProcessVertex;
+	aiMesh* pcMesh1;
+	aiMesh* pcMesh2;
+};
 
 // ------------------------------------------------------------------------------------------------
-void SplitLargeMeshesTest :: setUp (void)
+void SplitLargeMeshesTest::SetUp()
 {
 	// construct the processes
 	this->piProcessTriangle = new SplitLargeMeshesProcess_Triangle();
@@ -17,8 +34,8 @@ void SplitLargeMeshesTest :: setUp (void)
 
 	this->pcMesh1 = new aiMesh();
 	pcMesh1->mNumVertices = 2100; // quersumme: 3
-	pcMesh1->mVertices = new aiVector3D[pcMesh1->mNumVertices]; 
-	pcMesh1->mNormals = new aiVector3D[pcMesh1->mNumVertices]; 
+	pcMesh1->mVertices = new aiVector3D[pcMesh1->mNumVertices];
+	pcMesh1->mNormals = new aiVector3D[pcMesh1->mNumVertices];
 
 	pcMesh1->mNumFaces = pcMesh1->mNumVertices / 3;
 	pcMesh1->mFaces = new aiFace[pcMesh1->mNumFaces];
@@ -37,9 +54,9 @@ void SplitLargeMeshesTest :: setUp (void)
 	// generate many, many faces with randomized indices for
 	// the second mesh
 	this->pcMesh2 = new aiMesh();
-	pcMesh2->mNumVertices = 3000; 
-	pcMesh2->mVertices = new aiVector3D[pcMesh2->mNumVertices]; 
-	pcMesh2->mNormals = new aiVector3D[pcMesh2->mNumVertices]; 
+	pcMesh2->mNumVertices = 3000;
+	pcMesh2->mVertices = new aiVector3D[pcMesh2->mNumVertices];
+	pcMesh2->mNormals = new aiVector3D[pcMesh2->mNumVertices];
 
 	pcMesh2->mNumFaces = 10000;
 	pcMesh2->mFaces = new aiFace[pcMesh2->mNumFaces];
@@ -56,14 +73,14 @@ void SplitLargeMeshesTest :: setUp (void)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SplitLargeMeshesTest :: tearDown (void)
+void SplitLargeMeshesTest::TearDown()
 {
 	delete this->piProcessTriangle;
 	delete this->piProcessVertex;
 }
 
 // ------------------------------------------------------------------------------------------------
-void SplitLargeMeshesTest :: testVertexSplit()
+TEST_F(SplitLargeMeshesTest, testVertexSplit)
 {
 	std::vector< std::pair<aiMesh*, unsigned int> > avOut;
 
@@ -75,17 +92,18 @@ void SplitLargeMeshesTest :: testVertexSplit()
 		iter != end; ++iter)
 	{
 		aiMesh* mesh = (*iter).first;
-		CPPUNIT_ASSERT(mesh->mNumVertices < 1000);
-		CPPUNIT_ASSERT(0 != mesh->mNormals && 0 != mesh->mVertices);
+		EXPECT_LT(mesh->mNumVertices, 1000U);
+		EXPECT_TRUE(NULL != mesh->mNormals);
+		EXPECT_TRUE(NULL != mesh->mVertices);
 
 		iOldFaceNum -= mesh->mNumFaces;
 		delete mesh;
 	}
-	CPPUNIT_ASSERT(0 == iOldFaceNum);
+	EXPECT_EQ(0, iOldFaceNum);
 }
 
 // ------------------------------------------------------------------------------------------------
-void SplitLargeMeshesTest :: testTriangleSplit()
+TEST_F(SplitLargeMeshesTest, testTriangleSplit)
 {
 	std::vector< std::pair<aiMesh*, unsigned int> > avOut;
 
@@ -98,11 +116,12 @@ void SplitLargeMeshesTest :: testTriangleSplit()
 		iter != end; ++iter)
 	{
 		aiMesh* mesh = (*iter).first;
-		CPPUNIT_ASSERT(mesh->mNumFaces < 1000);
-		CPPUNIT_ASSERT(0 != mesh->mNormals && 0 != mesh->mVertices);
+		EXPECT_LT(mesh->mNumFaces, 1000U);
+		EXPECT_TRUE(NULL != mesh->mNormals);
+		EXPECT_TRUE(NULL != mesh->mVertices);
 
 		iOldFaceNum -= mesh->mNumFaces;
 		delete mesh;
 	}
-	CPPUNIT_ASSERT(0 == iOldFaceNum);
+	EXPECT_EQ(0, iOldFaceNum);
 }

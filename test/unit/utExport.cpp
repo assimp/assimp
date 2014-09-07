@@ -1,74 +1,82 @@
- 
 #include "UnitTestPCH.h"
-#include "utExport.h"
+
+#include <assimp/cexport.h>
+#include <assimp/Exporter.hpp>
+
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-CPPUNIT_TEST_SUITE_REGISTRATION (ExporterTest);
+class ExporterTest : public ::testing::Test {
+public:
 
-void ExporterTest :: setUp (void)
-{
-	
-	ex = new Assimp::Exporter();
-	im = new Assimp::Importer();
+	virtual void SetUp()
+	{
+		ex = new Assimp::Exporter();
+		im = new Assimp::Importer();
 
-	pTest = im->ReadFile("../../test/models/X/test.x",0);
-}
+		pTest = im->ReadFile("../../test/models/X/test.x",0);
+	}
 
+	virtual void TearDown()
+	{
+		delete ex;
+		delete im;
+	}
 
-void ExporterTest :: tearDown (void)
-{
-	delete ex;
-	delete im;
-}
+protected:
 
+	const aiScene* pTest;
+	Assimp::Exporter* ex;
+	Assimp::Importer* im;
+};
 
-void  ExporterTest :: testExportToFile (void)
+// ------------------------------------------------------------------------------------------------
+TEST_F(ExporterTest, testExportToFile)
 {
 	const char* file = "unittest_output.dae";
-	CPPUNIT_ASSERT_EQUAL(AI_SUCCESS,ex->Export(pTest,"collada",file));
+	EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
 
 	// check if we can read it again
-	CPPUNIT_ASSERT(im->ReadFile(file,0));
+	EXPECT_TRUE(im->ReadFile(file,0));
 }
 
-
-void  ExporterTest :: testExportToBlob (void)
+// ------------------------------------------------------------------------------------------------
+TEST_F(ExporterTest, testExportToBlob)
 {
 	const aiExportDataBlob* blob = ex->ExportToBlob(pTest,"collada");
-	CPPUNIT_ASSERT(blob);
-	CPPUNIT_ASSERT(blob->data);
-	CPPUNIT_ASSERT(blob->size > 0);
-	CPPUNIT_ASSERT(!blob->name.length); 
+	ASSERT_TRUE(blob);
+	EXPECT_TRUE(blob->data);
+	EXPECT_GT(blob->size,  0U);
+	EXPECT_EQ(0U, blob->name.length);
 
 	// XXX test chained blobs (i.e. obj file with accompanying mtl script)
 
 	// check if we can read it again
-	CPPUNIT_ASSERT(im->ReadFileFromMemory(blob->data,blob->size,0,"dae"));
+	EXPECT_TRUE(im->ReadFileFromMemory(blob->data,blob->size,0,"dae"));
 }
 
-
-void  ExporterTest :: testCppExportInterface (void)
+// ------------------------------------------------------------------------------------------------
+TEST_F(ExporterTest, testCppExportInterface)
 {
-	CPPUNIT_ASSERT(ex->GetExportFormatCount() > 0);
+	EXPECT_TRUE(ex->GetExportFormatCount() > 0);
 	for(size_t i = 0; i < ex->GetExportFormatCount(); ++i) {
 		const aiExportFormatDesc* const desc = ex->GetExportFormatDescription(i);
-		CPPUNIT_ASSERT(desc);
-		CPPUNIT_ASSERT(desc->description && strlen(desc->description));
-		CPPUNIT_ASSERT(desc->fileExtension && strlen(desc->fileExtension));
-		CPPUNIT_ASSERT(desc->id && strlen(desc->id));
+		ASSERT_TRUE(desc);
+		EXPECT_TRUE(desc->description && strlen(desc->description));
+		EXPECT_TRUE(desc->fileExtension && strlen(desc->fileExtension));
+		EXPECT_TRUE(desc->id && strlen(desc->id));
 	}
 
-	CPPUNIT_ASSERT(ex->IsDefaultIOHandler());
+	EXPECT_TRUE(ex->IsDefaultIOHandler());
 }
 
-
-void  ExporterTest :: testCExportInterface (void)
+// ------------------------------------------------------------------------------------------------
+TEST_F(ExporterTest, testCExportInterface)
 {
-	CPPUNIT_ASSERT(aiGetExportFormatCount() > 0);
+	EXPECT_TRUE(aiGetExportFormatCount() > 0);
 	for(size_t i = 0; i < aiGetExportFormatCount(); ++i) {
 		const aiExportFormatDesc* const desc = aiGetExportFormatDescription(i);
-		CPPUNIT_ASSERT(desc);
+		EXPECT_TRUE(desc);
 		// rest has aleady been validated by testCppExportInterface
 	}
 }

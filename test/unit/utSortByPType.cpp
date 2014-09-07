@@ -1,13 +1,28 @@
-
 #include "UnitTestPCH.h"
-#include "utSortByPType.h"
 
-#include "utScenePreprocessor.h"
+#include <assimp/scene.h>
+#include <ScenePreprocessor.h>
+#include <SortByPTypeProcess.h>
 
-CPPUNIT_TEST_SUITE_REGISTRATION (SortByPTypeProcessTest);
+using namespace std;
+using namespace Assimp;
+
+
+class SortByPTypeProcessTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	SortByPTypeProcess* process1;
+	aiScene* scene;
+};
 
 // ------------------------------------------------------------------------------------------------
-static unsigned int num[10][4] = 
+static unsigned int num[10][4] =
 	{
 		{0,0,0,1000},
 		{0,0,1000,0},
@@ -22,7 +37,7 @@ static unsigned int num[10][4] =
 	};
 
 // ------------------------------------------------------------------------------------------------
-static unsigned int result[10] = 
+static unsigned int result[10] =
 {
 	aiPrimitiveType_POLYGON,
 	aiPrimitiveType_TRIANGLE,
@@ -37,7 +52,7 @@ static unsigned int result[10] =
 };
 
 // ------------------------------------------------------------------------------------------------
-void SortByPTypeProcessTest :: setUp (void)
+void SortByPTypeProcessTest::SetUp()
 {
 //	process0 = new DeterminePTypeHelperProcess();
 	process1 = new SortByPTypeProcess();
@@ -113,7 +128,7 @@ void SortByPTypeProcessTest :: setUp (void)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SortByPTypeProcessTest :: tearDown (void)
+void SortByPTypeProcessTest::TearDown()
 {
 	//delete process0;
 	delete process1;
@@ -121,27 +136,27 @@ void SortByPTypeProcessTest :: tearDown (void)
 }
 
 // ------------------------------------------------------------------------------------------------
-//void  SortByPTypeProcessTest :: testDeterminePTypeStep (void)
+//TEST_F(SortByPTypeProcessTest, DeterminePTypeStep()
 //{
 //	process0->Execute(scene);
 //
 //	for (unsigned int i = 0; i < 10; ++i)
 //	{
 //		aiMesh* mesh = scene->mMeshes[i];
-//		CPPUNIT_ASSERT(mesh->mPrimitiveTypes == result[i]);
+//		EXPECT_TRUE(mesh->mPrimitiveTypes == result[i]);
 //	}
 //}
 
 // ------------------------------------------------------------------------------------------------
-void  SortByPTypeProcessTest :: testSortByPTypeStep (void)
+TEST_F(SortByPTypeProcessTest, SortByPTypeStep)
 {
-//	process0->Execute(scene);
+	// process0->Execute(scene);
 
 	// and another small test for ScenePreprocessor
 	ScenePreprocessor s(scene);
 	s.ProcessScene();
 	for (unsigned int m = 0; m< 10;++m)
-		CPPUNIT_ASSERT(scene->mMeshes[m]->mPrimitiveTypes == result[m]);
+		EXPECT_EQ(result[m], scene->mMeshes[m]->mPrimitiveTypes);
 
 	process1->Execute(scene);
 
@@ -152,23 +167,23 @@ void  SortByPTypeProcessTest :: testSortByPTypeStep (void)
 		{
 			if ((idx = num[m][n]))
 			{
-				CPPUNIT_ASSERT(real < scene->mNumMeshes);
+				EXPECT_TRUE(real < scene->mNumMeshes);
 
 				aiMesh* mesh = scene->mMeshes[real];
 
-				CPPUNIT_ASSERT(NULL != mesh);
-				CPPUNIT_ASSERT(mesh->mPrimitiveTypes == AI_PRIMITIVE_TYPE_FOR_N_INDICES(n+1));
-				CPPUNIT_ASSERT(NULL != mesh->mVertices);
-				CPPUNIT_ASSERT(NULL != mesh->mNormals);
-				CPPUNIT_ASSERT(NULL != mesh->mTangents);
-				CPPUNIT_ASSERT(NULL != mesh->mBitangents);
-				CPPUNIT_ASSERT(NULL != mesh->mTextureCoords[0]);
+				EXPECT_TRUE(NULL != mesh);
+				EXPECT_EQ(AI_PRIMITIVE_TYPE_FOR_N_INDICES(n+1), mesh->mPrimitiveTypes);
+				EXPECT_TRUE(NULL != mesh->mVertices);
+				EXPECT_TRUE(NULL != mesh->mNormals);
+				EXPECT_TRUE(NULL != mesh->mTangents);
+				EXPECT_TRUE(NULL != mesh->mBitangents);
+				EXPECT_TRUE(NULL != mesh->mTextureCoords[0]);
 
-				CPPUNIT_ASSERT(mesh->mNumFaces == idx);
+				EXPECT_TRUE(mesh->mNumFaces == idx);
 				for (unsigned int f = 0; f < mesh->mNumFaces;++f)
 				{
 					aiFace& face = mesh->mFaces[f];
-					CPPUNIT_ASSERT(face.mNumIndices == (n+1) || (3 == n && face.mNumIndices > 3));
+					EXPECT_TRUE(face.mNumIndices == (n+1) || (3 == n && face.mNumIndices > 3));
 				}
 				++real;
 			}

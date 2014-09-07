@@ -1,11 +1,27 @@
-
 #include "UnitTestPCH.h"
-#include "utJoinVertices.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (JoinVerticesTest);
+#include <assimp/scene.h>
+#include <JoinVerticesProcess.h>
+
+
+using namespace std;
+using namespace Assimp;
+
+class JoinVerticesTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	JoinVerticesProcess* piProcess;
+	aiMesh* pcMesh;
+};
 
 // ------------------------------------------------------------------------------------------------
-void JoinVerticesTest :: setUp (void)
+void JoinVerticesTest::SetUp()
 {
 	// construct the process
 	piProcess = new JoinVerticesProcess();
@@ -38,39 +54,39 @@ void JoinVerticesTest :: setUp (void)
 
 	// generate extra members - set them to zero to make sure they're identical
 	pcMesh->mTextureCoords[0] = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mTextureCoords[0][i] = aiVector3D( 0.f ); 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mTextureCoords[0][i] = aiVector3D( 0.f );
 
 	pcMesh->mNormals = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mNormals[i] = aiVector3D( 0.f ); 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mNormals[i] = aiVector3D( 0.f );
 
 	pcMesh->mTangents = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mTangents[i] = aiVector3D( 0.f ); 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mTangents[i] = aiVector3D( 0.f );
 
 	pcMesh->mBitangents = new aiVector3D[900];
-	for (unsigned int i = 0; i < 900;++i)pcMesh->mBitangents[i] = aiVector3D( 0.f ); 
+	for (unsigned int i = 0; i < 900;++i)pcMesh->mBitangents[i] = aiVector3D( 0.f );
 }
 
 // ------------------------------------------------------------------------------------------------
-void JoinVerticesTest :: tearDown (void)
+void JoinVerticesTest::TearDown()
 {
 	delete this->pcMesh;
 	delete this->piProcess;
 }
 
 // ------------------------------------------------------------------------------------------------
-void JoinVerticesTest :: testProcess(void)
+TEST_F(JoinVerticesTest, testProcess)
 {
 	// execute the step on the given data
 	piProcess->ProcessMesh(pcMesh,0);
 
 	// the number of faces shouldn't change
-	CPPUNIT_ASSERT(pcMesh->mNumFaces == 300);
-	CPPUNIT_ASSERT(pcMesh->mNumVertices == 300);
+	ASSERT_EQ(300U, pcMesh->mNumFaces);
+	ASSERT_EQ(300U, pcMesh->mNumVertices);
 
-	CPPUNIT_ASSERT(NULL != pcMesh->mNormals);
-	CPPUNIT_ASSERT(NULL != pcMesh->mTangents);
-	CPPUNIT_ASSERT(NULL != pcMesh->mBitangents);
-	CPPUNIT_ASSERT(NULL != pcMesh->mTextureCoords[0]);
+	ASSERT_TRUE(NULL != pcMesh->mNormals);
+	ASSERT_TRUE(NULL != pcMesh->mTangents);
+	ASSERT_TRUE(NULL != pcMesh->mBitangents);
+	ASSERT_TRUE(NULL != pcMesh->mTextureCoords[0]);
 
 	// the order doesn't care
 	float fSum = 0.f;
@@ -79,11 +95,11 @@ void JoinVerticesTest :: testProcess(void)
 		aiVector3D& v = pcMesh->mVertices[i];
 		fSum += v.x + v.y + v.z;
 
-		CPPUNIT_ASSERT(!pcMesh->mNormals[i].x);
-		CPPUNIT_ASSERT(!pcMesh->mTangents[i].x);
-		CPPUNIT_ASSERT(!pcMesh->mBitangents[i].x);
-		CPPUNIT_ASSERT(!pcMesh->mTextureCoords[0][i].x);
+		EXPECT_FALSE(pcMesh->mNormals[i].x);
+		EXPECT_FALSE(pcMesh->mTangents[i].x);
+		EXPECT_FALSE(pcMesh->mBitangents[i].x);
+		EXPECT_FALSE(pcMesh->mTextureCoords[0][i].x);
 	}
-	CPPUNIT_ASSERT(fSum == 150.f*299.f*3.f); // gaussian sum equation
+	EXPECT_EQ(150.f*299.f*3.f, fSum); // gaussian sum equation
 }
 

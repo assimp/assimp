@@ -1,8 +1,24 @@
-
 #include "UnitTestPCH.h"
-#include "utPretransformVertices.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (PretransformVerticesTest);
+#include <assimp/scene.h>
+#include <PretransformVertices.h>
+
+
+using namespace std;
+using namespace Assimp;
+
+class PretransformVerticesTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	aiScene* scene;
+	PretransformVertices* process;
+};
 
 // ------------------------------------------------------------------------------------------------
 void AddNodes(unsigned int num, aiNode* father, unsigned int depth)
@@ -29,7 +45,7 @@ void AddNodes(unsigned int num, aiNode* father, unsigned int depth)
 }
 
 // ------------------------------------------------------------------------------------------------
-void PretransformVerticesTest :: setUp (void)
+void PretransformVerticesTest::SetUp()
 {
 	scene = new aiScene();
 
@@ -55,7 +71,7 @@ void PretransformVerticesTest :: setUp (void)
 		}
 		mesh->mMaterialIndex = i%5;
 
-		if (i % 2) 
+		if (i % 2)
 			mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 	}
 
@@ -68,30 +84,28 @@ void PretransformVerticesTest :: setUp (void)
 }
 
 // ------------------------------------------------------------------------------------------------
-void PretransformVerticesTest :: tearDown (void)
+void PretransformVerticesTest::TearDown()
 {
 	delete scene;
 	delete process;
 }
 
- // ------------------------------------------------------------------------------------------------
-void PretransformVerticesTest :: testProcess_CollapseHierarchy (void)
+// ------------------------------------------------------------------------------------------------
+TEST_F(PretransformVerticesTest, testProcessCollapseHierarchy)
 {
 	process->KeepHierarchy(false);
 	process->Execute(scene);
 
-	CPPUNIT_ASSERT(scene->mNumMaterials == 5);
-	CPPUNIT_ASSERT(scene->mNumMeshes == 10); // every second mesh has normals
+	EXPECT_EQ(5U, scene->mNumMaterials);
+	EXPECT_EQ(10U, scene->mNumMeshes); // every second mesh has normals
 }
 
 // ------------------------------------------------------------------------------------------------
-void PretransformVerticesTest :: testProcess_KeepHierarchy (void)
+TEST_F(PretransformVerticesTest, testProcessKeepHierarchy)
 {
-	
 	process->KeepHierarchy(true);
 	process->Execute(scene);
 
-	CPPUNIT_ASSERT(scene->mNumMaterials == 5);
-	CPPUNIT_ASSERT(scene->mNumMeshes == 49); // see note on mesh 12 above
-	
+	EXPECT_EQ(5U, scene->mNumMaterials);
+	EXPECT_EQ(49U, scene->mNumMeshes); // see note on mesh 12 above
 }

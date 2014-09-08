@@ -6,11 +6,13 @@ build
 *.sln
 *.ncb
 *.vcproj
+Release/
+Debug/
+_*
 
 # Output
 bin/
 lib/
-contrib/
 
 # Generated
 assimp.pc
@@ -32,8 +34,11 @@ test/results
 
 # Python
 __pycache__
+*.pyc
 
 # brain 1.0
 *~
 obj/
+config-auto.h
+workspaces/
 libs/

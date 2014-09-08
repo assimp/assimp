@@ -54,6 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
 
+#include <time.h>
+
 using namespace Assimp;
 
 namespace Assimp	{
@@ -172,8 +174,8 @@ static std::string encodeXML(const std::string& data) {
 // Write a text model dump
 void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
 {
-	time_t tt = ::time(NULL);
-	tm* p     = ::gmtime(&tt);
+	time_t tt = time(NULL);
+	tm* p     = gmtime(&tt);
 
 	aiString name;
 

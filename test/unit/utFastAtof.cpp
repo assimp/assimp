@@ -2,6 +2,19 @@
 
 #include <fast_atof.h>
 
+namespace {
+
+template <typename Real>
+bool IsNan(Real x) {
+	return x != x;
+}
+
+template <typename Real>
+bool IsInf(Real x) {
+	return std::abs(x) == std::numeric_limits<Real>::infinity();
+}
+
+} // Namespace
 
 class FastAtofTest : public ::testing::Test
 {
@@ -12,8 +25,8 @@ protected:
 		const Real kEps = 1e-5;
 
 #define TEST_CASE(NUM) EXPECT_NEAR(static_cast<Real>(NUM), atof_func(#NUM), kEps)
-#define TEST_CASE_NAN(NUM) EXPECT_TRUE(std::isnan(atof_func(#NUM)))
-#define TEST_CASE_INF(NUM) EXPECT_TRUE(std::isinf(atof_func(#NUM)))
+#define TEST_CASE_NAN(NUM) EXPECT_TRUE(IsNan(atof_func(#NUM)))
+#define TEST_CASE_INF(NUM) EXPECT_TRUE(IsInf(atof_func(#NUM)))
 
 		TEST_CASE(0);
 		TEST_CASE(1.354);

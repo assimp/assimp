@@ -16,6 +16,7 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+	unit/utFastAtof.cpp
 	unit/utFindDegenerates.cpp
 	unit/utFindInvalidData.cpp
 	unit/utFixInfacingNormals.cpp

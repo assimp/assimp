@@ -42,4 +42,12 @@ toolchain (for standard GNU makefiles: cmake -G 'Unix Makefiles').
 Afterwards, use the generated build files to perform the actual
 build. 
 
+------------------------------
+Building for Android
+------------------------------
 
+When building for android this flag must be introduced to CMAKE:
+
+-DCMAKE_TOOLCHAIN_FILE=../android.toolchain.cmake
+
+where "android.toolchain.cmake" is a toolchain script for android (Can be easily found in web)

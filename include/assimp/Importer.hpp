@@ -53,6 +53,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "types.h"
 #include "config.h"
 
+#if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+#include <android/log.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#include <android/native_activity.h>
+#include <fstream>
+#endif //__ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+
 namespace Assimp	{
 	// =======================================================================
 	// Public interface to Assimp 
@@ -125,6 +133,15 @@ public:
 	 */
 	Importer();
 
+#if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+	// -------------------------------------------------------------------
+	/** Constructor. Inits the AndroidJniIOSystem.
+	 *
+	 * Call ReadFile() to start the import process. The configuration
+	 * property table is initially empty.
+	 */
+	Importer(ANativeActivity* activity);
+#endif //__ANDROID__ and __ANDROID_API__ > 9 and defined(AI_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
 	// -------------------------------------------------------------------
 	/** Copy constructor.
 	 * 
@@ -133,6 +150,14 @@ public:
 	 * Call ReadFile() to start the import process.
 	 */
 	Importer(const Importer& other);
+
+	// -------------------------------------------------------------------
+	/** Inits Importer defaults.
+	 *
+	 * This function inits the defaults for Importer class
+	 *
+	 */
+	void InitDefaults();
 
 	// -------------------------------------------------------------------
 	/** Destructor. The object kept ownership of the imported data,

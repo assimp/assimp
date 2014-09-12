@@ -109,9 +109,7 @@ const aiImporterDesc* ObjFileImporter::GetInfo () const
 // ------------------------------------------------------------------------------------------------
 //	Obj-file import implementation
 void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
-{
-    DefaultIOSystem io;
-    
+{    
 	// Read file into memory
 	const std::string mode = "rb";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));

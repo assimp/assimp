@@ -197,7 +197,7 @@ bool OpenGEXParser::getStringData( std::string &data ) {
 
 //------------------------------------------------------------------------------------------------
 bool OpenGEXParser::getFloatData( size_t num, float *data ) {
-    ai_assert( nullptr != data );
+    ai_assert( NULL != data );
 
     if( !getBracketOpen() ) {
         return false;

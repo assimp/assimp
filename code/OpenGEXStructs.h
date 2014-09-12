@@ -57,7 +57,10 @@ struct BoneIndexArray;
 struct BoneWeightArray;
 
 struct Metric {
-    std::string metricKey;
+    float m_distance;
+    float m_angle;
+    float m_time;
+    float m_up;
 };
 
 struct VertexArray {

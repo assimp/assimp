@@ -41,21 +41,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_OPENGEX_OPENGEXPARSER_H_INC
 
 #ifndef ASSIMP_BUILD_NO_OPEMGEX_IMPORTER
+#include <vector>
 
 namespace Assimp {
 namespace OpenGEX {
 
 class OpenGEXParser {
 public:
-    OpenGEXParser();
+    OpenGEXParser( const std::vector<char> &buffer );
     ~OpenGEXParser();
+    void parse();
+
+protected:
+    std::string getNextToken();
+    bool skipComments();
+    bool parseNextNode();
+    bool getNodeHeader( const std::string &name );
+    bool getBracketOpen();
+    bool getBracketClose();
+    bool getStringData( std::string &data );
+    bool getFloatData( size_t num, float *data );
+    bool getNodeData();
+    bool getMetricAttribute( std::string &attribName );
+    bool onMetricNode();
 
 private:
     OpenGEXParser( const OpenGEXParser & );
     OpenGEXParser &operator = ( const OpenGEXParser & );
 
 private:
-
+    const std::vector<char> &m_buffer;
+    size_t m_index;
+    size_t m_buffersize;
 };
 
 } // Namespace openGEX

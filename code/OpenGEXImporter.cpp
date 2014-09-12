@@ -41,6 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 #include "OpenGEXImporter.h"
+#include "OpenGEXParser.h"
+#include "DefaultIOSystem.h"
+
+#include <vector>
 
 static const aiImporterDesc desc = {
     "Open Game Engine Exchange",
@@ -70,12 +74,29 @@ OpenGEXImporter::~OpenGEXImporter() {
 
 //------------------------------------------------------------------------------------------------
 bool OpenGEXImporter::CanRead( const std::string &file, IOSystem *pIOHandler, bool checkSig ) const {
-    return false;
+    bool canRead( false );
+    if( !checkSig ) {
+        canRead = SimpleExtensionCheck( file, "ogex" );
+    } else {
+        static const char *token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
+        canRead = BaseImporter::SearchFileHeaderForToken( pIOHandler, file, token, 4 );
+    }
+
+    return canRead;
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::InternReadFile( const std::string &file, aiScene *pScene, IOSystem *pIOHandler ) {
+void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pScene, IOSystem *pIOHandler ) {
+    // open source file
+    IOStream *file = pIOHandler->Open( filename, "rb" );
+    if( !file ) {
+        throw DeadlyImportError( "Failed to open file " + filename );
+    }
 
+    std::vector<char> buffer;
+    TextFileToBuffer( file, buffer );
+    OpenGEXParser myParser( buffer );
+    myParser.parse();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -85,7 +106,7 @@ const aiImporterDesc *OpenGEXImporter::GetInfo() const {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::SetupProperties( const Importer *pImp ) {
-    
+
 }
 
 //------------------------------------------------------------------------------------------------

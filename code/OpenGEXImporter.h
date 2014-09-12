@@ -70,6 +70,11 @@ public:
 
     /// BaseImporter override.
     virtual void SetupProperties( const Importer *pImp );
+
+protected:
+    void ParseMetric();
+    void ParseGeoObject();
+    void ParseMaterial();
 };
 
 } // Namespace OpenGEX

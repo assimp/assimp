@@ -104,6 +104,8 @@ SET( Common_SRCS
 	DefaultIOStream.h
 	DefaultIOSystem.cpp
 	DefaultIOSystem.h
+	AndroidJNIIOSystem.cpp
+	AndroidJNIIOSystem.h
 	CInterfaceIOWrapper.h
 	Hash.h
 	Importer.cpp
@@ -724,7 +726,12 @@ ADD_LIBRARY( assimp ${assimp_src} )
 
 SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
-TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
+if(ANDROID)
+	TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} android log)
+else(ANDROID)
+	TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
+endif(ANDROID)
+
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${ASSIMP_VERSION}
 	SOVERSION ${ASSIMP_SOVERSION} # use full version 
@@ -739,7 +746,11 @@ endif()
 # assimp can #include "unzip.h"
 if (UNZIP_FOUND)
 	INCLUDE_DIRECTORIES(${UNZIP_INCLUDE_DIRS})
-	TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
+	if(ANDROID)
+		TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES} android log)
+	else(ANDROID)
+		TARGET_LINK_LIBRARIES(assimp ${UNZIP_LIBRARIES})
+	endif(ANDROID)
 else (UNZIP_FOUND)
 	INCLUDE_DIRECTORIES("../contrib/unzip")
 endif (UNZIP_FOUND)

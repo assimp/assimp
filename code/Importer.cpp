@@ -65,6 +65,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseProcess.h"
 
 #include "DefaultIOStream.h"
+#if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+#include "AndroidJNIIOSystem.h"
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#endif //__ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
 #include "DefaultIOSystem.h"
 #include "DefaultProgressHandler.h"
 #include "GenericProperty.h"
@@ -132,8 +137,8 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)	{
 }
 
 // ------------------------------------------------------------------------------------------------
-// Importer constructor. 
-Importer::Importer() 
+// Importer defaults loader.
+inline void Importer::InitDefaults()
 {
 	// allocate the pimpl first
 	pimpl = new ImporterPimpl();
@@ -143,7 +148,7 @@ Importer::Importer()
 
 	// Allocate a default IO handler
 	pimpl->mIOHandler = new DefaultIOSystem;
-	pimpl->mIsDefaultHandler = true; 
+	pimpl->mIsDefaultHandler = true;
 	pimpl->bExtraVerbose     = false; // disable extra verbose mode by default
 
 	pimpl->mProgressHandler = new DefaultProgressHandler();
@@ -155,12 +160,29 @@ Importer::Importer()
 	// Allocate a SharedPostProcessInfo object and store pointers to it in all post-process steps in the list.
 	pimpl->mPPShared = new SharedPostProcessInfo();
 	for (std::vector<BaseProcess*>::iterator it =  pimpl->mPostProcessingSteps.begin();
-		it != pimpl->mPostProcessingSteps.end(); 
+		it != pimpl->mPostProcessingSteps.end();
 		++it)	{
 
 		(*it)->SetSharedData(pimpl->mPPShared);
 	}
 }
+
+// ------------------------------------------------------------------------------------------------
+// Importer constructor.
+Importer::Importer()
+{
+	InitDefaults();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Jni android Importer constructor to ease the assets access on Android JNI projects.
+#if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+Importer::Importer(ANativeActivity* activity)
+{
+	InitDefaults();
+	SetIOHandler(new AndroidJNIIOSystem(activity));
+}
+#endif //__ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
 
 // ------------------------------------------------------------------------------------------------
 // Destructor of Importer

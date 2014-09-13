@@ -143,13 +143,21 @@ void BlenderBMeshConverter::DestroyTriMesh( )
 void BlenderBMeshConverter::ConvertPolyToFaces( const MPoly& poly )
 {
 	const MLoop* polyLoop = &BMesh->mloop[ poly.loopstart ];
-	const MLoopUV* loopUV = &BMesh->mloopuv[ poly.loopstart ];
-	
+
 	if ( poly.totloop == 3 || poly.totloop == 4 )
 	{
 		AddFace( polyLoop[ 0 ].v, polyLoop[ 1 ].v, polyLoop[ 2 ].v, poly.totloop == 4 ? polyLoop[ 3 ].v : 0 );
-		
-		AddTFace( loopUV[ 0 ].uv, loopUV[ 1 ].uv, loopUV[ 2 ].uv, poly.totloop == 4 ? loopUV[ 3 ].uv : 0 );
+
+		// UVs are optional, so only convert when present.
+		if ( BMesh->mloopuv.size() )
+		{
+			if ( (poly.loopstart + poly.totloop ) >= static_cast<int>( BMesh->mloopuv.size() ) )
+			{
+				ThrowException( "BMesh uv loop array has incorrect size" );
+			}
+			const MLoopUV* loopUV = &BMesh->mloopuv[ poly.loopstart ];
+			AddTFace( loopUV[ 0 ].uv, loopUV[ 1 ].uv, loopUV[ 2 ].uv, poly.totloop == 4 ? loopUV[ 3 ].uv : 0 );
+		}
 	}
 	else if ( poly.totloop > 4 )
 	{

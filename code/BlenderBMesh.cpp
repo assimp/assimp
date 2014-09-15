@@ -65,7 +65,6 @@ BlenderBMeshConverter::BlenderBMeshConverter( const Mesh* mesh ):
 	BMesh( mesh ),
 	triMesh( NULL )
 {
-	AssertValidMesh( );
 }
 
 // ------------------------------------------------------------------------------------------------

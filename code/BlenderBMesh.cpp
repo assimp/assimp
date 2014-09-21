@@ -150,7 +150,7 @@ void BlenderBMeshConverter::ConvertPolyToFaces( const MPoly& poly )
 		// UVs are optional, so only convert when present.
 		if ( BMesh->mloopuv.size() )
 		{
-			if ( (poly.loopstart + poly.totloop ) >= static_cast<int>( BMesh->mloopuv.size() ) )
+			if ( (poly.loopstart + poly.totloop ) > static_cast<int>( BMesh->mloopuv.size() ) )
 			{
 				ThrowException( "BMesh uv loop array has incorrect size" );
 			}

@@ -50,9 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 
 // Material specific token
-static const std::string DiffuseTexture      = "map_kd";
-static const std::string AmbientTexture      = "map_ka";
-static const std::string SpecularTexture     = "map_ks";
+static const std::string DiffuseTexture      = "map_Kd";
+static const std::string AmbientTexture      = "map_Ka";
+static const std::string SpecularTexture     = "map_Ks";
 static const std::string OpacityTexture      = "map_d";
 static const std::string EmmissiveTexture    = "map_emissive";
 static const std::string BumpTexture1        = "map_bump";

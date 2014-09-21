@@ -62,7 +62,7 @@ static const aiImporterDesc desc = {
 
 static const unsigned int ObjMinSize = 16;
 
-namespace Assimp	{
+namespace Assimp {
 
 using namespace std;
 
@@ -284,8 +284,9 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     aiMesh* pMesh = new aiMesh;
 	for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
 	{
-		ObjFile::Face* const inp = pObjMesh->m_Faces[ index ];
-	
+		ObjFile::Face *const inp = pObjMesh->m_Faces[ index ];
+        ai_assert( NULL != inp  );
+
 		if (inp->m_PrimitiveType == aiPrimitiveType_LINE) {
 			pMesh->mNumFaces += inp->m_pVertices->size() - 1;
 			pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
@@ -302,7 +303,7 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
 		}
 	}
 
-	unsigned int uiIdxCount = 0u;
+	unsigned int uiIdxCount( 0u );
 	if ( pMesh->mNumFaces > 0 )
 	{
 		pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
@@ -311,7 +312,7 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
 			pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
 		}
 
-		unsigned int outIndex = 0;
+		unsigned int outIndex( 0 );
 
 		// Copy all data from all stored meshes
 		for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)

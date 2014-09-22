@@ -53,12 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 #include <limits>
-
-#ifdef __cplusplus
-#   include <cmath>
-#else
-#   include <math.h>
-#endif
+#include <cmath>
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
@@ -379,12 +374,12 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::FromEulerAnglesXYZ(TReal x, TRe
 {
 	aiMatrix4x4t<TReal>& _this = *this;
 
-	TReal cr = cos( x );
-	TReal sr = sin( x );
-	TReal cp = cos( y );
-	TReal sp = sin( y );
-	TReal cy = cos( z );
-	TReal sy = sin( z );
+	TReal cr = std::cos( x );
+	TReal sr = std::sin( x );
+	TReal cp = std::cos( y );
+	TReal sp = std::sin( y );
+	TReal cy = std::cos( z );
+	TReal sy = std::sin( z );
 
 	_this.a1 = cp*cy ;
 	_this.a2 = cp*sy;
@@ -439,8 +434,8 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::RotationX(TReal a, aiMatrix4x4t
          |  0  sin(A)  cos(A)  0 |
          |  0  0       0       1 |	*/
 	out = aiMatrix4x4t<TReal>();
-	out.b2 = out.c3 = cos(a);
-	out.b3 = -(out.c2 = sin(a));
+	out.b2 = out.c3 = std::cos(a);
+	out.b3 = -(out.c2 = std::sin(a));
 	return out;
 }
 
@@ -455,8 +450,8 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::RotationY(TReal a, aiMatrix4x4t
          |  0       0   0       1 |
 		*/
 	out = aiMatrix4x4t<TReal>();
-	out.a1 = out.c3 = cos(a);
-	out.c1 = -(out.a3 = sin(a));
+	out.a1 = out.c3 = std::cos(a);
+	out.c1 = -(out.a3 = std::sin(a));
 	return out;
 }
 
@@ -470,8 +465,8 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::RotationZ(TReal a, aiMatrix4x4t
          |  0        0        1   0 |
          |  0        0        0   1 |	*/
 	out = aiMatrix4x4t<TReal>();
-	out.a1 = out.b2 = cos(a);
-	out.a2 = -(out.b1 = sin(a));
+	out.a1 = out.b2 = std::cos(a);
+	out.a2 = -(out.b1 = std::sin(a));
 	return out;
 }
 
@@ -480,7 +475,7 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::RotationZ(TReal a, aiMatrix4x4t
 template <typename TReal>
 inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Rotation( TReal a, const aiVector3t<TReal>& axis, aiMatrix4x4t<TReal>& out)
 {
-  TReal c = cos( a), s = sin( a), t = 1 - c;
+  TReal c = std::cos( a), s = std::sin( a), t = 1 - c;
   TReal x = axis.x, y = axis.y, z = axis.z;
 
   // Many thanks to MathWorld and Wikipedia

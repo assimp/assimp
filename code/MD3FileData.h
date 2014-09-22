@@ -263,9 +263,9 @@ inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
 	lat *= 3.141926f/128.0f;
 	lng *= 3.141926f/128.0f;
 
-	p_afOut[0] = cosf(lat) * sinf(lng);
-	p_afOut[1] = sinf(lat) * sinf(lng);
-	p_afOut[2] = cosf(lng);
+	p_afOut[0] = std::cos(lat) * std::sin(lng);
+	p_afOut[1] = std::sin(lat) * std::sin(lng);
+	p_afOut[2] = std::cos(lng);
 	return;
 }
 

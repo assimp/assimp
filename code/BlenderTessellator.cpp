@@ -324,7 +324,7 @@ void BlenderTessellatorP2T::Copy3DVertices( const MLoop* polyLoop, int vertexCou
 aiMatrix4x4 BlenderTessellatorP2T::GeneratePointTransformMatrix( const Blender::PlaneP2T& plane ) const
 {
 	aiVector3D sideA( 1.0f, 0.0f, 0.0f );
-	if ( fabs( plane.normal * sideA ) > 0.999f )
+	if ( std::fabs( plane.normal * sideA ) > 0.999f )
 	{
 		sideA = aiVector3D( 0.0f, 1.0f, 0.0f );
 	}
@@ -420,7 +420,7 @@ float BlenderTessellatorP2T::FindLargestMatrixElem( const aiMatrix3x3& mtx ) con
 	{
 		for ( int y = 0; y < 3; ++y )
 		{
-			result = p2tMax( fabs( mtx[ x ][ y ] ), result );
+			result = p2tMax( std::fabs( mtx[ x ][ y ] ), result );
 		}
 	}
 

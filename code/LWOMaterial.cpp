@@ -285,7 +285,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
 	{
 		float fGloss;
 		if (mIsLWO2)	{
-			fGloss = pow( surf.mGlossiness*10.0f+2.0f, 2.0f);
+			fGloss = std::pow( surf.mGlossiness*10.0f+2.0f, 2.0f);
 		}
 		else
 		{

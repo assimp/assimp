@@ -69,8 +69,8 @@ Intersect IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const I
 	const IfcVector3 pdelta = e0 - p, seg = e1-e0;
 	const IfcFloat dotOne = n*seg, dotTwo = -(n*pdelta);
 
-	if (fabs(dotOne) < 1e-6) {
-		return fabs(dotTwo) < 1e-6f ? Intersect_LiesOnPlane : Intersect_No;
+	if (std::fabs(dotOne) < 1e-6) {
+		return std::fabs(dotTwo) < 1e-6f ? Intersect_LiesOnPlane : Intersect_No;
 	}
 
 	const IfcFloat t = dotTwo/dotOne;
@@ -210,7 +210,7 @@ bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, cons
 		// segment-segment intersection
 		// solve b0 + b*s = e0 + e*t for (s,t)
 		const IfcFloat det = (-b.x * e.y + e.x * b.y);
-		if(fabs(det) < 1e-6) {
+		if(std::fabs(det) < 1e-6) {
 			// no solutions (parallel lines)
 			continue;
 		}
@@ -234,7 +234,7 @@ bool IntersectsBoundaryProfile( const IfcVector3& e0, const IfcVector3& e1, cons
 		if (t >= -epsilon && (t <= 1.0+epsilon || half_open) && s >= -epsilon && s <= 1.0) {
 
 			if (e0_hits_border && !*e0_hits_border) {
-				*e0_hits_border = fabs(t) < 1e-5f;
+				*e0_hits_border = std::fabs(t) < 1e-5f;
 			}
 	
 			const IfcVector3& p = e0 + e*t;
@@ -419,7 +419,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
 #ifdef ASSIMP_BUILD_DEBUG
 			if (isect == Intersect_Yes) {
-				const IfcFloat f = fabs((isectpos - p)*n);
+				const IfcFloat f = std::fabs((isectpos - p)*n);
 				ai_assert(f < 1e-5);
 			}
 #endif

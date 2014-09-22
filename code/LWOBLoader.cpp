@@ -321,7 +321,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		case AI_LWO_SMAN:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SMAN,4);
-				surf.mMaximumSmoothAngle = fabs( GetF4() );
+				surf.mMaximumSmoothAngle = std::fabs( GetF4() );
 				break;
 			}
 		// glossiness

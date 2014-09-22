@@ -124,7 +124,7 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
 
 		IfcFloat angle = 0.f;
 		for(size_t i = 0; i < segments; ++i, angle += delta) {
-			meshout.verts.push_back( IfcVector3( cos(angle)*radius, sin(angle)*radius, 0.f ));
+			meshout.verts.push_back( IfcVector3( std::cos(angle)*radius, std::sin(angle)*radius, 0.f ));
 		}
 
 		meshout.vertcnt.push_back(segments);

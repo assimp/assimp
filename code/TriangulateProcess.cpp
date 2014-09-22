@@ -241,7 +241,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				diag.Normalize();
 				right.Normalize();
 
-				const float angle = acos(left*diag) + acos(right*diag);
+				const float angle = std::acos(left*diag) + std::acos(right*diag);
 				if (angle > AI_MATH_PI_F) {
 					// this is the concave point
 					start_vertex = i;
@@ -486,7 +486,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			unsigned int* i = f->mIndices;
 
 			//  drop dumb 0-area triangles
-			if (fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
+			if (std::fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
 				DefaultLogger::get()->debug("Dropping triangle with area 0");
 				--curOut;
 

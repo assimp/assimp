@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "fast_atof.h"
+#include "ParsingUtils.h"
 
 namespace Assimp	{
 
@@ -228,7 +229,7 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 	pColor->r = r;
 	
     // we have to check if color is default 0 with only one token
-    if( !isNewLine( *m_DataIt ) ) {
+    if( !IsLineEnd( *m_DataIt ) ) {
         m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
         m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
     }
@@ -257,7 +258,7 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 void ObjFileMtlImporter::createMaterial()
 {	
 	std::string line( "" );
-	while ( !isNewLine( *m_DataIt ) ) {
+    while( !IsLineEnd( *m_DataIt ) ) {
 		line += *m_DataIt;
 		++m_DataIt;
 	}

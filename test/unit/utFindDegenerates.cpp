@@ -1,12 +1,26 @@
-
 #include "UnitTestPCH.h"
-#include "utFindDegenerates.h"
+
+#include <FindDegenerates.h>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION (FindDegeneratesProcessTest);
+using namespace std;
+using namespace Assimp;
+
+class FindDegeneratesProcessTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	aiMesh* mesh;
+	FindDegeneratesProcess* process;
+};
 
 // ------------------------------------------------------------------------------------------------
-void FindDegeneratesProcessTest :: setUp (void)
+void FindDegeneratesProcessTest::SetUp()
 {
 	mesh = new aiMesh();
 	process = new FindDegeneratesProcess();
@@ -22,31 +36,30 @@ void FindDegeneratesProcessTest :: setUp (void)
 	}
 
 	mesh->mPrimitiveTypes = aiPrimitiveType_LINE | aiPrimitiveType_POINT |
-		aiPrimitiveType_POLYGON | aiPrimitiveType_TRIANGLE;
+	aiPrimitiveType_POLYGON | aiPrimitiveType_TRIANGLE;
 
 	unsigned int numOut = 0, numFaces = 0;
 	for (unsigned int i = 0; i < 1000; ++i) {
 		aiFace& f = mesh->mFaces[i];
-		f.mNumIndices = (i % 5)+1; // between 1 and 5
-		f.mIndices = new unsigned int[f.mNumIndices];
-		bool had = false;
-		for (unsigned int n = 0; n < f.mNumIndices;++n) {
-
-			// FIXME
+	f.mNumIndices = (i % 5)+1; // between 1 and 5
+	f.mIndices = new unsigned int[f.mNumIndices];
+	bool had = false;
+	for (unsigned int n = 0; n < f.mNumIndices;++n) {
+		// FIXME
 #if 0
-			// some duplicate indices
-			if ( n && n == (i / 200)+1) {
-				f.mIndices[n] = f.mIndices[n-1];
-				had = true;
-			}
-			// and some duplicate vertices
+		// some duplicate indices
+		if ( n && n == (i / 200)+1) {
+			f.mIndices[n] = f.mIndices[n-1];
+			had = true;
+		}
+		// and some duplicate vertices
 #endif
-			if (n && i % 2 && 0 == n % 2) {
-				f.mIndices[n] = f.mIndices[n-1]+5000;
-				had = true;
-			}
-			else {
-				f.mIndices[n] = numOut++;
+		if (n && i % 2 && 0 == n % 2) {
+			f.mIndices[n] = f.mIndices[n-1]+5000;
+			had = true;
+		}
+		else {
+			f.mIndices[n] = numOut++;
 			}
 		}
 		if (!had)
@@ -57,14 +70,14 @@ void FindDegeneratesProcessTest :: setUp (void)
 }
 
 // ------------------------------------------------------------------------------------------------
-void FindDegeneratesProcessTest :: tearDown (void)
+void FindDegeneratesProcessTest::TearDown()
 {
 	delete mesh;
 	delete process;
 }
 
 // ------------------------------------------------------------------------------------------------
-void FindDegeneratesProcessTest :: testDegeneratesDetection( void )
+TEST_F(FindDegeneratesProcessTest, testDegeneratesDetection)
 {
 	process->EnableInstantRemoval(false);
 	process->ExecuteOnMesh(mesh);
@@ -75,18 +88,21 @@ void FindDegeneratesProcessTest :: testDegeneratesDetection( void )
 		out += f.mNumIndices;
 	}
 
-	CPPUNIT_ASSERT(mesh->mNumFaces == 1000 && mesh->mNumVertices == 10000);
-	CPPUNIT_ASSERT(mesh->mNumUVComponents[0] == out);
-	CPPUNIT_ASSERT(mesh->mPrimitiveTypes == (aiPrimitiveType_LINE | aiPrimitiveType_POINT |
-		aiPrimitiveType_POLYGON | aiPrimitiveType_TRIANGLE));
+	EXPECT_EQ(1000U, mesh->mNumFaces);
+	EXPECT_EQ(10000U, mesh->mNumVertices);
+	EXPECT_EQ(out, mesh->mNumUVComponents[0]);
+	EXPECT_EQ(static_cast<unsigned int>(
+	              aiPrimitiveType_LINE | aiPrimitiveType_POINT |
+	              aiPrimitiveType_POLYGON | aiPrimitiveType_TRIANGLE),
+	          mesh->mPrimitiveTypes);
 }
 
 // ------------------------------------------------------------------------------------------------
-void FindDegeneratesProcessTest :: testDegeneratesRemoval( void )
+TEST_F(FindDegeneratesProcessTest, testDegeneratesRemoval)
 {
 	process->EnableInstantRemoval(true);
 	process->ExecuteOnMesh(mesh);
 
-	CPPUNIT_ASSERT(mesh->mNumUVComponents[1] == mesh->mNumFaces);
+	EXPECT_EQ(mesh->mNumUVComponents[1], mesh->mNumFaces);
 }
 

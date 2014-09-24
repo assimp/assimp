@@ -51,6 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include "../contrib/zlib/zlib.h"
 #endif
 
+#include <time.h>
+
+
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
 

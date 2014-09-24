@@ -207,7 +207,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
 		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
 			out[pnt] = aiVector3D((atan2 (diff.z, diff.y) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
-				(asin  (diff.x) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
+				(std::asin  (diff.x) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
 	else if (axis * base_axis_y >= angle_epsilon)	{
@@ -215,7 +215,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
 		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
 			out[pnt] = aiVector3D((atan2 (diff.x, diff.z) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
-				(asin  (diff.y) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
+				(std::asin  (diff.y) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
 	else if (axis * base_axis_z >= angle_epsilon)	{
@@ -223,7 +223,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
 		for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)	{
 			const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
 			out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
-				(asin  (diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
+				(std::asin  (diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
 	// slower code path in case the mapping axis is not one of the coordinate system axes

@@ -285,7 +285,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
 	{
 		float fGloss;
 		if (mIsLWO2)	{
-			fGloss = pow( surf.mGlossiness*10.0f+2.0f, 2.0f);
+			fGloss = std::pow( surf.mGlossiness*10.0f+2.0f, 2.0f);
 		}
 		else
 		{
@@ -527,13 +527,13 @@ void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 	while (true)
 	{
 		if (mFileBuffer + 6 >= end)break;
-		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+		LE_NCONST IFF::SubChunkHeader head = IFF::LoadSubChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
+		if (mFileBuffer + head.length > end)
 			throw DeadlyImportError("LWO2: Invalid SURF.BLOCK chunk length");
 
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
+		uint8_t* const next = mFileBuffer+head.length;
+		switch (head.type)
 		{
 		case AI_LWO_PROJ:
 			tex.mapMode = (Texture::MappingMode)GetU2();
@@ -549,7 +549,7 @@ void LWOImporter::LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex )
 			tex.mClipIdx = GetU2();
 			break;
 		case AI_LWO_VMAP:
-			GetS0(tex.mUVChannelIndex,head->length);
+			GetS0(tex.mUVChannelIndex,head.length);
 			break;
 		case AI_LWO_WRPH:
 			tex.wrapAmountH = GetF4();
@@ -595,13 +595,13 @@ void LWOImporter::LoadLWO2TextureHeader(unsigned int size, LWO::Texture& tex )
 	while (true)
 	{
 		if (mFileBuffer + 6 >= end)break;
-		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+		const IFF::SubChunkHeader head = IFF::LoadSubChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
+		if (mFileBuffer + head.length > end)
 			throw DeadlyImportError("LWO2: Invalid texture header chunk length");
 
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
+		uint8_t* const next = mFileBuffer+head.length;
+		switch (head.type)
 		{
 		case AI_LWO_CHAN:
 			tex.type = GetU4();
@@ -698,20 +698,20 @@ void LWOImporter::LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* /*head*/, u
 	while (true)
 	{
 		if (mFileBuffer + 6 >= end)break;
-		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+		const IFF::SubChunkHeader head = IFF::LoadSubChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
+		if (mFileBuffer + head.length > end)
 			throw DeadlyImportError("LWO2: Invalid shader header chunk length");
 
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
+		uint8_t* const next = mFileBuffer+head.length;
+		switch (head.type)
 		{
 		case AI_LWO_ENAB:
 			shader.enabled = GetU2() ? true : false;
 			break;
 
 		case AI_LWO_FUNC:
-			GetS0( shader.functionName, head->length );
+			GetS0( shader.functionName, head.length );
 		}
 		mFileBuffer = next;
 	}
@@ -756,18 +756,18 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 	{
 		if (mFileBuffer + 6 >= end)
 			break;
-		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+		const IFF::SubChunkHeader head = IFF::LoadSubChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
+		if (mFileBuffer + head.length > end)
 			throw DeadlyImportError("LWO2: Invalid surface chunk length");
 
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
+		uint8_t* const next = mFileBuffer+head.length;
+		switch (head.type)
 		{
 			// diffuse color
 		case AI_LWO_COLR:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,COLR,12);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,COLR,12);
 				surf.mColor.r = GetF4();
 				surf.mColor.g = GetF4();
 				surf.mColor.b = GetF4();
@@ -776,14 +776,14 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 			// diffuse strength ... hopefully
 		case AI_LWO_DIFF:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,DIFF,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,DIFF,4);
 				surf.mDiffuseValue = GetF4();
 				break;
 			}
 			// specular strength ... hopefully
 		case AI_LWO_SPEC:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SPEC,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SPEC,4);
 				surf.mSpecularValue = GetF4();
 				break;
 			}
@@ -794,21 +794,21 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 				if (surf.mTransparency == 10e10f)
 					break;
 
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TRAN,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TRAN,4);
 				surf.mTransparency = GetF4();
 				break;
 			}
 			// additive transparency
 		case AI_LWO_ADTR:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,ADTR,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,ADTR,4);
 				surf.mAdditiveTransparency = GetF4();
 				break;
 			}
 			// wireframe mode
 		case AI_LWO_LINE:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LINE,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,LINE,2);
 				if (GetU2() & 0x1)
 					surf.mWireframe = true;
 				break;
@@ -816,49 +816,49 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 			// glossiness
 		case AI_LWO_GLOS:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,GLOS,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,GLOS,4);
 				surf.mGlossiness = GetF4();
 				break;
 			}
 			// bump intensity
 		case AI_LWO_BUMP:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,BUMP,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,BUMP,4);
 				surf.mBumpIntensity = GetF4();
 				break;
 			}
 			// color highlights
 		case AI_LWO_CLRH:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,CLRH,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,CLRH,4);
 				surf.mColorHighlights = GetF4();
 				break;
 			}
 			// index of refraction
 		case AI_LWO_RIND:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,RIND,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,RIND,4);
 				surf.mIOR = GetF4();
 				break;
 			}
 			// polygon sidedness
 		case AI_LWO_SIDE:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SIDE,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SIDE,2);
 				surf.bDoubleSided = (3 == GetU2());
 				break;
 			}
 			// maximum smoothing angle
 		case AI_LWO_SMAN:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SMAN,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SMAN,4);
 				surf.mMaximumSmoothAngle = fabs( GetF4() );
 				break;
 			}
 			// vertex color channel to be applied to the surface
 		case AI_LWO_VCOL:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,VCOL,12);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,VCOL,12);
 				surf.mDiffuseValue *= GetF4();				// strength
 				ReadVSizedIntLWO2(mFileBuffer);             // skip envelope
 				surf.mVCMapType = GetU4();					// type of the channel
@@ -870,18 +870,18 @@ void LWOImporter::LoadLWO2Surface(unsigned int size)
 			// surface bock entry
 		case AI_LWO_BLOK:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,BLOK,4);
-				LE_NCONST IFF::SubChunkHeader* head2 = IFF::LoadSubChunk(mFileBuffer);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,BLOK,4);
+				IFF::SubChunkHeader head2 = IFF::LoadSubChunk(mFileBuffer);
 
-				switch (head2->type)
+				switch (head2.type)
 				{
 				case AI_LWO_PROC:
 				case AI_LWO_GRAD:
 				case AI_LWO_IMAP:
-					LoadLWO2TextureBlock(head2, head->length);
+					LoadLWO2TextureBlock(&head2, head.length);
 					break;
 				case AI_LWO_SHDR:
-					LoadLWO2ShaderBlock(head2, head->length);
+					LoadLWO2ShaderBlock(&head2, head.length);
 					break;
 
 				default:

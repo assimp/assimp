@@ -73,7 +73,7 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-: noSkeletonMesh(), ignoreUpDirection(false)
+: noSkeletonMesh(), ignoreUpDirection(false), mNodeNameCounter()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -308,10 +308,6 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 			continue;
 		}
 		const Collada::Light* srcLight = &srcLightIt->second;
-		if (srcLight->mType == aiLightSource_AMBIENT) {
-			DefaultLogger::get()->error("Collada: Skipping ambient light for the moment");
-			continue;
-		}
 		
 		// now fill our ai data structure
 		aiLight* out = new aiLight();
@@ -341,7 +337,7 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 				{
 					// Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
 					// epsilon chosen to be 0.1
-					out->mAngleOuterCone = AI_DEG_TO_RAD (acos(pow(0.1f,1.f/srcLight->mFalloffExponent))+
+					out->mAngleOuterCone = AI_DEG_TO_RAD (std::acos(std::pow(0.1f,1.f/srcLight->mFalloffExponent))+
 						srcLight->mFalloffAngle);
 				}
 				else {
@@ -1547,7 +1543,7 @@ const Collada::Node* ColladaLoader::FindNodeBySID( const Collada::Node* pNode, c
 
 // ------------------------------------------------------------------------------------------------
 // Finds a proper name for a node derived from the collada-node's properties
-std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode) const
+std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
 {
 	// now setup the name of the node. We take the name if not empty, otherwise the collada ID
 	// FIX: Workaround for XSI calling the instanced visual scene 'untitled' by default.
@@ -1561,7 +1557,7 @@ std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode) const
 	{
 		// No need to worry. Unnamed nodes are no problem at all, except
 		// if cameras or lights need to be assigned to them.
-    return boost::str( boost::format( "$ColladaAutoName$_%d") % clock());
+    return boost::str( boost::format( "$ColladaAutoName$_%d") % mNodeNameCounter++);
 	}
 }
 

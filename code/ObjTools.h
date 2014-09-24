@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJ_TOOLS_H_INC
 
 #include "fast_atof.h"
+#include "ParsingUtils.h"
 
 namespace Assimp
 {
@@ -68,28 +69,6 @@ inline bool isEndOfBuffer(  char_t it, char_t end )
 	return ( it == end );	
 }
 
-/** @brief	Returns true, if token is a space on any supported platform
-*	@param	token	Token to search in
-*	@return	true, if token is a space			
-*/
-inline bool isSeparator( char token )
-{
-	return ( token == ' ' || 
-			token == '\n' || 
-			token == '\f' || 
-			token == '\r' ||
-			token == '\t' );
-}
-
-/**	@brief	Returns true, fi token id a new line marking token.
- *	@param	token	Token to search in
- *	@return	true, if token is a newline token.
- */
-inline bool isNewLine( char token )
-{
-	return ( token == '\n' || token == '\f' || token == '\r' );
-}
-
 /**	@brief	Returns next word separated by a space
  *	@param	pBuffer	Pointer to data buffer
  *	@param	pEnd	Pointer to end of buffer
@@ -100,7 +79,7 @@ inline Char_T getNextWord( Char_T pBuffer, Char_T pEnd )
 {
 	while ( !isEndOfBuffer( pBuffer, pEnd ) )
 	{
-		if ( !isSeparator( *pBuffer ) || isNewLine( *pBuffer ) )
+        if( !IsSpaceOrNewLine( *pBuffer ) || IsLineEnd( *pBuffer ) )
 			break;
 		pBuffer++;
 	}
@@ -117,7 +96,7 @@ inline Char_T getNextToken( Char_T pBuffer, Char_T pEnd )
 {
 	while ( !isEndOfBuffer( pBuffer, pEnd ) )
 	{
-		if ( isSeparator( *pBuffer ) )
+        if( IsSpaceOrNewLine( *pBuffer ) )
 			break;
 		pBuffer++;
 	}
@@ -127,14 +106,14 @@ inline Char_T getNextToken( Char_T pBuffer, Char_T pEnd )
 /**	@brief	Skips a line
  *	@param	it		Iterator set to current position
  *	@param	end		Iterator set to end of scratch buffer for readout
- *	@param	uiLine	Current linenumber in format
+ *	@param	uiLine	Current line number in format
  *	@return	Current-iterator with new position
  */
 template<class char_t>
-inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine )
-{
-	while ( !isEndOfBuffer( it, end ) && !isNewLine( *it ) )
-		++it;
+inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine ) {
+    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) ) {
+        ++it;
+    }
 	if ( it != end )
 	{
 		++it;
@@ -157,15 +136,16 @@ template<class char_t>
 inline char_t getName( char_t it, char_t end, std::string &name )
 {
 	name = "";
-	if ( isEndOfBuffer( it, end ) )
-		return end;
+    if( isEndOfBuffer( it, end ) ) {
+        return end;
+    }
 	
 	char *pStart = &( *it );
-	while ( !isEndOfBuffer( it, end ) && !isNewLine( *it ) ) {
+    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) ) {
 		++it;
 	}
 
-	while(isEndOfBuffer( it, end ) || isNewLine( *it ) || isSeparator(*it)) {
+    while( isEndOfBuffer( it, end ) || IsLineEnd( *it ) || IsSpaceOrNewLine( *it ) ) {
 		--it;
 	}
 	++it;
@@ -196,7 +176,7 @@ inline char_t CopyNextWord( char_t it, char_t end, char *pBuffer, size_t length 
 {
 	size_t index = 0;
 	it = getNextWord<char_t>( it, end );
-	while ( !isSeparator( *it ) && !isEndOfBuffer( it, end ) )
+    while( !IsSpaceOrNewLine( *it ) && !isEndOfBuffer( it, end ) )
 	{
 		pBuffer[index] = *it ;
 		index++;

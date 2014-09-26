@@ -138,6 +138,7 @@ aiString Read<aiString>(IOStream * stream)
 	aiString s;
 	stream->Read(&s.length,4,1);
 	stream->Read(s.data,s.length,1);
+	s.data[s.length] = 0;
 	return s;
 }
 

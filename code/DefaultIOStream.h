@@ -56,6 +56,9 @@ namespace Assimp	{
 class DefaultIOStream : public IOStream
 {
 	friend class DefaultIOSystem;
+#if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+	friend class AndroidJNIIOSystem;
+#endif //__ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
 
 protected:
 	DefaultIOStream ();

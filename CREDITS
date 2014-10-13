@@ -148,3 +148,6 @@ Bugfixes for uv-tanget calculation.
 
 - Jonne Nauha
 Ogre Binary format support
+
+- Filip Wasil, Tieto Poland Sp. z o.o.
+Android JNI asset extraction support

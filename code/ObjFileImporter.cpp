@@ -62,7 +62,7 @@ static const aiImporterDesc desc = {
 
 static const unsigned int ObjMinSize = 16;
 
-namespace Assimp	{
+namespace Assimp {
 
 using namespace std;
 
@@ -109,9 +109,7 @@ const aiImporterDesc* ObjFileImporter::GetInfo () const
 // ------------------------------------------------------------------------------------------------
 //	Obj-file import implementation
 void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
-{
-    DefaultIOSystem io;
-    
+{    
 	// Read file into memory
 	const std::string mode = "rb";
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
@@ -232,15 +230,9 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 	for ( unsigned int i=0; i< pObject->m_Meshes.size(); i++ )
 	{
 		unsigned int meshId = pObject->m_Meshes[ i ];
-		aiMesh *pMesh = new aiMesh;
-		createTopology( pModel, pObject, meshId, pMesh );	
-		if ( pMesh->mNumVertices > 0 ) 
-		{
+		aiMesh *pMesh = createTopology( pModel, pObject, meshId );	
+        if( pMesh && pMesh->mNumFaces > 0 ) {
 			MeshArray.push_back( pMesh );
-		}
-		else
-		{
-			delete pMesh;
 		}
 	}
 
@@ -274,45 +266,44 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 
 // ------------------------------------------------------------------------------------------------
 //	Create topology data
-void ObjFileImporter::createTopology(const ObjFile::Model* pModel, 
-									 const ObjFile::Object* pData, 
-									 unsigned int uiMeshIndex,
-									 aiMesh* pMesh )
+aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData, 
+                                         unsigned int uiMeshIndex )
 {
 	// Checking preconditions
 	ai_assert( NULL != pModel );
     if( NULL == pData ) {
-        return;
+        return NULL;
     }
 
 	// Create faces
 	ObjFile::Mesh *pObjMesh = pModel->m_Meshes[ uiMeshIndex ];
-	ai_assert( NULL != pObjMesh );
-
-	pMesh->mNumFaces = 0;
+    if( !pObjMesh ) {
+        return NULL;
+    }
+    ai_assert( NULL != pObjMesh );
+    aiMesh* pMesh = new aiMesh;
 	for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
 	{
-		ObjFile::Face* const inp = pObjMesh->m_Faces[ index ];
-	
+		ObjFile::Face *const inp = pObjMesh->m_Faces[ index ];
+        ai_assert( NULL != inp  );
+
 		if (inp->m_PrimitiveType == aiPrimitiveType_LINE) {
 			pMesh->mNumFaces += inp->m_pVertices->size() - 1;
 			pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
-		}
-		else if (inp->m_PrimitiveType == aiPrimitiveType_POINT) {
+		} else if (inp->m_PrimitiveType == aiPrimitiveType_POINT) {
 			pMesh->mNumFaces += inp->m_pVertices->size();
 			pMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
 		} else {
 			++pMesh->mNumFaces;
 			if (inp->m_pVertices->size() > 3) {
 				pMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
-			}
-			else {
+			} else {
 				pMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
 			}
 		}
 	}
 
-	unsigned int uiIdxCount = 0u;
+	unsigned int uiIdxCount( 0u );
 	if ( pMesh->mNumFaces > 0 )
 	{
 		pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
@@ -321,7 +312,7 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 			pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
 		}
 
-		unsigned int outIndex = 0;
+		unsigned int outIndex( 0 );
 
 		// Copy all data from all stored meshes
 		for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
@@ -355,6 +346,8 @@ void ObjFileImporter::createTopology(const ObjFile::Model* pModel,
 
 	// Create mesh vertices
 	createVertexArray(pModel, pData, uiMeshIndex, pMesh, uiIdxCount);
+
+    return pMesh;
 }
 
 // ------------------------------------------------------------------------------------------------

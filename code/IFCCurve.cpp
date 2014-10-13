@@ -88,10 +88,10 @@ public:
 		a *= conv.angle_scale;
 		b *= conv.angle_scale;
 
-		a = fmod(a,static_cast<IfcFloat>( AI_MATH_TWO_PI ));
-		b = fmod(b,static_cast<IfcFloat>( AI_MATH_TWO_PI ));
+		a = std::fmod(a,static_cast<IfcFloat>( AI_MATH_TWO_PI ));
+		b = std::fmod(b,static_cast<IfcFloat>( AI_MATH_TWO_PI ));
 		const IfcFloat setting = static_cast<IfcFloat>( AI_MATH_PI * conv.settings.conicSamplingAngle / 180.0 );
-		return static_cast<size_t>( ceil(abs( b-a)) / setting);
+		return static_cast<size_t>( std::ceil(abs( b-a)) / setting);
 	}
 
 	// --------------------------------------------------
@@ -124,8 +124,8 @@ public:
 	// --------------------------------------------------
 	IfcVector3 Eval(IfcFloat u) const {
 		u = -conv.angle_scale * u;
-		return location + static_cast<IfcFloat>(entity.Radius)*(static_cast<IfcFloat>(::cos(u))*p[0] + 
-			static_cast<IfcFloat>(::sin(u))*p[1]);
+		return location + static_cast<IfcFloat>(entity.Radius)*(static_cast<IfcFloat>(std::cos(u))*p[0] +
+			static_cast<IfcFloat>(std::sin(u))*p[1]);
 	}
 
 private:
@@ -153,8 +153,8 @@ public:
 	// --------------------------------------------------
 	IfcVector3 Eval(IfcFloat u) const {
 		u = -conv.angle_scale * u;
-		return location + static_cast<IfcFloat>(entity.SemiAxis1)*static_cast<IfcFloat>(::cos(u))*p[0] +
-			static_cast<IfcFloat>(entity.SemiAxis2)*static_cast<IfcFloat>(::sin(u))*p[1];
+		return location + static_cast<IfcFloat>(entity.SemiAxis1)*static_cast<IfcFloat>(std::cos(u))*p[0] +
+			static_cast<IfcFloat>(entity.SemiAxis2)*static_cast<IfcFloat>(std::sin(u))*p[1];
 	}
 
 private:
@@ -486,7 +486,7 @@ public:
 	IfcVector3 Eval(IfcFloat p) const {
 		ai_assert(InRange(p));
 		
-		const size_t b = static_cast<size_t>(floor(p));  
+		const size_t b = static_cast<size_t>(std::floor(p));
 		if (b == points.size()-1) {
 			return points.back();
 		}
@@ -498,7 +498,7 @@ public:
 	// --------------------------------------------------
 	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
-		return static_cast<size_t>( ceil(b) - floor(a) );
+		return static_cast<size_t>( std::ceil(b) - std::floor(a) );
 	}
 
 	// --------------------------------------------------
@@ -558,7 +558,7 @@ bool Curve :: InRange(IfcFloat u) const
 	if (IsClosed()) {
 		return true;
 		//ai_assert(range.first != std::numeric_limits<IfcFloat>::infinity() && range.second != std::numeric_limits<IfcFloat>::infinity());
-		//u = range.first + fmod(u-range.first,range.second-range.first);
+		//u = range.first + std::fmod(u-range.first,range.second-range.first);
 	}
 	const IfcFloat epsilon = 1e-5;
 	return u - range.first > -epsilon && range.second - u > -epsilon;
@@ -606,12 +606,12 @@ IfcFloat RecursiveSearch(const Curve* cv, const IfcVector3& val, IfcFloat a, Ifc
 	}
 
 	ai_assert(min_diff[0] != inf && min_diff[1] != inf);
-	if ( fabs(a-min_point[0]) < threshold || recurse >= max_recurse) {
+	if ( std::fabs(a-min_point[0]) < threshold || recurse >= max_recurse) {
 		return min_point[0];
 	}
 
 	// fix for closed curves to take their wrap-over into account
-	if (cv->IsClosed() && fabs(min_point[0]-min_point[1]) > cv->GetParametricRangeDelta()*0.5  ) {
+	if (cv->IsClosed() && std::fabs(min_point[0]-min_point[1]) > cv->GetParametricRangeDelta()*0.5  ) {
 		const Curve::ParamRange& range = cv->GetParametricRange();
 		const IfcFloat wrapdiff = (cv->Eval(range.first)-val).SquareLength();
 

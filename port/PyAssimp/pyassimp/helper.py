@@ -75,42 +75,51 @@ def get_bounding_box_for_node(node, bb_min, bb_max, transformation):
 
     return bb_min, bb_max
 
-
-
-def try_load_functions(library,dll,candidates):
-    """try to  functbind to aiImportFile and aiReleaseImport
+def try_load_functions(library_path, dll):
+    '''
+    Try to bind to aiImportFile and aiReleaseImport
     
-    library - path to current lib
-    dll - ctypes handle to it
-    candidates - receives matching candidates
-
-    They serve as signal functions to detect assimp,
-    also they're currently the only functions we need.
-    insert (library,aiImportFile,aiReleaseImport,dll) 
-    into 'candidates' if successful.
-
-    """
+    Arguments
+    ---------
+    library_path: path to current lib
+    dll:          ctypes handle to library
+    
+    Returns
+    ---------
+    If unsuccessful:
+        None
+    If successful:
+        Tuple containing (library_path, 
+                          load from filename function,
+                          load from memory function
+                          release function, 
+                          ctypes handle to assimp library)
+    '''
+    
     try:
-        load = dll.aiImportFile
-        release = dll.aiReleaseImport
+        load     = dll.aiImportFile
+        release  = dll.aiReleaseImport
+        load_mem = dll.aiImportFileFromMemory
     except AttributeError:
-        #OK, this is a library, but it has not the functions we need
-        pass
-    else:
-        #Library found!
-        from .structs import Scene
-        load.restype = POINTER(Scene)
-        
-        candidates.append((library, load, release, dll))
-
+        #OK, this is a library, but it doesn't have the functions we need
+        return None
+    
+    # library found!
+    from .structs import Scene
+    load.restype = POINTER(Scene)
+    load_mem.restype = POINTER(Scene)
+    return (library_path, load, load_mem, release, dll)
 
 def search_library():
-    """Loads the assimp-Library.
+    '''
+    Loads the assimp library. 
+    Throws exception AssimpError if no library_path is found
     
-    result (load-function, release-function)    
-    exception AssimpError if no library is found
-    
-        """
+    Returns: tuple, (load from filename function, 
+                     load from memory function,
+                     release function, 
+                     dll)
+    '''
     #this path
     folder = os.path.dirname(__file__)
 
@@ -121,7 +130,6 @@ def search_library():
         pass    
 
     candidates = []
-    
     # test every file
     for curfolder in [folder]+additional_dirs:
         for filename in os.listdir(curfolder):
@@ -132,23 +140,24 @@ def search_library():
                 os.path.splitext(filename)[-1].lower() not in ext_whitelist:
                 continue
 
-            library = os.path.join(curfolder, filename)
-            logger.debug('Try ' + library)
+            library_path = os.path.join(curfolder, filename)
+            logger.debug('Try ' + library_path)
             try:
-                dll = ctypes.cdll.LoadLibrary(library)
+                dll = ctypes.cdll.LoadLibrary(library_path)
             except Exception as e:
                 logger.warning(str(e))
                 # OK, this except is evil. But different OSs will throw different
                 # errors. So just ignore any errors.
                 continue
+            # see if the functions we need are in the dll
+            loaded = try_load_functions(library_path, dll)
+            if loaded: candidates.append(loaded)
 
-            try_load_functions(library,dll,candidates)
-    
     if not candidates:
         # no library found
         raise AssimpError("assimp library not found")
     else:
-        # get the newest library
+        # get the newest library_path
         candidates = map(lambda x: (os.lstat(x[0])[-2], x), candidates)
         res = max(candidates, key=operator.itemgetter(0))[1]
         logger.debug('Using assimp library located at ' + res[0])

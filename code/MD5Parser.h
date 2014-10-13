@@ -259,7 +259,7 @@ inline void ConvertQuaternion (const aiVector3D& in, aiQuaternion& out) {
 
 	if (t < 0.0f)
 		out.w = 0.0f;
-	else out.w = sqrt (t);
+	else out.w = std::sqrt (t);
 }
 
 // ---------------------------------------------------------------------------

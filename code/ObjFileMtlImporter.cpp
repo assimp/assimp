@@ -46,13 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "fast_atof.h"
+#include "ParsingUtils.h"
 
 namespace Assimp	{
 
 // Material specific token
-static const std::string DiffuseTexture      = "map_kd";
-static const std::string AmbientTexture      = "map_ka";
-static const std::string SpecularTexture     = "map_ks";
+static const std::string DiffuseTexture      = "map_Kd";
+static const std::string AmbientTexture      = "map_Ka";
+static const std::string SpecularTexture     = "map_Ks";
 static const std::string OpacityTexture      = "map_d";
 static const std::string EmmissiveTexture    = "map_emissive";
 static const std::string BumpTexture1        = "map_bump";
@@ -228,7 +229,7 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 	pColor->r = r;
 	
     // we have to check if color is default 0 with only one token
-    if( !isNewLine( *m_DataIt ) ) {
+    if( !IsLineEnd( *m_DataIt ) ) {
         m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
         m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
     }
@@ -257,7 +258,7 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 void ObjFileMtlImporter::createMaterial()
 {	
 	std::string line( "" );
-	while ( !isNewLine( *m_DataIt ) ) {
+    while( !IsLineEnd( *m_DataIt ) ) {
 		line += *m_DataIt;
 		++m_DataIt;
 	}

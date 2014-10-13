@@ -55,14 +55,15 @@ namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
 Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int offset)
-	: sbegin(sbegin)
+	: 
+	#ifdef DEBUG
+	contents(sbegin, static_cast<size_t>(send-sbegin)),
+	#endif
+	sbegin(sbegin)
 	, send(send)
 	, type(type)
 	, line(offset)
 	, column(BINARY_MARKER)
-#ifdef DEBUG
-	, contents(sbegin, static_cast<size_t>(send-sbegin))
-#endif
 {
 	ai_assert(sbegin);
 	ai_assert(send);

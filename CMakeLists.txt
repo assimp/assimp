@@ -45,6 +45,8 @@ set(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 set(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 set(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
+option(ASSIMP_ANDROID_JNIIOSYSTEM "Android JNI IOSystem support is active" OFF)
+
 if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
   add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
   # hide all not-exported symbols
@@ -111,7 +113,7 @@ IF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 	MESSAGE( STATUS "Building a non-boost version of Assimp." )
 ELSE ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 	SET( Boost_DETAILED_FAILURE_MSG ON )
-	SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" )	
+	SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" )	
 	FIND_PACKAGE( Boost )
 	IF ( NOT Boost_FOUND )
 		MESSAGE( FATAL_ERROR

@@ -316,7 +316,7 @@ public final class AiMesh {
      * 
      * @return the number of vertices.
      */
-    public int getNumVertives() {
+    public int getNumVertices() {
         return m_numVertices;
     }
     
@@ -432,7 +432,7 @@ public final class AiMesh {
      * Returns a buffer containing vertex positions.<p>
      * 
      * A vertex position consists of a triple of floats, the buffer will 
-     * therefore contain <code>3 * getNumVertives()</code> floats
+     * therefore contain <code>3 * getNumVertices()</code> floats
      * 
      * @return a native-order direct buffer, or null if no data is available
      */
@@ -503,7 +503,7 @@ public final class AiMesh {
      * used to check whether this is the case.<p>
      * 
      * Indices are stored as integers, the buffer will therefore contain 
-     * <code>3 * getNumVertives()</code> integers (3 indices per triangle)
+     * <code>3 * getNumVertices()</code> integers (3 indices per triangle)
      * 
      * @return a native-order direct buffer
      * @throws UnsupportedOperationException
@@ -523,7 +523,7 @@ public final class AiMesh {
      * Returns a buffer containing normals.<p>
      * 
      * A normal consists of a triple of floats, the buffer will 
-     * therefore contain <code>3 * getNumVertives()</code> floats
+     * therefore contain <code>3 * getNumVertices()</code> floats
      * 
      * @return a native-order direct buffer
      */
@@ -540,7 +540,7 @@ public final class AiMesh {
      * Returns a buffer containing tangents.<p>
      * 
      * A tangent consists of a triple of floats, the buffer will 
-     * therefore contain <code>3 * getNumVertives()</code> floats
+     * therefore contain <code>3 * getNumVertices()</code> floats
      * 
      * @return a native-order direct buffer
      */
@@ -557,7 +557,7 @@ public final class AiMesh {
      * Returns a buffer containing bitangents.<p>
      * 
      * A bitangent consists of a triple of floats, the buffer will 
-     * therefore contain <code>3 * getNumVertives()</code> floats
+     * therefore contain <code>3 * getNumVertices()</code> floats
      * 
      * @return a native-order direct buffer
      */
@@ -574,7 +574,7 @@ public final class AiMesh {
      * Returns a buffer containing vertex colors for a color set.<p>
      * 
      * A vertex color consists of 4 floats (red, green, blue and alpha), the 
-     * buffer will therefore contain <code>4 * getNumVertives()</code> floats
+     * buffer will therefore contain <code>4 * getNumVertices()</code> floats
      * 
      * @param colorset the color set
      * 
@@ -595,7 +595,7 @@ public final class AiMesh {
      * A texture coordinate consists of up to 3 floats (u, v, w). The actual
      * number can be queried via {@link #getNumUVComponents(int)}. The 
      * buffer will contain 
-     * <code>getNumUVComponents(coords) * getNumVertives()</code> floats
+     * <code>getNumUVComponents(coords) * getNumVertices()</code> floats
      * 
      * @param coords the texture coordinate set
      * 

@@ -248,6 +248,9 @@ inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma 
 	if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inf", 3) == 0)
 	{
 		out = std::numeric_limits<Real>::infinity();
+		if (inv) {
+			out = -out;
+		}
 		c += 3;
 		if ((c[0] == 'I' || c[0] == 'i') && ASSIMP_strincmp(c, "inity", 5) == 0)
 		{
@@ -309,7 +312,7 @@ inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma 
 		if (einv) {
 			exp = -exp;
 		}
-		f *= pow(static_cast<Real>(10.0), exp);
+		f *= std::pow(static_cast<Real>(10.0), exp);
 	}
 
 	if (inv) {

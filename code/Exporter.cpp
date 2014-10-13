@@ -80,6 +80,7 @@ void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*);
 void ExportScenePly(const char*,IOSystem*, const aiScene*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*);
+void ExportSceneAssxml(const char*, IOSystem*, const aiScene*);
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -121,6 +122,10 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
 	Exporter::ExportFormatEntry( "assbin", "Assimp Binary", "assbin" , &ExportSceneAssbin, 0),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
+	Exporter::ExportFormatEntry( "assxml", "Assxml Document", "assxml" , &ExportSceneAssxml, 0),
 #endif
 };
 

@@ -659,11 +659,15 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
 	) 
 {
+	// TODO: Resolve various problems with BMesh triangluation before re-enabling.
+	//       See issues #400, #373, #318  #315 and #132.
+#if defined(TODO_FIX_BMESH_CONVERSION)
 	BlenderBMeshConverter BMeshConverter( mesh );
 	if ( BMeshConverter.ContainsBMesh( ) )
 	{
 		mesh = BMeshConverter.TriangulateBMesh( );
 	}
+#endif
 
 	typedef std::pair<const int,size_t> MyPair;
 	if ((!mesh->totface && !mesh->totloop) || !mesh->totvert) {

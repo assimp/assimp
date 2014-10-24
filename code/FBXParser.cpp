@@ -376,7 +376,7 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
 			return SafeParse<float>(data+1, t.end());
 		}
 		else {
-			return SafeParse<double>(data+1, t.end());
+			return static_cast<float>( SafeParse<double>(data+1, t.end()) );
 		}
 	}
 

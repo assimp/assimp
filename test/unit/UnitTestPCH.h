@@ -8,9 +8,7 @@
 #include <AssimpPCH.h>
 #include <assimp/cimport.h>
 
-// CPPUNIT
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
 #include <math.h>
 

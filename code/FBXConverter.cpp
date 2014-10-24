@@ -381,8 +381,6 @@ private:
 		out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 		out_camera->mPosition = cam.Position();
 		out_camera->mLookAt = cam.InterestPosition() - out_camera->mPosition;
-
-		// BUG HERE cam.FieldOfView() returns 1.0f every time.  1.0f is default value.
 		out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
 	}
 
@@ -499,15 +497,15 @@ private:
 		bool is_id[3] = { true, true, true };
 
 		aiMatrix4x4 temp[3];
-		if(fabs(rotation.z) > angle_epsilon) {
+		if(std::fabs(rotation.z) > angle_epsilon) {
 			aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(rotation.z),temp[2]);
 			is_id[2] = false;
 		}
-		if(fabs(rotation.y) > angle_epsilon) {
+		if(std::fabs(rotation.y) > angle_epsilon) {
 			aiMatrix4x4::RotationY(AI_DEG_TO_RAD(rotation.y),temp[1]);
 			is_id[1] = false;
 		}
-		if(fabs(rotation.x) > angle_epsilon) {
+		if(std::fabs(rotation.x) > angle_epsilon) {
 			aiMatrix4x4::RotationX(AI_DEG_TO_RAD(rotation.x),temp[0]);
 			is_id[0] = false;
 		}
@@ -676,7 +674,7 @@ private:
 		}
 
 		const aiVector3D& Scaling = PropertyGet<aiVector3D>(props,"Lcl Scaling",ok);
-		if(ok && fabs(Scaling.SquareLength()-1.0f) > zero_epsilon) {
+		if(ok && std::fabs(Scaling.SquareLength()-1.0f) > zero_epsilon) {
 			aiMatrix4x4::Scaling(Scaling,chain[TransformationComp_Scaling]);
 		}
 
@@ -686,7 +684,7 @@ private:
 		}
 		
 		const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>(props, "GeometricScaling", ok);
-		if (ok && fabs(GeometricScaling.SquareLength() - 1.0f) > zero_epsilon) {
+		if (ok && std::fabs(GeometricScaling.SquareLength() - 1.0f) > zero_epsilon) {
 			aiMatrix4x4::Scaling(GeometricScaling, chain[TransformationComp_GeometricScaling]);
 		}
 		

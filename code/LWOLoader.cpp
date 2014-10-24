@@ -503,7 +503,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 	// Generate vertex normals. We have O(logn) for the binary lookup, which we need
 	// for n elements, thus the EXPECTED complexity is O(nlogn)
 	if (surface.mMaximumSmoothAngle < 3.f && !configSpeedFlag)	{
-		const float fLimit = cos(surface.mMaximumSmoothAngle);
+		const float fLimit = std::cos(surface.mMaximumSmoothAngle);
 
 		for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)	{
 			const aiFace& face = *begin;
@@ -787,7 +787,8 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 	CountVertsAndFacesLWO2(iNumVertices,iNumFaces,cursor,end);
 
 	// allocate the output array and copy face indices
-	if (iNumFaces)	{
+	if (iNumFaces)
+	{
 		cursor = (uint16_t*)mFileBuffer;
 
 		mCurLayer->mFaces.resize(iNumFaces,LWO::Face(type));
@@ -802,13 +803,18 @@ void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& face
 {
 	while (cursor < end && max--)
 	{
-		AI_LSWAP2P(cursor);
-		uint16_t numIndices = *cursor++;
+		uint16_t numIndices;
+		::memcpy(&numIndices, cursor++, 2);
+		AI_LSWAP2(numIndices);
 		numIndices &= 0x03FF;
-		verts += numIndices;++faces;
+
+		verts += numIndices;
+		++faces;
 
 		for(uint16_t i = 0; i < numIndices; i++)
+		{
 			ReadVSizedIntLWO2((uint8_t*&)cursor);
+		}
 	}
 }
 
@@ -817,10 +823,16 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
 	uint16_t*& cursor, 
 	const uint16_t* const end)
 {
-	while (cursor < end)	{
-
-		LWO::Face& face = *it++;;
-		if((face.mNumIndices = (*cursor++) & 0x03FF)) /* byte swapping has already been done */ {
+	while (cursor < end)
+	{
+		LWO::Face& face = *it++;
+		uint16_t numIndices;
+		::memcpy(&numIndices, cursor++, 2);
+		AI_LSWAP2(numIndices);
+		face.mNumIndices = numIndices & 0x03FF;
+		
+		if(face.mNumIndices) /* byte swapping has already been done */
+		{
 			face.mIndices = new unsigned int[face.mNumIndices];
 			for(unsigned int i = 0; i < face.mNumIndices; i++)
 			{
@@ -848,8 +860,8 @@ void LWOImporter::LoadLWO2PolygonTags(unsigned int length)
 	if (type != AI_LWO_SURF && type != AI_LWO_SMGP)
 		return;
 
-	while (mFileBuffer < end)	{
-
+	while (mFileBuffer < end)
+	{
 		unsigned int i = ReadVSizedIntLWO2(mFileBuffer) + mCurLayer->mFaceIDXOfs;
 		unsigned int j = GetU2();
 
@@ -1106,19 +1118,19 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 	// first - get the index of the clip
 	clip.idx = GetU4();
 
-	IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
-	switch (head->type)
+	IFF::SubChunkHeader head = IFF::LoadSubChunk(mFileBuffer);
+	switch (head.type)
 	{
 	case AI_LWO_STIL:
-		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,STIL,1);
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,STIL,1);
 
 		// "Normal" texture
-		GetS0(clip.path,head->length);
+		GetS0(clip.path,head.length);
 		clip.type = Clip::STILL;
 		break;
 
 	case AI_LWO_ISEQ:
-		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,ISEQ,16);
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,ISEQ,16);
 		// Image sequence. We'll later take the first.
 		{
 			uint8_t digits = GetU1();  mFileBuffer++;
@@ -1127,12 +1139,12 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 
 			std::string s;
 			std::ostringstream ss;
-			GetS0(s,head->length);
+			GetS0(s,head.length);
 
-			head->length -= (unsigned int)s.length()+1;
+			head.length -= (unsigned int)s.length()+1;
 			ss << s;
 			ss << std::setw(digits) << offset + start;
-			GetS0(s,head->length);
+			GetS0(s,head.length);
 			ss << s;
 			clip.path = ss.str();
 			clip.type = Clip::SEQ;
@@ -1148,7 +1160,7 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 		break;
 
 	case AI_LWO_XREF:
-		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,XREF,4);
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,XREF,4);
 
 		// Just a cross-reference to another CLIp
 		clip.type = Clip::REF;
@@ -1156,7 +1168,7 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
 		break;
 
 	case AI_LWO_NEGA:
-		AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,NEGA,2);
+		AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,NEGA,2);
 		clip.negate = (0 != GetU2());
 		break;
 
@@ -1194,17 +1206,17 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length)
 	while (true)
 	{
 		if (mFileBuffer + 6 >= end)break;
-		LE_NCONST IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+		LE_NCONST IFF::SubChunkHeader head = IFF::LoadSubChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
+		if (mFileBuffer + head.length > end)
 			throw DeadlyImportError("LWO2: Invalid envelope chunk length");
 
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
+		uint8_t* const next = mFileBuffer+head.length;
+		switch (head.type)
 		{
 			// Type & representation of the envelope
 		case AI_LWO_TYPE:
-			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TYPE,2);
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TYPE,2);
 			mFileBuffer++; // skip user format
 
 			// Determine type of envelope
@@ -1214,20 +1226,20 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length)
 
 			// precondition
 		case AI_LWO_PRE:
-			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,PRE,2);
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,PRE,2);
 			envelope.pre = (LWO::PrePostBehaviour)GetU2();
 			break;
 		
 			// postcondition
 		case AI_LWO_POST:
-			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,POST,2);
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,POST,2);
 			envelope.post = (LWO::PrePostBehaviour)GetU2();
 			break;
 
 			// keyframe
 		case AI_LWO_KEY: 
 			{
-			AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,KEY,8);
+			AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,KEY,8);
 			
 			envelope.keys.push_back(LWO::Key());
 			LWO::Key& key = envelope.keys.back();
@@ -1240,7 +1252,7 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length)
 			// interval interpolation
 		case AI_LWO_SPAN: 
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SPAN,4);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SPAN,4);
 				if (envelope.keys.size()<2)
 					DefaultLogger::get()->warn("LWO2: Unexpected SPAN chunk");
 				else {
@@ -1286,22 +1298,22 @@ void LWOImporter::LoadLWO2File()
 	while (true)
 	{
 		if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)break;
-		IFF::ChunkHeader* const head = IFF::LoadChunk(mFileBuffer);
+		const IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
+		if (mFileBuffer + head.length > end)
 		{
 			throw DeadlyImportError("LWO2: Chunk length points behind the file");
 			break;
 		}
-		uint8_t* const next = mFileBuffer+head->length;
+		uint8_t* const next = mFileBuffer+head.length;
 		unsigned int iUnnamed = 0;
 
-		if(!head->length) {
+		if(!head.length) {
 			mFileBuffer = next;
 			continue;
 		}
 
-		switch (head->type)
+		switch (head.type)
 		{
 			// new layer
 		case AI_LWO_LAYR:
@@ -1311,7 +1323,7 @@ void LWOImporter::LoadLWO2File()
 				LWO::Layer& layer = mLayers->back();
 				mCurLayer = &layer;
 
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LAYR,16);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,LAYR,16);
 
 				// layer index.
 				layer.mIndex = GetU2();
@@ -1327,7 +1339,7 @@ void LWOImporter::LoadLWO2File()
 				mCurLayer->mPivot.x = GetF4();
 				mCurLayer->mPivot.y = GetF4();
 				mCurLayer->mPivot.z = GetF4();
-				GetS0(layer.mName,head->length-16);
+				GetS0(layer.mName,head.length-16);
 
 				// if the name is empty, generate a default name
 				if (layer.mName.empty())	{
@@ -1360,7 +1372,7 @@ void LWOImporter::LoadLWO2File()
 					break;
 
 				unsigned int old = (unsigned int)mCurLayer->mTempPoints.size();
-				LoadLWOPoints(head->length);
+				LoadLWOPoints(head.length);
 				mCurLayer->mPointIDXOfs = old;
 				break;
 			}
@@ -1379,7 +1391,7 @@ void LWOImporter::LoadLWO2File()
 
 				if (mCurLayer->mTempPoints.empty())
 					DefaultLogger::get()->warn("LWO2: Unexpected VMAP chunk");
-				else LoadLWO2VertexMap(head->length,head->type == AI_LWO_VMAD);
+				else LoadLWO2VertexMap(head.length,head.type == AI_LWO_VMAD);
 				break;
 			}
 			// face list
@@ -1389,7 +1401,7 @@ void LWOImporter::LoadLWO2File()
 					break;
 
 				unsigned int old = (unsigned int)mCurLayer->mFaces.size();
-				LoadLWO2Polygons(head->length);
+				LoadLWO2Polygons(head.length);
 				mCurLayer->mFaceIDXOfs = old;
 				break;
 			}
@@ -1401,7 +1413,7 @@ void LWOImporter::LoadLWO2File()
 
 				if (mCurLayer->mFaces.empty())
 					DefaultLogger::get()->warn("LWO2: Unexpected PTAG");
-				else LoadLWO2PolygonTags(head->length);
+				else LoadLWO2PolygonTags(head.length);
 				break;
 			}
 			// list of tags
@@ -1409,28 +1421,28 @@ void LWOImporter::LoadLWO2File()
 			{
 				if (!mTags->empty())
 					DefaultLogger::get()->warn("LWO2: SRFS chunk encountered twice");
-				else LoadLWOTags(head->length);
+				else LoadLWOTags(head.length);
 				break;
 			}
 
 			// surface chunk
 		case AI_LWO_SURF:
 			{
-				LoadLWO2Surface(head->length);
+				LoadLWO2Surface(head.length);
 				break;
 			}
 
 			// clip chunk
 		case AI_LWO_CLIP:
 			{
-				LoadLWO2Clip(head->length);
+				LoadLWO2Clip(head.length);
 				break;
 			}
 
 			// envelope chunk
 		case AI_LWO_ENVL:
 			{
-				LoadLWO2Envelope(head->length);
+				LoadLWO2Envelope(head.length);
 				break;
 			}
 		}

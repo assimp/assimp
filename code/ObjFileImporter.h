@@ -91,8 +91,8 @@ private:
 		aiNode *pParent, aiScene* pScene, std::vector<aiMesh*> &MeshArray);
 
 	//!	\brief	Creates topology data like faces and meshes for the geometry.
-	void createTopology(const ObjFile::Model* pModel, const ObjFile::Object* pData,
-		unsigned int uiMeshIndex, aiMesh* pMesh);	
+    aiMesh *createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData,
+		unsigned int uiMeshIndex );	
 	
 	//!	\brief	Creates vertices from model.
 	void createVertexArray(const ObjFile::Model* pModel, const ObjFile::Object* pCurrentObject,

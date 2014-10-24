@@ -402,7 +402,9 @@ protected:
 // ------------------------------------------------------------------------------------------------
 inline float LWOImporter::GetF4()
 {
-	float f = *((float*)mFileBuffer);mFileBuffer += 4;
+	float f;
+	::memcpy(&f, mFileBuffer, 4);
+	mFileBuffer += 4;
 	AI_LSWAP4(f);
 	return f;
 }
@@ -410,7 +412,9 @@ inline float LWOImporter::GetF4()
 // ------------------------------------------------------------------------------------------------
 inline uint32_t LWOImporter::GetU4()
 {
-	uint32_t f = *((uint32_t*)mFileBuffer);mFileBuffer += 4;
+	uint32_t f;
+	::memcpy(&f, mFileBuffer, 4);
+	mFileBuffer += 4;
 	AI_LSWAP4(f);
 	return f;
 }
@@ -418,7 +422,9 @@ inline uint32_t LWOImporter::GetU4()
 // ------------------------------------------------------------------------------------------------
 inline uint16_t LWOImporter::GetU2()
 {
-	uint16_t f = *((uint16_t*)mFileBuffer);mFileBuffer += 2;
+	uint16_t f;
+	::memcpy(&f, mFileBuffer, 2);
+	mFileBuffer += 2;
 	AI_LSWAP2(f);
 	return f;
 }

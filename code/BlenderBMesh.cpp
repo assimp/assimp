@@ -65,7 +65,6 @@ BlenderBMeshConverter::BlenderBMeshConverter( const Mesh* mesh ):
 	BMesh( mesh ),
 	triMesh( NULL )
 {
-	AssertValidMesh( );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -143,9 +142,21 @@ void BlenderBMeshConverter::DestroyTriMesh( )
 void BlenderBMeshConverter::ConvertPolyToFaces( const MPoly& poly )
 {
 	const MLoop* polyLoop = &BMesh->mloop[ poly.loopstart ];
+
 	if ( poly.totloop == 3 || poly.totloop == 4 )
 	{
 		AddFace( polyLoop[ 0 ].v, polyLoop[ 1 ].v, polyLoop[ 2 ].v, poly.totloop == 4 ? polyLoop[ 3 ].v : 0 );
+
+		// UVs are optional, so only convert when present.
+		if ( BMesh->mloopuv.size() )
+		{
+			if ( (poly.loopstart + poly.totloop ) > static_cast<int>( BMesh->mloopuv.size() ) )
+			{
+				ThrowException( "BMesh uv loop array has incorrect size" );
+			}
+			const MLoopUV* loopUV = &BMesh->mloopuv[ poly.loopstart ];
+			AddTFace( loopUV[ 0 ].uv, loopUV[ 1 ].uv, loopUV[ 2 ].uv, poly.totloop == 4 ? loopUV[ 3 ].uv : 0 );
+		}
 	}
 	else if ( poly.totloop > 4 )
 	{
@@ -171,6 +182,22 @@ void BlenderBMeshConverter::AddFace( int v1, int v2, int v3, int v4 )
 	face.mat_nr = 0;
 	triMesh->mface.push_back( face );
 	triMesh->totface = triMesh->mface.size( );
+}
+
+// ------------------------------------------------------------------------------------------------
+void BlenderBMeshConverter::AddTFace( const float* uv1, const float *uv2, const float *uv3, const float* uv4 )
+{
+	MTFace mtface;
+	memcpy( &mtface.uv[ 0 ], uv1, sizeof(float) * 2 );
+	memcpy( &mtface.uv[ 1 ], uv2, sizeof(float) * 2 );
+	memcpy( &mtface.uv[ 2 ], uv3, sizeof(float) * 2 );
+	
+	if ( uv4 )
+	{
+		memcpy( &mtface.uv[ 3 ], uv4, sizeof(float) * 2 );
+	}
+	
+	triMesh->mtface.push_back( mtface );
 }
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

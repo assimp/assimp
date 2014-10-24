@@ -303,20 +303,20 @@ void InsertWindowContours(const ContourVector& contours,
 			const IfcVector2& v = contour[n];
 
 			bool hit = false;
-			if (fabs(v.x-bb.first.x)<epsilon) {
+			if (std::fabs(v.x-bb.first.x)<epsilon) {
 				edge.x = bb.first.x;
 				hit = true;
 			}
-			else if (fabs(v.x-bb.second.x)<epsilon) {
+			else if (std::fabs(v.x-bb.second.x)<epsilon) {
 				edge.x = bb.second.x;
 				hit = true;
 			}
 
-			if (fabs(v.y-bb.first.y)<epsilon) {
+			if (std::fabs(v.y-bb.first.y)<epsilon) {
 				edge.y = bb.first.y;
 				hit = true;
 			}
-			else if (fabs(v.y-bb.second.y)<epsilon) {
+			else if (std::fabs(v.y-bb.second.y)<epsilon) {
 				edge.y = bb.second.y;
 				hit = true;
 			}
@@ -343,17 +343,17 @@ void InsertWindowContours(const ContourVector& contours,
 
 						IfcVector2 corner = edge;
 
-						if (fabs(contour[last_hit].x-bb.first.x)<epsilon) {
+						if (std::fabs(contour[last_hit].x-bb.first.x)<epsilon) {
 							corner.x = bb.first.x;
 						}
-						else if (fabs(contour[last_hit].x-bb.second.x)<epsilon) {
+						else if (std::fabs(contour[last_hit].x-bb.second.x)<epsilon) {
 							corner.x = bb.second.x;
 						}
 
-						if (fabs(contour[last_hit].y-bb.first.y)<epsilon) {
+						if (std::fabs(contour[last_hit].y-bb.first.y)<epsilon) {
 							corner.y = bb.first.y;
 						}
-						else if (fabs(contour[last_hit].y-bb.second.y)<epsilon) {
+						else if (std::fabs(contour[last_hit].y-bb.second.y)<epsilon) {
 							corner.y = bb.second.y;
 						}
 
@@ -590,10 +590,10 @@ bool BoundingBoxesAdjacent(const BoundingBox& bb, const BoundingBox& ibb)
 {
 	// TODO: I'm pretty sure there is a much more compact way to check this
 	const IfcFloat epsilon = 1e-5f;
-	return	(fabs(bb.second.x - ibb.first.x) < epsilon && bb.first.y <= ibb.second.y && bb.second.y >= ibb.first.y) ||
-		(fabs(bb.first.x - ibb.second.x) < epsilon && ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) || 
-		(fabs(bb.second.y - ibb.first.y) < epsilon && bb.first.x <= ibb.second.x && bb.second.x >= ibb.first.x) ||
-		(fabs(bb.first.y - ibb.second.y) < epsilon && ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x);
+	return	(std::fabs(bb.second.x - ibb.first.x) < epsilon && bb.first.y <= ibb.second.y && bb.second.y >= ibb.first.y) ||
+		(std::fabs(bb.first.x - ibb.second.x) < epsilon && ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) || 
+		(std::fabs(bb.second.y - ibb.first.y) < epsilon && bb.first.x <= ibb.second.x && bb.second.x >= ibb.first.x) ||
+		(std::fabs(bb.first.y - ibb.second.y) < epsilon && ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -615,11 +615,11 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 
 	static const IfcFloat inf = std::numeric_limits<IfcFloat>::infinity();
 
-	if (!(n0_to_m0.SquareLength() < e*e || fabs(n0_to_m0 * n0_to_n1) / (n0_to_m0.Length() * n0_to_n1.Length()) > 1-1e-5 )) {
+	if (!(n0_to_m0.SquareLength() < e*e || std::fabs(n0_to_m0 * n0_to_n1) / (n0_to_m0.Length() * n0_to_n1.Length()) > 1-1e-5 )) {
 		return false;
 	}
 
-	if (!(n1_to_m1.SquareLength() < e*e || fabs(n1_to_m1 * n0_to_n1) / (n1_to_m1.Length() * n0_to_n1.Length()) > 1-1e-5 )) {
+	if (!(n1_to_m1.SquareLength() < e*e || std::fabs(n1_to_m1 * n0_to_n1) / (n1_to_m1.Length() * n0_to_n1.Length()) > 1-1e-5 )) {
 		return false;
 	}
 
@@ -631,14 +631,14 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 	// the higher absolute difference is big enough as to avoid
 	// divisions by zero, the case 0/0 ~ infinity is detected and
 	// handled separately.
-	if(fabs(n0_to_n1.x) > fabs(n0_to_n1.y)) {
+	if(std::fabs(n0_to_n1.x) > std::fabs(n0_to_n1.y)) {
 		s0 = n0_to_m0.x / n0_to_n1.x;
 		s1 = n0_to_m1.x / n0_to_n1.x;
 
-		if (fabs(s0) == inf && fabs(n0_to_m0.x) < smalle) {
+		if (std::fabs(s0) == inf && std::fabs(n0_to_m0.x) < smalle) {
 			s0 = 0.;
 		}
-		if (fabs(s1) == inf && fabs(n0_to_m1.x) < smalle) {
+		if (std::fabs(s1) == inf && std::fabs(n0_to_m1.x) < smalle) {
 			s1 = 0.;
 		}
 	}
@@ -646,10 +646,10 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 		s0 = n0_to_m0.y / n0_to_n1.y;
 		s1 = n0_to_m1.y / n0_to_n1.y;
 
-		if (fabs(s0) == inf && fabs(n0_to_m0.y) < smalle) {
+		if (std::fabs(s0) == inf && std::fabs(n0_to_m0.y) < smalle) {
 			s0 = 0.;
 		}
-		if (fabs(s1) == inf && fabs(n0_to_m1.y) < smalle) {
+		if (std::fabs(s1) == inf && std::fabs(n0_to_m1.y) < smalle) {
 			s1 = 0.;
 		}
 	}
@@ -664,7 +664,7 @@ bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 	s0 = std::min(1.0,s0);
 	s1 = std::min(1.0,s1);
 
-	if (fabs(s1-s0) < e) {
+	if (std::fabs(s1-s0) < e) {
 		return false;
 	}
 
@@ -755,7 +755,7 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 AI_FORCE_INLINE bool LikelyBorder(const IfcVector2& vdelta)
 {
 	const IfcFloat dot_point_epsilon = static_cast<IfcFloat>(1e-5);
-	return fabs(vdelta.x * vdelta.y) < dot_point_epsilon;
+	return std::fabs(vdelta.x * vdelta.y) < dot_point_epsilon;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -812,9 +812,9 @@ void FindBorderContours(ContourVector::iterator current)
 // ------------------------------------------------------------------------------------------------
 AI_FORCE_INLINE bool LikelyDiagonal(IfcVector2 vdelta)
 {
-	vdelta.x = fabs(vdelta.x);
-	vdelta.y = fabs(vdelta.y);
-	return (fabs(vdelta.x-vdelta.y) < 0.8 * std::max(vdelta.x, vdelta.y));
+	vdelta.x = std::fabs(vdelta.x);
+	vdelta.y = std::fabs(vdelta.y);
+	return (std::fabs(vdelta.x-vdelta.y) < 0.8 * std::max(vdelta.x, vdelta.y));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -926,7 +926,7 @@ size_t CloseWindows(ContourVector& contours,
 				/* debug code to check for unwanted diagonal lines in window contours
 				if (cit != cbegin) {
 					const IfcVector2& vdelta = proj_point - last_proj;
-					if (fabs(vdelta.x-vdelta.y) < 0.5 * std::max(vdelta.x, vdelta.y)) {
+					if (std::fabs(vdelta.x-vdelta.y) < 0.5 * std::max(vdelta.x, vdelta.y)) {
 						//continue;
 					}
 				} */
@@ -1065,7 +1065,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 	}
 #ifdef ASSIMP_BUILD_DEBUG
 	const IfcFloat det = m.Determinant();
-	ai_assert(fabs(det-1) < 1e-5);
+	ai_assert(std::fabs(det-1) < 1e-5);
 #endif
 
 	IfcFloat zcoord = 0;
@@ -1085,7 +1085,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 		// XXX this should be guarded, but we somehow need to pick a suitable
 		// epsilon
 		// if(coord != -1.0f) {
-		//	assert(fabs(coord - vv.z) < 1e-3f);
+		//	assert(std::fabs(coord - vv.z) < 1e-3f);
 		// }
 		zcoord += vv.z;
 		vmin = std::min(vv, vmin);
@@ -1125,7 +1125,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 		const IfcVector3& vv = m * x;
 
 		out_contour2.push_back(IfcVector2(vv.x,vv.y));
-		ai_assert(fabs(vv.z) < vmax.z + 1e-8);
+		ai_assert(std::fabs(vv.z) < vmax.z + 1e-8);
 	} 
 
 	for(size_t i = 0; i < out_contour.size(); ++i) {
@@ -1188,9 +1188,9 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		bool is_2d_source = false;
 		if (opening.profileMesh2D && norm_extrusion_dir.SquareLength() > 0) {
 			
-			if(fabs(norm_extrusion_dir * wall_extrusion_axis_norm) < 0.1) {
+			if(std::fabs(norm_extrusion_dir * wall_extrusion_axis_norm) < 0.1) {
 				// horizontal extrusion
-				if (fabs(norm_extrusion_dir * nor) > 0.9) {
+				if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
 					profile_data = opening.profileMesh2D.get();
 					is_2d_source = true;
 				}
@@ -1200,7 +1200,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 			}
 			else {
 				// vertical extrusion
-				if (fabs(norm_extrusion_dir * nor) > 0.9) {
+				if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
 					continue;
 				}
 				continue;
@@ -1289,7 +1289,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 			ai_assert(!is_2d_source);
 			const IfcVector2 area = vpmax-vpmin;
 			const IfcVector2 area2 = vpmax2-vpmin2;
-			if (temp_contour.size() <= 2 || fabs(area2.x * area2.y) > fabs(area.x * area.y)) {
+			if (temp_contour.size() <= 2 || std::fabs(area2.x * area2.y) > std::fabs(area.x * area.y)) {
 				temp_contour.swap(temp_contour2);
 
 				vpmax = vpmax2;
@@ -1301,7 +1301,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		}
 
 		// TODO: This epsilon may be too large
-		const IfcFloat epsilon = fabs(dmax-dmin) * 0.0001;
+		const IfcFloat epsilon = std::fabs(dmax-dmin) * 0.0001;
 		if (!is_2d_source && check_intersection && (0 < dmin-epsilon || 0 > dmax+epsilon)) {
 			continue;
 		}
@@ -1310,7 +1310,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 		// Skip over very small openings - these are likely projection errors
 		// (i.e. they don't belong to this side of the wall)
-		if(fabs(vpmax.x - vpmin.x) * fabs(vpmax.y - vpmin.y) < static_cast<IfcFloat>(1e-10)) {
+		if(std::fabs(vpmax.x - vpmin.x) * std::fabs(vpmax.y - vpmin.y) < static_cast<IfcFloat>(1e-10)) {
 			continue;
 		}
 		std::vector<TempOpening*> joined_openings(1, &opening);
@@ -1480,7 +1480,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		// XXX this should be guarded, but we somehow need to pick a suitable
 		// epsilon
 		// if(coord != -1.0f) {
-		//	assert(fabs(coord - vv.z) < 1e-3f);
+		//	assert(std::fabs(coord - vv.z) < 1e-3f);
 		// }
 
 		coord = vv.z;
@@ -1515,7 +1515,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		BOOST_FOREACH(const TempOpening& t,openings) {
 			const IfcVector3& outernor = nors[c++];
 			const IfcFloat dot = nor * outernor;
-			if (fabs(dot)<1.f-1e-6f) {
+			if (std::fabs(dot)<1.f-1e-6f) {
 				continue;
 			}
 
@@ -1529,7 +1529,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 			BOOST_FOREACH(const IfcVector3& xx, t.profileMesh->verts) {
 				IfcVector3 vv = m *  xx, vv_extr = m * (xx + t.extrusionDir);
 				
-				const bool is_extruded_side = fabs(vv.z - coord) > fabs(vv_extr.z - coord);
+				const bool is_extruded_side = std::fabs(vv.z - coord) > std::fabs(vv_extr.z - coord);
 				if (first) {
 					first = false;
 					if (dot > 0.f) {

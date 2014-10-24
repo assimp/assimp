@@ -58,30 +58,31 @@ void LWOImporter::LoadLWOBFile()
 	while (running)
 	{
 		if (mFileBuffer + sizeof(IFF::ChunkHeader) > end)break;
-		LE_NCONST IFF::ChunkHeader* const head = IFF::LoadChunk(mFileBuffer);
+		const IFF::ChunkHeader head = IFF::LoadChunk(mFileBuffer);
 
-		if (mFileBuffer + head->length > end)
+		if (mFileBuffer + head.length > end)
 		{
 			throw DeadlyImportError("LWOB: Invalid chunk length");
 			break;
 		}
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
+		uint8_t* const next = mFileBuffer+head.length;
+		switch (head.type)
 		{
 			// vertex list
 		case AI_LWO_PNTS:
 			{
 				if (!mCurLayer->mTempPoints.empty())
 					DefaultLogger::get()->warn("LWO: PNTS chunk encountered twice");
-				else LoadLWOPoints(head->length);
+				else LoadLWOPoints(head.length);
 				break;
 			}
 			// face list
 		case AI_LWO_POLS:
 			{
+
 				if (!mCurLayer->mFaces.empty())
 					DefaultLogger::get()->warn("LWO: POLS chunk encountered twice");
-				else LoadLWOBPolygons(head->length);
+				else LoadLWOBPolygons(head.length);
 				break;
 			}
 			// list of tags
@@ -89,14 +90,14 @@ void LWOImporter::LoadLWOBFile()
 			{
 				if (!mTags->empty())
 					DefaultLogger::get()->warn("LWO: SRFS chunk encountered twice");
-				else LoadLWOTags(head->length);
+				else LoadLWOTags(head.length);
 				break;
 			}
 
 			// surface chunk
 		case AI_LWO_SURF:
 			{
-				LoadLWOBSurface(head->length);
+				LoadLWOBSurface(head.length);
 				break;
 			}
 		}
@@ -137,14 +138,17 @@ void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& face
 {
 	while (cursor < end && max--)
 	{
-		uint16_t numIndices = *cursor++;
-		verts += numIndices;faces++;
+		uint16_t numIndices;
+		::memcpy(&numIndices, cursor++, 2);
+		verts += numIndices;
+		faces++;
 		cursor += numIndices;
-		int16_t surface = *cursor++;
+		int16_t surface;
+		::memcpy(&surface, cursor++, 2);
 		if (surface < 0)
 		{
 			// there are detail polygons
-			numIndices = *cursor++;
+			::memcpy(&numIndices, cursor++, 2);
 			CountVertsAndFacesLWOB(verts,faces,cursor,end,numIndices);
 		}
 	}
@@ -159,13 +163,22 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
 	while (cursor < end && max--)
 	{
 		LWO::Face& face = *it;++it;
-		if((face.mNumIndices = *cursor++))
+		uint16_t numIndices;
+		::memcpy(&numIndices, cursor++, 2);
+		face.mNumIndices = numIndices;
+		if(face.mNumIndices)
 		{
-			if (cursor + face.mNumIndices >= end)break;
+			if (cursor + face.mNumIndices >= end)
+			{
+				break;
+			}
 			face.mIndices = new unsigned int[face.mNumIndices];
 			for (unsigned int i = 0; i < face.mNumIndices;++i)
 			{
-				unsigned int & mi = face.mIndices[i] = *cursor++;
+				unsigned int & mi = face.mIndices[i];
+				uint16_t index;
+				::memcpy(&index, cursor++, 2);
+				mi = index;
 				if (mi > mCurLayer->mTempPoints.size())
 				{
 					DefaultLogger::get()->warn("LWOB: face index is out of range");
@@ -174,14 +187,19 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
 			}
 		}
 		else DefaultLogger::get()->warn("LWOB: Face has 0 indices");
-		int16_t surface = *cursor++;
+		int16_t surface;
+		::memcpy(&surface, cursor++, 2);
 		if (surface < 0)
 		{
 			surface = -surface;
 
 			// there are detail polygons. 
-			const uint16_t numPolygons = *cursor++;
-			if (cursor < end)CopyFaceIndicesLWOB(it,cursor,end,numPolygons);
+			uint16_t numPolygons;
+			::memcpy(&numPolygons, cursor++, 2);
+			if (cursor < end)
+			{
+				CopyFaceIndicesLWOB(it,cursor,end,numPolygons);
+			}
 		}
 		face.surfaceIndex = surface-1;
 	}
@@ -235,7 +253,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		if (mFileBuffer + 6 >= end)
 			break;
 
-		IFF::SubChunkHeader* const head = IFF::LoadSubChunk(mFileBuffer);
+		IFF::SubChunkHeader head = IFF::LoadSubChunk(mFileBuffer);
 
 		/*  A single test file (sonycam.lwo) seems to have invalid surface chunks.
 		 *  I'm assuming it's the fault of a single, unknown exporter so there are
@@ -244,18 +262,18 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		 *  We don't break if the chunk limit is exceeded. Instead, we're computing 
 		 *  how much storage is actually left and work with this value from now on.
 		 */
-		if (mFileBuffer + head->length > end) {
+		if (mFileBuffer + head.length > end) {
 			DefaultLogger::get()->error("LWOB: Invalid surface chunk length. Trying to continue.");
-			head->length = (uint16_t) (end - mFileBuffer);
+			head.length = (uint16_t) (end - mFileBuffer);
 		}
 
-		uint8_t* const next = mFileBuffer+head->length;
-		switch (head->type)
+		uint8_t* const next = mFileBuffer+head.length;
+		switch (head.type)
 		{
 		// diffuse color
 		case AI_LWO_COLR:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,COLR,3);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,COLR,3);
 				surf.mColor.r = GetU1() / 255.0f;
 				surf.mColor.g = GetU1() / 255.0f;
 				surf.mColor.b = GetU1() / 255.0f;
@@ -264,35 +282,35 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// diffuse strength ...
 		case AI_LWO_DIFF:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,DIFF,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,DIFF,2);
 				surf.mDiffuseValue = GetU2() / 255.0f;
 				break;
 			}
 		// specular strength ... 
 		case AI_LWO_SPEC:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SPEC,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SPEC,2);
 				surf.mSpecularValue = GetU2() / 255.0f;
 				break;
 			}
 		// luminosity ... 
 		case AI_LWO_LUMI:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,LUMI,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,LUMI,2);
 				surf.mLuminosity = GetU2() / 255.0f;
 				break;
 			}
 		// transparency
 		case AI_LWO_TRAN:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TRAN,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TRAN,2);
 				surf.mTransparency = GetU2() / 255.0f;
 				break;
 			}
 		// surface flags
 		case AI_LWO_FLAG:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,FLAG,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,FLAG,2);
 				uint16_t flag = GetU2();
 				if (flag & 0x4 )   surf.mMaximumSmoothAngle = 1.56207f;
 				if (flag & 0x8 )   surf.mColorHighlights = 1.f;
@@ -302,14 +320,14 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// maximum smoothing angle
 		case AI_LWO_SMAN:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,SMAN,4);
-				surf.mMaximumSmoothAngle = fabs( GetF4() );
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SMAN,4);
+				surf.mMaximumSmoothAngle = std::fabs( GetF4() );
 				break;
 			}
 		// glossiness
 		case AI_LWO_GLOS:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,GLOS,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,GLOS,2);
 				surf.mGlossiness = (float)GetU2();
 				break;
 			}
@@ -317,42 +335,42 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		case AI_LWO_CTEX:
 			{
 				pTex = SetupNewTextureLWOB(surf.mColorTextures,
-					head->length);
+					head.length);
 				break;
 			}
 		// diffuse texture
 		case AI_LWO_DTEX:
 			{
 				pTex = SetupNewTextureLWOB(surf.mDiffuseTextures,
-					head->length);
+					head.length);
 				break;
 			}
 		// specular texture
 		case AI_LWO_STEX:
 			{
 				pTex = SetupNewTextureLWOB(surf.mSpecularTextures,
-					head->length);
+					head.length);
 				break;
 			}
 		// bump texture
 		case AI_LWO_BTEX:
 			{
 				pTex = SetupNewTextureLWOB(surf.mBumpTextures,
-					head->length);
+					head.length);
 				break;
 			}
 		// transparency texture
 		case AI_LWO_TTEX:
 			{
 				pTex = SetupNewTextureLWOB(surf.mOpacityTextures,
-					head->length);
+					head.length);
 				break;
 			}
 		// texture path
 		case AI_LWO_TIMG:
 			{
 				if (pTex)	{
-					GetS0(pTex->mFileName,head->length);	
+					GetS0(pTex->mFileName,head.length);	
 				}
 				else DefaultLogger::get()->warn("LWOB: Unexpected TIMG chunk");
 				break;
@@ -360,7 +378,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// texture strength
 		case AI_LWO_TVAL:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TVAL,1);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TVAL,1);
 				if (pTex)	{
 					pTex->mStrength = (float)GetU1()/ 255.f;
 				}
@@ -370,7 +388,7 @@ void LWOImporter::LoadLWOBSurface(unsigned int size)
 		// texture flags
 		case AI_LWO_TFLG:
 			{
-				AI_LWO_VALIDATE_CHUNK_LENGTH(head->length,TFLG,2);
+				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,TFLG,2);
 
 				if (pTex) 
 				{

@@ -71,7 +71,7 @@ TReal aiVector2t<TReal>::SquareLength() const {
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
 TReal aiVector2t<TReal>::Length() const {
-	return ::sqrt( SquareLength());
+	return std::sqrt( SquareLength());
 }
 
 // ------------------------------------------------------------------------------------------------

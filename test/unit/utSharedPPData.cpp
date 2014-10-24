@@ -1,9 +1,23 @@
-
 #include "UnitTestPCH.h"
-#include "utSharedPPData.h"
+
+#include <assimp/scene.h>
+#include <BaseProcess.h>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION (SharedPPDataTest);
+using namespace std;
+using namespace Assimp;
+
+class SharedPPDataTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+
+	SharedPostProcessInfo* shared;
+};
 
 static bool destructed;
 
@@ -17,50 +31,55 @@ struct TestType
 
 
 // ------------------------------------------------------------------------------------------------
-void SharedPPDataTest :: setUp (void)
+void SharedPPDataTest::SetUp()
 {
 	shared = new SharedPostProcessInfo();
 	destructed = false;
 }
 
 // ------------------------------------------------------------------------------------------------
-void SharedPPDataTest :: tearDown (void)
+void SharedPPDataTest::TearDown()
 {
-	
+
 }
 
 // ------------------------------------------------------------------------------------------------
-void  SharedPPDataTest :: testPODProperty (void)
+TEST_F(SharedPPDataTest, testPODProperty)
 {
 	int i = 5;
 	shared->AddProperty("test",i);
 	int o;
-	CPPUNIT_ASSERT(shared->GetProperty("test",o) && 5 == o);
-	CPPUNIT_ASSERT(!shared->GetProperty("test2",o) && 5 == o);
+	EXPECT_TRUE(shared->GetProperty("test",o));
+	EXPECT_EQ(5, o);
+	EXPECT_FALSE(shared->GetProperty("test2",o));
+	EXPECT_EQ(5, o);
 
 	float f = 12.f, m;
 	shared->AddProperty("test",f);
-	CPPUNIT_ASSERT(shared->GetProperty("test",m) && 12.f == m);
+	EXPECT_TRUE(shared->GetProperty("test",m));
+	EXPECT_EQ(12.f, m);
 }
 
 // ------------------------------------------------------------------------------------------------
-void  SharedPPDataTest :: testPropertyPointer (void)
+TEST_F(SharedPPDataTest, testPropertyPointer)
 {
 	int *i = new int[35];
 	shared->AddProperty("test16",i);
 	int* o;
-	CPPUNIT_ASSERT(shared->GetProperty("test16",o) && o == i);
+	EXPECT_TRUE(shared->GetProperty("test16",o));
+	EXPECT_EQ(i, o);
 	shared->RemoveProperty("test16");
-	CPPUNIT_ASSERT(!shared->GetProperty("test16",o));
+	EXPECT_FALSE(shared->GetProperty("test16",o));
 }
 
 // ------------------------------------------------------------------------------------------------
-void  SharedPPDataTest :: testPropertyDeallocation (void)
+TEST_F(SharedPPDataTest, testPropertyDeallocation)
 {
 	TestType *out, * pip = new TestType();
 	shared->AddProperty("quak",pip);
-	CPPUNIT_ASSERT(shared->GetProperty("quak",out) && out == pip);
+	EXPECT_TRUE(shared->GetProperty("quak",out));
+	EXPECT_EQ(pip, out);
 
 	delete shared;
-	CPPUNIT_ASSERT(destructed);
+	EXPECT_TRUE(destructed);
 }

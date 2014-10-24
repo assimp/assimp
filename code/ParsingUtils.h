@@ -98,7 +98,7 @@ AI_FORCE_INLINE bool IsSpace( char_t in)
 template <class char_t>
 AI_FORCE_INLINE bool IsLineEnd( char_t in)
 {
-	return (in == (char_t)'\r' || in == (char_t)'\n' || in == (char_t)'\0');
+	return (in==(char_t)'\r'||in==(char_t)'\n'||in==(char_t)'\0'||in==(char_t)'\f');
 }
 
 // ---------------------------------------------------------------------------------

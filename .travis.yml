@@ -1,5 +1,5 @@
 before_install:
-  - sudo apt-get install cmake libcppunit-dev
+  - sudo apt-get install cmake python3
 
 env:
   - TRAVIS_NO_EXPORT=YES
@@ -16,6 +16,14 @@ compiler:
 script:
   - cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD
   - make
+  - sudo make install
+  - sudo ldconfig
   - cd test/unit
   - ../../bin/unit
+  - cd ../regression
+  - chmod 755 run.py
+  - ./run.py
+  - echo "=========================================================="
+  - echo "REGRESSION TEST FAILS (results/run_regression_suite_failures.csv)"
+  - cat ../results/run_regression_suite_failures.csv
 

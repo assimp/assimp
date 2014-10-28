@@ -48,6 +48,19 @@ namespace OpenGEX {
 
 class OpenGEXParser {
 public:
+    enum TokenType {
+        None = 0,
+        MetricNode,
+        GeometryNode,
+        GeometryObject,
+        Material,
+        BracketIn,
+        BracketOut,
+        CurlyBracketIn,
+        CurlyBracketOut,
+    };
+
+public:
     OpenGEXParser( const std::vector<char> &buffer );
     ~OpenGEXParser();
     void parse();
@@ -62,8 +75,8 @@ protected:
     bool getStringData( std::string &data );
     bool getFloatData( size_t num, float *data );
     bool getNodeData();
-    bool getMetricAttribute( std::string &attribName );
-    bool onMetricNode();
+    bool getMetricAttributeKey( std::string &attribName, std::string &value );
+    bool onMetricNode( const std::string &attribName );
 
 private:
     OpenGEXParser( const OpenGEXParser & );
@@ -71,6 +84,7 @@ private:
 
 private:
     const std::vector<char> &m_buffer;
+    std::vector<TokenType> m_nodeTypeStack;
     size_t m_index;
     size_t m_buffersize;
 };

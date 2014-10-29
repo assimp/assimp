@@ -161,9 +161,6 @@ private:
 	//! Per mesh info
 	std::vector<MeshInfo> meshes;
 
-	//! Next output mesh
-	aiMesh* mesh;
-
 	//! Output meshes
 	std::vector<aiMesh*> output;
 

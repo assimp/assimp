@@ -173,7 +173,6 @@ public:
 	// --------------------------------------------------
 	Line(const IfcLine& entity, ConversionData& conv) 
 		: Curve(entity,conv)
-		, entity(entity)
 	{
 		ConvertCartesianPoint(p,entity.Pnt);
 		ConvertVector(v,entity.Dir);
@@ -221,7 +220,6 @@ public:
 	}
 
 private:
-	const IfcLine& entity;
 	IfcVector3 p,v;
 };
 
@@ -238,7 +236,6 @@ public:
 	// --------------------------------------------------
 	CompositeCurve(const IfcCompositeCurve& entity, ConversionData& conv) 
 		: BoundedCurve(entity,conv)
-		, entity(entity)
 		, total()
 	{
 		curves.reserve(entity.Segments.size());
@@ -331,7 +328,6 @@ public:
 	}
 
 private:
-	const IfcCompositeCurve& entity;
 	std::vector< CurveEntry > curves;
 
 	IfcFloat total;
@@ -349,8 +345,6 @@ public:
 	// --------------------------------------------------
 	TrimmedCurve(const IfcTrimmedCurve& entity, ConversionData& conv) 
 		: BoundedCurve(entity,conv)
-		, entity(entity)
-		, ok()
 	{
 		base = boost::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
 
@@ -448,11 +442,9 @@ private:
 
 
 private:
-	const IfcTrimmedCurve& entity;
 	ParamRange range;
 	IfcFloat maxval;
 	bool agree_sense;
-	bool ok;
 
 	boost::shared_ptr<const Curve> base;
 };
@@ -469,7 +461,6 @@ public:
 	// --------------------------------------------------
 	PolyLine(const IfcPolyline& entity, ConversionData& conv) 
 		: BoundedCurve(entity,conv)
-		, entity(entity)
 	{
 		points.reserve(entity.Points.size());
 
@@ -507,7 +498,6 @@ public:
 	}
 
 private:
-	const IfcPolyline& entity;
 	std::vector<IfcVector3> points;
 };
 

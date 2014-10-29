@@ -72,9 +72,7 @@ private:
 	void WriteMeshBinary(const aiMesh* m);
 
 private:
-
 	const std::string filename;
-	const aiScene* const pScene;
 
 	// this endl() doesn't flush() the stream
 	const std::string endl;

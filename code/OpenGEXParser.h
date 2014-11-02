@@ -87,6 +87,7 @@ public:
 protected:
     std::string getNextToken();
     bool skipComments();
+    void readUntilEndOfLine();
     bool parseNextNode();
     bool getNodeHeader( std::string &name );
     bool getBracketOpen();

@@ -190,6 +190,17 @@ bool OpenGEXParser::skipComments() {
 }
 
 //------------------------------------------------------------------------------------------------
+void OpenGEXParser::readUntilEndOfLine() {
+    while( !IsLineEnd( m_buffer[ m_index ] ) ) {
+        ++m_index;
+    }
+    ++m_index;
+    if( IsLineEnd( m_buffer[ m_index ] ) ) {
+        ++m_index;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 bool OpenGEXParser::parseNextNode() {
     std::string token( getNextToken() );
     std::string rootNodeName, nodeType;
@@ -202,8 +213,11 @@ bool OpenGEXParser::parseNextNode() {
         if( !getNodeData( nodeType ) ) {
             return false;
         }
+        
+        readUntilEndOfLine();
 
         m_nodeTypeStack.pop_back();
+
     }
 
     return true;
@@ -329,21 +343,19 @@ bool OpenGEXParser::getMetricAttributeKey( std::string &attribName ) {
 
 //------------------------------------------------------------------------------------------------
 bool OpenGEXParser::onMetricNode( const std::string &attribName ) {
+    float value( 0.0f );
     bool success( true );
     if( "distance" == attribName ) {
-        float distance( 0.0f );
-        if( getFloatData( 1, &distance ) ) {
-            m_model.m_metrics.m_distance = distance;
+        if( getFloatData( 1, &value ) ) {
+            m_model.m_metrics.m_distance = value;
         }
     } else if( "angle" == attribName ) {
-        float angle( 0.0f );
-        if( getFloatData( 1, &angle ) ) {
-            m_model.m_metrics.m_angle = angle;
+        if( getFloatData( 1, &value ) ) {
+            m_model.m_metrics.m_angle = value;
         }
     } else if( "time" == attribName ) {
-        float time( 0.0f );
-        if( getFloatData( 1, &time ) ) {
-            m_model.m_metrics.m_time = time;
+        if( getFloatData( 1, &value ) ) {
+            m_model.m_metrics.m_time = value;
         }
     } else if( "up" == attribName ) {
         std::string up;

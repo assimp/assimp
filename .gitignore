@@ -47,3 +47,4 @@ test/gtest/src/gtest-stamp/gtest-build.cmake
 test/gtest/src/gtest-stamp/Debug/gtest-patch
 *.cache
 test/gtest/src/gtest-stamp/Debug/gtest-build
+*.lib

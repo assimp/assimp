@@ -41,10 +41,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_OPENGEX_OPENGEXPARSER_H_INC
 
 #ifndef ASSIMP_BUILD_NO_OPEMGEX_IMPORTER
+
 #include <vector>
+#include <map>
 
 namespace Assimp {
 namespace OpenGEX {
+
+struct OpenGEXModel {
+    struct Metrics {
+        float       m_distance;
+        float       m_angle;
+        float       m_time;
+        std::string m_up;
+
+        Metrics()
+        : m_distance( 0.0f )
+        , m_angle( 0.0f )
+        , m_time( 0.0f )
+        , m_up() {
+            // empty
+        }
+    } m_metrics;
+};
 
 class OpenGEXParser {
 public:
@@ -69,13 +88,13 @@ protected:
     std::string getNextToken();
     bool skipComments();
     bool parseNextNode();
-    bool getNodeHeader( const std::string &name );
+    bool getNodeHeader( std::string &name );
     bool getBracketOpen();
     bool getBracketClose();
     bool getStringData( std::string &data );
     bool getFloatData( size_t num, float *data );
-    bool getNodeData();
-    bool getMetricAttributeKey( std::string &attribName, std::string &value );
+    bool getNodeData( const std::string &nodeType );
+    bool getMetricAttributeKey( std::string &attribName );
     bool onMetricNode( const std::string &attribName );
 
 private:
@@ -85,6 +104,7 @@ private:
 private:
     const std::vector<char> &m_buffer;
     std::vector<TokenType> m_nodeTypeStack;
+    OpenGEXModel m_model;
     size_t m_index;
     size_t m_buffersize;
 };

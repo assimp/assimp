@@ -118,6 +118,16 @@ static OpenGEXParser::TokenType getTokenTypeByName( const char *in ) {
     return type;
 }
 
+static void removeQuotes( std::string &attribName ) {
+    std::string tmp;
+    for( unsigned int i = 0; i < attribName.size(); ++i ) {
+        if( attribName[ i ] != '\"' ) {
+            tmp += attribName[ i ];
+        }
+    }
+    attribName = tmp;
+}
+
 //------------------------------------------------------------------------------------------------
 OpenGEXParser::OpenGEXParser( const std::vector<char> &buffer ) 
 : m_buffer( buffer ) 
@@ -182,14 +192,14 @@ bool OpenGEXParser::skipComments() {
 //------------------------------------------------------------------------------------------------
 bool OpenGEXParser::parseNextNode() {
     std::string token( getNextToken() );
-    std::string rootNodeName;
+    std::string rootNodeName, nodeType;
     if( containsNode( token.c_str(), token.size(), RootNodes, NumObjects, rootNodeName ) ) {
         m_nodeTypeStack.push_back( getTokenTypeByName( rootNodeName.c_str() ) );
-        if( !getNodeHeader( rootNodeName ) ) {
+        if( !getNodeHeader( nodeType ) ) {
             return false;
         }
 
-        if( !getNodeData() ) {
+        if( !getNodeData( nodeType ) ) {
             return false;
         }
 
@@ -200,11 +210,10 @@ bool OpenGEXParser::parseNextNode() {
 }
 
 //------------------------------------------------------------------------------------------------
-bool OpenGEXParser::getNodeHeader( const std::string &name ) {
+bool OpenGEXParser::getNodeHeader( std::string &name ) {
     bool success( false );
     if( m_nodeTypeStack.back() == MetricNode ) {
-        std::string attribName, value;
-        if( getMetricAttributeKey( attribName, value ) ) {
+        if( getMetricAttributeKey( name ) ) {
             success = true;
         }
     }
@@ -248,6 +257,9 @@ bool OpenGEXParser::getStringData( std::string &data ) {
 bool OpenGEXParser::getFloatData( size_t num, float *data ) {
     ai_assert( NULL != data );
 
+    std::string tk;
+    tk = getNextToken();
+
     if( !getBracketOpen() ) {
         return false;
     }
@@ -257,7 +269,7 @@ bool OpenGEXParser::getFloatData( size_t num, float *data ) {
     for( unsigned int i = 0; i < num; ++i ) {
         data[ dataIdx ] = fast_atof( &m_buffer[ m_index ] );
         ++dataIdx;
-        std::string tk = getNextToken();
+        tk = getNextToken();
         if( tk == "," ) {
             if( i >= ( num - 1 ) ) {
                 ok = false;
@@ -274,24 +286,41 @@ bool OpenGEXParser::getFloatData( size_t num, float *data ) {
 }
 
 //------------------------------------------------------------------------------------------------
-bool OpenGEXParser::getNodeData() {
-    return true;
+bool OpenGEXParser::getNodeData( const std::string &nodeType ) {
+    bool success( false );
+
+    if( !getBracketOpen() ) {
+        return false;
+    }
+
+    TokenType type( m_nodeTypeStack.back() );
+    if( type == MetricNode ) {
+        success = onMetricNode( nodeType );
+    }
+
+    if( !getBracketClose() ) {
+        return false;
+    }
+
+    return success;
 }
 
 //------------------------------------------------------------------------------------------------
-bool OpenGEXParser::getMetricAttributeKey( std::string &attribName, std::string &value ) {
+bool OpenGEXParser::getMetricAttributeKey( std::string &attribName ) {
     bool ok( false );
     attribName = "";
     std::string token( getNextToken() );
     if( token[ 0 ] == '(' ) {
         // get attribute
-        attribName = getNextToken();
-        std::string equal = getNextToken();
-        value = getNextToken();
-        
         token = getNextToken();
-        if( token[ 0 ] == ')' ) {
-            ok = true;
+        if( "key" == token ) {
+            std::string equal = getNextToken();
+            attribName = getNextToken();
+            token = getNextToken();
+            if( token[ 0 ] == ')' ) {
+                ok = true;
+                removeQuotes( attribName );
+            }
         }
     }
 
@@ -300,28 +329,37 @@ bool OpenGEXParser::getMetricAttributeKey( std::string &attribName, std::string 
 
 //------------------------------------------------------------------------------------------------
 bool OpenGEXParser::onMetricNode( const std::string &attribName ) {
+    bool success( true );
     if( "distance" == attribName ) {
         float distance( 0.0f );
-        getFloatData( 1, &distance );
+        if( getFloatData( 1, &distance ) ) {
+            m_model.m_metrics.m_distance = distance;
+        }
     } else if( "angle" == attribName ) {
         float angle( 0.0f );
-        getFloatData( 1, &angle );
+        if( getFloatData( 1, &angle ) ) {
+            m_model.m_metrics.m_angle = angle;
+        }
     } else if( "time" == attribName ) {
         float time( 0.0f );
-        getFloatData( 1, &time );
+        if( getFloatData( 1, &time ) ) {
+            m_model.m_metrics.m_time = time;
+        }
     } else if( "up" == attribName ) {
         std::string up;
-        getStringData( up );
+        if( getStringData( up ) ) {
+            m_model.m_metrics.m_up = up;
+        }
     } else {
-        return false;
+        success = false;
     }
 
-    return true;
+    return success;
 }
 
 //------------------------------------------------------------------------------------------------
 
-} // Namespace openGEX
+} // Namespace OpenGEX
 } // Namespace Assimp
 
 #endif ASSIMP_BUILD_NO_OPEMGEX_IMPORTER

@@ -2132,27 +2132,36 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		// gather that number of vertices
 		for( size_t b = 0; b < numPoints; b++)
 		{
-			// read all indices for this vertex. Yes, in a hacky local array
-			ai_assert( numOffsets < 20 && perVertexOffset < 20);
-			size_t vindex[20];
-			for( size_t offsets = 0; offsets < numOffsets; ++offsets)
-				vindex[offsets] = indices[currentPrimitive * numOffsets * numPoints + b * numOffsets + offsets];
-
-			// extract per-vertex channels using the global per-vertex offset
-      for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
-        ExtractDataObjectFromChannel( *it, vindex[perVertexOffset], pMesh);
-			// and extract per-index channels using there specified offset
-      for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
-				ExtractDataObjectFromChannel( *it, vindex[it->mOffset], pMesh);
-
-			// store the vertex-data index for later assignment of bone vertex weights
-			pMesh->mFacePosIndices.push_back( vindex[perVertexOffset]);
+			CopyPrimitive(b, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 		}
 	}
 
 
 	// if I ever get my hands on that guy who invented this steaming pile of indirection...
 	TestClosing( "p");
+}
+
+void ColladaParser::CopyPrimitive(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
+	// don't overrun the boundaries of the index list
+	size_t maxIndexRequested = currentPrimitive * numOffsets * numPoints + (currentVertex + 1) * numOffsets - 1;
+	ai_assert(maxIndexRequested < indices.size());
+
+	// read all indices for this vertex. Yes, in a hacky local array
+	ai_assert(numOffsets < 20 && perVertexOffset < 20);
+	size_t vindex[20];
+
+	for (size_t offsets = 0; offsets < numOffsets; ++offsets)
+		vindex[offsets] = indices[currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets + offsets];
+
+	// extract per-vertex channels using the global per-vertex offset
+	for (std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
+		ExtractDataObjectFromChannel(*it, vindex[perVertexOffset], pMesh);
+	// and extract per-index channels using there specified offset
+	for (std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
+		ExtractDataObjectFromChannel(*it, vindex[it->mOffset], pMesh);
+
+	// store the vertex-data index for later assignment of bone vertex weights
+	pMesh->mFacePosIndices.push_back(vindex[perVertexOffset]);
 }
 
 // ------------------------------------------------------------------------------------------------

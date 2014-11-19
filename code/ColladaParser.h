@@ -180,6 +180,11 @@ protected:
 	void ReadPrimitives( Collada::Mesh* pMesh, std::vector<Collada::InputChannel>& pPerIndexChannels, 
 		size_t pNumPrimitives, const std::vector<size_t>& pVCount, Collada::PrimitiveType pPrimType);
 
+	/** Copies the data for a single primitive into the mesh, based on the InputChannels */
+	void CopyPrimitive(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset,
+		Collada::Mesh* pMesh, std::vector<Collada::InputChannel>& pPerIndexChannels,
+		size_t currentPrimitive, const std::vector<size_t>& indices);
+
 	/** Extracts a single object from an input channel and stores it in the appropriate mesh data array */
 	void ExtractDataObjectFromChannel( const Collada::InputChannel& pInput, size_t pLocalIndex, Collada::Mesh* pMesh);
 

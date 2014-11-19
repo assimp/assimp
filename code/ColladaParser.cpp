@@ -2109,16 +2109,24 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		{
 			case Prim_Lines:
 				numPoints = 2; 
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			case Prim_Triangles: 
 				numPoints = 3; 
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			case Prim_Polylist: 
 				numPoints = pVCount[currentPrimitive];
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			case Prim_TriFans: 
 			case Prim_Polygon:
 				numPoints = indices.size() / numOffsets; 
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			default:
 				// LineStrip and TriStrip not supported due to expected index unmangling
@@ -2128,12 +2136,6 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 
 		// store the face size to later reconstruct the face from
 		pMesh->mFaceSize.push_back( numPoints);
-
-		// gather that number of vertices
-		for( size_t b = 0; b < numPoints; b++)
-		{
-			CopyPrimitive(b, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
-		}
 	}
 
 

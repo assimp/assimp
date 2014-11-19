@@ -1868,7 +1868,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 	int attrCount = GetAttribute( "count");
 	size_t numPrimitives = (size_t) mReader->getAttributeValueAsInt( attrCount);
 
-	// material subgroup 
+	// material subgroup
 	int attrMaterial = TestAttribute( "material");
 	SubMesh subgroup;
 	if( attrMaterial > -1)
@@ -2113,12 +2113,12 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		switch( pPrimType)
 		{
 			case Prim_Lines:
-				numPoints = 2; 
+				numPoints = 2;
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
 					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
-			case Prim_Triangles: 
-				numPoints = 3; 
+			case Prim_Triangles:
+				numPoints = 3;
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
 					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
@@ -2133,7 +2133,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 				break;
 			case Prim_TriFans: 
 			case Prim_Polygon:
-				numPoints = indices.size() / numOffsets; 
+				numPoints = indices.size() / numOffsets;
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
 					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
@@ -2146,7 +2146,6 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 		// store the face size to later reconstruct the face from
 		pMesh->mFaceSize.push_back( numPoints);
 	}
-
 
 	// if I ever get my hands on that guy who invented this steaming pile of indirection...
 	TestClosing( "p");

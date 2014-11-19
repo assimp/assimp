@@ -2105,7 +2105,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	pMesh->mFaceSize.reserve( numPrimitives);
 	pMesh->mFacePosIndices.reserve( indices.size() / numOffsets);
 
-	for( size_t a = 0; a < numPrimitives; a++)
+	for (size_t currentPrimitive = 0; currentPrimitive < numPrimitives; currentPrimitive++)
 	{
 		// determine number of points for this primitive
 		size_t numPoints = 0;
@@ -2118,7 +2118,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 				numPoints = 3; 
 				break;
 			case Prim_Polylist: 
-				numPoints = pVCount[a];
+				numPoints = pVCount[currentPrimitive];
 				break;
 			case Prim_TriFans: 
 			case Prim_Polygon:

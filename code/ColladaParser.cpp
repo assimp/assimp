@@ -2093,10 +2093,6 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 			acc->mData = &ResolveLibraryReference( mDataLibrary, acc->mSource);
 	}
 
-
-	// now assemble vertex data according to those indices
-	std::vector<size_t>::const_iterator idx = indices.begin();
-
 	// For continued primitives, the given count does not come all in one <p>, but only one primitive per <p>
 	size_t numPrimitives = pNumPrimitives;
 	if( pPrimType == Prim_TriFans || pPrimType == Prim_Polygon)
@@ -2140,7 +2136,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 			ai_assert( numOffsets < 20 && perVertexOffset < 20);
 			size_t vindex[20];
 			for( size_t offsets = 0; offsets < numOffsets; ++offsets)
-				vindex[offsets] = *idx++;
+				vindex[offsets] = indices[currentPrimitive * numOffsets * numPoints + b * numOffsets + offsets];
 
 			// extract per-vertex channels using the global per-vertex offset
       for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)

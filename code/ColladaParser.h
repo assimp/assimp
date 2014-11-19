@@ -185,6 +185,10 @@ protected:
 		Collada::Mesh* pMesh, std::vector<Collada::InputChannel>& pPerIndexChannels,
 		size_t currentPrimitive, const std::vector<size_t>& indices);
 
+	/** Reads one triangle of a tristrip into the mesh */
+	void ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Collada::Mesh* pMesh,
+		std::vector<Collada::InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices);
+
 	/** Extracts a single object from an input channel and stores it in the appropriate mesh data array */
 	void ExtractDataObjectFromChannel( const Collada::InputChannel& pInput, size_t pLocalIndex, Collada::Mesh* pMesh);
 

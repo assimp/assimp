@@ -2122,6 +2122,10 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
 					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
+			case Prim_TriStrips:
+				numPoints = 3;
+				ReadPrimTriStrips(numOffsets, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+				break;
 			case Prim_Polylist: 
 				numPoints = pVCount[currentPrimitive];
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
@@ -2134,7 +2138,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			default:
-				// LineStrip and TriStrip not supported due to expected index unmangling
+				// LineStrip is not supported due to expected index unmangling
 				ThrowException( "Unsupported primitive type.");
 				break;
 		}
@@ -2169,6 +2173,20 @@ void ColladaParser::CopyPrimitive(size_t currentVertex, size_t numOffsets, size_
 
 	// store the vertex-data index for later assignment of bone vertex weights
 	pMesh->mFacePosIndices.push_back(vindex[perVertexOffset]);
+}
+
+void ColladaParser::ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
+	if (currentPrimitive % 2 != 0){
+		//odd tristrip triangles need their indices mangled, to preserve winding direction
+		CopyPrimitive(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyPrimitive(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyPrimitive(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+	}
+	else {//for non tristrips or even tristrip triangles
+		CopyPrimitive(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyPrimitive(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyPrimitive(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

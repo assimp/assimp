@@ -1867,14 +1867,15 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 	// read primitive count from the attribute
 	int attrCount = GetAttribute( "count");
 	size_t numPrimitives = (size_t) mReader->getAttributeValueAsInt( attrCount);
+	// some mesh types (e.g. tristrips) don't specify primitive count upfront,
+	// so we need to sum up the actual number of primitives while we read the <p>-tags
+	size_t actualPrimitives = 0;
 
 	// material subgroup
 	int attrMaterial = TestAttribute( "material");
 	SubMesh subgroup;
 	if( attrMaterial > -1)
 		subgroup.mMaterial = mReader->getAttributeValue( attrMaterial);
-	subgroup.mNumFaces = numPrimitives;
-	pMesh->mSubMeshes.push_back( subgroup);
 
 	// distinguish between polys and triangles
 	std::string elementName = mReader->getNodeName();
@@ -1933,7 +1934,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 				if( !mReader->isEmptyElement())
 				{
 					// now here the actual fun starts - these are the indices to construct the mesh data from
-					ReadPrimitives( pMesh, perIndexData, numPrimitives, vcount, primType);
+					actualPrimitives += ReadPrimitives(pMesh, perIndexData, numPrimitives, vcount, primType);
 				}
 			} else
 			{
@@ -1948,6 +1949,14 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 			break;
 		}
 	}
+
+	// small sanity check
+	if (primType != Prim_TriFans && primType != Prim_TriStrips)
+		ai_assert(actualPrimitives == numPrimitives);
+
+	// only when we're done reading all <p> tags (and thus know the final vertex count) can we commit the submesh
+	subgroup.mNumFaces = actualPrimitives;
+	pMesh->mSubMeshes.push_back(subgroup);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1995,7 +2004,7 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
 
 // ------------------------------------------------------------------------------------------------
 // Reads a <p> primitive index list and assembles the mesh data into the given mesh
-void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, 
+size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels,
 	size_t pNumPrimitives, const std::vector<size_t>& pVCount, PrimitiveType pPrimType)
 {
 	// determine number of indices coming per vertex 
@@ -2149,6 +2158,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 
 	// if I ever get my hands on that guy who invented this steaming pile of indirection...
 	TestClosing( "p");
+	return numPrimitives;
 }
 
 void ColladaParser::CopyPrimitive(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){

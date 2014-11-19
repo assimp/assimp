@@ -2097,6 +2097,11 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	size_t numPrimitives = pNumPrimitives;
 	if( pPrimType == Prim_TriFans || pPrimType == Prim_Polygon)
 		numPrimitives = 1;
+	// For continued primitives, the given count is actually the number of <p>'s inside the parent tag
+	if ( pPrimType == Prim_TriStrips){
+		size_t numberOfVertices = indices.size() / numOffsets;
+		numPrimitives = numberOfVertices - 2;
+	}
 
 	pMesh->mFaceSize.reserve( numPrimitives);
 	pMesh->mFacePosIndices.reserve( indices.size() / numOffsets);

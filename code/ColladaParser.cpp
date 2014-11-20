@@ -2164,26 +2164,22 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 }
 
 void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
+	// calculate the base offset of the vertex whose attributes we ant to copy
+	size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
+
 	// don't overrun the boundaries of the index list
-	size_t maxIndexRequested = currentPrimitive * numOffsets * numPoints + (currentVertex + 1) * numOffsets - 1;
+	size_t maxIndexRequested = baseOffset + numOffsets - 1;
 	ai_assert(maxIndexRequested < indices.size());
-
-	// copy the indices pertaining to this vertex
-	std::vector<size_t> vindex;
-	vindex.reserve(numOffsets);
-
-	for (size_t offsets = 0; offsets < numOffsets; ++offsets)
-		vindex[offsets] = indices[currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets + offsets];
 
 	// extract per-vertex channels using the global per-vertex offset
 	for (std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
-		ExtractDataObjectFromChannel(*it, vindex[perVertexOffset], pMesh);
+		ExtractDataObjectFromChannel(*it, indices[baseOffset + perVertexOffset], pMesh);
 	// and extract per-index channels using there specified offset
 	for (std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
-		ExtractDataObjectFromChannel(*it, vindex[it->mOffset], pMesh);
+		ExtractDataObjectFromChannel(*it, indices[baseOffset + it->mOffset], pMesh);
 
 	// store the vertex-data index for later assignment of bone vertex weights
-	pMesh->mFacePosIndices.push_back(vindex[perVertexOffset]);
+	pMesh->mFacePosIndices.push_back(indices[baseOffset + perVertexOffset]);
 }
 
 void ColladaParser::ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){

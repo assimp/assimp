@@ -2125,12 +2125,12 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 			case Prim_Lines:
 				numPoints = 2;
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
-					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+					CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			case Prim_Triangles:
 				numPoints = 3;
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
-					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+					CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			case Prim_TriStrips:
 				numPoints = 3;
@@ -2139,14 +2139,14 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 			case Prim_Polylist: 
 				numPoints = pVCount[currentPrimitive];
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
-					CopyPrimitive(polylistStartVertex + currentVertex, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, 0, indices);
+					CopyVertex(polylistStartVertex + currentVertex, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, 0, indices);
 				polylistStartVertex += numPoints;
 				break;
 			case Prim_TriFans: 
 			case Prim_Polygon:
 				numPoints = indices.size() / numOffsets;
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
-					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+					CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			default:
 				// LineStrip is not supported due to expected index unmangling
@@ -2163,7 +2163,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 	return numPrimitives;
 }
 
-void ColladaParser::CopyPrimitive(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
+void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
 	// don't overrun the boundaries of the index list
 	size_t maxIndexRequested = currentPrimitive * numOffsets * numPoints + (currentVertex + 1) * numOffsets - 1;
 	ai_assert(maxIndexRequested < indices.size());
@@ -2189,14 +2189,14 @@ void ColladaParser::CopyPrimitive(size_t currentVertex, size_t numOffsets, size_
 void ColladaParser::ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
 	if (currentPrimitive % 2 != 0){
 		//odd tristrip triangles need their indices mangled, to preserve winding direction
-		CopyPrimitive(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
-		CopyPrimitive(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
-		CopyPrimitive(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 	}
 	else {//for non tristrips or even tristrip triangles
-		CopyPrimitive(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
-		CopyPrimitive(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
-		CopyPrimitive(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 	}
 }
 

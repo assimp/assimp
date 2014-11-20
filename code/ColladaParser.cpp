@@ -2168,9 +2168,9 @@ void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t n
 	size_t maxIndexRequested = currentPrimitive * numOffsets * numPoints + (currentVertex + 1) * numOffsets - 1;
 	ai_assert(maxIndexRequested < indices.size());
 
-	// read all indices for this vertex. Yes, in a hacky local array
-	ai_assert(numOffsets < 20 && perVertexOffset < 20);
-	size_t vindex[20];
+	// copy the indices pertaining to this vertex
+	std::vector<size_t> vindex;
+	vindex.reserve(numOffsets);
 
 	for (size_t offsets = 0; offsets < numOffsets; ++offsets)
 		vindex[offsets] = indices[currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets + offsets];

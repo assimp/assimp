@@ -2115,6 +2115,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 	pMesh->mFaceSize.reserve( numPrimitives);
 	pMesh->mFacePosIndices.reserve( indices.size() / numOffsets);
 
+	size_t polylistStartVertex = 0;
 	for (size_t currentPrimitive = 0; currentPrimitive < numPrimitives; currentPrimitive++)
 	{
 		// determine number of points for this primitive
@@ -2138,7 +2139,8 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 			case Prim_Polylist: 
 				numPoints = pVCount[currentPrimitive];
 				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
-					CopyPrimitive(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+					CopyPrimitive(polylistStartVertex + currentVertex, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, 0, indices);
+				polylistStartVertex += numPoints;
 				break;
 			case Prim_TriFans: 
 			case Prim_Polygon:

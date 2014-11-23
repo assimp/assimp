@@ -33,7 +33,7 @@ def run_tests():
                         ok += 1
                     except errors.AssimpError as error:
                         # assimp error is fine, this is a controlled case
-                        print error
+                        print(error)
                         err += 1
                     except Exception:
                         print("Error encountered while loading <%s>"%os.path.join(root,afile))

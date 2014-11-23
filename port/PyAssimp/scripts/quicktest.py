@@ -9,8 +9,12 @@ data structures in detail. It just verifies whether basic
 loading and querying of 3d models using pyassimp works.
 """
 
+import os
+import sys
 
-import sys,os
+# Make the development (ie. GIT repo) version of PyAssimp available for import.
+sys.path.insert(0, '..')
+
 import sample
 from pyassimp import errors
 

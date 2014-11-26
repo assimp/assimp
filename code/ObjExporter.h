@@ -100,6 +100,7 @@ private:
 
 	void WriteMaterialFile();
 	void WriteGeometryFile();
+    
 
 	std::string GetMaterialName(unsigned int index);
 

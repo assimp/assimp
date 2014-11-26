@@ -75,7 +75,6 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
 } // end of namespace Assimp
 
-static const std::string MaterialExt = ".mtl";
 
 // ------------------------------------------------------------------------------------------------
 ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
@@ -108,7 +107,7 @@ std::string ObjExporter :: GetMaterialLibName()
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter :: GetMaterialLibFileName()
 {	
-    return filename + MaterialExt;
+	return filename + ".mtl";
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -133,7 +132,7 @@ std::string ObjExporter :: GetMaterialName(unsigned int index)
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter::WriteMaterialFile()
+void ObjExporter :: WriteMaterialFile()
 {
 	WriteHeader(mOutputMat);
 
@@ -145,16 +144,16 @@ void ObjExporter::WriteMaterialFile()
 
 		aiColor4D c;
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE,c)) {
-			mOutputMat << "Kd " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "kd " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_AMBIENT,c)) {
-			mOutputMat << "Ka " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "ka " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_SPECULAR,c)) {
-			mOutputMat << "Ks " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "ks " << c.r << " " << c.g << " " << c.b << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_EMISSIVE,c)) {
-			mOutputMat << "Ke " << c.r << " " << c.g << " " << c.b << endl;
+			mOutputMat << "ke " << c.r << " " << c.g << " " << c.b << endl;
 		}
 
 		float o;
@@ -171,19 +170,16 @@ void ObjExporter::WriteMaterialFile()
 
 		aiString s;
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_DIFFUSE(0),s)) {
-			mOutputMat << "map_Kd " << s.data << endl;
+			mOutputMat << "map_kd " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_AMBIENT(0),s)) {
-			mOutputMat << "map_Ka " << s.data << endl;
+			mOutputMat << "map_ka " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_SPECULAR(0),s)) {
-			mOutputMat << "map_Ks " << s.data << endl;
+			mOutputMat << "map_ks " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_SHININESS(0),s)) {
-			mOutputMat << "map_Ns " << s.data << endl;
-		}
-		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_OPACITY(0),s)) {
-			mOutputMat << "map_d " << s.data << endl;
+			mOutputMat << "map_ns " << s.data << endl;
 		}
 		if(AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_HEIGHT(0),s) || AI_SUCCESS == mat->Get(AI_MATKEY_TEXTURE_NORMALS(0),s)) {
 			// implementations seem to vary here, so write both variants
@@ -203,7 +199,7 @@ void ObjExporter :: WriteGeometryFile()
 
 	// collect mesh geometry
 	aiMatrix4x4 mBase;
-	AddNode(pScene->mRootNode, mBase);
+	AddNode(pScene->mRootNode,mBase);
 
 	// write vertex positions
 	vpMap.getVectors(vp);
@@ -230,11 +226,15 @@ void ObjExporter :: WriteGeometryFile()
 	mOutput << endl;
 
 	// now write all mesh instances
+    size_t meshID = 0;
 	BOOST_FOREACH(const MeshInstance& m, meshes) {
 		mOutput << "# Mesh \'" << m.name << "\' with " << m.faces.size() << " faces" << endl;
-		if (!m.name.empty()) {
-			mOutput << "g " << m.name << endl;
-		}
+
+        // we want to have selectable meshes (thus we add the id to the name to make it unique)
+        mOutput << "o " << "object " << meshID << endl;
+        mOutput << "g " << m.name << " " << meshID << endl;		
+        meshID++;
+
 		mOutput << "usemtl " << m.matname << endl;
 
 		BOOST_FOREACH(const Face& f, m.faces) {
@@ -249,8 +249,11 @@ void ObjExporter :: WriteGeometryFile()
 					if (fv.vt) {
 						mOutput << fv.vt;
 					}
-					if (f.kind == 'f' && fv.vn) {
-						mOutput << '/' << fv.vn;
+					if (f.kind == 'f') {
+						mOutput << '/';
+						if (fv.vn) {
+							mOutput << fv.vn;
+						}
 					}
 				}
 			}
@@ -261,12 +264,14 @@ void ObjExporter :: WriteGeometryFile()
 	}
 }
 
-// ------------------------------------------------------------------------------------------------
+
+
+
+
 int ObjExporter::vecIndexMap::getIndex(const aiVector3D& vec)
 {
-	vecIndexMap::dataType::iterator vertIt = vecMap.find(vec);
-	// vertex already exists, so reference it
-	if(vertIt != vecMap.end()){
+	vecIndexMap::dataType::iterator vertIt = vecMap.find(vec); 
+	if(vertIt != vecMap.end()){// vertex already exists, so reference it
 		return vertIt->second;
 	}
 	vecMap[vec] = mNextIndex;
@@ -275,7 +280,6 @@ int ObjExporter::vecIndexMap::getIndex(const aiVector3D& vec)
 	return ret;
 }
 
-// ------------------------------------------------------------------------------------------------
 void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 {
 	vecs.resize(vecMap.size());
@@ -284,13 +288,14 @@ void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 	}
 }
 
+
 // ------------------------------------------------------------------------------------------------
-void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
+void ObjExporter :: AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4x4& mat)
 {
 	meshes.push_back(MeshInstance());
 	MeshInstance& mesh = meshes.back();
 
-	mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_" + std::string(m->mName.data,m->mName.length) : "");
+	mesh.name = std::string(name.data,name.length) + (m->mName.length ? "_"+std::string(m->mName.data,m->mName.length) : "");
 	mesh.matname = GetMaterialName(m->mMaterialIndex);
 
 	mesh.faces.resize(m->mNumFaces);
@@ -318,8 +323,7 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
 			face.indices[a].vp = vpMap.getIndex(vert);
 
 			if (m->mNormals) {
-				aiVector3D norm = aiMatrix3x3(mat) * m->mNormals[idx];
-				face.indices[a].vn = vnMap.getIndex(norm);
+				face.indices[a].vn = vnMap.getIndex(m->mNormals[idx]);
 			}
 			else{
 				face.indices[a].vn = 0;
@@ -336,20 +340,21 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter::AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
+void ObjExporter :: AddNode(const aiNode* nd, const aiMatrix4x4& mParent)
 {
 	const aiMatrix4x4& mAbs = mParent * nd->mTransformation;
 
 	for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
-		AddMesh(nd->mName, pScene->mMeshes[nd->mMeshes[i]], mAbs);
+        std::stringstream uniqueNameStream;
+        uniqueNameStream << nd->mName.data << i;
+        aiString uniqueName(uniqueNameStream.str().c_str());
+		AddMesh(uniqueName, pScene->mMeshes[nd->mMeshes[i]],mAbs);
 	}
 
 	for(unsigned int i = 0; i < nd->mNumChildren; ++i) {
-		AddNode(nd->mChildren[i], mAbs);
+		AddNode(nd->mChildren[i],mAbs);
 	}
 }
 
-// ------------------------------------------------------------------------------------------------
-
-#endif // ASSIMP_BUILD_NO_OBJ_EXPORTER
-#endif // ASSIMP_BUILD_NO_EXPORT
+#endif
+#endif

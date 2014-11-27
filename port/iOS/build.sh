@@ -6,7 +6,7 @@
 
 BUILD_DIR="./lib/iOS"
 
-IOS_SDK_VERSION=7.1
+IOS_SDK_VERSION=
 IOS_SDK_TARGET=6.0
 #(iPhoneOS iPhoneSimulator) -- determined from arch
 IOS_SDK_DEVICE=

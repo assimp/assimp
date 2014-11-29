@@ -90,6 +90,10 @@ struct ScopeGuard
 	}
 
 private:
+    // no copying allowed.
+    ScopeGuard( const ScopeGuard & );
+    ScopeGuard &operator = ( const ScopeGuard & );
+
 	T* obj;
 	bool mdismiss;
 };

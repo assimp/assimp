@@ -97,6 +97,9 @@ protected:
     bool getNodeData( const std::string &nodeType );
     bool getMetricAttributeKey( std::string &attribName );
     bool onMetricNode( const std::string &attribName );
+    bool onGeometryNode();
+    bool onGeometryObject();
+    bool onMaterial();
 
 private:
     OpenGEXParser( const OpenGEXParser & );

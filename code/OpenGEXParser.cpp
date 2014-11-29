@@ -226,10 +226,19 @@ bool OpenGEXParser::parseNextNode() {
 //------------------------------------------------------------------------------------------------
 bool OpenGEXParser::getNodeHeader( std::string &name ) {
     bool success( false );
-    if( m_nodeTypeStack.back() == MetricNode ) {
+    TokenType tokenType( m_nodeTypeStack.back() );
+    if( tokenType == MetricNode ) {
         if( getMetricAttributeKey( name ) ) {
             success = true;
         }
+    } else if( tokenType == GeometryNode ) {
+
+    } else if( tokenType == GeometryObject ) {
+
+    } else if( tokenType == Material ) {
+
+    } else {
+        DefaultLogger::get()->warn( "Unknown token type in file." );
     }
 
     return success;
@@ -307,9 +316,17 @@ bool OpenGEXParser::getNodeData( const std::string &nodeType ) {
         return false;
     }
 
-    TokenType type( m_nodeTypeStack.back() );
+    const TokenType type( m_nodeTypeStack.back() );
     if( type == MetricNode ) {
         success = onMetricNode( nodeType );
+    } else if( type == GeometryNode ) {
+        success = onGeometryNode();
+    } else if( type == GeometryObject ) {
+        success = onGeometryObject();
+    } else if( type == Material ) {
+        success = onMaterial();
+    } else {
+        DefaultLogger::get()->warn( "Unknown token type in file." );
     }
 
     if( !getBracketClose() ) {
@@ -367,6 +384,21 @@ bool OpenGEXParser::onMetricNode( const std::string &attribName ) {
     }
 
     return success;
+}
+
+//------------------------------------------------------------------------------------------------
+bool OpenGEXParser::onGeometryNode() {
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------
+bool OpenGEXParser::onGeometryObject() {
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------
+bool OpenGEXParser::onMaterial() {
+    return true;
 }
 
 //------------------------------------------------------------------------------------------------

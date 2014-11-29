@@ -56,55 +56,59 @@ namespace Assimp	{
 class DefaultIOStream : public IOStream
 {
 	friend class DefaultIOSystem;
-#if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
-	friend class AndroidJNIIOSystem;
-#endif //__ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+#if __ANDROID__ 
+#if __ANDROID_API__ > 9
+#if defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+    friend class AndroidJNIIOSystem;
+#endif // defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+#endif // __ANDROID_API__ > 9
+#endif // __ANDROID__ 
 
 protected:
-	DefaultIOStream ();
-	DefaultIOStream (FILE* pFile, const std::string &strFilename);
+	DefaultIOStream();
+	DefaultIOStream(FILE* pFile, const std::string &strFilename);
 
 public:
 	/** Destructor public to allow simple deletion to close the file. */
 	~DefaultIOStream ();
 
 	// -------------------------------------------------------------------
-	// Read from stream
+	/// Read from stream
     size_t Read(void* pvBuffer, 
 		size_t pSize, 
 		size_t pCount);
 
 
 	// -------------------------------------------------------------------
-	// Write to stream
+	/// Write to stream
     size_t Write(const void* pvBuffer, 
 		size_t pSize,
 		size_t pCount);
 
 	// -------------------------------------------------------------------
-	// Seek specific position
+	/// Seek specific position
 	aiReturn Seek(size_t pOffset,
 		aiOrigin pOrigin);
 
 	// -------------------------------------------------------------------
-	// Get current seek position
+	/// Get current seek position
     size_t Tell() const;
 
 	// -------------------------------------------------------------------
-	// Get size of file
+	/// Get size of file
 	size_t FileSize() const;
 
 	// -------------------------------------------------------------------
-	// Flush file contents
+	/// Flush file contents
 	void Flush();
 
 private:
-	//!	File datastructure, using clib
+	//	File datastructure, using clib
 	FILE* mFile;
-	//!	Filename
+	//	Filename
 	std::string	mFilename;
 
-	//! Cached file size
+	// Cached file size
 	mutable size_t cachedSize;
 };
 

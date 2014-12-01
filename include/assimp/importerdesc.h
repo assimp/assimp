@@ -133,4 +133,6 @@ struct aiImporterDesc
 	const char* mFileExtensions;
 };
 
+ASSIMP_API C_STRUCT const aiImporterDesc* aiGetImporterDesc( const char *extension );
+
 #endif 

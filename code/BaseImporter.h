@@ -91,6 +91,7 @@ struct ScopeGuard
 
 private:
     // no copying allowed.
+    ScopeGuard();
     ScopeGuard( const ScopeGuard & );
     ScopeGuard &operator = ( const ScopeGuard & );
 

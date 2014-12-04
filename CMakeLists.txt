@@ -78,17 +78,11 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
 	"Path the header files are installed to." )
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
 	"Path the tool executables are installed to." )
-option (ASSIMP_BUILD_STATIC_LIB "Build a static (.a) version of the library" OFF)
 
 SET(ASSIMP_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
 
-# Allow the user to build a static library
+# Allow the user to build a shared or static library
 option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )
-IF ( ASSIMP_BUILD_STATIC_LIB )
-    option ( BUILD_SHARED_LIBS "Build a shared version of the library" OFF )
-ELSE ( ASSIMP_BUILD_STATIC_LIB )
-    option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )
-ENDIF ( ASSIMP_BUILD_STATIC_LIB )
 
 # Only generate this target if no higher-level project already has
 IF (NOT TARGET uninstall)

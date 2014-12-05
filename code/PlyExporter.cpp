@@ -56,7 +56,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 	PlyExporter exporter(pFile, pScene);
 
 	// we're still here - export successfully completed. Write the file.
-    boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
 	if(outfile == NULL) {
 		throw DeadlyExportError("could not open output .ply file: " + std::string(pFile));
 	}
@@ -67,7 +67,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
 {
 	// invoke the exporter 
-    PlyExporter exporter(pFile, pScene, true);
+	PlyExporter exporter(pFile, pScene, true);
 
 	// we're still here - export successfully completed. Write the file.
 	boost::scoped_ptr<IOStream> outfile(pIOSystem->Open(pFile, "wb"));
@@ -185,7 +185,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 
 	mOutput << "element face " << faces << endl;
 	mOutput << "property list uint uint vertex_index" << endl;
-    mOutput << "end_header" << endl;
+	mOutput << "end_header" << endl;
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
 		if (binary)
@@ -203,7 +203,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 }
 
 // ------------------------------------------------------------------------------------------------
-void PlyExporter :: WriteMeshVerts(const aiMesh* m, unsigned int components)
+void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 {
 	for (unsigned int i = 0; i < m->mNumVertices; ++i) {
 		mOutput << 
@@ -316,7 +316,7 @@ void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
 }
 
 // ------------------------------------------------------------------------------------------------
-void PlyExporter :: WriteMeshIndices(const aiMesh* m, unsigned int offset)
+void PlyExporter::WriteMeshIndices(const aiMesh* m, unsigned int offset)
 {
 	for (unsigned int i = 0; i < m->mNumFaces; ++i) {
 		const aiFace& f = m->mFaces[i];

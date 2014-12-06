@@ -67,7 +67,7 @@ public final class JaiDebug {
             return;
         }
         
-        for (int i = 0; i < mesh.getNumVertives(); i++) {
+        for (int i = 0; i < mesh.getNumVertices(); i++) {
             System.out.println("[" +
                     mesh.getPositionX(i) + ", " + 
                     mesh.getPositionY(i) + ", " + 
@@ -119,7 +119,7 @@ public final class JaiDebug {
             return;
         }
         
-        for (int i = 0; i < mesh.getNumVertives(); i++) {
+        for (int i = 0; i < mesh.getNumVertices(); i++) {
             System.out.println("[" + 
                     mesh.getColorR(i, colorset) + ", " + 
                     mesh.getColorG(i, colorset) + ", " + 
@@ -142,7 +142,7 @@ public final class JaiDebug {
             return;
         }
         
-        for (int i = 0; i < mesh.getNumVertives(); i++) {
+        for (int i = 0; i < mesh.getNumVertices(); i++) {
             int numComponents = mesh.getNumUVComponents(coords);
             System.out.print("[" + mesh.getTexCoordU(i, coords));
             

@@ -16,39 +16,40 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
-	unit/utFastAtof.cpp
-	unit/utFindDegenerates.cpp
-	unit/utFindInvalidData.cpp
-	unit/utFixInfacingNormals.cpp
-	unit/utGenNormals.cpp
-	unit/utImporter.cpp
-	unit/utImproveCacheLocality.cpp
-	unit/utJoinVertices.cpp
-	unit/utLimitBoneWeights.cpp
-	unit/utMaterialSystem.cpp
-	unit/utPretransformVertices.cpp
-	unit/utRemoveComments.cpp
-	unit/utRemoveComponent.cpp
-	unit/utRemoveRedundantMaterials.cpp
-	unit/utScenePreprocessor.cpp
-	unit/utSharedPPData.cpp
-	unit/utSortByPType.cpp
-	unit/utSplitLargeMeshes.cpp
-	unit/utTargetAnimation.cpp
-	unit/utTextureTransform.cpp
-	unit/utTriangulate.cpp
-	unit/utVertexTriangleAdjacency.cpp
-	unit/utNoBoostTest.cpp
+    unit/AssimpAPITest.cpp
+    unit/utFastAtof.cpp
+    unit/utFindDegenerates.cpp
+    unit/utFindInvalidData.cpp
+    unit/utFixInfacingNormals.cpp
+    unit/utGenNormals.cpp
+    unit/utImporter.cpp
+    unit/utImproveCacheLocality.cpp
+    unit/utJoinVertices.cpp
+    unit/utLimitBoneWeights.cpp
+    unit/utMaterialSystem.cpp
+    unit/utPretransformVertices.cpp
+    unit/utRemoveComments.cpp
+    unit/utRemoveComponent.cpp
+    unit/utRemoveRedundantMaterials.cpp
+    unit/utScenePreprocessor.cpp
+    unit/utSharedPPData.cpp
+    unit/utSortByPType.cpp
+    unit/utSplitLargeMeshes.cpp
+    unit/utTargetAnimation.cpp
+    unit/utTextureTransform.cpp
+    unit/utTriangulate.cpp
+    unit/utVertexTriangleAdjacency.cpp
+    unit/utNoBoostTest.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 
 add_executable( unit
-	unit/CCompilerTest.c
-	unit/Main.cpp
-	unit/UnitTestPCH.cpp
-	unit/UnitTestPCH.h
-	${TEST_SRCS}
+    unit/CCompilerTest.c
+    unit/Main.cpp
+    unit/UnitTestPCH.cpp
+    unit/UnitTestPCH.h
+    ${TEST_SRCS}
 )
 
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX} )

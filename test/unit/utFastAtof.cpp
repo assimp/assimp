@@ -22,7 +22,7 @@ protected:
 	template <typename Real, typename AtofFunc>
 	static void RunTest(AtofFunc atof_func)
 	{
-		const Real kEps = 1e-5;
+		const Real kEps = 1e-5f;
 
 #define TEST_CASE(NUM) EXPECT_NEAR(static_cast<Real>(NUM), atof_func(#NUM), kEps)
 #define TEST_CASE_NAN(NUM) EXPECT_TRUE(IsNan(atof_func(#NUM)))

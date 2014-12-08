@@ -7,8 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Inaccessible static: BUILTIN */
-/* Inaccessible static: s_wrapperProvider */
 /*
  * Class:     jassimp_Jassimp
  * Method:    getErrorString

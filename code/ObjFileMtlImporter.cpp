@@ -166,37 +166,32 @@ void ObjFileMtlImporter::load()
 			}
 			break;
 
-		case 'N':	// Shineness
+		case 'N':
+		case 'n':
 			{
 				++m_DataIt;
-				switch(*m_DataIt) 
+				switch(*m_DataIt)
 				{
-				case 's':
+				case 's':	// Specular exponent
 					++m_DataIt;
 					getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
 					break;
-				case 'i': //Index Of refraction 
+				case 'i':	// Index Of refraction
 					++m_DataIt;
 					getFloatValue(m_pModel->m_pCurrentMaterial->ior);
 					break;
+				case 'e':	// New material
+					createMaterial();
+					break;
 				}
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-				break;
 			}
 			break;
-		
 
 		case 'm':	// Texture
 		case 'b':   // quick'n'dirty - for 'bump' sections
 			{
 				getTexture();
-				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-			}
-			break;
-
-		case 'n':	// New material name
-			{
-				createMaterial();
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}
 			break;

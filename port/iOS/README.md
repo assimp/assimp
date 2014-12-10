@@ -1,4 +1,4 @@
-# assimp for iOS-SDK 7.1 
+# assimp for iOS
 (deployment target 6.0+, 32/64bit)
 
 Builds assimp libraries for several iOS CPU architectures at once, and outputs a fat binary from the result.
@@ -28,3 +28,12 @@ Supported architectures/devices:
 - ARMv7
 - ARMv7-s
 - ARM64
+
+### Building with older iOS SDK versions
+The script should work out of the box for the iOS 8.x SDKs and probably newer releases as well.
+If you are using SDK version 7.x or older, you need to specify the exact SDK version inside **build.sh**, for example:
+```
+IOS_SDK_VERSION=7.1
+```
+### Optimization
+By default, no compiler optimizations are specified inside the build script. For an optimized build, add the corresponding flags to the CFLAGS definition inside **build.sh**.

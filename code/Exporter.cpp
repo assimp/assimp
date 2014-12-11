@@ -114,7 +114,7 @@ Exporter::ExportFormatEntry gExporters[] =
 	Exporter::ExportFormatEntry( "ply", "Stanford Polygon Library", "ply" , &ExportScenePly, 
 		aiProcess_PreTransformVertices
 	),
-	Exporter::ExportFormatEntry( "plyb", "Stanford Polygon Library Binary", "ply", &ExportScenePlyBinary,
+	Exporter::ExportFormatEntry( "plyb", "Stanford Polygon Library (binary)", "ply", &ExportScenePlyBinary,
 		aiProcess_PreTransformVertices
 	),
 #endif

@@ -116,16 +116,14 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 	}
 
 	mOutput << "ply" << endl;
-	if (binary)
-	{
+	if (binary) {
 #if (defined AI_BUILD_BIG_ENDIAN)
 		mOutput << "format binary_big_endian 1.0" << endl;
 #else
 		mOutput << "format binary_little_endian 1.0" << endl;
 #endif
 	}
-	else
-	{
+	else {
 		mOutput << "format ascii 1.0" << endl;
 	}
 	mOutput << "comment Created by Open Asset Import Library - http://assimp.sf.net (v"
@@ -188,16 +186,20 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 	mOutput << "end_header" << endl;
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-		if (binary)
+		if (binary) {
 			WriteMeshVertsBinary(pScene->mMeshes[i], components);
-		else
+		}
+		else {
 			WriteMeshVerts(pScene->mMeshes[i], components);
+		}
 	}
 	for (unsigned int i = 0, ofs = 0; i < pScene->mNumMeshes; ++i) {
-		if (binary)
+		if (binary) {
 			WriteMeshIndicesBinary(pScene->mMeshes[i], ofs);
-		else
+		}
+		else {
 			WriteMeshIndices(pScene->mMeshes[i], ofs);
+		}
 		ofs += pScene->mMeshes[i]->mNumVertices;
 	}
 }
@@ -205,6 +207,8 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 // ------------------------------------------------------------------------------------------------
 void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 {
+	// If a component (for instance normal vectors) is present in at least one mesh in the scene,
+	// then default values are written for meshes that do not contain this component.
 	for (unsigned int i = 0; i < m->mNumVertices; ++i) {
 		mOutput << 
 			m->mVertices[i].x << " " << 
@@ -270,6 +274,8 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 // ------------------------------------------------------------------------------------------------
 void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
 {
+	// If a component (for instance normal vectors) is present in at least one mesh in the scene,
+	// then default values are written for meshes that do not contain this component.
 	aiVector3D defaultNormal(0, 0, 0);
 	aiVector2D defaultUV(-1, -1);
 	aiColor4D defaultColor(-1, -1, -1, -1);

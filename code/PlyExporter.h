@@ -59,7 +59,7 @@ class PlyExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	PlyExporter(const char* filename, const aiScene* pScene);
+	PlyExporter(const char* filename, const aiScene* pScene, bool binary = false);
 
 public:
 
@@ -70,6 +70,9 @@ private:
 
 	void WriteMeshVerts(const aiMesh* m, unsigned int components);
 	void WriteMeshIndices(const aiMesh* m, unsigned int ofs);
+
+	void WriteMeshVertsBinary(const aiMesh* m, unsigned int components);
+	void WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset);
 
 private:
 

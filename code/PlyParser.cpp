@@ -182,7 +182,7 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOu
 	{
 		eOut = PLY::EST_Opacity;
 	}
-	else if (TokenMatch(pCur,"specular_power",6))
+	else if (TokenMatch(pCur,"specular_power",14))
 	{
 		eOut = PLY::EST_PhongPower;
 	}

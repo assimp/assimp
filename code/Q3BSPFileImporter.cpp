@@ -630,7 +630,7 @@ aiFace *Q3BSPFileImporter::getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx )
 bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel,
 												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene*,
 												 aiMaterial *pMatHelper, int textureId ) {
-	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper ) {
+	if ( NULL == pArchive || NULL == pMatHelper ) {
 		return false;
 	}
 

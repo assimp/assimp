@@ -68,6 +68,8 @@ void RemoveVCProcessTest::SetUp()
 	// so we don't need a virtual destructor
 	char check[sizeof(aiMaterial) == sizeof(aiMaterial) ? 10 : -1];
 	check[0] = 0;
+	// to remove compiler warning
+	EXPECT_TRUE( check );
 }
 
 // ------------------------------------------------------------------------------------------------

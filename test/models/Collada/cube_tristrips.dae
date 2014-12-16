@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+	<asset>
+		<contributor/>
+		<created>2014-12-01T18:05:27Z</created>
+		<modified>2014-12-01T18:05:27Z</modified>
+		<unit/>
+		<up_axis>Z_UP</up_axis>
+	</asset>
+	<library_visual_scenes>
+		<visual_scene id="defaultScene">
+			<node id="sceneRoot">
+				<node id="Collada visual scene group">
+					<rotate sid="rotate">1 0 0 90</rotate>
+					<node id="Camera">
+						<matrix sid="Camera_matrix">0.838671 0.205746 -0.504282 -427.749 0 0.925901 0.377766 333.855 0.544639 -0.316822 0.776526 655.017 0 0 0 1</matrix>
+						<instance_camera url="#PerspCamera"/>
+					</node>
+					<node id="Light">
+						<matrix sid="Light_matrix">1 0 0 -500 0 1 0 1000 0 0 1 400 0 0 0 1</matrix>
+						<instance_light url="#light"/>
+					</node>
+					<node id="Box">
+						<matrix sid="Box_matrix">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+						<instance_geometry url="#BlueSG">
+							<bind_material>
+								<technique_common>
+									<instance_material symbol="BlueSG_material" target="#material"/>
+								</technique_common>
+							</bind_material>
+						</instance_geometry>
+					</node>
+					<node id="testCamera">
+						<matrix sid="testCamera_matrix">0.838671 0.205746 -0.504282 -427.749 0 0.925901 0.377766 333.855 0.544639 -0.316822 0.776526 655.017 0 0 0 1</matrix>
+						<instance_camera url="#testCameraShape"/>
+					</node>
+					<node id="pointLight1">
+						<matrix sid="pointLight1_matrix">1 0 0 3 0 1 0 4 0 0 1 10 0 0 0 1</matrix>
+						<instance_light url="#pointLightShape1"/>
+					</node>
+				</node>
+			</node>
+		</visual_scene>
+	</library_visual_scenes>
+	<library_cameras>
+		<camera id="PerspCamera">
+			<optics>
+				<technique_common>
+					<perspective>
+						<yfov>37.8493</yfov>
+						<aspect_ratio>1</aspect_ratio>
+						<znear>1</znear>
+						<zfar>1000</zfar>
+					</perspective>
+				</technique_common>
+			</optics>
+		</camera>
+		<camera id="testCameraShape">
+			<optics>
+				<technique_common>
+					<perspective>
+						<yfov>37.8501</yfov>
+						<aspect_ratio>1</aspect_ratio>
+						<znear>1</znear>
+						<zfar>1000</zfar>
+					</perspective>
+				</technique_common>
+			</optics>
+		</camera>
+	</library_cameras>
+	<library_lights>
+		<light id="light"/>
+		<light id="light">
+			<technique_common>
+				<point>
+					<color>1 1 1</color>
+					<constant_attenuation>1</constant_attenuation>
+					<linear_attenuation>0</linear_attenuation>
+					<quadratic_attenuation>0</quadratic_attenuation>
+				</point>
+			</technique_common>
+		</light>
+		<light id="pointLightShape1"/>
+		<light id="pointLightShape1">
+			<technique_common>
+				<point>
+					<color>1 1 1</color>
+					<constant_attenuation>1</constant_attenuation>
+					<linear_attenuation>0</linear_attenuation>
+					<quadratic_attenuation>0</quadratic_attenuation>
+				</point>
+			</technique_common>
+		</light>
+	</library_lights>
+	<library_geometries>
+		<geometry id="BlueSG">
+			<mesh>
+				<source id="BlueSG-positions">
+					<float_array id="BlueSG-positions-array" count="72">-50 50 50 -50 50 50 -50 50 50 50 50 50 50 50 50 50 50 50 -50 -50 50 -50 -50 50 -50 -50 50 50 -50 50 50 -50 50 50 -50 50 -50 50 -50 -50 50 -50 -50 50 -50 50 50 -50 50 50 -50 50 50 -50 -50 -50 -50 -50 -50 -50 -50 -50 -50 50 -50 -50 50 -50 -50 50 -50 -50</float_array>
+					<technique_common>
+						<accessor count="24" source="#BlueSG-positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<source id="BlueSG-normals">
+					<float_array id="BlueSG-normals-array" count="72">0 0 1 0 1 0 -1 0 0 0 0 1 0 1 0 1 0 0 0 0 1 0 -1 0 -1 0 0 0 0 1 0 -1 0 1 0 0 0 1 0 -1 0 0 0 0 -1 0 1 0 1 0 0 0 0 -1 0 -1 0 -1 0 0 0 0 -1 0 -1 0 1 0 0 0 0 -1</float_array>
+					<technique_common>
+						<accessor count="24" source="#BlueSG-normals-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="BlueSG-vertices">
+					<input semantic="POSITION" source="#BlueSG-positions"/>
+				</vertices>
+				<tristrips count="6" material="BlueSG_material">
+					<input offset="0" semantic="VERTEX" source="#BlueSG-vertices" set="0"/>
+					<input offset="1" semantic="NORMAL" source="#BlueSG-normals" set="0"/>
+					<p>6 6 9 9 0 0 3 3</p>
+					<p>12 12 1 1 15 15 4 4</p>
+					<p>14 14 17 17 20 20 23 23</p>
+					<p>5 5 11 11 16 16 22 22</p>
+					<p>13 13 19 19 2 2 8 8</p>
+					<p>21 21 10 10 18 18 7 7</p>
+				</tristrips>
+			</mesh>
+		</geometry>
+	</library_geometries>
+	<library_materials>
+		<material id="material">
+			<instance_effect url="#material_effect"/>
+		</material>
+	</library_materials>
+	<library_effects>
+		<effect id="material_effect">
+			<profile_COMMON>
+				<technique sid="t0">
+					<phong>
+						<emission>
+							<color>0 0 0 1</color>
+						</emission>
+						<ambient>
+							<color>0 0 0 1</color>
+						</ambient>
+						<diffuse>
+							<color>0.137255 0.403922 0.870588 1</color>
+						</diffuse>
+						<specular>
+							<color>0.5 0.5 0.5 1</color>
+						</specular>
+						<shininess>
+							<float>16</float>
+						</shininess>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+	</library_effects>
+	<scene>
+		<instance_visual_scene url="#defaultScene"/>
+	</scene>
+</COLLADA>

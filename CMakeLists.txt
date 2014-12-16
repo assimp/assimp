@@ -78,21 +78,11 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
 	"Path the header files are installed to." )
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
 	"Path the tool executables are installed to." )
-option (ASSIMP_BUILD_STATIC_LIB "Build a static (.a) version of the library" OFF)
 
 SET(ASSIMP_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
 
-# Allow the user to build a static library
+# Allow the user to build a shared or static library
 option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )
-IF ( ASSIMP_BUILD_STATIC_LIB )
-    option ( BUILD_SHARED_LIBS "Build a shared version of the library" OFF )
-ELSE ( ASSIMP_BUILD_STATIC_LIB )
-    option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )
-ENDIF ( ASSIMP_BUILD_STATIC_LIB )
-
-# Generate a pkg-config .pc for the Assimp library.
-CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )
-INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${ASSIMP_LIB_INSTALL_DIR}/pkgconfig/ COMPONENT ${LIBASSIMP-DEV_COMPONENT})
 
 # Only generate this target if no higher-level project already has
 IF (NOT TARGET uninstall)
@@ -136,6 +126,10 @@ option ( ASSIMP_NO_EXPORT
 	OFF
 )
 
+if( CMAKE_COMPILER_IS_GNUCXX )
+  set(LIBSTDC++_LIBRARIES -lstdc++)
+endif( CMAKE_COMPILER_IS_GNUCXX )
+
 # Search for external dependencies, and build them from source if not found
 # Search for zlib
 find_package(ZLIB)
@@ -151,6 +145,7 @@ if( NOT ZLIB_FOUND )
   set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
 else(NOT ZLIB_FOUND)
   ADD_DEFINITIONS(-DASSIMP_BUILD_NO_OWN_ZLIB)
+  set(ZLIB_LIBRARIES_LINKED -lz)
 endif(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
@@ -227,6 +222,10 @@ IF(MSVC)
 		ON
 	)
 ENDIF(MSVC)
+
+# Generate a pkg-config .pc for the Assimp library.
+CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/assimp.pc.in" "${PROJECT_BINARY_DIR}/assimp.pc" @ONLY )
+INSTALL( FILES "${PROJECT_BINARY_DIR}/assimp.pc" DESTINATION ${ASSIMP_LIB_INSTALL_DIR}/pkgconfig/ COMPONENT ${LIBASSIMP-DEV_COMPONENT})
 
 if(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
   # Packing information

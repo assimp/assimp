@@ -15,7 +15,12 @@ application examples using this wrapper
 How To Build
 ------------
 
- I) native library
+ I) native library, for example by issuing this command in jassimp-native/src:
+
+    $ gcc jassimp.cpp -I/usr/lib/jvm/default/include/ \
+      -I/usr/lib/jvm/default/include/linux -lassimp -shared -fPIC -o libjassimp.so
+
+    libjassimp.so is required at runtime and must be located in java.library.path.
 
 II) Java binding
     The java library is built using ant. Executing "ant" in the port/jassimp

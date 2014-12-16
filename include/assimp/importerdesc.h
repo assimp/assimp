@@ -133,4 +133,12 @@ struct aiImporterDesc
 	const char* mFileExtensions;
 };
 
+/** \brief  Returns the Importer description for a given extension.
+
+Will return a NULL-pointer if no assigned importer desc. was found for the given extension
+    \param  extension   [in] The extension to look for
+    \return A pointer showing to the ImporterDesc, \see aiImporterDesc.
+*/
+ASSIMP_API C_STRUCT const aiImporterDesc* aiGetImporterDesc( const char *extension );
+
 #endif 

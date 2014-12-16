@@ -40,6 +40,7 @@ TEST(NoBoostTest, Tuple) {
 	bool b = second.get<3>();
 	EXPECT_FALSE(b);
 
+    // check empty tuple, ignore compile warning
 	boost::tuple<> third;
 
 	// FIXME: Explicit conversion not really required yet

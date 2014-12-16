@@ -247,7 +247,7 @@ ASSIMP_API C_STRUCT aiLogStream aiGetPredefinedLogStream(
  *  Attaching a log stream can slightly reduce Assimp's overall import
  *  performance. Multiple log-streams can be attached. 
  *  @param stream Describes the new log stream.
- *  @note To ensure proepr destruction of the logging system, you need to manually
+ *  @note To ensure proper destruction of the logging system, you need to manually
  *    call aiDetachLogStream() on every single log stream you attach. 
  *    Alternatively (for the lazy folks) #aiDetachAllLogStreams is provided.
  */

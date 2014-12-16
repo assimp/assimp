@@ -50,7 +50,7 @@ def make_tuple(ai_obj, type = None):
 
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
-    aiFace.indices = [aiFace.mIndices[i] for i in xrange(aiFace.mNumIndices)]
+    aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
     
 assimp_struct_inits =  { structs.Face : _init_face }
     
@@ -177,7 +177,7 @@ def _init(self, target = None, parent = None):
                                      "and quads. Try to load your mesh with"
                                      " a post-processing to triangulate your"
                                      " faces.")
-                    sys.exit(1)
+                    raise e
 
 
             else: # starts with 'm' but not iterable

@@ -1379,6 +1379,7 @@ JNIEXPORT jobject JNICALL Java_jassimp_Jassimp_aiImportFile
 	goto end;
 
 error:
+	{
 	jclass exception = env->FindClass("java/io/IOException");
 
 	if (NULL == exception)
@@ -1390,6 +1391,7 @@ error:
 	env->ThrowNew(exception, aiGetErrorString());
 
 	lprintf("problem detected\n");
+	}
 
 end:
 	/* 

@@ -464,7 +464,7 @@ std::string LWSImporter::FindLWOFile(const std::string& in)
 	std::string tmp;
 	if (in.length() > 3 && in[1] == ':'&& in[2] != '\\' && in[2] != '/')
 	{
-		tmp = in[0] + (":\\" + in.substr(2));
+		tmp = in[0] + (std::string(":\\") + in.substr(2));
 	}
 	else tmp = in;
 
@@ -480,12 +480,12 @@ std::string LWSImporter::FindLWOFile(const std::string& in)
 	// <folder>\Scenes\<hh>\<*>.lws
 	// where <hh> is optional.
 
-	std::string test = ".." + (io->getOsSeparator() + tmp); 
+	std::string test = std::string("..") + (io->getOsSeparator() + tmp);
 	if (io->Exists(test)) {
 		return test;
 	}
 
-	test = ".." + (io->getOsSeparator() + test); 
+	test = std::string("..") + (io->getOsSeparator() + test);
 	if (io->Exists(test)) {
 		return test;
 	}

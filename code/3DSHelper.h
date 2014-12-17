@@ -468,7 +468,7 @@ struct aiFloatKey
 		{return mTime < o.mTime;}
 
 	bool operator > (const aiFloatKey& o) const
-		{return mTime < o.mTime;}
+		{return mTime > o.mTime;}
 
 #endif
 };

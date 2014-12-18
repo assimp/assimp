@@ -1952,7 +1952,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 
 	// small sanity check
 	if (primType != Prim_TriFans && primType != Prim_TriStrips)
-		ai_assert(actualPrimitives == numPrimitives);
+		ai_assert(actualPrimitives == numPrimitives)
 
 	// only when we're done reading all <p> tags (and thus know the final vertex count) can we commit the submesh
 	subgroup.mNumFaces = actualPrimitives;

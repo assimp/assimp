@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.4.4)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
+# use the old project command http://www.cmake.org/cmake/help/v3.0/policy/CMP0048.html
+cmake_policy(PUSH)
+cmake_policy(SET CMP0048 OLD)
 project(zlib C)
+cmake_policy(POP)
 
 set(VERSION "1.2.8")
 
@@ -185,3 +189,8 @@ if(MINGW)
 endif(MINGW)
 
 add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+INSTALL( TARGETS zlibstatic
+         LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+         ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+         RUNTIME DESTINATION ${ASSIMP_BIN_INSTALL_DIR}
+         COMPONENT ${LIBASSIMP_COMPONENT})

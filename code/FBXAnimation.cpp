@@ -59,7 +59,7 @@ namespace FBX {
 	using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc)
+AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& /*doc*/)
 : Object(id, element, name)
 {
 	const Scope& sc = GetRequiredScope(element);

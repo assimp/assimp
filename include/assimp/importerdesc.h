@@ -72,7 +72,7 @@ enum aiImporterFlags
 	  * should be used with care. This only happens for trunk
 	  * (i.e. SVN) versions, experimental code is not included
 	  * in releases. */
-	aiImporterFlags_Experimental = 0x10,
+	aiImporterFlags_Experimental = 0x10
 };
 
 
@@ -132,5 +132,13 @@ struct aiImporterDesc
 		file extensions such as XML would be tediously slow. */
 	const char* mFileExtensions;
 };
+
+/** \brief  Returns the Importer description for a given extension.
+
+Will return a NULL-pointer if no assigned importer desc. was found for the given extension
+    \param  extension   [in] The extension to look for
+    \return A pointer showing to the ImporterDesc, \see aiImporterDesc.
+*/
+ASSIMP_API C_STRUCT const aiImporterDesc* aiGetImporterDesc( const char *extension );
 
 #endif 

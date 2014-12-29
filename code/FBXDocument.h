@@ -696,7 +696,7 @@ public:
 public:
 
 	/** Get the Skin attached to this geometry or NULL */
-	const Skin* const DeformerSkin() const {
+	const Skin* DeformerSkin() const {
 		return skin;
 	}
 
@@ -1096,7 +1096,7 @@ public:
 		return transformLink;
 	}
 
-	const Model* const TargetNode() const {
+	const Model* TargetNode() const {
 		return node;
 	}
 

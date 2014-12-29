@@ -640,16 +640,25 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			}
 		}
 
+		// Get file size for progress handler
+		IOStream * fileIO = pimpl->mIOHandler->Open( pFile );
+		uint32_t fileSize = 0;
+		if (fileIO)
+		{
+			fileSize = fileIO->FileSize();
+			pimpl->mIOHandler->Close( fileIO );
+		}
+
 		// Dispatch the reading to the worker class for this format
 		DefaultLogger::get()->info("Found a matching importer for this file format");
-		pimpl->mProgressHandler->Update();
+		pimpl->mProgressHandler->UpdateFileRead( 0, fileSize );
 
 		if (profiler) {
 			profiler->BeginRegion("import");
 		}
 
 		pimpl->mScene = imp->ReadFile( this, pFile, pimpl->mIOHandler);
-		pimpl->mProgressHandler->Update();
+		pimpl->mProgressHandler->UpdateFileRead( fileSize, fileSize );
 
 		if (profiler) {
 			profiler->EndRegion("import");
@@ -678,7 +687,6 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			ScenePreprocessor pre(pimpl->mScene);
 			pre.ProcessScene();
 
-			pimpl->mProgressHandler->Update();
 			if (profiler) {
 				profiler->EndRegion("preprocess");
 			}
@@ -768,6 +776,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 	for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)	{
 
 		BaseProcess* process = pimpl->mPostProcessingSteps[a];
+		pimpl->mProgressHandler->UpdatePostProcess( a, pimpl->mPostProcessingSteps.size() );
 		if( process->IsActive( pFlags))	{
 
 			if (profiler) {
@@ -775,7 +784,6 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 			}
 
 			process->ExecuteOnScene	( this );
-			pimpl->mProgressHandler->Update();
 
 			if (profiler) {
 				profiler->EndRegion("postprocess");
@@ -803,6 +811,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		}
 #endif // ! DEBUG
 	}
+	pimpl->mProgressHandler->UpdatePostProcess( pimpl->mPostProcessingSteps.size(), pimpl->mPostProcessingSteps.size() );
 
 	// update private scene flags
   if( pimpl->mScene )

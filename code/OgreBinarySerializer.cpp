@@ -376,14 +376,14 @@ void OgreBinarySerializer::ReadMeshSkeletonLink(Mesh *mesh)
 	mesh->skeletonRef = ReadLine();
 }
 
-void OgreBinarySerializer::ReadMeshBounds(Mesh *mesh)
+void OgreBinarySerializer::ReadMeshBounds(Mesh * /*mesh*/)
 {
 	// Skip bounds, not compatible with Assimp.
 	// 2x float vec3 + 1x float sphere radius
 	SkipBytes(sizeof(float) * 7);
 }
 
-void OgreBinarySerializer::ReadMeshExtremes(Mesh *mesh)
+void OgreBinarySerializer::ReadMeshExtremes(Mesh * /*mesh*/)
 {
 	// Skip extremes, not compatible with Assimp.
 	size_t numBytes = m_currentLen - MSTREAM_OVERHEAD_SIZE; 
@@ -534,7 +534,6 @@ void OgreBinarySerializer::ReadSubMeshTextureAlias(SubMesh *submesh)
 void OgreBinarySerializer::ReadSubMeshNames(Mesh *mesh)
 {
 	uint16_t id = 0;
-	uint16_t submeshIndex = 0;
 
 	if (!AtEnd())
 	{
@@ -644,7 +643,7 @@ void OgreBinarySerializer::ReadGeometryVertexBuffer(VertexData *dest)
 	DefaultLogger::get()->debug(Formatter::format() << "    - Read vertex buffer for source " << bindIndex << " of " << numBytes << " bytes");
 }
 
-void OgreBinarySerializer::ReadEdgeList(Mesh *mesh)
+void OgreBinarySerializer::ReadEdgeList(Mesh * /*mesh*/)
 {
 	// Assimp does not acknowledge LOD levels as far as I can see it. This info is just skipped.
 
@@ -1055,7 +1054,7 @@ void OgreBinarySerializer::ReadSkeletonAnimation(Skeleton *skeleton)
 	DefaultLogger::get()->debug(Formatter::format() << "    " << anim->name << " (" << anim->length << " sec, " << anim->tracks.size() << " tracks)");	
 }
 
-void OgreBinarySerializer::ReadSkeletonAnimationTrack(Skeleton *skeleton, Animation *dest)
+void OgreBinarySerializer::ReadSkeletonAnimationTrack(Skeleton * /*skeleton*/, Animation *dest)
 {
 	uint16_t boneId = Read<uint16_t>();
 	Bone *bone = dest->parentSkeleton->BoneById(boneId);
@@ -1097,7 +1096,7 @@ void OgreBinarySerializer::ReadSkeletonAnimationKeyFrame(VertexAnimationTrack *d
 	dest->transformKeyFrames.push_back(keyframe);
 }
 
-void OgreBinarySerializer::ReadSkeletonAnimationLink(Skeleton *skeleton)
+void OgreBinarySerializer::ReadSkeletonAnimationLink(Skeleton * /*skeleton*/)
 {
 	// Skip bounds, not compatible with Assimp.
 	ReadLine(); // skeleton name

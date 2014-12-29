@@ -2,6 +2,29 @@
 CHANGELOG
 ----------------------------------------------------------------------
 
+3.1.1 (2014-06-15)
+
+FEATURES:
+   - Support for FBX 2013 and newer, binary and ASCII (this is partly
+     work from Google Summer of Code 2012)
+   - Support for OGRE binary mesh and skeleton format
+   - Updated BLEND support for newer Blender versions
+   - Support for arbitrary meta data, used to hold FBX and DAE metadata
+   - OBJ Export now produces smaller files
+   - Meshes can now have names, this is supported by the major importers
+   - Improved IFC geometry generation
+   - M3 support has been removed
+
+FIXES/HOUSEKEEPING:
+    - Hundreds of bugfixes in all parts of the library
+    - CMake is now the primary build system
+    
+API COMPATIBILITY:
+    - 3.1.1 is not binary compatible to 3.0 due to aiNode::mMetaData
+      and aiMesh::mName
+    - Export interface has been cleaned up and unified
+    - Other than that no relevant changes
+   
 
 3.0 (2012-07-07)
 

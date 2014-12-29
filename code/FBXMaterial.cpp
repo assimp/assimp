@@ -207,7 +207,7 @@ Texture::~Texture()
 
 }
 
-LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& doc, const std::string& name)
+LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& /*doc*/, const std::string& name)
 : Object(id,element,name)
 ,texture(0)
 ,blendMode(BlendMode_Modulate)

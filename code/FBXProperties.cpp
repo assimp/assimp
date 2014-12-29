@@ -85,7 +85,7 @@ Property* ReadTypedProperty(const Element& element)
 	else if (!strcmp(cs,"bool") || !strcmp(cs,"Bool")) {
 		return new TypedProperty<bool>(ParseTokenAsInt(*tok[4]) != 0);
 	}
-	else if (!strcmp(cs,"int") || !strcmp(cs,"enum")) {
+	else if (!strcmp(cs, "int") || !strcmp(cs, "Int") || !strcmp(cs, "enum") || !strcmp(cs, "Enum")) {
 		return new TypedProperty<int>(ParseTokenAsInt(*tok[4]));
 	}
 	else if (!strcmp(cs,"ULongLong")) {
@@ -105,7 +105,7 @@ Property* ReadTypedProperty(const Element& element)
 			ParseTokenAsFloat(*tok[6]))
 		);
 	}
-	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime") || !strcmp(cs,"Float")) {
+	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView")) {
 		return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
 	}
 	return NULL;

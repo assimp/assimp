@@ -75,8 +75,8 @@ private:
 	};
 	
 	OgreBinarySerializer(MemoryStreamReader *reader, AssetMode mode) :
-		m_reader(reader),
 		m_currentLen(0),
+		m_reader(reader),
 		assetMode(mode)
 	{
 	}
@@ -301,11 +301,12 @@ enum MeshChunkId
 						// unsigned short poseIndex 
 						// float influence
 		// Optional submesh extreme vertex list chink
-		M_TABLE_EXTREMES = 0xE000,
+		M_TABLE_EXTREMES = 0xE000
 		// unsigned short submesh_index;
 		// float extremes [n_extremes][3];
 };
 
+/*
 static std::string MeshHeaderToString(MeshChunkId id)
 {
 	switch(id)
@@ -347,6 +348,7 @@ static std::string MeshHeaderToString(MeshChunkId id)
 	}
 	return "Unknown_MeshChunkId";
 }
+*/
 
 enum SkeletonChunkId
 {
@@ -393,6 +395,7 @@ enum SkeletonChunkId
 		// float scale							: scale to apply to trans/scale keys
 };
 
+/*
 static std::string SkeletonHeaderToString(SkeletonChunkId id)
 {
 	switch(id)
@@ -409,6 +412,7 @@ static std::string SkeletonHeaderToString(SkeletonChunkId id)
 	}
 	return "Unknown_SkeletonChunkId";
 }
+*/
 } // Ogre
 } // Assimp
 

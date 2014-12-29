@@ -381,8 +381,6 @@ private:
 		out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
 		out_camera->mPosition = cam.Position();
 		out_camera->mLookAt = cam.InterestPosition() - out_camera->mPosition;
-
-		// BUG HERE cam.FieldOfView() returns 1.0f every time.  1.0f is default value.
 		out_camera->mHorizontalFOV = AI_DEG_TO_RAD(cam.FieldOfView());
 	}
 
@@ -499,15 +497,15 @@ private:
 		bool is_id[3] = { true, true, true };
 
 		aiMatrix4x4 temp[3];
-		if(fabs(rotation.z) > angle_epsilon) {
+		if(std::fabs(rotation.z) > angle_epsilon) {
 			aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(rotation.z),temp[2]);
 			is_id[2] = false;
 		}
-		if(fabs(rotation.y) > angle_epsilon) {
+		if(std::fabs(rotation.y) > angle_epsilon) {
 			aiMatrix4x4::RotationY(AI_DEG_TO_RAD(rotation.y),temp[1]);
 			is_id[1] = false;
 		}
-		if(fabs(rotation.x) > angle_epsilon) {
+		if(std::fabs(rotation.x) > angle_epsilon) {
 			aiMatrix4x4::RotationX(AI_DEG_TO_RAD(rotation.x),temp[0]);
 			is_id[0] = false;
 		}
@@ -676,7 +674,7 @@ private:
 		}
 
 		const aiVector3D& Scaling = PropertyGet<aiVector3D>(props,"Lcl Scaling",ok);
-		if(ok && fabs(Scaling.SquareLength()-1.0f) > zero_epsilon) {
+		if(ok && std::fabs(Scaling.SquareLength()-1.0f) > zero_epsilon) {
 			aiMatrix4x4::Scaling(Scaling,chain[TransformationComp_Scaling]);
 		}
 
@@ -686,7 +684,7 @@ private:
 		}
 		
 		const aiVector3D& GeometricScaling = PropertyGet<aiVector3D>(props, "GeometricScaling", ok);
-		if (ok && fabs(GeometricScaling.SquareLength() - 1.0f) > zero_epsilon) {
+		if (ok && std::fabs(GeometricScaling.SquareLength() - 1.0f) > zero_epsilon) {
 			aiMatrix4x4::Scaling(GeometricScaling, chain[TransformationComp_GeometricScaling]);
 		}
 		
@@ -767,7 +765,6 @@ private:
 
 		// find user defined properties (3ds Max)
 		data->Set(index++, "UserProperties", aiString(PropertyGet<std::string>(props, "UDP3DSMAX", "")));
-		unparsedProperties.erase("UDP3DSMAX");
 		// preserve the info that a node was marked as Null node in the original file.
 		data->Set(index++, "IsNull", model.IsNull() ? true : false);
 
@@ -1320,7 +1317,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertCluster(std::vector<aiBone*>& bones, const Model& model, const Cluster& cl, 		
+	void ConvertCluster(std::vector<aiBone*>& bones, const Model& /*model*/, const Cluster& cl,
 		std::vector<size_t>& out_indices,
 		std::vector<size_t>& index_out_indices,
 		std::vector<size_t>& count_out_indices,
@@ -2348,7 +2345,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	aiNodeAnim* GenerateScalingNodeAnim(const std::string& name, 
-		const Model& target, 
+		const Model& /*target*/,
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
 		double& max_time,
@@ -2379,7 +2376,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	aiNodeAnim* GenerateTranslationNodeAnim(const std::string& name, 
-		const Model& target, 
+		const Model& /*target*/,
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
 		double& max_time,
@@ -2831,7 +2828,7 @@ private:
 
 
 	// ------------------------------------------------------------------------------------------------
-	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& layers,
+	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& /*layers*/,
 		double& maxTime,
 		double& minTime)
 	{
@@ -2852,7 +2849,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
-		const LayerMap& layers,
+		const LayerMap& /*layers*/,
 		double& maxTime,
 		double& minTime)
 	{
@@ -2870,7 +2867,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
-		const LayerMap& layers, 
+		const LayerMap& /*layers*/,
 		double& maxTime,
 		double& minTime,
 		Model::RotOrder order)

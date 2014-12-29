@@ -1,11 +1,25 @@
-
 #include "UnitTestPCH.h"
-#include "utGenNormals.h"
+
+#include <GenVertexNormalsProcess.h>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION (GenNormalsTest);
+using namespace std;
+using namespace Assimp;
 
-void GenNormalsTest :: setUp (void)
+class GenNormalsTest : public ::testing::Test
+{
+public:
+
+	virtual void SetUp();
+	virtual void TearDown();
+
+protected:
+	aiMesh* pcMesh;
+	GenVertexNormalsProcess* piProcess;
+};
+
+// ------------------------------------------------------------------------------------------------
+void GenNormalsTest::SetUp()
 {
 	piProcess = new GenVertexNormalsProcess();
 	pcMesh = new aiMesh();
@@ -23,14 +37,16 @@ void GenNormalsTest :: setUp (void)
 	pcMesh->mVertices[2] = aiVector3D(3.0f,2.0f,4.0f);
 }
 
-void GenNormalsTest :: tearDown (void)
+// ------------------------------------------------------------------------------------------------
+void GenNormalsTest::TearDown()
 {
 	delete this->pcMesh;
 	delete this->piProcess;
 }
 
-void  GenNormalsTest :: testSimpleTriangle (void)
+// ------------------------------------------------------------------------------------------------
+TEST_F(GenNormalsTest, testSimpleTriangle)
 {
-	piProcess->GenMeshVertexNormals(pcMesh,0);
-	CPPUNIT_ASSERT(0 != pcMesh->mNormals);
+	piProcess->GenMeshVertexNormals(pcMesh, 0);
+	EXPECT_TRUE(pcMesh->mNormals != NULL);
 }

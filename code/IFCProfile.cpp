@@ -101,7 +101,7 @@ void ProcessOpenProfile(const IfcArbitraryOpenProfileDef& def, TempMesh& meshout
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& conv)
+void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh& meshout, ConversionData& /*conv*/)
 {
 	if(const IfcRectangleProfileDef* const cprofile = def.ToPtr<IfcRectangleProfileDef>()) {
 		const IfcFloat x = cprofile->XDim*0.5f, y = cprofile->YDim*0.5f;
@@ -124,7 +124,7 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
 
 		IfcFloat angle = 0.f;
 		for(size_t i = 0; i < segments; ++i, angle += delta) {
-			meshout.verts.push_back( IfcVector3( cos(angle)*radius, sin(angle)*radius, 0.f ));
+			meshout.verts.push_back( IfcVector3( std::cos(angle)*radius, std::sin(angle)*radius, 0.f ));
 		}
 
 		meshout.vertcnt.push_back(segments);

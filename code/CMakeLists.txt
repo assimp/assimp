@@ -111,6 +111,7 @@ SET( Common_SRCS
 	MemoryIOWrapper.h
 	ParsingUtils.h
 	StreamReader.h
+	StreamWriter.h
 	StringComparison.h
 	SGSpatialSort.cpp
 	SGSpatialSort.h
@@ -143,6 +144,7 @@ SET( Common_SRCS
 	LogAux.h
 	Bitmap.cpp
 	Bitmap.h
+	XMLTools.h
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -151,6 +153,8 @@ SET( 3DS_SRCS
 	3DSHelper.h
 	3DSLoader.cpp
 	3DSLoader.h
+	3DSExporter.h
+	3DSExporter.cpp
 )
 SOURCE_GROUP(3DS FILES ${3DS_SRCS})
 
@@ -167,6 +171,20 @@ SET( ASE_SRCS
 	ASEParser.h
 )
 SOURCE_GROUP( ASE FILES ${ASE_SRCS})
+
+SET( ASSBIN_SRCS
+	AssbinExporter.h
+	AssbinExporter.cpp
+	AssbinLoader.h
+	AssbinLoader.cpp
+)
+SOURCE_GROUP( Assbin FILES ${ASSBIN_SRCS})
+
+SET( ASSXML_SRCS
+	AssxmlExporter.h
+	AssxmlExporter.cpp
+)
+SOURCE_GROUP( Assxml FILES ${ASSXML_SRCS})
 
 SET( B3D_SRCS
 	B3DImporter.cpp
@@ -612,7 +630,7 @@ SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 
 # VC2010 fixes
 if(MSVC10)
-	OPTION( VC10_STDINT_FIX "Fix for VC10 Compiler regarding pstdint.h redefinition errors" OFF )
+	option( VC10_STDINT_FIX "Fix for VC10 Compiler regarding pstdint.h redefinition errors" OFF )
 	if( VC10_STDINT_FIX )
 		ADD_DEFINITIONS( -D_STDINT )
 	endif( VC10_STDINT_FIX )
@@ -643,6 +661,8 @@ SET( assimp_src
 	${3DS_SRCS}
 	${AC_SRCS}
 	${ASE_SRCS}
+	${ASSBIN_SRCS}
+	${ASSXML_SRCS}
 	${B3D_SRCS}
 	${BVH_SRCS}
 	${Collada_SRCS}
@@ -705,6 +725,13 @@ ADD_LIBRARY( assimp ${assimp_src} )
 SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
 TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
+
+if(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
+	set(ASSIMP_ANDROID_JNIIOSYSTEM_PATH port/AndroidJNI)
+	add_subdirectory(../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/ ../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/)
+	target_link_libraries(assimp android_jniiosystem)
+endif(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
+
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${ASSIMP_VERSION}
 	SOVERSION ${ASSIMP_SOVERSION} # use full version 
@@ -731,6 +758,11 @@ INSTALL( TARGETS assimp
          COMPONENT ${LIBASSIMP_COMPONENT})
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
+if (ASSIMP_ANDROID_JNIIOSYSTEM)
+	INSTALL(FILES ${HEADER_PATH}/../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
+			DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
+			COMPONENT assimp-dev)
+endif(ASSIMP_ANDROID_JNIIOSYSTEM)
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
 	install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${ASSIMP_DEBUG_POSTFIX}.pdb

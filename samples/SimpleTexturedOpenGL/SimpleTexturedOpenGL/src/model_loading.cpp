@@ -12,9 +12,6 @@
 // Thanks to NeHe on whose OpenGL tutorials this one's based on! :)
 // http://nehe.gamedev.net/
 // ----------------------------------------------------------------------------
-
-
-
 #include <windows.h>
 #include <stdio.h>
 #include <GL/gl.h>
@@ -36,7 +33,7 @@
 #include "assimp/LogStream.hpp"
 
 
-// The default hardcoded path. Can be overridden by supplying a path through the commandline.
+// The default hard-coded path. Can be overridden by supplying a path through the command line.
 static std::string modelpath = "../../test/models/OBJ/spider.obj";
 
 
@@ -47,7 +44,7 @@ HINSTANCE	hInstance;	// Holds The Instance Of The Application
 
 bool		keys[256];			// Array used for Keyboard Routine;
 bool		active=TRUE;		// Window Active Flag Set To TRUE by Default
-bool		fullscreen=TRUE;	// Fullscreen Flag Set To Fullscreen By Default
+bool		fullscreen=TRUE;	// full-screen Flag Set To full-screen By Default
 
 GLfloat		xrot;
 GLfloat		yrot;
@@ -80,6 +77,7 @@ Assimp::Importer importer;
 
 void createAILogger()
 {
+    // Change this line to normal if you not want to analyse the import process
 	//Assimp::Logger::LogSeverity severity = Assimp::Logger::NORMAL;
 	Assimp::Logger::LogSeverity severity = Assimp::Logger::VERBOSE;
 
@@ -101,20 +99,20 @@ void destroyAILogger()
 
 void logInfo(std::string logString)
 {
-	//Will add message to File with "info" Tag
+	// Will add message to File with "info" Tag
 	Assimp::DefaultLogger::get()->info(logString.c_str());
 }
 
 void logDebug(const char* logString)
 {
-	//Will add message to File with "debug" Tag
+	// Will add message to File with "debug" Tag
 	Assimp::DefaultLogger::get()->debug(logString);
 }
 
 
 bool Import3DFromFile( const std::string& pFile)
 {
-	//check if file exists
+	// Check if file exists
 	std::ifstream fin(pFile.c_str());
 	if(!fin.fail())
 	{
@@ -143,12 +141,14 @@ bool Import3DFromFile( const std::string& pFile)
 	return true;
 }
 
-
-void ReSizeGLScene(GLsizei width, GLsizei height)				// Resize And Initialize The GL Window
+// Resize And Initialize The GL Window
+void ReSizeGLScene(GLsizei width, GLsizei height)				
 {
-	if (height==0)								// Prevent A Divide By Zero By
+    // Prevent A Divide By Zero By
+	if (height==0)								
 	{
-		height=1;							// Making Height Equal One
+        // Making Height Equal One
+        height=1;		
 	}
 
 	glViewport(0, 0, width, height);					// Reset The Current Viewport
@@ -217,9 +217,6 @@ int LoadGLTextures(const aiScene* scene)
 	textureIds = new GLuint[numTextures];
 	glGenTextures(numTextures, textureIds); /* Texture name generation */
 
-	/* define texture path */
-	//std::string texturepath = "../../../test/models/Obj/";
-
 	/* get iterator */
 	std::map<std::string, GLuint*>::iterator itr = textureIdMap.begin();
 
@@ -239,48 +236,50 @@ int LoadGLTextures(const aiScene* scene)
 
 		if (success) /* If no error occured: */
 		{
-			success = ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE); /* Convert every colour component into
-			unsigned byte. If your image contains alpha channel you can replace IL_RGB with IL_RGBA */
+            // Convert every colour component into unsigned byte.If your image contains 
+            // alpha channel you can replace IL_RGB with IL_RGBA
+            success = ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
 			if (!success)
 			{
 				/* Error occured */
 				abortGLInit("Couldn't convert image");
 				return -1;
 			}
-			//glGenTextures(numTextures, &textureIds[i]); /* Texture name generation */
-			glBindTexture(GL_TEXTURE_2D, textureIds[i]); /* Binding of texture name */
-			//redefine standard texture values
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); /* We will use linear
-			interpolation for magnification filter */
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); /* We will use linear
-			interpolation for minifying filter */
-			glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH),
+            // Binding of texture name
+            glBindTexture(GL_TEXTURE_2D, textureIds[i]); 
+			// redefine standard texture values
+            // We will use linear interpolation for magnification filter
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            // We will use linear interpolation for minifying filter
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+            // Texture specification
+            glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH),
 				ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE,
-				ilGetData()); /* Texture specification */
+				ilGetData()); 
+            // we also want to be able to deal with odd texture dimensions
+            glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+            glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
+            glPixelStorei( GL_UNPACK_SKIP_PIXELS, 0 );
+            glPixelStorei( GL_UNPACK_SKIP_ROWS, 0 );
 		}
 		else
 		{
 			/* Error occured */
 			MessageBox(NULL, ("Couldn't load Image: " + fileloc).c_str() , "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		}
-
-
 	}
+    // Because we have already copied image data into texture data  we can release memory used by image.
+	ilDeleteImages(numTextures, imageIds); 
 
-	ilDeleteImages(numTextures, imageIds); /* Because we have already copied image data into texture data
-	we can release memory used by image. */
-
-	//Cleanup
+	// Cleanup
 	delete [] imageIds;
 	imageIds = NULL;
 
-	//return success;
 	return TRUE;
 }
 
-
-
-int InitGL()					 // All Setup For OpenGL goes here
+// All Setup For OpenGL goes here
+int InitGL()
 {
 	if (!LoadGLTextures(scene))
 	{
@@ -306,9 +305,6 @@ int InitGL()					 // All Setup For OpenGL goes here
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
 	glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
 	glEnable(GL_LIGHT1);
-
-	//glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-
 
 	return TRUE;					// Initialization Went OK
 }
@@ -449,8 +445,6 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd, float 
 			glDisable(GL_COLOR_MATERIAL);
 		}
 
-
-
 		for (t = 0; t < mesh->mNumFaces; ++t) {
 			const struct aiFace* face = &mesh->mFaces[t];
 			GLenum face_mode;
@@ -480,13 +474,9 @@ void recursive_render (const struct aiScene *sc, const struct aiNode* nd, float 
 					glNormal3fv(&mesh->mNormals[vertexIndex].x);
 					glVertex3fv(&mesh->mVertices[vertexIndex].x);
 			}
-
 			glEnd();
-
 		}
-
 	}
-
 
 	// draw all children
 	for (n = 0; n < nd->mNumChildren; ++n)
@@ -521,12 +511,11 @@ int DrawGLScene()				//Here's where we do all the drawing
 
 	drawAiScene(scene);
 
-
 	//xrot+=0.3f;
 	yrot+=0.2f;
 	//zrot+=0.4f;
 
-	return TRUE;					// Ewwrissing okay
+	return TRUE;					// okay
 }
 
 
@@ -667,11 +656,6 @@ BOOL CreateGLWindow(const char* title, int width, int height, int bits, bool ful
 	{
 		abortGLInit("Window Creation Error.");
 		return FALSE;
-		/*
-		KillGLWindow();											// Reset The Display
-		MessageBox(NULL, "Window Creation Error.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;											// Return False
-		*/
 	}
 
 	static	PIXELFORMATDESCRIPTOR pfd=					// pfd Tells Windows How We Want Things To Be
@@ -767,8 +751,8 @@ LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 			{
 				switch (wParam)
 				{
-					case SC_SCREENSAVE:		// Screensaver trying to start
-					case SC_MONITORPOWER:	// Monitor tryig to enter powersafe
+					case SC_SCREENSAVE:		// Screen-saver trying to start
+					case SC_MONITORPOWER:	// Monitor trying to enter power-safe
 					return 0;
 				}
 				break;
@@ -799,12 +783,12 @@ LRESULT CALLBACK WndProc(HWND hWnd,				// Handles for this Window
 			}
 	}
 
-	// Pass All Unhandled Messaged To DefWindowProc
+	// Pass All unhandled Messaged To DefWindowProc
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-int WINAPI WinMain( HINSTANCE hInstance, // Instance
-				   HINSTANCE hPrevInstance,      // Previous Instance
+int WINAPI WinMain( HINSTANCE hInstance,         // The instance
+				   HINSTANCE hPrevInstance,      // Previous instance
 				   LPSTR lpCmdLine,              // Command Line Parameters
 				   int nShowCmd )                // Window Show State
 {

@@ -1,5 +1,5 @@
 
-// This is just a small test to check whether Assimp's API compiles from C
+/* This is just a small test to check whether Assimp's API compiles from C */
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>

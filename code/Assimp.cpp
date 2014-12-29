@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "GenericProperty.h"
 #include "CInterfaceIOWrapper.h"
+#include "../include/assimp/importerdesc.h"
 #include "Importer.h"
 
 // ------------------------------------------------------------------------------------------------
@@ -84,7 +85,11 @@ namespace Assimp
 
 	/** Verbose logging active or not? */
 	static aiBool gVerboseLogging = false;
-}
+
+    /** will return all registered importers. */
+    void GetImporterInstanceList(std::vector< BaseImporter* >& out);
+
+} // namespace assimp
 
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
@@ -606,4 +611,22 @@ ASSIMP_API void aiIdentityMatrix4(
 	*mat = aiMatrix4x4();
 }
 
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API C_STRUCT const aiImporterDesc* aiGetImporterDesc( const char *extension ) {
+    if( NULL == extension ) {
+        return NULL;
+    }
+    const aiImporterDesc *desc( NULL );
+    std::vector< BaseImporter* > out;
+    GetImporterInstanceList( out );
+    for( size_t i = 0; i < out.size(); ++i ) {
+        if( 0 == strncmp( out[ i ]->GetInfo()->mFileExtensions, extension, strlen( extension ) ) ) {
+            desc = out[ i ]->GetInfo();
+            break;
+        }
+    }
 
+    return desc;
+}
+
+// ------------------------------------------------------------------------------------------------

@@ -46,14 +46,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "fast_atof.h"
+#include "ParsingUtils.h"
 
 namespace Assimp	{
 
 // Material specific token
-static const std::string DiffuseTexture      = "map_kd";
-static const std::string AmbientTexture      = "map_ka";
-static const std::string SpecularTexture     = "map_ks";
+static const std::string DiffuseTexture      = "map_Kd";
+static const std::string AmbientTexture      = "map_Ka";
+static const std::string SpecularTexture     = "map_Ks";
 static const std::string OpacityTexture      = "map_d";
+static const std::string EmmissiveTexture    = "map_emissive";
 static const std::string BumpTexture1        = "map_bump";
 static const std::string BumpTexture2        = "map_Bump";
 static const std::string BumpTexture3        = "bump";
@@ -128,6 +130,7 @@ void ObjFileMtlImporter::load()
 	{
 		switch (*m_DataIt)
 		{
+		case 'k':
 		case 'K':
 			{
 				++m_DataIt;
@@ -163,37 +166,32 @@ void ObjFileMtlImporter::load()
 			}
 			break;
 
-		case 'N':	// Shineness
+		case 'N':
+		case 'n':
 			{
 				++m_DataIt;
-				switch(*m_DataIt) 
+				switch(*m_DataIt)
 				{
-				case 's':
+				case 's':	// Specular exponent
 					++m_DataIt;
 					getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
 					break;
-				case 'i': //Index Of refraction 
+				case 'i':	// Index Of refraction
 					++m_DataIt;
 					getFloatValue(m_pModel->m_pCurrentMaterial->ior);
 					break;
+				case 'e':	// New material
+					createMaterial();
+					break;
 				}
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-				break;
 			}
 			break;
-		
 
 		case 'm':	// Texture
 		case 'b':   // quick'n'dirty - for 'bump' sections
 			{
 				getTexture();
-				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-			}
-			break;
-
-		case 'n':	// New material name
-			{
-				createMaterial();
 				m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 			}
 			break;
@@ -221,15 +219,17 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 {
 	ai_assert( NULL != pColor );
 	
-	float r, g, b;
+	float r( 0.0f ), g( 0.0f ), b( 0.0f );
 	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, r );
 	pColor->r = r;
 	
-	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
-	pColor->g = g;
-
-	m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
-	pColor->b = b;
+    // we have to check if color is default 0 with only one token
+    if( !IsLineEnd( *m_DataIt ) ) {
+        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
+        m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, b );
+    }
+    pColor->g = g;
+    pColor->b = b;
 }
 
 // -------------------------------------------------------------------
@@ -253,7 +253,7 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 void ObjFileMtlImporter::createMaterial()
 {	
 	std::string line( "" );
-	while ( !isNewLine( *m_DataIt ) ) {
+    while( !IsLineEnd( *m_DataIt ) ) {
 		line += *m_DataIt;
 		++m_DataIt;
 	}
@@ -303,11 +303,7 @@ void ObjFileMtlImporter::getTexture() {
 		// Opacity texture
 		out = & m_pModel->m_pCurrentMaterial->textureOpacity;
 		clampIndex = ObjFile::Material::TextureOpacityType;
-	} else if (!ASSIMP_strincmp( pPtr,"map_ka",6)) {
-		// Ambient texture
-		out = & m_pModel->m_pCurrentMaterial->textureAmbient;
-		clampIndex = ObjFile::Material::TextureAmbientType;
-	} else if (!ASSIMP_strincmp(&(*m_DataIt),"map_emissive",6)) {
+	} else if (!ASSIMP_strincmp( pPtr, EmmissiveTexture.c_str(), EmmissiveTexture.size())) {
 		// Emissive texture
 		out = & m_pModel->m_pCurrentMaterial->textureEmissive;
 		clampIndex = ObjFile::Material::TextureEmissiveType;

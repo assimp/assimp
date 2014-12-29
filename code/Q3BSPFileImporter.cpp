@@ -73,11 +73,13 @@ static const aiImporterDesc desc = {
 
 namespace Assimp {
 
+/*
 static void getSupportedExtensions(std::vector<std::string> &supportedExtensions) {
     supportedExtensions.push_back( ".jpg" );
     supportedExtensions.push_back( ".png" );
     supportedExtensions.push_back( ".tga" );
 }
+*/
     
 using namespace Q3BSP;
 
@@ -628,7 +630,7 @@ aiFace *Q3BSPFileImporter::getNextFace( aiMesh *pMesh, unsigned int &rFaceIdx )
 bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pModel,
 												 Q3BSP::Q3BSPZipArchive *pArchive, aiScene*,
 												 aiMaterial *pMatHelper, int textureId ) {
-	if ( NULL == pArchive || NULL == pArchive || NULL == pMatHelper ) {
+	if ( NULL == pArchive || NULL == pMatHelper ) {
 		return false;
 	}
 
@@ -639,17 +641,17 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 	bool res = true;
 	sQ3BSPTexture *pTexture = pModel->m_Textures[ textureId ];
 	if ( !pTexture ) {
-        return false;
-    }
+		return false;
+	}
 
-    std::vector<std::string> supportedExtensions;
-    supportedExtensions.push_back( ".jpg" );
-    supportedExtensions.push_back( ".png" );
-    supportedExtensions.push_back( ".tga" );
+	std::vector<std::string> supportedExtensions;
+	supportedExtensions.push_back( ".jpg" );
+	supportedExtensions.push_back( ".png" );
+	supportedExtensions.push_back( ".tga" );
 	std::string textureName, ext;
 	if ( expandFile( pArchive, pTexture->strName, supportedExtensions, textureName, ext ) ) {
 		IOStream *pTextureStream = pArchive->Open( textureName.c_str() );
-		if ( !pTextureStream ) {
+		if ( pTextureStream ) {
 			size_t texSize = pTextureStream->FileSize();
 			aiTexture *pTexture = new aiTexture;
 			pTexture->mHeight = 0;

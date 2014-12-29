@@ -656,7 +656,7 @@ uint32_t WriteBinaryScene(const aiScene* scene)
 // -----------------------------------------------------------------------------------
 // Write a binary model dump
 void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const char* cmd, 
-	bool _shortened, bool compressed, ImportData& imp)
+	bool _shortened, bool compressed, ImportData& /*imp*/)
 {
 	out = _out;
 	shortened = _shortened;

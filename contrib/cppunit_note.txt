@@ -1,8 +1,0 @@
-This is a "slim" version of CPPunit. It contains everything we need, but nothing more.
-
-- Tools have been removed
-- x64-Build configs have been added
-- VC6 build & headers have been removed (Assimp can't be compiled with vc6)
-- vc9 solution has been added, vc8 solution uses Assimp 'FastSTL' settings
-
---- Alex

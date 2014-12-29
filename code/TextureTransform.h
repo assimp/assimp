@@ -116,19 +116,19 @@ struct STransformVecInfo : public aiUVTransform
 		// We use a small epsilon here
 		const static float epsilon = 0.05f;
 
-		if (fabs( mTranslation.x - other.mTranslation.x ) > epsilon ||
-			fabs( mTranslation.y - other.mTranslation.y ) > epsilon)
+		if (std::fabs( mTranslation.x - other.mTranslation.x ) > epsilon ||
+			std::fabs( mTranslation.y - other.mTranslation.y ) > epsilon)
 		{
 			return false;
 		}
 
-		if (fabs( mScaling.x - other.mScaling.x ) > epsilon ||
-			fabs( mScaling.y - other.mScaling.y ) > epsilon)
+		if (std::fabs( mScaling.x - other.mScaling.x ) > epsilon ||
+			std::fabs( mScaling.y - other.mScaling.y ) > epsilon)
 		{
 			return false;
 		}
 
-		if (fabs( mRotation - other.mRotation) > epsilon)
+		if (std::fabs( mRotation - other.mRotation) > epsilon)
 		{
 			return false;
 		}
@@ -168,8 +168,8 @@ struct STransformVecInfo : public aiUVTransform
 		if (mRotation)
 		{
 			aiMatrix3x3 mRot; 
-			mRot.a1 = mRot.b2 = cos(mRotation);
-			mRot.a2 = mRot.b1 = sin(mRotation);
+			mRot.a1 = mRot.b2 = std::cos(mRotation);
+			mRot.a2 = mRot.b1 = std::sin(mRotation);
 			mRot.a2 = -mRot.a2;
 			mOut *= mRot;
 		}

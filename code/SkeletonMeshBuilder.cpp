@@ -101,7 +101,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 			aiVector3D up = aiVector3D( childpos).Normalize();
 
 			aiVector3D orth( 1.0f, 0.0f, 0.0f);
-			if( fabs( orth * up) > 0.99f)
+			if( std::fabs( orth * up) > 0.99f)
 				orth.Set( 0.0f, 1.0f, 0.0f);
 
 			aiVector3D front = (up ^ orth).Normalize();

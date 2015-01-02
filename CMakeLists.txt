@@ -54,7 +54,7 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_
 elseif(MSVC)
     # enable multi-core compilation with MSVC
     add_definitions(/MP)
-    endif()
+endif()
 
 INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )

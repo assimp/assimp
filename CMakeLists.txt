@@ -47,6 +47,11 @@ set(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
 option(ASSIMP_ANDROID_JNIIOSYSTEM "Android JNI IOSystem support is active" OFF)
 
+# Workaround to be able to deal with compiler bug "Too many sections" with mingw.
+if( CMAKE_COMPILER_IS_MINGW ) 
+    ADD_DEFINITIONS(-DASSIMP_BUILD_NO_IFC_IMPORTER )
+endif()
+
 if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
     add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
     # hide all not-exported symbols

@@ -16,6 +16,7 @@ compiler:
 script:
   - cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD
   - make
-  - cd test/unit
-  - ../../bin/unit
+  # Don't run unit test since test has already been disabled in CMakeLists.txt.
+  #- cd test/unit
+  #- ../../bin/unit
 

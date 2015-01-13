@@ -1867,14 +1867,15 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 	// read primitive count from the attribute
 	int attrCount = GetAttribute( "count");
 	size_t numPrimitives = (size_t) mReader->getAttributeValueAsInt( attrCount);
+	// some mesh types (e.g. tristrips) don't specify primitive count upfront,
+	// so we need to sum up the actual number of primitives while we read the <p>-tags
+	size_t actualPrimitives = 0;
 
-	// material subgroup 
+	// material subgroup
 	int attrMaterial = TestAttribute( "material");
 	SubMesh subgroup;
 	if( attrMaterial > -1)
 		subgroup.mMaterial = mReader->getAttributeValue( attrMaterial);
-	subgroup.mNumFaces = numPrimitives;
-	pMesh->mSubMeshes.push_back( subgroup);
 
 	// distinguish between polys and triangles
 	std::string elementName = mReader->getNodeName();
@@ -1933,7 +1934,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 				if( !mReader->isEmptyElement())
 				{
 					// now here the actual fun starts - these are the indices to construct the mesh data from
-					ReadPrimitives( pMesh, perIndexData, numPrimitives, vcount, primType);
+					actualPrimitives += ReadPrimitives(pMesh, perIndexData, numPrimitives, vcount, primType);
 				}
 			} else
 			{
@@ -1948,6 +1949,14 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 			break;
 		}
 	}
+
+	// small sanity check
+	if (primType != Prim_TriFans && primType != Prim_TriStrips)
+		ai_assert(actualPrimitives == numPrimitives);
+
+	// only when we're done reading all <p> tags (and thus know the final vertex count) can we commit the submesh
+	subgroup.mNumFaces = actualPrimitives;
+	pMesh->mSubMeshes.push_back(subgroup);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1995,7 +2004,7 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
 
 // ------------------------------------------------------------------------------------------------
 // Reads a <p> primitive index list and assembles the mesh data into the given mesh
-void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, 
+size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels,
 	size_t pNumPrimitives, const std::vector<size_t>& pVCount, PrimitiveType pPrimType)
 {
 	// determine number of indices coming per vertex 
@@ -2093,70 +2102,98 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 			acc->mData = &ResolveLibraryReference( mDataLibrary, acc->mSource);
 	}
 
-
-	// now assemble vertex data according to those indices
-	std::vector<size_t>::const_iterator idx = indices.begin();
-
 	// For continued primitives, the given count does not come all in one <p>, but only one primitive per <p>
 	size_t numPrimitives = pNumPrimitives;
 	if( pPrimType == Prim_TriFans || pPrimType == Prim_Polygon)
 		numPrimitives = 1;
+	// For continued primitives, the given count is actually the number of <p>'s inside the parent tag
+	if ( pPrimType == Prim_TriStrips){
+		size_t numberOfVertices = indices.size() / numOffsets;
+		numPrimitives = numberOfVertices - 2;
+	}
 
 	pMesh->mFaceSize.reserve( numPrimitives);
 	pMesh->mFacePosIndices.reserve( indices.size() / numOffsets);
 
-	for( size_t a = 0; a < numPrimitives; a++)
+	size_t polylistStartVertex = 0;
+	for (size_t currentPrimitive = 0; currentPrimitive < numPrimitives; currentPrimitive++)
 	{
 		// determine number of points for this primitive
 		size_t numPoints = 0;
 		switch( pPrimType)
 		{
 			case Prim_Lines:
-				numPoints = 2; 
+				numPoints = 2;
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
-			case Prim_Triangles: 
-				numPoints = 3; 
+			case Prim_Triangles:
+				numPoints = 3;
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+				break;
+			case Prim_TriStrips:
+				numPoints = 3;
+				ReadPrimTriStrips(numOffsets, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			case Prim_Polylist: 
-				numPoints = pVCount[a];
+				numPoints = pVCount[currentPrimitive];
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyVertex(polylistStartVertex + currentVertex, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, 0, indices);
+				polylistStartVertex += numPoints;
 				break;
 			case Prim_TriFans: 
 			case Prim_Polygon:
-				numPoints = indices.size() / numOffsets; 
+				numPoints = indices.size() / numOffsets;
+				for (size_t currentVertex = 0; currentVertex < numPoints; currentVertex++)
+					CopyVertex(currentVertex, numOffsets, numPoints, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
 				break;
 			default:
-				// LineStrip and TriStrip not supported due to expected index unmangling
+				// LineStrip is not supported due to expected index unmangling
 				ThrowException( "Unsupported primitive type.");
 				break;
 		}
 
 		// store the face size to later reconstruct the face from
 		pMesh->mFaceSize.push_back( numPoints);
-
-		// gather that number of vertices
-		for( size_t b = 0; b < numPoints; b++)
-		{
-			// read all indices for this vertex. Yes, in a hacky local array
-			ai_assert( numOffsets < 20 && perVertexOffset < 20);
-			size_t vindex[20];
-			for( size_t offsets = 0; offsets < numOffsets; ++offsets)
-				vindex[offsets] = *idx++;
-
-			// extract per-vertex channels using the global per-vertex offset
-      for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
-        ExtractDataObjectFromChannel( *it, vindex[perVertexOffset], pMesh);
-			// and extract per-index channels using there specified offset
-      for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
-				ExtractDataObjectFromChannel( *it, vindex[it->mOffset], pMesh);
-
-			// store the vertex-data index for later assignment of bone vertex weights
-			pMesh->mFacePosIndices.push_back( vindex[perVertexOffset]);
-		}
 	}
-
 
 	// if I ever get my hands on that guy who invented this steaming pile of indirection...
 	TestClosing( "p");
+	return numPrimitives;
+}
+
+void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
+	// calculate the base offset of the vertex whose attributes we ant to copy
+	size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;
+
+	// don't overrun the boundaries of the index list
+	size_t maxIndexRequested = baseOffset + numOffsets - 1;
+	ai_assert(maxIndexRequested < indices.size());
+
+	// extract per-vertex channels using the global per-vertex offset
+	for (std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
+		ExtractDataObjectFromChannel(*it, indices[baseOffset + perVertexOffset], pMesh);
+	// and extract per-index channels using there specified offset
+	for (std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
+		ExtractDataObjectFromChannel(*it, indices[baseOffset + it->mOffset], pMesh);
+
+	// store the vertex-data index for later assignment of bone vertex weights
+	pMesh->mFacePosIndices.push_back(indices[baseOffset + perVertexOffset]);
+}
+
+void ColladaParser::ReadPrimTriStrips(size_t numOffsets, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
+	if (currentPrimitive % 2 != 0){
+		//odd tristrip triangles need their indices mangled, to preserve winding direction
+		CopyVertex(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+	}
+	else {//for non tristrips or even tristrip triangles
+		CopyVertex(0, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(1, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+		CopyVertex(2, numOffsets, 1, perVertexOffset, pMesh, pPerIndexChannels, currentPrimitive, indices);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

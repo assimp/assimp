@@ -78,6 +78,7 @@ void ExportSceneObj(const char*,IOSystem*, const aiScene*);
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*);
 void ExportScenePly(const char*,IOSystem*, const aiScene*);
+void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*);
@@ -111,6 +112,9 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_PLY_EXPORTER
 	Exporter::ExportFormatEntry( "ply", "Stanford Polygon Library", "ply" , &ExportScenePly, 
+		aiProcess_PreTransformVertices
+	),
+	Exporter::ExportFormatEntry( "plyb", "Stanford Polygon Library (binary)", "ply", &ExportScenePlyBinary,
 		aiProcess_PreTransformVertices
 	),
 #endif

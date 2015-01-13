@@ -548,7 +548,7 @@ aiNode *B3DImporter::ReadNODE( aiNode *parent ){
 void B3DImporter::ReadBB3D( aiScene *scene ){
 
 	_textures.clear();
-	_materials.size();
+	_materials.clear();
 
 	_vertices.clear();
 	_meshes.clear();

@@ -2,16 +2,24 @@ before_install:
   - sudo apt-get install cmake python3
 
 env:
-  - TRAVIS_NO_EXPORT=YES
-  - TRAVIS_NO_EXPORT=NO
-  - TRAVIS_STATIC_BUILD=ON
-  - TRAVIS_STATIC_BUILD=OFF
+    matrix:
+    - LINUX=1 TRAVIS_NO_EXPORT=YES
+    - LINUX=1 TRAVIS_NO_EXPORT=NO
+    - LINUX=1 TRAVIS_STATIC_BUILD=ON
+    - LINUX=1 TRAVIS_STATIC_BUILD=OFF
+    - WINDOWS=1 TRAVIS_NO_EXPORT=YES
+    - WINDOWS=1 TRAVIS_NO_EXPORT=NO
+    - WINDOWS=1 TRAVIS_STATIC_BUILD=ON
+    - WINDOWS=1 TRAVIS_STATIC_BUILD=OFF
 
 language: cpp
 
 compiler:
   - gcc
   - clang
+
+install:
+  - if [ $WINDOWS ]; then travis_retry sudo apt-get install -q -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64; fi 
 
 script:
   - cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD

@@ -85,8 +85,7 @@ bool CompareBones(const aiMesh* orig, const aiMesh* inst)
 		aiBone* oha = inst->mBones[i];
 
 		if (aha->mNumWeights   != oha->mNumWeights   ||
-			aha->mOffsetMatrix != oha->mOffsetMatrix ||
-			aha->mNumWeights   != oha->mNumWeights) {
+			aha->mOffsetMatrix != oha->mOffsetMatrix) {
 			return false;
 		}
 

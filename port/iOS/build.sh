@@ -6,7 +6,7 @@
 
 BUILD_DIR="./lib/iOS"
 
-IOS_SDK_VERSION=7.1
+IOS_SDK_VERSION=
 IOS_SDK_TARGET=6.0
 #(iPhoneOS iPhoneSimulator) -- determined from arch
 IOS_SDK_DEVICE=
@@ -50,7 +50,7 @@ build_arch()
 
     rm CMakeCache.txt
 
-    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DENABLE_BOOST_WORKAROUND=ON -DASSIMP_BUILD_STATIC_LIB=ON
+    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=OFF
 
     echo "[!] Building $1 library"
 

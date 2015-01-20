@@ -523,11 +523,23 @@ enum aiPostProcessSteps
 	 *  Use <tt>#AI_CONFIG_PP_DB_ALL_OR_NONE</tt> if you want bones removed if and 
 	 *	only if all bones within the scene qualify for removal.
     */
-	aiProcess_Debone  = 0x4000000
+	aiProcess_Debone  = 0x4000000,
 
 	// aiProcess_GenEntityMeshes = 0x100000,
 	// aiProcess_OptimizeAnimations = 0x200000
 	// aiProcess_FixTexturePaths = 0x200000
+
+  // -------------------------------------------------------------------------
+	/**
+	 * <hr>This step scales meshes' vertices to unit box obtaining
+	 * center and radius of resulting scene.
+	 *
+	 * It is recommended to use this flag with aiProcess_GenNormals or
+	 * aiProcess_GenSmoothNormals to ensure normals being recomputed.
+	 *
+	 * <author> Alov Maxim <alovmaxy@yandex.ru>
+	 */
+	aiProcess_ScaleToUnitBox = 0x8000000
 };
 
 

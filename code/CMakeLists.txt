@@ -482,6 +482,8 @@ SET( PostProcessing_SRCS
 	RemoveRedundantMaterials.h
 	RemoveVCProcess.cpp
 	RemoveVCProcess.h
+	ScaleToUnitBoxProcess.cpp
+	ScaleToUnitBoxProcess.h
 	SortByPTypeProcess.cpp
 	SortByPTypeProcess.h
 	SplitLargeMeshes.cpp

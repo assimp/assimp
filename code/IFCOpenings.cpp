@@ -1244,7 +1244,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
 					(profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
-				const IfcFloat abs_dot_face_nor = abs(nor * face_nor);
+				const IfcFloat abs_dot_face_nor = std::abs(nor * face_nor);
 				if (abs_dot_face_nor < 0.9) {
 					vi_total += profile_vertcnts[f];
 					continue;

@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(_MSC_VER) && (_MSC_VER <= 1500)
 #include "Compiler/pstdint.h"
 #else
-#include <stdint.h>
+#include <limits.h>
 #endif
 
 

@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Compiler/pstdint.h"
 #else
 #include <limits.h>
+#include <stdint.h>
 #endif
 
 

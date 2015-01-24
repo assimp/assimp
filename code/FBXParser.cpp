@@ -549,7 +549,9 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
 		zstream.data_type = Z_BINARY;
 
 		// http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
-		inflateInit(&zstream);
+		if(Z_OK != inflateInit(&zstream)) {
+			ParseError("failure initializing zlib");
+		}
 
 		zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
 		zstream.avail_in  = comp_len;

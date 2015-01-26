@@ -96,8 +96,8 @@ void SweepContext::InitTriangulation()
 
 void SweepContext::InitEdges(std::vector<Point*> polyline)
 {
-  int num_points = polyline.size();
-  for (int i = 0; i < num_points - 1; i++) {
+  std::size_t num_points = polyline.size();
+  for (std::size_t i = 0; i < num_points - 1; i++) {
     edge_list.push_back(new Edge(*polyline[i], *polyline[i + 1]));
   }
   edge_list.push_back(new Edge(*polyline.back(), *polyline.front()));

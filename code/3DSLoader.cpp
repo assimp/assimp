@@ -948,6 +948,9 @@ void Discreet3DSImporter::ParseFaceChunk()
 		// This is the list of smoothing groups - a bitfield for every face. 
 		// Up to 32 smoothing groups assigned to a single face.
 		unsigned int num = chunkSize/4, m = 0;
+		if (num > mMesh.mFaces.size())	{
+			throw DeadlyImportError("3DS: More smoothing groups than faces");
+		}
 		for (std::vector<D3DS::Face>::iterator i =  mMesh.mFaces.begin(); m != num;++i, ++m)	{
 			// nth bit is set for nth smoothing group
 			(*i).iSmoothGroup = stream->GetI4();

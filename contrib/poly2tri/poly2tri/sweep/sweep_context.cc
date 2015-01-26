@@ -97,10 +97,10 @@ void SweepContext::InitTriangulation()
 void SweepContext::InitEdges(std::vector<Point*> polyline)
 {
   int num_points = polyline.size();
-  for (int i = 0; i < num_points; i++) {
-    int j = i < num_points - 1 ? i + 1 : 0;
-    edge_list.push_back(new Edge(*polyline[i], *polyline[j]));
+  for (int i = 0; i < num_points - 1; i++) {
+    edge_list.push_back(new Edge(*polyline[i], *polyline[i + 1]));
   }
+  edge_list.push_back(new Edge(*polyline.back(), *polyline.front()));
 }
 
 Point* SweepContext::GetPoint(const int& index)

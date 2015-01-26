@@ -175,6 +175,10 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	// file.
 	for (std::vector<D3DS::Mesh>::iterator i = mScene->mMeshes.begin(),
 		 end = mScene->mMeshes.end(); i != end;++i)	{
+		if ((*i).mFaces.size() > 0 && (*i).mPositions.size() == 0)	{
+			delete mScene;
+			throw DeadlyImportError("3DS file contains faces but no vertices: " + pFile);
+		}
 		CheckIndices(*i);
 		MakeUnique  (*i);
 		ComputeNormalsWithSmoothingsGroups<D3DS::Face>(*i);

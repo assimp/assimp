@@ -513,7 +513,7 @@ char *OpenDDLParser::parseReference( char *in, char *end, std::vector<Name*> &na
     }
 
     if( 0 != strncmp( in, RefToken, strlen( RefToken ) ) ) {
-        return false;
+        return in;
     } else {
         const size_t refTokenLen( strlen( RefToken ) );
         in += refTokenLen;

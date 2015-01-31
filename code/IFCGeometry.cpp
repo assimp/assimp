@@ -375,21 +375,21 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 		bool take_any = false;
 
 		for (unsigned int i = 0; i < 2; ++i, take_any = true) {
-			if ((last_dir == 0 || take_any) && abs(d.x) > 1e-6) {
+			if ((last_dir == 0 || take_any) && std::abs(d.x) > 1e-6) {
 				q.y = startvec.y;
 				q.z = startvec.z;
 				q.x = -(d.y * q.y + d.z * q.z) / d.x;
 				last_dir = 0;
 				break;
 			}
-			else if ((last_dir == 1 || take_any) && abs(d.y) > 1e-6) {
+			else if ((last_dir == 1 || take_any) && std::abs(d.y) > 1e-6) {
 				q.x = startvec.x;
 				q.z = startvec.z;
 				q.y = -(d.x * q.x + d.z * q.z) / d.y;
 				last_dir = 1;
 				break;
 			}
-			else if ((last_dir == 2 && abs(d.z) > 1e-6) || take_any) { 
+			else if ((last_dir == 2 && std::abs(d.z) > 1e-6) || take_any) {
 				q.y = startvec.y;
 				q.x = startvec.x;
 				q.z = -(d.y * q.y + d.x * q.x) / d.z;

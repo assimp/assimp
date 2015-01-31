@@ -112,12 +112,12 @@ unsigned int CountAnimChannels(const aiScene* scene)
 
 // -----------------------------------------------------------------------------------
 unsigned int GetAvgFacePerMesh(const aiScene* scene) {
-	return static_cast<unsigned int>(CountFaces(scene)/scene->mNumMeshes);
+	return (scene->mNumMeshes != 0) ? static_cast<unsigned int>(CountFaces(scene)/scene->mNumMeshes) : 0;
 }
 
 // -----------------------------------------------------------------------------------
 unsigned int GetAvgVertsPerMesh(const aiScene* scene) {
-	return static_cast<unsigned int>(CountVertices(scene)/scene->mNumMeshes);
+	return (scene->mNumMeshes != 0) ? static_cast<unsigned int>(CountVertices(scene)/scene->mNumMeshes) : 0;
 }
 
 // -----------------------------------------------------------------------------------

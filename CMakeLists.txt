@@ -48,7 +48,7 @@ set(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 option(ASSIMP_ANDROID_JNIIOSYSTEM "Android JNI IOSystem support is active" OFF)
 
 # Workaround to be able to deal with compiler bug "Too many sections" with mingw.
-if( CMAKE_COMPILER_IS_MINGW ) 
+if( CMAKE_COMPILER_IS_MINGW )
     ADD_DEFINITIONS(-DASSIMP_BUILD_NO_IFC_IMPORTER )
 endif()
 
@@ -84,7 +84,7 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
     "Path the tool executables are installed to." )
 
-SET(ASSIMP_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
+SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
 
 # Allow the user to build a shared or static library
 option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )
@@ -108,7 +108,7 @@ IF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
     MESSAGE( STATUS "Building a non-boost version of Assimp." )
 ELSE ( ASSIMP_ENABLE_BOOST_WORKAROUND )
     SET( Boost_DETAILED_FAILURE_MSG ON )
-    SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" )	
+    SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" )
     FIND_PACKAGE( Boost )
     IF ( NOT Boost_FOUND )
         MESSAGE( FATAL_ERROR
@@ -165,7 +165,7 @@ IF ( ASSIMP_NO_EXPORT )
     MESSAGE( STATUS "Build an import-only version of Assimp." )
 ENDIF( ASSIMP_NO_EXPORT )
 
-SET ( ASSIMP_BUILD_ARCHITECTURE "" CACHE STRING 
+SET ( ASSIMP_BUILD_ARCHITECTURE "" CACHE STRING
     "describe the current architecture."
 )
 IF    ( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
@@ -174,7 +174,7 @@ ELSE  ( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
 ENDIF ( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
 
 # ${CMAKE_GENERATOR}
-SET ( ASSIMP_BUILD_COMPILER "" CACHE STRING 
+SET ( ASSIMP_BUILD_COMPILER "" CACHE STRING
     "describe the current compiler."
 )
 IF    ( ASSIMP_BUILD_COMPILER STREQUAL "")
@@ -212,7 +212,7 @@ option ( ASSIMP_BUILD_TESTS
     "If the test suite for Assimp is built in addition to the library."
     ON
 )
-    
+
 IF ( ASSIMP_BUILD_TESTS )
     ADD_SUBDIRECTORY( test/ )
 ENDIF ( ASSIMP_BUILD_TESTS )

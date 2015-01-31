@@ -116,14 +116,6 @@ const std::string &DDLNode::getName() const {
     return m_name;
 }
 
-void DDLNode::setProperties( Property *first ) {
-    m_properties = first;
-}
-
-Property *DDLNode::getProperties() const {
-    return m_properties;
-}
-
 void DDLNode::setValue( Value *val ) {
     m_value = val;
 }

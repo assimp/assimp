@@ -72,7 +72,7 @@ static bool isIntegerType( Value::ValueType integerType ) {
     return true;
 }
 
-static DDLNode *createDDLNode( Identifier *id, Property *first, OpenDDLParser *parser ) {
+static DDLNode *createDDLNode( Identifier *id, OpenDDLParser *parser ) {
     if( nullptr == id || ddl_nullptr == parser ) {
         return ddl_nullptr;
     }
@@ -80,9 +80,6 @@ static DDLNode *createDDLNode( Identifier *id, Property *first, OpenDDLParser *p
     const std::string type( id->m_buffer );
     DDLNode *parent( parser->top() );
     DDLNode *node = DDLNode::create( type, "", parent );
-    if( ddl_nullptr != first ) {
-        node->setProperties( first );
-    }
 
     return node;
 }
@@ -254,8 +251,13 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
             in++;
         }
 
+        // set the properties
+        if( ddl_nullptr != first ) {
+            m_context->setProperties( first );
+        }
+
         // store the node
-        DDLNode *node( createDDLNode( id, first, this ) );
+        DDLNode *node( createDDLNode( id, this ) );
         if( nullptr != node ) {
             pushNode( node );
         } else {

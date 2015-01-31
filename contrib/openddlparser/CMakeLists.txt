@@ -13,6 +13,7 @@ else()
 endif()
 
 add_definitions( -DOPENDDLPARSER_BUILD )
+add_definitions( -DOPENDDL_NO_USE_CPP11 )
 add_definitions( -D_VARIADIC_MAX=10 )
 
 INCLUDE_DIRECTORIES(

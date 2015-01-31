@@ -106,7 +106,6 @@ private:
     bool m_ownsBuffer;
     char *m_buffer;
     size_t m_len;
-    //DDLNode *m_root;
     typedef std::vector<DDLNode*> DDLNodeStack;
     DDLNodeStack m_stack;
     Context *m_context;

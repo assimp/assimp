@@ -32,11 +32,11 @@ DDLNode::DllNodeList DDLNode::s_allocatedNodes;
 template<class T>
 inline
 static void releaseDataType( T *ptr ) {
-    if( nullptr == ptr ) {
+    if( ddl_nullptr == ptr ) {
         return;
     }
 
-    T *current( nullptr );
+    T *current( ddl_nullptr );
     while( ptr ) {
         current = ptr;
         ptr = ptr->m_next;
@@ -49,10 +49,10 @@ DDLNode::DDLNode( const std::string &type, const std::string &name, size_t idx, 
 , m_name( name )
 , m_parent( parent )
 , m_children()
-, m_properties( nullptr )
-, m_value( nullptr )
+, m_properties( ddl_nullptr )
+, m_value( ddl_nullptr )
 , m_idx( idx )
-, m_dtArrayList( nullptr ) {
+, m_dtArrayList( ddl_nullptr ) {
     if( m_parent ) {
         m_parent->m_children.push_back( this );
     }
@@ -63,9 +63,9 @@ DDLNode::~DDLNode() {
     releaseDataType<Value>( m_value );
 
     delete m_dtArrayList;
-    m_dtArrayList = nullptr;
+    m_dtArrayList = ddl_nullptr;
     if( s_allocatedNodes[ m_idx ] == this ) {
-        s_allocatedNodes[ m_idx ] = nullptr;
+        s_allocatedNodes[ m_idx ] = ddl_nullptr;
     }
 }
 
@@ -75,7 +75,7 @@ void DDLNode::attachParent( DDLNode *parent ) {
     }
 
     m_parent = parent;
-    if( nullptr != m_parent ) {
+    if( ddl_nullptr != m_parent ) {
         m_parent->m_children.push_back( this );
     }
 }
@@ -87,7 +87,7 @@ void DDLNode::detachParent() {
         if( m_parent->m_children.end() != it ) {
             m_parent->m_children.erase( it );
         }
-        m_parent = nullptr;
+        m_parent = ddl_nullptr;
     }
 }
 

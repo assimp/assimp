@@ -29,8 +29,8 @@ BEGIN_ODDLPARSER_NS
 Value::Value()
 : m_type( ddl_none )
 , m_size( 0 )
-, m_data( nullptr )
-, m_next( nullptr ) {
+, m_data( ddl_nullptr )
+, m_next( ddl_nullptr ) {
     // empty
 }
 
@@ -171,7 +171,7 @@ Value *Value::getNext() const {
 
 Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
     if( type == Value::ddl_none || Value::ddl_types_max == type ) {
-        return nullptr;
+        return ddl_nullptr;
     }
 
     Value *data = new Value;
@@ -236,8 +236,7 @@ void ValueAllocator::releasePrimData( Value **data ) {
     }
 
     delete *data;
-    *data = nullptr;
+    *data = ddl_nullptr;
 }
-
 
 END_ODDLPARSER_NS

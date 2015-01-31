@@ -46,6 +46,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
+#ifndef OPENDDL_NO_USE_CPP11
+#   define ddl_nullptr nullptr
+#else
+#   define ddl_nullptr NULL
+#endif
+
 class DDLNode;
 class Value;
 
@@ -106,9 +112,9 @@ struct Property {
 
     Property( Identifier *id )
         : m_id( id )
-        , m_primData( nullptr )
-        , m_ref( nullptr )
-        , m_next( nullptr ) {
+        , m_primData( ddl_nullptr )
+        , m_ref( ddl_nullptr )
+        , m_next( ddl_nullptr ) {
         // empty
     }
 };
@@ -120,8 +126,8 @@ struct DataArrayList {
 
     DataArrayList()
         : m_numItems( 0 )
-        , m_dataList( nullptr )
-        , m_next( nullptr ) {
+        , m_dataList( ddl_nullptr )
+        , m_next( ddl_nullptr ) {
         // empty
     }
 };
@@ -131,8 +137,8 @@ struct Context {
     DDLNode *m_root;
 
     Context()
-    : m_properties( nullptr )
-    , m_root( nullptr ) {
+        : m_properties( ddl_nullptr )
+        , m_root( ddl_nullptr ) {
         // empty
     }
 };

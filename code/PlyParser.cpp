@@ -436,7 +436,7 @@ bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut,bool isBinary)
 	*pCurOut = pCur;
 
 	// parse all elements
-	while (true)
+	while ((*pCur) != '\0')
 	{
 		// skip all comments
 		PLY::DOM::SkipComments(pCur,&pCur);

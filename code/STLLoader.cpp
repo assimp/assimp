@@ -229,6 +229,9 @@ void STLImporter::LoadASCIIFile()
 	size_t temp;
 	// setup the name of the node
 	if ((temp = (size_t)(sz-szMe)))	{
+		if (temp >= MAXLEN) {
+			throw DeadlyImportError( "STL: Node name too long" );
+		}
 
 		pScene->mRootNode->mName.length = temp;
 		memcpy(pScene->mRootNode->mName.data,szMe,temp);

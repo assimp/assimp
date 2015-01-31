@@ -156,7 +156,6 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 	}
 	else
 	{
-		delete[] this->mBuffer;
 		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw DeadlyImportError( "Invalid .ply file: Missing format specification");
 	}

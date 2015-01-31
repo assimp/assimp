@@ -51,3 +51,6 @@ test/gtest/src/gtest-stamp/Debug/gtest-build
 *.lib
 test/gtest/src/gtest-stamp/Debug/
 tools/assimp_view/assimp_viewer.vcxproj.user
+
+# Unix editor backups
+*~

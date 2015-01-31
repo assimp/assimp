@@ -730,6 +730,11 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
 	// --- this function is used for both LWO2 and LWOB but for
 	// LWO2 we need to allocate 25% more storage - it could be we'll 
 	// need to duplicate some points later.
+	const size_t vertexLen = 12;
+	if ((length % vertexLen) != 0)
+	{
+		throw DeadlyImportError( "LWO2: Points chunk length is not multiple of vertexLen (12)");
+	}
 	register unsigned int regularSize = (unsigned int)mCurLayer->mTempPoints.size() + length / 12;
 	if (mIsLWO2)
 	{

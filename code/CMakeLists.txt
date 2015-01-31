@@ -634,7 +634,6 @@ SET( unzip_SRCS
 )
 SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 
-
 # VC2010 fixes
 if(MSVC10)
 	option( VC10_STDINT_FIX "Fix for VC10 Compiler regarding pstdint.h redefinition errors" OFF )

@@ -1,0 +1,148 @@
+/*-----------------------------------------------------------------------------------------------
+The MIT License (MIT)
+
+Copyright (c) 2014 Kim Kulling
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-----------------------------------------------------------------------------------------------*/
+#pragma once
+#ifndef OPENDDLPARSER_OPENDDLPARSERCOMMON_H_INC
+#define OPENDDLPARSER_OPENDDLPARSERCOMMON_H_INC
+
+#include <cstddef>
+#include <string.h>
+
+#ifdef _WIN32
+#   define TAG_DLL_EXPORT __declspec(dllexport)
+#   define TAG_DLL_IMPORT __declspec(dllimport )
+#   ifdef OPENDDLPARSER_BUILD
+#       define DLL_ODDLPARSER_EXPORT TAG_DLL_EXPORT
+#   else
+#        define DLL_ODDLPARSER_EXPORT TAG_DLL_IMPORT
+#   endif // OPENDDLPARSER_BUILD
+#   pragma warning( disable : 4251 )
+#else
+#   define DLL_ODDLPARSER_EXPORT
+#endif // _WIN32
+
+#define BEGIN_ODDLPARSER_NS namespace ODDLParser {
+#define END_ODDLPARSER_NS   }
+#define USE_ODDLPARSER_NS   using namespace ODDLParser;
+
+BEGIN_ODDLPARSER_NS
+
+class DDLNode;
+class Value;
+
+struct Name;
+struct Identifier;
+struct Reference;
+struct Property;
+struct DataArrayList;
+
+typedef char  int8;
+typedef short int16;
+typedef int   int32;
+typedef long  int64;
+
+enum NameType {
+    GlobalName,
+    LocalName
+};
+
+struct Name {
+    NameType m_type;
+    Identifier *m_id;
+
+    Name( NameType type, Identifier *id )
+        : m_type( type )
+        , m_id( id ) {
+        // empty
+    }
+};
+
+struct Reference {
+    size_t m_numRefs;
+    Name **m_referencedName;
+
+    Reference( size_t numrefs, Name **names )
+        : m_numRefs( numrefs )
+        , m_referencedName( names ) {
+        // empty
+    }
+};
+
+struct Identifier {
+    size_t m_len;
+    char *m_buffer;
+
+    Identifier( size_t len, char *buffer )
+        : m_len( len )
+        , m_buffer( buffer ) {
+        // empty
+    }
+};
+
+struct Property {
+    Identifier *m_id;
+    Value *m_primData;
+    Reference *m_ref;
+    Property *m_next;
+
+    Property( Identifier *id )
+        : m_id( id )
+        , m_primData( nullptr )
+        , m_ref( nullptr )
+        , m_next( nullptr ) {
+        // empty
+    }
+};
+
+struct DataArrayList {
+    size_t m_numItems;
+    Value *m_dataList;
+    DataArrayList *m_next;
+
+    DataArrayList()
+        : m_numItems( 0 )
+        , m_dataList( nullptr )
+        , m_next( nullptr ) {
+        // empty
+    }
+};
+
+struct Context {
+    Property *m_properties;
+    DDLNode *m_root;
+
+    Context()
+    : m_properties( nullptr )
+    , m_root( nullptr ) {
+        // empty
+    }
+};
+
+END_ODDLPARSER_NS
+
+#define ODDL_NO_COPYING( classname ) \
+private: \
+    classname( const classname & ); \
+    classname &operator = ( const classname & );
+
+#endif // OPENDDLPARSER_OPENDDLPARSERCOMMON_H_INC
+

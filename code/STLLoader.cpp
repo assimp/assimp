@@ -326,8 +326,10 @@ void STLImporter::LoadASCIIFile()
 			break;
 		}
 		// else skip the whole identifier
-		else while (!::IsSpaceOrNewLine(*sz)) {
-			++sz;
+		else {
+			do {
+				++sz;
+			} while (!::IsSpaceOrNewLine(*sz));
 		}
 	}
 

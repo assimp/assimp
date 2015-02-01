@@ -308,6 +308,7 @@ void STLImporter::LoadASCIIFile()
 		{
 			if (3 == curVertex)	{
 				DefaultLogger::get()->error("STL: a facet with more than 3 vertices has been found");
+				++sz;
 			}
 			else
 			{
@@ -326,8 +327,10 @@ void STLImporter::LoadASCIIFile()
 			break;
 		}
 		// else skip the whole identifier
-		else while (!::IsSpaceOrNewLine(*sz)) {
-			++sz;
+		else {
+			do {
+				++sz;
+			} while (!::IsSpaceOrNewLine(*sz));
 		}
 	}
 

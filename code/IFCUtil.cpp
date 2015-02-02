@@ -122,7 +122,7 @@ void TempMesh::Transform(const IfcMatrix4& mat)
 // ------------------------------------------------------------------------------
 IfcVector3 TempMesh::Center() const
 {
-	return std::accumulate(verts.begin(),verts.end(),IfcVector3()) / static_cast<IfcFloat>(verts.size());
+	return (verts.size() == 0) ? IfcVector3(0.0f, 0.0f, 0.0f) : (std::accumulate(verts.begin(),verts.end(),IfcVector3()) / static_cast<IfcFloat>(verts.size()));
 }
 
 // ------------------------------------------------------------------------------------------------

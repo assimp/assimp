@@ -40,8 +40,15 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ---------------------------------------------------------------------------
 
-"""Generate the regression database db.zip from the files in the <root>
-/test/models directory. Older databases are overwritten with no prompt.
+"""
+Generate the regression database db.zip from the files in the <root>/test/models
+directory. Older databases are overwritten with no prompt but can be restored
+using Git as needed.
+
+Use --help for usage.
+
+On Windows, use ``py run.py <arguments>`` to make sure command line parameters
+are forwarded to the script.
 """
 
 import sys
@@ -52,9 +59,14 @@ import zipfile
 import settings
 import utils
 
-usage = """gen_db [-i=...] [-e=...] [-p] [-n]
+usage = """gen_db [assimp_binary] [-i=...] [-e=...] [-p] [-n]
 
-(lists of file extensions are comma delimited, i.e. `3ds,lwo,x`)
+The assimp_cmd (or assimp) binary to use is specified by the first
+command line argument and defaults to ``assimp``.
+
+To build, set ``ASSIMP_BUILD_ASSIMP_TOOLS=ON`` in CMake. If generating
+configs for an IDE, make sure to build the assimp_cmd project.
+
 -i,--include: List of file extensions to update dumps for. If omitted,
          all file extensions are updated except those in `exclude`.
 
@@ -66,6 +78,8 @@ usage = """gen_db [-i=...] [-e=...] [-p] [-n]
          Dont' change anything.
 
 -n,--nozip: Don't pack to ZIP archive. Keep all dumps in individual files.
+
+(lists of file extensions are comma delimited, i.e. `3ds,lwo,x`)
 """
 
 # -------------------------------------------------------------------------------
@@ -87,7 +101,7 @@ def process_dir(d, outfile, file_filter):
                 outf = os.path.join(os.getcwd(), settings.database_name,
                     utils.hashing(fullp, pp))
 
-                cmd = [utils.assimp_bin_path,"dump",fullp,outf,"-b","-s","-l"] + pp.split()
+                cmd = [ assimp_bin_path, "dump", fullp, outf, "-b", "-s", "-l" ] + pp.split()
                 outfile.write("assimp dump "+"-"*80+"\n")
                 outfile.flush()
                 if subprocess.call(cmd, stdout=outfile, stderr=outfile, shell=False):
@@ -158,7 +172,8 @@ def gen_db(ext_list,outfile):
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
-    utils.find_assimp_or_die()
+    assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
+
     def clean(f):
         f = f.strip("* \'")
         return "."+f if f[:1] != '.' else f
@@ -184,7 +199,7 @@ if __name__ == "__main__":
             
     outfile = open(os.path.join("..", "results", "gen_regression_db_output.txt"), "w")
     if ext_list is None:
-        (ext_list, err) = subprocess.Popen([utils.assimp_bin_path, "listext"],
+        (ext_list, err) = subprocess.Popen([assimp_bin_path, "listext"],
             stdout=subprocess.PIPE).communicate()
         ext_list = str(ext_list).lower().split(";")
 

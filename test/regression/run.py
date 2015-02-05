@@ -41,8 +41,16 @@
 # ---------------------------------------------------------------------------
 
 """
-Run the regression test suite using the settings from settings.py.
+Run the regression test suite using settings from settings.py.
 
+The assimp_cmd (or assimp) binary to use is specified by the first
+command line argument and defaults to ``assimp``.
+
+To build, set ``ASSIMP_BUILD_ASSIMP_TOOLS=ON`` in CMake. If generating
+configs for an IDE, make sure to build the assimp_cmd project.
+
+On Windows, use ``py run.py <path to assimp>`` to make sure the command
+line parameter is forwarded to the script.
 """
 
 import sys
@@ -124,8 +132,11 @@ class results:
     def report_results(self):
         """Write results to ../results/run_regression_suite_failures.txt"""
 
+        count_success = len(self.success)
+        count_fail = len(self.failures)
+        percent_good = float(count_success) / (count_success + count_fail)
         print("\n" + ('='*60) + "\n" + "SUCCESS: {0}\nFAILURE: {1}\nPercentage good: {2}".format(
-            len(self.success), len(self.failures), len(self.success)/(len(self.success)+len(self.failures))  ) + 
+            count_success, count_fail, percent_good) + 
               "\n" + ('='*60) + "\n")
 
         with open(os.path.join('..', 'results',outfilename_failur), "wt") as f:
@@ -138,7 +149,7 @@ class results:
                  + " for more details\n\n") 
     
 # -------------------------------------------------------------------------------
-def mkoutputdir_andgetpath(fullpath, myhash, app):
+def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(settings.results, "tmp", os.path.split(fullpath)[1] + "_" + myhash)
     try:
         os.mkdir(outfile)
@@ -154,7 +165,7 @@ def process_dir(d, outfile_results, zipin, result):
     shellparams = {'stdout':outfile_results, 'stderr':outfile_results, 'shell':False}
 
     print("Processing directory " + d)
-    for f in os.listdir(d):
+    for f in sorted(os.listdir(d)):
         fullpath = os.path.join(d, f)
         if os.path.isdir(fullpath) and not f == ".svn":
             process_dir(fullpath, outfile_results, zipin, result)
@@ -167,13 +178,16 @@ def process_dir(d, outfile_results, zipin, result):
         for pppreset in settings.pp_configs_to_test:
             filehash = utils.hashing(fullpath, pppreset)
             failure = False
+
             try:
                 input_expected = zipin.open(filehash, "r").read()
                 # empty dump files indicate 'expected import failure'
                 if not len(input_expected):
                    failure = True
             except KeyError:
-                #print("Didn't find "+fullpath+" (Hash is "+filehash+") in database")
+                # TODO(acgessler): Keep track of this and report as error in the end.
+                print("Didn't find "+fullpath+" (Hash is "+filehash+") in database. Outdated "+\
+                    "regression database? Use gen_db.zip to re-generate.")
                 continue
 
             # Ignore extensions via settings.py configured list
@@ -184,13 +198,18 @@ def process_dir(d, outfile_results, zipin, result):
 
             print("-"*60 + "\n  " + os.path.realpath(fullpath) + " pp: " + pppreset) 
             
-            outfile_actual = mkoutputdir_andgetpath(fullpath, filehash, "ACTUAL")
-            outfile_expect = mkoutputdir_andgetpath(fullpath, filehash, "EXPECT")
+            outfile_actual = prepare_output_dir(fullpath, filehash, "ACTUAL")
+            outfile_expect = prepare_output_dir(fullpath, filehash, "EXPECT")
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
 
-            command = [utils.assimp_bin_path,"dump",fullpath,outfile_actual,"-b","-s","-l"]+pppreset.split()
+            command = [assimp_bin_path,
+                "dump",
+                fullpath, outfile_actual, "-b", "-s", "-l" ] +\
+                pppreset.split()
+
             r = subprocess.call(command, **shellparams)
+            print(r)
 
             if r and not failure:
                 result.fail(fullpath, outfile_expect, pppreset, IMPORT_FAILURE, r)
@@ -216,7 +235,7 @@ def process_dir(d, outfile_results, zipin, result):
             outfile_results.write("assimp cmpdump "+"-"*80+"\n")
             outfile_results.flush()
 
-            command = [utils.assimp_bin_path,'cmpdump',outfile_actual,outfile_expect]
+            command = [ assimp_bin_path, 'cmpdump', outfile_actual, outfile_expect ]
             if subprocess.call(command, **shellparams) != 0:
                 result.fail(fullpath, outfile_expect, pppreset, DATABASE_VALUE_MISMATCH)
                 continue 
@@ -235,7 +254,6 @@ def del_folder_with_contents(folder):
 
 # -------------------------------------------------------------------------------
 def run_test():
-    utils.find_assimp_or_die()
     tmp_target_path = os.path.join(settings.results, "tmp")
     try: 
         os.mkdir(tmp_target_path) 
@@ -261,6 +279,8 @@ def run_test():
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
+    assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
+    print('Using assimp binary: ' + assimp_bin_path)
     run_test()
 
 # vim: ai ts=4 sts=4 et sw=4

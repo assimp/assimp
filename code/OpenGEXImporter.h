@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 namespace ODDLParser {
+    class DDLNode;
     struct Context;
 }
 
@@ -77,7 +78,8 @@ public:
     virtual void SetupProperties( const Importer *pImp );
 
 protected:
-    void importMetric( ODDLParser::Context *ctx );
+    void handleNodes( ODDLParser::DDLNode *node );
+    void importMetric( ODDLParser::DDLNode *node );
     void ParseGeoObject();
     void ParseMaterial();
 };

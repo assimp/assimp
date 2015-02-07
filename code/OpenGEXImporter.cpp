@@ -60,6 +60,23 @@ static const aiImporterDesc desc = {
     "ogex"
 };
 
+namespace Grammar {
+    static const char *MetricType = "Metric";
+    static const char *NameType = "Name";
+    static const char *ObjectRefType = "ObjectRef";
+    static const char *MaterialRefType = "MaterialRef";
+    static const char *MetricKeyType = "key";
+    static const char *GeometryNodeType = "GeometryNode";
+    static const char *GeometryObjectType = "GeometryObject";
+    static const char *TransformType = "Transform";
+    static const char *MeshType = "Mesh";
+    static const char *VertexArrayType = "VertexArray";
+    static const char *IndexArrayType = "IndexArray";
+    static const char *MaterialType = "Material";
+    static const char *ColorType = "Color";
+    static const char *TextureType = "Texture";
+} // Namespace Grammar
+
 namespace Assimp {
 namespace OpenGEX {
 
@@ -104,7 +121,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
     bool success( myParser.parse() );
     if( success ) {
         Context *ctx = myParser.getContext();
-        importMetric( ctx );
+        handleNodes( ctx->m_root );
     }
 }
 
@@ -115,13 +132,43 @@ const aiImporterDesc *OpenGEXImporter::GetInfo() const {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::SetupProperties( const Importer *pImp ) {
-
+    if( NULL == pImp ) {
+        return;
+    }
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::importMetric( Context *ctx ) {
-    if( NULL == ctx ) {
+void OpenGEXImporter::handleNodes( ODDLParser::DDLNode *node ) {
+    if( NULL == node ) {
         return;
+    }
+
+    DDLNode::DllNodeList childs = node->getChildNodeList();
+    for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); it++ ) {
+        if( ( *it )->getType() == Grammar::MetricType ) {
+            importMetric( *it );
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::importMetric( DDLNode *node ) {
+    if( NULL == node ) {
+        return;
+    }
+
+    Property *prop( node->getProperties() );
+    while( NULL != prop ) {
+        if( NULL != prop->m_id ) {
+            if( Value::ddl_string == prop->m_primData->m_type ) {
+                std::string valName( (char*) prop->m_primData->m_data );
+                Value *val( node->getValue() );
+                if( NULL != val ) {
+
+                }
+            }
+        }
+        prop = prop->m_next;
     }
 }
 

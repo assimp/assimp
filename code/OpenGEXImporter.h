@@ -44,6 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 
+
+namespace ODDLParser {
+    struct Context;
+}
+
 namespace Assimp {
 namespace OpenGEX {
 
@@ -72,7 +77,7 @@ public:
     virtual void SetupProperties( const Importer *pImp );
 
 protected:
-    void ParseMetric();
+    void importMetric( ODDLParser::Context *ctx );
     void ParseGeoObject();
     void ParseMaterial();
 };

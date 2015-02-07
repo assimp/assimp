@@ -41,8 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AssimpPCH.h"
 #include "OpenGEXImporter.h"
-#include "OpenGEXParser.h"
 #include "DefaultIOSystem.h"
+
+#include <openddlparser/OpenDDLParser.h>
 
 #include <vector>
 
@@ -61,6 +62,8 @@ static const aiImporterDesc desc = {
 
 namespace Assimp {
 namespace OpenGEX {
+
+ USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() {
@@ -95,8 +98,14 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
 
     std::vector<char> buffer;
     TextFileToBuffer( file, buffer );
-    OpenGEXParser myParser( buffer );
-    myParser.parse();
+
+    OpenDDLParser myParser;
+    myParser.setBuffer( &buffer[ 0 ], buffer.size() );
+    bool success( myParser.parse() );
+    if( success ) {
+        Context *ctx = myParser.getContext();
+        importMetric( ctx );
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -106,6 +115,28 @@ const aiImporterDesc *OpenGEXImporter::GetInfo() const {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::SetupProperties( const Importer *pImp ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::importMetric( Context *ctx ) {
+    if( NULL == ctx || NULL == ctx->getProperties() ) {
+        return;
+    }
+
+    Property *prop = ctx->getProperties();
+    while( NULL != prop ) {
+        prop = prop->m_next;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::ParseGeoObject() {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::ParseMaterial() {
 
 }
 

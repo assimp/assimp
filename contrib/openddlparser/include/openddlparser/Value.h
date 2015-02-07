@@ -28,20 +28,28 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
+///------------------------------------------------------------------------------------------------
+///	@brief  This class implements a value.
+///
+///	Values are used to store data types like boolean, integer, floats, double and many mode. To get
+///	an overview please check the enum VylueType ( @see Value::ValueType ).
+/// Values can be single items or lists of items. They are implemented as linked lists.
+///------------------------------------------------------------------------------------------------
 class DLL_ODDLPARSER_EXPORT Value {
 public:
+    ///	@brief  This enum describes the data type stored in the value.
     enum ValueType {
-        ddl_none = -1,
-        ddl_bool = 0,
-        ddl_int8,
-        ddl_int16,
-        ddl_int32,
-        ddl_int64,
-        ddl_unsigned_int8,
-        ddl_unsigned_int16,
-        ddl_unsigned_int32,
-        ddl_unsigned_int64,
-        ddl_half,
+        ddl_none = -1,          ///< Nothing specified
+        ddl_bool = 0,           ///< A boolean type
+        ddl_int8,               ///< Integer type, 8 bytes
+        ddl_int16,              ///< Integer type, 16 bytes
+        ddl_int32,              ///< Integer type, 32 bytes
+        ddl_int64,              ///< Integer type, 64 bytes
+        ddl_unsigned_int8,      ///< Unsigned integer type, 8 bytes
+        ddl_unsigned_int16,     ///< Unsigned integer type, 16 bytes
+        ddl_unsigned_int32,     ///< Unsigned integer type, 32 bytes
+        ddl_unsigned_int64,     ///< Unsigned integer type, 64 bytes
+        ddl_half,               
         ddl_float,
         ddl_double,
         ddl_string,

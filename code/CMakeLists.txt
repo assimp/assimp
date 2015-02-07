@@ -353,8 +353,6 @@ SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
 SET( OpenGEX_SRCS
     OpenGEXImporter.cpp
     OpenGEXImporter.h
-    OpenGEXParser.cpp
-    OpenGEXParser.h
     OpenGEXStructs.h
 )
 SOURCE_GROUP( OpenGEX FILES ${OpenGEX_SRCS})
@@ -729,7 +727,7 @@ SET( assimp_src
 
 ADD_LIBRARY( assimp ${assimp_src} )
 
-TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )
 
 if(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
 	set(ASSIMP_ANDROID_JNIIOSYSTEM_PATH port/AndroidJNI)

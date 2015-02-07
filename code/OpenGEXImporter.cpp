@@ -120,13 +120,8 @@ void OpenGEXImporter::SetupProperties( const Importer *pImp ) {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::importMetric( Context *ctx ) {
-    if( NULL == ctx || NULL == ctx->getProperties() ) {
+    if( NULL == ctx ) {
         return;
-    }
-
-    Property *prop = ctx->getProperties();
-    while( NULL != prop ) {
-        prop = prop->m_next;
     }
 }
 

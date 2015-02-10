@@ -244,21 +244,17 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
             in++;
         }
 
-        // set the properties
-        if( ddl_nullptr != first ) {
-            std::cout << id->m_buffer << std::endl;
-            DDLNode *current( top() );
-            if( current ) {
-                current->setProperties( first );
-            }
-        }
-
         // store the node
         DDLNode *node( createDDLNode( id, this ) );
         if( nullptr != node ) {
             pushNode( node );
         } else {
             std::cerr << "nullptr returned by creating DDLNode." << std::endl;
+        }
+
+        // set the properties
+        if( ddl_nullptr != first ) {
+            node->setProperties( first );
         }
 
         Name *name( ddl_nullptr );
@@ -277,6 +273,7 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
         return in;
     }
 
+    bool error( false );
     in = getNextToken( in, end );
     if( *in == '{' ) {
         in++;
@@ -307,6 +304,7 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
                     }
                 } else {
                     std::cerr << "0 for array is invalid." << std::endl;
+                    error = true;
                 }
             }
 
@@ -324,12 +322,16 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
     } else {
         in++;
         logInvalidTokenError( in, "{", m_logCallback );
+        error = true;
         return in;
 
     }
     in = getNextToken( in, end );
-
-    in++;
+    
+    // pop node from stack after successful parsing
+    if( !error ) {
+        popNode();
+    }
 
     return in;
 }

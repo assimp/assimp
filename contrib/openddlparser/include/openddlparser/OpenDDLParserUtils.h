@@ -62,7 +62,7 @@ bool isSpace( const T in ) {
 template<class T>
 inline
 bool isNewLine( const T in ) {
-    return ( '\n' == in );
+    return ( '\n' == in || ( '\r' == in ) );
 }
 
 template<class T>

@@ -61,35 +61,116 @@ static const aiImporterDesc desc = {
 };
 
 namespace Grammar {
-    static const char *MetricType = "Metric";
-    static const char *NameType = "Name";
-    static const char *ObjectRefType = "ObjectRef";
-    static const char *MaterialRefType = "MaterialRef";
-    static const char *MetricKeyType = "key";
-    static const char *GeometryNodeType = "GeometryNode";
-    static const char *GeometryObjectType = "GeometryObject";
-    static const char *TransformType = "Transform";
-    static const char *MeshType = "Mesh";
-    static const char *VertexArrayType = "VertexArray";
-    static const char *IndexArrayType = "IndexArray";
-    static const char *MaterialType = "Material";
-    static const char *ColorType = "Color";
-    static const char *TextureType = "Texture";
+    static const char *MetricType          = "Metric";
+    static const char *Metric_DistanceType = "distance";
+    static const char *Metric_AngleType    = "angle";
+    static const char *Metric_TimeType     = "time";
+    static const char *Metric_UpType       = "up";
+    static const char *NameType            = "Name";
+    static const char *ObjectRefType       = "ObjectRef";
+    static const char *MaterialRefType     = "MaterialRef";
+    static const char *MetricKeyType       = "key";
+    static const char *GeometryNodeType    = "GeometryNode";
+    static const char *GeometryObjectType  = "GeometryObject";
+    static const char *TransformType       = "Transform";
+    static const char *MeshType            = "Mesh";
+    static const char *VertexArrayType     = "VertexArray";
+    static const char *IndexArrayType      = "IndexArray";
+    static const char *MaterialType        = "Material";
+    static const char *ColorType           = "Color";
+    static const char *TextureType         = "Texture";
+
+    enum TokenType {
+        NoneType = -1,
+        MetricToken,
+        NameToken,
+        ObjectRefToken,
+        MaterialRefToken,
+        MetricKeyToken,
+        GeometryNodeToken,
+        GeometryObjectToken,
+        TransformToken,
+        MeshToken,
+        VertexArrayToken,
+        IndexArrayToken,
+        MaterialToken,
+        ColorToken,
+        TextureToken
+    };
+
+    static const char *ValidMetricToken[ 4 ] = {
+        Metric_DistanceType,
+        Metric_AngleType,
+        Metric_TimeType,
+        Metric_UpType
+    };
+
+    static int isValidMetricType( const char *token ) {
+        if( NULL == token ) {
+            return false;
+        }
+
+        int idx( -1 );
+        for( size_t i = 0; i < 4; i++ ) {
+            if( 0 == strncmp( ValidMetricToken[ i ], token, strlen( token ) ) ) {
+                idx = (int) i;
+                break;
+            }
+        }
+
+        return idx;
+    }
+
+    static TokenType matchTokenType( const char *tokenType ) {
+        if( 0 == strncmp( MetricType, tokenType, strlen( tokenType ) ) ) {
+            return MetricToken;
+        } else if( 0 == strncmp( NameType, tokenType, strlen( tokenType ) ) ) {
+            return NameToken;
+        } else if( 0 == strncmp( ObjectRefType, tokenType, strlen( tokenType ) ) ) {
+            return ObjectRefToken;
+        } else if( 0 == strncmp( MaterialRefType, tokenType, strlen( tokenType ) ) ) {
+            return MaterialRefToken; 
+        } else if( 0 == strncmp( MetricKeyType, tokenType, strlen( tokenType ) ) ) {
+            return MetricKeyToken;
+        } else if( 0 == strncmp( GeometryNodeType, tokenType, strlen( tokenType ) ) ) {
+            return GeometryNodeToken;
+        } else if( 0 == strncmp( GeometryObjectType, tokenType, strlen( tokenType ) ) ) {
+            return GeometryObjectToken;
+        } else if( 0 == strncmp( TransformType, tokenType, strlen( tokenType ) ) ) {
+            return TransformToken;
+        } else if( 0 == strncmp( MeshType, tokenType, strlen( tokenType ) ) ) {
+            return MeshToken;
+        } else if( 0 == strncmp( VertexArrayType, tokenType, strlen( tokenType ) ) ) {
+            return VertexArrayToken;
+        } else if( 0 == strncmp( IndexArrayType, tokenType, strlen( tokenType ) ) ) {
+            return IndexArrayToken;
+        } else if( 0 == strncmp( MaterialType, tokenType, strlen( tokenType ) ) ) {
+            return MaterialToken;
+        } else if( 0 == strncmp( ColorType, tokenType, strlen( tokenType ) ) ) {
+            return ColorToken;
+        } else if( 0 == strncmp( TextureType, tokenType, strlen( tokenType ) ) ) {
+            return TextureToken;
+        }
+
+        return NoneType;
+    }
+
 } // Namespace Grammar
 
 namespace Assimp {
 namespace OpenGEX {
 
- USE_ODDLPARSER_NS
+USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
-OpenGEXImporter::OpenGEXImporter() {
-
+OpenGEXImporter::OpenGEXImporter() 
+: m_ctx( NULL ) {
+    // empty
 }
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::~OpenGEXImporter() {
-
+    m_ctx = NULL;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -120,8 +201,8 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
     myParser.setBuffer( &buffer[ 0 ], buffer.size() );
     bool success( myParser.parse() );
     if( success ) {
-        Context *ctx = myParser.getContext();
-        handleNodes( ctx->m_root );
+        m_ctx = myParser.getContext();
+        handleNodes( m_ctx->m_root );
     }
 }
 
@@ -138,22 +219,45 @@ void OpenGEXImporter::SetupProperties( const Importer *pImp ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleNodes( ODDLParser::DDLNode *node ) {
+void OpenGEXImporter::handleNodes( DDLNode *node ) {
     if( NULL == node ) {
         return;
     }
 
     DDLNode::DllNodeList childs = node->getChildNodeList();
     for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); it++ ) {
-        if( ( *it )->getType() == Grammar::MetricType ) {
-            importMetric( *it );
+        Grammar::TokenType tokenType( Grammar::matchTokenType( ( *it )->getType().c_str() ) );
+        switch( tokenType ) {
+            case Grammar::MetricToken:
+                importMetric( *it );
+                break;
+
+            case Grammar::NameToken:
+            case Grammar::ObjectRefToken:
+            case Grammar::MaterialRefToken:
+            case Grammar::MetricKeyToken:
+            case Grammar::GeometryNodeToken:
+            case Grammar::GeometryObjectToken:
+            case Grammar::TransformToken:
+            case Grammar::MeshToken:
+            case Grammar::VertexArrayToken:
+            case Grammar::IndexArrayToken:
+            case Grammar::MaterialToken:
+            case Grammar::ColorToken:
+            case Grammar::TextureToken:
+            default:
+                break;
         }
     }
 }
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::importMetric( DDLNode *node ) {
-    if( NULL == node ) {
+    if( NULL == node || NULL == m_ctx ) {
+        return;
+    }
+
+    if( m_ctx->m_root != node->getParent() ) {
         return;
     }
 
@@ -162,9 +266,18 @@ void OpenGEXImporter::importMetric( DDLNode *node ) {
         if( NULL != prop->m_id ) {
             if( Value::ddl_string == prop->m_primData->m_type ) {
                 std::string valName( (char*) prop->m_primData->m_data );
-                Value *val( node->getValue() );
-                if( NULL != val ) {
-
+                int type( Grammar::isValidMetricType( valName.c_str() ) );
+                if( -1 != type ) {
+                    Value *val( node->getValue() );
+                    if( NULL != val ) {
+                        if( Value::ddl_float == val->m_type ) {
+                            m_metrics[ type ].m_floatValue = val->getFloat();
+                        } else if( Value::ddl_int32 == val->m_type ) {
+                            m_metrics[ type ].m_floatValue = val->getInt32();
+                        } else {
+                            throw DeadlyImportError( "OpenGEX: invalid data type for Metric node." );
+                        }
+                    }
                 }
             }
         }

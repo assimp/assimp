@@ -53,6 +53,19 @@ namespace ODDLParser {
 namespace Assimp {
 namespace OpenGEX {
 
+struct MetricInfo {
+    enum Type {
+        Distance = 0,
+        Angle,
+        Time,
+        Up,
+        Max
+    };
+
+    std::string m_stringValue;
+    float m_floatValue;
+};
+
 /** @brief  This class is used to implement the OpenGEX importer
  *
  *  See http://opengex.org/OpenGEX.pdf for spec.
@@ -82,6 +95,10 @@ protected:
     void importMetric( ODDLParser::DDLNode *node );
     void ParseGeoObject();
     void ParseMaterial();
+
+private:
+    ODDLParser::Context *m_ctx;
+    MetricInfo m_metrics[ MetricInfo::Max ];
 };
 
 } // Namespace OpenGEX

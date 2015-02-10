@@ -61,10 +61,10 @@ public:
     Value *getValue() const;
     void setDataArrayList( DataArrayList  *dtArrayList );
     DataArrayList *getDataArrayList() const;
-    static DDLNode *create( const std::string &type, const std::string &name, DDLNode *parent = nullptr );
+    static DDLNode *create( const std::string &type, const std::string &name, DDLNode *parent = ddl_nullptr );
 
 private:
-    DDLNode( const std::string &type, const std::string &name, size_t idx, DDLNode *parent = nullptr );
+    DDLNode( const std::string &type, const std::string &name, size_t idx, DDLNode *parent = ddl_nullptr );
     DDLNode();
     DDLNode( const DDLNode & );
     DDLNode &operator = ( const DDLNode & );

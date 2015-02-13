@@ -624,8 +624,8 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Private, do not use. */
-	ImporterPimpl* Pimpl() { return pimpl; };
-	const ImporterPimpl* Pimpl() const { return pimpl; };
+	ImporterPimpl* Pimpl() { return pimpl; }
+	const ImporterPimpl* Pimpl() const { return pimpl; }
 
 protected:
 

@@ -102,7 +102,7 @@ public:
 
 	// ----------------------------------------------------------------------------------
 	//! Virtual destructor
-	virtual ~CIrrXML_IOStreamReader() {};
+	virtual ~CIrrXML_IOStreamReader() {}
 
 	// ----------------------------------------------------------------------------------
 	//!   Reads an amount of bytes from the file.

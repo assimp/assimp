@@ -19,8 +19,8 @@ INCLUDE_DIRECTORIES(
 	${Assimp_SOURCE_DIR}/samples/DevIL/include/
 )
 
-LINK_DIRECTORIES( 
-	${Assimp_BINARY_DIR} 
+LINK_DIRECTORIES(
+	${Assimp_BINARY_DIR}
 	${Assimp_BINARY_DIR}/lib/
 	${Assimp_SOURCE_DIR}/samples/DevIL/lib/
 )
@@ -30,7 +30,7 @@ ADD_EXECUTABLE( assimp_simpletexturedogl WIN32
 	SimpleTexturedOpenGL/src/model_loading.cpp
 )
 
-SET_PROPERTY(TARGET assimp_simpletexturedogl PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
+SET_PROPERTY(TARGET assimp_simpletexturedogl PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 TARGET_LINK_LIBRARIES( assimp_simpletexturedogl assimp ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} DevIL.lib )
 
@@ -40,4 +40,4 @@ SET_TARGET_PROPERTIES( assimp_simpletexturedogl PROPERTIES
 
 INSTALL( TARGETS assimp_simpletexturedogl
 	DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-dev
-) 
+)

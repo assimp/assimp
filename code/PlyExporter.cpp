@@ -64,6 +64,20 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 	outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
 }
 
+void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+{
+	// invoke the exporter 
+	PlyExporter exporter(pFile, pScene, true);
+
+	// we're still here - export successfully completed. Write the file.
+	boost::scoped_ptr<IOStream> outfile(pIOSystem->Open(pFile, "wb"));
+	if (outfile == NULL) {
+		throw DeadlyExportError("could not open output .ply file: " + std::string(pFile));
+	}
+
+	outfile->Write(exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()), 1);
+}
+
 } // end of namespace Assimp
 
 #define PLY_EXPORT_HAS_NORMALS 0x1
@@ -72,7 +86,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 #define PLY_EXPORT_HAS_COLORS (PLY_EXPORT_HAS_TEXCOORDS << AI_MAX_NUMBER_OF_TEXTURECOORDS)
 
 // ------------------------------------------------------------------------------------------------
-PlyExporter :: PlyExporter(const char* _filename, const aiScene* pScene)
+PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool binary)
 : filename(_filename)
 , pScene(pScene)
 , endl("\n") 
@@ -102,7 +116,16 @@ PlyExporter :: PlyExporter(const char* _filename, const aiScene* pScene)
 	}
 
 	mOutput << "ply" << endl;
-	mOutput << "format ascii 1.0" << endl;
+	if (binary) {
+#if (defined AI_BUILD_BIG_ENDIAN)
+		mOutput << "format binary_big_endian 1.0" << endl;
+#else
+		mOutput << "format binary_little_endian 1.0" << endl;
+#endif
+	}
+	else {
+		mOutput << "format ascii 1.0" << endl;
+	}
 	mOutput << "comment Created by Open Asset Import Library - http://assimp.sf.net (v"
 		<< aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.' 
 		<< aiGetVersionRevision() << ")" << endl;
@@ -163,17 +186,29 @@ PlyExporter :: PlyExporter(const char* _filename, const aiScene* pScene)
 	mOutput << "end_header" << endl;
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-		WriteMeshVerts(pScene->mMeshes[i],components);
+		if (binary) {
+			WriteMeshVertsBinary(pScene->mMeshes[i], components);
+		}
+		else {
+			WriteMeshVerts(pScene->mMeshes[i], components);
+		}
 	}
 	for (unsigned int i = 0, ofs = 0; i < pScene->mNumMeshes; ++i) {
-		WriteMeshIndices(pScene->mMeshes[i],ofs);
+		if (binary) {
+			WriteMeshIndicesBinary(pScene->mMeshes[i], ofs);
+		}
+		else {
+			WriteMeshIndices(pScene->mMeshes[i], ofs);
+		}
 		ofs += pScene->mMeshes[i]->mNumVertices;
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void PlyExporter :: WriteMeshVerts(const aiMesh* m, unsigned int components)
+void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 {
+	// If a component (for instance normal vectors) is present in at least one mesh in the scene,
+	// then default values are written for meshes that do not contain this component.
 	for (unsigned int i = 0; i < m->mNumVertices; ++i) {
 		mOutput << 
 			m->mVertices[i].x << " " << 
@@ -237,13 +272,75 @@ void PlyExporter :: WriteMeshVerts(const aiMesh* m, unsigned int components)
 }
 
 // ------------------------------------------------------------------------------------------------
-void PlyExporter :: WriteMeshIndices(const aiMesh* m, unsigned int offset)
+void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
+{
+	// If a component (for instance normal vectors) is present in at least one mesh in the scene,
+	// then default values are written for meshes that do not contain this component.
+	aiVector3D defaultNormal(0, 0, 0);
+	aiVector2D defaultUV(-1, -1);
+	aiColor4D defaultColor(-1, -1, -1, -1);
+	for (unsigned int i = 0; i < m->mNumVertices; ++i) {
+		mOutput.write(reinterpret_cast<const char*>(&m->mVertices[i].x), 12);
+		if (components & PLY_EXPORT_HAS_NORMALS) {
+			if (m->HasNormals()) {
+				mOutput.write(reinterpret_cast<const char*>(&m->mNormals[i].x), 12);
+			}
+			else {
+				mOutput.write(reinterpret_cast<const char*>(&defaultNormal.x), 12);
+			}
+		}
+
+		for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
+			if (m->HasTextureCoords(c)) {
+				mOutput.write(reinterpret_cast<const char*>(&m->mTextureCoords[c][i].x), 6);
+			}
+			else {
+				mOutput.write(reinterpret_cast<const char*>(&defaultUV.x), 6);
+			}
+		}
+
+		for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
+			if (m->HasVertexColors(c)) {
+				mOutput.write(reinterpret_cast<const char*>(&m->mColors[c][i].r), 16);
+			}
+			else {
+				mOutput.write(reinterpret_cast<const char*>(&defaultColor.r), 16);
+			}
+		}
+
+		if (components & PLY_EXPORT_HAS_TANGENTS_BITANGENTS) {
+			if (m->HasTangentsAndBitangents()) {
+				mOutput.write(reinterpret_cast<const char*>(&m->mTangents[i].x), 12);
+				mOutput.write(reinterpret_cast<const char*>(&m->mBitangents[i].x), 12);
+			}
+			else {
+				mOutput.write(reinterpret_cast<const char*>(&defaultNormal.x), 12);
+				mOutput.write(reinterpret_cast<const char*>(&defaultNormal.x), 12);
+			}
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void PlyExporter::WriteMeshIndices(const aiMesh* m, unsigned int offset)
 {
 	for (unsigned int i = 0; i < m->mNumFaces; ++i) {
 		const aiFace& f = m->mFaces[i];
 		mOutput << f.mNumIndices << " ";
 		for(unsigned int c = 0; c < f.mNumIndices; ++c) {
 			mOutput << (f.mIndices[c] + offset) << (c == f.mNumIndices-1 ? endl : " ");
+		}
+	}
+}
+
+void PlyExporter::WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset)
+{
+	for (unsigned int i = 0; i < m->mNumFaces; ++i) {
+		const aiFace& f = m->mFaces[i];
+		mOutput.write(reinterpret_cast<const char*>(&f.mNumIndices), 4);
+		for (unsigned int c = 0; c < f.mNumIndices; ++c) {
+			unsigned int index = f.mIndices[c] + offset;
+			mOutput.write(reinterpret_cast<const char*>(&index), 4);
 		}
 	}
 }

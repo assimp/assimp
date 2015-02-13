@@ -1,5 +1,3 @@
-#-*- coding: UTF-8 -*-
-
 """
 PyAssimp
 
@@ -21,37 +19,31 @@ logger = logging.getLogger("pyassimp")
 logger.addHandler(logging.NullHandler())
 
 from . import structs
-from .errors import AssimpError
 from . import helper
+from . import postprocess
+from .errors import AssimpError
+from .formats import available_formats
 
-assimp_structs_as_tuple = (
-        structs.Matrix4x4, 
-        structs.Matrix3x3, 
-        structs.Vector2D, 
-        structs.Vector3D, 
-        structs.Color3D, 
-        structs.Color4D, 
-        structs.Quaternion, 
-        structs.Plane, 
-        structs.Texel)
+class AssimpLib(object):
+    """
+    Assimp-Singleton
+    """
+    load, load_mem, release, dll = helper.search_library()
+_assimp_lib = AssimpLib()
 
 def make_tuple(ai_obj, type = None):
     res = None
-
     if isinstance(ai_obj, structs.Matrix4x4):
         res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((4,4))
-        #import pdb;pdb.set_trace()
     elif isinstance(ai_obj, structs.Matrix3x3):
         res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((3,3))
     else:
         res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_])
-
     return res
 
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
     aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
-    
 assimp_struct_inits =  { structs.Face : _init_face }
     
 def call_init(obj, caller = None):
@@ -112,7 +104,7 @@ def _init(self, target = None, parent = None):
         obj = getattr(self, m)
 
         # Create tuples
-        if isinstance(obj, assimp_structs_as_tuple):
+        if isinstance(obj, structs.assimp_structs_as_tuple):
             setattr(target, name, make_tuple(obj))
             logger.debug(str(self) + ": Added array " + str(getattr(target, name)) +  " as self." + name.lower())
             continue
@@ -142,7 +134,7 @@ def _init(self, target = None, parent = None):
                 
 
                 try:
-                    if obj._type_ in assimp_structs_as_tuple:
+                    if obj._type_ in structs.assimp_structs_as_tuple:
                         setattr(target, name, numpy.array([make_tuple(obj[i]) for i in range(length)], dtype=numpy.float32))
 
                         logger.debug(str(self) + ": Added an array of numpy arrays (type "+ str(type(obj)) + ") as self." + name)
@@ -178,18 +170,15 @@ def _init(self, target = None, parent = None):
                                      " a post-processing to triangulate your"
                                      " faces.")
                     raise e
+                    
 
 
             else: # starts with 'm' but not iterable
-
                 setattr(target, name, obj)
                 logger.debug("Added " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
         
                 if _is_init_type(obj):
                     call_init(obj, target)
-
-
-
 
     if isinstance(self, structs.Mesh):
         _finalize_mesh(self, target)
@@ -200,14 +189,6 @@ def _init(self, target = None, parent = None):
 
     return self
 
-class AssimpLib(object):
-    """
-    Assimp-Singleton
-    """
-    load, load_mem, release, dll = helper.search_library()
-
-#the loader as singleton
-_assimp_lib = AssimpLib()
 
 def pythonize_assimp(type, obj, scene):
     """ This method modify the Assimp data structures
@@ -247,17 +228,16 @@ def recur_pythonize(node, scene):
     pythonize the assimp datastructures.
     '''
     node.meshes = pythonize_assimp("MESH", node.meshes, scene)
-    
     for mesh in node.meshes:
         mesh.material = scene.materials[mesh.materialindex]
-
     for cam in scene.cameras:
         pythonize_assimp("ADDTRANSFORMATION", cam, scene)
-
     for c in node.children:
         recur_pythonize(c, scene)
 
-def load(filename, processing=0, file_type=None):
+def load(filename, 
+         file_type  = None,
+         processing = postprocess.aiProcess_Triangulate):
     '''
     Load a model into a scene. On failure throws AssimpError.
     
@@ -267,12 +247,17 @@ def load(filename, processing=0, file_type=None):
                 If a file object is passed, file_type MUST be specified
                 Otherwise Assimp has no idea which importer to use.
                 This is named 'filename' so as to not break legacy code. 
-    processing: assimp processing parameters
-    file_type:  string, such as 'stl'
+    processing: assimp postprocessing parameters. Verbose keywords are imported
+                from postprocessing, and the parameters can be combined bitwise to
+                generate the final processing value. Note that the default value will
+                triangulate quad faces. Example of generating other possible values:
+                processing = (pyassimp.postprocess.aiProcess_Triangulate | 
+                              pyassimp.postprocess.aiProcess_OptimizeMeshes)
+    file_type:  string of file extension, such as 'stl'
         
     Returns
     ---------
-    Scene object with model-data
+    Scene object with model data
     '''
     
     if hasattr(filename, 'read'):

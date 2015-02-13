@@ -229,6 +229,9 @@ void STLImporter::LoadASCIIFile()
 	size_t temp;
 	// setup the name of the node
 	if ((temp = (size_t)(sz-szMe)))	{
+		if (temp >= MAXLEN) {
+			throw DeadlyImportError( "STL: Node name too long" );
+		}
 
 		pScene->mRootNode->mName.length = temp;
 		memcpy(pScene->mRootNode->mName.data,szMe,temp);
@@ -305,6 +308,7 @@ void STLImporter::LoadASCIIFile()
 		{
 			if (3 == curVertex)	{
 				DefaultLogger::get()->error("STL: a facet with more than 3 vertices has been found");
+				++sz;
 			}
 			else
 			{
@@ -323,8 +327,10 @@ void STLImporter::LoadASCIIFile()
 			break;
 		}
 		// else skip the whole identifier
-		else while (!::IsSpaceOrNewLine(*sz)) {
-			++sz;
+		else {
+			do {
+				++sz;
+			} while (!::IsSpaceOrNewLine(*sz));
 		}
 	}
 

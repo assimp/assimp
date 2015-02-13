@@ -182,7 +182,7 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOu
 	{
 		eOut = PLY::EST_Opacity;
 	}
-	else if (TokenMatch(pCur,"specular_power",6))
+	else if (TokenMatch(pCur,"specular_power",14))
 	{
 		eOut = PLY::EST_PhongPower;
 	}
@@ -436,7 +436,7 @@ bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut,bool isBinary)
 	*pCurOut = pCur;
 
 	// parse all elements
-	while (true)
+	while ((*pCur) != '\0')
 	{
 		// skip all comments
 		PLY::DOM::SkipComments(pCur,&pCur);

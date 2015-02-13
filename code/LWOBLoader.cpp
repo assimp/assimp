@@ -139,7 +139,15 @@ void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& face
 	while (cursor < end && max--)
 	{
 		uint16_t numIndices;
+		// must have 2 shorts left for numIndices and surface
+		if (end - cursor < 2) {
+			throw DeadlyImportError("LWOB: Unexpected end of file");
+		}
 		::memcpy(&numIndices, cursor++, 2);
+		// must have enough left for indices and surface
+		if (end - cursor < (1 + numIndices)) {
+			throw DeadlyImportError("LWOB: Unexpected end of file");
+		}
 		verts += numIndices;
 		faces++;
 		cursor += numIndices;

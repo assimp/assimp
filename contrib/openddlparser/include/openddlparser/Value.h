@@ -26,6 +26,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <openddlparser/OpenDDLCommon.h>
 
+#include <string>
+
 BEGIN_ODDLPARSER_NS
 
 ///------------------------------------------------------------------------------------------------
@@ -73,6 +75,8 @@ public:
     float getFloat() const;
     void setDouble( double value );
     double getDouble() const;
+    void setString( const std::string &str );
+    const char *getString() const;
     void dump();
     void setNext( Value *next );
     Value *getNext() const;

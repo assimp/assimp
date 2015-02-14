@@ -64,6 +64,12 @@ struct MetricInfo {
 
     std::string m_stringValue;
     float m_floatValue;
+
+    MetricInfo()
+    : m_stringValue( "" )
+    , m_floatValue( 0.0f ) {
+        // empty
+    }
 };
 
 /** @brief  This class is used to implement the OpenGEX importer
@@ -91,14 +97,15 @@ public:
     virtual void SetupProperties( const Importer *pImp );
 
 protected:
-    void handleNodes( ODDLParser::DDLNode *node );
-    void importMetric( ODDLParser::DDLNode *node );
-    void ParseGeoObject();
-    void ParseMaterial();
+    void handleNodes( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleMetricNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene );
 
 private:
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
+    aiNode *m_currentNode;
 };
 
 } // Namespace OpenGEX

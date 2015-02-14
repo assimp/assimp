@@ -669,7 +669,7 @@ char *OpenDDLParser::parseStringLiteral( char *in, char *end, Value **stringData
             len++;
         }
 
-        *stringData = ValueAllocator::allocPrimData( Value::ddl_string, len + 1 );
+        *stringData = ValueAllocator::allocPrimData( Value::ddl_string, len );
         ::strncpy( ( char* ) ( *stringData )->m_data, start, len );
         ( *stringData )->m_data[len] = '\0';
         in++;

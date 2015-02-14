@@ -164,7 +164,8 @@ USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
-: m_ctx( NULL ) {
+: m_ctx( NULL )
+, m_currentNode( NULL ) {
     // empty
 }
 
@@ -202,7 +203,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
     bool success( myParser.parse() );
     if( success ) {
         m_ctx = myParser.getContext();
-        handleNodes( m_ctx->m_root );
+        handleNodes( m_ctx->m_root, pScene );
     }
 }
 
@@ -219,7 +220,7 @@ void OpenGEXImporter::SetupProperties( const Importer *pImp ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleNodes( DDLNode *node ) {
+void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
     if( NULL == node ) {
         return;
     }
@@ -229,14 +230,20 @@ void OpenGEXImporter::handleNodes( DDLNode *node ) {
         Grammar::TokenType tokenType( Grammar::matchTokenType( ( *it )->getType().c_str() ) );
         switch( tokenType ) {
             case Grammar::MetricToken:
-                importMetric( *it );
+                handleMetricNode( *it, pScene );
                 break;
 
             case Grammar::NameToken:
+                handleNameNode( *it, pScene );
+                break;
+
             case Grammar::ObjectRefToken:
             case Grammar::MaterialRefToken:
             case Grammar::MetricKeyToken:
             case Grammar::GeometryNodeToken:
+                handleGeometryNode( *it, pScene );
+                break;
+
             case Grammar::GeometryObjectToken:
             case Grammar::TransformToken:
             case Grammar::MeshToken:
@@ -252,7 +259,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::importMetric( DDLNode *node ) {
+void OpenGEXImporter::handleMetricNode( DDLNode *node, aiScene *pScene ) {
     if( NULL == node || NULL == m_ctx ) {
         return;
     }
@@ -267,13 +274,15 @@ void OpenGEXImporter::importMetric( DDLNode *node ) {
             if( Value::ddl_string == prop->m_primData->m_type ) {
                 std::string valName( (char*) prop->m_primData->m_data );
                 int type( Grammar::isValidMetricType( valName.c_str() ) );
-                if( -1 != type ) {
+                if( Grammar::NoneType != type ) {
                     Value *val( node->getValue() );
                     if( NULL != val ) {
                         if( Value::ddl_float == val->m_type ) {
                             m_metrics[ type ].m_floatValue = val->getFloat();
                         } else if( Value::ddl_int32 == val->m_type ) {
                             m_metrics[ type ].m_floatValue = val->getInt32();
+                        } else if( Value::ddl_string == val->m_type ) {
+                            m_metrics[type].m_stringValue = std::string( val->getString() );
                         } else {
                             throw DeadlyImportError( "OpenGEX: invalid data type for Metric node." );
                         }
@@ -286,13 +295,27 @@ void OpenGEXImporter::importMetric( DDLNode *node ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::ParseGeoObject() {
+void OpenGEXImporter::handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == m_currentNode ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
 
+    Value *val( node->getValue() );
+    if( NULL != val ) {
+        if( Value::ddl_string != val->m_type ) {
+            throw DeadlyImportError( "OpenGEX: invalid data type for value in node name." );
+        }
+
+        std::string name( val->getString() );
+        m_currentNode->mName.Set( name.c_str() );
+    }
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::ParseMaterial() {
-
+void OpenGEXImporter::handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    m_currentNode = new aiNode;
+    handleNodes( node, pScene );
 }
 
 //------------------------------------------------------------------------------------------------

@@ -241,7 +241,7 @@ struct aiColor3D
  *  For most applications, it will be absolutely sufficient to interpret the
  *  aiString as ASCII data and work with it as one would work with a plain char*. 
  *  Windows users in need of proper support for i.e asian characters can use the
- *  #MultiByteToWideChar(), #WideCharToMultiByte() WinAPI functionality to convert the
+ *  MultiByteToWideChar(), WideCharToMultiByte() WinAPI functionality to convert the
  *  UTF-8 strings to their working character set (i.e. MBCS, WideChar).
  *
  *  We use this representation instead of std::string to be C-compatible. The 
@@ -388,6 +388,8 @@ typedef enum aiReturn
 	 *  Force 32-bit size enum
 	 */
 	_AI_ENFORCE_ENUM_SIZE = 0x7fffffff 
+
+    /// @endcond
 } aiReturn;  // !enum aiReturn
 
 // just for backwards compatibility, don't use these constants anymore
@@ -414,13 +416,14 @@ enum aiOrigin
 	 *   Force 32-bit size enum 
 	 */
 	_AI_ORIGIN_ENFORCE_ENUM_SIZE = 0x7fffffff 
+	
+	/// @endcond
 }; // !enum aiOrigin
 
 // ----------------------------------------------------------------------------------
 /** @brief Enumerates predefined log streaming destinations. 
  *  Logging to these streams can be enabled with a single call to 
- *   #LogStream::createDefaultStream or #aiAttachPredefinedLogStream(),
- *   respectively.
+ *   #LogStream::createDefaultStream.
  */
 enum aiDefaultLogStream	
 {
@@ -442,6 +445,7 @@ enum aiDefaultLogStream
 	 *  Force 32-bit size enum 
 	 */
 	_AI_DLS_ENFORCE_ENUM_SIZE = 0x7fffffff 
+	/// @endcond
 }; // !enum aiDefaultLogStream
 
 // just for backwards compatibility, don't use these constants anymore

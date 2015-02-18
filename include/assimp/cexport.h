@@ -122,10 +122,7 @@ ASSIMP_API void aiFreeScene(const C_STRUCT aiScene* pIn);
 * @param pFormatId ID string to specify to which format you want to export to. Use 
 * aiGetExportFormatCount() / aiGetExportFormatDescription() to learn which export formats are available.
 * @param pFileName Output file to write
-* @param pIO custom IO implementation to be used. Use this if you use your own storage methods.
-*   If none is supplied, a default implementation using standard file IO is used. Note that
-*   #aiExportSceneToBlob is provided as convenience function to export to memory buffers.
-* @param pPreprocessing Accepts any choice of the #aiPostProcessing enumerated
+* @param pPreprocessing Accepts any choice of the #aiPostProcessSteps enumerated
 *   flags, but in reality only a subset of them makes sense here. Specifying
 *   'preprocessing' flags is useful if the input scene does not conform to 
 *   Assimp's default conventions as specified in the @link data Data Structures Page @endlink. 
@@ -183,7 +180,7 @@ ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene,
 
 // --------------------------------------------------------------------------------
 /** Describes a blob of exported scene data. Use #aiExportSceneToBlob() to create a blob containing an
-* exported scene. The memory referred by this structure is owned by Assimp. Use #aiReleaseExportedFile()
+* exported scene. The memory referred by this structure is owned by Assimp. 
 * to free its resources. Don't try to free the memory on your side - it will crash for most build configurations
 * due to conflicting heaps.
 *

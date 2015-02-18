@@ -668,8 +668,7 @@ struct aiMesh
 	}
 
 	//! Check whether the mesh contains positions. Provided no special
-	//! scene flags are set (such as #AI_SCENE_FLAGS_ANIM_SKELETON_ONLY), 
-	//! this will always be true 
+	//! scene flags are set, this will always be true 
 	bool HasPositions() const 
 		{ return mVertices != NULL && mNumVertices > 0; }
 

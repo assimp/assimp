@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  aiQuaterniont.inl
+/** @file  quaternion.inl
  *  @brief Inline implementation of aiQuaterniont<TReal> operators
  */
 #ifndef AI_QUATERNION_INL_INC

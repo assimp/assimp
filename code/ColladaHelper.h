@@ -502,6 +502,8 @@ struct Effect
 	// Scalar factory
 	float mShininess, mRefractIndex, mReflectivity;
 	float mTransparency;
+	bool mHasTransparency;
+	bool mRGBTransparency;
 
 	// local params referring to each other by their SID
 	typedef std::map<std::string, Collada::EffectParam> ParamLibrary;
@@ -522,7 +524,9 @@ struct Effect
 		, mShininess    (10.0f)
 		, mRefractIndex (1.f)
 		, mReflectivity (1.f)
-		, mTransparency (0.f)
+		, mTransparency (1.f)
+		, mHasTransparency (false)
+		, mRGBTransparency(false)
 		, mDoubleSided	(false)
 		, mWireframe    (false)
 		, mFaceted      (false)

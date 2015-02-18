@@ -1199,6 +1199,14 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
 				ReadEffectColor( pEffect.mReflective, pEffect.mTexReflective);
 			}
 			else if( IsElement( "transparent")) {
+				pEffect.mHasTransparency = true;
+
+				// In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
+				if(::strcmp(mReader->getAttributeValueSafe("opaque"), "RGB_ZERO") == 0) {
+					// TODO: handle RGB_ZERO mode completely
+					pEffect.mRGBTransparency = true;
+				}
+
 				ReadEffectColor( pEffect.mTransparent,pEffect.mTexTransparent);
 			}
 			else if( IsElement( "shininess"))

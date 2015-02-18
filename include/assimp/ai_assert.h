@@ -1,4 +1,4 @@
-/** @file assert.h
+/** @file ai_assert.h
  */
 #ifndef AI_DEBUG_H_INC
 #define AI_DEBUG_H_INC

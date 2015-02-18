@@ -897,3 +897,13 @@ class Scene(Structure):
             # the scene.
             ("mCameras", POINTER(POINTER(Camera))),
         ]
+
+assimp_structs_as_tuple = (Matrix4x4,
+                           Matrix3x3,
+                           Vector2D,
+                           Vector3D,
+                           Color3D,
+                           Color4D,
+                           Quaternion,
+                           Plane,
+                           Texel)

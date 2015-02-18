@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file aiMatrix3x3.inl
+/** @file matrix3x3.inl
  *  @brief Inline implementation of the 3x3 matrix operators
  */
 #ifndef AI_MATRIX3x3_INL_INC

@@ -52,7 +52,7 @@ add_executable( unit
     ${TEST_SRCS}
 )
 
-SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX} )
+SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 add_dependencies( unit gtest )
 target_link_libraries( unit assimp

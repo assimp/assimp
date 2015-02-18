@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  aiVersion.h
+/** @file  version.h
  *  @brief Functions to query the version of the Assimp runtime, check
  *    compile flags, ...
  */

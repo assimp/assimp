@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  aiQuaterniont.inl
+/** @file  quaternion.inl
  *  @brief Inline implementation of aiQuaterniont<TReal> operators
  */
 #ifndef AI_QUATERNION_INL_INC
@@ -273,11 +273,10 @@ template<typename TReal>
 inline aiVector3t<TReal> aiQuaterniont<TReal>::Rotate (const aiVector3t<TReal>& v)
 {
 	aiQuaterniont q2(0.f,v.x,v.y,v.z), q = *this, qinv = q;
-	q.Conjugate();
+	qinv.Conjugate();
 
 	q = q*q2*qinv;
 	return aiVector3t<TReal>(q.x,q.y,q.z);
-
 }
 
 #endif

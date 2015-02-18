@@ -209,7 +209,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	"PP_RRM_EXCLUDE_LIST"
 
 // ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_PretransformVertices step to
+/** @brief Configures the #aiProcess_PreTransformVertices step to
  *  keep the scene hierarchy. Meshes are moved to worldspace, but
  *  no optimization is performed (read: meshes with equal materials are not 
  *  joined. The total number of meshes won't change).
@@ -224,7 +224,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	"PP_PTV_KEEP_HIERARCHY"
 
 // ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_PretransformVertices step to normalize
+/** @brief Configures the #aiProcess_PreTransformVertices step to normalize
  *  all vertex components into the [-1,1] range. That is, a bounding box
  *  for the whole scene is computed, the maximum component is taken and all
  *  meshes are scaled appropriately (uniformly of course!).
@@ -234,7 +234,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	"PP_PTV_NORMALIZE"
 
 // ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_PretransformVertices step to use
+/** @brief Configures the #aiProcess_PreTransformVertices step to use
  *  a users defined matrix as the scene root node transformation before
  *  transforming vertices. 
  *  Property type: bool. Default value: false.
@@ -243,7 +243,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	"PP_PTV_ADD_ROOT_TRANSFORMATION"
 
 // ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_PretransformVertices step to use
+/** @brief Configures the #aiProcess_PreTransformVertices step to use
  *  a users defined matrix as the scene root node transformation before
  *  transforming vertices. This property correspond to the 'a1' component
  *  of the transformation matrix.
@@ -376,7 +376,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ---------------------------------------------------------------------------
 /** @brief Enumerates components of the aiScene and aiMesh data structures
- *  that can be excluded from the import using the #aiPrpcess_RemoveComponent step.
+ *  that can be excluded from the import using the #aiProcess_RemoveComponent step.
  *
  *  See the documentation to #aiProcess_RemoveComponent for more details.
  */
@@ -715,7 +715,7 @@ enum aiComponent
 /** @brief  Tells the MD3 loader which skin files to load.
  *
  * When loading MD3 files, Assimp checks whether a file 
- * <md3_file_name>_<skin_name>.skin is existing. These files are used by
+ * [md3_file_name]_[skin_name].skin is existing. These files are used by
  * Quake III to be able to assign different skins (e.g. red and blue team) 
  * to models. 'default', 'red', 'blue' are typical skin names.
  * Property type: String. Default value: "default".
@@ -728,14 +728,14 @@ enum aiComponent
  *  MD3 file. This can also be a search path.
  *
  * By default Assimp's behaviour is as follows: If a MD3 file 
- * <tt><any_path>/models/<any_q3_subdir>/<model_name>/<file_name>.md3</tt> is 
+ * <tt>any_path/models/any_q3_subdir/model_name/file_name.md3</tt> is 
  * loaded, the library tries to locate the corresponding shader file in
- * <tt><any_path>/scripts/<model_name>.shader</tt>. This property overrides this
+ * <tt>any_path/scripts/model_name.shader</tt>. This property overrides this
  * behaviour. It can either specify a full path to the shader to be loaded
  * or alternatively the path (relative or absolute) to the directory where
  * the shaders for all MD3s to be loaded reside. Assimp attempts to open 
- * <tt><dir>/<model_name>.shader</tt> first, <tt><dir>/<file_name>.shader</tt> 
- * is the fallback file. Note that <dir> should have a terminal (back)slash.
+ * <tt>IMPORT_MD3_SHADER_SRC/model_name.shader</tt> first, <tt>IMPORT_MD3_SHADER_SRC/file_name.shader</tt> 
+ * is the fallback file. Note that IMPORT_MD3_SHADER_SRC should have a terminal (back)slash.
  * Property type: String. Default value: n/a.
  */
 #define AI_CONFIG_IMPORT_MD3_SHADER_SRC \
@@ -818,12 +818,13 @@ enum aiComponent
 /** @brief Ogre Importer detect the texture usage from its filename.
  *
  * Ogre material texture units do not define texture type, the textures usage
- * depends on the used shader or Ogres fixed pipeline. If this config property
+ * depends on the used shader or Ogre's fixed pipeline. If this config property
  * is true Assimp will try to detect the type from the textures filename postfix:
  * _n, _nrm, _nrml, _normal, _normals and _normalmap for normal map, _s, _spec,
  * _specular and _specularmap for specular map, _l, _light, _lightmap, _occ 
  * and _occlusion for light map, _disp and _displacement for displacement map.
- * The matching is case insensitive. Post fix is taken between last "_" and last ".".
+ * The matching is case insensitive. Post fix is taken between the last 
+ * underscore and the last period.
  * Default behavior is to detect type from lower cased texture unit name by 
  * matching against: normalmap, specularmap, lightmap and displacementmap.
  * For both cases if no match is found aiTextureType_DIFFUSE is used.

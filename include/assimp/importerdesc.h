@@ -98,8 +98,7 @@ struct aiImporterDesc
 	/** Implementation comments, i.e. unimplemented features*/
 	const char* mComments;
 
-	/** Any combination of the #aiLoaderFlags enumerated values.
-	    These flags indicate some characteristics common to many
+	/** These flags indicate some characteristics common to many
 		importers. */
 	unsigned int mFlags;
 

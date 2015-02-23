@@ -97,10 +97,10 @@ struct TempMesh
 	void RemoveDegenerates();
 
 	void FixupFaceOrientation();
+
+	static IfcVector3 ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bool normalize = true);
 	IfcVector3 ComputeLastPolygonNormal(bool normalize = true) const;
-	void ComputePolygonNormals(std::vector<IfcVector3>& normals, 
-		bool normalize = true, 
-		size_t ofs = 0) const;
+	void ComputePolygonNormals(std::vector<IfcVector3>& normals, bool normalize = true, size_t ofs = 0) const;
 
 	void Swap(TempMesh& other);
 };
@@ -195,8 +195,18 @@ struct ConversionData
 	std::vector<aiMesh*> meshes;
 	std::vector<aiMaterial*> materials;
 
-	typedef std::map<const IFC::IfcRepresentationItem*, std::vector<unsigned int> > MeshCache;
+	struct MeshCacheIndex {
+		const IFC::IfcRepresentationItem* item; unsigned int matindex;
+		MeshCacheIndex() : item(NULL), matindex(0) { }
+		MeshCacheIndex(const IFC::IfcRepresentationItem* i, unsigned int mi) : item(i), matindex(mi) { }
+		bool operator == (const MeshCacheIndex& o) const { return item == o.item && matindex == o.matindex; }
+		bool operator < (const MeshCacheIndex& o) const { return item < o.item || (item == o.item && matindex < o.matindex); }
+	};
+	typedef std::map<MeshCacheIndex, std::vector<unsigned int> > MeshCache;
 	MeshCache cached_meshes;
+
+	typedef std::map<const IFC::IfcSurfaceStyle*, unsigned int> MaterialCache;
+	MaterialCache cached_materials;
 
 	const IFCImporter::Settings& settings;
 
@@ -220,7 +230,7 @@ struct FuzzyVectorCompare {
 
 	FuzzyVectorCompare(IfcFloat epsilon) : epsilon(epsilon) {}
 	bool operator()(const IfcVector3& a, const IfcVector3& b) {
-		return std::fabs((a-b).SquareLength()) < epsilon;
+		return std::abs((a-b).SquareLength()) < epsilon;
 	}
 
 	const IfcFloat epsilon;
@@ -263,11 +273,11 @@ IfcFloat ConvertSIPrefix(const std::string& prefix);
 bool ProcessProfile(const IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv);
 
 // IFCMaterial.cpp
-unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, ConversionData& conv);
+unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat);
 
 // IFCGeometry.cpp
 IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut);
-bool ProcessRepresentationItem(const IfcRepresentationItem& item, std::vector<unsigned int>& mesh_indices, ConversionData& conv);
+bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int matid, std::vector<unsigned int>& mesh_indices, ConversionData& conv);
 void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/);
 
 void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, 

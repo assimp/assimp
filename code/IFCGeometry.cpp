@@ -579,6 +579,11 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	IfcVector3 min = in[0];
 	dir *= IfcMatrix3(trafo);
 
+	// reverse profile polygon if it's winded in the wrong direction in relation to the extrusion direction
+	IfcVector3 profileNormal = TempMesh::ComputePolygonNormal( in.data(), in.size());
+	if( profileNormal * dir < 0.0 )
+		std::reverse( in.begin(), in.end());
+
 	std::vector<IfcVector3> nors;
 	const bool openings = !!conv.apply_openings && conv.apply_openings->size();
 	
@@ -619,9 +624,9 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		curmesh.vertcnt.push_back(4);
 		
 		out.push_back(in[i]);
-		out.push_back(in[i]+dir);
-		out.push_back(in[next]+dir);
 		out.push_back(in[next]);
+		out.push_back(in[next]+dir);
+		out.push_back(in[i]+dir);
 
 		if(openings) {
 			if((in[i]-in[next]).Length() > diag * 0.1 && GenerateOpenings(*conv.apply_openings,nors,temp,true, true, dir)) {
@@ -646,8 +651,12 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	if(has_area) {
 
 		for(size_t n = 0; n < 2; ++n) {
-			for(size_t i = size; i--; ) {
-				out.push_back(in[i]+(n?dir:IfcVector3()));
+			if( n > 0 ) {
+				for(size_t i = 0; i < size; ++i ) 
+					out.push_back(in[i]+dir);
+			} else {
+				for(size_t i = size; i--; )
+					out.push_back(in[i]);
 			}
 
 			curmesh.vertcnt.push_back(size);
@@ -699,10 +708,10 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, 
+bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, std::vector<unsigned int>& mesh_indices, 
 	ConversionData& conv)
 {
-	bool fix_orientation = true;
+	bool fix_orientation = false;
 	boost::shared_ptr< TempMesh > meshtmp = boost::make_shared<TempMesh>(); 
 	if(const IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IfcShellBasedSurfaceModel>()) {
 		BOOST_FOREACH(boost::shared_ptr<const IfcShell> shell,shellmod->SbsmBoundary) {
@@ -716,24 +725,27 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 				IFCImporter::LogWarn("unexpected type error, IfcShell ought to inherit from IfcConnectedFaceSet");
 			}
 		}
+		fix_orientation = true;
 	}
 	else  if(const IfcConnectedFaceSet* fset = geo.ToPtr<IfcConnectedFaceSet>()) {
 		ProcessConnectedFaceSet(*fset,*meshtmp.get(),conv);
+		fix_orientation = true;
 	}	
 	else  if(const IfcSweptAreaSolid* swept = geo.ToPtr<IfcSweptAreaSolid>()) {
 		ProcessSweptAreaSolid(*swept,*meshtmp.get(),conv);
 	}   
 	else  if(const IfcSweptDiskSolid* disk = geo.ToPtr<IfcSweptDiskSolid>()) {
 		ProcessSweptDiskSolid(*disk,*meshtmp.get(),conv);
-		fix_orientation = false;
 	}   
 	else if(const IfcManifoldSolidBrep* brep = geo.ToPtr<IfcManifoldSolidBrep>()) {
 		ProcessConnectedFaceSet(brep->Outer,*meshtmp.get(),conv);
+		fix_orientation = true;
 	} 
 	else if(const IfcFaceBasedSurfaceModel* surf = geo.ToPtr<IfcFaceBasedSurfaceModel>()) {
 		BOOST_FOREACH(const IfcConnectedFaceSet& fc, surf->FbsmFaces) {
 			ProcessConnectedFaceSet(fc,*meshtmp.get(),conv);
 		}
+		fix_orientation = true;
 	}  
 	else  if(const IfcBooleanResult* boolean = geo.ToPtr<IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,*meshtmp.get(),conv);
@@ -777,7 +789,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 
 	aiMesh* const mesh = meshtmp->ToMesh();
 	if(mesh) {
-		mesh->mMaterialIndex = ProcessMaterials(geo,conv);
+		mesh->mMaterialIndex = matid; 
 		mesh_indices.push_back(conv.meshes.size());
 		conv.meshes.push_back(mesh);
 		return true;
@@ -807,10 +819,11 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
 
 // ------------------------------------------------------------------------------------------------
 bool TryQueryMeshCache(const IfcRepresentationItem& item, 
-	std::vector<unsigned int>& mesh_indices, 
+	std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
 	ConversionData& conv) 
 {
-	ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(&item);
+	ConversionData::MeshCacheIndex idx(&item, mat_index);
+	ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(idx);
 	if (it != conv.cached_meshes.end()) {
 		std::copy((*it).second.begin(),(*it).second.end(),std::back_inserter(mesh_indices));
 		return true;
@@ -820,21 +833,25 @@ bool TryQueryMeshCache(const IfcRepresentationItem& item,
 
 // ------------------------------------------------------------------------------------------------
 void PopulateMeshCache(const IfcRepresentationItem& item, 
-	const std::vector<unsigned int>& mesh_indices, 
+	const std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
 	ConversionData& conv)
 {
-	conv.cached_meshes[&item] = mesh_indices;
+	ConversionData::MeshCacheIndex idx(&item, mat_index);
+	conv.cached_meshes[idx] = mesh_indices;
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessRepresentationItem(const IfcRepresentationItem& item, 
+bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int matid,
 	std::vector<unsigned int>& mesh_indices, 
 	ConversionData& conv)
 {
-	if (!TryQueryMeshCache(item,mesh_indices,conv)) {
-		if(ProcessGeometricItem(item,mesh_indices,conv)) {
+	// determine material
+	unsigned int localmatid = ProcessMaterials(item.GetID(), matid, conv, true);
+
+	if (!TryQueryMeshCache(item,mesh_indices,localmatid,conv)) {
+		if(ProcessGeometricItem(item,localmatid,mesh_indices,conv)) {
 			if(mesh_indices.size()) {
-				PopulateMeshCache(item,mesh_indices,conv);
+				PopulateMeshCache(item,mesh_indices,localmatid,conv);
 			}
 		}
 		else return false;

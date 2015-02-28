@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #include "IFCUtil.h"
+#include <limits>
 
 namespace Assimp {
 	namespace IFC {
@@ -167,12 +168,12 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
 	}
 
 	// no local material defined. If there's global one, use that instead
-	if( prevMatId != UINT32_MAX )
+	if( prevMatId != std::numeric_limits<uint32_t>::max() )
 		return prevMatId;
 
 	// we're still here - create an default material if required, or simply fail otherwise
 	if( !forceDefaultMat )
-		return UINT32_MAX;
+		return std::numeric_limits<uint32_t>::max();
 
 	aiString name;
 	name.Set("<IFCDefault>");

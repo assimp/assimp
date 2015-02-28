@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
 #include <iterator>
+#include <limits>
 #include <boost/tuple/tuple.hpp>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
@@ -560,7 +561,7 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 	}
 
 	// extract Color from metadata, if present
-	unsigned int matid = ProcessMaterials( el.GetID(), UINT32_MAX, conv, false);
+	unsigned int matid = ProcessMaterials( el.GetID(), std::numeric_limits<uint32_t>::max(), conv, false);
 	std::vector<unsigned int> meshes;
 
 	// we want only one representation type, so bring them in a suitable order (i.e try those

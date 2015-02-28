@@ -413,7 +413,7 @@ float BVHLoader::GetNextTokenAsFloat()
 
 // ------------------------------------------------------------------------------------------------
 // Aborts the file reading with an exception
-void BVHLoader::ThrowException( const std::string& pError)
+AI_WONT_RETURN void BVHLoader::ThrowException( const std::string& pError)
 {
 	throw DeadlyImportError( boost::str( boost::format( "%s:%d - %s") % mFileName % mLine % pError));
 }

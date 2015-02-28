@@ -2659,7 +2659,7 @@ void ColladaParser::ReadScene()
 
 // ------------------------------------------------------------------------------------------------
 // Aborts the file reading with an exception
-void ColladaParser::ThrowException( const std::string& pError) const
+AI_WONT_RETURN void ColladaParser::ThrowException( const std::string& pError) const
 {
 	throw DeadlyImportError( boost::str( boost::format( "Collada: %s - %s") % mFileName % pError));
 }

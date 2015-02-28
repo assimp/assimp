@@ -221,7 +221,7 @@ public:
 private:
 
 	/* Report failure */
-	void failure(const std::string& err, const std::string& name) {
+	AI_WONT_RETURN void failure(const std::string& err, const std::string& name) AI_WONT_RETURN_SUFFIX {
 		std::stringstream ss;
 		throw compare_fails_exception((ss
 			<< "Files are different at " 

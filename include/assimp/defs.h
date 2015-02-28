@@ -162,8 +162,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define AI_FORCE_INLINE inline
 #endif // (defined _MSC_VER)
 
-#ifdef __clang__
-#	define AI_WONT_RETURN_SUFFIX  __attribute__((analyzer_noreturn))
+#ifdef __GNUC__
+#	define AI_WONT_RETURN_SUFFIX  __attribute__((noreturn))
 #else
 #	define AI_WONT_RETURN_SUFFIX
 #endif // (defined __clang__)

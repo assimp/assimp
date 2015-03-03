@@ -303,7 +303,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 		ivdx = -1; 
 		int max_priority = -1;
 		for (unsigned int* piCur = piCandidates;piCur != piCurCandidate;++piCur)	{
-			register const unsigned int dp = *piCur;
+			const unsigned int dp = *piCur;
 
 			// must have live triangles
 			if (piNumTriPtr[dp] > 0)	{

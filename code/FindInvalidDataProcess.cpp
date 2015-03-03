@@ -89,7 +89,7 @@ void UpdateMeshReferences(aiNode* node, const std::vector<unsigned int>& meshMap
 		unsigned int out = 0;
 		for (unsigned int a = 0; a < node->mNumMeshes;++a)	{
 
-			register unsigned int ref = node->mMeshes[a];
+			unsigned int ref = node->mMeshes[a];
 			if (UINT_MAX != (ref = meshMapping[ref]))	{
 				node->mMeshes[out++] = ref;
 			}

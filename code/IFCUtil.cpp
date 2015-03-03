@@ -149,7 +149,7 @@ void TempMesh::RemoveDegenerates()
 	for (std::vector<unsigned int>::iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
 		const unsigned int pcount = *it;
 		
-		if (normals[inor].SquareLength() < 1e-5f) {
+		if (normals[inor].SquareLength() < 1e-10f) {
 			it = vertcnt.erase(it);
 			vit = verts.erase(vit, vit + pcount);
 

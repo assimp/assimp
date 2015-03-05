@@ -455,12 +455,11 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 				continue;
 
 			IfcVector3 polyNormal = TempMesh::ComputePolygonNormal(srcVertices, srcVtxCount, true);
-			polyNormal = IfcMatrix3(proj) * polyNormal;
 
 			// if the poly is parallel to the plane, put it completely on the black or white side
 			if( std::abs(polyNormal * n) > 0.9999 )
 			{
-				bool isOnWhiteSide = ((proj * srcVertices[0]) - p) * n > -1e-6;
+				bool isOnWhiteSide = (srcVertices[0] - p) * n > -1e-6;
 				std::vector<IfcVector3>& targetSide = isOnWhiteSide ? whiteside : blackside;
 				targetSide.insert(targetSide.end(), srcVertices, srcVertices + srcVtxCount);
 			}
@@ -469,11 +468,11 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 				// otherwise start building one polygon for each side. Whenever the current line segment intersects the plane
 				// we put a point there as an end of the current segment. Then we switch to the other side, put a point there, too,
 				// as a beginning of the current segment, and simply continue accumulating vertices. 
-				bool isCurrentlyOnWhiteSide = ((proj * srcVertices[0]) - p) * n > -1e-6;
+				bool isCurrentlyOnWhiteSide = ((srcVertices[0]) - p) * n > -1e-6;
 				for( size_t a = 0; a < srcVtxCount; ++a )
 				{
-					IfcVector3 e0 = proj * srcVertices[a];
-					IfcVector3 e1 = proj * srcVertices[(a + 1) % srcVtxCount];
+					IfcVector3 e0 = srcVertices[a];
+					IfcVector3 e1 = srcVertices[(a + 1) % srcVtxCount];
 					IfcVector3 ei;
 
 					// put starting point to the current mesh
@@ -485,12 +484,11 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 					bool isPlaneHit = IntersectSegmentPlane(p, n, e0, e1, isCurrentlyOnWhiteSide, ei);
 					if( isPlaneHit )
 					{
-						IfcVector3 global_ei = proj_inv * ei;
-						if( trgt.empty() || (trgt.back() - global_ei).SquareLength() > 1e-12 )
-							trgt.push_back(global_ei);
+						if( trgt.empty() || (trgt.back() - ei).SquareLength() > 1e-12 )
+							trgt.push_back(ei);
 						isCurrentlyOnWhiteSide = !isCurrentlyOnWhiteSide;
 						std::vector<IfcVector3>& newtrgt = isCurrentlyOnWhiteSide ? whiteside : blackside;
-						newtrgt.push_back(global_ei);
+						newtrgt.push_back(ei);
 					}
 				}
 			}
@@ -648,6 +646,12 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 						// vertices of the current boundary segments
 						IfcVector3 currBoundaryPoint = profile->verts[currentBoundaryEdgeIdx];
 						IfcVector3 nextBoundaryPoint = profile->verts[nextBoundaryEdgeIdx];
+						// project the two onto the polygon
+						if( std::abs(polyNormal.z) > 1e-5 )
+						{
+							currBoundaryPoint.z = startingPoint.z + (currBoundaryPoint.x - startingPoint.x) * polyNormal.x/polyNormal.z + (currBoundaryPoint.y - startingPoint.y) * polyNormal.y/polyNormal.z;
+							nextBoundaryPoint.z = startingPoint.z + (nextBoundaryPoint.x - startingPoint.x) * polyNormal.x/polyNormal.z + (nextBoundaryPoint.y - startingPoint.y) * polyNormal.y/polyNormal.z;
+						}
 
 						// build a direction that goes along the boundary border but lies in the poly plane
 						IfcVector3 boundaryPlaneNormal = ((nextBoundaryPoint - currBoundaryPoint) ^ profileNormal).Normalize();
@@ -656,7 +660,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 						// until we finish that boundary segment and continue on the next 
 						if( std::abs(polyNormal.z) > 1e-5 )
 						{
-							t = std::min(t, (nextBoundaryPoint - startingPoint).Length() / std::abs(polyNormal.z));
+							t = std::min(t, (nextBoundaryPoint - startingPoint).Length());
 						}
 
 						// check if the direction hits the loop start - if yes, we got a poly to output

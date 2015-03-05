@@ -214,6 +214,10 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 			AI_SWAP2(ofs); 
 			P += 4;
 
+			if (P + ofs > End + 2) {
+				throw DeadlyImportError("X: Unexpected EOF in compressed chunk");
+			}
+
 			// push data to the stream
 			stream.next_in   = (Bytef*)P;
 			stream.avail_in  = ofs;
@@ -1428,7 +1432,7 @@ aiColor3D XFileParser::ReadRGB()
 
 // ------------------------------------------------------------------------------------------------
 // Throws an exception with a line number and the given text.
-void XFileParser::ThrowException( const std::string& pText)
+AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText)
 {
 	if( mIsBinaryFormat)
 		throw DeadlyImportError( pText);

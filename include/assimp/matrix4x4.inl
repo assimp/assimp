@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file aiMatrix4x4t<TReal>.inl
+/** @file matrix4x4.inl
  *  @brief Inline implementation of the 4x4 matrix operators
  */
 #ifndef AI_MATRIX4x4_INL_INC

@@ -452,7 +452,7 @@ void ColladaExporter::WriteMaterials()
 	  }
 	}
 
-	aiShadingMode shading;
+	aiShadingMode shading = aiShadingMode_Flat;
 	materials[a].shading_model = "phong";
 	if(mat->Get( AI_MATKEY_SHADING_MODEL, shading) == aiReturn_SUCCESS) {
 		if(shading == aiShadingMode_Phong) {

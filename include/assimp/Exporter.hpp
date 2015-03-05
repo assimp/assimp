@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  export.hpp
+/** @file  Exporter.hpp
 *  @brief Defines the CPP-API for the Assimp export interface
 */
 #ifndef AI_EXPORT_HPP_INC
@@ -181,7 +181,7 @@ public:
 	 *  about the output data flow of the export process.
 	 * @param pBlob A data blob obtained from a previous call to #aiExportScene. Must not be NULL.
 	 * @param pPath Full target file name. Target must be accessible.
-	 * @param pPreprocessing Accepts any choice of the #aiPostProcessing enumerated
+	 * @param pPreprocessing Accepts any choice of the #aiPostProcessSteps enumerated
 	 *   flags, but in reality only a subset of them makes sense here. Specifying
 	 *   'preprocessing' flags is useful if the input scene does not conform to 
 	 *   Assimp's default conventions as specified in the @link data Data Structures Page @endlink. 

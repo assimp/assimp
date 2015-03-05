@@ -68,13 +68,15 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// signal parse error, this is always unrecoverable. Throws DeadlyImportError.
-	void ParseError(const std::string& message, const Token& token)
+	AI_WONT_RETURN void ParseError(const std::string& message, const Token& token) AI_WONT_RETURN_SUFFIX;
+	AI_WONT_RETURN void ParseError(const std::string& message, const Token& token)
 	{
 		throw DeadlyImportError(Util::AddTokenText("FBX-Parser",message,&token));
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void ParseError(const std::string& message, const Element* element = NULL)
+	AI_WONT_RETURN void ParseError(const std::string& message, const Element* element = NULL) AI_WONT_RETURN_SUFFIX;
+	AI_WONT_RETURN void ParseError(const std::string& message, const Element* element)
 	{
 		if(element) {
 			ParseError(message,element->KeyToken());
@@ -549,7 +551,9 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
 		zstream.data_type = Z_BINARY;
 
 		// http://hewgill.com/journal/entries/349-how-to-decompress-gzip-stream-with-zlib
-		inflateInit(&zstream);
+		if(Z_OK != inflateInit(&zstream)) {
+			ParseError("failure initializing zlib");
+		}
 
 		zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
 		zstream.avail_in  = comp_len;

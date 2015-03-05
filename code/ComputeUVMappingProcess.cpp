@@ -454,7 +454,7 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
 						for (unsigned int m = 0; m < pScene->mNumMeshes;++m)
 						{
 							aiMesh* mesh = pScene->mMeshes[m];
-							unsigned int outIdx;
+							unsigned int outIdx = 0;
 							if ( mesh->mMaterialIndex != i || ( outIdx = FindEmptyUVChannel(mesh) ) == UINT_MAX ||
 								!mesh->mNumVertices)
 							{

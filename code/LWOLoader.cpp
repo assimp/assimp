@@ -344,7 +344,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 					// copy all vertices
 					for (unsigned int q = 0; q  < face.mNumIndices;++q,++vert)	{
-						register unsigned int idx = face.mIndices[q];
+						unsigned int idx = face.mIndices[q];
 						*pv++ = layer.mTempPoints[idx] /*- layer.mPivot*/;
 
 						// process UV coordinates
@@ -491,7 +491,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 		aiFace& face = *begin;
 		for (unsigned int i = 0; i < face.mNumIndices;++i)
 		{
-			register unsigned int tt = face.mIndices[i];
+			unsigned int tt = face.mIndices[i];
 			sSort.Add(mesh->mVertices[tt],tt,*it);
 		}
 	}
@@ -510,7 +510,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
 			for (; beginIdx != endIdx; ++beginIdx)
 			{
-				register unsigned int idx = *beginIdx;
+				unsigned int idx = *beginIdx;
 				sSort.FindPositions(mesh->mVertices[idx],*it,posEpsilon,poResult,true);
 				std::vector<unsigned int>::const_iterator a, end = poResult.end();
 
@@ -533,7 +533,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
 			for (; beginIdx != endIdx; ++beginIdx)
 			{
-				register unsigned int idx = *beginIdx;
+				unsigned int idx = *beginIdx;
 				if (vertexDone[idx])
 					continue;
 				sSort.FindPositions(mesh->mVertices[idx],*it,posEpsilon,poResult,true);
@@ -730,7 +730,12 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
 	// --- this function is used for both LWO2 and LWOB but for
 	// LWO2 we need to allocate 25% more storage - it could be we'll 
 	// need to duplicate some points later.
-	register unsigned int regularSize = (unsigned int)mCurLayer->mTempPoints.size() + length / 12;
+	const size_t vertexLen = 12;
+	if ((length % vertexLen) != 0)
+	{
+		throw DeadlyImportError( "LWO2: Points chunk length is not multiple of vertexLen (12)");
+	}
+	unsigned int regularSize = (unsigned int)mCurLayer->mTempPoints.size() + length / 12;
 	if (mIsLWO2)
 	{
 		mCurLayer->mTempPoints.reserve	( regularSize + (regularSize>>2u) );

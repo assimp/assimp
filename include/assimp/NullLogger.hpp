@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file  NullLogger.h
+/** @file  NullLogger.hpp
  *  @brief Dummy logger
 */
 

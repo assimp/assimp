@@ -148,6 +148,14 @@ SET( Common_SRCS
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
+IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
+	SET( C4D_SRCS
+		C4DImporter.cpp
+		C4DImporter.h
+	)
+	SOURCE_GROUP( C4D FILES ${C4D_SRCS})
+ENDIF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
+
 SET( 3DS_SRCS
 	3DSConverter.cpp
 	3DSHelper.h
@@ -205,7 +213,7 @@ SET( Collada_SRCS
 	ColladaParser.cpp
 	ColladaParser.h
 	ColladaExporter.h
-	ColladaExporter.cpp	
+	ColladaExporter.cpp
 )
 SOURCE_GROUP( Collada FILES ${Collada_SRCS})
 
@@ -332,7 +340,7 @@ SET( Obj_SRCS
 	ObjFileParser.cpp
 	ObjFileParser.h
 	ObjTools.h
-	
+
 	ObjExporter.h
 	ObjExporter.cpp
 )
@@ -596,14 +604,14 @@ SET( ConvertUTF_SRCS
 )
 SOURCE_GROUP( ConvertUTF FILES ${ConvertUTF_SRCS})
 
-SET( Clipper_SRCS 
+SET( Clipper_SRCS
 	../contrib/clipper/clipper.hpp
 	../contrib/clipper/clipper.cpp
 )
 SOURCE_GROUP( Clipper FILES ${Clipper_SRCS})
 
 
-SET( Poly2Tri_SRCS 
+SET( Poly2Tri_SRCS
 	../contrib/poly2tri/poly2tri/common/shapes.cc
 	../contrib/poly2tri/poly2tri/common/shapes.h
 	../contrib/poly2tri/poly2tri/common/utils.h
@@ -699,7 +707,7 @@ SET( assimp_src
 	${IFC_SRCS}
 	${XGL_SRCS}
 	${FBX_SRCS}
-	
+
 	# Third-party libraries
 	${IrrXML_SRCS}
 	${ConvertUTF_SRCS}
@@ -711,18 +719,21 @@ SET( assimp_src
 
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
-	
+
 	# Old precompiled header
 	# (removed because the precompiled header is not updated when visual studio switch configuration which leads to failed compilation.
 	# Moreover it's a drag to recompile assimp entirely each time a modification is made to one of the included header, which is definitely counter-productive.)
 	AssimpPCH.cpp
 )
 
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	SET( assimp_src ${assimp_src} ${C4D_SRCS})
+	INCLUDE_DIRECTORIES(${C4D_INCLUDES})
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+
 #ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
 
 ADD_LIBRARY( assimp ${assimp_src} )
-
-SET_PROPERTY(TARGET assimp PROPERTY DEBUG_POSTFIX ${ASSIMP_DEBUG_POSTFIX})
 
 TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
 
@@ -732,10 +743,36 @@ if(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
 	target_link_libraries(assimp android_jniiosystem)
 endif(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
 
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	TARGET_LINK_LIBRARIES(assimp optimized ${C4D_RELEASE_LIBRARY})
+	TARGET_LINK_LIBRARIES(assimp debug ${C4D_DEBUG_LIBRARY})
+	TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+
+if( MSVC )
+  # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
+  if( MSVC70 OR MSVC71 )
+    set(MSVC_PREFIX "vc70")
+  elseif( MSVC80 )
+    set(MSVC_PREFIX "vc80")
+  elseif( MSVC90 )
+    set(MSVC_PREFIX "vc90")
+  elseif( MSVC10 )
+    set(MSVC_PREFIX "vc100")
+  elseif( MSVC11 )
+    set(MSVC_PREFIX "vc110")
+  elseif( MSVC12 )
+    set(MSVC_PREFIX "vc120")
+  else()
+    set(MSVC_PREFIX "vc130")
+  endif()
+  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
+endif()
+
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${ASSIMP_VERSION}
-	SOVERSION ${ASSIMP_SOVERSION} # use full version 
-    OUTPUT_NAME assimp${ASSIMP_LIBRARY_SUFFIX}
+	SOVERSION ${ASSIMP_SOVERSION} # use full version
+    OUTPUT_NAME assimp${LIBRARY_SUFFIX}
 )
 
 if (APPLE)
@@ -765,7 +802,7 @@ if (ASSIMP_ANDROID_JNIIOSYSTEM)
 endif(ASSIMP_ANDROID_JNIIOSYSTEM)
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
-	install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${ASSIMP_DEBUG_POSTFIX}.pdb
+	install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${CMAKE_DEBUG_POSTFIX}.pdb
 		DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
 		CONFIGURATIONS Debug
 	)

@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 2.8 )
 PROJECT( Assimp )
 
 # Define here the needed parameters
@@ -47,6 +47,11 @@ set(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
 option(ASSIMP_ANDROID_JNIIOSYSTEM "Android JNI IOSystem support is active" OFF)
 
+# Workaround to be able to deal with compiler bug "Too many sections" with mingw.
+if( CMAKE_COMPILER_IS_MINGW )
+    ADD_DEFINITIONS(-DASSIMP_BUILD_NO_IFC_IMPORTER )
+endif()
+
 if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
     add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
     # hide all not-exported symbols
@@ -54,7 +59,7 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_
 elseif(MSVC)
     # enable multi-core compilation with MSVC
     add_definitions(/MP)
-    endif()
+endif()
 
 INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )
@@ -79,7 +84,7 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
     "Path the tool executables are installed to." )
 
-SET(ASSIMP_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
+SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
 
 # Allow the user to build a shared or static library
 option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )
@@ -103,7 +108,7 @@ IF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
     MESSAGE( STATUS "Building a non-boost version of Assimp." )
 ELSE ( ASSIMP_ENABLE_BOOST_WORKAROUND )
     SET( Boost_DETAILED_FAILURE_MSG ON )
-    SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" )	
+    SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" )
     FIND_PACKAGE( Boost )
     IF ( NOT Boost_FOUND )
         MESSAGE( FATAL_ERROR
@@ -159,7 +164,7 @@ IF ( ASSIMP_NO_EXPORT )
     MESSAGE( STATUS "Build an import-only version of Assimp." )
 ENDIF( ASSIMP_NO_EXPORT )
 
-SET ( ASSIMP_BUILD_ARCHITECTURE "" CACHE STRING 
+SET ( ASSIMP_BUILD_ARCHITECTURE "" CACHE STRING
     "describe the current architecture."
 )
 IF    ( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
@@ -168,7 +173,7 @@ ELSE  ( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
 ENDIF ( ASSIMP_BUILD_ARCHITECTURE STREQUAL "")
 
 # ${CMAKE_GENERATOR}
-SET ( ASSIMP_BUILD_COMPILER "" CACHE STRING 
+SET ( ASSIMP_BUILD_COMPILER "" CACHE STRING
     "describe the current compiler."
 )
 IF    ( ASSIMP_BUILD_COMPILER STREQUAL "")
@@ -177,6 +182,52 @@ ELSE  ( ASSIMP_BUILD_COMPILER STREQUAL "")
 ENDIF ( ASSIMP_BUILD_COMPILER STREQUAL "")
 
 MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
+
+
+SET ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL
+	"Build the C4D importer, which relies on the non-free Melange SDK." 
+)
+
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	IF ( MSVC )
+		SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/_melange/includes")
+		
+		# pick the correct prebuilt library
+		IF(MSVC11)
+			SET(C4D_LIB_POSTFIX "_2012md")
+		ELSEIF(MSVC10)
+			SET(C4D_LIB_POSTFIX "_2010md")
+		ELSEIF(MSVC90)
+			SET(C4D_LIB_POSTFIX "_2008md")
+		ELSE()
+			MESSAGE( FATAL_ERROR 
+				"C4D is currently only supported with MSVC 9, 10, 11"
+			)
+		ENDIF()
+		
+		IF(CMAKE_CL_64)
+			SET(C4D_LIB_ARCH_POSTFIX "_x64")
+		ELSE()
+			SET(C4D_LIB_ARCH_POSTFIX "")
+		ENDIF()
+		
+		SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/_melange/lib/WIN")
+		
+		SET(C4D_DEBUG_LIBRARY "${C4D_LIB_BASE_PATH}/debug/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
+		SET(C4D_RELEASE_LIBRARY "${C4D_LIB_BASE_PATH}/release/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
+		
+		# winsock and winmm are necessary dependencies of melange (this is undocumented, but true.)
+		SET(C4D_EXTRA_LIBRARIES WSock32.lib Winmm.lib)
+	ELSE ()
+		MESSAGE( FATAL_ERROR 
+			"C4D is currently only available on Windows with melange SDK installed in contrib/Melange"
+		)
+	ENDIF ( MSVC )
+else (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+
+
 
 ADD_SUBDIRECTORY( code/ )
 option ( ASSIMP_BUILD_ASSIMP_TOOLS
@@ -206,7 +257,7 @@ option ( ASSIMP_BUILD_TESTS
     "If the test suite for Assimp is built in addition to the library."
     ON
 )
-    
+
 IF ( ASSIMP_BUILD_TESTS )
     ADD_SUBDIRECTORY( test/ )
 ENDIF ( ASSIMP_BUILD_TESTS )

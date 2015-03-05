@@ -54,7 +54,8 @@ namespace Assimp
 namespace Ogre
 {
 
-void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error = "")
+AI_WONT_RETURN void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
+AI_WONT_RETURN void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error)
 {
 	if (!error.empty())
 	{

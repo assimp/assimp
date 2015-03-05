@@ -396,7 +396,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 			}
 			for (unsigned int q = 0, base = 0; q < aiSplit[p].size();++q)
 			{
-				register unsigned int index = aiSplit[p][q];
+				unsigned int index = aiSplit[p][q];
 				aiFace& face = meshOut->mFaces[q];
 
 				face.mIndices = new unsigned int[3];

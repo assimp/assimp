@@ -289,7 +289,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 
 				for (unsigned int q = 0; q < in.mNumIndices; ++q)
 				{
-					register unsigned int idx = in.mIndices[q];
+					unsigned int idx = in.mIndices[q];
 
 					// process all bones of this index
 					if (avw)

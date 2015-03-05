@@ -314,7 +314,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				if (!tex->mWidth || !tex->mHeight)
 					throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
 
-				register unsigned int mul = tex->mWidth * tex->mHeight;
+				unsigned int mul = tex->mWidth * tex->mHeight;
 				aiTexel* begin = tex->pcData = new aiTexel[mul];
 				aiTexel* const end = & begin [mul];
 

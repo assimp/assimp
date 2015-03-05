@@ -1256,8 +1256,11 @@ private:
 				// taking notes so we don't need to do it twice.
 				BOOST_FOREACH(WeightIndexArray::value_type index, indices) {
 
-					unsigned int count;
+					unsigned int count = 0;
 					const unsigned int* const out_idx = geo.ToOutputVertexIndex(index, count);
+					// ToOutputVertexIndex only returns NULL if index is out of bounds
+					// which should never happen
+					ai_assert(out_idx != NULL);
 
 					index_out_indices.push_back(no_index_sentinel);
 					count_out_indices.push_back(0);

@@ -290,6 +290,8 @@ void CatmullClarkSubdivider::InternSubdivide (
 		}
 	}
 	
+	{
+	// we want edges to go away before the recursive calls so begin a new scope
 	EdgeMap edges;
 
 	// ---------------------------------------------------------------------
@@ -572,6 +574,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 			}
 		}
 	}
+	}  // end of scope for edges, freeing its memory
 
 	// ---------------------------------------------------------------------
 	// 7. Apply the next subdivision step. 

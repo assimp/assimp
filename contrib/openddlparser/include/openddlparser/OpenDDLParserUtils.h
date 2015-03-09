@@ -198,6 +198,20 @@ bool isHexLiteral( T *in, T *end ) {
 
 template<class T>
 inline
+bool isReference( T *in, T *end ) {
+    if( *in == 'r' ) {
+        if( *(in+1) == 'e' ) {
+            if( *(in+2) == 'f' ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+template<class T>
+inline
 bool isEndofLine( const T in ) {
     return ( '\n' == in );
 }

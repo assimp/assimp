@@ -61,6 +61,8 @@ public:
     Value *getValue() const;
     void setDataArrayList( DataArrayList  *dtArrayList );
     DataArrayList *getDataArrayList() const;
+    void setReferences( Reference  *refs );
+    Reference *getReferences() const;
     static DDLNode *create( const std::string &type, const std::string &name, DDLNode *parent = ddl_nullptr );
 
 private:
@@ -78,6 +80,7 @@ private:
     Property *m_properties;
     Value *m_value;
     DataArrayList *m_dtArrayList;
+    Reference *m_references;
     size_t m_idx;
     static DllNodeList s_allocatedNodes;
 };

@@ -77,6 +77,7 @@ public:
     char *parseNextNode( char *current, char *end );
     char *parseHeader( char *in, char *end );
     char *parseStructure( char *in, char *end );
+    char *parseStructureBody( char *in, char *end, bool &error );
     void pushNode( DDLNode *node );
     DDLNode *popNode();
     DDLNode *top();
@@ -95,7 +96,7 @@ public: // static parser helpers
     static char *parseStringLiteral( char *in, char *end, Value **stringData );
     static char *parseHexaLiteral( char *in, char *end, Value **data );
     static char *parseProperty( char *in, char *end, Property **prop );
-    static char *parseDataList( char *in, char *end, Value **data );
+    static char *parseDataList( char *in, char *end, Value **data, Reference **refs );
     static char *parseDataArrayList( char *in, char *end, DataArrayList **dataList );
     static const char *getVersion();
 

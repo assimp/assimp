@@ -52,7 +52,8 @@ DDLNode::DDLNode( const std::string &type, const std::string &name, size_t idx, 
 , m_properties( ddl_nullptr )
 , m_value( ddl_nullptr )
 , m_idx( idx )
-, m_dtArrayList( ddl_nullptr ) {
+, m_dtArrayList( ddl_nullptr )
+, m_references( ddl_nullptr ) {
     if( m_parent ) {
         m_parent->m_children.push_back( this );
     }
@@ -138,6 +139,14 @@ void DDLNode::setDataArrayList( DataArrayList  *dtArrayList ) {
 
 DataArrayList *DDLNode::getDataArrayList() const {
     return m_dtArrayList;
+}
+
+void DDLNode::setReferences( Reference *refs ) {
+    m_references = refs;
+}
+
+Reference *DDLNode::getReferences() const {
+    return m_references;
 }
 
 DDLNode *DDLNode::create( const std::string &type, const std::string &name, DDLNode *parent ) {

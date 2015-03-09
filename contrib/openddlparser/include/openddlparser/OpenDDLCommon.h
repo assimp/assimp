@@ -88,9 +88,15 @@ struct Reference {
     size_t m_numRefs;
     Name **m_referencedName;
 
+    Reference()
+    : m_numRefs( 0 )
+    , m_referencedName( ddl_nullptr ) {
+        // empty
+    }
+     
     Reference( size_t numrefs, Name **names )
-        : m_numRefs( numrefs )
-        , m_referencedName( names ) {
+    : m_numRefs( numrefs )
+    , m_referencedName( names ) {
         // empty
     }
 };

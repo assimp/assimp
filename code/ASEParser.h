@@ -602,7 +602,7 @@ private:
 	// -------------------------------------------------------------------
 	//! Output an error to the logger
 	//! \param szWarn Error message
-	void LogError(const char* szWarn);
+	AI_WONT_RETURN void LogError(const char* szWarn) AI_WONT_RETURN_SUFFIX;
 
 	// -------------------------------------------------------------------
 	//! Parse a string, enclosed in double quotation marks

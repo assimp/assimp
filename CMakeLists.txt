@@ -183,6 +183,52 @@ ENDIF ( ASSIMP_BUILD_COMPILER STREQUAL "")
 
 MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
 
+
+SET ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL
+	"Build the C4D importer, which relies on the non-free Melange SDK." 
+)
+
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	IF ( MSVC )
+		SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/_melange/includes")
+		
+		# pick the correct prebuilt library
+		IF(MSVC11)
+			SET(C4D_LIB_POSTFIX "_2012md")
+		ELSEIF(MSVC10)
+			SET(C4D_LIB_POSTFIX "_2010md")
+		ELSEIF(MSVC90)
+			SET(C4D_LIB_POSTFIX "_2008md")
+		ELSE()
+			MESSAGE( FATAL_ERROR 
+				"C4D is currently only supported with MSVC 9, 10, 11"
+			)
+		ENDIF()
+		
+		IF(CMAKE_CL_64)
+			SET(C4D_LIB_ARCH_POSTFIX "_x64")
+		ELSE()
+			SET(C4D_LIB_ARCH_POSTFIX "")
+		ENDIF()
+		
+		SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/_melange/lib/WIN")
+		
+		SET(C4D_DEBUG_LIBRARY "${C4D_LIB_BASE_PATH}/debug/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
+		SET(C4D_RELEASE_LIBRARY "${C4D_LIB_BASE_PATH}/release/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
+		
+		# winsock and winmm are necessary dependencies of melange (this is undocumented, but true.)
+		SET(C4D_EXTRA_LIBRARIES WSock32.lib Winmm.lib)
+	ELSE ()
+		MESSAGE( FATAL_ERROR 
+			"C4D is currently only available on Windows with melange SDK installed in contrib/Melange"
+		)
+	ENDIF ( MSVC )
+else (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+
+
+
 ADD_SUBDIRECTORY( code/ )
 option ( ASSIMP_BUILD_ASSIMP_TOOLS
     "If the supplementary tools for Assimp are built in addition to the library."

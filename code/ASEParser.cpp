@@ -168,7 +168,7 @@ void Parser::LogInfo(const char* szWarn)
 }
 
 // ------------------------------------------------------------------------------------------------
-void Parser::LogError(const char* szWarn)
+AI_WONT_RETURN void Parser::LogError(const char* szWarn)
 {
 	ai_assert(NULL != szWarn);
 

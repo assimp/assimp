@@ -60,7 +60,7 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
 {
 	mRootNode = NULL;
 	mUnitSize = 1.0f;
-	mUpDirection = UP_Z;
+	mUpDirection = UP_Y;
 
 	// We assume the newest file format by default
 	mFormat = FV_1_5_n;
@@ -225,10 +225,10 @@ void ColladaParser::ReadAssetInfo()
 				const char* content = GetTextContent();
 				if( strncmp( content, "X_UP", 4) == 0)
 					mUpDirection = UP_X;
-				else if( strncmp( content, "Y_UP", 4) == 0)
-					mUpDirection = UP_Y;
-				else
+				else if( strncmp( content, "Z_UP", 4) == 0)
 					mUpDirection = UP_Z;
+				else
+					mUpDirection = UP_Y;
 
 				// check element end
 				TestClosing( "up_axis");
@@ -817,6 +817,7 @@ void ColladaParser::ReadMaterialLibrary()
 	if( mReader->isEmptyElement())
 		return;
 
+	std::map<std::string, int> names;
 	while( mReader->read())
 	{
 		if( mReader->getNodeType() == irr::io::EXN_ELEMENT) 
@@ -827,8 +828,32 @@ void ColladaParser::ReadMaterialLibrary()
 				int attrID = GetAttribute( "id");
 				std::string id = mReader->getAttributeValue( attrID);
 
+				std::string name;
+				int attrName = TestAttribute("name");
+				if (attrName >= 0)
+					name = mReader->getAttributeValue( attrName);
+
 				// create an entry and store it in the library under its ID
-				ReadMaterial(mMaterialLibrary[id] = Material());
+				mMaterialLibrary[id] = Material();
+
+				if( !name.empty())
+				{
+					std::map<std::string, int>::iterator it = names.find( name);
+					if( it != names.end())
+					{
+						std::ostringstream strStream;
+						strStream << ++it->second;
+						name.append( " " + strStream.str());
+					}
+					else
+					{
+						names[name] = 0;
+					}
+
+					mMaterialLibrary[id].mName = name;
+				}
+
+				ReadMaterial( mMaterialLibrary[id]);
 			} else
 			{
 				// ignore the rest
@@ -1393,6 +1418,9 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
 				if( attrTex >= 0 )
 	  				pSampler.mUVChannel = mReader->getAttributeValue( attrTex);
 				//SkipElement();
+
+				// as we've read texture, the color needs to be 1,1,1,1
+				pColor = aiColor4D(1.f, 1.f, 1.f, 1.f);
 			}
 			else if( IsElement( "technique"))
 			{
@@ -1944,6 +1972,10 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 					// now here the actual fun starts - these are the indices to construct the mesh data from
 					actualPrimitives += ReadPrimitives(pMesh, perIndexData, numPrimitives, vcount, primType);
 				}
+			}
+			else if (IsElement("extra"))
+			{
+				SkipElement("extra");
 			} else
 			{
 				ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <%s>") % mReader->getNodeName() % elementName));
@@ -2667,7 +2699,7 @@ void ColladaParser::ReadScene()
 
 // ------------------------------------------------------------------------------------------------
 // Aborts the file reading with an exception
-void ColladaParser::ThrowException( const std::string& pError) const
+AI_WONT_RETURN void ColladaParser::ThrowException( const std::string& pError) const
 {
 	throw DeadlyImportError( boost::str( boost::format( "Collada: %s - %s") % mFileName % pError));
 }

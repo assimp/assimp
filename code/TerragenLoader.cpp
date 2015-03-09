@@ -225,7 +225,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 
 					// make verts
 					const float fy = (float)yy, fx = (float)xx;
-					register unsigned tmp,tmp2;
+					unsigned tmp,tmp2;
 					*pv++ = aiVector3D(fx,fy,    (float)data[(tmp2=x*yy)    + xx] * hscale + bheight);
 					*pv++ = aiVector3D(fx,fy+1,  (float)data[(tmp=x*(yy+1)) + xx] * hscale + bheight);
 					*pv++ = aiVector3D(fx+1,fy+1,(float)data[tmp  + xx+1]         * hscale + bheight);

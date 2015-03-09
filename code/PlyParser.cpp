@@ -794,7 +794,7 @@ bool PLY::PropertyInstance::ParseValue(
 {
 	ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
 
-	register bool ret = true;
+	bool ret = true;
 	*pCurOut = pCur;
 	switch (eType)
 	{
@@ -841,7 +841,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 {
 	ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
 
-	register bool ret = true;
+	bool ret = true;
 	switch (eType)
 	{
 	case EDT_UInt:

@@ -84,7 +84,7 @@ inline void ArrayDelete(T**& in, unsigned int& num)
 // "don't remove" flag not set. Nodes with meshes are never deleted.
 bool UpdateNodeGraph(aiNode* node,std::list<aiNode*>& childsOfParent,bool root)
 {
-	register bool b = false;
+	bool b = false;
 
 	std::list<aiNode*> mine;
 	for (unsigned int i = 0; i < node->mNumChildren;++i)
@@ -271,7 +271,7 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
 	}
 
 	// handle texture coordinates
-	register bool b = (0 != (configDeleteFlags & aiComponent_TEXCOORDS));
+	bool b = (0 != (configDeleteFlags & aiComponent_TEXCOORDS));
 	for (unsigned int i = 0, real = 0; real < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++real)
 	{
 		if (!pMesh->mTextureCoords[i])break;

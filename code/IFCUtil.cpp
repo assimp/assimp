@@ -149,7 +149,7 @@ void TempMesh::RemoveDegenerates()
 	for (std::vector<unsigned int>::iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
 		const unsigned int pcount = *it;
 		
-		if (normals[inor].SquareLength() < 1e-5f) {
+		if (normals[inor].SquareLength() < 1e-10f) {
 			it = vertcnt.erase(it);
 			vit = verts.erase(vit, vit + pcount);
 
@@ -164,6 +164,23 @@ void TempMesh::RemoveDegenerates()
 	if(drop) {
 		IFCImporter::LogDebug("removing degenerate faces");
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+IfcVector3 TempMesh::ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bool normalize)
+{
+	std::vector<IfcFloat> temp((cnt+2)*3);
+	for( size_t vofs = 0, i = 0; vofs < cnt; ++vofs )
+	{
+		const IfcVector3& v = vtcs[vofs];
+		temp[i++] = v.x;
+		temp[i++] = v.y;
+		temp[i++] = v.z;
+	}
+
+	IfcVector3 nor;
+	NewellNormal<3, 3, 3>(nor, cnt, &temp[0], &temp[1], &temp[2]);
+	return normalize ? nor.Normalize() : nor;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -214,37 +231,148 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
 // Compute the normal of the last polygon in the given mesh
 IfcVector3 TempMesh::ComputeLastPolygonNormal(bool normalize) const
 {
-	size_t total = vertcnt.back(), vidx = verts.size() - total;
-	std::vector<IfcFloat> temp((total+2)*3);
-	for(size_t vofs = 0, cnt = 0; vofs < total; ++vofs) {
-		const IfcVector3& v = verts[vidx+vofs];
-		temp[cnt++] = v.x;
-		temp[cnt++] = v.y;
-		temp[cnt++] = v.z;
-	}
-	IfcVector3 nor;
-	NewellNormal<3,3,3>(nor,total,&temp[0],&temp[1],&temp[2]);
-	return normalize ? nor.Normalize() : nor;
+	return ComputePolygonNormal(&verts[verts.size() - vertcnt.back()], vertcnt.back(), normalize);
 }
+
+struct CompareVector
+{
+	bool operator () (const IfcVector3& a, const IfcVector3& b)
+	{
+		IfcVector3 d = a - b;
+		IfcFloat eps = 1e-6;
+		return d.x < -eps || (std::abs(d.x) < eps && d.y < -eps) || (std::abs(d.x) < eps && std::abs(d.y) < eps && d.z < -eps);
+	}
+};
+struct FindVector
+{
+	IfcVector3 v;
+	FindVector(const IfcVector3& p) : v(p) { }
+	bool operator () (const IfcVector3& p) { return FuzzyVectorCompare(1e-6)(p, v); }
+};
 
 // ------------------------------------------------------------------------------------------------
 void TempMesh::FixupFaceOrientation()
 {
 	const IfcVector3 vavg = Center();
 
-	std::vector<IfcVector3> normals;
-	ComputePolygonNormals(normals);
+	// create a list of start indices for all faces to allow random access to faces
+	std::vector<size_t> faceStartIndices(vertcnt.size());
+	for( size_t i = 0, a = 0; a < vertcnt.size(); i += vertcnt[a], ++a )
+		faceStartIndices[a] = i;
 
-	size_t c = 0, ofs = 0;
-	BOOST_FOREACH(unsigned int cnt, vertcnt) {
-		if (cnt>2){
-			const IfcVector3& thisvert = verts[c];
-			if (normals[ofs]*(thisvert-vavg) < 0) {
-				std::reverse(verts.begin()+c,verts.begin()+cnt+c);
+	// list all faces on a vertex
+	std::map<IfcVector3, std::vector<size_t>, CompareVector> facesByVertex;
+	for( size_t a = 0; a < vertcnt.size(); ++a )
+	{
+		for( size_t b = 0; b < vertcnt[a]; ++b )
+			facesByVertex[verts[faceStartIndices[a] + b]].push_back(a);
+	}
+	// determine neighbourhood for all polys
+	std::vector<size_t> neighbour(verts.size(), SIZE_MAX);
+	std::vector<size_t> tempIntersect(10);
+	for( size_t a = 0; a < vertcnt.size(); ++a )
+	{
+		for( size_t b = 0; b < vertcnt[a]; ++b )
+		{
+			size_t ib = faceStartIndices[a] + b, nib = faceStartIndices[a] + (b + 1) % vertcnt[a];
+			const std::vector<size_t>& facesOnB = facesByVertex[verts[ib]];
+			const std::vector<size_t>& facesOnNB = facesByVertex[verts[nib]];
+			// there should be exactly one or two faces which appear in both lists. Our face and the other side
+			std::vector<size_t>::iterator sectstart = tempIntersect.begin();
+			std::vector<size_t>::iterator sectend = std::set_intersection(
+				facesOnB.begin(), facesOnB.end(), facesOnNB.begin(), facesOnNB.end(), sectstart);
+
+			if( std::distance(sectstart, sectend) != 2 )
+				continue;
+			if( *sectstart == a )
+				++sectstart;
+			neighbour[ib] = *sectstart;
+		}
+	}
+
+	// now we're getting started. We take the face which is the farthest away from the center. This face is most probably
+	// facing outwards. So we reverse this face to point outwards in relation to the center. Then we adapt neighbouring 
+	// faces to have the same winding until all faces have been tested.
+	std::vector<bool> faceDone(vertcnt.size(), false);
+	while( std::count(faceDone.begin(), faceDone.end(), false) != 0 )
+	{
+		// find the farthest of the remaining faces
+		size_t farthestIndex = SIZE_MAX;
+		IfcFloat farthestDistance = -1.0;
+		for( size_t a = 0; a < vertcnt.size(); ++a )
+		{
+			if( faceDone[a] )
+				continue;
+			IfcVector3 faceCenter = std::accumulate(verts.begin() + faceStartIndices[a],
+				verts.begin() + faceStartIndices[a] + vertcnt[a], IfcVector3(0.0)) / IfcFloat(vertcnt[a]);
+			IfcFloat dst = (faceCenter - vavg).SquareLength();
+			if( dst > farthestDistance ) { farthestDistance = dst; farthestIndex = a; }
+		}
+
+		// calculate its normal and reverse the poly if its facing towards the mesh center
+		IfcVector3 farthestNormal = ComputePolygonNormal(verts.data() + faceStartIndices[farthestIndex], vertcnt[farthestIndex]);
+		IfcVector3 farthestCenter = std::accumulate(verts.begin() + faceStartIndices[farthestIndex],
+			verts.begin() + faceStartIndices[farthestIndex] + vertcnt[farthestIndex], IfcVector3(0.0))
+			/ IfcFloat(vertcnt[farthestIndex]);
+		// We accapt a bit of negative orientation without reversing. In case of doubt, prefer the orientation given in 
+		// the file.
+		if( (farthestNormal * (farthestCenter - vavg).Normalize()) < -0.4 )
+		{
+			size_t fsi = faceStartIndices[farthestIndex], fvc = vertcnt[farthestIndex];
+			std::reverse(verts.begin() + fsi, verts.begin() + fsi + fvc);
+			std::reverse(neighbour.begin() + fsi, neighbour.begin() + fsi + fvc);
+			// because of the neighbour index belonging to the edge starting with the point at the same index, we need to 
+			// cycle the neighbours through to match the edges again.
+			// Before: points A - B - C - D with edge neighbour p - q - r - s
+			// After: points D - C - B - A, reversed neighbours are s - r - q - p, but the should be
+			//                r   q   p   s
+			for( size_t a = 0; a < fvc - 1; ++a )
+				std::swap(neighbour[fsi + a], neighbour[fsi + a + 1]);
+		}
+		faceDone[farthestIndex] = true;
+		std::vector<size_t> todo;
+		todo.push_back(farthestIndex);
+
+		// go over its neighbour faces recursively and adapt their winding order to match the farthest face 
+		while( !todo.empty() )
+		{
+			size_t tdf = todo.back();
+			size_t vsi = faceStartIndices[tdf], vc = vertcnt[tdf];
+			todo.pop_back();
+
+			// check its neighbours
+			for( size_t a = 0; a < vc; ++a )
+			{
+				// ignore neighbours if we already checked them
+				size_t nbi = neighbour[vsi + a];
+				if( nbi == SIZE_MAX || faceDone[nbi] )
+					continue;
+
+				const IfcVector3& vp = verts[vsi + a];
+				size_t nbvsi = faceStartIndices[nbi], nbvc = vertcnt[nbi];
+				std::vector<IfcVector3>::iterator it = std::find_if(verts.begin() + nbvsi, verts.begin() + nbvsi + nbvc, FindVector(vp));
+				ai_assert(it != verts.begin() + nbvsi + nbvc);
+				size_t nb_vidx = std::distance(verts.begin() + nbvsi, it);
+				// two faces winded in the same direction should have a crossed edge, where one face has p0->p1 and the other
+				// has p1'->p0'. If the next point on the neighbouring face is also the next on the current face, we need 
+				// to reverse the neighbour
+				nb_vidx = (nb_vidx + 1) % nbvc;
+				size_t oursideidx = (a + 1) % vc;
+				if( FuzzyVectorCompare(1e-6)(verts[vsi + oursideidx], verts[nbvsi + nb_vidx]) )
+				{
+					std::reverse(verts.begin() + nbvsi, verts.begin() + nbvsi + nbvc);
+					std::reverse(neighbour.begin() + nbvsi, neighbour.begin() + nbvsi + nbvc);
+					for( size_t a = 0; a < nbvc - 1; ++a )
+						std::swap(neighbour[nbvsi + a], neighbour[nbvsi + a + 1]);
+				}
+
+				// either way we're done with the neighbour. Mark it as done and continue checking from there recursively
+				faceDone[nbi] = true;
+				todo.push_back(nbi);
 			}
 		}
-		c += cnt;
-		++ofs;
+
+		// no more faces reachable from this part of the surface, start over with a disjunct part and its farthest face
 	}
 }
 

@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
 #include <iterator>
+#include <limits>
 #include <boost/tuple/tuple.hpp>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
@@ -428,7 +429,7 @@ void GetAbsTransform(aiMatrix4x4& out, const aiNode* nd, ConversionData& conv)
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, ConversionData& conv)
+bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, unsigned int matid, ConversionData& conv)
 {
 	// insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
 	std::auto_ptr<aiNode> nd(new aiNode());
@@ -453,11 +454,12 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 		}
 	}
 
+	unsigned int localmatid = ProcessMaterials(mapped.GetID(),matid,conv,false);
 	const IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
 
 	bool got = false;
 	BOOST_FOREACH(const IfcRepresentationItem& item, repr.Items) {
-		if(!ProcessRepresentationItem(item,meshes,conv)) {
+		if(!ProcessRepresentationItem(item,localmatid,meshes,conv)) {
 			IFCImporter::LogWarn("skipping mapped entity of type " + item.GetClassName() + ", no representations could be generated");
 		}
 		else got = true;
@@ -557,7 +559,11 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 	if(!el.Representation) {
 		return;
 	}
+
+	// extract Color from metadata, if present
+	unsigned int matid = ProcessMaterials( el.GetID(), std::numeric_limits<uint32_t>::max(), conv, false);
 	std::vector<unsigned int> meshes;
+
 	// we want only one representation type, so bring them in a suitable order (i.e try those
 	// that look as if we could read them quickly at first). This way of reading
 	// representation is relatively generic and allows the concrete implementations
@@ -571,10 +577,10 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 		bool res = false;
 		BOOST_FOREACH(const IfcRepresentationItem& item, repr->Items) {
 			if(const IfcMappedItem* const geo = item.ToPtr<IfcMappedItem>()) {
-				res = ProcessMappedItem(*geo,nd,subnodes,conv) || res;
+				res = ProcessMappedItem(*geo,nd,subnodes,matid,conv) || res;
 			}
 			else {
-				res = ProcessRepresentationItem(item,meshes,conv) || res;
+				res = ProcessRepresentationItem(item,matid,meshes,conv) || res;
 			}
 		}
 		// if we got something meaningful at this point, skip any further representations

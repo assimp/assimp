@@ -88,7 +88,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 
 // ------------------------------------------------------------------------------------------------
 // Report error to the log stream
-/*static*/ void MD5Parser::ReportError (const char* error, unsigned int line)
+/*static*/ AI_WONT_RETURN void MD5Parser::ReportError (const char* error, unsigned int line)
 {
 	char szBuffer[1024];
 	::sprintf(szBuffer,"[MD5] Line %i: %s",line,error);

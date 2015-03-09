@@ -177,7 +177,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 				 0,  0,  1,  0,
 				 0, -1,  0,  0,
 				 0,  0,  0,  1);
-        }
+		}
 	// store all meshes
 	StoreSceneMeshes( pScene);
 
@@ -1394,7 +1394,7 @@ void ColladaLoader::BuildMaterials( ColladaParser& pParser, aiScene* /*pScene*/)
 
 		// create material
 		aiMaterial* mat = new aiMaterial;
-		aiString name( matIt->first);
+		aiString name( material.mName.empty() ? matIt->first : material.mName );
 		mat->AddProperty(&name,AI_MATKEY_NAME);
 
 		// store the material

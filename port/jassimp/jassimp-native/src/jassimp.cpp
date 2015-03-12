@@ -15,20 +15,6 @@
 #define lprintf
 #endif
 
-
-static void dumpRefTable(JNIEnv *env){
-	/* DEBUG STUFF */
-			jclass clazz = env->FindClass("dalvik/system/VMDebug");
-			jmethodID dump_mid = env->GetStaticMethodID( clazz, "dumpReferenceTables", "()V" );
-			env->CallStaticVoidMethod( clazz, dump_mid );
-			env->DeleteLocalRef(clazz);
-
-			/*jint res = env->EnsureLocalCapacity(20);
-			if(res < 0){
-				lprintf("too many meshes on the model!\n");
-			}*/
-}
-
 static bool createInstance(JNIEnv *env, const char* className, jobject& newInstance)
 {
 	jclass clazz = env->FindClass(className);

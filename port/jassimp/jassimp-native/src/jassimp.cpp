@@ -5,11 +5,29 @@
 
 
 #ifdef JNI_LOG
+#ifdef ANDROID
+#include <android/log.h>
+#define lprintf(...) __android_log_print(ANDROID_LOG_VERBOSE, __func__, __VA_ARGS__)
+#else
 #define lprintf(...) printf (__VA_ARGS__)
+#endif /* ANDROID */
 #else
 #define lprintf
 #endif
 
+
+static void dumpRefTable(JNIEnv *env){
+	/* DEBUG STUFF */
+			jclass clazz = env->FindClass("dalvik/system/VMDebug");
+			jmethodID dump_mid = env->GetStaticMethodID( clazz, "dumpReferenceTables", "()V" );
+			env->CallStaticVoidMethod( clazz, dump_mid );
+			env->DeleteLocalRef(clazz);
+
+			/*jint res = env->EnsureLocalCapacity(20);
+			if(res < 0){
+				lprintf("too many meshes on the model!\n");
+			}*/
+}
 
 static bool createInstance(JNIEnv *env, const char* className, jobject& newInstance)
 {
@@ -30,6 +48,7 @@ static bool createInstance(JNIEnv *env, const char* className, jobject& newInsta
 	}
 
 	newInstance = env->NewObject(clazz, ctr_id);
+	env->DeleteLocalRef(clazz);
 
 	if (NULL == newInstance) 
 	{
@@ -41,7 +60,7 @@ static bool createInstance(JNIEnv *env, const char* className, jobject& newInsta
 }
 
 
-static bool createInstance(JNIEnv *env, const char* className, const char* signature, const jvalue* params, jobject& newInstance)
+static bool createInstance(JNIEnv *env, const char* className, const char* signature,/* const*/ jvalue* params, jobject& newInstance)
 {
 	jclass clazz = env->FindClass(className);
 
@@ -60,6 +79,7 @@ static bool createInstance(JNIEnv *env, const char* className, const char* signa
 	}
 
 	newInstance = env->NewObjectA(clazz, ctr_id, params);
+	env->DeleteLocalRef(clazz);
 
 	if (NULL == newInstance) 
 	{
@@ -82,6 +102,7 @@ static bool getField(JNIEnv *env, jobject object, const char* fieldName, const c
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, signature);
+	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -106,6 +127,7 @@ static bool setIntField(JNIEnv *env, jobject object, const char* fieldName, jint
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, "I");
+	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -130,6 +152,7 @@ static bool setFloatField(JNIEnv *env, jobject object, const char* fieldName, jf
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, "F");
+	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -154,6 +177,7 @@ static bool setObjectField(JNIEnv *env, jobject object, const char* fieldName, c
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, signature);
+	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -192,7 +216,7 @@ static bool getStaticField(JNIEnv *env, const char* className, const char* field
 
 
 static bool call(JNIEnv *env, jobject object, const char* typeName, const char* methodName, 
-	const char* signature, const jvalue* params)
+	const char* signature,/* const*/ jvalue* params)
 {
 	jclass clazz = env->FindClass(typeName);
 
@@ -203,9 +227,31 @@ static bool call(JNIEnv *env, jobject object, const char* typeName, const char* 
 	}
 
 	jmethodID mid = env->GetMethodID(clazz, methodName, signature);
+	env->DeleteLocalRef(clazz);
 
 	if (NULL == mid)
 	{
+		lprintf("could not find method %s with signature %s in type %s\n", methodName, signature, typeName);
+		return false;
+	}
+
+	jboolean jReturnValue = env->CallBooleanMethod(object, mid, params[0].l);
+
+	return (bool)jReturnValue;
+}
+static bool callv(JNIEnv *env, jobject object, const char* typeName,
+		const char* methodName, const char* signature,/* const*/ jvalue* params) {
+	jclass clazz = env->FindClass(typeName);
+
+	if (NULL == clazz) {
+		lprintf("could not find class %s\n", typeName);
+		return false;
+	}
+
+	jmethodID mid = env->GetMethodID(clazz, methodName, signature);
+	env->DeleteLocalRef(clazz);
+
+	if (NULL == mid) {
 		lprintf("could not find method %s with signature %s in type %s\n", methodName, signature, typeName);
 		return false;
 	}
@@ -217,7 +263,7 @@ static bool call(JNIEnv *env, jobject object, const char* typeName, const char* 
 
 
 static bool callStaticObject(JNIEnv *env, const char* typeName, const char* methodName, 
-	const char* signature, const jvalue* params, jobject& returnValue)
+	const char* signature,/* const*/ jvalue* params, jobject& returnValue)
 {
 	jclass clazz = env->FindClass(typeName);
 
@@ -338,7 +384,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		/* set general mesh data in java */
 		jvalue setTypesParams[1];
 		setTypesParams[0].i = cMesh->mPrimitiveTypes;
-		if (!call(env, jMesh, "jassimp/AiMesh", "setPrimitiveTypes", "(I)V", setTypesParams))
+		if (!callv(env, jMesh, "jassimp/AiMesh", "setPrimitiveTypes", "(I)V", setTypesParams))
 		{
 			return false;
 		}
@@ -380,7 +426,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		allocateBuffersParams[1].i = cMesh->mNumFaces;
 		allocateBuffersParams[2].z = isPureTriangle;
 		allocateBuffersParams[3].i = (jint) faceBufferSize;
-		if (!call(env, jMesh, "jassimp/AiMesh", "allocateBuffers", "(IIZI)V", allocateBuffersParams))
+		if (!callv(env, jMesh, "jassimp/AiMesh", "allocateBuffers", "(IIZI)V", allocateBuffersParams))
 		{
 			return false;
 		}
@@ -470,7 +516,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 0;
 			allocateDataChannelParams[1].i = 0;
-			if (!call(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
 				lprintf("could not allocate normal data channel\n");
 				return false;
@@ -491,7 +537,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 1;
 			allocateDataChannelParams[1].i = 0;
-			if (!call(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
 				lprintf("could not allocate tangents data channel\n");
 				return false;
@@ -512,7 +558,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			jvalue allocateDataChannelParams[2];
 			allocateDataChannelParams[0].i = 2;
 			allocateDataChannelParams[1].i = 0;
-			if (!call(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+			if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 			{
 				lprintf("could not allocate bitangents data channel\n");
 				return false;
@@ -535,7 +581,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				jvalue allocateDataChannelParams[2];
 				allocateDataChannelParams[0].i = 3;
 				allocateDataChannelParams[1].i = c;
-				if (!call(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+				if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 				{
 					lprintf("could not allocate colorset data channel\n");
 					return false;
@@ -574,7 +620,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 
 				allocateDataChannelParams[1].i = c;
-				if (!call(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
+				if (!callv(env, jMesh, "jassimp/AiMesh", "allocateDataChannel", "(II)V", allocateDataChannelParams))
 				{
 					lprintf("could not allocate texture coordinates data channel\n");
 					return false;
@@ -701,6 +747,8 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 			}
 		}
+		env->DeleteLocalRef(jMeshes);
+		env->DeleteLocalRef(jMesh);
 	}
 
 	return true;
@@ -719,7 +767,7 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	wrapMatParams[0].l = jMatrixArr;
 	jobject jMatrix;
 				
-	if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapMatrix", "([F)Ljava/lang/Object;", wrapMatParams, jMatrix)) 
+	if (!callStaticObject(env, "jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapMatParams, jMatrix))
 	{
 		return false;
 	}
@@ -749,7 +797,7 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	wrapNodeParams[2].l = jMeshrefArr;
 	wrapNodeParams[3].l = jNodeName;
 	jobject jNode;
-	if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapSceneNode", 
+	if (!callStaticObject(env, "jassimp/Jassimp", "wrapSceneNode",
 		"(Ljava/lang/Object;Ljava/lang/Object;[ILjava/lang/String;)Ljava/lang/Object;", wrapNodeParams, jNode)) 
 	{
 		return false;
@@ -842,7 +890,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			setNumberParams[0].i = ttInd;
 			setNumberParams[1].i = num;
 
-			if (!call(env, jMaterial, "jassimp/AiMaterial", "setTextureNumber", "(II)V", setNumberParams))
+			if (!callv(env, jMaterial, "jassimp/AiMaterial", "setTextureNumber", "(II)V", setNumberParams))
 			{
 				return false;
 			}
@@ -880,7 +928,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				wrapColorParams[0].f = ((float*) cProperty->mData)[0];
 				wrapColorParams[1].f = ((float*) cProperty->mData)[1];
 				wrapColorParams[2].f = ((float*) cProperty->mData)[2];
-				if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jData)) 
+				if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jData))
 				{
 					return false;
 				}

@@ -677,10 +677,11 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 	const STEP::DB::RefMap& refs = conv.db.GetRefs();
 
 	// skip over space and annotation nodes - usually, these have no meaning in Assimp's context
+	bool skipGeometry = false;
 	if(conv.settings.skipSpaceRepresentations) {
 		if(const IfcSpace* const space = el.ToPtr<IfcSpace>()) {
 			IFCImporter::LogDebug("skipping IfcSpace entity due to importer settings");
-			return NULL;
+			skipGeometry = true;
 		}
 	}
 
@@ -850,8 +851,10 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 			conv.apply_openings = &openings;
 		}
 
-		ProcessProductRepresentation(el,nd.get(),subnodes,conv);
-		conv.apply_openings = conv.collect_openings = NULL;
+		if (!skipGeometry) {
+		  ProcessProductRepresentation(el,nd.get(),subnodes,conv);
+		  conv.apply_openings = conv.collect_openings = NULL;
+		}
 
 		if (subnodes.size()) {
 			nd->mChildren = new aiNode*[subnodes.size()]();

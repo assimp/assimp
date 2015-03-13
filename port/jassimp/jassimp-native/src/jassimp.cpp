@@ -703,7 +703,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				wrapParams[0].l = jMatrixArr;
 				jobject jMatrix;
 				
-				if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapMatrix", "([F)Ljava/lang/Object;", wrapParams, jMatrix)) 
+				if (!callStaticObject(env, "jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapParams, jMatrix))
 				{
 					return false;
 				}
@@ -939,7 +939,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				wrapColorParams[1].f = ((float*) cProperty->mData)[1];
 				wrapColorParams[2].f = ((float*) cProperty->mData)[2];
 				wrapColorParams[3].f = ((float*) cProperty->mData)[3];
-				if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapColor4", "(FFFF)Ljava/lang/Object;", wrapColorParams, jData)) 
+				if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor4", "(FFFF)Ljava/lang/Object;", wrapColorParams, jData))
 				{
 					return false;
 				}
@@ -1171,7 +1171,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[1].f = cLight->mColorDiffuse.g;
 		wrapColorParams[2].f = cLight->mColorDiffuse.b;
 		jobject jDiffuse;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jDiffuse)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jDiffuse))
 		{
 			return false;
 		}
@@ -1180,7 +1180,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[1].f = cLight->mColorSpecular.g;
 		wrapColorParams[2].f = cLight->mColorSpecular.b;
 		jobject jSpecular;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jSpecular)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jSpecular))
 		{
 			return false;
 		}
@@ -1189,7 +1189,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[1].f = cLight->mColorAmbient.g;
 		wrapColorParams[2].f = cLight->mColorAmbient.b;
 		jobject jAmbient;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jAmbient)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jAmbient))
 		{
 			return false;
 		}
@@ -1201,7 +1201,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapVec3Params[1].f = cLight->mPosition.y;
 		wrapVec3Params[2].f = cLight->mPosition.z;
 		jobject jPosition;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jPosition)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jPosition))
 		{
 			return false;
 		}
@@ -1210,7 +1210,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapVec3Params[1].f = cLight->mPosition.y;
 		wrapVec3Params[2].f = cLight->mPosition.z;
 		jobject jDirection;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection))
 		{
 			return false;
 		}
@@ -1276,7 +1276,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[1].f = cCamera->mPosition.y;
 		wrapPositionParams[2].f = cCamera->mPosition.z;
 		jobject jPosition;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jPosition)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jPosition))
 		{
 			return false;
 		}
@@ -1285,7 +1285,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[1].f = cCamera->mUp.y;
 		wrapPositionParams[2].f = cCamera->mUp.z;
 		jobject jUp;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jUp)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jUp))
 		{
 			return false;
 		}
@@ -1294,7 +1294,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[1].f = cCamera->mLookAt.y;
 		wrapPositionParams[2].f = cCamera->mLookAt.z;
 		jobject jLookAt;
-		if (!callStaticObject(env, "Ljassimp/Jassimp;", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jLookAt)) 
+		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jLookAt))
 		{
 			return false;
 		}

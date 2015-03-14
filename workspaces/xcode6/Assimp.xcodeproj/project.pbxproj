@@ -1489,7 +1489,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cat ${SRCROOT}/revision.h.in | sed \"s/@GIT_COMMIT_HASH@/`git rev-parse --short HEAD`/g\" | sed \"s/@GIT_BRANCH@/`git rev-parse --abbrev-ref HEAD`/g\" > ${DERIVED_FILE_DIR}/revision.h";
+			shellScript = "cat \"${SRCROOT}/revision.h.in\" | sed \"s/@GIT_COMMIT_HASH@/`git rev-parse --short HEAD`/g\" | sed \"s/@GIT_BRANCH@/`git rev-parse --abbrev-ref HEAD`/g\" > \"${DERIVED_FILE_DIR}/revision.h\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 

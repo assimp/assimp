@@ -7,161 +7,161 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		02D9D7977CF34425A1E4D0C1 /* OptimizeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAB9AE5328F843F5A8A3E85C /* OptimizeGraph.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		02FE70F552DA42B0AF5BA35E /* ImporterRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D029CE902F8045B0B3AFFDDB /* ImporterRegistry.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		0C43D2C2124D45AFB210AD77 /* JoinVerticesProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B36DA471B9E142FC9425EC45 /* JoinVerticesProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		0C68C4CF4C724B28888ABF43 /* ACLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F1076BAC69DB4935A93045A8 /* ACLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		0D2216F34ABC46919011B229 /* HMPLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43ABFF591F374920A5E18A24 /* HMPLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		11DA6BD79AB44123958A3748 /* SplitLargeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43641DC9C1B4B578BC40476 /* SplitLargeMeshes.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		12781B32512D411BA3FBD224 /* PostStepRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E663847651834244834CB9F5 /* PostStepRegistry.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		12DFE025ED3E4527BA61D494 /* MaterialSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FF72CB6E99E40E19AE0E64C /* MaterialSystem.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		13237D91501F46EB8EC4F25C /* AssbinExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6389F68312384CFD847B1D13 /* AssbinExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		13F5EF2AA13741BEAA52744A /* LWOAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 680C392FFE0B4CC5ABC7CA64 /* LWOAnimation.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		155A517D4D8040069E88337F /* UnrealLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3B8FD96D46314ACD8F157AC3 /* UnrealLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		19F3FA59D54E434586302A8E /* irrXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C6BACDA5DD4139AA26EE81 /* irrXML.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		1AD243EFA96047218513620C /* ProcessHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 890E32C714444692AA016AE5 /* ProcessHelper.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		1C4683268E00454284E8C1D2 /* IFCUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 59E3D32E3FC7438DB148537F /* IFCUtil.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		1CB938B3E5994902BABC1F2B /* OFFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EFD557FE2C3A46D78F070655 /* OFFLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		1EBC60AC385E4D28B639B182 /* FBXConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A56A688A3845768410F500 /* FBXConverter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		1F903C0A02D34828AD87609E /* XFileImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06DB494DCE4D47FDA00E8B35 /* XFileImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		1FA6FB6673934D11BFD23F41 /* FBXDocument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F22D5BA425444A028DA42BEA /* FBXDocument.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		212780A32DA8413D976187AB /* BaseImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A58410FEAA884A2D8D73ACCE /* BaseImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		227AF9BA6440437DBD69ABAB /* FindDegenerates.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BABB7734139C452A9DDEE797 /* FindDegenerates.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		231DEB2636A245B6A123B373 /* B3DImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCCB4BB481FB461688FE2F29 /* B3DImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		24850C77B93042A5BF680D60 /* MD5Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BC5FD00572F4C58B267A0EC /* MD5Parser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		249B88B0A31A47CA90934CA9 /* Exporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF4E90FB1A3446F095ECC8BD /* Exporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		251969D55FFA442180D0AF58 /* MD3Loader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 563FBACCFD774BDEA4AEAC10 /* MD3Loader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		25EBF16E84324F5C89A7F3FB /* RawLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A669762194B9D9A26DD20 /* RawLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		2A010C4331924629B44D800C /* XFileExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 435DC362E63D4CCBA68656D3 /* XFileExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		2A320C69D24C45C3A9D9C14E /* MDLLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA92FFC8B06D4569AD9C4CB1 /* MDLLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		2CA0229CCE5C4D0BB44176AB /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = AF75E6049338489BB256D295 /* ioapi.c */; settings = {COMPILER_FLAGS = ""; }; };
-		3091FA821E084C7EAC5C353E /* LWOMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED21FC57A384CE6B4F53C0C /* LWOMaterial.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		3331B1D6A54A4BFE9A595B4E /* ASEParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929F59CCA32549EC884A5033 /* ASEParser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		34B01510829644E0B2B8A196 /* IFCLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E9BB0220704C5D93CE7CE9 /* IFCLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		366C5700997F4FE3AE12CCF4 /* TextureTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF76D04D95E649BCBC15E64F /* TextureTransform.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		3A0E96946CD74F4B856517D2 /* OgreStructs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 79A49EFE23E34E1CBA2E4377 /* OgreStructs.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		3A518149B13B4C88BEEA4650 /* OptimizeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ACC87E846AE4E4A86E1AEF4 /* OptimizeMeshes.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		3CC1408ACD3249ECA00408B7 /* FBXBinaryTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1108AC28566B4D2B9F27C691 /* FBXBinaryTokenizer.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		3DC78BDA28EA4022BB1F13FD /* Assimp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 705D30EE141A48F292783F0E /* Assimp.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		3ED4918301614730B510E884 /* DeboneProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E20FCC571F144DDBD831CCB /* DeboneProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		3F8B686D2E214E2F8C93B12D /* NFFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0D6E8E292F594A2DAFF53564 /* NFFLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		405D15DF00D3447ABC2C78E5 /* Bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10238FBD7A9D401A82D667CB /* Bitmap.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		414FE97260614C37AE76CCE0 /* XFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 74C02A113B804568A7E39CBC /* XFileParser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		4429D10DE70A415483DACEAF /* BaseProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FAB6BC13FCFE40F5801D0972 /* BaseProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		44C9833378BF4F0A8D803022 /* TargetAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F65B6129F774AEDB8DC845A /* TargetAnimation.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		498D9244682B4746864377DA /* 3DSConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15221A74FC9C4B2AAA7306E3 /* 3DSConverter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		4A42D471540842B1933F1D84 /* OgreXmlSerializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EF9F805A4BA4428CA98C9DE5 /* OgreXmlSerializer.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		4B0EEEEFEB4E434789BB249D /* CalcTangentsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 90DD6CA40A5E41458E11FF3E /* CalcTangentsProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		4CC8B99EBE8C4CDF83AE4B25 /* BlenderModifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3106D75C13874F5AB3EBBFE7 /* BlenderModifier.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		4D1710ECAFB640A99F15D406 /* ColladaExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C0527629078403F81CFD117 /* ColladaExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		4DDD54E33C674EE89A85AE97 /* BlenderScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE0D259917354C80BE1CC791 /* BlenderScene.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		4F3A69E237A1457EA41FBFF2 /* MD5Loader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A277DBC1EFB944F995659A20 /* MD5Loader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		53E7CEA593864ECCBA27EB37 /* IFCGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3267EBBA6EEB435F83FF25E4 /* IFCGeometry.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		557F2B5892074E42A7774D8F /* TerragenLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4866DA5A7BFD49F79B61CBF8 /* TerragenLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		55E02364DDC84751854342DA /* NDOLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4F1B5789CA540C78FB9219D /* NDOLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		5604BB8263B043F9B3778D0D /* SMDLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD9BEC6B8A264AB092F98E20 /* SMDLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		56D8494BFA2447EF9DAF0E8B /* IRRLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 97DFA90F9D0C4B999C150B10 /* IRRLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		5861B04C98FF4BF2A1D90C43 /* MakeVerboseFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 21B797DAB0E0427C9339AE0F /* MakeVerboseFormat.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		5934E68DD8744098B694D8C9 /* VertexTriangleAdjacency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0AAF26EBF0A64ABDB840BA64 /* VertexTriangleAdjacency.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		5CBC282D206847F791F2ADAF /* DXFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466D6B9A7CCD402D9AA87071 /* DXFLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		5CD0466AD8454EF88928D43F /* FBXMeshGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42E110B9E6924AF9B55AE65A /* FBXMeshGeometry.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		61B4DFF611244C35845961C0 /* DefaultIOSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D502654EF864101A2DA9476 /* DefaultIOSystem.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		64493DD9B731476BBB5F9BA6 /* ComputeUVMappingProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ABBB4561E72413EB40702C3 /* ComputeUVMappingProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		6955346149D346A0AEE7AA13 /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5E10483FBE6D4F4594B460E0 /* sweep_context.cc */; settings = {COMPILER_FLAGS = ""; }; };
-		6ABAC74C1F9A406A921A7662 /* ObjExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE811A81663A492A84E13937 /* ObjExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		6B1CE2A7564543E79A391FA1 /* RemoveRedundantMaterials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ADACEBC4973F4FC0A6FEC68A /* RemoveRedundantMaterials.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		6B5223FAAD874885A6B3ED5C /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 973D4231A4AA4925B019FEEE /* unzip.c */; settings = {COMPILER_FLAGS = ""; }; };
-		6BB503736AA94711A81D26D3 /* FBXUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E6332CD992D447CA910DA456 /* FBXUtil.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		6C434551EB1F43C9AE9AE538 /* OgreMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F75457C6D026451B9267B65E /* OgreMaterial.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		6F9F7543873B40A3832D1703 /* FBXParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F373DF3B03B4B848B78EAD2 /* FBXParser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		7277E86702084F3D8F7F2595 /* IFCReaderGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5D1E6368384D429BA29D5A /* IFCReaderGen.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		74DCE45262FD417BB86348AC /* STEPFileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CDE3ECA98173418A9F997992 /* STEPFileReader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		765FA1339C83494B9D32D909 /* PretransformVertices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C115651B54570AA2040DB /* PretransformVertices.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		7C3E0E5CFEEF403B8DC8E0DA /* FBXModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A61BDC559CE4186B03C0396 /* FBXModel.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		7FD9BBB637FC44A995751DD1 /* PlyExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E51043448F1744FFA78526D5 /* PlyExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		8093E235B7A24B50809263BC /* SplitByBoneCountProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99A4349D505F4CC593F48CF6 /* SplitByBoneCountProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		813894EA73344FDD86C37085 /* shapes.cc in Sources */ = {isa = PBXBuildFile; fileRef = AE00939F150F413780C8AAD7 /* shapes.cc */; settings = {COMPILER_FLAGS = ""; }; };
-		833DBC32CB4A411CA2E1FBF4 /* advancing_front.cc in Sources */ = {isa = PBXBuildFile; fileRef = B72D0BA3EF66439F8D582ED3 /* advancing_front.cc */; settings = {COMPILER_FLAGS = ""; }; };
-		843E0AFA420542EF8E80C4F6 /* SceneCombiner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A3D87FF2C04C3BA3684F54 /* SceneCombiner.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		84BA05FFC4B84434A4F2865A /* ObjFileImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 862131D4574B4CABA5EC957B /* ObjFileImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		856922366B6F4D088324016F /* ObjFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF73EEAB2424213BF7158D5 /* ObjFileParser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		869150F5FA334A739CA55ED5 /* IRRShared.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CC54A231FF6B4B0CABCFD167 /* IRRShared.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		86FA5A1954F54AE1980D50E7 /* FixNormalsStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C54518F708BA4A328D5D7325 /* FixNormalsStep.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		877F5B1F1C3543C18CFB38CD /* AssimpCExport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1A9535EDF9A4FF2B8DABD7D /* AssimpCExport.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		8804DB0DABA64EFEB683E3F7 /* BlenderLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 906F71D342544BF381E1318E /* BlenderLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		880BBABBF77942EEA35AEFC4 /* IRRMeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFD53046F4AEB898C0832 /* IRRMeshLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		89939A908EA344F685D3EC4D /* cdt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 849EC6315E4A4E5FA06521EA /* cdt.cc */; settings = {COMPILER_FLAGS = ""; }; };
-		89C0A1FBD2414597B3F17EBB /* 3DSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E9476D129940BF84DE6682 /* 3DSLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		8A3CB60001A3485B859AAA00 /* FBXDeformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9855496CEA774F4FA7FBB862 /* FBXDeformer.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		8C16784DF44B4DB5A9051449 /* IFCOpenings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 74679D2078FD46ED9AC73355 /* IFCOpenings.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		90CB3F9403F04B91A033FA6D /* SGSpatialSort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52836A0629E24447B924750A /* SGSpatialSort.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		92642F0078664ACAA4578492 /* OgreBinarySerializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 56ADEC4899C047F2839AD791 /* OgreBinarySerializer.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		93C93490D1A645159F49630E /* sweep.cc in Sources */ = {isa = PBXBuildFile; fileRef = 49E993CD86A346869AF473BC /* sweep.cc */; settings = {COMPILER_FLAGS = ""; }; };
-		947A52B0651F4B67BB5A04EF /* ScenePreprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1775DE08FC8647EB896A0FB3 /* ScenePreprocessor.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		9636ACD2FDBC4E809B9FDE46 /* DefaultLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9E9EB834E09420197C3FB8C /* DefaultLogger.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		98E562C54EC844AA96551B41 /* COBLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C84DA0E6CE13493D833BA1C1 /* COBLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		9DE80CA157384A8AA191C9B2 /* AssimpPCH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C16ECC01B4954B07AB547D6C /* AssimpPCH.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A0285A7F436243969EF1241D /* FBXDocumentUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BB38E7E7661842448F008372 /* FBXDocumentUtil.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A201839885854EA09DF6F9B5 /* Q3BSPFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4A60A00727F04E049CF3AE33 /* Q3BSPFileParser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A2437AE5CC194212B02F55F6 /* FBXNodeAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 33B70115CA54405F895BA471 /* FBXNodeAttribute.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A2D1DCC827B0499B9CD5A0D6 /* 3DSExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ECCBBF2D75A44335AB93C84A /* 3DSExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A2E37983FB5F43A9A65C6F97 /* CSMLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77908990BEF04D0881E8AE80 /* CSMLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A4352EB42E754AEBAE139C8B /* ConvertUTF.c in Sources */ = {isa = PBXBuildFile; fileRef = 9A0960F123634603B15EEA38 /* ConvertUTF.c */; settings = {COMPILER_FLAGS = ""; }; };
-		A50FB7E42BEA428299BED42A /* Q3BSPZipArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43C75175738C4119871E8BB0 /* Q3BSPZipArchive.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A5FC512D048D4BFFAD960679 /* IFCCurve.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E7FD92FFCF441B0A60FC8B4 /* IFCCurve.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A8E506EA650F4D3DB504953D /* FBXAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD34F1AA6664B6B935C9421 /* FBXAnimation.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		A985EFF885964FB09421FDA6 /* STEPFileEncoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E11A39E91576445599DF2AC4 /* STEPFileEncoding.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		AA55FAFEE2184A3F8464AFC7 /* ColladaLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A4706D216414D4F8AA72EC9 /* ColladaLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		AC4098FF84BB45D49101F555 /* LimitBoneWeightsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E065DB38B0284196A9283CA3 /* LimitBoneWeightsProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		AD249481F4174272BB86D4F2 /* PlyParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D504725E540109530E254 /* PlyParser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		AF87AB1D5F124C63851EF06D /* LWSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFF41974881F466A9561BE4B /* LWSLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		B0F2D168DB044D4A93BB59F5 /* Q3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5178B3983F147F3B9BD8217 /* Q3DLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		B151BDC341654FA681214ACF /* IFCProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46E9F455A3284DB399986293 /* IFCProfile.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		B499F78FF5874465B1AA1ECE /* Importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9472EFB6831740DD91471337 /* Importer.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		B99026162B084974A1299A64 /* STLLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D2F1605B9484B08BB33402D /* STLLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		BABACE2F925443479F870954 /* STLExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89D2D359BD854D8AA60CB720 /* STLExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		BAE97CFFFDE34E9BA9E0B480 /* RemoveComments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6A86069DEEDC42B88634F78D /* RemoveComments.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		BE20AEE5126B4AC6AAC005F4 /* ObjFileMtlImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4108529663904025B21E526B /* ObjFileMtlImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		C0264BCE748E464596BF449C /* XGLLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E395349546A4FDF843E6963 /* XGLLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		C3ADFEA536BF4FF3B6C9F587 /* GenVertexNormalsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A0AED12A1A6D4635A8CFB65A /* GenVertexNormalsProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		C4F211D64AC348FDB8D7C67C /* FBXImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4C688FA08F44716855CDD3C /* FBXImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		C715213375A24A18A54D82F8 /* ColladaParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 420D77ED33554D54AA4D50EF /* ColladaParser.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		C8D153E801784E1CAECCC9F1 /* MDLMaterialLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEC69808E1844C23B95D3475 /* MDLMaterialLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		C97C468599E940F892D2FCD1 /* FBXMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE6163EB035149A6B8139DB8 /* FBXMaterial.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		CB2FC9139C4146F2963F7936 /* BVHLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C80B9A3AF4204AE08AA50BAE /* BVHLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		D1E81A09A0D24710A4FDE44F /* BlenderDNA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B65258E349704523BC43904D /* BlenderDNA.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		D4CAA1A48B574883B37969A2 /* LWOLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A4E05386C094B809A315A07 /* LWOLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		D5909BAE18664A6FA736EC80 /* AssxmlExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3E8A1BEF8E74F04AE06871B /* AssxmlExporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		DAE0A20354BE4889A9D918A0 /* IFCMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0014AE5E87A74AAA9EF0EC4B /* IFCMaterial.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		DAED741B6225426EBEAF5C63 /* ConvertToLHProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92D8734FFF9742B39A371B70 /* ConvertToLHProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		DCE1B99871964E928F5B4C91 /* IFCBoolean.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 285D1FDA48EC4DD8933B603E /* IFCBoolean.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		DDFBB8B2B78B4149B8D0785D /* SortByPTypeProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9A81E0E27E44718609615B /* SortByPTypeProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		DECFBA5CCE374CB0B5482B70 /* ASELoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C477FA4D89548F1BCEDC5A0 /* ASELoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		DFC61ACABFFE405CA2D81D97 /* Subdivision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBDEB63CFEB4F2EAA95358D /* Subdivision.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		E2302FC0DE0F4713AF4AE53F /* StandardShapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C18C5023460E4D17B8C922D7 /* StandardShapes.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		E3BA3531AA8943DF8AF5215C /* RemoveVCProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB4ABA17AF264257BDA4D921 /* RemoveVCProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		E3E3C9BAAAE14737BFBDB7AE /* SpatialSort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8EEC6646FC044D1E9658A590 /* SpatialSort.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		E846D2F46E724308B3762235 /* Q3BSPFileImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A88D56FBEA084A3EA9A0ECB3 /* Q3BSPFileImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		E89E29B47CA84BF38B5CC0D5 /* TriangulateProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A0AC303D18A48A69AB3BC03 /* TriangulateProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		EC253D2452644205BD59E69B /* FBXProperties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D203F78B24C4D7E8E2084A3 /* FBXProperties.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		ED1C236FBB204757A45E685C /* OgreImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 923283A9791E4B4E86D623FC /* OgreImporter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		EDA07283EFBC457CB0331971 /* MDCLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35E4944C052A4C91BF31DE5F /* MDCLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F0430145F6F24B03AD9E2394 /* FBXTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CF07D05DC86F4C98BC42FDCF /* FBXTokenizer.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F1B541BC242D4E178B31FEDC /* DefaultIOStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9FEF4D69EFC4605A4F752E5 /* DefaultIOStream.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F4B87C84ADE24C1D8950F229 /* AssbinLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FEEF58B24548F782A5D53C /* AssbinLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F555CEC0C5D349FB855E01B1 /* MD2Loader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B655CCE1314D4E8A94B371 /* MD2Loader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F576B26DE4C944E6AC9A5E4C /* ImproveCacheLocality.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 70D5FDFA995E45E6A3E8FD37 /* ImproveCacheLocality.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F632A255678844DEBD7DF103 /* MS3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A990C6FF244DC397B7BA7C /* MS3DLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F64BCE7A381744CCA4CE323A /* BlenderBMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 603AFA882AFF49AEAC2C8FA2 /* BlenderBMesh.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F66B9EDC7AAA4013B6651BF1 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 59F8A11A7AED45CC94CEDF28 /* clipper.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F70C84CC28084469B0171A67 /* ValidateDataStructure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0EF4F7A237F648C2809A8F31 /* ValidateDataStructure.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		F91C37C0C4424003ABCB1088 /* PlyLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 409C98EE093C499B8A574CA9 /* PlyLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		FBC467B84AFD4089B1B35B67 /* FindInvalidDataProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4221AA0AD2418FAA45EB64 /* FindInvalidDataProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		FD598E7E17A84C29A4C0F3F4 /* BlenderTessellator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12C5DD7A285042EDB1897FAE /* BlenderTessellator.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		FE0CF0380CE24DFA9DF0964D /* FindInstancesProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C9A101D1311C4E77AAEDD94C /* FindInstancesProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		FE6A140ABE3444D38A5303AD /* LWOBLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D629F6BF53864979B7619067 /* LWOBLoader.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		FEBD430870494EE2BFDAF420 /* SkeletonMeshBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B2827B3E64147E08A5AD334 /* SkeletonMeshBuilder.cpp */; settings = {COMPILER_FLAGS = ""; }; };
-		FF8AADE5437849E2AEE95E37 /* GenFaceNormalsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 982AE676D2364350B1FBD095 /* GenFaceNormalsProcess.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		7F79242A1AB43E20005A8E5D /* 3DSConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15221A74FC9C4B2AAA7306E3 /* 3DSConverter.cpp */; };
+		7F79242B1AB43E20005A8E5D /* 3DSExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ECCBBF2D75A44335AB93C84A /* 3DSExporter.cpp */; };
+		7F79242C1AB43E20005A8E5D /* 3DSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 02E9476D129940BF84DE6682 /* 3DSLoader.cpp */; };
+		7F79242D1AB43E20005A8E5D /* ACLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F1076BAC69DB4935A93045A8 /* ACLoader.cpp */; };
+		7F79242E1AB43E20005A8E5D /* ASELoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C477FA4D89548F1BCEDC5A0 /* ASELoader.cpp */; };
+		7F79242F1AB43E20005A8E5D /* ASEParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929F59CCA32549EC884A5033 /* ASEParser.cpp */; };
+		7F7924301AB43E20005A8E5D /* AssbinExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6389F68312384CFD847B1D13 /* AssbinExporter.cpp */; };
+		7F7924311AB43E20005A8E5D /* AssbinLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D9FEEF58B24548F782A5D53C /* AssbinLoader.cpp */; };
+		7F7924321AB43E20005A8E5D /* Assimp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 705D30EE141A48F292783F0E /* Assimp.cpp */; };
+		7F7924331AB43E20005A8E5D /* AssimpCExport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1A9535EDF9A4FF2B8DABD7D /* AssimpCExport.cpp */; };
+		7F7924341AB43E20005A8E5D /* AssimpPCH.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C16ECC01B4954B07AB547D6C /* AssimpPCH.cpp */; };
+		7F7924351AB43E20005A8E5D /* AssxmlExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3E8A1BEF8E74F04AE06871B /* AssxmlExporter.cpp */; };
+		7F7924361AB43E20005A8E5D /* B3DImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCCB4BB481FB461688FE2F29 /* B3DImporter.cpp */; };
+		7F7924371AB43E20005A8E5D /* BVHLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C80B9A3AF4204AE08AA50BAE /* BVHLoader.cpp */; };
+		7F7924381AB43E20005A8E5D /* BaseImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A58410FEAA884A2D8D73ACCE /* BaseImporter.cpp */; };
+		7F7924391AB43E20005A8E5D /* BaseProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FAB6BC13FCFE40F5801D0972 /* BaseProcess.cpp */; };
+		7F79243A1AB43E20005A8E5D /* Bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10238FBD7A9D401A82D667CB /* Bitmap.cpp */; };
+		7F79243B1AB43E20005A8E5D /* BlenderBMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 603AFA882AFF49AEAC2C8FA2 /* BlenderBMesh.cpp */; };
+		7F79243C1AB43E20005A8E5D /* BlenderDNA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B65258E349704523BC43904D /* BlenderDNA.cpp */; };
+		7F79243D1AB43E20005A8E5D /* BlenderLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 906F71D342544BF381E1318E /* BlenderLoader.cpp */; };
+		7F79243E1AB43E20005A8E5D /* BlenderModifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3106D75C13874F5AB3EBBFE7 /* BlenderModifier.cpp */; };
+		7F79243F1AB43E20005A8E5D /* BlenderScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE0D259917354C80BE1CC791 /* BlenderScene.cpp */; };
+		7F7924401AB43E20005A8E5D /* BlenderTessellator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 12C5DD7A285042EDB1897FAE /* BlenderTessellator.cpp */; };
+		7F7924411AB43E20005A8E5D /* COBLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C84DA0E6CE13493D833BA1C1 /* COBLoader.cpp */; };
+		7F7924421AB43E20005A8E5D /* CSMLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77908990BEF04D0881E8AE80 /* CSMLoader.cpp */; };
+		7F7924431AB43E20005A8E5D /* CalcTangentsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 90DD6CA40A5E41458E11FF3E /* CalcTangentsProcess.cpp */; };
+		7F7924441AB43E20005A8E5D /* ColladaExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C0527629078403F81CFD117 /* ColladaExporter.cpp */; };
+		7F7924451AB43E20005A8E5D /* ColladaLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A4706D216414D4F8AA72EC9 /* ColladaLoader.cpp */; };
+		7F7924461AB43E20005A8E5D /* ColladaParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 420D77ED33554D54AA4D50EF /* ColladaParser.cpp */; };
+		7F7924471AB43E20005A8E5D /* ComputeUVMappingProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ABBB4561E72413EB40702C3 /* ComputeUVMappingProcess.cpp */; };
+		7F7924481AB43E20005A8E5D /* ConvertToLHProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 92D8734FFF9742B39A371B70 /* ConvertToLHProcess.cpp */; };
+		7F7924491AB43E20005A8E5D /* DXFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466D6B9A7CCD402D9AA87071 /* DXFLoader.cpp */; };
+		7F79244A1AB43E20005A8E5D /* DeboneProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E20FCC571F144DDBD831CCB /* DeboneProcess.cpp */; };
+		7F79244B1AB43E20005A8E5D /* DefaultIOStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F9FEF4D69EFC4605A4F752E5 /* DefaultIOStream.cpp */; };
+		7F79244C1AB43E20005A8E5D /* DefaultIOSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D502654EF864101A2DA9476 /* DefaultIOSystem.cpp */; };
+		7F79244D1AB43E20005A8E5D /* DefaultLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A9E9EB834E09420197C3FB8C /* DefaultLogger.cpp */; };
+		7F79244E1AB43E20005A8E5D /* Exporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF4E90FB1A3446F095ECC8BD /* Exporter.cpp */; };
+		7F79244F1AB43E20005A8E5D /* FBXAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD34F1AA6664B6B935C9421 /* FBXAnimation.cpp */; };
+		7F7924501AB43E20005A8E5D /* FBXBinaryTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1108AC28566B4D2B9F27C691 /* FBXBinaryTokenizer.cpp */; };
+		7F7924511AB43E20005A8E5D /* FBXConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A56A688A3845768410F500 /* FBXConverter.cpp */; };
+		7F7924521AB43E20005A8E5D /* FBXDeformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9855496CEA774F4FA7FBB862 /* FBXDeformer.cpp */; };
+		7F7924531AB43E20005A8E5D /* FBXDocument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F22D5BA425444A028DA42BEA /* FBXDocument.cpp */; };
+		7F7924541AB43E20005A8E5D /* FBXDocumentUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BB38E7E7661842448F008372 /* FBXDocumentUtil.cpp */; };
+		7F7924551AB43E20005A8E5D /* FBXImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4C688FA08F44716855CDD3C /* FBXImporter.cpp */; };
+		7F7924561AB43E20005A8E5D /* FBXMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE6163EB035149A6B8139DB8 /* FBXMaterial.cpp */; };
+		7F7924571AB43E20005A8E5D /* FBXMeshGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42E110B9E6924AF9B55AE65A /* FBXMeshGeometry.cpp */; };
+		7F7924581AB43E20005A8E5D /* FBXModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A61BDC559CE4186B03C0396 /* FBXModel.cpp */; };
+		7F7924591AB43E20005A8E5D /* FBXNodeAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 33B70115CA54405F895BA471 /* FBXNodeAttribute.cpp */; };
+		7F79245A1AB43E20005A8E5D /* FBXParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5F373DF3B03B4B848B78EAD2 /* FBXParser.cpp */; };
+		7F79245B1AB43E20005A8E5D /* FBXProperties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9D203F78B24C4D7E8E2084A3 /* FBXProperties.cpp */; };
+		7F79245C1AB43E20005A8E5D /* FBXTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CF07D05DC86F4C98BC42FDCF /* FBXTokenizer.cpp */; };
+		7F79245D1AB43E20005A8E5D /* FBXUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E6332CD992D447CA910DA456 /* FBXUtil.cpp */; };
+		7F79245E1AB43E20005A8E5D /* FindDegenerates.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BABB7734139C452A9DDEE797 /* FindDegenerates.cpp */; };
+		7F79245F1AB43E20005A8E5D /* FindInstancesProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C9A101D1311C4E77AAEDD94C /* FindInstancesProcess.cpp */; };
+		7F7924601AB43E20005A8E5D /* FindInvalidDataProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4221AA0AD2418FAA45EB64 /* FindInvalidDataProcess.cpp */; };
+		7F7924611AB43E20005A8E5D /* FixNormalsStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C54518F708BA4A328D5D7325 /* FixNormalsStep.cpp */; };
+		7F7924621AB43E20005A8E5D /* GenFaceNormalsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 982AE676D2364350B1FBD095 /* GenFaceNormalsProcess.cpp */; };
+		7F7924631AB43E20005A8E5D /* GenVertexNormalsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A0AED12A1A6D4635A8CFB65A /* GenVertexNormalsProcess.cpp */; };
+		7F7924641AB43E20005A8E5D /* HMPLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43ABFF591F374920A5E18A24 /* HMPLoader.cpp */; };
+		7F7924651AB43E20005A8E5D /* IFCBoolean.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 285D1FDA48EC4DD8933B603E /* IFCBoolean.cpp */; };
+		7F7924661AB43E20005A8E5D /* IFCCurve.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E7FD92FFCF441B0A60FC8B4 /* IFCCurve.cpp */; };
+		7F7924671AB43E20005A8E5D /* IFCGeometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3267EBBA6EEB435F83FF25E4 /* IFCGeometry.cpp */; };
+		7F7924681AB43E20005A8E5D /* IFCLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E9BB0220704C5D93CE7CE9 /* IFCLoader.cpp */; };
+		7F7924691AB43E20005A8E5D /* IFCMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0014AE5E87A74AAA9EF0EC4B /* IFCMaterial.cpp */; };
+		7F79246A1AB43E20005A8E5D /* IFCOpenings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 74679D2078FD46ED9AC73355 /* IFCOpenings.cpp */; };
+		7F79246B1AB43E20005A8E5D /* IFCProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46E9F455A3284DB399986293 /* IFCProfile.cpp */; };
+		7F79246C1AB43E20005A8E5D /* IFCReaderGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3F5D1E6368384D429BA29D5A /* IFCReaderGen.cpp */; };
+		7F79246D1AB43E20005A8E5D /* IFCUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 59E3D32E3FC7438DB148537F /* IFCUtil.cpp */; };
+		7F79246E1AB43E20005A8E5D /* IRRLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 97DFA90F9D0C4B999C150B10 /* IRRLoader.cpp */; };
+		7F79246F1AB43E20005A8E5D /* IRRMeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD7FFD53046F4AEB898C0832 /* IRRMeshLoader.cpp */; };
+		7F7924701AB43E20005A8E5D /* IRRShared.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CC54A231FF6B4B0CABCFD167 /* IRRShared.cpp */; };
+		7F7924711AB43E20005A8E5D /* Importer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9472EFB6831740DD91471337 /* Importer.cpp */; };
+		7F7924721AB43E20005A8E5D /* ImporterRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D029CE902F8045B0B3AFFDDB /* ImporterRegistry.cpp */; };
+		7F7924731AB43E20005A8E5D /* ImproveCacheLocality.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 70D5FDFA995E45E6A3E8FD37 /* ImproveCacheLocality.cpp */; };
+		7F7924741AB43E20005A8E5D /* JoinVerticesProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B36DA471B9E142FC9425EC45 /* JoinVerticesProcess.cpp */; };
+		7F7924751AB43E20005A8E5D /* LWOAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 680C392FFE0B4CC5ABC7CA64 /* LWOAnimation.cpp */; };
+		7F7924761AB43E20005A8E5D /* LWOBLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D629F6BF53864979B7619067 /* LWOBLoader.cpp */; };
+		7F7924771AB43E20005A8E5D /* LWOLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A4E05386C094B809A315A07 /* LWOLoader.cpp */; };
+		7F7924781AB43E20005A8E5D /* LWOMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED21FC57A384CE6B4F53C0C /* LWOMaterial.cpp */; };
+		7F7924791AB43E20005A8E5D /* LWSLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFF41974881F466A9561BE4B /* LWSLoader.cpp */; };
+		7F79247A1AB43E20005A8E5D /* LimitBoneWeightsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E065DB38B0284196A9283CA3 /* LimitBoneWeightsProcess.cpp */; };
+		7F79247B1AB43E20005A8E5D /* MD2Loader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B655CCE1314D4E8A94B371 /* MD2Loader.cpp */; };
+		7F79247C1AB43E20005A8E5D /* MD3Loader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 563FBACCFD774BDEA4AEAC10 /* MD3Loader.cpp */; };
+		7F79247D1AB43E20005A8E5D /* MD5Loader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A277DBC1EFB944F995659A20 /* MD5Loader.cpp */; };
+		7F79247E1AB43E20005A8E5D /* MD5Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BC5FD00572F4C58B267A0EC /* MD5Parser.cpp */; };
+		7F79247F1AB43E20005A8E5D /* MDCLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35E4944C052A4C91BF31DE5F /* MDCLoader.cpp */; };
+		7F7924801AB43E20005A8E5D /* MDLLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA92FFC8B06D4569AD9C4CB1 /* MDLLoader.cpp */; };
+		7F7924811AB43E20005A8E5D /* MDLMaterialLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEC69808E1844C23B95D3475 /* MDLMaterialLoader.cpp */; };
+		7F7924821AB43E20005A8E5D /* MS3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A990C6FF244DC397B7BA7C /* MS3DLoader.cpp */; };
+		7F7924831AB43E20005A8E5D /* MakeVerboseFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 21B797DAB0E0427C9339AE0F /* MakeVerboseFormat.cpp */; };
+		7F7924841AB43E20005A8E5D /* MaterialSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FF72CB6E99E40E19AE0E64C /* MaterialSystem.cpp */; };
+		7F7924851AB43E20005A8E5D /* NDOLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4F1B5789CA540C78FB9219D /* NDOLoader.cpp */; };
+		7F7924861AB43E20005A8E5D /* NFFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0D6E8E292F594A2DAFF53564 /* NFFLoader.cpp */; };
+		7F7924871AB43E20005A8E5D /* OFFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EFD557FE2C3A46D78F070655 /* OFFLoader.cpp */; };
+		7F7924881AB43E20005A8E5D /* ObjExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE811A81663A492A84E13937 /* ObjExporter.cpp */; };
+		7F7924891AB43E20005A8E5D /* ObjFileImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 862131D4574B4CABA5EC957B /* ObjFileImporter.cpp */; };
+		7F79248A1AB43E20005A8E5D /* ObjFileMtlImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4108529663904025B21E526B /* ObjFileMtlImporter.cpp */; };
+		7F79248B1AB43E20005A8E5D /* ObjFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF73EEAB2424213BF7158D5 /* ObjFileParser.cpp */; };
+		7F79248C1AB43E20005A8E5D /* OgreBinarySerializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 56ADEC4899C047F2839AD791 /* OgreBinarySerializer.cpp */; };
+		7F79248D1AB43E20005A8E5D /* OgreImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 923283A9791E4B4E86D623FC /* OgreImporter.cpp */; };
+		7F79248E1AB43E20005A8E5D /* OgreMaterial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F75457C6D026451B9267B65E /* OgreMaterial.cpp */; };
+		7F79248F1AB43E20005A8E5D /* OgreStructs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 79A49EFE23E34E1CBA2E4377 /* OgreStructs.cpp */; };
+		7F7924901AB43E20005A8E5D /* OgreXmlSerializer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EF9F805A4BA4428CA98C9DE5 /* OgreXmlSerializer.cpp */; };
+		7F7924911AB43E20005A8E5D /* OptimizeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAB9AE5328F843F5A8A3E85C /* OptimizeGraph.cpp */; };
+		7F7924921AB43E20005A8E5D /* OptimizeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2ACC87E846AE4E4A86E1AEF4 /* OptimizeMeshes.cpp */; };
+		7F7924931AB43E20005A8E5D /* PlyExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E51043448F1744FFA78526D5 /* PlyExporter.cpp */; };
+		7F7924941AB43E20005A8E5D /* PlyLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 409C98EE093C499B8A574CA9 /* PlyLoader.cpp */; };
+		7F7924951AB43E20005A8E5D /* PlyParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D504725E540109530E254 /* PlyParser.cpp */; };
+		7F7924961AB43E20005A8E5D /* PostStepRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E663847651834244834CB9F5 /* PostStepRegistry.cpp */; };
+		7F7924971AB43E20005A8E5D /* PretransformVertices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 023C115651B54570AA2040DB /* PretransformVertices.cpp */; };
+		7F7924981AB43E20005A8E5D /* ProcessHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 890E32C714444692AA016AE5 /* ProcessHelper.cpp */; };
+		7F7924991AB43E20005A8E5D /* Q3BSPFileImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A88D56FBEA084A3EA9A0ECB3 /* Q3BSPFileImporter.cpp */; };
+		7F79249A1AB43E20005A8E5D /* Q3BSPFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4A60A00727F04E049CF3AE33 /* Q3BSPFileParser.cpp */; };
+		7F79249B1AB43E20005A8E5D /* Q3BSPZipArchive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43C75175738C4119871E8BB0 /* Q3BSPZipArchive.cpp */; };
+		7F79249C1AB43E20005A8E5D /* Q3DLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5178B3983F147F3B9BD8217 /* Q3DLoader.cpp */; };
+		7F79249D1AB43E20005A8E5D /* RawLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A669762194B9D9A26DD20 /* RawLoader.cpp */; };
+		7F79249E1AB43E20005A8E5D /* RemoveComments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6A86069DEEDC42B88634F78D /* RemoveComments.cpp */; };
+		7F79249F1AB43E20005A8E5D /* RemoveRedundantMaterials.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ADACEBC4973F4FC0A6FEC68A /* RemoveRedundantMaterials.cpp */; };
+		7F7924A01AB43E20005A8E5D /* RemoveVCProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB4ABA17AF264257BDA4D921 /* RemoveVCProcess.cpp */; };
+		7F7924A11AB43E20005A8E5D /* SGSpatialSort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 52836A0629E24447B924750A /* SGSpatialSort.cpp */; };
+		7F7924A21AB43E20005A8E5D /* SMDLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD9BEC6B8A264AB092F98E20 /* SMDLoader.cpp */; };
+		7F7924A31AB43E20005A8E5D /* STEPFileEncoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E11A39E91576445599DF2AC4 /* STEPFileEncoding.cpp */; };
+		7F7924A41AB43E20005A8E5D /* STEPFileReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CDE3ECA98173418A9F997992 /* STEPFileReader.cpp */; };
+		7F7924A51AB43E20005A8E5D /* STLExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89D2D359BD854D8AA60CB720 /* STLExporter.cpp */; };
+		7F7924A61AB43E20005A8E5D /* STLLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D2F1605B9484B08BB33402D /* STLLoader.cpp */; };
+		7F7924A71AB43E20005A8E5D /* SceneCombiner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A3D87FF2C04C3BA3684F54 /* SceneCombiner.cpp */; };
+		7F7924A81AB43E20005A8E5D /* ScenePreprocessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1775DE08FC8647EB896A0FB3 /* ScenePreprocessor.cpp */; };
+		7F7924A91AB43E20005A8E5D /* SkeletonMeshBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B2827B3E64147E08A5AD334 /* SkeletonMeshBuilder.cpp */; };
+		7F7924AA1AB43E20005A8E5D /* SortByPTypeProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD9A81E0E27E44718609615B /* SortByPTypeProcess.cpp */; };
+		7F7924AB1AB43E20005A8E5D /* SpatialSort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8EEC6646FC044D1E9658A590 /* SpatialSort.cpp */; };
+		7F7924AC1AB43E20005A8E5D /* SplitByBoneCountProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 99A4349D505F4CC593F48CF6 /* SplitByBoneCountProcess.cpp */; };
+		7F7924AD1AB43E20005A8E5D /* SplitLargeMeshes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43641DC9C1B4B578BC40476 /* SplitLargeMeshes.cpp */; };
+		7F7924AE1AB43E20005A8E5D /* StandardShapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C18C5023460E4D17B8C922D7 /* StandardShapes.cpp */; };
+		7F7924AF1AB43E20005A8E5D /* Subdivision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBDEB63CFEB4F2EAA95358D /* Subdivision.cpp */; };
+		7F7924B01AB43E20005A8E5D /* TargetAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F65B6129F774AEDB8DC845A /* TargetAnimation.cpp */; };
+		7F7924B11AB43E20005A8E5D /* TerragenLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4866DA5A7BFD49F79B61CBF8 /* TerragenLoader.cpp */; };
+		7F7924B21AB43E20005A8E5D /* TextureTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF76D04D95E649BCBC15E64F /* TextureTransform.cpp */; };
+		7F7924B31AB43E20005A8E5D /* TriangulateProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A0AC303D18A48A69AB3BC03 /* TriangulateProcess.cpp */; };
+		7F7924B41AB43E20005A8E5D /* UnrealLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3B8FD96D46314ACD8F157AC3 /* UnrealLoader.cpp */; };
+		7F7924B51AB43E20005A8E5D /* ValidateDataStructure.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0EF4F7A237F648C2809A8F31 /* ValidateDataStructure.cpp */; };
+		7F7924B61AB43E20005A8E5D /* VertexTriangleAdjacency.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0AAF26EBF0A64ABDB840BA64 /* VertexTriangleAdjacency.cpp */; };
+		7F7924B71AB43E20005A8E5D /* XFileExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 435DC362E63D4CCBA68656D3 /* XFileExporter.cpp */; };
+		7F7924B81AB43E20005A8E5D /* XFileImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06DB494DCE4D47FDA00E8B35 /* XFileImporter.cpp */; };
+		7F7924B91AB43E20005A8E5D /* XFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 74C02A113B804568A7E39CBC /* XFileParser.cpp */; };
+		7F7924BA1AB43E20005A8E5D /* XGLLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E395349546A4FDF843E6963 /* XGLLoader.cpp */; };
+		7F7924BB1AB43E20005A8E5D /* ConvertUTF.c in Sources */ = {isa = PBXBuildFile; fileRef = 9A0960F123634603B15EEA38 /* ConvertUTF.c */; };
+		7F7924BC1AB43E20005A8E5D /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 59F8A11A7AED45CC94CEDF28 /* clipper.cpp */; };
+		7F7924BD1AB43E20005A8E5D /* irrXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64C6BACDA5DD4139AA26EE81 /* irrXML.cpp */; };
+		7F7924BE1AB43E20005A8E5D /* shapes.cc in Sources */ = {isa = PBXBuildFile; fileRef = AE00939F150F413780C8AAD7 /* shapes.cc */; };
+		7F7924BF1AB43E20005A8E5D /* advancing_front.cc in Sources */ = {isa = PBXBuildFile; fileRef = B72D0BA3EF66439F8D582ED3 /* advancing_front.cc */; };
+		7F7924C01AB43E20005A8E5D /* cdt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 849EC6315E4A4E5FA06521EA /* cdt.cc */; };
+		7F7924C11AB43E20005A8E5D /* sweep.cc in Sources */ = {isa = PBXBuildFile; fileRef = 49E993CD86A346869AF473BC /* sweep.cc */; };
+		7F7924C21AB43E20005A8E5D /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5E10483FBE6D4F4594B460E0 /* sweep_context.cc */; };
+		7F7924C31AB43E20005A8E5D /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = AF75E6049338489BB256D295 /* ioapi.c */; };
+		7F7924C41AB43E20005A8E5D /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 973D4231A4AA4925B019FEEE /* unzip.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -195,7 +195,6 @@
 		1108AC28566B4D2B9F27C691 /* FBXBinaryTokenizer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FBXBinaryTokenizer.cpp; path = code/FBXBinaryTokenizer.cpp; sourceTree = SOURCE_ROOT; };
 		12C5DD7A285042EDB1897FAE /* BlenderTessellator.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = BlenderTessellator.cpp; path = code/BlenderTessellator.cpp; sourceTree = SOURCE_ROOT; };
 		12E167EBA81B4CD3A241D7AF /* irrXML.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = irrXML.h; path = contrib/irrXML/irrXML.h; sourceTree = SOURCE_ROOT; };
-		137A552C590C4E4BBBB1EE31 /* libassimp.3.1.1.a */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libassimp.3.1.1.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		139DFC029C4C44B09952C645 /* material.inl */ = {isa = PBXFileReference; explicitFileType = sourcecode; fileEncoding = 4; name = material.inl; path = include/assimp/material.inl; sourceTree = SOURCE_ROOT; };
 		13BFADA520C04B15AE256CC2 /* IFCUtil.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = IFCUtil.h; path = code/IFCUtil.h; sourceTree = SOURCE_ROOT; };
 		1520A11AA6E54812939B1FBB /* FileLogStream.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = FileLogStream.h; path = code/FileLogStream.h; sourceTree = SOURCE_ROOT; };
@@ -364,6 +363,7 @@
 		7E8BA0D338C9433587BC6C35 /* StreamWriter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = StreamWriter.h; path = code/StreamWriter.h; sourceTree = SOURCE_ROOT; };
 		7F29EF981AB26C4900E9D380 /* libz.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.dylib; path = /usr/lib/libz.1.dylib; sourceTree = "<absolute>"; };
 		7F392D921AB2C7BB00D952EB /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "/Users/wjs/Source/UberDwelling/Dwelling Test Apps/Dwelling2DBakeTest/../../../../../../usr/lib/libc++.dylib"; sourceTree = "<absolute>"; };
+		7F7922801AB43AC3005A8E5D /* libassimp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libassimp.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FF72CB6E99E40E19AE0E64C /* MaterialSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MaterialSystem.cpp; path = code/MaterialSystem.cpp; sourceTree = SOURCE_ROOT; };
 		815702BED5644DD5B242F347 /* TerragenLoader.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = TerragenLoader.h; path = code/TerragenLoader.h; sourceTree = SOURCE_ROOT; };
 		8299401C3E4A43A18E887DC1 /* SGSpatialSort.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = SGSpatialSort.h; path = code/SGSpatialSort.h; sourceTree = SOURCE_ROOT; };
@@ -566,6 +566,16 @@
 		FEEA39CDD7934999B89E2B4D /* MaterialSystem.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MaterialSystem.h; path = code/MaterialSystem.h; sourceTree = SOURCE_ROOT; };
 		FF4E90FB1A3446F095ECC8BD /* Exporter.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Exporter.cpp; path = code/Exporter.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7F79227D1AB43AC3005A8E5D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0117589D2B25420F831BA4CE /* MS3D */ = {
@@ -1192,7 +1202,7 @@
 		AF05BC16567A496BB5DCB2F0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				137A552C590C4E4BBBB1EE31 /* libassimp.3.1.1.a */,
+				7F7922801AB43AC3005A8E5D /* libassimp.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1433,12 +1443,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D9A8BDFCD91D4380A7A667E5 /* assimp */ = {
+		7F79227F1AB43AC3005A8E5D /* assimp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E978D36E8D2F4B8DB9D9FF64 /* Build configuration list for PBXNativeTarget "assimp" */;
+			buildConfigurationList = 7F7922911AB43AC3005A8E5D /* Build configuration list for PBXNativeTarget "assimp" */;
 			buildPhases = (
-				7F01B4BE1AB28080004CED7D /* Run Script to build 'revision.h' */,
-				C3600D5A4D864B6A9B5EC13F /* Sources */,
+				7F79229B1AB43AF4005A8E5D /* Run Script to build "revision.h" */,
+				7F79227C1AB43AC3005A8E5D /* Sources */,
+				7F79227D1AB43AC3005A8E5D /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1446,8 +1457,8 @@
 			);
 			name = assimp;
 			productName = assimp;
-			productReference = 137A552C590C4E4BBBB1EE31 /* libassimp.3.1.1.a */;
-			productType = "com.apple.product-type.library.dynamic";
+			productReference = 7F7922801AB43AC3005A8E5D /* libassimp.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
@@ -1457,6 +1468,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 0630;
+				TargetAttributes = {
+					7F79227F1AB43AC3005A8E5D = {
+						CreatedOnToolsVersion = 6.3;
+					};
+				};
 			};
 			buildConfigurationList = 0C36C32B633D49CB92166176 /* Build configuration list for PBXProject "Assimp" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1469,190 +1485,189 @@
 			projectDirPath = ../..;
 			projectRoot = "";
 			targets = (
-				D9A8BDFCD91D4380A7A667E5 /* assimp */,
+				7F79227F1AB43AC3005A8E5D /* assimp */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		7F01B4BE1AB28080004CED7D /* Run Script to build 'revision.h' */ = {
+		7F79229B1AB43AF4005A8E5D /* Run Script to build "revision.h" */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/revision.h.in",
 			);
-			name = "Run Script to build 'revision.h'";
+			name = "Run Script to build \"revision.h\"";
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/revision.h",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cat \"${SRCROOT}/revision.h.in\" | sed \"s/@GIT_COMMIT_HASH@/`git rev-parse --short HEAD`/g\" | sed \"s/@GIT_BRANCH@/`git rev-parse --abbrev-ref HEAD`/g\" > \"${DERIVED_FILE_DIR}/revision.h\"";
+			shellScript = "mkdir -p \"${DERIVED_FILE_DIR}\"\ncat \"${SRCROOT}/revision.h.in\" | sed \"s/@GIT_COMMIT_HASH@/`git rev-parse --short HEAD`/g\" | sed \"s/@GIT_BRANCH@/`git rev-parse --abbrev-ref HEAD`/g\" > \"${DERIVED_FILE_DIR}/revision.h\"";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		C3600D5A4D864B6A9B5EC13F /* Sources */ = {
+		7F79227C1AB43AC3005A8E5D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				498D9244682B4746864377DA /* 3DSConverter.cpp in Sources */,
-				A2D1DCC827B0499B9CD5A0D6 /* 3DSExporter.cpp in Sources */,
-				89C0A1FBD2414597B3F17EBB /* 3DSLoader.cpp in Sources */,
-				0C68C4CF4C724B28888ABF43 /* ACLoader.cpp in Sources */,
-				DECFBA5CCE374CB0B5482B70 /* ASELoader.cpp in Sources */,
-				3331B1D6A54A4BFE9A595B4E /* ASEParser.cpp in Sources */,
-				13237D91501F46EB8EC4F25C /* AssbinExporter.cpp in Sources */,
-				F4B87C84ADE24C1D8950F229 /* AssbinLoader.cpp in Sources */,
-				3DC78BDA28EA4022BB1F13FD /* Assimp.cpp in Sources */,
-				877F5B1F1C3543C18CFB38CD /* AssimpCExport.cpp in Sources */,
-				9DE80CA157384A8AA191C9B2 /* AssimpPCH.cpp in Sources */,
-				D5909BAE18664A6FA736EC80 /* AssxmlExporter.cpp in Sources */,
-				231DEB2636A245B6A123B373 /* B3DImporter.cpp in Sources */,
-				CB2FC9139C4146F2963F7936 /* BVHLoader.cpp in Sources */,
-				212780A32DA8413D976187AB /* BaseImporter.cpp in Sources */,
-				4429D10DE70A415483DACEAF /* BaseProcess.cpp in Sources */,
-				405D15DF00D3447ABC2C78E5 /* Bitmap.cpp in Sources */,
-				F64BCE7A381744CCA4CE323A /* BlenderBMesh.cpp in Sources */,
-				D1E81A09A0D24710A4FDE44F /* BlenderDNA.cpp in Sources */,
-				8804DB0DABA64EFEB683E3F7 /* BlenderLoader.cpp in Sources */,
-				4CC8B99EBE8C4CDF83AE4B25 /* BlenderModifier.cpp in Sources */,
-				4DDD54E33C674EE89A85AE97 /* BlenderScene.cpp in Sources */,
-				FD598E7E17A84C29A4C0F3F4 /* BlenderTessellator.cpp in Sources */,
-				98E562C54EC844AA96551B41 /* COBLoader.cpp in Sources */,
-				A2E37983FB5F43A9A65C6F97 /* CSMLoader.cpp in Sources */,
-				4B0EEEEFEB4E434789BB249D /* CalcTangentsProcess.cpp in Sources */,
-				4D1710ECAFB640A99F15D406 /* ColladaExporter.cpp in Sources */,
-				AA55FAFEE2184A3F8464AFC7 /* ColladaLoader.cpp in Sources */,
-				C715213375A24A18A54D82F8 /* ColladaParser.cpp in Sources */,
-				64493DD9B731476BBB5F9BA6 /* ComputeUVMappingProcess.cpp in Sources */,
-				DAED741B6225426EBEAF5C63 /* ConvertToLHProcess.cpp in Sources */,
-				5CBC282D206847F791F2ADAF /* DXFLoader.cpp in Sources */,
-				3ED4918301614730B510E884 /* DeboneProcess.cpp in Sources */,
-				F1B541BC242D4E178B31FEDC /* DefaultIOStream.cpp in Sources */,
-				61B4DFF611244C35845961C0 /* DefaultIOSystem.cpp in Sources */,
-				9636ACD2FDBC4E809B9FDE46 /* DefaultLogger.cpp in Sources */,
-				249B88B0A31A47CA90934CA9 /* Exporter.cpp in Sources */,
-				A8E506EA650F4D3DB504953D /* FBXAnimation.cpp in Sources */,
-				3CC1408ACD3249ECA00408B7 /* FBXBinaryTokenizer.cpp in Sources */,
-				1EBC60AC385E4D28B639B182 /* FBXConverter.cpp in Sources */,
-				8A3CB60001A3485B859AAA00 /* FBXDeformer.cpp in Sources */,
-				1FA6FB6673934D11BFD23F41 /* FBXDocument.cpp in Sources */,
-				A0285A7F436243969EF1241D /* FBXDocumentUtil.cpp in Sources */,
-				C4F211D64AC348FDB8D7C67C /* FBXImporter.cpp in Sources */,
-				C97C468599E940F892D2FCD1 /* FBXMaterial.cpp in Sources */,
-				5CD0466AD8454EF88928D43F /* FBXMeshGeometry.cpp in Sources */,
-				7C3E0E5CFEEF403B8DC8E0DA /* FBXModel.cpp in Sources */,
-				A2437AE5CC194212B02F55F6 /* FBXNodeAttribute.cpp in Sources */,
-				6F9F7543873B40A3832D1703 /* FBXParser.cpp in Sources */,
-				EC253D2452644205BD59E69B /* FBXProperties.cpp in Sources */,
-				F0430145F6F24B03AD9E2394 /* FBXTokenizer.cpp in Sources */,
-				6BB503736AA94711A81D26D3 /* FBXUtil.cpp in Sources */,
-				227AF9BA6440437DBD69ABAB /* FindDegenerates.cpp in Sources */,
-				FE0CF0380CE24DFA9DF0964D /* FindInstancesProcess.cpp in Sources */,
-				FBC467B84AFD4089B1B35B67 /* FindInvalidDataProcess.cpp in Sources */,
-				86FA5A1954F54AE1980D50E7 /* FixNormalsStep.cpp in Sources */,
-				FF8AADE5437849E2AEE95E37 /* GenFaceNormalsProcess.cpp in Sources */,
-				C3ADFEA536BF4FF3B6C9F587 /* GenVertexNormalsProcess.cpp in Sources */,
-				0D2216F34ABC46919011B229 /* HMPLoader.cpp in Sources */,
-				DCE1B99871964E928F5B4C91 /* IFCBoolean.cpp in Sources */,
-				A5FC512D048D4BFFAD960679 /* IFCCurve.cpp in Sources */,
-				53E7CEA593864ECCBA27EB37 /* IFCGeometry.cpp in Sources */,
-				34B01510829644E0B2B8A196 /* IFCLoader.cpp in Sources */,
-				DAE0A20354BE4889A9D918A0 /* IFCMaterial.cpp in Sources */,
-				8C16784DF44B4DB5A9051449 /* IFCOpenings.cpp in Sources */,
-				B151BDC341654FA681214ACF /* IFCProfile.cpp in Sources */,
-				7277E86702084F3D8F7F2595 /* IFCReaderGen.cpp in Sources */,
-				1C4683268E00454284E8C1D2 /* IFCUtil.cpp in Sources */,
-				56D8494BFA2447EF9DAF0E8B /* IRRLoader.cpp in Sources */,
-				880BBABBF77942EEA35AEFC4 /* IRRMeshLoader.cpp in Sources */,
-				869150F5FA334A739CA55ED5 /* IRRShared.cpp in Sources */,
-				B499F78FF5874465B1AA1ECE /* Importer.cpp in Sources */,
-				02FE70F552DA42B0AF5BA35E /* ImporterRegistry.cpp in Sources */,
-				F576B26DE4C944E6AC9A5E4C /* ImproveCacheLocality.cpp in Sources */,
-				0C43D2C2124D45AFB210AD77 /* JoinVerticesProcess.cpp in Sources */,
-				13F5EF2AA13741BEAA52744A /* LWOAnimation.cpp in Sources */,
-				FE6A140ABE3444D38A5303AD /* LWOBLoader.cpp in Sources */,
-				D4CAA1A48B574883B37969A2 /* LWOLoader.cpp in Sources */,
-				3091FA821E084C7EAC5C353E /* LWOMaterial.cpp in Sources */,
-				AF87AB1D5F124C63851EF06D /* LWSLoader.cpp in Sources */,
-				AC4098FF84BB45D49101F555 /* LimitBoneWeightsProcess.cpp in Sources */,
-				F555CEC0C5D349FB855E01B1 /* MD2Loader.cpp in Sources */,
-				251969D55FFA442180D0AF58 /* MD3Loader.cpp in Sources */,
-				4F3A69E237A1457EA41FBFF2 /* MD5Loader.cpp in Sources */,
-				24850C77B93042A5BF680D60 /* MD5Parser.cpp in Sources */,
-				EDA07283EFBC457CB0331971 /* MDCLoader.cpp in Sources */,
-				2A320C69D24C45C3A9D9C14E /* MDLLoader.cpp in Sources */,
-				C8D153E801784E1CAECCC9F1 /* MDLMaterialLoader.cpp in Sources */,
-				F632A255678844DEBD7DF103 /* MS3DLoader.cpp in Sources */,
-				5861B04C98FF4BF2A1D90C43 /* MakeVerboseFormat.cpp in Sources */,
-				12DFE025ED3E4527BA61D494 /* MaterialSystem.cpp in Sources */,
-				55E02364DDC84751854342DA /* NDOLoader.cpp in Sources */,
-				3F8B686D2E214E2F8C93B12D /* NFFLoader.cpp in Sources */,
-				1CB938B3E5994902BABC1F2B /* OFFLoader.cpp in Sources */,
-				6ABAC74C1F9A406A921A7662 /* ObjExporter.cpp in Sources */,
-				84BA05FFC4B84434A4F2865A /* ObjFileImporter.cpp in Sources */,
-				BE20AEE5126B4AC6AAC005F4 /* ObjFileMtlImporter.cpp in Sources */,
-				856922366B6F4D088324016F /* ObjFileParser.cpp in Sources */,
-				92642F0078664ACAA4578492 /* OgreBinarySerializer.cpp in Sources */,
-				ED1C236FBB204757A45E685C /* OgreImporter.cpp in Sources */,
-				6C434551EB1F43C9AE9AE538 /* OgreMaterial.cpp in Sources */,
-				3A0E96946CD74F4B856517D2 /* OgreStructs.cpp in Sources */,
-				4A42D471540842B1933F1D84 /* OgreXmlSerializer.cpp in Sources */,
-				02D9D7977CF34425A1E4D0C1 /* OptimizeGraph.cpp in Sources */,
-				3A518149B13B4C88BEEA4650 /* OptimizeMeshes.cpp in Sources */,
-				7FD9BBB637FC44A995751DD1 /* PlyExporter.cpp in Sources */,
-				F91C37C0C4424003ABCB1088 /* PlyLoader.cpp in Sources */,
-				AD249481F4174272BB86D4F2 /* PlyParser.cpp in Sources */,
-				12781B32512D411BA3FBD224 /* PostStepRegistry.cpp in Sources */,
-				765FA1339C83494B9D32D909 /* PretransformVertices.cpp in Sources */,
-				1AD243EFA96047218513620C /* ProcessHelper.cpp in Sources */,
-				E846D2F46E724308B3762235 /* Q3BSPFileImporter.cpp in Sources */,
-				A201839885854EA09DF6F9B5 /* Q3BSPFileParser.cpp in Sources */,
-				A50FB7E42BEA428299BED42A /* Q3BSPZipArchive.cpp in Sources */,
-				B0F2D168DB044D4A93BB59F5 /* Q3DLoader.cpp in Sources */,
-				25EBF16E84324F5C89A7F3FB /* RawLoader.cpp in Sources */,
-				BAE97CFFFDE34E9BA9E0B480 /* RemoveComments.cpp in Sources */,
-				6B1CE2A7564543E79A391FA1 /* RemoveRedundantMaterials.cpp in Sources */,
-				E3BA3531AA8943DF8AF5215C /* RemoveVCProcess.cpp in Sources */,
-				90CB3F9403F04B91A033FA6D /* SGSpatialSort.cpp in Sources */,
-				5604BB8263B043F9B3778D0D /* SMDLoader.cpp in Sources */,
-				A985EFF885964FB09421FDA6 /* STEPFileEncoding.cpp in Sources */,
-				74DCE45262FD417BB86348AC /* STEPFileReader.cpp in Sources */,
-				BABACE2F925443479F870954 /* STLExporter.cpp in Sources */,
-				B99026162B084974A1299A64 /* STLLoader.cpp in Sources */,
-				843E0AFA420542EF8E80C4F6 /* SceneCombiner.cpp in Sources */,
-				947A52B0651F4B67BB5A04EF /* ScenePreprocessor.cpp in Sources */,
-				FEBD430870494EE2BFDAF420 /* SkeletonMeshBuilder.cpp in Sources */,
-				DDFBB8B2B78B4149B8D0785D /* SortByPTypeProcess.cpp in Sources */,
-				E3E3C9BAAAE14737BFBDB7AE /* SpatialSort.cpp in Sources */,
-				8093E235B7A24B50809263BC /* SplitByBoneCountProcess.cpp in Sources */,
-				11DA6BD79AB44123958A3748 /* SplitLargeMeshes.cpp in Sources */,
-				E2302FC0DE0F4713AF4AE53F /* StandardShapes.cpp in Sources */,
-				DFC61ACABFFE405CA2D81D97 /* Subdivision.cpp in Sources */,
-				44C9833378BF4F0A8D803022 /* TargetAnimation.cpp in Sources */,
-				557F2B5892074E42A7774D8F /* TerragenLoader.cpp in Sources */,
-				366C5700997F4FE3AE12CCF4 /* TextureTransform.cpp in Sources */,
-				E89E29B47CA84BF38B5CC0D5 /* TriangulateProcess.cpp in Sources */,
-				155A517D4D8040069E88337F /* UnrealLoader.cpp in Sources */,
-				F70C84CC28084469B0171A67 /* ValidateDataStructure.cpp in Sources */,
-				5934E68DD8744098B694D8C9 /* VertexTriangleAdjacency.cpp in Sources */,
-				2A010C4331924629B44D800C /* XFileExporter.cpp in Sources */,
-				1F903C0A02D34828AD87609E /* XFileImporter.cpp in Sources */,
-				414FE97260614C37AE76CCE0 /* XFileParser.cpp in Sources */,
-				C0264BCE748E464596BF449C /* XGLLoader.cpp in Sources */,
-				A4352EB42E754AEBAE139C8B /* ConvertUTF.c in Sources */,
-				F66B9EDC7AAA4013B6651BF1 /* clipper.cpp in Sources */,
-				19F3FA59D54E434586302A8E /* irrXML.cpp in Sources */,
-				813894EA73344FDD86C37085 /* shapes.cc in Sources */,
-				833DBC32CB4A411CA2E1FBF4 /* advancing_front.cc in Sources */,
-				89939A908EA344F685D3EC4D /* cdt.cc in Sources */,
-				93C93490D1A645159F49630E /* sweep.cc in Sources */,
-				6955346149D346A0AEE7AA13 /* sweep_context.cc in Sources */,
-				2CA0229CCE5C4D0BB44176AB /* ioapi.c in Sources */,
-				6B5223FAAD874885A6B3ED5C /* unzip.c in Sources */,
+				7F79242A1AB43E20005A8E5D /* 3DSConverter.cpp in Sources */,
+				7F79242B1AB43E20005A8E5D /* 3DSExporter.cpp in Sources */,
+				7F79242C1AB43E20005A8E5D /* 3DSLoader.cpp in Sources */,
+				7F79242D1AB43E20005A8E5D /* ACLoader.cpp in Sources */,
+				7F79242E1AB43E20005A8E5D /* ASELoader.cpp in Sources */,
+				7F79242F1AB43E20005A8E5D /* ASEParser.cpp in Sources */,
+				7F7924301AB43E20005A8E5D /* AssbinExporter.cpp in Sources */,
+				7F7924311AB43E20005A8E5D /* AssbinLoader.cpp in Sources */,
+				7F7924321AB43E20005A8E5D /* Assimp.cpp in Sources */,
+				7F7924331AB43E20005A8E5D /* AssimpCExport.cpp in Sources */,
+				7F7924341AB43E20005A8E5D /* AssimpPCH.cpp in Sources */,
+				7F7924351AB43E20005A8E5D /* AssxmlExporter.cpp in Sources */,
+				7F7924361AB43E20005A8E5D /* B3DImporter.cpp in Sources */,
+				7F7924371AB43E20005A8E5D /* BVHLoader.cpp in Sources */,
+				7F7924381AB43E20005A8E5D /* BaseImporter.cpp in Sources */,
+				7F7924391AB43E20005A8E5D /* BaseProcess.cpp in Sources */,
+				7F79243A1AB43E20005A8E5D /* Bitmap.cpp in Sources */,
+				7F79243B1AB43E20005A8E5D /* BlenderBMesh.cpp in Sources */,
+				7F79243C1AB43E20005A8E5D /* BlenderDNA.cpp in Sources */,
+				7F79243D1AB43E20005A8E5D /* BlenderLoader.cpp in Sources */,
+				7F79243E1AB43E20005A8E5D /* BlenderModifier.cpp in Sources */,
+				7F79243F1AB43E20005A8E5D /* BlenderScene.cpp in Sources */,
+				7F7924401AB43E20005A8E5D /* BlenderTessellator.cpp in Sources */,
+				7F7924411AB43E20005A8E5D /* COBLoader.cpp in Sources */,
+				7F7924421AB43E20005A8E5D /* CSMLoader.cpp in Sources */,
+				7F7924431AB43E20005A8E5D /* CalcTangentsProcess.cpp in Sources */,
+				7F7924441AB43E20005A8E5D /* ColladaExporter.cpp in Sources */,
+				7F7924451AB43E20005A8E5D /* ColladaLoader.cpp in Sources */,
+				7F7924461AB43E20005A8E5D /* ColladaParser.cpp in Sources */,
+				7F7924471AB43E20005A8E5D /* ComputeUVMappingProcess.cpp in Sources */,
+				7F7924481AB43E20005A8E5D /* ConvertToLHProcess.cpp in Sources */,
+				7F7924491AB43E20005A8E5D /* DXFLoader.cpp in Sources */,
+				7F79244A1AB43E20005A8E5D /* DeboneProcess.cpp in Sources */,
+				7F79244B1AB43E20005A8E5D /* DefaultIOStream.cpp in Sources */,
+				7F79244C1AB43E20005A8E5D /* DefaultIOSystem.cpp in Sources */,
+				7F79244D1AB43E20005A8E5D /* DefaultLogger.cpp in Sources */,
+				7F79244E1AB43E20005A8E5D /* Exporter.cpp in Sources */,
+				7F79244F1AB43E20005A8E5D /* FBXAnimation.cpp in Sources */,
+				7F7924501AB43E20005A8E5D /* FBXBinaryTokenizer.cpp in Sources */,
+				7F7924511AB43E20005A8E5D /* FBXConverter.cpp in Sources */,
+				7F7924521AB43E20005A8E5D /* FBXDeformer.cpp in Sources */,
+				7F7924531AB43E20005A8E5D /* FBXDocument.cpp in Sources */,
+				7F7924541AB43E20005A8E5D /* FBXDocumentUtil.cpp in Sources */,
+				7F7924551AB43E20005A8E5D /* FBXImporter.cpp in Sources */,
+				7F7924561AB43E20005A8E5D /* FBXMaterial.cpp in Sources */,
+				7F7924571AB43E20005A8E5D /* FBXMeshGeometry.cpp in Sources */,
+				7F7924581AB43E20005A8E5D /* FBXModel.cpp in Sources */,
+				7F7924591AB43E20005A8E5D /* FBXNodeAttribute.cpp in Sources */,
+				7F79245A1AB43E20005A8E5D /* FBXParser.cpp in Sources */,
+				7F79245B1AB43E20005A8E5D /* FBXProperties.cpp in Sources */,
+				7F79245C1AB43E20005A8E5D /* FBXTokenizer.cpp in Sources */,
+				7F79245D1AB43E20005A8E5D /* FBXUtil.cpp in Sources */,
+				7F79245E1AB43E20005A8E5D /* FindDegenerates.cpp in Sources */,
+				7F79245F1AB43E20005A8E5D /* FindInstancesProcess.cpp in Sources */,
+				7F7924601AB43E20005A8E5D /* FindInvalidDataProcess.cpp in Sources */,
+				7F7924611AB43E20005A8E5D /* FixNormalsStep.cpp in Sources */,
+				7F7924621AB43E20005A8E5D /* GenFaceNormalsProcess.cpp in Sources */,
+				7F7924631AB43E20005A8E5D /* GenVertexNormalsProcess.cpp in Sources */,
+				7F7924641AB43E20005A8E5D /* HMPLoader.cpp in Sources */,
+				7F7924651AB43E20005A8E5D /* IFCBoolean.cpp in Sources */,
+				7F7924661AB43E20005A8E5D /* IFCCurve.cpp in Sources */,
+				7F7924671AB43E20005A8E5D /* IFCGeometry.cpp in Sources */,
+				7F7924681AB43E20005A8E5D /* IFCLoader.cpp in Sources */,
+				7F7924691AB43E20005A8E5D /* IFCMaterial.cpp in Sources */,
+				7F79246A1AB43E20005A8E5D /* IFCOpenings.cpp in Sources */,
+				7F79246B1AB43E20005A8E5D /* IFCProfile.cpp in Sources */,
+				7F79246C1AB43E20005A8E5D /* IFCReaderGen.cpp in Sources */,
+				7F79246D1AB43E20005A8E5D /* IFCUtil.cpp in Sources */,
+				7F79246E1AB43E20005A8E5D /* IRRLoader.cpp in Sources */,
+				7F79246F1AB43E20005A8E5D /* IRRMeshLoader.cpp in Sources */,
+				7F7924701AB43E20005A8E5D /* IRRShared.cpp in Sources */,
+				7F7924711AB43E20005A8E5D /* Importer.cpp in Sources */,
+				7F7924721AB43E20005A8E5D /* ImporterRegistry.cpp in Sources */,
+				7F7924731AB43E20005A8E5D /* ImproveCacheLocality.cpp in Sources */,
+				7F7924741AB43E20005A8E5D /* JoinVerticesProcess.cpp in Sources */,
+				7F7924751AB43E20005A8E5D /* LWOAnimation.cpp in Sources */,
+				7F7924761AB43E20005A8E5D /* LWOBLoader.cpp in Sources */,
+				7F7924771AB43E20005A8E5D /* LWOLoader.cpp in Sources */,
+				7F7924781AB43E20005A8E5D /* LWOMaterial.cpp in Sources */,
+				7F7924791AB43E20005A8E5D /* LWSLoader.cpp in Sources */,
+				7F79247A1AB43E20005A8E5D /* LimitBoneWeightsProcess.cpp in Sources */,
+				7F79247B1AB43E20005A8E5D /* MD2Loader.cpp in Sources */,
+				7F79247C1AB43E20005A8E5D /* MD3Loader.cpp in Sources */,
+				7F79247D1AB43E20005A8E5D /* MD5Loader.cpp in Sources */,
+				7F79247E1AB43E20005A8E5D /* MD5Parser.cpp in Sources */,
+				7F79247F1AB43E20005A8E5D /* MDCLoader.cpp in Sources */,
+				7F7924801AB43E20005A8E5D /* MDLLoader.cpp in Sources */,
+				7F7924811AB43E20005A8E5D /* MDLMaterialLoader.cpp in Sources */,
+				7F7924821AB43E20005A8E5D /* MS3DLoader.cpp in Sources */,
+				7F7924831AB43E20005A8E5D /* MakeVerboseFormat.cpp in Sources */,
+				7F7924841AB43E20005A8E5D /* MaterialSystem.cpp in Sources */,
+				7F7924851AB43E20005A8E5D /* NDOLoader.cpp in Sources */,
+				7F7924861AB43E20005A8E5D /* NFFLoader.cpp in Sources */,
+				7F7924871AB43E20005A8E5D /* OFFLoader.cpp in Sources */,
+				7F7924881AB43E20005A8E5D /* ObjExporter.cpp in Sources */,
+				7F7924891AB43E20005A8E5D /* ObjFileImporter.cpp in Sources */,
+				7F79248A1AB43E20005A8E5D /* ObjFileMtlImporter.cpp in Sources */,
+				7F79248B1AB43E20005A8E5D /* ObjFileParser.cpp in Sources */,
+				7F79248C1AB43E20005A8E5D /* OgreBinarySerializer.cpp in Sources */,
+				7F79248D1AB43E20005A8E5D /* OgreImporter.cpp in Sources */,
+				7F79248E1AB43E20005A8E5D /* OgreMaterial.cpp in Sources */,
+				7F79248F1AB43E20005A8E5D /* OgreStructs.cpp in Sources */,
+				7F7924901AB43E20005A8E5D /* OgreXmlSerializer.cpp in Sources */,
+				7F7924911AB43E20005A8E5D /* OptimizeGraph.cpp in Sources */,
+				7F7924921AB43E20005A8E5D /* OptimizeMeshes.cpp in Sources */,
+				7F7924931AB43E20005A8E5D /* PlyExporter.cpp in Sources */,
+				7F7924941AB43E20005A8E5D /* PlyLoader.cpp in Sources */,
+				7F7924951AB43E20005A8E5D /* PlyParser.cpp in Sources */,
+				7F7924961AB43E20005A8E5D /* PostStepRegistry.cpp in Sources */,
+				7F7924971AB43E20005A8E5D /* PretransformVertices.cpp in Sources */,
+				7F7924981AB43E20005A8E5D /* ProcessHelper.cpp in Sources */,
+				7F7924991AB43E20005A8E5D /* Q3BSPFileImporter.cpp in Sources */,
+				7F79249A1AB43E20005A8E5D /* Q3BSPFileParser.cpp in Sources */,
+				7F79249B1AB43E20005A8E5D /* Q3BSPZipArchive.cpp in Sources */,
+				7F79249C1AB43E20005A8E5D /* Q3DLoader.cpp in Sources */,
+				7F79249D1AB43E20005A8E5D /* RawLoader.cpp in Sources */,
+				7F79249E1AB43E20005A8E5D /* RemoveComments.cpp in Sources */,
+				7F79249F1AB43E20005A8E5D /* RemoveRedundantMaterials.cpp in Sources */,
+				7F7924A01AB43E20005A8E5D /* RemoveVCProcess.cpp in Sources */,
+				7F7924A11AB43E20005A8E5D /* SGSpatialSort.cpp in Sources */,
+				7F7924A21AB43E20005A8E5D /* SMDLoader.cpp in Sources */,
+				7F7924A31AB43E20005A8E5D /* STEPFileEncoding.cpp in Sources */,
+				7F7924A41AB43E20005A8E5D /* STEPFileReader.cpp in Sources */,
+				7F7924A51AB43E20005A8E5D /* STLExporter.cpp in Sources */,
+				7F7924A61AB43E20005A8E5D /* STLLoader.cpp in Sources */,
+				7F7924A71AB43E20005A8E5D /* SceneCombiner.cpp in Sources */,
+				7F7924A81AB43E20005A8E5D /* ScenePreprocessor.cpp in Sources */,
+				7F7924A91AB43E20005A8E5D /* SkeletonMeshBuilder.cpp in Sources */,
+				7F7924AA1AB43E20005A8E5D /* SortByPTypeProcess.cpp in Sources */,
+				7F7924AB1AB43E20005A8E5D /* SpatialSort.cpp in Sources */,
+				7F7924AC1AB43E20005A8E5D /* SplitByBoneCountProcess.cpp in Sources */,
+				7F7924AD1AB43E20005A8E5D /* SplitLargeMeshes.cpp in Sources */,
+				7F7924AE1AB43E20005A8E5D /* StandardShapes.cpp in Sources */,
+				7F7924AF1AB43E20005A8E5D /* Subdivision.cpp in Sources */,
+				7F7924B01AB43E20005A8E5D /* TargetAnimation.cpp in Sources */,
+				7F7924B11AB43E20005A8E5D /* TerragenLoader.cpp in Sources */,
+				7F7924B21AB43E20005A8E5D /* TextureTransform.cpp in Sources */,
+				7F7924B31AB43E20005A8E5D /* TriangulateProcess.cpp in Sources */,
+				7F7924B41AB43E20005A8E5D /* UnrealLoader.cpp in Sources */,
+				7F7924B51AB43E20005A8E5D /* ValidateDataStructure.cpp in Sources */,
+				7F7924B61AB43E20005A8E5D /* VertexTriangleAdjacency.cpp in Sources */,
+				7F7924B71AB43E20005A8E5D /* XFileExporter.cpp in Sources */,
+				7F7924B81AB43E20005A8E5D /* XFileImporter.cpp in Sources */,
+				7F7924B91AB43E20005A8E5D /* XFileParser.cpp in Sources */,
+				7F7924BA1AB43E20005A8E5D /* XGLLoader.cpp in Sources */,
+				7F7924BB1AB43E20005A8E5D /* ConvertUTF.c in Sources */,
+				7F7924BC1AB43E20005A8E5D /* clipper.cpp in Sources */,
+				7F7924BD1AB43E20005A8E5D /* irrXML.cpp in Sources */,
+				7F7924BE1AB43E20005A8E5D /* shapes.cc in Sources */,
+				7F7924BF1AB43E20005A8E5D /* advancing_front.cc in Sources */,
+				7F7924C01AB43E20005A8E5D /* cdt.cc in Sources */,
+				7F7924C11AB43E20005A8E5D /* sweep.cc in Sources */,
+				7F7924C21AB43E20005A8E5D /* sweep_context.cc in Sources */,
+				7F7924C31AB43E20005A8E5D /* ioapi.c in Sources */,
+				7F7924C41AB43E20005A8E5D /* unzip.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1668,15 +1683,32 @@
 			};
 			name = RelWithDebInfo;
 		};
-		8382AB21FE5948768A6ED06A /* Release */ = {
+		7F7922921AB43AC3005A8E5D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 3.0.0;
 				DYLIB_CURRENT_VERSION = 3.1.1;
-				EXECUTABLE_EXTENSION = a;
-				EXECUTABLE_PREFIX = lib;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					assimp_EXPORTS,
 					ASSIMP_BUILD_BOOST_WORKAROUND,
@@ -1685,11 +1717,170 @@
 					ASSIMP_BUILD_DLL_EXPORT,
 					"$(inherited)",
 				);
-				PRODUCT_NAME = assimp.3.1.1;
-				SECTORDER_FLAGS = "";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround include $(inherited)";
 			};
+			name = Debug;
+		};
+		7F7922931AB43AC3005A8E5D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 3.0.0;
+				DYLIB_CURRENT_VERSION = 3.1.1;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					assimp_EXPORTS,
+					ASSIMP_BUILD_BOOST_WORKAROUND,
+					ASSIMP_BUILD_NO_OWN_ZLIB,
+					ASSIMP_BUILD_NO_C4D_IMPORTER,
+					ASSIMP_BUILD_DLL_EXPORT,
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround include $(inherited)";
+				VALIDATE_PRODUCT = YES;
+			};
 			name = Release;
+		};
+		7F7922941AB43AC3005A8E5D /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 3.0.0;
+				DYLIB_CURRENT_VERSION = 3.1.1;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					assimp_EXPORTS,
+					ASSIMP_BUILD_BOOST_WORKAROUND,
+					ASSIMP_BUILD_NO_OWN_ZLIB,
+					ASSIMP_BUILD_NO_C4D_IMPORTER,
+					ASSIMP_BUILD_DLL_EXPORT,
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround include $(inherited)";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = MinSizeRel;
+		};
+		7F7922951AB43AC3005A8E5D /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 3.0.0;
+				DYLIB_CURRENT_VERSION = 3.1.1;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					assimp_EXPORTS,
+					ASSIMP_BUILD_BOOST_WORKAROUND,
+					ASSIMP_BUILD_NO_OWN_ZLIB,
+					ASSIMP_BUILD_NO_C4D_IMPORTER,
+					ASSIMP_BUILD_DLL_EXPORT,
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround include $(inherited)";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = RelWithDebInfo;
 		};
 		9604718722A94CBB9F87A9D8 /* MinSizeRel */ = {
 			isa = XCBuildConfiguration;
@@ -1697,29 +1888,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
 				MACH_O_TYPE = staticlib;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
-			};
-			name = MinSizeRel;
-		};
-		BCDC8BE7426B43EA8E129CD8 /* MinSizeRel */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 3.0.0;
-				DYLIB_CURRENT_VERSION = 3.1.1;
-				EXECUTABLE_EXTENSION = a;
-				EXECUTABLE_PREFIX = lib;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_OPTIMIZATION_LEVEL = s;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					assimp_EXPORTS,
-					ASSIMP_BUILD_BOOST_WORKAROUND,
-					ASSIMP_BUILD_NO_OWN_ZLIB,
-					ASSIMP_BUILD_NO_C4D_IMPORTER,
-					ASSIMP_BUILD_DLL_EXPORT,
-					"$(inherited)",
-				);
-				PRODUCT_NAME = assimp.3.1.1;
-				SECTORDER_FLAGS = "";
-				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround include $(inherited)";
 			};
 			name = MinSizeRel;
 		};
@@ -1732,29 +1900,6 @@
 			};
 			name = Debug;
 		};
-		D96F415CC43A4E33AB03FCDA /* RelWithDebInfo */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 3.0.0;
-				DYLIB_CURRENT_VERSION = 3.1.1;
-				EXECUTABLE_EXTENSION = a;
-				EXECUTABLE_PREFIX = lib;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 2;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					assimp_EXPORTS,
-					ASSIMP_BUILD_BOOST_WORKAROUND,
-					ASSIMP_BUILD_NO_OWN_ZLIB,
-					ASSIMP_BUILD_NO_C4D_IMPORTER,
-					ASSIMP_BUILD_DLL_EXPORT,
-					"$(inherited)",
-				);
-				PRODUCT_NAME = assimp.3.1.1;
-				SECTORDER_FLAGS = "";
-				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround include $(inherited)";
-			};
-			name = RelWithDebInfo;
-		};
 		DB0088F8DB7C490CBA3CCB90 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1763,29 +1908,6 @@
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
 			};
 			name = Release;
-		};
-		DEA8514637B640629DA686B3 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 3.0.0;
-				DYLIB_CURRENT_VERSION = 3.1.1;
-				EXECUTABLE_EXTENSION = a;
-				EXECUTABLE_PREFIX = lib;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					assimp_EXPORTS,
-					ASSIMP_BUILD_BOOST_WORKAROUND,
-					ASSIMP_BUILD_NO_OWN_ZLIB,
-					ASSIMP_BUILD_NO_C4D_IMPORTER,
-					ASSIMP_BUILD_DLL_EXPORT,
-					"$(inherited)",
-				);
-				PRODUCT_NAME = assimp.3.1.1;
-				SECTORDER_FLAGS = "";
-				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround include $(inherited)";
-			};
-			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -1801,13 +1923,13 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		E978D36E8D2F4B8DB9D9FF64 /* Build configuration list for PBXNativeTarget "assimp" */ = {
+		7F7922911AB43AC3005A8E5D /* Build configuration list for PBXNativeTarget "assimp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DEA8514637B640629DA686B3 /* Debug */,
-				8382AB21FE5948768A6ED06A /* Release */,
-				BCDC8BE7426B43EA8E129CD8 /* MinSizeRel */,
-				D96F415CC43A4E33AB03FCDA /* RelWithDebInfo */,
+				7F7922921AB43AC3005A8E5D /* Debug */,
+				7F7922931AB43AC3005A8E5D /* Release */,
+				7F7922941AB43AC3005A8E5D /* MinSizeRel */,
+				7F7922951AB43AC3005A8E5D /* RelWithDebInfo */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

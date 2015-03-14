@@ -492,13 +492,18 @@ void Exporter :: UnregisterExporter(const char* id)
 	}
 }
 
-void ExportProperties :: CopyProperties(ExportProperties* dest,const ExportProperties* source)
+ExportProperties :: ExportProperties()
 {
-	if (!source || !dest) return;
-	dest->mIntProperties = IntPropertyMap(source->mIntProperties);
-	dest->mFloatProperties = FloatPropertyMap(source->mFloatProperties);
-	dest->mStringProperties = StringPropertyMap(source->mStringProperties);
-	dest->mMatrixProperties = MatrixPropertyMap(source->mMatrixProperties);
+
+}
+
+ExportProperties :: ExportProperties(const ExportProperties* source)
+{
+	if (!source) return;
+	mIntProperties = IntPropertyMap(source->mIntProperties);
+	mFloatProperties = FloatPropertyMap(source->mFloatProperties);
+	mStringProperties = StringPropertyMap(source->mStringProperties);
+	mMatrixProperties = MatrixPropertyMap(source->mMatrixProperties);
 }
 
 
@@ -507,9 +512,7 @@ void ExportProperties :: CopyProperties(ExportProperties* dest,const ExportPrope
 void ExportProperties :: SetPropertyInteger(const char* szName, int iValue, 
 	bool* bWasExisting /*= NULL*/)
 {
-	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<int>(mIntProperties, szName,iValue,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+	SetGenericProperty<int>(mIntProperties, szName,iValue,bWasExisting);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -517,9 +520,7 @@ void ExportProperties :: SetPropertyInteger(const char* szName, int iValue,
 void ExportProperties :: SetPropertyFloat(const char* szName, float iValue, 
 	bool* bWasExisting /*= NULL*/)
 {
-	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<float>(mFloatProperties, szName,iValue,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+	SetGenericProperty<float>(mFloatProperties, szName,iValue,bWasExisting);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -527,9 +528,7 @@ void ExportProperties :: SetPropertyFloat(const char* szName, float iValue,
 void ExportProperties :: SetPropertyString(const char* szName, const std::string& value, 
 	bool* bWasExisting /*= NULL*/)
 {
-	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<std::string>(mStringProperties, szName,value,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+	SetGenericProperty<std::string>(mStringProperties, szName,value,bWasExisting);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -537,9 +536,7 @@ void ExportProperties :: SetPropertyString(const char* szName, const std::string
 void ExportProperties :: SetPropertyMatrix(const char* szName, const aiMatrix4x4& value, 
 	bool* bWasExisting /*= NULL*/)
 {
-	ASSIMP_BEGIN_EXCEPTION_REGION();
-	SetGenericProperty<aiMatrix4x4>(mMatrixProperties, szName,value,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+	SetGenericProperty<aiMatrix4x4>(mMatrixProperties, szName,value,bWasExisting);
 }
 
 // ------------------------------------------------------------------------------------------------

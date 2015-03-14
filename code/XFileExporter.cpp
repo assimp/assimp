@@ -79,12 +79,11 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 	}
 
 	// create/copy Properties
-	ExportProperties props;
-	ExportProperties::CopyProperties(&props, pProperties);
+	ExportProperties props(pProperties);
 
 	// set standard properties if not set
-	if (!props.HasPropertyBool("AI_CONFIG_XFILE_64BIT")) props.SetPropertyBool("AI_CONFIG_XFILE_64BIT", false);
-	if (!props.HasPropertyBool("AI_CONFIG_XFILE_BAKETRANSFORM")) props.SetPropertyBool("AI_CONFIG_XFILE_BAKETRANSFORM", false);
+	if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT, false);
+	if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_BAKETRANSFORM)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_BAKETRANSFORM, false);
 
 	// invoke the exporter 
 	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);
@@ -106,9 +105,6 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 // Constructor for a specific scene to export
 XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mIOSystem(pIOSystem), mPath(path), mFile(file), mProperties(pProperties)
 {
-	//DefaultLogger::get()->debug(boost::str( boost::format( "AI_CONFIG_XFILE_64BIT <%i>.") % mProperties->GetPropertyBool("AI_CONFIG_XFILE_64BIT", false)));
-	//DefaultLogger::get()->debug(boost::str( boost::format( "AI_CONFIG_XFILE_BAKETRANSFORM <%i>.") % mProperties->GetPropertyBool("AI_CONFIG_XFILE_BAKETRANSFORM", false)));
-
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
 
@@ -159,7 +155,7 @@ void XFileExporter::WriteFile()
 // Writes the asset header
 void XFileExporter::WriteHeader()
 {
-	if (mProperties->GetPropertyBool("AI_CONFIG_XFILE_64BIT") == true)
+	if (mProperties->GetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT) == true)
 		mOutput << startstr << "xof 0303txt 0064" << endstr;
 	else
 		mOutput << startstr << "xof 0303txt 0032" << endstr;

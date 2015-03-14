@@ -328,13 +328,17 @@ public:
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Get a deep copy of a scene
-	 *
-	 *  @param dest Receives a pointer to the destination scene
-	 *  @param src Source scene - remains unmodified.
-	 */
-	static void CopyProperties(ExportProperties* dest,const ExportProperties* source);
+	/** Standard constructor
+	* @see ExportProperties()
+	*/
+
+	ExportProperties();
+
+	/** Copy constructor
+	* @see ExportProperties(const ExportProperties* source)
+	*/
+	ExportProperties(const ExportProperties* source);
+
 
 	// -------------------------------------------------------------------
 	/** Set an integer configuration property.

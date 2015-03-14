@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 #include "cexport.h"
+#include <map>
 
 namespace Assimp	{
 	class ExporterPimpl;

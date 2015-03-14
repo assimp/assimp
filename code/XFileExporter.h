@@ -80,7 +80,7 @@ protected:
 	void WriteNode( aiNode* pNode );
 
 	/// write a mesh entry of the scene
-	void WriteMesh(const aiMesh* mesh);
+	void WriteMesh( aiMesh* mesh);
 
 	/// Enters a new xml element, which increases the indentation
 	void PushTag() { startstr.append( "  "); }
@@ -93,6 +93,9 @@ public:
 	std::stringstream mOutput;
 
 protected:
+
+	/// normalize the name to be accepted by xfile readers
+	std::string toXFileString(aiString &name);
 
 	/// hold the properties pointer
 	const ExportProperties* mProperties;

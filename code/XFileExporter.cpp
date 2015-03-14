@@ -307,7 +307,7 @@ void XFileExporter::WriteNode( aiNode* pNode)
 		ss << "Node_" << pNode;
 		pNode->mName.Set(ss.str());
 	}
-	mOutput << startstr << "Frame " << pNode->mName.C_Str() << " {" << endstr;
+	mOutput << startstr << "Frame " << toXFileString(pNode->mName) << " {" << endstr;
 
 	PushTag();
 
@@ -327,9 +327,9 @@ void XFileExporter::WriteNode( aiNode* pNode)
 	mOutput << startstr << "}" << endstr << endstr;
 }
 
-void XFileExporter::WriteMesh(const aiMesh* mesh)
+void XFileExporter::WriteMesh(aiMesh* mesh)
 {
-	mOutput << startstr << "Mesh " << mesh->mName.C_Str() << "_mShape" << " {" << endstr;
+	mOutput << startstr << "Mesh " << toXFileString(mesh->mName) << "_mShape" << " {" << endstr;
 
 	PushTag();
 
@@ -505,6 +505,13 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 
 }
 
+std::string XFileExporter::toXFileString(aiString &name)
+{
+	std::string str = std::string(name.C_Str());
+	std::replace(str.begin(), str.end(), '<', '_');
+	std::replace(str.begin(), str.end(), '>', '_');
+	return str;
+}
 
 void XFileExporter::writePath(aiString path)
 {

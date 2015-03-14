@@ -120,7 +120,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 	 * offset 2 and 3)
 	 */
 	if ((rounded  = (int)info.mTranslation.x))	{
-		float out;
+		float out = 0.0f;
 		szTemp[0] = 0;
 		if (aiTextureMapMode_Wrap == info.mapU)	{
 			// Wrap - simple take the fraction of the field
@@ -153,7 +153,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 	 * offset 2 and 3)
 	 */
 	if ((rounded  = (int)info.mTranslation.y))	{
-		float out;
+		float out = 0.0f;
 		szTemp[0] = 0;
 		if (aiTextureMapMode_Wrap == info.mapV)	{
 			// Wrap - simple take the fraction of the field

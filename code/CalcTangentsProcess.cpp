@@ -167,7 +167,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// their tangent vectors are set to qnan.
 			for (unsigned int i = 0; i < face.mNumIndices;++i)
 			{
-				register unsigned int idx = face.mIndices[i];
+				unsigned int idx = face.mIndices[i];
 				vertexDone  [idx] = true;
 				meshTang    [idx] = aiVector3D(qnan);
 				meshBitang  [idx] = aiVector3D(qnan);

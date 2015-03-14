@@ -95,7 +95,7 @@ private:
 
 	// -------------------------------------------------------------------
 	/** Prepend 'COB: ' and throw msg.*/
-	static void ThrowException(const std::string& msg);
+	AI_WONT_RETURN static void ThrowException(const std::string& msg) AI_WONT_RETURN_SUFFIX;
 
 	// -------------------------------------------------------------------
 	/** @brief Read from an ascii scene/object file

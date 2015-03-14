@@ -86,7 +86,8 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // signal tokenization error, this is always unrecoverable. Throws DeadlyImportError.
-void TokenizeError(const std::string& message, unsigned int line, unsigned int column)
+AI_WONT_RETURN void TokenizeError(const std::string& message, unsigned int line, unsigned int column) AI_WONT_RETURN_SUFFIX;
+AI_WONT_RETURN void TokenizeError(const std::string& message, unsigned int line, unsigned int column)
 {
 	throw DeadlyImportError(Util::AddLineAndColumn("FBX-Tokenize",message,line,column));
 }

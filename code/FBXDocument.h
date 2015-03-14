@@ -242,20 +242,20 @@ public:
 
 public:
 
-	fbx_simple_property(Position, aiVector3D, aiVector3D(0,0,0));
-	fbx_simple_property(UpVector, aiVector3D, aiVector3D(0,1,0));
-	fbx_simple_property(InterestPosition, aiVector3D, aiVector3D(0,0,0));
+	fbx_simple_property(Position, aiVector3D, aiVector3D(0,0,0))
+	fbx_simple_property(UpVector, aiVector3D, aiVector3D(0,1,0))
+	fbx_simple_property(InterestPosition, aiVector3D, aiVector3D(0,0,0))
 
-	fbx_simple_property(AspectWidth, float, 1.0f);
-	fbx_simple_property(AspectHeight, float, 1.0f);
-	fbx_simple_property(FilmWidth, float, 1.0f);
-	fbx_simple_property(FilmHeight, float, 1.0f);
+	fbx_simple_property(AspectWidth, float, 1.0f)
+	fbx_simple_property(AspectHeight, float, 1.0f)
+	fbx_simple_property(FilmWidth, float, 1.0f)
+	fbx_simple_property(FilmHeight, float, 1.0f)
 
-	fbx_simple_property(FilmAspectRatio, float, 1.0f);
-	fbx_simple_property(ApertureMode, int, 0);
+	fbx_simple_property(FilmAspectRatio, float, 1.0f)
+	fbx_simple_property(ApertureMode, int, 0)
 
-	fbx_simple_property(FieldOfView, float, 1.0f);
-	fbx_simple_property(FocalLength, float, 1.0f);
+	fbx_simple_property(FieldOfView, float, 1.0f)
+	fbx_simple_property(FocalLength, float, 1.0f)
 
 private:
 };
@@ -314,37 +314,37 @@ public:
 
 public:
 
-	fbx_simple_property(Color, aiVector3D, aiVector3D(1,1,1));
-	fbx_simple_enum_property(LightType, Type, 0);
-	fbx_simple_property(CastLightOnObject, bool, false);
-	fbx_simple_property(DrawVolumetricLight, bool, true);
-	fbx_simple_property(DrawGroundProjection, bool, true);
-	fbx_simple_property(DrawFrontFacingVolumetricLight, bool, false);
-	fbx_simple_property(Intensity, float, 1.0f);
-	fbx_simple_property(InnerAngle, float, 0.0f);
-	fbx_simple_property(OuterAngle, float, 45.0f);
-	fbx_simple_property(Fog, int, 50);
-	fbx_simple_enum_property(DecayType, Decay, 0);
-	fbx_simple_property(DecayStart, int, 0);
-	fbx_simple_property(FileName, std::string, "");
+	fbx_simple_property(Color, aiVector3D, aiVector3D(1,1,1))
+	fbx_simple_enum_property(LightType, Type, 0)
+	fbx_simple_property(CastLightOnObject, bool, false)
+	fbx_simple_property(DrawVolumetricLight, bool, true)
+	fbx_simple_property(DrawGroundProjection, bool, true)
+	fbx_simple_property(DrawFrontFacingVolumetricLight, bool, false)
+	fbx_simple_property(Intensity, float, 1.0f)
+	fbx_simple_property(InnerAngle, float, 0.0f)
+	fbx_simple_property(OuterAngle, float, 45.0f)
+	fbx_simple_property(Fog, int, 50)
+	fbx_simple_enum_property(DecayType, Decay, 0)
+	fbx_simple_property(DecayStart, int, 0)
+	fbx_simple_property(FileName, std::string, "")
 
-	fbx_simple_property(EnableNearAttenuation, bool, false);
-	fbx_simple_property(NearAttenuationStart, float, 0.0f);
-	fbx_simple_property(NearAttenuationEnd, float, 0.0f);
-	fbx_simple_property(EnableFarAttenuation, bool, false);
-	fbx_simple_property(FarAttenuationStart, float, 0.0f);
-	fbx_simple_property(FarAttenuationEnd, float, 0.0f);
+	fbx_simple_property(EnableNearAttenuation, bool, false)
+	fbx_simple_property(NearAttenuationStart, float, 0.0f)
+	fbx_simple_property(NearAttenuationEnd, float, 0.0f)
+	fbx_simple_property(EnableFarAttenuation, bool, false)
+	fbx_simple_property(FarAttenuationStart, float, 0.0f)
+	fbx_simple_property(FarAttenuationEnd, float, 0.0f)
 
-	fbx_simple_property(CastShadows, bool, true);
-	fbx_simple_property(ShadowColor, aiVector3D, aiVector3D(0,0,0));
+	fbx_simple_property(CastShadows, bool, true)
+	fbx_simple_property(ShadowColor, aiVector3D, aiVector3D(0,0,0))
 
-	fbx_simple_property(AreaLightShape, int, 0);
+	fbx_simple_property(AreaLightShape, int, 0)
 
-	fbx_simple_property(LeftBarnDoor, float, 20.0f);
-	fbx_simple_property(RightBarnDoor, float, 20.0f);
-	fbx_simple_property(TopBarnDoor, float, 20.0f);
-	fbx_simple_property(BottomBarnDoor, float, 20.0f);
-	fbx_simple_property(EnableBarnDoor, bool, true);
+	fbx_simple_property(LeftBarnDoor, float, 20.0f)
+	fbx_simple_property(RightBarnDoor, float, 20.0f)
+	fbx_simple_property(TopBarnDoor, float, 20.0f)
+	fbx_simple_property(BottomBarnDoor, float, 20.0f)
+	fbx_simple_property(EnableBarnDoor, bool, true)
 
 
 private:
@@ -387,81 +387,81 @@ public:
 
 public:
 
-	fbx_simple_property(QuaternionInterpolate, int, 0);
+	fbx_simple_property(QuaternionInterpolate, int, 0)
 
-	fbx_simple_property(RotationOffset, aiVector3D, aiVector3D());
-	fbx_simple_property(RotationPivot, aiVector3D, aiVector3D());
-	fbx_simple_property(ScalingOffset, aiVector3D, aiVector3D());
-	fbx_simple_property(ScalingPivot, aiVector3D, aiVector3D());
-	fbx_simple_property(TranslationActive, bool, false);
+	fbx_simple_property(RotationOffset, aiVector3D, aiVector3D())
+	fbx_simple_property(RotationPivot, aiVector3D, aiVector3D())
+	fbx_simple_property(ScalingOffset, aiVector3D, aiVector3D())
+	fbx_simple_property(ScalingPivot, aiVector3D, aiVector3D())
+	fbx_simple_property(TranslationActive, bool, false)
 
-	fbx_simple_property(TranslationMin, aiVector3D, aiVector3D());
-	fbx_simple_property(TranslationMax, aiVector3D, aiVector3D());
+	fbx_simple_property(TranslationMin, aiVector3D, aiVector3D())
+	fbx_simple_property(TranslationMax, aiVector3D, aiVector3D())
 
-	fbx_simple_property(TranslationMinX, bool, false);
-	fbx_simple_property(TranslationMaxX, bool, false);
-	fbx_simple_property(TranslationMinY, bool, false);
-	fbx_simple_property(TranslationMaxY, bool, false);
-	fbx_simple_property(TranslationMinZ, bool, false);
-	fbx_simple_property(TranslationMaxZ, bool, false);
+	fbx_simple_property(TranslationMinX, bool, false)
+	fbx_simple_property(TranslationMaxX, bool, false)
+	fbx_simple_property(TranslationMinY, bool, false)
+	fbx_simple_property(TranslationMaxY, bool, false)
+	fbx_simple_property(TranslationMinZ, bool, false)
+	fbx_simple_property(TranslationMaxZ, bool, false)
 
-	fbx_simple_enum_property(RotationOrder, RotOrder, 0);
-	fbx_simple_property(RotationSpaceForLimitOnly, bool, false);
-	fbx_simple_property(RotationStiffnessX, float, 0.0f);
-	fbx_simple_property(RotationStiffnessY, float, 0.0f);
-	fbx_simple_property(RotationStiffnessZ, float, 0.0f);
-	fbx_simple_property(AxisLen, float, 0.0f);
+	fbx_simple_enum_property(RotationOrder, RotOrder, 0)
+	fbx_simple_property(RotationSpaceForLimitOnly, bool, false)
+	fbx_simple_property(RotationStiffnessX, float, 0.0f)
+	fbx_simple_property(RotationStiffnessY, float, 0.0f)
+	fbx_simple_property(RotationStiffnessZ, float, 0.0f)
+	fbx_simple_property(AxisLen, float, 0.0f)
 
-	fbx_simple_property(PreRotation, aiVector3D, aiVector3D());
-	fbx_simple_property(PostRotation, aiVector3D, aiVector3D());
-	fbx_simple_property(RotationActive, bool, false);
+	fbx_simple_property(PreRotation, aiVector3D, aiVector3D())
+	fbx_simple_property(PostRotation, aiVector3D, aiVector3D())
+	fbx_simple_property(RotationActive, bool, false)
 
-	fbx_simple_property(RotationMin, aiVector3D, aiVector3D());
-	fbx_simple_property(RotationMax, aiVector3D, aiVector3D());
+	fbx_simple_property(RotationMin, aiVector3D, aiVector3D())
+	fbx_simple_property(RotationMax, aiVector3D, aiVector3D())
 
-	fbx_simple_property(RotationMinX, bool, false);
-	fbx_simple_property(RotationMaxX, bool, false);
-	fbx_simple_property(RotationMinY, bool, false);
-	fbx_simple_property(RotationMaxY, bool, false);
-	fbx_simple_property(RotationMinZ, bool, false);
-	fbx_simple_property(RotationMaxZ, bool, false);
-	fbx_simple_enum_property(InheritType, TransformInheritance, 0);
+	fbx_simple_property(RotationMinX, bool, false)
+	fbx_simple_property(RotationMaxX, bool, false)
+	fbx_simple_property(RotationMinY, bool, false)
+	fbx_simple_property(RotationMaxY, bool, false)
+	fbx_simple_property(RotationMinZ, bool, false)
+	fbx_simple_property(RotationMaxZ, bool, false)
+	fbx_simple_enum_property(InheritType, TransformInheritance, 0)
 
-	fbx_simple_property(ScalingActive, bool, false);
-	fbx_simple_property(ScalingMin, aiVector3D, aiVector3D());
-	fbx_simple_property(ScalingMax, aiVector3D, aiVector3D(1.f,1.f,1.f));
-	fbx_simple_property(ScalingMinX, bool, false);
-	fbx_simple_property(ScalingMaxX, bool, false);
-	fbx_simple_property(ScalingMinY, bool, false);
-	fbx_simple_property(ScalingMaxY, bool, false);
-	fbx_simple_property(ScalingMinZ, bool, false);
-	fbx_simple_property(ScalingMaxZ, bool, false);
+	fbx_simple_property(ScalingActive, bool, false)
+	fbx_simple_property(ScalingMin, aiVector3D, aiVector3D())
+	fbx_simple_property(ScalingMax, aiVector3D, aiVector3D(1.f,1.f,1.f))
+	fbx_simple_property(ScalingMinX, bool, false)
+	fbx_simple_property(ScalingMaxX, bool, false)
+	fbx_simple_property(ScalingMinY, bool, false)
+	fbx_simple_property(ScalingMaxY, bool, false)
+	fbx_simple_property(ScalingMinZ, bool, false)
+	fbx_simple_property(ScalingMaxZ, bool, false)
 
-	fbx_simple_property(GeometricTranslation, aiVector3D, aiVector3D());
-	fbx_simple_property(GeometricRotation, aiVector3D, aiVector3D());
-	fbx_simple_property(GeometricScaling, aiVector3D, aiVector3D(1.f, 1.f, 1.f));
+	fbx_simple_property(GeometricTranslation, aiVector3D, aiVector3D())
+	fbx_simple_property(GeometricRotation, aiVector3D, aiVector3D())
+	fbx_simple_property(GeometricScaling, aiVector3D, aiVector3D(1.f, 1.f, 1.f))
 
-	fbx_simple_property(MinDampRangeX, float, 0.0f);
-	fbx_simple_property(MinDampRangeY, float, 0.0f);
-	fbx_simple_property(MinDampRangeZ, float, 0.0f);
-	fbx_simple_property(MaxDampRangeX, float, 0.0f);
-	fbx_simple_property(MaxDampRangeY, float, 0.0f);
-	fbx_simple_property(MaxDampRangeZ, float, 0.0f);
+	fbx_simple_property(MinDampRangeX, float, 0.0f)
+	fbx_simple_property(MinDampRangeY, float, 0.0f)
+	fbx_simple_property(MinDampRangeZ, float, 0.0f)
+	fbx_simple_property(MaxDampRangeX, float, 0.0f)
+	fbx_simple_property(MaxDampRangeY, float, 0.0f)
+	fbx_simple_property(MaxDampRangeZ, float, 0.0f)
 
-	fbx_simple_property(MinDampStrengthX, float, 0.0f);
-	fbx_simple_property(MinDampStrengthY, float, 0.0f);
-	fbx_simple_property(MinDampStrengthZ, float, 0.0f);
-	fbx_simple_property(MaxDampStrengthX, float, 0.0f);
-	fbx_simple_property(MaxDampStrengthY, float, 0.0f);
-	fbx_simple_property(MaxDampStrengthZ, float, 0.0f);
+	fbx_simple_property(MinDampStrengthX, float, 0.0f)
+	fbx_simple_property(MinDampStrengthY, float, 0.0f)
+	fbx_simple_property(MinDampStrengthZ, float, 0.0f)
+	fbx_simple_property(MaxDampStrengthX, float, 0.0f)
+	fbx_simple_property(MaxDampStrengthY, float, 0.0f)
+	fbx_simple_property(MaxDampStrengthZ, float, 0.0f)
 
-	fbx_simple_property(PreferredAngleX, float, 0.0f);
-	fbx_simple_property(PreferredAngleY, float, 0.0f);
-	fbx_simple_property(PreferredAngleZ, float, 0.0f);
+	fbx_simple_property(PreferredAngleX, float, 0.0f)
+	fbx_simple_property(PreferredAngleY, float, 0.0f)
+	fbx_simple_property(PreferredAngleZ, float, 0.0f)
 
-	fbx_simple_property(Show, bool, true);
-	fbx_simple_property(LODBox, bool, false);
-	fbx_simple_property(Freeze, bool, false);
+	fbx_simple_property(Show, bool, true)
+	fbx_simple_property(LODBox, bool, false)
+	fbx_simple_property(Freeze, bool, false)
 
 public:
 
@@ -1015,10 +1015,10 @@ public:
 
 public:
 
-	fbx_simple_property(LocalStart, uint64_t, 0L);
-	fbx_simple_property(LocalStop, uint64_t, 0L);
-	fbx_simple_property(ReferenceStart, uint64_t, 0L);
-	fbx_simple_property(ReferenceStop, uint64_t, 0L);
+	fbx_simple_property(LocalStart, uint64_t, 0L)
+	fbx_simple_property(LocalStop, uint64_t, 0L)
+	fbx_simple_property(ReferenceStart, uint64_t, 0L)
+	fbx_simple_property(ReferenceStop, uint64_t, 0L)
 
 
 
@@ -1227,18 +1227,18 @@ public:
 	}
 
 
-	fbx_simple_property(UpAxis, int, 1);
-	fbx_simple_property(UpAxisSign, int, 1);
-	fbx_simple_property(FrontAxis, int, 2);
-	fbx_simple_property(FrontAxisSign, int, 1);
-	fbx_simple_property(CoordAxis, int, 0);
-	fbx_simple_property(CoordAxisSign, int, 1);
-	fbx_simple_property(OriginalUpAxis, int, 0);
-	fbx_simple_property(OriginalUpAxisSign, int, 1);
-	fbx_simple_property(UnitScaleFactor, double, 1);
-	fbx_simple_property(OriginalUnitScaleFactor, double, 1);
-	fbx_simple_property(AmbientColor, aiVector3D, aiVector3D(0,0,0));
-	fbx_simple_property(DefaultCamera, std::string, "");
+	fbx_simple_property(UpAxis, int, 1)
+	fbx_simple_property(UpAxisSign, int, 1)
+	fbx_simple_property(FrontAxis, int, 2)
+	fbx_simple_property(FrontAxisSign, int, 1)
+	fbx_simple_property(CoordAxis, int, 0)
+	fbx_simple_property(CoordAxisSign, int, 1)
+	fbx_simple_property(OriginalUpAxis, int, 0)
+	fbx_simple_property(OriginalUpAxisSign, int, 1)
+	fbx_simple_property(UnitScaleFactor, double, 1)
+	fbx_simple_property(OriginalUnitScaleFactor, double, 1)
+	fbx_simple_property(AmbientColor, aiVector3D, aiVector3D(0,0,0))
+	fbx_simple_property(DefaultCamera, std::string, "")
 
 
 	enum FrameRate {
@@ -1261,10 +1261,10 @@ public:
 		FrameRate_MAX// end-of-enum sentinel
 	};
 
-	fbx_simple_enum_property(TimeMode, FrameRate, FrameRate_DEFAULT);
-	fbx_simple_property(TimeSpanStart, uint64_t, 0L);
-	fbx_simple_property(TimeSpanStop, uint64_t, 0L);
-	fbx_simple_property(CustomFrameRate, float, -1.0f);
+	fbx_simple_enum_property(TimeMode, FrameRate, FrameRate_DEFAULT)
+	fbx_simple_property(TimeSpanStart, uint64_t, 0L)
+	fbx_simple_property(TimeSpanStop, uint64_t, 0L)
+	fbx_simple_property(CustomFrameRate, float, -1.0f)
 
 
 private:

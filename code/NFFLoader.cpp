@@ -400,7 +400,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						if (TokenMatch(sz,"0x",2))
 						{
 							hasColor = true;
-							register unsigned int numIdx = ::strtoul16(sz,&sz);
+							unsigned int numIdx = ::strtoul16(sz,&sz);
 							aiColor4D clr;
 							clr.a = 1.f;
 

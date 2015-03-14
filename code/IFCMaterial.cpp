@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #include "IFCUtil.h"
+#include <limits>
 
 namespace Assimp {
 	namespace IFC {
@@ -132,45 +133,70 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
 }
 
 // ------------------------------------------------------------------------------------------------
-unsigned int ProcessMaterials(const IFC::IfcRepresentationItem& item, ConversionData& conv)
+unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat)
 {
-	if (conv.materials.empty()) {
-		aiString name;
-		std::auto_ptr<aiMaterial> mat(new aiMaterial());
-
-		name.Set("<IFCDefault>");
-		mat->AddProperty(&name,AI_MATKEY_NAME);
-
-		const aiColor4D col = aiColor4D(0.6f,0.6f,0.6f,1.0f);
-		mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
-
-		conv.materials.push_back(mat.release());
-	}
-
-	STEP::DB::RefMapRange range = conv.db.GetRefs().equal_range(item.GetID());
+	STEP::DB::RefMapRange range = conv.db.GetRefs().equal_range(id);
 	for(;range.first != range.second; ++range.first) {
 		if(const IFC::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::IfcStyledItem>()) {
 			BOOST_FOREACH(const IFC::IfcPresentationStyleAssignment& as, styled->Styles) {
 				BOOST_FOREACH(boost::shared_ptr<const IFC::IfcPresentationStyleSelect> sel, as.Styles) {
 
-					if (const IFC::IfcSurfaceStyle* const surf =  sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db)) {
+					if( const IFC::IfcSurfaceStyle* const surf = sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db) ) {
+						// try to satisfy from cache
+						ConversionData::MaterialCache::iterator mit = conv.cached_materials.find(surf);
+						if( mit != conv.cached_materials.end() )
+							return mit->second;
+
+						// not found, create new material
 						const std::string side = static_cast<std::string>(surf->Side);
-						if (side != "BOTH") {
+						if( side != "BOTH" ) {
 							IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: " + side);
 						}
 
 						std::auto_ptr<aiMaterial> mat(new aiMaterial());
 
-						FillMaterial(mat.get(),surf,conv);
+						FillMaterial(mat.get(), surf, conv);
 
 						conv.materials.push_back(mat.release());
-						return conv.materials.size()-1;
-					}
-				}
+						unsigned int matindex = conv.materials.size() - 1;
+						conv.cached_materials[surf] = matindex;
+						return matindex;
 			}
 		}
 	}
-	return 0;
+		}
+	}
+
+	// no local material defined. If there's global one, use that instead
+	if( prevMatId != std::numeric_limits<uint32_t>::max() )
+		return prevMatId;
+
+	// we're still here - create an default material if required, or simply fail otherwise
+	if( !forceDefaultMat )
+		return std::numeric_limits<uint32_t>::max();
+
+	aiString name;
+	name.Set("<IFCDefault>");
+	//  ConvertColorToString( color, name);
+
+	// look if there's already a default material with this base color
+	for( size_t a = 0; a < conv.materials.size(); ++a )
+	{
+		aiString mname;
+		conv.materials[a]->Get(AI_MATKEY_NAME, mname);
+		if( name == mname )
+			return (unsigned int)a;
+	}
+
+	// we're here, yet - no default material with suitable color available. Generate one
+	std::auto_ptr<aiMaterial> mat(new aiMaterial());
+	mat->AddProperty(&name,AI_MATKEY_NAME);
+
+	const aiColor4D col = aiColor4D( 0.6f, 0.6f, 0.6f, 1.0f); // aiColor4D( color.r, color.g, color.b, 1.0f);
+	mat->AddProperty(&col,1, AI_MATKEY_COLOR_DIFFUSE);
+
+	conv.materials.push_back(mat.release());
+	return (unsigned int) conv.materials.size() - 1;
 }
 
 } // ! IFC

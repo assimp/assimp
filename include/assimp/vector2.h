@@ -38,7 +38,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file aiVector2t.h
+/** @file vector2.h
  *  @brief 2D vector structure, including operators when compiling in C++
  */
 #ifndef AI_VECTOR2D_H_INC

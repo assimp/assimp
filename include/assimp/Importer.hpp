@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  assimp.hpp
+/** @file  Importer.hpp
  *  @brief Defines the C++-API to the Open Asset Import Library.
  */
 #ifndef INCLUDED_AI_ASSIMP_HPP
@@ -624,8 +624,8 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Private, do not use. */
-	ImporterPimpl* Pimpl() { return pimpl; };
-	const ImporterPimpl* Pimpl() const { return pimpl; };
+	ImporterPimpl* Pimpl() { return pimpl; }
+	const ImporterPimpl* Pimpl() const { return pimpl; }
 
 protected:
 

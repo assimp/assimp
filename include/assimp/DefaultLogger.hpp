@@ -37,7 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-/** @file DefaultLogger.h
+/** @file DefaultLogger.hpp
 */
 
 #ifndef INCLUDED_AI_DEFAULTLOGGER

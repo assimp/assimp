@@ -212,7 +212,7 @@ protected:
 
 protected:
 	/** Aborts the file reading with an exception */
-	void ThrowException( const std::string& pError) const;
+	AI_WONT_RETURN void ThrowException( const std::string& pError) const AI_WONT_RETURN_SUFFIX;
 
 	/** Skips all data until the end node of the current element */
 	void SkipElement();

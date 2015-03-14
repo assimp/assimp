@@ -902,15 +902,20 @@ size_t CloseWindows(ContourVector& contours,
 			curmesh.verts.reserve(curmesh.verts.size() + (*it).contour.size() * 4);
 			curmesh.vertcnt.reserve(curmesh.vertcnt.size() + (*it).contour.size());
 
+			// compare base poly normal and contour normal to detect if we need to reverse the face winding
+			IfcVector3 basePolyNormal = TempMesh::ComputePolygonNormal( curmesh.verts.data(), curmesh.vertcnt.front());
+			std::vector<IfcVector3> worldSpaceContourVtx( it->contour.size());
+			for( size_t a = 0; a < it->contour.size(); ++a )
+				worldSpaceContourVtx[a] = minv * IfcVector3( it->contour[a].x, it->contour[a].y, 0.0);
+			IfcVector3 contourNormal = TempMesh::ComputePolygonNormal( worldSpaceContourVtx.data(), worldSpaceContourVtx.size());
+			bool reverseCountourFaces = (contourNormal * basePolyNormal) > 0.0;
+
 			// XXX this algorithm is really a bit inefficient - both in terms
 			// of constant factor and of asymptotic runtime.
 			std::vector<bool>::const_iterator skipit = skipbegin;
 
 			IfcVector3 start0;
 			IfcVector3 start1;
-
-			IfcVector2 last_proj; 
-			//const IfcVector2& first_proj; 
 
 			const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 
@@ -923,18 +928,8 @@ size_t CloseWindows(ContourVector& contours,
 				IfcFloat best = static_cast<IfcFloat>(1e10);
 				IfcVector3 bestv;
 
-				/* debug code to check for unwanted diagonal lines in window contours
-				if (cit != cbegin) {
-					const IfcVector2& vdelta = proj_point - last_proj;
-					if (std::fabs(vdelta.x-vdelta.y) < 0.5 * std::max(vdelta.x, vdelta.y)) {
-						//continue;
-					}
-				} */
-
 				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
 				
-				last_proj = proj_point;
-
 				BOOST_FOREACH(const TempOpening* opening, refs) {
 					BOOST_FOREACH(const IfcVector3& other, opening->wallPoints) {
 						const IfcFloat sqdist = (world_point - other).SquareLength();
@@ -956,8 +951,8 @@ size_t CloseWindows(ContourVector& contours,
 					curmesh.verts.pop_back();
 				}
 				else {
-					curmesh.verts.push_back(cit == cbegin ? world_point : bestv);
-					curmesh.verts.push_back(cit == cbegin ? bestv : world_point);
+					curmesh.verts.push_back(((cit == cbegin) != reverseCountourFaces) ? world_point : bestv);
+					curmesh.verts.push_back(((cit == cbegin) != reverseCountourFaces) ? bestv : world_point);
 
 					curmesh.vertcnt.push_back(4);
 					++closed;
@@ -969,8 +964,8 @@ size_t CloseWindows(ContourVector& contours,
 					continue;
 				}
 
-				curmesh.verts.push_back(world_point);
-				curmesh.verts.push_back(bestv);
+				curmesh.verts.push_back(reverseCountourFaces ? bestv : world_point);
+				curmesh.verts.push_back(reverseCountourFaces ? world_point : bestv);
 
 				if (cit == cend - 1) {
 					drop_this_edge = *skipit;
@@ -984,16 +979,11 @@ size_t CloseWindows(ContourVector& contours,
 						curmesh.verts.pop_back();
 					}
 					else {
-						curmesh.verts.push_back(start1);
-						curmesh.verts.push_back(start0);
+						curmesh.verts.push_back(reverseCountourFaces ? start0 : start1);
+						curmesh.verts.push_back(reverseCountourFaces ? start1 : start0);
 					}
 				}
 			}
-			/*
-			BOOST_FOREACH(TempOpening* opening, refs) {
-				//opening->wallPoints.clear();
-			}*/
-
 		}
 		else {
 			
@@ -1194,16 +1184,13 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					profile_data = opening.profileMesh2D.get();
 					is_2d_source = true;
 				}
-				else {
-					//continue;
-				}
 			}
 			else {
 				// vertical extrusion
 				if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
-					continue;
-				}
-				continue;
+					profile_data = opening.profileMesh2D.get();
+					is_2d_source = true;
+				} 
 			}
 		}
 		std::vector<IfcVector3> profile_verts = profile_data->verts;

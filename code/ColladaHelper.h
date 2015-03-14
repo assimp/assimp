@@ -395,6 +395,7 @@ struct Controller
 /** A collada material. Pretty much the only member is a reference to an effect. */
 struct Material
 {
+	std::string mName;
 	std::string mEffect;
 };
 

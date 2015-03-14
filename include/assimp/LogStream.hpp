@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file LogStream.h
+/** @file LogStream.hpp
  *  @brief Abstract base class 'LogStream', representing an output log stream.
  */
 #ifndef INCLUDED_AI_LOGSTREAM_H

@@ -346,7 +346,7 @@ struct VColorChannel : public VMapEntry
 		if (!rawData.empty())
 			return; // return if already allocated
 
-		register unsigned int m = num*dims;
+		unsigned int m = num*dims;
 		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
 		rawData.resize(m);
 

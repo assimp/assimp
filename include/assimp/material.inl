@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file aiMaterial.inl
+/** @file material.inl
  *  @brief Defines the C++ getters for the material system
  */
 

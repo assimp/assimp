@@ -106,7 +106,7 @@ void ComputeNormalsWithSmoothingsGroups(MeshWithSmoothingGroups<T>& sMesh)
 		std::vector<unsigned int> poResult;
 		for (unsigned int c = 0; c < 3;++c)
 		{
-			register unsigned int idx = (*i).mIndices[c];
+			unsigned int idx = (*i).mIndices[c];
 			if (vertexDone[idx])continue;
 
 			sSort.FindPositions(sMesh.mPositions[idx],(*i).iSmoothGroup,

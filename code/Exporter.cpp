@@ -495,13 +495,11 @@ void Exporter :: UnregisterExporter(const char* id)
 ExportProperties :: ExportProperties() {}
 
 ExportProperties::ExportProperties(const ExportProperties &other)
+	 : mIntProperties(other.mIntProperties),
+   mFloatProperties(other.mFloatProperties),
+   mStringProperties(other.mStringProperties),
+   mMatrixProperties(other.mMatrixProperties)
 {
-	new(this) ExportProperties();
-	
-	mIntProperties    = other.mIntProperties;
-	mFloatProperties  = other.mFloatProperties;
-	mStringProperties = other.mStringProperties;
-	mMatrixProperties = other.mMatrixProperties;
 	
 }
 

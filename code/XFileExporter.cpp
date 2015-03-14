@@ -510,6 +510,9 @@ std::string XFileExporter::toXFileString(aiString &name)
 	std::string str = std::string(name.C_Str());
 	std::replace(str.begin(), str.end(), '<', '_');
 	std::replace(str.begin(), str.end(), '>', '_');
+	std::replace(str.begin(), str.end(), '{', '_');
+	std::replace(str.begin(), str.end(), '}', '_');
+	std::replace(str.begin(), str.end(), '$', '_');
 	return str;
 }
 

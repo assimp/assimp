@@ -61,7 +61,7 @@ class XFileExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
+	XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
 
 	/// Destructor
 	virtual ~XFileExporter();
@@ -93,6 +93,9 @@ public:
 	std::stringstream mOutput;
 
 protected:
+
+	/// hold the properties pointer
+	const ExportProperties* mProperties;
 
 	/// write a path
 	void writePath(aiString path);	

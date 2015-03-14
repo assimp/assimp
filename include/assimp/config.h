@@ -889,11 +889,5 @@ enum aiComponent
 
 #define AI_CONFIG_EXPORT_XFILE_64BIT "EXPORT_XFILE_64BIT"
 
-/** @brief Specifies the xfile applies all transformations to the coordinates, normals
- * so all motions are identities
- * Property type: Bool. Default value: false.
- */
-
-#define AI_CONFIG_EXPORT_XFILE_BAKETRANSFORM "EXPORT_XFILE_BAKETRANSFORM"
 
 #endif // !! AI_CONFIG_H_INC

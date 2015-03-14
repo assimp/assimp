@@ -492,18 +492,17 @@ void Exporter :: UnregisterExporter(const char* id)
 	}
 }
 
-ExportProperties :: ExportProperties()
-{
+ExportProperties :: ExportProperties() {}
 
-}
-
-ExportProperties :: ExportProperties(const ExportProperties* source)
+ExportProperties::ExportProperties(const ExportProperties &other)
 {
-	if (!source) return;
-	mIntProperties = IntPropertyMap(source->mIntProperties);
-	mFloatProperties = FloatPropertyMap(source->mFloatProperties);
-	mStringProperties = StringPropertyMap(source->mStringProperties);
-	mMatrixProperties = MatrixPropertyMap(source->mMatrixProperties);
+	new(this) ExportProperties();
+	
+	mIntProperties    = other.mIntProperties;
+	mFloatProperties  = other.mFloatProperties;
+	mStringProperties = other.mStringProperties;
+	mMatrixProperties = other.mMatrixProperties;
+	
 }
 
 

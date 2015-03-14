@@ -334,11 +334,13 @@ public:
 
 	ExportProperties();
 
-	/** Copy constructor
-	* @see ExportProperties(const ExportProperties* source)
-	*/
-	ExportProperties(const ExportProperties* source);
-
+	// -------------------------------------------------------------------
+	/** Copy constructor.
+	 * 
+	 * This copies the configuration properties of another ExportProperties.
+	 * @see ExportProperties(const ExportProperties& other)
+	 */
+	ExportProperties(const ExportProperties& other);
 
 	// -------------------------------------------------------------------
 	/** Set an integer configuration property.

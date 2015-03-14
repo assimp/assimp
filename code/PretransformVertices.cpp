@@ -625,7 +625,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 		// flat node graph with a root node and some level 1 children
 		delete pScene->mRootNode;
 		pScene->mRootNode = new aiNode();
-		pScene->mRootNode->mName.Set("<dummy_root>");
+		pScene->mRootNode->mName.Set("dummy_root");
 
 		if (1 == pScene->mNumMeshes && !pScene->mNumLights && !pScene->mNumCameras)
 		{

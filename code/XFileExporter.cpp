@@ -79,11 +79,10 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 	}
 
 	// create/copy Properties
-	ExportProperties props(pProperties);
+	ExportProperties props(*pProperties);
 
 	// set standard properties if not set
 	if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT, false);
-	if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_BAKETRANSFORM)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_BAKETRANSFORM, false);
 
 	// invoke the exporter 
 	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);

@@ -1984,7 +1984,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 
 #ifdef ASSIMP_BUILD_DEBUG  
 	if (primType != Prim_TriFans && primType != Prim_TriStrips) {
-		ai_assert(actualPrimitives == numPrimitives)
+		ai_assert(actualPrimitives == numPrimitives);
 	}
 #endif
 

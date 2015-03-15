@@ -1052,7 +1052,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 		if (object->parent == obj) {
 			children.push_back(object);
 
-			it = conv_data.objects.erase(it);
+			conv_data.objects.erase(it++);
 			continue;
 		}
 		++it;

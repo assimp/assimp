@@ -559,24 +559,26 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 		if (mesh->mMaterialIndex == static_cast<unsigned int>( -1 )) {
 
 			if (index == static_cast<unsigned int>( -1 )) {
-
-				// ok, we need to add a dedicated default material for some poor material-less meshes
+				// Setup a default material.
 				boost::shared_ptr<Material> p(new Material());
+				ai_assert(::strlen(AI_DEFAULT_MATERIAL_NAME) < sizeof(p->id.name)-2);
 				strcpy( p->id.name+2, AI_DEFAULT_MATERIAL_NAME );
 
+				// Note: MSVC11 does not zero-initialize Material here, although it should.
+				// Thus all relevant fields should be explicitly initialized. We cannot add
+				// a default constructor to Material since the DNA codegen does not support
+				// parsing it.
 				p->r = p->g = p->b = 0.6f;
 				p->specr = p->specg = p->specb = 0.6f;
 				p->ambr = p->ambg = p->ambb = 0.0f;
 				p->mirr = p->mirg = p->mirb = 0.0f;
 				p->emit = 0.f;
 				p->alpha = 0.f;
-
-				// XXX add more / or add default c'tor to Material
+				p->har = 0;
 
 				index = static_cast<unsigned int>( conv_data.materials_raw.size() );
 				conv_data.materials_raw.push_back(p);
-
-				LogInfo("Adding default material ...");
+				LogInfo("Adding default material");
 			}
 			mesh->mMaterialIndex = index;
 		}
@@ -591,6 +593,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 	
 		aiMaterial* mout = new aiMaterial();
 		conv_data.materials->push_back(mout);
+		// For any new material field handled here, the default material above must be updated with an appropriate default value.
 
 		// set material name
 		aiString name = aiString(mat->id.name+2); // skip over the name prefix 'MA'
@@ -1049,7 +1052,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 		if (object->parent == obj) {
 			children.push_back(object);
 
-			conv_data.objects.erase(it++);
+			it = conv_data.objects.erase(it);
 			continue;
 		}
 		++it;

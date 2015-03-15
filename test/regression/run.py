@@ -171,7 +171,7 @@ def process_dir(d, outfile_results, zipin, result):
             process_dir(fullpath, outfile_results, zipin, result)
             continue
 
-        if f in settings.files_to_ignore:
+        if f in settings.files_to_ignore or os.path.splitext(f)[1] in settings.exclude_extensions:
             print("Ignoring " + f)
             continue
 

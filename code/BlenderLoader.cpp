@@ -1044,7 +1044,7 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
 aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, ConversionData& conv_data, const aiMatrix4x4& parentTransform)
 {
 	std::deque<const Object*> children;
-	for(std::set<const Object*>::iterator it = conv_data.objects.begin(); it != conv_data.objects.end() ;) {
+	for(ObjectSet::iterator it = conv_data.objects.begin(); it != conv_data.objects.end() ;) {
 		const Object* object = *it;
 		if (object->parent == obj) {
 			children.push_back(object);

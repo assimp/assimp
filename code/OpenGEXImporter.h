@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 
+#include <vector>
 
 namespace ODDLParser {
     class DDLNode;
@@ -100,9 +101,14 @@ protected:
     void handleNodes( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMetricNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleObjectRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleGeometryObject( ODDLParser::DDLNode *node, aiScene *pScene );
+    void resolveReferences();
 
 private:
+    std::vector<aiMesh*> m_meshCache;
+    std::map<std::string, size_t> m_mesh2refMap;
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
     aiNode *m_currentNode;

@@ -164,7 +164,9 @@ USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
-: m_ctx( NULL )
+: m_meshCache()
+, m_mesh2refMap()
+, m_ctx( NULL )
 , m_currentNode( NULL ) {
     // empty
 }
@@ -205,6 +207,8 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
         m_ctx = myParser.getContext();
         handleNodes( m_ctx->m_root, pScene );
     }
+
+    resolveReferences();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -238,6 +242,9 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
                 break;
 
             case Grammar::ObjectRefToken:
+                handleObjectRefNode( *it, pScene );
+                break;
+
             case Grammar::MaterialRefToken:
             case Grammar::MetricKeyToken:
             case Grammar::GeometryNodeToken:
@@ -245,6 +252,9 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
                 break;
 
             case Grammar::GeometryObjectToken:
+                handleGeometryObject( *it, pScene );
+                break;
+
             case Grammar::TransformToken:
             case Grammar::MeshToken:
             case Grammar::VertexArrayToken:
@@ -295,7 +305,7 @@ void OpenGEXImporter::handleMetricNode( DDLNode *node, aiScene *pScene ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
     if( NULL == m_currentNode ) {
         throw DeadlyImportError( "No parent node for name." );
         return;
@@ -313,9 +323,40 @@ void OpenGEXImporter::handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+void OpenGEXImporter::handleObjectRefNode( DDLNode *node, aiScene *pScene ) {
+    if( NULL == m_currentNode ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
+
+    Reference *ref = node->getReferences();
+    if( NULL != ref ) {
+        for( size_t i = 0; i < ref->m_numRefs; i++ )  {
+            Name *currentName( ref->m_referencedName[ i ] );
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
     m_currentNode = new aiNode;
     handleNodes( node, pScene );
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
+    aiMesh *currentMesh( new aiMesh );
+    const size_t idx( m_meshCache.size() );
+    m_meshCache.push_back( currentMesh );
+
+    // store name to reference relation
+    m_mesh2refMap[ node->getName() ] = idx;
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::resolveReferences() {
+
 }
 
 //------------------------------------------------------------------------------------------------

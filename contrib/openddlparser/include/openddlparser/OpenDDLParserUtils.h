@@ -202,7 +202,9 @@ bool isReference( T *in, T *end ) {
     if( *in == 'r' ) {
         if( *(in+1) == 'e' ) {
             if( *(in+2) == 'f' ) {
-                return true;
+                if( ( in + 2 ) != end ) {
+                    return true;
+                }
             }
         }
     }

@@ -35,7 +35,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #   ifdef OPENDDLPARSER_BUILD
 #       define DLL_ODDLPARSER_EXPORT TAG_DLL_EXPORT
 #   else
-#        define DLL_ODDLPARSER_EXPORT TAG_DLL_IMPORT
+#       define DLL_ODDLPARSER_EXPORT TAG_DLL_IMPORT
 #   endif // OPENDDLPARSER_BUILD
 #   pragma warning( disable : 4251 )
 #else
@@ -52,7 +52,7 @@ BEGIN_ODDLPARSER_NS
 #   define ddl_nullptr nullptr
 #else
 #   define ddl_nullptr NULL
-#endif
+#endif // OPENDDL_NO_USE_CPP11
 
 class DDLNode;
 class Value;

@@ -65,7 +65,7 @@ namespace Grammar {
 } // Namespace Grammar
 
 
-static void logInvalidTokenError( char *in, char *exp, OpenDDLParser::logCallback callback ) {
+static void logInvalidTokenError( char *in, const std::string &exp, OpenDDLParser::logCallback callback ) {
     std::stringstream stream;
     stream << "Invalid token " << *in << ", " << exp << " expected." << std::endl;
     callback( ddl_error_msg, stream.str() );
@@ -297,7 +297,7 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
     }
     else {
         in++;
-        logInvalidTokenError( in, "{", m_logCallback );
+        logInvalidTokenError( in, std::string( Grammar::OpenBracketToken ), m_logCallback );
         error = true;
         return in;
     }
@@ -365,7 +365,7 @@ char *OpenDDLParser::parseStructureBody( char *in, char *end, bool &error ) {
 
         in = getNextToken( in, end );
         if( *in != '}' ) {
-            logInvalidTokenError( in, "}", m_logCallback );
+            logInvalidTokenError( in, std::string( Grammar::CloseBracketToken ), m_logCallback );
         } else {
             //in++;
         }

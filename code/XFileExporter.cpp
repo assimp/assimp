@@ -59,7 +59,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	std::string path = "";
 	std::string file = pFile;
@@ -78,13 +78,19 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 		}
 	}
 
+	// create/copy Properties
+	ExportProperties props(*pProperties);
+
+	// set standard properties if not set
+	if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT, false);
+
 	// invoke the exporter 
-	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file);
+	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
 	if(outfile == NULL) {
-		throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
+		throw DeadlyExportError("could not open output .x file: " + std::string(pFile));
 	}
 
 	// XXX maybe use a small wrapper around IOStream that behaves like std::stringstream in order to avoid the extra copy.
@@ -96,7 +102,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
+XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mIOSystem(pIOSystem), mPath(path), mFile(file), mProperties(pProperties)
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
@@ -126,7 +132,7 @@ void XFileExporter::WriteFile()
 {
 	// note, that all realnumber values must be comma separated in x files
 	mOutput.setf(std::ios::fixed);
-	mOutput.precision(6); // precission for float
+	mOutput.precision(16); // precission for double
 
 	// entry of writing the file
 	WriteHeader();
@@ -148,7 +154,10 @@ void XFileExporter::WriteFile()
 // Writes the asset header
 void XFileExporter::WriteHeader()
 {
-	mOutput << startstr << "xof 0303txt 0032" << endstr;
+	if (mProperties->GetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT) == true)
+		mOutput << startstr << "xof 0303txt 0064" << endstr;
+	else
+		mOutput << startstr << "xof 0303txt 0032" << endstr;
 	mOutput << endstr;
 	mOutput << startstr << "template Frame {" << endstr;
 	PushTag();
@@ -298,7 +307,7 @@ void XFileExporter::WriteNode( aiNode* pNode)
 		ss << "Node_" << pNode;
 		pNode->mName.Set(ss.str());
 	}
-	mOutput << startstr << "Frame " << pNode->mName.C_Str() << " {" << endstr;
+	mOutput << startstr << "Frame " << toXFileString(pNode->mName) << " {" << endstr;
 
 	PushTag();
 
@@ -318,9 +327,9 @@ void XFileExporter::WriteNode( aiNode* pNode)
 	mOutput << startstr << "}" << endstr << endstr;
 }
 
-void XFileExporter::WriteMesh(const aiMesh* mesh)
+void XFileExporter::WriteMesh(aiMesh* mesh)
 {
-	mOutput << startstr << "Mesh " << mesh->mName.C_Str() << "_mShape" << " {" << endstr;
+	mOutput << startstr << "Mesh " << toXFileString(mesh->mName) << "_mShape" << " {" << endstr;
 
 	PushTag();
 
@@ -496,6 +505,16 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 
 }
 
+std::string XFileExporter::toXFileString(aiString &name)
+{
+	std::string str = std::string(name.C_Str());
+	std::replace(str.begin(), str.end(), '<', '_');
+	std::replace(str.begin(), str.end(), '>', '_');
+	std::replace(str.begin(), str.end(), '{', '_');
+	std::replace(str.begin(), str.end(), '}', '_');
+	std::replace(str.begin(), str.end(), '$', '_');
+	return str;
+}
 
 void XFileExporter::writePath(aiString path)
 {

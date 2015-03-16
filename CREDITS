@@ -151,3 +151,8 @@ Ogre Binary format support
 
 - Filip Wasil, Tieto Poland Sp. z o.o.
 Android JNI asset extraction support
+
+- Richard Steffen
+Contributed X File exporter
+Contributed ExportProperties interface
+

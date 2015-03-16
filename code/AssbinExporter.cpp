@@ -754,7 +754,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 		}
 	};
 
-void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	AssbinExport exporter;
 	exporter.WriteBinaryDump( pFile, pIOSystem, pScene );

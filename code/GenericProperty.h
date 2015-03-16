@@ -108,5 +108,18 @@ inline void SetGenericPropertyPtr(std::map< unsigned int, T* >& list,
 		*bWasExisting = true;
 }
 
+// ------------------------------------------------------------------------------------------------
+template <class T>
+inline const bool HasGenericProperty(const std::map< unsigned int, T >& list, 
+	const char* szName)
+{
+	ai_assert(NULL != szName);
+	const uint32_t hash = SuperFastHash(szName);
+
+	typename std::map<unsigned int, T>::const_iterator it = list.find(hash);
+	if (it == list.end()) return false;
+	
+	return true;
+}
 
 #endif // !! AI_GENERIC_PROPERTY_H_INCLUDED

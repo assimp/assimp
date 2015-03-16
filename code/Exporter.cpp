@@ -397,7 +397,8 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 					proc.Execute(scenecopy.get());
 				}
 
-				exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProperties);
+				ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
+				exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProperties ? pProperties : &emptyProperties);
 			}
 			catch (DeadlyExportError& err) {
 				pimpl->mError = err.what();

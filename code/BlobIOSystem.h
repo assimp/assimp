@@ -120,9 +120,11 @@ public:
 		{
 		case aiOrigin_CUR:
 			cursor += pOffset;
+			break;
 
 		case aiOrigin_END:
 			cursor = file_size - pOffset;
+			break;
 
 		case aiOrigin_SET:
 			cursor = pOffset;

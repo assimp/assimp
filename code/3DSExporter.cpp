@@ -188,8 +188,8 @@ Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, c
 
 	{
 		ChunkWriter chunk(writer, Discreet3DS::CHUNK_OBJMESH);
-		WriteMeshes();
 		WriteMaterials();
+		WriteMeshes();
 
 		{
 			ChunkWriter chunk(writer, Discreet3DS::CHUNK_MASTER_SCALE);

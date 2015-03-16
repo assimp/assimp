@@ -257,15 +257,31 @@ private:
 	/* read from both streams simult.*/
 	template <typename T> void read(T& filla,T& fille) {
 		if(1 != fread(&filla,sizeof(T),1,actual)) {
-			throw compare_fails_exception("Unexpected EOF reading ACTUAL");
+			EOFActual();
 		}
 		if(1 != fread(&fille,sizeof(T),1,expect)) {
-			throw compare_fails_exception("Unexpected EOF reading EXPECT");
+			EOFExpect();
 		}
 	}
 
-
 private:
+
+	void EOFActual() {
+		std::stringstream ss;
+		throw compare_fails_exception((ss
+			<< "Unexpected EOF reading ACTUAL.\nCurrent position in scene hierarchy is "
+			<< print_hierarchy(),ss.str().c_str()
+			));
+	}
+
+	void EOFExpect() {
+		std::stringstream ss;
+		throw compare_fails_exception((ss
+			<< "Unexpected EOF reading EXPECT.\nCurrent position in scene hierarchy is "
+			<< print_hierarchy(),ss.str().c_str()
+			));
+	}
+
 
 	FILE *const actual, *const expect;
 
@@ -290,10 +306,10 @@ template <> void comparer_context :: read<aiString>(aiString& filla,aiString& fi
 	read(lena,lene);
 
 	if(lena && 1 != fread(&filla.data,lena,1,actual)) {
-		throw compare_fails_exception("Unexpected EOF reading ACTUAL");
+		EOFActual();
 	}
 	if(lene && 1 != fread(&fille.data,lene,1,expect)) {
-		throw compare_fails_exception("Unexpected EOF reading ACTUAL");
+		EOFExpect();
 	}
 
 	fille.data[fille.length=static_cast<unsigned int>(lene)] = '\0';
@@ -487,7 +503,7 @@ private:
 		res|=fread(&actual.second,4,1,ctx.get_actual())		<<3u;
 
 		if(res!=0xf) {
-			ctx.failure("I/OError reading chunk head, dumps are not well-defined","<ChunkHead>");
+			ctx.failure("IO Error reading chunk head, dumps are malformed","<ChunkHead>");
 		}
 
 		if (current.first != actual.first) {
@@ -504,7 +520,7 @@ private:
 		if (current.first != actual.first) {
 			std::stringstream ss;
 			ctx.failure((ss
-				<<"Chunk lenghts do not match. EXPECT: "
+				<<"Chunk lengths do not match. EXPECT: "
 				<<current.second
 				<<" ACTUAL: " 
 				<< actual.second,

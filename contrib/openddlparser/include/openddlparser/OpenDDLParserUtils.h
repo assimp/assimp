@@ -173,7 +173,7 @@ bool isFloat( T *in, T *end ) {
 template<class T>
 inline
 bool isCharacter( const T in ) {
-    return ( in >= 'a' && in <= 'z' || in >= 'A' && in <= 'Z' );
+    return ( ( in >= 'a' && in <= 'z' ) || ( in >= 'A' && in <= 'Z' ) );
 }
 
 template<class T>

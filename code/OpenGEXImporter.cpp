@@ -163,11 +163,20 @@ namespace OpenGEX {
 USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
+OpenGEXImporter::RefInfo::RefInfo( aiNode *node, Type type, std::vector<std::string> &names )
+: m_node( node )
+, m_type( type )
+, m_Names( names ) {
+    // empty
+}
+
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
 : m_meshCache()
 , m_mesh2refMap()
 , m_ctx( NULL )
-, m_currentNode( NULL ) {
+, m_currentNode( NULL )
+, m_unresolvedRefStack() {
     // empty
 }
 
@@ -246,7 +255,12 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
                 break;
 
             case Grammar::MaterialRefToken:
+                handleMaterialRefNode( *it, pScene );
+                break;
+
             case Grammar::MetricKeyToken:
+                break;
+
             case Grammar::GeometryNodeToken:
                 handleGeometryNode( *it, pScene );
                 break;
@@ -256,12 +270,27 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
                 break;
 
             case Grammar::TransformToken:
+                break;
+
             case Grammar::MeshToken:
+                break;
+
             case Grammar::VertexArrayToken:
+                break;
+
             case Grammar::IndexArrayToken:
+                break;
+
             case Grammar::MaterialToken:
+                handleMaterial( *it, pScene );
+                break;
+
             case Grammar::ColorToken:
+                break;
+
             case Grammar::TextureToken:
+                break;
+            
             default:
                 break;
         }
@@ -290,7 +319,7 @@ void OpenGEXImporter::handleMetricNode( DDLNode *node, aiScene *pScene ) {
                         if( Value::ddl_float == val->m_type ) {
                             m_metrics[ type ].m_floatValue = val->getFloat();
                         } else if( Value::ddl_int32 == val->m_type ) {
-                            m_metrics[ type ].m_floatValue = val->getInt32();
+                            m_metrics[ type ].m_intValue = val->getInt32();
                         } else if( Value::ddl_string == val->m_type ) {
                             m_metrics[type].m_stringValue = std::string( val->getString() );
                         } else {
@@ -323,17 +352,50 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
 }
 
 //------------------------------------------------------------------------------------------------
+static void getRefNames( DDLNode *node, std::vector<std::string> &names ) {
+    ai_assert( NULL != node );
+
+    Reference *ref = node->getReferences();
+    if( NULL != ref ) {
+        for( size_t i = 0; i < ref->m_numRefs; i++ )  {
+            Name *currentName( ref->m_referencedName[ i ] );
+            if( NULL != currentName && NULL != currentName->m_id ) {
+                const std::string name( currentName->m_id->m_buffer );
+                if( !name.empty() ) {
+                    names.push_back( name );
+                }
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleObjectRefNode( DDLNode *node, aiScene *pScene ) {
     if( NULL == m_currentNode ) {
         throw DeadlyImportError( "No parent node for name." );
         return;
     }
 
-    Reference *ref = node->getReferences();
-    if( NULL != ref ) {
-        for( size_t i = 0; i < ref->m_numRefs; i++ )  {
-            Name *currentName( ref->m_referencedName[ i ] );
-        }
+    std::vector<std::string> objRefNames;
+    getRefNames( node, objRefNames );
+    m_currentNode->mNumMeshes = objRefNames.size();
+    m_currentNode->mMeshes = new unsigned int[ objRefNames.size() ];
+    if( !objRefNames.empty() ) {
+        m_unresolvedRefStack.push_back( new RefInfo( m_currentNode, RefInfo::MeshRef, objRefNames ) );
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == m_currentNode ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
+
+    std::vector<std::string> matRefNames;
+    getRefNames( node, matRefNames );
+    if( !matRefNames.empty() ) {
+        m_unresolvedRefStack.push_back( new RefInfo( m_currentNode, RefInfo::MaterialRef, matRefNames ) );
     }
 }
 
@@ -351,12 +413,35 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 
     // store name to reference relation
     m_mesh2refMap[ node->getName() ] = idx;
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleMaterial( ODDLParser::DDLNode *node, aiScene *pScene ) {
 
 }
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::resolveReferences() {
+    if( m_unresolvedRefStack.empty() ) {
+        return;
+    }
 
+    RefInfo *currentRefInfo( NULL );
+    for( std::vector<RefInfo*>::iterator it = m_unresolvedRefStack.begin(); it != m_unresolvedRefStack.end(); ++it ) {
+        currentRefInfo = *it;
+        if( NULL != currentRefInfo ) {
+            aiNode *node( currentRefInfo->m_node );
+            if( RefInfo::MeshRef == currentRefInfo->m_type ) {
+                for( size_t i = 0; i < currentRefInfo->m_Names.size(); i++ ) {
+                    const std::string &name(currentRefInfo->m_Names[ i ] );
+                    unsigned int meshIdx = m_mesh2refMap[ name ];
+                    node->mMeshes[ i ] = meshIdx;
+                }
+            } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
+                // ToDo
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------

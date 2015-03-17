@@ -68,13 +68,15 @@ namespace {
 
 	// ------------------------------------------------------------------------------------------------
 	// signal parse error, this is always unrecoverable. Throws DeadlyImportError.
-	void ParseError(const std::string& message, const Token& token)
+	AI_WONT_RETURN void ParseError(const std::string& message, const Token& token) AI_WONT_RETURN_SUFFIX;
+	AI_WONT_RETURN void ParseError(const std::string& message, const Token& token)
 	{
 		throw DeadlyImportError(Util::AddTokenText("FBX-Parser",message,&token));
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void ParseError(const std::string& message, const Element* element = NULL)
+	AI_WONT_RETURN void ParseError(const std::string& message, const Element* element = NULL) AI_WONT_RETURN_SUFFIX;
+	AI_WONT_RETURN void ParseError(const std::string& message, const Element* element)
 	{
 		if(element) {
 			ParseError(message,element->KeyToken());

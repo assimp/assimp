@@ -273,13 +273,13 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 			if (buffer) delete[] buffer;
 		}
 
-		void * GetBufferPointer() { return buffer; };
+		void * GetBufferPointer() { return buffer; }
 
 		// -------------------------------------------------------------------
-		virtual size_t Read(void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) { return 0; };
-		virtual aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) { return aiReturn_FAILURE; };
-		virtual size_t Tell() const { return cursor; };
-		virtual void Flush() { };
+		virtual size_t Read(void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/) { return 0; }
+		virtual aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/) { return aiReturn_FAILURE; }
+		virtual size_t Tell() const { return cursor; }
+		virtual void Flush() { }
 
 		virtual size_t FileSize() const
 		{
@@ -754,7 +754,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 		}
 	};
 
-void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneAssbin(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	AssbinExport exporter;
 	exporter.WriteBinaryDump( pFile, pIOSystem, pScene );

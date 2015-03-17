@@ -148,6 +148,14 @@ SET( Common_SRCS
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
+IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
+	SET( C4D_SRCS
+		C4DImporter.cpp
+		C4DImporter.h
+	)
+	SOURCE_GROUP( C4D FILES ${C4D_SRCS})
+ENDIF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
+
 SET( 3DS_SRCS
 	3DSConverter.cpp
 	3DSHelper.h
@@ -723,6 +731,11 @@ SET( assimp_src
 	AssimpPCH.cpp
 )
 
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	SET( assimp_src ${assimp_src} ${C4D_SRCS})
+	INCLUDE_DIRECTORIES(${C4D_INCLUDES})
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+
 #ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
 
 ADD_LIBRARY( assimp ${assimp_src} )
@@ -735,6 +748,12 @@ if(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
 	target_link_libraries(assimp android_jniiosystem)
 endif(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
 
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	TARGET_LINK_LIBRARIES(assimp optimized ${C4D_RELEASE_LIBRARY})
+	TARGET_LINK_LIBRARIES(assimp debug ${C4D_DEBUG_LIBRARY})
+	TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+
 if( MSVC )
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
   if( MSVC70 OR MSVC71 )
@@ -743,8 +762,14 @@ if( MSVC )
     set(MSVC_PREFIX "vc80")
   elseif( MSVC90 )
     set(MSVC_PREFIX "vc90")
-  else()
+  elseif( MSVC10 )
     set(MSVC_PREFIX "vc100")
+  elseif( MSVC11 )
+    set(MSVC_PREFIX "vc110")
+  elseif( MSVC12 )
+    set(MSVC_PREFIX "vc120")
+  else()
+    set(MSVC_PREFIX "vc130")
   endif()
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
 endif()

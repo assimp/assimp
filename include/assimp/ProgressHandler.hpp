@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file ProgressHandler.h
+/** @file ProgressHandler.hpp
  *  @brief Abstract base class 'ProgressHandler'.
  */
 #ifndef INCLUDED_AI_PROGRESSHANDLER_H
@@ -99,7 +99,7 @@ public:
 	virtual void UpdateFileRead(int currentStep /*= 0*/, int numberOfSteps /*= 0*/) {
 		float f = numberOfSteps ? currentStep / (float)numberOfSteps : 1.0f;
 		Update( f * 0.5f );
-	};
+	}
 
 	// -------------------------------------------------------------------
 	/** @brief Progress callback for post-processing steps
@@ -113,7 +113,7 @@ public:
 	virtual void UpdatePostProcess(int currentStep /*= 0*/, int numberOfSteps /*= 0*/) {
 		float f = numberOfSteps ? currentStep / (float)numberOfSteps : 1.0f;
 		Update( f * 0.5f + 0.5f );
-	};
+	}
 
 }; // !class ProgressHandler 
 // ------------------------------------------------------------------------------------

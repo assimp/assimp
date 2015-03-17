@@ -127,6 +127,13 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 	const unsigned int numVertices = strtoul10(sz,&sz);SkipSpaces(&sz);
 	const unsigned int numFaces = strtoul10(sz,&sz);
 
+	if (!numVertices) {
+		throw DeadlyImportError("OFF: There are no valid vertices");
+	}
+	if (!numFaces) {
+		throw DeadlyImportError("OFF: There are no valid faces");
+	}
+
 	pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes = 1 ];
 	aiMesh* mesh = pScene->mMeshes[0] = new aiMesh();
 	aiFace* faces = mesh->mFaces = new aiFace [mesh->mNumFaces = numFaces];

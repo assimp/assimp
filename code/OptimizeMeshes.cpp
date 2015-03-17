@@ -170,7 +170,7 @@ void OptimizeMeshesProcess::ProcessNode( aiNode* pNode)
 
 			// Find meshes to merge with us
 			for (unsigned int a = i+1; a < pNode->mNumMeshes;++a) {
-				register unsigned int am = pNode->mMeshes[a];
+				unsigned int am = pNode->mMeshes[a];
 				if (meshes[am].instance_cnt == 1 && CanJoin(im,am,verts,faces)) {
 
 					merge_list.push_back(mScene->mMeshes[am]);

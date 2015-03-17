@@ -127,12 +127,12 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::Oops(){
+AI_WONT_RETURN void B3DImporter::Oops(){
 	throw DeadlyImportError( "B3D Importer - INTERNAL ERROR" );
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::Fail( string str ){
+AI_WONT_RETURN void B3DImporter::Fail( string str ){
 #ifdef DEBUG_B3D
 	cout<<"Error in B3D file data: "<<str<<endl;
 #endif

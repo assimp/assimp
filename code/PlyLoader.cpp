@@ -64,6 +64,24 @@ static const aiImporterDesc desc = {
 	"ply" 
 };
 
+
+// ------------------------------------------------------------------------------------------------
+// Internal stuff
+namespace
+{
+	// ------------------------------------------------------------------------------------------------
+	// Checks that property index is within range
+	template <class T>
+	const T &GetProperty(const std::vector<T> &props, int idx)
+	{
+		if (idx >= props.size())
+			throw DeadlyImportError("Invalid .ply file: Property index is out of range.");
+
+		return props[idx];
+	}
+}
+
+
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter()
@@ -156,7 +174,6 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 	}
 	else
 	{
-		delete[] this->mBuffer;
 		AI_DEBUG_INVALIDATE_PTR(this->mBuffer);
 		throw DeadlyImportError( "Invalid .ply file: Missing format specification");
 	}
@@ -432,13 +449,13 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 			if (0xFFFFFFFF != aiPositions[0])
 			{
 				vOut.x = PLY::PropertyInstance::ConvertTo<float>(
-					(*i).alProperties[aiPositions[0]].avList.front(),aiTypes[0]);
+					GetProperty((*i).alProperties, aiPositions[0]).avList.front(),aiTypes[0]);
 			}
 
 			if (0xFFFFFFFF != aiPositions[1])
 			{
 				vOut.y = PLY::PropertyInstance::ConvertTo<float>(
-					(*i).alProperties[aiPositions[1]].avList.front(),aiTypes[1]);
+					GetProperty((*i).alProperties, aiPositions[1]).avList.front(),aiTypes[1]);
 			}
 			// and add them to our nice list
 			pvOut->push_back(vOut);
@@ -542,19 +559,19 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 			if (0xFFFFFFFF != aiPositions[0])
 			{
 				vOut.x = PLY::PropertyInstance::ConvertTo<float>(
-					(*i).alProperties[aiPositions[0]].avList.front(),aiTypes[0]);
+					GetProperty((*i).alProperties, aiPositions[0]).avList.front(),aiTypes[0]);
 			}
 
 			if (0xFFFFFFFF != aiPositions[1])
 			{
 				vOut.y = PLY::PropertyInstance::ConvertTo<float>(
-					(*i).alProperties[aiPositions[1]].avList.front(),aiTypes[1]);
+					GetProperty((*i).alProperties, aiPositions[1]).avList.front(),aiTypes[1]);
 			}
 
 			if (0xFFFFFFFF != aiPositions[2])
 			{
 				vOut.z = PLY::PropertyInstance::ConvertTo<float>(
-					(*i).alProperties[aiPositions[2]].avList.front(),aiTypes[2]);
+					GetProperty((*i).alProperties, aiPositions[2]).avList.front(),aiTypes[2]);
 			}
 
 			// and add them to our nice list
@@ -660,28 +677,28 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 			
 			if (0xFFFFFFFF != aiPositions[0])
 			{
-				vOut.r = NormalizeColorValue((*i).alProperties[
-					aiPositions[0]].avList.front(),aiTypes[0]);
+				vOut.r = NormalizeColorValue(GetProperty((*i).alProperties,
+					aiPositions[0]).avList.front(),aiTypes[0]);
 			}
 
 			if (0xFFFFFFFF != aiPositions[1])
 			{
-				vOut.g = NormalizeColorValue((*i).alProperties[
-					aiPositions[1]].avList.front(),aiTypes[1]);
+				vOut.g = NormalizeColorValue(GetProperty((*i).alProperties,
+					aiPositions[1]).avList.front(),aiTypes[1]);
 			}
 
 			if (0xFFFFFFFF != aiPositions[2])
 			{
-				vOut.b = NormalizeColorValue((*i).alProperties[
-					aiPositions[2]].avList.front(),aiTypes[2]);
+				vOut.b = NormalizeColorValue(GetProperty((*i).alProperties,
+					aiPositions[2]).avList.front(),aiTypes[2]);
 			}
 
 			// assume 1.0 for the alpha channel ifit is not set
 			if (0xFFFFFFFF == aiPositions[3])vOut.a = 1.0f;
 			else
 			{
-				vOut.a = NormalizeColorValue((*i).alProperties[
-					aiPositions[3]].avList.front(),aiTypes[3]);
+				vOut.a = NormalizeColorValue(GetProperty((*i).alProperties,
+					aiPositions[3]).avList.front(),aiTypes[3]);
 			}
 
 			// and add them to our nice list
@@ -774,11 +791,11 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 				// parse the list of vertex indices
 				if (0xFFFFFFFF != iProperty)
 				{
-					const unsigned int iNum = (unsigned int)(*i).alProperties[iProperty].avList.size();
+					const unsigned int iNum = (unsigned int)GetProperty((*i).alProperties, iProperty).avList.size();
 					sFace.mIndices.resize(iNum);
 
 					std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator p = 
-						(*i).alProperties[iProperty].avList.begin();
+						GetProperty((*i).alProperties, iProperty).avList.begin();
 
 					for (unsigned int a = 0; a < iNum;++a,++p)
 					{
@@ -790,7 +807,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 				if (0xFFFFFFFF != iMaterialIndex)
 				{
 					sFace.iMaterialIndex = PLY::PropertyInstance::ConvertTo<unsigned int>(
-						(*i).alProperties[iMaterialIndex].avList.front(),eType2);
+						GetProperty((*i).alProperties, iMaterialIndex).avList.front(),eType2);
 				}
 				pvOut->push_back(sFace);
 			}
@@ -801,7 +818,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 			// a value of -1 indicates a restart of the strip
 			bool flip = false;
 			for (std::vector<ElementInstance>::const_iterator i = pcList->alInstances.begin();i != pcList->alInstances.end();++i) {
-				const std::vector<PLY::PropertyInstance::ValueUnion>& quak = (*i).alProperties[iProperty].avList;
+				const std::vector<PLY::PropertyInstance::ValueUnion>& quak = GetProperty((*i).alProperties, iProperty).avList;
 				pvOut->reserve(pvOut->size() + quak.size() + (quak.size()>>2u));
 
 				int aiTable[2] = {-1,-1};
@@ -852,30 +869,30 @@ void PLYImporter::GetMaterialColor(const std::vector<PLY::PropertyInstance>& avL
 	if (0xFFFFFFFF == aiPositions[0])clrOut->r = 0.0f;
 	else
 	{
-		clrOut->r = NormalizeColorValue(avList[
-			aiPositions[0]].avList.front(),aiTypes[0]);
+		clrOut->r = NormalizeColorValue(GetProperty(avList,
+			aiPositions[0]).avList.front(),aiTypes[0]);
 	}
 
 	if (0xFFFFFFFF == aiPositions[1])clrOut->g = 0.0f;
 	else
 	{
-		clrOut->g = NormalizeColorValue(avList[
-			aiPositions[1]].avList.front(),aiTypes[1]);
+		clrOut->g = NormalizeColorValue(GetProperty(avList,
+			aiPositions[1]).avList.front(),aiTypes[1]);
 	}
 
 	if (0xFFFFFFFF == aiPositions[2])clrOut->b = 0.0f;
 	else
 	{
-		clrOut->b = NormalizeColorValue(avList[
-			aiPositions[2]].avList.front(),aiTypes[2]);
+		clrOut->b = NormalizeColorValue(GetProperty(avList,
+			aiPositions[2]).avList.front(),aiTypes[2]);
 	}
 
 	// assume 1.0 for the alpha channel ifit is not set
 	if (0xFFFFFFFF == aiPositions[3])clrOut->a = 1.0f;
 	else
 	{
-		clrOut->a = NormalizeColorValue(avList[
-			aiPositions[3]].avList.front(),aiTypes[3]);
+		clrOut->a = NormalizeColorValue(GetProperty(avList, 
+			aiPositions[3]).avList.front(),aiTypes[3]);
 	}
 }
 
@@ -1026,7 +1043,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 			// handle phong power and shading mode
 			int iMode;
 			if (0xFFFFFFFF != iPhong)	{
-				float fSpec = PLY::PropertyInstance::ConvertTo<float>((*i).alProperties[iPhong].avList.front(),ePhong);
+				float fSpec = PLY::PropertyInstance::ConvertTo<float>(GetProperty((*i).alProperties, iPhong).avList.front(),ePhong);
 
 				// if shininess is 0 (and the pow() calculation would therefore always
 				// become 1, not depending on the angle), use gouraud lighting
@@ -1044,7 +1061,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 
 			// handle opacity
 			if (0xFFFFFFFF != iOpacity)	{
-				float fOpacity = PLY::PropertyInstance::ConvertTo<float>((*i).alProperties[iPhong].avList.front(),eOpacity);
+				float fOpacity = PLY::PropertyInstance::ConvertTo<float>(GetProperty((*i).alProperties, iPhong).avList.front(),eOpacity);
 				pcHelper->AddProperty<float>(&fOpacity, 1, AI_MATKEY_OPACITY);
 			}
 

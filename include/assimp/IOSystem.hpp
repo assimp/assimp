@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file IOSystem.h
+/** @file IOSystem.hpp
  *  @brief File system wrapper for C++. Inherit this class to supply
  *  custom file handling logic to the Import library.
 */

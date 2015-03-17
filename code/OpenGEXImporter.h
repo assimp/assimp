@@ -65,10 +65,12 @@ struct MetricInfo {
 
     std::string m_stringValue;
     float m_floatValue;
+    int m_intValue;
 
     MetricInfo()
     : m_stringValue( "" )
-    , m_floatValue( 0.0f ) {
+    , m_floatValue( 0.0f )
+    , m_intValue( -1 ) {
         // empty
     }
 };
@@ -102,16 +104,33 @@ protected:
     void handleMetricNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleNameNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleObjectRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryObject( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleMaterial( ODDLParser::DDLNode *node, aiScene *pScene );
     void resolveReferences();
 
 private:
+    struct RefInfo {
+        enum Type {
+            MeshRef,
+            MaterialRef
+        };
+
+        aiNode *m_node;
+        Type m_type;
+        std::vector<std::string> m_Names;
+
+        RefInfo( aiNode *node, Type type, std::vector<std::string> &names );
+    };
+
     std::vector<aiMesh*> m_meshCache;
     std::map<std::string, size_t> m_mesh2refMap;
+
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
     aiNode *m_currentNode;
+    std::vector<RefInfo*> m_unresolvedRefStack;
 };
 
 } // Namespace OpenGEX

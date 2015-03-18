@@ -109,6 +109,10 @@ protected:
     void handleGeometryObject( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMaterial( ODDLParser::DDLNode *node, aiScene *pScene );
     void resolveReferences();
+    void pushNode( aiNode *node, aiScene *pScene );
+    aiNode *popNode();
+    aiNode *top() const;
+    void clearNodeStack();
 
 private:
     struct RefInfo {
@@ -130,6 +134,7 @@ private:
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
     aiNode *m_currentNode;
+    std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;
 };
 

@@ -176,6 +176,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_mesh2refMap()
 , m_ctx( NULL )
 , m_currentNode( NULL )
+, m_nodeStack()
 , m_unresolvedRefStack() {
     // empty
 }
@@ -214,6 +215,8 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
     bool success( myParser.parse() );
     if( success ) {
         m_ctx = myParser.getContext();
+        pScene->mRootNode = new aiNode;
+        pScene->mRootNode->mName.Set( filename );
         handleNodes( m_ctx->m_root, pScene );
     }
 
@@ -401,8 +404,12 @@ void OpenGEXImporter::handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene 
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
-    m_currentNode = new aiNode;
+    aiNode *newNode = new aiNode;
+    pushNode( newNode, pScene );
+    m_currentNode = newNode;
     handleNodes( node, pScene );
+    
+    popNode();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -413,6 +420,10 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 
     // store name to reference relation
     m_mesh2refMap[ node->getName() ] = idx;
+
+    // todo: child nodes?
+
+    handleNodes( node, pScene );
 }
 
 //------------------------------------------------------------------------------------------------
@@ -442,6 +453,48 @@ void OpenGEXImporter::resolveReferences() {
             }
         }
     }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
+    ai_assert( NULL != pScene );
+
+    if( NULL != node ) {
+        if( m_nodeStack.empty() ) {
+            node->mParent = pScene->mRootNode;
+        } else {
+            aiNode *parent( m_nodeStack.back() );
+            ai_assert( NULL != parent );
+            node->mParent = parent;
+        }
+        m_nodeStack.push_back( node );
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+aiNode *OpenGEXImporter::popNode() {
+    if( m_nodeStack.empty() ) {
+        return NULL;
+    }
+    
+    aiNode *node( top() );
+    m_nodeStack.pop_back();
+    
+    return node;
+}
+
+//------------------------------------------------------------------------------------------------
+aiNode *OpenGEXImporter::top() const {
+    if( m_nodeStack.empty() ) {
+        return NULL;
+    }
+
+    return m_nodeStack.back();
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::clearNodeStack() {
+    m_nodeStack.clear();
 }
 
 //------------------------------------------------------------------------------------------------

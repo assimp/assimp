@@ -33,13 +33,13 @@ public:
   * @return true if the process is present in this flag fields,
   *   false if not.
   */
-  bool IsActive( unsigned int pFlags) const;
+  bool IsActive( unsigned int pFlags ) const;
 
   /** Called prior to ExecuteOnScene().
   * The function is a request to the process to update its configuration
   * basing on the Importer's configuration property list.
   */
-  virtual void SetupProperties(const Importer* pImp);
+  virtual void SetupProperties( const Importer* pImp );
 
 protected:
   /** Executes the post processing step on the given imported data.
@@ -50,10 +50,17 @@ protected:
 
   /// Scales all vertices of the given mesh to conform unit box.
   /// @param pMesh the Mesh which vertices to be scaled.
-  void ScaleMesh( const aiMesh* pMesh) const;
+  void ScaleMesh( const aiMesh* pMesh ) const;
+  void ScaleScene( aiScene* pScene ) const;
+
+  aiVector3D findCenter( const aiMesh* pMesh ) const;
+  aiVector3D findCenter( const aiScene* pScene ) const;
+  float findRadius( const aiMesh* pMesh, const aiVector3D& center ) const;
+  float findRadius( const aiScene* pScene ) const;
 };
 
 } // end of namespace Assimp
 
 
 #endif // !!AI_SCALETOUNITBOXPROCESS_H_INC
+

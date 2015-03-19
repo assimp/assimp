@@ -37,7 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef ASSIMP_BUILD_NO_OPEMGEX_IMPORTER
+#ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
 #include "AssimpPCH.h"
 #include "OpenGEXImporter.h"
@@ -502,4 +502,4 @@ void OpenGEXImporter::clearNodeStack() {
 } // Namespace OpenGEX
 } // Namespace Assimp
 
-#endif // ASSIMP_BUILD_NO_OPEMGEX_IMPORTER
+#endif // ASSIMP_BUILD_NO_OPENGEX_IMPORTER

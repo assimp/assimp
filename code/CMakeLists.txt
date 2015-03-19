@@ -265,8 +265,6 @@ SET( LWS_SRCS
 )
 SOURCE_GROUP( LWS FILES ${LWS_SRCS})
 
-
-
 SET( MD2_SRCS
 	MD2FileData.h
 	MD2Loader.cpp
@@ -359,6 +357,13 @@ SET( Ogre_SRCS
 	OgreMaterial.cpp
 )
 SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
+
+SET( OpenGEX_SRCS
+    OpenGEXImporter.cpp
+    OpenGEXImporter.h
+    OpenGEXStructs.h
+)
+SOURCE_GROUP( OpenGEX FILES ${OpenGEX_SRCS})
 
 SET( Ply_SRCS
 	PlyLoader.cpp
@@ -635,6 +640,17 @@ SET( unzip_SRCS
 )
 SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 
+SET ( openddl_parser_SRCS
+    ../contrib/openddlparser/code/OpenDDLParser.cpp
+    ../contrib/openddlparser/code/DDLNode.cpp
+    ../contrib/openddlparser/code/Value.cpp
+    ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
+    ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
+    ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
+    ../contrib/openddlparser/include/openddlparser/DDLNode.h
+    ../contrib/openddlparser/include/openddlparser/Value.h
+)
+SOURCE_GROUP( openddl_parser FILES ${openddl_parser_SRCS})
 
 # VC2010 fixes
 if(MSVC10)
@@ -690,6 +706,7 @@ SET( assimp_src
 	${OFFFormat_SRCS}
 	${Obj_SRCS}
 	${Ogre_SRCS}
+    ${OpenGEX_SRCS}
 	${Ply_SRCS}
 	${Q3D_SRCS}
 	${Q3BSP_SRCS}
@@ -714,6 +731,7 @@ SET( assimp_src
 	${unzip_compile_SRCS}
 	${Poly2Tri_SRCS}
 	${Clipper_SRCS}
+    ${openddl_parser_SRCS}
 	# Necessary to show the headers in the project when using the VC++ generator:
 	${Boost_SRCS}
 
@@ -725,6 +743,11 @@ SET( assimp_src
 	# Moreover it's a drag to recompile assimp entirely each time a modification is made to one of the included header, which is definitely counter-productive.)
 	AssimpPCH.cpp
 )
+add_definitions( -DOPENDDLPARSER_BUILD )
+
+INCLUDE_DIRECTORIES( 
+    ../contrib/openddlparser/include
+)
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 	SET( assimp_src ${assimp_src} ${C4D_SRCS})
@@ -735,7 +758,7 @@ ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
 ADD_LIBRARY( assimp ${assimp_src} )
 
-TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )
 
 if(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
 	set(ASSIMP_ANDROID_JNIIOSYSTEM_PATH port/AndroidJNI)

@@ -81,7 +81,7 @@ static bool isIntegerType( Value::ValueType integerType ) {
 }
 
 static DDLNode *createDDLNode( Identifier *id, OpenDDLParser *parser ) {
-    if( nullptr == id || ddl_nullptr == parser ) {
+    if( ddl_nullptr == id || ddl_nullptr == parser ) {
         return ddl_nullptr;
     }
 
@@ -132,7 +132,7 @@ OpenDDLParser::~OpenDDLParser() {
 }
 
 void OpenDDLParser::setLogCallback( logCallback callback ) {
-    if( nullptr != callback ) {
+    if( ddl_nullptr != callback ) {
         // install user-specific log callback
         m_logCallback = callback;
     } else {
@@ -607,7 +607,7 @@ char *OpenDDLParser::parseBooleanLiteral( char *in, char *end, Value **boolean )
 
 char *OpenDDLParser::parseIntegerLiteral( char *in, char *end, Value **integer, Value::ValueType integerType ) {
     *integer = ddl_nullptr;
-    if( nullptr == in || in == end ) {
+    if( ddl_nullptr == in || in == end ) {
         return in;
     }
 
@@ -705,7 +705,7 @@ char *OpenDDLParser::parseStringLiteral( char *in, char *end, Value **stringData
 }
 
 static void createPropertyWithData( Identifier *id, Value *primData, Property **prop ) {
-    if( nullptr != primData ) {
+    if( ddl_nullptr != primData ) {
         ( *prop ) = new Property( id );
         ( *prop )->m_primData = primData;
     }
@@ -857,7 +857,7 @@ char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **da
     if( *in == '{' ) {
         in++;
         Value *current( ddl_nullptr );
-        Reference *refs( nullptr );
+        Reference *refs( ddl_nullptr );
         DataArrayList *prev( ddl_nullptr ), *currentDataList( ddl_nullptr );
         do {
             in = parseDataList( in, end, &current, &refs );

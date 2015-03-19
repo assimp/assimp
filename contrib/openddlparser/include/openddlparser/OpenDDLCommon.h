@@ -74,7 +74,7 @@ enum NameType {
 };
 
 struct Name {
-    NameType m_type;
+    NameType    m_type;
     Identifier *m_id;
 
     Name( NameType type, Identifier *id )
@@ -85,8 +85,8 @@ struct Name {
 };
 
 struct Reference {
-    size_t m_numRefs;
-    Name **m_referencedName;
+    size_t   m_numRefs;
+    Name   **m_referencedName;
 
     Reference()
     : m_numRefs( 0 )
@@ -165,11 +165,6 @@ struct BufferIt {
 };
 
 END_ODDLPARSER_NS
-
-#define ODDL_NO_COPYING( classname ) \
-private: \
-    classname( const classname & ); \
-    classname &operator = ( const classname & );
 
 #endif // OPENDDLPARSER_OPENDDLPARSERCOMMON_H_INC
 

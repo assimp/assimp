@@ -126,6 +126,11 @@ private:
         std::vector<std::string> m_Names;
 
         RefInfo( aiNode *node, Type type, std::vector<std::string> &names );
+        ~RefInfo();
+
+    private:
+        RefInfo( const RefInfo & );
+        RefInfo &operator = ( const RefInfo & );
     };
 
     std::vector<aiMesh*> m_meshCache;

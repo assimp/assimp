@@ -171,6 +171,11 @@ OpenGEXImporter::RefInfo::RefInfo( aiNode *node, Type type, std::vector<std::str
 }
 
 //------------------------------------------------------------------------------------------------
+OpenGEXImporter::RefInfo::~RefInfo() {
+    // empty
+}
+
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
 : m_meshCache()
 , m_mesh2refMap()

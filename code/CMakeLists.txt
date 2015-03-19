@@ -640,6 +640,18 @@ SET( unzip_SRCS
 )
 SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 
+SET ( openddl_parser_SRCS
+    ../contrib/openddlparser/code/OpenDDLParser.cpp
+    ../contrib/openddlparser/code/DDLNode.cpp
+    ../contrib/openddlparser/code/Value.cpp
+    ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
+    ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
+    ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
+    ../contrib/openddlparser/include/openddlparser/DDLNode.h
+    ../contrib/openddlparser/include/openddlparser/Value.h
+)
+SOURCE_GROUP( openddl_parser FILES ${openddl_parser_SRCS})
+
 # VC2010 fixes
 if(MSVC10)
 	option( VC10_STDINT_FIX "Fix for VC10 Compiler regarding pstdint.h redefinition errors" OFF )
@@ -719,6 +731,7 @@ SET( assimp_src
 	${unzip_compile_SRCS}
 	${Poly2Tri_SRCS}
 	${Clipper_SRCS}
+    ${openddl_parser_SRCS}
 	# Necessary to show the headers in the project when using the VC++ generator:
 	${Boost_SRCS}
 
@@ -729,6 +742,11 @@ SET( assimp_src
 	# (removed because the precompiled header is not updated when visual studio switch configuration which leads to failed compilation.
 	# Moreover it's a drag to recompile assimp entirely each time a modification is made to one of the included header, which is definitely counter-productive.)
 	AssimpPCH.cpp
+)
+add_definitions( -DOPENDDLPARSER_BUILD )
+
+INCLUDE_DIRECTORIES( 
+    ../contrib/openddlparser/include
 )
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)

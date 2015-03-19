@@ -156,10 +156,6 @@ else(NOT ZLIB_FOUND)
 endif(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
-add_subdirectory( contrib/openddlparser )
-INCLUDE_DIRECTORIES( contrib/openddlparser/include )
-SET( OPENDDL_PARSER_LIBRARIES openddl_parser )
-
 # Search for unzip
 if (PKG_CONFIG_FOUND)
     PKG_CHECK_MODULES(UNZIP minizip)

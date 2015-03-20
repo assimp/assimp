@@ -1184,16 +1184,13 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					profile_data = opening.profileMesh2D.get();
 					is_2d_source = true;
 				}
-				else {
-					//continue;
-				}
 			}
 			else {
 				// vertical extrusion
 				if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
-					continue;
-				}
-				continue;
+					profile_data = opening.profileMesh2D.get();
+					is_2d_source = true;
+				} 
 			}
 		}
 		std::vector<IfcVector3> profile_verts = profile_data->verts;

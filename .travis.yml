@@ -1,6 +1,10 @@
 before_install:
   - sudo apt-get install cmake python3
 
+branches:
+  only:
+    - master
+
 env:
     matrix:
     - LINUX=1 TRAVIS_NO_EXPORT=YES

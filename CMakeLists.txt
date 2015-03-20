@@ -11,6 +11,8 @@ set (PROJECT_VERSION "${ASSIMP_VERSION}")
 
 set(ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used for uploading the sources")
 
+add_definitions( -DOPENDDL_NO_USE_CPP11 )
+
 # Get the current working branch
 execute_process(
     COMMAND git rev-parse --abbrev-ref HEAD

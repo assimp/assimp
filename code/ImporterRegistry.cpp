@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -142,7 +142,7 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 #	include "OgreImporter.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_OPEMGEX_IMPORTER
+#ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 #   include "OpenGEXImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
@@ -277,7 +277,7 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #if (!defined ASSIMP_BUILD_NO_OGRE_IMPORTER)
     out.push_back( new Ogre::OgreImporter());
 #endif
-#if (!defined ASSIMP_BUILD_NO_OPEMGEX_IMPORTER )
+#if (!defined ASSIMP_BUILD_NO_OPENGEX_IMPORTER )
     out.push_back( new OpenGEX::OpenGEXImporter() );
 #endif
 #if (!defined ASSIMP_BUILD_NO_MS3D_IMPORTER)
@@ -309,8 +309,8 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
-	out.push_back( new C4DImporter() );
+    out.push_back( new C4DImporter() );
 #endif
 }
 
-}
+} // namespace Assimp

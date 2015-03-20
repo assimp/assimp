@@ -1,22 +1,22 @@
 before_install:
   - sudo apt-get install cmake python3
 
-branches:
-  only:
-    - master
+#branches:
+#  only:
+#    - master
 
 env:
   global:
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
   matrix:
-    - LINUX=1 TRAVIS_NO_EXPORT=YES
-    - LINUX=1 TRAVIS_NO_EXPORT=NO
-    - LINUX=1 TRAVIS_STATIC_BUILD=ON
-    - LINUX=1 TRAVIS_STATIC_BUILD=OFF
-    - WINDOWS=1 TRAVIS_NO_EXPORT=YES
-    - WINDOWS=1 TRAVIS_NO_EXPORT=NO
-    - WINDOWS=1 TRAVIS_STATIC_BUILD=ON
-    - WINDOWS=1 TRAVIS_STATIC_BUILD=OFF
+#    - LINUX=1 TRAVIS_NO_EXPORT=YES
+#    - LINUX=1 TRAVIS_NO_EXPORT=NO
+#    - LINUX=1 TRAVIS_STATIC_BUILD=ON
+#    - LINUX=1 TRAVIS_STATIC_BUILD=OFF
+#    - WINDOWS=1 TRAVIS_NO_EXPORT=YES
+#    - WINDOWS=1 TRAVIS_NO_EXPORT=NO
+#    - WINDOWS=1 TRAVIS_STATIC_BUILD=ON
+#    - WINDOWS=1 TRAVIS_STATIC_BUILD=OFF
     - ANDROID=1
 
 language: cpp
@@ -42,4 +42,4 @@ script:
   - echo "=========================================================="
   - echo "REGRESSION TEST FAILS (results/run_regression_suite_failures.csv)"
   - cat ../results/run_regression_suite_failures.csv
-  - if [ $ANDROID ]; then ant -v -Dbasedir=${TRAVIS_BUILD_DIR} -f port/jassimp/build.xml ndk-jni ; fi
+  - if [ $ANDROID ]; then ant -v -Dbasedir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ; fi

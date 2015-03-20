@@ -186,7 +186,7 @@ void STLImporter::InternReadFile( const std::string& pFile,
     pScene->mRootNode = new aiNode();
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
-    for (uint i = 0; i < pScene->mNumMeshes; i++)
+    for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
         pScene->mRootNode->mMeshes[i] = i;
 
 	// create a single default material, using a light gray diffuse color for consistency with
@@ -254,7 +254,7 @@ void STLImporter::LoadASCIIFile()
         }
         else pScene->mRootNode->mName.Set("<STL_ASCII>");
 
-        uint faceVertexCounter = 0;
+        unsigned int faceVertexCounter = 0;
         for ( ;; )
         {
             // go to the next token

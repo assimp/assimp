@@ -1,9 +1,9 @@
 before_install:
   - sudo apt-get install cmake python3
 
-branches:
-  only:
-    - master
+#branches:
+#  only:
+#    - master
 
 env:
   global:

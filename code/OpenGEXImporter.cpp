@@ -278,25 +278,31 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
                 break;
 
             case Grammar::TransformToken:
+                handleTransformNode( *it, pScene );
                 break;
 
             case Grammar::MeshToken:
+                handleMeshNode( *it, pScene );
                 break;
 
             case Grammar::VertexArrayToken:
+                handleVertexArrayNode( *it, pScene );
                 break;
 
             case Grammar::IndexArrayToken:
+                handleIndexArrayNode( *it, pScene );
                 break;
 
             case Grammar::MaterialToken:
-                handleMaterial( *it, pScene );
+                handleMaterialNode( *it, pScene );
                 break;
 
             case Grammar::ColorToken:
+                handleColorNode( *it, pScene );
                 break;
 
             case Grammar::TextureToken:
+                handleTextureNode( *it, pScene );
                 break;
             
             default:
@@ -432,7 +438,27 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleMaterial( ODDLParser::DDLNode *node, aiScene *pScene ) {
+void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
 
 }
 
@@ -458,6 +484,16 @@ void OpenGEXImporter::resolveReferences() {
             }
         }
     }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
 }
 
 //------------------------------------------------------------------------------------------------

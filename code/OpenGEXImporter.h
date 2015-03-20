@@ -107,7 +107,13 @@ protected:
     void handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryObject( ODDLParser::DDLNode *node, aiScene *pScene );
-    void handleMaterial( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();

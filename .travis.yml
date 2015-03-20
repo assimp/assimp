@@ -6,7 +6,9 @@ branches:
     - master
 
 env:
-    matrix:
+  global:
+    - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
+  matrix:
     - LINUX=1 TRAVIS_NO_EXPORT=YES
     - LINUX=1 TRAVIS_NO_EXPORT=NO
     - LINUX=1 TRAVIS_STATIC_BUILD=ON
@@ -15,6 +17,7 @@ env:
     - WINDOWS=1 TRAVIS_NO_EXPORT=NO
     - WINDOWS=1 TRAVIS_STATIC_BUILD=ON
     - WINDOWS=1 TRAVIS_STATIC_BUILD=OFF
+    - ANDROID=1
 
 language: cpp
 
@@ -24,6 +27,7 @@ compiler:
 
 install:
   - if [ $WINDOWS ]; then travis_retry sudo apt-get install -q -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64; fi 
+  - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi
 
 script:
   - cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD

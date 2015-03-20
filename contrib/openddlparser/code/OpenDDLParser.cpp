@@ -290,8 +290,8 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
     bool error( false );
     in = getNextToken( in, end );
     if( *in == '{' ) {
+        // loop over all children ( data and nodes )
         do {
-            // loop over all childs ( data and nodes )
             in = parseStructureBody( in, end, error );
         } while ( *in != '}' );
         in++;
@@ -489,7 +489,7 @@ char *OpenDDLParser::parseIdentifier( char *in, char *end, Identifier **id ) {
     // get size of id
     size_t idLen( 0 );
     char *start( in );
-    while( !isSeparator( *in ) && ( in != end ) && *in != '(' && *in != ')' ) {
+    while( !isSeparator( *in ) && !isNewLine( *in ) && ( in != end ) && *in != '(' && *in != ')' ) {
         in++;
         idLen++;
     }
@@ -855,7 +855,7 @@ char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **da
     }
 
     in = getNextToken( in, end );
-    if( *in == '{' ) {
+    if( *in == Grammar::OpenBracketToken[ 0 ] ) {
         in++;
         Value *current( ddl_nullptr );
         Reference *refs( ddl_nullptr );

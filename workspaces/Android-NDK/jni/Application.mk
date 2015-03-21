@@ -1,11 +1,8 @@
-# NDK_TOOLCHAIN_VERSION=clang # fails on IFCBoolean.cpp and GEOColorTable.h ???
-#NDK_TOOLCHAIN_VERSION=4.8
-#NDK_TOOLCHAIN_VERSION=4.7
-#NDK_TOOLCHAIN_VERSION=4.6
+ifeq ($(TRAVIS_LANGUAGE),clang)
+    NDK_TOOLCHAIN_VERSION := $(TRAVIS_LANGUAGE)
+    $(info "Use llvm Compiler")
+endif
 
-APP_ABI := all
-APP_ABI := x86
+APP_ABI := armeabi-v7a
 
 APP_STL := stlport_static
-
-#NDK_APP_OUT := /home/Video-HD/C-Backups/arris69_assimp.git/JassimpLibrary

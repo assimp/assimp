@@ -43,4 +43,4 @@ script:
   - echo "=========================================================="
 #  - echo "REGRESSION TEST FAILS (results/run_regression_suite_failures.csv)"
 #  - cat ../results/run_regression_suite_failures.csv
-  - if [ $ANDROID ]; then ant -v -Dbasedir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ; fi
+  - if [ $ANDROID ]; then ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ; fi

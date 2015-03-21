@@ -21,6 +21,9 @@ LOCAL_SRC_FILES += contrib/clipper/clipper.cpp \
 	contrib/poly2tri/poly2tri/sweep/cdt.cc \
 	contrib/poly2tri/poly2tri/common/shapes.cc
 
+LOCAL_SRC_FILES += contrib/openddlparser/code/OpenDDLParser.cpp \
+	contrib/openddlparser/code/DDLNode.cpp \
+	contrib/openddlparser/code/Value.cpp
 
 # enables -frtti and -fexceptions
 LOCAL_CPP_FEATURES := exceptions
@@ -107,7 +110,7 @@ DontBuildImporters := -DASSIMP_BUILD_NO_IFC_IMPORTER -DASSIMP_BUILD_NO_IRRMESH_I
 ASSIMP_FLAGS_3_0 = -DASSIMP_BUILD_DLL_EXPORT -DASSIMP_BUILD_NO_OWN_ZLIB -DASSIMP_BUILD_BOOST_WORKAROUND -Dassimp_EXPORTS -fPIC -fvisibility=hidden -Wall
 ASSIMP_FLAGS_3_1 = $(ASSIMP_FLAGS_3_0) # -DASSIMP_BUILD_BLENDER_DEBUG
 
-LOCAL_CFLAGS += $(ASSIMP_FLAGS_3_1) -DASSIMP_BUILD_NO_EXPORT $(DontBuildImporters)  # $(DontBuildProcess) 
+LOCAL_CFLAGS += $(ASSIMP_FLAGS_3_1) -DASSIMP_BUILD_NO_EXPORT -DOPENDDL_NO_USE_CPP11 $(DontBuildImporters)  # $(DontBuildProcess) 
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/$(ASSIMP_SRC_DIR)/BoostWorkaround $(LOCAL_PATH)/contrib/openddlparser/include ./ 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include $(LOCAL_PATH)/$(ASSIMP_SRC_DIR)/BoostWorkaround

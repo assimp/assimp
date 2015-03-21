@@ -1,5 +1,5 @@
-ifeq ($(TRAVIS_LANGUAGE),clang)
-    NDK_TOOLCHAIN_VERSION := $(TRAVIS_LANGUAGE)
+ifeq ($(CC),clang)
+    NDK_TOOLCHAIN_VERSION := $(CC)
     $(info "Use llvm Compiler")
 endif
 

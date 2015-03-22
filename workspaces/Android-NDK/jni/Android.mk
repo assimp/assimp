@@ -3,27 +3,17 @@ LOCAL_PATH := $(call my-dir)/../../../
 include $(CLEAR_VARS)
 LOCAL_MODULE    := assimp_static
 ASSIMP_SRC_DIR = code
-FILE_LIST := $(wildcard $(LOCAL_PATH)/$(ASSIMP_SRC_DIR)/*.cpp)
 
-IGNORE_LIST := $(wildcard $(LOCAL_PATH)/$(ASSIMP_SRC_DIR)/C4D*.cpp)
-EXCLUDES := $(IGNORE_LIST:$(LOCAL_PATH)/%=%)
-ALL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
-LOCAL_SRC_FILES := $(filter-out $(EXCLUDES), $(ALL_SRC_FILES))
+FILE_LIST := $(wildcard $(LOCAL_PATH)/$(ASSIMP_SRC_DIR)/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/contrib/openddlparser/code/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/contrib/unzip/*.c)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/contrib/poly2tri/poly2tri/*/*.cc)
+
+LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
 LOCAL_SRC_FILES += contrib/clipper/clipper.cpp \
 	contrib/ConvertUTF/ConvertUTF.c \
-	contrib/unzip/ioapi.c \
-	contrib/unzip/unzip.c \
-	contrib/irrXML/irrXML.cpp \
-	contrib/poly2tri/poly2tri/sweep/advancing_front.cc \
-	contrib/poly2tri/poly2tri/sweep/sweep_context.cc \
-	contrib/poly2tri/poly2tri/sweep/sweep.cc \
-	contrib/poly2tri/poly2tri/sweep/cdt.cc \
-	contrib/poly2tri/poly2tri/common/shapes.cc
-
-LOCAL_SRC_FILES += contrib/openddlparser/code/OpenDDLParser.cpp \
-	contrib/openddlparser/code/DDLNode.cpp \
-	contrib/openddlparser/code/Value.cpp
+	contrib/irrXML/irrXML.cpp
 
 # enables -frtti and -fexceptions
 LOCAL_CPP_FEATURES := exceptions

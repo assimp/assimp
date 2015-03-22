@@ -243,6 +243,9 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
     ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
+# starting with it. when to build? if java found?
+ADD_SUBDIRECTORY( port/jassimp/ )
+
 option ( ASSIMP_BUILD_SAMPLES
     "If the official samples are built as well (needs Glut)."
     OFF

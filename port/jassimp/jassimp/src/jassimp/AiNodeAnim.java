@@ -68,9 +68,9 @@ import java.nio.ByteOrder;
  */
 public final class AiNodeAnim {
     /**
-     * Size of one position key entry (includes padding).
+     * Size of one position key entry.
      */
-    private static final int POS_KEY_SIZE = 24;
+    private static final int POS_KEY_SIZE = 20;
     
     /**
      * Size of one rotation key entry.
@@ -78,9 +78,9 @@ public final class AiNodeAnim {
     private static final int ROT_KEY_SIZE = 24;
     
     /**
-     * Size of one scaling key entry (includes padding).
+     * Size of one scaling key entry.
      */
-    private static final int SCALE_KEY_SIZE = 24;
+    private static final int SCALE_KEY_SIZE = 20;
     
     
     /**

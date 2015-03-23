@@ -283,10 +283,8 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 	}
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
-		lprintf("Info: (%s) buffer size expected %u, got %lld (padding in struct aiNodeAnim)\n", jBufferName, size, env->GetDirectBufferCapacity(jBuffer));
-	if (env->GetDirectBufferCapacity(jBuffer) < size)
 	{
-		lprintf("Fatal: direct buffer too small, expected %u, got %lld\n", size, env->GetDirectBufferCapacity(jBuffer));
+		lprintf("invalid direct buffer, expected %u, got %lld\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 

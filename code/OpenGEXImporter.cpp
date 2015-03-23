@@ -360,8 +360,10 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
             throw DeadlyImportError( "OpenGEX: invalid data type for value in node name." );
         }
 
-        std::string name( val->getString() );
-        m_currentNode->mName.Set( name.c_str() );
+        if( NULL != m_currentNode ) {
+            std::string name( val->getString() );
+            m_currentNode->mName.Set( name.c_str() );
+        }
     }
 }
 
@@ -438,8 +440,54 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+static void setMatrix( aiNode *node, DataArrayList *transformData ) {
+    float m[ 16 ];
+    size_t i( 1 );
+    Value *next( transformData->m_dataList->m_next );
+    m[ 0 ] = transformData->m_dataList->getFloat();
+    while(  next != NULL ) {
+        m[ i ] = next->getFloat();
+        next = next->m_next;
+        i++;
+    }
+    
+    node->mTransformation.a1 = m[ 0 ];
+    node->mTransformation.a2 = m[ 1 ];
+    node->mTransformation.a3 = m[ 2 ];
+    node->mTransformation.a4 = m[ 3 ];
 
+    node->mTransformation.b1 = m[ 4 ];
+    node->mTransformation.b2 = m[ 5 ];
+    node->mTransformation.b3 = m[ 6 ];
+    node->mTransformation.b4 = m[ 7 ];
+
+    node->mTransformation.c1 = m[ 8 ];
+    node->mTransformation.c2 = m[ 9 ];
+    node->mTransformation.c3 = m[ 10 ];
+    node->mTransformation.c4 = m[ 11 ];
+
+    node->mTransformation.d1 = m[ 12 ];
+    node->mTransformation.d2 = m[ 13 ];
+    node->mTransformation.d3 = m[ 14 ];
+    node->mTransformation.d4 = m[ 15 ];
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == m_currentNode ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
+
+
+    DataArrayList *transformData( node->getDataArrayList() );
+    if( NULL != transformData ) {
+        if( transformData->m_numItems != 16 ) {
+            throw DeadlyImportError( "Invalid number of data for transform matrix." );
+            return;
+        }
+        setMatrix( m_currentNode, transformData );
+    } 
 }
 
 //------------------------------------------------------------------------------------------------

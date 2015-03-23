@@ -30,7 +30,7 @@
 		</javah>
 	</target>
 
-	<target name="ndk-jni" depends="package">
+	<target name="ndk-jni">
 		<exec executable="${ndk.dir}/ndk-build">
 			<arg line="all NDK_PROJECT_PATH=${my.dir}/workspaces/Android-NDK"/>
 		</exec>

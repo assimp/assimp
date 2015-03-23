@@ -352,7 +352,8 @@ char *OpenDDLParser::parseStructureBody( char *in, char *end, bool &error ) {
             DataArrayList *dtArrayList( ddl_nullptr );
             Value *values( ddl_nullptr );
             if( 1 == arrayLen ) {
-                in = parseDataList( in, end, &values, &refs );
+                size_t numRefs( 0 ), numValues( 0 );
+                in = parseDataList( in, end, &values, numValues, &refs, numRefs );
                 setNodeValues( top(), values );
                 setNodeReferences( top(), refs );
             } else if( arrayLen > 1 ) {
@@ -797,8 +798,9 @@ char *OpenDDLParser::parseProperty( char *in, char *end, Property **prop ) {
     return in;
 }
 
-char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, Reference **refs ) {
+char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, size_t &numValues, Reference **refs, size_t &numRefs ) {
     *data = ddl_nullptr;
+    numValues = numRefs = 0;
     if( ddl_nullptr == in || in == end ) {
         return in;
     }
@@ -824,6 +826,7 @@ char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, Reference
                 if( !names.empty() ) {
                     Reference *ref = new Reference( names.size(), &names[ 0 ] );
                     *refs = ref;
+                    numRefs = names.size();
                 }
             }
 
@@ -835,6 +838,7 @@ char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, Reference
                     prev->setNext( current );
                     prev = current;
                 }
+                numValues++;
             }
 
             in = getNextSeparator( in, end );
@@ -861,11 +865,13 @@ char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **da
         Reference *refs( ddl_nullptr );
         DataArrayList *prev( ddl_nullptr ), *currentDataList( ddl_nullptr );
         do {
-            in = parseDataList( in, end, &current, &refs );
+            size_t numRefs( 0 ), numValues( 0 );
+            in = parseDataList( in, end, &current, numValues, &refs, numRefs );
             if( ddl_nullptr != current ) {
                 if( ddl_nullptr == prev ) {
                     *dataList = new DataArrayList;
-                    (*dataList)->m_dataList = current;
+                    ( *dataList )->m_dataList = current;
+                    ( *dataList )->m_numItems = numValues;
                     prev = *dataList;
                 } else {
                     currentDataList = new DataArrayList;

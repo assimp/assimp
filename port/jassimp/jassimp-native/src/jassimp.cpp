@@ -283,8 +283,10 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 	}
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
+		lprintf("Info: (%s) buffer size expected %u, got %lld (padding in struct aiNodeAnim)\n", jBufferName, size, env->GetDirectBufferCapacity(jBuffer));
+	if (env->GetDirectBufferCapacity(jBuffer) < size)
 	{
-		lprintf("invalid direct buffer, expected %u, got %u\n", size, env->GetDirectBufferCapacity(jBuffer));
+		lprintf("Fatal: direct buffer too small, expected %u, got %lld\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 
@@ -315,7 +317,7 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
 	{
-		lprintf("invalid direct buffer, expected %u, got %u\n", size, env->GetDirectBufferCapacity(jBuffer));
+		lprintf("invalid direct bufferArray, expected %u, got %lld\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 
@@ -493,6 +495,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			}
 
 			lprintf("    with %u faces\n", cMesh->mNumFaces);
+			lprintf("    with %u indices\n", faceBufferSize);
 		}
 
 
@@ -839,7 +842,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 	{
 		const aiMaterial* cMaterial = cScene->mMaterials[m];
 
-		lprintf("converting material ...\n", m);
+		lprintf("converting material...\n");
 
 		jobject jMaterial = NULL;
 

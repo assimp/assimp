@@ -107,10 +107,10 @@ public final class AiNodeAnim {
         m_posKeys = ByteBuffer.allocateDirect(numPosKeys * POS_KEY_SIZE);
         m_posKeys.order(ByteOrder.nativeOrder());
         
-        m_rotKeys = ByteBuffer.allocateDirect(numRotKeys * 24);
+        m_rotKeys = ByteBuffer.allocateDirect(numRotKeys * ROT_KEY_SIZE);
         m_rotKeys.order(ByteOrder.nativeOrder());
         
-        m_scaleKeys = ByteBuffer.allocateDirect(numScaleKeys * 24);
+        m_scaleKeys = ByteBuffer.allocateDirect(numScaleKeys * SCALE_KEY_SIZE);
         m_scaleKeys.order(ByteOrder.nativeOrder());
     }
     

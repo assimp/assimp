@@ -122,33 +122,45 @@ namespace Grammar {
     }
 
     static TokenType matchTokenType( const char *tokenType ) {
-        if( 0 == strncmp( MetricType, tokenType, strlen( tokenType ) ) ) {
+        if( 0 == strncmp( MetricType, tokenType, strlen( MetricType ) ) ) {
             return MetricToken;
-        } else if( 0 == strncmp( NameType, tokenType, strlen( tokenType ) ) ) {
+        } else if( 0 == strncmp( NameType, tokenType, strlen( NameType ) ) ) {
             return NameToken;
-        } else if( 0 == strncmp( ObjectRefType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( ObjectRefType, tokenType, strlen( ObjectRefType ) ) ) {
             return ObjectRefToken;
-        } else if( 0 == strncmp( MaterialRefType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MaterialRefType, tokenType, strlen( MaterialRefType ) ) ) {
             return MaterialRefToken; 
-        } else if( 0 == strncmp( MetricKeyType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MetricKeyType, tokenType, strlen( MetricKeyType ) ) ) {
             return MetricKeyToken;
-        } else if( 0 == strncmp( GeometryNodeType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( GeometryNodeType, tokenType, strlen( GeometryNodeType ) ) ) {
             return GeometryNodeToken;
-        } else if( 0 == strncmp( GeometryObjectType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( GeometryObjectType, tokenType, strlen( GeometryObjectType ) ) ) {
             return GeometryObjectToken;
-        } else if( 0 == strncmp( TransformType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( TransformType, tokenType, strlen( TransformType ) ) ) {
             return TransformToken;
-        } else if( 0 == strncmp( MeshType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MeshType, tokenType, strlen( MeshType ) ) ) {
             return MeshToken;
-        } else if( 0 == strncmp( VertexArrayType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( VertexArrayType, tokenType, strlen( VertexArrayType ) ) ) {
             return VertexArrayToken;
-        } else if( 0 == strncmp( IndexArrayType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( IndexArrayType, tokenType, strlen( IndexArrayType ) ) ) {
             return IndexArrayToken;
-        } else if( 0 == strncmp( MaterialType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MaterialType, tokenType, strlen( MaterialType ) ) ) {
             return MaterialToken;
-        } else if( 0 == strncmp( ColorType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( ColorType, tokenType, strlen( ColorType ) ) ) {
             return ColorToken;
-        } else if( 0 == strncmp( TextureType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( TextureType, tokenType, strlen( TextureType ) ) ) {
             return TextureToken;
         }
 
@@ -358,12 +370,11 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
     if( NULL != val ) {
         if( Value::ddl_string != val->m_type ) {
             throw DeadlyImportError( "OpenGEX: invalid data type for value in node name." );
+            return;
         }
 
-        if( NULL != m_currentNode ) {
-            std::string name( val->getString() );
-            m_currentNode->mName.Set( name.c_str() );
-        }
+        const std::string name( val->getString() );
+        m_currentNode->mName.Set( name.c_str() );
     }
 }
 
@@ -441,6 +452,9 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 
 //------------------------------------------------------------------------------------------------
 static void setMatrix( aiNode *node, DataArrayList *transformData ) {
+    ai_assert( NULL != node );
+    ai_assert( NULL != transformData );
+
     float m[ 16 ];
     size_t i( 1 );
     Value *next( transformData->m_dataList->m_next );
@@ -529,6 +543,8 @@ void OpenGEXImporter::resolveReferences() {
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
                 // ToDo
+            } else {
+                throw DeadlyImportError( "Unknown reference info to resolve." );
             }
         }
     }

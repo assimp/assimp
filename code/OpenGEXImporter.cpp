@@ -122,33 +122,45 @@ namespace Grammar {
     }
 
     static TokenType matchTokenType( const char *tokenType ) {
-        if( 0 == strncmp( MetricType, tokenType, strlen( tokenType ) ) ) {
+        if( 0 == strncmp( MetricType, tokenType, strlen( MetricType ) ) ) {
             return MetricToken;
-        } else if( 0 == strncmp( NameType, tokenType, strlen( tokenType ) ) ) {
+        } else if( 0 == strncmp( NameType, tokenType, strlen( NameType ) ) ) {
             return NameToken;
-        } else if( 0 == strncmp( ObjectRefType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( ObjectRefType, tokenType, strlen( ObjectRefType ) ) ) {
             return ObjectRefToken;
-        } else if( 0 == strncmp( MaterialRefType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MaterialRefType, tokenType, strlen( MaterialRefType ) ) ) {
             return MaterialRefToken; 
-        } else if( 0 == strncmp( MetricKeyType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MetricKeyType, tokenType, strlen( MetricKeyType ) ) ) {
             return MetricKeyToken;
-        } else if( 0 == strncmp( GeometryNodeType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( GeometryNodeType, tokenType, strlen( GeometryNodeType ) ) ) {
             return GeometryNodeToken;
-        } else if( 0 == strncmp( GeometryObjectType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( GeometryObjectType, tokenType, strlen( GeometryObjectType ) ) ) {
             return GeometryObjectToken;
-        } else if( 0 == strncmp( TransformType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( TransformType, tokenType, strlen( TransformType ) ) ) {
             return TransformToken;
-        } else if( 0 == strncmp( MeshType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MeshType, tokenType, strlen( MeshType ) ) ) {
             return MeshToken;
-        } else if( 0 == strncmp( VertexArrayType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( VertexArrayType, tokenType, strlen( VertexArrayType ) ) ) {
             return VertexArrayToken;
-        } else if( 0 == strncmp( IndexArrayType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( IndexArrayType, tokenType, strlen( IndexArrayType ) ) ) {
             return IndexArrayToken;
-        } else if( 0 == strncmp( MaterialType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( MaterialType, tokenType, strlen( MaterialType ) ) ) {
             return MaterialToken;
-        } else if( 0 == strncmp( ColorType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( ColorType, tokenType, strlen( ColorType ) ) ) {
             return ColorToken;
-        } else if( 0 == strncmp( TextureType, tokenType, strlen( tokenType ) ) ) {
+        }
+        else if( 0 == strncmp( TextureType, tokenType, strlen( TextureType ) ) ) {
             return TextureToken;
         }
 
@@ -181,6 +193,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_mesh2refMap()
 , m_ctx( NULL )
 , m_currentNode( NULL )
+, m_currentMesh( NULL )
 , m_nodeStack()
 , m_unresolvedRefStack() {
     // empty
@@ -358,9 +371,10 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
     if( NULL != val ) {
         if( Value::ddl_string != val->m_type ) {
             throw DeadlyImportError( "OpenGEX: invalid data type for value in node name." );
+            return;
         }
 
-        std::string name( val->getString() );
+        const std::string name( val->getString() );
         m_currentNode->mName.Set( name.c_str() );
     }
 }
@@ -438,18 +452,147 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+static void setMatrix( aiNode *node, DataArrayList *transformData ) {
+    ai_assert( NULL != node );
+    ai_assert( NULL != transformData );
 
+    float m[ 16 ];
+    size_t i( 1 );
+    Value *next( transformData->m_dataList->m_next );
+    m[ 0 ] = transformData->m_dataList->getFloat();
+    while(  next != NULL ) {
+        m[ i ] = next->getFloat();
+        next = next->m_next;
+        i++;
+    }
+    
+    node->mTransformation.a1 = m[ 0 ];
+    node->mTransformation.a2 = m[ 1 ];
+    node->mTransformation.a3 = m[ 2 ];
+    node->mTransformation.a4 = m[ 3 ];
+
+    node->mTransformation.b1 = m[ 4 ];
+    node->mTransformation.b2 = m[ 5 ];
+    node->mTransformation.b3 = m[ 6 ];
+    node->mTransformation.b4 = m[ 7 ];
+
+    node->mTransformation.c1 = m[ 8 ];
+    node->mTransformation.c2 = m[ 9 ];
+    node->mTransformation.c3 = m[ 10 ];
+    node->mTransformation.c4 = m[ 11 ];
+
+    node->mTransformation.d1 = m[ 12 ];
+    node->mTransformation.d2 = m[ 13 ];
+    node->mTransformation.d3 = m[ 14 ];
+    node->mTransformation.d4 = m[ 15 ];
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == m_currentNode ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
+
+
+    DataArrayList *transformData( node->getDataArrayList() );
+    if( NULL != transformData ) {
+        if( transformData->m_numItems != 16 ) {
+            throw DeadlyImportError( "Invalid number of data for transform matrix." );
+            return;
+        }
+        setMatrix( m_currentNode, transformData );
+    } 
+}
+
+//------------------------------------------------------------------------------------------------
+static void propId2StdString( Property *prop, std::string &name, std::string &key ) {
+    name = key = "";
+    if( NULL == prop ) {
+        return;
+    }
+
+    if( NULL != prop->m_id ) {
+        name = prop->m_id->m_buffer;
+        if( Value::ddl_string == prop->m_primData->m_type ) {
+            key = prop->m_primData->getString();
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    Property *prop = node->getProperties();
+    m_currentMesh = new aiMesh;
+    m_meshCache.push_back( m_currentMesh );
+    
+    if( NULL != prop ) {
+        std::string propName, propKey;
+        propId2StdString( prop, propName, propKey );
+        if( "triangles" == propName ) {
+            m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+        }
+    }
 
+    handleNodes( node, pScene );
+}
+
+//------------------------------------------------------------------------------------------------
+enum MeshAttribute {
+    None,
+    Position,
+    Normal,
+    TexCoord
+};
+
+//------------------------------------------------------------------------------------------------
+static MeshAttribute getAttributeByName( const char *attribName ) {
+    ai_assert( NULL != attribName  );
+
+    if( 0 == strncmp( "position", attribName, strlen( "position" ) ) ) {
+        return Position;
+    } else if( 0 == strncmp( "normal", attribName, strlen( "normal" ) ) ) {
+        return Normal;
+    } else if( 0 == strncmp( "texcoord", attribName, strlen( "texcoord" ) ) ) {
+        return TexCoord;
+    }
+
+    return None;
 }
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == node ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
 
+    Property *prop( node->getProperties() );
+    if( NULL != prop ) {
+        std::string propName, propKey;
+        propId2StdString( prop, propName, propKey );
+        MeshAttribute attribType( getAttributeByName( propName.c_str() ) );
+        if( None == attribType ) {
+            return;
+        }
+
+        DataArrayList *vaList = node->getDataArrayList();
+        if( NULL == vaList ) {
+            return;
+        }
+
+        if( Position == attribType ) {
+            aiVector3D *pos = new aiVector3D[ vaList->m_numItems ];
+            Value *next( vaList->m_dataList );
+            for( size_t i = 0; i < vaList->m_numItems; i++ ) {
+                
+            }
+        } else if( Normal == attribType ) {
+            aiVector3D *normal = new aiVector3D[ vaList->m_numItems ];
+        } else if( TexCoord == attribType ) {
+            aiVector3D *tex = new aiVector3D[ vaList->m_numItems ];
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -481,6 +624,8 @@ void OpenGEXImporter::resolveReferences() {
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
                 // ToDo
+            } else {
+                throw DeadlyImportError( "Unknown reference info to resolve." );
             }
         }
     }

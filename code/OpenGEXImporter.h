@@ -145,6 +145,7 @@ private:
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
     aiNode *m_currentNode;
+    aiMesh *m_currentMesh;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;
 };

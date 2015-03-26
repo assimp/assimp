@@ -43,8 +43,21 @@ struct Property;
 
 template<class T>
 inline
-T *getNextToken( T *in, T *end ) {
+T *lookForNextToken( T *in, T *end ) {
     while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
+        in++;
+    }
+    return in;
+}
+
+template<class T>
+inline
+T *getNextToken( T *in, T *end ) {
+    T *tmp( in );
+    while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
+        in++;
+    }
+    if( tmp == in ) {
         in++;
     }
     return in;
@@ -96,7 +109,7 @@ public: // static parser helpers
     static char *parseStringLiteral( char *in, char *end, Value **stringData );
     static char *parseHexaLiteral( char *in, char *end, Value **data );
     static char *parseProperty( char *in, char *end, Property **prop );
-    static char *parseDataList( char *in, char *end, Value **data, Reference **refs );
+    static char *parseDataList( char *in, char *end, Value **data, size_t &numValues, Reference **refs, size_t &numRefs );
     static char *parseDataArrayList( char *in, char *end, DataArrayList **dataList );
     static const char *getVersion();
 

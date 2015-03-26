@@ -74,8 +74,9 @@ namespace
 	template <class T>
 	const T &GetProperty(const std::vector<T> &props, int idx)
 	{
-		if (idx >= props.size())
-			throw DeadlyImportError("Invalid .ply file: Property index is out of range.");
+        if( static_cast< size_t >( idx ) >= props.size() ) {
+            throw DeadlyImportError( "Invalid .ply file: Property index is out of range." );
+        }
 
 		return props[idx];
 	}

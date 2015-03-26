@@ -193,6 +193,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_mesh2refMap()
 , m_ctx( NULL )
 , m_currentNode( NULL )
+, m_currentMesh( NULL )
 , m_nodeStack()
 , m_unresolvedRefStack() {
     // empty
@@ -505,13 +506,93 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *p
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+static void propId2StdString( Property *prop, std::string &name, std::string &key ) {
+    name = key = "";
+    if( NULL == prop ) {
+        return;
+    }
 
+    if( NULL != prop->m_id ) {
+        name = prop->m_id->m_buffer;
+        if( Value::ddl_string == prop->m_primData->m_type ) {
+            key = prop->m_primData->getString();
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    Property *prop = node->getProperties();
+    m_currentMesh = new aiMesh;
+    m_meshCache.push_back( m_currentMesh );
+    
+    if( NULL != prop ) {
+        std::string propName, propKey;
+        propId2StdString( prop, propName, propKey );
+        if( "triangles" == propName ) {
+            m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+        }
+    }
+
+    handleNodes( node, pScene );
+}
+
+//------------------------------------------------------------------------------------------------
+enum MeshAttribute {
+    None,
+    Position,
+    Normal,
+    TexCoord
+};
+
+//------------------------------------------------------------------------------------------------
+static MeshAttribute getAttributeByName( const char *attribName ) {
+    ai_assert( NULL != attribName  );
+
+    if( 0 == strncmp( "position", attribName, strlen( "position" ) ) ) {
+        return Position;
+    } else if( 0 == strncmp( "normal", attribName, strlen( "normal" ) ) ) {
+        return Normal;
+    } else if( 0 == strncmp( "texcoord", attribName, strlen( "texcoord" ) ) ) {
+        return TexCoord;
+    }
+
+    return None;
 }
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == node ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
 
+    Property *prop( node->getProperties() );
+    if( NULL != prop ) {
+        std::string propName, propKey;
+        propId2StdString( prop, propName, propKey );
+        MeshAttribute attribType( getAttributeByName( propName.c_str() ) );
+        if( None == attribType ) {
+            return;
+        }
+
+        DataArrayList *vaList = node->getDataArrayList();
+        if( NULL == vaList ) {
+            return;
+        }
+
+        if( Position == attribType ) {
+            aiVector3D *pos = new aiVector3D[ vaList->m_numItems ];
+            Value *next( vaList->m_dataList );
+            for( size_t i = 0; i < vaList->m_numItems; i++ ) {
+                
+            }
+        } else if( Normal == attribType ) {
+            aiVector3D *normal = new aiVector3D[ vaList->m_numItems ];
+        } else if( TexCoord == attribType ) {
+            aiVector3D *tex = new aiVector3D[ vaList->m_numItems ];
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------

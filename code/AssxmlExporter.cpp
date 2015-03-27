@@ -621,7 +621,7 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
 
 } // end of namespace AssxmlExport
 
-void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	IOStream * out = pIOSystem->Open( pFile, "wt" );
 	if (!out) return;

@@ -59,7 +59,7 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	std::string path = "";
 	std::string file = pFile;

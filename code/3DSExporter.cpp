@@ -144,7 +144,7 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to 3DS. Prototyped and registered in Exporter.cpp
-void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	boost::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
 	if(!outfile) {
@@ -188,8 +188,8 @@ Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, c
 
 	{
 		ChunkWriter chunk(writer, Discreet3DS::CHUNK_OBJMESH);
-		WriteMeshes();
 		WriteMaterials();
+		WriteMeshes();
 
 		{
 			ChunkWriter chunk(writer, Discreet3DS::CHUNK_MASTER_SCALE);

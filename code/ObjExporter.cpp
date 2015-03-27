@@ -51,7 +51,7 @@ namespace Assimp	{
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Wavefront OBJ. Prototyped and registered in Exporter.cpp
-void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	// invoke the exporter 
 	ObjExporter exporter(pFile, pScene);

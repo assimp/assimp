@@ -72,16 +72,16 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 // ------------------------------------------------------------------------------------------------
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
 // do not use const, because some exporter need to convert the scene temporary
-void ExportSceneCollada(const char*,IOSystem*, const aiScene*);
-void ExportSceneXFile(const char*,IOSystem*, const aiScene*); 
-void ExportSceneObj(const char*,IOSystem*, const aiScene*);
-void ExportSceneSTL(const char*,IOSystem*, const aiScene*);
-void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*);
-void ExportScenePly(const char*,IOSystem*, const aiScene*);
-void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*);
-void ExportScene3DS(const char*, IOSystem*, const aiScene*);
-void ExportSceneAssbin(const char*, IOSystem*, const aiScene*);
-void ExportSceneAssxml(const char*, IOSystem*, const aiScene*);
+void ExportSceneCollada(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneXFile(const char*,IOSystem*, const aiScene*, const ExportProperties*); 
+void ExportSceneObj(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneSTL(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportScenePly(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportScene3DS(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -91,7 +91,7 @@ Exporter::ExportFormatEntry gExporters[] =
 	Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
 #endif
 
-#ifndef ASSIMP_BUILD_NO_FXILE_EXPORTER
+#ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
 	Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile,
 		aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs),
 #endif
@@ -226,7 +226,7 @@ bool Exporter :: IsDefaultIOHandler() const
 
 
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int )
+const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int, const ExportProperties* pProperties)
 {
 	if (pimpl->blob) {
 		delete pimpl->blob;
@@ -282,7 +282,7 @@ bool IsVerboseFormat(const aiScene* pScene)
 
 
 // ------------------------------------------------------------------------------------------------
-aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing )
+aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing, const ExportProperties* pProperties)
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
@@ -290,7 +290,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 	// format. They will likely not be aware that there is a flag in the scene to indicate
 	// this, however. To avoid surprises and bug reports, we check for duplicates in
 	// meshes upfront.
-	const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || IsVerboseFormat(pScene);
+	const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || IsVerboseFormat(pScene);	
 
 	pimpl->mError = "";
 	for (size_t i = 0; i < pimpl->mExporters.size(); ++i) {
@@ -397,7 +397,8 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 					proc.Execute(scenecopy.get());
 				}
 
-				exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get());
+				ExportProperties emptyProperties;  // Never pass NULL ExportProperties so Exporters don't have to worry.
+				exp.mExportFunction(pPath,pimpl->mIOSystem.get(),scenecopy.get(), pProperties ? pProperties : &emptyProperties);
 			}
 			catch (DeadlyExportError& err) {
 				pimpl->mError = err.what();
@@ -491,5 +492,117 @@ void Exporter :: UnregisterExporter(const char* id)
 		}
 	}
 }
+
+ExportProperties :: ExportProperties() {}
+
+ExportProperties::ExportProperties(const ExportProperties &other)
+	 : mIntProperties(other.mIntProperties),
+   mFloatProperties(other.mFloatProperties),
+   mStringProperties(other.mStringProperties),
+   mMatrixProperties(other.mMatrixProperties)
+{
+	
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// Set a configuration property
+void ExportProperties :: SetPropertyInteger(const char* szName, int iValue, 
+	bool* bWasExisting /*= NULL*/)
+{
+	SetGenericProperty<int>(mIntProperties, szName,iValue,bWasExisting);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Set a configuration property
+void ExportProperties :: SetPropertyFloat(const char* szName, float iValue, 
+	bool* bWasExisting /*= NULL*/)
+{
+	SetGenericProperty<float>(mFloatProperties, szName,iValue,bWasExisting);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Set a configuration property
+void ExportProperties :: SetPropertyString(const char* szName, const std::string& value, 
+	bool* bWasExisting /*= NULL*/)
+{
+	SetGenericProperty<std::string>(mStringProperties, szName,value,bWasExisting);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Set a configuration property
+void ExportProperties :: SetPropertyMatrix(const char* szName, const aiMatrix4x4& value, 
+	bool* bWasExisting /*= NULL*/)
+{
+	SetGenericProperty<aiMatrix4x4>(mMatrixProperties, szName,value,bWasExisting);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+int ExportProperties :: GetPropertyInteger(const char* szName, 
+	int iErrorReturn /*= 0xffffffff*/) const
+{
+	return GetGenericProperty<int>(mIntProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+float ExportProperties :: GetPropertyFloat(const char* szName, 
+	float iErrorReturn /*= 10e10*/) const
+{
+	return GetGenericProperty<float>(mFloatProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Get a configuration property
+const std::string ExportProperties :: GetPropertyString(const char* szName, 
+	const std::string& iErrorReturn /*= ""*/) const
+{
+	return GetGenericProperty<std::string>(mStringProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Has a configuration property
+const aiMatrix4x4 ExportProperties :: GetPropertyMatrix(const char* szName, 
+	const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const
+{
+	return GetGenericProperty<aiMatrix4x4>(mMatrixProperties,szName,iErrorReturn);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Has a configuration property
+bool ExportProperties :: HasPropertyInteger(const char* szName) const
+{
+	return HasGenericProperty<int>(mIntProperties, szName);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Has a configuration property
+bool ExportProperties :: HasPropertyBool(const char* szName) const
+{
+	return HasGenericProperty<int>(mIntProperties, szName);
+};
+
+// ------------------------------------------------------------------------------------------------
+// Has a configuration property
+bool ExportProperties :: HasPropertyFloat(const char* szName) const
+{
+	return HasGenericProperty<float>(mFloatProperties, szName);
+};
+
+// ------------------------------------------------------------------------------------------------
+// Has a configuration property
+bool ExportProperties :: HasPropertyString(const char* szName) const
+{
+	return HasGenericProperty<std::string>(mStringProperties, szName);
+};
+
+// ------------------------------------------------------------------------------------------------
+// Has a configuration property
+bool ExportProperties :: HasPropertyMatrix(const char* szName) const
+{
+	return HasGenericProperty<aiMatrix4x4>(mMatrixProperties, szName);
+};
+
 
 #endif // !ASSIMP_BUILD_NO_EXPORT

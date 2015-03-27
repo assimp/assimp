@@ -483,7 +483,7 @@ ASSIMP_API void aiSetImportPropertyInteger(aiPropertyStore* p, const char* szNam
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<int>(pp->ints,szName,value,NULL);
+	SetGenericProperty<int>(pp->ints,szName,value);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -493,7 +493,7 @@ ASSIMP_API void aiSetImportPropertyFloat(aiPropertyStore* p, const char* szName,
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<float>(pp->floats,szName,value,NULL);
+	SetGenericProperty<float>(pp->floats,szName,value);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -507,7 +507,7 @@ ASSIMP_API void aiSetImportPropertyString(aiPropertyStore* p, const char* szName
 	}
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<std::string>(pp->strings,szName,std::string(st->C_Str()),NULL);
+	SetGenericProperty<std::string>(pp->strings,szName,std::string(st->C_Str()));
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -521,7 +521,7 @@ ASSIMP_API void aiSetImportPropertyMatrix(aiPropertyStore* p, const char* szName
 	}
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<aiMatrix4x4>(pp->matrices,szName,*mat,NULL);
+	SetGenericProperty<aiMatrix4x4>(pp->matrices,szName,*mat);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 

@@ -46,22 +46,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ------------------------------------------------------------------------------------------------
 template <class T>
-inline void SetGenericProperty(std::map< unsigned int, T >& list, 
-	const char* szName, const T& value, bool* bWasExisting = NULL)
+inline bool SetGenericProperty(std::map< unsigned int, T >& list, 
+	const char* szName, const T& value)
 {
 	ai_assert(NULL != szName);
 	const uint32_t hash = SuperFastHash(szName);
 
 	typename std::map<unsigned int, T>::iterator it = list.find(hash);
 	if (it == list.end())	{
-		if (bWasExisting)
-			*bWasExisting = false;
 		list.insert(std::pair<unsigned int, T>( hash, value ));
-		return;
+		return false;
 	}
 	(*it).second = value;
-	if (bWasExisting)
-		*bWasExisting = true;
+	return true;
 }
 
 // ------------------------------------------------------------------------------------------------

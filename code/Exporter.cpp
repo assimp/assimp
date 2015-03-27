@@ -507,34 +507,30 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void ExportProperties :: SetPropertyInteger(const char* szName, int iValue, 
-	bool* bWasExisting /*= NULL*/)
+bool ExportProperties :: SetPropertyInteger(const char* szName, int iValue)
 {
-	SetGenericProperty<int>(mIntProperties, szName,iValue,bWasExisting);
+	return SetGenericProperty<int>(mIntProperties, szName,iValue);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void ExportProperties :: SetPropertyFloat(const char* szName, float iValue, 
-	bool* bWasExisting /*= NULL*/)
+bool ExportProperties :: SetPropertyFloat(const char* szName, float iValue)
 {
-	SetGenericProperty<float>(mFloatProperties, szName,iValue,bWasExisting);
+	return SetGenericProperty<float>(mFloatProperties, szName,iValue);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void ExportProperties :: SetPropertyString(const char* szName, const std::string& value, 
-	bool* bWasExisting /*= NULL*/)
+bool ExportProperties :: SetPropertyString(const char* szName, const std::string& value)
 {
-	SetGenericProperty<std::string>(mStringProperties, szName,value,bWasExisting);
+	return SetGenericProperty<std::string>(mStringProperties, szName,value);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void ExportProperties :: SetPropertyMatrix(const char* szName, const aiMatrix4x4& value, 
-	bool* bWasExisting /*= NULL*/)
+bool ExportProperties :: SetPropertyMatrix(const char* szName, const aiMatrix4x4& value)
 {
-	SetGenericProperty<aiMatrix4x4>(mMatrixProperties, szName,value,bWasExisting);
+	return SetGenericProperty<aiMatrix4x4>(mMatrixProperties, szName,value);
 }
 
 // ------------------------------------------------------------------------------------------------

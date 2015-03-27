@@ -919,42 +919,46 @@ void Importer::GetExtensionList(aiString& szOut) const
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyInteger(const char* szName, int iValue, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyInteger(const char* szName, int iValue)
 {
+	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		exising = SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyFloat(const char* szName, float iValue, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyFloat(const char* szName, float iValue)
 {
+	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		exising = SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyString(const char* szName, const std::string& value, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyString(const char* szName, const std::string& value)
 {
+	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		exising = SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value)
 {
+	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-	SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		exising = SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -348,16 +348,14 @@ public:
 	 *   are defined in the aiConfig.g header (all constants share the
 	 *   prefix AI_CONFIG_XXX and are simple strings).
 	 * @param iValue New value of the property
-	 * @param bWasExisting Optional pointer to receive true if the
-	 *   property was set before. The new value replaces the previous value
-	 *   in this case.
+	 * @return true if the property was set before. The new value replaces
+	 *   the previous value in this case.
 	 * @note Property of different types (float, int, string ..) are kept
 	 *   on different stacks, so calling SetPropertyInteger() for a 
 	 *   floating-point property has no effect - the loader will call
 	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
-	void SetPropertyInteger(const char* szName, int iValue, 
-		bool* bWasExisting = NULL);
+	bool SetPropertyInteger(const char* szName, int iValue);
 
 	// -------------------------------------------------------------------
 	/** Set a boolean configuration property. Boolean properties
@@ -366,30 +364,27 @@ public:
 	 *  #GetPropertyBool and vice versa.
 	 * @see SetPropertyInteger()
 	 */
-	void SetPropertyBool(const char* szName, bool value, bool* bWasExisting = NULL)	{
-		SetPropertyInteger(szName,value,bWasExisting);
+	bool SetPropertyBool(const char* szName, bool value)	{
+		return SetPropertyInteger(szName,value);
 	}
 
 	// -------------------------------------------------------------------
 	/** Set a floating-point configuration property.
 	 * @see SetPropertyInteger()
 	 */
-	void SetPropertyFloat(const char* szName, float fValue, 
-		bool* bWasExisting = NULL);
+	bool SetPropertyFloat(const char* szName, float fValue);
 
 	// -------------------------------------------------------------------
 	/** Set a string configuration property.
 	 * @see SetPropertyInteger()
 	 */
-	void SetPropertyString(const char* szName, const std::string& sValue, 
-		bool* bWasExisting = NULL);
+	bool SetPropertyString(const char* szName, const std::string& sValue);
 
 	// -------------------------------------------------------------------
 	/** Set a matrix configuration property.
 	 * @see SetPropertyInteger()
 	 */
-	void SetPropertyMatrix(const char* szName, const aiMatrix4x4& sValue, 
-		bool* bWasExisting = NULL);
+	bool SetPropertyMatrix(const char* szName, const aiMatrix4x4& sValue);
 
 	// -------------------------------------------------------------------
 	/** Get a configuration property.

@@ -556,7 +556,7 @@ bool MD3Importer::ReadMultipartFile()
 
 		// ensure we won't try to load ourselves recursively
 		BatchLoader::PropertyMap props;
-		SetGenericProperty( props.ints, AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART, 0, NULL);
+		SetGenericProperty( props.ints, AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART, 0);
 
 		// now read these three files
 		BatchLoader batch(mIOHandler);

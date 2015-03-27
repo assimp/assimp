@@ -7,6 +7,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getVKeysize
+  (JNIEnv *, jclass);
+
 /*
  * Class:     jassimp_Jassimp
  * Method:    getErrorString

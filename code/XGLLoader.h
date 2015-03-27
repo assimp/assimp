@@ -86,6 +86,7 @@ protected:
 
 private:
 
+	
 	struct TempScope
 	{
 		TempScope()
@@ -120,6 +121,16 @@ private:
 		std::vector<aiMaterial*> materials_linear;
 
 		aiLight* light;
+	};
+
+
+	struct SortMeshByMaterialId {
+		SortMeshByMaterialId(const TempScope& scope) : scope(scope) {}
+		bool operator()(unsigned int a, unsigned int b) const {
+			return scope.meshes_linear[a]->mMaterialIndex < scope.meshes_linear[b]->mMaterialIndex;
+		};
+
+		const TempScope& scope;
 	};
 
 	struct TempMesh

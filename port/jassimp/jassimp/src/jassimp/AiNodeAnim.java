@@ -70,7 +70,7 @@ public final class AiNodeAnim {
     /**
      * Size of one position key entry.
      */
-    private static final int POS_KEY_SIZE = 20;
+    private static final int POS_KEY_SIZE = Jassimp.getVKeysize();
     
     /**
      * Size of one rotation key entry.
@@ -80,7 +80,7 @@ public final class AiNodeAnim {
     /**
      * Size of one scaling key entry.
      */
-    private static final int SCALE_KEY_SIZE = 20;
+    private static final int SCALE_KEY_SIZE = Jassimp.getVKeysize();
     
     
     /**

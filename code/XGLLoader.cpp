@@ -87,7 +87,7 @@ static const aiImporterDesc desc = {
 	"",
 	"",
 	"",
-	aiImporterFlags_SupportTextFlavour,
+	aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportCompressedFlavour,
 	0,
 	0,
 	0,

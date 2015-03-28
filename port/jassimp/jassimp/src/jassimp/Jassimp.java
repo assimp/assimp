@@ -97,6 +97,13 @@ public final class Jassimp {
     
     
     /**
+     * Returns the size of a struct.<p>
+     * 
+     * @return the result of sizeof call
+     */
+    public static native int getVKeysize();
+
+    /**
      * Returns a human readable error description.<p>
      * 
      * This method can be called when one of the import methods fails, i.e.,

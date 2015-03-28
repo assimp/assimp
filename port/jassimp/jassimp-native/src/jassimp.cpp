@@ -1340,6 +1340,14 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 }
 
 
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getVKeysize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(aiVectorKey);
+
+	return res;
+}
+
 JNIEXPORT jstring JNICALL Java_jassimp_Jassimp_getErrorString
   (JNIEnv *env, jclass jClazz)
 {

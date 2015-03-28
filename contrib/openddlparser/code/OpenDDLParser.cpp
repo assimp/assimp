@@ -856,6 +856,14 @@ char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, size_t &n
     return in;
 }
 
+DataArrayList *createDataArrayList( Value *currentValue, size_t numValues ) {
+    DataArrayList *dataList = new DataArrayList;
+    dataList->m_dataList = currentValue;
+    dataList->m_numItems = numValues;
+
+    return dataList;
+
+}
 char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **dataList ) {
     *dataList = ddl_nullptr;
     if( ddl_nullptr == in || in == end ) {
@@ -865,20 +873,19 @@ char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **da
     in = lookForNextToken( in, end );
     if( *in == Grammar::OpenBracketToken[ 0 ] ) {
         in++;
-        Value *current( ddl_nullptr );
+        Value *currentValue( ddl_nullptr );
         Reference *refs( ddl_nullptr );
         DataArrayList *prev( ddl_nullptr ), *currentDataList( ddl_nullptr );
         do {
             size_t numRefs( 0 ), numValues( 0 );
-            in = parseDataList( in, end, &current, numValues, &refs, numRefs );
-            if( ddl_nullptr != current ) {
+            currentValue = ddl_nullptr;
+            in = parseDataList( in, end, &currentValue, numValues, &refs, numRefs );
+            if( ddl_nullptr != currentValue ) {
                 if( ddl_nullptr == prev ) {
-                    *dataList = new DataArrayList;
-                    ( *dataList )->m_dataList = current;
-                    ( *dataList )->m_numItems = numValues;
+                    *dataList = createDataArrayList( currentValue, numValues );
                     prev = *dataList;
                 } else {
-                    currentDataList = new DataArrayList;
+                    currentDataList = createDataArrayList( currentValue, numValues );
                     if( ddl_nullptr != prev ) {
                         prev->m_next = currentDataList;
                         prev = currentDataList;

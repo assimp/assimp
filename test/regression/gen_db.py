@@ -164,7 +164,7 @@ def gen_db(ext_list,outfile):
     num = 0
     for tp in settings.model_directories:
         num += process_dir(tp, outfile,
-            lambda x: os.path.splitext(x)[1] in ext_list and not x in settings.files_to_ignore)
+            lambda x: os.path.splitext(x)[1].lower() in ext_list and not x in settings.files_to_ignore)
 
     print("="*60)
     print("Updated {0} entries".format(num))

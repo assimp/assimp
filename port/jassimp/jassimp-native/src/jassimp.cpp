@@ -284,7 +284,7 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
 	{
-		lprintf("invalid direct buffer, expected %u, got %u\n", size, env->GetDirectBufferCapacity(jBuffer));
+		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 
@@ -315,7 +315,7 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
 	{
-		lprintf("invalid direct buffer, expected %u, got %u\n", size, env->GetDirectBufferCapacity(jBuffer));
+		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 
@@ -839,7 +839,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 	{
 		const aiMaterial* cMaterial = cScene->mMaterials[m];
 
-		lprintf("converting material ...\n", m);
+		lprintf("converting material %d ...\n", m);
 
 		jobject jMaterial = NULL;
 

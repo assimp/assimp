@@ -131,7 +131,7 @@ public final class Jassimp {
     /**
      * @see #getVKeysize
      */
-    public static native int getboublesize();
+    public static native int getdoublesize();
 
     /**
      * @see #getVKeysize

@@ -201,7 +201,7 @@ if __name__ == "__main__":
     if ext_list is None:
         (ext_list, err) = subprocess.Popen([assimp_bin_path, "listext"],
             stdout=subprocess.PIPE).communicate()
-        ext_list = str(ext_list).lower().split(";")
+        ext_list = str(ext_list.strip()).lower().split(";")
 
     # todo: Fix for multi dot extensions like .skeleton.xml
     ext_list = list(filter(lambda f: not f in settings.exclude_extensions,

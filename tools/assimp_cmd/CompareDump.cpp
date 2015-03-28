@@ -134,7 +134,7 @@ public:
 		if(it != history.back().second.end()) {
 			++history.back().second[s];
 		}
-		else history.back().second[s] = 1;
+		else history.back().second[s] = 0;
 
 		history.push_back(HistoryEntry(s,PerChunkCounter()));
 		debug_trace.push_back("PUSH " + s);
@@ -244,10 +244,10 @@ private:
 		const char* last = history.back().first.c_str();
 		std::string pad;
 
-		for(ChunkHistory::reverse_iterator rev = ++history.rbegin(),
-			end = history.rend(); rev < end; ++rev, pad += "  ")
+		for(ChunkHistory::reverse_iterator rev = history.rbegin(),
+			end = history.rend(); rev != end; ++rev, pad += "  ")
 		{
-			ss << pad << (*rev).first << "(Index: " << (*rev).second[last]-1 << ")" << std::endl;
+			ss << pad << (*rev).first << "(Index: " << (*rev).second[last] << ")" << std::endl;
 			last = (*rev).first.c_str();
 		}
 

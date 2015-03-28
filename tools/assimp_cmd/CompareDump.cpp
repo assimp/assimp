@@ -137,12 +137,13 @@ public:
 		else history.back().second[s] = 1;
 
 		history.push_back(HistoryEntry(s,PerChunkCounter()));
-
+		debug_trace.push_back("PUSH " + s);
 	}
 
 	/* leave current scope */
 	void pop_elem() {
 		ai_assert(history.size());
+		debug_trace.push_back("POP "+ history.back().first);
 		history.pop_back();
 	}
 
@@ -250,11 +251,15 @@ private:
 			last = (*rev).first.c_str();
 		}
 
+		ss << std::endl << "Debug trace: "<< std::endl;
+		for (const std::string& s : debug_trace) {
+			ss << s << std::endl;
+		}
 		return ss.str();
 	}
 
 
-	/* read from both streams simult.*/
+	/* read from both streams at the same time */
 	template <typename T> void read(T& filla,T& fille) {
 		if(1 != fread(&filla,sizeof(T),1,actual)) {
 			EOFActual();
@@ -290,6 +295,8 @@ private:
 
 	typedef std::deque<HistoryEntry> ChunkHistory;
 	ChunkHistory history;
+
+	std::vector<std::string> debug_trace;
 
 	typedef std::stack<std::pair<uint32_t,uint32_t> > LengthStack;
 	LengthStack lengths;

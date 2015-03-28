@@ -529,8 +529,10 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
     if( NULL != prop ) {
         std::string propName, propKey;
         propId2StdString( prop, propName, propKey );
-        if( "triangles" == propName ) {
-            m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+        if( "primitive" == propName ) {
+            if( "triangles" == propKey ) {
+                m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+            }
         }
     }
 
@@ -571,7 +573,7 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
     if( NULL != prop ) {
         std::string propName, propKey;
         propId2StdString( prop, propName, propKey );
-        MeshAttribute attribType( getAttributeByName( propName.c_str() ) );
+        MeshAttribute attribType( getAttributeByName( propKey.c_str() ) );
         if( None == attribType ) {
             return;
         }

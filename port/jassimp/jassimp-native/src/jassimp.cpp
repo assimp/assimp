@@ -1382,7 +1382,7 @@ JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getuintsize
 	return res;
 }
 
-JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getdoubletsize
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getdoublesize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(double);

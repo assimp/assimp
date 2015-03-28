@@ -164,7 +164,7 @@ def gen_db(ext_list,outfile):
     num = 0
     for tp in settings.model_directories:
         num += process_dir(tp, outfile,
-            lambda x: os.path.splitext(x)[1] in ext_list)
+            lambda x: os.path.splitext(x)[1].lower() in ext_list and not x in settings.files_to_ignore)
 
     print("="*60)
     print("Updated {0} entries".format(num))
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     if ext_list is None:
         (ext_list, err) = subprocess.Popen([assimp_bin_path, "listext"],
             stdout=subprocess.PIPE).communicate()
-        ext_list = str(ext_list).lower().split(";")
+        ext_list = str(ext_list.strip()).lower().split(";")
 
     # todo: Fix for multi dot extensions like .skeleton.xml
     ext_list = list(filter(lambda f: not f in settings.exclude_extensions,

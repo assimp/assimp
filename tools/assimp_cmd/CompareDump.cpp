@@ -252,8 +252,8 @@ private:
 		}
 
 		ss << std::endl << "Debug trace: "<< std::endl;
-		for (const std::string& s : debug_trace) {
-			ss << s << std::endl;
+		for (std::vector<std::string>::const_iterator it = debug_trace.begin(); it != debug_trace.end(); ++it) {
+			ss << *it << std::endl;
 		}
 		return ss.str();
 	}

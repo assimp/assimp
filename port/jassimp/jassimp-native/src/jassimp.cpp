@@ -1344,7 +1344,55 @@ JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getVKeysize
   (JNIEnv *env, jclass jClazz)
 {
 	const int res = sizeof(aiVectorKey);
+	return res;
+}
 
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getQKeysize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(aiQuatKey);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getV3Dsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(aiVector3D);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getfloatsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(float);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getintsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(int);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getuintsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(unsigned int);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getdoubletsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(double);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getlongsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(long);
 	return res;
 }
 

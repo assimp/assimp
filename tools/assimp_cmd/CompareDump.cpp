@@ -746,7 +746,7 @@ void CompareOnTheFlyLight(comparer_context& comp)	{
 	const aiLightSourceType type = static_cast<aiLightSourceType>( 
 		comp.cmp<uint32_t>("mType"));
 
-	if(type==aiLightSource_DIRECTIONAL) {
+	if(type!=aiLightSource_DIRECTIONAL) {
 		comp.cmp<float>("mAttenuationConstant");
 		comp.cmp<float>("mAttenuationLinear");
 		comp.cmp<float>("mAttenuationQuadratic");

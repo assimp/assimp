@@ -563,6 +563,51 @@ static MeshAttribute getAttributeByName( const char *attribName ) {
 }
 
 //------------------------------------------------------------------------------------------------
+static void fillVector3( aiVector3D *vec3, Value *vals ) {
+    ai_assert( NULL != vec3 );
+    ai_assert( NULL != vals );
+
+    float x( 0.0f ), y( 0.0f ), z( 0.0f );
+    Value *next( vals );
+    x = next->getFloat();
+    next = next->m_next;
+    y = next->getFloat();
+    next = next->m_next;
+    if( NULL != next ) {
+        z = next->getFloat();
+    }
+
+    vec3->Set( x, y, z );
+}
+
+//------------------------------------------------------------------------------------------------
+static size_t countDataArrayListItems( DataArrayList *vaList ) {
+    size_t numItems( 0 );
+    if( NULL == vaList ) {
+        return numItems;
+    }
+
+    DataArrayList *next( vaList );
+    while( NULL != next ) {
+        if( NULL != vaList->m_dataList ) {
+            numItems++;
+        }
+        next = next->m_next;
+    }
+
+    return numItems;
+}
+
+//------------------------------------------------------------------------------------------------
+static void copyVectorArray( size_t numItems, DataArrayList *vaList, aiVector3D *vectorArray ) {
+    for( size_t i = 0; i < numItems; i++ ) {
+        Value *next( vaList->m_dataList );
+        fillVector3( &vectorArray[ i ], next );
+        vaList = vaList->m_next;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     if( NULL == node ) {
         throw DeadlyImportError( "No parent node for name." );
@@ -583,16 +628,17 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
             return;
         }
 
+        const size_t numItems( countDataArrayListItems( vaList ) );
+        Value *next( vaList->m_dataList );
         if( Position == attribType ) {
-            aiVector3D *pos = new aiVector3D[ vaList->m_numItems ];
-            Value *next( vaList->m_dataList );
-            for( size_t i = 0; i < vaList->m_numItems; i++ ) {
-                
-            }
+            m_currentMesh->mVertices = new aiVector3D[ numItems ];
+            copyVectorArray( numItems, vaList, m_currentMesh->mVertices );
         } else if( Normal == attribType ) {
-            aiVector3D *normal = new aiVector3D[ vaList->m_numItems ];
+            m_currentMesh->mNormals = new aiVector3D[ numItems ];
+            copyVectorArray( numItems, vaList, m_currentMesh->mNormals );
         } else if( TexCoord == attribType ) {
-            aiVector3D *tex = new aiVector3D[ vaList->m_numItems ];
+            m_currentMesh->mTextureCoords[0] = new aiVector3D[ numItems ];
+            copyVectorArray( numItems, vaList, m_currentMesh->mTextureCoords[0] );
         }
     }
 }

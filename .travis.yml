@@ -48,3 +48,4 @@ script:
     echo "==========================================================" ;
     echo "REGRESSION TEST FAILS (results/run_regression_suite_failures.csv)" ;
     cat ../results/run_regression_suite_failures.csv;
+    fi

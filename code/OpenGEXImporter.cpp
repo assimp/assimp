@@ -645,7 +645,30 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == node ) {
+        throw DeadlyImportError( "No parent node for name." );
+        return;
+    }
 
+    DataArrayList *vaList = node->getDataArrayList();
+    if( NULL == vaList ) {
+        return;
+    }
+
+    const size_t numItems( countDataArrayListItems( vaList ) );
+    m_currentMesh->mNumFaces = numItems;
+    m_currentMesh->mFaces = new aiFace[ numItems ];
+    for( size_t i = 0; i < numItems; i++ ) {
+        aiFace *current( & ( m_currentMesh->mFaces[ i ] ) );
+        current->mNumIndices = 3;
+        current->mIndices = new unsigned int[ 3 ];
+        Value *next( vaList->m_dataList );
+        for( size_t i = 0; i < 3; i++ ) {
+            current->mIndices[ i ] = next->getInt32();
+            next = next->m_next;
+        }
+        vaList = vaList->m_next;
+    }
 }
 
 //------------------------------------------------------------------------------------------------

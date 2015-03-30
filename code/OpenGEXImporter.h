@@ -114,6 +114,7 @@ protected:
     void handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void copyMeshes( aiScene *pScene );
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();

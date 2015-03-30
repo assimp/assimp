@@ -238,6 +238,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
         handleNodes( m_ctx->m_root, pScene );
     }
 
+    copyMeshes( pScene );
     resolveReferences();
 }
 
@@ -676,6 +677,20 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
 
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
+    if( m_meshCache.empty() ) {
+        return;
+    }
+    pScene->mNumMeshes = m_meshCache.size();
+    pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
+    size_t i( 0 );
+    for( std::vector<aiMesh*>::iterator it = m_meshCache.begin(); it != m_meshCache.end(); it++ ) {
+        pScene->mMeshes[ i ] = *it;
+        i++;
+    }
 }
 
 //------------------------------------------------------------------------------------------------

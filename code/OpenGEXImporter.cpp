@@ -631,13 +631,15 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         const size_t numItems( countDataArrayListItems( vaList ) );
         Value *next( vaList->m_dataList );
         if( Position == attribType ) {
+            m_currentMesh->mNumVertices = numItems;
             m_currentMesh->mVertices = new aiVector3D[ numItems ];
             copyVectorArray( numItems, vaList, m_currentMesh->mVertices );
         } else if( Normal == attribType ) {
             m_currentMesh->mNormals = new aiVector3D[ numItems ];
             copyVectorArray( numItems, vaList, m_currentMesh->mNormals );
         } else if( TexCoord == attribType ) {
-            m_currentMesh->mTextureCoords[0] = new aiVector3D[ numItems ];
+            m_currentMesh->mNumUVComponents[0] = numItems;
+            m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ numItems ];
             copyVectorArray( numItems, vaList, m_currentMesh->mTextureCoords[0] );
         }
     }

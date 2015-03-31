@@ -1,5 +1,8 @@
 before_install:
+  - sudo apt-get update -qq
   - sudo apt-get install cmake python3
+  - if [ $WINDOWS ]; then sudo apt-get install -qq gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64 wine ; fi
+  - if [ $LINUX ]; then sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; fi
   - echo -e "#ifndef A_R_H_INC\n#define A_R_H_INC\n#define GitVersion ${TRAVIS_JOB_ID}\n#define GitBranch \"${TRAVIS_BRANCH}\"\n#endif // A_R_H_INC" > revision.h
 
 branches:
@@ -25,11 +28,6 @@ language: cpp
 compiler:
   - gcc
   - clang
-
-before_install:
-  - sudo apt-get update -qq
-  - if [ $WINDOWS ]; then sudo apt-get install -qq gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64 wine ; fi
-  - if [ $LINUX ]; then sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; fi
 
 install:
   - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi

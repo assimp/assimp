@@ -440,15 +440,6 @@ void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
-    aiMesh *currentMesh( new aiMesh );
-    const size_t idx( m_meshCache.size() );
-    m_meshCache.push_back( currentMesh );
-
-    // store name to reference relation
-    m_mesh2refMap[ node->getName() ] = idx;
-
-    // todo: child nodes?
-
     handleNodes( node, pScene );
 }
 

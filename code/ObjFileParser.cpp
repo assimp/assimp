@@ -259,7 +259,7 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
         copyNextWord( m_buffer, BUFFERSIZE );
         z = ( float ) fast_atof( m_buffer );
     } else {
-        ai_assert( !"Invalid number of components" );
+        throw DeadlyImportError( "OBJ: Invalid number of components" );
     }
     point3d_array.push_back( aiVector3D( x, y, z ) );
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );

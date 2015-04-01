@@ -424,7 +424,9 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
                 pMesh->mTextureCoords[ 0 ][ newIndex ] = aiVector3D( coord3d.x, coord3d.y, coord3d.z );
             }
 
-            ai_assert( pMesh->mNumVertices > newIndex );
+            if ( pMesh->mNumVertices <= newIndex ) {
+                throw DeadlyImportError("OBJ: bad vertex index");
+            }
 
             // Get destination face
             aiFace *pDestFace = &pMesh->mFaces[ outIndex ];

@@ -655,10 +655,11 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     for( size_t i = 0; i < numItems; i++ ) {
         aiFace *current( & ( m_currentMesh->mFaces[ i ] ) );
         current->mNumIndices = 3;
-        current->mIndices = new unsigned int[ 3 ];
+        current->mIndices = new unsigned int[ current->mNumIndices ];
         Value *next( vaList->m_dataList );
-        for( size_t i = 0; i < 3; i++ ) {
-            current->mIndices[ i ] = next->getInt32();
+        for( size_t indices = 0; indices < current->mNumIndices; indices++ ) {
+            const int idx = next->getInt32();
+            current->mIndices[ indices ] = next->getInt32();
             next = next->m_next;
         }
         vaList = vaList->m_next;

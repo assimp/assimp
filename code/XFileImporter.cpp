@@ -156,6 +156,10 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, XFile::
 		CreateMeshes( pScene, pScene->mRootNode, pData->mGlobalMeshes);
 	}
 
+	if (!pScene->mRootNode) {
+		throw DeadlyImportError( "No root node" );
+	}
+
 	// Convert everything to OpenGL space... it's the same operation as the conversion back, so we can reuse the step directly
 	MakeLeftHandedProcess convertProcess;
 	convertProcess.Execute( pScene);

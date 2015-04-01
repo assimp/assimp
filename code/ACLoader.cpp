@@ -274,6 +274,9 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 			SkipSpaces(&buffer);
 
 			unsigned int t = strtoul10(buffer,&buffer);
+			if (t >= std::numeric_limits<int32_t>::max() / sizeof(aiVector3D)) {
+				throw DeadlyImportError("AC3D: Too many vertices, would run out of memory");
+			}
 			obj.vertices.reserve(t);
 			for (unsigned int i = 0; i < t;++i)
 			{

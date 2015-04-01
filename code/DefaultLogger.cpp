@@ -165,7 +165,6 @@ void Logger::debug(const char* message)	{
 	// sometimes importers will include data from the input file
 	// (i.e. node names) in their messages.
 	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
 		return;
 	}
 	return OnDebug(message);
@@ -176,7 +175,6 @@ void Logger::info(const char* message)	{
 	
 	// SECURITY FIX: see above
 	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
 		return;
 	}
 	return OnInfo(message);
@@ -187,7 +185,6 @@ void Logger::warn(const char* message)	{
 	
 	// SECURITY FIX: see above
 	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
 		return;
 	}
 	return OnWarn(message);
@@ -198,7 +195,6 @@ void Logger::error(const char* message)	{
 	
 	// SECURITY FIX: see above
 	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
 		return;
 	}
 	return OnError(message);

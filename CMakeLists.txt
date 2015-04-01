@@ -249,9 +249,10 @@ option ( ASSIMP_BUILD_SAMPLES
 )
 
 IF ( ASSIMP_BUILD_SAMPLES)
-    IF ( WIN32 )
-        ADD_SUBDIRECTORY( samples/SimpleTexturedOpenGL/ )
-    ENDIF ( WIN32 )
+    FIND_PACKAGE(DirectX)
+    IF ( DirectX_FOUND )
+        ADD_SUBDIRECTORY( tools/assimp_view/ )
+    ENDIF ( DirectX_FOUND )
     ADD_SUBDIRECTORY( samples/SimpleOpenGL/ )
 ENDIF ( ASSIMP_BUILD_SAMPLES )
 

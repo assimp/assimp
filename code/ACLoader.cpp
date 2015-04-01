@@ -632,6 +632,10 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 								face.mIndices[1] = cur++;
 
 								// copy vertex positions
+								if (it2 == (*it).entries.end() ) {
+									throw DeadlyImportError("AC3D: Bad line");
+								}
+								ai_assert((*it2).first < object.vertices.size());
 								*vertices++ = object.vertices[(*it2).first];
 								
 								// copy texture coordinates 

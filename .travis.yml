@@ -39,8 +39,6 @@ script:
     elif [ $WINDOWS ]; then
     cmake -G "Unix Makefiles" -DCMAKE_VERBOSE_MAKEFILE=YES -DCMAKE_TOOLCHAIN_FILE=cmake-modules/MinGW_x86_64.cmake -DCMAKE_C_PLATFORM_ID=MinGW -DCMAKE_COMPILER_IS_MINGW=YES -DMINGW=YES -DASSIMP_ENABLE_BOOST_WORKAROUND=YES ;
     cmake --build . ;
-    echo "TODO: Fixing static shared build/linking for lib and exe" ;
-    echo "Testing exe files with wine." ;
     else
     cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD ;
     make ;

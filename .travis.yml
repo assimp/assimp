@@ -35,8 +35,10 @@ install:
 script:
   - if [ $ANDROID ]; then 
     ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ; 
-    elif [ $RESERVED ]; then
-    echo "Reserved condition" ;
+    elif [ $WINDOWS ]; then
+    cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=cmake-modules/MinGW_x86_64.cmake -DCMAKE_C_PLATFORM_ID=MinGW -DCMAKE_COMPILER_IS_MINGW=YES -DMINGW=YES -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$TRAVIS_STATIC_BUILD ;
+    cmake --build . ;
+    echo -e "TODO: Fixing static shared build/linking for lib and exe\nTesting exe files with wine." ;
     else
     cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD ;
     make ;

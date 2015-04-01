@@ -471,6 +471,9 @@ void MD3Importer::ReadSkin(Q3Shader::SkinData& fill) const
 	std::string::size_type s = filename.find_last_of('_');
 	if (s == std::string::npos) {
 		s = filename.find_last_of('.');
+		if (s == std::string::npos) {
+			s = filename.size();
+		}
 	}
 	ai_assert(s != std::string::npos);
 
@@ -532,7 +535,9 @@ bool MD3Importer::ReadMultipartFile()
 {
 	// check whether the file name contains a common postfix, e.g lower_2.md3
 	std::string::size_type s = filename.find_last_of('_'), t = filename.find_last_of('.');
-	ai_assert(t != std::string::npos);
+
+	if (t == std::string::npos)
+		t = filename.size();
 	if (s == std::string::npos)
 		s = t;
 

@@ -122,6 +122,22 @@ protected:
     void clearNodeStack();
 
 private:
+    struct VertexContainer {
+        size_t m_numVerts;
+        aiVector3D *m_vertices;
+        size_t m_numNormals;
+        aiVector3D *m_normals;
+        size_t m_numUVComps[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+        aiVector3D *m_textureCoords[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+
+        VertexContainer();
+        ~VertexContainer();
+
+    private:
+        VertexContainer( const VertexContainer & );
+        VertexContainer &operator = ( const VertexContainer & );
+    };
+
     struct RefInfo {
         enum Type {
             MeshRef,
@@ -146,6 +162,7 @@ private:
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
     aiNode *m_currentNode;
+    VertexContainer m_currentVertices;
     aiMesh *m_currentMesh;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;

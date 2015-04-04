@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssimpPCH.h"
 #include "OpenGEXImporter.h"
 #include "DefaultIOSystem.h"
+#include "MakeVerboseFormat.h"
 
 #include <openddlparser/OpenDDLParser.h>
 
@@ -173,6 +174,22 @@ namespace Assimp {
 namespace OpenGEX {
 
 USE_ODDLPARSER_NS
+
+OpenGEXImporter::VertexContainer::VertexContainer()
+: m_numVerts( 0 )
+, m_vertices( NULL )
+, m_numNormals( 0 )
+, m_normals( NULL ) {
+    ::memset( &m_numUVComps[ 0 ], 0, sizeof( size_t )*AI_MAX_NUMBER_OF_TEXTURECOORDS );
+}
+
+OpenGEXImporter::VertexContainer::~VertexContainer() {
+    delete[] m_vertices;
+    delete[] m_normals;
+    for( size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ ) {
+        delete[] m_textureCoords[ i ];
+    }
+}
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::RefInfo::RefInfo( aiNode *node, Type type, std::vector<std::string> &names )
@@ -514,10 +531,12 @@ static void propId2StdString( Property *prop, std::string &name, std::string &ke
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
-    Property *prop = node->getProperties();
     m_currentMesh = new aiMesh;
+    const size_t meshidx( m_meshCache.size() );
     m_meshCache.push_back( m_currentMesh );
+    m_mesh2refMap[ node->getName() ] = meshidx;
     
+    Property *prop = node->getProperties();
     if( NULL != prop ) {
         std::string propName, propKey;
         propId2StdString( prop, propName, propKey );
@@ -623,16 +642,17 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         const size_t numItems( countDataArrayListItems( vaList ) );
         Value *next( vaList->m_dataList );
         if( Position == attribType ) {
-            m_currentMesh->mNumVertices = numItems;
-            m_currentMesh->mVertices = new aiVector3D[ numItems ];
-            copyVectorArray( numItems, vaList, m_currentMesh->mVertices );
+            m_currentVertices.m_numVerts = numItems;
+            m_currentVertices.m_vertices = new aiVector3D[ numItems ];
+            copyVectorArray( numItems, vaList, m_currentVertices.m_vertices );
         } else if( Normal == attribType ) {
-            m_currentMesh->mNormals = new aiVector3D[ numItems ];
-            copyVectorArray( numItems, vaList, m_currentMesh->mNormals );
+            m_currentVertices.m_numNormals = numItems;
+            m_currentVertices.m_normals = new aiVector3D[ numItems ];
+            copyVectorArray( numItems, vaList, m_currentVertices.m_normals );
         } else if( TexCoord == attribType ) {
-            m_currentMesh->mNumUVComponents[0] = numItems;
-            m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ numItems ];
-            copyVectorArray( numItems, vaList, m_currentMesh->mTextureCoords[0] );
+            m_currentVertices.m_numUVComps[ 0 ] = numItems;
+            m_currentVertices.m_textureCoords[ 0 ] = new aiVector3D[ numItems ];
+            copyVectorArray( numItems, vaList, m_currentVertices.m_textureCoords[ 0 ] );
         }
     }
 }
@@ -644,6 +664,11 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         return;
     }
 
+    if( NULL == m_currentMesh ) {
+        throw DeadlyImportError( "No current mesh for index data found." );
+        return;
+    }
+
     DataArrayList *vaList = node->getDataArrayList();
     if( NULL == vaList ) {
         return;
@@ -652,14 +677,33 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     const size_t numItems( countDataArrayListItems( vaList ) );
     m_currentMesh->mNumFaces = numItems;
     m_currentMesh->mFaces = new aiFace[ numItems ];
-    for( size_t i = 0; i < numItems; i++ ) {
-        aiFace *current( & ( m_currentMesh->mFaces[ i ] ) );
-        current->mNumIndices = 3;
-        current->mIndices = new unsigned int[ current->mNumIndices ];
+    m_currentMesh->mNumVertices = numItems * 3;
+    m_currentMesh->mVertices = new aiVector3D[ m_currentVertices.m_numVerts ];
+    m_currentMesh->mNormals = new aiVector3D[ m_currentVertices.m_numVerts ];
+    m_currentMesh->mNumUVComponents[ 0 ] = numItems * 3;
+    m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ m_currentVertices.m_numUVComps[ 0 ] ];
+
+    unsigned int index( 0 );
+    for( size_t i = 0; i < m_currentMesh->mNumFaces; i++ ) {
+        aiFace &current(  m_currentMesh->mFaces[ i ] );
+        current.mNumIndices = 3;
+        current.mIndices = new unsigned int[ current.mNumIndices ];
         Value *next( vaList->m_dataList );
-        for( size_t indices = 0; indices < current->mNumIndices; indices++ ) {
+        for( size_t indices = 0; indices < current.mNumIndices; indices++ ) {
             const int idx = next->getInt32();
-            current->mIndices[ indices ] = next->getInt32();
+            ai_assert( idx <= m_currentVertices.m_numVerts );
+
+            aiVector3D pos = ( m_currentVertices.m_vertices[ idx ] );
+            aiVector3D normal = ( m_currentVertices.m_normals[ idx ] );
+            aiVector3D tex = ( m_currentVertices.m_textureCoords[ 0 ][ idx ] );
+
+            ai_assert( index < m_currentMesh->mNumVertices );
+            m_currentMesh->mVertices[ index ] = pos;
+            m_currentMesh->mNormals[ index ]  = normal;
+            m_currentMesh->mTextureCoords[0][ index ] = tex;
+            current.mIndices[ indices ] = index;
+            index++;
+            
             next = next->m_next;
         }
         vaList = vaList->m_next;
@@ -703,7 +747,7 @@ void OpenGEXImporter::resolveReferences() {
                     node->mMeshes[ i ] = meshIdx;
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
-                // ToDo
+                // ToDo!
             } else {
                 throw DeadlyImportError( "Unknown reference info to resolve." );
             }

@@ -176,10 +176,12 @@ namespace OpenGEX {
 USE_ODDLPARSER_NS
 
 OpenGEXImporter::VertexContainer::VertexContainer()
-: m_numVerts( 0 )
-, m_vertices( NULL )
-, m_numNormals( 0 )
-, m_normals( NULL ) {
+: m_numVerts()
+, m_vertices()
+, m_numNormals()
+, m_normals()
+, m_textureCoords()
+, m_numUVComps() {
     ::memset( &m_numUVComps[ 0 ], 0, sizeof( size_t )*AI_MAX_NUMBER_OF_TEXTURECOORDS );
 }
 

@@ -40,7 +40,7 @@ script:
     sudo sh -c "wget https://www.winehq.org/pipermail/wine-patches/2012-February/111438.html -O - | patch -p 1 -d /usr/x86_64-w64-mingw32" ;
     cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=cmake-modules/MinGW_x86_64.cmake -DCMAKE_C_PLATFORM_ID=MinGW -DCMAKE_COMPILER_IS_MINGW=YES -DMINGW=YES -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_BUILD_TESTS=OFF -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$TRAVIS_SHARED_BUILD;
     cmake --build . ;
-    find -name "*.exe" -o "*.dll*" -exec file {} ";" ;
+    find -name "*.exe" -or -name "*.dll*" -exec file {} ";" ;
     find -name "assimp.exe" -exec wine {} info ${TRAVIS_BUILD_DIR}/test/models-nonbsd/B3D/dwarf2.b3d ";" ;
     elif [ $RESERVED ]; then
     echo "Reserved condition" ;

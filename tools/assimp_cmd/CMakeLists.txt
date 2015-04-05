@@ -33,6 +33,9 @@ SET_TARGET_PROPERTIES( assimp_cmd PROPERTIES
 	OUTPUT_NAME assimp
 )
 
+# for MinGW:
+SET(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+
 INSTALL( TARGETS assimp_cmd
 	DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-bin
 )

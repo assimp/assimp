@@ -229,7 +229,7 @@ inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* m
 	if (inv || *in == '+')
 		++in;
 
-	int value = strtoul10_64(in, out, max_inout);
+	int64_t value = strtoul10_64(in, out, max_inout);
 	if (inv) {
 		value = -value;
 	}

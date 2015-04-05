@@ -459,7 +459,7 @@ int64_t ParseTokenAsInt64(const Token& t, const char*& err_out)
 	ai_assert(length > 0);
 
 	const char* out;
-	const int64_t id = strtoul10_64(t.begin(), &out, &length);
+	const int64_t id = strtol10_64(t.begin(), &out, &length);
 	if (out > t.end()) {
 		err_out = "failed to parse Int64 (text)";
 		return 0L;

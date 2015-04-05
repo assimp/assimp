@@ -220,6 +220,23 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 	return value;
 }
 
+// ------------------------------------------------------------------------------------
+// signed variant of strtoul10_64
+// ------------------------------------------------------------------------------------
+inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0)
+{
+	bool inv = (*in == '-');
+	if (inv || *in == '+')
+		++in;
+
+	int value = strtoul10_64(in, out, max_inout);
+	if (inv) {
+		value = -value;
+	}
+	return value;
+}
+
+
 // Number of relevant decimals for floating-point parsing.
 #define AI_FAST_ATOF_RELAVANT_DECIMALS 15
 

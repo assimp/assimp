@@ -182,10 +182,7 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 , m_normals()
 , m_textureCoords()
 , m_numUVComps() {
-    ::memset( &m_numUVComps[ 0 ], 0, sizeof( size_t )*AI_MAX_NUMBER_OF_TEXTURECOORDS );   
-    for( size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ ) {
-        m_textureCoords[ i ] = NULL;
-    }
+    // empty
 }
 
 OpenGEXImporter::VertexContainer::~VertexContainer() {
@@ -686,7 +683,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     m_currentMesh->mVertices = new aiVector3D[ m_currentMesh->mNumVertices ];
     m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
     m_currentMesh->mNumUVComponents[ 0 ] = numItems * 3;
-    m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ m_currentVertices.m_numUVComps[ 0 ] ];
+    m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ m_currentMesh->mNumUVComponents[ 0 ] ];
 
     unsigned int index( 0 );
     for( size_t i = 0; i < m_currentMesh->mNumFaces; i++ ) {

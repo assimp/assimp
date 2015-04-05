@@ -176,20 +176,23 @@ namespace OpenGEX {
 USE_ODDLPARSER_NS
 
 OpenGEXImporter::VertexContainer::VertexContainer()
-: m_numVerts()
+: m_numVerts( 0 )
 , m_vertices()
-, m_numNormals()
+, m_numNormals( 0 )
 , m_normals()
 , m_textureCoords()
 , m_numUVComps() {
-    ::memset( &m_numUVComps[ 0 ], 0, sizeof( size_t )*AI_MAX_NUMBER_OF_TEXTURECOORDS );
+    ::memset( &m_numUVComps[ 0 ], 0, sizeof( size_t )*AI_MAX_NUMBER_OF_TEXTURECOORDS );   
+    for( size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ ) {
+        m_textureCoords[ i ] = NULL;
+    }
 }
 
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_normals;
     for( size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ ) {
-        delete[] m_textureCoords[ i ];
+        delete [] m_textureCoords[ i ];
     }
 }
 
@@ -680,8 +683,8 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     m_currentMesh->mNumFaces = numItems;
     m_currentMesh->mFaces = new aiFace[ numItems ];
     m_currentMesh->mNumVertices = numItems * 3;
-    m_currentMesh->mVertices = new aiVector3D[ m_currentVertices.m_numVerts ];
-    m_currentMesh->mNormals = new aiVector3D[ m_currentVertices.m_numVerts ];
+    m_currentMesh->mVertices = new aiVector3D[ m_currentMesh->mNumVertices ];
+    m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
     m_currentMesh->mNumUVComponents[ 0 ] = numItems * 3;
     m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ m_currentVertices.m_numUVComps[ 0 ] ];
 
@@ -695,14 +698,14 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
             const int idx = next->getInt32();
             ai_assert( idx <= m_currentVertices.m_numVerts );
 
-            aiVector3D pos = ( m_currentVertices.m_vertices[ idx ] );
-            aiVector3D normal = ( m_currentVertices.m_normals[ idx ] );
-            aiVector3D tex = ( m_currentVertices.m_textureCoords[ 0 ][ idx ] );
+            aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
+            aiVector3D &normal = ( m_currentVertices.m_normals[ idx ] );
+            aiVector3D &tex = ( m_currentVertices.m_textureCoords[ 0 ][ idx ] );
 
             ai_assert( index < m_currentMesh->mNumVertices );
-            m_currentMesh->mVertices[ index ] = pos;
-            m_currentMesh->mNormals[ index ]  = normal;
-            m_currentMesh->mTextureCoords[0][ index ] = tex;
+            m_currentMesh->mVertices[ index ].Set( pos.x, pos.y, pos.z );
+            m_currentMesh->mNormals[ index ].Set( normal.x, normal.y, normal.z );
+            m_currentMesh->mTextureCoords[0][ index ].Set( tex.x, tex.y, tex.z );
             current.mIndices[ indices ] = index;
             index++;
             

@@ -197,7 +197,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
         pScene->mMeshes = new aiMesh*[ MeshArray.size() ];
         for (size_t index =0; index < MeshArray.size(); index++)
         {
-            pScene->mMeshes [ index ] = MeshArray[ index ];
+            pScene->mMeshes[ index ] = MeshArray[ index ];
         }
     }
 
@@ -227,7 +227,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
         appendChildToParentNode( pParent, pNode );
     }
 
-    for ( unsigned int i=0; i< pObject->m_Meshes.size(); i++ )
+    for ( size_t i=0; i< pObject->m_Meshes.size(); i++ )
     {
         unsigned int meshId = pObject->m_Meshes[ i ];
         aiMesh *pMesh = createTopology( pModel, pObject, meshId );	
@@ -267,16 +267,17 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 // ------------------------------------------------------------------------------------------------
 //	Create topology data
 aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData, 
-                                         unsigned int uiMeshIndex )
+                                         unsigned int meshIndex )
 {
     // Checking preconditions
     ai_assert( NULL != pModel );
+    
     if( NULL == pData ) {
         return NULL;
     }
 
     // Create faces
-    ObjFile::Mesh *pObjMesh = pModel->m_Meshes[ uiMeshIndex ];
+    ObjFile::Mesh *pObjMesh = pModel->m_Meshes[ meshIndex ];
     if( !pObjMesh ) {
         return NULL;
     }
@@ -345,7 +346,7 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     }
 
     // Create mesh vertices
-    createVertexArray(pModel, pData, uiMeshIndex, pMesh, uiIdxCount);
+    createVertexArray(pModel, pData, meshIndex, pMesh, uiIdxCount);
 
     return pMesh;
 }
@@ -356,7 +357,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
                                         const ObjFile::Object* pCurrentObject, 
                                         unsigned int uiMeshIndex,
                                         aiMesh* pMesh,
-                                        unsigned int uiIdxCount)
+                                        unsigned int numIndices)
 {
     // Checking preconditions
     ai_assert( NULL != pCurrentObject );
@@ -371,7 +372,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
         return;
 
     // Copy vertices of this mesh instance
-    pMesh->mNumVertices = uiIdxCount;
+    pMesh->mNumVertices = numIndices;
     pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
     
     // Allocate buffer for normal vectors

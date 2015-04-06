@@ -792,6 +792,13 @@ if( MSVC )
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
 endif()
 
+# for MinGW:
+#SET(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+#second try...
+#Set Linker flags, TODO: check CMAKE_SHARED_LIBS and maybe add "-static" too.
+SET_TARGET_PROPERTIES(assimp PROPERTIES LINK_FLAGS "-static-libgcc -static-libstdc++")
+
+
 SET_TARGET_PROPERTIES( assimp PROPERTIES
 	VERSION ${ASSIMP_VERSION}
 	SOVERSION ${ASSIMP_SOVERSION} # use full version

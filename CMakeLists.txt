@@ -237,9 +237,10 @@ option ( ASSIMP_BUILD_ASSIMP_TOOLS
     ON
 )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
-    IF ( WIN32 )
+    FIND_PACKAGE(DirectX)
+    IF ( DirectX_FOUND )
         ADD_SUBDIRECTORY( tools/assimp_view/ )
-    ENDIF ( WIN32 )
+    ENDIF ( DirectX_FOUND )
     ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 

@@ -19,6 +19,12 @@ ADD_EXECUTABLE( assimp_cmd
 	Export.cpp
 )
 
+# for MinGW:
+#SET(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+#second try...
+#Set Linker flags, TODO: check CMAKE_SHARED_LIBS and maybe add "-static" too.
+SET_TARGET_PROPERTIES(assimp_cmd PROPERTIES LINK_FLAGS "-static-libgcc -static-libstdc++")
+
 SET_PROPERTY(TARGET assimp_cmd PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
 IF( WIN32 )
@@ -32,9 +38,6 @@ TARGET_LINK_LIBRARIES( assimp_cmd assimp ${ZLIB_LIBRARIES} )
 SET_TARGET_PROPERTIES( assimp_cmd PROPERTIES
 	OUTPUT_NAME assimp
 )
-
-# for MinGW:
-SET(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
 
 INSTALL( TARGETS assimp_cmd
 	DESTINATION "${ASSIMP_BIN_INSTALL_DIR}" COMPONENT assimp-bin

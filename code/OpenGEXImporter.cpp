@@ -175,6 +175,7 @@ namespace OpenGEX {
 
 USE_ODDLPARSER_NS
 
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
 , m_vertices()
@@ -185,6 +186,7 @@ OpenGEXImporter::VertexContainer::VertexContainer()
     // empty
 }
 
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_normals;
@@ -536,7 +538,6 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
     m_meshCache.push_back( m_currentMesh );
-    m_mesh2refMap[ node->getName() ] = meshidx;
     
     Property *prop = node->getProperties();
     if( NULL != prop ) {
@@ -550,6 +551,12 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
     }
 
     handleNodes( node, pScene );
+
+    DDLNode *parent( node->getParent() );
+    if( NULL != parent ) {
+        const std::string &name = parent->getName();
+        m_mesh2refMap[ name ] = meshidx;
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -745,8 +752,12 @@ void OpenGEXImporter::resolveReferences() {
             if( RefInfo::MeshRef == currentRefInfo->m_type ) {
                 for( size_t i = 0; i < currentRefInfo->m_Names.size(); i++ ) {
                     const std::string &name(currentRefInfo->m_Names[ i ] );
-                    unsigned int meshIdx = m_mesh2refMap[ name ];
-                    node->mMeshes[ i ] = meshIdx;
+                    ReferenceMap::const_iterator it( m_mesh2refMap.find( name ) );
+                    if( m_mesh2refMap.end() != it ) {
+                        unsigned int meshIdx = m_mesh2refMap[ name ];
+                        node->mMeshes[ i ] = meshIdx;
+                        node->mNumMeshes++;
+                    }
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
                 // ToDo!

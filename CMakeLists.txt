@@ -1,6 +1,7 @@
 cmake_minimum_required( VERSION 2.8 )
 PROJECT( Assimp )
 
+option(BUILD_SHARED_LIBS "Build package with shared libraries." OFF)
 if(NOT BUILD_SHARED_LIBS)
 	set(CMAKE_EXE_LINKER_FLAGS "-static")
 endif(NOT BUILD_SHARED_LIBS)

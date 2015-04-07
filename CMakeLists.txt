@@ -1,6 +1,10 @@
 cmake_minimum_required( VERSION 2.8 )
 PROJECT( Assimp )
 
+if(NOT BUILD_SHARED_LIBS)
+	set(CMAKE_EXE_LINKER_FLAGS "-static")
+endif(NOT BUILD_SHARED_LIBS)
+
 # Define here the needed parameters
 set (ASSIMP_VERSION_MAJOR 3)
 set (ASSIMP_VERSION_MINOR 1)

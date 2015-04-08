@@ -3,7 +3,8 @@ PROJECT( Assimp )
 
 option(BUILD_SHARED_LIBS "Build package with shared libraries." OFF)
 if(NOT BUILD_SHARED_LIBS)
-	set(CMAKE_EXE_LINKER_FLAGS "-static")
+        #set(CMAKE_EXE_LINKER_FLAGS "-static")
+        set(LINK_SEARCH_START_STATIC 1)
 endif(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters

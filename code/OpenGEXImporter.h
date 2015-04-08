@@ -120,6 +120,7 @@ protected:
     aiNode *popNode();
     aiNode *top() const;
     void clearNodeStack();
+    void createNodeTree( aiScene *pScene );
 
 private:
     struct VertexContainer {
@@ -155,6 +156,14 @@ private:
         RefInfo( const RefInfo & );
         RefInfo &operator = ( const RefInfo & );
     };
+
+    struct ChildInfo {
+        typedef std::list<aiNode*> NodeList;
+        std::list<aiNode*> m_children;
+    };
+    ChildInfo *m_root;
+    typedef std::map<aiNode*, ChildInfo*> NodeChildMap;
+    NodeChildMap m_nodeChildMap;
 
     std::vector<aiMesh*> m_meshCache;
     typedef std::map<std::string, size_t> ReferenceMap;

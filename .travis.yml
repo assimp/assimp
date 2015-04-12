@@ -35,10 +35,12 @@ install:
 script:
   - if [ $ANDROID ]; then 
     ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ; 
-    elif [ $WINDOWS ]; then
+    elif [ $WINDOWS -a $CC = "gcc" ]; then
     cmake -G "Unix Makefiles" -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$SHARED_BUILD -DCMAKE_TOOLCHAIN_FILE=cmake-modules/MinGW_x86_64.cmake ;
     cmake --build . ;
     make install ;
+    elif [ $WINDOWS ]; then
+    echo "Skip compile with non-gcc setting." ;
     elif [ $RESERVED ]; then
     echo "Reserved condition" ;
     else

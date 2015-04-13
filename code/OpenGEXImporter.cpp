@@ -175,6 +175,7 @@ namespace OpenGEX {
 
 USE_ODDLPARSER_NS
 
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
 , m_vertices()
@@ -185,6 +186,7 @@ OpenGEXImporter::VertexContainer::VertexContainer()
     // empty
 }
 
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_normals;
@@ -209,6 +211,8 @@ OpenGEXImporter::RefInfo::~RefInfo() {
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
 : m_meshCache()
+, m_root( NULL )
+, m_nodeChildMap()
 , m_mesh2refMap()
 , m_ctx( NULL )
 , m_currentNode( NULL )
@@ -259,6 +263,7 @@ void OpenGEXImporter::InternReadFile( const std::string &filename, aiScene *pSce
 
     copyMeshes( pScene );
     resolveReferences();
+    createNodeTree( pScene );
 }
 
 //------------------------------------------------------------------------------------------------
@@ -536,7 +541,6 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
     m_meshCache.push_back( m_currentMesh );
-    m_mesh2refMap[ node->getName() ] = meshidx;
     
     Property *prop = node->getProperties();
     if( NULL != prop ) {
@@ -550,6 +554,12 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
     }
 
     handleNodes( node, pScene );
+
+    DDLNode *parent( node->getParent() );
+    if( NULL != parent ) {
+        const std::string &name = parent->getName();
+        m_mesh2refMap[ name ] = meshidx;
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -718,6 +728,16 @@ void OpenGEXImporter::handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pS
 }
 
 //------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
     if( m_meshCache.empty() ) {
         return;
@@ -745,8 +765,12 @@ void OpenGEXImporter::resolveReferences() {
             if( RefInfo::MeshRef == currentRefInfo->m_type ) {
                 for( size_t i = 0; i < currentRefInfo->m_Names.size(); i++ ) {
                     const std::string &name(currentRefInfo->m_Names[ i ] );
-                    unsigned int meshIdx = m_mesh2refMap[ name ];
-                    node->mMeshes[ i ] = meshIdx;
+                    ReferenceMap::const_iterator it( m_mesh2refMap.find( name ) );
+                    if( m_mesh2refMap.end() != it ) {
+                        unsigned int meshIdx = m_mesh2refMap[ name ];
+                        node->mMeshes[ i ] = meshIdx;
+                        //node->mNumMeshes++;
+                    }
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {
                 // ToDo!
@@ -758,13 +782,21 @@ void OpenGEXImporter::resolveReferences() {
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+void OpenGEXImporter::createNodeTree( aiScene *pScene ) {
+    if( NULL == m_root ) {
+        return;
+    }
 
-}
-
-//------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
-
+    if( m_root->m_children.empty() ) {
+        return;
+    }
+    size_t i( 0 );
+    pScene->mRootNode->mNumChildren = m_root->m_children.size();
+    pScene->mRootNode->mChildren = new C_STRUCT aiNode*[ pScene->mRootNode->mNumChildren ];
+    for( ChildInfo::NodeList::iterator it = m_root->m_children.begin(); it != m_root->m_children.end(); it++ ) {
+        pScene->mRootNode->mChildren[ i ] = *it;
+        i++;
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -772,12 +804,30 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
     ai_assert( NULL != pScene );
 
     if( NULL != node ) {
+        ChildInfo *info( NULL );
         if( m_nodeStack.empty() ) {
             node->mParent = pScene->mRootNode;
+            NodeChildMap::iterator it( m_nodeChildMap.find( node->mParent ) );
+            if( m_nodeChildMap.end() == it ) {
+                info = new ChildInfo;
+                m_root = info;
+                m_nodeChildMap[ node->mParent ] = info;
+            } else {
+                info = it->second;
+            }
+            info->m_children.push_back( node );
         } else {
             aiNode *parent( m_nodeStack.back() );
             ai_assert( NULL != parent );
             node->mParent = parent;
+            NodeChildMap::iterator it( m_nodeChildMap.find( node->mParent ) );
+            if( m_nodeChildMap.end() == it ) {
+                info = new ChildInfo;
+                m_nodeChildMap[ node->mParent ] = info;
+            } else {
+                info = it->second;
+            }
+            info->m_children.push_back( node );
         }
         m_nodeStack.push_back( node );
     }

@@ -15,12 +15,12 @@ env:
   matrix:
     - LINUX=1 TRAVIS_NO_EXPORT=YES
     - LINUX=1 TRAVIS_NO_EXPORT=NO
-    - LINUX=1 TRAVIS_STATIC_BUILD=ON
-    - LINUX=1 TRAVIS_STATIC_BUILD=OFF
+    - LINUX=1 SHARED_BUILD=ON
+    - LINUX=1 SHARED_BUILD=OFF
     - WINDOWS=1 TRAVIS_NO_EXPORT=YES
     - WINDOWS=1 TRAVIS_NO_EXPORT=NO
-    - WINDOWS=1 TRAVIS_STATIC_BUILD=ON
-    - WINDOWS=1 TRAVIS_STATIC_BUILD=OFF
+    - WINDOWS=1 SHARED_BUILD=ON
+    - WINDOWS=1 SHARED_BUILD=OFF
     - ANDROID=1
 
 language: cpp
@@ -35,10 +35,18 @@ install:
 script:
   - if [ $ANDROID ]; then 
     ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ; 
+    elif [ $WINDOWS -a $CC = "gcc" ]; then
+    sudo sh -c "wget http://source.winehq.org/git/wine.git/commitdiff_plain/86781a6a524fa336f893ffd0a87373ffd306913c?hp=076edfe9d4b6cd39b6cf41b9f1d3e18688cc8673 -O - | patch -p 1 -d /usr/x86_64-w64-mingw32" ;
+    sudo sh -c "wget https://www.winehq.org/pipermail/wine-patches/2012-February/111438.html -O - | patch -p 1 -d /usr/x86_64-w64-mingw32" ;
+    cmake -G "Unix Makefiles" -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$SHARED_BUILD -DCMAKE_TOOLCHAIN_FILE=cmake-modules/MinGW_x86_64.cmake ;
+    cmake --build . ;
+    make install ;
+    elif [ $WINDOWS ]; then
+    echo "Skip compile with non-gcc setting." ;
     elif [ $RESERVED ]; then
     echo "Reserved condition" ;
     else
-    cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD ;
+    cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$SHARED_BUILD ;
     make ;
     sudo make install ;
     sudo ldconfig ;

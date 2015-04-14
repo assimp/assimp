@@ -769,7 +769,6 @@ void OpenGEXImporter::resolveReferences() {
                     if( m_mesh2refMap.end() != it ) {
                         unsigned int meshIdx = m_mesh2refMap[ name ];
                         node->mMeshes[ i ] = meshIdx;
-                        //node->mNumMeshes++;
                     }
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {

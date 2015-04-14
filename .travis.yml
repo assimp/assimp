@@ -58,4 +58,5 @@ script:
     echo "==========================================================" ;
     echo "REGRESSION TEST FAILS (results/run_regression_suite_failures.csv)" ;
     cat ../results/run_regression_suite_failures.csv;
+    diff ../results/run_regression_suite_failures.csv ../regression/run_regression_suite_failures_whitelisted.csv
     fi

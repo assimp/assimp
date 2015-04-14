@@ -69,6 +69,9 @@ configs for an IDE, make sure to build the assimp_cmd project.
 
 -i,--include: List of file extensions to update dumps for. If omitted,
          all file extensions are updated except those in `exclude`.
+         Example: -ixyz,abc
+                  -i.xyz,.abc
+                  --include=xyz,abc
 
 -e,--exclude: Merged with settings.exclude_extensions to produce a
          list of all file extensions to ignore. If dumps exist,
@@ -78,8 +81,6 @@ configs for an IDE, make sure to build the assimp_cmd project.
          Dont' change anything.
 
 -n,--nozip: Don't pack to ZIP archive. Keep all dumps in individual files.
-
-(lists of file extensions are comma delimited, i.e. `3ds,lwo,x`)
 """
 
 # -------------------------------------------------------------------------------
@@ -172,30 +173,32 @@ def gen_db(ext_list,outfile):
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
-    assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
-
     def clean(f):
         f = f.strip("* \'")
         return "."+f if f[:1] != '.' else f
 
-    if len(sys.argv)>1 and (sys.argv[1] == "--help" or sys.argv[1] == "-h"):
+    if len(sys.argv) <= 1 or sys.argv[1] == "--help" or sys.argv[1] == "-h":
         print(usage)
         sys.exit(0)
 
+    assimp_bin_path = sys.argv[1]    
     ext_list, preview, nozip = None, False, False
-    for m in sys.argv[1:]:
+    for m in sys.argv[2:]:
         if m[:10]=="--exclude=":
             settings.exclude_extensions += map(clean, m[10:].split(","))
-        elif m[:3]=="-e=":
-            settings.exclude_extensions += map(clean, m[3:].split(","))
+        elif m[:2]=="-e":
+            settings.exclude_extensions += map(clean, m[2:].split(","))
         elif m[:10]=="--include=":
             ext_list = m[10:].split(",")
-        elif m[:3]=="-i=":
-            ext_list = m[3:].split(",")
+        elif m[:2]=="-i":
+            ext_list = m[2:].split(",")
         elif m=="-p" or m == "--preview":
             preview = True
         elif m=="-n" or m == "--nozip":
             nozip = True
+        else:
+            print("Unrecognized parameter: " + m)
+            sys.exit(-1)
             
     outfile = open(os.path.join("..", "results", "gen_regression_db_output.txt"), "w")
     if ext_list is None:
@@ -206,9 +209,8 @@ if __name__ == "__main__":
     # todo: Fix for multi dot extensions like .skeleton.xml
     ext_list = list(filter(lambda f: not f in settings.exclude_extensions,
         map(clean, ext_list)))
-
-    if preview:
-        print(','.join(ext_list))
+    print('File extensions processed: ' + ', '.join(ext_list))
+    if preview:       
         sys.exit(1)
 
     extract_zip()    

@@ -1,16 +1,17 @@
-# ============================================================================== 
+# ==============================================================================
 # List of IFC structures needed by Assimp
-# ============================================================================== 
+# ==============================================================================
 # use genentitylist.sh to update this list
 
-# This machine-generated list is not complete, it lacks many intermediate 
+# This machine-generated list is not complete, it lacks many intermediate
 # classes in the inheritance hierarchy. Those are magically augmented by the
-# code generator. Also, the names of all used entities need to be present 
+# code generator. Also, the names of all used entities need to be present
 # in the source code for this to work.
 
 IfcAnnotation
 IfcArbitraryClosedProfileDef
 IfcArbitraryOpenProfileDef
+IfcArbitraryProfileDefWithVoids
 IfcAxis1Placement
 IfcAxis2Placement
 IfcAxis2Placement2D

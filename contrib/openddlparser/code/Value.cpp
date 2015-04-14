@@ -88,6 +88,47 @@ int64 Value::getInt64() {
     return ( int64 ) ( *m_data );
 }
 
+void Value::setUnsignedInt8( uint8 value ) {
+    assert( ddl_unsigned_int8 == m_type );
+    ::memcpy( m_data, &value, m_size );
+}
+
+uint8 Value::getUnsignedInt8() const {
+    assert( ddl_unsigned_int8 == m_type );
+    return ( uint8 ) ( *m_data );
+}
+
+void Value::setUnsignedInt16( uint16 value ) {
+    assert( ddl_unsigned_int16 == m_type );
+    ::memcpy( m_data, &value, m_size );
+
+}
+uint16 Value::getUnsignedInt16() const {
+    assert( ddl_unsigned_int16 == m_type );
+    return ( uint8 ) ( *m_data );
+
+}
+
+void Value::setUnsignedInt32( uint32 value ) {
+    assert( ddl_unsigned_int32 == m_type );
+    ::memcpy( m_data, &value, m_size );
+}
+
+uint32 Value::getUnsignedInt32() const {
+    assert( ddl_unsigned_int32 == m_type );
+    return ( uint8 ) ( *m_data );
+}
+
+void Value::setUnsignedInt64( uint64 value ) {
+    assert( ddl_unsigned_int64 == m_type );
+    ::memcpy( m_data, &value, m_size );
+}
+
+uint64 Value::getUnsignedInt64() const {
+    assert( ddl_unsigned_int64 == m_type );
+    return ( uint64 ) ( *m_data );
+}
+
 void Value::setFloat( float value ) {
     assert( ddl_float == m_type );
     ::memcpy( m_data, &value, m_size );

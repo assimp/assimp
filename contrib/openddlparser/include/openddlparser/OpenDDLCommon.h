@@ -67,12 +67,52 @@ typedef char  int8;
 typedef short int16;
 typedef int   int32;
 typedef long  int64;
+typedef unsigned char  uint8;
+typedef unsigned short uint16;
+typedef unsigned int   uint32;
+typedef unsigned long  uint64;
 
 enum NameType {
     GlobalName,
     LocalName
 };
 
+struct Token {
+public:
+    Token( const char *token )
+    : m_token( token )
+    , m_size( 0 ){
+        if( ddl_nullptr != token ) {
+            m_size = strlen( m_token );
+        }
+    }
+    
+    ~Token() {
+        // empty
+    }
+
+    size_t length() const {
+        return m_size;
+    }
+
+    bool operator == ( const Token &rhs ) const {
+        if( m_size != rhs.m_size ) {
+            return false;
+        }
+
+        const int res( strncmp( m_token, rhs.m_token, m_size ) );
+        return ( res == 0 );
+    }
+
+private:
+    Token();
+    Token( const Token  & );
+    Token &operator = ( const Token & );
+
+private:
+    const char *m_token;
+    size_t m_size;
+};
 struct Name {
     NameType    m_type;
     Identifier *m_id;

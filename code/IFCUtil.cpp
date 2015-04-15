@@ -236,7 +236,7 @@ IfcVector3 TempMesh::ComputeLastPolygonNormal(bool normalize) const
 
 struct CompareVector
 {
-	bool operator () (const IfcVector3& a, const IfcVector3& b)
+	bool operator () (const IfcVector3& a, const IfcVector3& b) const
 	{
 		IfcVector3 d = a - b;
 		IfcFloat eps = 1e-6;

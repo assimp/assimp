@@ -207,6 +207,7 @@ size_t ParseTokenAsDim(const Token& t, const char*& err_out);
 
 float ParseTokenAsFloat(const Token& t, const char*& err_out);
 int ParseTokenAsInt(const Token& t, const char*& err_out);
+int64_t ParseTokenAsInt64(const Token& t, const char*& err_out);
 std::string ParseTokenAsString(const Token& t, const char*& err_out);
 
 
@@ -215,6 +216,7 @@ uint64_t ParseTokenAsID(const Token& t);
 size_t ParseTokenAsDim(const Token& t);
 float ParseTokenAsFloat(const Token& t);
 int ParseTokenAsInt(const Token& t);
+int64_t ParseTokenAsInt64(const Token& t);
 std::string ParseTokenAsString(const Token& t);
 
 /* read data arrays */
@@ -225,6 +227,7 @@ void ParseVectorDataArray(std::vector<int>& out, const Element& el);
 void ParseVectorDataArray(std::vector<float>& out, const Element& el);
 void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el);
 void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& e);
+void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el);
 
 
 

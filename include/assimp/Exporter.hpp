@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 #include "cexport.h"
+#include <map>
 
 namespace Assimp	{
 	class ExporterPimpl;
@@ -72,6 +73,9 @@ namespace Assimp	{
  * #ExportToBlob is especially useful if you intend to work 
  * with the data in-memory. 
 */
+
+class ASSIMP_API ExportProperties;
+
 class ASSIMP_API Exporter
 	// TODO: causes good ol' base class has no dll interface warning
 //#ifdef __cplusplus
@@ -81,7 +85,7 @@ class ASSIMP_API Exporter
 public:
 
 	/** Function pointer type of a Export worker function */
-	typedef void (*fpExportFunc)(const char*,IOSystem*, const aiScene*);
+	typedef void (*fpExportFunc)(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 
 	/** Internal description of an Assimp export format option */
 	struct ExportFormatEntry
@@ -171,8 +175,8 @@ public:
 	*   Any IO handlers set via #SetIOHandler are ignored here.
 	* @note Use aiCopyScene() to get a modifiable copy of a previously
 	*   imported scene. */
-	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u );
-	inline const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId, unsigned int pPreprocessing = 0u );
+	const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = NULL);
+	inline const aiExportDataBlob* ExportToBlob(  const aiScene* pScene, const std::string& pFormatId, unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = NULL);
 
 
 	// -------------------------------------------------------------------
@@ -208,8 +212,8 @@ public:
 	 * @return AI_SUCCESS if everything was fine. 
 	 * @note Use aiCopyScene() to get a modifiable copy of a previously
 	 *   imported scene.*/
-	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing = 0u);
-	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath,  unsigned int pPreprocessing = 0u);
+	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = NULL);
+	inline aiReturn Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath,  unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = NULL);
 
 
 	// -------------------------------------------------------------------
@@ -309,16 +313,188 @@ protected:
 };
 
 
-// ----------------------------------------------------------------------------------
-inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,unsigned int pPreprocessing ) 
+class ASSIMP_API ExportProperties
 {
-	return ExportToBlob(pScene,pFormatId.c_str(),pPreprocessing);
+public:
+	// Data type to store the key hash
+	typedef unsigned int KeyType;
+	
+	// typedefs for our four configuration maps.
+	// We don't need more, so there is no need for a generic solution
+	typedef std::map<KeyType, int> IntPropertyMap;
+	typedef std::map<KeyType, float> FloatPropertyMap;
+	typedef std::map<KeyType, std::string> StringPropertyMap;
+	typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
+
+public:
+
+	/** Standard constructor
+	* @see ExportProperties()
+	*/
+
+	ExportProperties();
+
+	// -------------------------------------------------------------------
+	/** Copy constructor.
+	 * 
+	 * This copies the configuration properties of another ExportProperties.
+	 * @see ExportProperties(const ExportProperties& other)
+	 */
+	ExportProperties(const ExportProperties& other);
+
+	// -------------------------------------------------------------------
+	/** Set an integer configuration property.
+	 * @param szName Name of the property. All supported properties
+	 *   are defined in the aiConfig.g header (all constants share the
+	 *   prefix AI_CONFIG_XXX and are simple strings).
+	 * @param iValue New value of the property
+	 * @param bWasExisting Optional pointer to receive true if the
+	 *   property was set before. The new value replaces the previous value
+	 *   in this case.
+	 * @note Property of different types (float, int, string ..) are kept
+	 *   on different stacks, so calling SetPropertyInteger() for a 
+	 *   floating-point property has no effect - the loader will call
+	 *   GetPropertyFloat() to read the property, but it won't be there.
+	 */
+	void SetPropertyInteger(const char* szName, int iValue, 
+		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
+	/** Set a boolean configuration property. Boolean properties
+	 *  are stored on the integer stack internally so it's possible
+	 *  to set them via #SetPropertyBool and query them with
+	 *  #GetPropertyBool and vice versa.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyBool(const char* szName, bool value, bool* bWasExisting = NULL)	{
+		SetPropertyInteger(szName,value,bWasExisting);
+	}
+
+	// -------------------------------------------------------------------
+	/** Set a floating-point configuration property.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyFloat(const char* szName, float fValue, 
+		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
+	/** Set a string configuration property.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyString(const char* szName, const std::string& sValue, 
+		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
+	/** Set a matrix configuration property.
+	 * @see SetPropertyInteger()
+	 */
+	void SetPropertyMatrix(const char* szName, const aiMatrix4x4& sValue, 
+		bool* bWasExisting = NULL);
+
+	// -------------------------------------------------------------------
+	/** Get a configuration property.
+	 * @param szName Name of the property. All supported properties
+	 *   are defined in the aiConfig.g header (all constants share the
+	 *   prefix AI_CONFIG_XXX).
+	 * @param iErrorReturn Value that is returned if the property 
+	 *   is not found. 
+	 * @return Current value of the property
+	 * @note Property of different types (float, int, string ..) are kept
+	 *   on different lists, so calling SetPropertyInteger() for a 
+	 *   floating-point property has no effect - the loader will call
+	 *   GetPropertyFloat() to read the property, but it won't be there.
+	 */
+	int GetPropertyInteger(const char* szName, 
+		int iErrorReturn = 0xffffffff) const;
+
+	// -------------------------------------------------------------------
+	/** Get a boolean configuration property. Boolean properties
+	 *  are stored on the integer stack internally so it's possible
+	 *  to set them via #SetPropertyBool and query them with
+	 *  #GetPropertyBool and vice versa.
+	 * @see GetPropertyInteger()
+	 */
+	bool GetPropertyBool(const char* szName, bool bErrorReturn = false) const {
+		return GetPropertyInteger(szName,bErrorReturn)!=0;
+	}
+
+	// -------------------------------------------------------------------
+	/** Get a floating-point configuration property
+	 * @see GetPropertyInteger()
+	 */
+	float GetPropertyFloat(const char* szName, 
+		float fErrorReturn = 10e10f) const;
+
+	// -------------------------------------------------------------------
+	/** Get a string configuration property
+	 *
+	 *  The return value remains valid until the property is modified.
+	 * @see GetPropertyInteger()
+	 */
+	const std::string GetPropertyString(const char* szName,
+		const std::string& sErrorReturn = "") const;
+
+	// -------------------------------------------------------------------
+	/** Get a matrix configuration property
+	 *
+	 *  The return value remains valid until the property is modified.
+	 * @see GetPropertyInteger()
+	 */
+	const aiMatrix4x4 GetPropertyMatrix(const char* szName,
+		const aiMatrix4x4& sErrorReturn = aiMatrix4x4()) const;
+
+	// -------------------------------------------------------------------
+	/** Determine a integer configuration property has been set.
+	* @see HasPropertyInteger()
+	 */
+	bool HasPropertyInteger(const char* szName) const;
+
+	/** Determine a boolean configuration property has been set.
+	* @see HasPropertyBool()
+	 */
+	bool HasPropertyBool(const char* szName) const;
+
+	/** Determine a boolean configuration property has been set.
+	* @see HasPropertyFloat()
+	 */
+	bool HasPropertyFloat(const char* szName) const;
+
+	/** Determine a String configuration property has been set.
+	* @see HasPropertyString()
+	 */
+	bool HasPropertyString(const char* szName) const;
+
+	/** Determine a Matrix configuration property has been set.
+	* @see HasPropertyMatrix()
+	 */
+	bool HasPropertyMatrix(const char* szName) const;
+
+protected:
+
+	/** List of integer properties */
+	IntPropertyMap mIntProperties;
+
+	/** List of floating-point properties */
+	FloatPropertyMap mFloatProperties;
+
+	/** List of string properties */
+	StringPropertyMap mStringProperties;
+
+	/** List of Matrix properties */
+	MatrixPropertyMap mMatrixProperties;
+};
+
+
+// ----------------------------------------------------------------------------------
+inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,unsigned int pPreprocessing, const ExportProperties* pProperties) 
+{
+	return ExportToBlob(pScene,pFormatId.c_str(),pPreprocessing, pProperties);
 }
 
 // ----------------------------------------------------------------------------------
-inline aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath, unsigned int pPreprocessing )
+inline aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pFormatId, const std::string& pPath, unsigned int pPreprocessing, const ExportProperties* pProperties)
 {
-	return Export(pScene,pFormatId.c_str(),pPath.c_str(),pPreprocessing);
+	return Export(pScene,pFormatId.c_str(),pPath.c_str(),pPreprocessing, pProperties);
 }
 
 } // namespace Assimp

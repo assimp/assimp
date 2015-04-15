@@ -879,4 +879,15 @@ enum aiComponent
 
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
+
+// ---------- All the Export defines ------------
+
+/** @brief Specifies the xfile use double for real values of float
+ *
+ * Property type: Bool. Default value: false.
+ */
+
+#define AI_CONFIG_EXPORT_XFILE_64BIT "EXPORT_XFILE_64BIT"
+
+
 #endif // !! AI_CONFIG_H_INC

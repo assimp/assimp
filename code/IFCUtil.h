@@ -277,6 +277,7 @@ IfcFloat ConvertSIPrefix(const std::string& prefix);
 
 // IFCProfile.cpp
 bool ProcessProfile(const IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv);
+bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv);
 
 // IFCMaterial.cpp
 unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat);

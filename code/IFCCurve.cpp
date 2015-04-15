@@ -648,10 +648,10 @@ void Curve :: SampleDiscrete(TempMesh& out,IfcFloat a, IfcFloat b) const
 	ai_assert(InRange(a) && InRange(b));
 
 	const size_t cnt = std::max(static_cast<size_t>(0),EstimateSampleCount(a,b));
-	out.verts.reserve( out.verts.size() + cnt );
+	out.verts.reserve( out.verts.size() + cnt + 1);
 
 	IfcFloat p = a, delta = (b-a)/cnt;
-	for(size_t i = 0; i < cnt; ++i, p += delta) {
+	for(size_t i = 0; i <= cnt; ++i, p += delta) {
 		out.verts.push_back(Eval(p));
 	}
 }

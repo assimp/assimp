@@ -55,7 +55,7 @@ namespace Assimp	{
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to PLY. Prototyped and registered in Exporter.cpp
-void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	// invoke the exporter 
 	PlyExporter exporter(pFile, pScene);
@@ -69,7 +69,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 	outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
 }
 
-void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	// invoke the exporter 
 	PlyExporter exporter(pFile, pScene, true);

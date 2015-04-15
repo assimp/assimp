@@ -1026,7 +1026,9 @@ void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src,bool allocate)
 	dest->mFlags = src->mFlags;
 
 	// source private data might be NULL if the scene is user-allocated (i.e. for use with the export API)
-	ScenePriv(dest)->mPPStepsApplied = ScenePriv(src) ? ScenePriv(src)->mPPStepsApplied : 0;
+	if (dest->mPrivate != NULL) {
+		ScenePriv(dest)->mPPStepsApplied = ScenePriv(src) ? ScenePriv(src)->mPPStepsApplied : 0;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

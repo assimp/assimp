@@ -154,13 +154,17 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	}
 
 	DefaultLogger::get()->info("File format tag: "+std::string(head+9,6));
-	void (COBImporter::* load)(Scene&,StreamReaderLE*)= head[15]=='A'?&COBImporter::ReadAsciiFile:&COBImporter::ReadBinaryFile;
 	if (head[16]!='L') {
 		ThrowException("File is big-endian, which is not supported");
 	}
 	
 	// load data into intermediate structures
-	(this->*load)(scene,stream.get());
+	if (head[15]=='A') {
+		ReadAsciiFile(scene, stream.get());
+	}
+	else {
+		ReadBinaryFile(scene, stream.get());
+	}
 	if(scene.nodes.empty()) {
 		ThrowException("No nodes loaded");
 	}

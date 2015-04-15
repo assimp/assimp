@@ -59,3 +59,5 @@ target_link_libraries( unit assimp
 	debug ${GTEST_DEBUG_LIBRARIES}
 	optimized ${GTEST_RELEASE_LIBRARIES}
 )
+add_subdirectory(headercheck)
+

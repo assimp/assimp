@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 #include "../include/assimp/types.h"
 #include "../include/assimp/quaternion.h"

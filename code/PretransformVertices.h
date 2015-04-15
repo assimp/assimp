@@ -47,7 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseProcess.h"
 #include "../include/assimp/mesh.h"
+#include <list>
+#include <vector>
 
+struct aiNode;
 class PretransformVerticesTest;
 namespace Assimp	{
 

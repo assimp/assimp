@@ -44,6 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 #include "../include/assimp/IOStream.hpp"
+#include "../include/assimp/importerdesc.h"
+
+#if (!defined SIZE_MAX)
+#       define SIZE_MAX (~((size_t)0))
+#endif
 
 namespace Assimp	{
 

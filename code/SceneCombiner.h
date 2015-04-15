@@ -45,6 +45,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_SCENE_COMBINER_H_INC
 
 #include "../include/assimp/ai_assert.h"
+#include "../include/assimp/types.h"
+#include <stddef.h>
+#include <set>
+#include <list>
+#include <stdint.h>
+#include <vector>
+#include "../include/assimp/Compiler/pstdint.h"
+
+struct aiScene;
+struct aiNode;
+struct aiMaterial;
+struct aiTexture;
+struct aiCamera;
+struct aiLight;
+struct aiMetadata;
+struct aiBone;
+struct aiMesh;
+struct aiAnimation;
+struct aiNodeAnim;
 
 namespace Assimp	{
 

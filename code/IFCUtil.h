@@ -47,6 +47,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCReaderGen.h"
 #include "IFCLoader.h"
+#include "STEPFile.h"
+
+struct aiMaterial;
+struct aiNode;
 
 namespace Assimp {
 namespace IFC {

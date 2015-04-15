@@ -47,7 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <map>
 #include <vector>
-#include "./../include/assimp/types.h"
+#include <set>
+#include "../include/assimp/types.h"
+#include "../include/assimp/ProgressHandler.hpp"
 
 struct aiScene;
 

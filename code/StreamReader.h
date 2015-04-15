@@ -46,6 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_STREAMREADER_H_INCLUDED
 
 #include "ByteSwap.h"
+#include "Exceptional.h"
+#include <boost/shared_ptr.hpp>
+#include "../include/assimp/IOStream.hpp"
 
 namespace Assimp {
 

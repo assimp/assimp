@@ -42,8 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_IMPORTER_H
 #define INCLUDED_AI_IMPORTER_H
 
-namespace Assimp	{
+#include <map>
+#include <string>
+#include <vector>
+#include "../include/assimp/matrix4x4.h"
 
+class aiScene;
+class SharedPostProcessInfo;
+
+namespace Assimp	{
+	class ProgressHandler;
+	class IOSystem;
 	class BaseImporter;
 	class BaseProcess;
 

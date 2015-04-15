@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MATRIX4X4_H_INC
 #define AI_MATRIX4X4_H_INC
 
+#include "vector3.h"
 #include "./Compiler/pushpack1.h"
 
 #ifdef __cplusplus

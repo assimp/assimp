@@ -47,10 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_XFILEEXPORTER_H_INC
 
 #include "../include/assimp/ai_assert.h"
+#include "../include/assimp/matrix4x4.h"
 #include <sstream>
 
 struct aiScene;
 struct aiNode;
+struct aiMesh;
+struct aiString;
+struct IOSystem;
 
 namespace Assimp	
 {

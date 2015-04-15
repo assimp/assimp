@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "irrXMLWrapper.h"
 #include "ColladaHelper.h"
+#include "../include/assimp/ai_assert.h"
+#include <boost/format.hpp>
 
 namespace Assimp
 {

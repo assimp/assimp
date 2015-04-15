@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  MD5Parser.cpp 
  *  @brief Implementation of the MD5 parser class
  */
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "MD5Loader.h"
@@ -50,6 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "StringComparison.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/mesh.h"
+
+
 
 using namespace Assimp;
 using namespace Assimp::MD5;

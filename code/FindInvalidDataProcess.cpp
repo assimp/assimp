@@ -42,13 +42,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Defines a post processing step to search an importer's output
     for data that is obviously invalid  */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_FINDINVALIDDATA_PROCESS
 
 // internal headers
 #include "FindInvalidDataProcess.h"
 #include "ProcessHelper.h"
+#include "Macros.h"
+#include "Exceptional.h"
+#include "qnan.h"
 
 using namespace Assimp;
 

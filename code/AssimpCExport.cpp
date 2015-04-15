@@ -43,11 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Assimp C export interface. See Exporter.cpp for some notes.
 */
 
-#include "AssimpPCH.h"
-
 #ifndef ASSIMP_BUILD_NO_EXPORT
-#include "CInterfaceIOWrapper.h" 
+#include "CInterfaceIOWrapper.h"
 #include "SceneCombiner.h"
+#include "ScenePrivate.h"
+#include "../include/assimp/Exporter.hpp"
 
 using namespace Assimp;
 

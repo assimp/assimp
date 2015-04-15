@@ -41,12 +41,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  BlenderModifier.cpp
  *  @brief Implementation of some blender modifiers (i.e subdivision, mirror).
  */
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #include "BlenderModifier.h"
 #include "SceneCombiner.h"
 #include "Subdivision.h"
+#include "../include/assimp/scene.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
+#include <boost/pointer_cast.hpp>
 
 #include <functional>
 

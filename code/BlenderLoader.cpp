@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  BlenderLoader.cpp
  *  @brief Implementation of the Blender3D importer class.
  */
-#include "AssimpPCH.h"
+
 
 //#define ASSIMP_BUILD_NO_COMPRESSED_BLEND
 // Uncomment this to disable support for (gzip)compressed .BLEND files
@@ -52,6 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderIntermediate.h"
 #include "BlenderModifier.h"
 #include "BlenderBMesh.h"
+#include "../include/assimp/scene.h"
+#include "StringComparison.h"
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"

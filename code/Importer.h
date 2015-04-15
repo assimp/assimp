@@ -48,13 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/matrix4x4.h"
 
 class aiScene;
-class SharedPostProcessInfo;
 
 namespace Assimp	{
 	class ProgressHandler;
 	class IOSystem;
 	class BaseImporter;
 	class BaseProcess;
+	class SharedPostProcessInfo;
 
 	
 //! @cond never

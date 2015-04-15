@@ -38,13 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
-
 #include "Subdivision.h"
 #include "SceneCombiner.h"
 #include "SpatialSort.h"
 #include "ProcessHelper.h"
 #include "Vertex.h"
+#include <stdio.h>
 
 using namespace Assimp;
 void mydummy() {}

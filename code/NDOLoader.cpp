@@ -43,9 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Implementation of the NDO importer class.
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
 #include "NDOLoader.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include "StreamReader.h"
+#include <boost/foreach.hpp>
 
 using namespace Assimp;
 #define for_each BOOST_FOREACH

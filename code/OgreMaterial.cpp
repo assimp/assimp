@@ -38,17 +38,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "OgreImporter.h"
 #include "TinyFormatter.h"
-
+#include "../include/assimp/material.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
 #include "fast_atof.h"
 
 #include <vector>
 #include <sstream>
+#include <boost/scoped_ptr.hpp>
 
 using namespace std;
 

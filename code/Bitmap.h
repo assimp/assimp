@@ -51,10 +51,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <cstddef>
 struct aiTexture;
-struct IOStream;
 
 namespace Assimp {
 
+struct IOStream;
 class Bitmap {
 
 	protected:

@@ -43,13 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * for all imported meshes
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_JOINVERTICES_PROCESS
 
 #include "JoinVerticesProcess.h"
 #include "ProcessHelper.h"
 #include "Vertex.h"
 #include "TinyFormatter.h"
+#include <stdio.h>
+#include <boost/static_assert.hpp>
 
 using namespace Assimp;
 // ------------------------------------------------------------------------------------------------

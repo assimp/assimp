@@ -43,14 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the aiProcess_OptimizeMeshes step
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_OPTIMIZEMESHES_PROCESS
 
-using namespace Assimp;
 
 #include "OptimizeMeshes.h"
 #include "ProcessHelper.h"
 #include "SceneCombiner.h"
+#include "Exceptional.h"
+
+using namespace Assimp;
 
 static const unsigned int NotSet   = 0xffffffff;
 static const unsigned int DeadBeef = 0xdeadbeef;

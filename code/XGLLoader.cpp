@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the XGL/ZGL importer class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 
 #include "XGLLoader.h"
@@ -50,6 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/scene.h"
+
 
 using namespace Assimp;
 using namespace irr;

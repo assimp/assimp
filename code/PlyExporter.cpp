@@ -38,12 +38,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_PLY_EXPORTER)
 
 #include "PlyExporter.h"
 #include "../include/assimp/version.h"
+#include "../include/assimp/IOSystem.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "Exceptional.h"
+#include "../include/assimp/scene.h"
+
 
 using namespace Assimp;
 namespace Assimp	{

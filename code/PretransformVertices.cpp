@@ -43,10 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the "PretransformVertices" post processing step 
 */
 
-#include "AssimpPCH.h"
+
 #include "PretransformVertices.h"
 #include "ProcessHelper.h"
 #include "SceneCombiner.h"
+#include "Exceptional.h"
 
 using namespace Assimp;
 

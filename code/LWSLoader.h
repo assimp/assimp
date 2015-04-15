@@ -48,12 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "BaseImporter.h"
 
-struct IOSystem;
 struct aiImporterDesc;
-struct Importer;
-struct BatchLoader;
 
 namespace Assimp	{
+	struct BatchLoader;
+	struct Importer;
+	struct IOSystem;
+
 	namespace LWS	{
 
 // ---------------------------------------------------------------------------

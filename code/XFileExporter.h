@@ -54,10 +54,11 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 struct aiString;
+
+namespace Assimp
+{
 struct IOSystem;
 
-namespace Assimp	
-{
 
 /// Helper class to export a given scene to a X-file.
 /// Note: an xFile uses a left hand system. Assimp used a right hand system (OpenGL), therefore we have to transform everything

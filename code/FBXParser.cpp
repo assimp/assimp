@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXParser.cpp
  *  @brief Implementation of the FBX parser and the rudimentary DOM that we use
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -59,6 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParsingUtils.h"
 #include "fast_atof.h"
+#include <boost/foreach.hpp>
+#include "ByteSwap.h"
 
 using namespace Assimp;
 using namespace Assimp::FBX;

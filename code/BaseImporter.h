@@ -55,12 +55,12 @@ struct aiScene;
 
 namespace Assimp	{
 
-class IOSystem;
 class Importer;
-class BaseImporter;
+class IOSystem;
 class BaseProcess;
 class SharedPostProcessInfo;
 class IOStream;
+
 
 // utility to do char4 to uint32 in a portable manner
 #define AI_MAKE_MAGIC(string) ((uint32_t)((string[0] << 24) + \

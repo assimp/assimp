@@ -47,8 +47,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 #include <string>
-
+#include <stdint.h>
+#include <numeric>
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/ai_assert.h"
+#include "../include/assimp/vector3.h"
+#include "../include/assimp/vector2.h"
+#include "../include/assimp/color4.h"
+#include "../include/assimp/mesh.h"
 #include "FBXProperties.h"
+#include "FBXParser.h"
+
+#define _AI_CONCAT(a,b)  a ## b
+#define  AI_CONCAT(a,b)  _AI_CONCAT(a,b)
 
 namespace Assimp {
 namespace FBX {

@@ -40,11 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include "AssimpPCH.h"
+
 
 #include "OgreImporter.h"
 #include "OgreBinarySerializer.h"
 #include "OgreXmlSerializer.h"
+#include "../include/assimp/Importer.hpp"
+#include <boost/scoped_ptr.hpp>
 
 static const aiImporterDesc desc = {
 	"Ogre3D Mesh Importer",

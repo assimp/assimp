@@ -42,12 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// @file SplitByBoneCountProcess.cpp 
 /// Implementation of the SplitByBoneCount postprocessing step
 
-#include "AssimpPCH.h"
-
 // internal headers of the post-processing framework
 #include "SplitByBoneCountProcess.h"
+#include "../include/assimp/postprocess.h"
+#include "../include/assimp/DefaultLogger.hpp"
 
 #include <limits>
+#include <boost/format.hpp>
 
 using namespace Assimp;
 

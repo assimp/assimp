@@ -47,6 +47,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
 #include "LogAux.h"
+#include <boost/foreach.hpp>
+#include "../include/assimp/material.h"
+#include "../include/assimp/Importer.hpp"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/light.h"
+
+struct aiNode;
 
 namespace Assimp	{
 

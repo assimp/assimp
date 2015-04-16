@@ -42,12 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implements a subset of Ifc boolean operations
  */
 
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #include "IFCUtil.h"
 #include "PolyTools.h"
 #include "ProcessHelper.h"
+#include "Defines.h"
 
 #include <iterator>
 #include <boost/tuple/tuple.hpp>

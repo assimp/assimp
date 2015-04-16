@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the CPP-API class #Importer
  */
 
-#include "AssimpPCH.h"
 #include "../include/assimp/version.h"
 
 // ------------------------------------------------------------------------------------------------
@@ -62,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Internal headers
 // ------------------------------------------------------------------------------------------------
 #include "Importer.h"
+#include "BaseImporter.h"
 #include "BaseProcess.h"
 
 #include "DefaultIOStream.h"
@@ -70,9 +70,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenericProperty.h"
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
+#include "ScenePrivate.h"
 #include "MemoryIOWrapper.h"
 #include "Profiler.h"
 #include "TinyFormatter.h"
+#include "Exceptional.h"
+#include "Profiler.h"
+#include <set>
+#include <boost/scoped_ptr.hpp>
+#include <cctype>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #	include "ValidateDataStructure.h"

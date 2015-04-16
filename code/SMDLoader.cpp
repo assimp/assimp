@@ -43,13 +43,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the SMD importer class 
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
 
 // internal headers
 #include "SMDLoader.h"
 #include "fast_atof.h"
 #include "SkeletonMeshBuilder.h"
+#include "../include/assimp/Importer.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+
 
 using namespace Assimp;
 

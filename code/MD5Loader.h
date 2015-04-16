@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MD5Parser.h"
 
 #include "../include/assimp/types.h"
+struct aiNode;
+struct aiNodeAnim;
 
 namespace Assimp	{
 

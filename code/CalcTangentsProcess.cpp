@@ -43,12 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  tangents and bitangents for all imported meshes
  */
 
-#include "AssimpPCH.h"
-
 // internal headers
 #include "CalcTangentsProcess.h"
 #include "ProcessHelper.h"
 #include "TinyFormatter.h"
+#include "qnan.h"
 
 using namespace Assimp;
 

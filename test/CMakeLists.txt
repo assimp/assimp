@@ -47,8 +47,7 @@ SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 add_executable( unit
     unit/CCompilerTest.c
     unit/Main.cpp
-    unit/UnitTestPCH.cpp
-    unit/UnitTestPCH.h
+    ../code/Version.cpp
     ${TEST_SRCS}
 )
 
@@ -59,3 +58,5 @@ target_link_libraries( unit assimp
 	debug ${GTEST_DEBUG_LIBRARIES}
 	optimized ${GTEST_RELEASE_LIBRARIES}
 )
+add_subdirectory(headercheck)
+

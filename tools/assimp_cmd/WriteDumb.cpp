@@ -58,6 +58,7 @@ const char* AICMD_MSG_DUMP_HELP =
 ;
 
 #include "../../code/assbin_chunks.h"
+#include <boost/static_assert.hpp>
 
 FILE* out = NULL;
 bool shortened = false;

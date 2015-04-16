@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief A simple tessellation wrapper
  */
 
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 

@@ -43,6 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAHELPER_H_INC
 #define AI_COLLADAHELPER_H_INC
 
+#include <string>
+#include <map>
+#include <vector>
+#include <stdint.h>
+#include "../include/assimp/types.h"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/material.h"
+
+struct aiMaterial;
+
 namespace Assimp	{
 namespace Collada		{
 

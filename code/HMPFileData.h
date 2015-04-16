@@ -45,6 +45,7 @@ namespace Assimp	{
 namespace HMP	{
 
 #include "./../include/assimp/Compiler/pushpack1.h"
+#include <stdint.h>
 
 // to make it easier for us, we test the magic word against both "endianesses"
 #define AI_HMP_MAGIC_NUMBER_BE_4	AI_MAKE_MAGIC("HMP4")

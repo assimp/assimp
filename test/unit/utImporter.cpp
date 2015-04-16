@@ -1,5 +1,7 @@
 #include "UnitTestPCH.h"
 
+#include "../../include/assimp/postprocess.h"
+#include "../../include/assimp/scene.h"
 #include <assimp/Importer.hpp>
 #include <BaseImporter.h>
 

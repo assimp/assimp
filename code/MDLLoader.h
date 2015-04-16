@@ -47,10 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MDLLOADER_H_INCLUDED
 
 #include "BaseImporter.h"
-
-struct aiNode;
 #include "MDLFileData.h"
 #include "HalfLifeFileData.h"
+
+struct aiNode;
+struct aiTexture;
 
 namespace Assimp	{
 

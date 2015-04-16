@@ -1,4 +1,5 @@
 #include "UnitTestPCH.h"
+#include "../../include/assimp/DefaultLogger.hpp"
 
 #include <math.h>
 #include <time.h>

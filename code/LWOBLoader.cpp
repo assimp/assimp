@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the LWO importer class for the older LWOB 
     file formats, including materials */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
 // Internal headers

@@ -45,7 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_COB_SCENE_H
 
 #include <boost/shared_ptr.hpp>
+#include <deque>
+
 #include "BaseImporter.h"
+#include "./../include/assimp/material.h"
 
 namespace Assimp	{
 	namespace COB {

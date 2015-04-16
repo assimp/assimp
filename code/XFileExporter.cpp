@@ -39,18 +39,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
 #include "XFileExporter.h"
 #include "ConvertToLHProcess.h"
 #include "Bitmap.h"
+#include "BaseImporter.h"
 #include "fast_atof.h"
-#include "SceneCombiner.h" 
+#include "SceneCombiner.h"
 
 #include <ctime>
 #include <set>
+#include <boost/scoped_ptr.hpp>
+#include "Exceptional.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/light.h"
+
+
 
 using namespace Assimp;
 

@@ -42,12 +42,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the XFile importer class 
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
 #include "ConvertToLHProcess.h"
+#include "../include/assimp/IOSystem.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include <boost/format.hpp>
+#include "Defines.h"
+#include <cctype>
+
+
 
 using namespace Assimp;
 

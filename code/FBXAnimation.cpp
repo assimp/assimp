@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Assimp::FBX::AnimationCurve, Assimp::FBX::AnimationCurveNode, 
  *         Assimp::FBX::AnimationLayer, Assimp::FBX::AnimationStack 
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -52,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
+#include <boost/foreach.hpp>
 
 namespace Assimp {
 namespace FBX {

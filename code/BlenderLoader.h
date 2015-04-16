@@ -46,6 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include "LogAux.h"
+#include <boost/shared_ptr.hpp>
+
+struct aiNode;
+struct aiMesh;
+struct aiLight;
+struct aiCamera;
+struct aiMaterial;
 
 namespace Assimp	{
 	

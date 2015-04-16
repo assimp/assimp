@@ -48,6 +48,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "../include/assimp/types.h"
 
+class aiMesh;
+class aiNode;
+class aiBone;
+class aiMaterial;
+class aiMaterialProperty;
+class aiNodeAnim;
+class aiAnimation;
+class aiTexture;
+class aiLight;
+class aiCamera;
+
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 
 namespace Assimp	{

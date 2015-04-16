@@ -78,6 +78,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Profiler.h"
 #include <set>
 #include <boost/scoped_ptr.hpp>
+#include <cctype>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #	include "ValidateDataStructure.h"

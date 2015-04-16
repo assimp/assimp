@@ -50,8 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/texture.h"
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/DefaultLogger.hpp"
-#include "qnan.h"
 #include "../include/assimp/scene.h"
+#include "qnan.h"
+#include "Defines.h"
 
 
 using namespace Assimp;

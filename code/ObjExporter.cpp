@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjExporter.h"
 #include "../include/assimp/version.h"
 #include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/Exporter.hpp"
 #include <boost/scoped_ptr.hpp>
 #include "Exceptional.h"
 #include "../include/assimp/material.h"

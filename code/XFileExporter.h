@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/ai_assert.h"
 #include "../include/assimp/matrix4x4.h"
+#include "../include/assimp/Exporter.hpp"
 #include <sstream>
 
 struct aiScene;

@@ -43,13 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
 #include "BaseImporter.h"
+#include "../include/assimp/mesh.h"
 
 #include <vector>
+#include <list>
 
 namespace ODDLParser {
     class DDLNode;
     struct Context;
 }
+struct aiNode;
 
 namespace Assimp {
 namespace OpenGEX {

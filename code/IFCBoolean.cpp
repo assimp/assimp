@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IFCUtil.h"
 #include "PolyTools.h"
 #include "ProcessHelper.h"
+#include "Defines.h"
 
 #include <iterator>
 #include <boost/tuple/tuple.hpp>

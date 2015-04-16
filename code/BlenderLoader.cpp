@@ -57,6 +57,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
+#include <cctype>
+
 
 // zlib is needed for compressed blend files 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND

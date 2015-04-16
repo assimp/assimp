@@ -45,9 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "STLExporter.h"
 #include "../include/assimp/version.h"
 #include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/Exporter.hpp"
 #include <boost/scoped_ptr.hpp>
 #include "Exceptional.h"
-#include "../include/assimp/scene.h"
 #include "ByteSwap.h"
 
 using namespace Assimp;

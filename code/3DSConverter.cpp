@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/DefaultLogger.hpp"
 #include "StringComparison.h"
 #include <boost/scoped_array.hpp>
+#include <cctype>
 
 using namespace Assimp;
 

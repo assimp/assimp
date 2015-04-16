@@ -52,12 +52,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "SkeletonMeshBuilder.h"
+#include "Defines.h"
 
 #include "time.h"
 #include <boost/foreach.hpp>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/Importer.hpp"
 #include <numeric>
+#include "Defines.h"
 
 
 using namespace Assimp;

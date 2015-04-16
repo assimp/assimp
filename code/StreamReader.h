@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include <boost/shared_ptr.hpp>
 #include "../include/assimp/IOStream.hpp"
+#include "Defines.h"
 
 namespace Assimp {
 

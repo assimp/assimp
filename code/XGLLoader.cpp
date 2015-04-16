@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/scoped_ptr.hpp>
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/scene.h"
+#include <cctype>
+
 
 
 using namespace Assimp;

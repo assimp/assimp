@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "../include/assimp/IOStream.hpp"
 #include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/Exporter.hpp"
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #	include <zlib.h>

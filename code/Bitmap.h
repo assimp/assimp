@@ -54,7 +54,7 @@ struct aiTexture;
 
 namespace Assimp {
 
-struct IOStream;
+class IOStream;
 class Bitmap {
 
 	protected:

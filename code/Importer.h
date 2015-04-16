@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "../include/assimp/matrix4x4.h"
 
-class aiScene;
+struct aiScene;
 
 namespace Assimp	{
 	class ProgressHandler;

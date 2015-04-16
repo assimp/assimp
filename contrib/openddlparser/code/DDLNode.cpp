@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014 Kim Kulling
+Copyright (c) 2014-2015 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -136,6 +136,31 @@ void DDLNode::setProperties( Property *prop ) {
 
 Property *DDLNode::getProperties() const {
     return m_properties;
+}
+
+bool DDLNode::hasProperty( const std::string &name ) {
+    const Property *prop( findPropertyByName( name ) );
+    return ( ddl_nullptr != prop );
+}
+
+Property *DDLNode::findPropertyByName( const std::string &name ) {
+    if( name.empty() ) {
+        return ddl_nullptr;
+    }
+
+    if( ddl_nullptr == m_properties ) {
+        return ddl_nullptr;
+    }
+    Property *current( m_properties );
+    while( ddl_nullptr != current ) {
+        int res = strncmp( current->m_id->m_buffer, name.c_str(), name.size() );
+        if( 0 == res ) {
+            return current;
+        }
+        current = current->m_next;
+    }
+
+    return ddl_nullptr;
 }
 
 void DDLNode::setValue( Value *val ) {

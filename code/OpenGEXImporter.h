@@ -174,6 +174,8 @@ private:
     aiNode *m_currentNode;
     VertexContainer m_currentVertices;
     aiMesh *m_currentMesh;
+    aiMaterial *m_currentMaterial;
+    std::vector<aiMaterial*> m_materialCache;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;
 };

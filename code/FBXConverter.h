@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_CONVERTER_H
 #define INCLUDED_AI_FBX_CONVERTER_H
 
-class aiScene;
+struct aiScene;
 
 namespace Assimp {
 namespace FBX {

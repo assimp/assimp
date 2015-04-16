@@ -56,9 +56,9 @@ struct aiNode;
 struct aiMesh;
 struct aiString;
 
-namespace Assimp
-{
-struct IOSystem;
+namespace Assimp {
+
+class IOSystem;
 
 
 /// Helper class to export a given scene to a X-file.

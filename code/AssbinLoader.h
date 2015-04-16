@@ -48,16 +48,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "../include/assimp/types.h"
 
-class aiMesh;
-class aiNode;
-class aiBone;
-class aiMaterial;
-class aiMaterialProperty;
-class aiNodeAnim;
-class aiAnimation;
-class aiTexture;
-class aiLight;
-class aiCamera;
+struct aiMesh;
+struct aiNode;
+struct aiBone;
+struct aiMaterial;
+struct aiMaterialProperty;
+struct aiNodeAnim;
+struct aiAnimation;
+struct aiTexture;
+struct aiLight;
+struct aiCamera;
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 

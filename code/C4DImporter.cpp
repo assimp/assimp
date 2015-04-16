@@ -639,3 +639,6 @@ unsigned int C4DImporter::ResolveMaterial(PolygonObject* obj)
 	ai_assert((*it).second < mat_count);
 	return (*it).second;
 }
+
+#endif // ASSIMP_BUILD_NO_C4D_IMPORTER
+

@@ -21,8 +21,14 @@
 #include <stdexcept>
 
 #include "StringComparison.h"
-//#include "../include/assimp/Compiler/pstdint.h"
-#include <stdint.h>
+
+
+#ifdef _MSC_VER 
+#  include <stdint.h>
+#else 
+#include "../include/assimp/Compiler/pstdint.h"
+#endif
+
 namespace Assimp
 {
 

@@ -43,8 +43,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include "AssimpPCH.h"
 #include "MemoryIOWrapper.h"
+#include <boost/shared_ptr.hpp>
+#include "../include/assimp/mesh.h"
+#include <map>
+#include <vector>
+#include <set>
+
+struct aiNodeAnim;
+struct aiAnimation;
+struct aiNode;
+struct aiMaterial;
+struct aiScene;
 
 /** @note Parts of this implementation, for example enums, deserialization constants and logic
 	has been copied directly with minor modifications from the MIT licensed Ogre3D code base.

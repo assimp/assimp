@@ -43,11 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the FindDegenerates post-process step.
 */
 
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "ProcessHelper.h"
 #include "FindDegenerates.h"
+#include "Exceptional.h"
 
 using namespace Assimp;
 

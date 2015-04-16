@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// @file ProcessHelper.cpp
 /** Implement shared utility functions for postprocessing steps */
 
-#include "AssimpPCH.h"
+
 #include "ProcessHelper.h"
 
 

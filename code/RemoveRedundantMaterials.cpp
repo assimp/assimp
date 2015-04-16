@@ -43,11 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // internal headers
-#include "AssimpPCH.h"
+
 #include "RemoveRedundantMaterials.h"
 #include "ParsingUtils.h"
 #include "ProcessHelper.h"
 #include "MaterialSystem.h"
+#include <stdio.h>
 
 using namespace Assimp;
 

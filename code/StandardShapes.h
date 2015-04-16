@@ -44,8 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STANDARD_SHAPES_H_INC
 #define AI_STANDARD_SHAPES_H_INC
 
+#include "../include/assimp/vector3.h"
 #include <vector>
 
+struct aiMesh;
 
 namespace Assimp	{
 

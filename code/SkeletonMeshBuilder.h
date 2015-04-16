@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "../include/assimp/mesh.h"
 
+struct aiMaterial;
 struct aiScene;
 struct aiNode;
 

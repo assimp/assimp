@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/types.h"
 #include "ParsingUtils.h"
+#include <vector>
+#include <stdint.h>
 
 struct aiFace;
 

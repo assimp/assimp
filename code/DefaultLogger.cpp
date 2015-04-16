@@ -43,13 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of DefaultLogger (and Logger)
  */
 
-#include "AssimpPCH.h"
 #include "DefaultIOSystem.h"
 
 // Default log streams
 #include "Win32DebugLogStream.h"
 #include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
+#include "../include/assimp/NullLogger.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/ai_assert.h"
+#include <iostream>
+#include <stdio.h>
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
 #	include <boost/thread/thread.hpp>

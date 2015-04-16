@@ -43,11 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  SortByPTypeProcess post-process steps.
 */
 
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "ProcessHelper.h"
 #include "SortByPTypeProcess.h"
+#include "Exceptional.h"
 
 using namespace Assimp;
 

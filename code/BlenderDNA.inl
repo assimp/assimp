@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_BLEND_DNA_INL
 #define INCLUDED_AI_BLEND_DNA_INL
 
+#include <boost/shared_ptr.hpp>
+
 namespace Assimp	{
 	namespace Blender {
 

@@ -63,7 +63,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <assimp/Exporter.hpp>
 #endif
 
-#include <../code/AssimpPCH.h> /* to get stdint.h */
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #include <zlib.h>
 #else

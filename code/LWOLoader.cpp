@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the LWO importer class
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
 // internal headers
@@ -53,6 +53,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwap.h"
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include <sstream>
+#include <iomanip>
+
 
 using namespace Assimp;
 

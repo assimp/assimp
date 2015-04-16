@@ -46,10 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include "ByteSwap.h"
-
+#include "MD3FileData.h"
+#include "StringComparison.h"
 #include "../include/assimp/types.h"
 
-#include "MD3FileData.h"
+#include <list>
+
+struct aiMaterial;
+
 namespace Assimp	{
 
 

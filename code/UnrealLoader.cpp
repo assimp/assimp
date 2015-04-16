@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *    http://local.wasp.uwa.edu.au/~pbourke/dataformats/unreal/
  */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_3D_IMPORTER
 
@@ -55,6 +55,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include "fast_atof.h"
 #include "ConvertToLHProcess.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 

@@ -40,10 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  AssbinExporter.cpp
  *  ASSBIN exporter main code
  */
-#include "AssimpPCH.h"
 #include "assbin_chunks.h"
-#include "./../include/assimp/version.h"
+#include "../include/assimp/version.h"
+#include "../include/assimp/IOStream.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/Exporter.hpp"
 #include "ProcessHelper.h"
+#include "Exceptional.h"
+#include <boost/static_assert.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #	include <zlib.h>

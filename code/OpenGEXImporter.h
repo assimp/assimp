@@ -53,6 +53,7 @@ namespace ODDLParser {
     struct Context;
 }
 struct aiNode;
+struct aiMaterial;
 
 namespace Assimp {
 namespace OpenGEX {

@@ -21,8 +21,8 @@
 #include <stdexcept>
 
 #include "StringComparison.h"
-#include "../include/assimp/Compiler/pstdint.h"
-
+//#include "../include/assimp/Compiler/pstdint.h"
+#include <stdint.h>
 namespace Assimp
 {
 

@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiImporterDesc;
 
 namespace Assimp	{
-	struct BatchLoader;
-	struct Importer;
-	struct IOSystem;
+	class BatchLoader;
+    class Importer;
+    class IOSystem;
 
 	namespace LWS	{
 

@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <vector>
 
-class aiMaterial;
+struct aiMaterial;
 
 namespace Assimp	{
 namespace MDL	{

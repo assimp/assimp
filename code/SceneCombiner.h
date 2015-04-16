@@ -51,6 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <list>
 #include <stdint.h>
+//#include "../include/assimp/Compiler/pstdint.h"
+
 #include <vector>
 
 struct aiScene;

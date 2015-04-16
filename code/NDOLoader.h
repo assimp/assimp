@@ -50,12 +50,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-class IOSystem;
-class Importer;
+
 struct aiImporterDesc;
 struct aiScene;
 
 namespace Assimp	{
+    class IOSystem;
+    class Importer;
 
 // ---------------------------------------------------------------------------
 /** @brief Importer class to load meshes from Nendo.

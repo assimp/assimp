@@ -52,7 +52,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER_H_INC
 #define AI_MDLFILEHELPER_H_INC
 
+#include "ByteSwap.h"
+#include "./../include/assimp/anim.h"
+#include "./../include/assimp/mesh.h"
 #include "./../include/assimp/Compiler/pushpack1.h"
+#include <stdint.h>
+#include <vector>
+
+struct aiMaterial;
 
 namespace Assimp	{
 namespace MDL	{

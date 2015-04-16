@@ -42,12 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *    we emit tokens so the parser needs almost no special handling
  *    for binary files.
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
+#include "../include/assimp/defs.h"
+#include <stdint.h>
+#include "Exceptional.h"
+#include "ByteSwap.h"
 
 namespace Assimp {
 namespace FBX {

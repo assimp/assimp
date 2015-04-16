@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fast_atof.h"
 #include "ParsingUtils.h"
+#include <vector>
 
 namespace Assimp
 {

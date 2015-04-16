@@ -39,12 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
-#include "AssimpPCH.h"
 #include "OpenGEXImporter.h"
 #include "DefaultIOSystem.h"
 #include "MakeVerboseFormat.h"
 
 #include <openddlparser/OpenDDLParser.h>
+#include "../include/assimp/scene.h"
+
 
 #include <vector>
 
@@ -217,6 +218,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_ctx( NULL )
 , m_currentNode( NULL )
 , m_currentMesh( NULL )
+, m_currentMaterial( NULL )
 , m_nodeStack()
 , m_unresolvedRefStack() {
     // empty
@@ -723,13 +725,55 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
 }
 
 //------------------------------------------------------------------------------------------------
+static void getColorRGBA( aiColor3D *pColor, Value *data ) {
+    if( NULL == pColor || NULL == data ) {
+        return;
+    }
+
+    pColor->r = data->getFloat();
+    data = data->getNext();
+    pColor->g = data->getFloat();
+    data = data->getNext();
+    pColor->b = data->getFloat();
+    data = data->getNext();
+}
+
+//------------------------------------------------------------------------------------------------
+enum ColorType {
+    NoneColor = 0,
+    DiffuseColor
+};
+
+//------------------------------------------------------------------------------------------------
+static ColorType getColorType( Identifier *id ) {
+    const int res(strncmp("diffuse", id->m_buffer, id->m_len ) );
+    if( 0 == res ) {
+        return DiffuseColor;
+    }
+
+    return NoneColor;
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    m_currentMaterial = new aiMaterial;
+    m_materialCache.push_back( m_currentMaterial );
+
+    handleNodes( node, pScene );
 
 }
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == node ) {
+        return;
+    }
 
+    Property *colorProp = node->getProperties();
+    if( NULL != colorProp ) {
+        if( NULL != colorProp->m_id ) {
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -769,7 +813,6 @@ void OpenGEXImporter::resolveReferences() {
                     if( m_mesh2refMap.end() != it ) {
                         unsigned int meshIdx = m_mesh2refMap[ name ];
                         node->mMeshes[ i ] = meshIdx;
-                        //node->mNumMeshes++;
                     }
                 }
             } else if( RefInfo::MaterialRef == currentRefInfo->m_type ) {

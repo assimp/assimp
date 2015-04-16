@@ -58,12 +58,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *     a file
  */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_TRIANGULATE_PROCESS
 #include "TriangulateProcess.h"
 #include "ProcessHelper.h"
 #include "PolyTools.h"
+#include <boost/scoped_array.hpp>
 
 //#define AI_BUILD_TRIANGULATE_COLOR_FACE_WINDING
 //#define AI_BUILD_TRIANGULATE_DEBUG_POLYS

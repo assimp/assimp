@@ -42,6 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Handy IOStream/IOSystem implemetation to read directly from a memory buffer */
 #ifndef AI_MEMORYIOSTREAM_H_INC
 #define AI_MEMORYIOSTREAM_H_INC
+
+#include "../include/assimp/IOStream.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/ai_assert.h"
+#include <stdint.h>
+
 namespace Assimp	{
 #define AI_MEMORYIO_MAGIC_FILENAME "$$$___magic___$$$"
 #define AI_MEMORYIO_MAGIC_FILENAME_LENGTH 17

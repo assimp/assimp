@@ -42,10 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_PROCESS_HELPER_H_INCLUDED
 
 #include "../include/assimp/postprocess.h"
+#include "../include/assimp/anim.h"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/material.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
 
 #include "SpatialSort.h"
 #include "BaseProcess.h"
 #include "ParsingUtils.h"
+
+#include <list>
 
 // -------------------------------------------------------------------------------
 // Some extensions to std namespace. Mainly std::min and std::max for all

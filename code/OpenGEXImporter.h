@@ -43,13 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
 #include "BaseImporter.h"
+#include "../include/assimp/mesh.h"
 
 #include <vector>
+#include <list>
 
 namespace ODDLParser {
     class DDLNode;
     struct Context;
 }
+struct aiNode;
+struct aiMaterial;
 
 namespace Assimp {
 namespace OpenGEX {
@@ -174,6 +178,8 @@ private:
     aiNode *m_currentNode;
     VertexContainer m_currentVertices;
     aiMesh *m_currentMesh;
+    aiMaterial *m_currentMaterial;
+    std::vector<aiMaterial*> m_materialCache;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;
 };

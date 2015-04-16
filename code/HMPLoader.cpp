@@ -41,12 +41,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the MDL importer class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
 
 // internal headers
 #include "HMPLoader.h"
 #include "MD2FileData.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
 
 using namespace Assimp;
 

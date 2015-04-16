@@ -49,6 +49,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
+#include <boost/foreach.hpp>
+#include <deque>
+#include "./../include/assimp/material.h"
+
+struct aiTexture;
 
 #define for_each(x,y) BOOST_FOREACH(x,y)
 

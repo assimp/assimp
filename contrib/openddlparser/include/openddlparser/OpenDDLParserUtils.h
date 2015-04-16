@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014 Kim Kulling
+Copyright (c) 2014-2015 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -227,17 +227,18 @@ static T *getNextSeparator( T *in, T *end ) {
     return in;
 }
 
-static const int ErrorHex2Decimal = 9999;
+static const int ErrorHex2Decimal = 9999999;
 
 inline
 int hex2Decimal( char in ) {
     if( isNumeric( in ) ) {
-        return (int) in-48;
+        return ( in - 48 );
     }
+    
     char hexCodeLower( 'a' ), hexCodeUpper( 'A' );
     for( int i = 0; i<16; i++ ) {
         if( in == hexCodeLower + i || in == hexCodeUpper + i ) {
-            return i+10;
+            return ( i+10 );
         }
     }
 

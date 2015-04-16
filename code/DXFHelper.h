@@ -48,6 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LineSplitter.h"
 #include "TinyFormatter.h"
 #include "StreamReader.h"
+#include "fast_atof.h"
+#include <vector>
+#include "../include/assimp/DefaultLogger.hpp"
 
 namespace Assimp {
 	namespace DXF {

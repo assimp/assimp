@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "ObjFileMtlImporter.h"
@@ -47,6 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileData.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
+#include "../include/assimp/material.h"
+#include "../include/assimp/DefaultLogger.hpp"
+
 
 namespace Assimp	{
 

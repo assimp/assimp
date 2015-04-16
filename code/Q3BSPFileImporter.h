@@ -43,6 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 
 struct aiMesh;
+struct aiNode;
+struct aiFace;
+struct aiMaterial;
+struct aiTexture;
 
 namespace Assimp
 {

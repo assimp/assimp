@@ -44,12 +44,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Written against http://chumbalum.swissquake.ch/ms3d/ms3dspec.txt
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
 
 // internal headers
 #include "MS3DLoader.h"
 #include "StreamReader.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/IOSystem.hpp"
+
+
 using namespace Assimp;
 
 static const aiImporterDesc desc = {

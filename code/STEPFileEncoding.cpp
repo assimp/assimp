@@ -41,11 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  STEPFileEncoding.cpp
  *  @brief STEP character handling, string unescaping
  */
-#include "AssimpPCH.h"
 #include "STEPFileEncoding.h"
 #include "fast_atof.h"
 
 #include "../contrib/ConvertUTF/ConvertUTF.h"
+#include <boost/scoped_array.hpp>
 
 using namespace Assimp;
 

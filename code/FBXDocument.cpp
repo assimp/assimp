@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXDocument.cpp
  *  @brief Implementation of the FBX DOM classes
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -54,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
+#include <boost/foreach.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Assimp {
 namespace FBX {

@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IRRShared.h"
 #include "SceneCombiner.h"
+#include "Importer.h"
+#include "../include/assimp/anim.h"
 
 namespace Assimp	{
 

@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  Implementation of the CSM importer class.
  */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
 
@@ -51,6 +51,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SkeletonMeshBuilder.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
+#include "../include/assimp/Importer.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/anim.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+
 
 using namespace Assimp;
 

@@ -45,6 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_COB_LOADER_H
 
 #include "BaseImporter.h"
+#include "StreamReader.h"
+
+struct aiNode;
+
 namespace Assimp	{
 	class LineSplitter;
 	

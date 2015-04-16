@@ -49,9 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER2_H_INC
 #define AI_MDLFILEHELPER2_H_INC
 
-#include "./../include/assimp/Compiler/pushpack1.h"
-
 #include "MDLFileData.h"
+#include "./../include/assimp/Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MDL	{

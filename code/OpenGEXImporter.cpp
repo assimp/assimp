@@ -772,12 +772,6 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
     Property *colorProp = node->getProperties();
     if( NULL != colorProp ) {
         if( NULL != colorProp->m_id ) {
-/*            ColorType type( getColorType( colorProp->m_primData ) );
-            if( type == DiffuseColor ) {
-                aiColor3D *col = new aiColor3D;
-                getColorRGBA( col, node->getValue() );
-                m_currentMaterial->AddProperty( col, 1, AI_MATKEY_COLOR_DIFFUSE );
-            }*/
         }
     }
 }

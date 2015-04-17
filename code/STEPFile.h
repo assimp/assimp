@@ -42,9 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_STEPFILE_H
 
 #include <boost/noncopyable.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/foreach.hpp>
 #include <bitset>
 #include <memory>
 #include <typeinfo>
+#include <vector>
+#include <map>
+#include <set>
+
+#include "FBXDocument.h" //ObjectMap::value_type
+#include "../include/assimp/DefaultLogger.hpp"
 
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)

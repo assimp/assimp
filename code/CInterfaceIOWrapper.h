@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_CIOSYSTEM_H_INCLUDED
 
 #include "../include/assimp/cfileio.h"
+#include "../include/assimp/IOStream.hpp"
+#include "../include/assimp/IOSystem.hpp"
 
 namespace Assimp	{
 	

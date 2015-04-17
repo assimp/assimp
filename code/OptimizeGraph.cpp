@@ -43,13 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the aiProcess_OptimizGraph step
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_OPTIMIZEGRAPH_PROCESS
 
-using namespace Assimp;
 #include "OptimizeGraph.h"
 #include "ProcessHelper.h"
 #include "SceneCombiner.h"
+#include "Exceptional.h"
+#include <stdio.h>
+
+using namespace Assimp;
 
 #define AI_RESERVED_NODE_NAME "$Reserved_And_Evil"
 

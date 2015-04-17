@@ -145,6 +145,7 @@ SET( Common_SRCS
 	Bitmap.cpp
 	Bitmap.h
 	XMLTools.h
+	Version.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -738,10 +739,6 @@ SET( assimp_src
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
 
-	# Old precompiled header
-	# (removed because the precompiled header is not updated when visual studio switch configuration which leads to failed compilation.
-	# Moreover it's a drag to recompile assimp entirely each time a modification is made to one of the included header, which is definitely counter-productive.)
-	AssimpPCH.cpp
 )
 add_definitions( -DOPENDDLPARSER_BUILD )
 
@@ -753,8 +750,6 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 	SET( assimp_src ${assimp_src} ${C4D_SRCS})
 	INCLUDE_DIRECTORIES(${C4D_INCLUDES})
 ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
-
-#ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
 
 ADD_LIBRARY( assimp ${assimp_src} )
 

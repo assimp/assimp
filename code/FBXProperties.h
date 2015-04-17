@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 #include <string>
+#include "FBXCompileConfig.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Assimp {
 namespace FBX {

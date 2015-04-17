@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_VERSION_H
 #define INCLUDED_AI_VERSION_H
 
+#include "defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

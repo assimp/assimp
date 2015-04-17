@@ -15,10 +15,19 @@
 #ifndef __FAST_A_TO_F_H_INCLUDED__
 #define __FAST_A_TO_F_H_INCLUDED__
 
-#include <math.h>
+#include <cmath>
 #include <limits>
+#include <stdint.h>
+#include <stdexcept>
 
 #include "StringComparison.h"
+
+
+#ifdef _MSC_VER 
+#  include <stdint.h>
+#else 
+#include "../include/assimp/Compiler/pstdint.h"
+#endif
 
 namespace Assimp
 {

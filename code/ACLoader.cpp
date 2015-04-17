@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the AC3D importer class */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_AC_IMPORTER
 
@@ -51,6 +51,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include "fast_atof.h"
 #include "Subdivision.h"
+#include "Importer.h"
+#include "BaseImporter.h"
+#include "../include/assimp/Importer.hpp"
+#include "../include/assimp/light.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/material.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/config.h"
+#include "../include/assimp/IOSystem.hpp"
+#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 

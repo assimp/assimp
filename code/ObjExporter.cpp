@@ -38,13 +38,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
 
 #include "ObjExporter.h"
 #include "../include/assimp/version.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/Exporter.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "Exceptional.h"
+#include "../include/assimp/material.h"
+#include "../include/assimp/scene.h"
+#include "StringComparison.h"
+#include <boost/foreach.hpp>
+
 
 using namespace Assimp;
 namespace Assimp	{

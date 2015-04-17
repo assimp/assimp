@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSIMP_Q3BSPFILEDATA_H_INC
 
 #include <vector>
+#include <string.h> //memset
+#include <string>
 
 namespace Assimp {
 namespace Q3BSP {

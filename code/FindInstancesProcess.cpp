@@ -43,8 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the aiProcess_FindInstances postprocessing step
 */
 
-#include "AssimpPCH.h"
+
 #include "FindInstancesProcess.h"
+#include <boost/scoped_array.hpp>
+#include <stdio.h>
 
 using namespace Assimp;
 

@@ -45,8 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_TOKENIZER_H
 
 #include <boost/shared_ptr.hpp>
-
 #include "FBXCompileConfig.h"
+#include "../include/assimp/ai_assert.h"
+#include <vector>
+#include <string>
 
 namespace Assimp {
 namespace FBX {

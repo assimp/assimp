@@ -41,12 +41,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the 3ds importer class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
 #include "3DSLoader.h"
 #include "TargetAnimation.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "StringComparison.h"
+#include <boost/scoped_array.hpp>
+#include <cctype>
 
 using namespace Assimp;
 

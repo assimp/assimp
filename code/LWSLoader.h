@@ -46,8 +46,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LWOFileData.h"
 #include "SceneCombiner.h"
+#include "BaseImporter.h"
+
+struct aiImporterDesc;
 
 namespace Assimp	{
+	class BatchLoader;
+    class Importer;
+    class IOSystem;
+
 	namespace LWS	{
 
 // ---------------------------------------------------------------------------

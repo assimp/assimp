@@ -55,6 +55,12 @@ const char* AICMD_MSG_CMPDUMP_HELP =
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "generic_inserter.hpp"
+#include <map>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <iostream>
+#include "../../include/assimp/ai_assert.h"
 
 // get << for aiString
 template <typename char_t, typename traits_t>

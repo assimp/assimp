@@ -38,9 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
 #include "TargetAnimation.h"
 #include <algorithm>
+#include "../include/assimp/ai_assert.h"
 
 using namespace Assimp;
 

@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/version.h"
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/Exporter.hpp"
+#include "qnan.h"
 
 
 using namespace Assimp;

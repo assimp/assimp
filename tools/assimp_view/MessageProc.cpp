@@ -39,11 +39,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "stdafx.h"
 #include "assimp_view.h"
+#include <assimp/Exporter.hpp>
+#include <algorithm>
+
 #include <windowsx.h>
 
 namespace AssimpView {
+
+using namespace Assimp;
 
 // Static array to keep custom color values
 COLORREF g_aclCustomColors[16] = {0};
@@ -1044,9 +1048,9 @@ void DoExport(size_t formatId)
 		ai_assert(strlen(szFileName) <= MAX_PATH);
 
 		// invent a nice default file name 
-		char* sz = std::max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
+		char* sz = max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
 		if (sz) {
-			strncpy(sz,std::max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
+			strncpy(sz,max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
 		}
 	}
 	else {

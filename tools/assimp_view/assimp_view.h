@@ -47,6 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // include resource definitions
 #include "resource.h"
 
+#include <assert.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <memory.h>
+#include <tchar.h>
+#include <stdio.h>
+#include <time.h>
+
 // Include ASSIMP headers (XXX: do we really need all of them?)
 #include <assimp/cimport.h>
 #include <assimp/Importer.hpp>
@@ -59,28 +67,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 
-#include "../../code/AssimpPCH.h" /* HACK */
  
 #include "../../code/MaterialSystem.h"   // aiMaterial class
 #include "../../code/StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
 
 // in order for std::min and std::max to behave properly
-#ifdef min 
+/*#ifdef min 
 #undef min
 #endif // min
 #ifdef max 
 #undef max
-#endif // min
+#endif // min*/
 
 #include <time.h>
 
 // default movement speed 
 #define MOVE_SPEED 3.f
-
-using namespace Assimp;
-
-namespace AssimpView 
-{
 
 #include "AssetHelper.h"
 #include "Camera.h"
@@ -93,7 +95,6 @@ namespace AssimpView
 #include "MeshRenderer.h"
 #include "MaterialManager.h"
 
-} // end of namespace AssimpView - for a while
 
 // outside of namespace, to help Intellisense and solve boost::metatype_stuff_miracle
 #include "AnimEvaluator.h"
@@ -105,30 +106,30 @@ namespace AssimpView
 //-------------------------------------------------------------------------------
 // Function prototypes
 //-------------------------------------------------------------------------------
-	int InitD3D(void);
-	int ShutdownD3D(void);
-	int CreateDevice (bool p_bMultiSample,bool p_bSuperSample, bool bHW = true);
-	int CreateDevice (void);
-	int ShutdownDevice(void);
-	int GetProjectionMatrix (aiMatrix4x4& p_mOut);
-	int LoadAsset(void);
-	int CreateAssetData(void);
-	int DeleteAssetData(bool bNoMaterials = false);
-	int ScaleAsset(void);
-	int DeleteAsset(void);
-	int SetupFPSView();
+int InitD3D(void);
+int ShutdownD3D(void);
+int CreateDevice (bool p_bMultiSample,bool p_bSuperSample, bool bHW = true);
+int CreateDevice (void);
+int ShutdownDevice(void);
+int GetProjectionMatrix (aiMatrix4x4& p_mOut);
+int LoadAsset(void);
+int CreateAssetData(void);
+int DeleteAssetData(bool bNoMaterials = false);
+int ScaleAsset(void);
+int DeleteAsset(void);
+int SetupFPSView();
 	
-	aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut);
-	int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource);
+aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut);
+int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource);
 
-	void HandleMouseInputFPS( void );
-	void HandleMouseInputLightRotate( void );
-	void HandleMouseInputLocal( void );
-	void HandleKeyboardInputFPS( void );
-	void HandleMouseInputLightIntensityAndColor( void );
-	void HandleMouseInputSkyBox( void );
-	void HandleKeyboardInputTextureView( void );
-	void HandleMouseInputTextureView( void );
+void HandleMouseInputFPS( void );
+void HandleMouseInputLightRotate( void );
+void HandleMouseInputLocal( void );
+void HandleKeyboardInputFPS( void );
+void HandleMouseInputLightIntensityAndColor( void );
+void HandleMouseInputSkyBox( void );
+void HandleKeyboardInputTextureView( void );
+void HandleMouseInputTextureView( void );
 
 
 //-------------------------------------------------------------------------------
@@ -160,7 +161,7 @@ INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg,UINT uMsg,
 
 //-------------------------------------------------------------------------------
 // 
-// Dialog prcoedure for the help dialog
+// Dialog procedure for the help dialog
 //
 //-------------------------------------------------------------------------------
 INT_PTR CALLBACK HelpDialogProc(HWND hwndDlg,UINT uMsg,
@@ -182,7 +183,7 @@ type clamp(intype in)
 {
 	// for unsigned types only ...
 	intype mask = (0x1u << (sizeof(type)*8))-1;
-	return (type)std::max((intype)0,std::min(in,mask));
+	return (type)max((intype)0,min(in,mask));
 }
 
 

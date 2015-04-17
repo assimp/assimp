@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
+#include <stdlib.h>
 #include "ObjFileMtlImporter.h"
 #include "ObjTools.h"
 #include "ObjFileData.h"

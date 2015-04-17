@@ -140,11 +140,11 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
 ZipFile::ZipFile(size_t size) : m_Size(size) {
 	ai_assert(m_Size != 0);
 
-	m_Buffer = std::malloc(m_Size);
+	m_Buffer = malloc(m_Size);
 }
 	
 ZipFile::~ZipFile() {
-	std::free(m_Buffer);
+	free(m_Buffer);
 	m_Buffer = NULL;
 }
 

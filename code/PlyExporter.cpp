@@ -225,7 +225,7 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 			m->mVertices[i].z
 		;
 		if(components & PLY_EXPORT_HAS_NORMALS) {
-			if (m->HasNormals() && is_not_qnan(m->mNormals[i].x) && std::absf(m->mNormals[i].x) != inf) {
+			if (m->HasNormals() && is_not_qnan(m->mNormals[i].x) && std::fabsf(m->mNormals[i].x) != inf) {
 				mOutput << 
 					" " << m->mNormals[i].x << 
 					" " << m->mNormals[i].y << 

@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXUtil.h"
 #include "FBXProperties.h"
 #include "FBXImporter.h"
-#include "../include/assimp/scene.h"
+#include "assimp/scene.h"
 #include <boost/foreach.hpp>
 #include <boost/scoped_array.hpp>
 

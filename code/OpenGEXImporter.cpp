@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MakeVerboseFormat.h"
 
 #include <openddlparser/OpenDDLParser.h>
-#include "../include/assimp/scene.h"
+#include "assimp/scene.h"
 
 
 #include <vector>

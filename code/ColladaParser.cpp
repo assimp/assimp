@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/foreach.hpp>
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/light.h"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/IOSystem.hpp"
+#include "assimp/light.h"
 
 
 using namespace Assimp;

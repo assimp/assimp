@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <stdint.h>
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/anim.h"
+#include "assimp/types.h"
+#include "assimp/mesh.h"
+#include "assimp/anim.h"
 
 #include "./../include/assimp/Compiler/pushpack1.h"
 

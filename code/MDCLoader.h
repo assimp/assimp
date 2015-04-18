@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDCLOADER_H_INCLUDED
 #define AI_MDCLOADER_H_INCLUDED
 
-#include "../include/assimp/types.h"
+#include "assimp/types.h"
 
 #include "BaseImporter.h"
 #include "MDCFileData.h"

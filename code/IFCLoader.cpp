@@ -60,8 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/Importer.hpp"
 
 
 namespace Assimp {

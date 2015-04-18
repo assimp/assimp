@@ -48,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "XFileImporter.h"
 #include "XFileParser.h"
 #include "ConvertToLHProcess.h"
-#include "../include/assimp/IOSystem.hpp"
+#include "assimp/IOSystem.hpp"
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include "assimp/scene.h"
+#include "assimp/DefaultLogger.hpp"
 #include <boost/format.hpp>
 #include "Defines.h"
 #include <cctype>

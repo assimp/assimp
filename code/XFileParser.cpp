@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include "ByteSwap.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include "assimp/DefaultLogger.hpp"
 
 
 using namespace Assimp;

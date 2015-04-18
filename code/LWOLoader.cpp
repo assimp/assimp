@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
+#include "assimp/IOSystem.hpp"
 #include <sstream>
 #include <iomanip>
 

@@ -50,11 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <numeric>
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/vector3.h"
-#include "../include/assimp/vector2.h"
-#include "../include/assimp/color4.h"
-#include "../include/assimp/mesh.h"
+#include "assimp/ai_assert.h"
+#include "assimp/vector3.h"
+#include "assimp/vector2.h"
+#include "assimp/color4.h"
+#include "assimp/mesh.h"
 #include "FBXProperties.h"
 #include "FBXParser.h"
 

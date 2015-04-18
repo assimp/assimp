@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "RemoveComments.h"
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include "assimp/IOSystem.hpp"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/scene.h"
 #include "qnan.h"
 
 

@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AssbinLoader.h"
 #include "assbin_chunks.h"
 #include "MemoryIOWrapper.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/scene.h"
+#include "assimp/mesh.h"
+#include "assimp/anim.h"
+#include "assimp/scene.h"
 #include <boost/static_assert.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB

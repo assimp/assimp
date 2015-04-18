@@ -58,11 +58,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "RemoveComments.h"
 #include "ParsingUtils.h"
 #include "Importer.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include "assimp/DefaultLogger.hpp"
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/material.h"
-#include "../include/assimp/scene.h"
+#include "assimp/IOSystem.hpp"
+#include "assimp/material.h"
+#include "assimp/scene.h"
 #include <cctype>
 
 

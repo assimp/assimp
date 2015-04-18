@@ -46,11 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MD2Loader.h"
 #include "ByteSwap.h"
 #include "MD2NormalTable.h" // shouldn't be included by other units
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/Importer.hpp"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/Importer.hpp"
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
+#include "assimp/IOSystem.hpp"
+#include "assimp/scene.h"
 
 
 

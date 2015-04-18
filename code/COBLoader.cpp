@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TinyFormatter.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/foreach.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include "assimp/IOSystem.hpp"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/scene.h"
 
 
 using namespace Assimp;

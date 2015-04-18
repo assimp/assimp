@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SpatialSort.h"
 #include <boost/static_assert.hpp>
-#include "../include/assimp/ai_assert.h"
+#include "assimp/ai_assert.h"
 
 using namespace Assimp;
 

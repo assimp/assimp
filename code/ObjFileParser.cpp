@@ -47,12 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "ParsingUtils.h"
-#include "../include/assimp/types.h"
+#include "assimp/types.h"
 #include "DefaultIOSystem.h"
 #include "BaseImporter.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/material.h"
-#include "../include/assimp/Importer.hpp"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/material.h"
+#include "assimp/Importer.hpp"
 
 
 namespace Assimp {

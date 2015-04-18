@@ -53,9 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <boost/scoped_ptr.hpp>
 #include "Exceptional.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/light.h"
+#include "assimp/IOSystem.hpp"
+#include "assimp/scene.h"
+#include "assimp/light.h"
 
 
 

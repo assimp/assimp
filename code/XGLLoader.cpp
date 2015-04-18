@@ -51,8 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
+#include "assimp/mesh.h"
+#include "assimp/scene.h"
 #include <cctype>
 
 

@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderModifier.h"
 #include "SceneCombiner.h"
 #include "Subdivision.h"
-#include "../include/assimp/scene.h"
+#include "assimp/scene.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/pointer_cast.hpp>

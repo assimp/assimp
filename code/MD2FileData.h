@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MD2FILEHELPER_H_INC
 #define AI_MD2FILEHELPER_H_INC
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/anim.h"
+#include "assimp/types.h"
+#include "assimp/mesh.h"
+#include "assimp/anim.h"
 #include <stdint.h>
 
 #include "./../include/assimp/Compiler/pushpack1.h"

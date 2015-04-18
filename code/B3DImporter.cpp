@@ -51,10 +51,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TextureTransform.h"
 #include "ConvertToLHProcess.h"
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include "assimp/IOSystem.hpp"
+#include "assimp/anim.h"
+#include "assimp/scene.h"
+#include "assimp/DefaultLogger.hpp"
 
 
 using namespace Assimp;

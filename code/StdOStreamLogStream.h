@@ -1,7 +1,7 @@
 #ifndef AI_STROSTREAMLOGSTREAM_H_INC
 #define AI_STROSTREAMLOGSTREAM_H_INC
 
-#include "../include/assimp/LogStream.hpp"
+#include "assimp/LogStream.hpp"
 #include <ostream>
 
 namespace Assimp	{

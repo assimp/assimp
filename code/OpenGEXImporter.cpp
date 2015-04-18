@@ -44,8 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MakeVerboseFormat.h"
 
 #include <openddlparser/OpenDDLParser.h>
-#include "../include/assimp/scene.h"
-
+#include <assimp/scene.h>
 
 #include <vector>
 
@@ -788,11 +787,7 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
     }
     pScene->mNumMeshes = m_meshCache.size();
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
-    size_t i( 0 );
-    for( std::vector<aiMesh*>::iterator it = m_meshCache.begin(); it != m_meshCache.end(); it++ ) {
-        pScene->mMeshes[ i ] = *it;
-        i++;
-    }
+    std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
 }
 
 //------------------------------------------------------------------------------------------------

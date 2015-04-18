@@ -42,11 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "TextureTransform.h"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 
+#include "TextureTransform.h"
 
 using namespace Assimp;
 

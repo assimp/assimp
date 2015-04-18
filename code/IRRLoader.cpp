@@ -47,25 +47,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
-#include "IRRLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-#include "GenericProperty.h"
-
-#include "SceneCombiner.h"
-#include "StandardShapes.h"
-#include "Importer.h"
-
-// We need boost::common_factor to compute the lcm/gcd of a number
-#include <boost/math/common_factor_rt.hpp>
-#include <boost/scoped_ptr.hpp>
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/mesh.h"
 #include "assimp/material.h"
 #include "assimp/scene.h"
 #include "assimp/IOSystem.hpp"
 #include "assimp/postprocess.h"
+// We need boost::common_factor to compute the lcm/gcd of a number
+#include <boost/math/common_factor_rt.hpp>
+#include <boost/scoped_ptr.hpp>
 
+#include "ParsingUtils.h"
+#include "fast_atof.h"
+#include "GenericProperty.h"
+#include "SceneCombiner.h"
+#include "StandardShapes.h"
+#include "Importer.h"
+#include "IRRLoader.h"
 
 using namespace Assimp;
 using namespace irr;

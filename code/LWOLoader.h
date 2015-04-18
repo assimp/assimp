@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp/material.h"
 #include "assimp/DefaultLogger.hpp"
 
-#include "LWOFileData.h"
 #include "BaseImporter.h"
+#include "LWOFileData.h"
 
 struct aiTexture;
 struct aiNode;

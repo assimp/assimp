@@ -43,12 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * all normals in meshes with infacing normals.
  */
 
-// internal headers
-#include "FixNormalsStep.h"
+#include <stdio.h>
+
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
-#include <stdio.h>
+
+// internal headers
+#include "FixNormalsStep.h"
 
 
 using namespace Assimp;

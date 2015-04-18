@@ -41,13 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  DefaultIOStream.cpp
  *  @brief Default File I/O implementation for #Importer 
  */
-
-
-#include "assimp/ai_assert.h"
-#include "DefaultIOStream.h"
-#include <boost/static_assert.hpp>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include "assimp/ai_assert.h"
+#include <boost/static_assert.hpp>
+
+#include "DefaultIOStream.h"
 
 using namespace Assimp;
 

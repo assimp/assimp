@@ -46,17 +46,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
+#include <sstream>
+#include <iomanip>
+
+#include "assimp/IOSystem.hpp"
+#include <boost/scoped_ptr.hpp>
+
 // internal headers
-#include "LWOLoader.h"
 #include "StringComparison.h"
 #include "SGSpatialSort.h"
 #include "ByteSwap.h"
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
-#include <boost/scoped_ptr.hpp>
-#include "assimp/IOSystem.hpp"
-#include <sstream>
-#include <iomanip>
+#include "LWOLoader.h"
 
 
 using namespace Assimp;

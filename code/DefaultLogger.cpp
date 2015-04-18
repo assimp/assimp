@@ -42,18 +42,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  DefaultLogger.cpp
  *  @brief Implementation of DefaultLogger (and Logger)
  */
-
-#include "DefaultIOSystem.h"
+#include <iostream>
+#include <stdio.h>
 
 // Default log streams
-#include "Win32DebugLogStream.h"
-#include "StdOStreamLogStream.h"
-#include "FileLogStream.h"
 #include "assimp/NullLogger.hpp"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/ai_assert.h"
-#include <iostream>
-#include <stdio.h>
+
+#include "Win32DebugLogStream.h"
+#include "StdOStreamLogStream.h"
+#include "FileLogStream.h"
+#include "DefaultIOSystem.h"
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
 #	include <boost/thread/thread.hpp>

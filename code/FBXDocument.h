@@ -49,12 +49,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <stdint.h>
 #include <numeric>
-#include <boost/scoped_ptr.hpp>
+
 #include "assimp/ai_assert.h"
 #include "assimp/vector3.h"
 #include "assimp/vector2.h"
 #include "assimp/color4.h"
 #include "assimp/mesh.h"
+#include <boost/scoped_ptr.hpp>
+
 #include "FBXProperties.h"
 #include "FBXParser.h"
 

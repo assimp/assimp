@@ -46,19 +46,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <exception>
 #include <iterator>
+
+#include "assimp/Importer.hpp"
 #include <boost/tuple/tuple.hpp>
 
+#include "StreamReader.h"
+#include "MemoryIOWrapper.h"
 #include "FBXImporter.h"
-
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
 #include "FBXUtil.h"
 #include "FBXDocument.h"
 #include "FBXConverter.h"
-
-#include "StreamReader.h"
-#include "MemoryIOWrapper.h"
-#include "assimp/Importer.hpp"
 
 namespace Assimp {
 	template<> const std::string LogFunctions<FBXImporter>::log_prefix = "FBX: ";

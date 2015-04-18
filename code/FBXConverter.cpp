@@ -46,18 +46,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iterator>
 #include <sstream>
-#include <boost/tuple/tuple.hpp>
 #include <vector>
+
+#include "assimp/scene.h"
+#include <boost/tuple/tuple.hpp>
+#include <boost/foreach.hpp>
+#include <boost/scoped_array.hpp>
+
 #include "FBXParser.h"
 #include "FBXConverter.h"
 #include "FBXDocument.h"
 #include "FBXUtil.h"
 #include "FBXProperties.h"
 #include "FBXImporter.h"
-#include "assimp/scene.h"
-#include <boost/foreach.hpp>
-#include <boost/scoped_array.hpp>
-
 
 namespace Assimp {
 namespace FBX {

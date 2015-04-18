@@ -44,23 +44,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
+#include <time.h>
+#include <numeric>
+
 #include "assimp/anim.h"
 #include "assimp/scene.h"
-#include "ColladaLoader.h"
-#include "ColladaParser.h"
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/Importer.hpp"
+#include <boost/foreach.hpp>
 
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "SkeletonMeshBuilder.h"
 #include "Defines.h"
 
-#include "time.h"
-#include <boost/foreach.hpp>
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/Importer.hpp"
-#include <numeric>
-#include "Defines.h"
-
+#include "ColladaLoader.h"
+#include "ColladaParser.h"
 
 using namespace Assimp;
 

@@ -42,21 +42,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-#include "ColladaExporter.h"
+#include <ctime>
+#include <set>
+
+#include "assimp/IOSystem.hpp"
+#include "assimp/Exporter.hpp"
+#include "assimp/scene.h"
+#include <boost/scoped_ptr.hpp>
 
 #include "Bitmap.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
 #include "XMLTools.h"
-#include "assimp/IOSystem.hpp"
-#include "assimp/Exporter.hpp"
-#include "assimp/scene.h"
-
 #include "Exceptional.h"
 
-#include <boost/scoped_ptr.hpp>
-#include <ctime>
-#include <set>
+#include "ColladaExporter.h"
 
 using namespace Assimp;
 

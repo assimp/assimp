@@ -48,10 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 
-#include "ConvertToLHProcess.h"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "assimp/DefaultLogger.hpp"
+
+#include "ConvertToLHProcess.h"
 
 using namespace Assimp;
 

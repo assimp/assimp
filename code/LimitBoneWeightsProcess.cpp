@@ -40,15 +40,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** Implementation of the LimitBoneWeightsProcess post processing step */
 
+#include <stdio.h>
 
-#include "LimitBoneWeightsProcess.h"
 #include "assimp/postprocess.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/scene.h"
-#include <stdio.h>
+
+#include "LimitBoneWeightsProcess.h"
 
 using namespace Assimp;
-
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer

@@ -42,8 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  Importer.cpp
  *  @brief Implementation of the CPP-API class #Importer
  */
+#include <cctype>
+#include <set>
 
 #include "assimp/version.h"
+#include <boost/scoped_ptr.hpp>
 
 // ------------------------------------------------------------------------------------------------
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.
@@ -76,9 +79,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TinyFormatter.h"
 #include "Exceptional.h"
 #include "Profiler.h"
-#include <set>
-#include <boost/scoped_ptr.hpp>
-#include <cctype>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #	include "ValidateDataStructure.h"

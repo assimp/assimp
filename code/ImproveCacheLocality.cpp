@@ -46,16 +46,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   .. although overdraw rduction isn't implemented yet ...
  */
 
+#include <stdio.h>
+#include <stack>
 
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
+#include "assimp/DefaultLogger.hpp"
 
 // internal headers
 #include "ImproveCacheLocality.h"
 #include "VertexTriangleAdjacency.h"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
-#include "assimp/DefaultLogger.hpp"
-#include <stdio.h>
-#include <stack>
 
 using namespace Assimp;
 

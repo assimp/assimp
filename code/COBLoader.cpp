@@ -44,20 +44,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
-#include "COBLoader.h"
-#include "COBScene.h"
-
-#include "StreamReader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-
-#include "LineSplitter.h"
-#include "TinyFormatter.h"
-#include <boost/scoped_ptr.hpp>
-#include <boost/foreach.hpp>
 #include "assimp/IOSystem.hpp"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/scene.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/foreach.hpp>
+
+#include "StreamReader.h"
+#include "ParsingUtils.h"
+#include "fast_atof.h"
+#include "LineSplitter.h"
+#include "TinyFormatter.h"
+#include "COBLoader.h"
+#include "COBScene.h"
+
 
 
 using namespace Assimp;

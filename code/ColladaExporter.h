@@ -44,13 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAEXPORTER_H_INC
 #define AI_COLLADAEXPORTER_H_INC
 
+#include <sstream>
+#include <vector>
+#include <map>
+
 #include "assimp/ai_assert.h"
 #include "assimp/material.h"
 #include "assimp/mesh.h"
 #include "assimp/Exporter.hpp"
-#include <sstream>
-#include <vector>
-#include <map>
 #include <boost/lexical_cast.hpp>
 
 struct aiScene;

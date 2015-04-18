@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "assimp/IOSystem.hpp"
 #include "assimp/DefaultLogger.hpp"
+
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 

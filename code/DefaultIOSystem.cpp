@@ -39,20 +39,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 /** @file Default implementation of IOSystem using the standard C file functions */
-
-#include "DefaultIOSystem.h"
-#include "DefaultIOStream.h"
-#include "StringComparison.h"
+#ifdef __unix__
+#include <sys/param.h>
+#endif
+#include <stdlib.h>
 
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/ai_assert.h"
-#include <stdlib.h>
 
+#include "StringComparison.h"
+#include "DefaultIOSystem.h"
+#include "DefaultIOStream.h"
 
-#ifdef __unix__
-#include <sys/param.h>
-#include <stdlib.h>
-#endif
 
 using namespace Assimp;
 

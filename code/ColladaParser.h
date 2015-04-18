@@ -45,10 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAPARSER_H_INC
 #define AI_COLLADAPARSER_H_INC
 
-#include "irrXMLWrapper.h"
-#include "ColladaHelper.h"
 #include "assimp/ai_assert.h"
 #include <boost/format.hpp>
+
+#include "irrXMLWrapper.h"
+#include "ColladaHelper.h"
 
 namespace Assimp
 {

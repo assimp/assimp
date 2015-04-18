@@ -48,24 +48,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Uncomment this to disable support for (gzip)compressed .BLEND files
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
+#include <cctype>
 
+#include "assimp/scene.h"
+
+#include "StringComparison.h"
+#include "StreamReader.h"
+#include "MemoryIOWrapper.h"
 #include "BlenderIntermediate.h"
 #include "BlenderModifier.h"
 #include "BlenderBMesh.h"
-#include "assimp/scene.h"
-#include "StringComparison.h"
-
-#include "StreamReader.h"
-#include "MemoryIOWrapper.h"
-#include <cctype>
-
 
 // zlib is needed for compressed blend files 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
 #	ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #		include <zlib.h>
 #	else
-#		include "../contrib/zlib/zlib.h"
+#		include "contrib/zlib/zlib.h"
 #	endif
 #endif
 

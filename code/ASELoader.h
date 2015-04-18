@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASELOADER_H_INCLUDED
 #define AI_ASELOADER_H_INCLUDED
 
-#include "BaseImporter.h"
 #include "assimp/types.h"
+#include "BaseImporter.h"
 
 struct aiNode;
 #include "ASEParser.h"

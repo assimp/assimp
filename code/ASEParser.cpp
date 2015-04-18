@@ -46,12 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
 
+#include "assimp/DefaultLogger.hpp"
 // internal headers
 #include "TextureTransform.h"
-#include "ASELoader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
-#include "assimp/DefaultLogger.hpp"
+#include "ASELoader.h"
 
 using namespace Assimp;
 using namespace Assimp::ASE;

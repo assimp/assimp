@@ -45,13 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_3DSIMPORTER_H_INC
 #define AI_3DSIMPORTER_H_INC
 
-#include "BaseImporter.h"
-#include "assimp/types.h"
-
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
-#include "3DSHelper.h"
+#include "assimp/types.h"
+#include "BaseImporter.h"
 #include "StreamReader.h"
+#include "3DSHelper.h"
 
 struct aiNode;
 

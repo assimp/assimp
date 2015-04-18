@@ -44,15 +44,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
-#include "BlenderModifier.h"
-#include "SceneCombiner.h"
-#include "Subdivision.h"
+#include <functional>
+
 #include "assimp/scene.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/pointer_cast.hpp>
 
-#include <functional>
+#include "SceneCombiner.h"
+#include "Subdivision.h"
+#include "BlenderModifier.h"
 
 using namespace Assimp;
 using namespace Assimp::Blender;

@@ -43,13 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BYTESWAP_H_INC
 #define AI_BYTESWAP_H_INC
 
-#include "assimp/ai_assert.h"
-#include "assimp/types.h"
 #include <stdint.h>
 
 #if _MSC_VER >= 1400 
 #include <stdlib.h>
 #endif
+
+#include "assimp/ai_assert.h"
+#include "assimp/types.h"
 
 namespace Assimp	{
 // --------------------------------------------------------------------------------------

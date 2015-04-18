@@ -44,14 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
-// internal headers
-#include "3DSLoader.h"
-#include "TargetAnimation.h"
+#include <cctype>
 #include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
+// internal headers
+#include "TargetAnimation.h"
 #include "StringComparison.h"
+#include "3DSLoader.h"
+
 #include <boost/scoped_array.hpp>
-#include <cctype>
 
 using namespace Assimp;
 

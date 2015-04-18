@@ -41,11 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of BaseProcess */
 
-#include "BaseImporter.h"
-#include "BaseProcess.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/scene.h"
+
 #include "Importer.h"
+#include "BaseImporter.h"
+#include "BaseProcess.h"
 
 using namespace Assimp;
 

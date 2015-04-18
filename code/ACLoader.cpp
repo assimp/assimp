@@ -46,13 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_AC_IMPORTER
 
-// internal headers
-#include "ACLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-#include "Subdivision.h"
-#include "Importer.h"
-#include "BaseImporter.h"
 #include "assimp/Importer.hpp"
 #include "assimp/light.h"
 #include "assimp/DefaultLogger.hpp"
@@ -61,6 +54,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp/config.h"
 #include "assimp/IOSystem.hpp"
 #include <boost/scoped_ptr.hpp>
+// internal headers
+#include "ParsingUtils.h"
+#include "fast_atof.h"
+#include "Subdivision.h"
+#include "Importer.h"
+#include "BaseImporter.h"
+#include "ACLoader.h"
 
 using namespace Assimp;
 

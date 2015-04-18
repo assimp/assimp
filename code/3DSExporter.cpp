@@ -42,15 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
 
-#include "3DSExporter.h"
-#include "3DSLoader.h"
-#include "SceneCombiner.h"
-#include "SplitLargeMeshes.h"
-#include "StringComparison.h"
+#include <memory>
 #include "assimp/IOSystem.hpp"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/Exporter.hpp"
-#include <memory>
+#include "SceneCombiner.h"
+#include "SplitLargeMeshes.h"
+#include "StringComparison.h"
+#include "3DSExporter.h"
+#include "3DSLoader.h"
 
 using namespace Assimp;
 namespace Assimp	{

@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/material.h"
 #include "../include/assimp/Importer.hpp"
+#include <cstdlib>
 
 
 namespace Assimp {

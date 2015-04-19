@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "assimp/IOStream.hpp"
 #include "assimp/IOSystem.hpp"
-#include "contrib/unzip/unzip.h"
+#include "unzip.h" /* contrib dir */
 
 namespace Assimp {
 namespace Q3BSP {

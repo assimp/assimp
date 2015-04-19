@@ -44,10 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OPTIMIZEGRAPHPROCESS_H_INC
 #define AI_OPTIMIZEGRAPHPROCESS_H_INC
 
+#include <set>
+
+#include "assimp/types.h"
+
 #include "BaseProcess.h"
 #include "ProcessHelper.h"
-#include "assimp/types.h"
-#include <set>
 
 struct aiMesh;
 class OptimizeGraphProcessTest;

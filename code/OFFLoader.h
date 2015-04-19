@@ -44,9 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OFFLOADER_H_INCLUDED
 #define AI_OFFLOADER_H_INCLUDED
 
-#include "BaseImporter.h"
-#include "assimp/types.h"
 #include <vector>
+
+#include "assimp/types.h"
+#include "BaseImporter.h"
 
 namespace Assimp	{
 

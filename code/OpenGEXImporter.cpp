@@ -39,15 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
-#include "OpenGEXImporter.h"
+#include <vector>
+
+#include "assimp/scene.h"
+#include <openddlparser/OpenDDLParser.h>
+
 #include "DefaultIOSystem.h"
 #include "MakeVerboseFormat.h"
-
-#include <openddlparser/OpenDDLParser.h>
-#include "assimp/scene.h"
-
-
-#include <vector>
+#include "OpenGEXImporter.h"
 
 static const aiImporterDesc desc = {
     "Open Game Engine Exchange",

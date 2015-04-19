@@ -44,9 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OPTIMIZEMESHESPROCESS_H_INC
 #define AI_OPTIMIZEMESHESPROCESS_H_INC
 
-#include "BaseProcess.h"
-#include "assimp/types.h"
 #include <vector>
+
+#include "assimp/types.h"
+
+#include "BaseProcess.h"
 
 struct aiMesh;
 struct aiNode;

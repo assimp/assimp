@@ -43,12 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include "BaseImporter.h"
+#include "assimp/material.h"
 
+#include "BaseImporter.h"
 #include "OgreStructs.h"
 #include "OgreParsingUtils.h"
-
-#include "assimp/material.h"
 
 namespace Assimp
 {

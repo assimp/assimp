@@ -44,10 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PLYLOADER_H_INCLUDED
 #define AI_PLYLOADER_H_INCLUDED
 
-#include "BaseImporter.h"
-#include "assimp/types.h"
-#include "PlyParser.h"
 #include <vector>
+
+#include "assimp/types.h"
+
+#include "BaseImporter.h"
+#include "PlyParser.h"
 
 struct aiNode;
 struct aiMaterial;

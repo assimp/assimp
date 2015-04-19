@@ -43,12 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include "MemoryIOWrapper.h"
-#include <boost/shared_ptr.hpp>
-#include "assimp/mesh.h"
 #include <map>
 #include <vector>
 #include <set>
+
+#include "assimp/mesh.h"
+#include <boost/shared_ptr.hpp>
+
+#include "MemoryIOWrapper.h"
 
 struct aiNodeAnim;
 struct aiAnimation;

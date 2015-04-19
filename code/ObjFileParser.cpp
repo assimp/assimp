@@ -42,18 +42,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
-#include "ObjFileParser.h"
-#include "ObjFileMtlImporter.h"
-#include "ObjTools.h"
-#include "ObjFileData.h"
-#include "ParsingUtils.h"
 #include "assimp/types.h"
-#include "DefaultIOSystem.h"
-#include "BaseImporter.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/material.h"
 #include "assimp/Importer.hpp"
 
+#include "ParsingUtils.h"
+#include "DefaultIOSystem.h"
+#include "BaseImporter.h"
+#include "ObjFileParser.h"
+#include "ObjFileMtlImporter.h"
+#include "ObjTools.h"
+#include "ObjFileData.h"
 
 namespace Assimp {
 

@@ -38,15 +38,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "OgreXmlSerializer.h"
-#include "OgreBinarySerializer.h"
-#include "OgreParsingUtils.h"
+#ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
-#include "TinyFormatter.h"
 #include "assimp/DefaultLogger.hpp"
 #include <boost/scoped_ptr.hpp>
 
-#ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
+#include "TinyFormatter.h"
+#include "OgreXmlSerializer.h"
+#include "OgreBinarySerializer.h"
+#include "OgreParsingUtils.h"
 
 // Define as 1 to get verbose logging.
 #define OGRE_XML_SERIALIZER_DEBUG 0

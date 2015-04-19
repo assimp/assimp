@@ -45,13 +45,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
+#include "assimp/IOSystem.hpp"
+#include "assimp/scene.h"
+#include <boost/scoped_ptr.hpp>
+
 // internal headers
 #include "PlyLoader.h"
 #include "Macros.h"
-#include <boost/scoped_ptr.hpp>
-#include "assimp/IOSystem.hpp"
-#include "assimp/scene.h"
-
 
 using namespace Assimp;
 

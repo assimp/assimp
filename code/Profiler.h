@@ -44,11 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_PROFILER_H
 #define INCLUDED_PROFILER_H
 
-#include "boost/timer.hpp"
-#include "assimp/DefaultLogger.hpp"
-#include "TinyFormatter.h"
-
 #include <map>
+
+#include "assimp/DefaultLogger.hpp"
+#include "boost/timer.hpp" /* inconsistence? */
+
+#include "TinyFormatter.h"
 
 namespace Assimp {
 	namespace Profiling {

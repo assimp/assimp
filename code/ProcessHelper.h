@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PROCESS_HELPER_H_INCLUDED
 #define AI_PROCESS_HELPER_H_INCLUDED
 
+#include <list>
+
 #include "assimp/postprocess.h"
 #include "assimp/anim.h"
 #include "assimp/mesh.h"
@@ -52,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseProcess.h"
 #include "ParsingUtils.h"
 
-#include <list>
 
 // -------------------------------------------------------------------------------
 // Some extensions to std namespace. Mainly std::min and std::max for all

@@ -44,11 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
-#include "PlyLoader.h"
-#include "fast_atof.h"
 #include "assimp/DefaultLogger.hpp"
-#include "ByteSwap.h"
 
+#include "fast_atof.h"
+#include "ByteSwap.h"
+#include "PlyLoader.h"
 
 using namespace Assimp;
 

@@ -187,7 +187,7 @@ struct Shader
 
 } PACK_STRUCT;
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 
 // ---------------------------------------------------------------------------

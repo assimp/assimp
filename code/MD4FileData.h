@@ -195,13 +195,7 @@ struct Frame
 	BoneFrame bones[1]; 
 } PACK_STRUCT; 
 
-
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
-
+#include <assimp/Compiler/poppack1.h>
 
 };
 };

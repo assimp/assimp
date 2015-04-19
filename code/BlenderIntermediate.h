@@ -45,13 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_BLEND_INTERMEDIATE_H
 #define INCLUDED_AI_BLEND_INTERMEDIATE_H
 
+#include <deque>
+
+#include <assimp/material.h>
+#include <boost/foreach.hpp>
+
 #include "BlenderLoader.h"
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
-#include <boost/foreach.hpp>
-#include <deque>
-#include "./../include/assimp/material.h"
 
 struct aiTexture;
 

@@ -44,11 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_NFFLOADER_H_INCLUDED
 #define AI_NFFLOADER_H_INCLUDED
 
-#include "BaseImporter.h"
-#include "assimp/types.h"
-#include "assimp/material.h"
 #include <vector>
 
+#include "assimp/types.h"
+#include "assimp/material.h"
+
+#include "BaseImporter.h"
 
 namespace Assimp	{
 

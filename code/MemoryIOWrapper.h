@@ -43,10 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MEMORYIOSTREAM_H_INC
 #define AI_MEMORYIOSTREAM_H_INC
 
+#include <stdint.h>
+
 #include "assimp/IOStream.hpp"
 #include "assimp/IOSystem.hpp"
 #include "assimp/ai_assert.h"
-#include <stdint.h>
 
 namespace Assimp	{
 #define AI_MEMORYIO_MAGIC_FILENAME "$$$___magic___$$$"

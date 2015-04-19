@@ -44,15 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/mesh.h"
+
 // internal headers
-#include "MD5Loader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "StringComparison.h"
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/mesh.h"
-
+#include "MD5Loader.h"
 
 
 using namespace Assimp;

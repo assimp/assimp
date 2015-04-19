@@ -43,16 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 
+#include "assimp/types.h"
+#include "assimp/material.h"
+#include "assimp/DefaultLogger.hpp"
 
 #include "Hash.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "MaterialSystem.h"
-#include "assimp/types.h"
-#include "assimp/material.h"
-#include "assimp/DefaultLogger.hpp"
 #include "Macros.h"
-
 
 using namespace Assimp;
 

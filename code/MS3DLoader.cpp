@@ -47,13 +47,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
 
-// internal headers
-#include "MS3DLoader.h"
-#include "StreamReader.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/scene.h"
 #include "assimp/IOSystem.hpp"
 
+// internal headers
+#include "StreamReader.h"
+#include "MS3DLoader.h"
 
 using namespace Assimp;
 

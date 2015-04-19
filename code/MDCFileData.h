@@ -49,12 +49,12 @@ http://themdcfile.planetwolfenstein.gamespy.com/MDC_File_Format.pdf
 #ifndef AI_MDCFILEHELPER_H_INC
 #define AI_MDCFILEHELPER_H_INC
 
+#include <stdint.h>
+
 #include "assimp/types.h"
 #include "assimp/mesh.h"
 #include "assimp/anim.h"
-
-#include "./../include/assimp/Compiler/pushpack1.h"
-#include <stdint.h>
+#include "assimp/Compiler/pushpack1.h"
 
 namespace Assimp {
 namespace MDC {

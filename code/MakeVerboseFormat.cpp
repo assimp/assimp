@@ -41,10 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the post processing step "MakeVerboseFormat"
 */
 
-
-#include "MakeVerboseFormat.h"
 #include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
+
+#include "MakeVerboseFormat.h"
 
 using namespace Assimp;
 

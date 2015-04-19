@@ -54,8 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp/types.h"
 #include "assimp/mesh.h"
 #include "assimp/anim.h"
-
-#include "./../include/assimp/Compiler/pushpack1.h"
+#include "assimp/Compiler/pushpack1.h"
 
 namespace Assimp	{
 namespace MD3	{

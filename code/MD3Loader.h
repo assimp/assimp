@@ -44,13 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MD3LOADER_H_INCLUDED
 #define AI_MD3LOADER_H_INCLUDED
 
-#include "BaseImporter.h"
-#include "ByteSwap.h"
-#include "MD3FileData.h"
-#include "StringComparison.h"
+#include <list>
+
 #include "assimp/types.h"
 
-#include <list>
+#include "BaseImporter.h"
+#include "ByteSwap.h"
+#include "StringComparison.h"
+#include "MD3FileData.h"
 
 struct aiMaterial;
 

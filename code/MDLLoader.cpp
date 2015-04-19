@@ -48,17 +48,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
-#include "MDLLoader.h"
-#include "MDLDefaultColorMap.h"
-#include "MD2FileData.h"
 #include "assimp/Importer.hpp"
-#include <boost/scoped_ptr.hpp>
 #include "assimp/IOSystem.hpp"
 #include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
+#include <boost/scoped_ptr.hpp>
+
 #include "Macros.h"
 #include "qnan.h"
-
+#include "MDLLoader.h"
+#include "MDLDefaultColorMap.h"
+#include "MD2FileData.h"
 
 using namespace Assimp;
 

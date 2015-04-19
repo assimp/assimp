@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "assimp/types.h"
 #include "assimp/material.h"
+
 #include "BaseProcess.h"
 
 struct aiBone;

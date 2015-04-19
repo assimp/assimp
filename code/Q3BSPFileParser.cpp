@@ -41,13 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
-#include "Q3BSPFileParser.h"
-#include "DefaultIOSystem.h"
-#include "Q3BSPFileData.h"
-#include "Q3BSPZipArchive.h"
 #include <vector>
+
 #include "assimp/ai_assert.h"
 
+#include "DefaultIOSystem.h"
+#include "Q3BSPFileParser.h"
+#include "Q3BSPFileData.h"
+#include "Q3BSPZipArchive.h"
 
 namespace Assimp
 {

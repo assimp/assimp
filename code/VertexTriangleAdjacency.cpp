@@ -42,9 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the VertexTriangleAdjacency helper class
  */
 
+#include "assimp/mesh.h"
+
 // internal headers
 #include "VertexTriangleAdjacency.h"
-#include "assimp/mesh.h"
 
 
 using namespace Assimp;

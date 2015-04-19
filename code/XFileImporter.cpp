@@ -45,18 +45,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
-#include "XFileImporter.h"
-#include "XFileParser.h"
-#include "ConvertToLHProcess.h"
-#include "assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
-#include "assimp/scene.h"
-#include "assimp/DefaultLogger.hpp"
-#include <boost/format.hpp>
-#include "Defines.h"
 #include <cctype>
 
+#include "assimp/IOSystem.hpp"
+#include "assimp/scene.h"
+#include "assimp/DefaultLogger.hpp"
+#include <boost/scoped_ptr.hpp>
+#include <boost/format.hpp>
 
+#include "Defines.h"
+#include "ConvertToLHProcess.h"
+#include "XFileImporter.h"
+#include "XFileParser.h"
 
 using namespace Assimp;
 

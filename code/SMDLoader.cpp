@@ -46,16 +46,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
 
-// internal headers
-#include "SMDLoader.h"
-#include "fast_atof.h"
-#include "SkeletonMeshBuilder.h"
 #include "assimp/Importer.hpp"
 #include "assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
 #include "assimp/scene.h"
 #include "assimp/DefaultLogger.hpp"
+#include <boost/scoped_ptr.hpp>
 
+// internal headers
+#include "fast_atof.h"
+#include "SkeletonMeshBuilder.h"
+#include "SMDLoader.h"
 
 using namespace Assimp;
 

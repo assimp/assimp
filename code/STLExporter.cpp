@@ -42,14 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_STL_EXPORTER)
 
-#include "STLExporter.h"
 #include "assimp/version.h"
 #include "assimp/IOSystem.hpp"
 #include "assimp/scene.h"
 #include "assimp/Exporter.hpp"
 #include <boost/scoped_ptr.hpp>
+
 #include "Exceptional.h"
 #include "ByteSwap.h"
+#include "STLExporter.h"
 
 using namespace Assimp;
 namespace Assimp	{

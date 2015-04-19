@@ -48,10 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_VERTEX_H_INC
 #define AI_VERTEX_H_INC
 
+#include <functional>
+
 #include "assimp/vector3.h"
 #include "assimp/mesh.h"
 #include "assimp/ai_assert.h"
-#include <functional>
 
 namespace Assimp	{
 	

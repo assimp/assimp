@@ -42,12 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *        any parts of the mesh structure from the imported data.
 */
 
-
-#include "RemoveVCProcess.h"
 #include "assimp/postprocess.h"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/scene.h"
 
+#include "RemoveVCProcess.h"
 
 using namespace Assimp;
 

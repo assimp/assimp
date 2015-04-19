@@ -42,11 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
-#include "Q3BSPZipArchive.h"
 #include <algorithm>
 #include <cassert>
+
 #include "assimp/ai_assert.h"
 
+#include "Q3BSPZipArchive.h"
 
 namespace Assimp {
 namespace Q3BSP {

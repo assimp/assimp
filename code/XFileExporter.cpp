@@ -42,22 +42,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
-#include "XFileExporter.h"
+
+#include <ctime>
+#include <set>
+
+#include "assimp/IOSystem.hpp"
+#include "assimp/scene.h"
+#include "assimp/light.h"
+#include <boost/scoped_ptr.hpp>
+
 #include "ConvertToLHProcess.h"
 #include "Bitmap.h"
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
-
-#include <ctime>
-#include <set>
-#include <boost/scoped_ptr.hpp>
 #include "Exceptional.h"
-#include "assimp/IOSystem.hpp"
-#include "assimp/scene.h"
-#include "assimp/light.h"
-
-
+#include "XFileExporter.h"
 
 using namespace Assimp;
 

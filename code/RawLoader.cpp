@@ -46,15 +46,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
 
-// internal headers
-#include "RawLoader.h"
-#include "ParsingUtils.h"
-#include "fast_atof.h"
-#include <boost/scoped_ptr.hpp>
 #include "assimp/IOSystem.hpp"
 #include "assimp/DefaultLogger.hpp"
 #include "assimp/scene.h"
+#include <boost/scoped_ptr.hpp>
 
+// internal headers
+#include "ParsingUtils.h"
+#include "fast_atof.h"
+#include "RawLoader.h"
 
 using namespace Assimp;
 

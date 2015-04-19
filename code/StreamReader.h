@@ -45,10 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STREAMREADER_H_INCLUDED
 #define AI_STREAMREADER_H_INCLUDED
 
+#include "assimp/IOStream.hpp"
+#include <boost/shared_ptr.hpp>
+
 #include "ByteSwap.h"
 #include "Exceptional.h"
-#include <boost/shared_ptr.hpp>
-#include "assimp/IOStream.hpp"
 #include "Defines.h"
 
 namespace Assimp {

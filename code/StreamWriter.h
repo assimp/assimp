@@ -45,11 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STREAMWRITER_H_INCLUDED
 #define AI_STREAMWRITER_H_INCLUDED
 
-#include "ByteSwap.h"
-#include "assimp/IOStream.hpp"
-
-#include <boost/shared_ptr.hpp>
 #include <vector>
+
+#include "assimp/IOStream.hpp"
+#include <boost/shared_ptr.hpp>
+
+#include "ByteSwap.h"
 
 namespace Assimp {
 

@@ -44,9 +44,10 @@ http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 #ifndef AI_SMOOTHINGGROUPS_H_INC
 #define AI_SMOOTHINGGROUPS_H_INC
 
-#include "assimp/vector3.h"
 #include <stdint.h>
 #include <vector>
+
+#include "assimp/vector3.h"
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a face with smoothing groups assigned */

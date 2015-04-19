@@ -44,15 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
-#include "XFileParser.h"
-#include "XFileHelper.h"
-#include "fast_atof.h"
-#include "Exceptional.h"
+#include "assimp/DefaultLogger.hpp"
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include "ByteSwap.h"
-#include "assimp/DefaultLogger.hpp"
 
+#include "fast_atof.h"
+#include "Exceptional.h"
+#include "ByteSwap.h"
+#include "XFileParser.h"
+#include "XFileHelper.h"
 
 using namespace Assimp;
 using namespace Assimp::XFile;

@@ -22,7 +22,6 @@
 
 #include "StringComparison.h"
 
-
 #ifdef _MSC_VER 
 #  include <stdint.h>
 #else 

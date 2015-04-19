@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 
-#include "assimp/ai_assert.h"
+#include <assimp/ai_assert.h>
 #include <boost/shared_ptr.hpp>
 
 #include "FBXCompileConfig.h"

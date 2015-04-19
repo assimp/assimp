@@ -47,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <set>
 
-#include "assimp/types.h"
-#include "assimp/ProgressHandler.hpp"
+#include <assimp/types.h>
+#include <assimp/ProgressHandler.hpp>
 
 #include "Exceptional.h"
 

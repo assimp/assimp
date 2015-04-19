@@ -44,10 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
-#include "assimp/texture.h"
-#include "assimp/IOSystem.hpp"
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/scene.h"
+#include <assimp/texture.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 
 // internal headers
 #include "qnan.h"

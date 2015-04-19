@@ -48,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 
-#include "assimp/ai_assert.h"
-#include "assimp/material.h"
-#include "assimp/mesh.h"
-#include "assimp/Exporter.hpp"
+#include <assimp/ai_assert.h>
+#include <assimp/material.h>
+#include <assimp/mesh.h>
+#include <assimp/Exporter.hpp>
 #include <boost/lexical_cast.hpp>
 
 struct aiScene;

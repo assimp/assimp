@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cctype>
 #include <set>
 
-#include "assimp/version.h"
+#include <assimp/version.h>
 #include <boost/scoped_ptr.hpp>
 
 // ------------------------------------------------------------------------------------------------

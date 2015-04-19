@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #include <functional>
 
-#include "assimp/scene.h"
+#include <assimp/scene.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/pointer_cast.hpp>

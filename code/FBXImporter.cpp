@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <exception>
 #include <iterator>
 
-#include "assimp/Importer.hpp"
+#include <assimp/Importer.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include "StreamReader.h"

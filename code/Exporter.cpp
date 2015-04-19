@@ -54,10 +54,10 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 #include <memory>
 
-#include "assimp/Exporter.hpp"
-#include "assimp/mesh.h"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
+#include <assimp/Exporter.hpp>
+#include <assimp/mesh.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <boost/shared_ptr.hpp>
 
 #include "DefaultIOSystem.h"

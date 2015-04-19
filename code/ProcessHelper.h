@@ -43,12 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <list>
 
-#include "assimp/postprocess.h"
-#include "assimp/anim.h"
-#include "assimp/mesh.h"
-#include "assimp/material.h"
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/scene.h"
+#include <assimp/postprocess.h>
+#include <assimp/anim.h>
+#include <assimp/mesh.h>
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 
 #include "SpatialSort.h"
 #include "BaseProcess.h"

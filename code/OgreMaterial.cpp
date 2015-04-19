@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <sstream>
 
-#include "assimp/material.h"
-#include "assimp/scene.h"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include "fast_atof.h"

@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "assimp/defs.h"
+#include <assimp/defs.h>
 #include <boost/shared_ptr.hpp>
 
 #include "FBXDocument.h"

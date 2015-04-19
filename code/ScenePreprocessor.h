@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stddef.h>
 
-#include "assimp/defs.h"
+#include <assimp/defs.h>
 
 struct aiScene;
 struct aiAnimation;

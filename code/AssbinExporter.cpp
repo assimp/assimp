@@ -42,10 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <time.h>
 
-#include "assimp/version.h"
-#include "assimp/IOStream.hpp"
-#include "assimp/IOSystem.hpp"
-#include "assimp/Exporter.hpp"
+#include <assimp/version.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
 #include <boost/static_assert.hpp>
 #include "assbin_chunks.h"
 #include "ProcessHelper.h"

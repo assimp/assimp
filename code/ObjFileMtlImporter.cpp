@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdlib.h>
 
-#include "assimp/material.h"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include "fast_atof.h"
 #include "ParsingUtils.h"

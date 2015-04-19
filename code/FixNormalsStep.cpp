@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdio.h>
 
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 // internal headers
 #include "FixNormalsStep.h"

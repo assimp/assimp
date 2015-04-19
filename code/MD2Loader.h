@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MD2LOADER_H_INCLUDED
 #define AI_MD2LOADER_H_INCLUDED
 
-#include "assimp/types.h"
+#include <assimp/types.h>
 #include "BaseImporter.h"
 #include "ByteSwap.h"
 #include "MD2FileData.h"

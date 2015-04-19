@@ -47,8 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //This section should be excluded only if both the Irrlicht AND the Irrlicht Mesh importers were omitted.
 #if !(defined(ASSIMP_BUILD_NO_IRR_IMPORTER) && defined(ASSIMP_BUILD_NO_IRRMESH_IMPORTER))
 
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/material.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/material.h>
 
 #include "ParsingUtils.h"
 #include "fast_atof.h"

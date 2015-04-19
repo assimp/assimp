@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cctype>
 
-#include "assimp/IOSystem.hpp"
-#include "assimp/scene.h"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
 

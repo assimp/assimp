@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdint.h>
 
-#include "assimp/IOStream.hpp"
-#include "assimp/IOSystem.hpp"
-#include "assimp/ai_assert.h"
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/ai_assert.h>
 
 namespace Assimp	{
 #define AI_MEMORYIO_MAGIC_FILENAME "$$$___magic___$$$"

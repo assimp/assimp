@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_VTADJACENCY_H_INC
 #define AI_VTADJACENCY_H_INC
 
-#include "assimp/types.h"
-#include "assimp/ai_assert.h"
+#include <assimp/types.h>
+#include <assimp/ai_assert.h>
 
 #include "BaseProcess.h"
 

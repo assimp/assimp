@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 
 #include "LineSplitter.h"
 #include "TinyFormatter.h"

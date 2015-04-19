@@ -48,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <numeric>
 
-#include "assimp/IOSystem.hpp"
-#include "assimp/scene.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
 #include <boost/foreach.hpp>
 
 #include "ParsingUtils.h"

@@ -38,9 +38,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "assimp/ai_assert.h"
-#include "assimp/scene.h"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/ai_assert.h>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include "ScenePreprocessor.h"
 

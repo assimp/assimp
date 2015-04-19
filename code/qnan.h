@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 #include <stdint.h>
 
-#include "assimp/defs.h"
+#include <assimp/defs.h>
 
 // ---------------------------------------------------------------------------
 /** Data structure to represent the bit pattern of a 32 Bit 

@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <iomanip>
 
-#include "assimp/IOSystem.hpp"
+#include <assimp/IOSystem.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // internal headers

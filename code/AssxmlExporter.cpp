@@ -44,10 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 #include <stdio.h>
 
-#include "assimp/version.h" /* Version.cpp ?? */
-#include "assimp/IOStream.hpp"
-#include "assimp/IOSystem.hpp"
-#include "assimp/Exporter.hpp"
+#include <assimp/version.h> /* Version.cpp ?? */
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
 
 #include "ProcessHelper.h"
 

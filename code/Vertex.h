@@ -50,9 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <functional>
 
-#include "assimp/vector3.h"
-#include "assimp/mesh.h"
-#include "assimp/ai_assert.h"
+#include <assimp/vector3.h>
+#include <assimp/mesh.h>
+#include <assimp/ai_assert.h>
 
 namespace Assimp	{
 	

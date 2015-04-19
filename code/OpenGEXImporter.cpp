@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include "assimp/scene.h"
+#include <assimp/scene.h>
 #include <openddlparser/OpenDDLParser.h>
 
 #include "DefaultIOSystem.h"

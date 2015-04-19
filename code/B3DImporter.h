@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
-#include "assimp/types.h"
-#include "assimp/mesh.h"
-#include "assimp/material.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/material.h>
 #include "BaseImporter.h"
 
 struct aiNodeAnim;

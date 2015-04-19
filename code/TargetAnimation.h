@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include "assimp/anim.h"
+#include <assimp/anim.h>
 
 namespace Assimp	{
 

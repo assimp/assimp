@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
 
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 // internal headers
 #include "TextureTransform.h"
 #include "MaterialSystem.h"

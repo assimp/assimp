@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <limits>
 
-#include "assimp/postprocess.h"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
 #include <boost/format.hpp>
 
 // internal headers of the post-processing framework

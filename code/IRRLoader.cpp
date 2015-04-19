@@ -47,12 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/mesh.h"
-#include "assimp/material.h"
-#include "assimp/scene.h"
-#include "assimp/IOSystem.hpp"
-#include "assimp/postprocess.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/mesh.h>
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/postprocess.h>
 // We need boost::common_factor to compute the lcm/gcd of a number
 #include <boost/math/common_factor_rt.hpp>
 #include <boost/scoped_ptr.hpp>

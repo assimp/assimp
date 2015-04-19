@@ -43,10 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <sstream>
 
-#include "assimp/types.h"
-#include "assimp/mesh.h"
-#include "assimp/scene.h"
-#include "assimp/ai_assert.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
 #include "StringComparison.h"
 
 //#include <windows.h>

@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 
-#include "assimp/mesh.h"
-#include "assimp/anim.h"
-#include "assimp/scene.h"
+#include <assimp/mesh.h>
+#include <assimp/anim.h>
+#include <assimp/scene.h>
 #include <boost/static_assert.hpp>
 // internal headers
 #include "assbin_chunks.h"

@@ -53,10 +53,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cctype>
 
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/IOSystem.hpp"
-#include "assimp/material.h"
-#include "assimp/scene.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/material.h>
+#include <assimp/scene.h>
 #include <boost/scoped_ptr.hpp>
 
 #include "ByteSwap.h"

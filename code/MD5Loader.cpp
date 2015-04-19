@@ -46,10 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/IOSystem.hpp"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // internal headers

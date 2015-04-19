@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_REMOVEVCPROCESS_H_INCLUDED
 #define AI_REMOVEVCPROCESS_H_INCLUDED
 
-#include "assimp/mesh.h"
+#include <assimp/mesh.h>
 
 #include "BaseProcess.h"
 

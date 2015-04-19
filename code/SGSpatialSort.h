@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <stdint.h>
 
-#include "assimp/types.h"
+#include <assimp/types.h>
 
 namespace Assimp	{
 

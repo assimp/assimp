@@ -3,7 +3,7 @@
 
 #include <ostream>
 
-#include "assimp/LogStream.hpp"
+#include <assimp/LogStream.hpp>
 
 namespace Assimp	{
 

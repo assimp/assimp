@@ -45,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctime>
 #include <set>
 
-#include "assimp/IOSystem.hpp"
-#include "assimp/Exporter.hpp"
-#include "assimp/scene.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
 #include <boost/scoped_ptr.hpp>
 
 #include "Bitmap.h"

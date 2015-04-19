@@ -46,10 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
 
-#include "assimp/IOSystem.hpp"
-#include "assimp/anim.h"
-#include "assimp/scene.h"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/IOSystem.hpp>
+#include <assimp/anim.h>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include <boost/scoped_ptr.hpp>
 // internal headers
 #include "TextureTransform.h"

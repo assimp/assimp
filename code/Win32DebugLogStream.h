@@ -5,7 +5,7 @@
 
 #include "windows.h"
 
-#include "assimp/LogStream.hpp"
+#include <assimp/LogStream.hpp>
 
 namespace Assimp	{
 

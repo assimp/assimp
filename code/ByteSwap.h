@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #endif
 
-#include "assimp/ai_assert.h"
-#include "assimp/types.h"
+#include <assimp/ai_assert.h>
+#include <assimp/types.h>
 
 namespace Assimp	{
 // --------------------------------------------------------------------------------------

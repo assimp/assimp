@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <list>
 
-#include "assimp/material.h"
+#include <assimp/material.h>
 
 #include "BaseImporter.h"
 #include "BaseProcess.h"

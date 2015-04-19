@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_LOGAUX_H
 #define INCLUDED_AI_LOGAUX_H
 
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 
 #include "TinyFormatter.h"
 #include "Exceptional.h"

@@ -47,11 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdint.h>
 
-#include "assimp/types.h"
-#include "assimp/mesh.h"
-#include "assimp/anim.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/anim.h>
 
-#include "assimp/Compiler/pushpack1.h"
+#include <assimp/Compiler/pushpack1.h>
 
 namespace Assimp	{
 namespace MD2	{
@@ -148,7 +148,7 @@ struct Skin
 	char name[AI_MD2_MAXQPATH];              /* texture file name */
 } PACK_STRUCT;
 
-#include "assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 
 // ---------------------------------------------------------------------------

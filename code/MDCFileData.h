@@ -51,10 +51,10 @@ http://themdcfile.planetwolfenstein.gamespy.com/MDC_File_Format.pdf
 
 #include <stdint.h>
 
-#include "assimp/types.h"
-#include "assimp/mesh.h"
-#include "assimp/anim.h"
-#include "assimp/Compiler/pushpack1.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/anim.h>
+#include <assimp/Compiler/pushpack1.h>
 
 namespace Assimp {
 namespace MDC {

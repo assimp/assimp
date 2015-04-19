@@ -49,10 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 // public Assimp headers
-#include "assimp/types.h"
-#include "assimp/texture.h"
-#include "assimp/anim.h"
-#include "assimp/material.h"
+#include <assimp/types.h>
+#include <assimp/texture.h>
+#include <assimp/anim.h>
+#include <assimp/material.h>
 
 // internal headers
 #include "BaseImporter.h"

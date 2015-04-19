@@ -50,9 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <vector>
 
-#include "assimp/ai_assert.h"
-#include "assimp/types.h"
-//#include "assimp/Compiler/pstdint.h"
+#include <assimp/ai_assert.h>
+#include <assimp/types.h>
+//#include <assimp/Compiler/pstdint.h>
 
 #include "Defines.h"
 

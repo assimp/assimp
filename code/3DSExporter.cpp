@@ -43,9 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
 
 #include <memory>
-#include "assimp/IOSystem.hpp"
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/Exporter.hpp"
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Exporter.hpp>
 #include "SceneCombiner.h"
 #include "SplitLargeMeshes.h"
 #include "StringComparison.h"

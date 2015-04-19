@@ -44,11 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <list>
 
-#include "assimp/cimport.h"
-#include "assimp/LogStream.hpp"
-#include "assimp/DefaultLogger.hpp"
-#include "assimp/importerdesc.h"
-#include "assimp/scene.h"
+#include <assimp/cimport.h>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
+#include <assimp/scene.h>
 
 #include "GenericProperty.h"
 #include "CInterfaceIOWrapper.h"

@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include "assimp/IOStream.hpp"
+#include <assimp/IOStream.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "ByteSwap.h"

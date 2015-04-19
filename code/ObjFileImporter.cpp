@@ -42,10 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/ai_assert.h"
-#include "assimp/DefaultLogger.hpp"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
+#include <assimp/DefaultLogger.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include "DefaultIOSystem.h"

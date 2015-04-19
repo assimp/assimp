@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <set>
 
-#include "assimp/types.h"
+#include <assimp/types.h>
 
 #include "BaseProcess.h"
 #include "ProcessHelper.h"

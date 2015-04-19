@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stddef.h>
 
-#include "assimp/mesh.h"
+#include <assimp/mesh.h>
 
 #include "StandardShapes.h"
 #include "StringComparison.h"

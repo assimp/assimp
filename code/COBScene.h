@@ -44,11 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_COB_SCENE_H
 #define INCLUDED_AI_COB_SCENE_H
 
-#include <boost/shared_ptr.hpp>
 #include <deque>
 
+#include <assimp/material.h>
+#include <boost/shared_ptr.hpp>
+
 #include "BaseImporter.h"
-#include "./../include/assimp/material.h"
 
 namespace Assimp	{
 	namespace COB {

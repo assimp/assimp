@@ -44,8 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp	{
 namespace HMP	{
 
-#include "./../include/assimp/Compiler/pushpack1.h"
 #include <stdint.h>
+
+#include <assimp/Compiler/pushpack1.h>
 
 // to make it easier for us, we test the magic word against both "endianesses"
 #define AI_HMP_MAGIC_NUMBER_BE_4	AI_MAKE_MAGIC("HMP4")
@@ -129,7 +130,7 @@ struct Vertex_HMP7
 	int8_t normal_x,normal_y;
 } PACK_STRUCT;
 
-#include "./../include/assimp/Compiler/poppack1.h"
+#include <assimp/Compiler/poppack1.h>
 
 } //! namespace HMP
 } //! namespace Assimp

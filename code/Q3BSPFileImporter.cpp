@@ -40,6 +40,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
+#include <vector>
+#include <sstream>
+
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
+#include "StringComparison.h"
+
 //#include <windows.h>
 #include "DefaultIOSystem.h"
 #include "Q3BSPFileImporter.h"
@@ -50,16 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #	include <zlib.h>
 #else
-#	include "../contrib/zlib/zlib.h"
+#	include "contrib/zlib/zlib.h"
 #endif
-
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/ai_assert.h"
-#include <vector>
-#include <sstream>
-#include "StringComparison.h"
 
 static const aiImporterDesc desc = {
 	"Quake III BSP Importer",

@@ -43,9 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_FINDINVALIDDATA_H_INC
 #define AI_FINDINVALIDDATA_H_INC
 
+#include <assimp/types.h>
+#include <assimp/anim.h>
+
 #include "BaseProcess.h"
-#include "../include/assimp/types.h"
-#include "../include/assimp/anim.h"
 
 struct aiMesh;
 class FindInvalidDataProcessTest;

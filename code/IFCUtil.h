@@ -45,12 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_IFCUTIL_H
 #define INCLUDED_IFCUTIL_H
 
+#include <assimp/mesh.h>
+#include <assimp/material.h>
+
 #include "IFCReaderGen.h"
 #include "IFCLoader.h"
 #include "STEPFile.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/material.h"
-
 
 struct aiNode;
 

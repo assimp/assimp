@@ -48,13 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 // internal headers
-#include "3DSLoader.h"
-#include "Macros.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
 #include "StringComparison.h"
+#include "Macros.h"
+#include "3DSLoader.h"
 
 using namespace Assimp;
 

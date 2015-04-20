@@ -43,8 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_GENVERTEXNORMALPROCESS_H_INC
 #define AI_GENVERTEXNORMALPROCESS_H_INC
 
+#include <assimp/mesh.h>
+
 #include "BaseProcess.h"
-#include "../include/assimp/mesh.h"
 
 class GenNormalsTest;
 

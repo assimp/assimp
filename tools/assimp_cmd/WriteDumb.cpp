@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "Main.h"
-#include "../code/ProcessHelper.h"
+#include "ProcessHelper.h"
 
 const char* AICMD_MSG_DUMP_HELP = 
 "assimp dump <model> [<out>] [-b] [-s] [-z] [common parameters]\n"
@@ -57,7 +57,7 @@ const char* AICMD_MSG_DUMP_HELP =
 "\t -cfull    Fires almost all post processing steps \n"
 ;
 
-#include "../../code/assbin_chunks.h"
+#include "assbin_chunks.h"
 #include <boost/static_assert.hpp>
 
 FILE* out = NULL;

@@ -45,10 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_3DSEXPORTER_H_INC
 
 #include <map>
+
+#include <assimp/material.h>
 #include <boost/shared_ptr.hpp>
 
 #include "StreamWriter.h"
-#include "./../include/assimp/material.h"
 
 struct aiScene;
 struct aiNode;

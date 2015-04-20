@@ -42,14 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_BASEIMPORTER_H
 #define INCLUDED_AI_BASEIMPORTER_H
 
-#include "Exceptional.h"
-
 #include <string>
 #include <map>
 #include <vector>
 #include <set>
-#include "../include/assimp/types.h"
-#include "../include/assimp/ProgressHandler.hpp"
+
+#include <assimp/types.h>
+#include <assimp/ProgressHandler.hpp>
+
+#include "Exceptional.h"
 
 struct aiScene;
 

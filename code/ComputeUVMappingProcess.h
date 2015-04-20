@@ -43,10 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COMPUTEUVMAPPING_H_INC
 #define AI_COMPUTEUVMAPPING_H_INC
 
+#include <assimp/mesh.h>
+#include <assimp/material.h>
+#include <assimp/types.h>
+
 #include "BaseProcess.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/types.h"
 
 class ComputeUVMappingTest;
 

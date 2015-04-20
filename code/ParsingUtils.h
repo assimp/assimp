@@ -45,8 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PARSING_UTILS_H_INC
 #define AI_PARSING_UTILS_H_INC
 
+#include <assimp/defs.h>
+
 #include "StringComparison.h"
-#include "../include/assimp/defs.h"
 
 namespace Assimp {
 

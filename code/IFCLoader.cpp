@@ -47,21 +47,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iterator>
 #include <limits>
+
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
-#	include "../contrib/unzip/unzip.h"
+#	include "unzip.h"
 #endif
+
+#include "StreamReader.h"
+#include "MemoryIOWrapper.h"
 
 #include "IFCLoader.h"
 #include "STEPFileReader.h"
 
 #include "IFCUtil.h"
-
-#include "StreamReader.h"
-#include "MemoryIOWrapper.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/Importer.hpp"
 
 
 namespace Assimp {

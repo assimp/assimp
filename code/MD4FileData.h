@@ -46,19 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <sstream>
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/anim.h"
-
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
-#elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
-#else
-#	error Compiler not supported
-#endif
-
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/anim.h>
+#include <assimp/Compiler/pushpack1.h>
 
 namespace Assimp
 {
@@ -204,13 +195,7 @@ struct Frame
 	BoneFrame bones[1]; 
 } PACK_STRUCT; 
 
-
-// reset packing to the original value
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
-#endif
-#undef PACK_STRUCT
-
+#include <assimp/Compiler/poppack1.h>
 
 };
 };

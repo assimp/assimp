@@ -42,16 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_PLY_EXPORTER)
 
-#include "PlyExporter.h"
-#include <boost/scoped_ptr.hpp>
 #include <cmath>
-#include "Exceptional.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/version.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
-#include "qnan.h"
 
+#include <assimp/scene.h>
+#include <assimp/version.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
+#include <boost/scoped_ptr.hpp>
+
+#include "qnan.h"
+#include "Exceptional.h"
+#include "PlyExporter.h"
 
 using namespace Assimp;
 namespace Assimp	{

@@ -44,10 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <utility>
-#include "BaseProcess.h"
 
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+
+#include "BaseProcess.h"
 
 class DeboneTest;
 

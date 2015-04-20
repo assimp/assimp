@@ -46,16 +46,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
 
-#include "DXFLoader.h"
+#include <numeric>
+
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <boost/foreach.hpp>
+
 #include "ParsingUtils.h"
 #include "ConvertToLHProcess.h"
 #include "fast_atof.h"
-
 #include "DXFHelper.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include <boost/foreach.hpp>
-#include <numeric>
+#include "DXFLoader.h"
 
 using namespace Assimp;
 

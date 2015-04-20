@@ -44,14 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_XGLLOADER_H_INCLUDED
 #define AI_XGLLOADER_H_INCLUDED
 
-#include "BaseImporter.h"
-#include "irrXMLWrapper.h"
-#include "LogAux.h"
+#include <assimp/material.h>
+#include <assimp/Importer.hpp>
+#include <assimp/mesh.h>
+#include <assimp/light.h>
 #include <boost/foreach.hpp>
-#include "../include/assimp/material.h"
-#include "../include/assimp/Importer.hpp"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/light.h"
+
+#include "BaseImporter.h"
+#include "LogAux.h"
+#include "irrXMLWrapper.h"
 
 struct aiNode;
 

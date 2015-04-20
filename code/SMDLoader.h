@@ -45,19 +45,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SMDLOADER_H_INCLUDED
 #define AI_SMDLOADER_H_INCLUDED
 
+// STL headers
+#include <vector>
+
+// public Assimp headers
+#include <assimp/types.h>
+#include <assimp/texture.h>
+#include <assimp/anim.h>
+#include <assimp/material.h>
+
 // internal headers
 #include "BaseImporter.h"
 #include "ParsingUtils.h"
 
-// public Assimp headers
-#include "../include/assimp/types.h"
-#include "../include/assimp/texture.h"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/material.h"
 struct aiNode;
-
-// STL headers
-#include <vector>
 
 namespace Assimp	{
 

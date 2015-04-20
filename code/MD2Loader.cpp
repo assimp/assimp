@@ -43,15 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
 
 /** @file Implementation of the MD2 importer class */
-#include "MD2Loader.h"
-#include "ByteSwap.h"
-#include "MD2NormalTable.h" // shouldn't be included by other units
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/Importer.hpp"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
 #include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
 
+#include "ByteSwap.h"
+#include "MD2Loader.h"
+#include "MD2NormalTable.h" // shouldn't be included by other units
 
 
 using namespace Assimp;

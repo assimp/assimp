@@ -806,6 +806,9 @@ else (UNZIP_FOUND)
 	INCLUDE_DIRECTORIES("../contrib/unzip")
 endif (UNZIP_FOUND)
 
+# add contrib folder to the includes (temporary for now)
+	INCLUDE_DIRECTORIES("../contrib")
+
 INSTALL( TARGETS assimp
          LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
          ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}

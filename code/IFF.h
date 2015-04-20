@@ -1,5 +1,3 @@
-
-
 // Definitions for the Interchange File Format (IFF)
 // Alexander Gessler, 2006
 // Adapted to Assimp August 2008
@@ -7,7 +5,7 @@
 #ifndef AI_IFF_H_INCLUDED
 #define AI_IFF_H_INCLUDED
 
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 
 namespace Assimp	{
 namespace IFF		{
@@ -81,12 +79,12 @@ inline SubChunkHeader LoadSubChunk(uint8_t*& outFile)
 
 /////////////////////////////////////////////////////////////////////////////////
 //! Read the file header and return the type of the file and its size
-//! @param outFile Pointer to the file data. The buffer must at 
+//! @param outFile Pointer to the file data. The buffer must at
 //!   least be 12 bytes large.
 //! @param fileType Receives the type of the file
 //! @return 0 if everything was OK, otherwise an error message
 /////////////////////////////////////////////////////////////////////////////////
-inline const char* ReadHeader(uint8_t* outFile, uint32_t& fileType) 
+inline const char* ReadHeader(uint8_t* outFile, uint32_t& fileType)
 {
 	ChunkHeader head = LoadChunk(outFile);
 	if(AI_IFF_FOURCC_FORM != head.type)

@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 #include "../include/assimp/DefaultLogger.hpp"
 
 

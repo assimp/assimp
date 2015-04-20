@@ -42,12 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
-#include <vector>
-#include <list>
-
+#include "BaseImporter.h"
 #include <assimp/mesh.h>
 
-#include "BaseImporter.h"
+#include <vector>
+#include <list>
 
 namespace ODDLParser {
     class DDLNode;

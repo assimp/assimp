@@ -42,8 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Plain-C API
  */
 
-#include <list>
-
 #include <assimp/cimport.h>
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
@@ -57,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include "ScenePrivate.h"
 #include "BaseImporter.h"
+#include <list>
 
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_SINGLETHREADED

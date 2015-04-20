@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>

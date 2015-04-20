@@ -39,14 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
-#include <vector>
-
-#include <assimp/scene.h>
-#include <openddlparser/OpenDDLParser.h>
-
+#include "OpenGEXImporter.h"
 #include "DefaultIOSystem.h"
 #include "MakeVerboseFormat.h"
-#include "OpenGEXImporter.h"
+
+#include <openddlparser/OpenDDLParser.h>
+#include <assimp/scene.h>
+
+#include <vector>
 
 static const aiImporterDesc desc = {
     "Open Game Engine Exchange",
@@ -787,11 +787,7 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
     }
     pScene->mNumMeshes = m_meshCache.size();
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
-    size_t i( 0 );
-    for( std::vector<aiMesh*>::iterator it = m_meshCache.begin(); it != m_meshCache.end(); it++ ) {
-        pScene->mMeshes[ i ] = *it;
-        i++;
-    }
+    std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
 }
 
 //------------------------------------------------------------------------------------------------

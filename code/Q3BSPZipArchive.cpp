@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Q3BSPZipArchive.h"
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include "../include/assimp/ai_assert.h"
 
 

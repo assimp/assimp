@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/Exporter.hpp"
 #include <boost/scoped_ptr.hpp>
 #include "Exceptional.h"
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 
 using namespace Assimp;
 namespace Assimp	{

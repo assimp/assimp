@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // internal headers
 #include "LWOLoader.h"
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 #include <boost/static_assert.hpp>
 
 

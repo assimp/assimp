@@ -98,7 +98,7 @@ SET( Common_SRCS
 	ScenePrivate.h
 	PostStepRegistry.cpp
 	ImporterRegistry.cpp
-	ByteSwap.h
+	ByteSwapper.h
 	DefaultProgressHandler.h
 	DefaultIOStream.cpp
 	DefaultIOStream.h

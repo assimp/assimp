@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
+#include <sstream>
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"

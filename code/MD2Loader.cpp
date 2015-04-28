@@ -39,13 +39,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
 
 /** @file Implementation of the MD2 importer class */
 #include "MD2Loader.h"
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 #include "MD2NormalTable.h" // shouldn't be included by other units
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/Importer.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+
+
 
 using namespace Assimp;
 using namespace Assimp::MD2;

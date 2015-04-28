@@ -48,16 +48,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *     http://www.heppler.com/shader/shader/
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
 
 #include "MD3Loader.h"
-#include "ByteSwap.h"
 #include "SceneCombiner.h"
 #include "GenericProperty.h"
 #include "RemoveComments.h"
 #include "ParsingUtils.h"
 #include "Importer.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/material.h"
+#include "../include/assimp/scene.h"
+#include <cctype>
+
+
 
 using namespace Assimp;
 

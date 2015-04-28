@@ -43,11 +43,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of BaseImporter 
  */
 
-#include "AssimpPCH.h"
 #include "BaseImporter.h"
 #include "FileSystemFilter.h"
-
 #include "Importer.h"
+#include "ByteSwapper.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/Importer.hpp"
+#include "../include/assimp/postprocess.h"
+#include <ios>
+#include <list>
+#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
+#include <sstream>
+#include <cctype>
+
 
 using namespace Assimp;
 

@@ -41,7 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file A helper class that processes texture transformations */
 
 
-#include "AssimpPCH.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
+
 #include "TextureTransform.h"
 
 using namespace Assimp;

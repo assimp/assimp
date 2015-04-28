@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
  * @file  MDLFileData.h
- * @brief Definition of in-memory structures for the MDL file format. 
+ * @brief Definition of in-memory structures for the MDL file format.
  *
  * The specification has been taken from various sources on the internet.
  * - http://tfc.duke.free.fr/coding/mdl-specs-en.html
@@ -52,7 +52,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MDLFILEHELPER_H_INC
 #define AI_MDLFILEHELPER_H_INC
 
+#include "ByteSwapper.h"
+#include "./../include/assimp/anim.h"
+#include "./../include/assimp/mesh.h"
 #include "./../include/assimp/Compiler/pushpack1.h"
+#include <stdint.h>
+#include <vector>
+
+struct aiMaterial;
 
 namespace Assimp	{
 namespace MDL	{
@@ -92,13 +99,13 @@ namespace MDL	{
 #	define AI_MDL_MAX_FRAMES			256
 #endif
 #if (!defined AI_MDL_MAX_UVS)
-#	define AI_MDL_MAX_UVS				1024	
+#	define AI_MDL_MAX_UVS				1024
 #endif
 #if (!defined AI_MDL_MAX_VERTS)
 #	define AI_MDL_MAX_VERTS				1024
 #endif
 #if (!defined AI_MDL_MAX_TRIANGLES)
-#	define AI_MDL_MAX_TRIANGLES			2048	
+#	define AI_MDL_MAX_TRIANGLES			2048
 #endif
 
 // material key that is set for dummy materials that are
@@ -114,47 +121,47 @@ namespace MDL	{
 struct Header
 {
 	//! magic number: "IDPO"
-	uint32_t ident;          
+	uint32_t ident;
 
 	//! version number: 6
-	int32_t version;          
+	int32_t version;
 
 	//! scale factors for each axis
-	aiVector3D scale;				
+	aiVector3D scale;
 
 	//! translation factors for each axis
-	aiVector3D translate;	
+	aiVector3D translate;
 
 	//! bounding radius of the mesh
 	float boundingradius;
-	 
+
 	//! Position of the viewer's exe. Ignored
 	aiVector3D vEyePos;
 
 	//! Number of textures
-	int32_t num_skins;       
+	int32_t num_skins;
 
 	//! Texture width in pixels
 	int32_t skinwidth;
 
 	//! Texture height in pixels
-	int32_t skinheight;       
+	int32_t skinheight;
 
 	//! Number of vertices contained in the file
-	int32_t num_verts;       
+	int32_t num_verts;
 
 	//! Number of triangles contained in the file
-	int32_t num_tris;         
+	int32_t num_tris;
 
 	//! Number of frames contained in the file
-	int32_t num_frames;      
+	int32_t num_frames;
 
 	//! 0 = synchron, 1 = random . Ignored
 	//! (MDLn formats: number of texture coordinates)
-	int32_t synctype;         
+	int32_t synctype;
 
 	//! State flag
-	int32_t flags;     
+	int32_t flags;
 
 	//! Could be the total size of the file (and not a float)
 	float size;
@@ -168,10 +175,10 @@ struct Header
 struct Header_MDL7
 {
 	//! magic number: "MDL7"
-	char	ident[4];		
+	char	ident[4];
 
 	//! Version number. Ignored
-	int32_t	version;		
+	int32_t	version;
 
 	//! Number of bones in file
 	uint32_t	bones_num;
@@ -180,13 +187,13 @@ struct Header_MDL7
 	uint32_t	groups_num;
 
 	//! Size of data in the file
-	uint32_t	data_size;	
+	uint32_t	data_size;
 
 	//! Ignored. Used to store entity specific information
-	int32_t	entlump_size;	
+	int32_t	entlump_size;
 
 	//! Ignored. Used to store MED related data
-	int32_t	medlump_size;	
+	int32_t	medlump_size;
 
 	//! Size of the Bone_MDL7 data structure used in the file
 	uint16_t bone_stc_size;
@@ -230,7 +237,7 @@ struct Bone_MDL7
 	//! Index of the parent bone of *this* bone. 0xffff means:
 	//! "hey, I have no parent, I'm an orphan"
 	uint16_t parent_index;
-	uint8_t _unused_[2]; 
+	uint8_t _unused_[2];
 
 	//! Relative position of the bone (relative to the
 	//! parent bone)
@@ -263,21 +270,21 @@ struct Bone_MDL7
 struct Group_MDL7
 {
 	//! = '1' -> triangle based Mesh
-	unsigned char	typ;		
+	unsigned char	typ;
 
 	int8_t	deformers;
 	int8_t	max_weights;
 	int8_t	_unused_;
 
 	//! size of data for this group in bytes ( MD7_GROUP stc. included).
-	int32_t	groupdata_size; 
+	int32_t	groupdata_size;
 	char	name[AI_MDL7_MAX_GROUPNAMESIZE];
 
 	//! Number of skins
 	int32_t	numskins;
 
 	//! Number of texture coordinates
-	int32_t	num_stpts;	
+	int32_t	num_stpts;
 
 	//! Number of triangles
 	int32_t	numtris;
@@ -320,7 +327,7 @@ struct Deformer_MDL7
 struct DeformerElement_MDL7
 {
 	//! bei deformer_typ==0 (==bones) element_index == bone index
-	int32_t	element_index;		
+	int32_t	element_index;
 	char	element_name[AI_MDL7_MAX_BONENAMESIZE];
 	int32_t	weights;
 } PACK_STRUCT;
@@ -333,7 +340,7 @@ struct DeformerElement_MDL7
 struct DeformerWeight_MDL7
 {
 	//! for deformer_typ==0 (==bones) index == vertex index
-	int32_t	index;				
+	int32_t	index;
 	float	weight;
 } PACK_STRUCT;
 
@@ -357,19 +364,19 @@ struct ColorValue_MDL7
 struct Material_MDL7
 {
 	//! Diffuse base color of the material
-	ColorValue_MDL7	Diffuse;        
+	ColorValue_MDL7	Diffuse;
 
 	//! Ambient base color of the material
-    ColorValue_MDL7	Ambient;  
+    ColorValue_MDL7	Ambient;
 
 	//! Specular base color of the material
-    ColorValue_MDL7	Specular;  
+    ColorValue_MDL7	Specular;
 
 	//! Emissive base color of the material
-    ColorValue_MDL7	Emissive; 
+    ColorValue_MDL7	Emissive;
 
 	//! Phong power
-    float			Power;         
+    float			Power;
 } PACK_STRUCT;
 
 
@@ -384,16 +391,16 @@ struct Skin
 	//! fore the size of the data to skip:
 	//-------------------------------------------------------
 	//! 2 for 565 RGB,
-	//! 3 for 4444 ARGB, 
-	//! 10 for 565 mipmapped, 
+	//! 3 for 4444 ARGB,
+	//! 10 for 565 mipmapped,
 	//! 11 for 4444 mipmapped (bpp = 2),
-	//! 12 for 888 RGB mipmapped (bpp = 3), 
+	//! 12 for 888 RGB mipmapped (bpp = 3),
 	//! 13 for 8888 ARGB mipmapped (bpp = 4)
 	//-------------------------------------------------------
-	int32_t group;      
+	int32_t group;
 
 	//! Texture data
-	uint8_t *data;  
+	uint8_t *data;
 } PACK_STRUCT;
 
 
@@ -404,8 +411,8 @@ struct Skin
  */
 struct Skin_MDL5
 {
-	int32_t size, width, height;      
-	uint8_t *data;  
+	int32_t size, width, height;
+	uint8_t *data;
 } PACK_STRUCT;
 
 // maximum length of texture file name
@@ -423,7 +430,7 @@ struct Skin_MDL7
 	int8_t			_unused_[3];
 	int32_t			width;
 	int32_t			height;
-	char			texture_name[AI_MDL7_MAX_TEXNAMESIZE];	
+	char			texture_name[AI_MDL7_MAX_TEXNAMESIZE];
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -456,16 +463,16 @@ struct ARGB4
 struct GroupSkin
 {
 	//! 0 = single (Skin), 1 = group (GroupSkin)
-    int32_t group;     
+    int32_t group;
 
 	//! Number of images
-	int32_t nb;       
+	int32_t nb;
 
 	//! Time for each image
-    float *time;   
+    float *time;
 
 	//! Data of each image
-	uint8_t **data;  
+	uint8_t **data;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -491,10 +498,10 @@ struct TexCoord
 struct TexCoord_MDL3
 {
 	//! position, horizontally in range 0..skinwidth-1
-	int16_t u; 
+	int16_t u;
 
 	//! position, vertically in range 0..skinheight-1
-	int16_t v; 
+	int16_t v;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -504,10 +511,10 @@ struct TexCoord_MDL3
 struct TexCoord_MDL7
 {
 	//! position, horizontally in range 0..1
-	float u; 
+	float u;
 
 	//! position, vertically in range 0..1
-	float v; 
+	float v;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -520,10 +527,10 @@ struct TexCoord_MDL7
 struct SkinSet_MDL7
 {
 	//! Index into the UV coordinate list
-	uint16_t	st_index[3]; // size 6	
+	uint16_t	st_index[3]; // size 6
 
 	//! Material index
-	int32_t		material;	 // size 4				
+	int32_t		material;	 // size 4
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -533,10 +540,10 @@ struct SkinSet_MDL7
 struct Triangle
 {
 	//! 0 = backface, 1 = frontface
-	int32_t facesfront;  
+	int32_t facesfront;
 
 	//! Vertex indices
-	int32_t vertex[3];   
+	int32_t vertex[3];
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -549,7 +556,7 @@ struct Triangle_MDL3
 	uint16_t index_xyz[3];
 
 	//! Index of 3 skin vertices in range 0..numskinverts
-	uint16_t index_uv[3]; 
+	uint16_t index_uv[3];
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -563,17 +570,17 @@ struct Triangle_MDL7
 
 	//! Two skinsets. The second will be used for multi-texturing
 	SkinSet_MDL7  skinsets[2];
-} PACK_STRUCT; 
+} PACK_STRUCT;
 
 #if (!defined AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV)
 #	define AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV (6+sizeof(SkinSet_MDL7)-sizeof(uint32_t))
-#endif 
+#endif
 #if (!defined AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV_WITH_MATINDEX)
 #	define AI_MDL7_TRIANGLE_STD_SIZE_ONE_UV_WITH_MATINDEX (6+sizeof(SkinSet_MDL7))
-#endif 
+#endif
 #if (!defined AI_MDL7_TRIANGLE_STD_SIZE_TWO_UV)
 #	define AI_MDL7_TRIANGLE_STD_SIZE_TWO_UV (6+2*sizeof(SkinSet_MDL7))
-#endif 
+#endif
 
 // Helper constants for Triangle::facesfront
 #if (!defined AI_MDL_BACKFACE)
@@ -627,10 +634,10 @@ struct Vertex_MDL7
 struct BoneTransform_MDL7
 {
 	//! 4*3
-	float	m [4*4];				
+	float	m [4*4];
 
 	//! the index of this vertex, 0.. header::bones_num - 1
-	uint16_t bone_index;		
+	uint16_t bone_index;
 
 	//! I HATE 3DGS AND THE SILLY DEVELOPER WHO DESIGNED
 	//! THIS STUPID FILE FORMAT!
@@ -648,8 +655,8 @@ struct BoneTransform_MDL7
 struct Frame_MDL7
 {
 	char	frame_name[AI_MDL7_MAX_FRAMENAMESIZE];
-	uint32_t	vertices_count;			
-	uint32_t	transmatrix_count;		
+	uint32_t	vertices_count;
+	uint32_t	transmatrix_count;
 };
 
 
@@ -660,16 +667,16 @@ struct Frame_MDL7
 struct SimpleFrame
 {
 	//! Minimum vertex of the bounding box
-	Vertex bboxmin; 
+	Vertex bboxmin;
 
 	//! Maximum vertex of the bounding box
-	Vertex bboxmax; 
+	Vertex bboxmax;
 
 	//! Name of the frame
 	char name[16];
 
 	//! Vertex list of the frame
-	Vertex *verts; 
+	Vertex *verts;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -679,10 +686,10 @@ struct SimpleFrame
 struct Frame
 {
 	//! 0 = simple frame, !0 = group frame
-	int32_t type;       
+	int32_t type;
 
 	//! Frame data
-	SimpleFrame frame;  	      
+	SimpleFrame frame;
 } PACK_STRUCT;
 
 
@@ -690,16 +697,16 @@ struct Frame
 struct SimpleFrame_MDLn_SP
 {
 	//! Minimum vertex of the bounding box
-	Vertex_MDL4 bboxmin; 
+	Vertex_MDL4 bboxmin;
 
 	//! Maximum vertex of the bounding box
-	Vertex_MDL4 bboxmax; 
+	Vertex_MDL4 bboxmax;
 
 	//! Name of the frame
 	char name[16];
 
 	//! Vertex list of the frame
-	Vertex_MDL4 *verts; 
+	Vertex_MDL4 *verts;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------------
@@ -709,19 +716,19 @@ struct SimpleFrame_MDLn_SP
 struct GroupFrame
 {
 	//! 0 = simple frame, !0 = group frame
-	int32_t type;                         
+	int32_t type;
 
 	//! Minimum vertex for all single frames
-	Vertex min;         
+	Vertex min;
 
 	//! Maximum vertex for all single frames
-	Vertex max;         
+	Vertex max;
 
 	//! Time for all single frames
-	float *time;                  
+	float *time;
 
 	//! List of single frames
-	SimpleFrame *frames; 
+	SimpleFrame *frames;
 } PACK_STRUCT;
 
 #include "./../include/assimp/Compiler/poppack1.h"
@@ -745,7 +752,7 @@ struct IntFace_MDL7
 
 	//! Material index (maximally two channels, which are joined later)
 	unsigned int iMatIndex[2];
-}; 
+};
 
 // -------------------------------------------------------------------------------------
 /** \struct IntMaterial_MDL7
@@ -805,7 +812,7 @@ struct IntBone_MDL7 : aiBone
 struct IntFrameInfo_MDL7
 {
 	//! Construction from an existing frame header
-	IntFrameInfo_MDL7(BE_NCONST MDL::Frame_MDL7* _pcFrame,unsigned int _iIndex) 
+	IntFrameInfo_MDL7(BE_NCONST MDL::Frame_MDL7* _pcFrame,unsigned int _iIndex)
 		: iIndex(_iIndex)
 		, pcFrame(_pcFrame)
 	{}
@@ -814,7 +821,7 @@ struct IntFrameInfo_MDL7
 	unsigned int iIndex;
 
 	//! Points to the header of the frame
-	BE_NCONST MDL::Frame_MDL7*	pcFrame; 
+	BE_NCONST MDL::Frame_MDL7*	pcFrame;
 };
 
 // -------------------------------------------------------------------------------------
@@ -822,7 +829,7 @@ struct IntFrameInfo_MDL7
 struct IntGroupInfo_MDL7
 {
 	//! Default constructor
-	IntGroupInfo_MDL7()		
+	IntGroupInfo_MDL7()
 		:	iIndex(0)
 		,	pcGroup(NULL)
 		,	pcGroupUVs(NULL)
@@ -840,13 +847,13 @@ struct IntGroupInfo_MDL7
 	unsigned int iIndex;
 
 	//! Points to the header of the group
-	BE_NCONST MDL::Group_MDL7*		pcGroup; 
+	BE_NCONST MDL::Group_MDL7*		pcGroup;
 
 	//! Points to the beginning of the uv coordinate section
-	BE_NCONST MDL::TexCoord_MDL7*	pcGroupUVs;		
+	BE_NCONST MDL::TexCoord_MDL7*	pcGroupUVs;
 
 	//! Points to the beginning of the triangle section
-	MDL::Triangle_MDL7*	pcGroupTris;		
+	MDL::Triangle_MDL7*	pcGroupTris;
 
 	//! Points to the beginning of the vertex section
 	BE_NCONST MDL::Vertex_MDL7*		pcGroupVerts;
@@ -861,16 +868,16 @@ struct IntGroupData_MDL7
 	{}
 
 	//! Array of faces that belong to the group
-	MDL::IntFace_MDL7* pcFaces;		
+	MDL::IntFace_MDL7* pcFaces;
 
 	//! Array of vertex positions
-	std::vector<aiVector3D>		vPositions;			
+	std::vector<aiVector3D>		vPositions;
 
 	//! Array of vertex normals
-	std::vector<aiVector3D>		vNormals;	
+	std::vector<aiVector3D>		vNormals;
 
 	//! Array of bones indices
-	std::vector<unsigned int>	aiBones;	
+	std::vector<unsigned int>	aiBones;
 
 	//! First UV coordinate set
 	std::vector<aiVector3D>		vTextureCoords1;
@@ -888,7 +895,7 @@ struct IntGroupData_MDL7
 struct IntSharedData_MDL7
 {
 	//! Default constructor
-	IntSharedData_MDL7() 
+	IntSharedData_MDL7()
 	{
 		abNeedMaterials.reserve(10);
 	}
@@ -922,7 +929,7 @@ struct IntSharedData_MDL7
 //! Contains input data for GenerateOutputMeshes_3DGS_MDL7
 struct IntSplitGroupData_MDL7
 {
-	//! Construction from a given shared data set 
+	//! Construction from a given shared data set
 	IntSplitGroupData_MDL7(IntSharedData_MDL7& _shared,
 		std::vector<aiMesh*>& _avOutList)
 
@@ -948,7 +955,7 @@ struct IntSplitGroupData_MDL7
 	//! Shared data for all groups of the model
 	IntSharedData_MDL7& shared;
 
-	//! List of meshes 
+	//! List of meshes
 	std::vector<aiMesh*>& avOutList;
 };
 

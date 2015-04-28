@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the XGL/ZGL importer class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 
 #include "XGLLoader.h"
@@ -50,6 +50,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/scene.h"
+#include <cctype>
+
+
 
 using namespace Assimp;
 using namespace irr;
@@ -87,7 +93,7 @@ static const aiImporterDesc desc = {
 	"",
 	"",
 	"",
-	aiImporterFlags_SupportTextFlavour,
+	aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportCompressedFlavour,
 	0,
 	0,
 	0,
@@ -430,6 +436,12 @@ aiNode* XGLImporter::ReadObject(TempScope& scope, bool skipFirst, const char* cl
 		}
 		throw;
 	}
+
+	// FIX: since we used std::multimap<> to keep meshes by id, mesh order now depends on the behaviour
+	// of the multimap implementation with respect to the ordering of entries with same values.
+	// C++11 gives the guarantee that it uses insertion order, before it is implementation-specific.
+	// Sort by material id to always guarantee a deterministic result.
+	std::sort(meshes.begin(), meshes.end(), SortMeshByMaterialId(scope));
 
 	// link meshes to node
 	nd->mNumMeshes = static_cast<unsigned int>(meshes.size());

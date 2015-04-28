@@ -43,12 +43,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Collada parser helper
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/foreach.hpp>
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/light.h"
+
 
 using namespace Assimp;
 using namespace Assimp::Collada;

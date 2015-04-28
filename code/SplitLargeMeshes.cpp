@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the SplitLargeMeshes postprocessing step
 */
 
-#include "AssimpPCH.h"
+
 
 // internal headers of the post-processing framework
 #include "SplitLargeMeshes.h"

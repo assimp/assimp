@@ -44,13 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *    the data structure returned by Assimp.
  */
 
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "ValidateDataStructure.h"
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "ProcessHelper.h"
+#include <boost/scoped_array.hpp>
 
 // CRT headers
 #include <stdarg.h>

@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the utility class SceneAnimator
  */
 
-#include "stdafx.h"
 #include "assimp_view.h"
 
 using namespace AssimpView;

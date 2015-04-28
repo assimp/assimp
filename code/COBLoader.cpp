@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  COBLoader.cpp
  *  @brief Implementation of the TrueSpace COB/SCN importer class.
  */
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #include "COBLoader.h"
@@ -53,6 +53,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LineSplitter.h"
 #include "TinyFormatter.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/foreach.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+
 
 using namespace Assimp;
 using namespace Assimp::COB;
@@ -148,13 +154,17 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	}
 
 	DefaultLogger::get()->info("File format tag: "+std::string(head+9,6));
-	void (COBImporter::* load)(Scene&,StreamReaderLE*)= head[15]=='A'?&COBImporter::ReadAsciiFile:&COBImporter::ReadBinaryFile;
 	if (head[16]!='L') {
 		ThrowException("File is big-endian, which is not supported");
 	}
 	
 	// load data into intermediate structures
-	(this->*load)(scene,stream.get());
+	if (head[15]=='A') {
+		ReadAsciiFile(scene, stream.get());
+	}
+	else {
+		ReadBinaryFile(scene, stream.get());
+	}
 	if(scene.nodes.empty()) {
 		ThrowException("No nodes loaded");
 	}

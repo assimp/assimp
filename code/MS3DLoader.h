@@ -45,6 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MS3DLOADER_H_INCLUDED
 
 #include "BaseImporter.h"
+#include "StreamReader.h"
+struct aiNode;
+
 namespace Assimp	{
 
 // ----------------------------------------------------------------------------------------------

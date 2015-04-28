@@ -41,9 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file GenUVCoords step */
 
 
-#include "AssimpPCH.h"
 #include "ComputeUVMappingProcess.h"
 #include "ProcessHelper.h"
+#include "Exceptional.h"
 
 using namespace Assimp;
 

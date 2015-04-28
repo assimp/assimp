@@ -39,13 +39,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "stdafx.h"
 #include "assimp_view.h"
 
 #include "richedit.h"
 
 namespace AssimpView {
-
 
 //-------------------------------------------------------------------------------
 // Message procedure for the help dialog

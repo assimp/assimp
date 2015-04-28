@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,37 +23,38 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
-/** @file Helper class tp perform various byte oder swappings 
+/** @file Helper class tp perform various byte oder swappings
    (e.g. little to big endian) */
-#ifndef AI_BYTESWAP_H_INC
-#define AI_BYTESWAP_H_INC
+#ifndef AI_BYTESWAPPER_H_INC
+#define AI_BYTESWAPPER_H_INC
 
 #include "../include/assimp/ai_assert.h"
 #include "../include/assimp/types.h"
+#include <stdint.h>
 
-#if _MSC_VER >= 1400 
+#if _MSC_VER >= 1400
 #include <stdlib.h>
 #endif
 
 namespace Assimp	{
 // --------------------------------------------------------------------------------------
 /** Defines some useful byte order swap routines.
- * 
+ *
  * This is required to read big-endian model formats on little-endian machines,
  * and vice versa. Direct use of this class is DEPRECATED. Use #StreamReader instead. */
 // --------------------------------------------------------------------------------------
@@ -166,7 +167,7 @@ public:
 	// ----------------------------------------------------------------------
 	//! Templatized ByteSwap
 	//! \returns param tOut as swapped
-	template<typename Type> 
+	template<typename Type>
 	static inline Type Swapped(Type tOut)
 	{
 		return _swapper<Type,sizeof(Type)>()(tOut);
@@ -179,28 +180,28 @@ private:
 
 template <typename T> struct ByteSwap::_swapper<T,2> {
 	T operator() (T tOut) {
-		Swap2(&tOut); 
+		Swap2(&tOut);
 		return tOut;
 	}
 };
 
 template <typename T> struct ByteSwap::_swapper<T,4> {
 	T operator() (T tOut) {
-		Swap4(&tOut); 
+		Swap4(&tOut);
 		return tOut;
 	}
 };
 
 template <typename T> struct ByteSwap::_swapper<T,8> {
 	T operator() (T tOut) {
-		Swap8(&tOut); 
+		Swap8(&tOut);
 		return tOut;
 	}
 };
 
 
 // --------------------------------------------------------------------------------------
-// ByteSwap macros for BigEndian/LittleEndian support 
+// ByteSwap macros for BigEndian/LittleEndian support
 // --------------------------------------------------------------------------------------
 #if (defined AI_BUILD_BIG_ENDIAN)
 #	define AI_LE(t)	(t)
@@ -249,7 +250,7 @@ struct ByteSwapper	{
 	}
 };
 
-template <typename T> 
+template <typename T>
 struct ByteSwapper<T,false>	{
 	void operator() (T*) {
 	}
@@ -271,7 +272,7 @@ struct Getter {
 	}
 };
 
-template <bool SwapEndianess, typename T> 
+template <bool SwapEndianess, typename T>
 struct Getter<SwapEndianess,T,false> {
 
 	void operator() (T* inout, bool /*le*/) {
@@ -282,4 +283,4 @@ struct Getter<SwapEndianess,T,false> {
 } // end Intern
 } // end Assimp
 
-#endif //!! AI_BYTESWAP_H_INC
+#endif //!! AI_BYTESWAPPER_H_INC

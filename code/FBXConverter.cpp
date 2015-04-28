@@ -41,20 +41,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXConverter.cpp
  *  @brief Implementation of the FBX DOM -> aiScene converter
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
 #include <iterator>
 #include <sstream>
 #include <boost/tuple/tuple.hpp>
-
+#include <vector>
 #include "FBXParser.h"
 #include "FBXConverter.h"
 #include "FBXDocument.h"
 #include "FBXUtil.h"
 #include "FBXProperties.h"
 #include "FBXImporter.h"
+#include "../include/assimp/scene.h"
+#include <boost/foreach.hpp>
+#include <boost/scoped_array.hpp>
+
 
 namespace Assimp {
 namespace FBX {
@@ -1209,7 +1212,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	/** - if materialIndex == NO_MATERIAL_SEPARATION, materials are not taken into
-	 *  account when determining which weights to include. 
+	 *  account when determining which weights to include.
 	 *  - outputVertStartIndices is only used when a material index is specified, it gives for
 	 *    each output vertex the DOM index it maps to. */
 	void ConvertWeights(aiMesh* out, const Model& model, const MeshGeometry& geo, 
@@ -1968,8 +1971,11 @@ private:
 
 		// strip AnimationStack:: prefix
 		std::string name = st.Name();
-		if(name.substr(0,16) == "AnimationStack::") {
+		if (name.substr(0, 16) == "AnimationStack::") {
 			name = name.substr(16);
+		}
+		else if (name.substr(0, 11) == "AnimStack::") {
+			name = name.substr(11);
 		}
 
 		anim->mName.Set(name);
@@ -2014,12 +2020,18 @@ private:
 		double min_time = 1e10;
 		double max_time = -1e10;
 
+		int64_t start_time = st.LocalStart();
+		int64_t stop_time = st.LocalStop();
+		double start_timeF = CONVERT_FBX_TIME(start_time);
+		double stop_timeF = CONVERT_FBX_TIME(stop_time);
+
 		try {
 			BOOST_FOREACH(const NodeMap::value_type& kv, node_map) {
 				GenerateNodeAnimations(node_anims, 
 					kv.first, 
 					kv.second, 
 					layer_map, 
+					start_time, stop_time,
 					max_time, 
 					min_time);
 			}
@@ -2043,9 +2055,27 @@ private:
 			return;
 		}
 
+		//adjust relative timing for animation
+		{
+			double start_fps = start_timeF * anim_fps;
+
+			for (unsigned int c = 0; c < anim->mNumChannels; c++)
+			{
+				aiNodeAnim* channel = anim->mChannels[c];
+				for (uint32_t i = 0; i < channel->mNumPositionKeys; i++)
+					channel->mPositionKeys[i].mTime -= start_fps;
+				for (uint32_t i = 0; i < channel->mNumRotationKeys; i++)
+					channel->mRotationKeys[i].mTime -= start_fps;
+				for (uint32_t i = 0; i < channel->mNumScalingKeys; i++)
+					channel->mScalingKeys[i].mTime -= start_fps;
+			}
+
+			max_time -= min_time;
+		}
+
 		// for some mysterious reason, mDuration is simply the maximum key -- the
 		// validator always assumes animations to start at zero.
-		anim->mDuration = max_time /*- min_time */;
+		anim->mDuration = (stop_timeF - start_timeF) * anim_fps;
 		anim->mTicksPerSecond = anim_fps;
 	}
 
@@ -2055,6 +2085,7 @@ private:
 		const std::string& fixed_name, 
 		const std::vector<const AnimationCurveNode*>& curves, 
 		const LayerMap& layer_map, 
+		int64_t start, int64_t stop,
 		double& max_time,
 		double& min_time)
 	{
@@ -2147,13 +2178,19 @@ private:
 			aiNodeAnim* const nd = GenerateSimpleNodeAnim(fixed_name, target, chain, 
 				node_property_map.end(), 
 				layer_map,
+				start, stop,
 				max_time,
 				min_time,
 				true // input is TRS order, assimp is SRT
 				);
 
 			ai_assert(nd);
-			node_anims.push_back(nd);
+			if (nd->mNumPositionKeys == 0 && nd->mNumRotationKeys == 0 && nd->mNumScalingKeys == 0) {
+				delete nd;
+			}
+			else {
+				node_anims.push_back(nd);
+			}
 			return;
 		}
 
@@ -2185,6 +2222,7 @@ private:
 						target, 
 						(*chain[i]).second,
 						layer_map,
+						start, stop,
 						max_time,
 						min_time);
 
@@ -2200,6 +2238,7 @@ private:
 						target, 
 						(*chain[i]).second,
 						layer_map,
+						start, stop,
 						max_time,
 						min_time);
 
@@ -2212,12 +2251,18 @@ private:
 							target, 
 							(*chain[i]).second,
 							layer_map,
+							start, stop,
 							max_time,
 							min_time,
 							true);
 
 						ai_assert(inv);
-						node_anims.push_back(inv);
+						if (inv->mNumPositionKeys == 0 && inv->mNumRotationKeys == 0 && inv->mNumScalingKeys == 0) {
+							delete inv;
+						}
+						else {
+							node_anims.push_back(inv);
+						}
 
 						ai_assert(TransformationComp_RotationPivotInverse > i);
 						flags |= bit << (TransformationComp_RotationPivotInverse - i);
@@ -2230,12 +2275,18 @@ private:
 							target, 
 							(*chain[i]).second,
 							layer_map,
+							start, stop,
 							max_time,
 							min_time,
 							true);
 
 						ai_assert(inv);
-						node_anims.push_back(inv);
+						if (inv->mNumPositionKeys == 0 && inv->mNumRotationKeys == 0 && inv->mNumScalingKeys == 0) {
+							delete inv;
+						}
+						else {
+							node_anims.push_back(inv);
+						}
 					
 						ai_assert(TransformationComp_RotationPivotInverse > i);
 						flags |= bit << (TransformationComp_RotationPivotInverse - i);
@@ -2249,6 +2300,7 @@ private:
 						target, 
 						(*chain[i]).second,
 						layer_map,
+						start, stop,
 						max_time,
 						min_time);
 
@@ -2259,7 +2311,12 @@ private:
 				}
 
 				ai_assert(na);
-				node_anims.push_back(na);
+				if (na->mNumPositionKeys == 0 && na->mNumRotationKeys == 0 && na->mNumScalingKeys == 0) {
+					delete na;
+				}
+				else {
+					node_anims.push_back(na);
+				}
 				continue;
 			}
 		}
@@ -2320,13 +2377,14 @@ private:
 		const Model& target, 
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
+		int64_t start, int64_t stop,
 		double& max_time,
 		double& min_time)
 	{
 		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
 		na->mNodeName.Set(name);
 
-		ConvertRotationKeys(na, curves, layer_map, max_time,min_time, target.RotationOrder());
+		ConvertRotationKeys(na, curves, layer_map, start, stop, max_time, min_time, target.RotationOrder());
 
 		// dummy scaling key
 		na->mScalingKeys = new aiVectorKey[1];
@@ -2351,13 +2409,14 @@ private:
 		const Model& /*target*/,
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
+		int64_t start, int64_t stop,
 		double& max_time,
 		double& min_time)
 	{
 		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
 		na->mNodeName.Set(name);
 
-		ConvertScaleKeys(na, curves, layer_map, max_time,min_time);
+		ConvertScaleKeys(na, curves, layer_map, start, stop, max_time, min_time);
 
 		// dummy rotation key
 		na->mRotationKeys = new aiQuatKey[1];
@@ -2382,6 +2441,7 @@ private:
 		const Model& /*target*/,
 		const std::vector<const AnimationCurveNode*>& curves,
 		const LayerMap& layer_map,
+		int64_t start, int64_t stop,
 		double& max_time,
 		double& min_time,
 		bool inverse = false)
@@ -2389,7 +2449,7 @@ private:
 		ScopeGuard<aiNodeAnim> na(new aiNodeAnim());
 		na->mNodeName.Set(name);
 
-		ConvertTranslationKeys(na, curves, layer_map, max_time,min_time);
+		ConvertTranslationKeys(na, curves, layer_map, start, stop, max_time, min_time);
 
 		if (inverse) {
 			for (unsigned int i = 0; i < na->mNumPositionKeys; ++i) {
@@ -2422,6 +2482,7 @@ private:
 		NodeMap::const_iterator chain[TransformationComp_MAXIMUM], 
 		NodeMap::const_iterator iter_end,
 		const LayerMap& layer_map,
+		int64_t start, int64_t stop,
 		double& max_time,
 		double& min_time,
 		bool reverse_order = false)
@@ -2443,21 +2504,21 @@ private:
 			KeyFrameListList rotation;
 			
 			if(chain[TransformationComp_Scaling] != iter_end) {
-				scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second);
+				scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second, start, stop);
 			}
 			else {
 				def_scale = PropertyGet(props,"Lcl Scaling",aiVector3D(1.f,1.f,1.f));
 			}
 
 			if(chain[TransformationComp_Translation] != iter_end) {
-				translation = GetKeyframeList((*chain[TransformationComp_Translation]).second);
+				translation = GetKeyframeList((*chain[TransformationComp_Translation]).second, start, stop);
 			}
 			else {
 				def_translate = PropertyGet(props,"Lcl Translation",aiVector3D(0.f,0.f,0.f));
 			}
 			
 			if(chain[TransformationComp_Rotation] != iter_end) {
-				rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second);
+				rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second, start, stop);
 			}
 			else {
 				def_rot = EulerToQuaternion(PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f)),
@@ -2475,17 +2536,20 @@ private:
 			aiVectorKey* out_scale = new aiVectorKey[times.size()];
 			aiVectorKey* out_translation = new aiVectorKey[times.size()];
 
-			ConvertTransformOrder_TRStoSRT(out_quat, out_scale, out_translation, 
-				scaling, 
-				translation, 
-				rotation, 
-				times,
-				max_time,
-				min_time,
-				target.RotationOrder(),
-				def_scale,
-				def_translate,
-				def_rot);
+			if (times.size())
+			{
+				ConvertTransformOrder_TRStoSRT(out_quat, out_scale, out_translation,
+					scaling,
+					translation,
+					rotation,
+					times,
+					max_time,
+					min_time,
+					target.RotationOrder(),
+					def_scale,
+					def_translate,
+					def_rot);
+			}
 
 			// XXX remove duplicates / redundant keys which this operation did
 			// likely produce if not all three channels were equally dense.
@@ -2507,6 +2571,7 @@ private:
 			if(chain[TransformationComp_Scaling] != iter_end) {
 				ConvertScaleKeys(na, (*chain[TransformationComp_Scaling]).second, 
 					layer_map, 
+					start, stop,
 					max_time, 
 					min_time);
 			}
@@ -2522,6 +2587,7 @@ private:
 			if(chain[TransformationComp_Rotation] != iter_end) {
 				ConvertRotationKeys(na, (*chain[TransformationComp_Rotation]).second, 
 					layer_map, 
+					start, stop,
 					max_time,
 					min_time,
 					target.RotationOrder());
@@ -2539,6 +2605,7 @@ private:
 			if(chain[TransformationComp_Translation] != iter_end) {
 				ConvertTranslationKeys(na, (*chain[TransformationComp_Translation]).second, 
 					layer_map, 
+					start, stop,
 					max_time, 
 					min_time);
 			}
@@ -2558,16 +2625,20 @@ private:
 
 
 	// key (time), value, mapto (component index)
-	typedef boost::tuple< const KeyTimeList*, const KeyValueList*, unsigned int > KeyFrameList;
+	typedef boost::tuple<boost::shared_ptr<KeyTimeList>, boost::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
 	typedef std::vector<KeyFrameList> KeyFrameListList;
 
 	
 
 	// ------------------------------------------------------------------------------------------------
-	KeyFrameListList GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes)
+	KeyFrameListList GetKeyframeList(const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop)
 	{
 		KeyFrameListList inputs;
 		inputs.reserve(nodes.size()*3);
+
+		//give some breathing room for rounding errors
+		int64_t adj_start = start - 10000;
+		int64_t adj_stop = stop + 10000;
 
 		BOOST_FOREACH(const AnimationCurveNode* node, nodes) {
 			ai_assert(node);
@@ -2593,7 +2664,23 @@ private:
 				const AnimationCurve* const curve = kv.second;
 				ai_assert(curve->GetKeys().size() == curve->GetValues().size() && curve->GetKeys().size());
 
-				inputs.push_back(boost::make_tuple(&curve->GetKeys(), &curve->GetValues(), mapto));
+				//get values within the start/stop time window
+				boost::shared_ptr<KeyTimeList> Keys(new KeyTimeList());
+				boost::shared_ptr<KeyValueList> Values(new KeyValueList());
+				const int count = curve->GetKeys().size();
+				Keys->reserve(count);
+				Values->reserve(count);
+				for (int n = 0; n < count; n++)
+				{
+					int64_t k = curve->GetKeys().at(n);
+					if (k >= adj_start && k <= adj_stop)
+					{
+						Keys->push_back(k);
+						Values->push_back(curve->GetValues().at(n));
+					}
+				}
+
+				inputs.push_back(boost::make_tuple(Keys, Values, mapto));
 			}
 		}
 		return inputs; // pray for NRVO :-)
@@ -2623,7 +2710,7 @@ private:
 		const size_t count = inputs.size();
 		while(true) {
 
-			uint64_t min_tick = std::numeric_limits<uint64_t>::max();
+			int64_t min_tick = std::numeric_limits<int64_t>::max();
 			for (size_t i = 0; i < count; ++i) {
 				const KeyFrameList& kfl = inputs[i];
 
@@ -2632,7 +2719,7 @@ private:
 				}
 			}
 
-			if (min_tick == std::numeric_limits<uint64_t>::max()) {
+			if (min_tick == std::numeric_limits<int64_t>::max()) {
 				break;
 			}
 			keys.push_back(min_tick);
@@ -2832,6 +2919,7 @@ private:
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertScaleKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, const LayerMap& /*layers*/,
+		int64_t start, int64_t stop,
 		double& maxTime,
 		double& minTime)
 	{
@@ -2841,36 +2929,40 @@ private:
 		// layers should be multiplied with each other). There is a FBX 
 		// property in the layer to specify the behaviour, though.
 
-		const KeyFrameListList& inputs = GetKeyframeList(nodes);
+		const KeyFrameListList& inputs = GetKeyframeList(nodes, start, stop);
 		const KeyTimeList& keys = GetKeyTimeList(inputs);
 
 		na->mNumScalingKeys = static_cast<unsigned int>(keys.size());
 		na->mScalingKeys = new aiVectorKey[keys.size()];
-		InterpolateKeys(na->mScalingKeys, keys, inputs, true, maxTime, minTime);
+		if (keys.size() > 0)
+			InterpolateKeys(na->mScalingKeys, keys, inputs, true, maxTime, minTime);
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertTranslationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
 		const LayerMap& /*layers*/,
+		int64_t start, int64_t stop,
 		double& maxTime,
 		double& minTime)
 	{
 		ai_assert(nodes.size());
 
 		// XXX see notes in ConvertScaleKeys()
-		const KeyFrameListList& inputs = GetKeyframeList(nodes);
+		const KeyFrameListList& inputs = GetKeyframeList(nodes, start, stop);
 		const KeyTimeList& keys = GetKeyTimeList(inputs);
 
 		na->mNumPositionKeys = static_cast<unsigned int>(keys.size());
 		na->mPositionKeys = new aiVectorKey[keys.size()];
-		InterpolateKeys(na->mPositionKeys, keys, inputs, false, maxTime, minTime);
+		if (keys.size() > 0)
+			InterpolateKeys(na->mPositionKeys, keys, inputs, false, maxTime, minTime);
 	}
 
 
 	// ------------------------------------------------------------------------------------------------
 	void ConvertRotationKeys(aiNodeAnim* na, const std::vector<const AnimationCurveNode*>& nodes, 
 		const LayerMap& /*layers*/,
+		int64_t start, int64_t stop,
 		double& maxTime,
 		double& minTime,
 		Model::RotOrder order)
@@ -2878,12 +2970,13 @@ private:
 		ai_assert(nodes.size());
 
 		// XXX see notes in ConvertScaleKeys()
-		const std::vector< KeyFrameList >& inputs = GetKeyframeList(nodes);
+		const std::vector< KeyFrameList >& inputs = GetKeyframeList(nodes, start, stop);
 		const KeyTimeList& keys = GetKeyTimeList(inputs);
 
 		na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
 		na->mRotationKeys = new aiQuatKey[keys.size()];
-		InterpolateKeys(na->mRotationKeys, keys, inputs, false, maxTime, minTime, order);
+		if (keys.size() > 0)
+			InterpolateKeys(na->mRotationKeys, keys, inputs, false, maxTime, minTime, order);
 	}
 
 

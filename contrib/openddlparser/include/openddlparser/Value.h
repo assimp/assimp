@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014 Kim Kulling
+Copyright (c) 2014-2015 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -66,11 +66,19 @@ public:
     void setInt8( int8 value );
     int8 getInt8();
     void setInt16( int16 value );
-    int16  getInt16();
+    int16 getInt16();
     void setInt32( int32 value );
-    int32  getInt32();
+    int32 getInt32();
     void setInt64( int64 value );
-    int64  getInt64();
+    int64 getInt64();
+    void setUnsignedInt8( uint8 value );
+    uint8 getUnsignedInt8() const;
+    void setUnsignedInt16( uint16 value );
+    uint16 getUnsignedInt16() const;
+    void setUnsignedInt32( uint32 value );
+    uint32 getUnsignedInt32() const;
+    void setUnsignedInt64( uint64 value );
+    uint64 getUnsignedInt64() const;
     void setFloat( float value );
     float getFloat() const;
     void setDouble( double value );

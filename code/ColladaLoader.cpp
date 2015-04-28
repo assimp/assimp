@@ -41,18 +41,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the Collada loader */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include "../include/assimp/anim.h"
+#include "../include/assimp/scene.h"
 #include "ColladaLoader.h"
 #include "ColladaParser.h"
 
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "SkeletonMeshBuilder.h"
+#include "Defines.h"
 
 #include "time.h"
+#include <boost/foreach.hpp>
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/Importer.hpp"
+#include <numeric>
+#include "Defines.h"
+
 
 using namespace Assimp;
 

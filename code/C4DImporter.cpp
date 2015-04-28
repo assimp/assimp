@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  C4DImporter.cpp
  *  @brief Implementation of the Cinema4D importer class.
  */
-#include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
 
 // no #ifdefing here, Cinema4D support is carried out in a branch of assimp
@@ -642,3 +641,4 @@ unsigned int C4DImporter::ResolveMaterial(PolygonObject* obj)
 }
 
 #endif // ASSIMP_BUILD_NO_C4D_IMPORTER
+

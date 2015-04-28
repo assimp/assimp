@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "ObjFileParser.h"
@@ -49,6 +49,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include "../include/assimp/types.h"
 #include "DefaultIOSystem.h"
+#include "BaseImporter.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/material.h"
+#include "../include/assimp/Importer.hpp"
+#include <cstdlib>
+
 
 namespace Assimp {
 

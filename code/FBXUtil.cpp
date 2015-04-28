@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXUtil.cpp
  *  @brief Implementation of internal FBX utility functions
  */
-#include "AssimpPCH.h"
 
 #include "FBXUtil.h"
 #include "FBXTokenizer.h"

@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "stdafx.h"
 #include "assimp_view.h"
 
 // note: these are no longer part of the public API, but they are 
@@ -53,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace AssimpView {
 
+using namespace Assimp;
 
 bool g_bWasFlipped = false;
 float g_smoothAngle = 80.f;

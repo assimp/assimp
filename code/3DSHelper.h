@@ -46,6 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SpatialSort.h"
 #include "SmoothingGroups.h"
+#include "qnan.h"
+#include "./../include/assimp/material.h"
+#include "./../include/assimp/camera.h"
+#include "./../include/assimp/light.h"
+#include "./../include/assimp/anim.h"
+#include <stdio.h> //sprintf
 
 namespace Assimp	{
 namespace D3DS	{

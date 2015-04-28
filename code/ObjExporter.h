@@ -44,10 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OBJEXPORTER_H_INC
 #define AI_OBJEXPORTER_H_INC
 
+#include "../include/assimp/types.h"
 #include <sstream>
+#include <vector>
+#include <map>
 
 struct aiScene;
 struct aiNode;
+struct aiMesh;
 
 namespace Assimp	
 {

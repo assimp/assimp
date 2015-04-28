@@ -47,8 +47,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 #include <string>
-
+#include <stdint.h>
+#include <numeric>
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/ai_assert.h"
+#include "../include/assimp/vector3.h"
+#include "../include/assimp/vector2.h"
+#include "../include/assimp/color4.h"
+#include "../include/assimp/mesh.h"
 #include "FBXProperties.h"
+#include "FBXParser.h"
+
+#define _AI_CONCAT(a,b)  a ## b
+#define  AI_CONCAT(a,b)  _AI_CONCAT(a,b)
 
 namespace Assimp {
 namespace FBX {
@@ -871,7 +882,7 @@ private:
 	std::vector<unsigned int> mappings;
 };
 
-typedef std::vector<uint64_t> KeyTimeList;
+typedef std::vector<int64_t> KeyTimeList;
 typedef std::vector<float> KeyValueList;
 
 /** Represents a FBX animation curve (i.e. a 1-dimensional set of keyframes and values therefor) */
@@ -1015,10 +1026,10 @@ public:
 
 public:
 
-	fbx_simple_property(LocalStart, uint64_t, 0L)
-	fbx_simple_property(LocalStop, uint64_t, 0L)
-	fbx_simple_property(ReferenceStart, uint64_t, 0L)
-	fbx_simple_property(ReferenceStop, uint64_t, 0L)
+	fbx_simple_property(LocalStart, int64_t, 0L)
+	fbx_simple_property(LocalStop, int64_t, 0L)
+	fbx_simple_property(ReferenceStart, int64_t, 0L)
+	fbx_simple_property(ReferenceStop, int64_t, 0L)
 
 
 

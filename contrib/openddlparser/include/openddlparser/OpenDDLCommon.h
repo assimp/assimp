@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014 Kim Kulling
+Copyright (c) 2014-2015 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -43,7 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif // _WIN32
 
 #define BEGIN_ODDLPARSER_NS namespace ODDLParser {
-#define END_ODDLPARSER_NS   }
+#define END_ODDLPARSER_NS   } // namespace ODDLParser
 #define USE_ODDLPARSER_NS   using namespace ODDLParser;
 
 BEGIN_ODDLPARSER_NS
@@ -63,14 +63,55 @@ struct Reference;
 struct Property;
 struct DataArrayList;
 
-typedef char  int8;
-typedef short int16;
-typedef int   int32;
-typedef long  int64;
+typedef char           int8;
+typedef short          int16;
+typedef int            int32;
+typedef long           int64;
+typedef unsigned char  uint8;
+typedef unsigned short uint16;
+typedef unsigned int   uint32;
+typedef unsigned long  uint64;
 
 enum NameType {
     GlobalName,
     LocalName
+};
+
+struct Token {
+public:
+    Token( const char *token )
+    : m_token( token )
+    , m_size( 0 ){
+        if( ddl_nullptr != token ) {
+            m_size = strlen( m_token );
+        }
+    }
+    
+    ~Token() {
+        // empty
+    }
+
+    size_t length() const {
+        return m_size;
+    }
+
+    bool operator == ( const Token &rhs ) const {
+        if( m_size != rhs.m_size ) {
+            return false;
+        }
+
+        const int res( strncmp( m_token, rhs.m_token, m_size ) );
+        return ( res == 0 );
+    }
+
+private:
+    Token();
+    Token( const Token  & );
+    Token &operator = ( const Token & );
+
+private:
+    const char *m_token;
+    size_t m_size;
 };
 
 struct Name {
@@ -82,6 +123,10 @@ struct Name {
         , m_id( id ) {
         // empty
     }
+
+private:
+    Name( const Name & );
+    Name &operator = ( const Name& );
 };
 
 struct Reference {
@@ -103,6 +148,10 @@ struct Reference {
             m_referencedName[ i ] = name;
         }
     }
+
+private:
+    Reference( const Reference & );
+    Reference &operator = ( const Reference & );
 };
 
 struct Identifier {
@@ -114,6 +163,10 @@ struct Identifier {
         , m_buffer( buffer ) {
         // empty
     }
+
+private:
+    Identifier( const Identifier & );
+    Identifier &operator = ( const Identifier & );
 };
 
 struct Property {
@@ -129,6 +182,10 @@ struct Property {
         , m_next( ddl_nullptr ) {
         // empty
     }
+
+private:
+    Property( const Property & );
+    Property &operator = ( const Property & );
 };
 
 struct DataArrayList {
@@ -142,6 +199,11 @@ struct DataArrayList {
         , m_next( ddl_nullptr ) {
         // empty
     }
+
+private:
+    DataArrayList( const DataArrayList & ); 
+    DataArrayList &operator = ( const DataArrayList & );
+
 };
 
 struct Context {
@@ -151,17 +213,10 @@ struct Context {
         : m_root( ddl_nullptr ) {
         // empty
     }
-};
 
-struct BufferIt {
-    std::vector<char> m_buffer;
-    size_t m_idx;
-
-    BufferIt( const std::vector<char> &buffer )
-        : m_buffer( buffer )
-        , m_idx( 0 ) {
-        // empty
-    }
+private:
+    Context( const Context & );
+    Context &operator = ( const Context & );
 };
 
 END_ODDLPARSER_NS

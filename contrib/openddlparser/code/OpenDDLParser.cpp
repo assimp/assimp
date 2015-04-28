@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014 Kim Kulling
+Copyright (c) 2014-2015 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -46,6 +46,7 @@ namespace Grammar {
     static const char *BoolTrue           = "true";
     static const char *BoolFalse          = "false";
     static const char *RefToken           = "ref";
+    static const char *CommaSeparator     = ",";
 
     static const char* PrimitiveTypeToken[ Value::ddl_types_max ] = {
         "bool",
@@ -752,13 +753,16 @@ char *OpenDDLParser::parseHexaLiteral( char *in, char *end, Value **data ) {
 
     int value( 0 );
     while( pos > 0 ) {
+        int v = hex2Decimal( *start );
         pos--;
-        value += hex2Decimal( *start ) * static_cast<int>( pow( 16.0, pos ) );
+        value = ( value << 4 ) | v;
         start++;
     }
 
-    *data = ValueAllocator::allocPrimData( Value::ddl_int32 );
-    (*data)->setInt32( value );
+    *data = ValueAllocator::allocPrimData( Value::ddl_unsigned_int64 );
+    if( ddl_nullptr != *data ) {
+        ( *data )->setUnsignedInt64( value );
+    }
 
     return in;
 }
@@ -856,6 +860,14 @@ char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, size_t &n
     return in;
 }
 
+static DataArrayList *createDataArrayList( Value *currentValue, size_t numValues ) {
+    DataArrayList *dataList = new DataArrayList;
+    dataList->m_dataList = currentValue;
+    dataList->m_numItems = numValues;
+
+    return dataList;
+
+}
 char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **dataList ) {
     *dataList = ddl_nullptr;
     if( ddl_nullptr == in || in == end ) {
@@ -865,27 +877,26 @@ char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **da
     in = lookForNextToken( in, end );
     if( *in == Grammar::OpenBracketToken[ 0 ] ) {
         in++;
-        Value *current( ddl_nullptr );
+        Value *currentValue( ddl_nullptr );
         Reference *refs( ddl_nullptr );
         DataArrayList *prev( ddl_nullptr ), *currentDataList( ddl_nullptr );
         do {
             size_t numRefs( 0 ), numValues( 0 );
-            in = parseDataList( in, end, &current, numValues, &refs, numRefs );
-            if( ddl_nullptr != current ) {
+            currentValue = ddl_nullptr;
+            in = parseDataList( in, end, &currentValue, numValues, &refs, numRefs );
+            if( ddl_nullptr != currentValue ) {
                 if( ddl_nullptr == prev ) {
-                    *dataList = new DataArrayList;
-                    ( *dataList )->m_dataList = current;
-                    ( *dataList )->m_numItems = numValues;
+                    *dataList = createDataArrayList( currentValue, numValues );
                     prev = *dataList;
                 } else {
-                    currentDataList = new DataArrayList;
+                    currentDataList = createDataArrayList( currentValue, numValues );
                     if( ddl_nullptr != prev ) {
                         prev->m_next = currentDataList;
                         prev = currentDataList;
                     }
                 }
             }
-        } while( ',' == *in && in != end );
+        } while( Grammar::CommaSeparator[ 0 ] == *in && in != end );
         in = lookForNextToken( in, end );
         in++;
     }

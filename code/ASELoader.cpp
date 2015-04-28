@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the ASE importer class
  */
 
-#include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
 
 // internal headers
@@ -51,6 +50,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 #include "SkeletonMeshBuilder.h"
 #include "TargetAnimation.h"
+#include "../include/assimp/Importer.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+
 
 // utilities
 #include "fast_atof.h"

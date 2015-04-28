@@ -1,8 +1,9 @@
 
 // Actually just a dummy, used by the compiler to build the precompiled header.
 
-#include "AssimpPCH.h"
 #include "./../include/assimp/version.h"
+#include "./../include/assimp/scene.h"
+#include "ScenePrivate.h"
 
 static const unsigned int MajorVersion = 3;
 static const unsigned int MinorVersion = 1;
@@ -100,32 +101,32 @@ ASSIMP_API aiScene::~aiScene()
 	// To make sure we won't crash if the data is invalid it's
 	// much better to check whether both mNumXXX and mXXX are
 	// valid instead of relying on just one of them.
-	if (mNumMeshes && mMeshes) 
+	if (mNumMeshes && mMeshes)
 		for( unsigned int a = 0; a < mNumMeshes; a++)
 			delete mMeshes[a];
 	delete [] mMeshes;
 
-	if (mNumMaterials && mMaterials) 
+	if (mNumMaterials && mMaterials)
 		for( unsigned int a = 0; a < mNumMaterials; a++)
 			delete mMaterials[a];
 	delete [] mMaterials;
 
-	if (mNumAnimations && mAnimations) 
+	if (mNumAnimations && mAnimations)
 		for( unsigned int a = 0; a < mNumAnimations; a++)
 			delete mAnimations[a];
 	delete [] mAnimations;
 
-	if (mNumTextures && mTextures) 
+	if (mNumTextures && mTextures)
 		for( unsigned int a = 0; a < mNumTextures; a++)
 			delete mTextures[a];
 	delete [] mTextures;
 
-	if (mNumLights && mLights) 
+	if (mNumLights && mLights)
 		for( unsigned int a = 0; a < mNumLights; a++)
 			delete mLights[a];
 	delete [] mLights;
 
-	if (mNumCameras && mCameras) 
+	if (mNumCameras && mCameras)
 		for( unsigned int a = 0; a < mNumCameras; a++)
 			delete mCameras[a];
 	delete [] mCameras;

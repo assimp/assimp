@@ -1,5 +1,7 @@
 before_install:
+  - sudo apt-get update -qq
   - sudo apt-get install cmake python3
+  - if [ $LINUX ]; then sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; fi
   - echo -e "#ifndef A_R_H_INC\n#define A_R_H_INC\n#define GitVersion ${TRAVIS_JOB_ID}\n#define GitBranch \"${TRAVIS_BRANCH}\"\n#endif // A_R_H_INC" > revision.h
 
 branches:
@@ -12,12 +14,8 @@ env:
   matrix:
     - LINUX=1 TRAVIS_NO_EXPORT=YES
     - LINUX=1 TRAVIS_NO_EXPORT=NO
-    - LINUX=1 TRAVIS_STATIC_BUILD=ON
-    - LINUX=1 TRAVIS_STATIC_BUILD=OFF
-    - WINDOWS=1 TRAVIS_NO_EXPORT=YES
-    - WINDOWS=1 TRAVIS_NO_EXPORT=NO
-    - WINDOWS=1 TRAVIS_STATIC_BUILD=ON
-    - WINDOWS=1 TRAVIS_STATIC_BUILD=OFF
+    - LINUX=1 SHARED_BUILD=ON
+    - LINUX=1 SHARED_BUILD=OFF
     - ANDROID=1
 
 language: cpp
@@ -27,20 +25,22 @@ compiler:
   - clang
 
 install:
-  - if [ $WINDOWS ]; then travis_retry sudo apt-get install -q -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 binutils-mingw-w64-x86-64; fi 
   - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi
 
 script:
-  - if [ $ANDROID ]; then ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ; fi
-  - cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -STATIC_BUILD=$TRAVIS_STATIC_BUILD
-  - make
-  - sudo make install
-  - sudo ldconfig
-  - cd test/unit
-  - ../../bin/unit
-  - cd ../regression
-  - chmod 755 run.py
-  - ./run.py
-  - echo "=========================================================="
-  - echo "REGRESSION TEST FAILS (results/run_regression_suite_failures.csv)"
-  - cat ../results/run_regression_suite_failures.csv
+  - if [ $ANDROID ]; then 
+    ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni ;
+    else
+    cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$SHARED_BUILD ;
+    make ;
+    sudo make install ;
+    sudo ldconfig ;
+    cd test/unit ;
+    ../../bin/unit ;
+    cd ../regression ;
+    chmod 755 run.py ;
+    ./run.py ;
+    echo "==========================================================" ;
+    echo "REGRESSION TEST FAILURES (results/run_regression_suite_failures.csv)" ;
+    cat ../results/run_regression_suite_failures.csv;
+    fi

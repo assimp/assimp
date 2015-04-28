@@ -43,13 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
 #include "BaseImporter.h"
+#include <assimp/mesh.h>
 
 #include <vector>
+#include <list>
 
 namespace ODDLParser {
     class DDLNode;
     struct Context;
 }
+struct aiNode;
+struct aiMaterial;
 
 namespace Assimp {
 namespace OpenGEX {
@@ -114,13 +118,31 @@ protected:
     void handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void copyMeshes( aiScene *pScene );
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();
     aiNode *top() const;
     void clearNodeStack();
+    void createNodeTree( aiScene *pScene );
 
 private:
+    struct VertexContainer {
+        size_t m_numVerts;
+        aiVector3D *m_vertices;
+        size_t m_numNormals;
+        aiVector3D *m_normals;
+        size_t m_numUVComps[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+        aiVector3D *m_textureCoords[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+
+        VertexContainer();
+        ~VertexContainer();
+
+    private:
+        VertexContainer( const VertexContainer & );
+        VertexContainer &operator = ( const VertexContainer & );
+    };
+
     struct RefInfo {
         enum Type {
             MeshRef,
@@ -139,13 +161,25 @@ private:
         RefInfo &operator = ( const RefInfo & );
     };
 
+    struct ChildInfo {
+        typedef std::list<aiNode*> NodeList;
+        std::list<aiNode*> m_children;
+    };
+    ChildInfo *m_root;
+    typedef std::map<aiNode*, ChildInfo*> NodeChildMap;
+    NodeChildMap m_nodeChildMap;
+
     std::vector<aiMesh*> m_meshCache;
+    typedef std::map<std::string, size_t> ReferenceMap;
     std::map<std::string, size_t> m_mesh2refMap;
 
     ODDLParser::Context *m_ctx;
     MetricInfo m_metrics[ MetricInfo::Max ];
     aiNode *m_currentNode;
+    VertexContainer m_currentVertices;
     aiMesh *m_currentMesh;
+    aiMaterial *m_currentMaterial;
+    std::vector<aiMaterial*> m_materialCache;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;
 };

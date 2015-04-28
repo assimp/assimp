@@ -43,13 +43,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the RAW importer class 
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
 
 // internal headers
 #include "RawLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+
 
 using namespace Assimp;
 

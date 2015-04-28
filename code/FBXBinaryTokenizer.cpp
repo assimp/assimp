@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -42,12 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *    we emit tokens so the parser needs almost no special handling
  *    for binary files.
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
+#include "../include/assimp/defs.h"
+#include <stdint.h>
+#include "Exceptional.h"
+#include "ByteSwapper.h"
 
 namespace Assimp {
 namespace FBX {
@@ -55,7 +58,7 @@ namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
 Token::Token(const char* sbegin, const char* send, TokenType type, unsigned int offset)
-	: 
+	:
 	#ifdef DEBUG
 	contents(sbegin, static_cast<size_t>(send-sbegin)),
 	#endif
@@ -105,7 +108,7 @@ uint32_t ReadWord(const char* input, const char*& cursor, const char* end)
 {
 	if(Offset(cursor, end) < 4) {
 		TokenizeError("cannot ReadWord, out of bounds",input, cursor);
-	} 
+	}
 
 	uint32_t word = *reinterpret_cast<const uint32_t*>(cursor);
 	AI_SWAP4(word);
@@ -121,7 +124,7 @@ uint8_t ReadByte(const char* input, const char*& cursor, const char* end)
 {
 	if(Offset(cursor, end) < 1) {
 		TokenizeError("cannot ReadByte, out of bounds",input, cursor);
-	} 
+	}
 
 	uint8_t word = *reinterpret_cast<const uint8_t*>(cursor);
 	++cursor;
@@ -131,14 +134,14 @@ uint8_t ReadByte(const char* input, const char*& cursor, const char* end)
 
 
 // ------------------------------------------------------------------------------------------------
-unsigned int ReadString(const char*& sbegin_out, const char*& send_out, const char* input, const char*& cursor, const char* end, 
+unsigned int ReadString(const char*& sbegin_out, const char*& send_out, const char* input, const char*& cursor, const char* end,
 	bool long_length = false,
 	bool allow_null = false)
 {
 	const uint32_t len_len = long_length ? 4 : 1;
 	if(Offset(cursor, end) < len_len) {
 		TokenizeError("cannot ReadString, out of bounds reading length",input, cursor);
-	} 
+	}
 
 	const uint32_t length = long_length ? ReadWord(input, cursor, end) : ReadByte(input, cursor, end);
 
@@ -169,7 +172,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 {
 	if(Offset(cursor, end) < 1) {
 		TokenizeError("cannot ReadData, out of bounds reading length",input, cursor);
-	} 
+	}
 
 	const char type = *cursor;
 	sbegin_out = cursor++;
@@ -208,14 +211,14 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 		// note: do not write cursor += ReadWord(...cursor) as this would be UB
 
 		// raw binary data
-	case 'R':	
+	case 'R':
 	{
 		const uint32_t length = ReadWord(input, cursor, end);
 		cursor += length;
 		break;
 	}
 
-	case 'b': 
+	case 'b':
 		// TODO: what is the 'b' type code? Right now we just skip over it /
 		// take the full range we could get
 		cursor = end;
@@ -226,7 +229,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 	case 'd':
 	case 'l':
 	case 'i':	{
-	
+
 		const uint32_t length = ReadWord(input, cursor, end);
 		const uint32_t encoding = ReadWord(input, cursor, end);
 
@@ -256,7 +259,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 			}
 		}
 		// zip/deflate algorithm (encoding==1)? take given length. anything else? die
-		else if (encoding != 1) {			
+		else if (encoding != 1) {
 			TokenizeError("cannot ReadData, unknown encoding",input, cursor);
 		}
 		cursor += comp_len;
@@ -276,7 +279,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 	if(cursor > end) {
 		TokenizeError("cannot ReadData, the remaining size is too small for the data type: " + std::string(&type, 1),input, cursor);
-	} 
+	}
 
 	// the type code is contained in the returned range
 	send_out = cursor;
@@ -288,10 +291,10 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 {
 	// the first word contains the offset at which this block ends
 	const uint32_t end_offset = ReadWord(input, cursor, end);
-	
+
 	// we may get 0 if reading reached the end of the file -
-	// fbx files have a mysterious extra footer which I don't know 
-	// how to extract any information from, but at least it always 
+	// fbx files have a mysterious extra footer which I don't know
+	// how to extract any information from, but at least it always
 	// starts with a 0.
 	if(!end_offset) {
 		return false;

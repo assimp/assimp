@@ -3,7 +3,7 @@
 Open Asset Import Library - Java Binding (jassimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -68,19 +68,19 @@ import java.nio.ByteOrder;
  */
 public final class AiNodeAnim {
     /**
-     * Size of one position key entry (includes padding).
+     * Size of one position key entry.
      */
-    private static final int POS_KEY_SIZE = 24;
+    private static final int POS_KEY_SIZE = Jassimp.NATIVE_AIVEKTORKEY_SIZE;
     
     /**
      * Size of one rotation key entry.
      */
-    private static final int ROT_KEY_SIZE = 24;
+    private static final int ROT_KEY_SIZE = Jassimp.NATIVE_AIQUATKEY_SIZE;
     
     /**
-     * Size of one scaling key entry (includes padding).
+     * Size of one scaling key entry.
      */
-    private static final int SCALE_KEY_SIZE = 24;
+    private static final int SCALE_KEY_SIZE = Jassimp.NATIVE_AIVEKTORKEY_SIZE;
     
     
     /**
@@ -103,14 +103,13 @@ public final class AiNodeAnim {
         m_preState = AiAnimBehavior.fromRawValue(preBehavior);
         m_postState = AiAnimBehavior.fromRawValue(postBehavior);
         
-        /* c data is padded -> 24 bytes with 20 bytes data */
         m_posKeys = ByteBuffer.allocateDirect(numPosKeys * POS_KEY_SIZE);
         m_posKeys.order(ByteOrder.nativeOrder());
         
-        m_rotKeys = ByteBuffer.allocateDirect(numRotKeys * 24);
+        m_rotKeys = ByteBuffer.allocateDirect(numRotKeys * ROT_KEY_SIZE);
         m_rotKeys.order(ByteOrder.nativeOrder());
         
-        m_scaleKeys = ByteBuffer.allocateDirect(numScaleKeys * 24);
+        m_scaleKeys = ByteBuffer.allocateDirect(numScaleKeys * SCALE_KEY_SIZE);
         m_scaleKeys.order(ByteOrder.nativeOrder());
     }
     
@@ -141,7 +140,7 @@ public final class AiNodeAnim {
      * Returns the buffer with position keys of this animation channel.<p>
      * 
      * Position keys consist of a time value (double) and a position (3D vector
-     * of floats), resulting in a total of 24 bytes per entry with padding. 
+     * of floats), resulting in a total of 20 bytes per entry. 
      * The buffer contains {@link #getNumPosKeys()} of these entries.<p>
      *
      * If there are position keys, there will also be at least one
@@ -340,7 +339,7 @@ public final class AiNodeAnim {
      * Returns the buffer with scaling keys of this animation channel.<p>
      * 
      * Scaling keys consist of a time value (double) and a 3D vector of floats,
-     * resulting in a total of 24 bytes per entry with padding. The buffer 
+     * resulting in a total of 20 bytes per entry. The buffer 
      * contains {@link #getNumScaleKeys()} of these entries.<p>
      * 
      * If there are scaling keys, there will also be at least one

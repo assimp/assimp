@@ -41,12 +41,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the XFile parser helper class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
 #include "XFileParser.h"
 #include "XFileHelper.h"
 #include "fast_atof.h"
+#include "Exceptional.h"
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+#include "ByteSwapper.h"
+#include "../include/assimp/DefaultLogger.hpp"
+
 
 using namespace Assimp;
 using namespace Assimp::XFile;

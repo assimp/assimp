@@ -46,6 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "ColladaParser.h"
 
+struct aiNode;
+struct aiCamera;
+struct aiLight;
+struct aiTexture;
+struct aiAnimation;
+
 namespace Assimp
 {
 

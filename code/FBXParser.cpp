@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXParser.cpp
  *  @brief Implementation of the FBX parser and the rudimentary DOM that we use
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -59,6 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParsingUtils.h"
 #include "fast_atof.h"
+#include <boost/foreach.hpp>
+#include "ByteSwapper.h"
 
 using namespace Assimp;
 using namespace Assimp::FBX;
@@ -188,7 +189,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 		TokenPtr t = parser.CurrentToken();
 		if (t->Type() != TokenType_OPEN_BRACKET) {
 			ParseError("expected open bracket",t);
-		}	
+		}
 	}
 
 	TokenPtr n = parser.AdvanceToNextToken();
@@ -383,7 +384,7 @@ float ParseTokenAsFloat(const Token& t, const char*& err_out)
 	}
 
 	// need to copy the input string to a temporary buffer
-	// first - next in the fbx token stream comes ',', 
+	// first - next in the fbx token stream comes ',',
 	// which fast_atof could interpret as decimal point.
 #define MAX_FLOAT_LENGTH 31
 	char temp[MAX_FLOAT_LENGTH + 1];
@@ -432,6 +433,43 @@ int ParseTokenAsInt(const Token& t, const char*& err_out)
 
 
 // ------------------------------------------------------------------------------------------------
+int64_t ParseTokenAsInt64(const Token& t, const char*& err_out)
+{
+	err_out = NULL;
+
+	if (t.Type() != TokenType_DATA) {
+		err_out = "expected TOK_DATA token";
+		return 0L;
+	}
+
+	if (t.IsBinary())
+	{
+		const char* data = t.begin();
+		if (data[0] != 'L') {
+			err_out = "failed to parse Int64, unexpected data type";
+			return 0L;
+		}
+
+		BE_NCONST int64_t id = SafeParse<int64_t>(data + 1, t.end());
+		AI_SWAP8(id);
+		return id;
+	}
+
+	// XXX: should use size_t here
+	unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
+	ai_assert(length > 0);
+
+	const char* out;
+	const int64_t id = strtol10_64(t.begin(), &out, &length);
+	if (out > t.end()) {
+		err_out = "failed to parse Int64 (text)";
+		return 0L;
+	}
+
+	return id;
+}
+
+// ------------------------------------------------------------------------------------------------
 std::string ParseTokenAsString(const Token& t, const char*& err_out)
 {
 	err_out = NULL;
@@ -477,7 +515,7 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // read the type code and element count of a binary data array and stop there
-void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uint32_t& count, 
+void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uint32_t& count,
 	const Element& el)
 {
 	if (static_cast<size_t>(end-data) < 5) {
@@ -498,8 +536,8 @@ void ReadBinaryDataArrayHead(const char*& data, const char* end, char& type, uin
 
 // ------------------------------------------------------------------------------------------------
 // read binary data array, assume cursor points to the 'compression mode' field (i.e. behind the header)
-void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const char* end, 
-	std::vector<char>& buff, 
+void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const char* end,
+	std::vector<char>& buff,
 	const Element& /*el*/)
 {
 	BE_NCONST uint32_t encmode = SafeParse<uint32_t>(data, end);
@@ -543,7 +581,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
 	else if(encmode == 1) {
 		// zlib/deflate, next comes ZIP head (0x78 0x01)
 		// see http://www.ietf.org/rfc/rfc1950.txt
-		
+
 		z_stream zstream;
 		zstream.opaque = Z_NULL;
 		zstream.zalloc = Z_NULL;
@@ -593,7 +631,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 	if(tok.empty()) {
 		ParseError("unexpected empty element",&el);
 	}
-	
+
 	if(tok[0]->IsBinary()) {
 		const char* data = tok[0]->begin(), *end = tok[0]->end();
 
@@ -615,7 +653,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 
 		std::vector<char> buff;
 		ReadBinaryDataArray(type, count, data, end, buff, el);
-		
+
 		ai_assert(data == end);
 		ai_assert(buff.size() == count * (type == 'd' ? 8 : 4));
 
@@ -1057,11 +1095,68 @@ void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 
 	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end; ) {
 		const uint64_t ival = ParseTokenAsID(**it++);
-		
+
 		out.push_back(ival);
 	}
 }
 
+// ------------------------------------------------------------------------------------------------
+// read an array of int64_ts
+void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el)
+{
+	out.clear();
+	const TokenList& tok = el.Tokens();
+	if (tok.empty()) {
+		ParseError("unexpected empty element", &el);
+	}
+
+	if (tok[0]->IsBinary()) {
+		const char* data = tok[0]->begin(), *end = tok[0]->end();
+
+		char type;
+		uint32_t count;
+		ReadBinaryDataArrayHead(data, end, type, count, el);
+
+		if (!count) {
+			return;
+		}
+
+		if (type != 'l') {
+			ParseError("expected long array (binary)", &el);
+		}
+
+		std::vector<char> buff;
+		ReadBinaryDataArray(type, count, data, end, buff, el);
+
+		ai_assert(data == end);
+		ai_assert(buff.size() == count * 8);
+
+		out.reserve(count);
+
+		const int64_t* ip = reinterpret_cast<const int64_t*>(&buff[0]);
+		for (unsigned int i = 0; i < count; ++i, ++ip) {
+			BE_NCONST int64_t val = *ip;
+			AI_SWAP8(val);
+			out.push_back(val);
+		}
+
+		return;
+	}
+
+	const size_t dim = ParseTokenAsDim(*tok[0]);
+
+	// see notes in ParseVectorDataArray()
+	out.reserve(dim);
+
+	const Scope& scope = GetRequiredScope(el);
+	const Element& a = GetRequiredElement(scope, "a", &el);
+
+	for (TokenList::const_iterator it = a.Tokens().begin(), end = a.Tokens().end(); it != end;) {
+		const int64_t ival = ParseTokenAsInt64(**it++);
+
+		out.push_back(ival);
+	}
+}
 
 // ------------------------------------------------------------------------------------------------
 aiMatrix4x4 ReadMatrix(const Element& element)
@@ -1116,7 +1211,7 @@ std::string ParseTokenAsString(const Token& t)
 
 // ------------------------------------------------------------------------------------------------
 // extract a required element from a scope, abort if the element cannot be found
-const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element /*= NULL*/) 
+const Element& GetRequiredElement(const Scope& sc, const std::string& index, const Element* element /*= NULL*/)
 {
 	const Element* el = sc[index];
 	if(!el) {
@@ -1154,7 +1249,7 @@ const Token& GetRequiredToken(const Element& el, unsigned int index)
 
 // ------------------------------------------------------------------------------------------------
 // wrapper around ParseTokenAsID() with ParseError handling
-uint64_t ParseTokenAsID(const Token& t) 
+uint64_t ParseTokenAsID(const Token& t)
 {
 	const char* err;
 	const uint64_t i = ParseTokenAsID(t,err);
@@ -1205,8 +1300,19 @@ int ParseTokenAsInt(const Token& t)
 
 
 
+// ------------------------------------------------------------------------------------------------
+// wrapper around ParseTokenAsInt64() with ParseError handling
+int64_t ParseTokenAsInt64(const Token& t)
+{
+	const char* err;
+	const int64_t i = ParseTokenAsInt64(t, err);
+	if (err) {
+		ParseError(err, t);
+	}
+	return i;
+}
+
 } // !FBX
 } // !Assimp
 
 #endif
-

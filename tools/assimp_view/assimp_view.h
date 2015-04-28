@@ -72,12 +72,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../code/StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
 
 // in order for std::min and std::max to behave properly
-/*#ifdef min 
-#undef min
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif // max
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif // min
-#ifdef max 
-#undef max
-#endif // min*/
 
 #include <time.h>
 

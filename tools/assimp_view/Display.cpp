@@ -693,7 +693,7 @@ int CDisplay::FillDisplayList(void)
 	// fill in the first entry
 	TVITEMEX tvi; 
 	TVINSERTSTRUCT sNew;
-	tvi.pszText = "Model";
+	tvi.pszText = (char*) "Model";
 	tvi.cchTextMax = (int)strlen(tvi.pszText);
 	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_STATE;
 	tvi.state = TVIS_EXPANDED;

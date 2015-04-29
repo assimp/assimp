@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "FileSystemFilter.h"
 #include "Importer.h"
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 #include "../include/assimp/scene.h"
 #include "../include/assimp/Importer.hpp"
 #include "../include/assimp/postprocess.h"

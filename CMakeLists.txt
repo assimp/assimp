@@ -1,3 +1,4 @@
+set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 cmake_minimum_required( VERSION 2.8 )
 PROJECT( Assimp )
 
@@ -61,9 +62,9 @@ if( CMAKE_COMPILER_IS_MINGW )
 endif()
 
 if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
-    add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
+    set(CMAKE_CXX_FLAGS "-fPIC") # this is a very important switch and some libraries seem now to have it....
     # hide all not-exported symbols
-    add_definitions( -fvisibility=hidden -Wall )
+    set(CMAKE_CXX_FLAGS "-fvisibility=hidden -Wall" )
 elseif(MSVC)
     # enable multi-core compilation with MSVC
     add_definitions(/MP)

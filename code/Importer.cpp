@@ -927,11 +927,11 @@ void Importer::GetExtensionList(aiString& szOut) const
 // Set a configuration property
 bool Importer::SetPropertyInteger(const char* szName, int iValue)
 {
-	bool exising;
+	bool existing;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		exising = SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue);	
+		existing = SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue);	
 	ASSIMP_END_EXCEPTION_REGION(bool);
-	return exising;
+	return existing;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -920,7 +920,7 @@ void SceneCombiner::MergeMaterials(aiMaterial** dest,
 
 			// Test if we already have a matching property 
 			const aiMaterialProperty* prop_exist;
-			if(aiGetMaterialProperty(out, sprop->mKey.C_Str(), sprop->mType, sprop->mIndex, &prop_exist) != AI_SUCCESS) {
+			if(aiGetMaterialProperty(out, sprop->mKey.C_Str(), sprop->mSemantic, sprop->mIndex, &prop_exist) != AI_SUCCESS) {
 				// If not, we add it to the new material
 				aiMaterialProperty* prop = out->mProperties[out->mNumProperties] = new aiMaterialProperty();
 

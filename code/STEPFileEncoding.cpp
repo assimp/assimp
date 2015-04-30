@@ -332,7 +332,7 @@ bool STEP::StringToUTF8(std::string& s)
 				case '4':
 					if (s[i+3] == '\\') {
 						const size_t basei = i+4;
-						size_t j = basei, jend = s.size()-4;						
+						size_t j = basei, jend = s.size()-3;				
 
 						for (; j < jend; ++j) {
 							if (s[j] == '\\' && s[j] == 'X' && s[j] == '0' && s[j] == '\\') {

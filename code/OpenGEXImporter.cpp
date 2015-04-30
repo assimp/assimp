@@ -728,17 +728,18 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
 }
 
 //------------------------------------------------------------------------------------------------
-static void getColorRGB( aiColor3D *pColor, Value *data ) {
-    if( NULL == pColor || NULL == data ) {
+static void getColorRGB( aiColor3D *pColor, DataArrayList *colList ) {
+    if( NULL == pColor || NULL == colList ) {
         return;
     }
-
-    pColor->r = data->getFloat();
-    data = data->getNext();
-    pColor->g = data->getFloat();
-    data = data->getNext();
-    pColor->b = data->getFloat();
-    data = data->getNext();
+    
+    ai_assert( 3, colList->m_numItems );
+    Value *val( colList->m_dataList );
+    pColor->r = val->getFloat();
+    val = val->getNext();
+    pColor->g = val->getFloat();
+    val = val->getNext();
+    pColor->b = val->getFloat();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -780,8 +781,12 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
     Property *prop = node->findPropertyByName( "attrib" );
     if( NULL != prop ) {
         if( NULL != prop->m_value ) {
+            DataArrayList *colList( node->getDataArrayList() );
+            if( NULL == colList ) {
+                return;
+            }
             aiColor3D col;
-            getColorRGB( &col, prop->m_value );
+            getColorRGB( &col, colList );
             const ColorType colType( getColorType( prop->m_key ) );
             if( DiffuseColor == colType ) {
                 m_currentMaterial->AddProperty( &col, 1, AI_MATKEY_COLOR_DIFFUSE );

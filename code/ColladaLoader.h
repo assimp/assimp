@@ -241,6 +241,7 @@ protected:
 
 	bool noSkeletonMesh;
 	bool ignoreUpDirection;
+	bool invertTransparency;
 
 	/** Used by FindNameForNode() to generate unique node names */
 	unsigned int mNodeNameCounter;

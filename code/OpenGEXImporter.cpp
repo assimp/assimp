@@ -734,7 +734,7 @@ static void getColorRGB( aiColor3D *pColor, DataArrayList *colList ) {
         return;
     }
     
-    ai_assert( 3, colList->m_numItems );
+    ai_assert( 3 == colList->m_numItems );
     Value *val( colList->m_dataList );
     pColor->r = val->getFloat();
     val = val->getNext();

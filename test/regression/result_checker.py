@@ -96,9 +96,9 @@ def run():
         return passed('No failures encountered')
 
     print('Failures:\n' + '\n'.join(sorted(result_dict.keys())))
-    print('Whitelisted:\n' + '\n'.join(sorted(whitelist_dict.keys()))
+    print('Whitelisted:\n' + '\n'.join(sorted(whitelist_dict.keys())))
     non_whitelisted_failures = set(result_dict.keys()) - set(whitelist_dict.keys())
-    print('Failures not whitelisted:\n' + '\n'.join(sorted(non_whitelisted_failures))
+    print('Failures not whitelisted:\n' + '\n'.join(sorted(non_whitelisted_failures)))
     if not non_whitelisted_failures:
         return passed('All failures are whitelisted and considered acceptable \n' +
             'due to implementation differences, library shortcomings and bugs \n' +

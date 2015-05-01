@@ -150,8 +150,6 @@ StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
 
-	mFile = std::string(file);
-	mPath = std::string(path);
 	mScene = pScene;
 	mSceneOwned = false;
 
@@ -182,9 +180,7 @@ void StepExporter::WriteFile()
 	// note, that all realnumber values must be comma separated in x files
 	mOutput.setf(std::ios::fixed);
 	mOutput.precision(16); // precission for double
-
-	aiMatrix4x4 baseTransform = mScene->mRootNode->mTransformation;
-
+	
 	int ind = 100; // the start index to be used
 	int faceEntryLen = 30; // number of entries for a triangle/face
 	// prepare unique (count triangles and vertices)
@@ -212,11 +208,16 @@ void StepExporter::WriteFile()
 		}
 	}
 
+	static const unsigned int date_nb_chars = 20;
+	char date_str[date_nb_chars];
+	std::time_t date = std::time(NULL);
+	std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
+
 	// write the header	
 	mOutput << "ISO-10303-21" << endstr;
 	mOutput << "HEADER" << endstr;
 	mOutput << "FILE_DESCRIPTION(('STEP AP214'),'1')" << endstr;
-	mOutput << "FILE_NAME('" << mFile << ".stp','2015-04-23T09:26:41',(' '),(' '),'Spatial InterOp 3D',' ',' ')" << endstr;
+	mOutput << "FILE_NAME('" << mFile << ".stp','" << date_str << "',(' '),(' '),'Spatial InterOp 3D',' ',' ')" << endstr;
 	mOutput << "FILE_SCHEMA(('automotive_design'))" << endstr;
 	mOutput << "ENDSEC" << endstr;
 

@@ -99,7 +99,7 @@ void FindSceneCenter (aiScene* scene, aiVector3D& out, aiVector3D& min, aiVector
 {
 	if (scene->mNumMeshes == 0) return;
 	FindMeshCenter(scene->mMeshes[0], out, min, max);
-	for (int i = 1; i < scene->mNumMeshes; ++i)
+	for (unsigned int i = 1; i < scene->mNumMeshes; ++i)
 	{
 		aiVector3D tout, tmin, tmax;
 		FindMeshCenter(scene->mMeshes[i], tout, tmin, tmax);

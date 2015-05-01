@@ -95,16 +95,17 @@ def run():
     if not result_dict:
         return passed('No failures encountered')
 
-    print('Failures:\n' + '\n'.join(result_dict.keys()))
-    print('Whitelisted:\n' + '\n'.join(whitelist_dict.keys()))
+    print('Failures:\n' + '\n'.join(sorted(result_dict.keys())))
+    print('Whitelisted:\n' + '\n'.join(sorted(whitelist_dict.keys()))
     non_whitelisted_failures = set(result_dict.keys()) - set(whitelist_dict.keys())
+    print('Failures not whitelisted:\n' + '\n'.join(sorted(non_whitelisted_failures))
     if not non_whitelisted_failures:
         return passed('All failures are whitelisted and considered acceptable \n' +
             'due to implementation differences, library shortcomings and bugs \n' +
             'that have not been fixed for a long time')
     return failed('Encountered new regression failures that are not whitelisted.  \n' +
         'Please carefully review the changes you made and use the gen_db.py script\n' +
-        'to update the regression database for the affected files.')
+        'to update the regression database for the affected files')
 
 if __name__ == "__main__":
     sys.exit(run())

@@ -1,5 +1,12 @@
+set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 cmake_minimum_required( VERSION 2.8 )
 PROJECT( Assimp )
+
+option(BUILD_SHARED_LIBS "Build package with shared libraries." ON)
+if(NOT BUILD_SHARED_LIBS)
+        #set(CMAKE_EXE_LINKER_FLAGS "-static")
+	set(LINK_SEARCH_START_STATIC TRUE)
+endif(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
 set (ASSIMP_VERSION_MAJOR 3)
@@ -55,9 +62,9 @@ if( CMAKE_COMPILER_IS_MINGW )
 endif()
 
 if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
-    add_definitions(-fPIC) # this is a very important switch and some libraries seem now to have it....
+    set(CMAKE_CXX_FLAGS "-fPIC") # this is a very important switch and some libraries seem now to have it....
     # hide all not-exported symbols
-    add_definitions( -fvisibility=hidden -Wall )
+    set(CMAKE_CXX_FLAGS "-fvisibility=hidden -Wall" )
 elseif(MSVC)
     # enable multi-core compilation with MSVC
     add_definitions(/MP)
@@ -87,9 +94,6 @@ SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
     "Path the tool executables are installed to." )
 
 SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
-
-# Allow the user to build a shared or static library
-option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )
 
 # Only generate this target if no higher-level project already has
 IF (NOT TARGET uninstall)

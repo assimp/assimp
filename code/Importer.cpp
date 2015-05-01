@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the CPP-API class #Importer
  */
 
-#include "AssimpPCH.h"
 #include "../include/assimp/version.h"
 
 // ------------------------------------------------------------------------------------------------
@@ -62,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Internal headers
 // ------------------------------------------------------------------------------------------------
 #include "Importer.h"
+#include "BaseImporter.h"
 #include "BaseProcess.h"
 
 #include "DefaultIOStream.h"
@@ -70,9 +70,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "GenericProperty.h"
 #include "ProcessHelper.h"
 #include "ScenePreprocessor.h"
+#include "ScenePrivate.h"
 #include "MemoryIOWrapper.h"
 #include "Profiler.h"
 #include "TinyFormatter.h"
+#include "Exceptional.h"
+#include "Profiler.h"
+#include <set>
+#include <boost/scoped_ptr.hpp>
+#include <cctype>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #	include "ValidateDataStructure.h"
@@ -919,42 +925,46 @@ void Importer::GetExtensionList(aiString& szOut) const
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyInteger(const char* szName, int iValue, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyInteger(const char* szName, int iValue)
 {
+	bool existing;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		existing = SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return existing;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyFloat(const char* szName, float iValue, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyFloat(const char* szName, float iValue)
 {
+	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		exising = SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyString(const char* szName, const std::string& value, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyString(const char* szName, const std::string& value)
 {
+	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		exising = SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-void Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value, 
-	bool* bWasExisting /*= NULL*/)
+bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value)
 {
+	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-	SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value,bWasExisting);	
-	ASSIMP_END_EXCEPTION_REGION(void);
+		exising = SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value);	
+	ASSIMP_END_EXCEPTION_REGION(bool);
+	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------

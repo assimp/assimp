@@ -41,18 +41,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the Collada loader */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include "../include/assimp/anim.h"
+#include "../include/assimp/scene.h"
 #include "ColladaLoader.h"
 #include "ColladaParser.h"
 
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "SkeletonMeshBuilder.h"
+#include "Defines.h"
 
 #include "time.h"
+#include <boost/foreach.hpp>
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/Importer.hpp"
+#include <numeric>
+#include "Defines.h"
+
 
 using namespace Assimp;
 
@@ -109,6 +117,7 @@ void ColladaLoader::SetupProperties(const Importer* pImp)
 {
 	noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
 	ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
+	invertTransparency = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_INVERT_TRANSPARENCY,0) != 0;
 }
 
 
@@ -1330,11 +1339,25 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 		mat.AddProperty( &effect.mRefractIndex, 1, AI_MATKEY_REFRACTI);
 
 		// transparency, a very hard one. seemingly not all files are following the
-		// specification here .. but we can trick.
-		if (effect.mTransparency >= 0.f && effect.mTransparency < 1.f) {
-			effect.mTransparency = 1.f- effect.mTransparency;
-			mat.AddProperty( &effect.mTransparency, 1, AI_MATKEY_OPACITY );
-			mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
+		// specification here (1.0 transparency => completly opaque)...
+		// therefore, we let the opportunity for the user to manually invert
+		// the transparency if necessary and we add preliminary support for RGB_ZERO mode
+		if(effect.mTransparency >= 0.f && effect.mTransparency <= 1.f) {
+			// Trying some support for RGB_ZERO mode
+			if(effect.mRGBTransparency) {
+				effect.mTransparency = 1.f - effect.mTransparent.a;
+			}
+			
+			// Global option
+			if(invertTransparency) {
+				effect.mTransparency = 1.f - effect.mTransparency;
+			}
+
+			// Is the material finally transparent ?
+			if (effect.mHasTransparency || effect.mTransparency < 1.f) {
+				mat.AddProperty( &effect.mTransparency, 1, AI_MATKEY_OPACITY );
+				mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
+			}
 		}
 
 		// add textures, if given

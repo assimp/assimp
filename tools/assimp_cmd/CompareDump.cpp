@@ -55,6 +55,12 @@ const char* AICMD_MSG_CMPDUMP_HELP =
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "generic_inserter.hpp"
+#include <map>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <iostream>
+#include "../../include/assimp/ai_assert.h"
 
 // get << for aiString
 template <typename char_t, typename traits_t>
@@ -134,15 +140,16 @@ public:
 		if(it != history.back().second.end()) {
 			++history.back().second[s];
 		}
-		else history.back().second[s] = 1;
+		else history.back().second[s] = 0;
 
 		history.push_back(HistoryEntry(s,PerChunkCounter()));
-
+		debug_trace.push_back("PUSH " + s);
 	}
 
 	/* leave current scope */
 	void pop_elem() {
 		ai_assert(history.size());
+		debug_trace.push_back("POP "+ history.back().first);
 		history.pop_back();
 	}
 
@@ -243,18 +250,22 @@ private:
 		const char* last = history.back().first.c_str();
 		std::string pad;
 
-		for(ChunkHistory::reverse_iterator rev = ++history.rbegin(),
-			end = history.rend(); rev < end; ++rev, pad += "  ")
+		for(ChunkHistory::reverse_iterator rev = history.rbegin(),
+			end = history.rend(); rev != end; ++rev, pad += "  ")
 		{
-			ss << pad << (*rev).first << "(Index: " << (*rev).second[last]-1 << ")" << std::endl;
+			ss << pad << (*rev).first << "(Index: " << (*rev).second[last] << ")" << std::endl;
 			last = (*rev).first.c_str();
 		}
 
+		ss << std::endl << "Debug trace: "<< std::endl;
+		for (std::vector<std::string>::const_iterator it = debug_trace.begin(); it != debug_trace.end(); ++it) {
+			ss << *it << std::endl;
+		}
 		return ss.str();
 	}
 
 
-	/* read from both streams simult.*/
+	/* read from both streams at the same time */
 	template <typename T> void read(T& filla,T& fille) {
 		if(1 != fread(&filla,sizeof(T),1,actual)) {
 			EOFActual();
@@ -290,6 +301,8 @@ private:
 
 	typedef std::deque<HistoryEntry> ChunkHistory;
 	ChunkHistory history;
+
+	std::vector<std::string> debug_trace;
 
 	typedef std::stack<std::pair<uint32_t,uint32_t> > LengthStack;
 	LengthStack lengths;
@@ -739,7 +752,7 @@ void CompareOnTheFlyLight(comparer_context& comp)	{
 	const aiLightSourceType type = static_cast<aiLightSourceType>( 
 		comp.cmp<uint32_t>("mType"));
 
-	if(type==aiLightSource_DIRECTIONAL) {
+	if(type!=aiLightSource_DIRECTIONAL) {
 		comp.cmp<float>("mAttenuationConstant");
 		comp.cmp<float>("mAttenuationLinear");
 		comp.cmp<float>("mAttenuationQuadratic");

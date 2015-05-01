@@ -46,10 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include "../include/assimp/types.h"
+#include "PlyParser.h"
+#include <vector>
 
 struct aiNode;
-
-#include "PlyParser.h"
+struct aiMaterial;
+struct aiMesh;
 
 namespace Assimp	{
 

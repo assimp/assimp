@@ -47,6 +47,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
 #include "LogAux.h"
+#include <boost/foreach.hpp>
+#include "../include/assimp/material.h"
+#include "../include/assimp/Importer.hpp"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/light.h"
+
+struct aiNode;
 
 namespace Assimp	{
 
@@ -86,6 +93,7 @@ protected:
 
 private:
 
+	
 	struct TempScope
 	{
 		TempScope()
@@ -120,6 +128,16 @@ private:
 		std::vector<aiMaterial*> materials_linear;
 
 		aiLight* light;
+	};
+
+
+	struct SortMeshByMaterialId {
+		SortMeshByMaterialId(const TempScope& scope) : scope(scope) {}
+		bool operator()(unsigned int a, unsigned int b) const {
+			return scope.meshes_linear[a]->mMaterialIndex < scope.meshes_linear[b]->mMaterialIndex;
+		};
+
+		const TempScope& scope;
 	};
 
 	struct TempMesh

@@ -98,7 +98,7 @@ SET( Common_SRCS
 	ScenePrivate.h
 	PostStepRegistry.cpp
 	ImporterRegistry.cpp
-	ByteSwap.h
+	ByteSwapper.h
 	DefaultProgressHandler.h
 	DefaultIOStream.cpp
 	DefaultIOStream.h
@@ -145,6 +145,7 @@ SET( Common_SRCS
 	Bitmap.cpp
 	Bitmap.h
 	XMLTools.h
+	Version.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
@@ -745,10 +746,6 @@ SET( assimp_src
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
 
-	# Old precompiled header
-	# (removed because the precompiled header is not updated when visual studio switch configuration which leads to failed compilation.
-	# Moreover it's a drag to recompile assimp entirely each time a modification is made to one of the included header, which is definitely counter-productive.)
-	AssimpPCH.cpp
 )
 add_definitions( -DOPENDDLPARSER_BUILD )
 
@@ -760,8 +757,6 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 	SET( assimp_src ${assimp_src} ${C4D_SRCS})
 	INCLUDE_DIRECTORIES(${C4D_INCLUDES})
 ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
-
-#ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
 
 ADD_LIBRARY( assimp ${assimp_src} )
 
@@ -796,7 +791,7 @@ if( MSVC )
   else()
     set(MSVC_PREFIX "vc130")
   endif()
-  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
+  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
 SET_TARGET_PROPERTIES( assimp PROPERTIES

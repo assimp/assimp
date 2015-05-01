@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJ_FILE_IMPORTER_H_INC
 
 #include "BaseImporter.h"
+#include "../include/assimp/material.h"
 #include <vector>
 
 struct aiMesh;
@@ -96,13 +97,15 @@ private:
     
     //!	\brief	Creates vertices from model.
     void createVertexArray(const ObjFile::Model* pModel, const ObjFile::Object* pCurrentObject,
-        unsigned int uiMeshIndex, aiMesh* pMesh,unsigned int uiIdxCount);
+        unsigned int uiMeshIndex, aiMesh* pMesh, unsigned int numIndices );
 
     //!	\brief	Object counter helper method.
     void countObjects(const std::vector<ObjFile::Object*> &rObjects, int &iNumMeshes);
 
     //!	\brief	Material creation.
     void createMaterials(const ObjFile::Model* pModel, aiScene* pScene);
+    
+    ///	@brief  Adds special property for the used texture mapping mode of the model.
     void addTextureMappingModeProperty(aiMaterial* mat, aiTextureType type, int clampMode = 1);
 
     //!	\brief	Appends a child node to a parent node and updates the data structures.

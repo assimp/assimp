@@ -42,56 +42,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AV_MESH_RENDERER_H_INCLUDED)
 #define AV_MESH_RENDERER_H_INCLUDED
 
+namespace AssimpView {
 
 
-//-------------------------------------------------------------------------------
-/* Helper class tp render meshes
-*/
-//-------------------------------------------------------------------------------
-class CMeshRenderer
-{
-private:
+    //-------------------------------------------------------------------------------
+    /* Helper class tp render meshes
+    */
+    //-------------------------------------------------------------------------------
+    class CMeshRenderer
+    {
+    private:
 
-	// default constructor
-	CMeshRenderer() 
+        // default constructor
+        CMeshRenderer()
 
-	{
-		// no other members to initialize
-	}
+        {
+            // no other members to initialize
+        }
 
-public:
+    public:
 
-	//------------------------------------------------------------------
-	// Singleton accessors
-	static CMeshRenderer s_cInstance;
-	inline static CMeshRenderer& Instance ()
-	{
-		return s_cInstance;
-	}
-
-
-	//------------------------------------------------------------------
-	// Draw a mesh in the global mesh list using the current pipeline state
-	// iIndex Index of the mesh to be drawn
-	//
-	// The function draws all faces in order, regardless of their distance
-	int DrawUnsorted(unsigned int iIndex);
-
-	//------------------------------------------------------------------
-	// Draw a mesh in the global mesh list using the current pipeline state
-	// iIndex Index of the mesh to be drawn
-	//
-	// The method sorts all vertices by their distance (back to front)
-	//
-	// mWorld World matrix for the node
-	int DrawSorted(unsigned int iIndex,
-		const aiMatrix4x4& mWorld);
+        //------------------------------------------------------------------
+        // Singleton accessors
+        static CMeshRenderer s_cInstance;
+        inline static CMeshRenderer& Instance()
+        {
+            return s_cInstance;
+        }
 
 
+        //------------------------------------------------------------------
+        // Draw a mesh in the global mesh list using the current pipeline state
+        // iIndex Index of the mesh to be drawn
+        //
+        // The function draws all faces in order, regardless of their distance
+        int DrawUnsorted( unsigned int iIndex );
 
-private:
+        //------------------------------------------------------------------
+        // Draw a mesh in the global mesh list using the current pipeline state
+        // iIndex Index of the mesh to be drawn
+        //
+        // The method sorts all vertices by their distance (back to front)
+        //
+        // mWorld World matrix for the node
+        int DrawSorted( unsigned int iIndex,
+            const aiMatrix4x4& mWorld );
 
-	
-};
 
+
+    private:
+
+
+    };
+
+}
 #endif //!! include guard

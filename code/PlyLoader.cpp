@@ -43,11 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the PLY importer class
  */
 
-#include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
 // internal headers
 #include "PlyLoader.h"
+#include "Macros.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+
 
 using namespace Assimp;
 
@@ -74,8 +78,9 @@ namespace
 	template <class T>
 	const T &GetProperty(const std::vector<T> &props, int idx)
 	{
-		if (idx >= props.size())
-			throw DeadlyImportError("Invalid .ply file: Property index is out of range.");
+        if( static_cast< size_t >( idx ) >= props.size() ) {
+            throw DeadlyImportError( "Invalid .ply file: Property index is out of range." );
+        }
 
 		return props[idx];
 	}

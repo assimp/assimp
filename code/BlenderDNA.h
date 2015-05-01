@@ -47,6 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include "TinyFormatter.h"
+#include "StreamReader.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include <stdint.h>
+#include <boost/shared_ptr.hpp>
+
 
 // enable verbose log output. really verbose, so be careful.
 #ifdef ASSIMP_BUILD_DEBUG

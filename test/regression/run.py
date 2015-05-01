@@ -65,7 +65,7 @@ import utils
 # -------------------------------------------------------------------------------
 EXPECTED_FAILURE_NOT_MET, DATABASE_LENGTH_MISMATCH, \
 DATABASE_VALUE_MISMATCH, IMPORT_FAILURE, \
-FILE_NOT_READABLE, COMPARE_SUCCESS = range(6)
+FILE_NOT_READABLE, COMPARE_SUCCESS, EXPECTED_FAILURE = range(7)
 
 messages = collections.defaultdict(lambda: "<unknown", {
         EXPECTED_FAILURE_NOT_MET:
@@ -88,7 +88,10 @@ messages = collections.defaultdict(lambda: "<unknown", {
 
         COMPARE_SUCCESS:
 """Results match archived reference dump in database\n\
-\tNumber of bytes compared: {0}"""
+\tNumber of bytes compared: {0}""",
+
+        EXPECTED_FAILURE:
+"""Expected failure was met.""",
 })
 
 outfilename_output = "run_regression_suite_output.txt"
@@ -210,6 +213,10 @@ def process_dir(d, outfile_results, zipin, result):
             elif failure and not r:
                 result.fail(fullpath, outfile_expect, pppreset, EXPECTED_FAILURE_NOT_MET)
                 outfile_results.write("Expected import to fail\n")
+                continue
+            elif failure and r:
+                result.ok(fullpath, pppreset, EXPECTED_FAILURE) 
+                outfile_results.write("Failed as expected, skipping.\n")
                 continue
             
             with open(outfile_expect, "wb") as s:

@@ -37,7 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Q3BSPFileData.h"
 #include "Q3BSPZipArchive.h"
 #include <vector>
+#include "../include/assimp/ai_assert.h"
+
 
 namespace Assimp
 {

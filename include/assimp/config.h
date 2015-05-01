@@ -877,8 +877,24 @@ enum aiComponent
  */
 #define AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION "IMPORT_IFC_CUSTOM_TRIANGULATION"
 
+// ---------------------------------------------------------------------------
+/** @brief Specifies whether the Collada loader will ignore the provided up direction.
+ *
+ * If this property is set to true, the up direction provided in the file header will
+ * be ignored and the file will be loaded as is.
+ * Property type: Bool. Default value: false.
+ */
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
+// ---------------------------------------------------------------------------
+/** @brief Specifies whether the Collada loader will invert the transparency value.
+ *
+ * If this property is set to true, the transparency value will be interpreted as the
+ * inverse of the usual transparency. This is useful because lots of exporters does
+ * not respect the standard and do the opposite of what is normally expected.
+ * Property type: Bool. Default value: false.
+ */
+#define AI_CONFIG_IMPORT_COLLADA_INVERT_TRANSPARENCY "IMPORT_COLLADA_INVERT_TRANSPARENCY"
 
 // ---------- All the Export defines ------------
 
@@ -888,6 +904,5 @@ enum aiComponent
  */
 
 #define AI_CONFIG_EXPORT_XFILE_64BIT "EXPORT_XFILE_64BIT"
-
 
 #endif // !! AI_CONFIG_H_INC

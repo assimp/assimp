@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014 Kim Kulling
+Copyright (c) 2014-2015 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <cstddef>
 #include <vector>
+#include <string>
 
 #include <string.h>
 
@@ -43,7 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif // _WIN32
 
 #define BEGIN_ODDLPARSER_NS namespace ODDLParser {
-#define END_ODDLPARSER_NS   }
+#define END_ODDLPARSER_NS   } // namespace ODDLParser
 #define USE_ODDLPARSER_NS   using namespace ODDLParser;
 
 BEGIN_ODDLPARSER_NS
@@ -63,14 +64,97 @@ struct Reference;
 struct Property;
 struct DataArrayList;
 
-typedef char  int8;
-typedef short int16;
-typedef int   int32;
-typedef long  int64;
+typedef char           int8;
+typedef short          int16;
+typedef int            int32;
+typedef long           int64;
+typedef unsigned char  uint8;
+typedef unsigned short uint16;
+typedef unsigned int   uint32;
+typedef unsigned long  uint64;
 
 enum NameType {
     GlobalName,
     LocalName
+};
+
+struct Text {
+    size_t m_capacity;
+    size_t m_len;
+    char *m_buffer;
+
+    Text( const char *buffer, size_t numChars )
+    : m_capacity( 0 )
+    , m_len( 0 )
+    , m_buffer( ddl_nullptr ) {
+        set( buffer, numChars );
+    }
+
+    ~Text() {
+        clear();
+    }
+
+    void clear() {
+        delete[] m_buffer;
+        m_buffer = ddl_nullptr;
+        m_capacity = 0;
+        m_len = 0;
+    }
+
+    void set( const char *buffer, size_t numChars ) {
+        clear();
+        if( numChars > 0 ) {
+            m_len = numChars;
+            m_capacity = m_len + 1;
+            m_buffer = new char[ m_capacity ];
+            strncpy( m_buffer, buffer, numChars );
+            m_buffer[ numChars ] = '\0';
+        }
+    }
+
+    bool operator == ( const std::string &name ) const {
+        if( m_len != name.size() ) {
+            return false;
+        }
+        const int res( strncmp( m_buffer, name.c_str(), name.size() ) );
+        return ( 0 == res );
+
+    }
+
+    bool operator == ( const Text &rhs ) const {
+        if( m_len != rhs.m_len ) {
+            return false;
+        }
+
+        const int res ( strncmp( m_buffer, rhs.m_buffer, m_len ) );
+        return ( 0 == res );
+    }
+
+private:
+    Text( const Text & );
+    Text &operator = ( const Text & );
+};
+
+struct Identifier {
+    Text m_text;
+
+    Identifier( char buffer[], size_t len )
+        : m_text( buffer, len ) {
+        // empty
+    }
+
+    Identifier( char buffer[] )
+    : m_text( buffer, strlen( buffer ) ) {
+        // empty
+    }
+
+    bool operator == ( const Identifier &rhs ) const {
+        return m_text == rhs.m_text;
+    }
+
+private:
+    Identifier( const Identifier & );
+    Identifier &operator = ( const Identifier & );
 };
 
 struct Name {
@@ -82,6 +166,10 @@ struct Name {
         , m_id( id ) {
         // empty
     }
+
+private:
+    Name( const Name & );
+    Name &operator = ( const Name& );
 };
 
 struct Reference {
@@ -103,32 +191,29 @@ struct Reference {
             m_referencedName[ i ] = name;
         }
     }
-};
 
-struct Identifier {
-    size_t m_len;
-    char *m_buffer;
-
-    Identifier( size_t len, char buffer[] )
-        : m_len( len )
-        , m_buffer( buffer ) {
-        // empty
-    }
+private:
+    Reference( const Reference & );
+    Reference &operator = ( const Reference & );
 };
 
 struct Property {
-    Identifier *m_id;
-    Value *m_primData;
+    Identifier *m_key;
+    Value *m_value;
     Reference *m_ref;
     Property *m_next;
 
     Property( Identifier *id )
-        : m_id( id )
-        , m_primData( ddl_nullptr )
+        : m_key( id )
+        , m_value( ddl_nullptr )
         , m_ref( ddl_nullptr )
         , m_next( ddl_nullptr ) {
         // empty
     }
+
+private:
+    Property( const Property & );
+    Property &operator = ( const Property & );
 };
 
 struct DataArrayList {
@@ -142,6 +227,11 @@ struct DataArrayList {
         , m_next( ddl_nullptr ) {
         // empty
     }
+
+private:
+    DataArrayList( const DataArrayList & ); 
+    DataArrayList &operator = ( const DataArrayList & );
+
 };
 
 struct Context {
@@ -151,17 +241,10 @@ struct Context {
         : m_root( ddl_nullptr ) {
         // empty
     }
-};
 
-struct BufferIt {
-    std::vector<char> m_buffer;
-    size_t m_idx;
-
-    BufferIt( const std::vector<char> &buffer )
-        : m_buffer( buffer )
-        , m_idx( 0 ) {
-        // empty
-    }
+private:
+    Context( const Context & );
+    Context &operator = ( const Context & );
 };
 
 END_ODDLPARSER_NS

@@ -7,8 +7,8 @@ Copyright (c) 2006-2012, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -45,17 +45,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STREAMREADER_H_INCLUDED
 #define AI_STREAMREADER_H_INCLUDED
 
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
+#include "Exceptional.h"
+#include <boost/shared_ptr.hpp>
+#include "../include/assimp/IOStream.hpp"
+#include "Defines.h"
 
 namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
-/** Wrapper class around IOStream to allow for consistent reading of binary data in both 
- *  little and big endian format. Don't attempt to instance the template directly. Use 
- *  StreamReaderLE to read from a little-endian stream and StreamReaderBE to read from a 
- *  BE stream. The class expects that the endianess of any input data is known at 
+/** Wrapper class around IOStream to allow for consistent reading of binary data in both
+ *  little and big endian format. Don't attempt to instance the template directly. Use
+ *  StreamReaderLE to read from a little-endian stream and StreamReaderBE to read from a
+ *  BE stream. The class expects that the endianess of any input data is known at
  *  compile-time, which should usually be true (#BaseImporter::ConvertToUTF8 implements
- *  runtime endianess conversions for text files). 
+ *  runtime endianess conversions for text files).
  *
  *  XXX switch from unsigned int for size types to size_t? or ptrdiff_t?*/
 // --------------------------------------------------------------------------------------------
@@ -67,7 +71,7 @@ public:
 
 	// FIXME: use these data types throughout the whole library,
 	// then change them to 64 bit values :-)
-	
+
 	typedef int diff;
 	typedef unsigned int pos;
 
@@ -76,7 +80,7 @@ public:
 
 	// ---------------------------------------------------------------------
 	/** Construction from a given stream with a well-defined endianess.
-	 * 
+	 *
 	 *  The StreamReader holds a permanent strong reference to the
 	 *  stream, which is released upon destruction.
 	 *  @param stream Input stream. The stream is not restarted if
@@ -90,7 +94,7 @@ public:
 		: stream(stream)
 		, le(le)
 	{
-		ai_assert(stream); 
+		ai_assert(stream);
 		InternBegin();
 	}
 
@@ -209,8 +213,8 @@ public:
 
 	// ---------------------------------------------------------------------
 	/** Set current file pointer (Get it from #GetPtr). This is if you
-	 *  prefer to do pointer arithmetics on your own or want to copy 
-	 *  large chunks of data at once. 
+	 *  prefer to do pointer arithmetics on your own or want to copy
+	 *  large chunks of data at once.
 	 *  @param p The new pointer, which is validated against the size
 	 *    limit and buffer boundaries. */
 	void SetPtr(int8_t* p)	{
@@ -246,7 +250,7 @@ public:
 
 	// ---------------------------------------------------------------------
 	/** Setup a temporary read limit
-	 * 
+	 *
 	 *  @param limit Maximum number of bytes to be read from
 	 *    the beginning of the file. Specifying UINT_MAX
 	 *    resets the limit to the original end of the stream. */
@@ -281,7 +285,7 @@ public:
 	/** overload operator>> and allow chaining of >> ops. */
 	template <typename T>
 	StreamReader& operator >> (T& f) {
-		f = Get<T>(); 
+		f = Get<T>();
 		return *this;
 	}
 
@@ -300,7 +304,7 @@ private:
 		memcpy (&f, current, sizeof(T));
 #else
 		T f = *((const T*)current);
-#endif	
+#endif
 		Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f,le);
 
 		current += sizeof(T);

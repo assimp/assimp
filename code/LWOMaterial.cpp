@@ -42,12 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Implementation of the material oart of the LWO importer class */
 
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
 // internal headers
 #include "LWOLoader.h"
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
+#include <boost/static_assert.hpp>
+
 
 using namespace Assimp;
 

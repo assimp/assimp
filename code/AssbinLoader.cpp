@@ -45,13 +45,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  see assbin_chunks.h
  */
 
-#include "AssimpPCH.h"
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 
 // internal headers
 #include "AssbinLoader.h"
 #include "assbin_chunks.h"
 #include "MemoryIOWrapper.h"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/anim.h"
+#include "../include/assimp/scene.h"
+#include <boost/static_assert.hpp>
+
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #	include <zlib.h>
 #else

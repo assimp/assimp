@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Irr importer class 
  */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
 
@@ -58,6 +58,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // We need boost::common_factor to compute the lcm/gcd of a number
 #include <boost/math/common_factor_rt.hpp>
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/material.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/postprocess.h"
+
 
 using namespace Assimp;
 using namespace irr;

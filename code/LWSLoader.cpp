@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the LWS importer class 
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
 
 #include "LWSLoader.h"
@@ -55,6 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SkeletonMeshBuilder.h"
 #include "ConvertToLHProcess.h"
 #include "Importer.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/IOSystem.hpp"
+#include <boost/scoped_ptr.hpp>
+
 
 using namespace Assimp;
 

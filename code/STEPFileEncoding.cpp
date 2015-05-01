@@ -41,11 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  STEPFileEncoding.cpp
  *  @brief STEP character handling, string unescaping
  */
-#include "AssimpPCH.h"
 #include "STEPFileEncoding.h"
 #include "fast_atof.h"
 
 #include "../contrib/ConvertUTF/ConvertUTF.h"
+#include <boost/scoped_array.hpp>
 
 using namespace Assimp;
 
@@ -332,7 +332,7 @@ bool STEP::StringToUTF8(std::string& s)
 				case '4':
 					if (s[i+3] == '\\') {
 						const size_t basei = i+4;
-						size_t j = basei, jend = s.size()-4;						
+						size_t j = basei, jend = s.size()-3;				
 
 						for (; j < jend; ++j) {
 							if (s[j] == '\\' && s[j] == 'X' && s[j] == '0' && s[j] == '\\') {

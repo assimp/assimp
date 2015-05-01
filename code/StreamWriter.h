@@ -7,8 +7,8 @@ Copyright (c) 2006-2012, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -45,14 +45,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STREAMWRITER_H_INCLUDED
 #define AI_STREAMWRITER_H_INCLUDED
 
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
+#include "../include/assimp/IOStream.hpp"
+
+#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace Assimp {
 
 // --------------------------------------------------------------------------------------------
-/** Wrapper class around IOStream to allow for consistent writing of binary data in both 
- *  little and big endian format. Don't attempt to instance the template directly. Use 
- *  StreamWriterLE to read from a little-endian stream and StreamWriterBE to read from a 
+/** Wrapper class around IOStream to allow for consistent writing of binary data in both
+ *  little and big endian format. Don't attempt to instance the template directly. Use
+ *  StreamWriterLE to read from a little-endian stream and StreamWriterBE to read from a
  *  BE stream. Alternatively, there is StreamWriterAny if the endianess of the output
  *  stream is to be determined at runtime.
  */
@@ -68,7 +72,7 @@ public:
 
 	// ---------------------------------------------------------------------
 	/** Construction from a given stream with a well-defined endianess.
-	 * 
+	 *
 	 *  The StreamReader holds a permanent strong reference to the
 	 *  stream, which is released upon destruction.
 	 *  @param stream Input stream. The stream is not re-seeked and writing
@@ -82,7 +86,7 @@ public:
 		, le(le)
 		, cursor()
 	{
-		ai_assert(stream); 
+		ai_assert(stream);
 		buffer.reserve(INITIAL_CAPACITY);
 	}
 
@@ -171,7 +175,7 @@ public:
 	/** overload operator<< and allow chaining of MM ops. */
 	template <typename T>
 	StreamWriter& operator << (T f) {
-		Put(f); 
+		Put(f);
 		return *this;
 	}
 
@@ -192,7 +196,7 @@ private:
 	template <typename T>
 	void Put(T f)	{
 		Intern :: Getter<SwapEndianess,T,RuntimeSwitch>() (&f, le);
-		
+
 		if (cursor + sizeof(T) >= buffer.size()) {
 			buffer.resize(cursor + sizeof(T));
 		}

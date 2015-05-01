@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------------
 The MIT License (MIT)
 
-Copyright (c) 2014 Kim Kulling
+Copyright (c) 2014-2015 Kim Kulling
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -109,6 +109,12 @@ bool isNumeric( const T in ) {
 
 template<class T>
 inline
+bool isNotEndOfToken( T *in, T *end ) {
+    return ( '}' != *in && ',' != *in && !isSpace( *in ) && in != end );
+}
+
+template<class T>
+inline
 bool isInteger( T *in, T *end ) {
     if( in != end ) {
         if( *in == '-' ) {
@@ -117,7 +123,8 @@ bool isInteger( T *in, T *end ) {
     }
 
     bool result( false );
-    while( '}' != *in && ',' != *in && !isSpace( *in ) && in != end ) {
+    while( isNotEndOfToken( in, end ) ) {
+        //while( '}' != *in && ',' != *in && !isSpace( *in ) && in != end ) {
         result = isNumeric( *in );
         if( !result ) {
             break;
@@ -139,7 +146,9 @@ bool isFloat( T *in, T *end ) {
 
     // check for <1>.0f
     bool result( false );
-    while( !isSpace( *in ) && in != end ) {
+    while( isNotEndOfToken( in, end ) ) {
+
+//    while( !isSpace( *in ) && in != end ) {
         if( *in == '.' ) {
             result = true;
             break;
@@ -159,7 +168,9 @@ bool isFloat( T *in, T *end ) {
     }
 
     // check for 1.<0>f
-    while( !isSpace( *in ) && in != end && *in != ',' ) {
+    while( isNotEndOfToken( in, end ) ) {
+
+//    while( !isSpace( *in ) && in != end && *in != ',' && *in != '}' ) {
         result = isNumeric( *in );
         if( !result ) {
             return false;
@@ -227,17 +238,18 @@ static T *getNextSeparator( T *in, T *end ) {
     return in;
 }
 
-static const int ErrorHex2Decimal = 9999;
+static const int ErrorHex2Decimal = 9999999;
 
 inline
 int hex2Decimal( char in ) {
     if( isNumeric( in ) ) {
-        return (int) in-48;
+        return ( in - 48 );
     }
+    
     char hexCodeLower( 'a' ), hexCodeUpper( 'A' );
     for( int i = 0; i<16; i++ ) {
         if( in == hexCodeLower + i || in == hexCodeUpper + i ) {
-            return i+10;
+            return ( i+10 );
         }
     }
 

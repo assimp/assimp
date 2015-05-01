@@ -47,9 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/types.h"
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/material.h"
+#include "BaseImporter.h"
 
 #include <string>
 #include <vector>
+
+struct aiNodeAnim;
+struct aiNode;
+struct aiAnimation;
 
 namespace Assimp{
 

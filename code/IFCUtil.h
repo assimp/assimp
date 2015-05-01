@@ -47,6 +47,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCReaderGen.h"
 #include "IFCLoader.h"
+#include "STEPFile.h"
+#include "../include/assimp/mesh.h"
+#include "../include/assimp/material.h"
+
+
+struct aiNode;
 
 namespace Assimp {
 namespace IFC {
@@ -271,6 +277,7 @@ IfcFloat ConvertSIPrefix(const std::string& prefix);
 
 // IFCProfile.cpp
 bool ProcessProfile(const IfcProfileDef& prof, TempMesh& meshout, ConversionData& conv);
+bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv);
 
 // IFCMaterial.cpp
 unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionData& conv, bool forceDefaultMat);

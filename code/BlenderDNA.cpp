@@ -42,12 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Blender `DNA`, that is its own
  *    serialized set of data structures.
  */
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #include "BlenderDNA.h"
 #include "StreamReader.h"
 #include "fast_atof.h"
+#include <boost/foreach.hpp>
 
 using namespace Assimp;
 using namespace Assimp::Blender;

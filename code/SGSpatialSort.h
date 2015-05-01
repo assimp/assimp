@@ -43,8 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_D3DSSPATIALSORT_H_INC
 #define AI_D3DSSPATIALSORT_H_INC
 
-#include <vector>
 #include "../include/assimp/types.h"
+#include <vector>
+#include <stdint.h>
 
 namespace Assimp	{
 

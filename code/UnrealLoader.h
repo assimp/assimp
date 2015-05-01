@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_3D_LOADER_H
 
 #include "BaseImporter.h"
+#include <stdint.h>
+
 namespace Assimp	{
 namespace Unreal {
 

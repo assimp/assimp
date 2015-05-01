@@ -39,14 +39,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "stdafx.h"
 #include "assimp_view.h"
-
 
 namespace AssimpView {
 
-
-/* extern */ CLogDisplay CLogDisplay::s_cInstance;
+CLogDisplay CLogDisplay::s_cInstance;
 
 //-------------------------------------------------------------------------------
 void CLogDisplay::AddEntry(const std::string& szText,

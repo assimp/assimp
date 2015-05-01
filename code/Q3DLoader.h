@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "../include/assimp/types.h"
 #include <vector>
+#include <stdint.h>
 
 namespace Assimp	{
 

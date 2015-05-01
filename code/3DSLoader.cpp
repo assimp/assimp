@@ -45,11 +45,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  http://www.the-labs.com/Blender/3DS-details.html
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
 // internal headers
 #include "3DSLoader.h"
+#include "Macros.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "StringComparison.h"
 
 using namespace Assimp;
 

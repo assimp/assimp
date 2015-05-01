@@ -38,12 +38,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_PLY_EXPORTER)
 
 #include "PlyExporter.h"
+#include <boost/scoped_ptr.hpp>
+#include <cmath>
+#include "Exceptional.h"
+#include "../include/assimp/scene.h"
 #include "../include/assimp/version.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/Exporter.hpp"
+#include "qnan.h"
+
 
 using namespace Assimp;
 namespace Assimp	{
@@ -207,6 +215,8 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 // ------------------------------------------------------------------------------------------------
 void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 {
+	static const float inf = std::numeric_limits<float>::infinity();
+	
 	// If a component (for instance normal vectors) is present in at least one mesh in the scene,
 	// then default values are written for meshes that do not contain this component.
 	for (unsigned int i = 0; i < m->mNumVertices; ++i) {
@@ -216,11 +226,11 @@ void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 			m->mVertices[i].z
 		;
 		if(components & PLY_EXPORT_HAS_NORMALS) {
-			if (m->HasNormals()) {
+			if (m->HasNormals() && is_not_qnan(m->mNormals[i].x) && std::fabs(m->mNormals[i].x) != inf) {
 				mOutput << 
-				" " << m->mNormals[i].x << 
-				" " << m->mNormals[i].y << 
-				" " << m->mNormals[i].z;
+					" " << m->mNormals[i].x << 
+					" " << m->mNormals[i].y << 
+					" " << m->mNormals[i].z;
 			}
 			else {
 				mOutput << " 0.0 0.0 0.0"; 

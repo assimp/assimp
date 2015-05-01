@@ -41,6 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_HASH_H_INCLUDED
 #define AI_HASH_H_INCLUDED
 
+#include <stdint.h>
+#include <string.h>
+
 // ------------------------------------------------------------------------------------------------
 // Hashing function taken from 
 // http://www.azillionmonkeys.com/qed/hash.html

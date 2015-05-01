@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_VALIDATEPROCESS_H_INC
 
 #include "../include/assimp/types.h"
+#include "../include/assimp/material.h"
 #include "BaseProcess.h"
 
 struct aiBone;
@@ -55,6 +56,8 @@ struct aiTexture;
 struct aiMaterial;
 struct aiNode;
 struct aiString;
+struct aiCamera;
+struct aiLight;
 
 namespace Assimp	{
 

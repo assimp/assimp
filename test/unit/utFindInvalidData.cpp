@@ -1,6 +1,7 @@
 #include "UnitTestPCH.h"
 
 #include <FindInvalidDataProcess.h>
+#include "../../include/assimp/mesh.h"
 
 
 using namespace std;

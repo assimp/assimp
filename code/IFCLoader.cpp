@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  IFCLoad.cpp
  *  @brief Implementation of the Industry Foundation Classes loader.
  */
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
@@ -60,6 +60,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/Importer.hpp"
+
 
 namespace Assimp {
 	template<> const std::string LogFunctions<IFCImporter>::log_prefix = "IFC: ";

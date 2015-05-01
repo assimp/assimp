@@ -42,13 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of conversion routines for some common Ifc helper entities.
  */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
 #include "IFCUtil.h"
 #include "PolyTools.h"
 #include "ProcessHelper.h"
+#include "Defines.h"
 
 namespace Assimp {
 	namespace IFC {

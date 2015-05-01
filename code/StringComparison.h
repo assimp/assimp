@@ -51,6 +51,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_STRING_WORKERS_H
 
 #include "../include/assimp/ai_assert.h"
+#include "StringComparison.h"
+
+#include <string.h>
+#include <stdint.h>
+#include <string>
+#include <cctype>
 
 namespace Assimp	{
 

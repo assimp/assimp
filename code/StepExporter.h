@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_STEPEXPORTER_H_INC
 
 #include "../include/assimp/ai_assert.h"
+#include "../include/assimp/matrix4x4.h"
+#include "../include/assimp/Exporter.hpp"
 #include <sstream>
 
 struct aiScene;

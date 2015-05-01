@@ -39,13 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_STEP_EXPORTER
 #include "StepExporter.h"
 #include "ConvertToLHProcess.h"
 #include "Bitmap.h"
+#include "BaseImporter.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h" 
 
@@ -53,6 +53,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <map>
 #include <list>
+#include <boost/scoped_ptr.hpp>
+#include "Exceptional.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/light.h"
 
 /* Tested with Step viewer v4 from www.ida-step.net */
 

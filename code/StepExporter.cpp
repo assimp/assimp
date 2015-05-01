@@ -48,7 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h" 
-
+#include "DefaultIOSystem.h"
+#include <iostream>
 #include <ctime>
 #include <set>
 #include <map>
@@ -58,6 +59,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/scene.h"
 #include "../include/assimp/light.h"
+
+//
+#if _MSC_VER > 1500 || (defined __GNUC___)
+#	define ASSIMP_STEP_USE_UNORDERED_MULTIMAP
+#	else
+#	define step_unordered_map map
+#	define step_unordered_multimap multimap
+#endif
+
+#ifdef ASSIMP_STEP_USE_UNORDERED_MULTIMAP
+#	include <unordered_map>
+#	if _MSC_VER > 1600
+#		define step_unordered_map unordered_map
+#		define step_unordered_multimap unordered_multimap
+#	else
+#		define step_unordered_map tr1::unordered_map
+#		define step_unordered_multimap tr1::unordered_multimap
+#	endif
+#endif
+
+typedef std::step_unordered_map<aiVector3D*, int> VectorIndexUMap;
 
 /* Tested with Step viewer v4 from www.ida-step.net */
 
@@ -70,28 +92,11 @@ namespace Assimp
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
 void ExportSceneStep(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-	std::string path = "";
-	std::string file = pFile;
-
-	// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
-	// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
-	const char* end_path = std::max(strrchr(pFile, '\\'), strrchr(pFile, '/'));
-
-	if(end_path != NULL) {
-		path = std::string(pFile, end_path + 1 - pFile);
-		file = file.substr(end_path + 1 - pFile, file.npos);
-
-		std::size_t pos = file.find_last_of('.');
-		if(pos != file.npos) {
-			file = file.substr(0, pos);
-		}
-	}
+	std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
+	std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));	
 
 	// create/copy Properties
 	ExportProperties props(*pProperties);
-
-	// set standard properties if not set
-	//if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT, false);
 
 	// invoke the exporter 
 	StepExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);
@@ -110,22 +115,22 @@ void ExportSceneStep(const char* pFile,IOSystem* pIOSystem, const aiScene* pScen
 
 
 namespace {
-inline uint64_t toIndexHash(int32_t id1, int32_t id2)
-{
-	// dont wonder that -1/-1 -> hash=-1
-    uint64_t hash = (uint32_t) id1;
-    hash = (hash << 32);
-    hash += (uint32_t) id2;
-    return hash;
-}
+	inline uint64_t toIndexHash(int32_t id1, int32_t id2)
+	{
+		// dont wonder that -1/-1 -> hash=-1
+		uint64_t hash = (uint32_t) id1;
+		hash = (hash << 32);
+		hash += (uint32_t) id2;
+		return hash;
+	}
 
-inline void fromIndexHash(uint64_t hash, int32_t &id1, int32_t &id2)
-{
-    id1 = (hash & 0xFFFFFFFF00000000) >> 32;
-    id2 = (hash & 0xFFFFFFFF);
-}
+	inline void fromIndexHash(uint64_t hash, int32_t &id1, int32_t &id2)
+	{
+		id1 = (hash & 0xFFFFFFFF00000000) >> 32;
+		id2 = (hash & 0xFFFFFFFF);
+	}
 
-// Collect world transformations for each node
+	// Collect world transformations for each node
 	void CollectTrafos(const aiNode* node, std::map<const aiNode*, aiMatrix4x4>& trafos) {
 		const aiMatrix4x4& parent = node->mParent ? trafos[node->mParent] : aiMatrix4x4();
 		trafos[node] = parent * node->mTransformation;
@@ -156,25 +161,12 @@ StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std
 	mOutput.imbue( std::locale("C") );
 
 	mScene = pScene;
-	mSceneOwned = false;
 
 	// set up strings
-	endstr = ";\n"; 
+	endstr = ";\n";
 
 	// start writing
 	WriteFile();
-
-
-
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor
-StepExporter::~StepExporter()
-{
-	if(mSceneOwned) {
-		delete mScene;
-	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -189,8 +181,9 @@ void StepExporter::WriteFile()
 	int ind = 100; // the start index to be used
 	int faceEntryLen = 30; // number of entries for a triangle/face
 	// prepare unique (count triangles and vertices)
-	std::map<aiVector3D*, int> uniqueVerts; // use a map to reduce find complexity to log(n)
-	std::map<aiVector3D*, int>::iterator it;
+
+	VectorIndexUMap uniqueVerts; // use a map to reduce find complexity to log(n)
+	VectorIndexUMap::iterator it;
 	int countFace = 0;
 
 	for (unsigned int i=0; i<mScene->mNumMeshes; ++i)
@@ -262,10 +255,7 @@ void StepExporter::WriteFile()
 	mOutput << "#25=CARTESIAN_POINT('',(0.0,0.0,0.0))" << endstr;
 	mOutput << "#26=DIRECTION('',(0.0,0.0,1.0))" << endstr;
 	mOutput << "#27=DIRECTION('',(1.0,0.0,0.0))" << endstr;	
-
 	mOutput << "#28= (NAMED_UNIT(#21)LENGTH_UNIT()SI_UNIT(.MILLI.,.METRE.))" << endstr;
-
-
 	mOutput << "#29=CLOSED_SHELL('',(";
 	for (int i=0; i<countFace; ++i)
 	{
@@ -372,8 +362,6 @@ void StepExporter::WriteFile()
 	mOutput << "ENDSEC" << endstr; // end of data section	
 	mOutput << "END-ISO-10303-21" << endstr; // end of file
 }
-
-
 
 #endif
 #endif

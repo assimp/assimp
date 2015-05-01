@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/Exporter.hpp"
 #include <sstream>
 
+
 struct aiScene;
 struct aiNode;
 
@@ -64,9 +65,6 @@ class StepExporter
 public:
 	/// Constructor for a specific scene to export
 	StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
-
-	/// Destructor
-	virtual ~StepExporter();
 
 protected:
 	/// Starts writing the contents
@@ -93,13 +91,14 @@ protected:
 
 	/// The scene to be written
 	const aiScene* mScene;
-	bool mSceneOwned;
 
 	/// current line end string for simple stream insertion
 	std::string endstr;
 
+	/// accumultated transformations for nodes
 	std::map<const aiNode*, aiMatrix4x4> trafos;
 
+	/// map to all meshed of nodes
 	typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
 	MeshesByNodeMap meshes;
 

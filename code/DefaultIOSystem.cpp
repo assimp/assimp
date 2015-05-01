@@ -167,4 +167,31 @@ bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
 	return !ASSIMP_stricmp(temp1,temp2);
 }
 
+
+std::string DefaultIOSystem::fileName(std::string path)
+{
+	std::string ret = path;
+	std::less<const char*> comp;
+	const char* end_path = comp(strrchr(path.c_str(), '\\'), strrchr(path.c_str(), '/')) ? strrchr(path.c_str(), '/') : strrchr(path.c_str(), '\\');
+	if(end_path != NULL) ret = ret.substr(end_path + 1 - path.c_str(), ret.npos);
+	return ret;
+}
+
+std::string DefaultIOSystem::completeBaseName(std::string path)
+{
+	std::string ret = fileName(path);
+	std::size_t pos = ret.find_last_of('.');
+	if(pos != ret.npos) ret = ret.substr(0, pos);
+	return ret;
+}
+
+std::string DefaultIOSystem::absolutePath(std::string path)
+{
+	std::string ret;
+	std::less<const char*> comp;
+	const char* end_path = comp(strrchr(path.c_str(), '\\'), strrchr(path.c_str(), '/')) ? strrchr(path.c_str(), '/') : strrchr(path.c_str(), '\\');
+	if(end_path != NULL) ret = std::string(path.c_str(), end_path + 1 - path.c_str());
+	return ret;
+}
+
 #undef PATHLIMIT

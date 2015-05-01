@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
-
+#include "DefaultIOSystem.h"
 #include <ctime>
 #include <set>
 #include <boost/scoped_ptr.hpp>
@@ -68,22 +68,8 @@ namespace Assimp
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
 void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-	std::string path = "";
-	std::string file = pFile;
-
-	// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
-	// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
-	const char* end_path = std::max(strrchr(pFile, '\\'), strrchr(pFile, '/'));
-
-	if(end_path != NULL) {
-		path = std::string(pFile, end_path + 1 - pFile);
-		file = file.substr(end_path + 1 - pFile, file.npos);
-
-		std::size_t pos = file.find_last_of('.');
-		if(pos != file.npos) {
-			file = file.substr(0, pos);
-		}
-	}
+	std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
+	std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
 
 	// create/copy Properties
 	ExportProperties props(*pProperties);

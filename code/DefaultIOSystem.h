@@ -76,6 +76,21 @@ public:
 	// -------------------------------------------------------------------
 	/** Compare two paths */
 	bool ComparePaths (const char* one, const char* second) const;
+	
+	/** @brief get the file name of a full filepath
+	 * example: /tmp/archive.tar.gz -> archive.tar.gz
+	 */
+	static std::string fileName(std::string path);
+
+	/** @brief get the complete base name of a full filepath
+	 * example: /tmp/archive.tar.gz -> archive.tar
+	 */
+	static std::string completeBaseName(std::string path);
+
+	/** @brief get the path of a full filepath
+	 * example: /tmp/archive.tar.gz -> /tmp/
+	 */
+	static std::string absolutePath(std::string path);
 };
 
 } //!ns Assimp

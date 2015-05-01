@@ -255,7 +255,7 @@ inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* m
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
 template <typename Real>
-inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma = true)
+inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
 {
 	Real f = 0;
 
@@ -286,14 +286,14 @@ inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma
 	}
 
 	if (!(c[0] >= '0' && c[0] <= '9') &&
-	    !(c[0] == '.' && c[1] >= '0' && c[1] <= '9'))
+	    !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9'))
 	{
 		throw std::invalid_argument("Cannot parse string "
 		                            "as real number: does not start with digit "
 		                            "or decimal point followed by digit.");
 	}
 
-	if (*c != '.')
+	if (*c != '.' && (! check_comma || c[0] != ','))
 	{
 		f = static_cast<Real>( strtoul10_64 ( c, &c) );
 	}

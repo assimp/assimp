@@ -98,7 +98,7 @@ SET( Common_SRCS
 	ScenePrivate.h
 	PostStepRegistry.cpp
 	ImporterRegistry.cpp
-	ByteSwap.h
+	ByteSwapper.h
 	DefaultProgressHandler.h
 	DefaultIOStream.cpp
 	DefaultIOStream.h
@@ -784,7 +784,7 @@ if( MSVC )
   else()
     set(MSVC_PREFIX "vc130")
   endif()
-  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
+  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
 SET_TARGET_PROPERTIES( assimp PROPERTIES

@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <cstddef>
 #include <vector>
+#include <string>
 
 #include <string.h>
 
@@ -77,41 +78,83 @@ enum NameType {
     LocalName
 };
 
-struct Token {
-public:
-    Token( const char *token )
-    : m_token( token )
-    , m_size( 0 ){
-        if( ddl_nullptr != token ) {
-            m_size = strlen( m_token );
+struct Text {
+    size_t m_capacity;
+    size_t m_len;
+    char *m_buffer;
+
+    Text( const char *buffer, size_t numChars )
+    : m_capacity( 0 )
+    , m_len( 0 )
+    , m_buffer( ddl_nullptr ) {
+        set( buffer, numChars );
+    }
+
+    ~Text() {
+        clear();
+    }
+
+    void clear() {
+        delete[] m_buffer;
+        m_buffer = ddl_nullptr;
+        m_capacity = 0;
+        m_len = 0;
+    }
+
+    void set( const char *buffer, size_t numChars ) {
+        clear();
+        if( numChars > 0 ) {
+            m_len = numChars;
+            m_capacity = m_len + 1;
+            m_buffer = new char[ m_capacity ];
+            strncpy( m_buffer, buffer, numChars );
+            m_buffer[ numChars ] = '\0';
         }
     }
-    
-    ~Token() {
-        // empty
+
+    bool operator == ( const std::string &name ) const {
+        if( m_len != name.size() ) {
+            return false;
+        }
+        const int res( strncmp( m_buffer, name.c_str(), name.size() ) );
+        return ( 0 == res );
+
     }
 
-    size_t length() const {
-        return m_size;
-    }
-
-    bool operator == ( const Token &rhs ) const {
-        if( m_size != rhs.m_size ) {
+    bool operator == ( const Text &rhs ) const {
+        if( m_len != rhs.m_len ) {
             return false;
         }
 
-        const int res( strncmp( m_token, rhs.m_token, m_size ) );
-        return ( res == 0 );
+        const int res ( strncmp( m_buffer, rhs.m_buffer, m_len ) );
+        return ( 0 == res );
     }
 
 private:
-    Token();
-    Token( const Token  & );
-    Token &operator = ( const Token & );
+    Text( const Text & );
+    Text &operator = ( const Text & );
+};
+
+struct Identifier {
+    Text m_text;
+
+    Identifier( char buffer[], size_t len )
+        : m_text( buffer, len ) {
+        // empty
+    }
+
+    Identifier( char buffer[] )
+    : m_text( buffer, strlen( buffer ) ) {
+        // empty
+    }
+
+    bool operator == ( const Identifier &rhs ) const {
+        return m_text == rhs.m_text;
+    }
 
 private:
-    const char *m_token;
-    size_t m_size;
+    Identifier( const Identifier & );
+    Identifier &operator = ( const Identifier & );
 };
 
 struct Name {
@@ -154,30 +197,15 @@ private:
     Reference &operator = ( const Reference & );
 };
 
-struct Identifier {
-    size_t m_len;
-    char *m_buffer;
-
-    Identifier( size_t len, char buffer[] )
-        : m_len( len )
-        , m_buffer( buffer ) {
-        // empty
-    }
-
-private:
-    Identifier( const Identifier & );
-    Identifier &operator = ( const Identifier & );
-};
-
 struct Property {
-    Identifier *m_id;
-    Value *m_primData;
+    Identifier *m_key;
+    Value *m_value;
     Reference *m_ref;
     Property *m_next;
 
     Property( Identifier *id )
-        : m_id( id )
-        , m_primData( ddl_nullptr )
+        : m_key( id )
+        , m_value( ddl_nullptr )
         , m_ref( ddl_nullptr )
         , m_next( ddl_nullptr ) {
         // empty

@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LWOLoader.h"
 #include "StringComparison.h"
 #include "SGSpatialSort.h"
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
 #include <boost/scoped_ptr.hpp>

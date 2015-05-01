@@ -117,11 +117,11 @@
 		2B7F478E1708365200A106A9 /* tuple.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45961708365100A106A9 /* tuple.hpp */; };
 		2B7F478F1708365200A106A9 /* tuple.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45961708365100A106A9 /* tuple.hpp */; };
 		2B7F47901708365200A106A9 /* tuple.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45961708365100A106A9 /* tuple.hpp */; };
-		2B7F479B1708365200A106A9 /* ByteSwap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwap.h */; };
-		2B7F479C1708365200A106A9 /* ByteSwap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwap.h */; };
-		2B7F479D1708365200A106A9 /* ByteSwap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwap.h */; };
-		2B7F479E1708365200A106A9 /* ByteSwap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwap.h */; };
-		2B7F479F1708365200A106A9 /* ByteSwap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwap.h */; };
+		2B7F479B1708365200A106A9 /* ByteSwapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwapper.h */; };
+		2B7F479C1708365200A106A9 /* ByteSwapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwapper.h */; };
+		2B7F479D1708365200A106A9 /* ByteSwapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwapper.h */; };
+		2B7F479E1708365200A106A9 /* ByteSwapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwapper.h */; };
+		2B7F479F1708365200A106A9 /* ByteSwapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B7F45991708365100A106A9 /* ByteSwapper.h */; };
 		2B7F47A01708365200A106A9 /* CalcTangentsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F459A1708365100A106A9 /* CalcTangentsProcess.cpp */; };
 		2B7F47A11708365200A106A9 /* CalcTangentsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F459A1708365100A106A9 /* CalcTangentsProcess.cpp */; };
 		2B7F47A21708365200A106A9 /* CalcTangentsProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2B7F459A1708365100A106A9 /* CalcTangentsProcess.cpp */; };
@@ -2018,7 +2018,7 @@
 		2B7F45931708365100A106A9 /* static_assert.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = static_assert.hpp; sourceTree = "<group>"; };
 		2B7F45941708365100A106A9 /* timer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = timer.hpp; sourceTree = "<group>"; };
 		2B7F45961708365100A106A9 /* tuple.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = tuple.hpp; sourceTree = "<group>"; };
-		2B7F45991708365100A106A9 /* ByteSwap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ByteSwap.h; sourceTree = "<group>"; };
+		2B7F45991708365100A106A9 /* ByteSwapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ByteSwapper.h; sourceTree = "<group>"; };
 		2B7F459A1708365100A106A9 /* CalcTangentsProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CalcTangentsProcess.cpp; sourceTree = "<group>"; };
 		2B7F459B1708365100A106A9 /* CalcTangentsProcess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CalcTangentsProcess.h; sourceTree = "<group>"; };
 		2B7F459C1708365100A106A9 /* CInterfaceIOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CInterfaceIOWrapper.h; sourceTree = "<group>"; };
@@ -2509,7 +2509,7 @@
 				2B7F45761708365100A106A9 /* BaseProcess.cpp */,
 				2B7F45771708365100A106A9 /* BaseProcess.h */,
 				2B7F45831708365100A106A9 /* BlobIOSystem.h */,
-				2B7F45991708365100A106A9 /* ByteSwap.h */,
+				2B7F45991708365100A106A9 /* ByteSwapper.h */,
 				2B7F459A1708365100A106A9 /* CalcTangentsProcess.cpp */,
 				2B7F459B1708365100A106A9 /* CalcTangentsProcess.h */,
 				2B7F459C1708365100A106A9 /* CInterfaceIOWrapper.h */,
@@ -3517,7 +3517,7 @@
 				2B7F47841708365200A106A9 /* static_assert.hpp in Headers */,
 				2B7F47891708365200A106A9 /* timer.hpp in Headers */,
 				2B7F478E1708365200A106A9 /* tuple.hpp in Headers */,
-				2B7F479D1708365200A106A9 /* ByteSwap.h in Headers */,
+				2B7F479D1708365200A106A9 /* ByteSwapper.h in Headers */,
 				2B7F47A71708365200A106A9 /* CalcTangentsProcess.h in Headers */,
 				2B7F47AC1708365200A106A9 /* CInterfaceIOWrapper.h in Headers */,
 				2B7F47C51708365200A106A9 /* ColladaExporter.h in Headers */,
@@ -3765,7 +3765,7 @@
 				2B7F47851708365200A106A9 /* static_assert.hpp in Headers */,
 				2B7F478A1708365200A106A9 /* timer.hpp in Headers */,
 				2B7F478F1708365200A106A9 /* tuple.hpp in Headers */,
-				2B7F479E1708365200A106A9 /* ByteSwap.h in Headers */,
+				2B7F479E1708365200A106A9 /* ByteSwapper.h in Headers */,
 				2B7F47A81708365200A106A9 /* CalcTangentsProcess.h in Headers */,
 				2B7F47AD1708365200A106A9 /* CInterfaceIOWrapper.h in Headers */,
 				2B7F47C61708365200A106A9 /* ColladaExporter.h in Headers */,
@@ -4013,7 +4013,7 @@
 				2B7F47861708365200A106A9 /* static_assert.hpp in Headers */,
 				2B7F478B1708365200A106A9 /* timer.hpp in Headers */,
 				2B7F47901708365200A106A9 /* tuple.hpp in Headers */,
-				2B7F479F1708365200A106A9 /* ByteSwap.h in Headers */,
+				2B7F479F1708365200A106A9 /* ByteSwapper.h in Headers */,
 				2B7F47A91708365200A106A9 /* CalcTangentsProcess.h in Headers */,
 				2B7F47AE1708365200A106A9 /* CInterfaceIOWrapper.h in Headers */,
 				2B7F47C71708365200A106A9 /* ColladaExporter.h in Headers */,
@@ -4261,7 +4261,7 @@
 				2B7F47821708365200A106A9 /* static_assert.hpp in Headers */,
 				2B7F47871708365200A106A9 /* timer.hpp in Headers */,
 				2B7F478C1708365200A106A9 /* tuple.hpp in Headers */,
-				2B7F479B1708365200A106A9 /* ByteSwap.h in Headers */,
+				2B7F479B1708365200A106A9 /* ByteSwapper.h in Headers */,
 				2B7F47A51708365200A106A9 /* CalcTangentsProcess.h in Headers */,
 				2B7F47AA1708365200A106A9 /* CInterfaceIOWrapper.h in Headers */,
 				2B7F47C31708365200A106A9 /* ColladaExporter.h in Headers */,
@@ -4509,7 +4509,7 @@
 				2B7F47831708365200A106A9 /* static_assert.hpp in Headers */,
 				2B7F47881708365200A106A9 /* timer.hpp in Headers */,
 				2B7F478D1708365200A106A9 /* tuple.hpp in Headers */,
-				2B7F479C1708365200A106A9 /* ByteSwap.h in Headers */,
+				2B7F479C1708365200A106A9 /* ByteSwapper.h in Headers */,
 				2B7F47A61708365200A106A9 /* CalcTangentsProcess.h in Headers */,
 				2B7F47AB1708365200A106A9 /* CInterfaceIOWrapper.h in Headers */,
 				2B7F47C41708365200A106A9 /* ColladaExporter.h in Headers */,

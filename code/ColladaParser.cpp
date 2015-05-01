@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
+#include <sstream>
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
@@ -1230,6 +1231,14 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
 				ReadEffectColor( pEffect.mReflective, pEffect.mTexReflective);
 			}
 			else if( IsElement( "transparent")) {
+				pEffect.mHasTransparency = true;
+
+				// In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
+				if(::strcmp(mReader->getAttributeValueSafe("opaque"), "RGB_ZERO") == 0) {
+					// TODO: handle RGB_ZERO mode completely
+					pEffect.mRGBTransparency = true;
+				}
+
 				ReadEffectColor( pEffect.mTransparent,pEffect.mTexTransparent);
 			}
 			else if( IsElement( "shininess"))

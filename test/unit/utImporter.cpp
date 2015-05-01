@@ -131,21 +131,19 @@ TEST_F(ImporterTest, testMemoryRead)
 // ------------------------------------------------------------------------------------------------
 TEST_F(ImporterTest, testIntProperty)
 {
-	bool b;
-	pImp->SetPropertyInteger("quakquak",1503,&b);
+	bool b = pImp->SetPropertyInteger("quakquak",1503);
 	EXPECT_FALSE(b);
 	EXPECT_EQ(1503, pImp->GetPropertyInteger("quakquak",0));
 	EXPECT_EQ(314159, pImp->GetPropertyInteger("not_there",314159));
 
-	pImp->SetPropertyInteger("quakquak",1504,&b);
+	b = pImp->SetPropertyInteger("quakquak",1504);
 	EXPECT_TRUE(b);
 }
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(ImporterTest, testFloatProperty)
 {
-	bool b;
-	pImp->SetPropertyFloat("quakquak",1503.f,&b);
+	bool b = pImp->SetPropertyFloat("quakquak",1503.f);
 	EXPECT_TRUE(!b);
 	EXPECT_EQ(1503.f, pImp->GetPropertyFloat("quakquak",0.f));
 	EXPECT_EQ(314159.f, pImp->GetPropertyFloat("not_there",314159.f));
@@ -154,8 +152,7 @@ TEST_F(ImporterTest, testFloatProperty)
 // ------------------------------------------------------------------------------------------------
 TEST_F(ImporterTest, testStringProperty)
 {
-	bool b;
-	pImp->SetPropertyString("quakquak","test",&b);
+	bool b = pImp->SetPropertyString("quakquak","test");
 	EXPECT_TRUE(!b);
 	EXPECT_EQ("test", pImp->GetPropertyString("quakquak","weghwekg"));
 	EXPECT_EQ("ILoveYou", pImp->GetPropertyString("not_there","ILoveYou"));

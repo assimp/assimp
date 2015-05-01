@@ -38,12 +38,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
-#include "stdafx.h"
 #include "assimp_view.h"
-
+#include "AnimEvaluator.h"
+#include "SceneAnimator.h"
 
 namespace AssimpView {
+
+using namespace Assimp;
+
+extern std::string g_szCheckerBackgroundShader;
 
 struct SVertex
 {
@@ -690,7 +693,7 @@ int CDisplay::FillDisplayList(void)
 	// fill in the first entry
 	TVITEMEX tvi; 
 	TVINSERTSTRUCT sNew;
-	tvi.pszText = "Model";
+	tvi.pszText = (char*) "Model";
 	tvi.cchTextMax = (int)strlen(tvi.pszText);
 	tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_STATE;
 	tvi.state = TVIS_EXPANDED;
@@ -2240,7 +2243,7 @@ int CDisplay::RenderTextureView()
 		const float ny = (float)sRect.bottom;
 		const float  x = (float)sDesc.Width;
 		const float  y = (float)sDesc.Height;
-		float f = std::min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
+		float f = min((nx-30) / x,(ny-30) / y) * (m_fTextureZoom/1000.0f);
 
 		float fHalfX = (nx - (f * x)) / 2.0f;
 		float fHalfY = (ny - (f * y)) / 2.0f;

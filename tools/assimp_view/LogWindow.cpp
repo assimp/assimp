@@ -39,13 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "stdafx.h"
 #include "assimp_view.h"
 #include "richedit.h"
 
 namespace AssimpView {
 
-/* extern */ CLogWindow CLogWindow::s_cInstance;
+CLogWindow CLogWindow::s_cInstance;
+
 extern HKEY g_hRegistry;
 
 // header for the RTF log file

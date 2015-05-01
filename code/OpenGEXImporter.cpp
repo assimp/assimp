@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MakeVerboseFormat.h"
 
 #include <openddlparser/OpenDDLParser.h>
-#include "../include/assimp/scene.h"
-
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
 
 #include <vector>
 
@@ -80,6 +80,10 @@ namespace Grammar {
     static const char *IndexArrayType      = "IndexArray";
     static const char *MaterialType        = "Material";
     static const char *ColorType           = "Color";
+    static const std::string DiffuseColorToken = "diffuse";
+    static const std::string SpecularColorToken = "specular";
+    static const std::string EmissionColorToken = "emission";
+
     static const char *TextureType         = "Texture";
 
     enum TokenType {
@@ -363,9 +367,9 @@ void OpenGEXImporter::handleMetricNode( DDLNode *node, aiScene *pScene ) {
 
     Property *prop( node->getProperties() );
     while( NULL != prop ) {
-        if( NULL != prop->m_id ) {
-            if( Value::ddl_string == prop->m_primData->m_type ) {
-                std::string valName( (char*) prop->m_primData->m_data );
+        if( NULL != prop->m_key ) {
+            if( Value::ddl_string == prop->m_value->m_type ) {
+                std::string valName( ( char* ) prop->m_value->m_data );
                 int type( Grammar::isValidMetricType( valName.c_str() ) );
                 if( Grammar::NoneType != type ) {
                     Value *val( node->getValue() );
@@ -415,7 +419,7 @@ static void getRefNames( DDLNode *node, std::vector<std::string> &names ) {
         for( size_t i = 0; i < ref->m_numRefs; i++ )  {
             Name *currentName( ref->m_referencedName[ i ] );
             if( NULL != currentName && NULL != currentName->m_id ) {
-                const std::string name( currentName->m_id->m_buffer );
+                const std::string name( currentName->m_id->m_text.m_buffer );
                 if( !name.empty() ) {
                     names.push_back( name );
                 }
@@ -530,10 +534,10 @@ static void propId2StdString( Property *prop, std::string &name, std::string &ke
         return;
     }
 
-    if( NULL != prop->m_id ) {
-        name = prop->m_id->m_buffer;
-        if( Value::ddl_string == prop->m_primData->m_type ) {
-            key = prop->m_primData->getString();
+    if( NULL != prop->m_key ) {
+        name = prop->m_key->m_text.m_buffer;
+        if( Value::ddl_string == prop->m_value->m_type ) {
+            key = prop->m_value->getString();
         }
     }
 }
@@ -705,7 +709,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         Value *next( vaList->m_dataList );
         for( size_t indices = 0; indices < current.mNumIndices; indices++ ) {
             const int idx = next->getInt32();
-            ai_assert( idx <= m_currentVertices.m_numVerts );
+            ai_assert( static_cast<size_t>( idx ) <= m_currentVertices.m_numVerts );
 
             aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
             aiVector3D &normal = ( m_currentVertices.m_normals[ idx ] );
@@ -725,30 +729,36 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
 }
 
 //------------------------------------------------------------------------------------------------
-static void getColorRGBA( aiColor3D *pColor, Value *data ) {
-    if( NULL == pColor || NULL == data ) {
+static void getColorRGB( aiColor3D *pColor, DataArrayList *colList ) {
+    if( NULL == pColor || NULL == colList ) {
         return;
     }
-
-    pColor->r = data->getFloat();
-    data = data->getNext();
-    pColor->g = data->getFloat();
-    data = data->getNext();
-    pColor->b = data->getFloat();
-    data = data->getNext();
+    
+    ai_assert( 3 == colList->m_numItems );
+    Value *val( colList->m_dataList );
+    pColor->r = val->getFloat();
+    val = val->getNext();
+    pColor->g = val->getFloat();
+    val = val->getNext();
+    pColor->b = val->getFloat();
 }
 
 //------------------------------------------------------------------------------------------------
 enum ColorType {
     NoneColor = 0,
-    DiffuseColor
+    DiffuseColor,
+    SpecularColor,
+    EmissionColor
 };
 
 //------------------------------------------------------------------------------------------------
 static ColorType getColorType( Identifier *id ) {
-    const int res(strncmp("diffuse", id->m_buffer, id->m_len ) );
-    if( 0 == res ) {
+    if( id->m_text == Grammar::DiffuseColorToken ) {
         return DiffuseColor;
+    } else if( id->m_text == Grammar::SpecularColorToken ) {
+        return SpecularColor;
+    } else if( id->m_text == Grammar::EmissionColorToken ) {
+        return EmissionColor;
     }
 
     return NoneColor;
@@ -769,9 +779,23 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
         return;
     }
 
-    Property *colorProp = node->getProperties();
-    if( NULL != colorProp ) {
-        if( NULL != colorProp->m_id ) {
+    Property *prop = node->findPropertyByName( "attrib" );
+    if( NULL != prop ) {
+        if( NULL != prop->m_value ) {
+            DataArrayList *colList( node->getDataArrayList() );
+            if( NULL == colList ) {
+                return;
+            }
+            aiColor3D col;
+            getColorRGB( &col, colList );
+            const ColorType colType( getColorType( prop->m_key ) );
+            if( DiffuseColor == colType ) {
+                m_currentMaterial->AddProperty( &col, 1, AI_MATKEY_COLOR_DIFFUSE );
+            } else if( SpecularColor == colType ) {
+                m_currentMaterial->AddProperty( &col, 1, AI_MATKEY_COLOR_SPECULAR );
+            } else if( EmissionColor == colType ) {
+                m_currentMaterial->AddProperty( &col, 1, AI_MATKEY_COLOR_EMISSIVE );
+            }
         }
     }
 }
@@ -786,13 +810,10 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
     if( m_meshCache.empty() ) {
         return;
     }
+    
     pScene->mNumMeshes = m_meshCache.size();
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
-    size_t i( 0 );
-    for( std::vector<aiMesh*>::iterator it = m_meshCache.begin(); it != m_meshCache.end(); it++ ) {
-        pScene->mMeshes[ i ] = *it;
-        i++;
-    }
+    std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
 }
 
 //------------------------------------------------------------------------------------------------
@@ -833,13 +854,10 @@ void OpenGEXImporter::createNodeTree( aiScene *pScene ) {
     if( m_root->m_children.empty() ) {
         return;
     }
-    size_t i( 0 );
+
     pScene->mRootNode->mNumChildren = m_root->m_children.size();
-    pScene->mRootNode->mChildren = new C_STRUCT aiNode*[ pScene->mRootNode->mNumChildren ];
-    for( ChildInfo::NodeList::iterator it = m_root->m_children.begin(); it != m_root->m_children.end(); it++ ) {
-        pScene->mRootNode->mChildren[ i ] = *it;
-        i++;
-    }
+    pScene->mRootNode->mChildren = new aiNode*[ pScene->mRootNode->mNumChildren ];
+    std::copy( m_root->m_children.begin(), m_root->m_children.end(), pScene->mRootNode->mChildren );
 }
 
 //------------------------------------------------------------------------------------------------

@@ -40,11 +40,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file XFileExporter.h
+/** @file StepExporter.h
  * Declares the exporter class to write a scene to a Collada file
  */
-#ifndef AI_XFILEEXPORTER_H_INC
-#define AI_XFILEEXPORTER_H_INC
+#ifndef AI_STEPEXPORTER_H_INC
+#define AI_STEPEXPORTER_H_INC
 
 #include "../include/assimp/ai_assert.h"
 #include <sstream>
@@ -55,75 +55,54 @@ struct aiNode;
 namespace Assimp	
 {
 
-/// Helper class to export a given scene to a X-file.
-/// Note: an xFile uses a left hand system. Assimp used a right hand system (OpenGL), therefore we have to transform everything
-class XFileExporter
+/// Helper class to export a given scene to a StepFile.
+/// Note: an StepFile uses a left hand system. Assimp used a right hand system (OpenGL), therefore we have to transform everything
+class StepExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
+	StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
 
 	/// Destructor
-	virtual ~XFileExporter();
+	virtual ~StepExporter();
 
 protected:
 	/// Starts writing the contents
 	void WriteFile();	
 
-	/// Writes the asset header
-	void WriteHeader();
-
-	/// write a frame transform
-	void WriteFrameTransform(aiMatrix4x4& m);
-
-	/// Recursively writes the given node
-	void WriteNode( aiNode* pNode );
-
-	/// write a mesh entry of the scene
-	void WriteMesh( aiMesh* mesh);
-
-	/// Enters a new xml element, which increases the indentation
-	void PushTag() { startstr.append( "  "); }
-
-	/// Leaves an element, decreasing the indentation
-	void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
-
 public:
+
 	/// Stringstream to write all output into
 	std::stringstream mOutput;
 
 protected:
 
-	/// normalize the name to be accepted by xfile readers
-	std::string toXFileString(aiString &name);
-
 	/// hold the properties pointer
-	const ExportProperties* mProperties;
-
-	/// write a path
-	void writePath(aiString path);	
+	const ExportProperties* mProperties;	
 
 	/// The IOSystem for output
 	IOSystem* mIOSystem;
 
-	/// Path of the directory where the scene will be exported
-	const std::string mPath;
-
 	/// Name of the file (without extension) where the scene will be exported
-	const std::string mFile;
+	std::string mFile;
+
+	/// Path of the directory where the scene will be exported
+	std::string mPath;	
 
 	/// The scene to be written
 	const aiScene* mScene;
 	bool mSceneOwned;
 
-	/// current line start string, contains the current indentation for simple stream insertion
-	std::string startstr;
-
 	/// current line end string for simple stream insertion
 	std::string endstr;
-  
+
+	std::map<const aiNode*, aiMatrix4x4> trafos;
+
+	typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
+	MeshesByNodeMap meshes;
+
 };
 
 }
 
-#endif // !! AI_XFILEEXPORTER_H_INC
+#endif // !! AI_STEPEXPORTER_H_INC

@@ -500,13 +500,13 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 
 std::string XFileExporter::toXFileString(aiString &name)
 {
-	std::string pref = "NN_"; // node name prefix to prevent unexpected start of string
+	std::string pref = ""; // node name prefix to prevent unexpected start of string
 	std::string str = pref + std::string(name.C_Str());	
 	for (int i=0; i < (int) str.length(); ++i)
 	{
-		if ((str[i] >= 48 && str[i] <= 57) || // 0-9
-			(str[i] >= 65 && str[i] <= 90) || // A-Z
-			(str[i] >= 97 && str[i] <= 122)) // a-z
+		if ((str[i] >= '0' && str[i] <= '9') || // 0-9
+			(str[i] >= 'A' && str[i] <= 'Z') || // A-Z
+			(str[i] >= 'a' && str[i] <= 'z')) // a-z
 			continue;
 		str[i] = '_';
 	}

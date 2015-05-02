@@ -171,11 +171,11 @@ bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
 std::string DefaultIOSystem::fileName(std::string path)
 {
 	std::string ret = path;
-	std::less<const char*> comp;
-	const char* end_path = comp(strrchr(path.c_str(), '\\'), strrchr(path.c_str(), '/')) ? strrchr(path.c_str(), '/') : strrchr(path.c_str(), '\\');
-	if(end_path != NULL) ret = ret.substr(end_path + 1 - path.c_str(), ret.npos);
+	std::size_t last = ret.find_last_of("\\/");
+	if (last != std::string::npos) ret = ret.substr(last + 1);
 	return ret;
 }
+
 
 std::string DefaultIOSystem::completeBaseName(std::string path)
 {
@@ -185,12 +185,12 @@ std::string DefaultIOSystem::completeBaseName(std::string path)
 	return ret;
 }
 
+
 std::string DefaultIOSystem::absolutePath(std::string path)
 {
-	std::string ret;
-	std::less<const char*> comp;
-	const char* end_path = comp(strrchr(path.c_str(), '\\'), strrchr(path.c_str(), '/')) ? strrchr(path.c_str(), '/') : strrchr(path.c_str(), '\\');
-	if(end_path != NULL) ret = std::string(path.c_str(), end_path + 1 - path.c_str());
+	std::string ret = path;
+	std::size_t last = ret.find_last_of("\\/");
+	if (last != std::string::npos) ret = ret.substr(0, last);
 	return ret;
 }
 

@@ -178,6 +178,12 @@ void StepExporter::WriteFile()
 	mOutput.setf(std::ios::fixed);
 	mOutput.precision(16); // precission for double
 	
+	// standard color
+	aiColor4D fColor;
+	fColor.r = 0.8f;
+	fColor.g = 0.8f;
+	fColor.b = 0.8f;
+
 	int ind = 100; // the start index to be used
 	int faceEntryLen = 30; // number of entries for a triangle/face
 	// prepare unique (count triangles and vertices)
@@ -310,6 +316,18 @@ void StepExporter::WriteFile()
 			int pid1 = uniqueVerts.find(v1)->second;
 			int pid2 = uniqueVerts.find(v2)->second;
 			int pid3 = uniqueVerts.find(v3)->second;
+			
+			// mean vertex color for the face if available
+			if (mesh->HasVertexColors(0))
+			{					
+				fColor.r = 0.0;
+				fColor.g = 0.0;
+				fColor.b = 0.0;
+				fColor += mesh->mColors[0][face->mIndices[0]];
+				fColor += mesh->mColors[0][face->mIndices[1]];
+				fColor += mesh->mColors[0][face->mIndices[2]];
+				fColor /= 3.0f;
+			}
 
 			int sid = ind; // the sub index		
 			mOutput << "#" << sid << "=STYLED_ITEM('',(#" << sid+1 << "),#" << sid+8 << ")" << endstr; /* the item that must be referenced in #1 */
@@ -320,7 +338,7 @@ void StepExporter::WriteFile()
 			mOutput << "#" << sid+4 << "=SURFACE_STYLE_FILL_AREA(#" << sid+5 << ")" << endstr;
 			mOutput << "#" << sid+5 << "=FILL_AREA_STYLE('',(#" << sid+6 << "))" << endstr;
 			mOutput << "#" << sid+6 << "=FILL_AREA_STYLE_COLOUR('',#" << sid+7 << ")" << endstr;
-			mOutput << "#" << sid+7 << "=COLOUR_RGB('',0.0,0.0,1.0)" << endstr;
+			mOutput << "#" << sid+7 << "=COLOUR_RGB(''," << fColor.r << "," << fColor.g << "," << fColor.b << ")" << endstr;
 
 			/* this is the geometry */
 			mOutput << "#" << sid+8 << "=FACE_SURFACE('',(#" << sid+13 << "),#" << sid+9<< ",.T.)" << endstr; /* the face that must be referenced in 29 */

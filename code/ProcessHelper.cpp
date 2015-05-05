@@ -95,6 +95,26 @@ void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D&
 }
 
 // -------------------------------------------------------------------------------
+void FindSceneCenter (aiScene* scene, aiVector3D& out, aiVector3D& min, aiVector3D& max)
+{
+	if (scene->mNumMeshes == 0) return;
+	FindMeshCenter(scene->mMeshes[0], out, min, max);
+	for (unsigned int i = 1; i < scene->mNumMeshes; ++i)
+	{
+		aiVector3D tout, tmin, tmax;
+		FindMeshCenter(scene->mMeshes[i], tout, tmin, tmax);
+		if (min[0] > tmin[0]) min[0] = tmin[0];
+		if (min[1] > tmin[1]) min[1] = tmin[1];
+		if (min[2] > tmin[2]) min[2] = tmin[2];
+		if (max[0] < tmax[0]) max[0] = tmax[0];
+		if (max[1] < tmax[1]) max[1] = tmax[1];
+		if (max[2] < tmax[2]) max[2] = tmax[2];
+	}
+	out = min + (max-min)*0.5f;
+}
+
+
+// -------------------------------------------------------------------------------
 void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out, aiVector3D& min,
 	aiVector3D& max, const aiMatrix4x4& m)
 {

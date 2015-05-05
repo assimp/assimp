@@ -580,6 +580,12 @@ SET( XFile_SRCS
 )
 SOURCE_GROUP( XFile FILES ${XFile_SRCS})
 
+SET( Step_SRCS
+	StepExporter.h
+	StepExporter.cpp
+)
+SOURCE_GROUP( Step FILES ${Step_SRCS})
+
 SET( Exporter_SRCS
 	Exporter.cpp
 	AssimpCExport.cpp
@@ -717,6 +723,7 @@ SET( assimp_src
 	${Terragen_SRCS}
 	${Unreal_SRCS}
 	${XFile_SRCS}
+	${Step_SRCS}
 	${Extra_SRCS}
 	${MS3D_SRCS}
 	${COB_SRCS}
@@ -784,7 +791,7 @@ if( MSVC )
   else()
     set(MSVC_PREFIX "vc130")
   endif()
-  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
+  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
 SET_TARGET_PROPERTIES( assimp PROPERTIES

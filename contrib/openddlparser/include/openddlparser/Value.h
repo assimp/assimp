@@ -21,8 +21,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -----------------------------------------------------------------------------------------------*/
 #pragma once
-#ifndef OPENDDLPARSER_VALUE_H_INC
-#define OPENDDLPARSER_VALUE_H_INC
 
 #include <openddlparser/OpenDDLCommon.h>
 
@@ -101,5 +99,3 @@ struct DLL_ODDLPARSER_EXPORT ValueAllocator {
 };
 
 END_ODDLPARSER_NS
-
-#endif // OPENDDLPARSER_VALUE_H_INC

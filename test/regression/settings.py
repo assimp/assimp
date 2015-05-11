@@ -53,16 +53,16 @@ import os
 # pond.0.ply - loads with 40k identical triangles, causing postprocessing
 # to have quadratic runtime.
 # -------------------------------------------------------------------------------
-files_to_ignore = ["pond.0.ply"]
+files_to_ignore = ["pond.0.ply", "Example.ogex"]
 
 # -------------------------------------------------------------------------------
 # List of file extensions to be excluded from the regression suite
 # File extensions are case insensitive
 # -------------------------------------------------------------------------------
 exclude_extensions = [
-    ".lws", ".assbin", ".assxml", ".txt", ".md",
+    ".assbin", ".assxml", ".txt", ".md",
     ".jpeg", ".jpg", ".png", ".gif", ".tga", ".bmp",
-    ".skeleton", ".skeleton.xml"
+    ".skeleton", ".skeleton.xml", ".license", ".mtl", ".material"
 ]
 
 # -------------------------------------------------------------------------------

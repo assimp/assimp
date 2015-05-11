@@ -38,7 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
@@ -47,6 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3DSLoader.h"
 #include "SceneCombiner.h"
 #include "SplitLargeMeshes.h"
+#include "StringComparison.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/Exporter.hpp"
+#include <memory>
 
 using namespace Assimp;
 namespace Assimp	{
@@ -144,7 +148,7 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to 3DS. Prototyped and registered in Exporter.cpp
-void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	boost::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
 	if(!outfile) {
@@ -188,8 +192,8 @@ Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, c
 
 	{
 		ChunkWriter chunk(writer, Discreet3DS::CHUNK_OBJMESH);
-		WriteMeshes();
 		WriteMaterials();
+		WriteMeshes();
 
 		{
 			ChunkWriter chunk(writer, Discreet3DS::CHUNK_MASTER_SCALE);
@@ -294,7 +298,7 @@ void Discreet3DSExporter::WriteMaterials()
 			WriteColor(color);
 		}
 
-		aiShadingMode shading_mode;
+		aiShadingMode shading_mode = aiShadingMode_Flat;
 		if (mat.Get(AI_MATKEY_SHADING_MODEL, shading_mode) == AI_SUCCESS) {
 			ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_SHADING);
 

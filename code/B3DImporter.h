@@ -47,9 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/types.h"
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/material.h"
+#include "BaseImporter.h"
 
 #include <string>
 #include <vector>
+
+struct aiNodeAnim;
+struct aiNode;
+struct aiAnimation;
 
 namespace Assimp{
 
@@ -87,8 +92,8 @@ private:
 		float weights[4];
 	};
 
-	void Oops();
-	void Fail( std::string str );
+	AI_WONT_RETURN void Oops() AI_WONT_RETURN_SUFFIX;
+	AI_WONT_RETURN void Fail( std::string str ) AI_WONT_RETURN_SUFFIX;
 
 	void ReadTEXS();
 	void ReadBRUS();

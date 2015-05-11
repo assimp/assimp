@@ -45,7 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 
+#include "../include/assimp/material.h"
+#include <list>
+
 struct aiNode;
+struct aiMaterial;
 
 namespace Assimp	{
 

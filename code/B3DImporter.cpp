@@ -43,13 +43,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the b3d importer class
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
 
 // internal headers
 #include "B3DImporter.h"
 #include "TextureTransform.h"
 #include "ConvertToLHProcess.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/anim.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+
 
 using namespace Assimp;
 using namespace std;
@@ -127,12 +133,12 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::Oops(){
+AI_WONT_RETURN void B3DImporter::Oops(){
 	throw DeadlyImportError( "B3D Importer - INTERNAL ERROR" );
 }
 
 // ------------------------------------------------------------------------------------------------
-void B3DImporter::Fail( string str ){
+AI_WONT_RETURN void B3DImporter::Fail( string str ){
 #ifdef DEBUG_B3D
 	cout<<"Error in B3D file data: "<<str<<endl;
 #endif

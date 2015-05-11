@@ -134,7 +134,7 @@ protected:
 	aiColor4D ReadRGBA();
 
 	/** Throws an exception with a line number and the given text. */
-	void ThrowException( const std::string& pText);
+	AI_WONT_RETURN void ThrowException( const std::string& pText) AI_WONT_RETURN_SUFFIX;
 
 	/** Filters the imported hierarchy for some degenerated cases that some exporters produce.
 	 * @param pData The sub-hierarchy to filter

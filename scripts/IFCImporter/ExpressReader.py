@@ -44,6 +44,7 @@
 entities and data types contained"""
 
 import sys, os, re
+from collections import OrderedDict
 
 re_match_entity = re.compile(r"""
 ENTITY\s+(\w+)\s*                                    # 'ENTITY foo'
@@ -68,8 +69,8 @@ re_match_field = re.compile(r"""
 
 class Schema:
     def __init__(self):
-        self.entities = {}
-        self.types = {}
+        self.entities = OrderedDict()
+        self.types = OrderedDict()
 
 class Entity:
     def __init__(self,name,parent,members):

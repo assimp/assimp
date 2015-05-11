@@ -43,11 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * normals for all imported faces.
 */
 
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "GenVertexNormalsProcess.h"
 #include "ProcessHelper.h"
+#include "Exceptional.h"
+#include "qnan.h"
 
 using namespace Assimp;
 
@@ -195,7 +197,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
 			// Write the smoothed normal back to all affected normals
 			for (unsigned int a = 0; a < verticesFound.size(); ++a)
 			{
-				register unsigned int vidx = verticesFound[a];
+				unsigned int vidx = verticesFound[a];
 				pcNew[vidx] = pcNor;
 				abHad[vidx] = true;
 			}

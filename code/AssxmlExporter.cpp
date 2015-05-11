@@ -41,9 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  ASSXML exporter main code
  */
 #include <stdarg.h>
-#include "AssimpPCH.h"
 #include "./../include/assimp/version.h"
 #include "ProcessHelper.h"
+#include "../include/assimp/IOStream.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/Exporter.hpp"
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #	include <zlib.h>
@@ -52,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <time.h>
+#include <stdio.h>
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
@@ -621,7 +624,7 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
 
 } // end of namespace AssxmlExport
 
-void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneAssxml(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	IOStream * out = pIOSystem->Open( pFile, "wt" );
 	if (!out) return;

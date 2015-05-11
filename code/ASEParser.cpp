@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the ASE parser class 
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
 
 // internal headers
@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ASELoader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
+#include "../include/assimp/DefaultLogger.hpp"
 
 using namespace Assimp;
 using namespace Assimp::ASE;
@@ -168,7 +169,7 @@ void Parser::LogInfo(const char* szWarn)
 }
 
 // ------------------------------------------------------------------------------------------------
-void Parser::LogError(const char* szWarn)
+AI_WONT_RETURN void Parser::LogError(const char* szWarn)
 {
 	ai_assert(NULL != szWarn);
 

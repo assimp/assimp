@@ -43,16 +43,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the LWO importer class
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
 
 // internal headers
 #include "LWOLoader.h"
 #include "StringComparison.h"
 #include "SGSpatialSort.h"
-#include "ByteSwap.h"
+#include "ByteSwapper.h"
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include <sstream>
+#include <iomanip>
+
 
 using namespace Assimp;
 
@@ -344,7 +349,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 					// copy all vertices
 					for (unsigned int q = 0; q  < face.mNumIndices;++q,++vert)	{
-						register unsigned int idx = face.mIndices[q];
+						unsigned int idx = face.mIndices[q];
 						*pv++ = layer.mTempPoints[idx] /*- layer.mPivot*/;
 
 						// process UV coordinates
@@ -491,7 +496,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 		aiFace& face = *begin;
 		for (unsigned int i = 0; i < face.mNumIndices;++i)
 		{
-			register unsigned int tt = face.mIndices[i];
+			unsigned int tt = face.mIndices[i];
 			sSort.Add(mesh->mVertices[tt],tt,*it);
 		}
 	}
@@ -510,7 +515,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
 			for (; beginIdx != endIdx; ++beginIdx)
 			{
-				register unsigned int idx = *beginIdx;
+				unsigned int idx = *beginIdx;
 				sSort.FindPositions(mesh->mVertices[idx],*it,posEpsilon,poResult,true);
 				std::vector<unsigned int>::const_iterator a, end = poResult.end();
 
@@ -533,7 +538,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 			unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
 			for (; beginIdx != endIdx; ++beginIdx)
 			{
-				register unsigned int idx = *beginIdx;
+				unsigned int idx = *beginIdx;
 				if (vertexDone[idx])
 					continue;
 				sSort.FindPositions(mesh->mVertices[idx],*it,posEpsilon,poResult,true);
@@ -735,7 +740,7 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
 	{
 		throw DeadlyImportError( "LWO2: Points chunk length is not multiple of vertexLen (12)");
 	}
-	register unsigned int regularSize = (unsigned int)mCurLayer->mTempPoints.size() + length / 12;
+	unsigned int regularSize = (unsigned int)mCurLayer->mTempPoints.size() + length / 12;
 	if (mIsLWO2)
 	{
 		mCurLayer->mTempPoints.reserve	( regularSize + (regularSize>>2u) );

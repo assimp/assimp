@@ -46,11 +46,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   .. although overdraw rduction isn't implemented yet ...
  */
 
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "ImproveCacheLocality.h"
 #include "VertexTriangleAdjacency.h"
+#include "../include/assimp/postprocess.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include <stdio.h>
+#include <stack>
 
 using namespace Assimp;
 
@@ -303,7 +308,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 		ivdx = -1; 
 		int max_priority = -1;
 		for (unsigned int* piCur = piCandidates;piCur != piCurCandidate;++piCur)	{
-			register const unsigned int dp = *piCur;
+			const unsigned int dp = *piCur;
 
 			// must have live triangles
 			if (piNumTriPtr[dp] > 0)	{

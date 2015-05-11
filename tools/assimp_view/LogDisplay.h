@@ -38,59 +38,62 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#pragma once
 
-#if (!defined AV_LOG_DISPLAY_H_INCLUDED)
-#define AV_LOG_DISPLAY_H_INCLUDE
+#include <list>
 
-//-------------------------------------------------------------------------------
-/**	\brief Class to display log strings in the upper right corner of the view
-*/
-//-------------------------------------------------------------------------------
-class CLogDisplay
-	{
-private:
+namespace AssimpView
+{
 
-	CLogDisplay()  {}
+    //-------------------------------------------------------------------------------
+    /**	\brief Class to display log strings in the upper right corner of the view
+    */
+    //-------------------------------------------------------------------------------
+    class CLogDisplay
+    {
+    private:
 
-public:
+        CLogDisplay()  {}
 
-	// data structure for an entry in the log queue
-	struct SEntry
-		{
-		SEntry ()
-			:
-			clrColor(D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0x00)), dwStartTicks(0)
-				{}
+    public:
 
-		std::string szText;
-		D3DCOLOR clrColor;
-		DWORD dwStartTicks;
-		};
+        // data structure for an entry in the log queue
+        struct SEntry
+        {
+            SEntry()
+                :
+                clrColor( D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) ), dwStartTicks( 0 )
+            {}
 
-	// Singleton accessors
-	static CLogDisplay s_cInstance;
-	inline static CLogDisplay& Instance ()
-		{
-		return s_cInstance;
-		}
+            std::string szText;
+            D3DCOLOR clrColor;
+            DWORD dwStartTicks;
+        };
 
-	// Add an entry to the log queue
-	void AddEntry(const std::string& szText,
-		const D3DCOLOR clrColor = D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0x00));
+        // Singleton accessors
+        static CLogDisplay s_cInstance;
+        inline static CLogDisplay& Instance()
+        {
+            return s_cInstance;
+        }
 
-	// Release any native resources associated with the instance
-	void ReleaseNativeResource();
+        // Add an entry to the log queue
+        void AddEntry( const std::string& szText,
+            const D3DCOLOR clrColor = D3DCOLOR_ARGB( 0xFF, 0xFF, 0xFF, 0x00 ) );
 
-	// Recreate any native resources associated with the instance
-	void RecreateNativeResource();
+        // Release any native resources associated with the instance
+        void ReleaseNativeResource();
 
-	// Called during the render loop
-	void OnRender();
+        // Recreate any native resources associated with the instance
+        void RecreateNativeResource();
 
-private:
+        // Called during the render loop
+        void OnRender();
 
-	std::list<SEntry> asEntries;
-	ID3DXFont* piFont;
-	};
+    private:
 
-#endif // AV_LOG_DISPLAY_H_INCLUDE
+        std::list<SEntry> asEntries;
+        ID3DXFont* piFont;
+    };
+
+}

@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OgreParsingUtils.h"
 
 #include "TinyFormatter.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include <boost/scoped_ptr.hpp>
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
@@ -54,7 +56,8 @@ namespace Assimp
 namespace Ogre
 {
 
-void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error = "")
+AI_WONT_RETURN void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error = "") AI_WONT_RETURN_SUFFIX;
+AI_WONT_RETURN void ThrowAttibuteError(const XmlReader* reader, const std::string &name, const std::string &error)
 {
 	if (!error.empty())
 	{

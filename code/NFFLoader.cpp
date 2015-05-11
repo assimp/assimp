@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the STL importer class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_NFF_IMPORTER
 
 // internal headers
@@ -50,6 +50,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StandardShapes.h"
 #include "fast_atof.h"
 #include "RemoveComments.h"
+#include <boost/scoped_ptr.hpp>
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+#include "qnan.h"
+
 
 using namespace Assimp;
 
@@ -400,7 +406,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						if (TokenMatch(sz,"0x",2))
 						{
 							hasColor = true;
-							register unsigned int numIdx = ::strtoul16(sz,&sz);
+							unsigned int numIdx = ::strtoul16(sz,&sz);
 							aiColor4D clr;
 							clr.a = 1.f;
 

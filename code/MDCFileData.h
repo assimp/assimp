@@ -54,7 +54,7 @@ http://themdcfile.planetwolfenstein.gamespy.com/MDC_File_Format.pdf
 #include "../include/assimp/anim.h"
 
 #include "./../include/assimp/Compiler/pushpack1.h"
-
+#include <stdint.h>
 
 namespace Assimp {
 namespace MDC {

@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/types.h"
 #include "ParsingUtils.h"
+#include <vector>
+#include <stdint.h>
 
 struct aiFace;
 
@@ -367,7 +369,7 @@ public:
 	 *  @param error Error message to be reported
 	 *  @param line Index of the line where the error occured
 	 */
-	static void ReportError (const char* error, unsigned int line);
+	AI_WONT_RETURN static void ReportError (const char* error, unsigned int line) AI_WONT_RETURN_SUFFIX;
 
 	// -------------------------------------------------------------------
 	/** Report a specific warning

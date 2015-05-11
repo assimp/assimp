@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_LWOLOADER_H_INCLUDED
 
 #include "../include/assimp/types.h"
+#include "../include/assimp/material.h"
 #include "../include/assimp/DefaultLogger.hpp"
 
 #include "LWOFileData.h"
@@ -50,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiTexture;
 struct aiNode;
+struct aiMaterial;
 
 namespace Assimp	{
 using namespace LWO;

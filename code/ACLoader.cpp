@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the AC3D importer class */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_AC_IMPORTER
 
@@ -51,6 +51,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include "fast_atof.h"
 #include "Subdivision.h"
+#include "Importer.h"
+#include "BaseImporter.h"
+#include "../include/assimp/Importer.hpp"
+#include "../include/assimp/light.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/material.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/config.h"
+#include "../include/assimp/IOSystem.hpp"
+#include <boost/scoped_ptr.hpp>
 
 using namespace Assimp;
 
@@ -489,7 +499,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 
 			for (it = object.surfaces.begin(); it != end; ++it)
 			{
-				register unsigned int idx = (*it).mat;
+				unsigned int idx = (*it).mat;
 				if (idx >= needMat.size())
 				{
 					DefaultLogger::get()->error("AC3D: material index is out of range");
@@ -617,7 +627,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 							it2  = (*it).entries.begin();
 
 							// either a closed or an unclosed line
-							register unsigned int tmp = (unsigned int)(*it).entries.size();
+							unsigned int tmp = (unsigned int)(*it).entries.size();
 							if (0x2 == type)--tmp;
 							for (unsigned int m = 0; m < tmp;++m)
 							{

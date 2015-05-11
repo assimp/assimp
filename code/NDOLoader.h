@@ -43,7 +43,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #ifndef INCLUDED_AI_NDO_LOADER_H
 #define INCLUDED_AI_NDO_LOADER_H
+
+#include "../include/assimp/vector3.h"
+#include "BaseImporter.h"
+#include <stdint.h>
+#include <string>
+#include <vector>
+
+
+struct aiImporterDesc;
+struct aiScene;
+
 namespace Assimp	{
+    class IOSystem;
+    class Importer;
 
 // ---------------------------------------------------------------------------
 /** @brief Importer class to load meshes from Nendo.

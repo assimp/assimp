@@ -9,6 +9,9 @@
 
 #include "irrXMLWrapper.h"
 #include "BaseImporter.h"
+#include <stdint.h>
+
+struct aiMaterial;
 
 namespace Assimp	{
 

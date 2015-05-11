@@ -40,8 +40,15 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ---------------------------------------------------------------------------
 
-"""Generate the regression database db.zip from the files in the <root>
-/test/models directory. Older databases are overwritten with no prompt.
+"""
+Generate the regression database db.zip from the files in the <root>/test/models
+directory. Older databases are overwritten with no prompt but can be restored
+using Git as needed.
+
+Use --help for usage.
+
+On Windows, use ``py run.py <arguments>`` to make sure command line parameters
+are forwarded to the script.
 """
 
 import sys
@@ -52,11 +59,19 @@ import zipfile
 import settings
 import utils
 
-usage = """gen_db [-i=...] [-e=...] [-p] [-n]
+usage = """gen_db [assimp_binary] [-i=...] [-e=...] [-p] [-n]
 
-(lists of file extensions are comma delimited, i.e. `3ds,lwo,x`)
+The assimp_cmd (or assimp) binary to use is specified by the first
+command line argument and defaults to ``assimp``.
+
+To build, set ``ASSIMP_BUILD_ASSIMP_TOOLS=ON`` in CMake. If generating
+configs for an IDE, make sure to build the assimp_cmd project.
+
 -i,--include: List of file extensions to update dumps for. If omitted,
          all file extensions are updated except those in `exclude`.
+         Example: -ixyz,abc
+                  -i.xyz,.abc
+                  --include=xyz,abc
 
 -e,--exclude: Merged with settings.exclude_extensions to produce a
          list of all file extensions to ignore. If dumps exist,
@@ -87,7 +102,7 @@ def process_dir(d, outfile, file_filter):
                 outf = os.path.join(os.getcwd(), settings.database_name,
                     utils.hashing(fullp, pp))
 
-                cmd = [utils.assimp_bin_path,"dump",fullp,outf,"-b","-s","-l"] + pp.split()
+                cmd = [ assimp_bin_path, "dump", fullp, outf, "-b", "-s", "-l" ] + pp.split()
                 outfile.write("assimp dump "+"-"*80+"\n")
                 outfile.flush()
                 if subprocess.call(cmd, stdout=outfile, stderr=outfile, shell=False):
@@ -150,7 +165,7 @@ def gen_db(ext_list,outfile):
     num = 0
     for tp in settings.model_directories:
         num += process_dir(tp, outfile,
-            lambda x: os.path.splitext(x)[1] in ext_list)
+            lambda x: os.path.splitext(x)[1].lower() in ext_list and not x in settings.files_to_ignore)
 
     print("="*60)
     print("Updated {0} entries".format(num))
@@ -158,42 +173,44 @@ def gen_db(ext_list,outfile):
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
-    utils.find_assimp_or_die()
     def clean(f):
         f = f.strip("* \'")
         return "."+f if f[:1] != '.' else f
 
-    if len(sys.argv)>1 and (sys.argv[1] == "--help" or sys.argv[1] == "-h"):
+    if len(sys.argv) <= 1 or sys.argv[1] == "--help" or sys.argv[1] == "-h":
         print(usage)
         sys.exit(0)
 
+    assimp_bin_path = sys.argv[1]    
     ext_list, preview, nozip = None, False, False
-    for m in sys.argv[1:]:
+    for m in sys.argv[2:]:
         if m[:10]=="--exclude=":
             settings.exclude_extensions += map(clean, m[10:].split(","))
-        elif m[:3]=="-e=":
-            settings.exclude_extensions += map(clean, m[3:].split(","))
+        elif m[:2]=="-e":
+            settings.exclude_extensions += map(clean, m[2:].split(","))
         elif m[:10]=="--include=":
             ext_list = m[10:].split(",")
-        elif m[:3]=="-i=":
-            ext_list = m[3:].split(",")
+        elif m[:2]=="-i":
+            ext_list = m[2:].split(",")
         elif m=="-p" or m == "--preview":
             preview = True
         elif m=="-n" or m == "--nozip":
             nozip = True
+        else:
+            print("Unrecognized parameter: " + m)
+            sys.exit(-1)
             
     outfile = open(os.path.join("..", "results", "gen_regression_db_output.txt"), "w")
     if ext_list is None:
-        (ext_list, err) = subprocess.Popen([utils.assimp_bin_path, "listext"],
+        (ext_list, err) = subprocess.Popen([assimp_bin_path, "listext"],
             stdout=subprocess.PIPE).communicate()
-        ext_list = str(ext_list).lower().split(";")
+        ext_list = str(ext_list.strip()).lower().split(";")
 
     # todo: Fix for multi dot extensions like .skeleton.xml
     ext_list = list(filter(lambda f: not f in settings.exclude_extensions,
         map(clean, ext_list)))
-
-    if preview:
-        print(','.join(ext_list))
+    print('File extensions processed: ' + ', '.join(ext_list))
+    if preview:       
         sys.exit(1)
 
     extract_zip()    

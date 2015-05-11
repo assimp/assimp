@@ -15,10 +15,19 @@
 #ifndef __FAST_A_TO_F_H_INCLUDED__
 #define __FAST_A_TO_F_H_INCLUDED__
 
-#include <math.h>
+#include <cmath>
 #include <limits>
+#include <stdint.h>
+#include <stdexcept>
 
 #include "StringComparison.h"
+
+
+#ifdef _MSC_VER 
+#  include <stdint.h>
+#else 
+#include "../include/assimp/Compiler/pstdint.h"
+#endif
 
 namespace Assimp
 {
@@ -220,6 +229,23 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 	return value;
 }
 
+// ------------------------------------------------------------------------------------
+// signed variant of strtoul10_64
+// ------------------------------------------------------------------------------------
+inline int64_t strtol10_64(const char* in, const char** out = 0, unsigned int* max_inout = 0)
+{
+	bool inv = (*in == '-');
+	if (inv || *in == '+')
+		++in;
+
+	int64_t value = strtoul10_64(in, out, max_inout);
+	if (inv) {
+		value = -value;
+	}
+	return value;
+}
+
+
 // Number of relevant decimals for floating-point parsing.
 #define AI_FAST_ATOF_RELAVANT_DECIMALS 15
 
@@ -229,7 +255,7 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
 // ------------------------------------------------------------------------------------
 template <typename Real>
-inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma = true)
+inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma = true)
 {
 	Real f = 0;
 
@@ -260,14 +286,14 @@ inline const char* fast_atoreal_move( const char* c, Real& out, bool check_comma
 	}
 
 	if (!(c[0] >= '0' && c[0] <= '9') &&
-	    !(c[0] == '.' && c[1] >= '0' && c[1] <= '9'))
+	    !((c[0] == '.' || (check_comma && c[0] == ',')) && c[1] >= '0' && c[1] <= '9'))
 	{
 		throw std::invalid_argument("Cannot parse string "
 		                            "as real number: does not start with digit "
 		                            "or decimal point followed by digit.");
 	}
 
-	if (*c != '.')
+	if (*c != '.' && (! check_comma || c[0] != ','))
 	{
 		f = static_cast<Real>( strtoul10_64 ( c, &c) );
 	}

@@ -52,6 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_QNAN_H_INCLUDED
 #define AI_QNAN_H_INCLUDED
 
+#include "../include/assimp/defs.h"
+#include <limits>
+#include <stdint.h>
+
 // ---------------------------------------------------------------------------
 /** Data structure to represent the bit pattern of a 32 Bit 
  *         IEEE 754 floating-point number. */

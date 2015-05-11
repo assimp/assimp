@@ -38,13 +38,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
 #include "Q3BSPZipArchive.h"
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
+#include "../include/assimp/ai_assert.h"
+
 
 namespace Assimp {
 namespace Q3BSP {
@@ -138,11 +141,11 @@ zlib_filefunc_def IOSystem2Unzip::get(IOSystem* pIOHandler) {
 ZipFile::ZipFile(size_t size) : m_Size(size) {
 	ai_assert(m_Size != 0);
 
-	m_Buffer = std::malloc(m_Size);
+	m_Buffer = malloc(m_Size);
 }
 	
 ZipFile::~ZipFile() {
-	std::free(m_Buffer);
+	free(m_Buffer);
 	m_Buffer = NULL;
 }
 

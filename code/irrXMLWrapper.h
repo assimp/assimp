@@ -44,6 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // some long includes ....
 #include "./../contrib/irrXML/irrXML.h"
 #include "./../include/assimp/IOStream.hpp"
+#include "BaseImporter.h"
+#include <vector>
+
 namespace Assimp	{
 
 // ---------------------------------------------------------------------------------
@@ -102,7 +105,7 @@ public:
 
 	// ----------------------------------------------------------------------------------
 	//! Virtual destructor
-	virtual ~CIrrXML_IOStreamReader() {};
+	virtual ~CIrrXML_IOStreamReader() {}
 
 	// ----------------------------------------------------------------------------------
 	//!   Reads an amount of bytes from the file.

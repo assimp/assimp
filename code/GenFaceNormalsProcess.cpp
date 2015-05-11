@@ -43,8 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * normals for all imported faces.
 */
 
-#include "AssimpPCH.h"
+
 #include "GenFaceNormalsProcess.h"
+#include "../include/assimp/postprocess.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "Exceptional.h"
+#include "qnan.h"
 
 
 using namespace Assimp;

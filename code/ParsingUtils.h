@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_PARSING_UTILS_H_INC
 
 #include "StringComparison.h"
+#include "../include/assimp/defs.h"
 
 namespace Assimp {
 
@@ -201,7 +202,12 @@ template <class char_t>
 AI_FORCE_INLINE bool TokenMatch(char_t*& in, const char* token, unsigned int len)
 {
 	if (!::strncmp(token,in,len) && IsSpaceOrNewLine(in[len])) {
-		in += len+1;
+		if (in[len] != '\0') {
+			in += len+1;
+		} else {
+			// If EOF after the token make sure we don't go past end of buffer
+			in += len;
+		}
 		return true;
 	}
 

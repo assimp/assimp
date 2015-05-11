@@ -41,11 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the PLY parser class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
 
 #include "PlyLoader.h"
 #include "fast_atof.h"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "ByteSwapper.h"
+
 
 using namespace Assimp;
 
@@ -794,7 +797,7 @@ bool PLY::PropertyInstance::ParseValue(
 {
 	ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
 
-	register bool ret = true;
+	bool ret = true;
 	*pCurOut = pCur;
 	switch (eType)
 	{
@@ -841,7 +844,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 {
 	ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
 
-	register bool ret = true;
+	bool ret = true;
 	switch (eType)
 	{
 	case EDT_UInt:

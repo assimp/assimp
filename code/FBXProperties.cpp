@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXProperties.cpp
  *  @brief Implementation of the FBX dynamic properties system
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -50,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
+#include <boost/foreach.hpp>
 
 namespace Assimp {
 namespace FBX {
@@ -88,8 +88,11 @@ Property* ReadTypedProperty(const Element& element)
 	else if (!strcmp(cs, "int") || !strcmp(cs, "Int") || !strcmp(cs, "enum") || !strcmp(cs, "Enum")) {
 		return new TypedProperty<int>(ParseTokenAsInt(*tok[4]));
 	}
-	else if (!strcmp(cs,"ULongLong")) {
+	else if (!strcmp(cs, "ULongLong")) {
 		return new TypedProperty<uint64_t>(ParseTokenAsID(*tok[4]));
+	}
+	else if (!strcmp(cs, "KTime")) {
+		return new TypedProperty<int64_t>(ParseTokenAsInt64(*tok[4]));
 	}
 	else if (!strcmp(cs,"Vector3D") || 
 		!strcmp(cs,"ColorRGB") || 
@@ -105,7 +108,7 @@ Property* ReadTypedProperty(const Element& element)
 			ParseTokenAsFloat(*tok[6]))
 		);
 	}
-	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"KTime") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView")) {
+	else if (!strcmp(cs,"double") || !strcmp(cs,"Number") || !strcmp(cs,"Float") || !strcmp(cs,"FieldOfView")) {
 		return new TypedProperty<float>(ParseTokenAsFloat(*tok[4]));
 	}
 	return NULL;

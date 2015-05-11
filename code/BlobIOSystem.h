@@ -45,6 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BLOBIOSYSTEM_H_INCLUDED
 #define AI_BLOBIOSYSTEM_H_INCLUDED
 
+#include "./../include/assimp/IOStream.hpp"
+#include "./../include/assimp/cexport.h"
+#include "./../include/assimp/IOSystem.hpp"
+#include "./../include/assimp/DefaultLogger.hpp"
+#include <boost/foreach.hpp>
+#include <stdint.h>
+#include <set>
+#include <vector>
+
 namespace Assimp	{
 	class BlobIOSystem;
 
@@ -120,9 +129,11 @@ public:
 		{
 		case aiOrigin_CUR:
 			cursor += pOffset;
+			break;
 
 		case aiOrigin_END:
 			cursor = file_size - pOffset;
+			break;
 
 		case aiOrigin_SET:
 			cursor = pOffset;

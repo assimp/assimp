@@ -47,13 +47,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_XFILEEXPORTER_H_INC
 
 #include "../include/assimp/ai_assert.h"
+#include "../include/assimp/matrix4x4.h"
+#include "../include/assimp/Exporter.hpp"
 #include <sstream>
 
 struct aiScene;
 struct aiNode;
+struct aiMesh;
+struct aiString;
 
-namespace Assimp	
-{
+namespace Assimp {
+
+class IOSystem;
+
 
 /// Helper class to export a given scene to a X-file.
 /// Note: an xFile uses a left hand system. Assimp used a right hand system (OpenGL), therefore we have to transform everything
@@ -61,7 +67,7 @@ class XFileExporter
 {
 public:
 	/// Constructor for a specific scene to export
-	XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
+	XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
 
 	/// Destructor
 	virtual ~XFileExporter();
@@ -80,7 +86,7 @@ protected:
 	void WriteNode( aiNode* pNode );
 
 	/// write a mesh entry of the scene
-	void WriteMesh(const aiMesh* mesh);
+	void WriteMesh( aiMesh* mesh);
 
 	/// Enters a new xml element, which increases the indentation
 	void PushTag() { startstr.append( "  "); }
@@ -93,6 +99,12 @@ public:
 	std::stringstream mOutput;
 
 protected:
+
+	/// normalize the name to be accepted by xfile readers
+	std::string toXFileString(aiString &name);
+
+	/// hold the properties pointer
+	const ExportProperties* mProperties;
 
 	/// write a path
 	void writePath(aiString path);	
@@ -116,8 +128,6 @@ protected:
 	/// current line end string for simple stream insertion
 	std::string endstr;
   
-protected:
-
 };
 
 }

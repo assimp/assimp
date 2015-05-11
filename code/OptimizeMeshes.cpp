@@ -43,14 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the aiProcess_OptimizeMeshes step
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_OPTIMIZEMESHES_PROCESS
 
-using namespace Assimp;
 
 #include "OptimizeMeshes.h"
 #include "ProcessHelper.h"
 #include "SceneCombiner.h"
+#include "Exceptional.h"
+
+using namespace Assimp;
 
 static const unsigned int NotSet   = 0xffffffff;
 static const unsigned int DeadBeef = 0xdeadbeef;
@@ -170,7 +172,7 @@ void OptimizeMeshesProcess::ProcessNode( aiNode* pNode)
 
 			// Find meshes to merge with us
 			for (unsigned int a = i+1; a < pNode->mNumMeshes;++a) {
-				register unsigned int am = pNode->mMeshes[a];
+				unsigned int am = pNode->mMeshes[a];
 				if (meshes[am].instance_cnt == 1 && CanJoin(im,am,verts,faces)) {
 
 					merge_list.push_back(mScene->mMeshes[am]);

@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Defines the CommentRemover utility class
  */
 
-#include "AssimpPCH.h"
 #include "RemoveComments.h"
 #include "ParsingUtils.h"
 

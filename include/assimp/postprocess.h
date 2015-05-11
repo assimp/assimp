@@ -282,7 +282,7 @@ enum aiPostProcessSteps
 	/** <hr>Searches for redundant/unreferenced materials and removes them.
 	 *
 	 * This is especially useful in combination with the 
-	 * #aiProcess_PretransformVertices and #aiProcess_OptimizeMeshes flags. 
+	 * #aiProcess_PreTransformVertices and #aiProcess_OptimizeMeshes flags. 
 	 * Both join small meshes with equal characteristics, but they can't do 
 	 * their work if two meshes have different materials. Because several
 	 * material settings are lost during Assimp's import filters,
@@ -335,7 +335,7 @@ enum aiPostProcessSteps
 	 * To have the degenerate stuff not only detected and collapsed but
 	 * removed, try one of the following procedures:
 	 * <br><b>1.</b> (if you support lines and points for rendering but don't
-	 *    want the degenerates)</br>
+	 *    want the degenerates)<br>
 	 * <ul>
 	 *   <li>Specify the #aiProcess_FindDegenerates flag.
 	 *   </li>
@@ -345,7 +345,7 @@ enum aiPostProcessSteps
 	 *       pipeline steps.
 	 *   </li>
 	 * </ul>
-	 * <br><b>2.</b>(if you don't support lines and points at all)</br>
+	 * <br><b>2.</b>(if you don't support lines and points at all)<br>
 	 * <ul>
 	 *   <li>Specify the #aiProcess_FindDegenerates flag.
 	 *   </li>
@@ -550,7 +550,7 @@ enum aiPostProcessSteps
 
 
 // ---------------------------------------------------------------------------------------
-/** @def aiProcessPreset_TargetRealtimeUse_Fast
+/** @def aiProcessPreset_TargetRealtime_Fast
  *  @brief Default postprocess configuration optimizing the data for real-time rendering.
  *  
  *  Applications would want to use this preset to load models on end-user PCs,

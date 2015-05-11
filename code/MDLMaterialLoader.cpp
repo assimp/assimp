@@ -41,12 +41,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the material part of the MDL importer class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
 // internal headers
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
+#include "../include/assimp/texture.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
+#include "qnan.h"
+#include "Defines.h"
+
 
 using namespace Assimp;
 static aiTexel* const bad_texel = reinterpret_cast<aiTexel*>(SIZE_MAX);

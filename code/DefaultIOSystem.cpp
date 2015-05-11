@@ -40,11 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /** @file Default implementation of IOSystem using the standard C file functions */
 
-#include "AssimpPCH.h"
-
-#include <stdlib.h>
 #include "DefaultIOSystem.h"
 #include "DefaultIOStream.h"
+#include "StringComparison.h"
+
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/ai_assert.h"
+#include <stdlib.h>
+
 
 #ifdef __unix__
 #include <sys/param.h>
@@ -162,6 +165,33 @@ bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
 	MakeAbsolutePath (second, temp2);
 
 	return !ASSIMP_stricmp(temp1,temp2);
+}
+
+
+std::string DefaultIOSystem::fileName(std::string path)
+{
+	std::string ret = path;
+	std::size_t last = ret.find_last_of("\\/");
+	if (last != std::string::npos) ret = ret.substr(last + 1);
+	return ret;
+}
+
+
+std::string DefaultIOSystem::completeBaseName(std::string path)
+{
+	std::string ret = fileName(path);
+	std::size_t pos = ret.find_last_of('.');
+	if(pos != ret.npos) ret = ret.substr(0, pos);
+	return ret;
+}
+
+
+std::string DefaultIOSystem::absolutePath(std::string path)
+{
+	std::string ret = path;
+	std::size_t last = ret.find_last_of("\\/");
+	if (last != std::string::npos) ret = ret.substr(0, last);
+	return ret;
 }
 
 #undef PATHLIMIT

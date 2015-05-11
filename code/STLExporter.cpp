@@ -38,19 +38,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
+
 
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_STL_EXPORTER)
 
 #include "STLExporter.h"
 #include "../include/assimp/version.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/Exporter.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "Exceptional.h"
+#include "ByteSwapper.h"
 
 using namespace Assimp;
 namespace Assimp	{
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Stereolithograpy. Prototyped and registered in Exporter.cpp
-void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	// invoke the exporter 
 	STLExporter exporter(pFile, pScene);
@@ -63,7 +69,7 @@ void ExportSceneSTL(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
 	outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
 }
-void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	// invoke the exporter 
 	STLExporter exporter(pFile, pScene, true);

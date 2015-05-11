@@ -39,18 +39,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
 #include "XFileExporter.h"
 #include "ConvertToLHProcess.h"
 #include "Bitmap.h"
+#include "BaseImporter.h"
 #include "fast_atof.h"
-#include "SceneCombiner.h" 
-
+#include "SceneCombiner.h"
+#include "DefaultIOSystem.h"
 #include <ctime>
 #include <set>
+#include <boost/scoped_ptr.hpp>
+#include "Exceptional.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/light.h"
+
+
 
 using namespace Assimp;
 
@@ -59,32 +66,24 @@ namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
-void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene)
+void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-	std::string path = "";
-	std::string file = pFile;
+	std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
+	std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
 
-	// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
-	// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
-	const char* end_path = std::max(strrchr(pFile, '\\'), strrchr(pFile, '/'));
+	// create/copy Properties
+	ExportProperties props(*pProperties);
 
-	if(end_path != NULL) {
-		path = std::string(pFile, end_path + 1 - pFile);
-		file = file.substr(end_path + 1 - pFile, file.npos);
-
-		std::size_t pos = file.find_last_of('.');
-		if(pos != file.npos) {
-			file = file.substr(0, pos);
-		}
-	}
+	// set standard properties if not set
+	if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT, false);
 
 	// invoke the exporter 
-	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file);
+	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
 	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
 	if(outfile == NULL) {
-		throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
+		throw DeadlyExportError("could not open output .x file: " + std::string(pFile));
 	}
 
 	// XXX maybe use a small wrapper around IOStream that behaves like std::stringstream in order to avoid the extra copy.
@@ -96,7 +95,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
+XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mIOSystem(pIOSystem), mPath(path), mFile(file), mProperties(pProperties)
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
@@ -105,7 +104,7 @@ XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const s
 	mSceneOwned = false;
 
 	// set up strings
-	endstr = "\n"; 
+	endstr = "\n";
 
 	// start writing
 	WriteFile();
@@ -126,7 +125,7 @@ void XFileExporter::WriteFile()
 {
 	// note, that all realnumber values must be comma separated in x files
 	mOutput.setf(std::ios::fixed);
-	mOutput.precision(6); // precission for float
+	mOutput.precision(16); // precission for double
 
 	// entry of writing the file
 	WriteHeader();
@@ -148,7 +147,10 @@ void XFileExporter::WriteFile()
 // Writes the asset header
 void XFileExporter::WriteHeader()
 {
-	mOutput << startstr << "xof 0303txt 0032" << endstr;
+	if (mProperties->GetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT) == true)
+		mOutput << startstr << "xof 0303txt 0064" << endstr;
+	else
+		mOutput << startstr << "xof 0303txt 0032" << endstr;
 	mOutput << endstr;
 	mOutput << startstr << "template Frame {" << endstr;
 	PushTag();
@@ -298,7 +300,7 @@ void XFileExporter::WriteNode( aiNode* pNode)
 		ss << "Node_" << pNode;
 		pNode->mName.Set(ss.str());
 	}
-	mOutput << startstr << "Frame " << pNode->mName.C_Str() << " {" << endstr;
+	mOutput << startstr << "Frame " << toXFileString(pNode->mName) << " {" << endstr;
 
 	PushTag();
 
@@ -310,17 +312,17 @@ void XFileExporter::WriteNode( aiNode* pNode)
 		WriteMesh(mScene->mMeshes[pNode->mMeshes[i]]);
 
 	// recursive call the Nodes
-	for (size_t a = 0; a < pNode->mNumChildren; a++)
-		WriteNode( mScene->mRootNode->mChildren[a]);
+	for (size_t i = 0; i < pNode->mNumChildren; ++i)
+		WriteNode( mScene->mRootNode->mChildren[i]);
 
 	PopTag();
 
 	mOutput << startstr << "}" << endstr << endstr;
 }
 
-void XFileExporter::WriteMesh(const aiMesh* mesh)
+void XFileExporter::WriteMesh(aiMesh* mesh)
 {
-	mOutput << startstr << "Mesh " << mesh->mName.C_Str() << "_mShape" << " {" << endstr;
+	mOutput << startstr << "Mesh " << toXFileString(mesh->mName) << "_mShape" << " {" << endstr;
 
 	PushTag();
 
@@ -496,6 +498,20 @@ void XFileExporter::WriteMesh(const aiMesh* mesh)
 
 }
 
+std::string XFileExporter::toXFileString(aiString &name)
+{
+	std::string pref = ""; // node name prefix to prevent unexpected start of string
+	std::string str = pref + std::string(name.C_Str());	
+	for (int i=0; i < (int) str.length(); ++i)
+	{
+		if ((str[i] >= '0' && str[i] <= '9') || // 0-9
+			(str[i] >= 'A' && str[i] <= 'Z') || // A-Z
+			(str[i] >= 'a' && str[i] <= 'z')) // a-z
+			continue;
+		str[i] = '_';
+	}
+	return str;
+}
 
 void XFileExporter::writePath(aiString path)
 {

@@ -43,6 +43,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SCENE_PREPROCESSOR_H_INC
 #define AI_SCENE_PREPROCESSOR_H_INC
 
+#include "../include/assimp/defs.h"
+#include <stddef.h>
+
+struct aiScene;
+struct aiAnimation;
+struct aiMesh;
+
 class ScenePreprocessorTest;
 namespace Assimp	{
 

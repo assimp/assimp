@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXTokenizer.cpp
  *  @brief Implementation of the FBX broadphase lexer
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -52,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
+#include "Exceptional.h"
 
 namespace Assimp {
 namespace FBX {
@@ -86,7 +86,8 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // signal tokenization error, this is always unrecoverable. Throws DeadlyImportError.
-void TokenizeError(const std::string& message, unsigned int line, unsigned int column)
+AI_WONT_RETURN void TokenizeError(const std::string& message, unsigned int line, unsigned int column) AI_WONT_RETURN_SUFFIX;
+AI_WONT_RETURN void TokenizeError(const std::string& message, unsigned int line, unsigned int column)
 {
 	throw DeadlyImportError(Util::AddLineAndColumn("FBX-Tokenize",message,line,column));
 }

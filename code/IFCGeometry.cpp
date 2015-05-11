@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Geometry conversion and synthesis for IFC
  */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 #include "IFCUtil.h"
@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../contrib/poly2tri/poly2tri/poly2tri.h"
 #include "../contrib/clipper/clipper.hpp"
+#include <boost/make_shared.hpp>
 
 #include <iterator>
 
@@ -522,43 +523,23 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
 	return m;
 }
 
-
-// ------------------------------------------------------------------------------------------------
-void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result, 
-	ConversionData& conv, bool collect_openings)
+// Extrudes the given polygon along the direction, converts it into an opening or applies all openings as necessary.
+void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curve,
+	const IfcVector3& extrusionDir, TempMesh& result, ConversionData &conv, bool collect_openings)
 {
-	TempMesh meshout;
-	
-	// First read the profile description
-	if(!ProcessProfile(*solid.SweptArea,meshout,conv) || meshout.verts.size()<=1) {
-		return;
-	}
-
-	IfcVector3 dir;
-	ConvertDirection(dir,solid.ExtrudedDirection);
-
-	dir *= solid.Depth; /*
-	if(conv.collect_openings && !conv.apply_openings) {
-		dir *= 1000.0;
-	} */
-
-	// Outline: assuming that `meshout.verts` is now a list of vertex points forming 
-	// the underlying profile, extrude along the given axis, forming new
-	// triangles.
-	
-	std::vector<IfcVector3>& in = meshout.verts;
-	const size_t size=in.size();
-
-	const bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
-	if(solid.Depth < 1e-6) {
-		if(has_area) {
-			result = meshout;
+	// Outline: 'curve' is now a list of vertex points forming the underlying profile, extrude along the given axis, 
+	// forming new triangles.
+	const bool has_area = solid.SweptArea->ProfileType == "AREA" && curve.verts.size() > 2;
+	if( solid.Depth < 1e-6 ) {
+		if( has_area ) {
+			result.Append(curve);
 		}
 		return;
 	}
 
-	result.verts.reserve(size*(has_area?4:2));
-	result.vertcnt.reserve(meshout.vertcnt.size()+2);
+	result.verts.reserve(curve.verts.size()*(has_area ? 4 : 2));
+	result.vertcnt.reserve(curve.verts.size() + 2);
+	std::vector<IfcVector3> in = curve.verts;
 
 	// First step: transform all vertices into the target coordinate space
 	IfcMatrix4 trafo;
@@ -566,7 +547,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 	IfcVector3 vmin, vmax;
 	MinMaxChooser<IfcVector3>()(vmin, vmax);
-	BOOST_FOREACH(IfcVector3& v,in) {
+	BOOST_FOREACH(IfcVector3& v, in) {
 		v *= trafo;
 
 		vmin = std::min(vmin, v);
@@ -575,84 +556,91 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 	vmax -= vmin;
 	const IfcFloat diag = vmax.Length();
-	
-	IfcVector3 min = in[0];
-	dir *= IfcMatrix3(trafo);
+	IfcVector3 dir = IfcMatrix3(trafo) * extrusionDir;
+
+	// reverse profile polygon if it's winded in the wrong direction in relation to the extrusion direction
+	IfcVector3 profileNormal = TempMesh::ComputePolygonNormal(in.data(), in.size());
+	if( profileNormal * dir < 0.0 )
+		std::reverse(in.begin(), in.end());
 
 	std::vector<IfcVector3> nors;
 	const bool openings = !!conv.apply_openings && conv.apply_openings->size();
-	
+
 	// Compute the normal vectors for all opening polygons as a prerequisite
 	// to TryAddOpenings_Poly2Tri()
 	// XXX this belongs into the aforementioned function
-	if (openings) {
+	if( openings ) {
 
-		if (!conv.settings.useCustomTriangulation) {	         
+		if( !conv.settings.useCustomTriangulation ) {
 			// it is essential to apply the openings in the correct spatial order. The direction	 
 			// doesn't matter, but we would screw up if we started with e.g. a door in between	 
 			// two windows.	 
-			std::sort(conv.apply_openings->begin(),conv.apply_openings->end(),
-				TempOpening::DistanceSorter(min));	 
+			std::sort(conv.apply_openings->begin(), conv.apply_openings->end(), TempOpening::DistanceSorter(in[0]));
 		}
-	
+
 		nors.reserve(conv.apply_openings->size());
-		BOOST_FOREACH(TempOpening& t,*conv.apply_openings) {
+		BOOST_FOREACH(TempOpening& t, *conv.apply_openings) {
 			TempMesh& bounds = *t.profileMesh.get();
-		
-			if (bounds.verts.size() <= 2) {
+
+			if( bounds.verts.size() <= 2 ) {
 				nors.push_back(IfcVector3());
 				continue;
 			}
-			nors.push_back(((bounds.verts[2]-bounds.verts[0])^(bounds.verts[1]-bounds.verts[0]) ).Normalize());
+			nors.push_back(((bounds.verts[2] - bounds.verts[0]) ^ (bounds.verts[1] - bounds.verts[0])).Normalize());
 		}
 	}
-	
+
 
 	TempMesh temp;
 	TempMesh& curmesh = openings ? temp : result;
 	std::vector<IfcVector3>& out = curmesh.verts;
- 
+
 	size_t sides_with_openings = 0;
-	for(size_t i = 0; i < size; ++i) {
-		const size_t next = (i+1)%size;
+	for( size_t i = 0; i < in.size(); ++i ) {
+		const size_t next = (i + 1) % in.size();
 
 		curmesh.vertcnt.push_back(4);
-		
-		out.push_back(in[i]);
-		out.push_back(in[i]+dir);
-		out.push_back(in[next]+dir);
-		out.push_back(in[next]);
 
-		if(openings) {
-			if((in[i]-in[next]).Length() > diag * 0.1 && GenerateOpenings(*conv.apply_openings,nors,temp,true, true, dir)) {
+		out.push_back(in[i]);
+		out.push_back(in[next]);
+		out.push_back(in[next] + dir);
+		out.push_back(in[i] + dir);
+
+		if( openings ) {
+			if( (in[i] - in[next]).Length() > diag * 0.1 && GenerateOpenings(*conv.apply_openings, nors, temp, true, true, dir) ) {
 				++sides_with_openings;
 			}
-			
+
 			result.Append(temp);
 			temp.Clear();
 		}
 	}
 
-	if(openings) {
+	if( openings ) {
 		BOOST_FOREACH(TempOpening& opening, *conv.apply_openings) {
-			if (!opening.wallPoints.empty()) {
+			if( !opening.wallPoints.empty() ) {
 				IFCImporter::LogError("failed to generate all window caps");
 			}
 			opening.wallPoints.clear();
 		}
 	}
-	
-	size_t sides_with_v_openings = 0;
-	if(has_area) {
 
-		for(size_t n = 0; n < 2; ++n) {
-			for(size_t i = size; i--; ) {
-				out.push_back(in[i]+(n?dir:IfcVector3()));
+	size_t sides_with_v_openings = 0;
+	if( has_area ) {
+
+		for( size_t n = 0; n < 2; ++n ) {
+			if( n > 0 ) {
+				for( size_t i = 0; i < in.size(); ++i )
+					out.push_back(in[i] + dir);
+			}
+			else {
+				for( size_t i = in.size(); i--; )
+					out.push_back(in[i]);
 			}
 
-			curmesh.vertcnt.push_back(size);
-			if(openings && size > 2) {
-				if(GenerateOpenings(*conv.apply_openings,nors,temp,true, true, dir)) {
+			curmesh.vertcnt.push_back(in.size());
+			if( openings && in.size() > 2 ) {
+				if( GenerateOpenings(*conv.apply_openings, nors, temp, true, true, dir) ) {
 					++sides_with_v_openings;
 				}
 
@@ -662,7 +650,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 		}
 	}
 
-	if(openings && ((sides_with_openings == 1 && sides_with_openings) || (sides_with_v_openings == 2 && sides_with_v_openings))) {
+	if( openings && ((sides_with_openings == 1 && sides_with_openings) || (sides_with_v_openings == 2 && sides_with_v_openings)) ) {
 		IFCImporter::LogWarn("failed to resolve all openings, presumably their topology is not supported by Assimp");
 	}
 
@@ -670,17 +658,58 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 
 	// If this is an opening element, store both the extruded mesh and the 2D profile mesh
 	// it was created from. Return an empty mesh to the caller.
-	if(collect_openings && !result.IsEmpty()) {
+	if( collect_openings && !result.IsEmpty() ) {
 		ai_assert(conv.collect_openings);
 		boost::shared_ptr<TempMesh> profile = boost::shared_ptr<TempMesh>(new TempMesh());
 		profile->Swap(result);
 
 		boost::shared_ptr<TempMesh> profile2D = boost::shared_ptr<TempMesh>(new TempMesh());
-		profile2D->Swap(meshout);
-		conv.collect_openings->push_back(TempOpening(&solid,dir,profile, profile2D));
+		profile2D->verts.insert(profile2D->verts.end(), in.begin(), in.end());
+		profile2D->vertcnt.push_back(in.size());
+		conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
 
 		ai_assert(result.IsEmpty());
-	} 
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result, 
+	ConversionData& conv, bool collect_openings)
+{
+	TempMesh meshout;
+	
+	// First read the profile description. 
+	if(!ProcessProfile(*solid.SweptArea,meshout,conv) || meshout.verts.size()<=1) {
+		return;
+	}
+
+	IfcVector3 dir;
+	ConvertDirection(dir,solid.ExtrudedDirection);
+	dir *= solid.Depth;
+
+	// Some profiles bring their own holes, for which we need to provide a container. This all is somewhat backwards, 
+	// and there's still so many corner cases uncovered - we really need a generic solution to all of this hole carving.
+	std::vector<TempOpening> fisherPriceMyFirstOpenings;
+	std::vector<TempOpening>* oldApplyOpenings = conv.apply_openings;
+	if( const IfcArbitraryProfileDefWithVoids* const cprofile = solid.SweptArea->ToPtr<IfcArbitraryProfileDefWithVoids>() ) {
+		if( !cprofile->InnerCurves.empty() ) {
+			// read all inner curves and extrude them to form proper openings. 
+			std::vector<TempOpening>* oldCollectOpenings = conv.collect_openings;
+			conv.collect_openings = &fisherPriceMyFirstOpenings;
+
+			BOOST_FOREACH(const IfcCurve* curve, cprofile->InnerCurves) {
+				TempMesh curveMesh, tempMesh;
+				ProcessCurve(*curve, curveMesh, conv);
+				ProcessExtrudedArea(solid, curveMesh, dir, tempMesh, conv, true);
+			}
+			// and then apply those to the geometry we're about to generate
+			conv.apply_openings = conv.collect_openings;
+			conv.collect_openings = oldCollectOpenings;
+		}
+	}
+
+	ProcessExtrudedArea(solid, meshout, dir, result, conv, collect_openings);
+	conv.apply_openings = oldApplyOpenings;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -699,10 +728,10 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned int>& mesh_indices, 
+bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, std::vector<unsigned int>& mesh_indices, 
 	ConversionData& conv)
 {
-	bool fix_orientation = true;
+	bool fix_orientation = false;
 	boost::shared_ptr< TempMesh > meshtmp = boost::make_shared<TempMesh>(); 
 	if(const IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IfcShellBasedSurfaceModel>()) {
 		BOOST_FOREACH(boost::shared_ptr<const IfcShell> shell,shellmod->SbsmBoundary) {
@@ -716,24 +745,27 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 				IFCImporter::LogWarn("unexpected type error, IfcShell ought to inherit from IfcConnectedFaceSet");
 			}
 		}
+		fix_orientation = true;
 	}
 	else  if(const IfcConnectedFaceSet* fset = geo.ToPtr<IfcConnectedFaceSet>()) {
 		ProcessConnectedFaceSet(*fset,*meshtmp.get(),conv);
+		fix_orientation = true;
 	}	
 	else  if(const IfcSweptAreaSolid* swept = geo.ToPtr<IfcSweptAreaSolid>()) {
 		ProcessSweptAreaSolid(*swept,*meshtmp.get(),conv);
 	}   
 	else  if(const IfcSweptDiskSolid* disk = geo.ToPtr<IfcSweptDiskSolid>()) {
 		ProcessSweptDiskSolid(*disk,*meshtmp.get(),conv);
-		fix_orientation = false;
 	}   
 	else if(const IfcManifoldSolidBrep* brep = geo.ToPtr<IfcManifoldSolidBrep>()) {
 		ProcessConnectedFaceSet(brep->Outer,*meshtmp.get(),conv);
+		fix_orientation = true;
 	} 
 	else if(const IfcFaceBasedSurfaceModel* surf = geo.ToPtr<IfcFaceBasedSurfaceModel>()) {
 		BOOST_FOREACH(const IfcConnectedFaceSet& fc, surf->FbsmFaces) {
 			ProcessConnectedFaceSet(fc,*meshtmp.get(),conv);
 		}
+		fix_orientation = true;
 	}  
 	else  if(const IfcBooleanResult* boolean = geo.ToPtr<IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,*meshtmp.get(),conv);
@@ -772,12 +804,12 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, std::vector<unsigned
 	meshtmp->RemoveDegenerates();
 
 	if(fix_orientation) {
-		meshtmp->FixupFaceOrientation();
+//		meshtmp->FixupFaceOrientation();
 	}
 
 	aiMesh* const mesh = meshtmp->ToMesh();
 	if(mesh) {
-		mesh->mMaterialIndex = ProcessMaterials(geo,conv);
+		mesh->mMaterialIndex = matid; 
 		mesh_indices.push_back(conv.meshes.size());
 		conv.meshes.push_back(mesh);
 		return true;
@@ -807,10 +839,11 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
 
 // ------------------------------------------------------------------------------------------------
 bool TryQueryMeshCache(const IfcRepresentationItem& item, 
-	std::vector<unsigned int>& mesh_indices, 
+	std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
 	ConversionData& conv) 
 {
-	ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(&item);
+	ConversionData::MeshCacheIndex idx(&item, mat_index);
+	ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(idx);
 	if (it != conv.cached_meshes.end()) {
 		std::copy((*it).second.begin(),(*it).second.end(),std::back_inserter(mesh_indices));
 		return true;
@@ -820,21 +853,25 @@ bool TryQueryMeshCache(const IfcRepresentationItem& item,
 
 // ------------------------------------------------------------------------------------------------
 void PopulateMeshCache(const IfcRepresentationItem& item, 
-	const std::vector<unsigned int>& mesh_indices, 
+	const std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
 	ConversionData& conv)
 {
-	conv.cached_meshes[&item] = mesh_indices;
+	ConversionData::MeshCacheIndex idx(&item, mat_index);
+	conv.cached_meshes[idx] = mesh_indices;
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessRepresentationItem(const IfcRepresentationItem& item, 
+bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int matid,
 	std::vector<unsigned int>& mesh_indices, 
 	ConversionData& conv)
 {
-	if (!TryQueryMeshCache(item,mesh_indices,conv)) {
-		if(ProcessGeometricItem(item,mesh_indices,conv)) {
+	// determine material
+	unsigned int localmatid = ProcessMaterials(item.GetID(), matid, conv, true);
+
+	if (!TryQueryMeshCache(item,mesh_indices,localmatid,conv)) {
+		if(ProcessGeometricItem(item,localmatid,mesh_indices,conv)) {
 			if(mesh_indices.size()) {
-				PopulateMeshCache(item,mesh_indices,conv);
+				PopulateMeshCache(item,mesh_indices,localmatid,conv);
 			}
 		}
 		else return false;

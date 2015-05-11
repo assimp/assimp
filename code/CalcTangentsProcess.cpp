@@ -43,12 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  tangents and bitangents for all imported meshes
  */
 
-#include "AssimpPCH.h"
-
 // internal headers
 #include "CalcTangentsProcess.h"
 #include "ProcessHelper.h"
 #include "TinyFormatter.h"
+#include "qnan.h"
 
 using namespace Assimp;
 
@@ -167,7 +166,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// their tangent vectors are set to qnan.
 			for (unsigned int i = 0; i < face.mNumIndices;++i)
 			{
-				register unsigned int idx = face.mIndices[i];
+				unsigned int idx = face.mIndices[i];
 				vertexDone  [idx] = true;
 				meshTang    [idx] = aiVector3D(qnan);
 				meshBitang  [idx] = aiVector3D(qnan);

@@ -38,13 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include "AssimpPCH.h"
-
 #include "Subdivision.h"
 #include "SceneCombiner.h"
 #include "SpatialSort.h"
 #include "ProcessHelper.h"
 #include "Vertex.h"
+#include <stdio.h>
 
 using namespace Assimp;
 void mydummy() {}
@@ -290,6 +289,8 @@ void CatmullClarkSubdivider::InternSubdivide (
 		}
 	}
 	
+	{
+	// we want edges to go away before the recursive calls so begin a new scope
 	EdgeMap edges;
 
 	// ---------------------------------------------------------------------
@@ -572,6 +573,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 			}
 		}
 	}
+	}  // end of scope for edges, freeing its memory
 
 	// ---------------------------------------------------------------------
 	// 7. Apply the next subdivision step. 

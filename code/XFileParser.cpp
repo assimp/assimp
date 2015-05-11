@@ -41,12 +41,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the XFile parser helper class */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
 
 #include "XFileParser.h"
 #include "XFileHelper.h"
 #include "fast_atof.h"
+#include "Exceptional.h"
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+#include "ByteSwapper.h"
+#include "../include/assimp/DefaultLogger.hpp"
+
 
 using namespace Assimp;
 using namespace Assimp::XFile;
@@ -1432,7 +1438,7 @@ aiColor3D XFileParser::ReadRGB()
 
 // ------------------------------------------------------------------------------------------------
 // Throws an exception with a line number and the given text.
-void XFileParser::ThrowException( const std::string& pText)
+AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText)
 {
 	if( mIsBinaryFormat)
 		throw DeadlyImportError( pText);

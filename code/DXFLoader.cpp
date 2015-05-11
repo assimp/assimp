@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the DXF importer class
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
 
 #include "DXFLoader.h"
@@ -52,6 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 
 #include "DXFHelper.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/scene.h"
+#include <boost/foreach.hpp>
+#include <numeric>
 
 using namespace Assimp;
 

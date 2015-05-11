@@ -49,6 +49,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
+#include <boost/foreach.hpp>
+#include <deque>
+#include "./../include/assimp/material.h"
+
+struct aiTexture;
 
 #define for_each(x,y) BOOST_FOREACH(x,y)
 
@@ -118,6 +123,16 @@ namespace Blender {
 #ifdef _MSC_VER
 #	pragma warning(disable:4351)
 #endif
+
+	struct ObjectCompare {
+		bool operator() (const Object* left, const Object* right) const {
+			return strcmp(left->id.name, right->id.name) == -1;
+		}
+	};
+
+	// When keeping objects in sets, sort them by their name.
+	typedef std::set<const Object*, ObjectCompare> ObjectSet;
+
 	// --------------------------------------------------------------------
 	/** ConversionData acts as intermediate storage location for
 	 *  the various ConvertXXX routines in BlenderImporter.*/
@@ -130,7 +145,13 @@ namespace Blender {
 			, db(db)
 		{}
 
-		std::set<const Object*> objects;
+		struct ObjectCompare {
+			bool operator() (const Object* left, const Object* right) const {
+				return strcmp(left->id.name, right->id.name) == -1;
+			}
+		};
+
+		ObjectSet objects;
 
 		TempArray <std::vector, aiMesh> meshes;
 		TempArray <std::vector, aiCamera> cameras;

@@ -43,13 +43,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Q3D importer class
  */
 
-#include "AssimpPCH.h"
+
 #ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
 
 // internal headers
 #include "Q3DLoader.h"
 #include "StreamReader.h"
 #include "fast_atof.h"
+#include "../include/assimp/IOSystem.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/scene.h"
 
 using namespace Assimp;
 
@@ -314,7 +317,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				if (!tex->mWidth || !tex->mHeight)
 					throw DeadlyImportError("Quick3D: Invalid texture. Width or height is zero");
 
-				register unsigned int mul = tex->mWidth * tex->mHeight;
+				unsigned int mul = tex->mWidth * tex->mHeight;
 				aiTexel* begin = tex->pcData = new aiTexel[mul];
 				aiTexel* const end = & begin [mul];
 

@@ -45,9 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_PROFILER_H
 
 #include "boost/timer.hpp"
-
 #include "../include/assimp/DefaultLogger.hpp"
 #include "TinyFormatter.h"
+
+#include <map>
 
 namespace Assimp {
 	namespace Profiling {

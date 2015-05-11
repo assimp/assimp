@@ -41,10 +41,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file Implementation of the Terragen importer class */
 
-#include "AssimpPCH.h"
+
 
 #ifndef ASSIMP_BUILD_NO_TERRAGEN_IMPORTER
 #include "TerragenLoader.h"
+#include "../include/assimp/Importer.hpp"
+#include "../include/assimp/IOSystem.hpp"
+#include "StreamReader.h"
+#include "../include/assimp/scene.h"
+#include "../include/assimp/DefaultLogger.hpp"
+
 
 using namespace Assimp;
 
@@ -225,7 +231,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 
 					// make verts
 					const float fy = (float)yy, fx = (float)xx;
-					register unsigned tmp,tmp2;
+					unsigned tmp,tmp2;
 					*pv++ = aiVector3D(fx,fy,    (float)data[(tmp2=x*yy)    + xx] * hscale + bheight);
 					*pv++ = aiVector3D(fx,fy+1,  (float)data[(tmp=x*(yy+1)) + xx] * hscale + bheight);
 					*pv++ = aiVector3D(fx+1,fy+1,(float)data[tmp  + xx+1]         * hscale + bheight);

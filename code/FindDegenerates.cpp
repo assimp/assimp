@@ -43,11 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the FindDegenerates post-process step.
 */
 
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "ProcessHelper.h"
 #include "FindDegenerates.h"
+#include "Exceptional.h"
 
 using namespace Assimp;
 
@@ -107,7 +108,7 @@ void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh)
 		bool first = true;
 
 		// check whether the face contains degenerated entries
-		for (register unsigned int i = 0; i < face.mNumIndices; ++i)
+		for (unsigned int i = 0; i < face.mNumIndices; ++i)
 		{
 			// Polygons with more than 4 points are allowed to have double points, that is
 			// simulating polygons with holes just with concave polygons. However,
@@ -116,7 +117,7 @@ void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh)
 			if (face.mNumIndices > 4)
 				limit = std::min(limit,i+2);
 
-			for (register unsigned int t = i+1; t < limit; ++t)
+			for (unsigned int t = i+1; t < limit; ++t)
 			{
 				if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[t]])
 				{

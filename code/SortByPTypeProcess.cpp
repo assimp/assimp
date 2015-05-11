@@ -43,11 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  SortByPTypeProcess post-process steps.
 */
 
-#include "AssimpPCH.h"
+
 
 // internal headers
 #include "ProcessHelper.h"
 #include "SortByPTypeProcess.h"
+#include "Exceptional.h"
 
 using namespace Assimp;
 
@@ -289,7 +290,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 
 				for (unsigned int q = 0; q < in.mNumIndices; ++q)
 				{
-					register unsigned int idx = in.mIndices[q];
+					unsigned int idx = in.mIndices[q];
 
 					// process all bones of this index
 					if (avw)

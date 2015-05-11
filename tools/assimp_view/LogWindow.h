@@ -42,87 +42,92 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (!defined AV_LOG_WINDOW_H_INCLUDED)
 #define AV_LOG_WINDOW_H_INCLUDE
 
-
-//-------------------------------------------------------------------------------
-/**	\brief Subclass of Assimp::LogStream used to add all log messages to the
- *         log window.
-*/
-//-------------------------------------------------------------------------------
-class CMyLogStream : public Assimp::LogStream
+namespace AssimpView
 {
-public:
-	/**	@brief	Implementation of the abstract method	*/
-	void write(const char* message);
-};
 
 
-//-------------------------------------------------------------------------------
-/**	\brief Class to display log strings in a separate window
-*/
-//-------------------------------------------------------------------------------
-class CLogWindow
-	{
-private:
-
-	friend class CMyLogStream;
-	friend INT_PTR CALLBACK LogDialogProc(HWND hwndDlg,UINT uMsg,
-		WPARAM wParam,LPARAM lParam);
-
-	CLogWindow() : hwnd(NULL),  bIsVisible(false), bUpdate(true) {}
-
-public:
+    //-------------------------------------------------------------------------------
+    /**	\brief Subclass of Assimp::LogStream used to add all log messages to the
+     *         log window.
+     */
+    //-------------------------------------------------------------------------------
+    class CMyLogStream : public Assimp::LogStream
+    {
+    public:
+        /**	@brief	Implementation of the abstract method	*/
+        void write( const char* message );
+    };
 
 
-	// Singleton accessors
-	static CLogWindow s_cInstance;
-	inline static CLogWindow& Instance ()
-		{
-		return s_cInstance;
-		}
+    //-------------------------------------------------------------------------------
+    /**	\brief Class to display log strings in a separate window
+    */
+    //-------------------------------------------------------------------------------
+    class CLogWindow
+    {
+    private:
 
-	// initializes the log window
-	void Init ();
+        friend class CMyLogStream;
+        friend INT_PTR CALLBACK LogDialogProc( HWND hwndDlg, UINT uMsg,
+            WPARAM wParam, LPARAM lParam );
 
-	// Shows the log window
-	void Show();
+        CLogWindow() : hwnd( NULL ), bIsVisible( false ), bUpdate( true ) {}
 
-	// Clears the log window
-	void Clear();
-
-	// Save the log window to an user-defined file
-	void Save();
-
-	// write a line to the log window
-	void WriteLine(const char* message);
-
-	// Set the bUpdate member
-	inline void SetAutoUpdate(bool b)
-	{
-		this->bUpdate = b;
-	}
-
-	// updates the log file
-	void Update();
-
-private:
-
-	// Window handle
-	HWND hwnd;
-
-	// current text of the window (contains RTF tags)
-	std::string szText;
-	std::string szPlainText;
-
-	// is the log window currently visible?
-	bool bIsVisible;
-
-	// Specified whether each new log message updates the log automatically
-	bool bUpdate;
+    public:
 
 
-public:
-	// associated log stream
-	CMyLogStream* pcStream;
-	};
+        // Singleton accessors
+        static CLogWindow s_cInstance;
+        inline static CLogWindow& Instance()
+        {
+            return s_cInstance;
+        }
+
+        // initializes the log window
+        void Init();
+
+        // Shows the log window
+        void Show();
+
+        // Clears the log window
+        void Clear();
+
+        // Save the log window to an user-defined file
+        void Save();
+
+        // write a line to the log window
+        void WriteLine( const char* message );
+
+        // Set the bUpdate member
+        inline void SetAutoUpdate( bool b )
+        {
+            this->bUpdate = b;
+        }
+
+        // updates the log file
+        void Update();
+
+    private:
+
+        // Window handle
+        HWND hwnd;
+
+        // current text of the window (contains RTF tags)
+        std::string szText;
+        std::string szPlainText;
+
+        // is the log window currently visible?
+        bool bIsVisible;
+
+        // Specified whether each new log message updates the log automatically
+        bool bUpdate;
+
+
+    public:
+        // associated log stream
+        CMyLogStream* pcStream;
+    };
+
+}
 
 #endif // AV_LOG_DISPLA

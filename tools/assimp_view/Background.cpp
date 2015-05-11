@@ -39,12 +39,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-#include "stdafx.h"
 #include "assimp_view.h"
-
 
 namespace AssimpView {
 
+extern std::string g_szSkyboxShader;
 
 // From: U3D build 1256 (src\kernel\graphic\scenegraph\SkyBox.cpp)
 // ------------------------------------------------------------------------------

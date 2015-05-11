@@ -42,13 +42,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Plain-C API
  */
 
-#include "AssimpPCH.h"
-#include "../include/assimp/cimport.h"
+#include <assimp/cimport.h>
+#include <assimp/LogStream.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/importerdesc.h>
+#include <assimp/scene.h>
 
 #include "GenericProperty.h"
 #include "CInterfaceIOWrapper.h"
-#include "../include/assimp/importerdesc.h"
 #include "Importer.h"
+#include "Exceptional.h"
+#include "ScenePrivate.h"
+#include "BaseImporter.h"
+#include <list>
 
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_SINGLETHREADED
@@ -483,7 +490,7 @@ ASSIMP_API void aiSetImportPropertyInteger(aiPropertyStore* p, const char* szNam
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<int>(pp->ints,szName,value,NULL);
+	SetGenericProperty<int>(pp->ints,szName,value);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -493,7 +500,7 @@ ASSIMP_API void aiSetImportPropertyFloat(aiPropertyStore* p, const char* szName,
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<float>(pp->floats,szName,value,NULL);
+	SetGenericProperty<float>(pp->floats,szName,value);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -507,7 +514,7 @@ ASSIMP_API void aiSetImportPropertyString(aiPropertyStore* p, const char* szName
 	}
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<std::string>(pp->strings,szName,std::string(st->C_Str()),NULL);
+	SetGenericProperty<std::string>(pp->strings,szName,std::string(st->C_Str()));
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -521,7 +528,7 @@ ASSIMP_API void aiSetImportPropertyMatrix(aiPropertyStore* p, const char* szName
 	}
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 	PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-	SetGenericProperty<aiMatrix4x4>(pp->matrices,szName,*mat,NULL);
+	SetGenericProperty<aiMatrix4x4>(pp->matrices,szName,*mat);
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 

@@ -98,7 +98,7 @@ SET( Common_SRCS
 	ScenePrivate.h
 	PostStepRegistry.cpp
 	ImporterRegistry.cpp
-	ByteSwap.h
+	ByteSwapper.h
 	DefaultProgressHandler.h
 	DefaultIOStream.cpp
 	DefaultIOStream.h
@@ -145,10 +145,39 @@ SET( Common_SRCS
 	Bitmap.cpp
 	Bitmap.h
 	XMLTools.h
+	Version.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 
-SET( 3DS_SRCS
+IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
+	SET( C4D_SRCS
+		C4DImporter.cpp
+		C4DImporter.h
+	)
+	SOURCE_GROUP( C4D FILES ${C4D_SRCS})
+ENDIF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
+
+# macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
+# this way selective loaders can be compiled (reduces filesize + compile time)
+MACRO(ADD_ASSIMP_IMPORTER name)
+	OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" TRUE)
+	IF(ASSIMP_BUILD_${name}_IMPORTER)
+		LIST(APPEND ASSIMP_LOADER_SRCS ${ARGN})
+		SET(ASSIMP_IMPORTERS_ENABLED "${ASSIMP_IMPORTERS_ENABLED} ${name}")
+		SET(${name}_SRCS ${ARGN})
+		SOURCE_GROUP(${name} FILES ${ARGN})
+	ELSE()
+		SET(${name}_SRC "")
+		SET(ASSIMP_IMPORTERS_DISABLED "${ASSIMP_IMPORTERS_DISABLED} ${name}")
+		add_definitions(-DASSIMP_BUILD_NO_${name}_IMPORTER)
+	ENDIF()
+ENDMACRO()
+
+SET(ASSIMP_LOADER_SRCS "")
+SET(ASSIMP_IMPORTERS_ENABLED "") # list of enabled importers
+SET(ASSIMP_IMPORTERS_DISABLED "") # disabled list (used to print)
+
+ADD_ASSIMP_IMPORTER(3DS
 	3DSConverter.cpp
 	3DSHelper.h
 	3DSLoader.cpp
@@ -156,49 +185,42 @@ SET( 3DS_SRCS
 	3DSExporter.h
 	3DSExporter.cpp
 )
-SOURCE_GROUP(3DS FILES ${3DS_SRCS})
 
-SET( AC_SRCS
+ADD_ASSIMP_IMPORTER(AC
 	ACLoader.cpp
 	ACLoader.h
 )
-SOURCE_GROUP( AC FILES ${AC_SRCS})
 
-SET( ASE_SRCS
+ADD_ASSIMP_IMPORTER(ASE
 	ASELoader.cpp
 	ASELoader.h
 	ASEParser.cpp
 	ASEParser.h
 )
-SOURCE_GROUP( ASE FILES ${ASE_SRCS})
 
-SET( ASSBIN_SRCS
+ADD_ASSIMP_IMPORTER(ASSBIN
 	AssbinExporter.h
 	AssbinExporter.cpp
 	AssbinLoader.h
 	AssbinLoader.cpp
 )
-SOURCE_GROUP( Assbin FILES ${ASSBIN_SRCS})
 
-SET( ASSXML_SRCS
+ADD_ASSIMP_IMPORTER(ASSXML
 	AssxmlExporter.h
 	AssxmlExporter.cpp
 )
-SOURCE_GROUP( Assxml FILES ${ASSXML_SRCS})
 
-SET( B3D_SRCS
+ADD_ASSIMP_IMPORTER(B3D
 	B3DImporter.cpp
 	B3DImporter.h
 )
-SOURCE_GROUP( B3D FILES ${B3D_SRCS})
 
-SET( BVH_SRCS
+ADD_ASSIMP_IMPORTER(BVH
 	BVHLoader.cpp
 	BVHLoader.h
 )
-SOURCE_GROUP( BVH FILES ${BVH_SRCS})
 
-SET( Collada_SRCS
+ADD_ASSIMP_IMPORTER(COLLADA
 	ColladaHelper.h
 	ColladaLoader.cpp
 	ColladaLoader.h
@@ -207,30 +229,27 @@ SET( Collada_SRCS
 	ColladaExporter.h
 	ColladaExporter.cpp
 )
-SOURCE_GROUP( Collada FILES ${Collada_SRCS})
 
-SET( DXF_SRCS
+ADD_ASSIMP_IMPORTER(DXF
 	DXFLoader.cpp
 	DXFLoader.h
 	DXFHelper.h
 )
-SOURCE_GROUP( DXF FILES ${DXF_SRCS})
 
-SET( CSM_SRCS
+ADD_ASSIMP_IMPORTER(CSM
 	CSMLoader.cpp
 	CSMLoader.h
 )
-SOURCE_GROUP( CSM FILES ${CSM_SRCS})
 
-SET( HMP_SRCS
+ADD_ASSIMP_IMPORTER(HMP
 	HMPFileData.h
 	HMPLoader.cpp
 	HMPLoader.h
 	HalfLifeFileData.h
 )
-SOURCE_GROUP( HMP FILES ${HMP_SRCS})
 
-SET( Irr_SRCS
+#FIXME: allow to set IRRMESH by option
+ADD_ASSIMP_IMPORTER(IRR
 	IRRLoader.cpp
 	IRRLoader.h
 	IRRMeshLoader.cpp
@@ -238,9 +257,8 @@ SET( Irr_SRCS
 	IRRShared.cpp
 	IRRShared.h
 )
-SOURCE_GROUP( Irr FILES ${Irr_SRCS})
 
-SET( LWO_SRCS
+ADD_ASSIMP_IMPORTER(LWO
 	LWOAnimation.cpp
 	LWOAnimation.h
 	LWOBLoader.cpp
@@ -249,55 +267,46 @@ SET( LWO_SRCS
 	LWOLoader.h
 	LWOMaterial.cpp
 )
-SOURCE_GROUP( LWO FILES ${LWO_SRCS})
 
-SET( LWS_SRCS
+ADD_ASSIMP_IMPORTER(LWS
 	LWSLoader.cpp
 	LWSLoader.h
 )
-SOURCE_GROUP( LWS FILES ${LWS_SRCS})
 
-
-
-SET( MD2_SRCS
+ADD_ASSIMP_IMPORTER(MD2
 	MD2FileData.h
 	MD2Loader.cpp
 	MD2Loader.h
 	MD2NormalTable.h
 )
-SOURCE_GROUP( MD2 FILES ${MD2_SRCS})
 
-SET( MD3_SRCS
+ADD_ASSIMP_IMPORTER(MD3
 	MD3FileData.h
 	MD3Loader.cpp
 	MD3Loader.h
 )
-SOURCE_GROUP( MD3 FILES ${MD3_SRCS})
 
-SET( MD5_SRCS
+ADD_ASSIMP_IMPORTER(MD5
 	MD5Loader.cpp
 	MD5Loader.h
 	MD5Parser.cpp
 	MD5Parser.h
 )
-SOURCE_GROUP( MD5 FILES ${MD5_SRCS})
 
-SET( MDC_SRCS
+ADD_ASSIMP_IMPORTER(MDC
 	MDCFileData.h
 	MDCLoader.cpp
 	MDCLoader.h
 	MDCNormalTable.h
 )
-SOURCE_GROUP( MDC FILES ${MDC_SRCS})
 
-SET( MDL_SRCS
+ADD_ASSIMP_IMPORTER(MDL
 	MDLDefaultColorMap.h
 	MDLFileData.h
 	MDLLoader.cpp
 	MDLLoader.h
 	MDLMaterialLoader.cpp
 )
-SOURCE_GROUP( MDL FILES ${MDL_SRCS})
 
 SET( MaterialSystem_SRCS
 	MaterialSystem.cpp
@@ -305,25 +314,22 @@ SET( MaterialSystem_SRCS
 )
 SOURCE_GROUP( MaterialSystem FILES ${MaterialSystem_SRCS})
 
-SET( NFF_SRCS
+ADD_ASSIMP_IMPORTER(NFF
 	NFFLoader.cpp
 	NFFLoader.h
 )
-SOURCE_GROUP( NFF FILES ${NFF_SRCS})
 
-SET( NDO_SRCS
+ADD_ASSIMP_IMPORTER(NDO
 	NDOLoader.cpp
 	NDOLoader.h
 )
-SOURCE_GROUP( NDO FILES ${NDO_SRCS})
 
-SET( OFFFormat_SRCS
+ADD_ASSIMP_IMPORTER(OFF
 	OFFLoader.cpp
 	OFFLoader.h
 )
-SOURCE_GROUP( OFFFormat FILES ${OFFFormat_SRCS})
 
-SET( Obj_SRCS
+ADD_ASSIMP_IMPORTER(OBJ
 	ObjFileData.h
 	ObjFileImporter.cpp
 	ObjFileImporter.h
@@ -336,9 +342,8 @@ SET( Obj_SRCS
 	ObjExporter.h
 	ObjExporter.cpp
 )
-SOURCE_GROUP( Obj FILES ${Obj_SRCS})
 
-SET( Ogre_SRCS
+ADD_ASSIMP_IMPORTER(OGRE
 	OgreImporter.h
 	OgreStructs.h
 	OgreParsingUtils.h
@@ -350,9 +355,14 @@ SET( Ogre_SRCS
 	OgreXmlSerializer.cpp
 	OgreMaterial.cpp
 )
-SOURCE_GROUP( Ogre FILES ${Ogre_SRCS})
 
-SET( Ply_SRCS
+ADD_ASSIMP_IMPORTER(OPENGEX
+    OpenGEXImporter.cpp
+    OpenGEXImporter.h
+    OpenGEXStructs.h
+)
+
+ADD_ASSIMP_IMPORTER(PLY
 	PlyLoader.cpp
 	PlyLoader.h
 	PlyParser.cpp
@@ -360,22 +370,19 @@ SET( Ply_SRCS
 	PlyExporter.cpp
 	PlyExporter.h
 )
-SOURCE_GROUP( Ply FILES ${Ply_SRCS})
 
-SET(MS3D_SRCS
+ADD_ASSIMP_IMPORTER(MS3D
 	MS3DLoader.cpp
 	MS3DLoader.h
 )
-SOURCE_GROUP( MS3D FILES ${MS3D_SRCS})
 
-SET(COB_SRCS
+ADD_ASSIMP_IMPORTER(COB
 	COBLoader.cpp
 	COBLoader.h
 	COBScene.h
 )
-SOURCE_GROUP( COB FILES ${COB_SRCS})
 
-SET(BLENDER_SRCS
+ADD_ASSIMP_IMPORTER(BLEND
 	BlenderLoader.cpp
 	BlenderLoader.h
 	BlenderDNA.cpp
@@ -392,9 +399,8 @@ SET(BLENDER_SRCS
 	BlenderTessellator.h
 	BlenderTessellator.cpp
 )
-SOURCE_GROUP( BLENDER FILES ${BLENDER_SRCS})
 
-SET(IFC_SRCS
+ADD_ASSIMP_IMPORTER(IFC
 	IFCLoader.cpp
 	IFCLoader.h
 	IFCReaderGen.cpp
@@ -413,16 +419,14 @@ SET(IFC_SRCS
 	STEPFileEncoding.cpp
 	STEPFileEncoding.h
 )
-SOURCE_GROUP( IFC FILES ${IFC_SRCS})
 
-SET( XGL_SRCS
+ADD_ASSIMP_IMPORTER(XGL
 	XGLLoader.cpp
 	XGLLoader.h
 )
-SOURCE_GROUP( XGL FILES ${XGL_SRCS})
 
 
-SET(FBX_SRCS
+ADD_ASSIMP_IMPORTER(FBX
 	FBXImporter.cpp
 	FBXCompileConfig.h
 	FBXImporter.h
@@ -448,8 +452,6 @@ SET(FBX_SRCS
 	FBXBinaryTokenizer.cpp
 	FBXDocumentUtil.cpp
 )
-SOURCE_GROUP( FBX FILES ${FBX_SRCS})
-
 
 SET( PostProcessing_SRCS
 	CalcTangentsProcess.cpp
@@ -506,13 +508,12 @@ SET( PostProcessing_SRCS
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
 
-SET( Q3D_SRCS
+ADD_ASSIMP_IMPORTER(Q3D
 	Q3DLoader.cpp
 	Q3DLoader.h
 )
-SOURCE_GROUP( Q3D FILES ${Q3D_SRCS})
 
-SET( Q3BSP_SRCS
+ADD_ASSIMP_IMPORTER(Q3BSP
 	Q3BSPFileData.h
 	Q3BSPFileParser.h
 	Q3BSPFileParser.cpp
@@ -521,41 +522,35 @@ SET( Q3BSP_SRCS
 	Q3BSPZipArchive.h
 	Q3BSPZipArchive.cpp
 )
-SOURCE_GROUP( Q3BSP FILES ${Q3BSP_SRCS})
 
-SET( Raw_SRCS
+ADD_ASSIMP_IMPORTER(RAW
 	RawLoader.cpp
 	RawLoader.h
 )
-SOURCE_GROUP( Raw FILES ${Raw_SRCS})
 
-SET( SMD_SRCS
+ADD_ASSIMP_IMPORTER(SMD
 	SMDLoader.cpp
 	SMDLoader.h
 )
-SOURCE_GROUP( SMD FILES ${SMD_SRCS})
 
-SET( STL_SRCS
+ADD_ASSIMP_IMPORTER(STL
 	STLLoader.cpp
 	STLLoader.h
 	STLExporter.h
 	STLExporter.cpp
 )
-SOURCE_GROUP( STL FILES ${STL_SRCS})
 
-SET( Terragen_SRCS
+ADD_ASSIMP_IMPORTER(TERRAGEN
 	TerragenLoader.cpp
 	TerragenLoader.h
 )
-SOURCE_GROUP( Terragen FILES ${Terragen_SRCS})
 
-SET( Unreal_SRCS
+ADD_ASSIMP_IMPORTER(3D
 	UnrealLoader.cpp
 	UnrealLoader.h
 )
-SOURCE_GROUP( Unreal FILES ${Unreal_SRCS})
 
-SET( XFile_SRCS
+ADD_ASSIMP_IMPORTER(X
 	XFileHelper.h
 	XFileImporter.cpp
 	XFileImporter.h
@@ -564,7 +559,12 @@ SET( XFile_SRCS
 	XFileExporter.h
 	XFileExporter.cpp
 )
-SOURCE_GROUP( XFile FILES ${XFile_SRCS})
+
+SET( Step_SRCS
+	StepExporter.h
+	StepExporter.cpp
+)
+SOURCE_GROUP( Step FILES ${Step_SRCS})
 
 SET( Exporter_SRCS
 	Exporter.cpp
@@ -627,6 +627,17 @@ SET( unzip_SRCS
 )
 SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 
+SET ( openddl_parser_SRCS
+    ../contrib/openddlparser/code/OpenDDLParser.cpp
+    ../contrib/openddlparser/code/DDLNode.cpp
+    ../contrib/openddlparser/code/Value.cpp
+    ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
+    ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
+    ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
+    ../contrib/openddlparser/include/openddlparser/DDLNode.h
+    ../contrib/openddlparser/include/openddlparser/Value.h
+)
+SOURCE_GROUP( openddl_parser FILES ${openddl_parser_SRCS})
 
 # VC2010 fixes
 if(MSVC10)
@@ -649,6 +660,9 @@ else (UNZIP_FOUND)
 	SET (unzip_compile_SRCS ${unzip_SRCS})
 endif (UNZIP_FOUND)
 
+MESSAGE(STATUS "Enabled formats:${ASSIMP_IMPORTERS_ENABLED}")
+MESSAGE(STATUS "Disabled formats:${ASSIMP_IMPORTERS_DISABLED}")
+
 SET( assimp_src
 	# Assimp Files
 	${Core_SRCS}
@@ -656,49 +670,11 @@ SET( assimp_src
 	${Logging_SRCS}
 	${Exporter_SRCS}
 	${PostProcessing_SRCS}
+	${MaterialSystem_SRCS}
+	${Step_SRCS}
 
 	# Model Support
-	${3DS_SRCS}
-	${AC_SRCS}
-	${ASE_SRCS}
-	${ASSBIN_SRCS}
-	${ASSXML_SRCS}
-	${B3D_SRCS}
-	${BVH_SRCS}
-	${Collada_SRCS}
-	${DXF_SRCS}
-	${CSM_SRCS}
-	${HMP_SRCS}
-	${Irr_SRCS}
-	${LWO_SRCS}
-	${LWS_SRCS}
-	${MD2_SRCS}
-	${MD3_SRCS}
-	${MD5_SRCS}
-	${MDC_SRCS}
-	${MDL_SRCS}
-	${MaterialSystem_SRCS}
-	${NFF_SRCS}
-	${OFFFormat_SRCS}
-	${Obj_SRCS}
-	${Ogre_SRCS}
-	${Ply_SRCS}
-	${Q3D_SRCS}
-	${Q3BSP_SRCS}
-	${Raw_SRCS}
-	${SMD_SRCS}
-	${STL_SRCS}
-	${Terragen_SRCS}
-	${Unreal_SRCS}
-	${XFile_SRCS}
-	${Extra_SRCS}
-	${MS3D_SRCS}
-	${COB_SRCS}
-	${BLENDER_SRCS}
-	${NDO_SRCS}
-	${IFC_SRCS}
-	${XGL_SRCS}
-	${FBX_SRCS}
+	${ASSIMP_LOADER_SRCS}
 
 	# Third-party libraries
 	${IrrXML_SRCS}
@@ -706,29 +682,40 @@ SET( assimp_src
 	${unzip_compile_SRCS}
 	${Poly2Tri_SRCS}
 	${Clipper_SRCS}
+	${openddl_parser_SRCS}
 	# Necessary to show the headers in the project when using the VC++ generator:
 	${Boost_SRCS}
 
 	${PUBLIC_HEADERS}
 	${COMPILER_HEADERS}
 
-	# Old precompiled header
-	# (removed because the precompiled header is not updated when visual studio switch configuration which leads to failed compilation.
-	# Moreover it's a drag to recompile assimp entirely each time a modification is made to one of the included header, which is definitely counter-productive.)
-	AssimpPCH.cpp
+)
+add_definitions( -DOPENDDLPARSER_BUILD )
+
+INCLUDE_DIRECTORIES( 
+    ../contrib/openddlparser/include
 )
 
-#ADD_MSVC_PRECOMPILED_HEADER("AssimpPCH.h" "AssimpPCH.cpp" assimp_src)
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	SET( assimp_src ${assimp_src} ${C4D_SRCS})
+	INCLUDE_DIRECTORIES(${C4D_INCLUDES})
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
 ADD_LIBRARY( assimp ${assimp_src} )
 
-TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(assimp ${ZLIB_LIBRARIES} ${OPENDDL_PARSER_LIBRARIES} )
 
 if(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
 	set(ASSIMP_ANDROID_JNIIOSYSTEM_PATH port/AndroidJNI)
 	add_subdirectory(../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/ ../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/)
 	target_link_libraries(assimp android_jniiosystem)
 endif(ANDROID AND ASSIMP_ANDROID_JNIIOSYSTEM)
+
+IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
+	TARGET_LINK_LIBRARIES(assimp optimized ${C4D_RELEASE_LIBRARY})
+	TARGET_LINK_LIBRARIES(assimp debug ${C4D_DEBUG_LIBRARY})
+	TARGET_LINK_LIBRARIES(assimp ${C4D_EXTRA_LIBRARIES})
+ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
 if( MSVC )
   # in order to prevent DLL hell, each of the DLLs have to be suffixed with the major version and msvc prefix
@@ -738,10 +725,16 @@ if( MSVC )
     set(MSVC_PREFIX "vc80")
   elseif( MSVC90 )
     set(MSVC_PREFIX "vc90")
-  else()
+  elseif( MSVC10 )
     set(MSVC_PREFIX "vc100")
+  elseif( MSVC11 )
+    set(MSVC_PREFIX "vc110")
+  elseif( MSVC12 )
+    set(MSVC_PREFIX "vc120")
+  else()
+    set(MSVC_PREFIX "vc130")
   endif()
-  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
+  set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
 
 SET_TARGET_PROPERTIES( assimp PROPERTIES

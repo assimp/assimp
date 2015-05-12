@@ -362,7 +362,7 @@
 		7DC4B0B5E57F4F4892CC823E /* MemoryIOWrapper.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MemoryIOWrapper.h; path = code/MemoryIOWrapper.h; sourceTree = SOURCE_ROOT; };
 		7E8BA0D338C9433587BC6C35 /* StreamWriter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = StreamWriter.h; path = code/StreamWriter.h; sourceTree = SOURCE_ROOT; };
 		7F29EF981AB26C4900E9D380 /* libz.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.dylib; path = /usr/lib/libz.1.dylib; sourceTree = "<absolute>"; };
-		7F392D921AB2C7BB00D952EB /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "/Users/wjs/Source/UberDwelling/Dwelling Test Apps/Dwelling2DBakeTest/../../../../../../usr/lib/libc++.dylib"; sourceTree = "<absolute>"; };
+		7F392D921AB2C7BB00D952EB /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "/usr/lib/libc++.dylib"; sourceTree = "<absolute>"; };
 		7F7922801AB43AC3005A8E5D /* libassimp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libassimp.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FF72CB6E99E40E19AE0E64C /* MaterialSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MaterialSystem.cpp; path = code/MaterialSystem.cpp; sourceTree = SOURCE_ROOT; };
 		815702BED5644DD5B242F347 /* TerragenLoader.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = TerragenLoader.h; path = code/TerragenLoader.h; sourceTree = SOURCE_ROOT; };

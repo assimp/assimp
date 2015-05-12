@@ -79,7 +79,8 @@ void GetPostProcessingStepInstanceList(std::vector< BaseProcess* >& out);
 // Exporter worker function prototypes. Should not be necessary to #ifndef them, it's just a prototype
 // do not use const, because some exporter need to convert the scene temporary
 void ExportSceneCollada(const char*,IOSystem*, const aiScene*, const ExportProperties*);
-void ExportSceneXFile(const char*,IOSystem*, const aiScene*, const ExportProperties*); 
+void ExportSceneXFile(const char*,IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneStep(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneObj(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTL(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*, const ExportProperties*);
@@ -100,6 +101,10 @@ Exporter::ExportFormatEntry gExporters[] =
 #ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
 	Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile,
 		aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_STEP_EXPORTER
+	Exporter::ExportFormatEntry( "stp", "Step Files", "stp", &ExportSceneStep, 0),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER

@@ -265,6 +265,16 @@ void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max, 
  *  @param[out] out Center point */
 void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D& max);
 
+// -------------------------------------------------------------------------------
+/** @brief Helper function to determine the 'real' center of a scene
+ *
+ *  That is the center of its axis-aligned bounding box.
+ *  @param scene Input scene
+ *  @param[out] min Minimum vertex of the scene
+ *  @param[out] max maximum vertex of the scene
+ *  @param[out] out Center point */
+void FindSceneCenter (aiScene* scene, aiVector3D& out, aiVector3D& min, aiVector3D& max);
+
 
 // -------------------------------------------------------------------------------
 // Helper function to determine the 'real' center of a mesh after applying a given transform

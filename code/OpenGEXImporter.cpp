@@ -223,6 +223,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_currentNode( NULL )
 , m_currentMesh( NULL )
 , m_currentMaterial( NULL )
+, m_tokenType( Grammar::NoneType )
 , m_nodeStack()
 , m_unresolvedRefStack() {
     // empty
@@ -406,7 +407,12 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
         }
 
         const std::string name( val->getString() );
-        m_currentNode->mName.Set( name.c_str() );
+        if( m_tokenType == Grammar::GeometryNodeToken ) {
+            m_currentNode->mName.Set( name.c_str() );
+        } else if( m_tokenType == Grammar::MaterialToken ) {
+            
+        }
+
     }
 }
 
@@ -462,6 +468,7 @@ void OpenGEXImporter::handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene 
 void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
     aiNode *newNode = new aiNode;
     pushNode( newNode, pScene );
+    m_tokenType = Grammar::GeometryNodeToken;
     m_currentNode = newNode;
     handleNodes( node, pScene );
     
@@ -768,9 +775,8 @@ static ColorType getColorType( Identifier *id ) {
 void OpenGEXImporter::handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     m_currentMaterial = new aiMaterial;
     m_materialCache.push_back( m_currentMaterial );
-
+    m_tokenType = Grammar::MaterialToken;
     handleNodes( node, pScene );
-
 }
 
 //------------------------------------------------------------------------------------------------

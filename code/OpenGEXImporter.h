@@ -179,6 +179,7 @@ private:
     VertexContainer m_currentVertices;
     aiMesh *m_currentMesh;
     aiMaterial *m_currentMaterial;
+    int m_tokenType;
     std::vector<aiMaterial*> m_materialCache;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;

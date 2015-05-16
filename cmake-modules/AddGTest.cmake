@@ -11,8 +11,8 @@ if (MSVC)
 	set(RELEASE_LIB_DIR ReleaseLibs)
 	set(DEBUG_LIB_DIR DebugLibs)
 else()
-	set(RELEASE_LIB_DIR "")
-	set(DEBUG_LIB_DIR "")
+	set(RELEASE_LIB_DIR "Release")
+	set(DEBUG_LIB_DIR "Debug")
 endif()
 
 set(GTEST_CMAKE_ARGS

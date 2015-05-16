@@ -79,7 +79,7 @@ public:
 };
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(AssimpBoneTest, testReadBone)
+TEST_F(AssimpBoneTest, exportShouldKeepObjectBones)
 {
 
 	const aiScene* sc = pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/simpleBone.dae",0);

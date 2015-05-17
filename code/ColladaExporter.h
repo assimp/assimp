@@ -83,6 +83,11 @@ protected:
 	/// Writes the material setup
 	void WriteMaterials();
 
+	/// Writes the cameras library
+	void WriteCamerasLibrary();
+
+	void WriteCamera(size_t pIndex);
+
 	/// Writes the geometry library
 	void WriteGeometryLibrary();
 

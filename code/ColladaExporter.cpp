@@ -127,6 +127,7 @@ void ColladaExporter::WriteFile()
 	WriteTextures();
 	WriteHeader();
 
+	WriteCamerasLibrary();
 	WriteMaterials();
 	WriteGeometryLibrary();
 
@@ -284,6 +285,61 @@ void ColladaExporter::WriteTextures() {
 			textures.insert(std::make_pair(i, name));
 		}
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Write the embedded textures
+void ColladaExporter::WriteCamerasLibrary() {
+	if(mScene->HasCameras()) {
+
+		mOutput << startstr << "<library_cameras>" << endstr;
+		PushTag();
+
+		for( size_t a = 0; a < mScene->mNumCameras; ++a)
+			WriteCamera( a);
+
+		PopTag();
+		mOutput << startstr << "</library_cameras>" << endstr;
+
+	}
+}
+
+void ColladaExporter::WriteCamera(size_t pIndex){
+
+	const aiCamera *cam = mScene->mCameras[pIndex];
+	const std::string idstrEscaped = XMLEscape(cam->mName.C_Str());
+
+	mOutput << startstr << "<camera id=\"" << idstrEscaped << "-camera\" name=\"" << idstrEscaped << "_name\" >" << endstr;
+	PushTag();
+	mOutput << startstr << "<optics>" << endstr;
+	PushTag();
+	mOutput << startstr << "<technique_common>" << endstr;
+	PushTag();
+	//assimp doesn't support the import of orthographic cameras! se we write
+	//always perspective
+	mOutput << startstr << "<perspective>" << endstr;
+	PushTag();
+	mOutput << startstr << "<xfov sid=\"xfov\">"<<
+								AI_RAD_TO_DEG(cam->mHorizontalFOV)
+						<<"</xfov>" << endstr;
+	mOutput << startstr << "<aspect_ratio>"
+						<<		cam->mAspect
+						<< "</aspect_ratio>" << endstr;
+	mOutput << startstr << "<znear sid=\"znear\">"
+						<<		cam->mClipPlaneNear
+						<<	"</znear>" << endstr;
+	mOutput << startstr << "<zfar sid=\"zfar\">"
+						<<		cam->mClipPlaneFar
+						<< "</zfar>" << endstr;
+	PopTag();
+	mOutput << startstr << "</perspective>" << endstr;
+	PopTag();
+	mOutput << startstr << "</technique_common>" << endstr;
+	PopTag();
+	mOutput << startstr << "</optics>" << endstr;
+	PopTag();
+	mOutput << startstr << "</camera>" << endstr;
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -847,6 +903,9 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 	mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
 	mOutput << "</matrix>" << endstr;
 
+	if(pNode->mNumMeshes==0){
+		mOutput << startstr <<"<instance_camera url=\"#" << node_name_escaped << "-camera\">" << endstr;
+	}else
 	// instance every geometry
 	for( size_t a = 0; a < pNode->mNumMeshes; ++a )
 	{
@@ -854,9 +913,8 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 	// do not instanciate mesh if empty. I wonder how this could happen
 	if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
 		continue;
-
-		mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
-		PushTag();
+	mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
+	PushTag();
 	mOutput << startstr << "<bind_material>" << endstr;
 	PushTag();
 	mOutput << startstr << "<technique_common>" << endstr;

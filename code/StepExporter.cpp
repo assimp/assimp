@@ -115,21 +115,6 @@ void ExportSceneStep(const char* pFile,IOSystem* pIOSystem, const aiScene* pScen
 
 
 namespace {
-	inline uint64_t toIndexHash(int32_t id1, int32_t id2)
-	{
-		// dont wonder that -1/-1 -> hash=-1
-		uint64_t hash = (uint32_t) id1;
-		hash = (hash << 32);
-		hash += (uint32_t) id2;
-		return hash;
-	}
-
-	inline void fromIndexHash(uint64_t hash, int32_t &id1, int32_t &id2)
-	{
-		id1 = (hash & 0xFFFFFFFF00000000) >> 32;
-		id2 = (hash & 0xFFFFFFFF);
-	}
-
 	// Collect world transformations for each node
 	void CollectTrafos(const aiNode* node, std::map<const aiNode*, aiMatrix4x4>& trafos) {
 		const aiMatrix4x4& parent = node->mParent ? trafos[node->mParent] : aiMatrix4x4();

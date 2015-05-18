@@ -665,7 +665,6 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         }
 
         const size_t numItems( countDataArrayListItems( vaList ) );
-        Value *next( vaList->m_dataList );
         if( Position == attribType ) {
             m_currentVertices.m_numVerts = numItems;
             m_currentVertices.m_vertices = new aiVector3D[ numItems ];

@@ -61,7 +61,6 @@ static const unsigned int DeadBeef = 0xdeadbeef;
 // Constructor to be privately used by Importer
 OptimizeMeshesProcess::OptimizeMeshesProcess()
     : mScene()
-    , mesh()
     , pts(false)
     , max_verts( NotSet )
     , max_faces( NotSet ) {

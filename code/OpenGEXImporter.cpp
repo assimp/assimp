@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 
+#include <algorithm>
 #include <vector>
 
 static const aiImporterDesc desc = {
@@ -183,12 +184,11 @@ USE_ODDLPARSER_NS
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
-, m_vertices()
+, m_vertices(NULL)
 , m_numNormals( 0 )
-, m_normals()
-, m_textureCoords()
-, m_numUVComps() {
-    // empty
+, m_normals(NULL) {
+    std::fill(&m_numUVComps[0], &m_numUVComps[AI_MAX_NUMBER_OF_TEXTURECOORDS], 0U);
+    std::fill(&m_textureCoords[0], &m_textureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS], static_cast<aiVector3D *>(NULL));
 }
 
 //------------------------------------------------------------------------------------------------
@@ -215,9 +215,9 @@ OpenGEXImporter::RefInfo::~RefInfo() {
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
-: m_meshCache()
-, m_root( NULL )
+: m_root( NULL )
 , m_nodeChildMap()
+, m_meshCache()
 , m_mesh2refMap()
 , m_ctx( NULL )
 , m_currentNode( NULL )
@@ -226,7 +226,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_tokenType( Grammar::NoneType )
 , m_nodeStack()
 , m_unresolvedRefStack() {
-    // empty
+    std::fill(&m_metrics[0], &m_metrics[MetricInfo::Max], MetricInfo());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -665,7 +665,6 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         }
 
         const size_t numItems( countDataArrayListItems( vaList ) );
-        Value *next( vaList->m_dataList );
         if( Position == attribType ) {
             m_currentVertices.m_numVerts = numItems;
             m_currentVertices.m_vertices = new aiVector3D[ numItems ];

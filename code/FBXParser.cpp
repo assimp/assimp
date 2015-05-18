@@ -87,27 +87,6 @@ namespace {
 
 
 	// ------------------------------------------------------------------------------------------------
-	// print warning, do return
-	void ParseWarning(const std::string& message, const Token& token)
-	{
-		if(DefaultLogger::get()) {
-			DefaultLogger::get()->warn(Util::AddTokenText("FBX-Parser",message,&token));
-		}
-	}
-
-	// ------------------------------------------------------------------------------------------------
-/*	void ParseWarning(const std::string& message, const Element* element = NULL)
-	{
-		if(element) {
-			ParseWarning(message,element->KeyToken());
-			return;
-		}
-		if(DefaultLogger::get()) {
-			DefaultLogger::get()->warn("FBX-Parser: " + message);
-		}
-	}
-*/
-	// ------------------------------------------------------------------------------------------------
 	void ParseError(const std::string& message, TokenPtr token)
 	{
 		if(token) {

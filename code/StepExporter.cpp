@@ -115,21 +115,6 @@ void ExportSceneStep(const char* pFile,IOSystem* pIOSystem, const aiScene* pScen
 
 
 namespace {
-	inline uint64_t toIndexHash(int32_t id1, int32_t id2)
-	{
-		// dont wonder that -1/-1 -> hash=-1
-		uint64_t hash = (uint32_t) id1;
-		hash = (hash << 32);
-		hash += (uint32_t) id2;
-		return hash;
-	}
-
-	inline void fromIndexHash(uint64_t hash, int32_t &id1, int32_t &id2)
-	{
-		id1 = (hash & 0xFFFFFFFF00000000) >> 32;
-		id2 = (hash & 0xFFFFFFFF);
-	}
-
 	// Collect world transformations for each node
 	void CollectTrafos(const aiNode* node, std::map<const aiNode*, aiMatrix4x4>& trafos) {
 		const aiMatrix4x4& parent = node->mParent ? trafos[node->mParent] : aiMatrix4x4();
@@ -152,18 +137,13 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mIOSystem(pIOSystem), mPath(path), mFile(file), mProperties(pProperties)
+StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mProperties(pProperties), mIOSystem(pIOSystem), mFile(file), mPath(path), mScene(pScene), endstr(";\n")
 {
 	CollectTrafos(pScene->mRootNode, trafos);
 	CollectMeshes(pScene->mRootNode, meshes);
 
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
-
-	mScene = pScene;
-
-	// set up strings
-	endstr = ";\n";
 
 	// start writing
 	WriteFile();

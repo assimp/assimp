@@ -215,9 +215,9 @@ OpenGEXImporter::RefInfo::~RefInfo() {
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
-: m_meshCache()
-, m_root( NULL )
+: m_root( NULL )
 , m_nodeChildMap()
+, m_meshCache()
 , m_mesh2refMap()
 , m_ctx( NULL )
 , m_currentNode( NULL )
@@ -226,7 +226,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_tokenType( Grammar::NoneType )
 , m_nodeStack()
 , m_unresolvedRefStack() {
-    // empty
+    std::fill(&m_metrics[0], &m_metrics[MetricInfo::Max], MetricInfo());
 }
 
 //------------------------------------------------------------------------------------------------

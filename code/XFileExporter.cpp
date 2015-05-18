@@ -95,16 +95,17 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mIOSystem(pIOSystem), mPath(path), mFile(file), mProperties(pProperties)
+XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties)
+		: mProperties(pProperties),
+		mIOSystem(pIOSystem),
+		mPath(path),
+		mFile(file),
+		mScene(pScene),
+		mSceneOwned(false),
+		endstr("\n")
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
-
-	mScene = pScene;
-	mSceneOwned = false;
-
-	// set up strings
-	endstr = "\n";
 
 	// start writing
 	WriteFile();

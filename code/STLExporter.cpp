@@ -89,8 +89,7 @@ void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* 
 // ------------------------------------------------------------------------------------------------
 STLExporter :: STLExporter(const char* _filename, const aiScene* pScene, bool binary)
 : filename(_filename)
-, pScene(pScene)
-, endl("\n") 
+, endl("\n")
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	const std::locale& l = std::locale("C");

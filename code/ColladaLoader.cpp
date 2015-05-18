@@ -81,7 +81,10 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-: noSkeletonMesh(), ignoreUpDirection(false), mNodeNameCounter()
+    : noSkeletonMesh()
+    , ignoreUpDirection(false)
+    , invertTransparency(false)
+    , mNodeNameCounter()
 {}
 
 // ------------------------------------------------------------------------------------------------

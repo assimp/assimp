@@ -144,8 +144,11 @@ protected:
   struct Property
   {
     bool exist;
-	float value;
-	Property() { exist = false; }
+	 float value;
+	 Property()
+         : exist(false)
+         , value(0.0f)
+     {}
   };
 
   // summarize a material in an convinient way. 

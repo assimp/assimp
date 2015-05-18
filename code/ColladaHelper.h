@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <vector>
 #include <stdint.h>
-#include "../include/assimp/types.h"
+#include "../include/assimp/light.h"
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/material.h"
 
@@ -134,7 +134,8 @@ struct Camera
 struct Light
 {	
 	Light()
-		:	mAttConstant     (1.f)
+		:	mType            (aiLightSource_UNDEFINED)
+		,	mAttConstant     (1.f)
 		,	mAttLinear       (0.f)
 		,	mAttQuadratic    (0.f)
 		,	mFalloffAngle    (180.f)
@@ -172,13 +173,14 @@ struct Light
 struct InputSemanticMapEntry
 {
 	InputSemanticMapEntry()
-		:	mSet	(0)
+		:	mSet(0)
+		,	mType(IT_Invalid)
 	{}
 
 	//! Index of set, optional
 	unsigned int mSet;
 
-	//! Name of referenced vertex input
+	//! Type of referenced vertex input
 	InputType mType;
 };
 
@@ -235,7 +237,7 @@ struct Node
 {
 	std::string mName;
 	std::string mID;
-  std::string mSID;
+    std::string mSID;
 	Node* mParent;
 	std::vector<Node*> mChildren;
 
@@ -384,8 +386,8 @@ struct Controller
 	// accessor URL of the joint names
 	std::string mJointNameSource;
 
-  ///< The bind shape matrix, as array of floats. I'm not sure what this matrix actually describes, but it can't be ignored in all cases
-  float mBindShapeMatrix[16];
+    ///< The bind shape matrix, as array of floats. I'm not sure what this matrix actually describes, but it can't be ignored in all cases
+    float mBindShapeMatrix[16];
 
 	// accessor URL of the joint inverse bind matrices
 	std::string mJointOffsetMatrixSource;
@@ -609,7 +611,15 @@ struct ChannelEntry
 	const Collada::Accessor* mValueAccessor; ///> Collada accessor to the key value values
 	const Collada::Data* mValueData; ///> Source datat array for the key value values
 
-	ChannelEntry() { mChannel = NULL; mSubElement = 0; }
+	ChannelEntry()
+      : mChannel()
+      , mTransformIndex()
+      , mSubElement()
+      , mTimeAccessor()
+      , mTimeData()
+      , mValueAccessor()
+      , mValueData()
+   {}
 };
 
 } // end of namespace Collada

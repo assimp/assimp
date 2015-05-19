@@ -454,13 +454,24 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light){
 	mOutput << startstr << "<quadratic_attenuation>"
 							<< light->mAttenuationQuadratic
 						<<"</quadratic_attenuation>" << endstr;
-/*	mOutput << startstr << "<falloff_angle sid=\"fall_off_angle\">"
-								<< light->
-							<<"</falloff_angle>" << endstr;
-	mOutput << startstr << "<linear_attenuation>"
-							<< light->mAttenuationLinear
-						<<"</linear_attenuation>" << endstr;
-*/
+	/*
+	out->mAngleOuterCone = AI_DEG_TO_RAD (std::acos(std::pow(0.1f,1.f/srcLight->mFalloffExponent))+
+							srcLight->mFalloffAngle);
+	*/
+
+	const float fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
+	mOutput << startstr <<"<falloff_angle sid=\"fall_off_angle\">"
+								<< fallOffAngle
+						<<"</falloff_angle>" << endstr;
+	double temp = light->mAngleOuterCone-light->mAngleInnerCone;
+
+	temp = std::cos(temp);
+	temp = std::log(temp)/std::log(0.1);
+	temp = 1/temp;
+	mOutput << startstr << "<falloff_exponent sid=\"fall_off_exponent\">"
+							<< temp
+						<<"</falloff_exponent>" << endstr;
+
 
 	PopTag();
 	mOutput << startstr << "</spot>" << endstr;
@@ -1042,7 +1053,21 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 	mOutput << "</matrix>" << endstr;
 
 	if(pNode->mNumMeshes==0){
-		mOutput << startstr <<"<instance_camera url=\"#" << node_name_escaped << "-camera\">" << endstr;
+		//check if it is a camera node
+		for(size_t i=0; i<mScene->mNumCameras; i++){
+			if(mScene->mCameras[i]->mName == pNode->mName){
+				mOutput << startstr <<"<instance_camera url=\"#" << node_name_escaped << "-camera\">" << endstr;
+				break;
+			}
+		}
+		//check if it is a light node
+		for(size_t i=0; i<mScene->mNumLights; i++){
+			if(mScene->mLights[i]->mName == pNode->mName){
+				mOutput << startstr <<"<instance_light url=\"#" << node_name_escaped << "-light\">" << endstr;
+				break;
+			}
+		}
+
 	}else
 	// instance every geometry
 	for( size_t a = 0; a < pNode->mNumMeshes; ++a )

@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <stdint.h>
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** Importer class for the Quick3D Object and Scene formats.
@@ -57,74 +57,74 @@ namespace Assimp	{
 class Q3DImporter : public BaseImporter
 {
 public:
-	Q3DImporter();
-	~Q3DImporter();
+    Q3DImporter();
+    ~Q3DImporter();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file.
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+    * See BaseImporter::CanRead() for details.  */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure.
-	* See BaseImporter::InternReadFile() for details
-	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+    * See BaseImporter::InternReadFile() for details
+    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 private:
 
-	struct Material
-	{
-		Material()
-			:	diffuse			(0.6f,0.6f,0.6f)
-			,	transparency	(0.f)
-			,	texIdx			(UINT_MAX)
-		{}
+    struct Material
+    {
+        Material()
+            :   diffuse         (0.6f,0.6f,0.6f)
+            ,   transparency    (0.f)
+            ,   texIdx          (UINT_MAX)
+        {}
 
-		aiString name;
-		aiColor3D ambient, diffuse, specular;
-		float transparency;
+        aiString name;
+        aiColor3D ambient, diffuse, specular;
+        float transparency;
 
-		unsigned int texIdx;
-	};
+        unsigned int texIdx;
+    };
 
-	struct Face
-	{
-		Face(unsigned int s)
-			:	indices	  (s)
-			,	uvindices (s)
-			,	mat		  (0)
-		{
-		}
+    struct Face
+    {
+        Face(unsigned int s)
+            :   indices   (s)
+            ,   uvindices (s)
+            ,   mat       (0)
+        {
+        }
 
-		std::vector<unsigned int> indices;
-		std::vector<unsigned int> uvindices;
-		unsigned int mat;
-	};
+        std::vector<unsigned int> indices;
+        std::vector<unsigned int> uvindices;
+        unsigned int mat;
+    };
 
-	struct Mesh
-	{
+    struct Mesh
+    {
 
-		std::vector<aiVector3D> verts;
-		std::vector<aiVector3D> normals;
-		std::vector<aiVector3D> uv;
-		std::vector<Face>       faces;
+        std::vector<aiVector3D> verts;
+        std::vector<aiVector3D> normals;
+        std::vector<aiVector3D> uv;
+        std::vector<Face>       faces;
 
-		uint32_t prevUVIdx;
-	};
+        uint32_t prevUVIdx;
+    };
 };
 
 } // end of namespace Assimp

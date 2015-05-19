@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/types.h"
 #include <vector>
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** Importer class for the PovRay RAW triangle format
@@ -56,62 +56,62 @@ namespace Assimp	{
 class RAWImporter : public BaseImporter
 {
 public:
-	RAWImporter();
-	~RAWImporter();
+    RAWImporter();
+    ~RAWImporter();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file.
-	 * See BaseImporter::CanRead() for details.
- 	 */
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+     * See BaseImporter::CanRead() for details.
+     */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure.
-	* See BaseImporter::InternReadFile() for details
-	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+    * See BaseImporter::InternReadFile() for details
+    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 private:
 
-	struct MeshInformation
-	{
-		MeshInformation(const std::string& _name)
-			: name(_name)
-		{
-			vertices.reserve(100);
-			colors.reserve(100);
-		}
+    struct MeshInformation
+    {
+        MeshInformation(const std::string& _name)
+            : name(_name)
+        {
+            vertices.reserve(100);
+            colors.reserve(100);
+        }
 
-		std::string name;
+        std::string name;
 
-		std::vector<aiVector3D> vertices;
-		std::vector<aiColor4D> colors;
-	};
+        std::vector<aiVector3D> vertices;
+        std::vector<aiColor4D> colors;
+    };
 
-	struct GroupInformation
-	{
-		GroupInformation(const std::string& _name)
-			: name(_name)
-		{
-			meshes.reserve(10);
-		}
+    struct GroupInformation
+    {
+        GroupInformation(const std::string& _name)
+            : name(_name)
+        {
+            meshes.reserve(10);
+        }
 
-		std::string name;
-		std::vector<MeshInformation> meshes;
-	};
+        std::string name;
+        std::vector<MeshInformation> meshes;
+    };
 };
 
 } // end of namespace Assimp

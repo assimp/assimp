@@ -60,69 +60,69 @@ namespace Assimp{
 class B3DImporter : public BaseImporter{
 public:
 
-	virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
+    virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
 protected:
 
-	virtual const aiImporterDesc* GetInfo () const;
-	virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+    virtual const aiImporterDesc* GetInfo () const;
+    virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 
 private:
 
-	int ReadByte();
-	int ReadInt();
-	float ReadFloat();
-	aiVector2D ReadVec2();
-	aiVector3D ReadVec3();
-	aiQuaternion ReadQuat();
-	std::string ReadString();
-	std::string ReadChunk();
-	void ExitChunk();
-	unsigned ChunkSize();
+    int ReadByte();
+    int ReadInt();
+    float ReadFloat();
+    aiVector2D ReadVec2();
+    aiVector3D ReadVec3();
+    aiQuaternion ReadQuat();
+    std::string ReadString();
+    std::string ReadChunk();
+    void ExitChunk();
+    unsigned ChunkSize();
 
-	template<class T>
-	T *to_array( const std::vector<T> &v );
+    template<class T>
+    T *to_array( const std::vector<T> &v );
 
-	struct Vertex{
-		aiVector3D vertex;
-		aiVector3D normal;
-		aiVector3D texcoords;
-		unsigned char bones[4];
-		float weights[4];
-	};
+    struct Vertex{
+        aiVector3D vertex;
+        aiVector3D normal;
+        aiVector3D texcoords;
+        unsigned char bones[4];
+        float weights[4];
+    };
 
-	AI_WONT_RETURN void Oops() AI_WONT_RETURN_SUFFIX;
-	AI_WONT_RETURN void Fail( std::string str ) AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Oops() AI_WONT_RETURN_SUFFIX;
+    AI_WONT_RETURN void Fail( std::string str ) AI_WONT_RETURN_SUFFIX;
 
-	void ReadTEXS();
-	void ReadBRUS();
+    void ReadTEXS();
+    void ReadBRUS();
 
-	void ReadVRTS();
-	void ReadTRIS( int v0 );
-	void ReadMESH();
-	void ReadBONE( int id );
-	void ReadKEYS( aiNodeAnim *nodeAnim );
-	void ReadANIM();
+    void ReadVRTS();
+    void ReadTRIS( int v0 );
+    void ReadMESH();
+    void ReadBONE( int id );
+    void ReadKEYS( aiNodeAnim *nodeAnim );
+    void ReadANIM();
 
-	aiNode *ReadNODE( aiNode *parent );
+    aiNode *ReadNODE( aiNode *parent );
 
-	void ReadBB3D( aiScene *scene );
+    void ReadBB3D( aiScene *scene );
 
-	unsigned _pos;
-//	unsigned _size;
-	std::vector<unsigned char> _buf;
-	std::vector<unsigned> _stack;
+    unsigned _pos;
+//  unsigned _size;
+    std::vector<unsigned char> _buf;
+    std::vector<unsigned> _stack;
 
-	std::vector<std::string> _textures;
-	std::vector<aiMaterial*> _materials;
+    std::vector<std::string> _textures;
+    std::vector<aiMaterial*> _materials;
 
-	int _vflags,_tcsets,_tcsize;
-	std::vector<Vertex> _vertices;
+    int _vflags,_tcsets,_tcsize;
+    std::vector<Vertex> _vertices;
 
-	std::vector<aiNode*> _nodes;
-	std::vector<aiMesh*> _meshes;
-	std::vector<aiNodeAnim*> _nodeAnims;
-	std::vector<aiAnimation*> _animations;
+    std::vector<aiNode*> _nodes;
+    std::vector<aiMesh*> _meshes;
+    std::vector<aiNodeAnim*> _nodeAnims;
+    std::vector<aiAnimation*> _animations;
 };
 
 }

@@ -56,159 +56,159 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 RemoveRedundantMatsProcess::RemoveRedundantMatsProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 RemoveRedundantMatsProcess::~RemoveRedundantMatsProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool RemoveRedundantMatsProcess::IsActive( unsigned int pFlags) const
 {
-	return (pFlags & aiProcess_RemoveRedundantMaterials) != 0;
+    return (pFlags & aiProcess_RemoveRedundantMaterials) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup import properties
 void RemoveRedundantMatsProcess::SetupProperties(const Importer* pImp)
 {
-	// Get value of AI_CONFIG_PP_RRM_EXCLUDE_LIST
-	configFixedMaterials = pImp->GetPropertyString(AI_CONFIG_PP_RRM_EXCLUDE_LIST,"");
+    // Get value of AI_CONFIG_PP_RRM_EXCLUDE_LIST
+    configFixedMaterials = pImp->GetPropertyString(AI_CONFIG_PP_RRM_EXCLUDE_LIST,"");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 {
-	DefaultLogger::get()->debug("RemoveRedundantMatsProcess begin");
+    DefaultLogger::get()->debug("RemoveRedundantMatsProcess begin");
 
-	unsigned int redundantRemoved = 0, unreferencedRemoved = 0;
-	if (pScene->mNumMaterials)
-	{
-		// Find out which materials are referenced by meshes
-		std::vector<bool> abReferenced(pScene->mNumMaterials,false);
-		for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
-			abReferenced[pScene->mMeshes[i]->mMaterialIndex] = true;
+    unsigned int redundantRemoved = 0, unreferencedRemoved = 0;
+    if (pScene->mNumMaterials)
+    {
+        // Find out which materials are referenced by meshes
+        std::vector<bool> abReferenced(pScene->mNumMaterials,false);
+        for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
+            abReferenced[pScene->mMeshes[i]->mMaterialIndex] = true;
 
-		// If a list of materials to be excluded was given, match the list with
-		// our imported materials and 'salt' all positive matches to ensure that
-		// we get unique hashes later.
-		if (configFixedMaterials.length()) {
+        // If a list of materials to be excluded was given, match the list with
+        // our imported materials and 'salt' all positive matches to ensure that
+        // we get unique hashes later.
+        if (configFixedMaterials.length()) {
 
-			std::list<std::string> strings;
-			ConvertListToStrings(configFixedMaterials,strings);
+            std::list<std::string> strings;
+            ConvertListToStrings(configFixedMaterials,strings);
 
-			for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
-				aiMaterial* mat = pScene->mMaterials[i];
+            for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
+                aiMaterial* mat = pScene->mMaterials[i];
 
-				aiString name;
-				mat->Get(AI_MATKEY_NAME,name);
+                aiString name;
+                mat->Get(AI_MATKEY_NAME,name);
 
-				if (name.length) {
-					std::list<std::string>::const_iterator it = std::find(strings.begin(), strings.end(), name.data);
-					if (it != strings.end()) {
+                if (name.length) {
+                    std::list<std::string>::const_iterator it = std::find(strings.begin(), strings.end(), name.data);
+                    if (it != strings.end()) {
 
-						// Our brilliant 'salt': A single material property with ~ as first
-						// character to mark it as internal and temporary.
-						const int dummy = 1;
-						((aiMaterial*)mat)->AddProperty(&dummy,1,"~RRM.UniqueMaterial",0,0);
+                        // Our brilliant 'salt': A single material property with ~ as first
+                        // character to mark it as internal and temporary.
+                        const int dummy = 1;
+                        ((aiMaterial*)mat)->AddProperty(&dummy,1,"~RRM.UniqueMaterial",0,0);
 
-						// Keep this material even if no mesh references it
-						abReferenced[i] = true;
-						DefaultLogger::get()->debug(std::string("Found positive match in exclusion list: \'") + name.data + "\'");
-					}
-				}
-			}
-		}
+                        // Keep this material even if no mesh references it
+                        abReferenced[i] = true;
+                        DefaultLogger::get()->debug(std::string("Found positive match in exclusion list: \'") + name.data + "\'");
+                    }
+                }
+            }
+        }
 
-		// TODO: reimplement this algorithm to work in-place
-		unsigned int* aiMappingTable = new unsigned int[pScene->mNumMaterials];
-		unsigned int iNewNum = 0;
+        // TODO: reimplement this algorithm to work in-place
+        unsigned int* aiMappingTable = new unsigned int[pScene->mNumMaterials];
+        unsigned int iNewNum = 0;
 
-		// Iterate through all materials and calculate a hash for them
-		// store all hashes in a list and so a quick search whether
-		// we do already have a specific hash. This allows us to
-		// determine which materials are identical.
-		uint32_t* aiHashes;
-		aiHashes = new uint32_t[pScene->mNumMaterials];
-		for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-		{
-			// No mesh is referencing this material, remove it.
-			if (!abReferenced[i]) {
-				++unreferencedRemoved;
-				delete pScene->mMaterials[i];
-				continue;
-			}
+        // Iterate through all materials and calculate a hash for them
+        // store all hashes in a list and so a quick search whether
+        // we do already have a specific hash. This allows us to
+        // determine which materials are identical.
+        uint32_t* aiHashes;
+        aiHashes = new uint32_t[pScene->mNumMaterials];
+        for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
+        {
+            // No mesh is referencing this material, remove it.
+            if (!abReferenced[i]) {
+                ++unreferencedRemoved;
+                delete pScene->mMaterials[i];
+                continue;
+            }
 
-			// Check all previously mapped materials for a matching hash.
-			// On a match we can delete this material and just make it ref to the same index.
-			uint32_t me = aiHashes[i] = ComputeMaterialHash(pScene->mMaterials[i]);
-			for (unsigned int a = 0; a < i;++a)
-			{
-				if (abReferenced[a] && me == aiHashes[a]) {
-					++redundantRemoved;
-					me = 0;
-					aiMappingTable[i] = aiMappingTable[a];
-					delete pScene->mMaterials[i];
-					break;
-				}
-			}
-			// This is a new material that is referenced, add to the map.
-			if (me)	{
-				aiMappingTable[i] = iNewNum++;
-			}
-		}
-		// If the new material count differs from the original,
-		// we need to rebuild the material list and remap mesh material indexes.
-		if (iNewNum != pScene->mNumMaterials) {
-			aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
-			::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
-			for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
-			{
-				// if the material is not referenced ... remove it
-				if (!abReferenced[p]) {
-					continue;
-				}
+            // Check all previously mapped materials for a matching hash.
+            // On a match we can delete this material and just make it ref to the same index.
+            uint32_t me = aiHashes[i] = ComputeMaterialHash(pScene->mMaterials[i]);
+            for (unsigned int a = 0; a < i;++a)
+            {
+                if (abReferenced[a] && me == aiHashes[a]) {
+                    ++redundantRemoved;
+                    me = 0;
+                    aiMappingTable[i] = aiMappingTable[a];
+                    delete pScene->mMaterials[i];
+                    break;
+                }
+            }
+            // This is a new material that is referenced, add to the map.
+            if (me) {
+                aiMappingTable[i] = iNewNum++;
+            }
+        }
+        // If the new material count differs from the original,
+        // we need to rebuild the material list and remap mesh material indexes.
+        if (iNewNum != pScene->mNumMaterials) {
+            aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
+            ::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
+            for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
+            {
+                // if the material is not referenced ... remove it
+                if (!abReferenced[p]) {
+                    continue;
+                }
 
-				// generate new names for all modified materials
-				const unsigned int idx = aiMappingTable[p];
-				if (ppcMaterials[idx])
-				{
-					aiString sz;
-					sz.length = ::sprintf(sz.data,"JoinedMaterial_#%u",p);
-					((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
-				}
-				else
-					ppcMaterials[idx] = pScene->mMaterials[p];
-			}
-			// update all material indices
-			for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
-				aiMesh* mesh = pScene->mMeshes[p];
-				mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
-			}
-			// delete the old material list
-			delete[] pScene->mMaterials;
-			pScene->mMaterials = ppcMaterials;
-			pScene->mNumMaterials = iNewNum;
-		}
-		// delete temporary storage
-		delete[] aiHashes;
-		delete[] aiMappingTable;
-	}
-	if (redundantRemoved == 0 && unreferencedRemoved == 0)
-	{
-		DefaultLogger::get()->debug("RemoveRedundantMatsProcess finished ");
-	}
-	else
-	{
-		char szBuffer[128]; // should be sufficiently large
-		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",
-			redundantRemoved,unreferencedRemoved);
-		DefaultLogger::get()->info(szBuffer);
-	}
+                // generate new names for all modified materials
+                const unsigned int idx = aiMappingTable[p];
+                if (ppcMaterials[idx])
+                {
+                    aiString sz;
+                    sz.length = ::sprintf(sz.data,"JoinedMaterial_#%u",p);
+                    ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
+                }
+                else
+                    ppcMaterials[idx] = pScene->mMaterials[p];
+            }
+            // update all material indices
+            for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
+                aiMesh* mesh = pScene->mMeshes[p];
+                mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
+            }
+            // delete the old material list
+            delete[] pScene->mMaterials;
+            pScene->mMaterials = ppcMaterials;
+            pScene->mNumMaterials = iNewNum;
+        }
+        // delete temporary storage
+        delete[] aiHashes;
+        delete[] aiMappingTable;
+    }
+    if (redundantRemoved == 0 && unreferencedRemoved == 0)
+    {
+        DefaultLogger::get()->debug("RemoveRedundantMatsProcess finished ");
+    }
+    else
+    {
+        char szBuffer[128]; // should be sufficiently large
+        ::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",
+            redundantRemoved,unreferencedRemoved);
+        DefaultLogger::get()->info(szBuffer);
+    }
 }

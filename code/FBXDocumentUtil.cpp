@@ -59,16 +59,16 @@ namespace Util {
 // signal DOM construction error, this is always unrecoverable. Throws DeadlyImportError.
 void DOMError(const std::string& message, const Token& token)
 {
-	throw DeadlyImportError(Util::AddTokenText("FBX-DOM",message,&token));
+    throw DeadlyImportError(Util::AddTokenText("FBX-DOM",message,&token));
 }
 
 // ------------------------------------------------------------------------------------------------
 void DOMError(const std::string& message, const Element* element /*= NULL*/)
 {
-	if(element) {
-		DOMError(message,element->KeyToken());
-	}
-	throw DeadlyImportError("FBX-DOM " + message);
+    if(element) {
+        DOMError(message,element->KeyToken());
+    }
+    throw DeadlyImportError("FBX-DOM " + message);
 }
 
 
@@ -76,55 +76,55 @@ void DOMError(const std::string& message, const Element* element /*= NULL*/)
 // print warning, do return
 void DOMWarning(const std::string& message, const Token& token)
 {
-	if(DefaultLogger::get()) {
-		DefaultLogger::get()->warn(Util::AddTokenText("FBX-DOM",message,&token));
-	}
+    if(DefaultLogger::get()) {
+        DefaultLogger::get()->warn(Util::AddTokenText("FBX-DOM",message,&token));
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void DOMWarning(const std::string& message, const Element* element /*= NULL*/)
 {
-	if(element) {
-		DOMWarning(message,element->KeyToken());
-		return;
-	}
-	if(DefaultLogger::get()) {
-		DefaultLogger::get()->warn("FBX-DOM: " + message);
-	}
+    if(element) {
+        DOMWarning(message,element->KeyToken());
+        return;
+    }
+    if(DefaultLogger::get()) {
+        DefaultLogger::get()->warn("FBX-DOM: " + message);
+    }
 }
 
 
 // ------------------------------------------------------------------------------------------------
 // fetch a property table and the corresponding property template
 boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
-	const std::string& templateName,
-	const Element &element,
-	const Scope& sc,
-	bool no_warn /*= false*/)
+    const std::string& templateName,
+    const Element &element,
+    const Scope& sc,
+    bool no_warn /*= false*/)
 {
-	const Element* const Properties70 = sc["Properties70"];
-	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(
-		static_cast<const PropertyTable*>(NULL));
+    const Element* const Properties70 = sc["Properties70"];
+    boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(
+        static_cast<const PropertyTable*>(NULL));
 
-	if(templateName.length()) {
-		PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName);
-		if(it != doc.Templates().end()) {
-			templateProps = (*it).second;
-		}
-	}
+    if(templateName.length()) {
+        PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName);
+        if(it != doc.Templates().end()) {
+            templateProps = (*it).second;
+        }
+    }
 
-	if(!Properties70) {
-		if(!no_warn) {
-			DOMWarning("property table (Properties70) not found",&element);
-		}
-		if(templateProps) {
-			return templateProps;
-		}
-		else {
-			return boost::make_shared<const PropertyTable>();
-		}
-	}
-	return boost::make_shared<const PropertyTable>(*Properties70,templateProps);
+    if(!Properties70) {
+        if(!no_warn) {
+            DOMWarning("property table (Properties70) not found",&element);
+        }
+        if(templateProps) {
+            return templateProps;
+        }
+        else {
+            return boost::make_shared<const PropertyTable>();
+        }
+    }
+    return boost::make_shared<const PropertyTable>(*Properties70,templateProps);
 }
 } // !Util
 } // !FBX

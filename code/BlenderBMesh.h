@@ -48,46 +48,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp
 {
-	// TinyFormatter.h
-	namespace Formatter
-	{
-		template < typename T,typename TR, typename A > class basic_formatter;
-		typedef class basic_formatter< char, std::char_traits< char >, std::allocator< char > > format;
-	}
+    // TinyFormatter.h
+    namespace Formatter
+    {
+        template < typename T,typename TR, typename A > class basic_formatter;
+        typedef class basic_formatter< char, std::char_traits< char >, std::allocator< char > > format;
+    }
 
-	// BlenderScene.h
-	namespace Blender
-	{
-		struct Mesh;
-		struct MPoly;
-		struct MLoop;
-	}
+    // BlenderScene.h
+    namespace Blender
+    {
+        struct Mesh;
+        struct MPoly;
+        struct MLoop;
+    }
 
-	class BlenderBMeshConverter: public LogFunctions< BlenderBMeshConverter >
-	{
-	public:
-		BlenderBMeshConverter( const Blender::Mesh* mesh );
-		~BlenderBMeshConverter( );
+    class BlenderBMeshConverter: public LogFunctions< BlenderBMeshConverter >
+    {
+    public:
+        BlenderBMeshConverter( const Blender::Mesh* mesh );
+        ~BlenderBMeshConverter( );
 
-		bool ContainsBMesh( ) const;
+        bool ContainsBMesh( ) const;
 
-		const Blender::Mesh* TriangulateBMesh( );
+        const Blender::Mesh* TriangulateBMesh( );
 
-	private:
-		void AssertValidMesh( );
-		void AssertValidSizes( );
-		void PrepareTriMesh( );
-		void DestroyTriMesh( );
-		void ConvertPolyToFaces( const Blender::MPoly& poly );
-		void AddFace( int v1, int v2, int v3, int v4 = 0 );
-		void AddTFace( const float* uv1, const float* uv2, const float *uv3, const float* uv4 = 0 );
+    private:
+        void AssertValidMesh( );
+        void AssertValidSizes( );
+        void PrepareTriMesh( );
+        void DestroyTriMesh( );
+        void ConvertPolyToFaces( const Blender::MPoly& poly );
+        void AddFace( int v1, int v2, int v3, int v4 = 0 );
+        void AddTFace( const float* uv1, const float* uv2, const float *uv3, const float* uv4 = 0 );
 
-		const Blender::Mesh* BMesh;
-		Blender::Mesh* triMesh;
+        const Blender::Mesh* BMesh;
+        Blender::Mesh* triMesh;
 
-		friend class BlenderTessellatorGL;
-		friend class BlenderTessellatorP2T;
-	};
+        friend class BlenderTessellatorGL;
+        friend class BlenderTessellatorP2T;
+    };
 
 } // end of namespace Assimp
 

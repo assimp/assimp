@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/DefaultLogger.hpp"
 
 
-namespace Assimp	{
+namespace Assimp    {
 
 // Material specific token
 static const std::string DiffuseTexture      = "map_Kd";
@@ -68,23 +68,23 @@ static const std::string DisplacementTexture = "disp";
 static const std::string SpecularityTexture  = "map_ns";
 
 // texture option specific token
-static const std::string BlendUOption		= "-blendu";
-static const std::string BlendVOption		= "-blendv";
-static const std::string BoostOption		= "-boost";
-static const std::string ModifyMapOption	= "-mm";
-static const std::string OffsetOption		= "-o";
-static const std::string ScaleOption		= "-s";
-static const std::string TurbulenceOption	= "-t";
-static const std::string ResolutionOption	= "-texres";
-static const std::string ClampOption		= "-clamp";
-static const std::string BumpOption			= "-bm";
-static const std::string ChannelOption		= "-imfchan";
-static const std::string TypeOption			= "-type";
+static const std::string BlendUOption       = "-blendu";
+static const std::string BlendVOption       = "-blendv";
+static const std::string BoostOption        = "-boost";
+static const std::string ModifyMapOption    = "-mm";
+static const std::string OffsetOption       = "-o";
+static const std::string ScaleOption        = "-s";
+static const std::string TurbulenceOption   = "-t";
+static const std::string ResolutionOption   = "-texres";
+static const std::string ClampOption        = "-clamp";
+static const std::string BumpOption         = "-bm";
+static const std::string ChannelOption      = "-imfchan";
+static const std::string TypeOption         = "-type";
 
 
 
 // -------------------------------------------------------------------
-//	Constructor
+//  Constructor
 ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
                                        const std::string & /*strAbsPath*/,
                                        ObjFile::Model *pModel ) :
@@ -103,28 +103,28 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
 }
 
 // -------------------------------------------------------------------
-//	Destructor
+//  Destructor
 ObjFileMtlImporter::~ObjFileMtlImporter()
 {
     // empty
 }
 
 // -------------------------------------------------------------------
-//	Private copy constructor
+//  Private copy constructor
 ObjFileMtlImporter::ObjFileMtlImporter(const ObjFileMtlImporter & /* rOther */ )
 {
     // empty
 }
 
 // -------------------------------------------------------------------
-//	Private copy constructor
+//  Private copy constructor
 ObjFileMtlImporter &ObjFileMtlImporter::operator = ( const ObjFileMtlImporter & /*rOther */ )
 {
     return *this;
 }
 
 // -------------------------------------------------------------------
-//	Loads the material description
+//  Loads the material description
 void ObjFileMtlImporter::load()
 {
     if ( m_DataIt == m_DataItEnd )
@@ -143,7 +143,7 @@ void ObjFileMtlImporter::load()
                     ++m_DataIt;
                     getColorRGBA( &m_pModel->m_pCurrentMaterial->ambient );
                 }
-                else if (*m_DataIt == 'd')	// Diffuse color
+                else if (*m_DataIt == 'd')  // Diffuse color
                 {
                     ++m_DataIt;
                     getColorRGBA( &m_pModel->m_pCurrentMaterial->diffuse );
@@ -162,7 +162,7 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'd':	// Alpha value
+        case 'd':   // Alpha value
             {
                 ++m_DataIt;
                 getFloatValue( m_pModel->m_pCurrentMaterial->alpha );
@@ -176,15 +176,15 @@ void ObjFileMtlImporter::load()
                 ++m_DataIt;
                 switch(*m_DataIt)
                 {
-                case 's':	// Specular exponent
+                case 's':   // Specular exponent
                     ++m_DataIt;
                     getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
                     break;
-                case 'i':	// Index Of refraction
+                case 'i':   // Index Of refraction
                     ++m_DataIt;
                     getFloatValue(m_pModel->m_pCurrentMaterial->ior);
                     break;
-                case 'e':	// New material
+                case 'e':   // New material
                     createMaterial();
                     break;
                 }
@@ -192,7 +192,7 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'm':	// Texture
+        case 'm':   // Texture
         case 'b':   // quick'n'dirty - for 'bump' sections
             {
                 getTexture();
@@ -200,7 +200,7 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'i':	// Illumination model
+        case 'i':   // Illumination model
             {
                 m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
                 getIlluminationModel( m_pModel->m_pCurrentMaterial->illumination_model );
@@ -218,7 +218,7 @@ void ObjFileMtlImporter::load()
 }
 
 // -------------------------------------------------------------------
-//	Loads a color definition
+//  Loads a color definition
 void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 {
     ai_assert( NULL != pColor );
@@ -237,7 +237,7 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 }
 
 // -------------------------------------------------------------------
-//	Loads the kind of illumination model.
+//  Loads the kind of illumination model.
 void ObjFileMtlImporter::getIlluminationModel( int &illum_model )
 {
     m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
@@ -245,7 +245,7 @@ void ObjFileMtlImporter::getIlluminationModel( int &illum_model )
 }
 
 // -------------------------------------------------------------------
-//	Loads a single float value.
+//  Loads a single float value.
 void ObjFileMtlImporter::getFloatValue( float &value )
 {
     m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
@@ -253,7 +253,7 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 }
 
 // -------------------------------------------------------------------
-//	Creates a material from loaded data.
+//  Creates a material from loaded data.
 void ObjFileMtlImporter::createMaterial()
 {
     std::string line( "" );
@@ -264,20 +264,20 @@ void ObjFileMtlImporter::createMaterial()
 
     std::vector<std::string> token;
     const unsigned int numToken = tokenize<std::string>( line, token, " \t" );
-	std::string name( "" );
-	if ( numToken == 1 ) {
-		name = AI_DEFAULT_MATERIAL_NAME;
-	} else {
-		// skip newmtl and all following white spaces
-		std::size_t first_ws_pos = line.find_first_of(" \t");
-		std::size_t first_non_ws_pos = line.find_first_not_of(" \t", first_ws_pos);
-		if (first_non_ws_pos != std::string::npos) {
-			name = line.substr(first_non_ws_pos);
-		}
-	}
+    std::string name( "" );
+    if ( numToken == 1 ) {
+        name = AI_DEFAULT_MATERIAL_NAME;
+    } else {
+        // skip newmtl and all following white spaces
+        std::size_t first_ws_pos = line.find_first_of(" \t");
+        std::size_t first_non_ws_pos = line.find_first_not_of(" \t", first_ws_pos);
+        if (first_non_ws_pos != std::string::npos) {
+            name = line.substr(first_non_ws_pos);
+        }
+    }
 
-	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( name );
-	if ( m_pModel->m_MaterialMap.end() == it) {
+    std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( name );
+    if ( m_pModel->m_MaterialMap.end() == it) {
         // New Material created
         m_pModel->m_pCurrentMaterial = new ObjFile::Material();
         m_pModel->m_pCurrentMaterial->MaterialName.Set( name );
@@ -290,7 +290,7 @@ void ObjFileMtlImporter::createMaterial()
 }
 
 // -------------------------------------------------------------------
-//	Gets a texture name from data.
+//  Gets a texture name from data.
 void ObjFileMtlImporter::getTexture() {
     aiString *out( NULL );
     int clampIndex = -1;
@@ -354,8 +354,8 @@ void ObjFileMtlImporter::getTexture() {
  * According to http://en.wikipedia.org/wiki/Wavefront_.obj_file#Texture_options
  * Texture map statement can contains various texture option, for example:
  *
- *	map_Ka -o 1 1 1 some.png
- *	map_Kd -clamp on some.png
+ *  map_Ka -o 1 1 1 some.png
+ *  map_Kd -clamp on some.png
  *
  * So we need to parse and skip these options, and leave the last part which is
  * the url of image, otherwise we will get a wrong url like "-clamp on some.png".

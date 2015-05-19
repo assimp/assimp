@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/mesh.h"
 
 class SortByPTypeProcessTest;
-namespace Assimp	{
+namespace Assimp    {
 
 
 // ---------------------------------------------------------------------------
@@ -59,22 +59,22 @@ class ASSIMP_API SortByPTypeProcess : public BaseProcess
 {
 public:
 
-	SortByPTypeProcess();
-	~SortByPTypeProcess();
+    SortByPTypeProcess();
+    ~SortByPTypeProcess();
 
 public:
-	// -------------------------------------------------------------------
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    void SetupProperties(const Importer* pImp);
 
 private:
 
-	int configRemoveMeshes;
+    int configRemoveMeshes;
 };
 
 

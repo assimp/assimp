@@ -64,106 +64,106 @@ namespace Assimp
 class BVHLoader : public BaseImporter
 {
 
-	/** Possible animation channels for which the motion data holds the values */
-	enum ChannelType
-	{
-		Channel_PositionX,
-		Channel_PositionY,
-		Channel_PositionZ,
-		Channel_RotationX,
-		Channel_RotationY,
-		Channel_RotationZ
-	};
+    /** Possible animation channels for which the motion data holds the values */
+    enum ChannelType
+    {
+        Channel_PositionX,
+        Channel_PositionY,
+        Channel_PositionZ,
+        Channel_RotationX,
+        Channel_RotationY,
+        Channel_RotationZ
+    };
 
-	/** Collected list of node. Will be bones of the dummy mesh some day, addressed by their array index */
-	struct Node
-	{
-		const aiNode* mNode;
-		std::vector<ChannelType> mChannels;
-		std::vector<float> mChannelValues; // motion data values for that node. Of size NumChannels * NumFrames
+    /** Collected list of node. Will be bones of the dummy mesh some day, addressed by their array index */
+    struct Node
+    {
+        const aiNode* mNode;
+        std::vector<ChannelType> mChannels;
+        std::vector<float> mChannelValues; // motion data values for that node. Of size NumChannels * NumFrames
 
-		Node() { }
-		Node( const aiNode* pNode) : mNode( pNode) { }
-	};
-
-public:
-
-	BVHLoader();
-	~BVHLoader();
+        Node() { }
+        Node( const aiNode* pNode) : mNode( pNode) { }
+    };
 
 public:
-	/** Returns whether the class can handle the format of the given file.
-	 * See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const;
 
-	void SetupProperties(const Importer* pImp);
-	const aiImporterDesc* GetInfo () const;
+    BVHLoader();
+    ~BVHLoader();
 
-protected:
+public:
+    /** Returns whether the class can handle the format of the given file.
+     * See BaseImporter::CanRead() for details. */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const;
 
-
-	/** Imports the given file into the given scene structure.
-	 * See BaseImporter::InternReadFile() for details
-	 */
-	void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
+    void SetupProperties(const Importer* pImp);
+    const aiImporterDesc* GetInfo () const;
 
 protected:
-	/** Reads the file */
-	void ReadStructure( aiScene* pScene);
 
-	/** Reads the hierarchy */
-	void ReadHierarchy( aiScene* pScene);
 
-	/** Reads a node and recursively its childs and returns the created node. */
-	aiNode* ReadNode();
-
-	/** Reads an end node and returns the created node. */
-	aiNode* ReadEndSite( const std::string& pParentName);
-
-	/** Reads a node offset for the given node */
-	void ReadNodeOffset( aiNode* pNode);
-
-	/** Reads the animation channels into the given node */
-	void ReadNodeChannels( BVHLoader::Node& pNode);
-
-	/** Reads the motion data */
-	void ReadMotion( aiScene* pScene);
-
-	/** Retrieves the next token */
-	std::string GetNextToken();
-
-	/** Reads the next token as a float */
-	float GetNextTokenAsFloat();
-
-	/** Aborts the file reading with an exception */
-	AI_WONT_RETURN void ThrowException( const std::string& pError) AI_WONT_RETURN_SUFFIX;
-
-	/** Constructs an animation for the motion data and stores it in the given scene */
-	void CreateAnimation( aiScene* pScene);
+    /** Imports the given file into the given scene structure.
+     * See BaseImporter::InternReadFile() for details
+     */
+    void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
 
 protected:
-	/** Filename, for a verbose error message */
-	std::string mFileName;
+    /** Reads the file */
+    void ReadStructure( aiScene* pScene);
 
-	/** Buffer to hold the loaded file */
-	std::vector<char> mBuffer;
+    /** Reads the hierarchy */
+    void ReadHierarchy( aiScene* pScene);
 
-	/** Next char to read from the buffer */
-	std::vector<char>::const_iterator mReader;
+    /** Reads a node and recursively its childs and returns the created node. */
+    aiNode* ReadNode();
 
-	/** Current line, for error messages */
-	unsigned int mLine;
+    /** Reads an end node and returns the created node. */
+    aiNode* ReadEndSite( const std::string& pParentName);
 
-	/** Collected list of nodes. Will be bones of the dummy mesh some day, addressed by their array index.
-	* Also contain the motion data for the node's channels
-	*/
-	std::vector<Node> mNodes;
+    /** Reads a node offset for the given node */
+    void ReadNodeOffset( aiNode* pNode);
 
-	/** basic Animation parameters */
-	float mAnimTickDuration;
-	unsigned int mAnimNumFrames;
+    /** Reads the animation channels into the given node */
+    void ReadNodeChannels( BVHLoader::Node& pNode);
 
-	bool noSkeletonMesh;
+    /** Reads the motion data */
+    void ReadMotion( aiScene* pScene);
+
+    /** Retrieves the next token */
+    std::string GetNextToken();
+
+    /** Reads the next token as a float */
+    float GetNextTokenAsFloat();
+
+    /** Aborts the file reading with an exception */
+    AI_WONT_RETURN void ThrowException( const std::string& pError) AI_WONT_RETURN_SUFFIX;
+
+    /** Constructs an animation for the motion data and stores it in the given scene */
+    void CreateAnimation( aiScene* pScene);
+
+protected:
+    /** Filename, for a verbose error message */
+    std::string mFileName;
+
+    /** Buffer to hold the loaded file */
+    std::vector<char> mBuffer;
+
+    /** Next char to read from the buffer */
+    std::vector<char>::const_iterator mReader;
+
+    /** Current line, for error messages */
+    unsigned int mLine;
+
+    /** Collected list of nodes. Will be bones of the dummy mesh some day, addressed by their array index.
+    * Also contain the motion data for the node's channels
+    */
+    std::vector<Node> mNodes;
+
+    /** basic Animation parameters */
+    float mAnimTickDuration;
+    unsigned int mAnimNumFrames;
+
+    bool noSkeletonMesh;
 };
 
 } // end of namespace Assimp

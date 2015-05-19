@@ -60,47 +60,47 @@ using namespace Assimp;
 // Constructor.
 DefaultIOSystem::DefaultIOSystem()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor.
 DefaultIOSystem::~DefaultIOSystem()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists( const char* pFile) const
 {
-	FILE* file = ::fopen( pFile, "rb");
-	if( !file)
-		return false;
+    FILE* file = ::fopen( pFile, "rb");
+    if( !file)
+        return false;
 
-	::fclose( file);
-	return true;
+    ::fclose( file);
+    return true;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Open a new file with a given path.
 IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
 {
-	ai_assert(NULL != strFile);
-	ai_assert(NULL != strMode);
+    ai_assert(NULL != strFile);
+    ai_assert(NULL != strMode);
 
-	FILE* file = ::fopen( strFile, strMode);
-	if( NULL == file)
-		return NULL;
+    FILE* file = ::fopen( strFile, strMode);
+    if( NULL == file)
+        return NULL;
 
-	return new DefaultIOStream(file, (std::string) strFile);
+    return new DefaultIOStream(file, (std::string) strFile);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Closes the given file and releases all resources associated with it.
 void DefaultIOSystem::Close( IOStream* pFile)
 {
-	delete pFile;
+    delete pFile;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -108,9 +108,9 @@ void DefaultIOSystem::Close( IOStream* pFile)
 char DefaultIOSystem::getOsSeparator() const
 {
 #ifndef _WIN32
-	return '/';
+    return '/';
 #else
-	return '\\';
+    return '\\';
 #endif
 }
 
@@ -118,80 +118,80 @@ char DefaultIOSystem::getOsSeparator() const
 // IOSystem default implementation (ComparePaths isn't a pure virtual function)
 bool IOSystem::ComparePaths (const char* one, const char* second) const
 {
-	return !ASSIMP_stricmp(one,second);
+    return !ASSIMP_stricmp(one,second);
 }
 
 // maximum path length
 // XXX http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html
 #ifdef PATH_MAX
-#	define PATHLIMIT PATH_MAX
+#   define PATHLIMIT PATH_MAX
 #else
-#	define PATHLIMIT 4096
+#   define PATHLIMIT 4096
 #endif
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path
 inline void MakeAbsolutePath (const char* in, char* _out)
 {
-	ai_assert(in && _out);
-	char* ret;
+    ai_assert(in && _out);
+    char* ret;
 #ifdef _WIN32
-	ret = ::_fullpath(_out, in,PATHLIMIT);
+    ret = ::_fullpath(_out, in,PATHLIMIT);
 #else
-    	// use realpath
-    	ret = realpath(in, _out);
+        // use realpath
+        ret = realpath(in, _out);
 #endif
-	if(!ret) {
-		// preserve the input path, maybe someone else is able to fix
-		// the path before it is accessed (e.g. our file system filter)
-		DefaultLogger::get()->warn("Invalid path: "+std::string(in));
-		strcpy(_out,in);
-	}
+    if(!ret) {
+        // preserve the input path, maybe someone else is able to fix
+        // the path before it is accessed (e.g. our file system filter)
+        DefaultLogger::get()->warn("Invalid path: "+std::string(in));
+        strcpy(_out,in);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // DefaultIOSystem's more specialized implementation
 bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
 {
-	// chances are quite good both paths are formatted identically,
-	// so we can hopefully return here already
-	if( !ASSIMP_stricmp(one,second) )
-		return true;
+    // chances are quite good both paths are formatted identically,
+    // so we can hopefully return here already
+    if( !ASSIMP_stricmp(one,second) )
+        return true;
 
-	char temp1[PATHLIMIT];
-	char temp2[PATHLIMIT];
+    char temp1[PATHLIMIT];
+    char temp2[PATHLIMIT];
 
-	MakeAbsolutePath (one, temp1);
-	MakeAbsolutePath (second, temp2);
+    MakeAbsolutePath (one, temp1);
+    MakeAbsolutePath (second, temp2);
 
-	return !ASSIMP_stricmp(temp1,temp2);
+    return !ASSIMP_stricmp(temp1,temp2);
 }
 
 
 std::string DefaultIOSystem::fileName(std::string path)
 {
-	std::string ret = path;
-	std::size_t last = ret.find_last_of("\\/");
-	if (last != std::string::npos) ret = ret.substr(last + 1);
-	return ret;
+    std::string ret = path;
+    std::size_t last = ret.find_last_of("\\/");
+    if (last != std::string::npos) ret = ret.substr(last + 1);
+    return ret;
 }
 
 
 std::string DefaultIOSystem::completeBaseName(std::string path)
 {
-	std::string ret = fileName(path);
-	std::size_t pos = ret.find_last_of('.');
-	if(pos != ret.npos) ret = ret.substr(0, pos);
-	return ret;
+    std::string ret = fileName(path);
+    std::size_t pos = ret.find_last_of('.');
+    if(pos != ret.npos) ret = ret.substr(0, pos);
+    return ret;
 }
 
 
 std::string DefaultIOSystem::absolutePath(std::string path)
 {
-	std::string ret = path;
-	std::size_t last = ret.find_last_of("\\/");
-	if (last != std::string::npos) ret = ret.substr(0, last);
-	return ret;
+    std::string ret = path;
+    std::size_t last = ret.find_last_of("\\/");
+    if (last != std::string::npos) ret = ret.substr(0, last);
+    return ret;
 }
 
 #undef PATHLIMIT

@@ -56,58 +56,58 @@ namespace Util {
 // ------------------------------------------------------------------------------------------------
 const char* TokenTypeString(TokenType t)
 {
-	switch(t) {
-		case TokenType_OPEN_BRACKET:
-			return "TOK_OPEN_BRACKET";
+    switch(t) {
+        case TokenType_OPEN_BRACKET:
+            return "TOK_OPEN_BRACKET";
 
-		case TokenType_CLOSE_BRACKET:
-			return "TOK_CLOSE_BRACKET";
+        case TokenType_CLOSE_BRACKET:
+            return "TOK_CLOSE_BRACKET";
 
-		case TokenType_DATA:
-			return "TOK_DATA";
+        case TokenType_DATA:
+            return "TOK_DATA";
 
-		case TokenType_COMMA:
-			return "TOK_COMMA";
+        case TokenType_COMMA:
+            return "TOK_COMMA";
 
-		case TokenType_KEY:
-			return "TOK_KEY";
+        case TokenType_KEY:
+            return "TOK_KEY";
 
-		case TokenType_BINARY_DATA:
-			return "TOK_BINARY_DATA";
-	}
+        case TokenType_BINARY_DATA:
+            return "TOK_BINARY_DATA";
+    }
 
-	ai_assert(false);
-	return "";
+    ai_assert(false);
+    return "";
 }
 
 
 // ------------------------------------------------------------------------------------------------
 std::string AddOffset(const std::string& prefix, const std::string& text, unsigned int offset)
 {
-	return static_cast<std::string>( (Formatter::format(),prefix," (offset 0x",std::hex,offset,") ",text) );
+    return static_cast<std::string>( (Formatter::format(),prefix," (offset 0x",std::hex,offset,") ",text) );
 }
 
 // ------------------------------------------------------------------------------------------------
 std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column)
 {
-	return static_cast<std::string>( (Formatter::format(),prefix," (line ",line,", col ",column,") ",text) );
+    return static_cast<std::string>( (Formatter::format(),prefix," (line ",line,", col ",column,") ",text) );
 }
 
 // ------------------------------------------------------------------------------------------------
 std::string AddTokenText(const std::string& prefix, const std::string& text, const Token* tok)
 {
-	if(tok->IsBinary()) {
-		return static_cast<std::string>( (Formatter::format(),prefix,
-			" (",TokenTypeString(tok->Type()),
-			", offset 0x", std::hex, tok->Offset(),") ",
-			text) );
-	}
+    if(tok->IsBinary()) {
+        return static_cast<std::string>( (Formatter::format(),prefix,
+            " (",TokenTypeString(tok->Type()),
+            ", offset 0x", std::hex, tok->Offset(),") ",
+            text) );
+    }
 
-	return static_cast<std::string>( (Formatter::format(),prefix,
-		" (",TokenTypeString(tok->Type()),
-		", line ",tok->Line(),
-		", col ",tok->Column(),") ",
-		text) );
+    return static_cast<std::string>( (Formatter::format(),prefix,
+        " (",TokenTypeString(tok->Type()),
+        ", line ",tok->Line(),
+        ", col ",tok->Column(),") ",
+        text) );
 }
 
 } // !Util

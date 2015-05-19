@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/types.h"
 #include <vector>
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** Importer class for the Object File Format (.off)
@@ -56,32 +56,32 @@ namespace Assimp	{
 class OFFImporter : public BaseImporter
 {
 public:
-	OFFImporter();
-	~OFFImporter();
+    OFFImporter();
+    ~OFFImporter();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file.
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+    * See BaseImporter::CanRead() for details.  */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure.
-	* See BaseImporter::InternReadFile() for details
-	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+    * See BaseImporter::InternReadFile() for details
+    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 private:
 

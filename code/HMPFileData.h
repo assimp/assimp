@@ -41,21 +41,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //! @file Data structures for the 3D Game Studio Heightmap format (HMP)
 //!
 
-namespace Assimp	{
-namespace HMP	{
+namespace Assimp    {
+namespace HMP   {
 
 #include "./../include/assimp/Compiler/pushpack1.h"
 #include <stdint.h>
 
 // to make it easier for us, we test the magic word against both "endianesses"
-#define AI_HMP_MAGIC_NUMBER_BE_4	AI_MAKE_MAGIC("HMP4")
-#define AI_HMP_MAGIC_NUMBER_LE_4	AI_MAKE_MAGIC("4PMH")
+#define AI_HMP_MAGIC_NUMBER_BE_4    AI_MAKE_MAGIC("HMP4")
+#define AI_HMP_MAGIC_NUMBER_LE_4    AI_MAKE_MAGIC("4PMH")
 
-#define AI_HMP_MAGIC_NUMBER_BE_5	AI_MAKE_MAGIC("HMP5")
-#define AI_HMP_MAGIC_NUMBER_LE_5	AI_MAKE_MAGIC("5PMH")
+#define AI_HMP_MAGIC_NUMBER_BE_5    AI_MAKE_MAGIC("HMP5")
+#define AI_HMP_MAGIC_NUMBER_LE_5    AI_MAKE_MAGIC("5PMH")
 
-#define AI_HMP_MAGIC_NUMBER_BE_7	AI_MAKE_MAGIC("HMP7")
-#define AI_HMP_MAGIC_NUMBER_LE_7	AI_MAKE_MAGIC("7PMH")
+#define AI_HMP_MAGIC_NUMBER_BE_7    AI_MAKE_MAGIC("HMP7")
+#define AI_HMP_MAGIC_NUMBER_LE_7    AI_MAKE_MAGIC("7PMH")
 
 // ---------------------------------------------------------------------------
 /** Data structure for the header of a HMP5 file.
@@ -63,41 +63,41 @@ namespace HMP	{
 */
 struct Header_HMP5
 {
-	int8_t	ident[4]; // "HMP5"
-	int32_t		version;
+    int8_t  ident[4]; // "HMP5"
+    int32_t     version;
 
-	// ignored
-	float	scale[3];
-	float	scale_origin[3];
-	float	boundingradius;
+    // ignored
+    float   scale[3];
+    float   scale_origin[3];
+    float   boundingradius;
 
-	//! Size of one triangle in x direction
-	float	ftrisize_x;
-	//! Size of one triangle in y direction
-	float	ftrisize_y;
-	//! Number of vertices in x direction
-	float	fnumverts_x;
+    //! Size of one triangle in x direction
+    float   ftrisize_x;
+    //! Size of one triangle in y direction
+    float   ftrisize_y;
+    //! Number of vertices in x direction
+    float   fnumverts_x;
 
-	//! Number of skins in the file
-	int32_t		numskins;
+    //! Number of skins in the file
+    int32_t     numskins;
 
-	// can ignore this?
-	int32_t		skinwidth;
-	int32_t		skinheight;
+    // can ignore this?
+    int32_t     skinwidth;
+    int32_t     skinheight;
 
-	//!Number of vertices in the file
-	int32_t		numverts;
+    //!Number of vertices in the file
+    int32_t     numverts;
 
-	// ignored and zero
-	int32_t		numtris;
+    // ignored and zero
+    int32_t     numtris;
 
-	//! only one supported ...
-	int32_t		numframes;
+    //! only one supported ...
+    int32_t     numframes;
 
-	//! Always 0 ...
-	int32_t		num_stverts;
-	int32_t		flags;
-	float	size;
+    //! Always 0 ...
+    int32_t     num_stverts;
+    int32_t     flags;
+    float   size;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -105,9 +105,9 @@ struct Header_HMP5
 */
 struct Vertex_HMP4
 {
-	uint16_t p_pos[3];
-	uint8_t normals162index;
-	uint8_t pad;
+    uint16_t p_pos[3];
+    uint8_t normals162index;
+    uint8_t pad;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -115,9 +115,9 @@ struct Vertex_HMP4
 */
 struct Vertex_HMP5
 {
-	uint16_t z;
-	uint8_t normals162index;
-	uint8_t pad;
+    uint16_t z;
+    uint8_t normals162index;
+    uint8_t pad;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -125,8 +125,8 @@ struct Vertex_HMP5
 */
 struct Vertex_HMP7
 {
-	uint16_t	 z;
-	int8_t normal_x,normal_y;
+    uint16_t     z;
+    int8_t normal_x,normal_y;
 } PACK_STRUCT;
 
 #include "./../include/assimp/Compiler/poppack1.h"

@@ -64,32 +64,32 @@ namespace Assimp
 class Discreet3DSExporter
 {
 public:
-	Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, const aiScene* pScene);
+    Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, const aiScene* pScene);
 
 private:
 
-	void WriteMeshes();
-	void WriteMaterials();
-	void WriteTexture(const aiMaterial& mat, aiTextureType type, uint16_t chunk_flags);
+    void WriteMeshes();
+    void WriteMaterials();
+    void WriteTexture(const aiMaterial& mat, aiTextureType type, uint16_t chunk_flags);
 
-	void WriteFaceMaterialChunk(const aiMesh& mesh);
+    void WriteFaceMaterialChunk(const aiMesh& mesh);
 
-	int WriteHierarchy(const aiNode& node, int level, int sibling_level);
+    int WriteHierarchy(const aiNode& node, int level, int sibling_level);
 
-	void WriteString(const std::string& s);
-	void WriteString(const aiString& s);
-	void WriteColor(const aiColor3D& color);
-	void WritePercentChunk(float f);
+    void WriteString(const std::string& s);
+    void WriteString(const aiString& s);
+    void WriteColor(const aiColor3D& color);
+    void WritePercentChunk(float f);
 
 private:
 
-	const aiScene* const scene;
-	StreamWriterLE writer;
+    const aiScene* const scene;
+    StreamWriterLE writer;
 
-	std::map<const aiNode*, aiMatrix4x4> trafos;
+    std::map<const aiNode*, aiMatrix4x4> trafos;
 
-	typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
-	MeshesByNodeMap meshes;
+    typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
+    MeshesByNodeMap meshes;
 
 };
 

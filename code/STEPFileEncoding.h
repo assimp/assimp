@@ -47,14 +47,14 @@ namespace Assimp {
 namespace STEP {
 
 
-	// --------------------------------------------------------------------------
-	// Convert an ASCII STEP identifier with possibly escaped character
-	// sequences using foreign encodings to plain UTF8.
-	//
-	// Return false if an error occurs, s may or may not be modified in
-	// this case and could still contain escape sequences (even partly
-	// escaped ones).
-	bool StringToUTF8(std::string& s);
+    // --------------------------------------------------------------------------
+    // Convert an ASCII STEP identifier with possibly escaped character
+    // sequences using foreign encodings to plain UTF8.
+    //
+    // Return false if an error occurs, s may or may not be modified in
+    // this case and could still contain escape sequences (even partly
+    // escaped ones).
+    bool StringToUTF8(std::string& s);
 
 
 } // ! STEP

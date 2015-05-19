@@ -49,13 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXImportSettings.h"
 
-namespace Assimp	{
+namespace Assimp    {
 
-	// TinyFormatter.h
-	namespace Formatter {
-		template <typename T,typename TR, typename A> class basic_formatter;
-		typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
-	}
+    // TinyFormatter.h
+    namespace Formatter {
+        template <typename T,typename TR, typename A> class basic_formatter;
+        typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
+    }
 
 
 // -------------------------------------------------------------------------------------------
@@ -67,38 +67,38 @@ namespace Assimp	{
 class FBXImporter : public BaseImporter, public LogFunctions<FBXImporter>
 {
 public:
-	FBXImporter();
-	~FBXImporter();
+    FBXImporter();
+    ~FBXImporter();
 
 
 public:
 
-	// --------------------
-	bool CanRead( const std::string& pFile,
-		IOSystem* pIOHandler,
-		bool checkSig
-	) const;
+    // --------------------
+    bool CanRead( const std::string& pFile,
+        IOSystem* pIOHandler,
+        bool checkSig
+    ) const;
 
 protected:
 
-	// --------------------
-	const aiImporterDesc* GetInfo () const;
+    // --------------------
+    const aiImporterDesc* GetInfo () const;
 
-	// --------------------
-	void SetupProperties(const Importer* pImp);
+    // --------------------
+    void SetupProperties(const Importer* pImp);
 
-	// --------------------
-	void InternReadFile( const std::string& pFile,
-		aiScene* pScene,
-		IOSystem* pIOHandler
-	);
-
-private:
-
+    // --------------------
+    void InternReadFile( const std::string& pFile,
+        aiScene* pScene,
+        IOSystem* pIOHandler
+    );
 
 private:
 
-	FBX::ImportSettings settings;
+
+private:
+
+    FBX::ImportSettings settings;
 
 }; // !class FBXImporter
 

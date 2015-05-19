@@ -49,7 +49,7 @@ struct aiScene;
 namespace Assimp {
 namespace FBX {
 
-	class Document;
+    class Document;
 
 
 /** Convert a FBX #Document to #aiScene

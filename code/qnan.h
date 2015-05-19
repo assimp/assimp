@@ -61,13 +61,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *         IEEE 754 floating-point number. */
 union _IEEESingle
 {
-	float Float;
-	struct
-	{
-		uint32_t Frac : 23;
-		uint32_t Exp  : 8;
-		uint32_t Sign : 1;
-	} IEEE;
+    float Float;
+    struct
+    {
+        uint32_t Frac : 23;
+        uint32_t Exp  : 8;
+        uint32_t Sign : 1;
+    } IEEE;
 } ;
 
 // ---------------------------------------------------------------------------
@@ -75,15 +75,15 @@ union _IEEESingle
  *  @param in Input value */
 AI_FORCE_INLINE bool is_qnan(float in)
 {
-	// the straightforward solution does not work:
-	//   return (in != in);
-	// compiler generates code like this
-	//   load <in> to <register-with-different-width>
-	//   compare <register-with-different-width> against <in>
+    // the straightforward solution does not work:
+    //   return (in != in);
+    // compiler generates code like this
+    //   load <in> to <register-with-different-width>
+    //   compare <register-with-different-width> against <in>
 
-	// FIXME: Use <float> stuff instead? I think fpclassify needs C99
-	return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1 &&
-		reinterpret_cast<_IEEESingle*>(&in)->IEEE.Frac);
+    // FIXME: Use <float> stuff instead? I think fpclassify needs C99
+    return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1 &&
+        reinterpret_cast<_IEEESingle*>(&in)->IEEE.Frac);
 }
 
 // ---------------------------------------------------------------------------
@@ -91,7 +91,7 @@ AI_FORCE_INLINE bool is_qnan(float in)
  *  @param in Input value */
 AI_FORCE_INLINE bool is_not_qnan(float in)
 {
-	return !is_qnan(in);
+    return !is_qnan(in);
 }
 
 // ---------------------------------------------------------------------------
@@ -101,14 +101,14 @@ AI_FORCE_INLINE bool is_not_qnan(float in)
  *  @param in Input value */
 AI_FORCE_INLINE bool is_special_float(float in)
 {
-	return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1);
+    return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1);
 }
 
 // ---------------------------------------------------------------------------
 /** @brief Get a fresh qnan.  */
 AI_FORCE_INLINE float get_qnan()
 {
-	return std::numeric_limits<float>::quiet_NaN();
+    return std::numeric_limits<float>::quiet_NaN();
 }
 
 #endif // !! AI_QNAN_H_INCLUDED

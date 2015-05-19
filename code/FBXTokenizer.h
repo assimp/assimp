@@ -57,24 +57,24 @@ namespace FBX {
  *  basic scope hierarchy. */
 enum TokenType
 {
-	// {
-	TokenType_OPEN_BRACKET = 0,
+    // {
+    TokenType_OPEN_BRACKET = 0,
 
-	// }
-	TokenType_CLOSE_BRACKET,
+    // }
+    TokenType_CLOSE_BRACKET,
 
-	// '"blablubb"', '2', '*14' - very general token class,
-	// further processing happens at a later stage.
-	TokenType_DATA,
+    // '"blablubb"', '2', '*14' - very general token class,
+    // further processing happens at a later stage.
+    TokenType_DATA,
 
-	//
-	TokenType_BINARY_DATA,
+    //
+    TokenType_BINARY_DATA,
 
-	// ,
-	TokenType_COMMA,
+    // ,
+    TokenType_COMMA,
 
-	// blubb:
-	TokenType_KEY
+    // blubb:
+    TokenType_KEY
 };
 
 
@@ -87,75 +87,75 @@ class Token
 
 private:
 
-	static const unsigned int BINARY_MARKER = static_cast<unsigned int>(-1);
+    static const unsigned int BINARY_MARKER = static_cast<unsigned int>(-1);
 
 public:
 
-	/** construct a textual token */
-	Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
+    /** construct a textual token */
+    Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
 
-	/** construct a binary token */
-	Token(const char* sbegin, const char* send, TokenType type, unsigned int offset);
+    /** construct a binary token */
+    Token(const char* sbegin, const char* send, TokenType type, unsigned int offset);
 
-	~Token();
-
-public:
-
-	std::string StringContents() const {
-		return std::string(begin(),end());
-	}
+    ~Token();
 
 public:
 
-	bool IsBinary() const {
-		return column == BINARY_MARKER;
-	}
+    std::string StringContents() const {
+        return std::string(begin(),end());
+    }
 
-	const char* begin() const {
-		return sbegin;
-	}
+public:
 
-	const char* end() const {
-		return send;
-	}
+    bool IsBinary() const {
+        return column == BINARY_MARKER;
+    }
 
-	TokenType Type() const {
-		return type;
-	}
+    const char* begin() const {
+        return sbegin;
+    }
 
-	unsigned int Offset() const {
-		ai_assert(IsBinary());
-		return offset;
-	}
+    const char* end() const {
+        return send;
+    }
 
-	unsigned int Line() const {
-		ai_assert(!IsBinary());
-		return line;
-	}
+    TokenType Type() const {
+        return type;
+    }
 
-	unsigned int Column() const {
-		ai_assert(!IsBinary());
-		return column;
-	}
+    unsigned int Offset() const {
+        ai_assert(IsBinary());
+        return offset;
+    }
+
+    unsigned int Line() const {
+        ai_assert(!IsBinary());
+        return line;
+    }
+
+    unsigned int Column() const {
+        ai_assert(!IsBinary());
+        return column;
+    }
 
 private:
 
 #ifdef DEBUG
-	// full string copy for the sole purpose that it nicely appears
-	// in msvc's debugger window.
-	const std::string contents;
+    // full string copy for the sole purpose that it nicely appears
+    // in msvc's debugger window.
+    const std::string contents;
 #endif
 
 
-	const char* const sbegin;
-	const char* const send;
-	const TokenType type;
+    const char* const sbegin;
+    const char* const send;
+    const TokenType type;
 
-	union {
-		const unsigned int line;
-		unsigned int offset;
-	};
-	const unsigned int column;
+    union {
+        const unsigned int line;
+        unsigned int offset;
+    };
+    const unsigned int column;
 };
 
 // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03

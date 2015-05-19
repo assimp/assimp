@@ -55,19 +55,19 @@ struct aiMaterial;
 struct aiImporterDesc;
 
 namespace _melange_ {
-	class BaseObject; // c4d_file.h
-	class PolygonObject;
-	class BaseMaterial;
-	class BaseShader;
+    class BaseObject; // c4d_file.h
+    class PolygonObject;
+    class BaseMaterial;
+    class BaseShader;
 }
 
-namespace Assimp	{
+namespace Assimp    {
 
-	// TinyFormatter.h
-	namespace Formatter {
-		template <typename T,typename TR, typename A> class basic_formatter;
-		typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
-	}
+    // TinyFormatter.h
+    namespace Formatter {
+        template <typename T,typename TR, typename A> class basic_formatter;
+        typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
+    }
 
 // -------------------------------------------------------------------------------------------
 /** Importer class to load Cinema4D files using the Melange library to be obtained from
@@ -79,42 +79,42 @@ class C4DImporter : public BaseImporter, public LogFunctions<C4DImporter>
 {
 public:
 
-	C4DImporter();
-	~C4DImporter();
+    C4DImporter();
+    ~C4DImporter();
 
 
 public:
 
-	// --------------------
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // --------------------
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// --------------------
-	const aiImporterDesc* GetInfo () const;
+    // --------------------
+    const aiImporterDesc* GetInfo () const;
 
-	// --------------------
-	void SetupProperties(const Importer* pImp);
+    // --------------------
+    void SetupProperties(const Importer* pImp);
 
-	// --------------------
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // --------------------
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 private:
 
-	void ReadMaterials(_melange_::BaseMaterial* mat);
-	void RecurseHierarchy(_melange_::BaseObject* object, aiNode* parent);
-	aiMesh* ReadMesh(_melange_::BaseObject* object);
-	unsigned int ResolveMaterial(_melange_::PolygonObject* obj);
+    void ReadMaterials(_melange_::BaseMaterial* mat);
+    void RecurseHierarchy(_melange_::BaseObject* object, aiNode* parent);
+    aiMesh* ReadMesh(_melange_::BaseObject* object);
+    unsigned int ResolveMaterial(_melange_::PolygonObject* obj);
 
-	bool ReadShader(aiMaterial* out, _melange_::BaseShader* shader);
+    bool ReadShader(aiMaterial* out, _melange_::BaseShader* shader);
 
-	std::vector<aiMesh*> meshes;
-	std::vector<aiMaterial*> materials;
+    std::vector<aiMesh*> meshes;
+    std::vector<aiMaterial*> materials;
 
-	typedef std::map<_melange_::BaseMaterial*, unsigned int> MaterialMap;
-	MaterialMap material_mapping;
+    typedef std::map<_melange_::BaseMaterial*, unsigned int> MaterialMap;
+    MaterialMap material_mapping;
 
 }; // !class C4DImporter
 

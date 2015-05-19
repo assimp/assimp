@@ -54,21 +54,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-	using namespace Util;
+    using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
 NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-	: Object(id,element,name)
+    : Object(id,element,name)
 {
-	const Scope& sc = GetRequiredScope(element);
+    const Scope& sc = GetRequiredScope(element);
 
-	const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
+    const std::string& classname = ParseTokenAsString(GetRequiredToken(element,2));
 
-	// hack on the deriving type but Null/LimbNode attributes are the only case in which
-	// the property table is by design absent and no warning should be generated
-	// for it.
-	const bool is_null_or_limb = !strcmp(classname.c_str(), "Null") || !strcmp(classname.c_str(), "LimbNode");
-	props = GetPropertyTable(doc,"NodeAttribute.Fbx" + classname,element,sc, is_null_or_limb);
+    // hack on the deriving type but Null/LimbNode attributes are the only case in which
+    // the property table is by design absent and no warning should be generated
+    // for it.
+    const bool is_null_or_limb = !strcmp(classname.c_str(), "Null") || !strcmp(classname.c_str(), "LimbNode");
+    props = GetPropertyTable(doc,"NodeAttribute.Fbx" + classname,element,sc, is_null_or_limb);
 }
 
 
@@ -81,24 +81,24 @@ NodeAttribute::~NodeAttribute()
 
 // ------------------------------------------------------------------------------------------------
 CameraSwitcher::CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-	: NodeAttribute(id,element,doc,name)
+    : NodeAttribute(id,element,doc,name)
 {
-	const Scope& sc = GetRequiredScope(element);
-	const Element* const CameraId = sc["CameraId"];
-	const Element* const CameraName = sc["CameraName"];
-	const Element* const CameraIndexName = sc["CameraIndexName"];
+    const Scope& sc = GetRequiredScope(element);
+    const Element* const CameraId = sc["CameraId"];
+    const Element* const CameraName = sc["CameraName"];
+    const Element* const CameraIndexName = sc["CameraIndexName"];
 
-	if(CameraId) {
-		cameraId = ParseTokenAsInt(GetRequiredToken(*CameraId,0));
-	}
+    if(CameraId) {
+        cameraId = ParseTokenAsInt(GetRequiredToken(*CameraId,0));
+    }
 
-	if(CameraName) {
-		cameraName = GetRequiredToken(*CameraName,0).StringContents();
-	}
+    if(CameraName) {
+        cameraName = GetRequiredToken(*CameraName,0).StringContents();
+    }
 
-	if(CameraIndexName && CameraIndexName->Tokens().size()) {
-		cameraIndexName = GetRequiredToken(*CameraIndexName,0).StringContents();
-	}
+    if(CameraIndexName && CameraIndexName->Tokens().size()) {
+        cameraIndexName = GetRequiredToken(*CameraIndexName,0).StringContents();
+    }
 }
 
 

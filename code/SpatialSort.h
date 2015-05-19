@@ -60,109 +60,109 @@ class SpatialSort
 {
 public:
 
-	SpatialSort();
+    SpatialSort();
 
-	// ------------------------------------------------------------------------------------
-	/** Constructs a spatially sorted representation from the given position array.
-	 * Supply the positions in its layout in memory, the class will only refer to them
-	 * by index.
-	 * @param pPositions Pointer to the first position vector of the array.
-	 * @param pNumPositions Number of vectors to expect in that array.
-	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory
-	 *   to the beginning of the next vector. */
-	SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions,
-		unsigned int pElementOffset);
+    // ------------------------------------------------------------------------------------
+    /** Constructs a spatially sorted representation from the given position array.
+     * Supply the positions in its layout in memory, the class will only refer to them
+     * by index.
+     * @param pPositions Pointer to the first position vector of the array.
+     * @param pNumPositions Number of vectors to expect in that array.
+     * @param pElementOffset Offset in bytes from the beginning of one vector in memory
+     *   to the beginning of the next vector. */
+    SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions,
+        unsigned int pElementOffset);
 
-	/** Destructor */
-	~SpatialSort();
+    /** Destructor */
+    ~SpatialSort();
 
 public:
 
-	// ------------------------------------------------------------------------------------
-	/** Sets the input data for the SpatialSort. This replaces existing data, if any.
-	 *  The new data receives new indices in ascending order.
-	 *
-	 * @param pPositions Pointer to the first position vector of the array.
-	 * @param pNumPositions Number of vectors to expect in that array.
-	 * @param pElementOffset Offset in bytes from the beginning of one vector in memory
-	 *   to the beginning of the next vector.
-	 * @param pFinalize Specifies whether the SpatialSort's internal representation
-	 *   is finalized after the new data has been added. Finalization is
-	 *   required in order to use #FindPosition() or #GenerateMappingTable().
-	 *   If you don't finalize yet, you can use #Append() to add data from
-	 *   other sources.*/
-	void Fill( const aiVector3D* pPositions, unsigned int pNumPositions,
-		unsigned int pElementOffset,
-		bool pFinalize = true);
+    // ------------------------------------------------------------------------------------
+    /** Sets the input data for the SpatialSort. This replaces existing data, if any.
+     *  The new data receives new indices in ascending order.
+     *
+     * @param pPositions Pointer to the first position vector of the array.
+     * @param pNumPositions Number of vectors to expect in that array.
+     * @param pElementOffset Offset in bytes from the beginning of one vector in memory
+     *   to the beginning of the next vector.
+     * @param pFinalize Specifies whether the SpatialSort's internal representation
+     *   is finalized after the new data has been added. Finalization is
+     *   required in order to use #FindPosition() or #GenerateMappingTable().
+     *   If you don't finalize yet, you can use #Append() to add data from
+     *   other sources.*/
+    void Fill( const aiVector3D* pPositions, unsigned int pNumPositions,
+        unsigned int pElementOffset,
+        bool pFinalize = true);
 
 
-	// ------------------------------------------------------------------------------------
-	/** Same as #Fill(), except the method appends to existing data in the #SpatialSort. */
-	void Append( const aiVector3D* pPositions, unsigned int pNumPositions,
-		unsigned int pElementOffset,
-		bool pFinalize = true);
+    // ------------------------------------------------------------------------------------
+    /** Same as #Fill(), except the method appends to existing data in the #SpatialSort. */
+    void Append( const aiVector3D* pPositions, unsigned int pNumPositions,
+        unsigned int pElementOffset,
+        bool pFinalize = true);
 
 
-	// ------------------------------------------------------------------------------------
-	/** Finalize the spatial hash data structure. This can be useful after
-	 *  multiple calls to #Append() with the pFinalize parameter set to false.
-	 *  This is finally required before one of #FindPositions() and #GenerateMappingTable()
-	 *  can be called to query the spatial sort.*/
-	void Finalize();
+    // ------------------------------------------------------------------------------------
+    /** Finalize the spatial hash data structure. This can be useful after
+     *  multiple calls to #Append() with the pFinalize parameter set to false.
+     *  This is finally required before one of #FindPositions() and #GenerateMappingTable()
+     *  can be called to query the spatial sort.*/
+    void Finalize();
 
-	// ------------------------------------------------------------------------------------
-	/** Returns an iterator for all positions close to the given position.
-	 * @param pPosition The position to look for vertices.
-	 * @param pRadius Maximal distance from the position a vertex may have to be counted in.
-	 * @param poResults The container to store the indices of the found positions.
-	 *   Will be emptied by the call so it may contain anything.
-	 * @return An iterator to iterate over all vertices in the given area.*/
-	void FindPositions( const aiVector3D& pPosition, float pRadius,
-		std::vector<unsigned int>& poResults) const;
+    // ------------------------------------------------------------------------------------
+    /** Returns an iterator for all positions close to the given position.
+     * @param pPosition The position to look for vertices.
+     * @param pRadius Maximal distance from the position a vertex may have to be counted in.
+     * @param poResults The container to store the indices of the found positions.
+     *   Will be emptied by the call so it may contain anything.
+     * @return An iterator to iterate over all vertices in the given area.*/
+    void FindPositions( const aiVector3D& pPosition, float pRadius,
+        std::vector<unsigned int>& poResults) const;
 
-	// ------------------------------------------------------------------------------------
-	/** Fills an array with indices of all positions indentical to the given position. In
-	 *  opposite to FindPositions(), not an epsilon is used but a (very low) tolerance of
-	 *  four floating-point units.
-	 * @param pPosition The position to look for vertices.
-	 * @param poResults The container to store the indices of the found positions.
-	 *   Will be emptied by the call so it may contain anything.*/
-	void FindIdenticalPositions( const aiVector3D& pPosition,
-		std::vector<unsigned int>& poResults) const;
+    // ------------------------------------------------------------------------------------
+    /** Fills an array with indices of all positions indentical to the given position. In
+     *  opposite to FindPositions(), not an epsilon is used but a (very low) tolerance of
+     *  four floating-point units.
+     * @param pPosition The position to look for vertices.
+     * @param poResults The container to store the indices of the found positions.
+     *   Will be emptied by the call so it may contain anything.*/
+    void FindIdenticalPositions( const aiVector3D& pPosition,
+        std::vector<unsigned int>& poResults) const;
 
-	// ------------------------------------------------------------------------------------
-	/** Compute a table that maps each vertex ID referring to a spatially close
-	 *  enough position to the same output ID. Output IDs are assigned in ascending order
-	 *  from 0...n.
-	 * @param fill Will be filled with numPositions entries.
-	 * @param pRadius Maximal distance from the position a vertex may have to
-	 *   be counted in.
-	 *  @return Number of unique vertices (n).  */
-	unsigned int GenerateMappingTable(std::vector<unsigned int>& fill,
-		float pRadius) const;
+    // ------------------------------------------------------------------------------------
+    /** Compute a table that maps each vertex ID referring to a spatially close
+     *  enough position to the same output ID. Output IDs are assigned in ascending order
+     *  from 0...n.
+     * @param fill Will be filled with numPositions entries.
+     * @param pRadius Maximal distance from the position a vertex may have to
+     *   be counted in.
+     *  @return Number of unique vertices (n).  */
+    unsigned int GenerateMappingTable(std::vector<unsigned int>& fill,
+        float pRadius) const;
 
 protected:
-	/** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */
-	aiVector3D mPlaneNormal;
+    /** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */
+    aiVector3D mPlaneNormal;
 
-	/** An entry in a spatially sorted position array. Consists of a vertex index,
-	 * its position and its precalculated distance from the reference plane */
-	struct Entry
-	{
-		unsigned int mIndex; ///< The vertex referred by this entry
-		aiVector3D mPosition; ///< Position
-		float mDistance; ///< Distance of this vertex to the sorting plane
+    /** An entry in a spatially sorted position array. Consists of a vertex index,
+     * its position and its precalculated distance from the reference plane */
+    struct Entry
+    {
+        unsigned int mIndex; ///< The vertex referred by this entry
+        aiVector3D mPosition; ///< Position
+        float mDistance; ///< Distance of this vertex to the sorting plane
 
-		Entry() { /** intentionally not initialized.*/ }
-		Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance)
-			: mIndex( pIndex), mPosition( pPosition), mDistance( pDistance)
-		{ 	}
+        Entry() { /** intentionally not initialized.*/ }
+        Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance)
+            : mIndex( pIndex), mPosition( pPosition), mDistance( pDistance)
+        {   }
 
-		bool operator < (const Entry& e) const { return mDistance < e.mDistance; }
-	};
+        bool operator < (const Entry& e) const { return mDistance < e.mDistance; }
+    };
 
-	// all positions, sorted by distance to the sorting plane
-	std::vector<Entry> mPositions;
+    // all positions, sorted by distance to the sorting plane
+    std::vector<Entry> mPositions;
 };
 
 } // end of namespace Assimp

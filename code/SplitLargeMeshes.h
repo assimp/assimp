@@ -67,12 +67,12 @@ class SplitLargeMeshesProcess_Vertex;
 
 // default limit for vertices
 #if (!defined AI_SLM_DEFAULT_MAX_VERTICES)
-#	define AI_SLM_DEFAULT_MAX_VERTICES		1000000
+#   define AI_SLM_DEFAULT_MAX_VERTICES      1000000
 #endif
 
 // default limit for triangles
 #if (!defined AI_SLM_DEFAULT_MAX_TRIANGLES)
-#	define AI_SLM_DEFAULT_MAX_TRIANGLES		1000000
+#   define AI_SLM_DEFAULT_MAX_TRIANGLES     1000000
 #endif
 
 // ---------------------------------------------------------------------------
@@ -83,63 +83,63 @@ class SplitLargeMeshesProcess_Vertex;
 */
 class ASSIMP_API SplitLargeMeshesProcess_Triangle : public BaseProcess
 {
-	friend class SplitLargeMeshesProcess_Vertex;
+    friend class SplitLargeMeshesProcess_Vertex;
 
 public:
 
-	SplitLargeMeshesProcess_Triangle();
-	~SplitLargeMeshesProcess_Triangle();
+    SplitLargeMeshesProcess_Triangle();
+    ~SplitLargeMeshesProcess_Triangle();
 
 public:
-	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag.
-	* @param pFlags The processing flags the importer was called with. A
- 	*   bitwise combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields,
- 	*   false if not.
-	*/
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the processing step is present in the given flag.
+    * @param pFlags The processing flags the importer was called with. A
+    *   bitwise combination of #aiPostProcessSteps.
+    * @return true if the process is present in this flag fields,
+    *   false if not.
+    */
+    bool IsActive( unsigned int pFlags) const;
 
 
-	// -------------------------------------------------------------------
-	/** Called prior to ExecuteOnScene().
-	* The function is a request to the process to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
-	virtual void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    /** Called prior to ExecuteOnScene().
+    * The function is a request to the process to update its configuration
+    * basing on the Importer's configuration property list.
+    */
+    virtual void SetupProperties(const Importer* pImp);
 
 
-	//! Set the split limit - needed for unit testing
-	inline void SetLimit(unsigned int l)
-		{LIMIT = l;}
+    //! Set the split limit - needed for unit testing
+    inline void SetLimit(unsigned int l)
+        {LIMIT = l;}
 
-	//! Get the split limit
-	inline unsigned int GetLimit() const
-		{return LIMIT;}
-
-public:
-
-	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
-	void Execute( aiScene* pScene);
-
-	// -------------------------------------------------------------------
-	//! Apply the algorithm to a given mesh
-	void SplitMesh (unsigned int a, aiMesh* pcMesh,
-		std::vector<std::pair<aiMesh*, unsigned int> >& avList);
-
-	// -------------------------------------------------------------------
-	//! Update a node in the asset after a few of its meshes
-	//! have been split
-	static void UpdateNode(aiNode* pcNode,
-		const std::vector<std::pair<aiMesh*, unsigned int> >& avList);
+    //! Get the split limit
+    inline unsigned int GetLimit() const
+        {return LIMIT;}
 
 public:
-	//! Triangle limit
-	unsigned int LIMIT;
+
+    // -------------------------------------------------------------------
+    /** Executes the post processing step on the given imported data.
+    * At the moment a process is not supposed to fail.
+    * @param pScene The imported data to work at.
+    */
+    void Execute( aiScene* pScene);
+
+    // -------------------------------------------------------------------
+    //! Apply the algorithm to a given mesh
+    void SplitMesh (unsigned int a, aiMesh* pcMesh,
+        std::vector<std::pair<aiMesh*, unsigned int> >& avList);
+
+    // -------------------------------------------------------------------
+    //! Update a node in the asset after a few of its meshes
+    //! have been split
+    static void UpdateNode(aiNode* pcNode,
+        const std::vector<std::pair<aiMesh*, unsigned int> >& avList);
+
+public:
+    //! Triangle limit
+    unsigned int LIMIT;
 };
 
 
@@ -153,53 +153,53 @@ class ASSIMP_API SplitLargeMeshesProcess_Vertex : public BaseProcess
 {
 public:
 
-	SplitLargeMeshesProcess_Vertex();
-	~SplitLargeMeshesProcess_Vertex();
+    SplitLargeMeshesProcess_Vertex();
+    ~SplitLargeMeshesProcess_Vertex();
 
 public:
-	// -------------------------------------------------------------------
-	/** Returns whether the processing step is present in the given flag field.
-	* @param pFlags The processing flags the importer was called with. A bitwise
-	*   combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields, false if not.
-	*/
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the processing step is present in the given flag field.
+    * @param pFlags The processing flags the importer was called with. A bitwise
+    *   combination of #aiPostProcessSteps.
+    * @return true if the process is present in this flag fields, false if not.
+    */
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	/** Called prior to ExecuteOnScene().
-	* The function is a request to the process to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
-	virtual void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    /** Called prior to ExecuteOnScene().
+    * The function is a request to the process to update its configuration
+    * basing on the Importer's configuration property list.
+    */
+    virtual void SetupProperties(const Importer* pImp);
 
 
-	//! Set the split limit - needed for unit testing
-	inline void SetLimit(unsigned int l)
-		{LIMIT = l;}
+    //! Set the split limit - needed for unit testing
+    inline void SetLimit(unsigned int l)
+        {LIMIT = l;}
 
-	//! Get the split limit
-	inline unsigned int GetLimit() const
-		{return LIMIT;}
-
-public:
-
-	// -------------------------------------------------------------------
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
-	void Execute( aiScene* pScene);
-
-	// -------------------------------------------------------------------
-	//! Apply the algorithm to a given mesh
-	void SplitMesh (unsigned int a, aiMesh* pcMesh,
-		std::vector<std::pair<aiMesh*, unsigned int> >& avList);
-
-	// NOTE: Reuse SplitLargeMeshesProcess_Triangle::UpdateNode()
+    //! Get the split limit
+    inline unsigned int GetLimit() const
+        {return LIMIT;}
 
 public:
-	//! Triangle limit
-	unsigned int LIMIT;
+
+    // -------------------------------------------------------------------
+    /** Executes the post processing step on the given imported data.
+    * At the moment a process is not supposed to fail.
+    * @param pScene The imported data to work at.
+    */
+    void Execute( aiScene* pScene);
+
+    // -------------------------------------------------------------------
+    //! Apply the algorithm to a given mesh
+    void SplitMesh (unsigned int a, aiMesh* pcMesh,
+        std::vector<std::pair<aiMesh*, unsigned int> >& avList);
+
+    // NOTE: Reuse SplitLargeMeshesProcess_Triangle::UpdateNode()
+
+public:
+    //! Triangle limit
+    unsigned int LIMIT;
 };
 
 } // end of namespace Assimp

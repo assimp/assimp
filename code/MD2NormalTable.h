@@ -39,10 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- *	@file Slightly modified version of the anorms.h header file
+ *  @file Slightly modified version of the anorms.h header file
  *  released by ID software with the Quake 2 source code.
  *
- *	Table of normals used by MD2 models
+ *  Table of normals used by MD2 models
  */
 
 #ifndef AI_MDL_NORMALTABLE_H_INC

@@ -52,48 +52,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "./../include/assimp/Compiler/pushpack1.h"
 
-namespace Assimp	{
-namespace MD2	{
+namespace Assimp    {
+namespace MD2   {
 
 // to make it easier for us, we test the magic word against both "endianesses"
-#define AI_MD2_MAGIC_NUMBER_BE	AI_MAKE_MAGIC("IDP2")
-#define AI_MD2_MAGIC_NUMBER_LE	AI_MAKE_MAGIC("2PDI")
+#define AI_MD2_MAGIC_NUMBER_BE  AI_MAKE_MAGIC("IDP2")
+#define AI_MD2_MAGIC_NUMBER_LE  AI_MAKE_MAGIC("2PDI")
 
 // common limitations
-#define AI_MD2_VERSION			15
-#define AI_MD2_MAXQPATH			64
-#define AI_MD2_MAX_FRAMES		512
-#define AI_MD2_MAX_SKINS		32
-#define AI_MD2_MAX_VERTS		2048
-#define AI_MD2_MAX_TRIANGLES	4096
+#define AI_MD2_VERSION          15
+#define AI_MD2_MAXQPATH         64
+#define AI_MD2_MAX_FRAMES       512
+#define AI_MD2_MAX_SKINS        32
+#define AI_MD2_MAX_VERTS        2048
+#define AI_MD2_MAX_TRIANGLES    4096
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for the MD2 main header
+/** \brief Data structure for the MD2 main header
  */
 struct Header
 {
-	uint32_t magic;
-	uint32_t version;
-	uint32_t skinWidth;
-	uint32_t skinHeight;
-	uint32_t frameSize;
-	uint32_t numSkins;
-	uint32_t numVertices;
-	uint32_t numTexCoords;
-	uint32_t numTriangles;
-	uint32_t numGlCommands;
-	uint32_t numFrames;
-	uint32_t offsetSkins;
-	uint32_t offsetTexCoords;
-	uint32_t offsetTriangles;
-	uint32_t offsetFrames;
-	uint32_t offsetGlCommands;
-	uint32_t offsetEnd;
+    uint32_t magic;
+    uint32_t version;
+    uint32_t skinWidth;
+    uint32_t skinHeight;
+    uint32_t frameSize;
+    uint32_t numSkins;
+    uint32_t numVertices;
+    uint32_t numTexCoords;
+    uint32_t numTriangles;
+    uint32_t numGlCommands;
+    uint32_t numFrames;
+    uint32_t offsetSkins;
+    uint32_t offsetTexCoords;
+    uint32_t offsetTriangles;
+    uint32_t offsetFrames;
+    uint32_t offsetGlCommands;
+    uint32_t offsetEnd;
 
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a MD2 OpenGl draw command
+/** \brief Data structure for a MD2 OpenGl draw command
  */
 struct GLCommand
 {
@@ -102,49 +102,49 @@ struct GLCommand
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a MD2 triangle
+/** \brief Data structure for a MD2 triangle
  */
 struct Triangle
 {
-	uint16_t vertexIndices[3];
-	uint16_t textureIndices[3];
+    uint16_t vertexIndices[3];
+    uint16_t textureIndices[3];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a MD2 vertex
+/** \brief Data structure for a MD2 vertex
  */
 struct Vertex
 {
-	uint8_t vertex[3];
-	uint8_t lightNormalIndex;
+    uint8_t vertex[3];
+    uint8_t lightNormalIndex;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a MD2 frame
+/** \brief Data structure for a MD2 frame
  */
 struct Frame
 {
-	float scale[3];
-	float translate[3];
-	char name[16];
-	Vertex vertices[1];
+    float scale[3];
+    float translate[3];
+    char name[16];
+    Vertex vertices[1];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a MD2 texture coordinate
+/** \brief Data structure for a MD2 texture coordinate
  */
 struct TexCoord
 {
-	uint16_t s;
-	uint16_t t;
+    uint16_t s;
+    uint16_t t;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
-/**	\brief Data structure for a MD2 skin
+/** \brief Data structure for a MD2 skin
  */
 struct Skin
 {
-	char name[AI_MD2_MAXQPATH];              /* texture file name */
+    char name[AI_MD2_MAXQPATH];              /* texture file name */
 } PACK_STRUCT;
 
 #include "./../include/assimp/Compiler/poppack1.h"

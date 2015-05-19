@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/anim.h"
 #include <vector>
 
-namespace Assimp	{
+namespace Assimp    {
 
 
 
@@ -61,63 +61,63 @@ class KeyIterator
 public:
 
 
-	// ------------------------------------------------------------------
-	/** Constructs a new key iterator
-	 *
-	 *  @param _objPos Object position track. May be NULL.
-	 *  @param _targetObjPos Target object position track. May be NULL.
-	 *  @param defaultObjectPos Default object position to be used if
-	 *	  no animated track is available. May be NULL.
-	 *  @param defaultTargetPos Default target position to be used if
-	 *	  no animated track is available. May be NULL.
-	 */
-	KeyIterator(const std::vector<aiVectorKey>* _objPos,
-		const std::vector<aiVectorKey>* _targetObjPos,
-		const aiVector3D*  defaultObjectPos = NULL,
-		const aiVector3D*  defaultTargetPos = NULL);
+    // ------------------------------------------------------------------
+    /** Constructs a new key iterator
+     *
+     *  @param _objPos Object position track. May be NULL.
+     *  @param _targetObjPos Target object position track. May be NULL.
+     *  @param defaultObjectPos Default object position to be used if
+     *    no animated track is available. May be NULL.
+     *  @param defaultTargetPos Default target position to be used if
+     *    no animated track is available. May be NULL.
+     */
+    KeyIterator(const std::vector<aiVectorKey>* _objPos,
+        const std::vector<aiVectorKey>* _targetObjPos,
+        const aiVector3D*  defaultObjectPos = NULL,
+        const aiVector3D*  defaultTargetPos = NULL);
 
-	// ------------------------------------------------------------------
-	/** Returns true if all keys have been processed
-	 */
-	bool Finished() const
-		{return reachedEnd;}
+    // ------------------------------------------------------------------
+    /** Returns true if all keys have been processed
+     */
+    bool Finished() const
+        {return reachedEnd;}
 
-	// ------------------------------------------------------------------
-	/** Increment the iterator
-	 */
-	void operator++();
-	inline void operator++(int)
-		{return ++(*this);}
+    // ------------------------------------------------------------------
+    /** Increment the iterator
+     */
+    void operator++();
+    inline void operator++(int)
+        {return ++(*this);}
 
 
 
-	// ------------------------------------------------------------------
-	/** Getters to retrieve the current state of the iterator
-	 */
-	inline const aiVector3D& GetCurPosition() const
-		{return curPosition;}
+    // ------------------------------------------------------------------
+    /** Getters to retrieve the current state of the iterator
+     */
+    inline const aiVector3D& GetCurPosition() const
+        {return curPosition;}
 
-	inline const aiVector3D& GetCurTargetPosition() const
-		{return curTargetPosition;}
+    inline const aiVector3D& GetCurTargetPosition() const
+        {return curTargetPosition;}
 
-	inline double GetCurTime() const
-		{return curTime;}
+    inline double GetCurTime() const
+        {return curTime;}
 
 private:
 
-	//! Did we reach the end?
-	bool reachedEnd;
+    //! Did we reach the end?
+    bool reachedEnd;
 
-	//! Represents the current position of the iterator
-	aiVector3D curPosition, curTargetPosition;
+    //! Represents the current position of the iterator
+    aiVector3D curPosition, curTargetPosition;
 
-	double curTime;
+    double curTime;
 
-	//! Input tracks and the next key to process
-	const std::vector<aiVectorKey>* objPos,*targetObjPos;
+    //! Input tracks and the next key to process
+    const std::vector<aiVectorKey>* objPos,*targetObjPos;
 
-	unsigned int nextObjPos, nextTargetObjPos;
-	std::vector<aiVectorKey> defaultObjPos,defaultTargetObjPos;
+    unsigned int nextObjPos, nextTargetObjPos;
+    std::vector<aiVectorKey> defaultObjPos,defaultTargetObjPos;
 };
 
 // ---------------------------------------------------------------------------
@@ -132,47 +132,47 @@ class TargetAnimationHelper
 {
 public:
 
-	TargetAnimationHelper()
-		:	targetPositions		(NULL)
-		,	objectPositions		(NULL)
-	{}
+    TargetAnimationHelper()
+        :   targetPositions     (NULL)
+        ,   objectPositions     (NULL)
+    {}
 
 
-	// ------------------------------------------------------------------
-	/** Sets the target animation channel
-	 *
-	 *  This channel specifies the position of the camera/spot light
-	 *  target at a specific position.
-	 *
-	 *  @param targetPositions Translation channel*/
-	void SetTargetAnimationChannel (const
-		std::vector<aiVectorKey>* targetPositions);
+    // ------------------------------------------------------------------
+    /** Sets the target animation channel
+     *
+     *  This channel specifies the position of the camera/spot light
+     *  target at a specific position.
+     *
+     *  @param targetPositions Translation channel*/
+    void SetTargetAnimationChannel (const
+        std::vector<aiVectorKey>* targetPositions);
 
 
-	// ------------------------------------------------------------------
-	/** Sets the main animation channel
-	 *
-	 *  @param objectPositions Translation channel */
-	void SetMainAnimationChannel ( const
-		std::vector<aiVectorKey>* objectPositions);
+    // ------------------------------------------------------------------
+    /** Sets the main animation channel
+     *
+     *  @param objectPositions Translation channel */
+    void SetMainAnimationChannel ( const
+        std::vector<aiVectorKey>* objectPositions);
 
-	// ------------------------------------------------------------------
-	/** Sets the main animation channel to a fixed value
-	 *
-	 *  @param fixed Fixed value for the main animation channel*/
-	void SetFixedMainAnimationChannel(const aiVector3D& fixed);
+    // ------------------------------------------------------------------
+    /** Sets the main animation channel to a fixed value
+     *
+     *  @param fixed Fixed value for the main animation channel*/
+    void SetFixedMainAnimationChannel(const aiVector3D& fixed);
 
 
-	// ------------------------------------------------------------------
-	/** Computes final animation channels
-	 * @param distanceTrack Receive camera translation keys ... != NULL. */
-	void Process( std::vector<aiVectorKey>* distanceTrack );
+    // ------------------------------------------------------------------
+    /** Computes final animation channels
+     * @param distanceTrack Receive camera translation keys ... != NULL. */
+    void Process( std::vector<aiVectorKey>* distanceTrack );
 
 
 private:
 
-	const std::vector<aiVectorKey>* targetPositions,*objectPositions;
-	aiVector3D fixedMain;
+    const std::vector<aiVectorKey>* targetPositions,*objectPositions;
+    aiVector3D fixedMain;
 };
 
 

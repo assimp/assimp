@@ -72,7 +72,7 @@ uint32_t tmp;
 int rem;
 
     if (!data) return 0;
-	if (!len)len = (uint32_t)::strlen(data);
+    if (!len)len = (uint32_t)::strlen(data);
 
     rem = len & 3;
     len >>= 2;

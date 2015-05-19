@@ -59,9 +59,9 @@ namespace Util {
 template<typename T>
 struct delete_fun
 {
-	void operator()(const volatile T* del) {
-		delete del;
-	}
+    void operator()(const volatile T* del) {
+        delete del;
+    }
 };
 
 /** Get a string representation for a #TokenType. */

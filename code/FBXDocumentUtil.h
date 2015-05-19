@@ -68,50 +68,50 @@ void DOMWarning(const std::string& message, const Element* element = NULL);
 
 // fetch a property table and the corresponding property template
 boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
-	const std::string& templateName,
-	const Element &element,
-	const Scope& sc,
-	bool no_warn = false);
+    const std::string& templateName,
+    const Element &element,
+    const Scope& sc,
+    bool no_warn = false);
 
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline const T* ProcessSimpleConnection(const Connection& con,
-	bool is_object_property_conn,
-	const char* name,
-	const Element& element,
-	const char** propNameOut = NULL)
+    bool is_object_property_conn,
+    const char* name,
+    const Element& element,
+    const char** propNameOut = NULL)
 {
-	if (is_object_property_conn && !con.PropertyName().length()) {
-		DOMWarning("expected incoming " + std::string(name) +
-			" link to be an object-object connection, ignoring",
-			&element
-			);
-		return NULL;
-	}
-	else if (!is_object_property_conn && con.PropertyName().length()) {
-		DOMWarning("expected incoming " + std::string(name) +
-			" link to be an object-property connection, ignoring",
-			&element
-			);
-		return NULL;
-	}
+    if (is_object_property_conn && !con.PropertyName().length()) {
+        DOMWarning("expected incoming " + std::string(name) +
+            " link to be an object-object connection, ignoring",
+            &element
+            );
+        return NULL;
+    }
+    else if (!is_object_property_conn && con.PropertyName().length()) {
+        DOMWarning("expected incoming " + std::string(name) +
+            " link to be an object-property connection, ignoring",
+            &element
+            );
+        return NULL;
+    }
 
-	if(is_object_property_conn && propNameOut) {
-		// note: this is ok, the return value of PropertyValue() is guaranteed to
-		// remain valid and unchanged as long as the document exists.
-		*propNameOut = con.PropertyName().c_str();
-	}
+    if(is_object_property_conn && propNameOut) {
+        // note: this is ok, the return value of PropertyValue() is guaranteed to
+        // remain valid and unchanged as long as the document exists.
+        *propNameOut = con.PropertyName().c_str();
+    }
 
-	const Object* const ob = con.SourceObject();
-	if(!ob) {
-		DOMWarning("failed to read source object for incoming" + std::string(name) +
-			" link, ignoring",
-			&element);
-		return NULL;
-	}
+    const Object* const ob = con.SourceObject();
+    if(!ob) {
+        DOMWarning("failed to read source object for incoming" + std::string(name) +
+            " link, ignoring",
+            &element);
+        return NULL;
+    }
 
-	return dynamic_cast<const T*>(ob);
+    return dynamic_cast<const T*>(ob);
 }
 
 

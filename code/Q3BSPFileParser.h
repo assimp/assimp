@@ -60,28 +60,28 @@ class ZipFile;
 class Q3BSPFileParser
 {
 public:
-	Q3BSPFileParser( const std::string &rMapName, Q3BSP::Q3BSPZipArchive *pZipArchive );
-	~Q3BSPFileParser();
-	Q3BSP::Q3BSPModel *getModel() const;
+    Q3BSPFileParser( const std::string &rMapName, Q3BSP::Q3BSPZipArchive *pZipArchive );
+    ~Q3BSPFileParser();
+    Q3BSP::Q3BSPModel *getModel() const;
 
 protected:
-	bool readData(const std::string &rMapName);
-	bool parseFile();
-	bool validateFormat();
-	void getLumps();
-	void countLumps();
-	void getVertices();
-	void getIndices();
-	void getFaces();
-	void getTextures();
-	void getLightMaps();
-	void getEntities();
+    bool readData(const std::string &rMapName);
+    bool parseFile();
+    bool validateFormat();
+    void getLumps();
+    void countLumps();
+    void getVertices();
+    void getIndices();
+    void getFaces();
+    void getTextures();
+    void getLightMaps();
+    void getEntities();
 
 private:
-	size_t m_sOffset;
-	std::vector<char> m_Data;
-	Q3BSP::Q3BSPModel *m_pModel;
-	Q3BSP::Q3BSPZipArchive *m_pZipArchive;
+    size_t m_sOffset;
+    std::vector<char> m_Data;
+    Q3BSP::Q3BSPModel *m_pModel;
+    Q3BSP::Q3BSPZipArchive *m_pZipArchive;
 };
 
 } // Namespace Assimp

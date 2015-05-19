@@ -62,35 +62,35 @@ class ImproveCacheLocalityProcess : public BaseProcess
 {
 public:
 
-	ImproveCacheLocalityProcess();
-	~ImproveCacheLocalityProcess();
+    ImproveCacheLocalityProcess();
+    ~ImproveCacheLocalityProcess();
 
 public:
 
-	// -------------------------------------------------------------------
-	// Check whether the pp step is active
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    // Check whether the pp step is active
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	// Executes the pp step on a given scene
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    // Executes the pp step on a given scene
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	// Configures the pp step
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    // Configures the pp step
+    void SetupProperties(const Importer* pImp);
 
 protected:
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given mesh
-	 * @param pMesh The mesh to process.
-	 * @param meshNum Index of the mesh to process
-	 */
-	float ProcessMesh( aiMesh* pMesh, unsigned int meshNum);
+    // -------------------------------------------------------------------
+    /** Executes the postprocessing step on the given mesh
+     * @param pMesh The mesh to process.
+     * @param meshNum Index of the mesh to process
+     */
+    float ProcessMesh( aiMesh* pMesh, unsigned int meshNum);
 
 private:
-	//! Configuration parameter: specifies the size of the cache to
-	//! optimize the vertex data for.
-	unsigned int configCacheDepth;
+    //! Configuration parameter: specifies the size of the cache to
+    //! optimize the vertex data for.
+    unsigned int configCacheDepth;
 };
 
 } // end of namespace Assimp

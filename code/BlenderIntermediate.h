@@ -60,142 +60,142 @@ struct aiTexture;
 namespace Assimp {
 namespace Blender {
 
-	// --------------------------------------------------------------------
-	/** Mini smart-array to avoid pulling in even more boost stuff. usable with vector and deque */
-	// --------------------------------------------------------------------
-	template <template <typename,typename> class TCLASS, typename T>
-	struct TempArray	{
-		typedef TCLASS< T*,std::allocator<T*> > mywrap;
+    // --------------------------------------------------------------------
+    /** Mini smart-array to avoid pulling in even more boost stuff. usable with vector and deque */
+    // --------------------------------------------------------------------
+    template <template <typename,typename> class TCLASS, typename T>
+    struct TempArray    {
+        typedef TCLASS< T*,std::allocator<T*> > mywrap;
 
-		TempArray() {
-		}
+        TempArray() {
+        }
 
-		~TempArray () {
-			for_each(T* elem, arr) {
-				delete elem;
-			}
-		}
+        ~TempArray () {
+            for_each(T* elem, arr) {
+                delete elem;
+            }
+        }
 
-		void dismiss() {
-			arr.clear();
-		}
+        void dismiss() {
+            arr.clear();
+        }
 
-		mywrap* operator -> () {
-			return &arr;
-		}
+        mywrap* operator -> () {
+            return &arr;
+        }
 
-		operator mywrap& () {
-			return arr;
-		}
+        operator mywrap& () {
+            return arr;
+        }
 
-		operator const mywrap& () const {
-			return arr;
-		}
+        operator const mywrap& () const {
+            return arr;
+        }
 
-		mywrap& get () {
-			return arr;
-		}
+        mywrap& get () {
+            return arr;
+        }
 
-		const mywrap& get () const {
-			return arr;
-		}
+        const mywrap& get () const {
+            return arr;
+        }
 
-		T* operator[] (size_t idx) const {
-			return arr[idx];
-		}
+        T* operator[] (size_t idx) const {
+            return arr[idx];
+        }
 
-		T*& operator[] (size_t idx) {
-			return arr[idx];
-		}
+        T*& operator[] (size_t idx) {
+            return arr[idx];
+        }
 
-	private:
-		// no copy semantics
-		void operator= (const TempArray&)  {
-		}
+    private:
+        // no copy semantics
+        void operator= (const TempArray&)  {
+        }
 
-		TempArray(const TempArray& arr) {
-		}
+        TempArray(const TempArray& arr) {
+        }
 
-	private:
-		mywrap arr;
-	};
+    private:
+        mywrap arr;
+    };
 
 #ifdef _MSC_VER
-#	pragma warning(disable:4351)
+#   pragma warning(disable:4351)
 #endif
 
-	struct ObjectCompare {
-		bool operator() (const Object* left, const Object* right) const {
-			return strcmp(left->id.name, right->id.name) == -1;
-		}
-	};
+    struct ObjectCompare {
+        bool operator() (const Object* left, const Object* right) const {
+            return strcmp(left->id.name, right->id.name) == -1;
+        }
+    };
 
-	// When keeping objects in sets, sort them by their name.
-	typedef std::set<const Object*, ObjectCompare> ObjectSet;
+    // When keeping objects in sets, sort them by their name.
+    typedef std::set<const Object*, ObjectCompare> ObjectSet;
 
-	// --------------------------------------------------------------------
-	/** ConversionData acts as intermediate storage location for
-	 *  the various ConvertXXX routines in BlenderImporter.*/
-	// --------------------------------------------------------------------
-	struct ConversionData
-	{
-		ConversionData(const FileDatabase& db)
-			: sentinel_cnt()
-			, next_texture()
-			, db(db)
-		{}
+    // --------------------------------------------------------------------
+    /** ConversionData acts as intermediate storage location for
+     *  the various ConvertXXX routines in BlenderImporter.*/
+    // --------------------------------------------------------------------
+    struct ConversionData
+    {
+        ConversionData(const FileDatabase& db)
+            : sentinel_cnt()
+            , next_texture()
+            , db(db)
+        {}
 
-		struct ObjectCompare {
-			bool operator() (const Object* left, const Object* right) const {
-				return strcmp(left->id.name, right->id.name) == -1;
-			}
-		};
+        struct ObjectCompare {
+            bool operator() (const Object* left, const Object* right) const {
+                return strcmp(left->id.name, right->id.name) == -1;
+            }
+        };
 
-		ObjectSet objects;
+        ObjectSet objects;
 
-		TempArray <std::vector, aiMesh> meshes;
-		TempArray <std::vector, aiCamera> cameras;
-		TempArray <std::vector, aiLight> lights;
-		TempArray <std::vector, aiMaterial> materials;
-		TempArray <std::vector, aiTexture> textures;
+        TempArray <std::vector, aiMesh> meshes;
+        TempArray <std::vector, aiCamera> cameras;
+        TempArray <std::vector, aiLight> lights;
+        TempArray <std::vector, aiMaterial> materials;
+        TempArray <std::vector, aiTexture> textures;
 
-		// set of all materials referenced by at least one mesh in the scene
-		std::deque< boost::shared_ptr< Material > > materials_raw;
+        // set of all materials referenced by at least one mesh in the scene
+        std::deque< boost::shared_ptr< Material > > materials_raw;
 
-		// counter to name sentinel textures inserted as substitutes for procedural textures.
-		unsigned int sentinel_cnt;
+        // counter to name sentinel textures inserted as substitutes for procedural textures.
+        unsigned int sentinel_cnt;
 
-		// next texture ID for each texture type, respectively
-		unsigned int next_texture[aiTextureType_UNKNOWN+1];
+        // next texture ID for each texture type, respectively
+        unsigned int next_texture[aiTextureType_UNKNOWN+1];
 
-		// original file data
-		const FileDatabase& db;
-	};
+        // original file data
+        const FileDatabase& db;
+    };
 #ifdef _MSC_VER
-#	pragma warning(default:4351)
+#   pragma warning(default:4351)
 #endif
 
 // ------------------------------------------------------------------------------------------------
 inline const char* GetTextureTypeDisplayString(Tex::Type t)
 {
-	switch (t)	{
-	case Tex::Type_CLOUDS		:  return  "Clouds";
-	case Tex::Type_WOOD			:  return  "Wood";
-	case Tex::Type_MARBLE		:  return  "Marble";
-	case Tex::Type_MAGIC		:  return  "Magic";
-	case Tex::Type_BLEND		:  return  "Blend";
-	case Tex::Type_STUCCI		:  return  "Stucci";
-	case Tex::Type_NOISE		:  return  "Noise";
-	case Tex::Type_PLUGIN		:  return  "Plugin";
-	case Tex::Type_MUSGRAVE		:  return  "Musgrave";
-	case Tex::Type_VORONOI		:  return  "Voronoi";
-	case Tex::Type_DISTNOISE	:  return  "DistortedNoise";
-	case Tex::Type_ENVMAP		:  return  "EnvMap";
-	case Tex::Type_IMAGE		:  return  "Image";
-	default:
-		break;
-	}
-	return "<Unknown>";
+    switch (t)  {
+    case Tex::Type_CLOUDS       :  return  "Clouds";
+    case Tex::Type_WOOD         :  return  "Wood";
+    case Tex::Type_MARBLE       :  return  "Marble";
+    case Tex::Type_MAGIC        :  return  "Magic";
+    case Tex::Type_BLEND        :  return  "Blend";
+    case Tex::Type_STUCCI       :  return  "Stucci";
+    case Tex::Type_NOISE        :  return  "Noise";
+    case Tex::Type_PLUGIN       :  return  "Plugin";
+    case Tex::Type_MUSGRAVE     :  return  "Musgrave";
+    case Tex::Type_VORONOI      :  return  "Voronoi";
+    case Tex::Type_DISTNOISE    :  return  "DistortedNoise";
+    case Tex::Type_ENVMAP       :  return  "EnvMap";
+    case Tex::Type_IMAGE        :  return  "Image";
+    default:
+        break;
+    }
+    return "<Unknown>";
 }
 
 } // ! Blender

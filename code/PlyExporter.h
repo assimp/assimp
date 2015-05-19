@@ -59,28 +59,28 @@ namespace Assimp
 class PlyExporter
 {
 public:
-	/// Constructor for a specific scene to export
-	PlyExporter(const char* filename, const aiScene* pScene, bool binary = false);
+    /// Constructor for a specific scene to export
+    PlyExporter(const char* filename, const aiScene* pScene, bool binary = false);
 
 public:
 
-	/// public stringstreams to write all output into
-	std::ostringstream mOutput;
+    /// public stringstreams to write all output into
+    std::ostringstream mOutput;
 
 private:
 
-	void WriteMeshVerts(const aiMesh* m, unsigned int components);
-	void WriteMeshIndices(const aiMesh* m, unsigned int ofs);
+    void WriteMeshVerts(const aiMesh* m, unsigned int components);
+    void WriteMeshIndices(const aiMesh* m, unsigned int ofs);
 
-	void WriteMeshVertsBinary(const aiMesh* m, unsigned int components);
-	void WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset);
+    void WriteMeshVertsBinary(const aiMesh* m, unsigned int components);
+    void WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset);
 
 private:
 
-	const std::string filename;
+    const std::string filename;
 
-	// obviously, this endl() doesn't flush() the stream
-	const std::string endl;
+    // obviously, this endl() doesn't flush() the stream
+    const std::string endl;
 };
 
 }

@@ -55,7 +55,7 @@ struct aiMaterial;
 struct aiScene;
 struct aiNode;
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /**
@@ -67,55 +67,55 @@ class SkeletonMeshBuilder
 {
 public:
 
-	// -------------------------------------------------------------------
-	/** The constructor processes the given scene and adds a mesh there.
-	 *
-	 * Does nothing if the scene already has mesh data.
-	 * @param pScene The scene for which a skeleton mesh should be constructed.
-	 * @param root The node to start with. NULL is the scene root
-	 * @param bKnobsOnly Set this to true if you don't want the connectors
-	 *   between the knobs representing the nodes.
-	 */
-	SkeletonMeshBuilder( aiScene* pScene, aiNode* root = NULL,
-		bool bKnobsOnly = false);
+    // -------------------------------------------------------------------
+    /** The constructor processes the given scene and adds a mesh there.
+     *
+     * Does nothing if the scene already has mesh data.
+     * @param pScene The scene for which a skeleton mesh should be constructed.
+     * @param root The node to start with. NULL is the scene root
+     * @param bKnobsOnly Set this to true if you don't want the connectors
+     *   between the knobs representing the nodes.
+     */
+    SkeletonMeshBuilder( aiScene* pScene, aiNode* root = NULL,
+        bool bKnobsOnly = false);
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Recursively builds a simple mesh representation for the given node
-	 * and also creates a joint for the node that affects this part of
-	 * the mesh.
-	 * @param pNode The node to build geometry for.
-	 */
-	void CreateGeometry( const aiNode* pNode);
+    // -------------------------------------------------------------------
+    /** Recursively builds a simple mesh representation for the given node
+     * and also creates a joint for the node that affects this part of
+     * the mesh.
+     * @param pNode The node to build geometry for.
+     */
+    void CreateGeometry( const aiNode* pNode);
 
-	// -------------------------------------------------------------------
-	/** Creates the mesh from the internally accumulated stuff and returns it.
-	 */
-	aiMesh* CreateMesh();
+    // -------------------------------------------------------------------
+    /** Creates the mesh from the internally accumulated stuff and returns it.
+     */
+    aiMesh* CreateMesh();
 
-	// -------------------------------------------------------------------
-	/** Creates a dummy material and returns it. */
-	aiMaterial* CreateMaterial();
+    // -------------------------------------------------------------------
+    /** Creates a dummy material and returns it. */
+    aiMaterial* CreateMaterial();
 
 protected:
-	/** space to assemble the mesh data: points */
-	std::vector<aiVector3D> mVertices;
+    /** space to assemble the mesh data: points */
+    std::vector<aiVector3D> mVertices;
 
-	/** faces */
-	struct Face
-	{
-		unsigned int mIndices[3];
-		Face();
-		Face( unsigned int p0, unsigned int p1, unsigned int p2)
-		{ mIndices[0] = p0; mIndices[1] = p1; mIndices[2] = p2; }
-	};
-	std::vector<Face> mFaces;
+    /** faces */
+    struct Face
+    {
+        unsigned int mIndices[3];
+        Face();
+        Face( unsigned int p0, unsigned int p1, unsigned int p2)
+        { mIndices[0] = p0; mIndices[1] = p1; mIndices[2] = p2; }
+    };
+    std::vector<Face> mFaces;
 
-	/** bones */
-	std::vector<aiBone*> mBones;
+    /** bones */
+    std::vector<aiBone*> mBones;
 
-	bool mKnobsOnly;
+    bool mKnobsOnly;
 };
 
 } // end of namespace Assimp

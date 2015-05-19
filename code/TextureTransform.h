@@ -51,13 +51,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiNode;
 struct aiMaterial;
 
-namespace Assimp	{
+namespace Assimp    {
 
-#define AI_TT_UV_IDX_LOCK_TBD	0xffffffff
-#define AI_TT_UV_IDX_LOCK_NONE	0xeeeeeeee
+#define AI_TT_UV_IDX_LOCK_TBD   0xffffffff
+#define AI_TT_UV_IDX_LOCK_NONE  0xeeeeeeee
 
 
-#define AI_TT_ROTATION_EPSILON	((float)AI_DEG_TO_RAD(0.5))
+#define AI_TT_ROTATION_EPSILON  ((float)AI_DEG_TO_RAD(0.5))
 
 // ---------------------------------------------------------------------------
 /** Small helper structure representing a shortcut into the material list
@@ -65,21 +65,21 @@ namespace Assimp	{
 */
 struct TTUpdateInfo
 {
-	TTUpdateInfo() :
-			directShortcut	(NULL)
-		,	mat				(NULL)
-		,	semantic		(0)
-		,	index			(0)
-	{}
+    TTUpdateInfo() :
+            directShortcut  (NULL)
+        ,   mat             (NULL)
+        ,   semantic        (0)
+        ,   index           (0)
+    {}
 
-	//! Direct shortcut, if available
-	unsigned int* directShortcut;
+    //! Direct shortcut, if available
+    unsigned int* directShortcut;
 
-	//! Material
-	aiMaterial *mat;
+    //! Material
+    aiMaterial *mat;
 
-	//! Texture type and index
-	unsigned int semantic, index;
+    //! Texture type and index
+    unsigned int semantic, index;
 };
 
 
@@ -89,102 +89,102 @@ struct TTUpdateInfo
 struct STransformVecInfo : public aiUVTransform
 {
 
-	STransformVecInfo()
-		:	uvIndex		(0)
-		,	mapU		(aiTextureMapMode_Wrap)
-		,	mapV		(aiTextureMapMode_Wrap)
-		,	lockedPos	(AI_TT_UV_IDX_LOCK_NONE)
-	{}
+    STransformVecInfo()
+        :   uvIndex     (0)
+        ,   mapU        (aiTextureMapMode_Wrap)
+        ,   mapV        (aiTextureMapMode_Wrap)
+        ,   lockedPos   (AI_TT_UV_IDX_LOCK_NONE)
+    {}
 
-	//! Source texture coordinate index
-	unsigned int uvIndex;
+    //! Source texture coordinate index
+    unsigned int uvIndex;
 
-	//! Texture mapping mode in the u, v direction
-	aiTextureMapMode mapU,mapV;
+    //! Texture mapping mode in the u, v direction
+    aiTextureMapMode mapU,mapV;
 
-	//! Locked destination UV index
-	//! AI_TT_UV_IDX_LOCK_TBD - to be determined
-	//! AI_TT_UV_IDX_LOCK_NONE - none (default)
-	unsigned int lockedPos;
+    //! Locked destination UV index
+    //! AI_TT_UV_IDX_LOCK_TBD - to be determined
+    //! AI_TT_UV_IDX_LOCK_NONE - none (default)
+    unsigned int lockedPos;
 
-	//! Update info - shortcuts into all materials
-	//! that are referencing this transform setup
-	std::list<TTUpdateInfo> updateList;
-
-
-	// -------------------------------------------------------------------
-	/** Compare two transform setups
-	*/
-	inline bool operator== (const STransformVecInfo& other) const
-	{
-		// We use a small epsilon here
-		const static float epsilon = 0.05f;
-
-		if (std::fabs( mTranslation.x - other.mTranslation.x ) > epsilon ||
-			std::fabs( mTranslation.y - other.mTranslation.y ) > epsilon)
-		{
-			return false;
-		}
-
-		if (std::fabs( mScaling.x - other.mScaling.x ) > epsilon ||
-			std::fabs( mScaling.y - other.mScaling.y ) > epsilon)
-		{
-			return false;
-		}
-
-		if (std::fabs( mRotation - other.mRotation) > epsilon)
-		{
-			return false;
-		}
-		return true;
-	}
-
-	inline bool operator!= (const STransformVecInfo& other) const
-	{
-			return !(*this == other);
-	}
+    //! Update info - shortcuts into all materials
+    //! that are referencing this transform setup
+    std::list<TTUpdateInfo> updateList;
 
 
-	// -------------------------------------------------------------------
-	/** Returns whether this is an untransformed texture coordinate set
-	*/
-	inline bool IsUntransformed() const
-	{
-		return (1.0f == mScaling.x && 1.f == mScaling.y &&
-			!mTranslation.x && !mTranslation.y &&
-			mRotation < AI_TT_ROTATION_EPSILON);
-	}
+    // -------------------------------------------------------------------
+    /** Compare two transform setups
+    */
+    inline bool operator== (const STransformVecInfo& other) const
+    {
+        // We use a small epsilon here
+        const static float epsilon = 0.05f;
 
-	// -------------------------------------------------------------------
-	/** Build a 3x3 matrix from the transformations
-	*/
-	inline void GetMatrix(aiMatrix3x3& mOut)
-	{
-		mOut = aiMatrix3x3();
+        if (std::fabs( mTranslation.x - other.mTranslation.x ) > epsilon ||
+            std::fabs( mTranslation.y - other.mTranslation.y ) > epsilon)
+        {
+            return false;
+        }
 
-		if (1.0f != mScaling.x || 1.0f != mScaling.y)
-		{
-			aiMatrix3x3 mScale;
-			mScale.a1 = mScaling.x;
-			mScale.b2 = mScaling.y;
-			mOut = mScale;
-		}
-		if (mRotation)
-		{
-			aiMatrix3x3 mRot;
-			mRot.a1 = mRot.b2 = std::cos(mRotation);
-			mRot.a2 = mRot.b1 = std::sin(mRotation);
-			mRot.a2 = -mRot.a2;
-			mOut *= mRot;
-		}
-		if (mTranslation.x || mTranslation.y)
-		{
-			aiMatrix3x3 mTrans;
-			mTrans.a3 = mTranslation.x;
-			mTrans.b3 = mTranslation.y;
-			mOut *= mTrans;
-		}
-	}
+        if (std::fabs( mScaling.x - other.mScaling.x ) > epsilon ||
+            std::fabs( mScaling.y - other.mScaling.y ) > epsilon)
+        {
+            return false;
+        }
+
+        if (std::fabs( mRotation - other.mRotation) > epsilon)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    inline bool operator!= (const STransformVecInfo& other) const
+    {
+            return !(*this == other);
+    }
+
+
+    // -------------------------------------------------------------------
+    /** Returns whether this is an untransformed texture coordinate set
+    */
+    inline bool IsUntransformed() const
+    {
+        return (1.0f == mScaling.x && 1.f == mScaling.y &&
+            !mTranslation.x && !mTranslation.y &&
+            mRotation < AI_TT_ROTATION_EPSILON);
+    }
+
+    // -------------------------------------------------------------------
+    /** Build a 3x3 matrix from the transformations
+    */
+    inline void GetMatrix(aiMatrix3x3& mOut)
+    {
+        mOut = aiMatrix3x3();
+
+        if (1.0f != mScaling.x || 1.0f != mScaling.y)
+        {
+            aiMatrix3x3 mScale;
+            mScale.a1 = mScaling.x;
+            mScale.b2 = mScaling.y;
+            mOut = mScale;
+        }
+        if (mRotation)
+        {
+            aiMatrix3x3 mRot;
+            mRot.a1 = mRot.b2 = std::cos(mRotation);
+            mRot.a2 = mRot.b1 = std::sin(mRotation);
+            mRot.a2 = -mRot.a2;
+            mOut *= mRot;
+        }
+        if (mTranslation.x || mTranslation.y)
+        {
+            aiMatrix3x3 mTrans;
+            mTrans.a3 = mTranslation.x;
+            mTrans.b3 = mTranslation.y;
+            mOut *= mTrans;
+        }
+    }
 };
 
 
@@ -196,34 +196,34 @@ class TextureTransformStep : public BaseProcess
 {
 public:
 
-	TextureTransformStep();
-	~TextureTransformStep();
+    TextureTransformStep();
+    ~TextureTransformStep();
 
 public:
 
-	// -------------------------------------------------------------------
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    void SetupProperties(const Importer* pImp);
 
 
 protected:
 
 
-	// -------------------------------------------------------------------
-	/** Preprocess a specific UV transformation setup
-	 *
-	 *  @param info Transformation setup to be preprocessed.
-	*/
-	void PreProcessUVTransform(STransformVecInfo& info);
+    // -------------------------------------------------------------------
+    /** Preprocess a specific UV transformation setup
+     *
+     *  @param info Transformation setup to be preprocessed.
+    */
+    void PreProcessUVTransform(STransformVecInfo& info);
 
 private:
 
-	unsigned int configFlags;
+    unsigned int configFlags;
 };
 
 }

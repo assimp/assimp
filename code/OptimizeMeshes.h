@@ -52,7 +52,7 @@ struct aiMesh;
 struct aiNode;
 class OptimizeMeshesProcessTest;
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** @brief Postprocessing step to optimize mesh usage
@@ -66,115 +66,115 @@ class OptimizeMeshesProcess : public BaseProcess
 {
 public:
 
-	OptimizeMeshesProcess();
-	~OptimizeMeshesProcess();
+    OptimizeMeshesProcess();
+    ~OptimizeMeshesProcess();
 
 
-	/** @brief Internal utility to store additional mesh info
-	 */
-	struct MeshInfo
-	{
-		MeshInfo()
-			:	instance_cnt  (0)
-			,	vertex_format (0)
-			,	output_id	  (0xffffffff)
-		{}
+    /** @brief Internal utility to store additional mesh info
+     */
+    struct MeshInfo
+    {
+        MeshInfo()
+            :   instance_cnt  (0)
+            ,   vertex_format (0)
+            ,   output_id     (0xffffffff)
+        {}
 
-		//! Number of times this mesh is referenced
-		unsigned int instance_cnt;
+        //! Number of times this mesh is referenced
+        unsigned int instance_cnt;
 
-		//! Vertex format id
-		unsigned int vertex_format;
+        //! Vertex format id
+        unsigned int vertex_format;
 
-		//! Output ID
-		unsigned int output_id;
-	};
+        //! Output ID
+        unsigned int output_id;
+    };
 
 public:
-	// -------------------------------------------------------------------
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	void SetupProperties(const Importer* pImp);
-
-
-	// -------------------------------------------------------------------
-	/** @brief Specify whether you want meshes with different
-	 *   primitive types to be merged as well.
-	 *
-	 *  IsActive() sets this property automatically to true if the
-	 *  aiProcess_SortByPType flag is found.
-	 */
-	void EnablePrimitiveTypeSorting(bool enable) {
-		pts = enable;
-	}
-
-	// Getter
-	bool IsPrimitiveTypeSortingEnabled () const {
-		return pts;
-	}
+    // -------------------------------------------------------------------
+    void SetupProperties(const Importer* pImp);
 
 
-	// -------------------------------------------------------------------
-	/** @brief Specify a maximum size of a single output mesh.
-	 *
-	 *  If a single input mesh already exceeds this limit, it won't
-	 *  be split.
-	 *  @param verts Maximum number of vertices per mesh
-	 *  @param faces Maximum number of faces per mesh
-	 */
-	void SetPreferredMeshSizeLimit (unsigned int verts, unsigned int faces)
-	{
-		max_verts = verts;
-		max_faces = faces;
-	}
+    // -------------------------------------------------------------------
+    /** @brief Specify whether you want meshes with different
+     *   primitive types to be merged as well.
+     *
+     *  IsActive() sets this property automatically to true if the
+     *  aiProcess_SortByPType flag is found.
+     */
+    void EnablePrimitiveTypeSorting(bool enable) {
+        pts = enable;
+    }
+
+    // Getter
+    bool IsPrimitiveTypeSortingEnabled () const {
+        return pts;
+    }
+
+
+    // -------------------------------------------------------------------
+    /** @brief Specify a maximum size of a single output mesh.
+     *
+     *  If a single input mesh already exceeds this limit, it won't
+     *  be split.
+     *  @param verts Maximum number of vertices per mesh
+     *  @param faces Maximum number of faces per mesh
+     */
+    void SetPreferredMeshSizeLimit (unsigned int verts, unsigned int faces)
+    {
+        max_verts = verts;
+        max_faces = faces;
+    }
 
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** @brief Do the actual optimization on all meshes of this node
-	 *  @param pNode Node we're working with
-	 */
-	void ProcessNode( aiNode* pNode);
+    // -------------------------------------------------------------------
+    /** @brief Do the actual optimization on all meshes of this node
+     *  @param pNode Node we're working with
+     */
+    void ProcessNode( aiNode* pNode);
 
-	// -------------------------------------------------------------------
-	/** @brief Returns true if b can be joined with a
-	 *
-	 *  @param verts Number of output verts up to now
-	 *  @param faces Number of output faces up to now
-	 */
-	bool CanJoin ( unsigned int a, unsigned int b,
-		unsigned int verts, unsigned int faces );
+    // -------------------------------------------------------------------
+    /** @brief Returns true if b can be joined with a
+     *
+     *  @param verts Number of output verts up to now
+     *  @param faces Number of output faces up to now
+     */
+    bool CanJoin ( unsigned int a, unsigned int b,
+        unsigned int verts, unsigned int faces );
 
-	// -------------------------------------------------------------------
-	/** @brief Find instanced meshes, for the moment we're excluding
-	 *   them from all optimizations
-	 */
-	void FindInstancedMeshes (aiNode* pNode);
+    // -------------------------------------------------------------------
+    /** @brief Find instanced meshes, for the moment we're excluding
+     *   them from all optimizations
+     */
+    void FindInstancedMeshes (aiNode* pNode);
 
 private:
 
-	//! Scene we're working with
-	aiScene* mScene;
+    //! Scene we're working with
+    aiScene* mScene;
 
-	//! Per mesh info
-	std::vector<MeshInfo> meshes;
+    //! Per mesh info
+    std::vector<MeshInfo> meshes;
 
-	//! Output meshes
-	std::vector<aiMesh*> output;
+    //! Output meshes
+    std::vector<aiMesh*> output;
 
-	//! @see EnablePrimitiveTypeSorting
-	mutable bool pts;
+    //! @see EnablePrimitiveTypeSorting
+    mutable bool pts;
 
-	//! @see SetPreferredMeshSizeLimit
-	mutable unsigned int max_verts,max_faces;
+    //! @see SetPreferredMeshSizeLimit
+    mutable unsigned int max_verts,max_faces;
 
-	//! Temporary storage
-	std::vector<aiMesh*> merge_list;
+    //! Temporary storage
+    std::vector<aiMesh*> merge_list;
 };
 
 } // end of namespace Assimp

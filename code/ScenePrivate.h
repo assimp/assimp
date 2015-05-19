@@ -45,40 +45,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/scene.h"
 
-namespace Assimp	{
+namespace Assimp    {
 
-	class Importer;
+    class Importer;
 
 struct ScenePrivateData {
 
-	ScenePrivateData()
-		: mOrigImporter()
-		, mPPStepsApplied()
-		, mIsCopy()
-	{}
+    ScenePrivateData()
+        : mOrigImporter()
+        , mPPStepsApplied()
+        , mIsCopy()
+    {}
 
-	// Importer that originally loaded the scene though the C-API
-	// If set, this object is owned by this private data instance.
-	Assimp::Importer* mOrigImporter;
+    // Importer that originally loaded the scene though the C-API
+    // If set, this object is owned by this private data instance.
+    Assimp::Importer* mOrigImporter;
 
-	// List of postprocessing steps already applied to the scene.
-	unsigned int mPPStepsApplied;
+    // List of postprocessing steps already applied to the scene.
+    unsigned int mPPStepsApplied;
 
-	// true if the scene is a copy made with aiCopyScene()
-	// or the corresponding C++ API. This means that user code
-	// may have made modifications to it, so mPPStepsApplied
-	// and mOrigImporter are no longer safe to rely on and only
-	// serve informative purposes.
-	bool mIsCopy;
+    // true if the scene is a copy made with aiCopyScene()
+    // or the corresponding C++ API. This means that user code
+    // may have made modifications to it, so mPPStepsApplied
+    // and mOrigImporter are no longer safe to rely on and only
+    // serve informative purposes.
+    bool mIsCopy;
 };
 
 // Access private data stored in the scene
 inline ScenePrivateData* ScenePriv(aiScene* in) {
-	return static_cast<ScenePrivateData*>(in->mPrivate);
+    return static_cast<ScenePrivateData*>(in->mPrivate);
 }
 
 inline const ScenePrivateData* ScenePriv(const aiScene* in) {
-	return static_cast<const ScenePrivateData*>(in->mPrivate);
+    return static_cast<const ScenePrivateData*>(in->mPrivate);
 }
 
 }

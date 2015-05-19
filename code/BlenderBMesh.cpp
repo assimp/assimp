@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp
 {
-	template< > const std::string LogFunctions< BlenderBMeshConverter >::log_prefix = "BLEND_BMESH: ";
+    template< > const std::string LogFunctions< BlenderBMeshConverter >::log_prefix = "BLEND_BMESH: ";
 }
 
 using namespace Assimp;
@@ -61,142 +61,142 @@ using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 BlenderBMeshConverter::BlenderBMeshConverter( const Mesh* mesh ):
-	BMesh( mesh ),
-	triMesh( NULL )
+    BMesh( mesh ),
+    triMesh( NULL )
 {
 }
 
 // ------------------------------------------------------------------------------------------------
 BlenderBMeshConverter::~BlenderBMeshConverter( )
 {
-	DestroyTriMesh( );
+    DestroyTriMesh( );
 }
 
 // ------------------------------------------------------------------------------------------------
 bool BlenderBMeshConverter::ContainsBMesh( ) const
 {
-	// TODO - Should probably do some additional verification here
-	return BMesh->totpoly && BMesh->totloop && BMesh->totvert;
+    // TODO - Should probably do some additional verification here
+    return BMesh->totpoly && BMesh->totloop && BMesh->totvert;
 }
 
 // ------------------------------------------------------------------------------------------------
 const Mesh* BlenderBMeshConverter::TriangulateBMesh( )
 {
-	AssertValidMesh( );
-	AssertValidSizes( );
-	PrepareTriMesh( );
+    AssertValidMesh( );
+    AssertValidSizes( );
+    PrepareTriMesh( );
 
-	for ( int i = 0; i < BMesh->totpoly; ++i )
-	{
-		const MPoly& poly = BMesh->mpoly[ i ];
-		ConvertPolyToFaces( poly );
-	}
+    for ( int i = 0; i < BMesh->totpoly; ++i )
+    {
+        const MPoly& poly = BMesh->mpoly[ i ];
+        ConvertPolyToFaces( poly );
+    }
 
-	return triMesh;
+    return triMesh;
 }
 
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::AssertValidMesh( )
 {
-	if ( !ContainsBMesh( ) )
-	{
-		ThrowException( "BlenderBMeshConverter requires a BMesh with \"polygons\" - please call BlenderBMeshConverter::ContainsBMesh to check this first" );
-	}
+    if ( !ContainsBMesh( ) )
+    {
+        ThrowException( "BlenderBMeshConverter requires a BMesh with \"polygons\" - please call BlenderBMeshConverter::ContainsBMesh to check this first" );
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::AssertValidSizes( )
 {
-	if ( BMesh->totpoly != static_cast<int>( BMesh->mpoly.size( ) ) )
-	{
-		ThrowException( "BMesh poly array has incorrect size" );
-	}
-	if ( BMesh->totloop != static_cast<int>( BMesh->mloop.size( ) ) )
-	{
-		ThrowException( "BMesh loop array has incorrect size" );
-	}
+    if ( BMesh->totpoly != static_cast<int>( BMesh->mpoly.size( ) ) )
+    {
+        ThrowException( "BMesh poly array has incorrect size" );
+    }
+    if ( BMesh->totloop != static_cast<int>( BMesh->mloop.size( ) ) )
+    {
+        ThrowException( "BMesh loop array has incorrect size" );
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::PrepareTriMesh( )
 {
-	if ( triMesh )
-	{
-		DestroyTriMesh( );
-	}
+    if ( triMesh )
+    {
+        DestroyTriMesh( );
+    }
 
-	triMesh = new Mesh( *BMesh );
-	triMesh->totface = 0;
-	triMesh->mface.clear( );
+    triMesh = new Mesh( *BMesh );
+    triMesh->totface = 0;
+    triMesh->mface.clear( );
 }
 
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::DestroyTriMesh( )
 {
-	delete triMesh;
-	triMesh = NULL;
+    delete triMesh;
+    triMesh = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::ConvertPolyToFaces( const MPoly& poly )
 {
-	const MLoop* polyLoop = &BMesh->mloop[ poly.loopstart ];
+    const MLoop* polyLoop = &BMesh->mloop[ poly.loopstart ];
 
-	if ( poly.totloop == 3 || poly.totloop == 4 )
-	{
-		AddFace( polyLoop[ 0 ].v, polyLoop[ 1 ].v, polyLoop[ 2 ].v, poly.totloop == 4 ? polyLoop[ 3 ].v : 0 );
+    if ( poly.totloop == 3 || poly.totloop == 4 )
+    {
+        AddFace( polyLoop[ 0 ].v, polyLoop[ 1 ].v, polyLoop[ 2 ].v, poly.totloop == 4 ? polyLoop[ 3 ].v : 0 );
 
-		// UVs are optional, so only convert when present.
-		if ( BMesh->mloopuv.size() )
-		{
-			if ( (poly.loopstart + poly.totloop ) > static_cast<int>( BMesh->mloopuv.size() ) )
-			{
-				ThrowException( "BMesh uv loop array has incorrect size" );
-			}
-			const MLoopUV* loopUV = &BMesh->mloopuv[ poly.loopstart ];
-			AddTFace( loopUV[ 0 ].uv, loopUV[ 1 ].uv, loopUV[ 2 ].uv, poly.totloop == 4 ? loopUV[ 3 ].uv : 0 );
-		}
-	}
-	else if ( poly.totloop > 4 )
-	{
+        // UVs are optional, so only convert when present.
+        if ( BMesh->mloopuv.size() )
+        {
+            if ( (poly.loopstart + poly.totloop ) > static_cast<int>( BMesh->mloopuv.size() ) )
+            {
+                ThrowException( "BMesh uv loop array has incorrect size" );
+            }
+            const MLoopUV* loopUV = &BMesh->mloopuv[ poly.loopstart ];
+            AddTFace( loopUV[ 0 ].uv, loopUV[ 1 ].uv, loopUV[ 2 ].uv, poly.totloop == 4 ? loopUV[ 3 ].uv : 0 );
+        }
+    }
+    else if ( poly.totloop > 4 )
+    {
 #if ASSIMP_BLEND_WITH_GLU_TESSELLATE
-		BlenderTessellatorGL tessGL( *this );
-		tessGL.Tessellate( polyLoop, poly.totloop, triMesh->mvert );
+        BlenderTessellatorGL tessGL( *this );
+        tessGL.Tessellate( polyLoop, poly.totloop, triMesh->mvert );
 #elif ASSIMP_BLEND_WITH_POLY_2_TRI
-		BlenderTessellatorP2T tessP2T( *this );
-		tessP2T.Tessellate( polyLoop, poly.totloop, triMesh->mvert );
+        BlenderTessellatorP2T tessP2T( *this );
+        tessP2T.Tessellate( polyLoop, poly.totloop, triMesh->mvert );
 #endif
-	}
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::AddFace( int v1, int v2, int v3, int v4 )
 {
-	MFace face;
-	face.v1 = v1;
-	face.v2 = v2;
-	face.v3 = v3;
-	face.v4 = v4;
-	// TODO - Work out how materials work
-	face.mat_nr = 0;
-	triMesh->mface.push_back( face );
-	triMesh->totface = triMesh->mface.size( );
+    MFace face;
+    face.v1 = v1;
+    face.v2 = v2;
+    face.v3 = v3;
+    face.v4 = v4;
+    // TODO - Work out how materials work
+    face.mat_nr = 0;
+    triMesh->mface.push_back( face );
+    triMesh->totface = triMesh->mface.size( );
 }
 
 // ------------------------------------------------------------------------------------------------
 void BlenderBMeshConverter::AddTFace( const float* uv1, const float *uv2, const float *uv3, const float* uv4 )
 {
-	MTFace mtface;
-	memcpy( &mtface.uv[ 0 ], uv1, sizeof(float) * 2 );
-	memcpy( &mtface.uv[ 1 ], uv2, sizeof(float) * 2 );
-	memcpy( &mtface.uv[ 2 ], uv3, sizeof(float) * 2 );
+    MTFace mtface;
+    memcpy( &mtface.uv[ 0 ], uv1, sizeof(float) * 2 );
+    memcpy( &mtface.uv[ 1 ], uv2, sizeof(float) * 2 );
+    memcpy( &mtface.uv[ 2 ], uv3, sizeof(float) * 2 );
 
-	if ( uv4 )
-	{
-		memcpy( &mtface.uv[ 3 ], uv4, sizeof(float) * 2 );
-	}
+    if ( uv4 )
+    {
+        memcpy( &mtface.uv[ 3 ], uv4, sizeof(float) * 2 );
+    }
 
-	triMesh->mtface.push_back( mtface );
+    triMesh->mtface.push_back( mtface );
 }
 
 #endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

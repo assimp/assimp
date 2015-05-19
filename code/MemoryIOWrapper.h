@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/ai_assert.h"
 #include <stdint.h>
 
-namespace Assimp	{
+namespace Assimp    {
 #define AI_MEMORYIO_MAGIC_FILENAME "$$$___magic___$$$"
 #define AI_MEMORYIO_MAGIC_FILENAME_LENGTH 17
 
@@ -57,88 +57,88 @@ namespace Assimp	{
 // ----------------------------------------------------------------------------------
 class MemoryIOStream : public IOStream
 {
-	//friend class MemoryIOSystem;
+    //friend class MemoryIOSystem;
 public:
-	MemoryIOStream (const uint8_t* buff, size_t len, bool own = false)
-		: buffer (buff)
-		, length(len)
-		, pos((size_t)0)
-		, own(own)
-	{
-	}
+    MemoryIOStream (const uint8_t* buff, size_t len, bool own = false)
+        : buffer (buff)
+        , length(len)
+        , pos((size_t)0)
+        , own(own)
+    {
+    }
 
 public:
 
-	~MemoryIOStream ()	{
-		if(own) {
-			delete[] buffer;
-		}
-	}
+    ~MemoryIOStream ()  {
+        if(own) {
+            delete[] buffer;
+        }
+    }
 
-	// -------------------------------------------------------------------
-	// Read from stream
-    size_t Read(void* pvBuffer, size_t pSize, size_t pCount)	{
-		const size_t cnt = std::min(pCount,(length-pos)/pSize),ofs = pSize*cnt;
+    // -------------------------------------------------------------------
+    // Read from stream
+    size_t Read(void* pvBuffer, size_t pSize, size_t pCount)    {
+        const size_t cnt = std::min(pCount,(length-pos)/pSize),ofs = pSize*cnt;
 
-		memcpy(pvBuffer,buffer+pos,ofs);
-		pos += ofs;
+        memcpy(pvBuffer,buffer+pos,ofs);
+        pos += ofs;
 
-		return cnt;
-	}
+        return cnt;
+    }
 
-	// -------------------------------------------------------------------
-	// Write to stream
-	size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/,size_t /*pCount*/)	{
-		ai_assert(false); // won't be needed
-		return 0;
-	}
+    // -------------------------------------------------------------------
+    // Write to stream
+    size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/,size_t /*pCount*/)  {
+        ai_assert(false); // won't be needed
+        return 0;
+    }
 
-	// -------------------------------------------------------------------
-	// Seek specific position
-	aiReturn Seek(size_t pOffset, aiOrigin pOrigin) {
-		if (aiOrigin_SET == pOrigin) {
-			if (pOffset >= length) {
-				return AI_FAILURE;
-			}
-			pos = pOffset;
-		}
-		else if (aiOrigin_END == pOrigin) {
-			if (pOffset >= length) {
-				return AI_FAILURE;
-			}
-			pos = length-pOffset;
-		}
-		else {
-			if (pOffset+pos >= length) {
-				return AI_FAILURE;
-			}
-			pos += pOffset;
-		}
-		return AI_SUCCESS;
-	}
+    // -------------------------------------------------------------------
+    // Seek specific position
+    aiReturn Seek(size_t pOffset, aiOrigin pOrigin) {
+        if (aiOrigin_SET == pOrigin) {
+            if (pOffset >= length) {
+                return AI_FAILURE;
+            }
+            pos = pOffset;
+        }
+        else if (aiOrigin_END == pOrigin) {
+            if (pOffset >= length) {
+                return AI_FAILURE;
+            }
+            pos = length-pOffset;
+        }
+        else {
+            if (pOffset+pos >= length) {
+                return AI_FAILURE;
+            }
+            pos += pOffset;
+        }
+        return AI_SUCCESS;
+    }
 
-	// -------------------------------------------------------------------
-	// Get current seek position
-	size_t Tell() const {
-		return pos;
-	}
+    // -------------------------------------------------------------------
+    // Get current seek position
+    size_t Tell() const {
+        return pos;
+    }
 
-	// -------------------------------------------------------------------
-	// Get size of file
-	size_t FileSize() const {
-		return length;
-	}
+    // -------------------------------------------------------------------
+    // Get size of file
+    size_t FileSize() const {
+        return length;
+    }
 
-	// -------------------------------------------------------------------
-	// Flush file contents
-	void Flush() {
-		ai_assert(false); // won't be needed
-	}
+    // -------------------------------------------------------------------
+    // Flush file contents
+    void Flush() {
+        ai_assert(false); // won't be needed
+    }
 
 private:
-	const uint8_t* buffer;
-	size_t length,pos;
-	bool own;
+    const uint8_t* buffer;
+    size_t length,pos;
+    bool own;
 };
 
 // ---------------------------------------------------------------------------
@@ -146,50 +146,50 @@ private:
 class MemoryIOSystem : public IOSystem
 {
 public:
-	/** Constructor. */
+    /** Constructor. */
     MemoryIOSystem (const uint8_t* buff, size_t len)
-		: buffer (buff), length(len) {
-	}
+        : buffer (buff), length(len) {
+    }
 
-	/** Destructor. */
-	~MemoryIOSystem() {
-	}
+    /** Destructor. */
+    ~MemoryIOSystem() {
+    }
 
-	// -------------------------------------------------------------------
-	/** Tests for the existence of a file at the given path. */
-	bool Exists( const char* pFile) const {
-		return !strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH);
-	}
+    // -------------------------------------------------------------------
+    /** Tests for the existence of a file at the given path. */
+    bool Exists( const char* pFile) const {
+        return !strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH);
+    }
 
-	// -------------------------------------------------------------------
-	/** Returns the directory separator. */
-	char getOsSeparator() const {
-		return '/'; // why not? it doesn't care
-	}
+    // -------------------------------------------------------------------
+    /** Returns the directory separator. */
+    char getOsSeparator() const {
+        return '/'; // why not? it doesn't care
+    }
 
-	// -------------------------------------------------------------------
-	/** Open a new file with a given path. */
-	IOStream* Open( const char* pFile, const char* /*pMode*/ = "rb") {
-		if (strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
-			return NULL;
-		}
-		return new MemoryIOStream(buffer,length);
-	}
+    // -------------------------------------------------------------------
+    /** Open a new file with a given path. */
+    IOStream* Open( const char* pFile, const char* /*pMode*/ = "rb") {
+        if (strncmp(pFile,AI_MEMORYIO_MAGIC_FILENAME,AI_MEMORYIO_MAGIC_FILENAME_LENGTH)) {
+            return NULL;
+        }
+        return new MemoryIOStream(buffer,length);
+    }
 
-	// -------------------------------------------------------------------
-	/** Closes the given file and releases all resources associated with it. */
-	void Close( IOStream* /*pFile*/) {
-	}
+    // -------------------------------------------------------------------
+    /** Closes the given file and releases all resources associated with it. */
+    void Close( IOStream* /*pFile*/) {
+    }
 
-	// -------------------------------------------------------------------
-	/** Compare two paths */
-	bool ComparePaths (const char* /*one*/, const char* /*second*/) const {
-		return false;
-	}
+    // -------------------------------------------------------------------
+    /** Compare two paths */
+    bool ComparePaths (const char* /*one*/, const char* /*second*/) const {
+        return false;
+    }
 
 private:
-	const uint8_t* buffer;
-	size_t length;
+    const uint8_t* buffer;
+    size_t length;
 };
 } // end namespace Assimp
 

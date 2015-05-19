@@ -59,25 +59,25 @@ namespace Assimp
 class STLExporter
 {
 public:
-	/// Constructor for a specific scene to export
-	STLExporter(const char* filename, const aiScene* pScene, bool binary = false);
+    /// Constructor for a specific scene to export
+    STLExporter(const char* filename, const aiScene* pScene, bool binary = false);
 
 public:
 
-	/// public stringstreams to write all output into
-	std::ostringstream mOutput;
+    /// public stringstreams to write all output into
+    std::ostringstream mOutput;
 
 private:
 
-	void WriteMesh(const aiMesh* m);
-	void WriteMeshBinary(const aiMesh* m);
+    void WriteMesh(const aiMesh* m);
+    void WriteMeshBinary(const aiMesh* m);
 
 private:
 
-	const std::string filename;
+    const std::string filename;
 
-	// this endl() doesn't flush() the stream
-	const std::string endl;
+    // this endl() doesn't flush() the stream
+    const std::string endl;
 };
 
 }

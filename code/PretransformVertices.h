@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 class PretransformVerticesTest;
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** The PretransformVertices pre-transforms all vertices in the node tree
@@ -63,102 +63,102 @@ class ASSIMP_API PretransformVertices : public BaseProcess
 {
 public:
 
-	PretransformVertices ();
-	~PretransformVertices ();
+    PretransformVertices ();
+    ~PretransformVertices ();
 
 public:
 
-	// -------------------------------------------------------------------
-	// Check whether step is active
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    // Check whether step is active
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	// Execute step on a given scene
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    // Execute step on a given scene
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	// Setup import settings
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    // Setup import settings
+    void SetupProperties(const Importer* pImp);
 
 
-	// -------------------------------------------------------------------
-	/** @brief Toggle the 'keep hierarchy' option
-	 *  @param d hm ... difficult to guess what this means, hu!?
-	 */
-	void KeepHierarchy(bool d) {
-		configKeepHierarchy = d;
-	}
+    // -------------------------------------------------------------------
+    /** @brief Toggle the 'keep hierarchy' option
+     *  @param d hm ... difficult to guess what this means, hu!?
+     */
+    void KeepHierarchy(bool d) {
+        configKeepHierarchy = d;
+    }
 
-	// -------------------------------------------------------------------
-	/** @brief Check whether 'keep hierarchy' is currently enabled.
-	 *  @return ...
-	 */
-	bool IsHierarchyKept() const {
-		return configKeepHierarchy;
-	}
+    // -------------------------------------------------------------------
+    /** @brief Check whether 'keep hierarchy' is currently enabled.
+     *  @return ...
+     */
+    bool IsHierarchyKept() const {
+        return configKeepHierarchy;
+    }
 
 private:
 
-	// -------------------------------------------------------------------
-	// Count the number of nodes
-	unsigned int CountNodes( aiNode* pcNode );
+    // -------------------------------------------------------------------
+    // Count the number of nodes
+    unsigned int CountNodes( aiNode* pcNode );
 
-	// -------------------------------------------------------------------
-	// Get a bitwise combination identifying the vertex format of a mesh
-	unsigned int GetMeshVFormat(aiMesh* pcMesh);
+    // -------------------------------------------------------------------
+    // Get a bitwise combination identifying the vertex format of a mesh
+    unsigned int GetMeshVFormat(aiMesh* pcMesh);
 
-	// -------------------------------------------------------------------
-	// Count the number of vertices in the whole scene and a given
-	// material index
-	void CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNode,
-		unsigned int iMat,
-		unsigned int iVFormat,
-		unsigned int* piFaces,
-		unsigned int* piVertices);
+    // -------------------------------------------------------------------
+    // Count the number of vertices in the whole scene and a given
+    // material index
+    void CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNode,
+        unsigned int iMat,
+        unsigned int iVFormat,
+        unsigned int* piFaces,
+        unsigned int* piVertices);
 
-	// -------------------------------------------------------------------
-	// Collect vertex/face data
-	void CollectData( aiScene* pcScene, aiNode* pcNode,
-		unsigned int iMat,
-		unsigned int iVFormat,
-		aiMesh* pcMeshOut,
-		unsigned int aiCurrent[2],
-		unsigned int* num_refs);
+    // -------------------------------------------------------------------
+    // Collect vertex/face data
+    void CollectData( aiScene* pcScene, aiNode* pcNode,
+        unsigned int iMat,
+        unsigned int iVFormat,
+        aiMesh* pcMeshOut,
+        unsigned int aiCurrent[2],
+        unsigned int* num_refs);
 
-	// -------------------------------------------------------------------
-	// Get a list of all vertex formats that occur for a given material
-	// The output list contains duplicate elements
-	void GetVFormatList( aiScene* pcScene, unsigned int iMat,
-		std::list<unsigned int>& aiOut);
+    // -------------------------------------------------------------------
+    // Get a list of all vertex formats that occur for a given material
+    // The output list contains duplicate elements
+    void GetVFormatList( aiScene* pcScene, unsigned int iMat,
+        std::list<unsigned int>& aiOut);
 
-	// -------------------------------------------------------------------
-	// Compute the absolute transformation matrices of each node
-	void ComputeAbsoluteTransform( aiNode* pcNode );
+    // -------------------------------------------------------------------
+    // Compute the absolute transformation matrices of each node
+    void ComputeAbsoluteTransform( aiNode* pcNode );
 
-	// -------------------------------------------------------------------
-	// Simple routine to build meshes in worldspace, no further optimization
-	void BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in,
-		unsigned int numIn, aiNode* node);
+    // -------------------------------------------------------------------
+    // Simple routine to build meshes in worldspace, no further optimization
+    void BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in,
+        unsigned int numIn, aiNode* node);
 
-	// -------------------------------------------------------------------
-	// Apply the node transformation to a mesh
-	void ApplyTransform(aiMesh* mesh, const aiMatrix4x4& mat);
+    // -------------------------------------------------------------------
+    // Apply the node transformation to a mesh
+    void ApplyTransform(aiMesh* mesh, const aiMatrix4x4& mat);
 
-	// -------------------------------------------------------------------
-	// Reset transformation matrices to identity
-	void MakeIdentityTransform(aiNode* nd);
+    // -------------------------------------------------------------------
+    // Reset transformation matrices to identity
+    void MakeIdentityTransform(aiNode* nd);
 
-	// -------------------------------------------------------------------
-	// Build reference counters for all meshes
-	void BuildMeshRefCountArray(aiNode* nd, unsigned int * refs);
+    // -------------------------------------------------------------------
+    // Build reference counters for all meshes
+    void BuildMeshRefCountArray(aiNode* nd, unsigned int * refs);
 
 
 
-	//! Configuration option: keep scene hierarchy as long as possible
-	bool configKeepHierarchy;
-	bool configNormalize;
-	bool configTransform;
-	aiMatrix4x4 configTransformation;
+    //! Configuration option: keep scene hierarchy as long as possible
+    bool configKeepHierarchy;
+    bool configNormalize;
+    bool configTransform;
+    aiMatrix4x4 configTransformation;
 };
 
 } // end of namespace Assimp

@@ -50,13 +50,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/anim.h"
 
-#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||	defined (__BCPLUSPLUS__)
-#	pragma pack(push,1)
-#	define PACK_STRUCT
+#if defined(_MSC_VER) ||  defined(__BORLANDC__) ||  defined (__BCPLUSPLUS__)
+#   pragma pack(push,1)
+#   define PACK_STRUCT
 #elif defined( __GNUC__ )
-#	define PACK_STRUCT	__attribute__((packed))
+#   define PACK_STRUCT  __attribute__((packed))
 #else
-#	error Compiler not supported
+#   error Compiler not supported
 #endif
 
 
@@ -66,17 +66,17 @@ namespace Assimp
 namespace MD4
 {
 
-#define AI_MD4_MAGIC_NUMBER_BE	'IDP4'
-#define AI_MD4_MAGIC_NUMBER_LE	'4PDI'
+#define AI_MD4_MAGIC_NUMBER_BE  'IDP4'
+#define AI_MD4_MAGIC_NUMBER_LE  '4PDI'
 
 // common limitations
-#define AI_MD4_VERSION			4
-#define AI_MD4_MAXQPATH			64
-#define AI_MD4_MAX_FRAMES		2028
-#define AI_MD4_MAX_SURFACES		32
-#define AI_MD4_MAX_BONES		256
-#define AI_MD4_MAX_VERTS		4096
-#define AI_MD4_MAX_TRIANGLES	8192
+#define AI_MD4_VERSION          4
+#define AI_MD4_MAXQPATH         64
+#define AI_MD4_MAX_FRAMES       2028
+#define AI_MD4_MAX_SURFACES     32
+#define AI_MD4_MAX_BONES        256
+#define AI_MD4_MAX_VERTS        4096
+#define AI_MD4_MAX_TRIANGLES    8192
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for the MD4 main header
@@ -84,35 +84,35 @@ namespace MD4
 // ---------------------------------------------------------------------------
 struct Header
 {
-	//! magic number
-	int32_t magic;
+    //! magic number
+    int32_t magic;
 
-	//! file format version
-	int32_t version;
+    //! file format version
+    int32_t version;
 
-	//! original name in .pak archive
-	unsigned char name[ AI_MD4_MAXQPATH ];
+    //! original name in .pak archive
+    unsigned char name[ AI_MD4_MAXQPATH ];
 
-	//! number of frames in the file
-	int32_t NUM_FRAMES;
+    //! number of frames in the file
+    int32_t NUM_FRAMES;
 
-	//! number of bones in the file
-	int32_t NUM_BONES;
+    //! number of bones in the file
+    int32_t NUM_BONES;
 
-	//! number of surfaces in the file
-	int32_t NUM_SURFACES;
+    //! number of surfaces in the file
+    int32_t NUM_SURFACES;
 
-	//! offset of the first frame
-	int32_t OFS_FRAMES;
+    //! offset of the first frame
+    int32_t OFS_FRAMES;
 
-	//! offset of the first bone
-	int32_t OFS_BONES;
+    //! offset of the first bone
+    int32_t OFS_BONES;
 
-	//! offset of the first surface
-	int32_t OFS_SURFACES;
+    //! offset of the first surface
+    int32_t OFS_SURFACES;
 
-	//! end of file
-	int32_t OFS_EOF;
+    //! end of file
+    int32_t OFS_EOF;
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -121,7 +121,7 @@ struct Header
 // ---------------------------------------------------------------------------
 struct BoneFrame
 {
-	float matrix[3][4];
+    float matrix[3][4];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -130,9 +130,9 @@ struct BoneFrame
 // ---------------------------------------------------------------------------
 struct  BoneName
 {
-	char name[32] ;
-	int parent ;
-	int flags ;
+    char name[32] ;
+    int parent ;
+    int flags ;
 }  PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -141,21 +141,21 @@ struct  BoneName
 // ---------------------------------------------------------------------------
 struct Surface
 {
-	int32_t ident;
-	char name[64];
-	char shader[64];
-	int32_t shaderIndex;
-	int32_t lodBias;
-	int32_t minLod;
-	int32_t ofsHeader;
-	int32_t numVerts;
-	int32_t ofsVerts;
-	int32_t numTris;
-	int32_t ofsTris;
-	int32_t numBoneRefs;
-	int32_t ofsBoneRefs;
-	int32_t ofsCollapseMap;
-	int32_t ofsEnd;
+    int32_t ident;
+    char name[64];
+    char shader[64];
+    int32_t shaderIndex;
+    int32_t lodBias;
+    int32_t minLod;
+    int32_t ofsHeader;
+    int32_t numVerts;
+    int32_t ofsVerts;
+    int32_t numTris;
+    int32_t ofsTris;
+    int32_t numBoneRefs;
+    int32_t ofsBoneRefs;
+    int32_t ofsCollapseMap;
+    int32_t ofsEnd;
 } PACK_STRUCT;
 
 
@@ -165,9 +165,9 @@ struct Surface
 // ---------------------------------------------------------------------------
 struct Weight
 {
-	int32_t boneIndex;
-	float boneWeight;
-	float offset[3];
+    int32_t boneIndex;
+    float boneWeight;
+    float offset[3];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -176,11 +176,11 @@ struct Weight
 // ---------------------------------------------------------------------------
 struct Vertex
 {
-	float vertex[3];
-	float normal[3];
-	float texCoords[2];
-	int32_t numWeights;
-	Weight weights[1];
+    float vertex[3];
+    float normal[3];
+    float texCoords[2];
+    int32_t numWeights;
+    Weight weights[1];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ struct Vertex
 // ---------------------------------------------------------------------------
 struct Triangle
 {
-	int32_t indexes[3];
+    int32_t indexes[3];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -198,16 +198,16 @@ struct Triangle
 // ---------------------------------------------------------------------------
 struct Frame
 {
-	float bounds[3][2];
-	float localOrigin[3];
-	float radius;
-	BoneFrame bones[1];
+    float bounds[3][2];
+    float localOrigin[3];
+    float radius;
+    BoneFrame bones[1];
 } PACK_STRUCT;
 
 
 // reset packing to the original value
 #if defined(_MSC_VER) ||  defined(__BORLANDC__) || defined (__BCPLUSPLUS__)
-#	pragma pack( pop )
+#   pragma pack( pop )
 #endif
 #undef PACK_STRUCT
 

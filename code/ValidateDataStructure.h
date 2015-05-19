@@ -59,7 +59,7 @@ struct aiString;
 struct aiCamera;
 struct aiLight;
 
-namespace Assimp	{
+namespace Assimp    {
 
 // --------------------------------------------------------------------------------------
 /** Validates the whole ASSIMP scene data structure for correctness.
@@ -69,113 +69,113 @@ class ValidateDSProcess : public BaseProcess
 {
 public:
 
-	ValidateDSProcess();
-	~ValidateDSProcess();
+    ValidateDSProcess();
+    ~ValidateDSProcess();
 
 public:
-	// -------------------------------------------------------------------
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    void Execute( aiScene* pScene);
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Report a validation error. This will throw an exception,
-	 *  control won't return.
-	 * @param msg Format string for sprintf().*/
-	AI_WONT_RETURN void ReportError(const char* msg,...) AI_WONT_RETURN_SUFFIX;
+    // -------------------------------------------------------------------
+    /** Report a validation error. This will throw an exception,
+     *  control won't return.
+     * @param msg Format string for sprintf().*/
+    AI_WONT_RETURN void ReportError(const char* msg,...) AI_WONT_RETURN_SUFFIX;
 
 
-	// -------------------------------------------------------------------
-	/** Report a validation warning. This won't throw an exception,
-	 *  control will return to the callera.
-	 * @param msg Format string for sprintf().*/
-	void ReportWarning(const char* msg,...);
+    // -------------------------------------------------------------------
+    /** Report a validation warning. This won't throw an exception,
+     *  control will return to the callera.
+     * @param msg Format string for sprintf().*/
+    void ReportWarning(const char* msg,...);
 
 
-	// -------------------------------------------------------------------
-	/** Validates a mesh
-	 * @param pMesh Input mesh*/
-	void Validate( const aiMesh* pMesh);
+    // -------------------------------------------------------------------
+    /** Validates a mesh
+     * @param pMesh Input mesh*/
+    void Validate( const aiMesh* pMesh);
 
-	// -------------------------------------------------------------------
-	/** Validates a bone
-	 * @param pMesh Input mesh
-	 * @param pBone Input bone*/
-	void Validate( const aiMesh* pMesh,const aiBone* pBone,float* afSum);
+    // -------------------------------------------------------------------
+    /** Validates a bone
+     * @param pMesh Input mesh
+     * @param pBone Input bone*/
+    void Validate( const aiMesh* pMesh,const aiBone* pBone,float* afSum);
 
-	// -------------------------------------------------------------------
-	/** Validates an animation
-	 * @param pAnimation Input animation*/
-	void Validate( const aiAnimation* pAnimation);
+    // -------------------------------------------------------------------
+    /** Validates an animation
+     * @param pAnimation Input animation*/
+    void Validate( const aiAnimation* pAnimation);
 
-	// -------------------------------------------------------------------
-	/** Validates a material
-	 * @param pMaterial Input material*/
-	void Validate( const aiMaterial* pMaterial);
+    // -------------------------------------------------------------------
+    /** Validates a material
+     * @param pMaterial Input material*/
+    void Validate( const aiMaterial* pMaterial);
 
-	// -------------------------------------------------------------------
-	/** Search the material data structure for invalid or corrupt
-	 *  texture keys.
-	 * @param pMaterial Input material
-	 * @param type Type of the texture*/
-	void SearchForInvalidTextures(const aiMaterial* pMaterial,
-		aiTextureType type);
+    // -------------------------------------------------------------------
+    /** Search the material data structure for invalid or corrupt
+     *  texture keys.
+     * @param pMaterial Input material
+     * @param type Type of the texture*/
+    void SearchForInvalidTextures(const aiMaterial* pMaterial,
+        aiTextureType type);
 
-	// -------------------------------------------------------------------
-	/** Validates a texture
-	 * @param pTexture Input texture*/
-	void Validate( const aiTexture* pTexture);
+    // -------------------------------------------------------------------
+    /** Validates a texture
+     * @param pTexture Input texture*/
+    void Validate( const aiTexture* pTexture);
 
-	// -------------------------------------------------------------------
-	/** Validates a light source
-	 * @param pLight Input light
-	 */
-	void Validate( const aiLight* pLight);
+    // -------------------------------------------------------------------
+    /** Validates a light source
+     * @param pLight Input light
+     */
+    void Validate( const aiLight* pLight);
 
-	// -------------------------------------------------------------------
-	/** Validates a camera
-	 * @param pCamera Input camera*/
-	void Validate( const aiCamera* pCamera);
+    // -------------------------------------------------------------------
+    /** Validates a camera
+     * @param pCamera Input camera*/
+    void Validate( const aiCamera* pCamera);
 
-	// -------------------------------------------------------------------
-	/** Validates a bone animation channel
-	 * @param pAnimation Animation channel.
-	 * @param pBoneAnim Input bone animation */
-	void Validate( const aiAnimation* pAnimation,
-		const aiNodeAnim* pBoneAnim);
+    // -------------------------------------------------------------------
+    /** Validates a bone animation channel
+     * @param pAnimation Animation channel.
+     * @param pBoneAnim Input bone animation */
+    void Validate( const aiAnimation* pAnimation,
+        const aiNodeAnim* pBoneAnim);
 
-	// -------------------------------------------------------------------
-	/** Validates a node and all of its subnodes
-	 * @param Node Input node*/
-	void Validate( const aiNode* pNode);
+    // -------------------------------------------------------------------
+    /** Validates a node and all of its subnodes
+     * @param Node Input node*/
+    void Validate( const aiNode* pNode);
 
-	// -------------------------------------------------------------------
-	/** Validates a string
-	 * @param pString Input string*/
-	void Validate( const aiString* pString);
+    // -------------------------------------------------------------------
+    /** Validates a string
+     * @param pString Input string*/
+    void Validate( const aiString* pString);
 
 private:
 
-	// template to validate one of the aiScene::mXXX arrays
-	template <typename T>
-	inline void DoValidation(T** array, unsigned int size,
-		const char* firstName, const char* secondName);
+    // template to validate one of the aiScene::mXXX arrays
+    template <typename T>
+    inline void DoValidation(T** array, unsigned int size,
+        const char* firstName, const char* secondName);
 
-	// extended version: checks whethr T::mName occurs twice
-	template <typename T>
-	inline void DoValidationEx(T** array, unsigned int size,
-		const char* firstName, const char* secondName);
+    // extended version: checks whethr T::mName occurs twice
+    template <typename T>
+    inline void DoValidationEx(T** array, unsigned int size,
+        const char* firstName, const char* secondName);
 
-	// extension to the first template which does also search
-	// the nodegraph for an item with the same name
-	template <typename T>
-	inline void DoValidationWithNameCheck(T** array, unsigned int size,
-		const char* firstName, const char* secondName);
+    // extension to the first template which does also search
+    // the nodegraph for an item with the same name
+    template <typename T>
+    inline void DoValidationWithNameCheck(T** array, unsigned int size,
+        const char* firstName, const char* secondName);
 
-	aiScene* mScene;
+    aiScene* mScene;
 };
 
 

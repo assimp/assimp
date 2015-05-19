@@ -58,122 +58,122 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 FixInfacingNormalsProcess::FixInfacingNormalsProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 FixInfacingNormalsProcess::~FixInfacingNormalsProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool FixInfacingNormalsProcess::IsActive( unsigned int pFlags) const
 {
-	return (pFlags & aiProcess_FixInfacingNormals) != 0;
+    return (pFlags & aiProcess_FixInfacingNormals) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void FixInfacingNormalsProcess::Execute( aiScene* pScene)
 {
-	DefaultLogger::get()->debug("FixInfacingNormalsProcess begin");
+    DefaultLogger::get()->debug("FixInfacingNormalsProcess begin");
 
-	bool bHas = false;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-		if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
+    bool bHas = false;
+    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
+        if(ProcessMesh( pScene->mMeshes[a],a))bHas = true;
 
-	if (bHas)
-		 DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. Found issues.");
-	else DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. No changes to the scene.");
+    if (bHas)
+         DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. Found issues.");
+    else DefaultLogger::get()->debug("FixInfacingNormalsProcess finished. No changes to the scene.");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Apply the step to the mesh
 bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 {
-	ai_assert(NULL != pcMesh);
+    ai_assert(NULL != pcMesh);
 
-	// Nothing to do if there are no model normals
-	if (!pcMesh->HasNormals())return false;
+    // Nothing to do if there are no model normals
+    if (!pcMesh->HasNormals())return false;
 
-	// Compute the bounding box of both the model vertices + normals and
-	// the umodified model vertices. Then check whether the first BB
-	// is smaller than the second. In this case we can assume that the
-	// normals need to be flipped, although there are a few special cases ..
-	// convex, concave, planar models ...
+    // Compute the bounding box of both the model vertices + normals and
+    // the umodified model vertices. Then check whether the first BB
+    // is smaller than the second. In this case we can assume that the
+    // normals need to be flipped, although there are a few special cases ..
+    // convex, concave, planar models ...
 
-	aiVector3D vMin0 (1e10f,1e10f,1e10f);
-	aiVector3D vMin1 (1e10f,1e10f,1e10f);
-	aiVector3D vMax0 (-1e10f,-1e10f,-1e10f);
-	aiVector3D vMax1 (-1e10f,-1e10f,-1e10f);
+    aiVector3D vMin0 (1e10f,1e10f,1e10f);
+    aiVector3D vMin1 (1e10f,1e10f,1e10f);
+    aiVector3D vMax0 (-1e10f,-1e10f,-1e10f);
+    aiVector3D vMax1 (-1e10f,-1e10f,-1e10f);
 
-	for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-	{
-		vMin1.x = std::min(vMin1.x,pcMesh->mVertices[i].x);
-		vMin1.y = std::min(vMin1.y,pcMesh->mVertices[i].y);
-		vMin1.z = std::min(vMin1.z,pcMesh->mVertices[i].z);
+    for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
+    {
+        vMin1.x = std::min(vMin1.x,pcMesh->mVertices[i].x);
+        vMin1.y = std::min(vMin1.y,pcMesh->mVertices[i].y);
+        vMin1.z = std::min(vMin1.z,pcMesh->mVertices[i].z);
 
-		vMax1.x = std::max(vMax1.x,pcMesh->mVertices[i].x);
-		vMax1.y = std::max(vMax1.y,pcMesh->mVertices[i].y);
-		vMax1.z = std::max(vMax1.z,pcMesh->mVertices[i].z);
+        vMax1.x = std::max(vMax1.x,pcMesh->mVertices[i].x);
+        vMax1.y = std::max(vMax1.y,pcMesh->mVertices[i].y);
+        vMax1.z = std::max(vMax1.z,pcMesh->mVertices[i].z);
 
-		const aiVector3D vWithNormal = pcMesh->mVertices[i] + pcMesh->mNormals[i];
+        const aiVector3D vWithNormal = pcMesh->mVertices[i] + pcMesh->mNormals[i];
 
-		vMin0.x = std::min(vMin0.x,vWithNormal.x);
-		vMin0.y = std::min(vMin0.y,vWithNormal.y);
-		vMin0.z = std::min(vMin0.z,vWithNormal.z);
+        vMin0.x = std::min(vMin0.x,vWithNormal.x);
+        vMin0.y = std::min(vMin0.y,vWithNormal.y);
+        vMin0.z = std::min(vMin0.z,vWithNormal.z);
 
-		vMax0.x = std::max(vMax0.x,vWithNormal.x);
-		vMax0.y = std::max(vMax0.y,vWithNormal.y);
-		vMax0.z = std::max(vMax0.z,vWithNormal.z);
-	}
+        vMax0.x = std::max(vMax0.x,vWithNormal.x);
+        vMax0.y = std::max(vMax0.y,vWithNormal.y);
+        vMax0.z = std::max(vMax0.z,vWithNormal.z);
+    }
 
-	const float fDelta0_x = (vMax0.x - vMin0.x);
-	const float fDelta0_y = (vMax0.y - vMin0.y);
-	const float fDelta0_z = (vMax0.z - vMin0.z);
+    const float fDelta0_x = (vMax0.x - vMin0.x);
+    const float fDelta0_y = (vMax0.y - vMin0.y);
+    const float fDelta0_z = (vMax0.z - vMin0.z);
 
-	const float fDelta1_x = (vMax1.x - vMin1.x);
-	const float fDelta1_y = (vMax1.y - vMin1.y);
-	const float fDelta1_z = (vMax1.z - vMin1.z);
+    const float fDelta1_x = (vMax1.x - vMin1.x);
+    const float fDelta1_y = (vMax1.y - vMin1.y);
+    const float fDelta1_z = (vMax1.z - vMin1.z);
 
-	// Check whether the boxes are overlapping
-	if ((fDelta0_x > 0.0f) != (fDelta1_x > 0.0f))return false;
-	if ((fDelta0_y > 0.0f) != (fDelta1_y > 0.0f))return false;
-	if ((fDelta0_z > 0.0f) != (fDelta1_z > 0.0f))return false;
+    // Check whether the boxes are overlapping
+    if ((fDelta0_x > 0.0f) != (fDelta1_x > 0.0f))return false;
+    if ((fDelta0_y > 0.0f) != (fDelta1_y > 0.0f))return false;
+    if ((fDelta0_z > 0.0f) != (fDelta1_z > 0.0f))return false;
 
-	// Check whether this is a planar surface
-	const float fDelta1_yz = fDelta1_y * fDelta1_z;
+    // Check whether this is a planar surface
+    const float fDelta1_yz = fDelta1_y * fDelta1_z;
 
-	if (fDelta1_x < 0.05f * sqrtf( fDelta1_yz ))return false;
-	if (fDelta1_y < 0.05f * sqrtf( fDelta1_z * fDelta1_x ))return false;
-	if (fDelta1_z < 0.05f * sqrtf( fDelta1_y * fDelta1_x ))return false;
+    if (fDelta1_x < 0.05f * sqrtf( fDelta1_yz ))return false;
+    if (fDelta1_y < 0.05f * sqrtf( fDelta1_z * fDelta1_x ))return false;
+    if (fDelta1_z < 0.05f * sqrtf( fDelta1_y * fDelta1_x ))return false;
 
-	// now compare the volumes of the bounding boxes
-	if (std::fabs(fDelta0_x * fDelta1_yz) <
-		std::fabs(fDelta1_x * fDelta1_y * fDelta1_z))
-	{
-		if (!DefaultLogger::isNullLogger())
-		{
-			char buffer[128]; // should be sufficiently large
-			::sprintf(buffer,"Mesh %u: Normals are facing inwards (or the mesh is planar)",index);
-			DefaultLogger::get()->info(buffer);
-		}
+    // now compare the volumes of the bounding boxes
+    if (std::fabs(fDelta0_x * fDelta1_yz) <
+        std::fabs(fDelta1_x * fDelta1_y * fDelta1_z))
+    {
+        if (!DefaultLogger::isNullLogger())
+        {
+            char buffer[128]; // should be sufficiently large
+            ::sprintf(buffer,"Mesh %u: Normals are facing inwards (or the mesh is planar)",index);
+            DefaultLogger::get()->info(buffer);
+        }
 
-		// Invert normals
-		for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
-			pcMesh->mNormals[i] *= -1.0f;
+        // Invert normals
+        for (unsigned int i = 0; i < pcMesh->mNumVertices;++i)
+            pcMesh->mNormals[i] *= -1.0f;
 
-		// ... and flip faces
-		for (unsigned int i = 0; i < pcMesh->mNumFaces;++i)
-		{
-			aiFace& face = pcMesh->mFaces[i];
-			for( unsigned int b = 0; b < face.mNumIndices / 2; b++)
-				std::swap( face.mIndices[b], face.mIndices[ face.mNumIndices - 1 - b]);
-		}
-		return true;
-	}
-	return false;
+        // ... and flip faces
+        for (unsigned int i = 0; i < pcMesh->mNumFaces;++i)
+        {
+            aiFace& face = pcMesh->mFaces[i];
+            for( unsigned int b = 0; b < face.mNumIndices / 2; b++)
+                std::swap( face.mIndices[b], face.mIndices[ face.mNumIndices - 1 - b]);
+        }
+        return true;
+    }
+    return false;
 }

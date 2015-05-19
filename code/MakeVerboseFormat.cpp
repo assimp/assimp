@@ -51,167 +51,167 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 MakeVerboseFormatProcess::MakeVerboseFormatProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 // ------------------------------------------------------------------------------------------------
 MakeVerboseFormatProcess::~MakeVerboseFormatProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void MakeVerboseFormatProcess::Execute( aiScene* pScene)
 {
-	ai_assert(NULL != pScene);
-	DefaultLogger::get()->debug("MakeVerboseFormatProcess begin");
+    ai_assert(NULL != pScene);
+    DefaultLogger::get()->debug("MakeVerboseFormatProcess begin");
 
-	bool bHas = false;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
-	{
-		if(	MakeVerboseFormat( pScene->mMeshes[a]))
-			bHas = true;
-	}
-	if (bHas) DefaultLogger::get()->info("MakeVerboseFormatProcess finished. There was much work to do ...");
-	else DefaultLogger::get()->debug("MakeVerboseFormatProcess. There was nothing to do.");
+    bool bHas = false;
+    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)
+    {
+        if( MakeVerboseFormat( pScene->mMeshes[a]))
+            bHas = true;
+    }
+    if (bHas) DefaultLogger::get()->info("MakeVerboseFormatProcess finished. There was much work to do ...");
+    else DefaultLogger::get()->debug("MakeVerboseFormatProcess. There was nothing to do.");
 
-	pScene->mFlags &= ~AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+    pScene->mFlags &= ~AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
 
 }
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
 {
-	ai_assert(NULL != pcMesh);
+    ai_assert(NULL != pcMesh);
 
-	unsigned int iOldNumVertices = pcMesh->mNumVertices;
-	const unsigned int iNumVerts = pcMesh->mNumFaces*3;
+    unsigned int iOldNumVertices = pcMesh->mNumVertices;
+    const unsigned int iNumVerts = pcMesh->mNumFaces*3;
 
-	aiVector3D* pvPositions = new aiVector3D[ iNumVerts ];
+    aiVector3D* pvPositions = new aiVector3D[ iNumVerts ];
 
-	aiVector3D* pvNormals = NULL;
-	if (pcMesh->HasNormals())
-	{
-		pvNormals = new aiVector3D[iNumVerts];
-	}
-	aiVector3D* pvTangents = NULL, *pvBitangents = NULL;
-	if (pcMesh->HasTangentsAndBitangents())
-	{
-		pvTangents = new aiVector3D[iNumVerts];
-		pvBitangents = new aiVector3D[iNumVerts];
-	}
+    aiVector3D* pvNormals = NULL;
+    if (pcMesh->HasNormals())
+    {
+        pvNormals = new aiVector3D[iNumVerts];
+    }
+    aiVector3D* pvTangents = NULL, *pvBitangents = NULL;
+    if (pcMesh->HasTangentsAndBitangents())
+    {
+        pvTangents = new aiVector3D[iNumVerts];
+        pvBitangents = new aiVector3D[iNumVerts];
+    }
 
-	aiVector3D* apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = {0};
-	aiColor4D* apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = {0};
+    aiVector3D* apvTextureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS] = {0};
+    aiColor4D* apvColorSets[AI_MAX_NUMBER_OF_COLOR_SETS] = {0};
 
-	unsigned int p = 0;
-	while (pcMesh->HasTextureCoords(p))
-		apvTextureCoords[p++] = new aiVector3D[iNumVerts];
+    unsigned int p = 0;
+    while (pcMesh->HasTextureCoords(p))
+        apvTextureCoords[p++] = new aiVector3D[iNumVerts];
 
-	p = 0;
-	while (pcMesh->HasVertexColors(p))
-		apvColorSets[p++] = new aiColor4D[iNumVerts];
+    p = 0;
+    while (pcMesh->HasVertexColors(p))
+        apvColorSets[p++] = new aiColor4D[iNumVerts];
 
-	// allocate enough memory to hold output bones and vertex weights ...
-	std::vector<aiVertexWeight>* newWeights = new std::vector<aiVertexWeight>[pcMesh->mNumBones];
-	for (unsigned int i = 0;i < pcMesh->mNumBones;++i) {
-		newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights*3);
-	}
+    // allocate enough memory to hold output bones and vertex weights ...
+    std::vector<aiVertexWeight>* newWeights = new std::vector<aiVertexWeight>[pcMesh->mNumBones];
+    for (unsigned int i = 0;i < pcMesh->mNumBones;++i) {
+        newWeights[i].reserve(pcMesh->mBones[i]->mNumWeights*3);
+    }
 
-	// iterate through all faces and build a clean list
-	unsigned int iIndex = 0;
-	for (unsigned int a = 0; a< pcMesh->mNumFaces;++a)
-	{
-		aiFace* pcFace = &pcMesh->mFaces[a];
-		for (unsigned int q = 0; q < pcFace->mNumIndices;++q,++iIndex)
-		{
-			// need to build a clean list of bones, too
-			for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
-			{
-				for (unsigned int a = 0;  a < pcMesh->mBones[i]->mNumWeights;a++)
-				{
-					const aiVertexWeight& w = pcMesh->mBones[i]->mWeights[a];
-					if(pcFace->mIndices[q] == w.mVertexId)
-					{
-						aiVertexWeight wNew;
-						wNew.mVertexId = iIndex;
-						wNew.mWeight = w.mWeight;
-						newWeights[i].push_back(wNew);
-					}
-				}
-			}
+    // iterate through all faces and build a clean list
+    unsigned int iIndex = 0;
+    for (unsigned int a = 0; a< pcMesh->mNumFaces;++a)
+    {
+        aiFace* pcFace = &pcMesh->mFaces[a];
+        for (unsigned int q = 0; q < pcFace->mNumIndices;++q,++iIndex)
+        {
+            // need to build a clean list of bones, too
+            for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
+            {
+                for (unsigned int a = 0;  a < pcMesh->mBones[i]->mNumWeights;a++)
+                {
+                    const aiVertexWeight& w = pcMesh->mBones[i]->mWeights[a];
+                    if(pcFace->mIndices[q] == w.mVertexId)
+                    {
+                        aiVertexWeight wNew;
+                        wNew.mVertexId = iIndex;
+                        wNew.mWeight = w.mWeight;
+                        newWeights[i].push_back(wNew);
+                    }
+                }
+            }
 
-			pvPositions[iIndex] = pcMesh->mVertices[pcFace->mIndices[q]];
+            pvPositions[iIndex] = pcMesh->mVertices[pcFace->mIndices[q]];
 
-			if (pcMesh->HasNormals())
-			{
-				pvNormals[iIndex] = pcMesh->mNormals[pcFace->mIndices[q]];
-			}
-			if (pcMesh->HasTangentsAndBitangents())
-			{
-				pvTangents[iIndex] = pcMesh->mTangents[pcFace->mIndices[q]];
-				pvBitangents[iIndex] = pcMesh->mBitangents[pcFace->mIndices[q]];
-			}
+            if (pcMesh->HasNormals())
+            {
+                pvNormals[iIndex] = pcMesh->mNormals[pcFace->mIndices[q]];
+            }
+            if (pcMesh->HasTangentsAndBitangents())
+            {
+                pvTangents[iIndex] = pcMesh->mTangents[pcFace->mIndices[q]];
+                pvBitangents[iIndex] = pcMesh->mBitangents[pcFace->mIndices[q]];
+            }
 
-			unsigned int p = 0;
-			while (pcMesh->HasTextureCoords(p))
-			{
-				apvTextureCoords[p][iIndex] = pcMesh->mTextureCoords[p][pcFace->mIndices[q]];
-				++p;
-			}
-			p = 0;
-			while (pcMesh->HasVertexColors(p))
-			{
-				apvColorSets[p][iIndex] = pcMesh->mColors[p][pcFace->mIndices[q]];
-				++p;
-			}
-			pcFace->mIndices[q] = iIndex;
-		}
-	}
+            unsigned int p = 0;
+            while (pcMesh->HasTextureCoords(p))
+            {
+                apvTextureCoords[p][iIndex] = pcMesh->mTextureCoords[p][pcFace->mIndices[q]];
+                ++p;
+            }
+            p = 0;
+            while (pcMesh->HasVertexColors(p))
+            {
+                apvColorSets[p][iIndex] = pcMesh->mColors[p][pcFace->mIndices[q]];
+                ++p;
+            }
+            pcFace->mIndices[q] = iIndex;
+        }
+    }
 
-	// build output vertex weights
-	for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
-	{
-		delete pcMesh->mBones[i]->mWeights;
-		if (!newWeights[i].empty())
-		{
-			pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
-			memcpy(pcMesh->mBones[i]->mWeights,&newWeights[i][0],
-				sizeof(aiVertexWeight) * newWeights[i].size());
-		}
-		else pcMesh->mBones[i]->mWeights = NULL;
-	}
+    // build output vertex weights
+    for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
+    {
+        delete pcMesh->mBones[i]->mWeights;
+        if (!newWeights[i].empty())
+        {
+            pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
+            memcpy(pcMesh->mBones[i]->mWeights,&newWeights[i][0],
+                sizeof(aiVertexWeight) * newWeights[i].size());
+        }
+        else pcMesh->mBones[i]->mWeights = NULL;
+    }
 
-	// delete the old members
-	delete[] pcMesh->mVertices;
-	pcMesh->mVertices = pvPositions;
+    // delete the old members
+    delete[] pcMesh->mVertices;
+    pcMesh->mVertices = pvPositions;
 
-	p = 0;
-	while (pcMesh->HasTextureCoords(p))
-	{
-		delete pcMesh->mTextureCoords[p];
-		pcMesh->mTextureCoords[p] = apvTextureCoords[p];
-		++p;
-	}
-	p = 0;
-	while (pcMesh->HasVertexColors(p))
-	{
-		delete pcMesh->mColors[p];
-		pcMesh->mColors[p] = apvColorSets[p];
-		++p;
-	}
-	pcMesh->mNumVertices = iNumVerts;
+    p = 0;
+    while (pcMesh->HasTextureCoords(p))
+    {
+        delete pcMesh->mTextureCoords[p];
+        pcMesh->mTextureCoords[p] = apvTextureCoords[p];
+        ++p;
+    }
+    p = 0;
+    while (pcMesh->HasVertexColors(p))
+    {
+        delete pcMesh->mColors[p];
+        pcMesh->mColors[p] = apvColorSets[p];
+        ++p;
+    }
+    pcMesh->mNumVertices = iNumVerts;
 
-	if (pcMesh->HasNormals())
-	{
-		delete[] pcMesh->mNormals;
-		pcMesh->mNormals = pvNormals;
-	}
-	if (pcMesh->HasTangentsAndBitangents())
-	{
-		delete[] pcMesh->mTangents;
-		pcMesh->mTangents = pvTangents;
-		delete[] pcMesh->mBitangents;
-		pcMesh->mBitangents = pvBitangents;
-	}
-	return (pcMesh->mNumVertices != iOldNumVertices);
+    if (pcMesh->HasNormals())
+    {
+        delete[] pcMesh->mNormals;
+        pcMesh->mNormals = pvNormals;
+    }
+    if (pcMesh->HasTangentsAndBitangents())
+    {
+        delete[] pcMesh->mTangents;
+        pcMesh->mTangents = pvTangents;
+        delete[] pcMesh->mBitangents;
+        pcMesh->mBitangents = pvBitangents;
+    }
+    return (pcMesh->mNumVertices != iOldNumVertices);
 }

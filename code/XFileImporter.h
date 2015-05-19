@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiNode;
 
-namespace Assimp	{
+namespace Assimp    {
 
 namespace XFile {
 struct Scene;
@@ -67,82 +67,82 @@ struct Node;
 class XFileImporter : public BaseImporter
 {
 public:
-	XFileImporter();
-	~XFileImporter();
+    XFileImporter();
+    ~XFileImporter();
 
 
 public:
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file.
-	 * See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool CheckSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+     * See BaseImporter::CanRead() for details. */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool CheckSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure.
-	 * See BaseImporter::InternReadFile() for details
-	 */
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+     * See BaseImporter::InternReadFile() for details
+     */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
-	// -------------------------------------------------------------------
-	/** Constructs the return data structure out of the imported data.
-	 * @param pScene The scene to construct the return data in.
-	 * @param pData The imported data in the internal temporary
-	 *   representation.
-	 */
-	void CreateDataRepresentationFromImport( aiScene* pScene, XFile::Scene* pData);
+    // -------------------------------------------------------------------
+    /** Constructs the return data structure out of the imported data.
+     * @param pScene The scene to construct the return data in.
+     * @param pData The imported data in the internal temporary
+     *   representation.
+     */
+    void CreateDataRepresentationFromImport( aiScene* pScene, XFile::Scene* pData);
 
-	// -------------------------------------------------------------------
-	/** Recursively creates scene nodes from the imported hierarchy.
-	 * The meshes and materials of the nodes will be extracted on the way.
-	 * @param pScene The scene to construct the return data in.
-	 * @param pParent The parent node where to create new child nodes
-	 * @param pNode The temporary node to copy.
-	 * @return The created node
-	 */
-	aiNode* CreateNodes( aiScene* pScene, aiNode* pParent,
-		const XFile::Node* pNode);
+    // -------------------------------------------------------------------
+    /** Recursively creates scene nodes from the imported hierarchy.
+     * The meshes and materials of the nodes will be extracted on the way.
+     * @param pScene The scene to construct the return data in.
+     * @param pParent The parent node where to create new child nodes
+     * @param pNode The temporary node to copy.
+     * @return The created node
+     */
+    aiNode* CreateNodes( aiScene* pScene, aiNode* pParent,
+        const XFile::Node* pNode);
 
-	// -------------------------------------------------------------------
-	/** Converts all meshes in the given mesh array. Each mesh is split
-	 * up per material, the indices of the generated meshes are stored in
-	 * the node structure.
-	 * @param pScene The scene to construct the return data in.
-	 * @param pNode The target node structure that references the
-	 *   constructed meshes.
-	 * @param pMeshes The array of meshes to convert
-	 */
-	void CreateMeshes( aiScene* pScene, aiNode* pNode,
-		const std::vector<XFile::Mesh*>& pMeshes);
+    // -------------------------------------------------------------------
+    /** Converts all meshes in the given mesh array. Each mesh is split
+     * up per material, the indices of the generated meshes are stored in
+     * the node structure.
+     * @param pScene The scene to construct the return data in.
+     * @param pNode The target node structure that references the
+     *   constructed meshes.
+     * @param pMeshes The array of meshes to convert
+     */
+    void CreateMeshes( aiScene* pScene, aiNode* pNode,
+        const std::vector<XFile::Mesh*>& pMeshes);
 
-	// -------------------------------------------------------------------
-	/** Converts the animations from the given imported data and creates
-	*  them in the scene.
-	 * @param pScene The scene to hold to converted animations
-	 * @param pData The data to read the animations from
-	 */
-	void CreateAnimations( aiScene* pScene, const XFile::Scene* pData);
+    // -------------------------------------------------------------------
+    /** Converts the animations from the given imported data and creates
+    *  them in the scene.
+     * @param pScene The scene to hold to converted animations
+     * @param pData The data to read the animations from
+     */
+    void CreateAnimations( aiScene* pScene, const XFile::Scene* pData);
 
-	// -------------------------------------------------------------------
-	/** Converts all materials in the given array and stores them in the
-	 *  scene's material list.
-	 * @param pScene The scene to hold the converted materials.
-	 * @param pMaterials The material array to convert.
-	 */
-	void ConvertMaterials( aiScene* pScene, std::vector<XFile::Material>& pMaterials);
+    // -------------------------------------------------------------------
+    /** Converts all materials in the given array and stores them in the
+     *  scene's material list.
+     * @param pScene The scene to hold the converted materials.
+     * @param pMaterials The material array to convert.
+     */
+    void ConvertMaterials( aiScene* pScene, std::vector<XFile::Material>& pMaterials);
 
 protected:
-	/** Buffer to hold the loaded file */
-	std::vector<char> mBuffer;
+    /** Buffer to hold the loaded file */
+    std::vector<char> mBuffer;
 };
 
 } // end of namespace Assimp

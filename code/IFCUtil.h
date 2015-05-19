@@ -57,14 +57,14 @@ struct aiNode;
 namespace Assimp {
 namespace IFC {
 
-	typedef double IfcFloat;
+    typedef double IfcFloat;
 
-	// IfcFloat-precision math data types
-	typedef aiVector2t<IfcFloat> IfcVector2;
-	typedef aiVector3t<IfcFloat> IfcVector3;
-	typedef aiMatrix4x4t<IfcFloat> IfcMatrix4;
-	typedef aiMatrix3x3t<IfcFloat> IfcMatrix3;
-	typedef aiColor4t<IfcFloat> IfcColor4;
+    // IfcFloat-precision math data types
+    typedef aiVector2t<IfcFloat> IfcVector2;
+    typedef aiVector3t<IfcFloat> IfcVector3;
+    typedef aiMatrix4x4t<IfcFloat> IfcMatrix4;
+    typedef aiMatrix3x3t<IfcFloat> IfcMatrix3;
+    typedef aiColor4t<IfcFloat> IfcColor4;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -73,9 +73,9 @@ namespace IFC {
 template<typename T>
 struct delete_fun
 {
-	void operator()(T* del) {
-		delete del;
-	}
+    void operator()(T* del) {
+        delete del;
+    }
 };
 
 
@@ -85,30 +85,30 @@ struct delete_fun
 // ------------------------------------------------------------------------------------------------
 struct TempMesh
 {
-	std::vector<IfcVector3> verts;
-	std::vector<unsigned int> vertcnt;
+    std::vector<IfcVector3> verts;
+    std::vector<unsigned int> vertcnt;
 
-	// utilities
-	aiMesh* ToMesh();
-	void Clear();
-	void Transform(const IfcMatrix4& mat);
-	IfcVector3 Center() const;
-	void Append(const TempMesh& other);
+    // utilities
+    aiMesh* ToMesh();
+    void Clear();
+    void Transform(const IfcMatrix4& mat);
+    IfcVector3 Center() const;
+    void Append(const TempMesh& other);
 
-	bool IsEmpty() const {
-		return verts.empty() && vertcnt.empty();
-	}
+    bool IsEmpty() const {
+        return verts.empty() && vertcnt.empty();
+    }
 
-	void RemoveAdjacentDuplicates();
-	void RemoveDegenerates();
+    void RemoveAdjacentDuplicates();
+    void RemoveDegenerates();
 
-	void FixupFaceOrientation();
+    void FixupFaceOrientation();
 
-	static IfcVector3 ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bool normalize = true);
-	IfcVector3 ComputeLastPolygonNormal(bool normalize = true) const;
-	void ComputePolygonNormals(std::vector<IfcVector3>& normals, bool normalize = true, size_t ofs = 0) const;
+    static IfcVector3 ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bool normalize = true);
+    IfcVector3 ComputeLastPolygonNormal(bool normalize = true) const;
+    void ComputePolygonNormals(std::vector<IfcVector3>& normals, bool normalize = true, size_t ofs = 0) const;
 
-	void Swap(TempMesh& other);
+    void Swap(TempMesh& other);
 };
 
 
@@ -117,55 +117,55 @@ struct TempMesh
 // ------------------------------------------------------------------------------------------------
 struct TempOpening
 {
-	const IFC::IfcSolidModel* solid;
-	IfcVector3 extrusionDir;
+    const IFC::IfcSolidModel* solid;
+    IfcVector3 extrusionDir;
 
-	boost::shared_ptr<TempMesh> profileMesh;
-	boost::shared_ptr<TempMesh> profileMesh2D;
+    boost::shared_ptr<TempMesh> profileMesh;
+    boost::shared_ptr<TempMesh> profileMesh2D;
 
-	// list of points generated for this opening. This is used to
-	// create connections between two opposing holes created
-	// from a single opening instance (two because walls tend to
-	// have two sides). If !empty(), the other side of the wall
-	// has already been processed.
-	std::vector<IfcVector3> wallPoints;
+    // list of points generated for this opening. This is used to
+    // create connections between two opposing holes created
+    // from a single opening instance (two because walls tend to
+    // have two sides). If !empty(), the other side of the wall
+    // has already been processed.
+    std::vector<IfcVector3> wallPoints;
 
-	// ------------------------------------------------------------------------------
-	TempOpening()
-		: solid()
-		, extrusionDir()
-		, profileMesh()
-	{
-	}
+    // ------------------------------------------------------------------------------
+    TempOpening()
+        : solid()
+        , extrusionDir()
+        , profileMesh()
+    {
+    }
 
-	// ------------------------------------------------------------------------------
-	TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,
-		boost::shared_ptr<TempMesh> profileMesh,
-		boost::shared_ptr<TempMesh> profileMesh2D)
-		: solid(solid)
-		, extrusionDir(extrusionDir)
-		, profileMesh(profileMesh)
-		, profileMesh2D(profileMesh2D)
-	{
-	}
+    // ------------------------------------------------------------------------------
+    TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,
+        boost::shared_ptr<TempMesh> profileMesh,
+        boost::shared_ptr<TempMesh> profileMesh2D)
+        : solid(solid)
+        , extrusionDir(extrusionDir)
+        , profileMesh(profileMesh)
+        , profileMesh2D(profileMesh2D)
+    {
+    }
 
-	// ------------------------------------------------------------------------------
-	void Transform(const IfcMatrix4& mat); // defined later since TempMesh is not complete yet
+    // ------------------------------------------------------------------------------
+    void Transform(const IfcMatrix4& mat); // defined later since TempMesh is not complete yet
 
 
 
-	// ------------------------------------------------------------------------------
-	// Helper to sort openings by distance from a given base point
-	struct DistanceSorter {
+    // ------------------------------------------------------------------------------
+    // Helper to sort openings by distance from a given base point
+    struct DistanceSorter {
 
-		DistanceSorter(const IfcVector3& base) : base(base) {}
+        DistanceSorter(const IfcVector3& base) : base(base) {}
 
-		bool operator () (const TempOpening& a, const TempOpening& b) const {
-			return (a.profileMesh->Center()-base).SquareLength() < (b.profileMesh->Center()-base).SquareLength();
-		}
+        bool operator () (const TempOpening& a, const TempOpening& b) const {
+            return (a.profileMesh->Center()-base).SquareLength() < (b.profileMesh->Center()-base).SquareLength();
+        }
 
-		IfcVector3 base;
-	};
+        IfcVector3 base;
+    };
 };
 
 
@@ -174,58 +174,58 @@ struct TempOpening
 // ------------------------------------------------------------------------------------------------
 struct ConversionData
 {
-	ConversionData(const STEP::DB& db, const IFC::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
-		: len_scale(1.0)
-		, angle_scale(-1.0)
-		, db(db)
-		, proj(proj)
-		, out(out)
-		, settings(settings)
-		, apply_openings()
-		, collect_openings()
-	{}
+    ConversionData(const STEP::DB& db, const IFC::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
+        : len_scale(1.0)
+        , angle_scale(-1.0)
+        , db(db)
+        , proj(proj)
+        , out(out)
+        , settings(settings)
+        , apply_openings()
+        , collect_openings()
+    {}
 
-	~ConversionData() {
-		std::for_each(meshes.begin(),meshes.end(),delete_fun<aiMesh>());
-		std::for_each(materials.begin(),materials.end(),delete_fun<aiMaterial>());
-	}
+    ~ConversionData() {
+        std::for_each(meshes.begin(),meshes.end(),delete_fun<aiMesh>());
+        std::for_each(materials.begin(),materials.end(),delete_fun<aiMaterial>());
+    }
 
-	IfcFloat len_scale, angle_scale;
-	bool plane_angle_in_radians;
+    IfcFloat len_scale, angle_scale;
+    bool plane_angle_in_radians;
 
-	const STEP::DB& db;
-	const IFC::IfcProject& proj;
-	aiScene* out;
+    const STEP::DB& db;
+    const IFC::IfcProject& proj;
+    aiScene* out;
 
-	IfcMatrix4 wcs;
-	std::vector<aiMesh*> meshes;
-	std::vector<aiMaterial*> materials;
+    IfcMatrix4 wcs;
+    std::vector<aiMesh*> meshes;
+    std::vector<aiMaterial*> materials;
 
-	struct MeshCacheIndex {
-		const IFC::IfcRepresentationItem* item; unsigned int matindex;
-		MeshCacheIndex() : item(NULL), matindex(0) { }
-		MeshCacheIndex(const IFC::IfcRepresentationItem* i, unsigned int mi) : item(i), matindex(mi) { }
-		bool operator == (const MeshCacheIndex& o) const { return item == o.item && matindex == o.matindex; }
-		bool operator < (const MeshCacheIndex& o) const { return item < o.item || (item == o.item && matindex < o.matindex); }
-	};
-	typedef std::map<MeshCacheIndex, std::vector<unsigned int> > MeshCache;
-	MeshCache cached_meshes;
+    struct MeshCacheIndex {
+        const IFC::IfcRepresentationItem* item; unsigned int matindex;
+        MeshCacheIndex() : item(NULL), matindex(0) { }
+        MeshCacheIndex(const IFC::IfcRepresentationItem* i, unsigned int mi) : item(i), matindex(mi) { }
+        bool operator == (const MeshCacheIndex& o) const { return item == o.item && matindex == o.matindex; }
+        bool operator < (const MeshCacheIndex& o) const { return item < o.item || (item == o.item && matindex < o.matindex); }
+    };
+    typedef std::map<MeshCacheIndex, std::vector<unsigned int> > MeshCache;
+    MeshCache cached_meshes;
 
-	typedef std::map<const IFC::IfcSurfaceStyle*, unsigned int> MaterialCache;
-	MaterialCache cached_materials;
+    typedef std::map<const IFC::IfcSurfaceStyle*, unsigned int> MaterialCache;
+    MaterialCache cached_materials;
 
-	const IFCImporter::Settings& settings;
+    const IFCImporter::Settings& settings;
 
-	// Intermediate arrays used to resolve openings in walls: only one of them
-	// can be given at a time. apply_openings if present if the current element
-	// is a wall and needs its openings to be poured into its geometry while
-	// collect_openings is present only if the current element is an
-	// IfcOpeningElement, for which all the geometry needs to be preserved
-	// for later processing by a parent, which is a wall.
-	std::vector<TempOpening>* apply_openings;
-	std::vector<TempOpening>* collect_openings;
+    // Intermediate arrays used to resolve openings in walls: only one of them
+    // can be given at a time. apply_openings if present if the current element
+    // is a wall and needs its openings to be poured into its geometry while
+    // collect_openings is present only if the current element is an
+    // IfcOpeningElement, for which all the geometry needs to be preserved
+    // for later processing by a parent, which is a wall.
+    std::vector<TempOpening>* apply_openings;
+    std::vector<TempOpening>* collect_openings;
 
-	std::set<uint64_t> already_processed;
+    std::set<uint64_t> already_processed;
 };
 
 
@@ -234,12 +234,12 @@ struct ConversionData
 // ------------------------------------------------------------------------------------------------
 struct FuzzyVectorCompare {
 
-	FuzzyVectorCompare(IfcFloat epsilon) : epsilon(epsilon) {}
-	bool operator()(const IfcVector3& a, const IfcVector3& b) {
-		return std::abs((a-b).SquareLength()) < epsilon;
-	}
+    FuzzyVectorCompare(IfcFloat epsilon) : epsilon(epsilon) {}
+    bool operator()(const IfcVector3& a, const IfcVector3& b) {
+        return std::abs((a-b).SquareLength()) < epsilon;
+    }
 
-	const IfcFloat epsilon;
+    const IfcFloat epsilon;
 };
 
 
@@ -248,13 +248,13 @@ struct FuzzyVectorCompare {
 // ------------------------------------------------------------------------------------------------
 struct XYSorter {
 
-	// sort first by X coordinates, then by Y coordinates
-	bool operator () (const IfcVector2&a, const IfcVector2& b) const {
-		if (a.x == b.x) {
-			return a.y < b.y;
-		}
-		return a.x < b.x;
-	}
+    // sort first by X coordinates, then by Y coordinates
+    bool operator () (const IfcVector2&a, const IfcVector2& b) const {
+        if (a.x == b.x) {
+            return a.y < b.y;
+        }
+        return a.x < b.x;
+    }
 };
 
 
@@ -288,34 +288,34 @@ bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int m
 void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/);
 
 void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
-						   ConversionData& conv);
+                           ConversionData& conv);
 
 void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result,
-							  ConversionData& conv, bool collect_openings);
+                              ConversionData& conv, bool collect_openings);
 
 // IFCBoolean.cpp
 
 void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv);
 void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& result,
-									   const TempMesh& first_operand,
-									   ConversionData& conv);
+                                       const TempMesh& first_operand,
+                                       ConversionData& conv);
 
 void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBoundedHalfSpace* hs, TempMesh& result,
-													   const TempMesh& first_operand,
-													   ConversionData& conv);
+                                                       const TempMesh& first_operand,
+                                                       ConversionData& conv);
 void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result,
-											   const TempMesh& first_operand,
-											   ConversionData& conv);
+                                               const TempMesh& first_operand,
+                                               ConversionData& conv);
 
 
 // IFCOpenings.cpp
 
 bool GenerateOpenings(std::vector<TempOpening>& openings,
-					  const std::vector<IfcVector3>& nors,
-					  TempMesh& curmesh,
-					  bool check_intersection,
-					  bool generate_connection_geometry,
-					  const IfcVector3& wall_extrusion_axis = IfcVector3(0,1,0));
+                      const std::vector<IfcVector3>& nors,
+                      TempMesh& curmesh,
+                      bool check_intersection,
+                      bool generate_connection_geometry,
+                      const IfcVector3& wall_extrusion_axis = IfcVector3(0,1,0));
 
 
 
@@ -327,12 +327,12 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 class CurveError
 {
 public:
-	CurveError(const std::string& s)
-		: s(s)
-	{
-	}
+    CurveError(const std::string& s)
+        : s(s)
+    {
+    }
 
-	std::string s;
+    std::string s;
 };
 
 
@@ -344,57 +344,57 @@ class Curve
 {
 protected:
 
-	Curve(const IfcCurve& base_entity, ConversionData& conv)
-		: base_entity(base_entity)
-		, conv(conv)
-	{}
+    Curve(const IfcCurve& base_entity, ConversionData& conv)
+        : base_entity(base_entity)
+        , conv(conv)
+    {}
 
 public:
 
-	typedef std::pair<IfcFloat, IfcFloat> ParamRange;
+    typedef std::pair<IfcFloat, IfcFloat> ParamRange;
 
 public:
 
 
-	virtual ~Curve() {}
+    virtual ~Curve() {}
 
 
-	// check if a curve is closed
-	virtual bool IsClosed() const = 0;
+    // check if a curve is closed
+    virtual bool IsClosed() const = 0;
 
-	// evaluate the curve at the given parametric position
-	virtual IfcVector3 Eval(IfcFloat p) const = 0;
+    // evaluate the curve at the given parametric position
+    virtual IfcVector3 Eval(IfcFloat p) const = 0;
 
-	// try to match a point on the curve to a given parameter
-	// for self-intersecting curves, the result is not ambiguous and
-	// it is undefined which parameter is returned.
-	virtual bool ReverseEval(const IfcVector3& val, IfcFloat& paramOut) const;
+    // try to match a point on the curve to a given parameter
+    // for self-intersecting curves, the result is not ambiguous and
+    // it is undefined which parameter is returned.
+    virtual bool ReverseEval(const IfcVector3& val, IfcFloat& paramOut) const;
 
-	// get the range of the curve (both inclusive).
-	// +inf and -inf are valid return values, the curve is not bounded in such a case.
-	virtual std::pair<IfcFloat,IfcFloat> GetParametricRange() const = 0;
-	IfcFloat GetParametricRangeDelta() const;
+    // get the range of the curve (both inclusive).
+    // +inf and -inf are valid return values, the curve is not bounded in such a case.
+    virtual std::pair<IfcFloat,IfcFloat> GetParametricRange() const = 0;
+    IfcFloat GetParametricRangeDelta() const;
 
-	// estimate the number of sample points that this curve will require
-	virtual size_t EstimateSampleCount(IfcFloat start,IfcFloat end) const;
+    // estimate the number of sample points that this curve will require
+    virtual size_t EstimateSampleCount(IfcFloat start,IfcFloat end) const;
 
-	// intelligently sample the curve based on the current settings
-	// and append the result to the mesh
-	virtual void SampleDiscrete(TempMesh& out,IfcFloat start,IfcFloat end) const;
+    // intelligently sample the curve based on the current settings
+    // and append the result to the mesh
+    virtual void SampleDiscrete(TempMesh& out,IfcFloat start,IfcFloat end) const;
 
 #ifdef ASSIMP_BUILD_DEBUG
-	// check if a particular parameter value lies within the well-defined range
-	bool InRange(IfcFloat) const;
+    // check if a particular parameter value lies within the well-defined range
+    bool InRange(IfcFloat) const;
 #endif
 
 public:
 
-	static Curve* Convert(const IFC::IfcCurve&,ConversionData& conv);
+    static Curve* Convert(const IFC::IfcCurve&,ConversionData& conv);
 
 protected:
 
-	const IfcCurve& base_entity;
-	ConversionData& conv;
+    const IfcCurve& base_entity;
+    ConversionData& conv;
 };
 
 
@@ -406,19 +406,19 @@ class BoundedCurve : public Curve
 {
 public:
 
-	BoundedCurve(const IfcBoundedCurve& entity, ConversionData& conv)
-		: Curve(entity,conv)
-	{}
+    BoundedCurve(const IfcBoundedCurve& entity, ConversionData& conv)
+        : Curve(entity,conv)
+    {}
 
 public:
 
-	bool IsClosed() const;
+    bool IsClosed() const;
 
 public:
 
-	// sample the entire curve
-	void SampleDiscrete(TempMesh& out) const;
-	using Curve::SampleDiscrete;
+    // sample the entire curve
+    void SampleDiscrete(TempMesh& out) const;
+    using Curve::SampleDiscrete;
 };
 
 // IfcProfile.cpp

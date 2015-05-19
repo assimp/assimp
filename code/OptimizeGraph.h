@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiMesh;
 class OptimizeGraphProcessTest;
-namespace Assimp	{
+namespace Assimp    {
 
 // -----------------------------------------------------------------------------
 /** @brief Postprocessing step to optimize the scenegraph
@@ -66,76 +66,76 @@ class OptimizeGraphProcess : public BaseProcess
 {
 public:
 
-	OptimizeGraphProcess();
-	~OptimizeGraphProcess();
+    OptimizeGraphProcess();
+    ~OptimizeGraphProcess();
 
 public:
-	// -------------------------------------------------------------------
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    void SetupProperties(const Importer* pImp);
 
 
-	// -------------------------------------------------------------------
-	/** @brief Add a list of node names to be locked and not modified.
-	 *  @param in List of nodes. See #AI_CONFIG_PP_OG_EXCLUDE_LIST for
-	 *    format explanations.
-	 */
-	inline void AddLockedNodeList(std::string& in)
-	{
-		ConvertListToStrings (in,locked_nodes);
-	}
+    // -------------------------------------------------------------------
+    /** @brief Add a list of node names to be locked and not modified.
+     *  @param in List of nodes. See #AI_CONFIG_PP_OG_EXCLUDE_LIST for
+     *    format explanations.
+     */
+    inline void AddLockedNodeList(std::string& in)
+    {
+        ConvertListToStrings (in,locked_nodes);
+    }
 
-	// -------------------------------------------------------------------
-	/** @brief Add another node to be locked and not modified.
-	 *  @param name Name to be locked
-	 */
-	inline void AddLockedNode(std::string& name)
-	{
-		locked_nodes.push_back(name);
-	}
+    // -------------------------------------------------------------------
+    /** @brief Add another node to be locked and not modified.
+     *  @param name Name to be locked
+     */
+    inline void AddLockedNode(std::string& name)
+    {
+        locked_nodes.push_back(name);
+    }
 
-	// -------------------------------------------------------------------
-	/** @brief Rmeove a node from the list of locked nodes.
-	 *  @param name Name to be unlocked
-	 */
-	inline void RemoveLockedNode(std::string& name)
-	{
-		locked_nodes.remove(name);
-	}
+    // -------------------------------------------------------------------
+    /** @brief Rmeove a node from the list of locked nodes.
+     *  @param name Name to be unlocked
+     */
+    inline void RemoveLockedNode(std::string& name)
+    {
+        locked_nodes.remove(name);
+    }
 
 protected:
 
-	void CollectNewChildren(aiNode* nd, std::list<aiNode*>& nodes);
-	void FindInstancedMeshes (aiNode* pNode);
+    void CollectNewChildren(aiNode* nd, std::list<aiNode*>& nodes);
+    void FindInstancedMeshes (aiNode* pNode);
 
 private:
 
 #ifdef AI_OG_USE_HASHING
-	typedef std::set<unsigned int> LockedSetType;
+    typedef std::set<unsigned int> LockedSetType;
 #else
-	typedef std::set<std::string> LockedSetType;
+    typedef std::set<std::string> LockedSetType;
 #endif
 
 
-	//! Scene we're working with
-	aiScene* mScene;
+    //! Scene we're working with
+    aiScene* mScene;
 
-	//! List of locked names. Stored is the hash of the name
-	LockedSetType locked;
+    //! List of locked names. Stored is the hash of the name
+    LockedSetType locked;
 
-	//! List of nodes to be locked in addition to those with animations, lights or cameras assigned.
-	std::list<std::string> locked_nodes;
+    //! List of nodes to be locked in addition to those with animations, lights or cameras assigned.
+    std::list<std::string> locked_nodes;
 
-	//! Node counters for logging purposes
-	unsigned int nodes_in,nodes_out, count_merged;
+    //! Node counters for logging purposes
+    unsigned int nodes_in,nodes_out, count_merged;
 
-	//! Reference counters for meshes
-	std::vector<unsigned int> meshes;
+    //! Reference counters for meshes
+    std::vector<unsigned int> meshes;
 };
 
 } // end of namespace Assimp

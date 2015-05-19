@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_TERRAGEN_TERRAIN_LOADER_H
 
 #include "BaseImporter.h"
-namespace Assimp	{
+namespace Assimp    {
 
 // Magic strings
 #define AI_TERR_BASE_STRING         "TERRAGEN"
@@ -70,31 +70,31 @@ namespace Assimp	{
 class TerragenImporter : public BaseImporter
 {
 public:
-	TerragenImporter();
-	~TerragenImporter();
+    TerragenImporter();
+    ~TerragenImporter();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
-	// -------------------------------------------------------------------
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    void SetupProperties(const Importer* pImp);
 
 private:
 
-	bool configComputeUVs;
+    bool configComputeUVs;
 
 }; //! class TerragenImporter
 

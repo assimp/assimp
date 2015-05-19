@@ -58,86 +58,86 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 GenFaceNormalsProcess::GenFaceNormalsProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 GenFaceNormalsProcess::~GenFaceNormalsProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool GenFaceNormalsProcess::IsActive( unsigned int pFlags) const
 {
-	return	(pFlags & aiProcess_GenNormals) != 0;
+    return  (pFlags & aiProcess_GenNormals) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void GenFaceNormalsProcess::Execute( aiScene* pScene)
 {
-	DefaultLogger::get()->debug("GenFaceNormalsProcess begin");
+    DefaultLogger::get()->debug("GenFaceNormalsProcess begin");
 
-	if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
-		throw DeadlyImportError("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
-	}
+    if (pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) {
+        throw DeadlyImportError("Post-processing order mismatch: expecting pseudo-indexed (\"verbose\") vertices here");
+    }
 
-	bool bHas = false;
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)	{
-		if(this->GenMeshFaceNormals( pScene->mMeshes[a])) {
-			bHas = true;
-		}
-	}
-	if (bHas)	{
-		DefaultLogger::get()->info("GenFaceNormalsProcess finished. "
-			"Face normals have been calculated");
-	}
-	else DefaultLogger::get()->debug("GenFaceNormalsProcess finished. "
-		"Normals are already there");
+    bool bHas = false;
+    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)   {
+        if(this->GenMeshFaceNormals( pScene->mMeshes[a])) {
+            bHas = true;
+        }
+    }
+    if (bHas)   {
+        DefaultLogger::get()->info("GenFaceNormalsProcess finished. "
+            "Face normals have been calculated");
+    }
+    else DefaultLogger::get()->debug("GenFaceNormalsProcess finished. "
+        "Normals are already there");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 bool GenFaceNormalsProcess::GenMeshFaceNormals (aiMesh* pMesh)
 {
-	if (NULL != pMesh->mNormals) {
-		return false;
-	}
+    if (NULL != pMesh->mNormals) {
+        return false;
+    }
 
-	// If the mesh consists of lines and/or points but not of
-	// triangles or higher-order polygons the normal vectors
-	// are undefined.
-	if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))	{
-		DefaultLogger::get()->info("Normal vectors are undefined for line and point meshes");
-		return false;
-	}
+    // If the mesh consists of lines and/or points but not of
+    // triangles or higher-order polygons the normal vectors
+    // are undefined.
+    if (!(pMesh->mPrimitiveTypes & (aiPrimitiveType_TRIANGLE | aiPrimitiveType_POLYGON)))   {
+        DefaultLogger::get()->info("Normal vectors are undefined for line and point meshes");
+        return false;
+    }
 
-	// allocate an array to hold the output normals
-	pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
-	const float qnan = get_qnan();
+    // allocate an array to hold the output normals
+    pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+    const float qnan = get_qnan();
 
-	// iterate through all faces and compute per-face normals but store them per-vertex.
-	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)	{
-		const aiFace& face = pMesh->mFaces[a];
-		if (face.mNumIndices < 3)	{
-			// either a point or a line -> no well-defined normal vector
-			for (unsigned int i = 0;i < face.mNumIndices;++i) {
-				pMesh->mNormals[face.mIndices[i]] = aiVector3D(qnan);
-			}
-			continue;
-		}
+    // iterate through all faces and compute per-face normals but store them per-vertex.
+    for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
+        const aiFace& face = pMesh->mFaces[a];
+        if (face.mNumIndices < 3)   {
+            // either a point or a line -> no well-defined normal vector
+            for (unsigned int i = 0;i < face.mNumIndices;++i) {
+                pMesh->mNormals[face.mIndices[i]] = aiVector3D(qnan);
+            }
+            continue;
+        }
 
-		const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
-		const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
-		const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
-		const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
+        const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
+        const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
+        const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
+        const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1)).Normalize();
 
-		for (unsigned int i = 0;i < face.mNumIndices;++i) {
-			pMesh->mNormals[face.mIndices[i]] = vNor;
-		}
-	}
-	return true;
+        for (unsigned int i = 0;i < face.mNumIndices;++i) {
+            pMesh->mNormals[face.mIndices[i]] = vNor;
+        }
+    }
+    return true;
 }

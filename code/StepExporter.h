@@ -63,44 +63,44 @@ namespace Assimp
 class StepExporter
 {
 public:
-	/// Constructor for a specific scene to export
-	StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
+    /// Constructor for a specific scene to export
+    StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
 
 protected:
-	/// Starts writing the contents
-	void WriteFile();
+    /// Starts writing the contents
+    void WriteFile();
 
 public:
 
-	/// Stringstream to write all output into
-	std::stringstream mOutput;
+    /// Stringstream to write all output into
+    std::stringstream mOutput;
 
 protected:
 
-	/// hold the properties pointer
-	const ExportProperties* mProperties;
+    /// hold the properties pointer
+    const ExportProperties* mProperties;
 
-	/// The IOSystem for output
-	IOSystem* mIOSystem;
+    /// The IOSystem for output
+    IOSystem* mIOSystem;
 
-	/// Name of the file (without extension) where the scene will be exported
-	std::string mFile;
+    /// Name of the file (without extension) where the scene will be exported
+    std::string mFile;
 
-	/// Path of the directory where the scene will be exported
-	std::string mPath;
+    /// Path of the directory where the scene will be exported
+    std::string mPath;
 
-	/// The scene to be written
-	const aiScene* mScene;
+    /// The scene to be written
+    const aiScene* mScene;
 
-	/// current line end string for simple stream insertion
-	std::string endstr;
+    /// current line end string for simple stream insertion
+    std::string endstr;
 
-	/// accumultated transformations for nodes
-	std::map<const aiNode*, aiMatrix4x4> trafos;
+    /// accumultated transformations for nodes
+    std::map<const aiNode*, aiMatrix4x4> trafos;
 
-	/// map to all meshed of nodes
-	typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
-	MeshesByNodeMap meshes;
+    /// map to all meshed of nodes
+    typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
+    MeshesByNodeMap meshes;
 
 };
 

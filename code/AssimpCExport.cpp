@@ -54,76 +54,76 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API size_t aiGetExportFormatCount(void)
 {
-	return Exporter().GetExportFormatCount();
+    return Exporter().GetExportFormatCount();
 }
 
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex)
 {
-	// Note: this is valid as the index always pertains to a builtin exporter,
-	// for which the returned structure is guaranteed to be of static storage duration.
-	return Exporter().GetExportFormatDescription(pIndex);
+    // Note: this is valid as the index always pertains to a builtin exporter,
+    // for which the returned structure is guaranteed to be of static storage duration.
+    return Exporter().GetExportFormatDescription(pIndex);
 }
 
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)
 {
-	if (!pOut || !pIn) {
-		return;
-	}
+    if (!pOut || !pIn) {
+        return;
+    }
 
-	SceneCombiner::CopyScene(pOut,pIn,true);
-	ScenePriv(*pOut)->mIsCopy = true;
+    SceneCombiner::CopyScene(pOut,pIn,true);
+    ScenePriv(*pOut)->mIsCopy = true;
 }
 
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiFreeScene(const C_STRUCT aiScene* pIn)
 {
-	// note: aiReleaseImport() is also able to delete scene copies, but in addition
-	// it also handles scenes with import metadata.
-	delete pIn;
+    // note: aiReleaseImport() is also able to delete scene copies, but in addition
+    // it also handles scenes with import metadata.
+    delete pIn;
 }
 
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiReturn aiExportScene( const aiScene* pScene, const char* pFormatId, const char* pFileName, unsigned int pPreprocessing )
 {
-	return ::aiExportSceneEx(pScene,pFormatId,pFileName,NULL,pPreprocessing);
+    return ::aiExportSceneEx(pScene,pFormatId,pFileName,NULL,pPreprocessing);
 }
 
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiReturn aiExportSceneEx( const aiScene* pScene, const char* pFormatId, const char* pFileName, aiFileIO* pIO, unsigned int pPreprocessing )
 {
-	Exporter exp;
+    Exporter exp;
 
-	if (pIO) {
-		exp.SetIOHandler(new CIOSystemWrapper(pIO));
-	}
-	return exp.Export(pScene,pFormatId,pFileName,pPreprocessing);
+    if (pIO) {
+        exp.SetIOHandler(new CIOSystemWrapper(pIO));
+    }
+    return exp.Export(pScene,pFormatId,pFileName,pPreprocessing);
 }
 
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API const C_STRUCT aiExportDataBlob* aiExportSceneToBlob( const aiScene* pScene, const char* pFormatId, unsigned int pPreprocessing  )
 {
-	Exporter exp;
-	if (!exp.ExportToBlob(pScene,pFormatId,pPreprocessing)) {
-		return NULL;
-	}
-	const aiExportDataBlob* blob = exp.GetOrphanedBlob();
-	ai_assert(blob);
+    Exporter exp;
+    if (!exp.ExportToBlob(pScene,pFormatId,pPreprocessing)) {
+        return NULL;
+    }
+    const aiExportDataBlob* blob = exp.GetOrphanedBlob();
+    ai_assert(blob);
 
-	return blob;
+    return blob;
 }
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API C_STRUCT void aiReleaseExportBlob( const aiExportDataBlob* pData )
 {
-	delete pData;
+    delete pData;
 }
 
 #endif // !ASSIMP_BUILD_NO_EXPORT

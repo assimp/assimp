@@ -52,14 +52,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDLFileData.h"
 #include "./../include/assimp/Compiler/pushpack1.h"
 
-namespace Assimp	{
-namespace MDL	{
+namespace Assimp    {
+namespace MDL   {
 
 // magic bytes used in Half Life 2 MDL models
-#define AI_MDL_MAGIC_NUMBER_BE_HL2a	AI_MAKE_MAGIC("IDST")
-#define AI_MDL_MAGIC_NUMBER_LE_HL2a	AI_MAKE_MAGIC("TSDI")
-#define AI_MDL_MAGIC_NUMBER_BE_HL2b	AI_MAKE_MAGIC("IDSQ")
-#define AI_MDL_MAGIC_NUMBER_LE_HL2b	AI_MAKE_MAGIC("QSDI")
+#define AI_MDL_MAGIC_NUMBER_BE_HL2a AI_MAKE_MAGIC("IDST")
+#define AI_MDL_MAGIC_NUMBER_LE_HL2a AI_MAKE_MAGIC("TSDI")
+#define AI_MDL_MAGIC_NUMBER_BE_HL2b AI_MAKE_MAGIC("IDSQ")
+#define AI_MDL_MAGIC_NUMBER_LE_HL2b AI_MAKE_MAGIC("QSDI")
 
 // ---------------------------------------------------------------------------
 /** \struct Header_HL2
@@ -68,77 +68,77 @@ namespace MDL	{
 // ---------------------------------------------------------------------------
 struct Header_HL2
 {
-	//! magic number: "IDST"/"IDSQ"
-	char	ident[4];
+    //! magic number: "IDST"/"IDSQ"
+    char    ident[4];
 
-	//! Version number
-	int32_t	version;
+    //! Version number
+    int32_t version;
 
-	//! Original file name in pak ?
-	char		name[64];
+    //! Original file name in pak ?
+    char        name[64];
 
-	//! Length of file name/length of file?
-	int32_t		length;
+    //! Length of file name/length of file?
+    int32_t     length;
 
-	//! For viewer, ignored
-	aiVector3D		eyeposition;
-	aiVector3D		min;
-	aiVector3D		max;
+    //! For viewer, ignored
+    aiVector3D      eyeposition;
+    aiVector3D      min;
+    aiVector3D      max;
 
-	//! AABB of the model
-	aiVector3D		bbmin;
-	aiVector3D		bbmax;
+    //! AABB of the model
+    aiVector3D      bbmin;
+    aiVector3D      bbmax;
 
-	// File flags
-	int32_t			flags;
+    // File flags
+    int32_t         flags;
 
-	//! NUmber of bones contained in the file
-	int32_t			numbones;
-	int32_t			boneindex;
+    //! NUmber of bones contained in the file
+    int32_t         numbones;
+    int32_t         boneindex;
 
-	//! Number of bone controllers for bone animation
-	int32_t			numbonecontrollers;
-	int32_t			bonecontrollerindex;
+    //! Number of bone controllers for bone animation
+    int32_t         numbonecontrollers;
+    int32_t         bonecontrollerindex;
 
-	//! More bounding boxes ...
-	int32_t			numhitboxes;
-	int32_t			hitboxindex;
+    //! More bounding boxes ...
+    int32_t         numhitboxes;
+    int32_t         hitboxindex;
 
-	//! Animation sequences in the file
-	int32_t			numseq;
-	int32_t			seqindex;
+    //! Animation sequences in the file
+    int32_t         numseq;
+    int32_t         seqindex;
 
-	//! Loaded sequences. Ignored
-	int32_t			numseqgroups;
-	int32_t			seqgroupindex;
+    //! Loaded sequences. Ignored
+    int32_t         numseqgroups;
+    int32_t         seqgroupindex;
 
-	//! Raw texture data
-	int32_t			numtextures;
-	int32_t			textureindex;
-	int32_t			texturedataindex;
+    //! Raw texture data
+    int32_t         numtextures;
+    int32_t         textureindex;
+    int32_t         texturedataindex;
 
-	//! Number of skins (=textures?)
-	int32_t			numskinref;
-	int32_t			numskinfamilies;
-	int32_t			skinindex;
+    //! Number of skins (=textures?)
+    int32_t         numskinref;
+    int32_t         numskinfamilies;
+    int32_t         skinindex;
 
-	//! Number of parts
-	int32_t			numbodyparts;
-	int32_t			bodypartindex;
+    //! Number of parts
+    int32_t         numbodyparts;
+    int32_t         bodypartindex;
 
-	//! attachable points for gameplay and physics
-	int32_t			numattachments;
-	int32_t			attachmentindex;
+    //! attachable points for gameplay and physics
+    int32_t         numattachments;
+    int32_t         attachmentindex;
 
-	//! Table of sound effects associated with the model
-	int32_t			soundtable;
-	int32_t			soundindex;
-	int32_t			soundgroups;
-	int32_t			soundgroupindex;
+    //! Table of sound effects associated with the model
+    int32_t         soundtable;
+    int32_t         soundindex;
+    int32_t         soundgroups;
+    int32_t         soundgroupindex;
 
-	//! Number of animation transitions
-	int32_t			numtransitions;
-	int32_t			transitionindex;
+    //! Number of animation transitions
+    int32_t         numtransitions;
+    int32_t         transitionindex;
 } PACK_STRUCT;
 
 #include "./../include/assimp/Compiler/poppack1.h"

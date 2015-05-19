@@ -55,43 +55,43 @@ namespace Assimp
 namespace Ogre
 {
 
-/**	Importer for Ogre mesh, skeleton and material formats.
-	@todo Support vertex colors.
-	@todo Support poses/animations from the mesh file.
-	Currently only skeleton file animations are supported. */
+/** Importer for Ogre mesh, skeleton and material formats.
+    @todo Support vertex colors.
+    @todo Support poses/animations from the mesh file.
+    Currently only skeleton file animations are supported. */
 class OgreImporter : public BaseImporter
 {
 public:
-	/// BaseImporter override.
-	virtual bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
+    /// BaseImporter override.
+    virtual bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
 
-	/// BaseImporter override.
-	virtual void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
+    /// BaseImporter override.
+    virtual void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
 
-	/// BaseImporter override.
-	virtual const aiImporterDesc *GetInfo() const;
+    /// BaseImporter override.
+    virtual const aiImporterDesc *GetInfo() const;
 
-	/// BaseImporter override.
-	virtual void SetupProperties(const Importer *pImp);
+    /// BaseImporter override.
+    virtual void SetupProperties(const Importer *pImp);
 
 private:
-	/// Read materials referenced by the @c mesh to @c pScene.
-	void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, Mesh *mesh);
-	void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, MeshXml *mesh);
-	void AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials);
+    /// Read materials referenced by the @c mesh to @c pScene.
+    void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, Mesh *mesh);
+    void ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIOHandler, aiScene *pScene, MeshXml *mesh);
+    void AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials);
 
-	/// Reads material
-	aiMaterial* ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string &MaterialName);
+    /// Reads material
+    aiMaterial* ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string &MaterialName);
 
-	// These functions parse blocks from a material file from @c ss. Starting parsing from "{" and ending it to "}".
-	bool ReadTechnique(const std::string &techniqueName, std::stringstream &ss, aiMaterial *material);
-	bool ReadPass(const std::string &passName, std::stringstream &ss, aiMaterial *material);
-	bool ReadTextureUnit(const std::string &textureUnitName, std::stringstream &ss, aiMaterial *material);
+    // These functions parse blocks from a material file from @c ss. Starting parsing from "{" and ending it to "}".
+    bool ReadTechnique(const std::string &techniqueName, std::stringstream &ss, aiMaterial *material);
+    bool ReadPass(const std::string &passName, std::stringstream &ss, aiMaterial *material);
+    bool ReadTextureUnit(const std::string &textureUnitName, std::stringstream &ss, aiMaterial *material);
 
-	std::string m_userDefinedMaterialLibFile;
-	bool m_detectTextureTypeFromFilename;
+    std::string m_userDefinedMaterialLibFile;
+    bool m_detectTextureTypeFromFilename;
 
-	std::map<aiTextureType, unsigned int> m_textures;
+    std::map<aiTextureType, unsigned int> m_textures;
 };
 } // Ogre
 } // Assimp

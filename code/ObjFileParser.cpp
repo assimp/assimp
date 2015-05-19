@@ -61,7 +61,7 @@ namespace Assimp {
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
-//	Constructor with loaded data and directories.
+//  Constructor with loaded data and directories.
 ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem *io ) :
     m_DataIt(Data.begin()),
     m_DataItEnd(Data.end()),
@@ -86,7 +86,7 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 }
 
 // -------------------------------------------------------------------
-//	Destructor
+//  Destructor
 ObjFileParser::~ObjFileParser()
 {
     delete m_pModel;
@@ -94,14 +94,14 @@ ObjFileParser::~ObjFileParser()
 }
 
 // -------------------------------------------------------------------
-//	Returns a pointer to the model instance.
+//  Returns a pointer to the model instance.
 ObjFile::Model *ObjFileParser::GetModel() const
 {
     return m_pModel;
 }
 
 // -------------------------------------------------------------------
-//	File parsing method.
+//  File parsing method.
 void ObjFileParser::parseFile()
 {
     if (m_DataIt == m_DataItEnd)
@@ -187,7 +187,7 @@ void ObjFileParser::parseFile()
 }
 
 // -------------------------------------------------------------------
-//	Copy the next word in a temporary buffer
+//  Copy the next word in a temporary buffer
 void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
 {
     size_t index = 0;
@@ -272,7 +272,7 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
 }
 
 // -------------------------------------------------------------------
-//	Get values for a new 3D vector instance
+//  Get values for a new 3D vector instance
 void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
     float x, y, z;
     copyNextWord(m_buffer, BUFFERSIZE);
@@ -289,7 +289,7 @@ void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
 }
 
 // -------------------------------------------------------------------
-//	Get values for a new 2D vector instance
+//  Get values for a new 2D vector instance
 void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
     float x, y;
     copyNextWord(m_buffer, BUFFERSIZE);
@@ -304,7 +304,7 @@ void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
 }
 
 // -------------------------------------------------------------------
-//	Get values for a new face instance
+//  Get values for a new face instance
 void ObjFileParser::getFace(aiPrimitiveType type)
 {
     copyNextLine(m_buffer, BUFFERSIZE);
@@ -451,15 +451,15 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 }
 
 // -------------------------------------------------------------------
-//	Get values for a new material description
+//  Get values for a new material description
 void ObjFileParser::getMaterialDesc()
 {
     // Each material request a new object.
     // Sometimes the object is already created (see 'o' tag by example), but it is not initialized !
     // So, we create a new object only if the current on is already initialized !
     if (m_pModel->m_pCurrent != NULL &&
-        (	m_pModel->m_pCurrent->m_Meshes.size() > 1 ||
-            (m_pModel->m_pCurrent->m_Meshes.size() == 1 && m_pModel->m_Meshes[m_pModel->m_pCurrent->m_Meshes[0]]->m_Faces.size() != 0)	)
+        (   m_pModel->m_pCurrent->m_Meshes.size() > 1 ||
+            (m_pModel->m_pCurrent->m_Meshes.size() == 1 && m_pModel->m_Meshes[m_pModel->m_pCurrent->m_Meshes[0]]->m_Faces.size() != 0)  )
         )
         m_pModel->m_pCurrent = NULL;
 
@@ -502,7 +502,7 @@ void ObjFileParser::getMaterialDesc()
 }
 
 // -------------------------------------------------------------------
-//	Get a comment, values will be skipped
+//  Get a comment, values will be skipped
 void ObjFileParser::getComment()
 {
     while (m_DataIt != m_DataItEnd)
@@ -520,7 +520,7 @@ void ObjFileParser::getComment()
 }
 
 // -------------------------------------------------------------------
-//	Get material library from file.
+//  Get material library from file.
 void ObjFileParser::getMaterialLib()
 {
     // Translate tuple
@@ -555,7 +555,7 @@ void ObjFileParser::getMaterialLib()
 }
 
 // -------------------------------------------------------------------
-//	Set a new material definition as the current material.
+//  Set a new material definition as the current material.
 void ObjFileParser::getNewMaterial()
 {
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
@@ -608,7 +608,7 @@ int ObjFileParser::getMaterialIndex( const std::string &strMaterialName )
 }
 
 // -------------------------------------------------------------------
-//	Getter for a group name.
+//  Getter for a group name.
 void ObjFileParser::getGroupName()
 {
     std::string strGroupName;
@@ -644,7 +644,7 @@ void ObjFileParser::getGroupName()
 }
 
 // -------------------------------------------------------------------
-//	Not supported
+//  Not supported
 void ObjFileParser::getGroupNumber()
 {
     // Not used
@@ -653,7 +653,7 @@ void ObjFileParser::getGroupNumber()
 }
 
 // -------------------------------------------------------------------
-//	Not supported
+//  Not supported
 void ObjFileParser::getGroupNumberAndResolution()
 {
     // Not used
@@ -662,8 +662,8 @@ void ObjFileParser::getGroupNumberAndResolution()
 }
 
 // -------------------------------------------------------------------
-//	Stores values for a new object instance, name will be used to
-//	identify it.
+//  Stores values for a new object instance, name will be used to
+//  identify it.
 void ObjFileParser::getObjectName()
 {
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
@@ -701,7 +701,7 @@ void ObjFileParser::getObjectName()
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 // -------------------------------------------------------------------
-//	Creates a new object instance
+//  Creates a new object instance
 void ObjFileParser::createObject(const std::string &strObjectName)
 {
     ai_assert( NULL != m_pModel );
@@ -721,7 +721,7 @@ void ObjFileParser::createObject(const std::string &strObjectName)
     }
 }
 // -------------------------------------------------------------------
-//	Creates a new mesh
+//  Creates a new mesh
 void ObjFileParser::createMesh()
 {
     ai_assert( NULL != m_pModel );
@@ -739,7 +739,7 @@ void ObjFileParser::createMesh()
 }
 
 // -------------------------------------------------------------------
-//	Returns true, if a new mesh must be created.
+//  Returns true, if a new mesh must be created.
 bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
 {
     if(m_pModel->m_pCurrentMesh == 0)
@@ -760,7 +760,7 @@ bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
 }
 
 // -------------------------------------------------------------------
-//	Shows an error in parsing process.
+//  Shows an error in parsing process.
 void ObjFileParser::reportErrorTokenInFace()
 {
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -769,6 +769,6 @@ void ObjFileParser::reportErrorTokenInFace()
 
 // -------------------------------------------------------------------
 
-}	// Namespace Assimp
+}   // Namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_OBJ_IMPORTER

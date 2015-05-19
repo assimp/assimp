@@ -65,88 +65,88 @@ namespace Assimp
 class ColladaExporter
 {
 public:
-	/// Constructor for a specific scene to export
-	ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
+    /// Constructor for a specific scene to export
+    ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file);
 
-	/// Destructor
-	virtual ~ColladaExporter();
+    /// Destructor
+    virtual ~ColladaExporter();
 
 protected:
-	/// Starts writing the contents
-	void WriteFile();
+    /// Starts writing the contents
+    void WriteFile();
 
-	/// Writes the asset header
-	void WriteHeader();
+    /// Writes the asset header
+    void WriteHeader();
 
-	/// Writes the embedded textures
-	void WriteTextures();
+    /// Writes the embedded textures
+    void WriteTextures();
 
-	/// Writes the material setup
-	void WriteMaterials();
+    /// Writes the material setup
+    void WriteMaterials();
 
-	/// Writes the cameras library
-	void WriteCamerasLibrary();
+    /// Writes the cameras library
+    void WriteCamerasLibrary();
 
-	// Write a camera entry
-	void WriteCamera(size_t pIndex);
+    // Write a camera entry
+    void WriteCamera(size_t pIndex);
 
-	/// Writes the cameras library
-	void WriteLightsLibrary();
+    /// Writes the cameras library
+    void WriteLightsLibrary();
 
-	// Write a camera entry
-	void WriteLight(size_t pIndex);
-	void WritePointLight(const aiLight *const light);
-	void WriteDirectionalLight(const aiLight *const light);
-	void WriteSpotLight(const aiLight *const light);
-	void WriteAmbienttLight(const aiLight *const light);
+    // Write a camera entry
+    void WriteLight(size_t pIndex);
+    void WritePointLight(const aiLight *const light);
+    void WriteDirectionalLight(const aiLight *const light);
+    void WriteSpotLight(const aiLight *const light);
+    void WriteAmbienttLight(const aiLight *const light);
 
-	/// Writes the geometry library
-	void WriteGeometryLibrary();
+    /// Writes the geometry library
+    void WriteGeometryLibrary();
 
-	/// Writes the given mesh
-	void WriteGeometry( size_t pIndex);
+    /// Writes the given mesh
+    void WriteGeometry( size_t pIndex);
 
-	enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
+    enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
 
-	/// Writes a float array of the given type
-	void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount);
+    /// Writes a float array of the given type
+    void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount);
 
-	/// Writes the scene library
-	void WriteSceneLibrary();
+    /// Writes the scene library
+    void WriteSceneLibrary();
 
-	/// Recursively writes the given node
-	void WriteNode( aiNode* pNode);
+    /// Recursively writes the given node
+    void WriteNode( aiNode* pNode);
 
-	/// Enters a new xml element, which increases the indentation
-	void PushTag() { startstr.append( "  "); }
-	/// Leaves an element, decreasing the indentation
-	void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
+    /// Enters a new xml element, which increases the indentation
+    void PushTag() { startstr.append( "  "); }
+    /// Leaves an element, decreasing the indentation
+    void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
 
-	/// Creates a mesh ID for the given mesh
-	std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + boost::lexical_cast<std::string> (pIndex); }
+    /// Creates a mesh ID for the given mesh
+    std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + boost::lexical_cast<std::string> (pIndex); }
 
 public:
-	/// Stringstream to write all output into
-	std::stringstream mOutput;
+    /// Stringstream to write all output into
+    std::stringstream mOutput;
 
 protected:
-	/// The IOSystem for output
-	IOSystem* mIOSystem;
+    /// The IOSystem for output
+    IOSystem* mIOSystem;
 
-	/// Path of the directory where the scene will be exported
-	const std::string mPath;
+    /// Path of the directory where the scene will be exported
+    const std::string mPath;
 
-	/// Name of the file (without extension) where the scene will be exported
-	const std::string mFile;
+    /// Name of the file (without extension) where the scene will be exported
+    const std::string mFile;
 
-	/// The scene to be written
-	const aiScene* mScene;
-	bool mSceneOwned;
+    /// The scene to be written
+    const aiScene* mScene;
+    bool mSceneOwned;
 
-	/// current line start string, contains the current indentation for simple stream insertion
-	std::string startstr;
-	/// current line end string for simple stream insertion
-	std::string endstr;
+    /// current line start string, contains the current indentation for simple stream insertion
+    std::string startstr;
+    /// current line end string for simple stream insertion
+    std::string endstr;
 
   // pair of color and texture - texture precedences color
   struct Surface
@@ -161,8 +161,8 @@ protected:
   struct Property
   {
     bool exist;
-	 float value;
-	 Property()
+     float value;
+     Property()
          : exist(false)
          , value(0.0f)
      {}
@@ -174,7 +174,7 @@ protected:
     std::string name;
     std::string shading_model;
     Surface ambient, diffuse, specular, emissive, reflective, transparent, normal;
-   	Property shininess, transparency, index_refraction;
+    Property shininess, transparency, index_refraction;
 
     Material() {}
   };

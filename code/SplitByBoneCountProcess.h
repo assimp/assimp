@@ -63,45 +63,45 @@ class SplitByBoneCountProcess : public BaseProcess
 {
 public:
 
-	SplitByBoneCountProcess();
-	~SplitByBoneCountProcess();
+    SplitByBoneCountProcess();
+    ~SplitByBoneCountProcess();
 
 public:
-	/** Returns whether the processing step is present in the given flag.
-	* @param pFlags The processing flags the importer was called with. A
- 	*   bitwise combination of #aiPostProcessSteps.
-	* @return true if the process is present in this flag fields,
- 	*   false if not.
-	*/
-	bool IsActive( unsigned int pFlags) const;
+    /** Returns whether the processing step is present in the given flag.
+    * @param pFlags The processing flags the importer was called with. A
+    *   bitwise combination of #aiPostProcessSteps.
+    * @return true if the process is present in this flag fields,
+    *   false if not.
+    */
+    bool IsActive( unsigned int pFlags) const;
 
-	/** Called prior to ExecuteOnScene().
-	* The function is a request to the process to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
-	virtual void SetupProperties(const Importer* pImp);
+    /** Called prior to ExecuteOnScene().
+    * The function is a request to the process to update its configuration
+    * basing on the Importer's configuration property list.
+    */
+    virtual void SetupProperties(const Importer* pImp);
 
 protected:
-	/** Executes the post processing step on the given imported data.
-	* At the moment a process is not supposed to fail.
-	* @param pScene The imported data to work at.
-	*/
-	void Execute( aiScene* pScene);
+    /** Executes the post processing step on the given imported data.
+    * At the moment a process is not supposed to fail.
+    * @param pScene The imported data to work at.
+    */
+    void Execute( aiScene* pScene);
 
-	/// Splits the given mesh by bone count.
-	/// @param pMesh the Mesh to split. Is not changed at all, but might be superfluous in case it was split.
-	/// @param poNewMeshes Array of submeshes created in the process. Empty if splitting was not necessary.
-	void SplitMesh( const aiMesh* pMesh, std::vector<aiMesh*>& poNewMeshes) const;
+    /// Splits the given mesh by bone count.
+    /// @param pMesh the Mesh to split. Is not changed at all, but might be superfluous in case it was split.
+    /// @param poNewMeshes Array of submeshes created in the process. Empty if splitting was not necessary.
+    void SplitMesh( const aiMesh* pMesh, std::vector<aiMesh*>& poNewMeshes) const;
 
-	/// Recursively updates the node's mesh list to account for the changed mesh list
-	void UpdateNode( aiNode* pNode) const;
+    /// Recursively updates the node's mesh list to account for the changed mesh list
+    void UpdateNode( aiNode* pNode) const;
 
 public:
-	/// Max bone count. Splitting occurs if a mesh has more than that number of bones.
-	size_t mMaxBoneCount;
+    /// Max bone count. Splitting occurs if a mesh has more than that number of bones.
+    size_t mMaxBoneCount;
 
-	/// Per mesh index: Array of indices of the new submeshes.
-	std::vector< std::vector<size_t> > mSubMeshIndices;
+    /// Per mesh index: Array of indices of the new submeshes.
+    std::vector< std::vector<size_t> > mSubMeshIndices;
 };
 
 } // end of namespace Assimp

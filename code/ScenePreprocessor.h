@@ -51,7 +51,7 @@ struct aiAnimation;
 struct aiMesh;
 
 class ScenePreprocessorTest;
-namespace Assimp	{
+namespace Assimp    {
 
 // ----------------------------------------------------------------------------------
 /** ScenePreprocessor: Preprocess a scene before any post-processing
@@ -63,58 +63,58 @@ namespace Assimp	{
 // ----------------------------------------------------------------------------------
 class ASSIMP_API ScenePreprocessor
 {
-	// Make ourselves a friend of the corresponding test unit.
-	friend class ::ScenePreprocessorTest;
+    // Make ourselves a friend of the corresponding test unit.
+    friend class ::ScenePreprocessorTest;
 public:
 
-	// ----------------------------------------------------------------
-	/** Default c'tpr. Use SetScene() to assign a scene to the object.
-	 */
-	ScenePreprocessor()
-		:	scene	(NULL)
-	{}
+    // ----------------------------------------------------------------
+    /** Default c'tpr. Use SetScene() to assign a scene to the object.
+     */
+    ScenePreprocessor()
+        :   scene   (NULL)
+    {}
 
-	/** Constructs the object and assigns a specific scene to it
-	 */
-	ScenePreprocessor(aiScene* _scene)
-		:	scene	(_scene)
-	{}
+    /** Constructs the object and assigns a specific scene to it
+     */
+    ScenePreprocessor(aiScene* _scene)
+        :   scene   (_scene)
+    {}
 
-	// ----------------------------------------------------------------
-	/** Assign a (new) scene to the object.
-	 *
-	 *  One 'SceneProcessor' can be used for multiple scenes.
-	 *  Call ProcessScene to have the scene preprocessed.
-	 *  @param sc Scene to be processed.
-	 */
-	void SetScene (aiScene* sc)	{
-		scene = sc;
-	}
+    // ----------------------------------------------------------------
+    /** Assign a (new) scene to the object.
+     *
+     *  One 'SceneProcessor' can be used for multiple scenes.
+     *  Call ProcessScene to have the scene preprocessed.
+     *  @param sc Scene to be processed.
+     */
+    void SetScene (aiScene* sc) {
+        scene = sc;
+    }
 
-	// ----------------------------------------------------------------
-	/** Preprocess the current scene
-	 */
-	void ProcessScene ();
-
-protected:
-
-	// ----------------------------------------------------------------
-	/** Preprocess an animation in the scene
-	 *  @param anim Anim to be preprocessed.
-	 */
-	void ProcessAnimation (aiAnimation* anim);
-
-
-	// ----------------------------------------------------------------
-	/** Preprocess a mesh in the scene
-	 *  @param mesh Mesh to be preprocessed.
-	 */
-	void ProcessMesh (aiMesh* mesh);
+    // ----------------------------------------------------------------
+    /** Preprocess the current scene
+     */
+    void ProcessScene ();
 
 protected:
 
-	//! Scene we're currently working on
-	aiScene* scene;
+    // ----------------------------------------------------------------
+    /** Preprocess an animation in the scene
+     *  @param anim Anim to be preprocessed.
+     */
+    void ProcessAnimation (aiAnimation* anim);
+
+
+    // ----------------------------------------------------------------
+    /** Preprocess a mesh in the scene
+     *  @param mesh Mesh to be preprocessed.
+     */
+    void ProcessMesh (aiMesh* mesh);
+
+protected:
+
+    //! Scene we're currently working on
+    aiScene* scene;
 };
 
 

@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "../include/assimp/types.h"
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** Importer class for the sterolithography STL file format
@@ -55,59 +55,59 @@ namespace Assimp	{
 class STLImporter : public BaseImporter
 {
 public:
-	STLImporter();
-	~STLImporter();
+    STLImporter();
+    ~STLImporter();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file.
-	 * See BaseImporter::CanRead() for details.
-	 */
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+     * See BaseImporter::CanRead() for details.
+     */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure.
-	* See BaseImporter::InternReadFile() for details
-	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+    * See BaseImporter::InternReadFile() for details
+    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 
-	// -------------------------------------------------------------------
-	/** Loads a binary .stl file
-	 * @return true if the default vertex color must be used as material color
-	*/
-	bool LoadBinaryFile();
+    // -------------------------------------------------------------------
+    /** Loads a binary .stl file
+     * @return true if the default vertex color must be used as material color
+    */
+    bool LoadBinaryFile();
 
-	// -------------------------------------------------------------------
-	/** Loads a ASCII text .stl file
-	*/
-	void LoadASCIIFile();
+    // -------------------------------------------------------------------
+    /** Loads a ASCII text .stl file
+    */
+    void LoadASCIIFile();
 
 protected:
 
-	/** Buffer to hold the loaded file */
-	const char* mBuffer;
+    /** Buffer to hold the loaded file */
+    const char* mBuffer;
 
-	/** Size of the file, in bytes */
-	unsigned int fileSize;
+    /** Size of the file, in bytes */
+    unsigned int fileSize;
 
-	/** Output scene */
-	aiScene* pScene;
+    /** Output scene */
+    aiScene* pScene;
 
-	/** Default vertex color */
-	aiColor4D clrColorDefault;
+    /** Default vertex color */
+    aiColor4D clrColorDefault;
 };
 
 } // end of namespace Assimp

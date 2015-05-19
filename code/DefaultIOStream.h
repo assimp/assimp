@@ -47,17 +47,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/importerdesc.h"
 #include "Defines.h"
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ----------------------------------------------------------------------------------
-//!	@class	DefaultIOStream
-//!	@brief	Default IO implementation, use standard IO operations
+//! @class  DefaultIOStream
+//! @brief  Default IO implementation, use standard IO operations
 //! @note   An instance of this class can exist without a valid file handle
 //!         attached to it. All calls fail, but the instance can nevertheless be
 //!         used with no restrictions.
 class DefaultIOStream : public IOStream
 {
-	friend class DefaultIOSystem;
+    friend class DefaultIOSystem;
 #if __ANDROID__
 #if __ANDROID_API__ > 9
 #if defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
@@ -67,72 +67,72 @@ class DefaultIOStream : public IOStream
 #endif // __ANDROID__
 
 protected:
-	DefaultIOStream();
-	DefaultIOStream(FILE* pFile, const std::string &strFilename);
+    DefaultIOStream();
+    DefaultIOStream(FILE* pFile, const std::string &strFilename);
 
 public:
-	/** Destructor public to allow simple deletion to close the file. */
-	~DefaultIOStream ();
+    /** Destructor public to allow simple deletion to close the file. */
+    ~DefaultIOStream ();
 
-	// -------------------------------------------------------------------
-	/// Read from stream
+    // -------------------------------------------------------------------
+    /// Read from stream
     size_t Read(void* pvBuffer,
-		size_t pSize,
-		size_t pCount);
+        size_t pSize,
+        size_t pCount);
 
 
-	// -------------------------------------------------------------------
-	/// Write to stream
+    // -------------------------------------------------------------------
+    /// Write to stream
     size_t Write(const void* pvBuffer,
-		size_t pSize,
-		size_t pCount);
+        size_t pSize,
+        size_t pCount);
 
-	// -------------------------------------------------------------------
-	/// Seek specific position
-	aiReturn Seek(size_t pOffset,
-		aiOrigin pOrigin);
+    // -------------------------------------------------------------------
+    /// Seek specific position
+    aiReturn Seek(size_t pOffset,
+        aiOrigin pOrigin);
 
-	// -------------------------------------------------------------------
-	/// Get current seek position
+    // -------------------------------------------------------------------
+    /// Get current seek position
     size_t Tell() const;
 
-	// -------------------------------------------------------------------
-	/// Get size of file
-	size_t FileSize() const;
+    // -------------------------------------------------------------------
+    /// Get size of file
+    size_t FileSize() const;
 
-	// -------------------------------------------------------------------
-	/// Flush file contents
-	void Flush();
+    // -------------------------------------------------------------------
+    /// Flush file contents
+    void Flush();
 
 private:
-	//	File datastructure, using clib
-	FILE* mFile;
-	//	Filename
-	std::string	mFilename;
+    //  File datastructure, using clib
+    FILE* mFile;
+    //  Filename
+    std::string mFilename;
 
-	// Cached file size
-	mutable size_t cachedSize;
+    // Cached file size
+    mutable size_t cachedSize;
 };
 
 
 // ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream () :
-	mFile		(NULL),
-	mFilename	(""),
-	cachedSize	(SIZE_MAX)
+    mFile       (NULL),
+    mFilename   (""),
+    cachedSize  (SIZE_MAX)
 {
-	// empty
+    // empty
 }
 
 
 // ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream (FILE* pFile,
-		const std::string &strFilename) :
-	mFile(pFile),
-	mFilename(strFilename),
-	cachedSize	(SIZE_MAX)
+        const std::string &strFilename) :
+    mFile(pFile),
+    mFilename(strFilename),
+    cachedSize  (SIZE_MAX)
 {
-	// empty
+    // empty
 }
 // ----------------------------------------------------------------------------------
 

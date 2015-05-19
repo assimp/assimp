@@ -63,87 +63,87 @@ using namespace HMP;
 class HMPImporter : public MDLImporter
 {
 public:
-	HMPImporter();
-	~HMPImporter();
+    HMPImporter();
+    ~HMPImporter();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file.
-	 * See BaseImporter::CanRead() for details.
-	 */
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+     * See BaseImporter::CanRead() for details.
+     */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
 
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure.
-	* See BaseImporter::InternReadFile() for details
-	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+    * See BaseImporter::InternReadFile() for details
+    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 protected:
 
-	// -------------------------------------------------------------------
-	/** Import a HMP4 file
-	*/
-	void InternReadFile_HMP4( );
+    // -------------------------------------------------------------------
+    /** Import a HMP4 file
+    */
+    void InternReadFile_HMP4( );
 
-	// -------------------------------------------------------------------
-	/** Import a HMP5 file
-	*/
-	void InternReadFile_HMP5( );
+    // -------------------------------------------------------------------
+    /** Import a HMP5 file
+    */
+    void InternReadFile_HMP5( );
 
-	// -------------------------------------------------------------------
-	/** Import a HMP7 file
-	*/
-	void InternReadFile_HMP7( );
+    // -------------------------------------------------------------------
+    /** Import a HMP7 file
+    */
+    void InternReadFile_HMP7( );
 
-	// -------------------------------------------------------------------
-	/** Validate a HMP 5,4,7 file header
-	*/
-	void ValidateHeader_HMP457( );
+    // -------------------------------------------------------------------
+    /** Validate a HMP 5,4,7 file header
+    */
+    void ValidateHeader_HMP457( );
 
-	// -------------------------------------------------------------------
-	/** Try to load one material from the file, if this fails create
-	 * a default material
-	*/
-	void CreateMaterial(const unsigned char* szCurrent,
-		const unsigned char** szCurrentOut);
+    // -------------------------------------------------------------------
+    /** Try to load one material from the file, if this fails create
+     * a default material
+    */
+    void CreateMaterial(const unsigned char* szCurrent,
+        const unsigned char** szCurrentOut);
 
-	// -------------------------------------------------------------------
-	/** Build a list of output faces and vertices. The function
-	 *  triangulates the height map read from the file
-	 * \param width Width of the height field
-	 * \param width Height of the height field
-	*/
-	void CreateOutputFaceList(unsigned int width,unsigned int height);
+    // -------------------------------------------------------------------
+    /** Build a list of output faces and vertices. The function
+     *  triangulates the height map read from the file
+     * \param width Width of the height field
+     * \param width Height of the height field
+    */
+    void CreateOutputFaceList(unsigned int width,unsigned int height);
 
-	// -------------------------------------------------------------------
-	/** Generate planar texture coordinates for a terrain
-	 * \param width Width of the terrain, in vertices
-	 * \param height Height of the terrain, in vertices
-	*/
-	void GenerateTextureCoords(const unsigned int width,
-		const unsigned int height);
+    // -------------------------------------------------------------------
+    /** Generate planar texture coordinates for a terrain
+     * \param width Width of the terrain, in vertices
+     * \param height Height of the terrain, in vertices
+    */
+    void GenerateTextureCoords(const unsigned int width,
+        const unsigned int height);
 
-	// -------------------------------------------------------------------
-	/** Read the first skin from the file and skip all others ...
-	 *  \param iNumSkins Number of skins in the file
-	 *  \param szCursor Position of the first skin (offset 84)
-	*/
-	void ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szCursor,
-		const unsigned char** szCursorOut);
+    // -------------------------------------------------------------------
+    /** Read the first skin from the file and skip all others ...
+     *  \param iNumSkins Number of skins in the file
+     *  \param szCursor Position of the first skin (offset 84)
+    */
+    void ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szCursor,
+        const unsigned char** szCursorOut);
 
 private:
 

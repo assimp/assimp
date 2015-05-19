@@ -66,67 +66,67 @@ class IOSystem;
 class XFileExporter
 {
 public:
-	/// Constructor for a specific scene to export
-	XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
+    /// Constructor for a specific scene to export
+    XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
 
-	/// Destructor
-	virtual ~XFileExporter();
+    /// Destructor
+    virtual ~XFileExporter();
 
 protected:
-	/// Starts writing the contents
-	void WriteFile();
+    /// Starts writing the contents
+    void WriteFile();
 
-	/// Writes the asset header
-	void WriteHeader();
+    /// Writes the asset header
+    void WriteHeader();
 
-	/// write a frame transform
-	void WriteFrameTransform(aiMatrix4x4& m);
+    /// write a frame transform
+    void WriteFrameTransform(aiMatrix4x4& m);
 
-	/// Recursively writes the given node
-	void WriteNode( aiNode* pNode );
+    /// Recursively writes the given node
+    void WriteNode( aiNode* pNode );
 
-	/// write a mesh entry of the scene
-	void WriteMesh( aiMesh* mesh);
+    /// write a mesh entry of the scene
+    void WriteMesh( aiMesh* mesh);
 
-	/// Enters a new xml element, which increases the indentation
-	void PushTag() { startstr.append( "  "); }
+    /// Enters a new xml element, which increases the indentation
+    void PushTag() { startstr.append( "  "); }
 
-	/// Leaves an element, decreasing the indentation
-	void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
+    /// Leaves an element, decreasing the indentation
+    void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
 
 public:
-	/// Stringstream to write all output into
-	std::stringstream mOutput;
+    /// Stringstream to write all output into
+    std::stringstream mOutput;
 
 protected:
 
-	/// normalize the name to be accepted by xfile readers
-	std::string toXFileString(aiString &name);
+    /// normalize the name to be accepted by xfile readers
+    std::string toXFileString(aiString &name);
 
-	/// hold the properties pointer
-	const ExportProperties* mProperties;
+    /// hold the properties pointer
+    const ExportProperties* mProperties;
 
-	/// write a path
-	void writePath(aiString path);
+    /// write a path
+    void writePath(aiString path);
 
-	/// The IOSystem for output
-	IOSystem* mIOSystem;
+    /// The IOSystem for output
+    IOSystem* mIOSystem;
 
-	/// Path of the directory where the scene will be exported
-	const std::string mPath;
+    /// Path of the directory where the scene will be exported
+    const std::string mPath;
 
-	/// Name of the file (without extension) where the scene will be exported
-	const std::string mFile;
+    /// Name of the file (without extension) where the scene will be exported
+    const std::string mFile;
 
-	/// The scene to be written
-	const aiScene* mScene;
-	bool mSceneOwned;
+    /// The scene to be written
+    const aiScene* mScene;
+    bool mSceneOwned;
 
-	/// current line start string, contains the current indentation for simple stream insertion
-	std::string startstr;
+    /// current line start string, contains the current indentation for simple stream insertion
+    std::string startstr;
 
-	/// current line end string for simple stream insertion
-	std::string endstr;
+    /// current line end string for simple stream insertion
+    std::string endstr;
 
 };
 

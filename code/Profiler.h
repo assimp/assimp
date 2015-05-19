@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 
 namespace Assimp {
-	namespace Profiling {
+    namespace Profiling {
 
-		using namespace Formatter;
+        using namespace Formatter;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -65,34 +65,34 @@ class Profiler
 
 public:
 
-	Profiler() {}
+    Profiler() {}
 
 public:
 
-	/** Start a named timer */
-	void BeginRegion(const std::string& region) {
-		regions[region] = boost::timer();
-		DefaultLogger::get()->debug((format("START `"),region,"`"));
-	}
+    /** Start a named timer */
+    void BeginRegion(const std::string& region) {
+        regions[region] = boost::timer();
+        DefaultLogger::get()->debug((format("START `"),region,"`"));
+    }
 
 
-	/** End a specific named timer and write its end time to the log */
-	void EndRegion(const std::string& region) {
-		RegionMap::const_iterator it = regions.find(region);
-		if (it == regions.end()) {
-			return;
-		}
+    /** End a specific named timer and write its end time to the log */
+    void EndRegion(const std::string& region) {
+        RegionMap::const_iterator it = regions.find(region);
+        if (it == regions.end()) {
+            return;
+        }
 
-		DefaultLogger::get()->debug((format("END   `"),region,"`, dt= ",(*it).second.elapsed()," s"));
-	}
+        DefaultLogger::get()->debug((format("END   `"),region,"`, dt= ",(*it).second.elapsed()," s"));
+    }
 
 private:
 
-	typedef std::map<std::string,boost::timer> RegionMap;
-	RegionMap regions;
+    typedef std::map<std::string,boost::timer> RegionMap;
+    RegionMap regions;
 };
 
-	}
+    }
 }
 
 #endif

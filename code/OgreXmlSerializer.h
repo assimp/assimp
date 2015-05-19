@@ -57,56 +57,56 @@ typedef boost::shared_ptr<XmlReader> XmlReaderPtr;
 class OgreXmlSerializer
 {
 public:
-	/// Imports mesh and returns the result.
-	/** @note Fatal unrecoverable errors will throw a DeadlyImportError. */
-	static MeshXml *ImportMesh(XmlReader *reader);
+    /// Imports mesh and returns the result.
+    /** @note Fatal unrecoverable errors will throw a DeadlyImportError. */
+    static MeshXml *ImportMesh(XmlReader *reader);
 
-	/// Imports skeleton to @c mesh.
-	/** If mesh does not have a skeleton reference or the skeleton file
-		cannot be found it is not a fatal DeadlyImportError.
-		@return If skeleton import was successful. */
-	static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
-	static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
+    /// Imports skeleton to @c mesh.
+    /** If mesh does not have a skeleton reference or the skeleton file
+        cannot be found it is not a fatal DeadlyImportError.
+        @return If skeleton import was successful. */
+    static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, MeshXml *mesh);
+    static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
 
 private:
-	OgreXmlSerializer(XmlReader *reader) :
-		m_reader(reader)
-	{
-	}
+    OgreXmlSerializer(XmlReader *reader) :
+        m_reader(reader)
+    {
+    }
 
-	static XmlReaderPtr OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename);
+    static XmlReaderPtr OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename);
 
-	// Mesh
-	void ReadMesh(MeshXml *mesh);
-	void ReadSubMesh(MeshXml *mesh);
+    // Mesh
+    void ReadMesh(MeshXml *mesh);
+    void ReadSubMesh(MeshXml *mesh);
 
-	void ReadGeometry(VertexDataXml *dest);
-	void ReadGeometryVertexBuffer(VertexDataXml *dest);
+    void ReadGeometry(VertexDataXml *dest);
+    void ReadGeometryVertexBuffer(VertexDataXml *dest);
 
-	void ReadBoneAssignments(VertexDataXml *dest);
+    void ReadBoneAssignments(VertexDataXml *dest);
 
-	// Skeleton
-	void ReadSkeleton(Skeleton *skeleton);
+    // Skeleton
+    void ReadSkeleton(Skeleton *skeleton);
 
-	void ReadBones(Skeleton *skeleton);
-	void ReadBoneHierarchy(Skeleton *skeleton);
+    void ReadBones(Skeleton *skeleton);
+    void ReadBoneHierarchy(Skeleton *skeleton);
 
-	void ReadAnimations(Skeleton *skeleton);
-	void ReadAnimationTracks(Animation *dest);
-	void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest);
+    void ReadAnimations(Skeleton *skeleton);
+    void ReadAnimationTracks(Animation *dest);
+    void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest);
 
-	template<typename T>
-	T ReadAttribute(const std::string &name) const;
-	bool HasAttribute(const std::string &name) const;
+    template<typename T>
+    T ReadAttribute(const std::string &name) const;
+    bool HasAttribute(const std::string &name) const;
 
-	std::string &NextNode();
-	std::string &SkipCurrentNode();
+    std::string &NextNode();
+    std::string &SkipCurrentNode();
 
-	bool CurrentNodeNameEquals(const std::string &name) const;
-	std::string CurrentNodeName(bool forceRead = false);
+    bool CurrentNodeNameEquals(const std::string &name) const;
+    std::string CurrentNodeName(bool forceRead = false);
 
-	XmlReader *m_reader;
-	std::string m_currentNodeName;
+    XmlReader *m_reader;
+    std::string m_currentNodeName;
 };
 
 } // Ogre

@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/mesh.h"
 
 class RemoveRedundantMatsTest;
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** RemoveRedundantMatsProcess: Post-processing step to remove redundant
@@ -58,45 +58,45 @@ class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
 {
 public:
     /// The default class constructor.
-	RemoveRedundantMatsProcess();
+    RemoveRedundantMatsProcess();
 
     /// The class destructor.
-	~RemoveRedundantMatsProcess();
+    ~RemoveRedundantMatsProcess();
 
 public:
-	// -------------------------------------------------------------------
-	// Check whether step is active
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    // Check whether step is active
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	// Execute step on a given scene
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    // Execute step on a given scene
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	// Setup import settings
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    // Setup import settings
+    void SetupProperties(const Importer* pImp);
 
 
-	// -------------------------------------------------------------------
-	/** @brief Set list of fixed (unmutable) materials
-	 *  @param fixed See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
-	 */
-	void SetFixedMaterialsString(const std::string& fixed = "") {
-		configFixedMaterials = fixed;
-	}
+    // -------------------------------------------------------------------
+    /** @brief Set list of fixed (unmutable) materials
+     *  @param fixed See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
+     */
+    void SetFixedMaterialsString(const std::string& fixed = "") {
+        configFixedMaterials = fixed;
+    }
 
-	// -------------------------------------------------------------------
-	/** @brief Get list of fixed (unmutable) materials
-	 *  @return See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
-	 */
-	const std::string& GetFixedMaterialsString() const {
-		return configFixedMaterials;
-	}
+    // -------------------------------------------------------------------
+    /** @brief Get list of fixed (unmutable) materials
+     *  @return See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
+     */
+    const std::string& GetFixedMaterialsString() const {
+        return configFixedMaterials;
+    }
 
 private:
 
-	//! Configuration option: list of all fixed materials
-	std::string configFixedMaterials;
+    //! Configuration option: list of all fixed materials
+    std::string configFixedMaterials;
 };
 
 } // end of namespace Assimp

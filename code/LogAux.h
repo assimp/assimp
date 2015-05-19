@@ -56,76 +56,76 @@ class LogFunctions
 
 public:
 
-	// ------------------------------------------------------------------------------------------------
-	static void ThrowException(const std::string& msg)
-	{
-		throw DeadlyImportError(log_prefix+msg);
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void ThrowException(const std::string& msg)
+    {
+        throw DeadlyImportError(log_prefix+msg);
+    }
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogWarn(const Formatter::format& message)	{
-		if (!DefaultLogger::isNullLogger()) {
-			DefaultLogger::get()->warn(log_prefix+(std::string)message);
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogWarn(const Formatter::format& message)   {
+        if (!DefaultLogger::isNullLogger()) {
+            DefaultLogger::get()->warn(log_prefix+(std::string)message);
+        }
+    }
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogError(const Formatter::format& message)	{
-		if (!DefaultLogger::isNullLogger()) {
-			DefaultLogger::get()->error(log_prefix+(std::string)message);
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogError(const Formatter::format& message)  {
+        if (!DefaultLogger::isNullLogger()) {
+            DefaultLogger::get()->error(log_prefix+(std::string)message);
+        }
+    }
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogInfo(const Formatter::format& message)	{
-		if (!DefaultLogger::isNullLogger()) {
-			DefaultLogger::get()->info(log_prefix+(std::string)message);
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogInfo(const Formatter::format& message)   {
+        if (!DefaultLogger::isNullLogger()) {
+            DefaultLogger::get()->info(log_prefix+(std::string)message);
+        }
+    }
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogDebug(const Formatter::format& message)	{
-		if (!DefaultLogger::isNullLogger()) {
-			DefaultLogger::get()->debug(log_prefix+(std::string)message);
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogDebug(const Formatter::format& message)  {
+        if (!DefaultLogger::isNullLogger()) {
+            DefaultLogger::get()->debug(log_prefix+(std::string)message);
+        }
+    }
 
-	// https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462
+    // https://sourceforge.net/tracker/?func=detail&atid=1067632&aid=3358562&group_id=226462
 #if !defined(__GNUC__) || !defined(__APPLE__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogWarn  (const char* message) {
-		if (!DefaultLogger::isNullLogger()) {
-			LogWarn(Formatter::format(message));
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogWarn  (const char* message) {
+        if (!DefaultLogger::isNullLogger()) {
+            LogWarn(Formatter::format(message));
+        }
+    }
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogError  (const char* message) {
-		if (!DefaultLogger::isNullLogger()) {
-			LogError(Formatter::format(message));
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogError  (const char* message) {
+        if (!DefaultLogger::isNullLogger()) {
+            LogError(Formatter::format(message));
+        }
+    }
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogInfo  (const char* message) {
-		if (!DefaultLogger::isNullLogger()) {
-			LogInfo(Formatter::format(message));
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogInfo  (const char* message) {
+        if (!DefaultLogger::isNullLogger()) {
+            LogInfo(Formatter::format(message));
+        }
+    }
 
-	// ------------------------------------------------------------------------------------------------
-	static void LogDebug  (const char* message) {
-		if (!DefaultLogger::isNullLogger()) {
-			LogDebug(Formatter::format(message));
-		}
-	}
+    // ------------------------------------------------------------------------------------------------
+    static void LogDebug  (const char* message) {
+        if (!DefaultLogger::isNullLogger()) {
+            LogDebug(Formatter::format(message));
+        }
+    }
 
 #endif
 
 private:
 
-	static const std::string log_prefix;
+    static const std::string log_prefix;
 
 };
 

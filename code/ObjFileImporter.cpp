@@ -73,7 +73,7 @@ namespace Assimp {
 using namespace std;
 
 // ------------------------------------------------------------------------------------------------
-//	Default constructor
+//  Default constructor
 ObjFileImporter::ObjFileImporter() :
     m_Buffer(),
     m_pRootObject( NULL ),
@@ -84,7 +84,7 @@ ObjFileImporter::ObjFileImporter() :
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Destructor.
+//  Destructor.
 ObjFileImporter::~ObjFileImporter()
 {
     delete m_pRootObject;
@@ -92,7 +92,7 @@ ObjFileImporter::~ObjFileImporter()
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Returns true, if file is an obj file.
+//  Returns true, if file is an obj file.
 bool ObjFileImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const
 {
     if(!checkSig) //Check File Extension
@@ -113,7 +113,7 @@ const aiImporterDesc* ObjFileImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Obj-file import implementation
+//  Obj-file import implementation
 void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     // Read file into memory
@@ -171,7 +171,7 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Create the data from parsed obj-file
+//  Create the data from parsed obj-file
 void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene* pScene) {
     if( 0L == pModel ) {
         return;
@@ -212,7 +212,7 @@ void ObjFileImporter::CreateDataFromImport(const ObjFile::Model* pModel, aiScene
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Creates all nodes of the model
+//  Creates all nodes of the model
 aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile::Object* pObject,
                                      aiNode *pParent, aiScene* pScene,
                                      std::vector<aiMesh*> &MeshArray )
@@ -271,7 +271,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Create topology data
+//  Create topology data
 aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData,
                                          unsigned int meshIndex )
 {
@@ -358,7 +358,7 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Creates a vertex array
+//  Creates a vertex array
 void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
                                         const ObjFile::Object* pCurrentObject,
                                         unsigned int uiMeshIndex,
@@ -483,7 +483,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Counts all stored meshes
+//  Counts all stored meshes
 void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects, int &iNumMeshes)
 {
     iNumMeshes = 0;
@@ -503,7 +503,7 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 }
 
 // ------------------------------------------------------------------------------------------------
-//	 Add clamp mode property to material if necessary
+//   Add clamp mode property to material if necessary
 void ObjFileImporter::addTextureMappingModeProperty(aiMaterial* mat, aiTextureType type, int clampMode)
 {
     ai_assert( NULL != mat);
@@ -512,7 +512,7 @@ void ObjFileImporter::addTextureMappingModeProperty(aiMaterial* mat, aiTextureTy
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Creates the material
+//  Creates the material
 void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pScene )
 {
     ai_assert( NULL != pScene );
@@ -661,7 +661,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 }
 
 // ------------------------------------------------------------------------------------------------
-//	Appends this node to the parent node
+//  Appends this node to the parent node
 void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 {
     // Checking preconditions
@@ -695,6 +695,6 @@ void ObjFileImporter::appendChildToParentNode(aiNode *pParent, aiNode *pChild)
 
 // ------------------------------------------------------------------------------------------------
 
-}	// Namespace Assimp
+}   // Namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_OBJ_IMPORTER

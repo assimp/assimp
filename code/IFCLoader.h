@@ -47,17 +47,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "LogAux.h"
 
-namespace Assimp	{
+namespace Assimp    {
 
-	// TinyFormatter.h
-	namespace Formatter {
-		template <typename T,typename TR, typename A> class basic_formatter;
-		typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
-	}
+    // TinyFormatter.h
+    namespace Formatter {
+        template <typename T,typename TR, typename A> class basic_formatter;
+        typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
+    }
 
-	namespace STEP {
-		class DB;
-	}
+    namespace STEP {
+        class DB;
+    }
 
 
 // -------------------------------------------------------------------------------------------
@@ -70,31 +70,31 @@ namespace Assimp	{
 class IFCImporter : public BaseImporter, public LogFunctions<IFCImporter>
 {
 public:
-	IFCImporter();
-	~IFCImporter();
+    IFCImporter();
+    ~IFCImporter();
 
 
 public:
 
-	// --------------------
-	bool CanRead( const std::string& pFile,
-		IOSystem* pIOHandler,
-		bool checkSig
-	) const;
+    // --------------------
+    bool CanRead( const std::string& pFile,
+        IOSystem* pIOHandler,
+        bool checkSig
+    ) const;
 
 protected:
 
-	// --------------------
-	const aiImporterDesc* GetInfo () const;
+    // --------------------
+    const aiImporterDesc* GetInfo () const;
 
-	// --------------------
-	void SetupProperties(const Importer* pImp);
+    // --------------------
+    void SetupProperties(const Importer* pImp);
 
-	// --------------------
-	void InternReadFile( const std::string& pFile,
-		aiScene* pScene,
-		IOSystem* pIOHandler
-	);
+    // --------------------
+    void InternReadFile( const std::string& pFile,
+        aiScene* pScene,
+        IOSystem* pIOHandler
+    );
 
 private:
 
@@ -102,29 +102,29 @@ private:
 public:
 
 
-	// loader settings, publicly accessible via their corresponding AI_CONFIG constants
-	struct Settings
-	{
-		Settings()
-			: skipSpaceRepresentations()
-			, skipCurveRepresentations()
-			, useCustomTriangulation()
-			, skipAnnotations()
-			, conicSamplingAngle(10.f)
-		{}
+    // loader settings, publicly accessible via their corresponding AI_CONFIG constants
+    struct Settings
+    {
+        Settings()
+            : skipSpaceRepresentations()
+            , skipCurveRepresentations()
+            , useCustomTriangulation()
+            , skipAnnotations()
+            , conicSamplingAngle(10.f)
+        {}
 
 
-		bool skipSpaceRepresentations;
-		bool skipCurveRepresentations;
-		bool useCustomTriangulation;
-		bool skipAnnotations;
-		float conicSamplingAngle;
-	};
+        bool skipSpaceRepresentations;
+        bool skipCurveRepresentations;
+        bool useCustomTriangulation;
+        bool skipAnnotations;
+        float conicSamplingAngle;
+    };
 
 
 private:
 
-	Settings settings;
+    Settings settings;
 
 }; // !class IFCImporter
 

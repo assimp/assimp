@@ -60,18 +60,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-	class Scope;
-	class Parser;
-	class Element;
+    class Scope;
+    class Parser;
+    class Element;
 
-	// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
-	typedef std::vector< Scope* > ScopeList;
-	typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
+    // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+    typedef std::vector< Scope* > ScopeList;
+    typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
-	typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
+    typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
 
-#	define new_Scope new Scope
-#	define new_Element new Element
+#   define new_Scope new Scope
+#   define new_Element new Element
 
 
 /** FBX data entity that consists of a key:value tuple.
@@ -89,28 +89,28 @@ class Element
 {
 public:
 
-	Element(const Token& key_token, Parser& parser);
-	~Element();
+    Element(const Token& key_token, Parser& parser);
+    ~Element();
 
 public:
 
-	const Scope* Compound() const {
-		return compound.get();
-	}
+    const Scope* Compound() const {
+        return compound.get();
+    }
 
-	const Token& KeyToken() const {
-		return key_token;
-	}
+    const Token& KeyToken() const {
+        return key_token;
+    }
 
-	const TokenList& Tokens() const {
-		return tokens;
-	}
+    const TokenList& Tokens() const {
+        return tokens;
+    }
 
 private:
 
-	const Token& key_token;
-	TokenList tokens;
-	boost::scoped_ptr<Scope> compound;
+    const Token& key_token;
+    TokenList tokens;
+    boost::scoped_ptr<Scope> compound;
 };
 
 
@@ -131,27 +131,27 @@ class Scope
 
 public:
 
-	Scope(Parser& parser, bool topLevel = false);
-	~Scope();
+    Scope(Parser& parser, bool topLevel = false);
+    ~Scope();
 
 public:
 
-	const Element* operator[] (const std::string& index) const {
-		ElementMap::const_iterator it = elements.find(index);
-		return it == elements.end() ? NULL : (*it).second;
-	}
+    const Element* operator[] (const std::string& index) const {
+        ElementMap::const_iterator it = elements.find(index);
+        return it == elements.end() ? NULL : (*it).second;
+    }
 
-	ElementCollection GetCollection(const std::string& index) const {
-		return elements.equal_range(index);
-	}
+    ElementCollection GetCollection(const std::string& index) const {
+        return elements.equal_range(index);
+    }
 
-	const ElementMap& Elements() const	{
-		return elements;
-	}
+    const ElementMap& Elements() const  {
+        return elements;
+    }
 
 private:
 
-	ElementMap elements;
+    ElementMap elements;
 };
 
 
@@ -161,43 +161,43 @@ class Parser
 {
 public:
 
-	/** Parse given a token list. Does not take ownership of the tokens -
-	 *  the objects must persist during the entire parser lifetime */
-	Parser (const TokenList& tokens,bool is_binary);
-	~Parser();
+    /** Parse given a token list. Does not take ownership of the tokens -
+     *  the objects must persist during the entire parser lifetime */
+    Parser (const TokenList& tokens,bool is_binary);
+    ~Parser();
 
 public:
 
-	const Scope& GetRootScope() const {
-		return *root.get();
-	}
+    const Scope& GetRootScope() const {
+        return *root.get();
+    }
 
 
-	bool IsBinary() const {
-		return is_binary;
-	}
-
-private:
-
-	friend class Scope;
-	friend class Element;
-
-	TokenPtr AdvanceToNextToken();
-
-	TokenPtr LastToken() const;
-	TokenPtr CurrentToken() const;
-
-
+    bool IsBinary() const {
+        return is_binary;
+    }
 
 private:
 
-	const TokenList& tokens;
+    friend class Scope;
+    friend class Element;
 
-	TokenPtr last, current;
-	TokenList::const_iterator cursor;
-	boost::scoped_ptr<Scope> root;
+    TokenPtr AdvanceToNextToken();
 
-	const bool is_binary;
+    TokenPtr LastToken() const;
+    TokenPtr CurrentToken() const;
+
+
+
+private:
+
+    const TokenList& tokens;
+
+    TokenPtr last, current;
+    TokenList::const_iterator cursor;
+    boost::scoped_ptr<Scope> root;
+
+    const bool is_binary;
 };
 
 

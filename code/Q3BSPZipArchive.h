@@ -52,107 +52,107 @@ namespace Assimp {
 namespace Q3BSP {
 
 // ------------------------------------------------------------------------------------------------
-///	\class		IOSystem2Unzip
-///	\ingroup	Assimp::Q3BSP
+/// \class      IOSystem2Unzip
+/// \ingroup    Assimp::Q3BSP
 ///
-///	\brief
+/// \brief
 // ------------------------------------------------------------------------------------------------
 class IOSystem2Unzip {
 
-	public:
+    public:
 
-		static voidpf open(voidpf opaque, const char* filename, int mode);
+        static voidpf open(voidpf opaque, const char* filename, int mode);
 
-		static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
+        static uLong read(voidpf opaque, voidpf stream, void* buf, uLong size);
 
-		static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
+        static uLong write(voidpf opaque, voidpf stream, const void* buf, uLong size);
 
-		static long tell(voidpf opaque, voidpf stream);
+        static long tell(voidpf opaque, voidpf stream);
 
-		static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
+        static long seek(voidpf opaque, voidpf stream, uLong offset, int origin);
 
-		static int close(voidpf opaque, voidpf stream);
+        static int close(voidpf opaque, voidpf stream);
 
-		static int testerror(voidpf opaque, voidpf stream);
+        static int testerror(voidpf opaque, voidpf stream);
 
-		static zlib_filefunc_def get(IOSystem* pIOHandler);
+        static zlib_filefunc_def get(IOSystem* pIOHandler);
 };
 
 // ------------------------------------------------------------------------------------------------
-///	\class		ZipFile
-///	\ingroup	Assimp::Q3BSP
+/// \class      ZipFile
+/// \ingroup    Assimp::Q3BSP
 ///
-///	\brief
+/// \brief
 // ------------------------------------------------------------------------------------------------
 class ZipFile : public IOStream {
 
-	friend class Q3BSPZipArchive;
+    friend class Q3BSPZipArchive;
 
-	public:
+    public:
 
-		ZipFile(size_t size);
+        ZipFile(size_t size);
 
-		~ZipFile();
+        ~ZipFile();
 
-		size_t Read(void* pvBuffer, size_t pSize, size_t pCount );
+        size_t Read(void* pvBuffer, size_t pSize, size_t pCount );
 
-		size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/);
+        size_t Write(const void* /*pvBuffer*/, size_t /*pSize*/, size_t /*pCount*/);
 
-		size_t FileSize() const;
+        size_t FileSize() const;
 
-		aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/);
+        aiReturn Seek(size_t /*pOffset*/, aiOrigin /*pOrigin*/);
 
-		size_t Tell() const;
+        size_t Tell() const;
 
-		void Flush();
+        void Flush();
 
-	private:
+    private:
 
-		void* m_Buffer;
+        void* m_Buffer;
 
-		size_t m_Size;
+        size_t m_Size;
 };
 
 // ------------------------------------------------------------------------------------------------
-///	\class		Q3BSPZipArchive
-///	\ingroup	Assimp::Q3BSP
+/// \class      Q3BSPZipArchive
+/// \ingroup    Assimp::Q3BSP
 ///
-///	\brief	IMplements a zip archive like the WinZip archives. Will be also used to import data
-///	from a P3K archive ( Quake level format ).
+/// \brief  IMplements a zip archive like the WinZip archives. Will be also used to import data
+/// from a P3K archive ( Quake level format ).
 // ------------------------------------------------------------------------------------------------
 class Q3BSPZipArchive : public Assimp::IOSystem {
 
-	public:
+    public:
 
-		static const unsigned int FileNameSize = 256;
+        static const unsigned int FileNameSize = 256;
 
-	public:
+    public:
 
-		Q3BSPZipArchive(IOSystem* pIOHandler, const std::string & rFile);
+        Q3BSPZipArchive(IOSystem* pIOHandler, const std::string & rFile);
 
-		~Q3BSPZipArchive();
+        ~Q3BSPZipArchive();
 
-		bool Exists(const char* pFile) const;
+        bool Exists(const char* pFile) const;
 
-		char getOsSeparator() const;
+        char getOsSeparator() const;
 
-		IOStream* Open(const char* pFile, const char* pMode = "rb");
+        IOStream* Open(const char* pFile, const char* pMode = "rb");
 
-		void Close(IOStream* pFile);
+        void Close(IOStream* pFile);
 
-		bool isOpen() const;
+        bool isOpen() const;
 
-		void getFileList(std::vector<std::string> &rFileList);
+        void getFileList(std::vector<std::string> &rFileList);
 
-	private:
+    private:
 
-		bool mapArchive();
+        bool mapArchive();
 
-	private:
+    private:
 
-		unzFile m_ZipFileHandle;
+        unzFile m_ZipFileHandle;
 
-		std::map<std::string, ZipFile*> m_ArchiveMap;
+        std::map<std::string, ZipFile*> m_ArchiveMap;
 
 };
 

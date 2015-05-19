@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/Importer.hpp"
 
 namespace Assimp {
-	template<> const std::string LogFunctions<FBXImporter>::log_prefix = "FBX: ";
+    template<> const std::string LogFunctions<FBXImporter>::log_prefix = "FBX: ";
 }
 
 using namespace Assimp;
@@ -70,16 +70,16 @@ using namespace Assimp::FBX;
 
 namespace {
 static const aiImporterDesc desc = {
-	"Autodesk FBX Importer",
-	"",
-	"",
-	"",
-	aiImporterFlags_SupportTextFlavour,
-	0,
-	0,
-	0,
-	0,
-	"fbx"
+    "Autodesk FBX Importer",
+    "",
+    "",
+    "",
+    aiImporterFlags_SupportTextFlavour,
+    0,
+    0,
+    0,
+    0,
+    "fbx"
 };
 }
 
@@ -98,24 +98,24 @@ FBXImporter::~FBXImporter()
 // Returns whether the class can handle the format of the given file.
 bool FBXImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	const std::string& extension = GetExtension(pFile);
-	if (extension == "fbx") {
-		return true;
-	}
+    const std::string& extension = GetExtension(pFile);
+    if (extension == "fbx") {
+        return true;
+    }
 
-	else if ((!extension.length() || checkSig) && pIOHandler)	{
-		// at least ascii FBX files usually have a 'FBX' somewhere in their head
-		const char* tokens[] = {"fbx"};
-		return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
-	}
-	return false;
+    else if ((!extension.length() || checkSig) && pIOHandler)   {
+        // at least ascii FBX files usually have a 'FBX' somewhere in their head
+        const char* tokens[] = {"fbx"};
+        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+    }
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 // List all extensions handled by this loader
 const aiImporterDesc* FBXImporter::GetInfo () const
 {
-	return &desc;
+    return &desc;
 }
 
 
@@ -123,69 +123,69 @@ const aiImporterDesc* FBXImporter::GetInfo () const
 // Setup configuration properties for the loader
 void FBXImporter::SetupProperties(const Importer* pImp)
 {
-	settings.readAllLayers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS, true);
-	settings.readAllMaterials = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_MATERIALS, false);
-	settings.readMaterials = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_MATERIALS, true);
-	settings.readCameras = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_CAMERAS, true);
-	settings.readLights = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_LIGHTS, true);
-	settings.readAnimations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS, true);
-	settings.strictMode = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, false);
-	settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
-	settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
+    settings.readAllLayers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS, true);
+    settings.readAllMaterials = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_MATERIALS, false);
+    settings.readMaterials = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_MATERIALS, true);
+    settings.readCameras = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_CAMERAS, true);
+    settings.readLights = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_LIGHTS, true);
+    settings.readAnimations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS, true);
+    settings.strictMode = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, false);
+    settings.preservePivots = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, true);
+    settings.optimizeEmptyAnimationCurves = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES, true);
 }
 
 
 // ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void FBXImporter::InternReadFile( const std::string& pFile,
-	aiScene* pScene, IOSystem* pIOHandler)
+    aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
-	if (!stream) {
-		ThrowException("Could not open file for reading");
-	}
+    boost::scoped_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
+    if (!stream) {
+        ThrowException("Could not open file for reading");
+    }
 
-	// read entire file into memory - no streaming for this, fbx
-	// files can grow large, but the assimp output data structure
-	// then becomes very large, too. Assimp doesn't support
-	// streaming for its output data structures so the net win with
-	// streaming input data would be very low.
-	std::vector<char> contents;
-	contents.resize(stream->FileSize()+1);
+    // read entire file into memory - no streaming for this, fbx
+    // files can grow large, but the assimp output data structure
+    // then becomes very large, too. Assimp doesn't support
+    // streaming for its output data structures so the net win with
+    // streaming input data would be very low.
+    std::vector<char> contents;
+    contents.resize(stream->FileSize()+1);
     stream->Read( &*contents.begin(), 1, contents.size()-1 );
     contents[ contents.size() - 1 ] = 0;
-	const char* const begin = &*contents.begin();
+    const char* const begin = &*contents.begin();
 
-	// broadphase tokenizing pass in which we identify the core
-	// syntax elements of FBX (brackets, commas, key:value mappings)
-	TokenList tokens;
-	try {
+    // broadphase tokenizing pass in which we identify the core
+    // syntax elements of FBX (brackets, commas, key:value mappings)
+    TokenList tokens;
+    try {
 
-		bool is_binary = false;
-		if (!strncmp(begin,"Kaydara FBX Binary",18)) {
-			is_binary = true;
-			TokenizeBinary(tokens,begin,contents.size());
-		}
-		else {
-			Tokenize(tokens,begin);
-		}
+        bool is_binary = false;
+        if (!strncmp(begin,"Kaydara FBX Binary",18)) {
+            is_binary = true;
+            TokenizeBinary(tokens,begin,contents.size());
+        }
+        else {
+            Tokenize(tokens,begin);
+        }
 
-		// use this information to construct a very rudimentary
-		// parse-tree representing the FBX scope structure
-		Parser parser(tokens, is_binary);
+        // use this information to construct a very rudimentary
+        // parse-tree representing the FBX scope structure
+        Parser parser(tokens, is_binary);
 
-		// take the raw parse-tree and convert it to a FBX DOM
-		Document doc(parser,settings);
+        // take the raw parse-tree and convert it to a FBX DOM
+        Document doc(parser,settings);
 
-		// convert the FBX DOM to aiScene
-		ConvertToAssimpScene(pScene,doc);
+        // convert the FBX DOM to aiScene
+        ConvertToAssimpScene(pScene,doc);
 
-		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
-	}
-	catch(std::exception&) {
-		std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
-		throw;
-	}
+        std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
+    }
+    catch(std::exception&) {
+        std::for_each(tokens.begin(),tokens.end(),Util::delete_fun<Token>());
+        throw;
+    }
 }
 
 #endif // !ASSIMP_BUILD_NO_FBX_IMPORTER

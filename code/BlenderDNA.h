@@ -55,21 +55,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // enable verbose log output. really verbose, so be careful.
 #ifdef ASSIMP_BUILD_DEBUG
-#	define ASSIMP_BUILD_BLENDER_DEBUG
+#   define ASSIMP_BUILD_BLENDER_DEBUG
 #endif
 
 // #define ASSIMP_BUILD_BLENDER_NO_STATS
 
-namespace Assimp	{
-	template <bool,bool> class StreamReader;
-	typedef StreamReader<true,true> StreamReaderAny;
+namespace Assimp    {
+    template <bool,bool> class StreamReader;
+    typedef StreamReader<true,true> StreamReaderAny;
 
-	namespace Blender {
-		class  FileDatabase;
-		struct FileBlockHead;
+    namespace Blender {
+        class  FileDatabase;
+        struct FileBlockHead;
 
-		template <template <typename> class TOUT>
-		class ObjectCache;
+        template <template <typename> class TOUT>
+        class ObjectCache;
 
 // -------------------------------------------------------------------------------
 /** Exception class used by the blender loader to selectively catch exceptions
@@ -80,9 +80,9 @@ namespace Assimp	{
 // -------------------------------------------------------------------------------
 struct Error : DeadlyImportError
 {
-	Error (const std::string& s)
-		: DeadlyImportError(s)
-	{}
+    Error (const std::string& s)
+        : DeadlyImportError(s)
+    {}
 };
 
 // -------------------------------------------------------------------------------
@@ -91,16 +91,16 @@ struct Error : DeadlyImportError
 // -------------------------------------------------------------------------------
 struct ElemBase
 {
-	virtual ~ElemBase() {}
+    virtual ~ElemBase() {}
 
-	/** Type name of the element. The type
-	 * string points is the `c_str` of the `name` attribute of the
-	 * corresponding `Structure`, that is, it is only valid as long
-	 * as the DNA is not modified. The dna_type is only set if the
-	 * data type is not static, i.e. a boost::shared_ptr<ElemBase>
-	 * in the scene description would have its type resolved
-	 * at runtime, so this member is always set. */
-	const char* dna_type;
+    /** Type name of the element. The type
+     * string points is the `c_str` of the `name` attribute of the
+     * corresponding `Structure`, that is, it is only valid as long
+     * as the DNA is not modified. The dna_type is only set if the
+     * data type is not static, i.e. a boost::shared_ptr<ElemBase>
+     * in the scene description would have its type resolved
+     * at runtime, so this member is always set. */
+    const char* dna_type;
 };
 
 
@@ -112,8 +112,8 @@ struct ElemBase
 // -------------------------------------------------------------------------------
 struct Pointer
 {
-	Pointer() : val() {}
-	uint64_t val;
+    Pointer() : val() {}
+    uint64_t val;
 };
 
 // -------------------------------------------------------------------------------
@@ -121,8 +121,8 @@ struct Pointer
 // -------------------------------------------------------------------------------
 struct FileOffset
 {
-	FileOffset() : val() {}
-	uint64_t val;
+    FileOffset() : val() {}
+    uint64_t val;
 };
 
 // -------------------------------------------------------------------------------
@@ -135,16 +135,16 @@ template <typename T>
 class vector : public std::vector<T>
 {
 public:
-	using std::vector<T>::resize;
-	using std::vector<T>::empty;
+    using std::vector<T>::resize;
+    using std::vector<T>::empty;
 
-	void reset() {
-		resize(0);
-	}
+    void reset() {
+        resize(0);
+    }
 
-	operator bool () const {
-		return !empty();
-	}
+    operator bool () const {
+        return !empty();
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -152,8 +152,8 @@ public:
 // -------------------------------------------------------------------------------
 enum FieldFlags
 {
-	FieldFlag_Pointer = 0x1,
-	FieldFlag_Array   = 0x2
+    FieldFlag_Pointer = 0x1,
+    FieldFlag_Array   = 0x2
 };
 
 // -------------------------------------------------------------------------------
@@ -161,18 +161,18 @@ enum FieldFlags
 // -------------------------------------------------------------------------------
 struct Field
 {
-	std::string name;
-	std::string type;
+    std::string name;
+    std::string type;
 
-	size_t size;
-	size_t offset;
+    size_t size;
+    size_t offset;
 
-	/** Size of each array dimension. For flat arrays,
-	 *  the second dimension is set to 1. */
-	size_t array_sizes[2];
+    /** Size of each array dimension. For flat arrays,
+     *  the second dimension is set to 1. */
+    size_t array_sizes[2];
 
-	/** Any of the #FieldFlags enumerated values */
-	unsigned int flags;
+    /** Any of the #FieldFlags enumerated values */
+    unsigned int flags;
 };
 
 // -------------------------------------------------------------------------------
@@ -182,16 +182,16 @@ struct Field
 // -------------------------------------------------------------------------------
 enum ErrorPolicy
 {
-	/** Substitute default value and ignore */
-	ErrorPolicy_Igno,
-	/** Substitute default value and write to log */
-	ErrorPolicy_Warn,
-	/** Substitute a massive error message and crash the whole matrix. Its time for another zion */
-	ErrorPolicy_Fail
+    /** Substitute default value and ignore */
+    ErrorPolicy_Igno,
+    /** Substitute default value and write to log */
+    ErrorPolicy_Warn,
+    /** Substitute a massive error message and crash the whole matrix. Its time for another zion */
+    ErrorPolicy_Fail
 };
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
-#	define ErrorPolicy_Igno ErrorPolicy_Warn
+#   define ErrorPolicy_Igno ErrorPolicy_Warn
 #endif
 
 // -------------------------------------------------------------------------------
@@ -204,202 +204,202 @@ enum ErrorPolicy
 // -------------------------------------------------------------------------------
 class Structure
 {
-	template <template <typename> class> friend class ObjectCache;
+    template <template <typename> class> friend class ObjectCache;
 
 public:
 
-	Structure()
-		:	cache_idx(-1)
-	{}
+    Structure()
+        :   cache_idx(-1)
+    {}
 
 public:
 
-	// publicly accessible members
-	std::string name;
-	vector< Field > fields;
-	std::map<std::string, size_t> indices;
+    // publicly accessible members
+    std::string name;
+    vector< Field > fields;
+    std::map<std::string, size_t> indices;
 
-	size_t size;
-
-public:
-
-	// --------------------------------------------------------
-	/** Access a field of the structure by its canonical name. The pointer version
-	 *  returns NULL on failure while the reference version raises an import error. */
-	inline const Field& operator [] (const std::string& ss) const;
-	inline const Field* Get (const std::string& ss) const;
-
-	// --------------------------------------------------------
-	/** Access a field of the structure by its index */
-	inline const Field& operator [] (const size_t i) const;
-
-	// --------------------------------------------------------
-	inline bool operator== (const Structure& other) const {
-		return name == other.name; // name is meant to be an unique identifier
-	}
-
-	// --------------------------------------------------------
-	inline bool operator!= (const Structure& other) const {
-		return name != other.name;
-	}
+    size_t size;
 
 public:
 
-	// --------------------------------------------------------
-	/** Try to read an instance of the structure from the stream
-	 *  and attempt to convert to `T`. This is done by
-	 *  an appropriate specialization. If none is available,
-	 *  a compiler complain is the result.
-	 *  @param dest Destination value to be written
-	 *  @param db File database, including input stream. */
-	template <typename T> inline void Convert (T& dest,
-		const FileDatabase& db) const;
+    // --------------------------------------------------------
+    /** Access a field of the structure by its canonical name. The pointer version
+     *  returns NULL on failure while the reference version raises an import error. */
+    inline const Field& operator [] (const std::string& ss) const;
+    inline const Field* Get (const std::string& ss) const;
+
+    // --------------------------------------------------------
+    /** Access a field of the structure by its index */
+    inline const Field& operator [] (const size_t i) const;
+
+    // --------------------------------------------------------
+    inline bool operator== (const Structure& other) const {
+        return name == other.name; // name is meant to be an unique identifier
+    }
+
+    // --------------------------------------------------------
+    inline bool operator!= (const Structure& other) const {
+        return name != other.name;
+    }
+
+public:
+
+    // --------------------------------------------------------
+    /** Try to read an instance of the structure from the stream
+     *  and attempt to convert to `T`. This is done by
+     *  an appropriate specialization. If none is available,
+     *  a compiler complain is the result.
+     *  @param dest Destination value to be written
+     *  @param db File database, including input stream. */
+    template <typename T> inline void Convert (T& dest,
+        const FileDatabase& db) const;
 
 
 
-	// --------------------------------------------------------
-	// generic converter
-	template <typename T>
-	void Convert(boost::shared_ptr<ElemBase> in,const FileDatabase& db) const;
+    // --------------------------------------------------------
+    // generic converter
+    template <typename T>
+    void Convert(boost::shared_ptr<ElemBase> in,const FileDatabase& db) const;
 
-	// --------------------------------------------------------
-	// generic allocator
-	template <typename T> boost::shared_ptr<ElemBase> Allocate() const;
+    // --------------------------------------------------------
+    // generic allocator
+    template <typename T> boost::shared_ptr<ElemBase> Allocate() const;
 
 
 
-	// --------------------------------------------------------
-	// field parsing for 1d arrays
-	template <int error_policy, typename T, size_t M>
-	void ReadFieldArray(T (& out)[M], const char* name,
-		const FileDatabase& db) const;
+    // --------------------------------------------------------
+    // field parsing for 1d arrays
+    template <int error_policy, typename T, size_t M>
+    void ReadFieldArray(T (& out)[M], const char* name,
+        const FileDatabase& db) const;
 
-	// --------------------------------------------------------
-	// field parsing for 2d arrays
-	template <int error_policy, typename T, size_t M, size_t N>
-	void ReadFieldArray2(T (& out)[M][N], const char* name,
-		const FileDatabase& db) const;
+    // --------------------------------------------------------
+    // field parsing for 2d arrays
+    template <int error_policy, typename T, size_t M, size_t N>
+    void ReadFieldArray2(T (& out)[M][N], const char* name,
+        const FileDatabase& db) const;
 
-	// --------------------------------------------------------
-	// field parsing for pointer or dynamic array types
-	// (boost::shared_ptr or boost::shared_array)
-	// The return value indicates whether the data was already cached.
-	template <int error_policy, template <typename> class TOUT, typename T>
-	bool ReadFieldPtr(TOUT<T>& out, const char* name,
-		const FileDatabase& db,
-		bool non_recursive = false) const;
+    // --------------------------------------------------------
+    // field parsing for pointer or dynamic array types
+    // (boost::shared_ptr or boost::shared_array)
+    // The return value indicates whether the data was already cached.
+    template <int error_policy, template <typename> class TOUT, typename T>
+    bool ReadFieldPtr(TOUT<T>& out, const char* name,
+        const FileDatabase& db,
+        bool non_recursive = false) const;
 
-	// --------------------------------------------------------
-	// field parsing for static arrays of pointer or dynamic
-	// array types (boost::shared_ptr[] or boost::shared_array[])
-	// The return value indicates whether the data was already cached.
-	template <int error_policy, template <typename> class TOUT, typename T, size_t N>
-	bool ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
-		const FileDatabase& db) const;
+    // --------------------------------------------------------
+    // field parsing for static arrays of pointer or dynamic
+    // array types (boost::shared_ptr[] or boost::shared_array[])
+    // The return value indicates whether the data was already cached.
+    template <int error_policy, template <typename> class TOUT, typename T, size_t N>
+    bool ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
+        const FileDatabase& db) const;
 
-	// --------------------------------------------------------
-	// field parsing for `normal` values
-	// The return value indicates whether the data was already cached.
-	template <int error_policy, typename T>
-	void ReadField(T& out, const char* name,
-		const FileDatabase& db) const;
+    // --------------------------------------------------------
+    // field parsing for `normal` values
+    // The return value indicates whether the data was already cached.
+    template <int error_policy, typename T>
+    void ReadField(T& out, const char* name,
+        const FileDatabase& db) const;
 
 private:
 
-	// --------------------------------------------------------
-	template <template <typename> class TOUT, typename T>
-	bool ResolvePointer(TOUT<T>& out, const Pointer & ptrval,
-		const FileDatabase& db, const Field& f,
-		bool non_recursive = false) const;
+    // --------------------------------------------------------
+    template <template <typename> class TOUT, typename T>
+    bool ResolvePointer(TOUT<T>& out, const Pointer & ptrval,
+        const FileDatabase& db, const Field& f,
+        bool non_recursive = false) const;
 
-	// --------------------------------------------------------
-	template <template <typename> class TOUT, typename T>
-	bool ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
-		const FileDatabase& db, const Field& f, bool) const;
+    // --------------------------------------------------------
+    template <template <typename> class TOUT, typename T>
+    bool ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
+        const FileDatabase& db, const Field& f, bool) const;
 
-	// --------------------------------------------------------
-	bool ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval,
-		const FileDatabase& db, const Field& f, bool) const;
+    // --------------------------------------------------------
+    bool ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval,
+        const FileDatabase& db, const Field& f, bool) const;
 
-	// --------------------------------------------------------
-	inline const FileBlockHead* LocateFileBlockForAddress(
-		const Pointer & ptrval,
-		const FileDatabase& db) const;
-
-private:
-
-	// ------------------------------------------------------------------------------
-	template <typename T> T* _allocate(boost::shared_ptr<T>& out, size_t& s) const {
-		out = boost::shared_ptr<T>(new T());
-		s = 1;
-		return out.get();
-	}
-
-	template <typename T> T* _allocate(vector<T>& out, size_t& s) const {
-		out.resize(s);
-		return s ? &out.front() : NULL;
-	}
-
-	// --------------------------------------------------------
-	template <int error_policy>
-	struct _defaultInitializer {
-
-		template <typename T, unsigned int N>
-		void operator ()(T (& out)[N], const char* = NULL) {
-			for (unsigned int i = 0; i < N; ++i) {
-				out[i] = T();
-			}
-		}
-
-		template <typename T, unsigned int N, unsigned int M>
-		void operator ()(T (& out)[N][M], const char* = NULL) {
-			for (unsigned int i = 0; i < N; ++i) {
-				for (unsigned int j = 0; j < M; ++j) {
-					out[i][j] = T();
-				}
-			}
-		}
-
-		template <typename T>
-		void operator ()(T& out, const char* = NULL) {
-			out = T();
-		}
-	};
+    // --------------------------------------------------------
+    inline const FileBlockHead* LocateFileBlockForAddress(
+        const Pointer & ptrval,
+        const FileDatabase& db) const;
 
 private:
 
-	mutable size_t cache_idx;
+    // ------------------------------------------------------------------------------
+    template <typename T> T* _allocate(boost::shared_ptr<T>& out, size_t& s) const {
+        out = boost::shared_ptr<T>(new T());
+        s = 1;
+        return out.get();
+    }
+
+    template <typename T> T* _allocate(vector<T>& out, size_t& s) const {
+        out.resize(s);
+        return s ? &out.front() : NULL;
+    }
+
+    // --------------------------------------------------------
+    template <int error_policy>
+    struct _defaultInitializer {
+
+        template <typename T, unsigned int N>
+        void operator ()(T (& out)[N], const char* = NULL) {
+            for (unsigned int i = 0; i < N; ++i) {
+                out[i] = T();
+            }
+        }
+
+        template <typename T, unsigned int N, unsigned int M>
+        void operator ()(T (& out)[N][M], const char* = NULL) {
+            for (unsigned int i = 0; i < N; ++i) {
+                for (unsigned int j = 0; j < M; ++j) {
+                    out[i][j] = T();
+                }
+            }
+        }
+
+        template <typename T>
+        void operator ()(T& out, const char* = NULL) {
+            out = T();
+        }
+    };
+
+private:
+
+    mutable size_t cache_idx;
 };
 
 // --------------------------------------------------------
 template <>  struct Structure :: _defaultInitializer<ErrorPolicy_Warn> {
 
-	template <typename T>
-	void operator ()(T& out, const char* reason = "<add reason>") {
-		DefaultLogger::get()->warn(reason);
+    template <typename T>
+    void operator ()(T& out, const char* reason = "<add reason>") {
+        DefaultLogger::get()->warn(reason);
 
-		// ... and let the show go on
-		_defaultInitializer<0 /*ErrorPolicy_Igno*/>()(out);
-	}
+        // ... and let the show go on
+        _defaultInitializer<0 /*ErrorPolicy_Igno*/>()(out);
+    }
 };
 
 template <> struct Structure :: _defaultInitializer<ErrorPolicy_Fail> {
 
-	template <typename T>
-	void operator ()(T& /*out*/,const char* = "") {
-		// obviously, it is crucial that _DefaultInitializer is used
-		// only from within a catch clause.
-		throw;
-	}
+    template <typename T>
+    void operator ()(T& /*out*/,const char* = "") {
+        // obviously, it is crucial that _DefaultInitializer is used
+        // only from within a catch clause.
+        throw;
+    }
 };
 
 // -------------------------------------------------------------------------------------------------------
 template <> inline bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out,
-	const Pointer & ptrval,
-	const FileDatabase& db,
-	const Field& f,
-	bool
-	) const;
+    const Pointer & ptrval,
+    const FileDatabase& db,
+    const Field& f,
+    bool
+    ) const;
 
 
 // -------------------------------------------------------------------------------
@@ -412,106 +412,106 @@ class DNA
 {
 public:
 
-	typedef void (Structure::*ConvertProcPtr) (
-		boost::shared_ptr<ElemBase> in,
-		const FileDatabase&
-	) const;
+    typedef void (Structure::*ConvertProcPtr) (
+        boost::shared_ptr<ElemBase> in,
+        const FileDatabase&
+    ) const;
 
-	typedef boost::shared_ptr<ElemBase> (
-		Structure::*AllocProcPtr) () const;
+    typedef boost::shared_ptr<ElemBase> (
+        Structure::*AllocProcPtr) () const;
 
-	typedef std::pair< AllocProcPtr, ConvertProcPtr > FactoryPair;
-
-public:
-
-	std::map<std::string, FactoryPair > converters;
-	vector<Structure > structures;
-	std::map<std::string, size_t> indices;
+    typedef std::pair< AllocProcPtr, ConvertProcPtr > FactoryPair;
 
 public:
 
-	// --------------------------------------------------------
-	/** Access a structure by its canonical name, the pointer version returns NULL on failure
-	  * while the reference version raises an error. */
-	inline const Structure& operator [] (const std::string& ss) const;
-	inline const Structure* Get (const std::string& ss) const;
-
-	// --------------------------------------------------------
-	/** Access a structure by its index */
-	inline const Structure& operator [] (const size_t i) const;
+    std::map<std::string, FactoryPair > converters;
+    vector<Structure > structures;
+    std::map<std::string, size_t> indices;
 
 public:
 
-	// --------------------------------------------------------
-	/** Add structure definitions for all the primitive types,
-	 *  i.e. integer, short, char, float */
-	void AddPrimitiveStructures();
+    // --------------------------------------------------------
+    /** Access a structure by its canonical name, the pointer version returns NULL on failure
+      * while the reference version raises an error. */
+    inline const Structure& operator [] (const std::string& ss) const;
+    inline const Structure* Get (const std::string& ss) const;
 
-	// --------------------------------------------------------
-	/** Fill the @c converters member with converters for all
-	 *  known data types. The implementation of this method is
-	 *  in BlenderScene.cpp and is machine-generated.
-	 *  Converters are used to quickly handle objects whose
-	 *  exact data type is a runtime-property and not yet
-	 *  known at compile time (consier Object::data).*/
-	void RegisterConverters();
+    // --------------------------------------------------------
+    /** Access a structure by its index */
+    inline const Structure& operator [] (const size_t i) const;
+
+public:
+
+    // --------------------------------------------------------
+    /** Add structure definitions for all the primitive types,
+     *  i.e. integer, short, char, float */
+    void AddPrimitiveStructures();
+
+    // --------------------------------------------------------
+    /** Fill the @c converters member with converters for all
+     *  known data types. The implementation of this method is
+     *  in BlenderScene.cpp and is machine-generated.
+     *  Converters are used to quickly handle objects whose
+     *  exact data type is a runtime-property and not yet
+     *  known at compile time (consier Object::data).*/
+    void RegisterConverters();
 
 
-	// --------------------------------------------------------
-	/** Take an input blob from the stream, interpret it according to
-	 *  a its structure name and convert it to the intermediate
-	 *  representation.
-	 *  @param structure Destination structure definition
-	 *  @param db File database.
-	 *  @return A null pointer if no appropriate converter is available.*/
-	boost::shared_ptr< ElemBase > ConvertBlobToStructure(
-		const Structure& structure,
-		const FileDatabase& db
-		) const;
+    // --------------------------------------------------------
+    /** Take an input blob from the stream, interpret it according to
+     *  a its structure name and convert it to the intermediate
+     *  representation.
+     *  @param structure Destination structure definition
+     *  @param db File database.
+     *  @return A null pointer if no appropriate converter is available.*/
+    boost::shared_ptr< ElemBase > ConvertBlobToStructure(
+        const Structure& structure,
+        const FileDatabase& db
+        ) const;
 
-	// --------------------------------------------------------
-	/** Find a suitable conversion function for a given Structure.
-	 *  Such a converter function takes a blob from the input
-	 *  stream, reads as much as it needs, and builds up a
-	 *  complete object in intermediate representation.
-	 *  @param structure Destination structure definition
-	 *  @param db File database.
-	 *  @return A null pointer in .first if no appropriate converter is available.*/
-	FactoryPair GetBlobToStructureConverter(
-		const Structure& structure,
-		const FileDatabase& db
-		) const;
+    // --------------------------------------------------------
+    /** Find a suitable conversion function for a given Structure.
+     *  Such a converter function takes a blob from the input
+     *  stream, reads as much as it needs, and builds up a
+     *  complete object in intermediate representation.
+     *  @param structure Destination structure definition
+     *  @param db File database.
+     *  @return A null pointer in .first if no appropriate converter is available.*/
+    FactoryPair GetBlobToStructureConverter(
+        const Structure& structure,
+        const FileDatabase& db
+        ) const;
 
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
-	// --------------------------------------------------------
-	/** Dump the DNA to a text file. This is for debugging purposes.
-	 *  The output file is `dna.txt` in the current working folder*/
-	void DumpToFile();
+    // --------------------------------------------------------
+    /** Dump the DNA to a text file. This is for debugging purposes.
+     *  The output file is `dna.txt` in the current working folder*/
+    void DumpToFile();
 #endif
 
-	// --------------------------------------------------------
-	/** Extract array dimensions from a C array declaration, such
-	 *  as `...[4][6]`. Returned string would be `...[][]`.
-	 *  @param out
-	 *  @param array_sizes Receive maximally two array dimensions,
-	 *    the second element is set to 1 if the array is flat.
-	 *    Both are set to 1 if the input is not an array.
-	 *  @throw DeadlyImportError if more than 2 dimensions are
-	 *    encountered. */
-	static void ExtractArraySize(
-		const std::string& out,
-		size_t array_sizes[2]
-	);
+    // --------------------------------------------------------
+    /** Extract array dimensions from a C array declaration, such
+     *  as `...[4][6]`. Returned string would be `...[][]`.
+     *  @param out
+     *  @param array_sizes Receive maximally two array dimensions,
+     *    the second element is set to 1 if the array is flat.
+     *    Both are set to 1 if the input is not an array.
+     *  @throw DeadlyImportError if more than 2 dimensions are
+     *    encountered. */
+    static void ExtractArraySize(
+        const std::string& out,
+        size_t array_sizes[2]
+    );
 };
 
 // special converters for primitive types
-template <> inline void Structure :: Convert<int>		(int& dest,const FileDatabase& db) const;
-template <> inline void Structure :: Convert<short>		(short& dest,const FileDatabase& db) const;
-template <> inline void Structure :: Convert<char>		(char& dest,const FileDatabase& db) const;
-template <> inline void Structure :: Convert<float>		(float& dest,const FileDatabase& db) const;
-template <> inline void Structure :: Convert<double>	(double& dest,const FileDatabase& db) const;
-template <> inline void Structure :: Convert<Pointer>	(Pointer& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<int>       (int& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<short>     (short& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<char>      (char& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<float>     (float& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<double>    (double& dest,const FileDatabase& db) const;
+template <> inline void Structure :: Convert<Pointer>   (Pointer& dest,const FileDatabase& db) const;
 
 // -------------------------------------------------------------------------------
 /** Describes a master file block header. Each master file sections holds n
@@ -519,37 +519,37 @@ template <> inline void Structure :: Convert<Pointer>	(Pointer& dest,const FileD
 // -------------------------------------------------------------------------------
 struct FileBlockHead
 {
-	// points right after the header of the file block
-	StreamReaderAny::pos start;
+    // points right after the header of the file block
+    StreamReaderAny::pos start;
 
-	std::string id;
-	size_t size;
+    std::string id;
+    size_t size;
 
-	// original memory address of the data
-	Pointer address;
+    // original memory address of the data
+    Pointer address;
 
-	// index into DNA
-	unsigned int dna_index;
+    // index into DNA
+    unsigned int dna_index;
 
-	// number of structure instances to follow
-	size_t num;
+    // number of structure instances to follow
+    size_t num;
 
 
 
-	// file blocks are sorted by address to quickly locate specific memory addresses
-	bool operator < (const FileBlockHead& o) const {
-		return address.val < o.address.val;
-	}
+    // file blocks are sorted by address to quickly locate specific memory addresses
+    bool operator < (const FileBlockHead& o) const {
+        return address.val < o.address.val;
+    }
 
-	// for std::upper_bound
-	operator const Pointer& () const {
-		return address;
-	}
+    // for std::upper_bound
+    operator const Pointer& () const {
+        return address;
+    }
 };
 
 // for std::upper_bound
 inline bool operator< (const Pointer& a, const Pointer& b) {
-	return a.val < b.val;
+    return a.val < b.val;
 }
 
 // -------------------------------------------------------------------------------
@@ -559,38 +559,38 @@ class SectionParser
 {
 public:
 
-	// --------------------------------------------------------
-	/** @param stream Inout stream, must point to the
-	 *  first section in the file. Call Next() once
-	 *  to have it read.
-	 *  @param ptr64 Pointer size in file is 64 bits? */
-	SectionParser(StreamReaderAny& stream,bool ptr64)
-		: stream(stream)
-		, ptr64(ptr64)
-	{
-		current.size = current.start = 0;
-	}
+    // --------------------------------------------------------
+    /** @param stream Inout stream, must point to the
+     *  first section in the file. Call Next() once
+     *  to have it read.
+     *  @param ptr64 Pointer size in file is 64 bits? */
+    SectionParser(StreamReaderAny& stream,bool ptr64)
+        : stream(stream)
+        , ptr64(ptr64)
+    {
+        current.size = current.start = 0;
+    }
 
 public:
 
-	// --------------------------------------------------------
-	const FileBlockHead& GetCurrent() const {
-		return current;
-	}
+    // --------------------------------------------------------
+    const FileBlockHead& GetCurrent() const {
+        return current;
+    }
 
 
 public:
 
-	// --------------------------------------------------------
-	/** Advance to the next section.
-	 *  @throw DeadlyImportError if the last chunk was passed. */
-	void Next();
+    // --------------------------------------------------------
+    /** Advance to the next section.
+     *  @throw DeadlyImportError if the last chunk was passed. */
+    void Next();
 
 public:
 
-	FileBlockHead current;
-	StreamReaderAny& stream;
-	bool ptr64;
+    FileBlockHead current;
+    StreamReaderAny& stream;
+    bool ptr64;
 };
 
 
@@ -602,31 +602,31 @@ class Statistics {
 
 public:
 
-	Statistics ()
-		: fields_read		()
-		, pointers_resolved	()
-		, cache_hits		()
-//		, blocks_read		()
-		, cached_objects	()
-	{}
+    Statistics ()
+        : fields_read       ()
+        , pointers_resolved ()
+        , cache_hits        ()
+//      , blocks_read       ()
+        , cached_objects    ()
+    {}
 
 public:
 
-	/** total number of fields we read */
-	unsigned int fields_read;
+    /** total number of fields we read */
+    unsigned int fields_read;
 
-	/** total number of resolved pointers */
-	unsigned int pointers_resolved;
+    /** total number of resolved pointers */
+    unsigned int pointers_resolved;
 
-	/** number of pointers resolved from the cache */
-	unsigned int cache_hits;
+    /** number of pointers resolved from the cache */
+    unsigned int cache_hits;
 
-	/** number of blocks (from  FileDatabase::entries)
-	  we did actually read from. */
-	// unsigned int blocks_read;
+    /** number of blocks (from  FileDatabase::entries)
+      we did actually read from. */
+    // unsigned int blocks_read;
 
-	/** objects in FileData::cache */
-	unsigned int cached_objects;
+    /** objects in FileData::cache */
+    unsigned int cached_objects;
 };
 #endif
 
@@ -639,49 +639,49 @@ class ObjectCache
 {
 public:
 
-	typedef std::map< Pointer, TOUT<ElemBase> > StructureCache;
+    typedef std::map< Pointer, TOUT<ElemBase> > StructureCache;
 
 public:
 
-	ObjectCache(const FileDatabase& db)
-		: db(db)
-	{
-		// currently there are only ~400 structure records per blend file.
-		// we read only a small part of them and don't cache objects
-		// which we don't need, so this should suffice.
-		caches.reserve(64);
-	}
+    ObjectCache(const FileDatabase& db)
+        : db(db)
+    {
+        // currently there are only ~400 structure records per blend file.
+        // we read only a small part of them and don't cache objects
+        // which we don't need, so this should suffice.
+        caches.reserve(64);
+    }
 
 public:
 
-	// --------------------------------------------------------
-	/** Check whether a specific item is in the cache.
-	 *  @param s Data type of the item
-	 *  @param out Output pointer. Unchanged if the
-	 *   cache doens't know the item yet.
-	 *  @param ptr Item address to look for. */
-	template <typename T> void get (
-		const Structure& s,
-		TOUT<T>& out,
-		const Pointer& ptr) const;
+    // --------------------------------------------------------
+    /** Check whether a specific item is in the cache.
+     *  @param s Data type of the item
+     *  @param out Output pointer. Unchanged if the
+     *   cache doens't know the item yet.
+     *  @param ptr Item address to look for. */
+    template <typename T> void get (
+        const Structure& s,
+        TOUT<T>& out,
+        const Pointer& ptr) const;
 
-	// --------------------------------------------------------
-	/** Add an item to the cache after the item has
-	 * been fully read. Do not insert anything that
-	 * may be faulty or might cause the loading
-	 * to abort.
-	 *  @param s Data type of the item
-	 *  @param out Item to insert into the cache
-	 *  @param ptr address (cache key) of the item. */
-	template <typename T> void set
-		(const Structure& s,
-		const TOUT<T>& out,
-		const Pointer& ptr);
+    // --------------------------------------------------------
+    /** Add an item to the cache after the item has
+     * been fully read. Do not insert anything that
+     * may be faulty or might cause the loading
+     * to abort.
+     *  @param s Data type of the item
+     *  @param out Item to insert into the cache
+     *  @param ptr address (cache key) of the item. */
+    template <typename T> void set
+        (const Structure& s,
+        const TOUT<T>& out,
+        const Pointer& ptr);
 
 private:
 
-	mutable vector<StructureCache> caches;
-	const FileDatabase& db;
+    mutable vector<StructureCache> caches;
+    const FileDatabase& db;
 };
 
 // -------------------------------------------------------------------------------
@@ -690,14 +690,14 @@ template <> class ObjectCache<Blender::vector>
 {
 public:
 
-	ObjectCache(const FileDatabase&) {}
+    ObjectCache(const FileDatabase&) {}
 
-	template <typename T> void get(const Structure&, vector<T>&, const Pointer&) {}
-	template <typename T> void set(const Structure&, const vector<T>&, const Pointer&) {}
+    template <typename T> void get(const Structure&, vector<T>&, const Pointer&) {}
+    template <typename T> void set(const Structure&, const vector<T>&, const Pointer&) {}
 };
 
 #ifdef _MSC_VER
-#	pragma warning(disable:4355)
+#   pragma warning(disable:4355)
 #endif
 
 // -------------------------------------------------------------------------------
@@ -706,62 +706,62 @@ public:
 // -------------------------------------------------------------------------------
 class FileDatabase
 {
-	template <template <typename> class TOUT> friend class ObjectCache;
+    template <template <typename> class TOUT> friend class ObjectCache;
 
 public:
 
 
-	FileDatabase()
-		: _cacheArrays(*this)
-		, _cache(*this)
-		, next_cache_idx()
-	{}
+    FileDatabase()
+        : _cacheArrays(*this)
+        , _cache(*this)
+        , next_cache_idx()
+    {}
 
 public:
 
-	// publicly accessible fields
-	bool i64bit;
-	bool little;
+    // publicly accessible fields
+    bool i64bit;
+    bool little;
 
-	DNA dna;
-	boost::shared_ptr< StreamReaderAny > reader;
-	vector< FileBlockHead > entries;
+    DNA dna;
+    boost::shared_ptr< StreamReaderAny > reader;
+    vector< FileBlockHead > entries;
 
 public:
 
-	Statistics& stats() const {
-		return _stats;
-	}
+    Statistics& stats() const {
+        return _stats;
+    }
 
-	// For all our templates to work on both shared_ptr's and vector's
-	// using the same code, a dummy cache for arrays is provided. Actually,
-	// arrays of objects are never cached because we can't easily
-	// ensure their proper destruction.
-	template <typename T>
-	ObjectCache<boost::shared_ptr>& cache(boost::shared_ptr<T>& /*in*/) const {
-		return _cache;
-	}
+    // For all our templates to work on both shared_ptr's and vector's
+    // using the same code, a dummy cache for arrays is provided. Actually,
+    // arrays of objects are never cached because we can't easily
+    // ensure their proper destruction.
+    template <typename T>
+    ObjectCache<boost::shared_ptr>& cache(boost::shared_ptr<T>& /*in*/) const {
+        return _cache;
+    }
 
-	template <typename T>
-	ObjectCache<vector>& cache(vector<T>& /*in*/) const {
-		return _cacheArrays;
-	}
+    template <typename T>
+    ObjectCache<vector>& cache(vector<T>& /*in*/) const {
+        return _cacheArrays;
+    }
 
 private:
 
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
-	mutable Statistics _stats;
+    mutable Statistics _stats;
 #endif
 
-	mutable ObjectCache<vector> _cacheArrays;
-	mutable ObjectCache<boost::shared_ptr> _cache;
+    mutable ObjectCache<vector> _cacheArrays;
+    mutable ObjectCache<boost::shared_ptr> _cache;
 
-	mutable size_t next_cache_idx;
+    mutable size_t next_cache_idx;
 };
 
 #ifdef _MSC_VER
-#	pragma warning(default:4355)
+#   pragma warning(default:4355)
 #endif
 
 // -------------------------------------------------------------------------------
@@ -772,36 +772,36 @@ class DNAParser
 
 public:
 
-	/** Bind the parser to a empty DNA and an input stream */
-	DNAParser(FileDatabase& db)
-		: db(db)
-	{}
+    /** Bind the parser to a empty DNA and an input stream */
+    DNAParser(FileDatabase& db)
+        : db(db)
+    {}
 
 public:
 
-	// --------------------------------------------------------
-	/** Locate the DNA in the file and parse it. The input
-	 *  stream is expected to point to the beginning of the DN1
-	 *  chunk at the time this method is called and is
-	 *  undefined afterwards.
-	 *  @throw DeadlyImportError if the DNA cannot be read.
-	 *  @note The position of the stream pointer is undefined
-	 *    afterwards.*/
-	void Parse ();
+    // --------------------------------------------------------
+    /** Locate the DNA in the file and parse it. The input
+     *  stream is expected to point to the beginning of the DN1
+     *  chunk at the time this method is called and is
+     *  undefined afterwards.
+     *  @throw DeadlyImportError if the DNA cannot be read.
+     *  @note The position of the stream pointer is undefined
+     *    afterwards.*/
+    void Parse ();
 
 public:
 
-	/** Obtain a reference to the extracted DNA information */
-	const Blender::DNA& GetDNA() const {
-		return db.dna;
-	}
+    /** Obtain a reference to the extracted DNA information */
+    const Blender::DNA& GetDNA() const {
+        return db.dna;
+    }
 
 private:
 
-	FileDatabase& db;
+    FileDatabase& db;
 };
 
-	} // end Blend
+    } // end Blend
 } // end Assimp
 
 #include "BlenderDNA.inl"

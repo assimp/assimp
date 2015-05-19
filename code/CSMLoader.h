@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** Importer class to load MOCAPs in CharacterStudio Motion format.
@@ -60,30 +60,30 @@ namespace Assimp	{
 class CSMImporter : public BaseImporter
 {
 public:
-	CSMImporter();
-	~CSMImporter();
+    CSMImporter();
+    ~CSMImporter();
 
 
 public:
-	// -------------------------------------------------------------------
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    void SetupProperties(const Importer* pImp);
 
-	// -------------------------------------------------------------------
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 private:
 
-	bool noSkeletonMesh;
+    bool noSkeletonMesh;
 
 }; // end of class CSMImporter
 } // end of namespace Assimp

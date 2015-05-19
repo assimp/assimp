@@ -54,43 +54,43 @@ struct aiLight;
 struct aiCamera;
 struct aiMaterial;
 
-namespace Assimp	{
+namespace Assimp    {
 
-	// TinyFormatter.h
-	namespace Formatter {
-		template <typename T,typename TR, typename A> class basic_formatter;
-		typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
-	}
+    // TinyFormatter.h
+    namespace Formatter {
+        template <typename T,typename TR, typename A> class basic_formatter;
+        typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
+    }
 
-	// BlenderDNA.h
-	namespace Blender {
-		class  FileDatabase;
-		struct ElemBase;
-	}
+    // BlenderDNA.h
+    namespace Blender {
+        class  FileDatabase;
+        struct ElemBase;
+    }
 
-	// BlenderScene.h
-	namespace Blender {
-		struct Scene;
-		struct Object;
-		struct Mesh;
-		struct Camera;
-		struct Lamp;
-		struct MTex;
-		struct Image;
-		struct Material;
-	}
+    // BlenderScene.h
+    namespace Blender {
+        struct Scene;
+        struct Object;
+        struct Mesh;
+        struct Camera;
+        struct Lamp;
+        struct MTex;
+        struct Image;
+        struct Material;
+    }
 
-	// BlenderIntermediate.h
-	namespace Blender {
-		struct ConversionData;
-		template <template <typename,typename> class TCLASS, typename T> struct TempArray;
-	}
+    // BlenderIntermediate.h
+    namespace Blender {
+        struct ConversionData;
+        template <template <typename,typename> class TCLASS, typename T> struct TempArray;
+    }
 
-	// BlenderModifier.h
-	namespace Blender {
-		class BlenderModifierShowcase;
-		class BlenderModifier;
-	}
+    // BlenderModifier.h
+    namespace Blender {
+        class BlenderModifierShowcase;
+        class BlenderModifier;
+    }
 
 
 
@@ -102,127 +102,127 @@ namespace Assimp	{
 class BlenderImporter : public BaseImporter, public LogFunctions<BlenderImporter>
 {
 public:
-	BlenderImporter();
-	~BlenderImporter();
+    BlenderImporter();
+    ~BlenderImporter();
 
 
 public:
 
-	// --------------------
-	bool CanRead( const std::string& pFile,
-		IOSystem* pIOHandler,
-		bool checkSig
-	) const;
+    // --------------------
+    bool CanRead( const std::string& pFile,
+        IOSystem* pIOHandler,
+        bool checkSig
+    ) const;
 
 protected:
 
-	// --------------------
-	const aiImporterDesc* GetInfo () const;
+    // --------------------
+    const aiImporterDesc* GetInfo () const;
 
-	// --------------------
-	void GetExtensionList(std::set<std::string>& app);
+    // --------------------
+    void GetExtensionList(std::set<std::string>& app);
 
-	// --------------------
-	void SetupProperties(const Importer* pImp);
+    // --------------------
+    void SetupProperties(const Importer* pImp);
 
-	// --------------------
-	void InternReadFile( const std::string& pFile,
-		aiScene* pScene,
-		IOSystem* pIOHandler
-	);
+    // --------------------
+    void InternReadFile( const std::string& pFile,
+        aiScene* pScene,
+        IOSystem* pIOHandler
+    );
 
-	// --------------------
-	void ParseBlendFile(Blender::FileDatabase& out,
-		boost::shared_ptr<IOStream> stream
-	);
+    // --------------------
+    void ParseBlendFile(Blender::FileDatabase& out,
+        boost::shared_ptr<IOStream> stream
+    );
 
-	// --------------------
-	void ExtractScene(Blender::Scene& out,
-		const Blender::FileDatabase& file
-	);
+    // --------------------
+    void ExtractScene(Blender::Scene& out,
+        const Blender::FileDatabase& file
+    );
 
-	// --------------------
-	void ConvertBlendFile(aiScene* out,
-		const Blender::Scene& in,
-		const Blender::FileDatabase& file
-	);
+    // --------------------
+    void ConvertBlendFile(aiScene* out,
+        const Blender::Scene& in,
+        const Blender::FileDatabase& file
+    );
 
 private:
 
-	// --------------------
-	aiNode* ConvertNode(const Blender::Scene& in,
-		const Blender::Object* obj,
-		Blender::ConversionData& conv_info,
-		const aiMatrix4x4& parentTransform
-	);
+    // --------------------
+    aiNode* ConvertNode(const Blender::Scene& in,
+        const Blender::Object* obj,
+        Blender::ConversionData& conv_info,
+        const aiMatrix4x4& parentTransform
+    );
 
-	// --------------------
-	void ConvertMesh(const Blender::Scene& in,
-		const Blender::Object* obj,
-		const Blender::Mesh* mesh,
-		Blender::ConversionData& conv_data,
-		Blender::TempArray<std::vector,aiMesh>& temp
-	);
+    // --------------------
+    void ConvertMesh(const Blender::Scene& in,
+        const Blender::Object* obj,
+        const Blender::Mesh* mesh,
+        Blender::ConversionData& conv_data,
+        Blender::TempArray<std::vector,aiMesh>& temp
+    );
 
-	// --------------------
-	aiLight* ConvertLight(const Blender::Scene& in,
-		const Blender::Object* obj,
-		const Blender::Lamp* mesh,
-		Blender::ConversionData& conv_data
-	);
+    // --------------------
+    aiLight* ConvertLight(const Blender::Scene& in,
+        const Blender::Object* obj,
+        const Blender::Lamp* mesh,
+        Blender::ConversionData& conv_data
+    );
 
-	// --------------------
-	aiCamera* ConvertCamera(const Blender::Scene& in,
-		const Blender::Object* obj,
-		const Blender::Camera* mesh,
-		Blender::ConversionData& conv_data
-	);
+    // --------------------
+    aiCamera* ConvertCamera(const Blender::Scene& in,
+        const Blender::Object* obj,
+        const Blender::Camera* mesh,
+        Blender::ConversionData& conv_data
+    );
 
-	// --------------------
-	void BuildMaterials(
-		Blender::ConversionData& conv_data
-	) ;
+    // --------------------
+    void BuildMaterials(
+        Blender::ConversionData& conv_data
+    ) ;
 
-	// --------------------
-	void ResolveTexture(
-		aiMaterial* out,
-		const Blender::Material* mat,
-		const Blender::MTex* tex,
-		Blender::ConversionData& conv_data
-	);
+    // --------------------
+    void ResolveTexture(
+        aiMaterial* out,
+        const Blender::Material* mat,
+        const Blender::MTex* tex,
+        Blender::ConversionData& conv_data
+    );
 
-	// --------------------
-	void ResolveImage(
-		aiMaterial* out,
-		const Blender::Material* mat,
-		const Blender::MTex* tex,
-		const Blender::Image* img,
-		Blender::ConversionData& conv_data
-	);
+    // --------------------
+    void ResolveImage(
+        aiMaterial* out,
+        const Blender::Material* mat,
+        const Blender::MTex* tex,
+        const Blender::Image* img,
+        Blender::ConversionData& conv_data
+    );
 
-	void AddSentinelTexture(
-		aiMaterial* out,
-		const Blender::Material* mat,
-		const Blender::MTex* tex,
-		Blender::ConversionData& conv_data
-	);
+    void AddSentinelTexture(
+        aiMaterial* out,
+        const Blender::Material* mat,
+        const Blender::MTex* tex,
+        Blender::ConversionData& conv_data
+    );
 
 private: // static stuff, mostly logging and error reporting.
 
-	// --------------------
-	static void CheckActualType(const Blender::ElemBase* dt,
-		const char* check
-	);
+    // --------------------
+    static void CheckActualType(const Blender::ElemBase* dt,
+        const char* check
+    );
 
-	// --------------------
-	static void NotSupportedObjectType(const Blender::Object* obj,
-		const char* type
-	);
+    // --------------------
+    static void NotSupportedObjectType(const Blender::Object* obj,
+        const char* type
+    );
 
 
 private:
 
-	Blender::BlenderModifierShowcase* modifier_cache;
+    Blender::BlenderModifierShowcase* modifier_cache;
 
 }; // !class BlenderImporter
 

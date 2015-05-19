@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiImporterDesc;
 struct aiScene;
 
-namespace Assimp	{
+namespace Assimp    {
     class IOSystem;
     class Importer;
 
@@ -67,57 +67,57 @@ namespace Assimp	{
 class NDOImporter : public BaseImporter
 {
 public:
-	NDOImporter();
-	~NDOImporter();
+    NDOImporter();
+    ~NDOImporter();
 
 
 public:
 
-	//! Represents a single edge
-	struct Edge
-	{
-		unsigned int edge[8];
-		unsigned int hard;
-		uint8_t color[8];
-	};
+    //! Represents a single edge
+    struct Edge
+    {
+        unsigned int edge[8];
+        unsigned int hard;
+        uint8_t color[8];
+    };
 
-	//! Represents a single face
-	struct Face
-	{
-		unsigned int elem;
-	};
+    //! Represents a single face
+    struct Face
+    {
+        unsigned int elem;
+    };
 
-	struct Vertex
-	{
-		unsigned int num;
-		aiVector3D val;
-	};
+    struct Vertex
+    {
+        unsigned int num;
+        aiVector3D val;
+    };
 
-	//! Represents a single object
-	struct Object
-	{
-		std::string name;
+    //! Represents a single object
+    struct Object
+    {
+        std::string name;
 
-		std::vector<Edge> edges;
-		std::vector<Face> faces;
-		std::vector<Vertex> vertices;
-	};
+        std::vector<Edge> edges;
+        std::vector<Face> faces;
+        std::vector<Vertex> vertices;
+    };
 
-	// -------------------------------------------------------------------
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 protected:
 
-	// -------------------------------------------------------------------
-	const aiImporterDesc* GetInfo () const;
+    // -------------------------------------------------------------------
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    void SetupProperties(const Importer* pImp);
 
-	// -------------------------------------------------------------------
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 private:
 

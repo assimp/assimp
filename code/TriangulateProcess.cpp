@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -147,7 +147,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		if( face.mNumIndices <= 3) {
 			numOut++;
 
-		}	
+		}
 		else {
 			numOut += face.mNumIndices-2;
 			max_out = std::max(max_out,face.mNumIndices);
@@ -184,7 +184,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 	aiColor4D* clr = pMesh->mColors[0];
 #endif
 
-	
+
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
 	FILE* fout = fopen(POLY_OUTPUT_FILE,"a");
 #endif
@@ -192,7 +192,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 	const aiVector3D* verts = pMesh->mVertices;
 
 	// use boost::scoped_array to avoid slow std::vector<bool> specialiations
-	boost::scoped_array<bool> done(new bool[max_out]); 
+	boost::scoped_array<bool> done(new bool[max_out]);
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)	{
 		aiFace& face = pMesh->mFaces[a];
 
@@ -208,7 +208,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		}
 #endif
 
-		aiFace* const last_face = curOut; 
+		aiFace* const last_face = curOut;
 
 		// if it's a simple point,line or triangle: just copy it
 		if( face.mNumIndices <= 3)
@@ -219,13 +219,13 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 			face.mIndices = NULL;
 			continue;
-		}  
+		}
 		// optimized code for quadrilaterals
 		else if ( face.mNumIndices == 4) {
 
 			// quads can have at maximum one concave vertex. Determine
 			// this vertex (if it exists) and start tri-fanning from
-			// it. 
+			// it.
 			unsigned int start_vertex = 0;
 			for (unsigned int i = 0; i < 4; ++i) {
 				const aiVector3D& v0 = verts[face.mIndices[(i+3) % 4]];
@@ -234,9 +234,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 				const aiVector3D& v = verts[face.mIndices[i]];
 
-				aiVector3D left = (v0-v); 
-				aiVector3D diag = (v1-v); 
-				aiVector3D right = (v2-v); 
+				aiVector3D left = (v0-v);
+				aiVector3D diag = (v1-v);
+				aiVector3D right = (v2-v);
 
 				left.Normalize();
 				diag.Normalize();
@@ -251,7 +251,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			}
 
 			const unsigned int temp[] = {face.mIndices[0], face.mIndices[1], face.mIndices[2], face.mIndices[3]};
-	
+
 			aiFace& nface = *curOut++;
 			nface.mNumIndices = 3;
 			nface.mIndices = face.mIndices;
@@ -267,11 +267,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			sface.mIndices[0] = temp[start_vertex];
 			sface.mIndices[1] = temp[(start_vertex + 2) % 4];
 			sface.mIndices[2] = temp[(start_vertex + 3) % 4];
-		
+
 			// prevent double deletion of the indices field
 			face.mIndices = NULL;
 			continue;
-		} 
+		}
 		else
 		{
 			// A polygon with more than 3 vertices can be either concave or convex.
@@ -297,9 +297,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			}
 
 			// Select largest normal coordinate to ignore for projection
-			const float ax = (n.x>0 ? n.x : -n.x);    
-			const float ay = (n.y>0 ? n.y : -n.y);   
-			const float az = (n.z>0 ? n.z : -n.z);    
+			const float ax = (n.x>0 ? n.x : -n.x);
+			const float ay = (n.y>0 ? n.y : -n.y);
+			const float az = (n.z>0 ? n.z : -n.z);
 
 			unsigned int ac = 0, bc = 1; /* no z coord. projection to xy */
 			float inv = n.z;
@@ -322,10 +322,10 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 			for (tmp =0; tmp < max; ++tmp) {
 				temp_verts[tmp].x = verts[idx[tmp]][ac];
 				temp_verts[tmp].y = verts[idx[tmp]][bc];
-				done[tmp] = false;	
+				done[tmp] = false;
 			}
 
-			
+
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
 			// plot the plane onto which we mapped the polygon to a 2D ASCII pic
 			aiVector2D bmin,bmax;
@@ -344,7 +344,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				}
 				*(loc+sprintf(loc,"%i",i)) = ' ';
 			}
-			
+
 
 			for(size_t y = 0; y < POLY_GRID_Y; ++y) {
 				grid[y][POLY_GRID_X+POLY_GRID_XPAD-1] = '\0';
@@ -362,7 +362,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 				// Find the next ear of the polygon
 				int num_found = 0;
 				for (ear = next;;prev = ear,ear = next) {
-				
+
 					// break after we looped two times without a positive match
 					for (next=ear+1;done[(next>=max?next=0:next)];++next);
 					if (next < ear) {
@@ -370,10 +370,10 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 							break;
 						}
 					}
-					const aiVector2D* pnt1 = &temp_verts[ear], 
-						*pnt0 = &temp_verts[prev], 
+					const aiVector2D* pnt1 = &temp_verts[ear],
+						*pnt0 = &temp_verts[prev],
 						*pnt2 = &temp_verts[next];
-			
+
 					// Must be a convex point. Assuming ccw winding, it must be on the right of the line between p-1 and p+1.
 					if (OnLeftSideOfLine2D(*pnt0,*pnt2,*pnt1)) {
 						continue;
@@ -382,16 +382,16 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 					// and no other point may be contained in this triangle
 					for ( tmp = 0; tmp < max; ++tmp) {
 
-						// We need to compare the actual values because it's possible that multiple indexes in 
+						// We need to compare the actual values because it's possible that multiple indexes in
 						// the polygon are referring to the same position. concave_polygon.obj is a sample
 						//
 						// FIXME: Use 'epsiloned' comparisons instead? Due to numeric inaccuracies in
 						// PointInTriangle() I'm guessing that it's actually possible to construct
 						// input data that would cause us to end up with no ears. The problem is,
 						// which epsilon? If we chose a too large value, we'd get wrong results
-						const aiVector2D& vtmp = temp_verts[tmp]; 
+						const aiVector2D& vtmp = temp_verts[tmp];
 						if ( vtmp != *pnt1 && vtmp != *pnt2 && vtmp != *pnt0 && PointInTriangle2D(*pnt0,*pnt1,*pnt2,vtmp)) {
-							break;		
+							break;
 						}
 					}
 					if (tmp != max) {
@@ -402,7 +402,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 					break;
 				}
 				if (num_found == 2) {
-					
+
 					// Due to the 'two ear theorem', every simple polygon with more than three points must
 					// have 2 'ears'. Here's definitely someting wrong ... but we don't give up yet.
 					//
@@ -410,7 +410,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 					// Instead we're continuting with the standard trifanning algorithm which we'd
 					// use if we had only convex polygons. That's life.
 					DefaultLogger::get()->error("Failed to triangulate polygon (no ear found). Probably not a simple polygon?");
-					
+
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
 					fprintf(fout,"critical error here, no ear found! ");
@@ -472,7 +472,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		}
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
-		
+
 		for(aiFace* f = last_face; f != curOut; ++f) {
 			unsigned int* i = f->mIndices;
 			fprintf(fout," (%i %i %i)",i[0],i[1],i[2]);
@@ -480,7 +480,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 
 		fprintf(fout,"\n*********************************************************************\n");
 		fflush(fout);
-		
+
 #endif
 
 		for(aiFace* f = last_face; f != curOut; ) {
@@ -509,7 +509,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 		}
 
 		delete[] face.mIndices;
-		face.mIndices = NULL; 
+		face.mIndices = NULL;
 	}
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS

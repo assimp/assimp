@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -96,7 +96,7 @@ public:
 
 	const Object* Get(bool dieOnError = false);
 
-	template <typename T> 
+	template <typename T>
 	const T* Get(bool dieOnError = false) {
 		const Object* const ob = Get(dieOnError);
 		return ob ? dynamic_cast<const T*>(ob) : NULL;
@@ -373,12 +373,12 @@ public:
 public:
 
 	enum RotOrder
-	{ 
-		RotOrder_EulerXYZ = 0, 
-		RotOrder_EulerXZY, 
-		RotOrder_EulerYZX, 
-		RotOrder_EulerYXZ, 
-		RotOrder_EulerZXY, 
+	{
+		RotOrder_EulerXYZ = 0,
+		RotOrder_EulerXZY,
+		RotOrder_EulerYZX,
+		RotOrder_EulerYXZ,
+		RotOrder_EulerZXY,
 		RotOrder_EulerZYX,
 
 		RotOrder_SphericXYZ,
@@ -566,7 +566,7 @@ public:
 		return *props.get();
 	}
 
-	// return a 4-tuple 
+	// return a 4-tuple
 	const unsigned int* Crop() const {
 		return crop;
 	}
@@ -753,9 +753,9 @@ public:
 	const std::vector<aiVector3D>& GetBinormals() const {
 		return binormals;
 	}
-	
+
 	/** Return list of faces - each entry denotes a face and specifies
-	 *  how many vertices it has. Vertices are taken from the 
+	 *  how many vertices it has. Vertices are taken from the
 	 *  vertex data arrays in sequential order. */
 	const std::vector<unsigned int>& GetFaceIndexCounts() const {
 		return faces;
@@ -781,8 +781,8 @@ public:
 		static const std::vector<aiColor4D> empty;
 		return index >= AI_MAX_NUMBER_OF_COLOR_SETS ? empty : colors[index];
 	}
-	
-	
+
+
 	/** Get per-face-vertex material assignments */
 	const MatIndexArray& GetMaterialIndices() const {
 		return materials;
@@ -810,7 +810,7 @@ public:
 	 *  This mapping is always unique. */
 	unsigned int FaceForVertexIndex(unsigned int in_index) const {
 		ai_assert(in_index < vertices.size());
-	
+
 		// in the current conversion pattern this will only be needed if
 		// weights are present, so no need to always pre-compute this table
 		if (facesVertexStartIndices.empty()) {
@@ -827,7 +827,7 @@ public:
 			in_index
 		);
 
-		return static_cast<unsigned int>(std::distance(facesVertexStartIndices.begin(), it - 1)); 
+		return static_cast<unsigned int>(std::distance(facesVertexStartIndices.begin(), it - 1));
 	}
 
 public:
@@ -838,27 +838,27 @@ private:
 	void ReadLayerElement(const Scope& layerElement);
 	void ReadVertexData(const std::string& type, int index, const Scope& source);
 
-	void ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source, 
+	void ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source,
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
-	void ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, const Scope& source, 
+	void ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, const Scope& source,
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
-	void ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source, 
+	void ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source,
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
-	void ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source, 
+	void ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source,
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
-	void ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source, 
+	void ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source,
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
-	void ReadVertexDataMaterials(MatIndexArray& materials_out, const Scope& source, 
+	void ReadVertexDataMaterials(MatIndexArray& materials_out, const Scope& source,
 		const std::string& MappingInformationType,
 		const std::string& ReferenceInformationType);
 
@@ -902,7 +902,7 @@ public:
 	}
 
 
-	/** get list of keyframe values. 
+	/** get list of keyframe values.
 	  * Invariant: |GetKeys()| == |GetValues()| && |GetKeys()| > 0*/
 	const KeyValueList& GetValues() const {
 		return values;
@@ -990,7 +990,7 @@ class AnimationLayer : public Object
 {
 public:
 
-	
+
 	AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc);
 	~AnimationLayer();
 
@@ -1210,7 +1210,7 @@ public:
 	// during their entire lifetime (Document). FBX files have
 	// up to many thousands of objects (most of which we never use),
 	// so the memory overhead for them should be kept at a minimum.
-	typedef std::map<uint64_t, LazyObject*> ObjectMap; 
+	typedef std::map<uint64_t, LazyObject*> ObjectMap;
 	typedef std::fbx_unordered_map<std::string, boost::shared_ptr<const PropertyTable> > PropertyTemplateMap;
 
 
@@ -1288,7 +1288,7 @@ private:
 
 
 /** DOM root for a FBX file */
-class Document 
+class Document
 {
 public:
 
@@ -1353,10 +1353,10 @@ public:
 	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source, const char* classname) const;
 	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest, const char* classname) const;
 
-	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source, 
+	std::vector<const Connection*> GetConnectionsBySourceSequenced(uint64_t source,
 		const char* const* classnames, size_t count) const;
-	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest, 
-		const char* const* classnames, 
+	std::vector<const Connection*> GetConnectionsByDestinationSequenced(uint64_t dest,
+		const char* const* classnames,
 		size_t count) const;
 
 	const std::vector<const AnimationStack*>& AnimationStacks() const;
@@ -1364,9 +1364,9 @@ public:
 private:
 
 	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, const ConnectionMap&) const;
-	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, bool is_src, 
-		const ConnectionMap&, 
-		const char* const* classnames, 
+	std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, bool is_src,
+		const ConnectionMap&,
+		const char* const* classnames,
 		size_t count) const;
 
 private:

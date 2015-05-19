@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -74,7 +74,7 @@ static const aiImporterDesc desc = {
 	3,
 	1,
 	5,
-	"dae" 
+	"dae"
 };
 
 
@@ -93,12 +93,12 @@ ColladaLoader::~ColladaLoader()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool ColladaLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// check file extension 
+	// check file extension
 	std::string extension = GetExtension(pFile);
-	
+
 	if( extension == "dae")
 		return true;
 
@@ -132,7 +132,7 @@ const aiImporterDesc* ColladaLoader::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
+// Imports the given file into the given scene structure.
 void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	mFileName = pFile;
@@ -170,21 +170,21 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 	FillMaterials(parser, pScene);
 
         // Apply unitsize scale calculation
-        pScene->mRootNode->mTransformation *= aiMatrix4x4(parser.mUnitSize, 0,  0,  0, 
+        pScene->mRootNode->mTransformation *= aiMatrix4x4(parser.mUnitSize, 0,  0,  0,
                                                           0,  parser.mUnitSize,  0,  0,
                                                           0,  0,  parser.mUnitSize,  0,
                                                           0,  0,  0,  1);
         if( !ignoreUpDirection ) {
         // Convert to Y_UP, if different orientation
 		if( parser.mUpDirection == ColladaParser::UP_X)
-			pScene->mRootNode->mTransformation *= aiMatrix4x4( 
-				 0, -1,  0,  0, 
+			pScene->mRootNode->mTransformation *= aiMatrix4x4(
+				 0, -1,  0,  0,
 				 1,  0,  0,  0,
 				 0,  0,  1,  0,
 				 0,  0,  0,  1);
 		else if( parser.mUpDirection == ColladaParser::UP_Z)
-			pScene->mRootNode->mTransformation *= aiMatrix4x4( 
-				 1,  0,  0,  0, 
+			pScene->mRootNode->mTransformation *= aiMatrix4x4(
+				 1,  0,  0,  0,
 				 0,  0,  1,  0,
 				 0, -1,  0,  0,
 				 0,  0,  0,  1);
@@ -207,7 +207,7 @@ void ColladaLoader::InternReadFile( const std::string& pFile, aiScene* pScene, I
 
 	// If no meshes have been loaded, it's probably just an animated skeleton.
 	if (!pScene->mNumMeshes) {
-	
+
 		if (!noSkeletonMesh) {
 			SkeletonMeshBuilder hero(pScene);
 		}
@@ -282,9 +282,9 @@ void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Co
 		if (!nd) {
 			nd = FindNode(pParser.mRootNode,(*it).mNode);
 		}
-		if (!nd) 
+		if (!nd)
 			DefaultLogger::get()->error("Collada: Unable to resolve reference to instanced node " + (*it).mNode);
-		
+
 		else {
 			//	attach this node to the list of children
 			resolved.push_back(nd);
@@ -320,7 +320,7 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 			continue;
 		}
 		const Collada::Light* srcLight = &srcLightIt->second;
-		
+
 		// now fill our ai data structure
 		aiLight* out = new aiLight();
 		out->mName = pTarget->mName;
@@ -338,13 +338,13 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 
 		// convert falloff angle and falloff exponent in our representation, if given
 		if (out->mType == aiLightSource_SPOT) {
-			
+
 			out->mAngleInnerCone = AI_DEG_TO_RAD( srcLight->mFalloffAngle );
 
-			// ... some extension magic. 
+			// ... some extension magic.
 			if (srcLight->mOuterAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
 			{
-				// ... some deprecation magic. 
+				// ... some deprecation magic.
 				if (srcLight->mPenumbraAngle >= ASSIMP_COLLADA_LIGHT_ANGLE_NOT_SET*(1-1e-6f))
 				{
 					// Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
@@ -397,13 +397,13 @@ void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Col
 		out->mClipPlaneFar = srcCamera->mZFar;
 		out->mClipPlaneNear = srcCamera->mZNear;
 
-		// ... but for the rest some values are optional 
-		// and we need to compute the others in any combination. 
+		// ... but for the rest some values are optional
+		// and we need to compute the others in any combination.
 		 if (srcCamera->mAspect != 10e10f)
 			out->mAspect = srcCamera->mAspect;
 
 		if (srcCamera->mHorFov != 10e10f) {
-			out->mHorizontalFOV = srcCamera->mHorFov; 
+			out->mHorizontalFOV = srcCamera->mHorFov;
 
 			if (srcCamera->mVerFov != 10e10f && srcCamera->mAspect == 10e10f) {
 				out->mAspect = tan(AI_DEG_TO_RAD(srcCamera->mHorFov)) /
@@ -480,7 +480,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 				table = &meshMatIt->second;
 				meshMaterial = table->mMatName;
 			}
-			else 
+			else
 			{
 				DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup <%s> in geometry <%s>.") % submesh.mMaterial % mid.mMeshOrController));
 				if( !mid.mMaterials.empty() )
@@ -516,7 +516,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 			std::map<ColladaMeshIndex, size_t>::const_iterator dstMeshIt = mMeshIndexByID.find( index);
 			if( dstMeshIt != mMeshIndexByID.end())	{
 				newMeshRefs.push_back( dstMeshIt->second);
-			} 
+			}
 			else
 			{
 				// else we have to add the mesh to the collection and store its newly assigned index at the node
@@ -549,11 +549,11 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
 // ------------------------------------------------------------------------------------------------
 // Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh
-aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh, 
+aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
 	const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace)
 {
 	aiMesh* dstMesh = new aiMesh;
-    
+
     dstMesh->mName = pSrcMesh->mName;
 
 	// count the vertices addressed by its faces
@@ -563,11 +563,11 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 	// copy positions
 	dstMesh->mNumVertices = numVertices;
 	dstMesh->mVertices = new aiVector3D[numVertices];
-	std::copy( pSrcMesh->mPositions.begin() + pStartVertex, pSrcMesh->mPositions.begin() + 
+	std::copy( pSrcMesh->mPositions.begin() + pStartVertex, pSrcMesh->mPositions.begin() +
 		pStartVertex + numVertices, dstMesh->mVertices);
 
-	// normals, if given. HACK: (thom) Due to the glorious Collada spec we never 
-	// know if we have the same number of normals as there are positions. So we 
+	// normals, if given. HACK: (thom) Due to the glorious Collada spec we never
+	// know if we have the same number of normals as there are positions. So we
 	// also ignore any vertex attribute if it has a different count
 	if( pSrcMesh->mNormals.size() >= pStartVertex + numVertices)
 	{
@@ -576,19 +576,19 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 			pStartVertex + numVertices, dstMesh->mNormals);
 	}
 
-	// tangents, if given. 
+	// tangents, if given.
 	if( pSrcMesh->mTangents.size() >= pStartVertex + numVertices)
 	{
 		dstMesh->mTangents = new aiVector3D[numVertices];
-		std::copy( pSrcMesh->mTangents.begin() + pStartVertex, pSrcMesh->mTangents.begin() + 
+		std::copy( pSrcMesh->mTangents.begin() + pStartVertex, pSrcMesh->mTangents.begin() +
 			pStartVertex + numVertices, dstMesh->mTangents);
 	}
 
-	// bitangents, if given. 
+	// bitangents, if given.
 	if( pSrcMesh->mBitangents.size() >= pStartVertex + numVertices)
 	{
 		dstMesh->mBitangents = new aiVector3D[numVertices];
-		std::copy( pSrcMesh->mBitangents.begin() + pStartVertex, pSrcMesh->mBitangents.begin() + 
+		std::copy( pSrcMesh->mBitangents.begin() + pStartVertex, pSrcMesh->mBitangents.begin() +
 			pStartVertex + numVertices, dstMesh->mBitangents);
 	}
 
@@ -601,7 +601,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
 			dstMesh->mTextureCoords[real] = new aiVector3D[numVertices];
 			for( size_t b = 0; b < numVertices; ++b)
 				dstMesh->mTextureCoords[real][b] = pSrcMesh->mTexCoords[a][pStartVertex+b];
-			
+
 			dstMesh->mNumUVComponents[real] = pSrcMesh->mNumUVComponents[a];
 			++real;
 		}
@@ -848,7 +848,7 @@ void ColladaLoader::StoreSceneMaterials( aiScene* pScene)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Stores all animations 
+// Stores all animations
 void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pParser)
 {
 	// recursivly collect all animations from the collada scene
@@ -918,7 +918,7 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
 }
 
 // ------------------------------------------------------------------------------------------------
-// Constructs the animations for the given source anim 
+// Constructs the animations for the given source anim
 void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string &pPrefix)
 {
 	std::string animName = pPrefix.empty() ? pSrcAnim->mName : pPrefix + "_" + pSrcAnim->mName;
@@ -989,7 +989,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 					entry.mSubElement = 1;
 				else if( subElement == "Z")
 					entry.mSubElement = 2;
-				else 
+				else
 					DefaultLogger::get()->warn( boost::str( boost::format( "Unknown anim subelement <%s>. Ignoring") % subElement));
 			} else
 			{
@@ -1002,9 +1002,9 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			{
 				entry.mTransformId = srcChannel.mTarget.substr(slashPos + 1, bracketPos - slashPos - 1);
 				std::string subElement = srcChannel.mTarget.substr(bracketPos);
-			
+
 				if (subElement == "(0)(0)")
-					entry.mSubElement = 0; 
+					entry.mSubElement = 0;
 				else if (subElement == "(1)(0)")
 					entry.mSubElement = 1;
 				else if (subElement == "(2)(0)")
@@ -1259,7 +1259,7 @@ void ColladaLoader::AddTexture ( aiMaterial& mat, const ColladaParser& pParser,
 	mat.AddProperty((float*)&sampler.mWeighting , 1,
 		_AI_MATKEY_TEXBLEND_BASE, type, idx);
 
-	// UV source index ... if we didn't resolve the mapping, it is actually just 
+	// UV source index ... if we didn't resolve the mapping, it is actually just
 	// a guess but it works in most cases. We search for the frst occurence of a
 	// number in the channel name. We assume it is the zero-based index into the
 	// UV channel array of all corresponding meshes. It could also be one-based
@@ -1289,7 +1289,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 	for (std::vector<std::pair<Collada::Effect*, aiMaterial*> >::iterator it = newMats.begin(),
 		end = newMats.end(); it != end; ++it)
 	{
-		aiMaterial&  mat = (aiMaterial&)*it->second; 
+		aiMaterial&  mat = (aiMaterial&)*it->second;
 		Collada::Effect& effect = *it->first;
 
 		// resolve shading mode
@@ -1299,22 +1299,22 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 		else {
 			switch( effect.mShadeType)
 			{
-			case Collada::Shade_Constant: 
-				shadeMode = aiShadingMode_NoShading; 
+			case Collada::Shade_Constant:
+				shadeMode = aiShadingMode_NoShading;
 				break;
 			case Collada::Shade_Lambert:
-				shadeMode = aiShadingMode_Gouraud; 
+				shadeMode = aiShadingMode_Gouraud;
 				break;
-			case Collada::Shade_Blinn: 
+			case Collada::Shade_Blinn:
 				shadeMode = aiShadingMode_Blinn;
 				break;
-			case Collada::Shade_Phong: 
-				shadeMode = aiShadingMode_Phong; 
+			case Collada::Shade_Phong:
+				shadeMode = aiShadingMode_Phong;
 				break;
 
 			default:
 				DefaultLogger::get()->warn("Collada: Unrecognized shading mode, using gouraud shading");
-				shadeMode = aiShadingMode_Gouraud; 
+				shadeMode = aiShadingMode_Gouraud;
 				break;
 			}
 		}
@@ -1350,7 +1350,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 			if(effect.mRGBTransparency) {
 				effect.mTransparency = 1.f - effect.mTransparent.a;
 			}
-			
+
 			// Global option
 			if(invertTransparency) {
 				effect.mTransparency = 1.f - effect.mTransparency;
@@ -1364,7 +1364,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
 		}
 
 		// add textures, if given
-		if( !effect.mTexAmbient.mName.empty()) 
+		if( !effect.mTexAmbient.mName.empty())
 			 /* It is merely a lightmap */
 			AddTexture( mat, pParser, effect, effect.mTexAmbient, aiTextureType_LIGHTMAP);
 
@@ -1455,16 +1455,16 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
 
 	// find the image referred by this name in the image library of the scene
 	ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
-	if( imIt == pParser.mImageLibrary.end()) 
+	if( imIt == pParser.mImageLibrary.end())
 	{
-		throw DeadlyImportError( boost::str( boost::format( 
+		throw DeadlyImportError( boost::str( boost::format(
 			"Collada: Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
 	}
 
 	aiString result;
 
 	// if this is an embedded texture image setup an aiTexture for it
-	if (imIt->second.mFileName.empty()) 
+	if (imIt->second.mFileName.empty())
 	{
 		if (imIt->second.mImageData.empty())  {
 			throw DeadlyImportError("Collada: Invalid texture, no data or file reference given");
@@ -1491,7 +1491,7 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
 		// and add this texture to the list
 		mTextures.push_back(tex);
 	}
-	else 
+	else
 	{
 		result.Set( imIt->second.mFileName );
 		ConvertPath(result);
@@ -1507,14 +1507,14 @@ void ColladaLoader::ConvertPath (aiString& ss)
 	// For the moment we're just stripping the file:// away to make it work.
 	// Windoes doesn't seem to be able to find stuff like
 	// 'file://..\LWO\LWO2\MappingModes\earthSpherical.jpg'
-	if (0 == strncmp(ss.data,"file://",7)) 
+	if (0 == strncmp(ss.data,"file://",7))
 	{
 		ss.length -= 7;
 		memmove(ss.data,ss.data+7,ss.length);
 		ss.data[ss.length] = '\0';
 	}
 
-  // Maxon Cinema Collada Export writes "file:///C:\andsoon" with three slashes... 
+  // Maxon Cinema Collada Export writes "file:///C:\andsoon" with three slashes...
   // I need to filter it without destroying linux paths starting with "/somewhere"
   if( ss.data[0] == '/' && isalpha( ss.data[1]) && ss.data[2] == ':' )
   {

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -49,7 +49,7 @@ using namespace Assimp;
 void mydummy() {}
 
 // ------------------------------------------------------------------------------------------------
-/** Subdivider stub class to implement the Catmull-Clarke subdivision algorithm. The 
+/** Subdivider stub class to implement the Catmull-Clarke subdivision algorithm. The
  *  implementation is basing on recursive refinement. Directly evaluating the result is also
  *  possible and much quicker, but it depends on lengthy matrix lookup tables. */
 // ------------------------------------------------------------------------------------------------
@@ -81,8 +81,8 @@ public:
 
 	// ---------------------------------------------------------------------------
 	// Hashing function to derive an index into an #EdgeMap from two given
-	// 'unsigned int' vertex coordinates (!!distinct coordinates - same 
-	// vertex position == same index!!). 
+	// 'unsigned int' vertex coordinates (!!distinct coordinates - same
+	// vertex position == same index!!).
 	// NOTE - this leads to rare hash collisions if a) sizeof(unsigned int)>4
 	// and (id[0]>2^32-1 or id[0]>2^32-1).
 	// MAKE_EDGE_HASH() uses temporaries, so INIT_EDGE_HASH() needs to be put
@@ -100,7 +100,7 @@ public:
 
 private:
 
-	void InternSubdivide (const aiMesh* const * smesh, 
+	void InternSubdivide (const aiMesh* const * smesh,
 		size_t nmesh,aiMesh** out, unsigned int num);
 };
 
@@ -122,7 +122,7 @@ Subdivider* Subdivider::Create (Algorithm algo)
 // ------------------------------------------------------------------------------------------------
 // Call the Catmull Clark subdivision algorithm for one mesh
 void  CatmullClarkSubdivider::Subdivide (
-	aiMesh* mesh, 
+	aiMesh* mesh,
 	aiMesh*& out,
 	unsigned int num,
 	bool discard_input
@@ -135,9 +135,9 @@ void  CatmullClarkSubdivider::Subdivide (
 // ------------------------------------------------------------------------------------------------
 // Call the Catmull Clark subdivision algorithm for multiple meshes
 void CatmullClarkSubdivider::Subdivide (
-	aiMesh** smesh, 
+	aiMesh** smesh,
 	size_t nmesh,
-	aiMesh** out, 
+	aiMesh** out,
 	unsigned int num,
 	bool discard_input
 	)
@@ -147,7 +147,7 @@ void CatmullClarkSubdivider::Subdivide (
 	// course, both regions may not overlap
 	assert(smesh<out || smesh+nmesh>out+nmesh);
 	if (!num) {
-		
+
 		// No subdivision at all. Need to copy all the meshes .. argh.
 		if (discard_input) {
 			for (size_t s = 0; s < nmesh; ++s) {
@@ -171,8 +171,8 @@ void CatmullClarkSubdivider::Subdivide (
 	outmeshes.reserve(nmesh);
 	maptbl.reserve(nmesh);
 
-	// Remove pure line and point meshes from the working set to reduce the 
-	// number of edge cases the subdivider is forced to deal with. Line and 
+	// Remove pure line and point meshes from the working set to reduce the
+	// number of edge cases the subdivider is forced to deal with. Line and
 	// point meshes are simply passed through.
 	for (size_t s = 0; s < nmesh; ++s) {
 		aiMesh* i = smesh[s];
@@ -194,7 +194,7 @@ void CatmullClarkSubdivider::Subdivide (
 		maptbl.push_back(s);
 	}
 
-	// Do the actual subdivision on the preallocated storage. InternSubdivide 
+	// Do the actual subdivision on the preallocated storage. InternSubdivide
 	// *always* assumes that enough storage is available, it does not bother
 	// checking any ranges.
 	ai_assert(inmeshes.size()==outmeshes.size()&&inmeshes.size()==maptbl.size());
@@ -216,20 +216,20 @@ void CatmullClarkSubdivider::Subdivide (
 }
 
 // ------------------------------------------------------------------------------------------------
-// Note - this is an implementation of the standard (recursive) Cm-Cl algorithm without further 
+// Note - this is an implementation of the standard (recursive) Cm-Cl algorithm without further
 // optimizations (except we're using some nice LUTs). A description of the algorithm can be found
 // here: http://en.wikipedia.org/wiki/Catmull-Clark_subdivision_surface
 //
 // The code is mostly O(n), however parts are O(nlogn) which is therefore the algorithm's
 // expected total runtime complexity. The implementation is able to work in-place on the same
 // mesh arrays. Calling #InternSubdivide() directly is not encouraged. The code can operate
-// in-place unless 'smesh' and 'out' are equal (no strange overlaps or reorderings). 
+// in-place unless 'smesh' and 'out' are equal (no strange overlaps or reorderings).
 // Previous data is replaced/deleted then.
 // ------------------------------------------------------------------------------------------------
 void CatmullClarkSubdivider::InternSubdivide (
-	const aiMesh* const * smesh, 
+	const aiMesh* const * smesh,
 	size_t nmesh,
-	aiMesh** out, 
+	aiMesh** out,
 	unsigned int num
 	)
 {
@@ -288,13 +288,13 @@ void CatmullClarkSubdivider::InternSubdivide (
 			nfacesout += face.mNumIndices;
 		}
 	}
-	
+
 	{
 	// we want edges to go away before the recursive calls so begin a new scope
 	EdgeMap edges;
 
 	// ---------------------------------------------------------------------
-	// 2. Set each edge point to be the average of all neighbouring 
+	// 2. Set each edge point to be the average of all neighbouring
 	// face points and original points. Every edge exists twice
 	// if there is a neighboring face.
 	// ---------------------------------------------------------------------
@@ -305,12 +305,12 @@ void CatmullClarkSubdivider::InternSubdivide (
 			const aiFace& face = mesh->mFaces[i];
 
 			for (unsigned int p =0; p< face.mNumIndices; ++p) {
-				const unsigned int id[] = { 
-					face.mIndices[p], 
+				const unsigned int id[] = {
+					face.mIndices[p],
 					face.mIndices[p==face.mNumIndices-1?0:p+1]
 				};
-				const unsigned int mp[] = { 
-					maptbl[FLATTEN_VERTEX_IDX(t,id[0])], 
+				const unsigned int mp[] = {
+					maptbl[FLATTEN_VERTEX_IDX(t,id[0])],
 					maptbl[FLATTEN_VERTEX_IDX(t,id[1])]
 				};
 
@@ -353,14 +353,14 @@ void CatmullClarkSubdivider::InternSubdivide (
 	// ---------------------------------------------------------------------
 	// 4. Compute a vertex-face adjacency table. We can't reuse the code
 	// from VertexTriangleAdjacency because we need the table for multiple
-	// meshes and out vertex indices need to be mapped to distinct values 
+	// meshes and out vertex indices need to be mapped to distinct values
 	// first.
 	// ---------------------------------------------------------------------
 	UIntVector faceadjac(nfacesout), cntadjfac(maptbl.size(),0), ofsadjvec(maptbl.size()+1,0); {
 	for (size_t t = 0; t < nmesh; ++t) {
 		const aiMesh* const minp = smesh[t];
 		for (unsigned int i = 0; i < minp->mNumFaces; ++i) {
-			
+
 			const aiFace& f = minp->mFaces[i];
 			for (unsigned int n = 0; n < f.mNumIndices; ++n) {
 				++cntadjfac[maptbl[FLATTEN_VERTEX_IDX(t,f.mIndices[n])]];
@@ -375,14 +375,14 @@ void CatmullClarkSubdivider::InternSubdivide (
 	for (size_t t = 0; t < nmesh; ++t) {
 		const aiMesh* const minp = smesh[t];
 		for (unsigned int i = 0; i < minp->mNumFaces; ++i) {
-			
+
 			const aiFace& f = minp->mFaces[i];
 			for (unsigned int n = 0; n < f.mNumIndices; ++n) {
 				faceadjac[ofsadjvec[1+maptbl[FLATTEN_VERTEX_IDX(t,f.mIndices[n])]]++] = FLATTEN_FACE_IDX(t,i);
 			}
 		}
-	} 
-	
+	}
+
 	// check the other way round for consistency
 #ifdef ASSIMP_BUILD_DEBUG
 
@@ -391,11 +391,11 @@ void CatmullClarkSubdivider::InternSubdivide (
 			const unsigned int fidx = faceadjac[ofsadjvec[t]+m];
 			ai_assert(fidx < totfaces);
 			for (size_t n = 1; n < nmesh; ++n) {
-			
+
 				if (moffsets[n].first > fidx) {
 					const aiMesh* msh = smesh[--n];
 					const aiFace& f = msh->mFaces[fidx-moffsets[n].first];
-					
+
 					bool haveit = false;
 					for (unsigned int i = 0; i < f.mNumIndices; ++i) {
 						if (maptbl[FLATTEN_VERTEX_IDX(n,f.mIndices[i])]==(unsigned int)t) {
@@ -469,17 +469,17 @@ void CatmullClarkSubdivider::InternSubdivide (
 
 				// Spawn a new quadrilateral (ccw winding) for this original point between:
 				// a) face centroid
-				centroids[FLATTEN_FACE_IDX(t,i)].SortBack(mout,faceOut.mIndices[0]=v++); 
+				centroids[FLATTEN_FACE_IDX(t,i)].SortBack(mout,faceOut.mIndices[0]=v++);
 
 				// b) adjacent edge on the left, seen from the centroid
 				const Edge& e0 = edges[MAKE_EDGE_HASH(maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a])],
 					maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a==face.mNumIndices-1?0:a+1])
-					])];  // fixme: replace with mod face.mNumIndices? 
+					])];  // fixme: replace with mod face.mNumIndices?
 
 				// c) adjacent edge on the right, seen from the centroid
 				const Edge& e1 = edges[MAKE_EDGE_HASH(maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a])],
 					maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[!a?face.mNumIndices-1:a-1])
-					])];  // fixme: replace with mod face.mNumIndices? 
+					])];  // fixme: replace with mod face.mNumIndices?
 
 				e0.edge_point.SortBack(mout,faceOut.mIndices[3]=v++);
 				e1.edge_point.SortBack(mout,faceOut.mIndices[1]=v++);
@@ -493,7 +493,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 				//    R := R+ midpoint of edge of f from i to i+1
 				//    n := n+1
 				//
-				// (F+2R+(n-3)P)/n         
+				// (F+2R+(n-3)P)/n
 				const unsigned int org = maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a])];
 				TouchedOVertex& ov = new_points[org];
 
@@ -547,11 +547,11 @@ void CatmullClarkSubdivider::InternSubdivide (
 
 									const Edge& c0 = edges[MAKE_EDGE_HASH(org,maptbl[FLATTEN_VERTEX_IDX(
 										nidx,f.mIndices[!m?f.mNumIndices-1:m-1])])];
-									// fixme: replace with mod face.mNumIndices? 
+									// fixme: replace with mod face.mNumIndices?
 
 									const Edge& c1 = edges[MAKE_EDGE_HASH(org,maptbl[FLATTEN_VERTEX_IDX(
 										nidx,f.mIndices[m==f.mNumIndices-1?0:m+1])])];
-									// fixme: replace with mod face.mNumIndices? 
+									// fixme: replace with mod face.mNumIndices?
 									R += c0.midpoint+c1.midpoint;
 
 #						ifdef ASSIMP_BUILD_DEBUG
@@ -566,7 +566,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 						}
 
 						const float div = static_cast<float>(cnt), divsq = 1.f/(div*div);
-						ov.second = Vertex(minp,face.mIndices[a])*((div-3.f) / div) + R*divsq + F*divsq;  
+						ov.second = Vertex(minp,face.mIndices[a])*((div-3.f) / div) + R*divsq + F*divsq;
 					}
 				}
 				ov.second.SortBack(mout,faceOut.mIndices[2]=v++);
@@ -576,7 +576,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 	}  // end of scope for edges, freeing its memory
 
 	// ---------------------------------------------------------------------
-	// 7. Apply the next subdivision step. 
+	// 7. Apply the next subdivision step.
 	// ---------------------------------------------------------------------
 	if (num != 1) {
 		std::vector<aiMesh*> tmp(nmesh);

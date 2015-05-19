@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -120,7 +120,7 @@ struct NodeAttachmentInfo
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES      0x1
 
 /** @def AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES
- *  Generate unique names for materials, too. 
+ *  Generate unique names for materials, too.
  *  This is not absolutely required to pass the validation.
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES   0x2
@@ -184,7 +184,7 @@ struct SceneHelper
 	// prefix to be added to all identifiers in the scene ...
 	char id [32];
 
-	// and its strlen() 
+	// and its strlen()
 	unsigned int idlen;
 
 	// hash table to quickly check whether a name is contained in the scene
@@ -193,9 +193,9 @@ struct SceneHelper
 
 // ---------------------------------------------------------------------------
 /** \brief Static helper class providing various utilities to merge two
- *    scenes. It is intended as internal utility and NOT for use by 
+ *    scenes. It is intended as internal utility and NOT for use by
  *    applications.
- * 
+ *
  * The class is currently being used by various postprocessing steps
  * and loaders (ie. LWS).
  */
@@ -227,14 +227,14 @@ public:
 	 *  @param dest Receives a pointer to the destination scene. If the
 	 *    pointer doesn't point to NULL when the function is called, the
 	 *    existing scene is cleared and refilled.
-	 *  @param master Master scene. It will be deleted afterwards. All 
+	 *  @param master Master scene. It will be deleted afterwards. All
 	 *    other scenes will be inserted in its node graph.
 	 *  @param src Non-empty list of scenes to be merged along with their
 	 *    corresponding attachment points in the master scene. The function
 	 *    deletes the input scenes afterwards. There may be duplicate scenes.
 	 *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
 	 */
-	static void MergeScenes(aiScene** dest, aiScene* master, 
+	static void MergeScenes(aiScene** dest, aiScene* master,
 		std::vector<AttachmentInfo>& src,
 		unsigned int flags = 0);
 
@@ -244,7 +244,7 @@ public:
 	 *
 	 *  The meshes should have equal vertex formats. Only components
 	 *  that are provided by ALL meshes will be present in the output mesh.
-	 *  An exception is made for VColors - they are set to black. The 
+	 *  An exception is made for VColors - they are set to black. The
 	 *  meshes should have the same material indices, too. The output
 	 *  material index is always the material index of the first mesh.
 	 *
@@ -325,10 +325,10 @@ public:
 	 *  @duplicates List of duplicates. If elem[n] == n the scene is not
 	 *    a duplicate. Otherwise elem[n] links scene n to its first occurence.
 	 */
-	static void AttachToGraph ( aiScene* master, 
+	static void AttachToGraph ( aiScene* master,
 		std::vector<NodeAttachmentInfo>& srcList);
 
-	static void AttachToGraph (aiNode* attach, 
+	static void AttachToGraph (aiNode* attach,
 		std::vector<NodeAttachmentInfo>& srcList);
 
 
@@ -380,9 +380,9 @@ private:
 
 	// -------------------------------------------------------------------
 	// Same as AddNodePrefixes, but with an additional check
-	static void AddNodePrefixesChecked(aiNode* node, const char* prefix, 
+	static void AddNodePrefixesChecked(aiNode* node, const char* prefix,
 		unsigned int len,
-		std::vector<SceneHelper>& input, 
+		std::vector<SceneHelper>& input,
 		unsigned int cur);
 
 	// -------------------------------------------------------------------
@@ -392,7 +392,7 @@ private:
 
 	// -------------------------------------------------------------------
 	// Search for duplicate names
-	static bool FindNameMatch(const aiString& name, 
+	static bool FindNameMatch(const aiString& name,
 		std::vector<SceneHelper>& input, unsigned int cur);
 };
 

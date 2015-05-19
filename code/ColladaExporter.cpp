@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -71,7 +71,7 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
 	std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
 	std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
 
-	// invoke the exporter 
+	// invoke the exporter
 	ColladaExporter iDoTheExportThing( pScene, pIOSystem, path, file);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
@@ -99,7 +99,7 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
 	mSceneOwned = false;
 
 	// set up strings
-	endstr = "\n"; 
+	endstr = "\n";
 
 	// start writing
 	WriteFile();
@@ -134,7 +134,7 @@ void ColladaExporter::WriteFile()
 
 	WriteSceneLibrary();
 
-	// useless Collada fu at the end, just in case we haven't had enough indirections, yet. 
+	// useless Collada fu at the end, just in case we haven't had enough indirections, yet.
 	mOutput << startstr << "<scene>" << endstr;
 	PushTag();
 	mOutput << startstr << "<instance_visual_scene url=\"#" + XMLEscape(mScene->mRootNode->mName.C_Str()) + "\" />" << endstr;
@@ -149,7 +149,7 @@ void ColladaExporter::WriteFile()
 void ColladaExporter::WriteHeader()
 {
 	static const float epsilon = 0.00001f;
-	static const aiQuaternion x_rot(aiMatrix3x3( 
+	static const aiQuaternion x_rot(aiMatrix3x3(
 		0, -1,  0,
 		1,  0,  0,
 		0,  0,  1));
@@ -228,19 +228,19 @@ void ColladaExporter::WriteHeader()
 
 	aiMetadata* meta = mScene->mRootNode->mMetaData;
 	aiString value;
-	if (!meta || !meta->Get("Author", value))		
+	if (!meta || !meta->Get("Author", value))
 		mOutput << startstr << "<author>" << "Assimp" << "</author>" << endstr;
-	else		
+	else
 		mOutput << startstr << "<author>" << XMLEscape(value.C_Str()) << "</author>" << endstr;
 
 	if (!meta || !meta->Get("AuthoringTool", value))
 		mOutput << startstr << "<authoring_tool>" << "Assimp Exporter" << "</authoring_tool>" << endstr;
-	else		
+	else
 		mOutput << startstr << "<authoring_tool>" << XMLEscape(value.C_Str()) << "</authoring_tool>" << endstr;
 
 	//mOutput << startstr << "<author>" << mScene->author.C_Str() << "</author>" << endstr;
 	//mOutput << startstr << "<authoring_tool>" << mScene->authoringTool.C_Str() << "</authoring_tool>" << endstr;
-	
+
 	PopTag();
 	mOutput << startstr << "</contributor>" << endstr;
 	mOutput << startstr << "<created>" << date_str << "</created>" << endstr;
@@ -533,9 +533,9 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
   if( !pSurface.texture.empty() )
   {
     mOutput << startstr << "<image id=\"" << XMLEscape(pNameAdd) << "\">" << endstr;
-    PushTag(); 
+    PushTag();
     mOutput << startstr << "<init_from>";
-	
+
 	// URL encode image file name first, then XML encode on top
 	std::stringstream imageUrlEncoded;
     for( std::string::const_iterator it = pSurface.texture.begin(); it != pSurface.texture.end(); ++it )
@@ -676,10 +676,10 @@ void ColladaExporter::WriteMaterials()
   // output textures if present
   if( numTextures > 0 )
   {
-    mOutput << startstr << "<library_images>" << endstr; 
+    mOutput << startstr << "<library_images>" << endstr;
     PushTag();
     for( std::vector<Material>::const_iterator it = materials.begin(); it != materials.end(); ++it )
-    { 
+    {
       const Material& mat = *it;
       WriteImageEntry( mat.ambient, mat.name + "-ambient-image");
       WriteImageEntry( mat.diffuse, mat.name + "-diffuse-image");
@@ -835,7 +835,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 		if( mesh->HasVertexColors( a) )
 			mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " /*<< set=\"" << a << "\"" */ << " />" << endstr;
 	}
-	
+
 	PopTag();
 	mOutput << startstr << "</vertices>" << endstr;
 
@@ -871,11 +871,11 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 
 	// polygons
 	if (countPoly)
-	{		
+	{
 		mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
 		PushTag();
 		mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
-	
+
 		mOutput << startstr << "<vcount>";
 		for( size_t a = 0; a < mesh->mNumFaces; ++a )
 		{
@@ -883,7 +883,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 			mOutput << mesh->mFaces[a].mNumIndices << " ";
 		}
 		mOutput << "</vcount>" << endstr;
-	
+
 		mOutput << startstr << "<p>";
 		for( size_t a = 0; a < mesh->mNumFaces; ++a )
 		{
@@ -935,7 +935,7 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
 			mOutput << pData[a*3+0] << " ";
 			mOutput << pData[a*3+1] << " ";
 		}
-	} 
+	}
 	else if( pType == FloatType_Color )
 	{
 		for( size_t a = 0; a < pElementCount; ++a )
@@ -950,7 +950,7 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
 		for( size_t a = 0; a < pElementCount * floatsPerElement; ++a )
 			mOutput << pData[a] << " ";
 	}
-	mOutput << "</float_array>" << endstr; 
+	mOutput << "</float_array>" << endstr;
 	PopTag();
 
 	// the usual Collada fun. Let's bloat it even more!
@@ -1020,7 +1020,7 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 {
 	// the must have a name
 	if (pNode->mName.length == 0)
-	{		
+	{
 		std::stringstream ss;
 		ss << "Node_" << pNode;
 		pNode->mName.Set(ss.str());

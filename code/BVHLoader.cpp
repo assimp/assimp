@@ -8,8 +8,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -26,16 +26,16 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -79,12 +79,12 @@ BVHLoader::~BVHLoader()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool BVHLoader::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const
 {
-	// check file extension 
+	// check file extension
 	const std::string extension = GetExtension(pFile);
-	
+
 	if( extension == "bvh")
 		return true;
 
@@ -109,7 +109,7 @@ const aiImporterDesc* BVHLoader::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
+// Imports the given file into the given scene structure.
 void BVHLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	mFileName = pFile;
@@ -207,7 +207,7 @@ aiNode* BVHLoader::ReadNode()
 			aiNode* child = ReadNode();
 			child->mParent = node;
 			childNodes.push_back( child);
-		} 
+		}
 		else if( token == "End")
 		{
 			// The real symbol is "End Site". Second part comes in a separate token
@@ -218,7 +218,7 @@ aiNode* BVHLoader::ReadNode()
 			aiNode* child = ReadEndSite( nodeName);
 			child->mParent = node;
 			childNodes.push_back( child);
-		} 
+		}
 		else if( token == "}")
 		{
 			// we're done with that part of the hierarchy
@@ -263,7 +263,7 @@ aiNode* BVHLoader::ReadEndSite( const std::string& pParentName)
 		if( token == "OFFSET")
 		{
 			ReadNodeOffset( node);
-		} 
+		}
 		else if( token == "}")
 		{
 			// we're done with the end node
@@ -468,7 +468,7 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 				for( unsigned int channel = 0; channel < 3; ++channel)
 				{
 					switch( node.mChannels[channel])
-					{	
+					{
 					case Channel_PositionX: poskey->mValue.x = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
 					case Channel_PositionY: poskey->mValue.y = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
 					case Channel_PositionZ: poskey->mValue.z = node.mChannelValues[fr * node.mChannels.size() + channel]; break;
@@ -494,7 +494,7 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 			{
 				// Offset all further calculations
 				rotOffset = 3;
-			} 
+			}
 
 			// Then create the number of rotation keys
 			nodeAnim->mNumRotationKeys = mAnimNumFrames;
@@ -511,7 +511,7 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
 					const float angle = node.mChannelValues[fr * node.mChannels.size() + rotOffset + channel] * float( AI_MATH_PI) / 180.0f;
 
 					// Compute rotation transformations in the right order
-					switch (node.mChannels[rotOffset+channel]) 
+					switch (node.mChannels[rotOffset+channel])
 					{
 					case Channel_RotationX: aiMatrix4x4::RotationX( angle, temp); rotMatrix *= aiMatrix3x3( temp); break;
 					case Channel_RotationY: aiMatrix4x4::RotationY( angle, temp); rotMatrix *= aiMatrix3x3( temp);	break;

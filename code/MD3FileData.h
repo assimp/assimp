@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -71,9 +71,9 @@ namespace MD3	{
 #define AI_MD3_MAX_FRAMES		1024
 #define AI_MD3_MAX_TAGS			16
 #define AI_MD3_MAX_SURFACES		32
-#define AI_MD3_MAX_SHADERS		256	
-#define AI_MD3_MAX_VERTS		4096	
-#define AI_MD3_MAX_TRIANGLES	8192	
+#define AI_MD3_MAX_SHADERS		256
+#define AI_MD3_MAX_VERTS		4096
+#define AI_MD3_MAX_TRIANGLES	8192
 
 // master scale factor for all vertices in a MD3 model
 #define AI_MD3_XYZ_SCALE		(1.0f/64.0f)
@@ -186,7 +186,7 @@ struct Surface
 	uint32_t NUM_TRIANGLES;
 
 
-	//! offset to the triangle data 
+	//! offset to the triangle data
 	uint32_t OFS_TRIANGLES;
 
 	//! offset to the shader data
@@ -278,23 +278,23 @@ inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
  *
  *	@note This has been taken from q3 source (mathlib.c)
  */
-inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut ) 
+inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
 {
 	// check for singularities
-	if ( 0.0f == p_vIn[0] && 0.0f == p_vIn[1] ) 
+	if ( 0.0f == p_vIn[0] && 0.0f == p_vIn[1] )
 	{
-		if ( p_vIn[2] > 0.0f ) 
+		if ( p_vIn[2] > 0.0f )
 		{
 			((unsigned char*)&p_iOut)[0] = 0;
 			((unsigned char*)&p_iOut)[1] = 0;		// lat = 0, long = 0
-		} 
-		else 
+		}
+		else
 		{
 			((unsigned char*)&p_iOut)[0] = 128;
 			((unsigned char*)&p_iOut)[1] = 0;		// lat = 0, long = 128
 		}
-	} 
-	else 
+	}
+	else
 	{
 		int	a, b;
 

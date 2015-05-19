@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -68,10 +68,10 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"3ds prj" 
+	"3ds prj"
 };
 
-		
+
 // ------------------------------------------------------------------------------------------------
 // Begins a new parsing block
 // - Reads the current chunk and validates it
@@ -88,7 +88,7 @@ static const aiImporterDesc desc = {
         continue;                                                        \
 	const int oldReadLimit = stream->GetReadLimit();                     \
 	stream->SetReadLimit(stream->GetCurrentPos() + chunkSize);           \
-	
+
 
 // ------------------------------------------------------------------------------------------------
 // End a parsing block
@@ -106,12 +106,12 @@ Discreet3DSImporter::Discreet3DSImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 Discreet3DSImporter::~Discreet3DSImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool Discreet3DSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	std::string extension = GetExtension(pFile);
@@ -143,8 +143,8 @@ void Discreet3DSImporter::SetupProperties(const Importer* /*pImp*/)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void Discreet3DSImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
@@ -174,7 +174,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
 	ParseMainChunk();
 
 	// Process all meshes in the file. First check whether all
-	// face indices haev valid values. The generate our 
+	// face indices haev valid values. The generate our
 	// internal verbose representation. Finally compute normal
 	// vectors from the smoothing groups we read from the
 	// file.
@@ -225,7 +225,7 @@ void Discreet3DSImporter::ApplyMasterScale(aiScene* pScene)
 	else mMasterScale = 1.0f / mMasterScale;
 
 	// Construct an uniform scaling matrix and multiply with it
-	pScene->mRootNode->mTransformation *= aiMatrix4x4( 
+	pScene->mRootNode->mTransformation *= aiMatrix4x4(
 		mMasterScale,0.0f, 0.0f, 0.0f,
 		0.0f, mMasterScale,0.0f, 0.0f,
 		0.0f, 0.0f, mMasterScale,0.0f,
@@ -245,7 +245,7 @@ void Discreet3DSImporter::ReadChunk(Discreet3DS::Chunk* pcOut)
 
 	if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSize())
 		throw DeadlyImportError("Chunk is too large");
-	
+
 	if (pcOut->Size - sizeof(Discreet3DS::Chunk) > stream->GetRemainingSizeToLimit())
 		DefaultLogger::get()->error("3DS: Chunk overflow");
 }
@@ -256,7 +256,7 @@ void Discreet3DSImporter::SkipChunk()
 {
 	Discreet3DS::Chunk psChunk;
 	ReadChunk(&psChunk);
-	
+
 	stream->IncPtr(psChunk.Size-sizeof(Discreet3DS::Chunk));
 	return;
 }
@@ -270,7 +270,7 @@ void Discreet3DSImporter::ParseMainChunk()
 	// get chunk type
 	switch (chunk.Flag)
 	{
-	
+
 	case Discreet3DS::CHUNK_PRJ:
 		bIsPrj = true;
 	case Discreet3DS::CHUNK_MAIN:
@@ -356,7 +356,7 @@ void Discreet3DSImporter::ParseObjectChunk()
 
 	case Discreet3DS::CHUNK_BIT_MAP:
 		{
-		// Specifies the background image. The string should already be 
+		// Specifies the background image. The string should already be
 		// properly 0 terminated but we need to be sure
 		unsigned int cnt = 0;
 		const char* sz = (const char*)stream->GetPtr();
@@ -404,7 +404,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		}
 		break;
 
-	case Discreet3DS::CHUNK_LIGHT:	
+	case Discreet3DS::CHUNK_LIGHT:
 		{
 		// This starts a new light
 		aiLight* light = new aiLight();
@@ -453,7 +453,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		camera->mLookAt.z = stream->GetF4() - camera->mPosition.z;
 		float len = camera->mLookAt.Length();
 		if (len < 1e-5f) {
-			
+
 			// There are some files with lookat == position. Don't know why or whether it's ok or not.
 			DefaultLogger::get()->error("3DS: Unable to read proper camera look-at vector");
 			camera->mLookAt = aiVector3D(0.f,1.f,0.f);
@@ -461,7 +461,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 		}
 		else camera->mLookAt /= len;
 
-		// And finally - the camera rotation angle, in counter clockwise direction 
+		// And finally - the camera rotation angle, in counter clockwise direction
 		const float angle =  AI_DEG_TO_RAD( stream->GetF4() );
 		aiQuaternion quat(camera->mLookAt,angle);
 		camera->mUp = quat.GetMatrix() * aiVector3D(0.f,1.f,0.f);
@@ -472,7 +472,7 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
 			camera->mHorizontalFOV = AI_DEG_TO_RAD(45.f);
 		}
 
-		// Now check for further subchunks 
+		// Now check for further subchunks
 		if (!bIsPrj) /* fixme */ {
 			ParseCameraChunk();
 		}}
@@ -505,7 +505,7 @@ void Discreet3DSImporter::ParseLightChunk()
 
 		// FIX: the falloff angle is just an offset
 		light->mAngleOuterCone = light->mAngleInnerCone+AI_DEG_TO_RAD( stream->GetF4() );
-		break; 
+		break;
 
 		// intensity multiplier
 	case Discreet3DS::CHUNK_DL_MULTIPLIER:
@@ -521,7 +521,7 @@ void Discreet3DSImporter::ParseLightChunk()
 		break;
 
 		// light attenuation
-	case Discreet3DS::CHUNK_DL_ATTENUATE: 
+	case Discreet3DS::CHUNK_DL_ATTENUATE:
 		light->mAttenuationLinear = stream->GetF4();
 		break;
 	};
@@ -665,7 +665,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		while (stream->GetI1())++cnt;
 		std::string name = std::string(sz,cnt);
 
-		// Now find out whether we have this node already (target animation channels 
+		// Now find out whether we have this node already (target animation channels
 		// are stored with a separate object ID)
 		D3DS::Node* pcNode = FindNode(mRootNode,name);
 		int instanceNumber = 1;
@@ -698,7 +698,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 			// add to the parent of the last touched node
 			mCurrentNode->mParent->push_back(pcNode);
-			mLastNodeIndex++;	
+			mLastNodeIndex++;
 		}
 		else if(hierarchy >= mLastNodeIndex)	{
 
@@ -709,7 +709,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 		else	{
 			// need to go back to the specified position in the hierarchy.
 			InverseNodeSearch(pcNode,mCurrentNode);
-			mLastNodeIndex++;	
+			mLastNodeIndex++;
 		}
 		// Make this node the current node
 		mCurrentNode = pcNode;
@@ -734,7 +734,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 
 	case Discreet3DS::CHUNK_TRACKPIVOT:
 
-		if ( Discreet3DS::CHUNK_TRACKINFO != parent) 
+		if ( Discreet3DS::CHUNK_TRACKINFO != parent)
 		{
 			DefaultLogger::get()->warn("3DS: Skipping pivot subchunk for non usual object");
 			break;
@@ -814,7 +814,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 			aiFloatKey v;
 			v.mTime = (double)fidx;
 
-			// This is just a single float 
+			// This is just a single float
 			SkipTCBInfo();
 			v.mValue = stream->GetF4();
 
@@ -917,7 +917,7 @@ void Discreet3DSImporter::ParseHierarchyChunk(uint16_t parent)
 			// check whether we'll need to sort the keys
 			if (!l->empty() && v.mTime <= l->back().mTime)
 				sortKeys = true;
-			
+
 			// Remove zero-scalings on singular axes - they've been reported to be there erroneously in some strange files
 			if (!v.mValue.x) v.mValue.x = 1.f;
 			if (!v.mValue.y) v.mValue.y = 1.f;
@@ -950,7 +950,7 @@ void Discreet3DSImporter::ParseFaceChunk()
 	{
 	case Discreet3DS::CHUNK_SMOOLIST:
 		{
-		// This is the list of smoothing groups - a bitfield for every face. 
+		// This is the list of smoothing groups - a bitfield for every face.
 		// Up to 32 smoothing groups assigned to a single face.
 		unsigned int num = chunkSize/4, m = 0;
 		if (num > mMesh.mFaces.size())	{
@@ -1071,7 +1071,7 @@ void Discreet3DSImporter::ParseMeshChunk()
 			stream->IncPtr(2); // skip edge visibility flag
 		}
 
-		// Resize the material array (0xcdcdcdcd marks the default material; so if a face is 
+		// Resize the material array (0xcdcdcdcd marks the default material; so if a face is
 		// not referenced by a material, $$DEFAULT will be assigned to it)
 		mMesh.mFaceMaterials.resize(mMesh.mFaces.size(),0xcdcdcdcd);
 
@@ -1314,10 +1314,10 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 		// Get the mapping mode (for both axes)
 		if (iFlags & 0x2u)
 			pcOut->mMapMode = aiTextureMapMode_Mirror;
-		
+
 		else if (iFlags & 0x10u)
 			pcOut->mMapMode = aiTextureMapMode_Decal;
-		
+
 		// wrapping in all remaining cases
 		else pcOut->mMapMode = aiTextureMapMode_Wrap;
 		}

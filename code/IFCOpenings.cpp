@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2010, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  IFCOpenings.cpp
- *  @brief Implements a subset of Ifc CSG operations for pouring 
+ *  @brief Implements a subset of Ifc CSG operations for pouring
   *    holes for windows and doors into walls.
  */
 
@@ -68,7 +68,7 @@ namespace Assimp {
 
 
 		// fallback method to generate wall openings
-		bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, 
+		bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors,
 			TempMesh& curmesh);
 
 
@@ -77,15 +77,15 @@ typedef std::map<IfcVector2,size_t,XYSorter> XYSortedField;
 
 
 // ------------------------------------------------------------------------------------------------
-void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField& field, 
-	const std::vector< BoundingBox >& bbs, 
+void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField& field,
+	const std::vector< BoundingBox >& bbs,
 	std::vector<IfcVector2>& out)
 {
 	if (!(pmin.x-pmax.x) || !(pmin.y-pmax.y)) {
 		return;
 	}
 
-	IfcFloat xs = 1e10, xe = 1e10;	
+	IfcFloat xs = 1e10, xe = 1e10;
 	bool found = false;
 
 	// Search along the x-axis until we find an opening
@@ -94,7 +94,7 @@ void QuadrifyPart(const IfcVector2& pmin, const IfcVector2& pmax, XYSortedField&
 		const BoundingBox& bb = bbs[(*start).second];
 		if(bb.first.x >= pmax.x) {
 			break;
-		} 
+		}
 
 		if (bb.second.x > pmin.x && bb.second.y > pmin.y && bb.first.y < pmax.y) {
 			xs = bb.first.x;
@@ -202,7 +202,7 @@ struct ProjectedWindowContour
 typedef std::vector< ProjectedWindowContour > ContourVector;
 
 // ------------------------------------------------------------------------------------------------
-bool BoundingBoxesOverlapping( const BoundingBox &ibb, const BoundingBox &bb ) 
+bool BoundingBoxesOverlapping( const BoundingBox &ibb, const BoundingBox &bb )
 {
 	// count the '=' case as non-overlapping but as adjacent to each other
 	return ibb.first.x < bb.second.x && ibb.second.x > bb.first.x &&
@@ -217,12 +217,12 @@ bool IsDuplicateVertex(const IfcVector2& vv, const std::vector<IfcVector2>& temp
 		if ((cp-vv).SquareLength() < 1e-5f) {
 			return true;
 		}
-	}  
+	}
 	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
-void ExtractVerticesFromClipper(const ClipperLib::Polygon& poly, std::vector<IfcVector2>& temp_contour, 
+void ExtractVerticesFromClipper(const ClipperLib::Polygon& poly, std::vector<IfcVector2>& temp_contour,
 	bool filter_duplicates = false)
 {
 	temp_contour.clear();
@@ -278,8 +278,8 @@ void InsertWindowContours(const ContourVector& contours,
 			}
 			const std::set<IfcVector2,XYSorter>::const_iterator end = verts.end();
 			if (verts.find(bb.first)!=end && verts.find(bb.second)!=end
-				&& verts.find(IfcVector2(bb.first.x,bb.second.y))!=end 
-				&& verts.find(IfcVector2(bb.second.x,bb.first.y))!=end 
+				&& verts.find(IfcVector2(bb.first.x,bb.second.y))!=end
+				&& verts.find(IfcVector2(bb.second.x,bb.first.y))!=end
 				) {
 					continue;
 			}
@@ -382,9 +382,9 @@ void InsertWindowContours(const ContourVector& contours,
 }
 
 // ------------------------------------------------------------------------------------------------
-void MergeWindowContours (const std::vector<IfcVector2>& a, 
-	const std::vector<IfcVector2>& b, 
-	ClipperLib::ExPolygons& out) 
+void MergeWindowContours (const std::vector<IfcVector2>& a,
+	const std::vector<IfcVector2>& b,
+	ClipperLib::ExPolygons& out)
 {
 	out.clear();
 
@@ -416,9 +416,9 @@ void MergeWindowContours (const std::vector<IfcVector2>& a,
 
 // ------------------------------------------------------------------------------------------------
 // Subtract a from b
-void MakeDisjunctWindowContours (const std::vector<IfcVector2>& a, 
-	const std::vector<IfcVector2>& b, 
-	ClipperLib::ExPolygons& out) 
+void MakeDisjunctWindowContours (const std::vector<IfcVector2>& a,
+	const std::vector<IfcVector2>& b,
+	ClipperLib::ExPolygons& out)
 {
 	out.clear();
 
@@ -465,7 +465,7 @@ void CleanupWindowContour(ProjectedWindowContour& window)
 	clipper.AddPolygon(subject,ClipperLib::ptSubject);
 	clipper.Execute(ClipperLib::ctUnion,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
 
-	// This should yield only one polygon or something went wrong 
+	// This should yield only one polygon or something went wrong
 	if (clipped.size() != 1) {
 
 		// Empty polygon? drop the contour altogether
@@ -493,7 +493,7 @@ void CleanupWindowContours(ContourVector& contours)
 		}
 	}
 	catch (const char* sx) {
-		IFCImporter::LogError("error during polygon clipping, window shape may be wrong: (Clipper: " 
+		IFCImporter::LogError("error during polygon clipping, window shape may be wrong: (Clipper: "
 			+ std::string(sx) + ")");
 	}
 }
@@ -552,7 +552,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 					iold.push_back(ex.outer.size());
 					BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
 						vold.push_back(IfcVector3(
-							from_int64(point.X), 
+							from_int64(point.X),
 							from_int64(point.Y),
 							0.0f));
 					}
@@ -565,7 +565,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 		}
 	}
 	catch (const char* sx) {
-		IFCImporter::LogError("Ifc: error during polygon clipping, wall contour line may be wrong: (Clipper: " 
+		IFCImporter::LogError("Ifc: error during polygon clipping, wall contour line may be wrong: (Clipper: "
 			+ std::string(sx) + ")");
 
 		return;
@@ -580,9 +580,9 @@ typedef std::vector<TempOpening*> OpeningRefs;
 typedef std::vector<OpeningRefs > OpeningRefVector;
 
 typedef std::vector<std::pair<
-	ContourVector::const_iterator, 
-	Contour::const_iterator> 
-> ContourRefVector; 
+	ContourVector::const_iterator,
+	Contour::const_iterator>
+> ContourRefVector;
 
 // ------------------------------------------------------------------------------------------------
 bool BoundingBoxesAdjacent(const BoundingBox& bb, const BoundingBox& ibb)
@@ -590,7 +590,7 @@ bool BoundingBoxesAdjacent(const BoundingBox& bb, const BoundingBox& ibb)
 	// TODO: I'm pretty sure there is a much more compact way to check this
 	const IfcFloat epsilon = 1e-5f;
 	return	(std::fabs(bb.second.x - ibb.first.x) < epsilon && bb.first.y <= ibb.second.y && bb.second.y >= ibb.first.y) ||
-		(std::fabs(bb.first.x - ibb.second.x) < epsilon && ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) || 
+		(std::fabs(bb.first.x - ibb.second.x) < epsilon && ibb.first.y <= bb.second.y && ibb.second.y >= bb.first.y) ||
 		(std::fabs(bb.second.y - ibb.first.y) < epsilon && bb.first.x <= ibb.second.x && bb.second.x >= ibb.first.x) ||
 		(std::fabs(bb.first.y - ibb.second.y) < epsilon && ibb.first.x <= bb.second.x && ibb.second.x >= bb.first.x);
 }
@@ -598,7 +598,7 @@ bool BoundingBoxesAdjacent(const BoundingBox& bb, const BoundingBox& ibb)
 // ------------------------------------------------------------------------------------------------
 // Check if m0,m1 intersects n0,n1 assuming same ordering of the points in the line segments
 // output the intersection points on n0,n1
-bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1, 
+bool IntersectingLineSegments(const IfcVector2& n0, const IfcVector2& n1,
 	const IfcVector2& m0, const IfcVector2& m1,
 	IfcVector2& out0, IfcVector2& out1)
 {
@@ -730,7 +730,7 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
 						if ((isect0 - n0).SquareLength() > sqlen_epsilon) {
 							++n;
 
-							ncontour.insert(ncontour.begin() + n, isect0);	
+							ncontour.insert(ncontour.begin() + n, isect0);
 							skiplist.insert(skiplist.begin() + n, true);
 						}
 						else {
@@ -789,7 +789,7 @@ void FindBorderContours(ContourVector::iterator current)
 				else if (cit == cbegin) {
 					start_on_outer_border = true;
 				}
-		
+
 				outer_border = true;
 		}
 		else {
@@ -831,7 +831,7 @@ void FindLikelyCrossingLines(ContourVector::iterator current)
 			if (LikelyDiagonal(vdelta)) {
 				skiplist[std::distance(cbegin, cit) - 1] = true;
 			}
-		} 
+		}
 
 		last_proj_point = proj_point;
 	}
@@ -843,19 +843,19 @@ void FindLikelyCrossingLines(ContourVector::iterator current)
 }
 
 // ------------------------------------------------------------------------------------------------
-size_t CloseWindows(ContourVector& contours, 		  
-	const IfcMatrix4& minv, 
-	OpeningRefVector& contours_to_openings, 
+size_t CloseWindows(ContourVector& contours,
+	const IfcMatrix4& minv,
+	OpeningRefVector& contours_to_openings,
 	TempMesh& curmesh)
 {
 	size_t closed = 0;
 	// For all contour points, check if one of the assigned openings does
 	// already have points assigned to it. In this case, assume this is
 	// the other side of the wall and generate connections between
-	// the two holes in order to close the window. 
+	// the two holes in order to close the window.
 
 	// All this gets complicated by the fact that contours may pertain to
-	// multiple openings(due to merging of adjacent or overlapping openings). 
+	// multiple openings(due to merging of adjacent or overlapping openings).
 	// The code is based on the assumption that this happens symmetrically
 	// on both sides of the wall. If it doesn't (which would be a bug anyway)
 	// wrong geometry may be generated.
@@ -928,11 +928,11 @@ size_t CloseWindows(ContourVector& contours,
 				IfcVector3 bestv;
 
 				const IfcVector3& world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
-				
+
 				BOOST_FOREACH(const TempOpening* opening, refs) {
 					BOOST_FOREACH(const IfcVector3& other, opening->wallPoints) {
 						const IfcFloat sqdist = (world_point - other).SquareLength();
-						
+
 						if (sqdist < best) {
 							// avoid self-connections
 							if(sqdist < 1e-5) {
@@ -940,7 +940,7 @@ size_t CloseWindows(ContourVector& contours,
 							}
 
 							bestv = other;
-							best = sqdist;							
+							best = sqdist;
 						}
 					}
 				}
@@ -985,7 +985,7 @@ size_t CloseWindows(ContourVector& contours,
 			}
 		}
 		else {
-			
+
 			const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
 			BOOST_FOREACH(TempOpening* opening, refs) {
 				ai_assert(opening->wallPoints.empty());
@@ -1042,7 +1042,7 @@ void Quadrify(const ContourVector& contours, TempMesh& curmesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh& in_mesh, 
+IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh& in_mesh,
 	bool &ok, IfcVector3& nor_out)
 {
 	const std::vector<IfcVector3>& in_verts = in_mesh.verts;
@@ -1115,7 +1115,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 
 		out_contour2.push_back(IfcVector2(vv.x,vv.y));
 		ai_assert(std::fabs(vv.z) < vmax.z + 1e-8);
-	} 
+	}
 
 	for(size_t i = 0; i < out_contour.size(); ++i) {
 		ai_assert((out_contour[i]-out_contour2[i]).SquareLength() < 1e-6);
@@ -1127,7 +1127,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
 
 // ------------------------------------------------------------------------------------------------
 bool GenerateOpenings(std::vector<TempOpening>& openings,
-	const std::vector<IfcVector3>& nors, 
+	const std::vector<IfcVector3>& nors,
 	TempMesh& curmesh,
 	bool check_intersection,
 	bool generate_connection_geometry,
@@ -1135,8 +1135,8 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 {
 	OpeningRefVector contours_to_openings;
 
-	// Try to derive a solid base plane within the current surface for use as 
-	// working coordinate system. Map all vertices onto this plane and 
+	// Try to derive a solid base plane within the current surface for use as
+	// working coordinate system. Map all vertices onto this plane and
 	// rescale them to [0,1] range. This normalization means all further
 	// epsilons need not be scaled.
 	bool ok = true;
@@ -1176,7 +1176,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 		TempMesh* profile_data =  opening.profileMesh.get();
 		bool is_2d_source = false;
 		if (opening.profileMesh2D && norm_extrusion_dir.SquareLength() > 0) {
-			
+
 			if(std::fabs(norm_extrusion_dir * wall_extrusion_axis_norm) < 0.1) {
 				// horizontal extrusion
 				if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
@@ -1189,14 +1189,14 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				if (std::fabs(norm_extrusion_dir * nor) > 0.9) {
 					profile_data = opening.profileMesh2D.get();
 					is_2d_source = true;
-				} 
+				}
 			}
 		}
 		std::vector<IfcVector3> profile_verts = profile_data->verts;
 		std::vector<unsigned int> profile_vertcnts = profile_data->vertcnt;
 		if(profile_verts.size() <= 2) {
-			continue;	
-		}	
+			continue;
+		}
 
 		// The opening meshes are real 3D meshes so skip over all faces
 		// clearly facing into the wrong direction. Also, we need to check
@@ -1267,7 +1267,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 				if (!IsDuplicateVertex(vv, store)) {
 					store.push_back(vv);
-				}		
+				}
 			}
 		}
 
@@ -1279,7 +1279,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				temp_contour.swap(temp_contour2);
 
 				vpmax = vpmax2;
-				vpmin = vpmin2;			
+				vpmin = vpmin2;
 			}
 		}
 		if(temp_contour.size() <= 2) {
@@ -1321,7 +1321,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 				// no longer overlaps ibb
 				MakeDisjunctWindowContours(other, temp_contour, poly);
 				if(poly.size() == 1) {
-					
+
 					const BoundingBox& newbb = GetBoundingBox(poly[0].outer);
 					if (!BoundingBoxesOverlapping(ibb, newbb )) {
 						 // Good guy bounding box
@@ -1332,12 +1332,12 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					}
 				}
 
-				// Take these two overlapping contours and try to merge them. If they 
+				// Take these two overlapping contours and try to merge them. If they
 				// overlap (which should not happen, but in fact happens-in-the-real-
 				// world [tm] ), resume using a single contour and a single bounding box.
 				MergeWindowContours(temp_contour, other, poly);
 
-				if (poly.size() > 1) { 
+				if (poly.size() > 1) {
 					return TryAddOpenings_Poly2Tri(openings, nors, curmesh);
 				}
 				else if (poly.size() == 0) {
@@ -1346,7 +1346,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 					break;
 				}
 				else {
-					IFCImporter::LogDebug("merging overlapping openings");				
+					IFCImporter::LogDebug("merging overlapping openings");
 					ExtractVerticesFromClipper(poly[0].outer, temp_contour, false);
 
 					// Generate the union of the bounding boxes
@@ -1355,7 +1355,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
 					// Update contour-to-opening tables accordingly
 					if (generate_connection_geometry) {
-						std::vector<TempOpening*>& t = contours_to_openings[std::distance(contours.begin(),it)]; 
+						std::vector<TempOpening*>& t = contours_to_openings[std::distance(contours.begin(),it)];
 						joined_openings.insert(joined_openings.end(), t.begin(), t.end());
 
 						contours_to_openings.erase(contours_to_openings.begin() + std::distance(contours.begin(),it));
@@ -1426,7 +1426,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors, 
+bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std::vector<IfcVector3>& nors,
 	TempMesh& curmesh)
 {
 	IFCImporter::LogWarn("forced to use poly2tri fallback method to generate wall openings");
@@ -1434,8 +1434,8 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 	bool result = false;
 
-	// Try to derive a solid base plane within the current surface for use as 
-	// working coordinate system. 
+	// Try to derive a solid base plane within the current surface for use as
+	// working coordinate system.
 	bool ok;
 	IfcVector3 nor;
 	const IfcMatrix3& m = DerivePlaneCoordinateSpace(curmesh, ok, nor);
@@ -1453,7 +1453,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 	IfcVector2 vmin, vmax;
 	MinMaxChooser<IfcVector2>()(vmin, vmax);
-	
+
 	// Move all points into the new coordinate system, collecting min/max verts on the way
 	BOOST_FOREACH(IfcVector3& x, out) {
 		const IfcVector3 vv = m * x;
@@ -1476,9 +1476,9 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 		contour_flat.push_back(IfcVector2(vv.x,vv.y));
 	}
-		
-	// With the current code in DerivePlaneCoordinateSpace, 
-	// vmin,vmax should always be the 0...1 rectangle (+- numeric inaccuracies) 
+
+	// With the current code in DerivePlaneCoordinateSpace,
+	// vmin,vmax should always be the 0...1 rectangle (+- numeric inaccuracies)
 	// but here we won't rely on this.
 
 	vmax -= vmin;
@@ -1507,14 +1507,14 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 			const std::vector<IfcVector3>& va = t.profileMesh->verts;
 			if(va.size() <= 2) {
-				continue;	
+				continue;
 			}
-		
+
 			std::vector<IfcVector2> contour;
 
 			BOOST_FOREACH(const IfcVector3& xx, t.profileMesh->verts) {
 				IfcVector3 vv = m *  xx, vv_extr = m * (xx + t.extrusionDir);
-				
+
 				const bool is_extruded_side = std::fabs(vv.z - coord) > std::fabs(vv_extr.z - coord);
 				if (first) {
 					first = false;
@@ -1587,7 +1587,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 	}
 	catch (const char* sx) {
-		IFCImporter::LogError("Ifc: error during polygon clipping, skipping openings for this face: (Clipper: " 
+		IFCImporter::LogError("Ifc: error during polygon clipping, skipping openings for this face: (Clipper: "
 			+ std::string(sx) + ")");
 
 		return false;
@@ -1601,7 +1601,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 
 	// add connection geometry to close the adjacent 'holes' for the openings
-	// this should only be done from one side of the wall or the polygons 
+	// this should only be done from one side of the wall or the polygons
 	// would be emitted twice.
 	if (false && do_connections) {
 
@@ -1615,7 +1615,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 			BOOST_FOREACH(ClipperLib::IntPoint& point, opening) {
 
 				tmpvec.push_back( minv * IfcVector3(
-					vmin.x + from_int64(point.X) * vmax.x, 
+					vmin.x + from_int64(point.X) * vmax.x,
 					vmin.y + from_int64(point.Y) * vmax.y,
 					coord));
 			}
@@ -1636,10 +1636,10 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 			}
 		}
 	}
-	
+
 	std::vector< std::vector<p2t::Point*> > contours;
 	BOOST_FOREACH(ClipperLib::ExPolygon& clip, clipped) {
-		
+
 		contours.clear();
 
 		// Build the outer polygon contour line for feeding into poly2tri
@@ -1657,15 +1657,15 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 			cdt = new p2t::CDT(contour_points);
 		}
 		catch(const std::exception& e) {
-			IFCImporter::LogError("Ifc: error during polygon triangulation, skipping some openings: (poly2tri: " 
+			IFCImporter::LogError("Ifc: error during polygon triangulation, skipping some openings: (poly2tri: "
 				+ std::string(e.what()) + ")");
 			continue;
 		}
-		
+
 
 		// Build the poly2tri inner contours for all holes we got from ClipperLib
 		BOOST_FOREACH(ClipperLib::Polygon& opening, clip.holes) {
-			
+
 			contours.push_back(std::vector<p2t::Point*>());
 			std::vector<p2t::Point*>& contour = contours.back();
 
@@ -1675,13 +1675,13 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 			cdt->AddHole(contour);
 		}
-		
+
 		try {
 			// Note: See above
 			cdt->Triangulate();
 		}
 		catch(const std::exception& e) {
-			IFCImporter::LogError("Ifc: error during polygon triangulation, skipping some openings: (poly2tri: " 
+			IFCImporter::LogError("Ifc: error during polygon triangulation, skipping some openings: (poly2tri: "
 				+ std::string(e.what()) + ")");
 			continue;
 		}
@@ -1692,13 +1692,13 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 		BOOST_FOREACH(p2t::Triangle* tri, tris) {
 			for(int i = 0; i < 3; ++i) {
 
-				const IfcVector2& v = IfcVector2( 
-					static_cast<IfcFloat>( tri->GetPoint(i)->x ), 
+				const IfcVector2& v = IfcVector2(
+					static_cast<IfcFloat>( tri->GetPoint(i)->x ),
 					static_cast<IfcFloat>( tri->GetPoint(i)->y )
 				);
 
 				assert(v.x <= 1.0 && v.x >= 0.0 && v.y <= 1.0 && v.y >= 0.0);
-				const IfcVector3 v3 = minv * IfcVector3(vmin.x + v.x * vmax.x, vmin.y + v.y * vmax.y,coord) ; 
+				const IfcVector3 v3 = minv * IfcVector3(vmin.x + v.x * vmax.x, vmin.y + v.y * vmax.y,coord) ;
 
 				curmesh.verts.push_back(v3);
 			}
@@ -1727,4 +1727,4 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 #undef from_int64
 #undef one_vec
 
-#endif 
+#endif

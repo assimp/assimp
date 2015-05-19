@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -91,7 +91,7 @@ public:
 public:
 
 	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file. 
+	/** Returns whether the class can handle the format of the given file.
 	* See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
 		bool checkSig) const;
@@ -114,10 +114,10 @@ protected:
 	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. 
+	/** Imports the given file into the given scene structure.
 	* See BaseImporter::InternReadFile() for details
 	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+	void InternReadFile( const std::string& pFile, aiScene* pScene,
 		IOSystem* pIOHandler);
 
 protected:
@@ -189,7 +189,7 @@ protected:
 	 * \param iType Color data type
 	 * \param piSkip Receive: Size to skip, in bytes
 	*/
-	void CreateTexture_3DGS_MDL4(const unsigned char* szData, 
+	void CreateTexture_3DGS_MDL4(const unsigned char* szData,
 		unsigned int iType,
 		unsigned int* piSkip);
 
@@ -200,7 +200,7 @@ protected:
 	 * \param iType Color data type
 	 * \param piSkip Receive: Size to skip, in bytes
 	*/
-	void CreateTexture_3DGS_MDL5(const unsigned char* szData, 
+	void CreateTexture_3DGS_MDL5(const unsigned char* szData,
 		unsigned int iType,
 		unsigned int* piSkip);
 
@@ -232,7 +232,7 @@ protected:
 	 * \param UV coordinate index
 	*/
 	void ImportUVCoordinate_3DGS_MDL345( aiVector3D& vOut,
-		const MDL::TexCoord_MDL3* pcSrc, 
+		const MDL::TexCoord_MDL3* pcSrc,
 		unsigned int iIndex);
 
 	// -------------------------------------------------------------------
@@ -246,7 +246,7 @@ protected:
 
 	// -------------------------------------------------------------------
 	/** Parse a skin lump in a MDL7/HMP7 file with all of its features
-	 *  variant 1: Current cursor position is the beginning of the skin header 
+	 *  variant 1: Current cursor position is the beginning of the skin header
 	 * \param szCurrent Current data pointer
 	 * \param szCurrentOut Output data pointer
 	 * \param pcMats Material list for this group. To be filled ...
@@ -275,7 +275,7 @@ protected:
 		unsigned int iHeight);
 
 	// -------------------------------------------------------------------
-	/** Skip a skin lump in a MDL7/HMP7 file 
+	/** Skip a skin lump in a MDL7/HMP7 file
 	 * \param szCurrent Current data pointer
 	 * \param szCurrentOut Output data pointer. Points to the byte just
 	 * behind the last byte of the skin.
@@ -294,12 +294,12 @@ protected:
 	 * \param szData Current data pointer
 	 * \param iType type of the texture data. No DDS or external
 	 * \param piSkip Receive the number of bytes to skip
-	 * \param pcNew Must point to fully initialized data. Width and 
+	 * \param pcNew Must point to fully initialized data. Width and
 	 *        height must be set. If pcNew->pcData is set to UINT_MAX,
 	 *        piSkip will receive the size of the texture, in bytes, but no
 	 *        color data will be read.
 	 */
-	void ParseTextureColorData(const unsigned char* szData, 
+	void ParseTextureColorData(const unsigned char* szData,
 		unsigned int iType,
 		unsigned int* piSkip,
 		aiTexture* pcNew);
@@ -408,7 +408,7 @@ protected:
 		const MDL::IntGroupInfo_MDL7& groupInfo,
 		MDL::IntGroupData_MDL7& groupData,
 		MDL::IntSplitGroupData_MDL7& splitGroupData);
-	
+
 	// -------------------------------------------------------------------
 	/** Read all faces and vertices from a MDL7 group. The function fills
 	 *  preallocated memory buffers.
@@ -437,8 +437,8 @@ protected:
 
 	/** Buffer to hold the loaded file */
 	unsigned char* mBuffer;
-    
-	/** For GameStudio MDL files: The number in the magic word, either 3,4 or 5 
+
+	/** For GameStudio MDL files: The number in the magic word, either 3,4 or 5
 	 * (MDL7 doesn't need this, the format has a separate loader) */
 	unsigned int iGSFileVersion;
 

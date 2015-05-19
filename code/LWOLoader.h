@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -76,8 +76,8 @@ public:
 public:
 
 	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file. 
-	 * See BaseImporter::CanRead() for details.	
+	/** Returns whether the class can handle the format of the given file.
+	 * See BaseImporter::CanRead() for details.
 	 */
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
 		bool checkSig) const;
@@ -97,10 +97,10 @@ protected:
 	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. 
+	/** Imports the given file into the given scene structure.
 	* See BaseImporter::InternReadFile() for details
 	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+	void InternReadFile( const std::string& pFile, aiScene* pScene,
 		IOSystem* pIOHandler);
 
 private:
@@ -128,19 +128,19 @@ private:
 
 	// -------------------------------------------------------------------
 	/** Loads a surface chunk from an LWOB file
-	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param size Maximum size to be read, in bytes.
 	 */
 	void LoadLWOBSurface(unsigned int size);
 
 	// -------------------------------------------------------------------
 	/** Loads a surface chunk from an LWO2 file
-	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param size Maximum size to be read, in bytes.
 	 */
 	void LoadLWO2Surface(unsigned int size);
 
 	// -------------------------------------------------------------------
 	/** Loads a texture block from a LWO2 file.
-	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param size Maximum size to be read, in bytes.
 	 *  @param head Header of the SUF.BLOK header
 	 */
 	void LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head,
@@ -148,7 +148,7 @@ private:
 
 	// -------------------------------------------------------------------
 	/** Loads a shader block from a LWO2 file.
-	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param size Maximum size to be read, in bytes.
 	 *  @param head Header of the SUF.BLOK header
 	 */
 	void LoadLWO2ShaderBlock(LE_NCONST IFF::SubChunkHeader* head,
@@ -156,7 +156,7 @@ private:
 
 	// -------------------------------------------------------------------
 	/** Loads an image map from a LWO2 file
-	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param size Maximum size to be read, in bytes.
 	 *  @param tex Texture object to be filled
 	 */
 	void LoadLWO2ImageMap(unsigned int size, LWO::Texture& tex );
@@ -168,7 +168,7 @@ private:
 
 	// -------------------------------------------------------------------
 	/** Loads the LWO tag list from the file
-	 *  @param size Maximum size to be read, in bytes.  
+	 *  @param size Maximum size to be read, in bytes.
 	 */
 	void LoadLWOTags(unsigned int size);
 
@@ -213,15 +213,15 @@ private:
 	// -------------------------------------------------------------------
 	/** Count vertices and faces in a LWOB/LWO2 file
 	*/
-	void CountVertsAndFacesLWO2(unsigned int& verts, 
+	void CountVertsAndFacesLWO2(unsigned int& verts,
 		unsigned int& faces,
-		uint16_t*& cursor, 
+		uint16_t*& cursor,
 		const uint16_t* const end,
 		unsigned int max = UINT_MAX);
 
-	void CountVertsAndFacesLWOB(unsigned int& verts, 
+	void CountVertsAndFacesLWOB(unsigned int& verts,
 		unsigned int& faces,
-		LE_NCONST uint16_t*& cursor, 
+		LE_NCONST uint16_t*& cursor,
 		const uint16_t* const end,
 		unsigned int max = UINT_MAX);
 
@@ -229,13 +229,13 @@ private:
 	/** Read vertices and faces in a LWOB/LWO2 file
 	*/
 	void CopyFaceIndicesLWO2(LWO::FaceList::iterator& it,
-		uint16_t*& cursor, 
+		uint16_t*& cursor,
 		const uint16_t* const end);
 
 	// -------------------------------------------------------------------
 	void CopyFaceIndicesLWOB(LWO::FaceList::iterator& it,
-		LE_NCONST uint16_t*& cursor, 
-		const uint16_t* const end, 
+		LE_NCONST uint16_t*& cursor,
+		const uint16_t* const end,
 		unsigned int max = UINT_MAX);
 
 	// -------------------------------------------------------------------
@@ -270,16 +270,16 @@ private:
 	*/
 	void ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat);
 
-	
+
 	// -------------------------------------------------------------------
 	/** Get a list of all UV/VC channels required by a specific surface.
 	 *
 	 *  @param surf Working surface
 	 *  @param layer Working layer
-	 *  @param out Output list. The members are indices into the 
+	 *  @param out Output list. The members are indices into the
 	 *    UV/VC channel lists of the layer
 	*/
-	void FindUVChannels(/*const*/ LWO::Surface& surf, 
+	void FindUVChannels(/*const*/ LWO::Surface& surf,
 		LWO::SortedRep& sorted,
 		/*const*/ LWO::Layer& layer,
 		unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS]);
@@ -289,8 +289,8 @@ private:
 		LWO::Layer& layer,LWO::UVChannel& uv, unsigned int next);
 
 	// -------------------------------------------------------------------
-	void FindVCChannels(const LWO::Surface& surf, 
-		LWO::SortedRep& sorted,  
+	void FindVCChannels(const LWO::Surface& surf,
+		LWO::SortedRep& sorted,
 		const LWO::Layer& layer,
 		unsigned int out[AI_MAX_NUMBER_OF_COLOR_SETS]);
 
@@ -307,7 +307,7 @@ private:
 	 *  @param parent Index of the node
 	 *  @param apcNodes Flat list of nodes - used nodes are set to NULL.
 	*/
-	void AddChildren(aiNode* node, uint16_t parent, 
+	void AddChildren(aiNode* node, uint16_t parent,
 		std::vector<aiNode*>& apcNodes);
 
 	// -------------------------------------------------------------------
@@ -317,7 +317,7 @@ private:
 	int ReadVSizedIntLWO2(uint8_t*& inout);
 
 	// -------------------------------------------------------------------
-	/** Assign a value from a VMAP to a vertex and all vertices 
+	/** Assign a value from a VMAP to a vertex and all vertices
 	 *  attached to it.
 	 *  @param base VMAP destination data
 	 *  @param numRead Number of float's to be read
@@ -325,21 +325,21 @@ private:
 	 *  @param data Value of the VMAP to be assigned - read numRead
 	 *    floats from this array.
 	*/
-	void DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead, 
+	void DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead,
 		unsigned int idx, float* data);
 
 	// -------------------------------------------------------------------
 	/** Compute normal vectors for a mesh
 	 *  @param mesh Input mesh
 	 *  @param smoothingGroups Smoothing-groups-per-face array
-	 *  @param surface Surface for the mesh 
+	 *  @param surface Surface for the mesh
 	*/
 	void ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& smoothingGroups,
 		const LWO::Surface& surface);
 
 
 	// -------------------------------------------------------------------
-	/** Setup a new texture after the corresponding chunk was 
+	/** Setup a new texture after the corresponding chunk was
 	 *  encountered in the file.
 	 *  @param list Texture list
 	 *  @param size Maximum number of bytes to be read

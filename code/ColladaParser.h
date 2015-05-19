@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file ColladaParser.h
- *  @brief Defines the parser helper class for the collada loader 
+ *  @brief Defines the parser helper class for the collada loader
  */
 
 #ifndef AI_COLLADAPARSER_H_INC
@@ -54,9 +54,9 @@ namespace Assimp
 {
 
 // ------------------------------------------------------------------------------------------
-/** Parser helper class for the Collada loader. 
+/** Parser helper class for the Collada loader.
  *
- *  Does all the XML reading and builds internal data structures from it, 
+ *  Does all the XML reading and builds internal data structures from it,
  *  but leaves the resolving of all the references to the loader.
 */
 class ColladaParser
@@ -154,7 +154,7 @@ protected:
 	/** Reads a mesh from the geometry library */
 	void ReadMesh( Collada::Mesh* pMesh);
 
-	/** Reads a source element - a combination of raw data and an accessor defining 
+	/** Reads a source element - a combination of raw data and an accessor defining
 	 * things that should not be redefinable. Yes, that's another rant.
 	 */
 	void ReadSource();
@@ -164,7 +164,7 @@ protected:
 	 */
 	void ReadDataArray();
 
-	/** Reads an accessor and stores it in the global library under the given ID - 
+	/** Reads an accessor and stores it in the global library under the given ID -
 	 * accessors use the ID of the parent <source> element
 	 */
 	void ReadAccessor( const std::string& pID);
@@ -231,7 +231,7 @@ protected:
 	/** Tests for the closing tag of the given element, throws an exception if not found */
 	void TestClosing( const char* pName);
 
-	/** Checks the present element for the presence of the attribute, returns its index 
+	/** Checks the present element for the presence of the attribute, returns its index
 	    or throws an exception if not found */
 	int GetAttribute( const char* pAttr) const;
 
@@ -239,7 +239,7 @@ protected:
 	    therefore useful for optional attributes */
 	int TestAttribute( const char* pAttr) const;
 
-	/** Reads the text contents of an element, throws an exception if not given. 
+	/** Reads the text contents of an element, throws an exception if not given.
 	    Skips leading whitespace. */
 	const char* GetTextContent();
 
@@ -270,7 +270,7 @@ protected:
 	/** XML reader, member for everyday use */
 	irr::io::IrrXMLReader* mReader;
 
-	/** All data arrays found in the file by ID. Might be referred to by actually 
+	/** All data arrays found in the file by ID. Might be referred to by actually
 	    everyone. Collada, you are a steaming pile of indirection. */
 	typedef std::map<std::string, Collada::Data> DataLibrary;
 	DataLibrary mDataLibrary;
@@ -311,7 +311,7 @@ protected:
 	typedef std::map<std::string, Collada::Controller> ControllerLibrary;
 	ControllerLibrary mControllerLibrary;
 
-	/** Pointer to the root node. Don't delete, it just points to one of 
+	/** Pointer to the root node. Don't delete, it just points to one of
 	    the nodes in the node library. */
 	Collada::Node* mRootNode;
 
@@ -332,13 +332,13 @@ protected:
 // Check for element match
 inline bool ColladaParser::IsElement( const char* pName) const
 {
-	ai_assert( mReader->getNodeType() == irr::io::EXN_ELEMENT); 
-	return ::strcmp( mReader->getNodeName(), pName) == 0; 
+	ai_assert( mReader->getNodeType() == irr::io::EXN_ELEMENT);
+	return ::strcmp( mReader->getNodeName(), pName) == 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Finds the item in the given library by its reference, throws if not found
-template <typename Type> 
+template <typename Type>
 const Type& ColladaParser::ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const
 {
 	typename std::map<std::string, Type>::const_iterator it = pLibrary.find( pURL);

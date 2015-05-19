@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file  OFFLoader.cpp
- *  @brief Implementation of the OFF importer class 
+ *  @brief Implementation of the OFF importer class
  */
 
 
@@ -68,7 +68,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"off" 
+	"off"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -77,12 +77,12 @@ OFFImporter::OFFImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 OFFImporter::~OFFImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool OFFImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
@@ -105,8 +105,8 @@ const aiImporterDesc* OFFImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void OFFImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void OFFImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
@@ -115,7 +115,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 	if( file.get() == NULL) {
 		throw DeadlyImportError( "Failed to open OFF file " + pFile + ".");
 	}
-	
+
 	// allocate storage and copy the contents of the file to a memory buffer
 	std::vector<char> mBuffer2;
 	TextFileToBuffer(file.get(),mBuffer2);
@@ -160,7 +160,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 		fast_atoreal_move<float>(sz,(float&)v.z);
 	}
 
-	
+
 	// First find out how many vertices we'll need
 	const char* old = buffer;
 	for (unsigned int i = 0; i< mesh->mNumFaces;++i)
@@ -213,7 +213,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 		++i;
 		++faces;
 	}
-	
+
 	// generate the output node graph
 	pScene->mRootNode = new aiNode();
 	pScene->mRootNode->mName.Set("<OFFRoot>");

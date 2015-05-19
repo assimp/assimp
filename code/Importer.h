@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -56,7 +56,7 @@ namespace Assimp	{
 	class BaseProcess;
 	class SharedPostProcessInfo;
 
-	
+
 //! @cond never
 // ---------------------------------------------------------------------------
 /** @brief Internal PIMPL implementation for Assimp::Importer
@@ -65,13 +65,13 @@ namespace Assimp	{
  *  std::vector and std::map in the public headers. Furthermore we are dropping
  *  any STL interface problems caused by mismatching STL settings. All
  *  size calculation are now done by us, not the app heap. */
-class ImporterPimpl 
+class ImporterPimpl
 {
 public:
 
 	// Data type to store the key hash
 	typedef unsigned int KeyType;
-	
+
 	// typedefs for our four configuration maps.
 	// We don't need more, so there is no need for a generic solution
 	typedef std::map<KeyType, int> IntPropertyMap;
@@ -126,14 +126,14 @@ public:
 struct BatchData;
 
 // ---------------------------------------------------------------------------
-/** FOR IMPORTER PLUGINS ONLY: A helper class to the pleasure of importers 
+/** FOR IMPORTER PLUGINS ONLY: A helper class to the pleasure of importers
  *  that need to load many external meshes recursively.
  *
  *  The class uses several threads to load these meshes (or at least it
  *  could, this has not yet been implemented at the moment).
  *
  *  @note The class may not be used by more than one thread*/
-class BatchLoader 
+class BatchLoader
 {
 	// friend of Importer
 
@@ -152,7 +152,7 @@ public:
 
 		bool operator == (const PropertyMap& prop) const {
 			// fixme: really isocpp? gcc complains
-			return ints == prop.ints && floats == prop.floats && strings == prop.strings && matrices == prop.matrices; 
+			return ints == prop.ints && floats == prop.floats && strings == prop.strings && matrices == prop.matrices;
 		}
 
 		bool empty () const {
@@ -162,10 +162,10 @@ public:
 	//! @endcond
 
 public:
-	
+
 
 	// -------------------------------------------------------------------
-	/** Construct a batch loader from a given IO system to be used 
+	/** Construct a batch loader from a given IO system to be used
 	 *  to acess external files */
 	BatchLoader(IOSystem* pIO);
 	~BatchLoader();
@@ -181,7 +181,7 @@ public:
 	 *  @see GetImport */
 	unsigned int AddLoadRequest	(
 		const std::string& file,
-		unsigned int steps = 0, 
+		unsigned int steps = 0,
 		const PropertyMap* map = NULL
 		);
 

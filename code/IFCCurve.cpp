@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -61,7 +61,7 @@ class Conic : public Curve
 public:
 
 	// --------------------------------------------------
-	Conic(const IfcConic& entity, ConversionData& conv) 
+	Conic(const IfcConic& entity, ConversionData& conv)
 		: Curve(entity,conv)
 	{
 		IfcMatrix4 trafo;
@@ -80,7 +80,7 @@ public:
 	bool IsClosed() const {
 		return true;
 	}
-	
+
 	// --------------------------------------------------
 	size_t EstimateSampleCount(IfcFloat a, IfcFloat b) const {
 		ai_assert(InRange(a) && InRange(b));
@@ -113,7 +113,7 @@ class Circle : public Conic
 public:
 
 	// --------------------------------------------------
-	Circle(const IfcCircle& entity, ConversionData& conv) 
+	Circle(const IfcCircle& entity, ConversionData& conv)
 		: Conic(entity,conv)
 		, entity(entity)
 	{
@@ -142,7 +142,7 @@ class Ellipse : public Conic
 public:
 
 	// --------------------------------------------------
-	Ellipse(const IfcEllipse& entity, ConversionData& conv) 
+	Ellipse(const IfcEllipse& entity, ConversionData& conv)
 		: Conic(entity,conv)
 		, entity(entity)
 	{
@@ -165,13 +165,13 @@ private:
 // --------------------------------------------------------------------------------
 // Line
 // --------------------------------------------------------------------------------
-class Line : public Curve 
+class Line : public Curve
 {
 
 public:
 
 	// --------------------------------------------------
-	Line(const IfcLine& entity, ConversionData& conv) 
+	Line(const IfcLine& entity, ConversionData& conv)
 		: Curve(entity,conv)
 	{
 		ConvertCartesianPoint(p,entity.Pnt);
@@ -202,7 +202,7 @@ public:
 	void SampleDiscrete(TempMesh& out,IfcFloat a, IfcFloat b) const
 	{
 		ai_assert(InRange(a) && InRange(b));
-	
+
 		if (a == b) {
 			out.verts.push_back(Eval(a));
 			return;
@@ -226,7 +226,7 @@ private:
 // --------------------------------------------------------------------------------
 // CompositeCurve joins multiple smaller, bounded curves
 // --------------------------------------------------------------------------------
-class CompositeCurve : public BoundedCurve 
+class CompositeCurve : public BoundedCurve
 {
 
 	typedef std::pair< boost::shared_ptr< BoundedCurve >, bool > CurveEntry;
@@ -234,7 +234,7 @@ class CompositeCurve : public BoundedCurve
 public:
 
 	// --------------------------------------------------
-	CompositeCurve(const IfcCompositeCurve& entity, ConversionData& conv) 
+	CompositeCurve(const IfcCompositeCurve& entity, ConversionData& conv)
 		: BoundedCurve(entity,conv)
 		, total()
 	{
@@ -337,19 +337,19 @@ private:
 // --------------------------------------------------------------------------------
 // TrimmedCurve can be used to trim an unbounded curve to a bounded range
 // --------------------------------------------------------------------------------
-class TrimmedCurve : public BoundedCurve 
+class TrimmedCurve : public BoundedCurve
 {
 
 public:
 
 	// --------------------------------------------------
-	TrimmedCurve(const IfcTrimmedCurve& entity, ConversionData& conv) 
+	TrimmedCurve(const IfcTrimmedCurve& entity, ConversionData& conv)
 		: BoundedCurve(entity,conv)
 	{
 		base = boost::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
 
 		typedef boost::shared_ptr<const STEP::EXPRESS::DataType> Entry;
-	
+
 		// for some reason, trimmed curves can either specify a parametric value
 		// or a point on the curve, or both. And they can even specify which of the
 		// two representations they prefer, even though an information invariant
@@ -453,13 +453,13 @@ private:
 // --------------------------------------------------------------------------------
 // PolyLine is a 'curve' defined by linear interpolation over a set of discrete points
 // --------------------------------------------------------------------------------
-class PolyLine : public BoundedCurve 
+class PolyLine : public BoundedCurve
 {
 
 public:
 
 	// --------------------------------------------------
-	PolyLine(const IfcPolyline& entity, ConversionData& conv) 
+	PolyLine(const IfcPolyline& entity, ConversionData& conv)
 		: BoundedCurve(entity,conv)
 	{
 		points.reserve(entity.Points.size());
@@ -476,7 +476,7 @@ public:
 	// --------------------------------------------------
 	IfcVector3 Eval(IfcFloat p) const {
 		ai_assert(InRange(p));
-		
+
 		const size_t b = static_cast<size_t>(std::floor(p));
 		if (b == points.size()-1) {
 			return points.back();
@@ -506,7 +506,7 @@ private:
 
 
 // ------------------------------------------------------------------------------------------------
-Curve* Curve :: Convert(const IFC::IfcCurve& curve,ConversionData& conv) 
+Curve* Curve :: Convert(const IFC::IfcCurve& curve,ConversionData& conv)
 {
 	if(curve.ToPtr<IfcBoundedCurve>()) {
 		if(const IfcPolyline* c = curve.ToPtr<IfcPolyline>()) {
@@ -542,7 +542,7 @@ Curve* Curve :: Convert(const IFC::IfcCurve& curve,ConversionData& conv)
 
 #ifdef ASSIMP_BUILD_DEBUG
 // ------------------------------------------------------------------------------------------------
-bool Curve :: InRange(IfcFloat u) const 
+bool Curve :: InRange(IfcFloat u) const
 {
 	const ParamRange range = GetParametricRange();
 	if (IsClosed()) {
@@ -553,7 +553,7 @@ bool Curve :: InRange(IfcFloat u) const
 	const IfcFloat epsilon = 1e-5;
 	return u - range.first > -epsilon && range.second - u > -epsilon;
 }
-#endif 
+#endif
 
 // ------------------------------------------------------------------------------------------------
 IfcFloat Curve :: GetParametricRangeDelta() const

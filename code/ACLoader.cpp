@@ -8,8 +8,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -26,16 +26,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -84,7 +84,7 @@ static const aiImporterDesc desc = {
 	{ \
 		DefaultLogger::get()->error("AC3D: Unexpected EOF/EOL"); \
 		continue; \
-	} 
+	}
 
 // ------------------------------------------------------------------------------------------------
 // read a string (may be enclosed in double quotation marks). buffer must point to "
@@ -107,7 +107,7 @@ static const aiImporterDesc desc = {
 
 
 // ------------------------------------------------------------------------------------------------
-// read 1 to n floats prefixed with an optional predefined identifier 
+// read 1 to n floats prefixed with an optional predefined identifier
 #define AI_AC_CHECKED_LOAD_FLOAT_ARRAY(name,name_length,num,out) \
 	AI_AC_SKIP_TO_NEXT_TOKEN(); \
 	if (name_length) \
@@ -134,14 +134,14 @@ AC3DImporter::AC3DImporter()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 AC3DImporter::~AC3DImporter()
 {
 	// nothing to be done here
 }
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool AC3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	std::string extension = GetExtension(pFile);
@@ -168,7 +168,7 @@ const aiImporterDesc* AC3DImporter::GetInfo () const
 // Get a pointer to the next line from the file
 bool AC3DImporter::GetNextLine( )
 {
-	SkipLine(&buffer); 
+	SkipLine(&buffer);
 	return SkipSpaces(&buffer);
 }
 
@@ -309,7 +309,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 		else if (TokenMatch(buffer,"numsurf",7))
 		{
 			SkipSpaces(&buffer);
-			
+
 			bool Q3DWorkAround = false;
 
 			const unsigned int t = strtoul10(buffer,&buffer);
@@ -319,7 +319,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 				GetNextLine();
 				if (!TokenMatch(buffer,"SURF",4))
 				{
-					// FIX: this can occur for some files - Quick 3D for 
+					// FIX: this can occur for some files - Quick 3D for
 					// example writes no surf chunks
 					if (!Q3DWorkAround)
 					{
@@ -335,7 +335,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 				obj.surfaces.push_back(Surface());
 				Surface& surf = obj.surfaces.back();
 				surf.flags = strtoul_cppstyle(buffer);
-			
+
 				while (1)
 				{
 					if(!GetNextLine())
@@ -381,7 +381,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 							AI_AC_CHECKED_LOAD_FLOAT_ARRAY("",0,2,&entry.second);
 						}
 					}
-					else 
+					else
 					{
 
 						--buffer; // make sure the line is processed a second time
@@ -455,8 +455,8 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 	{
 		if (!object.surfaces.size() || !object.numRefs)
 		{
-			/* " An object with 7 vertices (no surfaces, no materials defined). 
-			     This is a good way of getting point data into AC3D. 
+			/* " An object with 7 vertices (no surfaces, no materials defined).
+			     This is a good way of getting point data into AC3D.
 			     The Vertex->create convex-surface/object can be used on these
 			     vertices to 'wrap' a 3d shape around them "
 				 (http://www.opencity.info/html/ac3dfileformat.html)
@@ -598,7 +598,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 						const Surface& src = *it;
 
 						// closed polygon
-						unsigned int type = (*it).flags & 0xf; 
+						unsigned int type = (*it).flags & 0xf;
 						if (!type)
 						{
 							aiFace& face = *faces++;
@@ -617,7 +617,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 									*vertices = object.vertices[entry.first] + object.translation;
 
 
-									// copy texture coordinates 
+									// copy texture coordinates
 									if (uv)
 									{
 										uv->x =  entry.second.x;
@@ -629,7 +629,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 						}
 						else
 						{
-							
+
 							it2  = (*it).entries.begin();
 
 							// either a closed or an unclosed line
@@ -650,8 +650,8 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 								}
 								ai_assert((*it2).first < object.vertices.size());
 								*vertices++ = object.vertices[(*it2).first];
-								
-								// copy texture coordinates 
+
+								// copy texture coordinates
 								if (uv)
 								{
 									uv->x =  (*it2).second.x;
@@ -722,7 +722,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 			break;
 
 			// there shouldn't be more than one world, but we don't care
-		case Object::World: 
+		case Object::World:
 			node->mName.length = ::sprintf(node->mName.data,"ACWorld_%i",worlds++);
 			break;
 		}
@@ -762,8 +762,8 @@ void AC3DImporter::SetupProperties(const Importer* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void AC3DImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void AC3DImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));

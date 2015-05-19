@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2008, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -98,7 +98,7 @@ bool Q3BSPFileParser::readData( const std::string &rMapName )
 	IOStream *pMapFile = m_pZipArchive->Open( rMapName.c_str() );
 	if ( NULL == pMapFile )
 		return false;
-		
+
 	const size_t size = pMapFile->FileSize();
 	m_Data.resize( size );
 
@@ -129,7 +129,7 @@ bool Q3BSPFileParser::parseFile()
 	// Imports the dictionary of the level
 	getLumps();
 
-	// Conunt data and prepare model data 
+	// Conunt data and prepare model data
 	countLumps();
 
 	// Read in Vertices
@@ -137,7 +137,7 @@ bool Q3BSPFileParser::parseFile()
 
 	// Read in Indices
 	getIndices();
-	
+
 	// Read Faces
 	getFaces();
 
@@ -160,8 +160,8 @@ bool Q3BSPFileParser::validateFormat()
 	m_sOffset += sizeof( sQ3BSPHeader );
 
 	// Version and identify string validation
-	if (pHeader->strID[ 0 ] != 'I' || pHeader->strID[ 1 ] != 'B' || pHeader->strID[ 2 ] != 'S' 
-		|| pHeader->strID[ 3 ] != 'P') 
+	if (pHeader->strID[ 0 ] != 'I' || pHeader->strID[ 1 ] != 'B' || pHeader->strID[ 2 ] != 'S'
+		|| pHeader->strID[ 3 ] != 'P')
 	{
 		return false;
 	}
@@ -211,7 +211,7 @@ void Q3BSPFileParser::getIndices()
 {
 	ai_assert( NULL != m_pModel );
 
-	sQ3BSPLump *lump = m_pModel->m_Lumps[ kMeshVerts ];	
+	sQ3BSPLump *lump = m_pModel->m_Lumps[ kMeshVerts ];
 	size_t Offset = (size_t) lump->iOffset;
 	const size_t nIndices = lump->iSize / sizeof( int );
 	m_pModel->m_Indices.resize( nIndices );
@@ -222,7 +222,7 @@ void Q3BSPFileParser::getIndices()
 void Q3BSPFileParser::getFaces()
 {
 	ai_assert( NULL != m_pModel );
-	
+
 	size_t Offset = m_pModel->m_Lumps[ kFaces ]->iOffset;
 	for ( size_t idx = 0; idx < m_pModel->m_Faces.size(); idx++ )
 	{
@@ -268,7 +268,7 @@ void Q3BSPFileParser::getEntities()
 {
 	int size = m_pModel->m_Lumps[ kEntities ]->iSize;
 	m_pModel->m_EntityData.resize( size );
-	if ( size > 0 ) 
+	if ( size > 0 )
 	{
 		size_t Offset = m_pModel->m_Lumps[ kEntities ]->iOffset;
 		memcpy( &m_pModel->m_EntityData[ 0 ], &m_Data[ Offset ], sizeof( char ) * size );

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -75,7 +75,7 @@ struct TTUpdateInfo
 	//! Direct shortcut, if available
 	unsigned int* directShortcut;
 
-	//! Material 
+	//! Material
 	aiMaterial *mat;
 
 	//! Texture type and index
@@ -151,7 +151,7 @@ struct STransformVecInfo : public aiUVTransform
 	inline bool IsUntransformed() const
 	{
 		return (1.0f == mScaling.x && 1.f == mScaling.y &&
-			!mTranslation.x && !mTranslation.y && 
+			!mTranslation.x && !mTranslation.y &&
 			mRotation < AI_TT_ROTATION_EPSILON);
 	}
 
@@ -171,7 +171,7 @@ struct STransformVecInfo : public aiUVTransform
 		}
 		if (mRotation)
 		{
-			aiMatrix3x3 mRot; 
+			aiMatrix3x3 mRot;
 			mRot.a1 = mRot.b2 = std::cos(mRotation);
 			mRot.a2 = mRot.b1 = std::sin(mRotation);
 			mRot.a2 = -mRot.a2;
@@ -179,7 +179,7 @@ struct STransformVecInfo : public aiUVTransform
 		}
 		if (mTranslation.x || mTranslation.y)
 		{
-			aiMatrix3x3 mTrans; 
+			aiMatrix3x3 mTrans;
 			mTrans.a3 = mTranslation.x;
 			mTrans.b3 = mTranslation.y;
 			mOut *= mTrans;

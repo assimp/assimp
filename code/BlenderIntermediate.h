@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -119,7 +119,7 @@ namespace Blender {
 	private:
 		mywrap arr;
 	};
-	
+
 #ifdef _MSC_VER
 #	pragma warning(disable:4351)
 #endif
@@ -137,7 +137,7 @@ namespace Blender {
 	/** ConversionData acts as intermediate storage location for
 	 *  the various ConvertXXX routines in BlenderImporter.*/
 	// --------------------------------------------------------------------
-	struct ConversionData	
+	struct ConversionData
 	{
 		ConversionData(const FileDatabase& db)
 			: sentinel_cnt()
@@ -179,20 +179,20 @@ namespace Blender {
 inline const char* GetTextureTypeDisplayString(Tex::Type t)
 {
 	switch (t)	{
-	case Tex::Type_CLOUDS		:  return  "Clouds";			
-	case Tex::Type_WOOD			:  return  "Wood";			
-	case Tex::Type_MARBLE		:  return  "Marble";			
-	case Tex::Type_MAGIC		:  return  "Magic";		
-	case Tex::Type_BLEND		:  return  "Blend";			
-	case Tex::Type_STUCCI		:  return  "Stucci";			
-	case Tex::Type_NOISE		:  return  "Noise";			
-	case Tex::Type_PLUGIN		:  return  "Plugin";			
-	case Tex::Type_MUSGRAVE		:  return  "Musgrave";		
-	case Tex::Type_VORONOI		:  return  "Voronoi";			
-	case Tex::Type_DISTNOISE	:  return  "DistortedNoise";	
-	case Tex::Type_ENVMAP		:  return  "EnvMap";	
-	case Tex::Type_IMAGE		:  return  "Image";	
-	default: 
+	case Tex::Type_CLOUDS		:  return  "Clouds";
+	case Tex::Type_WOOD			:  return  "Wood";
+	case Tex::Type_MARBLE		:  return  "Marble";
+	case Tex::Type_MAGIC		:  return  "Magic";
+	case Tex::Type_BLEND		:  return  "Blend";
+	case Tex::Type_STUCCI		:  return  "Stucci";
+	case Tex::Type_NOISE		:  return  "Noise";
+	case Tex::Type_PLUGIN		:  return  "Plugin";
+	case Tex::Type_MUSGRAVE		:  return  "Musgrave";
+	case Tex::Type_VORONOI		:  return  "Voronoi";
+	case Tex::Type_DISTNOISE	:  return  "DistortedNoise";
+	case Tex::Type_ENVMAP		:  return  "EnvMap";
+	case Tex::Type_IMAGE		:  return  "Image";
+	default:
 		break;
 	}
 	return "<Unknown>";

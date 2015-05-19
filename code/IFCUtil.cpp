@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -55,7 +55,7 @@ namespace Assimp {
 	namespace IFC {
 
 // ------------------------------------------------------------------------------------------------
-void TempOpening::Transform(const IfcMatrix4& mat) 
+void TempOpening::Transform(const IfcMatrix4& mat)
 {
 	if(profileMesh) {
 		profileMesh->Transform(mat);
@@ -67,7 +67,7 @@ void TempOpening::Transform(const IfcMatrix4& mat)
 }
 
 // ------------------------------------------------------------------------------------------------
-aiMesh* TempMesh::ToMesh() 
+aiMesh* TempMesh::ToMesh()
 {
 	ai_assert(verts.size() == std::accumulate(vertcnt.begin(),vertcnt.end(),size_t(0)));
 
@@ -113,7 +113,7 @@ void TempMesh::Clear()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TempMesh::Transform(const IfcMatrix4& mat) 
+void TempMesh::Transform(const IfcMatrix4& mat)
 {
 	BOOST_FOREACH(IfcVector3& v, verts) {
 		v *= mat;
@@ -149,7 +149,7 @@ void TempMesh::RemoveDegenerates()
 	std::vector<IfcVector3>::iterator vit = verts.begin();
 	for (std::vector<unsigned int>::iterator it = vertcnt.begin(); it != vertcnt.end(); ++inor) {
 		const unsigned int pcount = *it;
-		
+
 		if (normals[inor].SquareLength() < 1e-10f) {
 			it = vertcnt.erase(it);
 			vit = verts.erase(vit, vit + pcount);
@@ -185,8 +185,8 @@ IfcVector3 TempMesh::ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bo
 }
 
 // ------------------------------------------------------------------------------------------------
-void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals, 
-	bool normalize, 
+void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
+	bool normalize,
 	size_t ofs) const
 {
 	size_t max_vcount = 0;
@@ -198,7 +198,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
 	std::vector<IfcFloat> temp((max_vcount+2)*4);
 	normals.reserve( normals.size() + vertcnt.size()-ofs );
 
-	// `NewellNormal()` currently has a relatively strange interface and need to 
+	// `NewellNormal()` currently has a relatively strange interface and need to
 	// re-structure things a bit to meet them.
 	size_t vidx = std::accumulate(vertcnt.begin(),begin,0);
 	for(iit = begin; iit != end; vidx += *iit++) {
@@ -292,7 +292,7 @@ void TempMesh::FixupFaceOrientation()
 	}
 
 	// now we're getting started. We take the face which is the farthest away from the center. This face is most probably
-	// facing outwards. So we reverse this face to point outwards in relation to the center. Then we adapt neighbouring 
+	// facing outwards. So we reverse this face to point outwards in relation to the center. Then we adapt neighbouring
 	// faces to have the same winding until all faces have been tested.
 	std::vector<bool> faceDone(vertcnt.size(), false);
 	while( std::count(faceDone.begin(), faceDone.end(), false) != 0 )
@@ -315,14 +315,14 @@ void TempMesh::FixupFaceOrientation()
 		IfcVector3 farthestCenter = std::accumulate(verts.begin() + faceStartIndices[farthestIndex],
 			verts.begin() + faceStartIndices[farthestIndex] + vertcnt[farthestIndex], IfcVector3(0.0))
 			/ IfcFloat(vertcnt[farthestIndex]);
-		// We accapt a bit of negative orientation without reversing. In case of doubt, prefer the orientation given in 
+		// We accapt a bit of negative orientation without reversing. In case of doubt, prefer the orientation given in
 		// the file.
 		if( (farthestNormal * (farthestCenter - vavg).Normalize()) < -0.4 )
 		{
 			size_t fsi = faceStartIndices[farthestIndex], fvc = vertcnt[farthestIndex];
 			std::reverse(verts.begin() + fsi, verts.begin() + fsi + fvc);
 			std::reverse(neighbour.begin() + fsi, neighbour.begin() + fsi + fvc);
-			// because of the neighbour index belonging to the edge starting with the point at the same index, we need to 
+			// because of the neighbour index belonging to the edge starting with the point at the same index, we need to
 			// cycle the neighbours through to match the edges again.
 			// Before: points A - B - C - D with edge neighbour p - q - r - s
 			// After: points D - C - B - A, reversed neighbours are s - r - q - p, but the should be
@@ -334,7 +334,7 @@ void TempMesh::FixupFaceOrientation()
 		std::vector<size_t> todo;
 		todo.push_back(farthestIndex);
 
-		// go over its neighbour faces recursively and adapt their winding order to match the farthest face 
+		// go over its neighbour faces recursively and adapt their winding order to match the farthest face
 		while( !todo.empty() )
 		{
 			size_t tdf = todo.back();
@@ -355,7 +355,7 @@ void TempMesh::FixupFaceOrientation()
 				ai_assert(it != verts.begin() + nbvsi + nbvc);
 				size_t nb_vidx = std::distance(verts.begin() + nbvsi, it);
 				// two faces winded in the same direction should have a crossed edge, where one face has p0->p1 and the other
-				// has p1'->p0'. If the next point on the neighbouring face is also the next on the current face, we need 
+				// has p1'->p0'. If the next point on the neighbouring face is also the next on the current face, we need
 				// to reverse the neighbour
 				nb_vidx = (nb_vidx + 1) % nbvc;
 				size_t oursideidx = (a + 1) % vc;
@@ -378,7 +378,7 @@ void TempMesh::FixupFaceOrientation()
 }
 
 // ------------------------------------------------------------------------------------------------
-void TempMesh::RemoveAdjacentDuplicates() 
+void TempMesh::RemoveAdjacentDuplicates()
 {
 
 	bool drop = false;
@@ -396,7 +396,7 @@ void TempMesh::RemoveAdjacentDuplicates()
 		const IfcFloat epsilon = (vmax-vmin).SquareLength() / static_cast<IfcFloat>(1e9);
 		//const IfcFloat dotepsilon = 1e-9;
 
-		//// look for vertices that lie directly on the line between their predecessor and their 
+		//// look for vertices that lie directly on the line between their predecessor and their
 		//// successor and replace them with either of them.
 
 		//for(size_t i = 0; i < cnt; ++i) {
@@ -598,7 +598,7 @@ void ConvertAxisPlacement(IfcMatrix4& out, const IfcAxis2Placement3D& in)
 
 	IfcVector3 z(0.f,0.f,1.f),r(1.f,0.f,0.f),x;
 
-	if (in.Axis) { 
+	if (in.Axis) {
 		ConvertDirection(z,*in.Axis.Get());
 	}
 	if (in.RefDirection) {
@@ -678,7 +678,7 @@ void ConvertTransformOperator(IfcMatrix4& out, const IfcCartesianTransformationO
 	}
 
 	IfcMatrix4 locm;
-	IfcMatrix4::Translation(loc,locm);	
+	IfcMatrix4::Translation(loc,locm);
 	AssignMatrixAxes(out,x,y,z);
 
 

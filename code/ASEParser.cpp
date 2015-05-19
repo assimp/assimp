@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file  ASEParser.cpp
- *  @brief Implementation of the ASE parser class 
+ *  @brief Implementation of the ASE parser class
  */
 
 
@@ -86,7 +86,7 @@ using namespace Assimp::ASE;
 		++iLineNumber; \
 		bLastWasEndLine = true; \
 	} else bLastWasEndLine = false; \
-	++filePtr; 
+	++filePtr;
 
 // ------------------------------------------------------------------------------------------------
 // Handle a nested section in the file. EOF is an error in this case
@@ -114,7 +114,7 @@ using namespace Assimp::ASE;
 		++iLineNumber; \
 		bLastWasEndLine = true; \
 	} else bLastWasEndLine = false; \
-	++filePtr; 
+	++filePtr;
 
 // ------------------------------------------------------------------------------------------------
 Parser::Parser (const char* szFile, unsigned int fileFormatDefault)
@@ -229,7 +229,7 @@ bool Parser::SkipSection()
 		}
 		else if ('\0' == *filePtr)
 		{
-			LogWarning("Unable to parse block: Unexpected EOF, closing bracket \'}\' was expected [#1]");	
+			LogWarning("Unable to parse block: Unexpected EOF, closing bracket \'}\' was expected [#1]");
 			return false;
 		}
 		else if(IsLineEnd(*filePtr))++iLineNumber;
@@ -276,50 +276,50 @@ void Parser::Parse()
 			}
 			// "group" - no implementation yet, in facte
 			// we're just ignoring them for the moment
-			if (TokenMatch(filePtr,"GROUP",5)) 
+			if (TokenMatch(filePtr,"GROUP",5))
 			{
 				Parse();
 				continue;
 			}
 			// material list
-			if (TokenMatch(filePtr,"MATERIAL_LIST",13)) 
+			if (TokenMatch(filePtr,"MATERIAL_LIST",13))
 			{
 				ParseLV1MaterialListBlock();
 				continue;
 			}
 			// geometric object (mesh)
-			if (TokenMatch(filePtr,"GEOMOBJECT",10)) 
-				
+			if (TokenMatch(filePtr,"GEOMOBJECT",10))
+
 			{
 				m_vMeshes.push_back(Mesh());
 				ParseLV1ObjectBlock(m_vMeshes.back());
 				continue;
 			}
 			// helper object = dummy in the hierarchy
-			if (TokenMatch(filePtr,"HELPEROBJECT",12)) 
-				
+			if (TokenMatch(filePtr,"HELPEROBJECT",12))
+
 			{
 				m_vDummies.push_back(Dummy());
 				ParseLV1ObjectBlock(m_vDummies.back());
 				continue;
 			}
 			// light object
-			if (TokenMatch(filePtr,"LIGHTOBJECT",11)) 
-				
+			if (TokenMatch(filePtr,"LIGHTOBJECT",11))
+
 			{
 				m_vLights.push_back(Light());
 				ParseLV1ObjectBlock(m_vLights.back());
 				continue;
 			}
 			// camera object
-			if (TokenMatch(filePtr,"CAMERAOBJECT",12)) 
+			if (TokenMatch(filePtr,"CAMERAOBJECT",12))
 			{
 				m_vCameras.push_back(Camera());
 				ParseLV1ObjectBlock(m_vCameras.back());
 				continue;
 			}
 			// comment - print it on the console
-			if (TokenMatch(filePtr,"COMMENT",7)) 
+			if (TokenMatch(filePtr,"COMMENT",7))
 			{
 				std::string out = "<unknown>";
 				ParseString(out,"*COMMENT");
@@ -327,7 +327,7 @@ void Parser::Parse()
 				continue;
 			}
 			// ASC bone weights
-			if (AI_ASE_IS_OLD_FILE_FORMAT() && TokenMatch(filePtr,"MESH_SOFTSKINVERTS",18)) 
+			if (AI_ASE_IS_OLD_FILE_FORMAT() && TokenMatch(filePtr,"MESH_SOFTSKINVERTS",18))
 			{
 				ParseLV1SoftSkinBlock();
 			}
@@ -347,7 +347,7 @@ void Parser::ParseLV1SoftSkinBlock()
 	// nested sections supported and the single elements aren't
 	// marked by keywords starting with an asterisk.
 
-	/** 
+	/**
 	FORMAT BEGIN
 
 	*MESH_SOFTSKINVERTS {
@@ -358,7 +358,7 @@ void Parser::ParseLV1SoftSkinBlock()
 		<number of weights>	[for <number of weights> times:] <bone name> <weight>
 	}
 
-	FORMAT END 
+	FORMAT END
 	*/
 	// **************************************************************
 	while (true)
@@ -433,7 +433,7 @@ void Parser::ParseLV1SoftSkinBlock()
 							// Find the bone in the mesh's list
 							std::pair<int,float> me;
 							me.first = -1;
-							
+
 							for (unsigned int n = 0; n < curMesh->mBones.size();++n)
 							{
 								if (curMesh->mBones[n].mName == bone)
@@ -471,21 +471,21 @@ void Parser::ParseLV1SceneBlock()
 		if ('*' == *filePtr)
 		{
 			++filePtr;
-			if (TokenMatch(filePtr,"SCENE_BACKGROUND_STATIC",23)) 
-				
+			if (TokenMatch(filePtr,"SCENE_BACKGROUND_STATIC",23))
+
 			{
 				// parse a color triple and assume it is really the bg color
 				ParseLV4MeshFloatTriple( &m_clrBackground.r );
 				continue;
 			}
-			if (TokenMatch(filePtr,"SCENE_AMBIENT_STATIC",20)) 
-				
+			if (TokenMatch(filePtr,"SCENE_AMBIENT_STATIC",20))
+
 			{
 				// parse a color triple and assume it is really the bg color
 				ParseLV4MeshFloatTriple( &m_clrAmbient.r );
 				continue;
 			}
-			if (TokenMatch(filePtr,"SCENE_FIRSTFRAME",16)) 
+			if (TokenMatch(filePtr,"SCENE_FIRSTFRAME",16))
 			{
 				ParseLV4MeshLong(iFirstFrame);
 				continue;
@@ -495,7 +495,7 @@ void Parser::ParseLV1SceneBlock()
 				ParseLV4MeshLong(iLastFrame);
 				continue;
 			}
-			if (TokenMatch(filePtr,"SCENE_FRAMESPEED",16)) 
+			if (TokenMatch(filePtr,"SCENE_FRAMESPEED",16))
 			{
 				ParseLV4MeshLong(iFrameSpeed);
 				continue;
@@ -709,7 +709,7 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
 			// submaterial chunks
 			if (TokenMatch(filePtr,"SUBMATERIAL",11))
 			{
-			
+
 				unsigned int iIndex = 0;
 				ParseLV4MeshLong(iIndex);
 
@@ -741,7 +741,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
 	// but we need to expect that case ... if the path is
 	// empty the texture won't be used later.
 	// ***********************************************************
-	bool parsePath = true; 
+	bool parsePath = true;
 	while (true)
 	{
 		if ('*' == *filePtr)
@@ -756,7 +756,7 @@ void Parser::ParseLV3MapBlock(Texture& map)
 				if (temp != "Bitmap" && temp != "Normal Bump")
 				{
 					DefaultLogger::get()->warn("ASE: Skipping unknown map type: " + temp);
-					parsePath = false; 
+					parsePath = false;
 				}
 				continue;
 			}
@@ -844,7 +844,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
 	{
 		if ('\"' == *sz)break;
 		else if ('\0' == *sz)
-		{			
+		{
 			sprintf(szBuffer,"Unable to parse %s block: Strings are expected to "
 				"be enclosed in double quotation marks but EOF was reached before "
 				"a closing quotation mark was encountered",szName);
@@ -959,7 +959,7 @@ void Parser::ParseLV1ObjectBlock(ASE::BaseNode& node)
 			{
 				// mesh data
 				// FIX: Older files use MESH_SOFTSKIN
-				if (TokenMatch(filePtr,"MESH" ,4) || 
+				if (TokenMatch(filePtr,"MESH" ,4) ||
 					TokenMatch(filePtr,"MESH_SOFTSKIN",13))
 				{
 					ParseLV2MeshBlock((ASE::Mesh&)node);
@@ -1060,14 +1060,14 @@ void Parser::ParseLV2AnimationBlock(ASE::BaseNode& mesh)
 				if(!ParseString(temp,"*NODE_NAME"))
 					SkipToNextToken();
 
-				// If the name of the node contains .target it 
+				// If the name of the node contains .target it
 				// represents an animated camera or spot light
 				// target.
 				if (std::string::npos != temp.find(".Target"))
 				{
 					if  ((mesh.mType != BaseNode::Camera || ((ASE::Camera&)mesh).mCameraType != ASE::Camera::TARGET)  &&
 						( mesh.mType != BaseNode::Light  || ((ASE::Light&)mesh).mLightType   != ASE::Light::TARGET))
-					{   
+					{
 
 						DefaultLogger::get()->error("ASE: Found target animation channel "
 							"but the node is neither a camera nor a spot light");
@@ -1176,7 +1176,7 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation& anim)
 		if ('*' == *filePtr)
 		{
 			++filePtr;
-			
+
 			bool b = false;
 
 			// For the moment we're just reading the three floats -
@@ -1265,7 +1265,7 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation& anim)
 void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode& mesh)
 {
 	AI_ASE_PARSER_INIT();
-	int mode   = 0; 
+	int mode   = 0;
 	while (true)
 	{
 		if ('*' == *filePtr)
@@ -1304,7 +1304,7 @@ void Parser::ParseLV2NodeTransformBlock(ASE::BaseNode& mesh)
 			}
 			if (mode)
 			{
-				// fourth row of the transformation matrix - and also the 
+				// fourth row of the transformation matrix - and also the
 				// only information here that is interesting for targets
 				if (TokenMatch(filePtr,"TM_ROW3" ,7))
 				{
@@ -1491,7 +1491,7 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
 			// mesh animation keyframe. Not supported
 			if (TokenMatch(filePtr,"MESH_ANIMATION" ,14))
 			{
-				
+
 				LogWarning("Found *MESH_ANIMATION element in ASE/ASK file. "
 					"Keyframe animation is not supported by Assimp, this element "
 					"will be ignored");
@@ -1571,7 +1571,7 @@ void Parser::ParseLV4MeshBones(unsigned int iNumBones,ASE::Mesh& mesh)
 						LogWarning("Bone index is out of bounds");
 						continue;
 					}
-					if (!ParseString(mesh.mBones[iIndex].mName,"*MESH_BONE_NAME"))						
+					if (!ParseString(mesh.mBones[iIndex].mName,"*MESH_BONE_NAME"))
 						SkipToNextToken();
 					continue;
 				}
@@ -1648,7 +1648,7 @@ void Parser::ParseLV3MeshVertexListBlock(
 			// Vertex entry
 			if (TokenMatch(filePtr,"MESH_VERTEX" ,11))
 			{
-				
+
 				aiVector3D vTemp;
 				unsigned int iIndex;
 				ParseLV4MeshFloatTriple(&vTemp.x,iIndex);
@@ -1904,7 +1904,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 				ParseLV4MeshFloatTriple(&vNormal.x,index);
 				if (faceIdx >=  sMesh.mFaces.size())
 					continue;
-					
+
 				// Make sure we assign it to the correct face
 				const ASE::Face& face = sMesh.mFaces[faceIdx];
 				if (index == face.mIndices[0])
@@ -1943,7 +1943,7 @@ void Parser::ParseLV3MeshNormalListBlock(ASE::Mesh& sMesh)
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshFace(ASE::Face& out)
-{	
+{
 	// skip spaces and tabs
 	if(!SkipSpaces(&filePtr))
 	{
@@ -1963,7 +1963,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 		SkipToNextToken();
 		return;
 	}
-	// FIX: There are some ASE files which haven't got ':' here 
+	// FIX: There are some ASE files which haven't got ':' here
 	if(':' == *filePtr)++filePtr;
 
 	// Parse all mesh indices
@@ -1989,7 +1989,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 		case 'c':
 			iIndex = 2;
 			break;
-		default: 
+		default:
 			LogWarning("Unable to parse *MESH_FACE Element: Unexpected EOL. "
 				"A,B or C expected [#3]");
 			SkipToNextToken();
@@ -2017,7 +2017,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 		out.mIndices[iIndex] = strtoul10(filePtr,&filePtr);
 	}
 
-	// now we need to skip the AB, BC, CA blocks. 
+	// now we need to skip the AB, BC, CA blocks.
 	while (true)
 	{
 		if ('*' == *filePtr)break;
@@ -2039,7 +2039,7 @@ void Parser::ParseLV4MeshFace(ASE::Face& out)
 			SkipToNextToken();
 			return;
 		}
-		
+
 		// Parse smoothing groups until we don't anymore see commas
 		// FIX: There needn't always be a value, sad but true
 		while (true)
@@ -2108,7 +2108,7 @@ void Parser::ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut)
 
 	// parse the index
 	ParseLV4MeshLong(rIndexOut);
-	
+
 	// parse the three others
 	ParseLV4MeshFloatTriple(apOut);
 }
@@ -2126,7 +2126,7 @@ void Parser::ParseLV4MeshFloat(float& fOut)
 	// skip spaces and tabs
 	if(!SkipSpaces(&filePtr))
 	{
-		// LOG 
+		// LOG
 		LogWarning("Unable to parse float: unexpected EOL [#1]");
 		fOut = 0.0f;
 		++iLineNumber;
@@ -2141,7 +2141,7 @@ void Parser::ParseLV4MeshLong(unsigned int& iOut)
 	// Skip spaces and tabs
 	if(!SkipSpaces(&filePtr))
 	{
-		// LOG 
+		// LOG
 		LogWarning("Unable to parse long: unexpected EOL [#1]");
 		iOut = 0;
 		++iLineNumber;

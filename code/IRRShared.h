@@ -29,7 +29,7 @@ extern const aiMatrix4x4 AI_TO_IRR_MATRIX;
 #define AI_IRRMESH_MAT_trans_add			0x2
 
 // Lightmapping flags
-#define AI_IRRMESH_MAT_lightmap				0x2 
+#define AI_IRRMESH_MAT_lightmap				0x2
 #define AI_IRRMESH_MAT_lightmap_m2			(AI_IRRMESH_MAT_lightmap|0x4)
 #define AI_IRRMESH_MAT_lightmap_m4			(AI_IRRMESH_MAT_lightmap|0x8)
 #define AI_IRRMESH_MAT_lightmap_light		(AI_IRRMESH_MAT_lightmap|0x10)
@@ -56,7 +56,7 @@ extern const aiMatrix4x4 AI_TO_IRR_MATRIX;
 /** Base class for the Irr and IrrMesh importers.
  *
  *  Declares some irrlight-related xml parsing utilities and provides tools
- *  to load materials from IRR and IRRMESH files. 
+ *  to load materials from IRR and IRRMESH files.
  */
 class IrrlichtBase
 {

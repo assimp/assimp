@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,21 +25,21 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 /** @file RemoveRedundantMaterials.cpp
- *  @brief Implementation of the "RemoveRedundantMaterials" post processing step 
+ *  @brief Implementation of the "RemoveRedundantMaterials" post processing step
 */
 
 // internal headers
@@ -95,14 +95,14 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		for (unsigned int i = 0;i < pScene->mNumMeshes;++i)
 			abReferenced[pScene->mMeshes[i]->mMaterialIndex] = true;
 
-		// If a list of materials to be excluded was given, match the list with 
+		// If a list of materials to be excluded was given, match the list with
 		// our imported materials and 'salt' all positive matches to ensure that
 		// we get unique hashes later.
 		if (configFixedMaterials.length()) {
 
 			std::list<std::string> strings;
 			ConvertListToStrings(configFixedMaterials,strings);
-			
+
 			for (unsigned int i = 0; i < pScene->mNumMaterials;++i) {
 				aiMaterial* mat = pScene->mMaterials[i];
 
@@ -112,7 +112,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 				if (name.length) {
 					std::list<std::string>::const_iterator it = std::find(strings.begin(), strings.end(), name.data);
 					if (it != strings.end()) {
-						
+
 						// Our brilliant 'salt': A single material property with ~ as first
 						// character to mark it as internal and temporary.
 						const int dummy = 1;
@@ -167,7 +167,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 		// we need to rebuild the material list and remap mesh material indexes.
 		if (iNewNum != pScene->mNumMaterials) {
 			aiMaterial** ppcMaterials = new aiMaterial*[iNewNum];
-			::memset(ppcMaterials,0,sizeof(void*)*iNewNum); 
+			::memset(ppcMaterials,0,sizeof(void*)*iNewNum);
 			for (unsigned int p = 0; p < pScene->mNumMaterials;++p)
 			{
 				// if the material is not referenced ... remove it
@@ -176,8 +176,8 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 				}
 
 				// generate new names for all modified materials
-				const unsigned int idx = aiMappingTable[p]; 
-				if (ppcMaterials[idx]) 
+				const unsigned int idx = aiMappingTable[p];
+				if (ppcMaterials[idx])
 				{
 					aiString sz;
 					sz.length = ::sprintf(sz.data,"JoinedMaterial_#%u",p);
@@ -204,7 +204,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 	{
 		DefaultLogger::get()->debug("RemoveRedundantMatsProcess finished ");
 	}
-	else 
+	else
 	{
 		char szBuffer[128]; // should be sufficiently large
 		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",

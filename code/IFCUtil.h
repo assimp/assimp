@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -64,7 +64,7 @@ namespace IFC {
 	typedef aiVector3t<IfcFloat> IfcVector3;
 	typedef aiMatrix4x4t<IfcFloat> IfcMatrix4;
 	typedef aiMatrix3x3t<IfcFloat> IfcMatrix3;
-	typedef aiColor4t<IfcFloat> IfcColor4; 
+	typedef aiColor4t<IfcFloat> IfcColor4;
 
 
 // ------------------------------------------------------------------------------------------------
@@ -115,11 +115,11 @@ struct TempMesh
 // ------------------------------------------------------------------------------------------------
 // Temporary representation of an opening in a wall or a floor
 // ------------------------------------------------------------------------------------------------
-struct TempOpening 
+struct TempOpening
 {
 	const IFC::IfcSolidModel* solid;
 	IfcVector3 extrusionDir;
-	
+
 	boost::shared_ptr<TempMesh> profileMesh;
 	boost::shared_ptr<TempMesh> profileMesh2D;
 
@@ -140,7 +140,7 @@ struct TempOpening
 
 	// ------------------------------------------------------------------------------
 	TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,
-		boost::shared_ptr<TempMesh> profileMesh, 
+		boost::shared_ptr<TempMesh> profileMesh,
 		boost::shared_ptr<TempMesh> profileMesh2D)
 		: solid(solid)
 		, extrusionDir(extrusionDir)
@@ -172,7 +172,7 @@ struct TempOpening
 // ------------------------------------------------------------------------------------------------
 // Intermediate data storage during conversion. Keeps everything and a bit more.
 // ------------------------------------------------------------------------------------------------
-struct ConversionData 
+struct ConversionData
 {
 	ConversionData(const STEP::DB& db, const IFC::IfcProject& proj, aiScene* out,const IFCImporter::Settings& settings)
 		: len_scale(1.0)
@@ -219,9 +219,9 @@ struct ConversionData
 	// Intermediate arrays used to resolve openings in walls: only one of them
 	// can be given at a time. apply_openings if present if the current element
 	// is a wall and needs its openings to be poured into its geometry while
-	// collect_openings is present only if the current element is an 
+	// collect_openings is present only if the current element is an
 	// IfcOpeningElement, for which all the geometry needs to be preserved
-	// for later processing by a parent, which is a wall. 
+	// for later processing by a parent, which is a wall.
 	std::vector<TempOpening>* apply_openings;
 	std::vector<TempOpening>* collect_openings;
 
@@ -287,31 +287,31 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
 bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int matid, std::vector<unsigned int>& mesh_indices, ConversionData& conv);
 void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,ConversionData& /*conv*/);
 
-void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, 
+void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 						   ConversionData& conv);
 
-void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result, 
+void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result,
 							  ConversionData& conv, bool collect_openings);
 
 // IFCBoolean.cpp
 
 void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, ConversionData& conv);
-void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& result, 
-									   const TempMesh& first_operand, 
+void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& result,
+									   const TempMesh& first_operand,
 									   ConversionData& conv);
 
-void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBoundedHalfSpace* hs, TempMesh& result, 
-													   const TempMesh& first_operand, 
+void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBoundedHalfSpace* hs, TempMesh& result,
+													   const TempMesh& first_operand,
 													   ConversionData& conv);
-void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result, 
-											   const TempMesh& first_operand, 
+void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result,
+											   const TempMesh& first_operand,
 											   ConversionData& conv);
 
 
 // IFCOpenings.cpp
 
 bool GenerateOpenings(std::vector<TempOpening>& openings,
-					  const std::vector<IfcVector3>& nors, 
+					  const std::vector<IfcVector3>& nors,
 					  TempMesh& curmesh,
 					  bool check_intersection,
 					  bool generate_connection_geometry,
@@ -324,7 +324,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 // ------------------------------------------------------------------------------------------------
 // Custom exception for use by members of the Curve class
 // ------------------------------------------------------------------------------------------------
-class CurveError 
+class CurveError
 {
 public:
 	CurveError(const std::string& s)
@@ -359,7 +359,7 @@ public:
 	virtual ~Curve() {}
 
 
-	// check if a curve is closed 
+	// check if a curve is closed
 	virtual bool IsClosed() const = 0;
 
 	// evaluate the curve at the given parametric position
@@ -367,7 +367,7 @@ public:
 
 	// try to match a point on the curve to a given parameter
 	// for self-intersecting curves, the result is not ambiguous and
-	// it is undefined which parameter is returned. 
+	// it is undefined which parameter is returned.
 	virtual bool ReverseEval(const IfcVector3& val, IfcFloat& paramOut) const;
 
 	// get the range of the curve (both inclusive).
@@ -385,7 +385,7 @@ public:
 #ifdef ASSIMP_BUILD_DEBUG
 	// check if a particular parameter value lies within the well-defined range
 	bool InRange(IfcFloat) const;
-#endif 
+#endif
 
 public:
 
@@ -402,7 +402,7 @@ protected:
 // A BoundedCurve always holds the invariant that GetParametricRange()
 // never returns infinite values.
 // --------------------------------------------------------------------------------
-class BoundedCurve : public Curve 
+class BoundedCurve : public Curve
 {
 public:
 
@@ -426,4 +426,4 @@ bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& con
 }
 }
 
-#endif 
+#endif

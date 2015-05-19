@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -64,7 +64,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"hmp" 
+	"hmp"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -75,23 +75,23 @@ HMPImporter::HMPImporter()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 HMPImporter::~HMPImporter()
 {
 	// nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool HMPImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const
 {
 	const std::string extension = GetExtension(pFile);
 	if (extension == "hmp" )
 		return true;
 
-	// if check for extension is not enough, check for the magic tokens 
+	// if check for extension is not enough, check for the magic tokens
 	if (!extension.length() || cs) {
-		uint32_t tokens[3]; 
+		uint32_t tokens[3];
 		tokens[0] = AI_HMP_MAGIC_NUMBER_LE_4;
 		tokens[1] = AI_HMP_MAGIC_NUMBER_LE_5;
 		tokens[2] = AI_HMP_MAGIC_NUMBER_LE_7;
@@ -108,8 +108,8 @@ const aiImporterDesc* HMPImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void HMPImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void HMPImporter::InternReadFile( const std::string& pFile,
 								 aiScene* _pScene, IOSystem* _pIOHandler)
 {
 	pScene     = _pScene;
@@ -177,7 +177,7 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 	// File buffer destructs automatically now
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 void HMPImporter::ValidateHeader_HMP457( )
 {
 	const HMP::Header_HMP5* const pcHeader = (const HMP::Header_HMP5*)mBuffer;
@@ -190,22 +190,22 @@ void HMPImporter::ValidateHeader_HMP457( )
 
 	if (!pcHeader->ftrisize_x || !pcHeader->ftrisize_y)
 		throw DeadlyImportError("Size of triangles in either  x or y direction is zero");
-	
+
 	if(pcHeader->fnumverts_x < 1.0f || (pcHeader->numverts/pcHeader->fnumverts_x) < 1.0f)
 		throw DeadlyImportError("Number of triangles in either x or y direction is zero");
-	
+
 	if(!pcHeader->numframes)
 		throw DeadlyImportError("There are no frames. At least one should be there");
 
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 void HMPImporter::InternReadFile_HMP4( )
 {
 	throw DeadlyImportError("HMP4 is currently not supported");
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 void HMPImporter::InternReadFile_HMP5( )
 {
 	// read the file header and skip everything to byte 84
@@ -229,7 +229,7 @@ void HMPImporter::InternReadFile_HMP5( )
 	CreateMaterial(szCurrent,&szCurrent);
 
 	// goto offset 120, I don't know why ...
-	// (fixme) is this the frame header? I assume yes since it starts with 2. 
+	// (fixme) is this the frame header? I assume yes since it starts with 2.
 	szCurrent += 36;
 	SizeCheck(szCurrent + sizeof(const HMP::Vertex_HMP7)*height*width);
 
@@ -243,7 +243,7 @@ void HMPImporter::InternReadFile_HMP5( )
 		{
 			pcVertOut->x = x * pcHeader->ftrisize_x;
 			pcVertOut->y = y * pcHeader->ftrisize_y;
-			pcVertOut->z = (((float)src->z / 0xffff)-0.5f) * pcHeader->ftrisize_x * 8.0f; 
+			pcVertOut->z = (((float)src->z / 0xffff)-0.5f) * pcHeader->ftrisize_x * 8.0f;
 			MD2::LookupNormalIndex(src->normals162index, *pcNorOut );
 			++pcVertOut;++pcNorOut;++src;
 		}
@@ -254,7 +254,7 @@ void HMPImporter::InternReadFile_HMP5( )
 		GenerateTextureCoords(width,height);
 
 	// now build a list of faces
-	CreateOutputFaceList(width,height);	
+	CreateOutputFaceList(width,height);
 
 	// there is no nodegraph in HMP files. Simply assign the one mesh
 	// (no, not the one ring) to the root node
@@ -265,7 +265,7 @@ void HMPImporter::InternReadFile_HMP5( )
 	pScene->mRootNode->mMeshes[0] = 0;
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 void HMPImporter::InternReadFile_HMP7( )
 {
 	// read the file header and skip everything to byte 84
@@ -289,7 +289,7 @@ void HMPImporter::InternReadFile_HMP7( )
 	CreateMaterial(szCurrent,&szCurrent);
 
 	// goto offset 120, I don't know why ...
-	// (fixme) is this the frame header? I assume yes since it starts with 2. 
+	// (fixme) is this the frame header? I assume yes since it starts with 2.
 	szCurrent += 36;
 
 	SizeCheck(szCurrent + sizeof(const HMP::Vertex_HMP7)*height*width);
@@ -308,13 +308,13 @@ void HMPImporter::InternReadFile_HMP7( )
 			// FIXME: What exctly is the correct scaling factor to use?
 			// possibly pcHeader->scale_origin[2] in combination with a
 			// signed interpretation of src->z?
-			pcVertOut->z = (((float)src->z / 0xffff)-0.5f) * pcHeader->ftrisize_x * 8.0f; 
+			pcVertOut->z = (((float)src->z / 0xffff)-0.5f) * pcHeader->ftrisize_x * 8.0f;
 
 			pcNorOut->x = ((float)src->normal_x / 0x80 ); // * pcHeader->scale_origin[0];
 			pcNorOut->y = ((float)src->normal_y / 0x80 ); // * pcHeader->scale_origin[1];
 			pcNorOut->z = 1.0f;
 			pcNorOut->Normalize();
-			
+
 			++pcVertOut;++pcNorOut;++src;
 		}
 	}
@@ -323,7 +323,7 @@ void HMPImporter::InternReadFile_HMP7( )
 	if (pcHeader->numskins)GenerateTextureCoords(width,height);
 
 	// now build a list of faces
-	CreateOutputFaceList(width,height);	
+	CreateOutputFaceList(width,height);
 
 	// there is no nodegraph in HMP files. Simply assign the one mesh
 	// (no, not the One Ring) to the root node
@@ -334,7 +334,7 @@ void HMPImporter::InternReadFile_HMP7( )
 	pScene->mRootNode->mMeshes[0] = 0;
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 void HMPImporter::CreateMaterial(const unsigned char* szCurrent,
 	const unsigned char** szCurrentOut)
 {
@@ -378,7 +378,7 @@ void HMPImporter::CreateMaterial(const unsigned char* szCurrent,
 	*szCurrentOut = szCurrent;
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
 {
 	aiMesh* const pcMesh = this->pScene->mMeshes[0];
@@ -409,7 +409,7 @@ void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
 			*pcVertOut++ = pcMesh->mVertices[(y+1)*width+x];
 			*pcVertOut++ = pcMesh->mVertices[(y+1)*width+x+1];
 			*pcVertOut++ = pcMesh->mVertices[y*width+x+1];
-			
+
 
 			*pcNorOut++ = pcMesh->mNormals[y*width+x];
 			*pcNorOut++ = pcMesh->mNormals[(y+1)*width+x];
@@ -423,7 +423,7 @@ void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
 				*pcUVOut++ = pcMesh->mTextureCoords[0][(y+1)*width+x+1];
 				*pcUVOut++ = pcMesh->mTextureCoords[0][y*width+x+1];
 			}
-			
+
 			for (unsigned int i = 0; i < 4;++i)
 				pcFaceOut->mIndices[i] = iCurrent++;
 		}
@@ -441,7 +441,7 @@ void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
 	}
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szCursor,
 	const unsigned char** szCursorOut)
 {
@@ -456,7 +456,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szC
 		iType = *((uint32_t*)szCursor);szCursor += sizeof(uint32_t);
 		if (!iType)
 			throw DeadlyImportError("Unable to read HMP7 skin chunk");
-		
+
 	}
 	// read width and height
 	uint32_t iWidth  = *((uint32_t*)szCursor); szCursor += sizeof(uint32_t);
@@ -469,7 +469,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szC
 	ParseSkinLump_3DGS_MDL7(szCursor,&szCursor,
 		pcMat,iType,iWidth,iHeight);
 
-	// now we need to skip any other skins ... 
+	// now we need to skip any other skins ...
 	for (unsigned int i = 1; i< iNumSkins;++i)
 	{
 		iType   = *((uint32_t*)szCursor);   szCursor += sizeof(uint32_t);
@@ -488,7 +488,7 @@ void HMPImporter::ReadFirstSkin(unsigned int iNumSkins, const unsigned char* szC
 	*szCursorOut = szCursor;
 }
 
-// ------------------------------------------------------------------------------------------------ 
+// ------------------------------------------------------------------------------------------------
 // Generate proepr texture coords
 void HMPImporter::GenerateTextureCoords(
 	const unsigned int width, const unsigned int height)

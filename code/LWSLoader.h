@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  LWSLoader.h
- *  @brief Declaration of the LightWave scene importer class. 
+ *  @brief Declaration of the LightWave scene importer class.
  */
 #ifndef AI_LWSLOADER_H_INCLUDED
 #define AI_LWSLOADER_H_INCLUDED
@@ -98,7 +98,7 @@ struct NodeDesc
 	{}
 
 	enum {
-	
+
 		OBJECT = 1,
 		LIGHT  = 2,
 		CAMERA = 3,
@@ -159,7 +159,7 @@ struct NodeDesc
 		if (!num)
 			return false;
 		unsigned int _type = num >> 28u;
-		
+
 		return _type == static_cast<unsigned int>(type) && (num & AI_LWS_MASK) == number;
 	}
 };
@@ -171,7 +171,7 @@ struct NodeDesc
  *
  *  This class does heavily depend on the LWO importer class. LWS files
  *  contain mainly descriptions how LWO objects are composed together
- *  in a scene. 
+ *  in a scene.
 */
 class LWSImporter : public BaseImporter
 {
@@ -195,7 +195,7 @@ protected:
 
 	// -------------------------------------------------------------------
 	// Import file into given scene data structure
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+	void InternReadFile( const std::string& pFile, aiScene* pScene,
 		IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
@@ -211,23 +211,23 @@ private:
 
 	// -------------------------------------------------------------------
 	// Read an envelope description for the older LW file format
-	void ReadEnvelope_Old(std::list< LWS::Element >::const_iterator& it, 
+	void ReadEnvelope_Old(std::list< LWS::Element >::const_iterator& it,
 		const std::list< LWS::Element >::const_iterator& end,
 		LWS::NodeDesc& nodes,
 		unsigned int version);
 
 	// -------------------------------------------------------------------
-	// Setup a nice name for a node 
+	// Setup a nice name for a node
 	void SetupNodeName(aiNode* nd, LWS::NodeDesc& src);
 
 	// -------------------------------------------------------------------
 	// Recursively build the scenegraph
-	void BuildGraph(aiNode* nd, 
-		LWS::NodeDesc& src, 
+	void BuildGraph(aiNode* nd,
+		LWS::NodeDesc& src,
 		std::vector<AttachmentInfo>& attach,
 		BatchLoader& batch,
 		aiCamera**& camOut,
-		aiLight**& lightOut, 
+		aiLight**& lightOut,
 		std::vector<aiNodeAnim*>& animOut);
 
 	// -------------------------------------------------------------------
@@ -241,7 +241,7 @@ private:
 
 	double first,last,fps;
 
-	bool noSkeletonMesh; 
+	bool noSkeletonMesh;
 };
 
 } // end of namespace Assimp

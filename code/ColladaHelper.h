@@ -7,8 +7,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -94,7 +94,7 @@ struct Transform
 {
 	std::string mID;  ///< SID of the transform step, by which anim channels address their target node
 	TransformType mType;
-	float f[16]; ///< Interpretation of data depends on the type of the transformation 
+	float f[16]; ///< Interpretation of data depends on the type of the transformation
 };
 
 /** A collada camera. */
@@ -132,7 +132,7 @@ struct Camera
 
 /** A collada light source. */
 struct Light
-{	
+{
 	Light()
 		:	mType            (aiLightSource_UNDEFINED)
 		,	mAttConstant     (1.f)
@@ -245,13 +245,13 @@ struct Node
 	std::vector<Transform> mTransforms;
 
 	/** Meshes at this node */
-	std::vector<MeshInstance> mMeshes;    
+	std::vector<MeshInstance> mMeshes;
 
 	/** Lights at this node */
-	std::vector<LightInstance> mLights;  
+	std::vector<LightInstance> mLights;
 
 	/** Cameras at this node */
-	std::vector<CameraInstance> mCameras; 
+	std::vector<CameraInstance> mCameras;
 
 	/** Node instances at this node */
 	std::vector<NodeInstance> mNodeInstances;
@@ -260,14 +260,14 @@ struct Node
 	std::string mPrimaryCamera;
 
 	//! Constructor. Begin with a zero parent
-	Node() { 
+	Node() {
 		mParent = NULL;
 	}
 
 	//! Destructor: delete all children subsequently
-	~Node() { 
-		for( std::vector<Node*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it) 
-			delete *it; 
+	~Node() {
+		for( std::vector<Node*>::iterator it = mChildren.begin(); it != mChildren.end(); ++it)
+			delete *it;
 	}
 };
 
@@ -286,15 +286,15 @@ struct Accessor
 	size_t mSize;    // size of an object, in elements (floats or strings, mostly 1)
 	size_t mOffset;  // in number of values
 	size_t mStride;  // Stride in number of values
-	std::vector<std::string> mParams; // names of the data streams in the accessors. Empty string tells to ignore. 
+	std::vector<std::string> mParams; // names of the data streams in the accessors. Empty string tells to ignore.
 	size_t mSubOffset[4]; // Suboffset inside the object for the common 4 elements. For a vector, thats XYZ, for a color RGBA and so on.
 						  // For example, SubOffset[0] denotes which of the values inside the object is the vector X component.
 	std::string mSource;   // URL of the source array
 	mutable const Data* mData; // Pointer to the source array, if resolved. NULL else
 
-	Accessor() 
-	{ 
-		mCount = 0; mSize = 0; mOffset = 0; mStride = 0; mData = NULL; 
+	Accessor()
+	{
+		mCount = 0; mSize = 0; mOffset = 0; mStride = 0; mData = NULL;
 		mSubOffset[0] = mSubOffset[1] = mSubOffset[2] = mSubOffset[3] = 0;
 	}
 };
@@ -332,15 +332,15 @@ struct Mesh
 		for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
 			mNumUVComponents[i] = 2;
 	}
-    
+
     std::string mName;
 
 	// just to check if there's some sophisticated addressing involved...
 	// which we don't support, and therefore should warn about.
-	std::string mVertexID; 
+	std::string mVertexID;
 
 	// Vertex data addressed by vertex indices
-	std::vector<InputChannel> mPerVertexData; 
+	std::vector<InputChannel> mPerVertexData;
 
 	// actual mesh data, assembled on encounter of a <p> element. Verbose format, not indexed
 	std::vector<aiVector3D> mPositions;
@@ -355,8 +355,8 @@ struct Mesh
 	// Faces. Stored are only the number of vertices for each face.
 	// 1 == point, 2 == line, 3 == triangle, 4+ == poly
 	std::vector<size_t> mFaceSize;
-	
-	// Position indices for all faces in the sequence given in mFaceSize - 
+
+	// Position indices for all faces in the sequence given in mFaceSize -
 	// necessary for bone weight assignment
 	std::vector<size_t> mFacePosIndices;
 
@@ -381,7 +381,7 @@ enum PrimitiveType
 struct Controller
 {
 	// the URL of the mesh deformed by the controller.
-	std::string mMeshId; 
+	std::string mMeshId;
 
 	// accessor URL of the joint names
 	std::string mJointNameSource;
@@ -392,7 +392,7 @@ struct Controller
 	// accessor URL of the joint inverse bind matrices
 	std::string mJointOffsetMatrixSource;
 
-	// input channel: joint names. 
+	// input channel: joint names.
 	InputChannel mWeightInputJoints;
 	// input channel: joint weights
 	InputChannel mWeightInputWeights;
@@ -422,7 +422,7 @@ enum ParamType
 struct EffectParam
 {
 	ParamType mType;
-	std::string mReference; // to which other thing the param is referring to. 
+	std::string mReference; // to which other thing the param is referring to.
 };
 
 /** Shading type supported by the standard effect spec of Collada */
@@ -526,7 +526,7 @@ struct Effect
 	// ---------------------------------------------------------
 	// Double-sided?
 	bool mDoubleSided, mWireframe, mFaceted;
-	
+
 	Effect()
 		: mShadeType    (Shade_Phong)
 		, mEmissive		( 0, 0, 0, 1)
@@ -543,7 +543,7 @@ struct Effect
 		, mDoubleSided	(false)
 		, mWireframe    (false)
 		, mFaceted      (false)
-	{ 
+	{
 	}
 };
 
@@ -566,8 +566,8 @@ struct Image
 /** An animation channel. */
 struct AnimationChannel
 {
-	/** URL of the data to animate. Could be about anything, but we support only the 
-	 * "NodeID/TransformID.SubElement" notation 
+	/** URL of the data to animate. Could be about anything, but we support only the
+	 * "NodeID/TransformID.SubElement" notation
 	 */
 	std::string mTarget;
 

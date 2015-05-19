@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  STEPFileReader.cpp
- *  @brief Implementation of the STEP file parser, which fills a 
+ *  @brief Implementation of the STEP file parser, which fills a
  *     STEP::DB with data read from a file.
  */
 
@@ -56,14 +56,14 @@ namespace EXPRESS = STEP::EXPRESS;
 #include <functional>
 
 // ------------------------------------------------------------------------------------------------
-std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = "") 
+std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIFIED*/, const std::string& prefix = "")
 {
 	return line == STEP::SyntaxError::LINE_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,") ",s) );
 }
 
 
 // ------------------------------------------------------------------------------------------------
-std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = "") 
+std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = "")
 {
 	return entity == STEP::TypeError::ENTITY_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(entity #",entity,") ",s));
 }
@@ -176,7 +176,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 
 	const DB::ObjectMap& map = db.GetObjects();
 	LineSplitter& splitter = db.GetSplitter();
-	
+
 	while (splitter) {
 		bool has_next = false;
 		std::string s = *splitter;
@@ -196,7 +196,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 		}
 		// ---
 		// extract id, entity class name and argument string,
-		// but don't create the actual object yet. 
+		// but don't create the actual object yet.
 		// ---
 		const std::string::size_type n0 = s.find_first_of('=');
 		if (n0 == std::string::npos) {
@@ -221,7 +221,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 					continue;
 				}
 
-				// the next line doesn't start an entity, so maybe it is 
+				// the next line doesn't start an entity, so maybe it is
 				// just a continuation  for this line, keep going
 				if (!IsEntityDef(snext)) {
 					s.append(snext);
@@ -241,7 +241,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 
 		std::string::size_type n2 = s.find_last_of(')');
 		if (n2 == std::string::npos || n2 < n1 || n2 == s.length() - 1 || s[n2 + 1] != ';') {
-			
+
 			has_next = true;
 			bool ok = false;
 			for( ++splitter; splitter; ++splitter) {
@@ -249,7 +249,7 @@ void STEP::ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
 				if (snext.empty()) {
 					continue;
 				}
-				// the next line doesn't start an entity, so maybe it is 
+				// the next line doesn't start an entity, so maybe it is
 				// just a continuation  for this line, keep going
 				if (!IsEntityDef(snext)) {
 					s.append(snext);
@@ -450,7 +450,7 @@ boost::shared_ptr<const EXPRESS::LIST> EXPRESS::LIST::Parse(const char*& inout,u
 		if (*cur == ')') {
 			break;
 		}
-		
+
 		members.push_back( EXPRESS::DataType::Parse(cur,line,schema));
 		SkipSpaces(cur,&cur);
 
@@ -479,7 +479,7 @@ STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t /*line*/, const char* 
 	// this helps us emulate STEPs INVERSE fields.
 	if (db.KeepInverseIndicesForType(type)) {
 		const char* a  = args;
-	
+
 		// do a quick scan through the argument tuple and watch out for entity references
 		int64_t skip_depth = 0;
 		while(*a) {
@@ -502,7 +502,7 @@ STEP::LazyObject::LazyObject(DB& db, uint64_t id,uint64_t /*line*/, const char* 
 }
 
 // ------------------------------------------------------------------------------------------------
-STEP::LazyObject::~LazyObject() 
+STEP::LazyObject::~LazyObject()
 {
 	// make sure the right dtor/operator delete get called
 	if (obj) {

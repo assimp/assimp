@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -74,7 +74,7 @@ void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
 }
 
 // -------------------------------------------------------------------------------
-void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max, 
+void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max,
 	const aiMatrix4x4& m)
 {
 	min = aiVector3D (10e10f,  10e10f, 10e10f);
@@ -142,7 +142,7 @@ float ComputePositionEpsilon(const aiMesh* pMesh)
 {
 	const float epsilon = 1e-4f;
 
-	// calculate the position bounds so we have a reliable epsilon to check position differences against 
+	// calculate the position bounds so we have a reliable epsilon to check position differences against
 	aiVector3D minVec, maxVec;
 	ArrayBounds(pMesh->mVertices,pMesh->mNumVertices,minVec,maxVec);
 	return (maxVec - minVec).Length() * epsilon;
@@ -153,7 +153,7 @@ float ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
 {
 	const float epsilon = 1e-4f;
 
-	// calculate the position bounds so we have a reliable epsilon to check position differences against 
+	// calculate the position bounds so we have a reliable epsilon to check position differences against
 	aiVector3D minVec, maxVec, mi, ma;
 	MinMaxChooser<aiVector3D>()(minVec,maxVec);
 
@@ -257,9 +257,9 @@ const char* TextureTypeToString(aiTextureType in)
 	default:
 		break;
 	}
-   
+
 	ai_assert(false);
-    return  "BUG";          
+    return  "BUG";
 }
 
 // -------------------------------------------------------------------------------
@@ -284,17 +284,17 @@ const char* MappingTypeToString(aiTextureMapping in)
 	}
 
 	ai_assert(false);
-    return  "BUG";   
+    return  "BUG";
 }
 
 
 // -------------------------------------------------------------------------------
 aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMeshFaces, unsigned int subFlags)
-{		
-	aiMesh *oMesh = new aiMesh(); 
+{
+	aiMesh *oMesh = new aiMesh();
 	std::vector<unsigned int> vMap(pMesh->mNumVertices,UINT_MAX);
 
-	size_t numSubVerts = 0; 
+	size_t numSubVerts = 0;
 	size_t numSubFaces = subMeshFaces.size();
 
 	for(unsigned int i=0;i<numSubFaces;i++)	{
@@ -304,16 +304,16 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 			if(vMap[f.mIndices[j]]==UINT_MAX)	{
 				vMap[f.mIndices[j]] = numSubVerts++;
 			}
-		}		
-	} 
+		}
+	}
 
 	oMesh->mName = pMesh->mName;
-		
+
 	oMesh->mMaterialIndex = pMesh->mMaterialIndex;
 	oMesh->mPrimitiveTypes = pMesh->mPrimitiveTypes;
-	
+
 	// create all the arrays for this mesh if the old mesh contained them
-		
+
 	oMesh->mNumFaces = subMeshFaces.size();
 	oMesh->mNumVertices = numSubVerts;
 	oMesh->mVertices = new aiVector3D[numSubVerts];
@@ -337,7 +337,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 
 	// and copy over the data, generating faces with linear indices along the way
 	oMesh->mFaces = new aiFace[numSubFaces];
-	
+
 	for(unsigned int a = 0; a < numSubFaces; ++a )	{
 
 		const aiFace& srcFace = pMesh->mFaces[subMeshFaces[a]];
@@ -352,7 +352,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 	}
 
 	for(unsigned int srcIndex = 0; srcIndex < pMesh->mNumVertices; ++srcIndex ) {
-		unsigned int nvi = vMap[srcIndex]; 
+		unsigned int nvi = vMap[srcIndex];
 		if(nvi==UINT_MAX) {
 			continue;
 		}
@@ -361,7 +361,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 		if( pMesh->HasNormals() ) {
 			oMesh->mNormals[nvi] = pMesh->mNormals[srcIndex];
 		}
-		
+
 		if( pMesh->HasTangentsAndBitangents() )	{
 			oMesh->mTangents[nvi] = pMesh->mTangents[srcIndex];
 			oMesh->mBitangents[nvi] = pMesh->mBitangents[srcIndex];
@@ -374,7 +374,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 		}
 	}
 
-	if(~subFlags&AI_SUBMESH_FLAGS_SANS_BONES)	{			
+	if(~subFlags&AI_SUBMESH_FLAGS_SANS_BONES)	{
 		std::vector<unsigned int> subBones(pMesh->mNumBones,0);
 
 		for(unsigned int a=0;a<pMesh->mNumBones;++a)	{
@@ -403,7 +403,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 
 			for(unsigned int a=0;a<pMesh->mNumBones;++a)	{
 				if(subBones[a]==0) {
-					continue; 
+					continue;
 				}
 				aiBone *newBone = new aiBone;
 				oMesh->mBones[oMesh->mNumBones++] = newBone;
@@ -417,7 +417,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 				for(unsigned int b=0;b<bone->mNumWeights;b++)	{
 					const unsigned int v = vMap[bone->mWeights[b].mVertexId];
 
-					if(v!=UINT_MAX)	{	
+					if(v!=UINT_MAX)	{
 						aiVertexWeight w(v,bone->mWeights[b].mWeight);
 						newBone->mWeights[newBone->mNumWeights++] = w;
 					}
@@ -427,7 +427,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 			ai_assert(nbParanoia==oMesh->mNumBones);
 			(void)nbParanoia; // remove compiler warning on release build
 		}
-	}					 
+	}
 
 	return oMesh;
 }

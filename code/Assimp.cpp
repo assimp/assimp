@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -110,7 +110,7 @@ static boost::mutex gLogStreamMutex;
 class LogToCallbackRedirector : public LogStream
 {
 public:
-	LogToCallbackRedirector(const aiLogStream& s) 
+	LogToCallbackRedirector(const aiLogStream& s)
 		: stream (s)	{
 			ai_assert(NULL != s.callback);
 	}
@@ -121,10 +121,10 @@ public:
 #endif
 		// (HACK) Check whether the 'stream.user' pointer points to a
 		// custom LogStream allocated by #aiGetPredefinedLogStream.
-		// In this case, we need to delete it, too. Of course, this 
+		// In this case, we need to delete it, too. Of course, this
 		// might cause strange problems, but the chance is quite low.
 
-		PredefLogStreamMap::iterator it = std::find(gPredefinedStreams.begin(), 
+		PredefLogStreamMap::iterator it = std::find(gPredefinedStreams.begin(),
 			gPredefinedStreams.end(), (Assimp::LogStream*)stream.user);
 
 		if (it != gPredefinedStreams.end()) {
@@ -152,7 +152,7 @@ void ReportSceneNotFoundError()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Reads the given file and returns its content. 
+// Reads the given file and returns its content.
 const aiScene* aiImportFile( const char* pFile, unsigned int pFlags)
 {
 	return aiImportFileEx(pFile,pFlags,NULL);
@@ -165,7 +165,7 @@ const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,  aiFileIO
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFlags, 
+const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFlags,
 	aiFileIO* pFS,
 	const aiPropertyStore* props)
 {
@@ -198,7 +198,7 @@ const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFl
 	if( scene)	{
 		ScenePrivateData* priv = const_cast<ScenePrivateData*>( ScenePriv(scene) );
 		priv->mOrigImporter = imp;
-	} 
+	}
 	else	{
 		// if failed, extract error code and destroy the import
 		gLastErrorString = imp->GetErrorString();
@@ -211,7 +211,7 @@ const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFl
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* aiImportFileFromMemory( 
+const aiScene* aiImportFileFromMemory(
 	const char* pBuffer,
 	unsigned int pLength,
 	unsigned int pFlags,
@@ -221,7 +221,7 @@ const aiScene* aiImportFileFromMemory(
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* aiImportFileFromMemoryWithProperties( 
+const aiScene* aiImportFileFromMemoryWithProperties(
 	const char* pBuffer,
 	unsigned int pLength,
 	unsigned int pFlags,
@@ -253,7 +253,7 @@ const aiScene* aiImportFileFromMemoryWithProperties(
 	if( scene)	{
 		 ScenePrivateData* priv = const_cast<ScenePrivateData*>( ScenePriv(scene) );
 		 priv->mOrigImporter = imp;
-	} 
+	}
 	else	{
 		// if failed, extract error code and destroy the import
 		gLastErrorString = imp->GetErrorString();
@@ -265,7 +265,7 @@ const aiScene* aiImportFileFromMemoryWithProperties(
 }
 
 // ------------------------------------------------------------------------------------------------
-// Releases all resources associated with the given import process. 
+// Releases all resources associated with the given import process.
 void aiReleaseImport( const aiScene* pScene)
 {
 	if (!pScene) {
@@ -273,7 +273,7 @@ void aiReleaseImport( const aiScene* pScene)
 	}
 
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-	
+
 	// find the importer associated with this data
 	const ScenePrivateData* priv = ScenePriv(pScene);
 	if( !priv || !priv->mOrigImporter)	{
@@ -286,7 +286,7 @@ void aiReleaseImport( const aiScene* pScene)
 		Importer* importer = priv->mOrigImporter;
 		delete importer;
 	}
-	
+
 	ASSIMP_END_EXCEPTION_REGION(void);
 }
 
@@ -295,7 +295,7 @@ ASSIMP_API const aiScene* aiApplyPostProcessing(const aiScene* pScene,
 	unsigned int pFlags)
 {
 	const aiScene* sc = NULL;
-	
+
 
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
@@ -417,7 +417,7 @@ ASSIMP_API void aiEnableVerboseLogging(aiBool d)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Returns the error text of the last failed import process. 
+// Returns the error text of the last failed import process.
 const char* aiGetErrorString()
 {
 	return gLastErrorString.c_str();
@@ -439,14 +439,14 @@ size_t aiGetImportFormatCount(void)
 
 
 // ------------------------------------------------------------------------------------------------
-// Returns the error text of the last failed import process. 
+// Returns the error text of the last failed import process.
 aiBool aiIsExtensionSupported(const char* szExtension)
 {
 	ai_assert(NULL != szExtension);
 	aiBool candoit=AI_FALSE;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
-	// FIXME: no need to create a temporary Importer instance just for that .. 
+	// FIXME: no need to create a temporary Importer instance just for that ..
 	Assimp::Importer tmp;
 	candoit = tmp.IsExtensionSupported(std::string(szExtension)) ? AI_TRUE : AI_FALSE;
 
@@ -461,7 +461,7 @@ void aiGetExtensionList(aiString* szOut)
 	ai_assert(NULL != szOut);
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
-	// FIXME: no need to create a temporary Importer instance just for that .. 
+	// FIXME: no need to create a temporary Importer instance just for that ..
 	Assimp::Importer tmp;
 	tmp.GetExtensionList(*szOut);
 
@@ -582,7 +582,7 @@ ASSIMP_API void aiTransposeMatrix4(aiMatrix4x4* mat)
 
 // ------------------------------------------------------------------------------------------------
 // Vector transformation
-ASSIMP_API void aiTransformVecByMatrix3(aiVector3D* vec, 
+ASSIMP_API void aiTransformVecByMatrix3(aiVector3D* vec,
 	const aiMatrix3x3* mat)
 {
 	ai_assert(NULL != mat && NULL != vec);
@@ -590,7 +590,7 @@ ASSIMP_API void aiTransformVecByMatrix3(aiVector3D* vec,
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API void aiTransformVecByMatrix4(aiVector3D* vec, 
+ASSIMP_API void aiTransformVecByMatrix4(aiVector3D* vec,
 	const aiMatrix4x4* mat)
 {
 	ai_assert(NULL != mat && NULL != vec);
@@ -600,7 +600,7 @@ ASSIMP_API void aiTransformVecByMatrix4(aiVector3D* vec,
 // ------------------------------------------------------------------------------------------------
 // Matrix multiplication
 ASSIMP_API void aiMultiplyMatrix4(
-	aiMatrix4x4* dst, 
+	aiMatrix4x4* dst,
 	const aiMatrix4x4* src)
 {
 	ai_assert(NULL != dst && NULL != src);
@@ -609,7 +609,7 @@ ASSIMP_API void aiMultiplyMatrix4(
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiMultiplyMatrix3(
-	aiMatrix3x3* dst, 
+	aiMatrix3x3* dst,
 	const aiMatrix3x3* src)
 {
 	ai_assert(NULL != dst && NULL != src);

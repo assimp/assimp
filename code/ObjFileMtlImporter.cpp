@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -85,7 +85,7 @@ static const std::string TypeOption			= "-type";
 
 // -------------------------------------------------------------------
 //	Constructor
-ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer, 
+ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
                                        const std::string & /*strAbsPath*/,
                                        ObjFile::Model *pModel ) :
     m_DataIt( buffer.begin() ),
@@ -115,7 +115,7 @@ ObjFileMtlImporter::ObjFileMtlImporter(const ObjFileMtlImporter & /* rOther */ )
 {
     // empty
 }
-    
+
 // -------------------------------------------------------------------
 //	Private copy constructor
 ObjFileMtlImporter &ObjFileMtlImporter::operator = ( const ObjFileMtlImporter & /*rOther */ )
@@ -222,11 +222,11 @@ void ObjFileMtlImporter::load()
 void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 {
     ai_assert( NULL != pColor );
-    
+
     float r( 0.0f ), g( 0.0f ), b( 0.0f );
     m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, r );
     pColor->r = r;
-    
+
     // we have to check if color is default 0 with only one token
     if( !IsLineEnd( *m_DataIt ) ) {
         m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
@@ -245,7 +245,7 @@ void ObjFileMtlImporter::getIlluminationModel( int &illum_model )
 }
 
 // -------------------------------------------------------------------
-//	Loads a single float value. 
+//	Loads a single float value.
 void ObjFileMtlImporter::getFloatValue( float &value )
 {
     m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
@@ -255,13 +255,13 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 // -------------------------------------------------------------------
 //	Creates a material from loaded data.
 void ObjFileMtlImporter::createMaterial()
-{	
+{
     std::string line( "" );
     while( !IsLineEnd( *m_DataIt ) ) {
         line += *m_DataIt;
         ++m_DataIt;
     }
-    
+
     std::vector<std::string> token;
     const unsigned int numToken = tokenize<std::string>( line, token, " \t" );
 	std::string name( "" );
@@ -279,7 +279,7 @@ void ObjFileMtlImporter::createMaterial()
 	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( name );
 	if ( m_pModel->m_MaterialMap.end() == it) {
         // New Material created
-        m_pModel->m_pCurrentMaterial = new ObjFile::Material();	
+        m_pModel->m_pCurrentMaterial = new ObjFile::Material();
         m_pModel->m_pCurrentMaterial->MaterialName.Set( name );
         m_pModel->m_MaterialLib.push_back( name );
         m_pModel->m_MaterialMap[ name ] = m_pModel->m_pCurrentMaterial;
@@ -317,12 +317,12 @@ void ObjFileMtlImporter::getTexture() {
         out = & m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;
     } else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), BumpTexture1.size() ) ||
-                !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) || 
+                !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) ||
                 !ASSIMP_strincmp( pPtr, BumpTexture3.c_str(), BumpTexture3.size() ) ) {
-        // Bump texture 
+        // Bump texture
         out = & m_pModel->m_pCurrentMaterial->textureBump;
         clampIndex = ObjFile::Material::TextureBumpType;
-    } else if (!ASSIMP_strincmp( pPtr,NormalTexture.c_str(), NormalTexture.size())) { 
+    } else if (!ASSIMP_strincmp( pPtr,NormalTexture.c_str(), NormalTexture.size())) {
         // Normal map
         out = & m_pModel->m_pCurrentMaterial->textureNormal;
         clampIndex = ObjFile::Material::TextureNormalType;
@@ -357,7 +357,7 @@ void ObjFileMtlImporter::getTexture() {
  *	map_Ka -o 1 1 1 some.png
  *	map_Kd -clamp on some.png
  *
- * So we need to parse and skip these options, and leave the last part which is 
+ * So we need to parse and skip these options, and leave the last part which is
  * the url of image, otherwise we will get a wrong url like "-clamp on some.png".
  *
  * Because aiMaterial supports clamp option, so we also want to return it

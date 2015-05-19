@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -129,7 +129,7 @@ public:
 			,	vertices()
 			,	surfaces()
 			,	numRefs (0)
-			,	subDiv	(0)                
+			,	subDiv	(0)
 		{}
 
 		// Type description
@@ -168,7 +168,7 @@ public:
 		// number of indices (= num verts in verbose format)
 		unsigned int numRefs;
 
-		// number of subdivisions to be performed on the 
+		// number of subdivisions to be performed on the
 		// imported data
 		unsigned int subDiv;
 
@@ -180,7 +180,7 @@ public:
 public:
 
 	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file. 
+	/** Returns whether the class can handle the format of the given file.
 	 * See BaseImporter::CanRead() for details.
 	 */
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
@@ -194,9 +194,9 @@ protected:
 	const aiImporterDesc* GetInfo () const;
 
 	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. 
+	/** Imports the given file into the given scene structure.
 	 * See BaseImporter::InternReadFile() for details*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
+	void InternReadFile( const std::string& pFile, aiScene* pScene,
 		IOSystem* pIOHandler);
 
 	// -------------------------------------------------------------------
@@ -214,7 +214,7 @@ private:
 
 	// -------------------------------------------------------------------
 	/** Load the object section. This method is called recursively to
-	 *  load subobjects, the method returns after a 'kids 0' was 
+	 *  load subobjects, the method returns after a 'kids 0' was
 	 *  encountered.
 	 *  @objects List of output objects*/
 	void LoadObjectSection(std::vector<Object>& objects);
@@ -248,7 +248,7 @@ private:
 	const char* buffer;
 
 	// Configuration option: if enabled, up to two meshes
-	// are generated per material: those faces who have 
+	// are generated per material: those faces who have
 	// their bf cull flags set are separated.
 	bool configSplitBFCull;
 

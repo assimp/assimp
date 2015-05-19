@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -65,7 +65,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"ply" 
+	"ply"
 };
 
 
@@ -93,12 +93,12 @@ PLYImporter::PLYImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 PLYImporter::~PLYImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool PLYImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
@@ -121,8 +121,8 @@ const aiImporterDesc* PLYImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void PLYImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void PLYImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
@@ -146,7 +146,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 
 	char* szMe = (char*)&this->mBuffer[3];
 	SkipSpacesAndLineEnd(szMe,(const char**)&szMe);
-	
+
 	// determine the format of the file data
 	PLY::DOM sPlyDom;
 	if (TokenMatch(szMe,"format",6))
@@ -192,7 +192,7 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 		throw DeadlyImportError( "Invalid .ply file: No vertices found. "
 			"Unable to parse the data format of the PLY file.");
 
-	// now load a list of normals. 
+	// now load a list of normals.
 	std::vector<aiVector3D> avNormals;
 	LoadVertices(&avNormals,true);
 
@@ -288,7 +288,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 	unsigned int iNum = 0;
 	for (std::vector<PLY::Face>::const_iterator i = avFaces->begin();i != avFaces->end();++i,++iNum)
 		aiSplit[(*i).iMaterialIndex].push_back(iNum);
-	
+
 	// now generate submeshes
 	for (unsigned int p = 0; p < avMaterials->size();++p)
 	{
@@ -326,7 +326,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
 			for (std::vector<unsigned int>::const_iterator i =  aiSplit[p].begin();
 				i != aiSplit[p].end();++i,++iNum)
 			{
-				p_pcOut->mFaces[iNum].mNumIndices = (unsigned int)(*avFaces)[*i].mIndices.size(); 
+				p_pcOut->mFaces[iNum].mNumIndices = (unsigned int)(*avFaces)[*i].mIndices.size();
 				p_pcOut->mFaces[iNum].mIndices = new unsigned int[p_pcOut->mFaces[iNum].mNumIndices];
 
 				// build an unique set of vertices/colors for this face
@@ -544,7 +544,7 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 						aiPositions[2] = _a;
 						aiTypes[2] = (*a).eType;
 					}
-					if (3 == cnt)break; 
+					if (3 == cnt)break;
 				}
 			}
 			break;
@@ -665,7 +665,7 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 					aiPositions[3] = _a;
 					aiTypes[3] = (*a).eType;
 				}
-				if (4 == cnt)break; 
+				if (4 == cnt)break;
 			}
 			break;
 		}
@@ -679,7 +679,7 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
 		{
 			// convert the vertices to sp floats
 			aiColor4D vOut;
-			
+
 			if (0xFFFFFFFF != aiPositions[0])
 			{
 				vOut.r = NormalizeColorValue(GetProperty((*i).alProperties,
@@ -749,14 +749,14 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 					if (!(*a).bIsList)continue;
 					iProperty	= _a;
 					bOne		= true;
-					eType		= (*a).eType;		
+					eType		= (*a).eType;
 				}
 				else if (PLY::EST_MaterialIndex == (*a).Semantic)
 				{
 					if ((*a).bIsList)continue;
 					iMaterialIndex	= _a;
 					bOne			= true;
-					eType2		= (*a).eType;		
+					eType2		= (*a).eType;
 				}
 			}
 			break;
@@ -776,7 +776,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 				iProperty	= _a;
 				bOne		= true;
 				bIsTristrip	= true;
-				eType		= (*a).eType;	
+				eType		= (*a).eType;
 				break;
 			}
 			break;
@@ -799,7 +799,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 					const unsigned int iNum = (unsigned int)GetProperty((*i).alProperties, iProperty).avList.size();
 					sFace.mIndices.resize(iNum);
 
-					std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator p = 
+					std::vector<PLY::PropertyInstance::ValueUnion>::const_iterator p =
 						GetProperty((*i).alProperties, iProperty).avList.begin();
 
 					for (unsigned int a = 0; a < iNum;++a,++p)
@@ -844,7 +844,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 						aiTable[1] = p;
 						continue;
 					}
-				
+
 					pvOut->push_back(PLY::Face());
 					PLY::Face& sFace = pvOut->back();
 					sFace.mIndices[0] = aiTable[0];
@@ -853,7 +853,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 					if ((flip = !flip)) {
 						std::swap(sFace.mIndices[0],sFace.mIndices[1]);
 					}
-					
+
 					aiTable[0] = aiTable[1];
 					aiTable[1] = p;
 				}
@@ -865,7 +865,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 // ------------------------------------------------------------------------------------------------
 // Get a RGBA color in [0...1] range
 void PLYImporter::GetMaterialColor(const std::vector<PLY::PropertyInstance>& avList,
-	unsigned int aiPositions[4], 
+	unsigned int aiPositions[4],
 	PLY::EDataType aiTypes[4],
 	 aiColor4D* clrOut)
 {
@@ -896,7 +896,7 @@ void PLYImporter::GetMaterialColor(const std::vector<PLY::PropertyInstance>& avL
 	if (0xFFFFFFFF == aiPositions[3])clrOut->a = 1.0f;
 	else
 	{
-		clrOut->a = NormalizeColorValue(GetProperty(avList, 
+		clrOut->a = NormalizeColorValue(GetProperty(avList,
 			aiPositions[3]).avList.front(),aiTypes[3]);
 	}
 }
@@ -1032,7 +1032,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 		for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();i != pcList->alInstances.end();++i)	{
 			aiColor4D clrOut;
 			aiMaterial* pcHelper = new aiMaterial();
-	
+
 			// build the diffuse material color
 			GetMaterialColor((*i).alProperties,aaiPositions[0],aaiTypes[0],&clrOut);
 			pcHelper->AddProperty<aiColor4D>(&clrOut,1,AI_MATKEY_COLOR_DIFFUSE);

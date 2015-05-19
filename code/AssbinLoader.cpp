@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -74,7 +74,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"assbin" 
+	"assbin"
 };
 
 const aiImporterDesc* AssbinImporter::GetInfo() const
@@ -187,7 +187,7 @@ aiQuatKey Read<aiQuatKey>(IOStream * stream)
 
 template <typename T>
 void ReadArray(IOStream * stream, T * out, unsigned int size)
-{ 
+{
 	for (unsigned int i=0; i<size; i++) out[i] = Read<T>(stream);
 }
 
@@ -241,11 +241,11 @@ void AssbinImporter::ReadBinaryBone( IOStream * stream, aiBone* b )
 
 	// for the moment we write dumb min/max values for the bones, too.
 	// maybe I'll add a better, hash-like solution later
-	if (shortened) 
+	if (shortened)
 	{
 		ReadBounds(stream,b->mWeights,b->mNumWeights);
 	} // else write as usual
-	else 
+	else
 	{
 		b->mWeights = new aiVertexWeight[b->mNumWeights];
 		ReadArray<aiVertexWeight>(stream,b->mWeights,b->mNumWeights);
@@ -268,35 +268,35 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 	// first of all, write bits for all existent vertex components
 	unsigned int c = Read<unsigned int>(stream);
 
-	if (c & ASSBIN_MESH_HAS_POSITIONS) 
+	if (c & ASSBIN_MESH_HAS_POSITIONS)
 	{
 		if (shortened) {
 			ReadBounds(stream,mesh->mVertices,mesh->mNumVertices);
 		} // else write as usual
-		else 
+		else
 		{
 			mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 			ReadArray<aiVector3D>(stream,mesh->mVertices,mesh->mNumVertices);
 		}
 	}
-	if (c & ASSBIN_MESH_HAS_NORMALS) 
+	if (c & ASSBIN_MESH_HAS_NORMALS)
 	{
 		if (shortened) {
 			ReadBounds(stream,mesh->mNormals,mesh->mNumVertices);
 		} // else write as usual
-		else 
+		else
 		{
 			mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 			ReadArray<aiVector3D>(stream,mesh->mNormals,mesh->mNumVertices);
 		}
 	}
-	if (c & ASSBIN_MESH_HAS_TANGENTS_AND_BITANGENTS) 
+	if (c & ASSBIN_MESH_HAS_TANGENTS_AND_BITANGENTS)
 	{
 		if (shortened) {
 			ReadBounds(stream,mesh->mTangents,mesh->mNumVertices);
 			ReadBounds(stream,mesh->mBitangents,mesh->mNumVertices);
 		} // else write as usual
-		else 
+		else
 		{
 			mesh->mTangents = new aiVector3D[mesh->mNumVertices];
 			ReadArray<aiVector3D>(stream,mesh->mTangents,mesh->mNumVertices);
@@ -304,22 +304,22 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 			ReadArray<aiVector3D>(stream,mesh->mBitangents,mesh->mNumVertices);
 		}
 	}
-	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS;++n) 
+	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_COLOR_SETS;++n)
 	{
 		if (!(c & ASSBIN_MESH_HAS_COLOR(n)))
 			break;
 
-		if (shortened) 
+		if (shortened)
 		{
 			ReadBounds(stream,mesh->mColors[n],mesh->mNumVertices);
 		} // else write as usual
-		else 
+		else
 		{
 			mesh->mColors[n] = new aiColor4D[mesh->mNumVertices];
 			ReadArray<aiColor4D>(stream,mesh->mColors[n],mesh->mNumVertices);
 		}
 	}
-	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n) 
+	for (unsigned int n = 0; n < AI_MAX_NUMBER_OF_TEXTURECOORDS;++n)
 	{
 		if (!(c & ASSBIN_MESH_HAS_TEXCOORD(n)))
 			break;
@@ -330,7 +330,7 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 		if (shortened) {
 			ReadBounds(stream,mesh->mTextureCoords[n],mesh->mNumVertices);
 		} // else write as usual
-		else 
+		else
 		{
 			mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
 			ReadArray<aiVector3D>(stream,mesh->mTextureCoords[n],mesh->mNumVertices);
@@ -356,11 +356,11 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 			f.mIndices = new unsigned int[f.mNumIndices];
 
 			for (unsigned int a = 0; a < f.mNumIndices;++a) {
-				if (mesh->mNumVertices < (1u<<16)) 
+				if (mesh->mNumVertices < (1u<<16))
 				{
 					f.mIndices[a] = Read<uint16_t>(stream);
 				}
-				else 
+				else
 				{
 					f.mIndices[a] = Read<unsigned int>(stream);
 				}
@@ -404,7 +404,7 @@ void AssbinImporter::ReadBinaryMaterial(IOStream * stream, aiMaterial* mat)
 	mat->mNumAllocated = mat->mNumProperties = Read<unsigned int>(stream);
 	if (mat->mNumProperties)
 	{
-		if (mat->mProperties) 
+		if (mat->mProperties)
 		{
 			delete[] mat->mProperties;
 		}
@@ -445,7 +445,7 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
 			ReadBounds(stream,nd->mRotationKeys,nd->mNumRotationKeys);
 
 		} // else write as usual
-		else 
+		else
 		{
 			nd->mRotationKeys = new aiQuatKey[nd->mNumRotationKeys];
 			ReadArray<aiQuatKey>(stream,nd->mRotationKeys,nd->mNumRotationKeys);
@@ -456,7 +456,7 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
 			ReadBounds(stream,nd->mScalingKeys,nd->mNumScalingKeys);
 
 		} // else write as usual
-		else 
+		else
 		{
 			nd->mScalingKeys = new aiVectorKey[nd->mNumScalingKeys];
 			ReadArray<aiVectorKey>(stream,nd->mScalingKeys,nd->mNumScalingKeys);
@@ -520,7 +520,7 @@ void AssbinImporter::ReadBinaryLight( IOStream * stream, aiLight* l )
 	l->mName = Read<aiString>(stream);
 	l->mType = (aiLightSourceType)Read<unsigned int>(stream);
 
-	if (l->mType != aiLightSource_DIRECTIONAL) { 
+	if (l->mType != aiLightSource_DIRECTIONAL) {
 		l->mAttenuationConstant = Read<float>(stream);
 		l->mAttenuationLinear = Read<float>(stream);
 		l->mAttenuationQuadratic = Read<float>(stream);
@@ -680,7 +680,7 @@ void AssbinImporter::InternReadFile( const std::string& pFile, aiScene* pScene, 
 	{
 		ReadBinaryScene(stream,pScene);
 	}
-	
+
 	pIOHandler->Close(stream);
 }
 

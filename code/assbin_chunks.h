@@ -4,7 +4,7 @@
 #define ASSBIN_VERSION_MAJOR 1
 #define ASSBIN_VERSION_MINOR 0
 
-/** 
+/**
 @page assfile .ASS File formats
 
 @section over Overview
@@ -20,7 +20,7 @@ the 'aiScene' data structure returned by the APIs. The focus for the binary form
 (<tt>.assbin</tt>) is fast loading. Optional deflate compression helps reduce file size. The XML
 flavour, <tt>.assxml</tt> or simply .xml, is just a plain-to-xml conversion of aiScene.
 
-ASSBIN is Assimp's binary interchange format. assimp_cmd (<tt>&lt;root&gt;/tools/assimp_cmd</tt>) is able to 
+ASSBIN is Assimp's binary interchange format. assimp_cmd (<tt>&lt;root&gt;/tools/assimp_cmd</tt>) is able to
 write it and the core library provides a loader for it.
 
 @section assxml XML File format
@@ -59,8 +59,8 @@ integer	is four bytes wide, stored in little-endian byte order.
 short	is two bytes wide, stored in little-endian byte order.
 byte	is a single byte.
 string  is an integer n followed by n UTF-8 characters, not terminated by zero
-float	is an IEEE 754 single-precision floating-point value 
-double	is an IEEE 754 double-precision floating-point value 
+float	is an IEEE 754 single-precision floating-point value
+double	is an IEEE 754 double-precision floating-point value
 t[n]    is an array of n elements of type t
 
 -------------------------------------------------------------------------------
@@ -78,16 +78,16 @@ integer		SVN revision of the Assimp library (intended for our internal
             debugging - if you write Ass files from your own APPs, set this value to 0.
 integer		Assimp compile flags
 
-short		0 for normal files, 1 for shortened dumps for regression tests 
+short		0 for normal files, 1 for shortened dumps for regression tests
                 these should have the file extension assbin.regress
 
 short       1 if the data after the header is compressed with the DEFLATE algorithm,
             0 for uncompressed files.
                    For compressed files, the first integer after the header is
                    always the uncompressed data size
-                
+
 byte[256]	Zero-terminated source file name, UTF-8
-byte[128]	Zero-terminated command line parameters passed to assimp_cmd, UTF-8 
+byte[128]	Zero-terminated command line parameters passed to assimp_cmd, UTF-8
 
 byte[64]	Reserved for future use
 ---> Total length: 512 bytes
@@ -97,7 +97,7 @@ byte[64]	Reserved for future use
 -------------------------------------------------------------------------------
 
 integer		Magic chunk ID (ASSBIN_CHUNK_XXX)
-integer		Chunk data length, in bytes 
+integer		Chunk data length, in bytes
                 (unknown chunks are possible, a good reader skips over them)
                 (chunk-data-length does not include the first two integers)
 
@@ -109,13 +109,13 @@ their size is included in chunk-data-length.
 The chunk layout for all ASSIMP data structures is derived from their C declarations.
 The general 'rule' to get from Assimp headers to the serialized layout is:
 
-   1. POD members (i.e. aiMesh::mPrimitiveTypes, aiMesh::mNumVertices), 
+   1. POD members (i.e. aiMesh::mPrimitiveTypes, aiMesh::mNumVertices),
         in order of declaration.
 
-   2. Array-members (aiMesh::mFaces, aiMesh::mVertices, aiBone::mWeights), 
+   2. Array-members (aiMesh::mFaces, aiMesh::mVertices, aiBone::mWeights),
         in order of declaration.
 
-   2. Object array members (i.e aiMesh::mBones, aiScene::mMeshes) are stored in 
+   2. Object array members (i.e aiMesh::mBones, aiScene::mMeshes) are stored in
       subchunks directly following the data written in 1.) and 2.)
 
 
@@ -124,7 +124,7 @@ The general 'rule' to get from Assimp headers to the serialized layout is:
 [[aiScene]]
 
    - The root node holding the scene structure is naturally stored in
-     a ASSBIN_CHUNK_AINODE subchunk following 1.) and 2.) (which is 
+     a ASSBIN_CHUNK_AINODE subchunk following 1.) and 2.) (which is
 	 empty for aiScene).
 
 [[aiMesh]]
@@ -135,15 +135,15 @@ The general 'rule' to get from Assimp headers to the serialized layout is:
        integer mNumUVComponents[n]
        float mTextureCoords[n][3]
 
-       -> more than AI_MAX_TEXCOORD_CHANNELS can be stored. This allows Assimp 
+       -> more than AI_MAX_TEXCOORD_CHANNELS can be stored. This allows Assimp
 	   builds with different settings for AI_MAX_TEXCOORD_CHANNELS to exchange
 	   data.
        -> the on-disk format always uses 3 floats to write UV coordinates.
 	   If mNumUVComponents[0] is 1, the corresponding mTextureCoords array
 	   consists of 3 floats.
 
-   - The array member block of aiMesh is prefixed with an integer that specifies 
-     the kinds of vertex components actually present in the mesh. This is a 
+   - The array member block of aiMesh is prefixed with an integer that specifies
+     the kinds of vertex components actually present in the mesh. This is a
 	 bitwise combination of the ASSBIN_MESH_HAS_xxx constants.
 
 [[aiFace]]

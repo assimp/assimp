@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -92,7 +92,7 @@ void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportPrope
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
-Exporter::ExportFormatEntry gExporters[] = 
+Exporter::ExportFormatEntry gExporters[] =
 {
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
 	Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
@@ -108,21 +108,21 @@ Exporter::ExportFormatEntry gExporters[] =
 #endif
 
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
-	Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj, 
+	Exporter::ExportFormatEntry( "obj", "Wavefront OBJ format", "obj", &ExportSceneObj,
 		aiProcess_GenSmoothNormals /*| aiProcess_PreTransformVertices */),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_STL_EXPORTER
-	Exporter::ExportFormatEntry( "stl", "Stereolithography", "stl" , &ExportSceneSTL, 
+	Exporter::ExportFormatEntry( "stl", "Stereolithography", "stl" , &ExportSceneSTL,
 		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
 	),
-	Exporter::ExportFormatEntry( "stlb", "Stereolithography (binary)", "stl" , &ExportSceneSTLBinary, 
+	Exporter::ExportFormatEntry( "stlb", "Stereolithography (binary)", "stl" , &ExportSceneSTLBinary,
 		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_PreTransformVertices
 	),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_PLY_EXPORTER
-	Exporter::ExportFormatEntry( "ply", "Stanford Polygon Library", "ply" , &ExportScenePly, 
+	Exporter::ExportFormatEntry( "ply", "Stanford Polygon Library", "ply" , &ExportScenePly,
 		aiProcess_PreTransformVertices
 	),
 	Exporter::ExportFormatEntry( "plyb", "Stanford Polygon Library (binary)", "ply", &ExportScenePlyBinary,
@@ -162,7 +162,7 @@ public:
 		std::copy(gExporters,gExporters+ASSIMP_NUM_EXPORTERS,mExporters.begin());
 	}
 
-	~ExporterPimpl() 
+	~ExporterPimpl()
 	{
 		delete blob;
 
@@ -173,7 +173,7 @@ public:
 	}
 
 public:
-		
+
 	aiExportDataBlob* blob;
 	boost::shared_ptr< Assimp::IOSystem > mIOSystem;
 	bool mIsDefaultIOHandler;
@@ -199,7 +199,7 @@ using namespace Assimp;
 
 
 // ------------------------------------------------------------------------------------------------
-Exporter :: Exporter() 
+Exporter :: Exporter()
 : pimpl(new ExporterPimpl())
 {
 }
@@ -263,7 +263,7 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
 
 
 // ------------------------------------------------------------------------------------------------
-bool IsVerboseFormat(const aiMesh* mesh) 
+bool IsVerboseFormat(const aiMesh* mesh)
 {
 	// avoid slow vector<bool> specialization
 	std::vector<unsigned int> seen(mesh->mNumVertices,0);
@@ -281,7 +281,7 @@ bool IsVerboseFormat(const aiMesh* mesh)
 
 
 // ------------------------------------------------------------------------------------------------
-bool IsVerboseFormat(const aiScene* pScene) 
+bool IsVerboseFormat(const aiScene* pScene)
 {
 	for(unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
 		if(!IsVerboseFormat(pScene->mMeshes[i])) {
@@ -301,7 +301,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 	// format. They will likely not be aware that there is a flag in the scene to indicate
 	// this, however. To avoid surprises and bug reports, we check for duplicates in
 	// meshes upfront.
-	const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || IsVerboseFormat(pScene);	
+	const bool is_verbose_format = !(pScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT) || IsVerboseFormat(pScene);
 
 	pimpl->mError = "";
 	for (size_t i = 0; i < pimpl->mExporters.size(); ++i) {
@@ -310,7 +310,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 
 			try {
 
-				// Always create a full copy of the scene. We might optimize this one day, 
+				// Always create a full copy of the scene. We might optimize this one day,
 				// but for now it is the most pragmatic way.
 				aiScene* scenecopy_tmp;
 				SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
@@ -339,7 +339,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 				// we need to run the MakeVerboseFormat step first.
 				bool must_join_again = false;
 				if (!is_verbose_format) {
-					
+
 					bool verbosify = false;
 					for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
 						BaseProcess* const p = pimpl->mPostProcessingSteps[a];
@@ -370,7 +370,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 							step.Execute(scenecopy.get());
 						}
 					}
-					
+
 					{
 						FlipUVsProcess step;
 						if (step.IsActive(pp)) {
@@ -389,9 +389,9 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 					for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++) {
 						BaseProcess* const p = pimpl->mPostProcessingSteps[a];
 
-						if (p->IsActive(pp) 
-							&& !dynamic_cast<FlipUVsProcess*>(p) 
-							&& !dynamic_cast<FlipWindingOrderProcess*>(p) 
+						if (p->IsActive(pp)
+							&& !dynamic_cast<FlipUVsProcess*>(p)
+							&& !dynamic_cast<FlipWindingOrderProcess*>(p)
 							&& !dynamic_cast<MakeLeftHandedProcess*>(p)) {
 
 							p->Execute(scenecopy.get());
@@ -443,14 +443,14 @@ void Exporter :: FreeBlob( )
 
 
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter :: GetBlob() const 
+const aiExportDataBlob* Exporter :: GetBlob() const
 {
 	return pimpl->blob;
 }
 
 
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter :: GetOrphanedBlob() const 
+const aiExportDataBlob* Exporter :: GetOrphanedBlob() const
 {
 	const aiExportDataBlob* tmp = pimpl->blob;
 	pimpl->blob = NULL;
@@ -459,18 +459,18 @@ const aiExportDataBlob* Exporter :: GetOrphanedBlob() const
 
 
 // ------------------------------------------------------------------------------------------------
-size_t Exporter :: GetExportFormatCount() const 
+size_t Exporter :: GetExportFormatCount() const
 {
 	return pimpl->mExporters.size();
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex ) const 
+const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex ) const
 {
 	if (pIndex >= GetExportFormatCount()) {
 		return NULL;
 	}
-	
+
 	// Return from static storage if the requested index is built-in.
 	if (pIndex < sizeof(gExporters) / sizeof(gExporters[0])) {
 		return &gExporters[pIndex].mDescription;
@@ -512,7 +512,7 @@ ExportProperties::ExportProperties(const ExportProperties &other)
    mStringProperties(other.mStringProperties),
    mMatrixProperties(other.mMatrixProperties)
 {
-	
+
 }
 
 
@@ -546,7 +546,7 @@ bool ExportProperties :: SetPropertyMatrix(const char* szName, const aiMatrix4x4
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-int ExportProperties :: GetPropertyInteger(const char* szName, 
+int ExportProperties :: GetPropertyInteger(const char* szName,
 	int iErrorReturn /*= 0xffffffff*/) const
 {
 	return GetGenericProperty<int>(mIntProperties,szName,iErrorReturn);
@@ -554,7 +554,7 @@ int ExportProperties :: GetPropertyInteger(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-float ExportProperties :: GetPropertyFloat(const char* szName, 
+float ExportProperties :: GetPropertyFloat(const char* szName,
 	float iErrorReturn /*= 10e10*/) const
 {
 	return GetGenericProperty<float>(mFloatProperties,szName,iErrorReturn);
@@ -562,7 +562,7 @@ float ExportProperties :: GetPropertyFloat(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const std::string ExportProperties :: GetPropertyString(const char* szName, 
+const std::string ExportProperties :: GetPropertyString(const char* szName,
 	const std::string& iErrorReturn /*= ""*/) const
 {
 	return GetGenericProperty<std::string>(mStringProperties,szName,iErrorReturn);
@@ -570,7 +570,7 @@ const std::string ExportProperties :: GetPropertyString(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Has a configuration property
-const aiMatrix4x4 ExportProperties :: GetPropertyMatrix(const char* szName, 
+const aiMatrix4x4 ExportProperties :: GetPropertyMatrix(const char* szName,
 	const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const
 {
 	return GetGenericProperty<aiMatrix4x4>(mMatrixProperties,szName,iErrorReturn);

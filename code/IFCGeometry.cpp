@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2010, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -73,10 +73,10 @@ bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData&
 	meshout.vertcnt.push_back(cnt);
 
 	// zero- or one- vertex polyloops simply ignored
-	if (meshout.vertcnt.back() > 1) { 
+	if (meshout.vertcnt.back() > 1) {
 		return true;
 	}
-	
+
 	if (meshout.vertcnt.back()==1) {
 		meshout.vertcnt.pop_back();
 		meshout.verts.pop_back();
@@ -85,7 +85,7 @@ bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData&
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = (size_t)-1) 
+void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t master_bounds = (size_t)-1)
 {
 	// handle all trivial cases
 	if(inmesh.vertcnt.empty()) {
@@ -114,9 +114,9 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	std::vector<IfcVector3> normals;
 	inmesh.ComputePolygonNormals(normals,false);
 
-	// One of the polygons might be a IfcFaceOuterBound (in which case `master_bounds` 
-	// is its index). Sadly we can't rely on it, the docs say 'At most one of the bounds 
-	// shall be of the type IfcFaceOuterBound' 
+	// One of the polygons might be a IfcFaceOuterBound (in which case `master_bounds`
+	// is its index). Sadly we can't rely on it, the docs say 'At most one of the bounds
+	// shall be of the type IfcFaceOuterBound'
 	IfcFloat area_outer_polygon = 1e-10f;
 	if (master_bounds != (size_t)-1) {
 		ai_assert(master_bounds < inmesh.vertcnt.size());
@@ -124,7 +124,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 	}
 	else {
 		for(iit = begin; iit != end; iit++) {
-			// find the polygon with the largest area and take it as the outer bound. 
+			// find the polygon with the largest area and take it as the outer bound.
 			IfcVector3& n = normals[std::distance(begin,iit)];
 			const IfcFloat area = n.SquareLength();
 			if (area > area_outer_polygon) {
@@ -174,10 +174,10 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
 		opening.profileMesh->verts.reserve(*iit);
 		opening.profileMesh->vertcnt.push_back(*iit);
 
-		std::copy(vit, vit + *iit, std::back_inserter(opening.profileMesh->verts)); 
+		std::copy(vit, vit + *iit, std::back_inserter(opening.profileMesh->verts));
 	}
 
-	// fill a mesh with ONLY the main polygon 
+	// fill a mesh with ONLY the main polygon
 	TempMesh temp;
 	temp.verts.reserve(outer_polygon_size);
 	temp.vertcnt.push_back(outer_polygon_size);
@@ -195,7 +195,7 @@ void ProcessConnectedFaceSet(const IfcConnectedFaceSet& fset, TempMesh& result, 
 		// size_t ob = -1, cnt = 0;
 		TempMesh meshout;
 		BOOST_FOREACH(const IfcFaceBound& bound, face.Bounds) {
-			
+
 			if(const IfcPolyLoop* const polyloop = bound.Bound->ToPtr<IfcPolyLoop>()) {
 				if(ProcessPolyloop(*polyloop, meshout,conv)) {
 
@@ -248,7 +248,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 
 	const std::vector<IfcVector3>& in = meshout.verts;
 	const size_t size=in.size();
-	
+
 	bool has_area = solid.SweptArea->ProfileType == "AREA" && size>2;
 	const IfcFloat max_angle = solid.Angle*conv.angle_scale;
 	if(std::fabs(max_angle) < 1e-3) {
@@ -262,7 +262,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 	const IfcFloat delta = max_angle/cnt_segments;
 
 	has_area = has_area && std::fabs(max_angle) < AI_MATH_TWO_PI_F*0.99;
-	
+
 	result.verts.reserve(size*((cnt_segments+1)*4+(has_area?2:0)));
 	result.vertcnt.reserve(size*cnt_segments+2);
 
@@ -295,7 +295,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 	out.erase(out.begin(),out.begin()+size*4);
 
 	if(has_area) {
-		// leave the triangulation of the profile area to the ear cutting 
+		// leave the triangulation of the profile area to the ear cutting
 		// implementation in aiProcess_Triangulate - for now we just
 		// feed in two huge polygons.
 		base -= size*8;
@@ -311,7 +311,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
 
 	IfcMatrix4 trafo;
 	ConvertAxisPlacement(trafo, solid.Position);
-	
+
 	result.Transform(trafo);
 	IFCImporter::LogDebug("generate mesh procedurally by radial extrusion (IfcRevolvedAreaSolid)");
 }
@@ -326,7 +326,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 		IFCImporter::LogError("failed to convert Directrix curve (IfcSweptDiskSolid)");
 		return;
 	}
-	
+
 	const unsigned int cnt_segments = 16;
 	const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;
 
@@ -367,11 +367,11 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 
 		// get a direction vector reflecting the approximate curvature (i.e. tangent)
 		IfcVector3 d = (current-previous) + (next-previous);
-	
+
 		d.Normalize();
 
 		// figure out an arbitrary point q so that (p-q) * d = 0,
-		// try to maximize ||(p-q)|| * ||(p_last-q_last)|| 
+		// try to maximize ||(p-q)|| * ||(p_last-q_last)||
 		IfcVector3 q;
 		bool take_any = false;
 
@@ -407,7 +407,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 		IfcMatrix4::Rotation(deltaAngle,d,rot);
 
 		for (unsigned int seg = 0; seg < cnt_segments; ++seg, q *= rot ) {
-			points.push_back(q + current);	
+			points.push_back(q + current);
 		}
 
 		previous = current;
@@ -444,10 +444,10 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 			IfcVector3& v3 = *(result.verts.end()-3);
 			IfcVector3& v4 = *(result.verts.end()-4);
 
-			if (((v4-v3) ^ (v4-v1)) * (v4 - curve_points[i]) < 0.0f) {			
+			if (((v4-v3) ^ (v4-v1)) * (v4 - curve_points[i]) < 0.0f) {
 				std::swap(v4, v1);
 				std::swap(v3, v2);
-			} 
+			}
 
 			result.vertcnt.push_back(4);
 		}
@@ -457,7 +457,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
 }
 
 // ------------------------------------------------------------------------------------------------
-IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut) 
+IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVector3& norOut)
 {
 	const std::vector<IfcVector3>& out = curmesh.verts;
 	IfcMatrix3 m;
@@ -469,7 +469,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
 	assert(curmesh.vertcnt.size() == 1 && curmesh.vertcnt.back() == s);
 
 	const IfcVector3 any_point = out[s-1];
-	IfcVector3 nor; 
+	IfcVector3 nor;
 
 	// The input polygon is arbitrarily shaped, therefore we might need some tries
 	// until we find a suitable normal. Note that Newell's algorithm would give
@@ -527,7 +527,7 @@ IfcMatrix3 DerivePlaneCoordinateSpace(const TempMesh& curmesh, bool& ok, IfcVect
 void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curve,
 	const IfcVector3& extrusionDir, TempMesh& result, ConversionData &conv, bool collect_openings)
 {
-	// Outline: 'curve' is now a list of vertex points forming the underlying profile, extrude along the given axis, 
+	// Outline: 'curve' is now a list of vertex points forming the underlying profile, extrude along the given axis,
 	// forming new triangles.
 	const bool has_area = solid.SweptArea->ProfileType == "AREA" && curve.verts.size() > 2;
 	if( solid.Depth < 1e-6 ) {
@@ -572,9 +572,9 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
 	if( openings ) {
 
 		if( !conv.settings.useCustomTriangulation ) {
-			// it is essential to apply the openings in the correct spatial order. The direction	 
-			// doesn't matter, but we would screw up if we started with e.g. a door in between	 
-			// two windows.	 
+			// it is essential to apply the openings in the correct spatial order. The direction
+			// doesn't matter, but we would screw up if we started with e.g. a door in between
+			// two windows.
 			std::sort(conv.apply_openings->begin(), conv.apply_openings->end(), TempOpening::DistanceSorter(in[0]));
 		}
 
@@ -673,12 +673,12 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result, 
+void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& result,
 	ConversionData& conv, bool collect_openings)
 {
 	TempMesh meshout;
-	
-	// First read the profile description. 
+
+	// First read the profile description.
 	if(!ProcessProfile(*solid.SweptArea,meshout,conv) || meshout.verts.size()<=1) {
 		return;
 	}
@@ -687,13 +687,13 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 	ConvertDirection(dir,solid.ExtrudedDirection);
 	dir *= solid.Depth;
 
-	// Some profiles bring their own holes, for which we need to provide a container. This all is somewhat backwards, 
+	// Some profiles bring their own holes, for which we need to provide a container. This all is somewhat backwards,
 	// and there's still so many corner cases uncovered - we really need a generic solution to all of this hole carving.
 	std::vector<TempOpening> fisherPriceMyFirstOpenings;
 	std::vector<TempOpening>* oldApplyOpenings = conv.apply_openings;
 	if( const IfcArbitraryProfileDefWithVoids* const cprofile = solid.SweptArea->ToPtr<IfcArbitraryProfileDefWithVoids>() ) {
 		if( !cprofile->InnerCurves.empty() ) {
-			// read all inner curves and extrude them to form proper openings. 
+			// read all inner curves and extrude them to form proper openings.
 			std::vector<TempOpening>* oldCollectOpenings = conv.collect_openings;
 			conv.collect_openings = &fisherPriceMyFirstOpenings;
 
@@ -713,7 +713,7 @@ void ProcessExtrudedAreaSolid(const IfcExtrudedAreaSolid& solid, TempMesh& resul
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout, 
+void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 	ConversionData& conv)
 {
 	if(const IfcExtrudedAreaSolid* const solid = swept.ToPtr<IfcExtrudedAreaSolid>()) {
@@ -728,16 +728,16 @@ void ProcessSweptAreaSolid(const IfcSweptAreaSolid& swept, TempMesh& meshout,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, std::vector<unsigned int>& mesh_indices, 
+bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, std::vector<unsigned int>& mesh_indices,
 	ConversionData& conv)
 {
 	bool fix_orientation = false;
-	boost::shared_ptr< TempMesh > meshtmp = boost::make_shared<TempMesh>(); 
+	boost::shared_ptr< TempMesh > meshtmp = boost::make_shared<TempMesh>();
 	if(const IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IfcShellBasedSurfaceModel>()) {
 		BOOST_FOREACH(boost::shared_ptr<const IfcShell> shell,shellmod->SbsmBoundary) {
 			try {
 				const EXPRESS::ENTITY& e = shell->To<ENTITY>();
-				const IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<IfcConnectedFaceSet>(); 
+				const IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<IfcConnectedFaceSet>();
 
 				ProcessConnectedFaceSet(fs,*meshtmp.get(),conv);
 			}
@@ -750,36 +750,36 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
 	else  if(const IfcConnectedFaceSet* fset = geo.ToPtr<IfcConnectedFaceSet>()) {
 		ProcessConnectedFaceSet(*fset,*meshtmp.get(),conv);
 		fix_orientation = true;
-	}	
+	}
 	else  if(const IfcSweptAreaSolid* swept = geo.ToPtr<IfcSweptAreaSolid>()) {
 		ProcessSweptAreaSolid(*swept,*meshtmp.get(),conv);
-	}   
+	}
 	else  if(const IfcSweptDiskSolid* disk = geo.ToPtr<IfcSweptDiskSolid>()) {
 		ProcessSweptDiskSolid(*disk,*meshtmp.get(),conv);
-	}   
+	}
 	else if(const IfcManifoldSolidBrep* brep = geo.ToPtr<IfcManifoldSolidBrep>()) {
 		ProcessConnectedFaceSet(brep->Outer,*meshtmp.get(),conv);
 		fix_orientation = true;
-	} 
+	}
 	else if(const IfcFaceBasedSurfaceModel* surf = geo.ToPtr<IfcFaceBasedSurfaceModel>()) {
 		BOOST_FOREACH(const IfcConnectedFaceSet& fc, surf->FbsmFaces) {
 			ProcessConnectedFaceSet(fc,*meshtmp.get(),conv);
 		}
 		fix_orientation = true;
-	}  
+	}
 	else  if(const IfcBooleanResult* boolean = geo.ToPtr<IfcBooleanResult>()) {
 		ProcessBoolean(*boolean,*meshtmp.get(),conv);
 	}
 	else if(geo.ToPtr<IfcBoundingBox>()) {
 		// silently skip over bounding boxes
-		return false; 
-	} 
+		return false;
+	}
 	else {
 		IFCImporter::LogWarn("skipping unknown IfcGeometricRepresentationItem entity, type is " + geo.GetClassName());
 		return false;
 	}
 
-	// Do we just collect openings for a parent element (i.e. a wall)? 
+	// Do we just collect openings for a parent element (i.e. a wall)?
 	// In such a case, we generate the polygonal mesh as usual,
 	// but attach it to a TempOpening instance which will later be applied
 	// to the wall it pertains to.
@@ -794,7 +794,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
 				boost::shared_ptr<TempMesh>()));
 		}
 		return true;
-	} 
+	}
 
 	if (meshtmp->IsEmpty()) {
 		return false;
@@ -809,7 +809,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
 
 	aiMesh* const mesh = meshtmp->ToMesh();
 	if(mesh) {
-		mesh->mMaterialIndex = matid; 
+		mesh->mMaterialIndex = matid;
 		mesh_indices.push_back(conv.meshes.size());
 		conv.meshes.push_back(mesh);
 		return true;
@@ -838,9 +838,9 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool TryQueryMeshCache(const IfcRepresentationItem& item, 
+bool TryQueryMeshCache(const IfcRepresentationItem& item,
 	std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
-	ConversionData& conv) 
+	ConversionData& conv)
 {
 	ConversionData::MeshCacheIndex idx(&item, mat_index);
 	ConversionData::MeshCache::const_iterator it = conv.cached_meshes.find(idx);
@@ -852,7 +852,7 @@ bool TryQueryMeshCache(const IfcRepresentationItem& item,
 }
 
 // ------------------------------------------------------------------------------------------------
-void PopulateMeshCache(const IfcRepresentationItem& item, 
+void PopulateMeshCache(const IfcRepresentationItem& item,
 	const std::vector<unsigned int>& mesh_indices, unsigned int mat_index,
 	ConversionData& conv)
 {
@@ -862,7 +862,7 @@ void PopulateMeshCache(const IfcRepresentationItem& item,
 
 // ------------------------------------------------------------------------------------------------
 bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int matid,
-	std::vector<unsigned int>& mesh_indices, 
+	std::vector<unsigned int>& mesh_indices,
 	ConversionData& conv)
 {
 	// determine material
@@ -883,4 +883,4 @@ bool ProcessRepresentationItem(const IfcRepresentationItem& item, unsigned int m
 } // ! IFC
 } // ! Assimp
 
-#endif 
+#endif

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -215,7 +215,7 @@ template <> struct MinMaxChooser<aiVertexWeight> {
  *  @param[out] max maximum value
  */
 template <typename T>
-inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max) 
+inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max)
 {
 	MinMaxChooser<T> ()(min,max);
 	for (unsigned int i = 0; i < size;++i) {
@@ -226,12 +226,12 @@ inline void ArrayBounds(const T* in, unsigned int size, T& min, T& max)
 
 
 // -------------------------------------------------------------------------------
-/** Little helper function to calculate the quadratic difference 
- * of two colours. 
+/** Little helper function to calculate the quadratic difference
+ * of two colours.
  * @param pColor1 First color
  * @param pColor2 second color
  * @return Quadratic color difference */
-inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2) 
+inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pColor2)
 {
 	const aiColor4D c (pColor1.r - pColor2.r, pColor1.g - pColor2.g, pColor1.b - pColor2.b, pColor1.a - pColor2.a);
 	return c.r*c.r + c.g*c.g + c.b*c.b + c.a*c.a;
@@ -240,7 +240,7 @@ inline float GetColorDifference( const aiColor4D& pColor1, const aiColor4D& pCol
 
 // -------------------------------------------------------------------------------
 /** @brief Extract single strings from a list of identifiers
- *  @param in Input string list. 
+ *  @param in Input string list.
  *  @param out Receives a list of clean output strings
  *  @sdee #AI_CONFIG_PP_OG_EXCLUDE_LIST */
 void ConvertListToStrings(const std::string& in, std::list<std::string>& out);
@@ -339,16 +339,16 @@ class ComputeSpatialSortProcess : public BaseProcess
 {
 	bool IsActive( unsigned int pFlags) const
 	{
-		return NULL != shared && 0 != (pFlags & (aiProcess_CalcTangentSpace | 
+		return NULL != shared && 0 != (pFlags & (aiProcess_CalcTangentSpace |
 			aiProcess_GenNormals | aiProcess_JoinIdenticalVertices));
 	}
 
 	void Execute( aiScene* pScene)
 	{
-		typedef std::pair<SpatialSort, float> _Type; 
+		typedef std::pair<SpatialSort, float> _Type;
 		DefaultLogger::get()->debug("Generate spatially-sorted vertex cache");
 
-		std::vector<_Type>* p = new std::vector<_Type>(pScene->mNumMeshes); 
+		std::vector<_Type>* p = new std::vector<_Type>(pScene->mNumMeshes);
 		std::vector<_Type>::iterator it = p->begin();
 
 		for (unsigned int i = 0; i < pScene->mNumMeshes; ++i, ++it)	{
@@ -368,7 +368,7 @@ class DestroySpatialSortProcess : public BaseProcess
 {
 	bool IsActive( unsigned int pFlags) const
 	{
-		return NULL != shared && 0 != (pFlags & (aiProcess_CalcTangentSpace | 
+		return NULL != shared && 0 != (pFlags & (aiProcess_CalcTangentSpace |
 			aiProcess_GenNormals | aiProcess_JoinIdenticalVertices));
 	}
 

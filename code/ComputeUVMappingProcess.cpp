@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -96,7 +96,7 @@ inline unsigned int FindEmptyUVChannel (aiMesh* mesh)
 {
 	for (unsigned int m = 0; m < AI_MAX_NUMBER_OF_TEXTURECOORDS;++m)
 		if (!mesh->mTextureCoords[m])return m;
-	
+
 	DefaultLogger::get()->error("Unable to compute UV coordinates, no free UV slot found");
 	return UINT_MAX;
 }
@@ -106,8 +106,8 @@ inline unsigned int FindEmptyUVChannel (aiMesh* mesh)
 void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
 {
 	// TODO: just a very rough algorithm. I think it could be done
-	// much easier, but I don't know how and am currently too tired to 
-	// to think about a better solution. 
+	// much easier, but I don't know how and am currently too tired to
+	// to think about a better solution.
 
 	const static float LOWER_LIMIT = 0.1f;
 	const static float UPPER_LIMIT = 0.9f;
@@ -125,7 +125,7 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
 
 		// Check whether this face lies on a UV seam. We can just guess,
 		// but the assumption that a face with at least one very small
-		// on the one side and one very large U coord on the other side 
+		// on the one side and one very large U coord on the other side
 		// lies on a UV seam should work for most cases.
 		for (unsigned int n = 0; n < face.mNumIndices;++n)
 		{
@@ -153,12 +153,12 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
 		{
 			for (unsigned int n = 0; n < face.mNumIndices;++n)
 			{
-				// If the u value is over the upper limit and no other u 
+				// If the u value is over the upper limit and no other u
 				// value of that face is 0, round it to 0
 				if (out[face.mIndices[n]].x > UPPER_LIMIT && !zero)
 					out[face.mIndices[n]].x = 0.f;
 
-				// If the u value is below the lower limit and no other u 
+				// If the u value is below the lower limit and no other u
 				// value of that face is 1, round it to 1
 				else if (out[face.mIndices[n]].x < LOWER_LIMIT && !one)
 					out[face.mIndices[n]].x = 1.f;
@@ -166,7 +166,7 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
 				// The face contains both 0 and 1 as UV coords. This can occur
 				// for faces which have an edge that lies directly on the seam.
 				// Due to numerical inaccuracies one U coord becomes 0, the
-				// other 1. But we do still have a third UV coord to determine 
+				// other 1. But we do still have a third UV coord to determine
 				// to which side we must round to.
 				else if (one && zero)
 				{
@@ -188,7 +188,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
 
 	// If the axis is one of x,y,z run a faster code path. It's worth the extra effort ...
 	// currently the mapping axis will always be one of x,y,z, except if the
-	// PretransformVertices step is used (it transforms the meshes into worldspace, 
+	// PretransformVertices step is used (it transforms the meshes into worldspace,
 	// thus changing the mapping axis)
 	if (axis * base_axis_x >= angle_epsilon)	{
 
@@ -200,7 +200,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
 		// x = cos(lon)*cos(lat)
 		// y = sin(lon)*cos(lat)
 		// z = sin(lat)
-		// 
+		//
 		// Thus we can derive:
 		// lat  = arcsin (z)
 		// lon  = arctan (y/x)
@@ -238,8 +238,8 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
 				(asin  (diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.f);
 		}
 	}
-	
-	
+
+
 	// Now find and remove UV seams. A seam occurs if a face has a tcoord
 	// close to zero on the one side, and a tcoord close to one on the
 	// other side.
@@ -253,13 +253,13 @@ void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,const aiVector
 
 	// If the axis is one of x,y,z run a faster code path. It's worth the extra effort ...
 	// currently the mapping axis will always be one of x,y,z, except if the
-	// PretransformVertices step is used (it transforms the meshes into worldspace, 
+	// PretransformVertices step is used (it transforms the meshes into worldspace,
 	// thus changing the mapping axis)
 	if (axis * base_axis_x >= angle_epsilon)	{
 		FindMeshCenter(mesh, center, min, max);
 		const float diff = max.x - min.x;
 
-		// If the main axis is 'z', the z coordinate of a point 'p' is mapped 
+		// If the main axis is 'z', the z coordinate of a point 'p' is mapped
 		// directly to the texture V axis. The other axis is derived from
 		// the angle between ( p.x - c.x, p.y - c.y ) and (1,0), where
 		// 'c' is the center point of the mesh.
@@ -328,7 +328,7 @@ void ComputeUVMappingProcess::ComputePlaneMapping(aiMesh* mesh,const aiVector3D&
 
 	// If the axis is one of x,y,z run a faster code path. It's worth the extra effort ...
 	// currently the mapping axis will always be one of x,y,z, except if the
-	// PretransformVertices step is used (it transforms the meshes into worldspace, 
+	// PretransformVertices step is used (it transforms the meshes into worldspace,
 	// thus changing the mapping axis)
 	if (axis * base_axis_x >= angle_epsilon)	{
 		FindMeshCenter(mesh, center, min, max);
@@ -386,7 +386,7 @@ void ComputeUVMappingProcess::ComputeBoxMapping( aiMesh*, aiVector3D* )
 }
 
 // ------------------------------------------------------------------------------------------------
-void ComputeUVMappingProcess::Execute( aiScene* pScene) 
+void ComputeUVMappingProcess::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("GenUVCoordsProcess begin");
 	char buffer[1024];

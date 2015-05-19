@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -69,7 +69,7 @@ AI_WONT_RETURN void ThrowAttibuteError(const XmlReader* reader, const std::strin
 	}
 }
 
-template<> 
+template<>
 int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const std::string &name) const
 {
 	if (HasAttribute(name.c_str()))
@@ -83,13 +83,13 @@ int32_t OgreXmlSerializer::ReadAttribute<int32_t>(const std::string &name) const
 	}
 }
 
-template<> 
+template<>
 uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const std::string &name) const
 {
 	if (HasAttribute(name.c_str()))
 	{
 		/** @note This is hackish. But we are never expecting unsigned values that go outside the
-			int32_t range. Just monitor for negative numbers and kill the import. */	
+			int32_t range. Just monitor for negative numbers and kill the import. */
 		int32_t temp = ReadAttribute<int32_t>(name);
 		if (temp >= 0)
 		{
@@ -102,12 +102,12 @@ uint32_t OgreXmlSerializer::ReadAttribute<uint32_t>(const std::string &name) con
 	}
 	else
 	{
-		ThrowAttibuteError(m_reader, name);		
+		ThrowAttibuteError(m_reader, name);
 	}
 	return 0;
 }
 
-template<> 
+template<>
 uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const std::string &name) const
 {
 	if (HasAttribute(name.c_str()))
@@ -116,12 +116,12 @@ uint16_t OgreXmlSerializer::ReadAttribute<uint16_t>(const std::string &name) con
 	}
 	else
 	{
-		ThrowAttibuteError(m_reader, name);		
+		ThrowAttibuteError(m_reader, name);
 	}
 	return 0;
 }
 
-template<> 
+template<>
 float OgreXmlSerializer::ReadAttribute<float>(const std::string &name) const
 {
 	if (HasAttribute(name.c_str()))
@@ -135,7 +135,7 @@ float OgreXmlSerializer::ReadAttribute<float>(const std::string &name) const
 	}
 }
 
-template<> 
+template<>
 std::string OgreXmlSerializer::ReadAttribute<std::string>(const std::string &name) const
 {
 	const char* value = m_reader->getAttributeValue(name.c_str());
@@ -150,7 +150,7 @@ std::string OgreXmlSerializer::ReadAttribute<std::string>(const std::string &nam
 	}
 }
 
-template<> 
+template<>
 bool OgreXmlSerializer::ReadAttribute<bool>(const std::string &name) const
 {
 	std::string value = Ogre::ToLower(ReadAttribute<std::string>(name));
@@ -319,7 +319,7 @@ void OgreXmlSerializer::ReadMesh(MeshXml *mesh)
 	DefaultLogger::get()->debug("Reading Mesh");
 
 	NextNode();
-	
+
 	// Root level nodes
 	while(m_currentNodeName == nnSharedGeometry  ||
 		  m_currentNodeName == nnSubMeshes       ||
@@ -376,7 +376,7 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
 	bool normals   = (HasAttribute("normals") && ReadAttribute<bool>("normals"));
 	bool tangents  = (HasAttribute("tangents") && ReadAttribute<bool>("tangents"));
 	uint32_t uvs   = (HasAttribute("texture_coords") ? ReadAttribute<uint32_t>("texture_coords") : 0);
-	
+
 	// Not having positions is a error only if a previous vertex buffer did not have them.
 	if (!positions && !dest->HasPositions()) {
 		throw DeadlyImportError("Vertex buffer does not contain positions!");
@@ -528,7 +528,7 @@ void OgreXmlSerializer::ReadGeometryVertexBuffer(VertexDataXml *dest)
 	for(unsigned int i=0; i<dest->uvs.size(); ++i)
 	{
 		if (dest->uvs[i].size() != dest->count) {
-			throw DeadlyImportError(Formatter::format() << "Read only " << dest->uvs[i].size() 
+			throw DeadlyImportError(Formatter::format() << "Read only " << dest->uvs[i].size()
 				<< " uvs for uv index " << i << " when should have read " << dest->count);
 		}
 	}
@@ -543,9 +543,9 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
 	static const std::string anV2                = "v2";
 	static const std::string anV3                = "v3";
 	static const std::string anV4                = "v4";
-	
+
 	SubMeshXml* submesh = new SubMeshXml();
-	
+
 	if (HasAttribute(anMaterial)) {
 		submesh->materialRef = ReadAttribute<std::string>(anMaterial);
 	}
@@ -610,7 +610,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
 			if (submesh->usesSharedVertexData) {
 				throw DeadlyImportError("Found <geometry> in <submesh> when use shared geometry is true. Invalid mesh file.");
 			}
-			
+
 			submesh->vertexData = new VertexDataXml();
 			ReadGeometry(submesh->vertexData);
 		}
@@ -622,7 +622,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
 		else
 			SkipCurrentNode();
 	}
-	
+
 	submesh->index = mesh->subMeshes.size();
 	mesh->subMeshes.push_back(submesh);
 }
@@ -676,7 +676,7 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
 			}
 		}
 	}
-	
+
 	DefaultLogger::get()->debug(Formatter::format() << "  - " << dest->boneAssignments.size() << " bone assignments");
 }
 
@@ -760,12 +760,12 @@ void OgreXmlSerializer::ReadSkeleton(Skeleton *skeleton)
 	if (NextNode() != nnSkeleton) {
 		throw DeadlyImportError("Root node is <" + m_currentNodeName + "> expecting <skeleton>");
 	}
-	
+
 	DefaultLogger::get()->debug("Reading Skeleton");
-	
+
 	// Optional blend mode from root node
 	if (HasAttribute("blendmode")) {
-		skeleton->blendMode = (ToLower(ReadAttribute<std::string>("blendmode")) == "cumulative" 
+		skeleton->blendMode = (ToLower(ReadAttribute<std::string>("blendmode")) == "cumulative"
 			? Skeleton::ANIMBLEND_CUMULATIVE : Skeleton::ANIMBLEND_AVERAGE);
 	}
 
@@ -795,14 +795,14 @@ void OgreXmlSerializer::ReadAnimations(Skeleton *skeleton)
 	}
 
 	DefaultLogger::get()->debug("  - Animations");
-	
+
 	NextNode();
 	while(m_currentNodeName == nnAnimation)
 	{
 		Animation *anim = new Animation(skeleton);
 		anim->name = ReadAttribute<std::string>("name");
 		anim->length = ReadAttribute<float>("length");
-		
+
 		if (NextNode() != nnTracks) {
 			throw DeadlyImportError(Formatter::format() << "No <tracks> found in <animation> " << anim->name);
 		}
@@ -810,7 +810,7 @@ void OgreXmlSerializer::ReadAnimations(Skeleton *skeleton)
 		ReadAnimationTracks(anim);
 		skeleton->animations.push_back(anim);
 
-		DefaultLogger::get()->debug(Formatter::format() << "    " << anim->name << " (" << anim->length << " sec, " << anim->tracks.size() << " tracks)");	
+		DefaultLogger::get()->debug(Formatter::format() << "    " << anim->name << " (" << anim->length << " sec, " << anim->tracks.size() << " tracks)");
 	}
 }
 
@@ -836,13 +836,13 @@ void OgreXmlSerializer::ReadAnimationTracks(Animation *dest)
 void OgreXmlSerializer::ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *dest)
 {
 	const aiVector3D zeroVec(0.f, 0.f, 0.f);
-	
+
 	NextNode();
 	while(m_currentNodeName == nnKeyFrame)
 	{
 		TransformKeyFrame keyframe;
 		keyframe.timePos = ReadAttribute<float>("time");
-		
+
 		NextNode();
 		while(m_currentNodeName == nnTranslate || m_currentNodeName == nnRotate || m_currentNodeName == nnScale)
 		{
@@ -892,7 +892,7 @@ void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton)
 	if (skeleton->bones.empty()) {
 		throw DeadlyImportError("Cannot read <bonehierarchy> for a Skeleton without bones");
 	}
-	
+
 	while(NextNode() == nnBoneParent)
 	{
 		const std::string name = ReadAttribute<std::string>("bone");
@@ -906,7 +906,7 @@ void OgreXmlSerializer::ReadBoneHierarchy(Skeleton *skeleton)
 		else
 			throw DeadlyImportError("Failed to find bones for parenting: Child " + name + " for parent " + parentName);
 	}
-	
+
 	// Calculate bone matrices for root bones. Recursively calculates their children.
 	for (size_t i=0, len=skeleton->bones.size(); i<len; ++i)
 	{
@@ -924,7 +924,7 @@ bool BoneCompare(Bone *a, Bone *b)
 void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
 {
 	DefaultLogger::get()->debug("  - Bones");
-	
+
 	NextNode();
 	while(m_currentNodeName == nnBone)
 	{
@@ -933,7 +933,7 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
 		bone->name = ReadAttribute<std::string>("name");
 
 		NextNode();
-		while(m_currentNodeName == nnPosition || 
+		while(m_currentNodeName == nnPosition ||
 			  m_currentNodeName == nnRotation ||
 			  m_currentNodeName == nnScale)
 		{
@@ -955,7 +955,7 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
 				axis.x = ReadAttribute<float>(anX);
 				axis.y = ReadAttribute<float>(anY);
 				axis.z = ReadAttribute<float>(anZ);
-				
+
 				bone->rotation = aiQuaternion(axis, angle);
 			}
 			else if (m_currentNodeName == nnScale)
@@ -976,7 +976,7 @@ void OgreXmlSerializer::ReadBones(Skeleton *skeleton)
 						bone->scale.z = ReadAttribute<float>(anZ);
 				}
 			}
-				
+
 			NextNode();
 		}
 

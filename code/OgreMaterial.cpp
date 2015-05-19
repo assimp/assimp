@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -126,7 +126,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 		return 0;
 	}
 
-	// Full reference and examples of Ogre Material Script 
+	// Full reference and examples of Ogre Material Script
 	// can be found from http://www.ogre3d.org/docs/manual/manual_14.html
 
 	/*and here is another one:
@@ -140,14 +140,14 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 	{
 	  set $diffuse_map "hero_hair_alpha_c.dds"
 	}
-	
+
 	material hero/hair_alpha : mat_char_cns_singlepass_areject_4weights
 	{
 	  set $diffuse_map  "hero_hair_alpha_c.dds"
 	  set $specular_map "hero_hair_alpha_s.dds"
 	  set $normal_map   "hero_hair_alpha_n.dds"
 	  set $light_map    "black_lightmap.dds"
-  
+
 	  set $shadow_caster_material "hero/hair/caster"
 	}
 	*/
@@ -155,7 +155,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 	stringstream ss;
 
 	// Scope for scopre_ptr auto release
-	{	
+	{
 		/* There are three .material options in priority order:
 			1) File with the material name (materialName)
 			2) File with the mesh files base name (pFile)
@@ -165,7 +165,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 		potentialFiles.push_back(pFile.substr(0, pFile.rfind(".mesh")) + ".material");
 		if (!m_userDefinedMaterialLibFile.empty())
 			potentialFiles.push_back(m_userDefinedMaterialLibFile);
-		
+
 		IOStream *materialFile = 0;
 		for(size_t i=0; i<potentialFiles.size(); ++i)
 		{
@@ -191,19 +191,19 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 		// Read bytes
 		vector<char> data(stream->FileSize());
 		stream->Read(&data[0], stream->FileSize(), 1);
-		
+
 		// Convert to UTF-8 and terminate the string for ss
 		BaseImporter::ConvertToUTF8(data);
 		data.push_back('\0');
-		
+
 		ss << &data[0];
 	}
-	
+
 	DefaultLogger::get()->debug("Reading material '" + materialName + "'");
 
 	aiMaterial *material = new aiMaterial();
 	m_textures.clear();
-	
+
 	aiString ts(materialName);
 	material->AddProperty(&ts, AI_MATKEY_NAME);
 
@@ -211,7 +211,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 	// It will also trim whitespace from line start and between words.
 	string linePart;
 	ss >> linePart;
-	
+
 	const string partMaterial   = "material";
 	const string partTechnique  = "technique";
 
@@ -243,14 +243,14 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 			DefaultLogger::get()->error(Formatter::format() << "Invalid material: block start missing near index " << ss.tellg());
 			return material;
 		}
-		
+
 		DefaultLogger::get()->debug("material '" + materialName + "'");
 
 		while(linePart != partBlockEnd)
 		{
 			// Proceed to the first technique
 			ss >> linePart;
-					
+
 			if (linePart == partTechnique)
 			{
 				string techniqueName = SkipLine(ss);
@@ -333,7 +333,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 					aiString ts(linePart);
 					material->AddProperty(&ts, AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, 0));
 				}
-			}					
+			}
 		}
 		ss >> linePart;
 	}
@@ -359,7 +359,7 @@ bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream 
 	while(linePart != partBlockEnd)
 	{
 		ss >> linePart;
-		
+
 		// Skip commented lines
 		if (linePart == partComment)
 		{
@@ -367,7 +367,7 @@ bool OgreImporter::ReadTechnique(const std::string &techniqueName, stringstream 
 			continue;
 		}
 
-		/// @todo Techniques have other attributes than just passes.		
+		/// @todo Techniques have other attributes than just passes.
 		if (linePart == partPass)
 		{
 			string passName = SkipLine(ss);
@@ -399,7 +399,7 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
 	while(linePart != partBlockEnd)
 	{
 		ss >> linePart;
-		
+
 		// Skip commented lines
 		if (linePart == partComment)
 		{
@@ -414,9 +414,9 @@ bool OgreImporter::ReadPass(const std::string &passName, stringstream &ss, aiMat
 			float r, g, b;
 			ss >> r >> g >> b;
 			const aiColor3D color(r, g, b);
-			
+
 			DefaultLogger::get()->debug(Formatter::format() << "   " << linePart << " " << r << " " << g << " " << b);
-			
+
 			if (linePart == partAmbient)
 			{
 				material->AddProperty(&color, 1, AI_MATKEY_COLOR_AMBIENT);
@@ -480,12 +480,12 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 			ss >> linePart;
 			textureRef = linePart;
 
-			// User defined Assimp config property to detect texture type from filename.	
+			// User defined Assimp config property to detect texture type from filename.
 			if (m_detectTextureTypeFromFilename)
 			{
 				size_t posSuffix = textureRef.find_last_of(".");
 				size_t posUnderscore = textureRef.find_last_of("_");
-				
+
 				if (posSuffix != string::npos && posUnderscore != string::npos && posSuffix > posUnderscore)
 				{
 					string identifier = Ogre::ToLower(textureRef.substr(posUnderscore, posSuffix - posUnderscore));
@@ -517,7 +517,7 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 					textureType = aiTextureType_DIFFUSE;
 				}
 			}
-			// Detect from texture unit name. This cannot be too broad as 
+			// Detect from texture unit name. This cannot be too broad as
 			// authors might give names like "LightSaber" or "NormalNinja".
 			else
 			{
@@ -562,9 +562,9 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 				//material->AddProperty(aiTextureOp_Multiply)
 			}
 			*/
-		}	
+		}
 	}
-	
+
 	if (textureRef.empty())
 	{
 		DefaultLogger::get()->warn("Texture reference is empty, ignoring texture_unit.");
@@ -578,14 +578,14 @@ bool OgreImporter::ReadTextureUnit(const std::string &textureUnitName, stringstr
 
 	unsigned int textureTypeIndex = m_textures[textureType];
 	m_textures[textureType]++;
-	
-	DefaultLogger::get()->debug(Formatter::format() << "    texture '" << textureRef << "' type " << textureType 
+
+	DefaultLogger::get()->debug(Formatter::format() << "    texture '" << textureRef << "' type " << textureType
 		<< " index " << textureTypeIndex << " UV " << uvCoord);
-	
+
 	aiString assimpTextureRef(textureRef);
 	material->AddProperty(&assimpTextureRef, AI_MATKEY_TEXTURE(textureType, textureTypeIndex));
 	material->AddProperty(&uvCoord, 1, AI_MATKEY_UVWSRC(textureType, textureTypeIndex));
-	
+
 	return true;
 }
 

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -62,7 +62,7 @@ namespace Assimp	{
 // Worker function for exporting a scene to Wavefront OBJ. Prototyped and registered in Exporter.cpp
 void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-	// invoke the exporter 
+	// invoke the exporter
 	ObjExporter exporter(pFile, pScene);
 
 	// we're still here - export successfully completed. Write both the main OBJ file and the material script
@@ -70,14 +70,14 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 		boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
 		if(outfile == NULL) {
 			throw DeadlyExportError("could not open output .obj file: " + std::string(pFile));
-		} 
+		}
 		outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
 	}
 	{
 		boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(exporter.GetMaterialLibFileName(),"wt"));
 		if(outfile == NULL) {
 			throw DeadlyExportError("could not open output .mtl file: " + std::string(exporter.GetMaterialLibFileName()));
-		} 
+		}
 		outfile->Write( exporter.mOutputMat.str().c_str(), static_cast<size_t>(exporter.mOutputMat.tellp()),1);
 	}
 }
@@ -90,7 +90,7 @@ static const std::string MaterialExt = ".mtl";
 ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
 : filename(_filename)
 , pScene(pScene)
-, endl("\n") 
+, endl("\n")
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	const std::locale& l = std::locale("C");
@@ -103,7 +103,7 @@ ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter :: GetMaterialLibName()
-{	
+{
 	// within the Obj file, we use just the relative file name with the path stripped
 	const std::string& s = GetMaterialLibFileName();
 	std::string::size_type il = s.find_last_of("/\\");
@@ -116,7 +116,7 @@ std::string ObjExporter :: GetMaterialLibName()
 
 // ------------------------------------------------------------------------------------------------
 std::string ObjExporter :: GetMaterialLibFileName()
-{	
+{
     return filename + MaterialExt;
 }
 
@@ -309,13 +309,13 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
 
 		Face& face = mesh.faces[i];
 		switch (f.mNumIndices) {
-			case 1: 
+			case 1:
 				face.kind = 'p';
 				break;
-			case 2: 
+			case 2:
 				face.kind = 'l';
 				break;
-			default: 
+			default:
 				face.kind = 'f';
 		}
 		face.indices.resize(f.mNumIndices);

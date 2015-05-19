@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -48,7 +48,7 @@ namespace Assimp {
 namespace FBX {
 
 /** FBX import settings, parts of which are publicly accessible via their corresponding AI_CONFIG constants */
-struct ImportSettings 
+struct ImportSettings
 {
 	ImportSettings()
 		: strictMode(true)
@@ -62,7 +62,7 @@ struct ImportSettings
 		, preservePivots(true)
 		, optimizeEmptyAnimationCurves(true)
 	{}
- 
+
 
 	/** enable strict mode:
 	 *   - only accept fbx 2012, 2013 files
@@ -75,7 +75,7 @@ struct ImportSettings
 	/** specifies whether all geometry layers are read and scanned for
 	  * usable data channels. The FBX spec indicates that many readers
 	  * will only read the first channel and that this is in some way
-	  * the recommended way- in reality, however, it happens a lot that 
+	  * the recommended way- in reality, however, it happens a lot that
 	  * vertex data is spread among multiple layers. The default
 	  * value for this option is true.*/
 	bool readAllLayers;
@@ -88,7 +88,7 @@ struct ImportSettings
 	bool readAllMaterials;
 
 
-	/** import materials (true) or skip them and assign a default 
+	/** import materials (true) or skip them and assign a default
 	 *  material. The default value is true.*/
 	bool readMaterials;
 
@@ -114,7 +114,7 @@ struct ImportSettings
 	 *
 	 *  The naming scheme for the generated nodes is:
 	 *    <OriginalName>_$AssimpFbx$_<TransformName>
-	 *  
+	 *
 	 *  where <TransformName> is one of
 	 *    RotationPivot
 	 *    RotationOffset

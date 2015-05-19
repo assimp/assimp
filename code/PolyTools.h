@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -53,7 +53,7 @@ namespace Assimp {
  *  The function accepts an unconstrained template parameter for use with
  *  both aiVector3D and aiVector2D, but generally ignores the third coordinate.*/
 template <typename T>
-inline double GetArea2D(const T& v1, const T& v2, const T& v3) 
+inline double GetArea2D(const T& v1, const T& v2, const T& v3)
 {
 	return 0.5 * (v1.x * ((double)v3.y - v2.y) + v2.x * ((double)v1.y - v3.y) + v3.x * ((double)v2.y - v1.y));
 }
@@ -96,7 +96,7 @@ inline bool PointInTriangle2D(const T& p0, const T& p1,const T& p2, const T& pp)
 
 // -------------------------------------------------------------------------------
 /** Check whether the winding order of a given polygon is counter-clockwise.
- *  The function accepts an unconstrained template parameter, but is intended 
+ *  The function accepts an unconstrained template parameter, but is intended
  *  to be used only with aiVector2D and aiVector3D (z axis is ignored, only
  *  x and y are taken into account).
  * @note Code taken from http://cgm.cs.mcgill.ca/~godfried/teaching/cg-projects/97/Ian/applet1.html and translated to C++
@@ -109,14 +109,14 @@ inline bool IsCCW(T* in, size_t npoints) {
 
 	ai_assert(npoints >= 3);
 
-	for (size_t i = 0; i < npoints - 2; i++) {		
+	for (size_t i = 0; i < npoints - 2; i++) {
 		aa = ((in[i+2].x - in[i].x) * (in[i+2].x - in[i].x)) +
 			((-in[i+2].y + in[i].y) * (-in[i+2].y + in[i].y));
 
 		bb = ((in[i+1].x - in[i].x) * (in[i+1].x - in[i].x)) +
 			((-in[i+1].y + in[i].y) * (-in[i+1].y + in[i].y));
 
-		cc = ((in[i+2].x - in[i+1].x) * 
+		cc = ((in[i+2].x - in[i+1].x) *
 			(in[i+2].x - in[i+1].x)) +
 			((-in[i+2].y + in[i+1].y) *
 			(-in[i+2].y + in[i+1].y));
@@ -136,14 +136,14 @@ inline bool IsCCW(T* in, size_t npoints) {
 			convex_sum -= AI_MATH_PI_F - theta;
 		}
 	}
-	aa = ((in[1].x - in[npoints-2].x) * 
+	aa = ((in[1].x - in[npoints-2].x) *
 		(in[1].x - in[npoints-2].x)) +
-		((-in[1].y + in[npoints-2].y) * 
+		((-in[1].y + in[npoints-2].y) *
 		(-in[1].y + in[npoints-2].y));
 
-	bb = ((in[0].x - in[npoints-2].x) * 
+	bb = ((in[0].x - in[npoints-2].x) *
 		(in[0].x - in[npoints-2].x)) +
-		((-in[0].y + in[npoints-2].y) * 
+		((-in[0].y + in[npoints-2].y) *
 		(-in[0].y + in[npoints-2].y));
 
 	cc = ((in[1].x - in[0].x) * (in[1].x - in[0].x)) +
@@ -160,7 +160,7 @@ inline bool IsCCW(T* in, size_t npoints) {
 		convex_turn = AI_MATH_PI_F - theta;
 		convex_sum += convex_turn;
 	}
-	else { 
+	else {
 		convex_sum -= AI_MATH_PI_F - theta;
 	}
 
@@ -176,9 +176,9 @@ inline bool IsCCW(T* in, size_t npoints) {
  *
  *  @param out Receives the output normal
  *  @param num Number of input vertices
- *  @param x X data source. x[ofs_x*n] is the n'th element. 
- *  @param y Y data source. y[ofs_y*n] is the y'th element 
- *  @param z Z data source. z[ofs_z*n] is the z'th element 
+ *  @param x X data source. x[ofs_x*n] is the n'th element.
+ *  @param y Y data source. y[ofs_y*n] is the y'th element
+ *  @param z Z data source. z[ofs_z*n] is the z'th element
  *
  *  @note The data arrays must have storage for at least num+2 elements. Using
  *  this method is much faster than the 'other' NewellNormal()
@@ -187,14 +187,14 @@ template <int ofs_x, int ofs_y, int ofs_z, typename TReal>
 inline void NewellNormal (aiVector3t<TReal>& out, int num, TReal* x, TReal* y, TReal* z)
 {
 	// Duplicate the first two vertices at the end
-	x[(num+0)*ofs_x] = x[0]; 
-	x[(num+1)*ofs_x] = x[ofs_x]; 
+	x[(num+0)*ofs_x] = x[0];
+	x[(num+1)*ofs_x] = x[ofs_x];
 
-	y[(num+0)*ofs_y] = y[0]; 
-	y[(num+1)*ofs_y] = y[ofs_y]; 
+	y[(num+0)*ofs_y] = y[0];
+	y[(num+1)*ofs_y] = y[ofs_y];
 
-	z[(num+0)*ofs_z] = z[0]; 
-	z[(num+1)*ofs_z] = z[ofs_z]; 
+	z[(num+0)*ofs_z] = z[0];
+	z[(num+1)*ofs_z] = z[ofs_z];
 
 	TReal sum_xy = 0.0, sum_yz = 0.0, sum_zx = 0.0;
 

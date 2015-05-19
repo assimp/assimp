@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -62,7 +62,7 @@ using namespace irr;
 using namespace irr::io;
 
 
-// zlib is needed for compressed XGL files 
+// zlib is needed for compressed XGL files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
 #	ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #		include <zlib.h>
@@ -98,7 +98,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"xgl zgl" 
+	"xgl zgl"
 };
 
 
@@ -108,12 +108,12 @@ XGLImporter::XGLImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 XGLImporter::~XGLImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool XGLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	/* NOTE: A simple check for the file extension is not enough
@@ -143,8 +143,8 @@ const aiImporterDesc* XGLImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void XGLImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void XGLImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
@@ -165,7 +165,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 #ifdef ASSIMP_BUILD_NO_COMPRESSED_XGL
 		ThrowException("Cannot read ZGL file since Assimp was built without compression support");
 #else
-		boost::scoped_ptr<StreamReaderLE> raw_reader(new StreamReaderLE(stream));	
+		boost::scoped_ptr<StreamReaderLE> raw_reader(new StreamReaderLE(stream));
 
 		// build a zlib stream
 		z_stream zstream;
@@ -182,7 +182,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 
 		zstream.next_in   = reinterpret_cast<Bytef*>( raw_reader->GetPtr() );
 		zstream.avail_in  = raw_reader->GetRemainingSize();
-		
+
 		size_t total = 0l;
 
 		// and decompress the data .... do 1k chunks in the hope that we won't kill the stack
@@ -201,14 +201,14 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 			total += have;
 			dest = reinterpret_cast<Bytef*>( realloc(dest,total) );
 			memcpy(dest + total - have,block,have);
-		} 
+		}
 		while (ret != Z_STREAM_END);
 
 		// terminate zlib
 		inflateEnd(&zstream);
 
 		// replace the input stream with a memory stream
-		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(dest),total)); 
+		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(dest),total));
 #endif
 	}
 
@@ -220,12 +220,12 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 	// parse the XML file
 	TempScope scope;
 
-	while (ReadElement())	{	
+	while (ReadElement())	{
 		if (!ASSIMP_stricmp(reader->getNodeName(),"world")) {
 			ReadWorld(scope);
 		}
 	}
-	
+
 
 	std::vector<aiMesh*>& meshes = scope.meshes_linear;
 	std::vector<aiMaterial*>& materials = scope.materials_linear;
@@ -310,7 +310,7 @@ std::string XGLImporter::GetElementName()
 // ------------------------------------------------------------------------------------------------
 void XGLImporter::ReadWorld(TempScope& scope)
 {
-	while (ReadElementUpToClosing("world"))	{	
+	while (ReadElementUpToClosing("world"))	{
 		const std::string& s = GetElementName();
 		// XXX right now we'd skip <lighting> if it comes after
 		// <object> or <mesh>
@@ -322,7 +322,7 @@ void XGLImporter::ReadWorld(TempScope& scope)
 		}
 	}
 
-	
+
 	aiNode* const nd = ReadObject(scope,true,"world");
 	if(!nd) {
 		ThrowException("failure reading <world>");
@@ -357,7 +357,7 @@ aiLight* XGLImporter::ReadDirectionalLight()
 	ScopeGuard<aiLight> l(new aiLight());
 	l->mType = aiLightSource_DIRECTIONAL;
 
-	while (ReadElementUpToClosing("directionallight"))	{	
+	while (ReadElementUpToClosing("directionallight"))	{
 		const std::string& s = GetElementName();
 		if (s == "direction") {
 			l->mDirection = ReadVec3();
@@ -471,7 +471,7 @@ aiMatrix4x4 XGLImporter::ReadTrafo()
 	aiVector3D forward, up, right, position;
 	float scale = 1.0f;
 
-	while (ReadElementUpToClosing("transform"))	{	
+	while (ReadElementUpToClosing("transform"))	{
 		const std::string& s = GetElementName();
 		if (s == "forward") {
 			forward = ReadVec3();
@@ -582,7 +582,7 @@ bool XGLImporter::ReadMesh(TempScope& scope)
 	std::map<unsigned int, TempMaterialMesh> bymat;
 	const unsigned int mesh_id = ReadIDAttr();
 
-	while (ReadElementUpToClosing("mesh"))	{	
+	while (ReadElementUpToClosing("mesh"))	{
 		const std::string& s = GetElementName();
 
 		if (s == "mat") {
@@ -663,7 +663,7 @@ bool XGLImporter::ReadMesh(TempScope& scope)
 
 				nor = nor || tf[i].has_normal;
 				uv = uv || tf[i].has_uv;
-			}			
+			}
 
 			if (mid >= (1<<30)) {
 				LogWarn("material indices exhausted, this may cause errors in the output");
@@ -681,15 +681,15 @@ bool XGLImporter::ReadMesh(TempScope& scope)
 				if(uv) {
 					mesh.uvs.push_back(tf[i].uv);
 				}
-				
+
 				mesh.pflags |= 1 << (vcount-1);
 			}
 
 			mesh.vcounts.push_back(vcount);
-		}		
+		}
 	}
 
-	// finally extract output meshes and add them to the scope 
+	// finally extract output meshes and add them to the scope
 	typedef std::pair<unsigned int, TempMaterialMesh> pairt;
 	BOOST_FOREACH(const pairt& p, bymat) {
 		aiMesh* const m  = ToOutputMesh(p.second);
@@ -720,7 +720,7 @@ unsigned int XGLImporter::ResolveMaterialRef(TempScope& scope)
 	if (it == end) {
 		ThrowException("<matref> index out of range");
 	}
-	
+
 	// ok, this is n^2 and should get optimized one day
 	aiMaterial* const m = (*it).second;
 
@@ -832,11 +832,11 @@ void XGLImporter::ReadFaceVertex(const TempMesh& t, TempFace& out)
 unsigned int XGLImporter::ReadIDAttr()
 {
 	for(int i = 0, e = reader->getAttributeCount(); i < e; ++i) {
-	
+
 		if(!ASSIMP_stricmp(reader->getAttributeName(i),"id")) {
 			return reader->getAttributeValueAsInt(i);
 		}
-	}	
+	}
 	return ~0u;
 }
 
@@ -956,4 +956,4 @@ aiColor3D XGLImporter::ReadCol3()
 	return aiColor3D(v.x,v.y,v.z);
 }
 
-#endif 
+#endif

@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,24 +25,24 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file MD3Loader.cpp
- *  @brief Implementation of the MD3 importer class 
- * 
- *  Sources: 
+ *  @brief Implementation of the MD3 importer class
+ *
+ *  Sources:
  *     http://www.gamers.org/dEngine/quake3/UQ3S
  *     http://linux.ucla.edu/~phaethon/q3/formats/md3format.html
  *     http://www.heppler.com/shader/shader/
@@ -78,7 +78,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"md3" 
+	"md3"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 
 	// read line per line
 	for (;SkipSpacesAndLineEnd(&buff);SkipLine(&buff)) {
-	
+
 		if (*buff == '{') {
 			++buff;
 
@@ -151,9 +151,9 @@ bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 						// 'map' - Specifies texture file name
 						if (TokenMatchI(buff,"map",3) || TokenMatchI(buff,"clampmap",8)) {
 							curMap->name = GetNextToken(buff);
-						}	
+						}
 						// 'blendfunc' - Alpha blending mode
-						else if (TokenMatchI(buff,"blendfunc",9)) {	
+						else if (TokenMatchI(buff,"blendfunc",9)) {
 							const std::string blend_src = GetNextToken(buff);
 							if (blend_src == "add") {
 								curMap->blend_src  = Q3Shader::BLEND_GL_ONE;
@@ -173,7 +173,7 @@ bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 							}
 						}
 						// 'alphafunc' - Alpha testing mode
-						else if (TokenMatchI(buff,"alphafunc",9)) {	
+						else if (TokenMatchI(buff,"alphafunc",9)) {
 							const std::string at = GetNextToken(buff);
 							if (at == "GT0") {
 								curMap->alpha_test = Q3Shader::AT_GT0;
@@ -196,7 +196,7 @@ bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 				}
 				else if (*buff == '}') {
 					++buff;
-					curData = NULL;					
+					curData = NULL;
 					break;
 				}
 
@@ -254,7 +254,7 @@ bool Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
 
 		// get first identifier
 		std::string ss = GetNextToken(buff);
-		
+
 		// ignore tokens starting with tag_
 		if (!::strncmp(&ss[0],"tag_",std::min((size_t)4, ss.length())))
 			continue;
@@ -277,9 +277,9 @@ void Q3Shader::ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& s
 	/*  IMPORTANT: This is not a real conversion. Actually we're just guessing and
 	 *  hacking around to build an aiMaterial that looks nearly equal to the
 	 *  original Quake 3 shader. We're missing some important features like
-	 *  animatable material properties in our material system, but at least 
+	 *  animatable material properties in our material system, but at least
 	 *  multiple textures should be handled correctly.
-	 */ 
+	 */
 
 	// Two-sided material?
 	if (shader.cull == Q3Shader::CULL_NONE) {
@@ -291,7 +291,7 @@ void Q3Shader::ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& s
 
 	// Iterate through all textures
 	for (std::list< Q3Shader::ShaderMapBlock >::const_iterator it = shader.maps.begin(); it != shader.maps.end();++it) {
-		
+
 		// CONVERSION BEHAVIOUR:
 		//
 		//
@@ -315,7 +315,7 @@ void Q3Shader::ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& s
 			if (it == shader.maps.begin()) {
 				const int additive = aiBlendMode_Additive;
 				out->AddProperty(&additive,1,AI_MATKEY_BLEND_FUNC);
-				
+
 				index = cur_diffuse++;
 				type  = aiTextureType_DIFFUSE;
 			}
@@ -331,7 +331,7 @@ void Q3Shader::ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& s
 		else {
 			const int blend = aiBlendMode_Default;
 			out->AddProperty(&blend,1,AI_MATKEY_BLEND_FUNC);
-			
+
 			index = cur_diffuse++;
 			type  = aiTextureType_DIFFUSE;
 		}
@@ -359,21 +359,21 @@ MD3Importer::MD3Importer()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 MD3Importer::~MD3Importer()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool MD3Importer::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
 	if (extension == "md3")
 		return true;
 
-	// if check for extension is not enough, check for the magic tokens 
+	// if check for extension is not enough, check for the magic tokens
 	if (!extension.length() || checkSig) {
-		uint32_t tokens[1]; 
+		uint32_t tokens[1];
 		tokens[0] = AI_MD3_MAGIC_NUMBER_LE;
 		return CheckMagicToken(pIOHandler,pFile,tokens,1);
 	}
@@ -396,7 +396,7 @@ void MD3Importer::ValidateHeaderOffsets()
 	if (!pcHeader->NUM_SURFACES)
 		throw DeadlyImportError( "Invalid md3 file: NUM_SURFACES is 0");
 
-	if (pcHeader->OFS_FRAMES >= fileSize || pcHeader->OFS_SURFACES >= fileSize || 
+	if (pcHeader->OFS_FRAMES >= fileSize || pcHeader->OFS_SURFACES >= fileSize ||
 		pcHeader->OFS_EOF > fileSize) {
 		throw DeadlyImportError("Invalid MD3 header: some offsets are outside the file");
 	}
@@ -449,7 +449,7 @@ const aiImporterDesc* MD3Importer::GetInfo () const
 // Setup configuration properties
 void MD3Importer::SetupProperties(const Importer* pImp)
 {
-	// The 
+	// The
 	// AI_CONFIG_IMPORT_MD3_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
 	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_MD3_KEYFRAME,-1);
@@ -507,7 +507,7 @@ void MD3Importer::ReadShader(Q3Shader::ShaderData& fill) const
 		// Otherwise it's a directory.
 		const std::string::size_type st = configShaderFile.find_last_of('.');
 		if (st == std::string::npos) {
-			
+
 			if(!Q3Shader::LoadShader(fill,configShaderFile + model_file + ".shader",mIOHandler)) {
 				Q3Shader::LoadShader(fill,configShaderFile + filename + ".shader",mIOHandler);
 			}
@@ -525,7 +525,7 @@ void RemoveSingleNodeFromList(aiNode* nd)
 	if (!nd || nd->mNumChildren || !nd->mParent)return;
 	aiNode* par = nd->mParent;
 	for (unsigned int i = 0; i < par->mNumChildren;++i) {
-		if (par->mChildren[i] == nd) { 
+		if (par->mChildren[i] == nd) {
 			--par->mNumChildren;
 			for (;i < par->mNumChildren;++i) {
 				par->mChildren[i] = par->mChildren[i+1];
@@ -706,8 +706,8 @@ void MD3Importer::ConvertPath(const char* texture_name, const char* header_name,
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void MD3Importer::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void MD3Importer::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	mFile = pFile;
@@ -863,7 +863,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 		const char* texture_name = NULL;
 
 		// Check whether we have a texture record for this surface in the .skin file
-		std::list< Q3Shader::SkinData::TextureEntry >::iterator it = std::find( 
+		std::list< Q3Shader::SkinData::TextureEntry >::iterator it = std::find(
 			skins.textures.begin(), skins.textures.end(), pcSurfaces->NAME );
 
 		if (it != skins.textures.end()) {
@@ -1005,7 +1005,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			}
 			pcTriangles++;
 		}
-	
+
 		// Go to the next surface
 		pcSurfaces = (BE_NCONST MD3::Surface*)(((unsigned char*)pcSurfaces) + pcSurfaces->OFS_END);
 	}

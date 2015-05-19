@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -59,14 +59,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-// AutoCAD Binary DXF<CR><LF><SUB><NULL> 
+// AutoCAD Binary DXF<CR><LF><SUB><NULL>
 #define AI_DXF_BINARY_IDENT ("AutoCAD Binary DXF\r\n\x1a\0")
 #define AI_DXF_BINARY_IDENT_LEN (24)
 
 // default vertex color that all uncolored vertices will receive
 #define AI_DXF_DEFAULT_COLOR aiColor4D(0.6f,0.6f,0.6f,0.6f)
 
-// color indices for DXF - 16 are supported, the table is 
+// color indices for DXF - 16 are supported, the table is
 // taken directly from the DXF spec.
 static aiColor4D g_aclrDxfIndexColors[] =
 {
@@ -101,7 +101,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"dxf" 
+	"dxf"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -110,12 +110,12 @@ DXFImporter::DXFImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 DXFImporter::~DXFImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool DXFImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
 {
 	return SimpleExtensionCheck(pFile,"dxf");
@@ -129,13 +129,13 @@ const aiImporterDesc* DXFImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void DXFImporter::InternReadFile( const std::string& pFile, 
-	aiScene* pScene, 
+// Imports the given file into the given scene structure.
+void DXFImporter::InternReadFile( const std::string& pFile,
+	aiScene* pScene,
 	IOSystem* pIOHandler)
 {
 	boost::shared_ptr<IOStream> file = boost::shared_ptr<IOStream>( pIOHandler->Open( pFile) );
-	
+
 	// Check whether we can read the file
 	if( file.get() == NULL) {
 		throw DeadlyImportError( "Failed to open DXF file " + pFile + "");
@@ -153,7 +153,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 	// which will choose a suitable strategy.
 	file->Seek(0,aiOrigin_SET);
 	StreamReaderLE stream( file );
-	
+
 	DXF::LineReader reader (stream);
 	DXF::FileData output;
 
@@ -167,14 +167,14 @@ void DXFImporter::InternReadFile( const std::string& pFile,
 			ParseBlocks(reader,output);
 			continue;
 		}
-	
+
 		// primary entity table
 		if (reader.Is(2,"ENTITIES")) {
 			ParseEntities(reader,output);
 			continue;
 		}
 
-		// skip unneeded sections entirely to avoid any problems with them 
+		// skip unneeded sections entirely to avoid any problems with them
 		// alltogether.
 		else if (reader.Is(2,"CLASSES") || reader.Is(2,"TABLES")) {
 			SkipSection(reader);
@@ -239,7 +239,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 	}
 
 	DXF::Block* entities = 0;
-	
+
 	// index blocks by name
 	DXF::BlockMap blocks_by_name;
 	BOOST_FOREACH (DXF::Block& bl, output.blocks) {
@@ -296,7 +296,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 		unsigned int cvert = 0,cface = 0;
 		BOOST_FOREACH(const DXF::PolyLine* pl, corr[elem.second]){
 			// sum over all faces since we need to 'verbosify' them.
-			cvert += std::accumulate(pl->counts.begin(),pl->counts.end(),0); 
+			cvert += std::accumulate(pl->counts.begin(),pl->counts.end(),0);
 			cface += pl->counts.size();
 		}
 
@@ -371,7 +371,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
 
 		// XXX this would be the place to implement recursive expansion if needed.
 		const DXF::Block& bl_src = *(*it).second;
-		
+
 		BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl_in, bl_src.lines) {
 			boost::shared_ptr<DXF::PolyLine> pl_out = boost::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
@@ -454,21 +454,21 @@ void DXFImporter::GenerateHierarchy(aiScene* pScene, DXF::FileData& /*output*/)
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::SkipSection(DXF::LineReader& reader)
-{	
+{
 	for( ;!reader.End() && !reader.Is(0,"ENDSEC"); reader++);
 }
 
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseHeader(DXF::LineReader& reader, DXF::FileData& /*output*/)
-{	
+{
 	for( ;!reader.End() && !reader.Is(0,"ENDSEC"); reader++);
 }
 
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output)
-{	
+{
 	while( !reader.End() && !reader.Is(0,"ENDSEC")) {
 		if (reader.Is(0,"BLOCK")) {
 			ParseBlock(++reader,output);
@@ -485,7 +485,7 @@ void DXFImporter::ParseBlocks(DXF::LineReader& reader, DXF::FileData& output)
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output)
-{	
+{
 	// push a new block onto the stack.
 	output.blocks.push_back( DXF::Block() );
 	DXF::Block& block = output.blocks.back();
@@ -532,7 +532,7 @@ void DXFImporter::ParseBlock(DXF::LineReader& reader, DXF::FileData& output)
 
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output)
-{	
+{
 	// push a new block onto the stack.
 	output.blocks.push_back( DXF::Block() );
 	DXF::Block& block = output.blocks.back();
@@ -566,13 +566,13 @@ void DXFImporter::ParseEntities(DXF::LineReader& reader, DXF::FileData& output)
 
 
 void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
-{	
+{
 	output.blocks.back().insertions.push_back( DXF::InsertBlock() );
 	DXF::InsertBlock& bl = output.blocks.back().insertions.back();
 
 	while( !reader.End() && !reader.Is(0)) {
 
-		switch(reader.GroupCode()) 
+		switch(reader.GroupCode())
 		{
 			// name of referenced block
 		case 2:
@@ -623,7 +623,7 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 
 	unsigned int iguess = 0, vguess = 0;
 	while( !reader.End() && !reader.Is(0,"ENDSEC")) {
-	
+
 		if (reader.Is(0,"VERTEX")) {
 			ParsePolyLineVertex(++reader,line);
 			if (reader.Is(0,"SEQEND")) {
@@ -632,9 +632,9 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 			continue;
 		}
 
-		switch(reader.GroupCode())	
+		switch(reader.GroupCode())
 		{
-		// flags --- important that we know whether it is a 
+		// flags --- important that we know whether it is a
 		// polyface mesh or 'just' a line.
 		case 70:
 			if (!line.flags)	{
@@ -682,7 +682,7 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 				return;
 		}
 
-		// if these numbers are wrong, parsing might have gone wild. 
+		// if these numbers are wrong, parsing might have gone wild.
 		// however, the docs state that applications are not required
 		// to set the 71 and 72 fields, respectively, to valid values.
 		// So just fire a warning.
@@ -752,10 +752,10 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
 		case 30: out.z = reader.ValueAsFloat();break;
 
 		// POLYFACE vertex indices
-		case 71: 
+		case 71:
 		case 72:
 		case 73:
-		case 74: 
+		case 74:
 			if (cnti == 4) {
 				DefaultLogger::get()->warn("DXF: more than 4 indices per face not supported; ignoring");
 				break;
@@ -764,14 +764,14 @@ void DXFImporter::ParsePolyLineVertex(DXF::LineReader& reader, DXF::PolyLine& li
 			break;
 
 		// color
-		case 62: 
-			clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS]; 
+		case 62:
+			clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS];
 			break;
 		};
-	
+
 		reader++;
 	}
-	
+
 	if (line.flags & DXF_POLYLINE_FLAG_POLYFACEMESH && !(flags & DXF_VERTEX_FLAG_PART_OF_POLYFACE)) {
 		DefaultLogger::get()->warn("DXF: expected vertex to be part of a polyface but the 0x128 flag isn't set");
 	}
@@ -805,7 +805,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 
 	aiVector3D vip[4];
 	aiColor4D  clr = AI_DXF_DEFAULT_COLOR;
-	
+
 	bool b[4] = {false,false,false,false};
 	while( !reader.End() ) {
 
@@ -813,11 +813,11 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 		if (reader.GroupCode() == 0) {
 			break;
 		}
-		switch (reader.GroupCode())	
+		switch (reader.GroupCode())
 		{
 
 		// 8 specifies the layer
-		case 8:	
+		case 8:
 			line.layer = reader.Value();
 			break;
 
@@ -882,8 +882,8 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 			break;
 
 		// color
-		case 62: 
-			clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS]; 
+		case 62:
+			clr = g_aclrDxfIndexColors[reader.ValueAsUnsignedInt() % AI_DXF_NUM_INDEX_COLORS];
 			break;
 		};
 
@@ -895,7 +895,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
 	if (vip[3] == vip[2]) {
 		b[1] = false;
 	}
-	
+
 	// sanity checks to see if we got something meaningful
 	if ((b[1] && !b[0]) || !b[2] || !b[3]) {
 		DefaultLogger::get()->warn("DXF: unexpected vertex setup in 3DFACE/LINE/FACE entity; ignoring");

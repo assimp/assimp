@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -74,14 +74,14 @@ private:
 		AM_Mesh,
 		AM_Skeleton
 	};
-	
+
 	OgreBinarySerializer(MemoryStreamReader *reader, AssetMode mode) :
 		m_currentLen(0),
 		m_reader(reader),
 		assetMode(mode)
 	{
 	}
-	
+
 	static MemoryStreamReaderPtr OpenReader(Assimp::IOSystem *pIOHandler, const std::string &filename);
 
 	// Header
@@ -112,7 +112,7 @@ private:
 	void ReadEdgeList(Mesh *mesh);
 	void ReadPoses(Mesh *mesh);
 	void ReadPoseVertices(Pose *pose);
-	
+
 	void ReadAnimations(Mesh *mesh);
 	void ReadAnimation(Animation *anim);
 	void ReadAnimationKeyFrames(Animation *anim, VertexAnimationTrack *track);
@@ -120,12 +120,12 @@ private:
 	void NormalizeBoneWeights(VertexData *vertexData) const;
 
 	// Skeleton
-	
+
 	void ReadSkeleton(Skeleton *skeleton);
-	
+
 	void ReadBone(Skeleton *skeleton);
 	void ReadBoneParent(Skeleton *skeleton);
-	
+
 	void ReadSkeletonAnimation(Skeleton *skeleton);
 	void ReadSkeletonAnimationTrack(Skeleton *skeleton, Animation *dest);
 	void ReadSkeletonAnimationKeyFrame(VertexAnimationTrack *dest);
@@ -133,15 +133,15 @@ private:
 
 	// Reader utils
 	bool AtEnd() const;
-	
-	template<typename T> 
+
+	template<typename T>
 	inline T Read();
 
 	void ReadBytes(char *dest, size_t numBytes);
 	void ReadBytes(uint8_t *dest, size_t numBytes);
 	void ReadBytes(void *dest, size_t numBytes);
 	uint8_t *ReadBytes(size_t numBytes);
-	
+
 	void ReadVector(aiVector3D &vec);
 	void ReadQuaternion(aiQuaternion &quat);
 
@@ -163,7 +163,7 @@ enum MeshChunkId
 	M_MESH   = 0x3000,
 		// bool skeletallyAnimated   // important flag which affects h/w buffer policies
 		// Optional M_GEOMETRY chunk
-		M_SUBMESH			 = 0x4000, 
+		M_SUBMESH			 = 0x4000,
 			// char* materialName
 			// bool useSharedVertices
 			// unsigned int indexCount
@@ -233,7 +233,7 @@ enum MeshChunkId
 			// float minx, miny, minz
 			// float maxx, maxy, maxz
 			// float radius
-				
+
 		// Added By DrEvil
 		// optional chunk that contains a table of submesh indexes and the names of
 		// the sub-meshes.
@@ -242,7 +242,7 @@ enum MeshChunkId
 			M_SUBMESH_NAME_TABLE_ELEMENT = 0xA100,
 				// short index
 				// char* name
-		// Optional chunk which stores precomputed edge data					 
+		// Optional chunk which stores precomputed edge data
 		M_EDGE_LISTS = 0xB000,
 			// Each LOD has a separate edge list
 			M_EDGE_LIST_LOD = 0xB100,
@@ -255,8 +255,8 @@ enum MeshChunkId
 						// unsigned long indexSet
 						// unsigned long vertexSet
 						// unsigned long vertIndex[3]
-						// unsigned long sharedVertIndex[3] 
-						// float normal[4] 
+						// unsigned long sharedVertIndex[3]
+						// float normal[4]
 
 					M_EDGE_GROUP = 0xB110,
 						// unsigned long vertexSet
@@ -272,7 +272,7 @@ enum MeshChunkId
 		M_POSES = 0xC000,
 			M_POSE = 0xC100,
 				// char* name (may be blank)
-				// unsigned short target	// 0 for shared geometry, 
+				// unsigned short target	// 0 for shared geometry,
 											// 1+ for submesh index + 1
 				// bool includesNormals [1.8+]
 				M_POSE_VERTEX = 0xC111,
@@ -280,7 +280,7 @@ enum MeshChunkId
 					// float xoffset, yoffset, zoffset
 					// float xnormal, ynormal, znormal (optional, 1.8+)
 		// Optional vertex animation chunk
-		M_ANIMATIONS = 0xD000, 
+		M_ANIMATIONS = 0xD000,
 			M_ANIMATION = 0xD100,
 			// char* name
 			// float length
@@ -290,7 +290,7 @@ enum MeshChunkId
 			// float baseKeyFrameTime
 			M_ANIMATION_TRACK = 0xD110,
 				// unsigned short type			// 1 == morph, 2 == pose
-				// unsigned short target		// 0 for shared geometry, 
+				// unsigned short target		// 0 for shared geometry,
 												// 1+ for submesh index + 1
 				M_ANIMATION_MORPH_KEYFRAME = 0xD111,
 					// float time
@@ -299,7 +299,7 @@ enum MeshChunkId
 				M_ANIMATION_POSE_KEYFRAME = 0xD112,
 					// float time
 					M_ANIMATION_POSE_REF = 0xD113, // repeat for number of referenced poses
-						// unsigned short poseIndex 
+						// unsigned short poseIndex
 						// float influence
 		// Optional submesh extreme vertex list chink
 		M_TABLE_EXTREMES = 0xE000
@@ -358,14 +358,14 @@ enum SkeletonChunkId
 		SKELETON_BLENDMODE		= 0x1010, // optional
 			// unsigned short blendmode		: SkeletonAnimationBlendMode
 	SKELETON_BONE				= 0x2000,
-	// Repeating section defining each bone in the system. 
+	// Repeating section defining each bone in the system.
 	// Bones are assigned indexes automatically based on their order of declaration
 	// starting with 0.
 		// char* name					   : name of the bone
 		// unsigned short handle			: handle of the bone, should be contiguous & start at 0
-		// Vector3 position				 : position of this bone relative to parent 
-		// Quaternion orientation		   : orientation of this bone relative to parent 
-		// Vector3 scale					: scale of this bone relative to parent 
+		// Vector3 position				 : position of this bone relative to parent
+		// Quaternion orientation		   : orientation of this bone relative to parent
+		// Vector3 scale					: scale of this bone relative to parent
 	SKELETON_BONE_PARENT		= 0x3000,
 	// Record of the parent of a single bone, used to build the node tree
 	// Repeating section, listed in Bone Index order, one per Bone

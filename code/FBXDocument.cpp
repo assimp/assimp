@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -107,7 +107,7 @@ const Object* LazyObject::Get(bool dieOnError)
 	std::string name = ParseTokenAsString(*tokens[1],err);
 	if (err) {
 		DOMError(err,&element);
-	} 
+	}
 
 	// small fix for binary reading: binary fbx files don't use
 	// prefixes such as Model:: in front of their names. The
@@ -125,7 +125,7 @@ const Object* LazyObject::Get(bool dieOnError)
 	const std::string classtag = ParseTokenAsString(*tokens[2],err);
 	if (err) {
 		DOMError(err,&element);
-	} 
+	}
 
 	// prevent recursive calls
 	flags |= BEING_CONSTRUCTED;
@@ -192,7 +192,7 @@ const Object* LazyObject::Get(bool dieOnError)
 		}
 		else if (!strncmp(obtype,"AnimationCurveNode",length)) {
 			object.reset(new AnimationCurveNode(id,element,name,doc));
-		}	
+		}
 	}
 	catch(std::exception& ex) {
 		flags &= ~BEING_CONSTRUCTED;
@@ -236,7 +236,7 @@ Object::~Object()
 // ------------------------------------------------------------------------------------------------
 FileGlobalSettings::FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props)
 : props(props)
-, doc(doc) 
+, doc(doc)
 {
 
 }
@@ -314,7 +314,7 @@ void Document::ReadHeader()
 				" trying to read it nevertheless");
 		}
 	}
-	
+
 
 	const Element* const ecreator = shead["Creator"];
 	if(ecreator) {
@@ -372,10 +372,10 @@ void Document::ReadObjects()
 
 	const Scope& sobjects = *eobjects->Compound();
 	BOOST_FOREACH(const ElementMap::value_type& el, sobjects.Elements()) {
-		
-		// extract ID 
+
+		// extract ID
 		const TokenList& tok = el.second->Tokens();
-		
+
 		if (tok.empty()) {
 			DOMError("expected ID after object key",el.second);
 		}
@@ -503,8 +503,8 @@ void Document::ReadConnections()
 
 		// add new connection
 		const Connection* const c = new Connection(insertionOrder++,src,dest,prop,*this);
-		src_connections.insert(ConnectionMap::value_type(src,c));  
-		dest_connections.insert(ConnectionMap::value_type(dest,c));  
+		src_connections.insert(ConnectionMap::value_type(src,c));
+		dest_connections.insert(ConnectionMap::value_type(dest,c));
 	}
 }
 
@@ -541,12 +541,12 @@ LazyObject* Document::GetObject(uint64_t id) const
 #define MAX_CLASSNAMES 6
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, 
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id,
 	const ConnectionMap& conns) const
 {
 	std::vector<const Connection*> temp;
 
-	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range = 
+	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range =
 		conns.equal_range(id);
 
 	temp.reserve(std::distance(range.first,range.second));
@@ -561,9 +561,9 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id,
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src, 
-	const ConnectionMap& conns, 
-	const char* const* classnames, 
+std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bool is_src,
+	const ConnectionMap& conns,
+	const char* const* classnames,
 	size_t count) const
 
 {
@@ -579,12 +579,12 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
 
 	std::vector<const Connection*> temp;
 
-	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range = 
+	const std::pair<ConnectionMap::const_iterator,ConnectionMap::const_iterator> range =
 		conns.equal_range(id);
 
 	temp.reserve(std::distance(range.first,range.second));
 	for (ConnectionMap::const_iterator it = range.first; it != range.second; ++it) {
-		const Token& key = (is_src 
+		const Token& key = (is_src
 			? (*it).second->LazyDestinationObject()
 			: (*it).second->LazySourceObject()
 		).GetElement().KeyToken();
@@ -620,7 +620,7 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t dest, 
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t dest,
 	const char* classname) const
 {
 	const char* arr[] = {classname};
@@ -630,7 +630,7 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source, 
+std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_t source,
 	const char* const* classnames, size_t count) const
 {
 	return GetConnectionsSequenced(source, true, ConnectionsBySource(),classnames, count);
@@ -638,7 +638,7 @@ std::vector<const Connection*> Document::GetConnectionsBySourceSequenced(uint64_
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, 
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest,
 	const char* classname) const
 {
 	const char* arr[] = {classname};
@@ -654,7 +654,7 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
 
 
 // ------------------------------------------------------------------------------------------------
-std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest, 
+std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(uint64_t dest,
 	const char* const* classnames, size_t count) const
 
 {
@@ -663,7 +663,7 @@ std::vector<const Connection*> Document::GetConnectionsByDestinationSequenced(ui
 
 
 // ------------------------------------------------------------------------------------------------
-Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, 
+Connection::Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop,
 	const Document& doc)
 
 : insertionOrder(insertionOrder)

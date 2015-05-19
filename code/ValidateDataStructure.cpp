@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file  ValidateDataStructure.cpp
- *  @brief Implementation of the post processing step to validate 
+ *  @brief Implementation of the post processing step to validate
  *    the data structure returned by Assimp.
  */
 
@@ -121,7 +121,7 @@ inline int HasNameMatch(const aiString& in, aiNode* node)
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline void ValidateDSProcess::DoValidation(T** parray, unsigned int size, 
+inline void ValidateDSProcess::DoValidation(T** parray, unsigned int size,
 	const char* firstName, const char* secondName)
 {
 	// validate all entries
@@ -146,7 +146,7 @@ inline void ValidateDSProcess::DoValidation(T** parray, unsigned int size,
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size, 
+inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size,
 	const char* firstName, const char* secondName)
 {
 	// validate all entries
@@ -180,13 +180,13 @@ inline void ValidateDSProcess::DoValidationEx(T** parray, unsigned int size,
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-inline void ValidateDSProcess::DoValidationWithNameCheck(T** array, 
-	unsigned int size, const char* firstName, 
+inline void ValidateDSProcess::DoValidationWithNameCheck(T** array,
+	unsigned int size, const char* firstName,
 	const char* secondName)
 {
 	// validate all entries
 	DoValidationEx(array,size,firstName,secondName);
-	
+
 	for (unsigned int i = 0; i < size;++i)
 	{
 		int res = HasNameMatch(array[i]->mName,mScene->mRootNode);
@@ -207,10 +207,10 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 {
 	this->mScene = pScene;
 	DefaultLogger::get()->debug("ValidateDataStructureProcess begin");
-	
+
 	// validate the node graph of the scene
 	Validate(pScene->mRootNode);
-	
+
 	// validate all meshes
 	if (pScene->mNumMeshes) {
 		DoValidation(pScene->mMeshes,pScene->mNumMeshes,"mMeshes","mNumMeshes");
@@ -221,7 +221,7 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	else if (pScene->mMeshes)	{
 		ReportError("aiScene::mMeshes is non-null although there are no meshes");
 	}
-	
+
 	// validate all animations
 	if (pScene->mNumAnimations) {
 		DoValidation(pScene->mAnimations,pScene->mNumAnimations,
@@ -257,7 +257,7 @@ void ValidateDSProcess::Execute( aiScene* pScene)
 	else if (pScene->mTextures)	{
 		ReportError("aiScene::mTextures is non-null although there are no textures");
 	}
-	
+
 	// validate all materials
 	if (pScene->mNumMaterials) {
 		DoValidation(pScene->mMaterials,pScene->mNumMaterials,"mMaterials","mNumMaterials");
@@ -283,7 +283,7 @@ void ValidateDSProcess::Validate( const aiLight* pLight)
 		ReportWarning("aiLight::mType is aiLightSource_UNDEFINED");
 
 	if (!pLight->mAttenuationConstant &&
-		!pLight->mAttenuationLinear   && 
+		!pLight->mAttenuationLinear   &&
 		!pLight->mAttenuationQuadratic)	{
 		ReportWarning("aiLight::mAttenuationXXX - all are zero");
 	}
@@ -291,13 +291,13 @@ void ValidateDSProcess::Validate( const aiLight* pLight)
 	if (pLight->mAngleInnerCone > pLight->mAngleOuterCone)
 		ReportError("aiLight::mAngleInnerCone is larger than aiLight::mAngleOuterCone");
 
-	if (pLight->mColorDiffuse.IsBlack() && pLight->mColorAmbient.IsBlack() 
+	if (pLight->mColorDiffuse.IsBlack() && pLight->mColorAmbient.IsBlack()
 		&& pLight->mColorSpecular.IsBlack())
 	{
 		ReportWarning("aiLight::mColorXXX - all are black and won't have any influence");
 	}
 }
-	
+
 // ------------------------------------------------------------------------------------------------
 void ValidateDSProcess::Validate( const aiCamera* pCamera)
 {
@@ -406,7 +406,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 				ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
 			}
 			// the MSB flag is temporarily used by the extra verbose
-			// mode to tell us that the JoinVerticesProcess might have 
+			// mode to tell us that the JoinVerticesProcess might have
 			// been executed already.
 			if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && abRefList[face.mIndices[a]])
 			{
@@ -538,7 +538,7 @@ void ValidateDSProcess::Validate( const aiAnimation* pAnimation)
 	Validate(&pAnimation->mName);
 
 	// validate all materials
-	if (pAnimation->mNumChannels)	
+	if (pAnimation->mNumChannels)
 	{
 		if (!pAnimation->mChannels)	{
 			ReportError("aiAnimation::mChannels is NULL (aiAnimation::mNumChannels is %i)",
@@ -568,7 +568,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 
 	// ****************************************************************************
 	// Search all keys of the material ...
-	// textures must be specified with ascending indices 
+	// textures must be specified with ascending indices
 	// (e.g. diffuse #2 may not be specified if diffuse #1 is not there ...)
 	// ****************************************************************************
 
@@ -605,7 +605,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
 				"are only %i textures of type %s",
 				prop->mIndex, iNumIndices, szType);
 		}
-			
+
 		if (!::strcmp(prop->mKey.data,"$tex.mapping"))	{
 			if (aiPTI_Integer != prop->mType || prop->mDataLength < sizeof(aiTextureMapping))
 			{
@@ -718,7 +718,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 		// TODO: check whether there is a key with an unknown name ...
 	}
 
-	// make some more specific tests 
+	// make some more specific tests
 	float fTemp;
 	int iShading;
 	if (AI_SUCCESS == aiGetMaterialInteger( pMaterial,AI_MATKEY_SHADING_MODEL,&iShading))	{
@@ -773,7 +773,7 @@ void ValidateDSProcess::Validate( const aiTexture* pTexture)
 		if (!pTexture->mWidth)ReportError("aiTexture::mWidth is zero "
 			"(aiTexture::mHeight is %i, uncompressed texture)",pTexture->mHeight);
 	}
-	else 
+	else
 	{
 		if (!pTexture->mWidth) {
 			ReportError("aiTexture::mWidth is zero (compressed texture)");

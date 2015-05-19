@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -105,7 +105,7 @@ void UpdateNodes(const std::vector<unsigned int>& replaceMeshIndex, aiNode* node
 		else
 		{
 			// Try to reuse the old array if possible
-			unsigned int* newMeshes = (newSize > node->mNumMeshes 
+			unsigned int* newMeshes = (newSize > node->mNumMeshes
 				? new unsigned int[newSize] : node->mMeshes);
 
 			for (unsigned int m = 0; m< node->mNumMeshes; ++m)
@@ -157,12 +157,12 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 
 		// if there's just one primitive type in the mesh there's nothing to do for us
 		unsigned int num = 0;
-		if (mesh->mPrimitiveTypes & aiPrimitiveType_POINT) 
+		if (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
 		{
 			++aiNumMeshesPerPType[0];
 			++num;
 		}
-		if (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)   
+		if (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
 		{
 			++aiNumMeshesPerPType[1];
 			++num;
@@ -192,7 +192,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 		}
 		bAnyChanges = true;
 
-		// reuse our current mesh arrays for the submesh 
+		// reuse our current mesh arrays for the submesh
 		// with the largest numer of primitives
 		unsigned int aiNumPerPType[4] = {0,0,0,0};
 		aiFace* pFirstFace = mesh->mFaces;
@@ -238,7 +238,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 			aiVector3D *vert(NULL), *nor(NULL), *tan(NULL), *bit(NULL);
 			aiVector3D *uv   [AI_MAX_NUMBER_OF_TEXTURECOORDS];
 			aiColor4D  *cols [AI_MAX_NUMBER_OF_COLOR_SETS];
-		
+
 			if (mesh->mVertices)
 				vert = out->mVertices = new aiVector3D[out->mNumVertices];
 
@@ -284,7 +284,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
 				{
 					continue;
 				}
-				
+
 				outFaces->mNumIndices = in.mNumIndices;
 				outFaces->mIndices    = in.mIndices;
 

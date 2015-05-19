@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -67,7 +67,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"ms3d" 
+	"ms3d"
 };
 
 // ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH
@@ -81,12 +81,12 @@ MS3DImporter::MS3DImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 MS3DImporter::~MS3DImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool MS3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	// first call - simple extension check
@@ -127,7 +127,7 @@ void ReadVector(StreamReaderLE& stream, aiVector3D& pos)
 }
 
 // ------------------------------------------------------------------------------------------------
-template<typename T> 
+template<typename T>
 void MS3DImporter :: ReadComments(StreamReaderLE& stream, std::vector<T>& outp)
 {
 	uint16_t cnt;
@@ -158,8 +158,8 @@ template <typename T, typename T2, typename T3> bool inrange(const T& in, const 
 
 // ------------------------------------------------------------------------------------------------
 void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints,
-	std::vector<bool>& hadit, 
-	aiNode* nd, 
+	std::vector<bool>& hadit,
+	aiNode* nd,
 	const aiMatrix4x4& absTrafo)
 {
 	unsigned int cnt = 0;
@@ -191,7 +191,7 @@ void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints,
 					}
 				}
 			}
-	
+
 			hadit[i] = true;
 			CollectChildJoints(joints,hadit,ch,abs);
 		}
@@ -208,8 +208,8 @@ void MS3DImporter :: CollectChildJoints(const std::vector<TempJoint>& joints, ai
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void MS3DImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void MS3DImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
@@ -242,7 +242,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		stream.IncPtr(1);
 		ReadVector(stream,v.pos);
-		v.bone_id[0] = stream.GetI1(); 
+		v.bone_id[0] = stream.GetI1();
 		v.ref_cnt = stream.GetI1();
 
 		v.bone_id[1] = v.bone_id[2] = v.bone_id[3] = UINT_MAX;
@@ -273,8 +273,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			stream >> (float&)(t.uv[i].y);
 		}
 
-		t.sg    = stream.GetI1(); 
-		t.group = stream.GetI1(); 
+		t.sg    = stream.GetI1();
+		t.group = stream.GetI1();
 	}
 
 	uint16_t grp;
@@ -294,9 +294,9 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		t.triangles.resize(num);
 		for (unsigned int i = 0; i < num; ++i) {
-			t.triangles[i] = stream.GetI2(); 
+			t.triangles[i] = stream.GetI2();
 		}
-		t.mat = stream.GetI1(); 
+		t.mat = stream.GetI1();
 		if (t.mat == UINT_MAX) {
 			need_default = true;
 		}
@@ -373,7 +373,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			ReadComments<TempGroup>(stream,groups);
 			ReadComments<TempMaterial>(stream,materials);
 			ReadComments<TempJoint>(stream,joints);
-			
+
 			// model comment - print it for we have such a nice log.
 			if (stream.GetI4()) {
 				const size_t len = static_cast<size_t>(stream.GetI4());
@@ -405,7 +405,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 	if (need_default && materials.size()) {
 		DefaultLogger::get()->warn("MS3D: Found group with no material assigned, spawning default material");
-		// if one of the groups has no material assigned, but there are other 
+		// if one of the groups has no material assigned, but there are other
 		// groups with materials, a default material needs to be added (
 		// scenepreprocessor adds a default material only if nummat==0).
 		materials.push_back(TempMaterial());
@@ -471,7 +471,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes=static_cast<unsigned int>(groups.size())]();
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
-	
+
 		aiMesh* m = pScene->mMeshes[i] = new aiMesh();
 		const TempGroup& g = groups[i];
 
@@ -480,7 +480,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		} // no error if no materials at all - scenepreprocessor adds one then
 
 		m->mMaterialIndex  = g.mat;
-		m->mPrimitiveTypes = aiPrimitiveType_TRIANGLE; 
+		m->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 		m->mFaces = new aiFace[m->mNumFaces = g.triangles.size()];
 		m->mNumVertices = m->mNumFaces*3;
@@ -502,7 +502,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 			TempTriangle& t = triangles[g.triangles[i]];
 			f.mIndices = new unsigned int[f.mNumIndices=3];
-			
+
 			for (unsigned int i = 0; i < 3; ++i,++n) {
 				if (t.indices[i]>vertices.size()) {
 					throw DeadlyImportError("MS3D: Encountered invalid vertex index, file is malformed");
@@ -536,7 +536,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 			m->mBones = new aiBone*[mybones.size()]();
 			for(BoneSet::const_iterator it = mybones.begin(); it != mybones.end(); ++it) {
 				aiBone* const bn = m->mBones[m->mNumBones] = new aiBone();
-				const TempJoint& jnt = joints[(*it).first]; 
+				const TempJoint& jnt = joints[(*it).first];
 
 				bn->mName.Set(jnt.name);
 				bn->mWeights = new aiVertexWeight[(*it).second];
@@ -570,7 +570,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 	// ... add dummy nodes under a single root, each holding a reference to one
 	// mesh. If we didn't do this, we'd lose the group name.
 	aiNode* rt = pScene->mRootNode = new aiNode("<MS3DRoot>");
-	
+
 #ifdef ASSIMP_BUILD_MS3D_ONE_NODE_PER_MESH
 	rt->mChildren = new aiNode*[rt->mNumChildren=pScene->mNumMeshes+(joints.size()?1:0)]();
 
@@ -617,7 +617,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
 		// carry the fps info to the user by scaling all times with it
 		anim->mTicksPerSecond = animfps;
-		
+
 		// leave duration at its default, so ScenePreprocessor will fill an appropriate
 		// value (the values taken from some MS3D files seem to be too unreliable
 		// to pass the validation)

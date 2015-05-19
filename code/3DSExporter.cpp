@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -88,7 +88,7 @@ namespace {
 			writer.PutU4(chunk_size);
 			writer.SetCurrentPos(head_pos);
 		}
-		
+
 	private:
 		StreamWriterLE& writer;
 		std::size_t chunk_start_pos;
@@ -153,7 +153,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
 	boost::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
 	if(!outfile) {
 		throw DeadlyExportError("Could not open output .3ds file: " + std::string(pFile));
-	} 
+	}
 
 	// TODO: This extra copy should be avoided and all of this made a preprocess
 	// requirement of the 3DS exporter.
@@ -174,7 +174,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
 	vert_splitter.SetLimit(0xffff);
 	vert_splitter.Execute(scenecopy.get());
 
-	// Invoke the actual exporter 
+	// Invoke the actual exporter
 	Discreet3DSExporter exporter(outfile, scenecopy.get());
 }
 
@@ -347,7 +347,7 @@ void Discreet3DSExporter::WriteMaterials()
 			ChunkWriter chunk(writer, Discreet3DS::CHUNK_MAT_TWO_SIDE);
 			writer.PutI2(1);
 		}
-		
+
 		WriteTexture(mat, aiTextureType_DIFFUSE, Discreet3DS::CHUNK_MAT_TEXTURE);
 		WriteTexture(mat, aiTextureType_HEIGHT, Discreet3DS::CHUNK_MAT_BUMPMAP);
 		WriteTexture(mat, aiTextureType_OPACITY, Discreet3DS::CHUNK_MAT_OPACMAP);
@@ -359,7 +359,7 @@ void Discreet3DSExporter::WriteMaterials()
 }
 
 // ------------------------------------------------------------------------------------------------
-void Discreet3DSExporter::WriteTexture(const aiMaterial& mat, aiTextureType type, uint16_t chunk_flags) 
+void Discreet3DSExporter::WriteTexture(const aiMaterial& mat, aiTextureType type, uint16_t chunk_flags)
 {
 	aiString path;
 	aiTextureMapMode map_mode[2] = {

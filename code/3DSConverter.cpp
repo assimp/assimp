@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -59,7 +59,7 @@ using namespace Assimp;
 // Setup final material indices, generae a default material if necessary
 void Discreet3DSImporter::ReplaceDefaultMaterial()
 {
-	
+
 	// Try to find an existing material that matches the
 	// typical default material setting:
 	// - no textures
@@ -81,7 +81,7 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
 			mScene->mMaterials[i].mDiffuse.b)continue;
 
 		if (mScene->mMaterials[i].sTexDiffuse.mMapName.length()   != 0	||
-			mScene->mMaterials[i].sTexBump.mMapName.length()      != 0	|| 
+			mScene->mMaterials[i].sTexBump.mMapName.length()      != 0	||
 			mScene->mMaterials[i].sTexOpacity.mMapName.length()   != 0	||
 			mScene->mMaterials[i].sTexEmissive.mMapName.length()  != 0	||
 			mScene->mMaterials[i].sTexSpecular.mMapName.length()  != 0	||
@@ -159,7 +159,7 @@ void Discreet3DSImporter::CheckIndices(D3DS::Mesh& sMesh)
 void Discreet3DSImporter::MakeUnique(D3DS::Mesh& sMesh)
 {
 	// TODO: really necessary? I don't think. Just a waste of memory and time
-	// to do it now in a separate buffer. 
+	// to do it now in a separate buffer.
 
 	// Allocate output storage
 	std::vector<aiVector3D> vNew  (sMesh.mFaces.size() * 3);
@@ -202,7 +202,7 @@ void CopyTexture(aiMaterial& mat, D3DS::Texture& texture, aiTextureType type)
 	mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_U(type,0));
 	mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_V(type,0));
 
-	// Mirroring - double the scaling values 
+	// Mirroring - double the scaling values
 	// FIXME: this is not really correct ...
 	if (texture.mMapMode == aiTextureMapMode_Mirror)
 	{
@@ -211,7 +211,7 @@ void CopyTexture(aiMaterial& mat, D3DS::Texture& texture, aiTextureType type)
 		texture.mOffsetU /= 2.f;
 		texture.mOffsetV /= 2.f;
 	}
-	
+
 	// Setup texture UV transformations
 	mat.AddProperty<float>(&texture.mOffsetU,5,AI_MATKEY_UVTRANSFORM(type,0));
 }
@@ -249,7 +249,7 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
 	mat.AddProperty( &oldMat.mEmissive, 1, AI_MATKEY_COLOR_EMISSIVE);
 
 	// Phong shininess and shininess strength
-	if (D3DS::Discreet3DS::Phong == oldMat.mShading || 
+	if (D3DS::Discreet3DS::Phong == oldMat.mShading ||
 		D3DS::Discreet3DS::Metal == oldMat.mShading)
 	{
 		if (!oldMat.mSpecularExponent || !oldMat.mShininessStrength)
@@ -456,7 +456,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 	}
 	if (!iArray.empty())
 	{
-		// The matrix should be identical for all meshes with the 
+		// The matrix should be identical for all meshes with the
 		// same name. It HAS to be identical for all meshes .....
 		D3DS::Mesh* imesh = ((D3DS::Mesh*)pcSOut->mMeshes[iArray[0]]->mColors[0]);
 
@@ -537,7 +537,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 
 		pcOut->mTransformation = aiMatrix4x4( pcIn->aRotationKeys[0].mValue.GetMatrix() );
 	}
-	else if (pcIn->aCameraRollKeys.size()) 
+	else if (pcIn->aCameraRollKeys.size())
 	{
 		aiMatrix4x4::RotationZ(AI_DEG_TO_RAD(- pcIn->aCameraRollKeys[0].mValue),
 			pcOut->mTransformation);
@@ -684,7 +684,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
 		}
 	}
 
-	// Allocate storage for children 
+	// Allocate storage for children
 	pcOut->mNumChildren = (unsigned int)pcIn->mChildren.size();
 	pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
 
@@ -735,12 +735,12 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 		//                ROOT_NODE
 		//                   |
 		//   ----------------------------------------
-		//   |       |       |            |         |  
+		//   |       |       |            |         |
 		// MESH_0  MESH_1  MESH_2  ...  MESH_N    CAMERA_0 ....
 		//
 		DefaultLogger::get()->warn("No hierarchy information has been found in the file. ");
 
-		pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes + 
+		pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes +
 			mScene->mCameras.size() + mScene->mLights.size();
 
 		pcOut->mRootNode->mChildren = new aiNode* [ pcOut->mRootNode->mNumChildren ];
@@ -757,7 +757,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 			pcNode->mNumMeshes = 1;
 
 			// Build a name for the node
-			pcNode->mName.length = sprintf(pcNode->mName.data,"3DSMesh_%u",i);	
+			pcNode->mName.length = sprintf(pcNode->mName.data,"3DSMesh_%u",i);
 		}
 
 		// Build dummy nodes for all cameras
@@ -796,7 +796,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
 
 			anim->mName.Set("3DSMasterAnim");
 
-			// Allocate enough storage for all node animation channels, 
+			// Allocate enough storage for all node animation channels,
 			// but don't set the mNumChannels member - we'll use it to
 			// index into the array
 			anim->mChannels = new aiNodeAnim*[numChannel];

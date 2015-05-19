@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -60,10 +60,10 @@ using namespace Assimp;
  * The unhashed variant should be faster, except for *very* large data sets
  */
 #ifdef AI_OG_USE_HASHING
-	// Use our standard hashing function to compute the hash 
+	// Use our standard hashing function to compute the hash
 #	define AI_OG_GETKEY(str) SuperFastHash(str.data,str.length)
 #else
-	// Otherwise hope that std::string will utilize a static buffer 
+	// Otherwise hope that std::string will utilize a static buffer
 	// for shorter node names. This would avoid endless heap copying.
 #	define AI_OG_GETKEY(str) std::string(str.data)
 #endif
@@ -92,7 +92,7 @@ bool OptimizeGraphProcess::IsActive( unsigned int pFlags) const
 // ------------------------------------------------------------------------------------------------
 // Setup properties for the postprocessing step
 void OptimizeGraphProcess::SetupProperties(const Importer* pImp)
-{	
+{
 	// Get value of AI_CONFIG_PP_OG_EXCLUDE_LIST
 	std::string tmp = pImp->GetPropertyString(AI_CONFIG_PP_OG_EXCLUDE_LIST,"");
 	AddLockedNodeList(tmp);
@@ -126,7 +126,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 			++it;
 		}
 
-		if (nd->mNumMeshes || !child_nodes.empty()) { 
+		if (nd->mNumMeshes || !child_nodes.empty()) {
 			nodes.push_back(nd);
 		}
 		else {
@@ -135,7 +135,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 		}
 	}
 	else {
-		
+
 		// Retain our current position in the hierarchy
 		nodes.push_back(nd);
 
@@ -149,7 +149,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 		for (std::list<aiNode*>::iterator it = child_nodes.begin(); it != child_nodes.end();)	{
 			aiNode* child = *it;
 			if (child->mNumChildren == 0 && locked.find(AI_OG_GETKEY(child->mName)) == end) {
-			
+
 				// There may be no instanced meshes
 				unsigned int n = 0;
 				for (; n < child->mNumMeshes;++n) {
@@ -168,7 +168,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 
 						child->mTransformation = inv * child->mTransformation ;
 
-						join.push_back(child);	
+						join.push_back(child);
 						it = child_nodes.erase(it);
 						continue;
 					}
@@ -183,12 +183,12 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 			for (std::list<aiNode*>::iterator it = join.begin(); it != join.end(); ++it) {
 				out_meshes += (*it)->mNumMeshes;
 			}
-			
+
 			// copy all mesh references in one array
 			if (out_meshes) {
 				unsigned int* meshes = new unsigned int[out_meshes+join_master->mNumMeshes], *tmp = meshes;
 				for (unsigned int n = 0; n < join_master->mNumMeshes;++n) {
-					*tmp++ = join_master->mMeshes[n];		
+					*tmp++ = join_master->mMeshes[n];
 				}
 
 				for (std::list<aiNode*>::iterator it = join.begin(); it != join.end(); ++it) {
@@ -198,9 +198,9 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 						aiMesh* mesh = mScene->mMeshes[*tmp++];
 
 						// manually move the mesh into the right coordinate system
-						const aiMatrix3x3 IT = aiMatrix3x3( (*it)->mTransformation ).Inverse().Transpose(); 
+						const aiMatrix3x3 IT = aiMatrix3x3( (*it)->mTransformation ).Inverse().Transpose();
 						for (unsigned int a = 0; a < mesh->mNumVertices; ++a) {
-						
+
 							mesh->mVertices[a] *= (*it)->mTransformation;
 
 							if (mesh->HasNormals())
@@ -264,7 +264,7 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 
 	for (unsigned int i = 0; i < pScene->mNumAnimations; ++i) {
 		for (unsigned int a = 0; a < pScene->mAnimations[i]->mNumChannels; ++a) {
-		
+
 			aiNodeAnim* anim = pScene->mAnimations[i]->mChannels[a];
 			locked.insert(AI_OG_GETKEY(anim->mNodeName));
 		}
@@ -272,7 +272,7 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 
 	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
 		for (unsigned int a = 0; a < pScene->mMeshes[i]->mNumBones; ++a) {
-		
+
 			aiBone* bone = pScene->mMeshes[i]->mBones[a];
 			locked.insert(AI_OG_GETKEY(bone->mName));
 
@@ -317,12 +317,12 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 
 	if (dummy_root->mNumChildren > 1) {
 		pScene->mRootNode = dummy_root;
-	
+
 		// Keep the dummy node but assign the name of the old root node to it
 		pScene->mRootNode->mName = prev;
 	}
 	else {
-		
+
 		// Remove the dummy root node again.
 		pScene->mRootNode = dummy_root->mChildren[0];
 
@@ -349,7 +349,7 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 void OptimizeGraphProcess::FindInstancedMeshes (aiNode* pNode)
 {
 	for (unsigned int i = 0; i < pNode->mNumMeshes;++i) {
-		++meshes[pNode->mMeshes[i]]; 
+		++meshes[pNode->mMeshes[i]];
 	}
 
 	for (unsigned int i = 0; i < pNode->mNumChildren; ++i)

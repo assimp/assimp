@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file  IRRLoader.cpp
- *  @brief Implementation of the Irr importer class 
+ *  @brief Implementation of the Irr importer class
  */
 
 
@@ -81,7 +81,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"irr xml" 
+	"irr xml"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -90,12 +90,12 @@ IRRImporter::IRRImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 IRRImporter::~IRRImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	/* NOTE: A simple check for the file extension is not enough
@@ -104,7 +104,7 @@ bool IRRImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 	 * search for typical tokens.
 	 */
 	const std::string extension = GetExtension(pFile);
-	
+
 	if (extension == "irr")return true;
 	else if (extension == "xml" || checkSig)
 	{
@@ -155,7 +155,7 @@ aiMesh* IRRImporter::BuildSingleQuadMesh(const SkyboxVertex& v1,
 	// build the face
 	out->mFaces    = new aiFace[1];
 	aiFace& face   = out->mFaces[0];
-	
+
 	face.mNumIndices = 4;
 	face.mIndices    = new unsigned int[4];
 	for (unsigned int i = 0; i < 4;++i)
@@ -208,7 +208,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 	const float l = 10.f; // the size used by Irrlicht
 
 	// FRONT SIDE
-	meshes.push_back( BuildSingleQuadMesh( 
+	meshes.push_back( BuildSingleQuadMesh(
 		SkyboxVertex(-l,-l,-l,  0, 0, 1,   1.f,1.f),
 		SkyboxVertex( l,-l,-l,  0, 0, 1,   0.f,1.f),
 		SkyboxVertex( l, l,-l,  0, 0, 1,   0.f,0.f),
@@ -216,7 +216,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 	meshes.back()->mMaterialIndex = materials.size()-6u;
 
 	// LEFT SIDE
-	meshes.push_back( BuildSingleQuadMesh( 
+	meshes.push_back( BuildSingleQuadMesh(
 		SkyboxVertex( l,-l,-l,  -1, 0, 0,   1.f,1.f),
 		SkyboxVertex( l,-l, l,  -1, 0, 0,   0.f,1.f),
 		SkyboxVertex( l, l, l,  -1, 0, 0,   0.f,0.f),
@@ -224,7 +224,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 	meshes.back()->mMaterialIndex = materials.size()-5u;
 
 	// BACK SIDE
-	meshes.push_back( BuildSingleQuadMesh( 
+	meshes.push_back( BuildSingleQuadMesh(
 		SkyboxVertex( l,-l, l,  0, 0, -1,   1.f,1.f),
 		SkyboxVertex(-l,-l, l,  0, 0, -1,   0.f,1.f),
 		SkyboxVertex(-l, l, l,  0, 0, -1,   0.f,0.f),
@@ -232,7 +232,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 	meshes.back()->mMaterialIndex = materials.size()-4u;
 
 	// RIGHT SIDE
-	meshes.push_back( BuildSingleQuadMesh( 
+	meshes.push_back( BuildSingleQuadMesh(
 		SkyboxVertex(-l,-l, l,  1, 0, 0,   1.f,1.f),
 		SkyboxVertex(-l,-l,-l,  1, 0, 0,   0.f,1.f),
 		SkyboxVertex(-l, l,-l,  1, 0, 0,   0.f,0.f),
@@ -240,7 +240,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 	meshes.back()->mMaterialIndex = materials.size()-3u;
 
 	// TOP SIDE
-	meshes.push_back( BuildSingleQuadMesh( 
+	meshes.push_back( BuildSingleQuadMesh(
 		SkyboxVertex( l, l,-l,  0, -1, 0,   1.f,1.f),
 		SkyboxVertex( l, l, l,  0, -1, 0,   0.f,1.f),
 		SkyboxVertex(-l, l, l,  0, -1, 0,   0.f,0.f),
@@ -248,7 +248,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 	meshes.back()->mMaterialIndex = materials.size()-2u;
 
 	// BOTTOM SIDE
-	meshes.push_back( BuildSingleQuadMesh( 
+	meshes.push_back( BuildSingleQuadMesh(
 		SkyboxVertex( l,-l, l,  0,  1, 0,   0.f,0.f),
 		SkyboxVertex( l,-l,-l,  0,  1, 0,   1.f,0.f),
 		SkyboxVertex(-l,-l,-l,  0,  1, 0,   1.f,1.f),
@@ -375,8 +375,8 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 			{
 				// -----------------------------------------------------
 				// find out how long a full rotation will take
-				// This is the least common multiple of 360.f and all 
-				// three euler angles. Although we'll surely find a 
+				// This is the least common multiple of 360.f and all
+				// three euler angles. Although we'll surely find a
 				// possible multiple (haha) it could be somewhat large
 				// for our purposes. So we need to modify the angles
 				// here in order to get good results.
@@ -454,8 +454,8 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 		case Animator::FLY_CIRCLE:
 			{
 				// -----------------------------------------------------
-				// Find out how much time we'll need to perform a 
-				// full circle. 
+				// Find out how much time we'll need to perform a
+				// full circle.
 				// -----------------------------------------------------
 				const double seconds = (1. / in.speed) / 1000.;
 				const double tdelta = 1000. / fps;
@@ -546,8 +546,8 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
 
 					// get the 4 current points to evaluate the spline
 					const aiVector3D& p0 = in.splineKeys[ ClampSpline( idx - 1, size ) ].mValue;
-					const aiVector3D& p1 = in.splineKeys[ ClampSpline( idx + 0, size ) ].mValue; 
-					const aiVector3D& p2 = in.splineKeys[ ClampSpline( idx + 1, size ) ].mValue; 
+					const aiVector3D& p1 = in.splineKeys[ ClampSpline( idx + 0, size ) ].mValue;
+					const aiVector3D& p2 = in.splineKeys[ ClampSpline( idx + 1, size ) ].mValue;
 					const aiVector3D& p3 = in.splineKeys[ ClampSpline( idx + 2, size ) ].mValue;
 
 					// compute polynomials
@@ -657,7 +657,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	unsigned int oldMeshSize = (unsigned int)meshes.size();
 	//unsigned int meshTrafoAssign = 0;
 
-	// Now determine the type of the node 
+	// Now determine the type of the node
 	switch (root->type)
 	{
 	case Node::ANIMMESH:
@@ -667,7 +667,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 				break;
 
 			// Get the loaded mesh from the scene and add it to
-			// the list of all scenes to be attached to the 
+			// the list of all scenes to be attached to the
 			// graph we're currently building
 			aiScene* scene = batch.GetImport(root->id);
 			if (!scene)	{
@@ -699,11 +699,11 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			// but we do it in a separate loop if this behaviour changes
 			// in future.
 			for (unsigned int i = 0; i < scene->mNumMeshes;++i)	{
-				// Process material flags 
+				// Process material flags
 				aiMesh* mesh = scene->mMeshes[i];
 
 
-				// If "trans_vertex_alpha" mode is enabled, search all vertex colors 
+				// If "trans_vertex_alpha" mode is enabled, search all vertex colors
 				// and check whether they have a common alpha value. This is quite
 				// often the case so we can simply extract it to a shared oacity
 				// value.
@@ -795,7 +795,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 			CopyMaterial(materials, root->materials, defMatIdx, meshes.back());
 
 			// Now adjust this output material - if there is a first texture
-			// set, setup cubic UV mapping 
+			// set, setup cubic UV mapping
 			SetupMapping ( (aiMaterial*) materials.back(), aiTextureMapping_BOX );
 		}
 		break;
@@ -838,7 +838,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 		break;
 	};
 
-	// Check whether we added a mesh (or more than one ...). In this case 
+	// Check whether we added a mesh (or more than one ...). In this case
 	// we'll also need to attach it to the node
 	if (oldMeshSize != (unsigned int) meshes.size())	{
 
@@ -862,18 +862,18 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	// apply scaling
 	aiMatrix4x4& mat = rootOut->mTransformation;
 	mat.a1 *= root->scaling.x;
-	mat.b1 *= root->scaling.x; 
+	mat.b1 *= root->scaling.x;
 	mat.c1 *= root->scaling.x;
-	mat.a2 *= root->scaling.y; 
-	mat.b2 *= root->scaling.y; 
+	mat.a2 *= root->scaling.y;
+	mat.b2 *= root->scaling.y;
 	mat.c2 *= root->scaling.y;
 	mat.a3 *= root->scaling.z;
-	mat.b3 *= root->scaling.z; 
+	mat.b3 *= root->scaling.z;
 	mat.c3 *= root->scaling.z;
 
 	// apply translation
-	mat.a4 += root->position.x; 
-	mat.b4 += root->position.y; 
+	mat.a4 += root->position.x;
+	mat.b4 += root->position.y;
 	mat.c4 += root->position.z;
 
 	// now compute animations for the node
@@ -883,7 +883,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 	// for them, then call us again
 	rootOut->mNumChildren = (unsigned int)root->children.size();
 	if (rootOut->mNumChildren)	{
-		
+
 		rootOut->mChildren = new aiNode*[rootOut->mNumChildren];
 		for (unsigned int i = 0; i < rootOut->mNumChildren;++i)	{
 
@@ -896,8 +896,8 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void IRRImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void IRRImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
@@ -930,7 +930,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	// Batch loader used to load external models
 	BatchLoader batch(pIOHandler);
 //	batch.SetBasePath(pFile);
-	
+
 	cameras.reserve(5);
 	lights.reserve(5);
 
@@ -941,14 +941,14 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 	while (reader->read())	{
 		switch (reader->getNodeType())	{
 		case EXN_ELEMENT:
-			
+
 			if (!ASSIMP_stricmp(reader->getNodeName(),"node"))	{
 				// ***********************************************************************
 				/*  What we're going to do with the node depends
 				 *  on its type:
 				 *
 				 *  "mesh" - Load a mesh from an external file
-				 *  "cube" - Generate a cube 
+				 *  "cube" - Generate a cube
 				 *  "skybox" - Generate a skybox
 				 *  "light" - A light source
 				 *  "sphere" - Generate a sphere mesh
@@ -1016,7 +1016,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 					DefaultLogger::get()->warn("IRR: Found unknown node: " + std::string(sz));
 
 					/*  We skip the contents of nodes we don't know.
-					 *  We parse the transformation and all animators 
+					 *  We parse the transformation and all animators
 					 *  and skip the rest.
 					 */
 					nd = new Node(Node::DUMMY);
@@ -1070,7 +1070,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 					++guessedAnimCnt;
 				}
 
-				/*  Parse all elements in the attributes block 
+				/*  Parse all elements in the attributes block
 				 *  and process them.
 				 */
 				while (reader->read())	{
@@ -1172,7 +1172,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 								if (prop.name == "FramesPerSecond" && Node::ANIMMESH == curNode->type)	{
 									curNode->framesPerSecond = prop.value;
 								}
-								else if (Node::CAMERA == curNode->type)	{	
+								else if (Node::CAMERA == curNode->type)	{
 									/*  This is the vertical, not the horizontal FOV.
 									*  We need to compute the right FOV from the
 									*  screen aspect which we don't know yet.
@@ -1190,7 +1190,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 										cameras.back()->mClipPlaneFar = prop.value;
 									}
 								}
-								else if (Node::LIGHT == curNode->type)	{	
+								else if (Node::LIGHT == curNode->type)	{
 									/*  Additional light information
 									 */
 									if (prop.name == "Attenuation")	{
@@ -1205,9 +1205,9 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 								}
 								// radius of the sphere to be generated -
 								// or alternatively, size of the cube
-								else if ((Node::SPHERE == curNode->type && prop.name == "Radius") 
+								else if ((Node::SPHERE == curNode->type && prop.name == "Radius")
 									|| (Node::CUBE == curNode->type   && prop.name == "Size" ))	{
-									
+
 										curNode->sphereRadius = prop.value;
 								}
 							}
@@ -1339,7 +1339,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 			break;
 
 		case EXN_ELEMENT_END:
-		
+
 			// If we reached the end of a node, we need to continue processing its parent
 			if (!ASSIMP_stricmp(reader->getNodeName(),"node"))	{
 				if (!curNode)	{
@@ -1430,7 +1430,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
 		// ***********************************************************
 		// This is only the global animation channel of the scene.
-		// If there are animated models, they will have separate 
+		// If there are animated models, they will have separate
 		// animation channels in the scene. To display IRR scenes
 		// correctly, users will need to combine the global anim
 		// channel with all the local animations they want to play
@@ -1476,7 +1476,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 		pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
 	}
 
-	/* Finished ... everything destructs automatically and all 
+	/* Finished ... everything destructs automatically and all
 	 * temporary scenes have already been deleted by MergeScenes()
 	 */
 	return;

@@ -6,8 +6,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -24,16 +24,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cctype>
 
 
-// zlib is needed for compressed blend files 
+// zlib is needed for compressed blend files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
 #	ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #		include <zlib.h>
@@ -98,14 +98,14 @@ BlenderImporter::BlenderImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 BlenderImporter::~BlenderImporter()
 {
 	delete modifier_cache;
 }
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string& extension = GetExtension(pFile);
@@ -123,7 +123,7 @@ bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
 // ------------------------------------------------------------------------------------------------
 // List all extensions handled by this loader
-void BlenderImporter::GetExtensionList(std::set<std::string>& app) 
+void BlenderImporter::GetExtensionList(std::set<std::string>& app)
 {
 	app.insert("blend");
 }
@@ -153,8 +153,8 @@ struct free_it
 };
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void BlenderImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void BlenderImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_BLEND
@@ -162,7 +162,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 	free_it free_it_really(dest);
 #endif
 
-	FileDatabase file; 
+	FileDatabase file;
 	boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
 	if (!stream) {
 		ThrowException("Could not open file for reading");
@@ -222,14 +222,14 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 			total += have;
 			dest = reinterpret_cast<Bytef*>( realloc(dest,total) );
 			memcpy(dest + total - have,block,have);
-		} 
+		}
 		while (ret != Z_STREAM_END);
 
 		// terminate zlib
 		inflateEnd(&zstream);
 
 		// replace the input stream with a memory stream
-		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(dest),total)); 
+		stream.reset(new MemoryIOStream(reinterpret_cast<uint8_t*>(dest),total));
 
 		// .. and retry
 		stream->Read(magic,7,1);
@@ -259,7 +259,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ParseBlendFile(FileDatabase& out, boost::shared_ptr<IOStream> stream) 
+void BlenderImporter::ParseBlendFile(FileDatabase& out, boost::shared_ptr<IOStream> stream)
 {
 	out.reader = boost::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream,out.little));
 
@@ -293,7 +293,7 @@ void BlenderImporter::ParseBlendFile(FileDatabase& out, boost::shared_ptr<IOStre
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file) 
+void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
 {
 	const FileBlockHead* block = NULL;
 	std::map<std::string,size_t>::const_iterator it = file.dna.indices.find("Scene");
@@ -303,7 +303,7 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
 
 	const Structure& ss = file.dna.structures[(*it).second];
 
-	// we need a scene somewhere to start with. 
+	// we need a scene somewhere to start with.
 	for_each(const FileBlockHead& bl,file.entries) {
 
 		// Fix: using the DNA index is more reliable to locate scenes
@@ -325,15 +325,15 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	DefaultLogger::get()->info((format(),
 		"(Stats) Fields read: "	,file.stats().fields_read,
-		", pointers resolved: "	,file.stats().pointers_resolved,  
-		", cache hits: "        ,file.stats().cache_hits,  
+		", pointers resolved: "	,file.stats().pointers_resolved,
+		", cache hits: "        ,file.stats().cache_hits,
 		", cached objects: "	,file.stats().cached_objects
 	));
 #endif
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileDatabase& file) 
+void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileDatabase& file)
 {
 	ConversionData conv(file);
 
@@ -366,7 +366,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
 	root->mNumChildren = static_cast<unsigned int>(no_parents.size());
 	root->mChildren = new aiNode*[root->mNumChildren]();
 	for (unsigned int i = 0; i < root->mNumChildren; ++i) {
-		root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());	
+		root->mChildren[i] = ConvertNode(in, no_parents[i], conv, aiMatrix4x4());
 		root->mChildren[i]->mParent = root;
 	}
 
@@ -511,29 +511,29 @@ void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const
 	if(!rtex || !rtex->type) {
 		return;
 	}
-	
+
 	// We can't support most of the texture types because they're mostly procedural.
 	// These are substituted by a dummy texture.
 	const char* dispnam = "";
-	switch( rtex->type ) 
+	switch( rtex->type )
 	{
 			// these are listed in blender's UI
-		case Tex::Type_CLOUDS		:  
-		case Tex::Type_WOOD			:  
-		case Tex::Type_MARBLE		:  
-		case Tex::Type_MAGIC		: 
-		case Tex::Type_BLEND		:  
-		case Tex::Type_STUCCI		: 
-		case Tex::Type_NOISE		: 
-		case Tex::Type_PLUGIN		: 
-		case Tex::Type_MUSGRAVE		:  
-		case Tex::Type_VORONOI		:  
-		case Tex::Type_DISTNOISE	:  
-		case Tex::Type_ENVMAP		:  
+		case Tex::Type_CLOUDS		:
+		case Tex::Type_WOOD			:
+		case Tex::Type_MARBLE		:
+		case Tex::Type_MAGIC		:
+		case Tex::Type_BLEND		:
+		case Tex::Type_STUCCI		:
+		case Tex::Type_NOISE		:
+		case Tex::Type_PLUGIN		:
+		case Tex::Type_MUSGRAVE		:
+		case Tex::Type_VORONOI		:
+		case Tex::Type_DISTNOISE	:
+		case Tex::Type_ENVMAP		:
 
 			// these do no appear in the UI, why?
-		case Tex::Type_POINTDENSITY	:  
-		case Tex::Type_VOXELDATA	: 
+		case Tex::Type_POINTDENSITY	:
+		case Tex::Type_VOXELDATA	:
 
 			LogWarn(std::string("Encountered a texture with an unsupported type: ")+dispnam);
 			AddSentinelTexture(out, mat, tex, conv_data);
@@ -553,7 +553,7 @@ void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::BuildMaterials(ConversionData& conv_data) 
+void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 {
 	conv_data.materials->reserve(conv_data.materials_raw.size());
 
@@ -594,7 +594,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 		for (size_t i = 0; i < sizeof(conv_data.next_texture)/sizeof(conv_data.next_texture[0]);++i) {
 			conv_data.next_texture[i] = 0 ;
 		}
-	
+
 		aiMaterial* mout = new aiMaterial();
 		conv_data.materials->push_back(mout);
 		// For any new material field handled here, the default material above must be updated with an appropriate default value.
@@ -607,7 +607,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 		// basic material colors
 		aiColor3D col(mat->r,mat->g,mat->b);
 		if (mat->r || mat->g || mat->b ) {
-			
+
 			// Usually, zero diffuse color means no diffuse color at all in the equation.
 			// So we omit this member to express this intent.
 			mout->AddProperty(&col,1,AI_MATKEY_COLOR_DIFFUSE);
@@ -649,7 +649,7 @@ void BlenderImporter::CheckActualType(const ElemBase* dt, const char* check)
 	ai_assert(dt);
 	if (strcmp(dt->dna_type,check)) {
 		ThrowException((format(),
-			"Expected object at ",std::hex,dt," to be of type `",check, 
+			"Expected object at ",std::hex,dt," to be of type `",check,
 			"`, but it claims to be a `",dt->dna_type,"`instead"
 		));
 	}
@@ -664,7 +664,7 @@ void BlenderImporter::NotSupportedObjectType(const Object* obj, const char* type
 // ------------------------------------------------------------------------------------------------
 void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, const Mesh* mesh,
 	ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
-	) 
+	)
 {
 	// TODO: Resolve various problems with BMesh triangluation before re-enabling.
 	//       See issues #400, #373, #318  #315 and #132.
@@ -730,11 +730,11 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
 		// all submeshes created from this mesh are named equally. this allows
 		// curious users to recover the original adjacency.
-		out->mName = aiString(mesh->id.name+2);  
+		out->mName = aiString(mesh->id.name+2);
 			// skip over the name prefix 'ME'
 
 		// resolve the material reference and add this material to the set of
-		// output materials. The (temporary) material index is the index 
+		// output materials. The (temporary) material index is the index
 		// of the material entry within the list of resolved materials.
 		if (mesh->mat) {
 
@@ -771,7 +771,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 		aiVector3D* vn = out->mNormals + out->mNumVertices;
 
 		// XXX we can't fold this easily, because we are restricted
-		// to the member names from the BLEND file (v1,v2,v3,v4) 
+		// to the member names from the BLEND file (v1,v2,v3,v4)
 		// which are assigned by the genblenddna.py script and
 		// cannot be changed without breaking the entire
 		// import process.
@@ -846,16 +846,16 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	}
 
 	for (int i = 0; i < mesh->totpoly; ++i) {
-		
+
 		const MPoly& mf = mesh->mpoly[i];
-		
+
 		aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
 		aiFace& f = out->mFaces[out->mNumFaces++];
-		
+
 		f.mIndices = new unsigned int[ f.mNumIndices = mf.totloop ];
 		aiVector3D* vo = out->mVertices + out->mNumVertices;
 		aiVector3D* vn = out->mNormals + out->mNumVertices;
-		
+
 		// XXX we can't fold this easily, because we are restricted
 		// to the member names from the BLEND file (v1,v2,v3,v4)
 		// which are assigned by the genblenddna.py script and
@@ -870,7 +870,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 			}
 
 			const MVert& v = mesh->mvert[loop.v];
-			
+
 			vo->x = v.co[0];
 			vo->y = v.co[1];
 			vo->z = v.co[2];
@@ -878,10 +878,10 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 			vn->y = v.no[1];
 			vn->z = v.no[2];
 			f.mIndices[j] = out->mNumVertices++;
-			
+
 			++vo;
 			++vn;
-			
+
 		}
 		if (mf.totloop == 3)
 		{
@@ -892,7 +892,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 			out->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
 		}
 	}
-	
+
 	// collect texture coordinates, they're stored in a separate per-face buffer
 	if (mesh->mtface || mesh->mloopuv) {
 		if (mesh->totface > static_cast<int> ( mesh->mtface.size())) {
@@ -910,26 +910,26 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
 			aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
 			const aiFace& f = out->mFaces[out->mNumFaces++];
-			
+
 			aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
 			for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo,++out->mNumVertices) {
 				vo->x = v->uv[i][0];
 				vo->y = v->uv[i][1];
 			}
 		}
-		
+
 		for (int i = 0; i < mesh->totpoly; ++i) {
 			const MPoly& v = mesh->mpoly[i];
 			aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
 			const aiFace& f = out->mFaces[out->mNumFaces++];
-			
+
 			aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
 			for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
 				const MLoopUV& uv = mesh->mloopuv[v.loopstart + j];
 				vo->x = uv.uv[0];
 				vo->y = uv.uv[1];
 			}
-			
+
 		}
 	}
 
@@ -950,7 +950,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
 			aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
 			const aiFace& f = out->mFaces[out->mNumFaces++];
-			
+
 			aiVector3D* vo = &out->mTextureCoords[0][out->mNumVertices];
 			for (unsigned int i = 0; i < f.mNumIndices; ++i,++vo,++out->mNumVertices) {
 				vo->x = v->uv[i][0];
@@ -975,7 +975,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 
 			aiMesh* const out = temp[ mat_num_to_mesh_idx[ mesh->mface[i].mat_nr ] ];
 			const aiFace& f = out->mFaces[out->mNumFaces++];
-			
+
 			aiColor4D* vo = &out->mColors[0][out->mNumVertices];
 			for (unsigned int n = 0; n < f.mNumIndices; ++n, ++vo,++out->mNumVertices) {
 				const MCol* col = &mesh->mcol[(i<<2)+n];
@@ -987,12 +987,12 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 			}
 			for (unsigned int n = f.mNumIndices; n < 4; ++n);
 		}
-		
+
 		for (int i = 0; i < mesh->totpoly; ++i) {
 			const MPoly& v = mesh->mpoly[i];
 			aiMesh* const out = temp[ mat_num_to_mesh_idx[ v.mat_nr ] ];
 			const aiFace& f = out->mFaces[out->mNumFaces++];
-			
+
 			aiColor4D* vo = &out->mColors[0][out->mNumVertices];
 			for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
 				const MLoopCol& col = mesh->mloopcol[v.loopstart + j];
@@ -1001,7 +1001,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 				vo->b = col.b;
 				vo->a = col.a;
 			}
-			
+
 		}
 
 	}
@@ -1140,7 +1140,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 	m = m.Inverse();
 
 	node->mTransformation = m*node->mTransformation;
-	
+
 	if (children.size()) {
 		node->mNumChildren = static_cast<unsigned int>(children.size());
 		aiNode** nd = node->mChildren = new aiNode*[node->mNumChildren]();

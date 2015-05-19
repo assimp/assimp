@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,21 +25,21 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  MD5Parser.cpp 
+/** @file  MD5Parser.cpp
  *  @brief Implementation of the MD5 parser class
  */
 
@@ -103,7 +103,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 // Report warning to the log stream
 /*static*/ void MD5Parser::ReportWarning (const char* warn, unsigned int line)
 {
-	char szBuffer[1024]; 
+	char szBuffer[1024];
 	::sprintf(szBuffer,"[MD5] Line %u: %s",line,warn);
 	DefaultLogger::get()->warn(szBuffer);
 }
@@ -167,7 +167,7 @@ bool MD5Parser::ParseSection(Section& out)
 				elem.iLineNumber = lineNumber;
 				elem.szStart = buffer;
 
-				// terminate the line with zero 
+				// terminate the line with zero
 				while (!IsLineEnd( *buffer))buffer++;
 				if (*buffer) {
 					++lineNumber;
@@ -254,7 +254,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 
 				// negative values, at least -1, is allowed here
 				desc.mParentIndex = (int)strtol10(sz,&sz);
-		
+
 				AI_MD5_READ_TRIPLE(desc.mPositionXYZ);
 				AI_MD5_READ_TRIPLE(desc.mRotationQuat); // normalized quaternion, so w is not there
 			}
@@ -295,7 +295,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					if (idx >= desc.mVertices.size())
 						desc.mVertices.resize(idx+1);
 
-					VertexDesc& vert = desc.mVertices[idx];	
+					VertexDesc& vert = desc.mVertices[idx];
 					if ('(' != *sz++)
 						MD5Parser::ReportWarning("Unexpected token: ( was expected",(*eit).iLineNumber);
 					AI_MD5_SKIP_SPACES();
@@ -318,7 +318,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					if (idx >= desc.mFaces.size())
 						desc.mFaces.resize(idx+1);
 
-					aiFace& face = desc.mFaces[idx];	
+					aiFace& face = desc.mFaces[idx];
 					face.mIndices = new unsigned int[face.mNumIndices = 3];
 					for (unsigned int i = 0; i < 3;++i)	{
 						AI_MD5_SKIP_SPACES();
@@ -334,7 +334,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
 					if (idx >= desc.mWeights.size())
 						desc.mWeights.resize(idx+1);
 
-					WeightDesc& weight = desc.mWeights[idx];	
+					WeightDesc& weight = desc.mWeights[idx];
 					weight.mBone = strtoul10(sz,&sz);
 					AI_MD5_SKIP_SPACES();
 					sz = fast_atoreal_move<float>(sz,weight.mWeight);
@@ -356,7 +356,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
 	mNumAnimatedComponents = UINT_MAX;
 	for (SectionList::const_iterator iter =  mSections.begin(), iterEnd = mSections.end();iter != iterEnd;++iter) {
 		if ((*iter).mName == "hierarchy")	{
-			// "sheath"	0 63 6 
+			// "sheath"	0 63 6
 			for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end();eit != eitEnd; ++eit) {
 				mAnimatedBones.push_back ( AnimBoneDesc () );
 				AnimBoneDesc& desc = mAnimatedBones.back();

@@ -7,8 +7,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -60,17 +60,17 @@ struct ColladaMeshIndex
 	std::string mMeshID;
 	size_t mSubMesh;
 	std::string mMaterial;
-	ColladaMeshIndex( const std::string& pMeshID, size_t pSubMesh, const std::string& pMaterial) 
+	ColladaMeshIndex( const std::string& pMeshID, size_t pSubMesh, const std::string& pMaterial)
 		: mMeshID( pMeshID), mSubMesh( pSubMesh), mMaterial( pMaterial)
 	{   }
 
 	bool operator < (const ColladaMeshIndex& p) const
 	{
-		if( mMeshID == p.mMeshID) 
+		if( mMeshID == p.mMeshID)
 		{
 			if( mSubMesh == p.mSubMesh)
 				return mMaterial < p.mMaterial;
-			else 
+			else
 				return mSubMesh < p.mSubMesh;
 		} else
 		{
@@ -80,7 +80,7 @@ struct ColladaMeshIndex
 };
 
 /** Loader class to read Collada scenes. Collada is over-engineered to death, with every new iteration bringing
- * more useless stuff, so I limited the data to what I think is useful for games. 
+ * more useless stuff, so I limited the data to what I think is useful for games.
 */
 class ColladaLoader : public BaseImporter
 {
@@ -90,7 +90,7 @@ public:
 
 
 public:
-	/** Returns whether the class can handle the format of the given file. 
+	/** Returns whether the class can handle the format of the given file.
 	 * See BaseImporter::CanRead() for details.	*/
 	bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const;
 
@@ -102,7 +102,7 @@ protected:
 
 	void SetupProperties(const Importer* pImp);
 
-	/** Imports the given file into the given scene structure. 
+	/** Imports the given file into the given scene structure.
 	 * See BaseImporter::InternReadFile() for details
 	 */
 	void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler);
@@ -115,19 +115,19 @@ protected:
 		std::vector<const Collada::Node*>& resolved);
 
 	/** Builds meshes for the given node and references them */
-	void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode, 
+	void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode,
 		aiNode* pTarget);
 
 	/** Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh */
-	aiMesh* CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh, 
+	aiMesh* CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
 		const Collada::Controller* pSrcController, size_t pStartVertex, size_t pStartFace);
 
 	/** Builds cameras for the given node and references them */
-	void BuildCamerasForNode( const ColladaParser& pParser, const Collada::Node* pNode, 
+	void BuildCamerasForNode( const ColladaParser& pParser, const Collada::Node* pNode,
 		aiNode* pTarget);
 
 	/** Builds lights for the given node and references them */
-	void BuildLightsForNode( const ColladaParser& pParser, const Collada::Node* pNode, 
+	void BuildLightsForNode( const ColladaParser& pParser, const Collada::Node* pNode,
 		aiNode* pTarget);
 
 	/** Stores all meshes in the given scene */
@@ -145,7 +145,7 @@ protected:
 	/** Stores all textures in the given scene */
 	void StoreSceneTextures( aiScene* pScene);
 
-	/** Stores all animations 
+	/** Stores all animations
 	 * @param pScene target scene to store the anims
 	 */
 	void StoreAnimations( aiScene* pScene, const ColladaParser& pParser);
@@ -159,7 +159,7 @@ protected:
 
 	/** Constructs the animation for the given source anim */
 	void CreateAnimation( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string& pName);
-	
+
 	/** Constructs materials from the collada material definitions */
 	void BuildMaterials( ColladaParser& pParser, aiScene* pScene);
 
@@ -177,7 +177,7 @@ protected:
 		aiTextureType type, unsigned int idx = 0);
 
 	/** Resolves the texture name for the given effect texture entry */
-	aiString FindFilenameForEffectTexture( const ColladaParser& pParser, 
+	aiString FindFilenameForEffectTexture( const ColladaParser& pParser,
 		const Collada::Effect& pEffect, const std::string& pName);
 
 	/** Converts a path read from a collada file to the usual representation */

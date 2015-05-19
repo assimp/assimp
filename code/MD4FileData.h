@@ -5,8 +5,8 @@ Open Asset Import Library (ASSIMP)
 Copyright (c) 2006-2010, ASSIMP Development Team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the ASSIMP Development Team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -75,8 +75,8 @@ namespace MD4
 #define AI_MD4_MAX_FRAMES		2028
 #define AI_MD4_MAX_SURFACES		32
 #define AI_MD4_MAX_BONES		256
-#define AI_MD4_MAX_VERTS		4096	
-#define AI_MD4_MAX_TRIANGLES	8192	
+#define AI_MD4_MAX_VERTS		4096
+#define AI_MD4_MAX_TRIANGLES	8192
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for the MD4 main header
@@ -120,8 +120,8 @@ struct Header
  */
 // ---------------------------------------------------------------------------
 struct BoneFrame
-{  
-	float matrix[3][4]; 
+{
+	float matrix[3][4];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -129,8 +129,8 @@ struct BoneFrame
  */
 // ---------------------------------------------------------------------------
 struct  BoneName
-{  
-	char name[32] ; 
+{
+	char name[32] ;
 	int parent ;
 	int flags ;
 }  PACK_STRUCT;
@@ -140,7 +140,7 @@ struct  BoneName
  */
 // ---------------------------------------------------------------------------
 struct Surface
-{  
+{
 	int32_t ident;
 	char name[64];
 	char shader[64];
@@ -164,32 +164,32 @@ struct Surface
  */
 // ---------------------------------------------------------------------------
 struct Weight
-{  
-	int32_t boneIndex; 
-	float boneWeight; 
-	float offset[3]; 
-} PACK_STRUCT; 
+{
+	int32_t boneIndex;
+	float boneWeight;
+	float offset[3];
+} PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a vertex in a MD4 file
  */
 // ---------------------------------------------------------------------------
 struct Vertex
-{  
+{
 	float vertex[3];
 	float normal[3];
 	float texCoords[2];
 	int32_t numWeights;
 	Weight weights[1];
-} PACK_STRUCT; 
+} PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a triangle in a MD4 file
  */
 // ---------------------------------------------------------------------------
-struct Triangle 
-{  
-	int32_t indexes[3]; 
+struct Triangle
+{
+	int32_t indexes[3];
 } PACK_STRUCT;
 
 // ---------------------------------------------------------------------------
@@ -197,12 +197,12 @@ struct Triangle
  */
 // ---------------------------------------------------------------------------
 struct Frame
-{  
+{
 	float bounds[3][2];
-	float localOrigin[3]; 
+	float localOrigin[3];
 	float radius;
-	BoneFrame bones[1]; 
-} PACK_STRUCT; 
+	BoneFrame bones[1];
+} PACK_STRUCT;
 
 
 // reset packing to the original value

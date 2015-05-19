@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -115,9 +115,9 @@ enum ESemantic
 	EST_UTextureCoord,
 	//! v texture coordinate
 	EST_VTextureCoord,
-	
+
 	//! vertex colors, red channel
-	EST_Red,		
+	EST_Red,
 	//! vertex colors, green channel
 	EST_Green,
 	//! vertex colors, blue channel
@@ -125,16 +125,16 @@ enum ESemantic
 	//! vertex colors, alpha channel
 	EST_Alpha,
 
-	//! vertex index list 
+	//! vertex index list
 	EST_VertexIndex,
 
-	//! texture index 
+	//! texture index
 	EST_TextureIndex,
 
 	//! texture coordinates (stored as element of a face)
 	EST_TextureCoordinates,
 
-	//! material index 
+	//! material index
 	EST_MaterialIndex,
 
 	//! ambient color, red channel
@@ -193,7 +193,7 @@ enum EElementSemantic
 	//! The element is an edge description (ignored)
 	EEST_Edge,
 
-	//! The element is a material description 
+	//! The element is a material description
 	EEST_Material,
 
 	//! Marks invalid entries
@@ -234,7 +234,7 @@ public:
 	//! string is either '\n', '\r' or '\0'. Return valie is false
 	//! if the input string is NOT a valid property (E.g. does
 	//! not start with the "property" keyword)
-	static bool ParseProperty (const char* pCur, const char** pCurOut, 
+	static bool ParseProperty (const char* pCur, const char** pCurOut,
 		Property* pOut);
 
 	// -------------------------------------------------------------------
@@ -278,10 +278,10 @@ public:
 
 
 	// -------------------------------------------------------------------
-	//! Parse an element from a string. 
+	//! Parse an element from a string.
 	//! The function will parse all properties contained in the
 	//! element, too.
-	static bool ParseElement (const char* pCur, const char** pCurOut, 
+	static bool ParseElement (const char* pCur, const char** pCurOut,
 		Element* pOut);
 
 	// -------------------------------------------------------------------
@@ -293,7 +293,7 @@ public:
 // ---------------------------------------------------------------------------------
 /** \brief Instance of a property in a PLY file
  */
-class PropertyInstance 
+class PropertyInstance
 {
 public:
 
@@ -326,7 +326,7 @@ public:
 	std::vector<ValueUnion> avList;
 
 	// -------------------------------------------------------------------
-	//! Parse a property instance 
+	//! Parse a property instance
 	static bool ParseInstance (const char* pCur,const char** pCurOut,
 		const Property* prop, PropertyInstance* p_pcOut);
 
@@ -358,7 +358,7 @@ public:
 // ---------------------------------------------------------------------------------
 /** \brief Class for an element instance in a PLY file
  */
-class ElementInstance 
+class ElementInstance
 {
 public:
 
@@ -383,7 +383,7 @@ public:
 // ---------------------------------------------------------------------------------
 /** \brief Class for an element instance list in a PLY file
  */
-class ElementInstanceList 
+class ElementInstanceList
 {
 public:
 
@@ -405,7 +405,7 @@ public:
 		const Element* pcElement, ElementInstanceList* p_pcOut,bool p_bBE);
 };
 // ---------------------------------------------------------------------------------
-/** \brief Class to represent the document object model of an ASCII or binary 
+/** \brief Class to represent the document object model of an ASCII or binary
  * (both little and big-endian) PLY file
  */
 class DOM

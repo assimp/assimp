@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -76,7 +76,7 @@ static const float units[] = {
 	1.f/0.3048f,
 	1.f/0.9144f,
 	1.f/1609.344f
-};	
+};
 
 static const aiImporterDesc desc = {
 	"TrueSpace Object Importer",
@@ -98,12 +98,12 @@ COBImporter::COBImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 COBImporter::~COBImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool COBImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string& extension = GetExtension(pFile);
@@ -139,8 +139,8 @@ void COBImporter::SetupProperties(const Importer* /*pImp*/)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void COBImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void COBImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	COB::Scene scene;
@@ -157,7 +157,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	if (head[16]!='L') {
 		ThrowException("File is big-endian, which is not supported");
 	}
-	
+
 	// load data into intermediate structures
 	if (head[15]=='A') {
 		ReadAsciiFile(scene, stream.get());
@@ -176,7 +176,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 			for_each(Face& f,mesh.faces) {
 				mesh.temp_map[f.material].push_back(&f);
 			}
-		} 
+		}
 	}
 
 	// count meshes
@@ -186,7 +186,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 			if (mesh.vertex_positions.size() && mesh.texture_coords.size()) {
 				pScene->mNumMeshes += mesh.temp_map.size();
 			}
-		} 
+		}
 	}
 	pScene->mMeshes = new aiMesh*[pScene->mNumMeshes]();
 	pScene->mMaterials = new aiMaterial*[pScene->mNumMeshes]();
@@ -282,8 +282,8 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 							if (v.uv_idx >= ndmesh.texture_coords.size()) {
 								ThrowException("UV index out of range");
 							}
-							outmesh->mVertices[outmesh->mNumVertices] = ndmesh.vertex_positions[ v.pos_idx ]; 
-							outmesh->mTextureCoords[0][outmesh->mNumVertices] = aiVector3D( 
+							outmesh->mVertices[outmesh->mNumVertices] = ndmesh.vertex_positions[ v.pos_idx ];
+							outmesh->mTextureCoords[0][outmesh->mNumVertices] = aiVector3D(
 								ndmesh.texture_coords[ v.uv_idx ].x,
 								ndmesh.texture_coords[ v.uv_idx ].y,
 								0.f
@@ -320,7 +320,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 					}
 
 					{	int shader;
-						switch(min->shader) 
+						switch(min->shader)
 						{
 						case Material::FLAT:
 							shader = aiShadingMode_Gouraud;
@@ -369,7 +369,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 	else if (Node::TYPE_LIGHT == root.type) {
 		const Light& ndlight = (const Light&)(root);
 		aiLight* outlight = fill->mLights[fill->mNumLights++] = new aiLight();
-		
+
 		outlight->mName.Set(ndlight.name);
 		outlight->mColorDiffuse = outlight->mColorAmbient = outlight->mColorSpecular = ndlight.color;
 
@@ -479,7 +479,7 @@ void COBImporter::UnsupportedChunk_Ascii(LineSplitter& splitter, const ChunkInfo
 
 		// (HACK) - our current position in the stream is the beginning of the
 		// head line of the next chunk. That's fine, but the caller is going
-		// to call ++ on `splitter`, which we need to swallow to avoid 
+		// to call ++ on `splitter`, which we need to swallow to avoid
 		// missing the next line.
 		splitter.get_stream().IncPtr(nfo.size);
 		splitter.swallow_next_increment();
@@ -554,14 +554,14 @@ void COBImporter::ReadBasicNodeInfo_Ascii(Node& msh, LineSplitter& splitter, con
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
-void COBImporter::ReadFloat3Tuple_Ascii(T& fill, const char** in) 
+void COBImporter::ReadFloat3Tuple_Ascii(T& fill, const char** in)
 {
 	const char* rgb = *in;
 	for(unsigned int i = 0; i < 3; ++i) {
 		SkipSpaces(&rgb);
 		if (*rgb == ',')++rgb;
 		SkipSpaces(&rgb);
-		
+
 		fill[i] = fast_atof(&rgb);
 	}
 	*in = rgb;
@@ -650,7 +650,7 @@ void COBImporter::ReadUnit_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 	for_each(boost::shared_ptr< Node >& nd, out.nodes) {
 		if (nd->id == nfo.parent_id) {
 			const unsigned int t=strtoul10(splitter[1]);
-		
+
 			nd->unit_scale = t>=sizeof(units)/sizeof(units[0])?(
 				LogWarn_Ascii(splitter,format()<<t<<" is not a valid value for `Units` attribute in `Unit chunk` "<<nfo.id)
 				,1.f):units[t];
@@ -696,7 +696,7 @@ void COBImporter::ReadLght_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 			"Unknown kind of light source in `Lght` chunk "<<nfo.id<<" : "<<*splitter);
 		msh.ltype = Light::SPOT;
 	}
-	
+
 	++splitter;
 	if (!splitter.match_start("color ")) {
 		LogWarn_Ascii(splitter,format()<<
@@ -797,7 +797,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 			for(unsigned int cur = 0;cur < cnt && ++splitter;++cur) {
 				const char* s = splitter->c_str();
 
-				aiVector3D& v = msh.vertex_positions[cur]; 
+				aiVector3D& v = msh.vertex_positions[cur];
 
 				SkipSpaces(&s);
 				v.x = fast_atof(&s);
@@ -814,7 +814,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 			for(unsigned int cur = 0;cur < cnt && ++splitter;++cur) {
 				const char* s = splitter->c_str();
 
-				aiVector2D& v = msh.texture_coords[cur]; 
+				aiVector2D& v = msh.texture_coords[cur];
 
 				SkipSpaces(&s);
 				v.x = fast_atof(&s);
@@ -881,8 +881,8 @@ void COBImporter::ReadBitM_Ascii(Scene& /*out*/, LineSplitter& splitter, const C
 /*
 	"\nThumbNailHdrSize %ld"
 	"\nThumbHeader: %02hx 02hx %02hx "
-	"\nColorBufSize %ld"		
-	"\nColorBufZipSize %ld"		
+	"\nColorBufSize %ld"
+	"\nColorBufZipSize %ld"
 	"\nZippedThumbnail: %02hx 02hx %02hx "
 */
 
@@ -1068,7 +1068,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
 			// with holes. Test data specific to COB is needed to confirm it.
 			if (msh.faces.empty()) {
 				ThrowException(format("A hole is the first entity in the `PolH` chunk with id ") << nfo.id);
-			}	
+			}
 		}
 		else msh.faces.push_back(Face());
 		Face& f = msh.faces.back();
@@ -1094,7 +1094,7 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
 		}
 	}
 	if (nfo.version>4) {
-		msh.draw_flags = reader.GetI4();	
+		msh.draw_flags = reader.GetI4();
 	}
 	nfo.version>5 && nfo.version<8 ? reader.GetI4() : 0;
 }

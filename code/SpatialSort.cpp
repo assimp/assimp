@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -54,10 +54,10 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructs a spatially sorted representation from the given position array.
-SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions, 
+SpatialSort::SpatialSort( const aiVector3D* pPositions, unsigned int pNumPositions,
 	unsigned int pElementOffset)
 
-	// define the reference plane. We choose some arbitrary vector away from all basic axises 
+	// define the reference plane. We choose some arbitrary vector away from all basic axises
 	// in the hope that no model spreads all its vertices along this plane.
 	: mPlaneNormal(0.8523f, 0.34321f, 0.5736f)
 {
@@ -80,7 +80,7 @@ SpatialSort::~SpatialSort()
 }
 
 // ------------------------------------------------------------------------------------------------
-void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions, 
+void SpatialSort::Fill( const aiVector3D* pPositions, unsigned int pNumPositions,
 	unsigned int pElementOffset,
 	bool pFinalize /*= true */)
 {
@@ -95,7 +95,7 @@ void SpatialSort :: Finalize()
 }
 
 // ------------------------------------------------------------------------------------------------
-void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositions, 
+void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositions,
 	unsigned int pElementOffset,
 	bool pFinalize /*= true */)
 {
@@ -120,7 +120,7 @@ void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositio
 
 // ------------------------------------------------------------------------------------------------
 // Returns an iterator for all positions close to the given position.
-void SpatialSort::FindPositions( const aiVector3D& pPosition, 
+void SpatialSort::FindPositions( const aiVector3D& pPosition,
 	float pRadius, std::vector<unsigned int>& poResults) const
 {
 	const float dist = pPosition * mPlaneNormal;
@@ -157,7 +157,7 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
 		index--;
 	while( index < (mPositions.size() - 1) && mPositions[index].mDistance < minDist)
 		index++;
-	
+
 	// Mow start iterating from there until the first position lays outside of the distance range.
 	// Add all positions inside the distance range within the given radius to the result aray
 	std::vector<Entry>::const_iterator it = mPositions.begin() + index;
@@ -237,7 +237,7 @@ namespace {
 // ------------------------------------------------------------------------------------------------
 // Fills an array with indices of all positions indentical to the given position. In opposite to
 // FindPositions(), not an epsilon is used but a (very low) tolerance of four floating-point units.
-void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition, 
+void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 	std::vector<unsigned int>& poResults) const
 {
 	// Epsilons have a huge disadvantage: they are of constant precision, while floating-point
@@ -322,8 +322,8 @@ unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill,f
 
 		fill[mPositions[i].mIndex] = t;
 		const aiVector3D& oldpos = mPositions[i].mPosition;
-		for (++i; i < fill.size() && mPositions[i].mDistance < maxDist 
-			&& (mPositions[i].mPosition - oldpos).SquareLength() < pSquared; ++i) 
+		for (++i; i < fill.size() && mPositions[i].mDistance < maxDist
+			&& (mPositions[i].mPosition - oldpos).SquareLength() < pSquared; ++i)
 		{
 			fill[mPositions[i].mIndex] = t;
 		}

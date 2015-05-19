@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -130,7 +130,7 @@ struct Bone
 	Bone()
 	{
 		static int iCnt = 0;
-		
+
 		// Generate a default name for the bone
 		char szTemp[128];
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
@@ -263,7 +263,7 @@ struct BaseNode
 struct Mesh : public MeshWithSmoothingGroups<ASE::Face>, public BaseNode
 {
 	//! Constructor.
-	Mesh() 
+	Mesh()
 		: BaseNode	(BaseNode::Mesh)
 		, bSkip		(false)
 	{
@@ -309,15 +309,15 @@ struct Light : public BaseNode
 		DIRECTIONAL
 	};
 
-	//! Constructor. 
-	Light() 
+	//! Constructor.
+	Light()
 		: BaseNode	 (BaseNode::Light)
 		, mLightType (OMNI)
 		, mColor	 (1.f,1.f,1.f)
 		, mIntensity (1.f) // light is white by default
 		, mAngle	 (45.f)
 		, mFalloff	 (0.f)
-	{	
+	{
 	}
 
 	LightType mLightType;
@@ -338,10 +338,10 @@ struct Camera : public BaseNode
 	};
 
 	//! Constructor
-	Camera() 
+	Camera()
 		: BaseNode	  (BaseNode::Camera)
 		, mFOV        (0.75f)   // in radians
-		, mNear       (0.1f) 
+		, mNear       (0.1f)
 		, mFar        (1000.f)  // could be zero
 		, mCameraType (FREE)
 	{
@@ -356,7 +356,7 @@ struct Camera : public BaseNode
 struct Dummy : public BaseNode
 {
 	//! Constructor
-	Dummy() 
+	Dummy()
 		: BaseNode	(BaseNode::Dummy)
 	{
 	}
@@ -492,7 +492,7 @@ private:
 		unsigned int iNumFaces,Mesh& mesh, unsigned int iChannel = 0);
 
 	// -------------------------------------------------------------------
-	//! Parse an additional mapping channel 
+	//! Parse an additional mapping channel
 	//! (specified via *MESH_MAPPINGCHANNEL)
 	//! \param iChannel Channel index to be filled
 	//! \param mesh Mesh object to be filled
@@ -571,12 +571,12 @@ private:
 	void ParseLV4MeshLongTriple(unsigned int* apOut);
 
 	// -------------------------------------------------------------------
-	//! Parse a single float element 
+	//! Parse a single float element
 	//! \param fOut Output float
 	void ParseLV4MeshFloat(float& fOut);
 
 	// -------------------------------------------------------------------
-	//! Parse a single int element 
+	//! Parse a single int element
 	//! \param iOut Output integer
 	void ParseLV4MeshLong(unsigned int& iOut);
 

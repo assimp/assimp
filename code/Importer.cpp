@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ------------------------------------------------------------------------------------------------
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.
  *
- * Note that any Exception except DeadlyImportError may lead to 
+ * Note that any Exception except DeadlyImportError may lead to
  * undefined behaviour -> loaders could remain in an unusable state and
  * further imports with the same Importer instance could fail/crash/burn ...
  */
@@ -138,8 +138,8 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)	{
 }
 
 // ------------------------------------------------------------------------------------------------
-// Importer constructor. 
-Importer::Importer() 
+// Importer constructor.
+Importer::Importer()
 {
 	// allocate the pimpl first
 	pimpl = new ImporterPimpl();
@@ -149,7 +149,7 @@ Importer::Importer()
 
 	// Allocate a default IO handler
 	pimpl->mIOHandler = new DefaultIOSystem;
-	pimpl->mIsDefaultHandler = true; 
+	pimpl->mIsDefaultHandler = true;
 	pimpl->bExtraVerbose     = false; // disable extra verbose mode by default
 
 	pimpl->mProgressHandler = new DefaultProgressHandler();
@@ -161,7 +161,7 @@ Importer::Importer()
 	// Allocate a SharedPostProcessInfo object and store pointers to it in all post-process steps in the list.
 	pimpl->mPPShared = new SharedPostProcessInfo();
 	for (std::vector<BaseProcess*>::iterator it =  pimpl->mPostProcessingSteps.begin();
-		it != pimpl->mPostProcessingSteps.end(); 
+		it != pimpl->mPostProcessingSteps.end();
 		++it)	{
 
 		(*it)->SetSharedData(pimpl->mPPShared);
@@ -215,7 +215,7 @@ aiReturn Importer::RegisterPPStep(BaseProcess* pImp)
 
 		pimpl->mPostProcessingSteps.push_back(pImp);
 		DefaultLogger::get()->info("Registering custom post-processing step");
-	
+
 	ASSIMP_END_EXCEPTION_REGION(aiReturn);
 	return AI_SUCCESS;
 }
@@ -228,9 +228,9 @@ aiReturn Importer::RegisterLoader(BaseImporter* pImp)
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
 	// --------------------------------------------------------------------
-	// Check whether we would have two loaders for the same file extension 
+	// Check whether we would have two loaders for the same file extension
 	// This is absolutely OK, but we should warn the developer of the new
-	// loader that his code will probably never be called if the first 
+	// loader that his code will probably never be called if the first
 	// loader is a bit too lazy in his file checking.
 	// --------------------------------------------------------------------
 	std::set<std::string> st;
@@ -377,8 +377,8 @@ bool Importer::IsDefaultProgressHandler() const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Validate post process step flags 
-bool _ValidateFlags(unsigned int pFlags) 
+// Validate post process step flags
+bool _ValidateFlags(unsigned int pFlags)
 {
 	if (pFlags & aiProcess_GenSmoothNormals && pFlags & aiProcess_GenNormals)	{
 		DefaultLogger::get()->error("#aiProcess_GenSmoothNormals and #aiProcess_GenNormals are incompatible");
@@ -405,8 +405,8 @@ void Importer::FreeScene( )
 
 // ------------------------------------------------------------------------------------------------
 // Get the current error string, if any
-const char* Importer::GetErrorString() const 
-{ 
+const char* Importer::GetErrorString() const
+{
 	 /* Must remain valid as long as ReadFile() or FreeFile() are not called */
 	return pimpl->mErrorString.c_str();
 }
@@ -460,13 +460,13 @@ bool Importer::ValidateFlags(unsigned int pFlags) const
 	// Now iterate through all bits which are set in the flags and check whether we find at least
 	// one pp plugin which handles it.
 	for (unsigned int mask = 1; mask < (1u << (sizeof(unsigned int)*8-1));mask <<= 1) {
-		
+
 		if (pFlags & mask) {
-		
+
 			bool have = false;
 			for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)	{
 				if (pimpl->mPostProcessingSteps[a]-> IsActive(mask) ) {
-				
+
 					have = true;
 					break;
 				}
@@ -529,10 +529,10 @@ void WriteLogOpening(const std::string& file)
 	const unsigned int flags = aiGetCompileFlags();
 	l->debug(format()
 		<< "Assimp "
-		<< aiGetVersionMajor() 
-		<< "." 
-		<< aiGetVersionMinor() 
-		<< "." 
+		<< aiGetVersionMajor()
+		<< "."
+		<< aiGetVersionMinor()
+		<< "."
 		<< aiGetVersionRevision()
 
 		<< " "
@@ -540,7 +540,7 @@ void WriteLogOpening(const std::string& file)
 		<< ASSIMP_BUILD_ARCHITECTURE
 #elif defined(_M_IX86) || defined(__x86_32__) || defined(__i386__)
 		<< "x86"
-#elif defined(_M_X64) || defined(__x86_64__) 
+#elif defined(_M_X64) || defined(__x86_64__)
 		<< "amd64"
 #elif defined(_M_IA64) || defined(__ia64__)
 		<< "itanium"
@@ -584,7 +584,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 
 	// ----------------------------------------------------------------------
 	// Put a large try block around everything to catch all std::exception's
-	// that might be thrown by STL containers or by new(). 
+	// that might be thrown by STL containers or by new().
 	// ImportErrorException's are throw by ourselves and caught elsewhere.
 	//-----------------------------------------------------------------------
 
@@ -685,7 +685,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			}
 #endif // no validation
 
-			// Preprocess the scene and prepare it for post-processing 
+			// Preprocess the scene and prepare it for post-processing
 			if (profiler) {
 				profiler->BeginRegion("preprocess");
 			}
@@ -715,7 +715,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 #ifdef ASSIMP_CATCH_GLOBAL_EXCEPTIONS
 	catch (std::exception &e)
 	{
-#if (defined _MSC_VER) &&	(defined _CPPRTTI) 
+#if (defined _MSC_VER) &&	(defined _CPPRTTI)
 		// if we have RTTI get the full name of the exception that occured
 		pimpl->mErrorString = std::string(typeid( e ).name()) + ": " + e.what();
 #else
@@ -796,7 +796,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 			}
 		}
 		if( !pimpl->mScene) {
-			break; 
+			break;
 		}
 #ifdef ASSIMP_BUILD_DEBUG
 
@@ -808,11 +808,11 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 		if (pimpl->bExtraVerbose)	{
 			DefaultLogger::get()->debug("Verbose Import: revalidating data structures");
 
-			ValidateDSProcess ds; 
+			ValidateDSProcess ds;
 			ds.ExecuteOnScene (this);
 			if( !pimpl->mScene)	{
 				DefaultLogger::get()->error("Verbose Import: failed to revalidate data structures");
-				break; 
+				break;
 			}
 		}
 #endif // ! DEBUG
@@ -929,7 +929,7 @@ bool Importer::SetPropertyInteger(const char* szName, int iValue)
 {
 	bool existing;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		existing = SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue);	
+		existing = SetGenericProperty<int>(pimpl->mIntProperties, szName,iValue);
 	ASSIMP_END_EXCEPTION_REGION(bool);
 	return existing;
 }
@@ -940,7 +940,7 @@ bool Importer::SetPropertyFloat(const char* szName, float iValue)
 {
 	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		exising = SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue);	
+		exising = SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue);
 	ASSIMP_END_EXCEPTION_REGION(bool);
 	return exising;
 }
@@ -951,7 +951,7 @@ bool Importer::SetPropertyString(const char* szName, const std::string& value)
 {
 	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		exising = SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value);	
+		exising = SetGenericProperty<std::string>(pimpl->mStringProperties, szName,value);
 	ASSIMP_END_EXCEPTION_REGION(bool);
 	return exising;
 }
@@ -962,14 +962,14 @@ bool Importer::SetPropertyMatrix(const char* szName, const aiMatrix4x4& value)
 {
 	bool exising;
 	ASSIMP_BEGIN_EXCEPTION_REGION();
-		exising = SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value);	
+		exising = SetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties, szName,value);
 	ASSIMP_END_EXCEPTION_REGION(bool);
 	return exising;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-int Importer::GetPropertyInteger(const char* szName, 
+int Importer::GetPropertyInteger(const char* szName,
 	int iErrorReturn /*= 0xffffffff*/) const
 {
 	return GetGenericProperty<int>(pimpl->mIntProperties,szName,iErrorReturn);
@@ -977,7 +977,7 @@ int Importer::GetPropertyInteger(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-float Importer::GetPropertyFloat(const char* szName, 
+float Importer::GetPropertyFloat(const char* szName,
 	float iErrorReturn /*= 10e10*/) const
 {
 	return GetGenericProperty<float>(pimpl->mFloatProperties,szName,iErrorReturn);
@@ -985,7 +985,7 @@ float Importer::GetPropertyFloat(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const std::string Importer::GetPropertyString(const char* szName, 
+const std::string Importer::GetPropertyString(const char* szName,
 	const std::string& iErrorReturn /*= ""*/) const
 {
 	return GetGenericProperty<std::string>(pimpl->mStringProperties,szName,iErrorReturn);
@@ -993,7 +993,7 @@ const std::string Importer::GetPropertyString(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-const aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName, 
+const aiMatrix4x4 Importer::GetPropertyMatrix(const char* szName,
 	const aiMatrix4x4& iErrorReturn /*= aiMatrix4x4()*/) const
 {
 	return GetGenericProperty<aiMatrix4x4>(pimpl->mMatrixProperties,szName,iErrorReturn);
@@ -1006,7 +1006,7 @@ inline void AddNodeWeight(unsigned int& iScene,const aiNode* pcNode)
 	iScene += sizeof(aiNode);
 	iScene += sizeof(unsigned int) * pcNode->mNumMeshes;
 	iScene += sizeof(void*) * pcNode->mNumChildren;
-	
+
 	for (unsigned int i = 0; i < pcNode->mNumChildren;++i) {
 		AddNodeWeight(iScene,pcNode->mChildren[i]);
 	}

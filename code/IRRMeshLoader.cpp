@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -71,7 +71,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"xml irrmesh" 
+	"xml irrmesh"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -80,12 +80,12 @@ IRRMeshImporter::IRRMeshImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 IRRMeshImporter::~IRRMeshImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool IRRMeshImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	/* NOTE: A simple check for the file extension is not enough
@@ -117,8 +117,8 @@ const aiImporterDesc* IRRMeshImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void IRRMeshImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
@@ -155,7 +155,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 	while (reader->read())	{
 		switch (reader->getNodeType())	{
 		case EXN_ELEMENT:
-			
+
 			if (!ASSIMP_stricmp(reader->getNodeName(),"buffer") && (curMat || curMesh))	{
 				// end of previous buffer. A material and a mesh should be there
 				if ( !curMat || !curMesh)	{
@@ -164,8 +164,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					delete curMesh;
 				}
 				else	{
-					materials.push_back(curMat); 
-					meshes.push_back(curMesh);  
+					materials.push_back(curMat);
+					meshes.push_back(curMesh);
 				}
 				curMat  = NULL;
 				curMesh = NULL;
@@ -178,7 +178,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 				curTangents.clear();
 				curBitangents.clear();
 			}
-			
+
 
 			if (!ASSIMP_stricmp(reader->getNodeName(),"material"))	{
 				if (curMat)	{
@@ -217,7 +217,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 						// *********************************************************
 						// We have a second texture! So use this UV channel
 						// for it. The 2nd texture can be either a normal
-						// texture (solid_2layer or lightmap_xxx) or a normal 
+						// texture (solid_2layer or lightmap_xxx) or a normal
 						// map (normal_..., parallax_...)
 						// *********************************************************
 						int idx = 1;
@@ -342,7 +342,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 					curNormals.push_back(temp);
 
 					// read the vertex colors
-					uint32_t clr = strtoul16(sz,&sz);	
+					uint32_t clr = strtoul16(sz,&sz);
 					ColorFromARGBPacked(clr,c);
 
 					if (!curColors.empty() && c != *(curColors.end()-1))
@@ -484,8 +484,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
 			delete curMesh;
 		}
 		else	{
-			materials.push_back(curMat); 
-			meshes.push_back(curMesh);  
+			materials.push_back(curMat);
+			meshes.push_back(curMesh);
 		}
 	}
 

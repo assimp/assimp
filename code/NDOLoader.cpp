@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -65,7 +65,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"ndo" 
+	"ndo"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -74,17 +74,17 @@ NDOImporter::NDOImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 NDOImporter::~NDOImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool NDOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-	// check file extension 
+	// check file extension
 	const std::string extension = GetExtension(pFile);
-	
+
 	if( extension == "ndo")
 		return true;
 
@@ -110,8 +110,8 @@ void NDOImporter::SetupProperties(const Importer* /*pImp*/)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void NDOImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void NDOImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	StreamReaderBE reader(pIOHandler->Open( pFile, "rb"));
@@ -152,7 +152,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 
 	// read all objects
 	for (unsigned int o = 0; o < objects.size(); ++o) {
-		
+
 //		if (file_format < 12) {
 			if (!reader.GetI1()) {
 				continue; /* skip over empty object */
@@ -171,7 +171,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 		temp = file_format >= 12 ? reader.GetU4() : reader.GetU2();
 		obj.edges.reserve(temp);
 		for (unsigned int e = 0; e < temp; ++e) {
-			
+
 			obj.edges.push_back(Edge());
 			Edge& edge = obj.edges.back();
 
@@ -188,7 +188,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 		temp = file_format >= 12 ? reader.GetU4() : reader.GetU2();
 		obj.faces.reserve(temp);
 		for (unsigned int e = 0; e < temp; ++e) {
-			
+
 			obj.faces.push_back(Face());
 			Face& face = obj.faces.back();
 
@@ -199,7 +199,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 		temp = file_format >= 12 ? reader.GetU4() : reader.GetU2();
 		obj.vertices.reserve(temp);
 		for (unsigned int e = 0; e < temp; ++e) {
-			
+
 			obj.vertices.push_back(Vertex());
 			Vertex& v = obj.vertices.back();
 
@@ -251,7 +251,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 
 		unsigned int n = 0;
 		for_each(const Edge& edge, obj.edges) {
-		
+
 			face_table[edge.edge[2]] = n;
 			face_table[edge.edge[3]] = n;
 
@@ -262,12 +262,12 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 		aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces=face_table.size()];
 
 		vertices.clear();
-		vertices.reserve(4 * face_table.size()); // arbitrarily choosen 
+		vertices.reserve(4 * face_table.size()); // arbitrarily choosen
 		for_each(FaceTable::value_type& v, face_table) {
 			indices.clear();
 
 			aiFace& f = *faces++;
-		
+
 			const unsigned int key = v.first;
 			unsigned int cur_edge = v.second;
 			while (1) {
@@ -288,7 +288,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 					break;
 				}
 			}
-			
+
 			f.mIndices = new unsigned int[f.mNumIndices = indices.size()];
 			std::copy(indices.begin(),indices.end(),f.mIndices);
 		}
@@ -304,4 +304,4 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 	}
 }
 
-#endif 
+#endif

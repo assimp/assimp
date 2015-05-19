@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -50,7 +50,7 @@ KeyIterator::KeyIterator(const std::vector<aiVectorKey>* _objPos,
 	const std::vector<aiVectorKey>* _targetObjPos,
 	const aiVector3D*  defaultObjectPos /*= NULL*/,
 	const aiVector3D*  defaultTargetPos /*= NULL*/)
-		
+
 		:	reachedEnd		(false)
 		,	curTime			(-1.)
 		,	objPos			(_objPos)
@@ -99,10 +99,10 @@ void KeyIterator::operator ++()
 	// Now search in all arrays for the time value closest
 	// to our current position on the time line
 	double d0,d1;
-	
+
 	d0 = objPos->at      ( std::min<unsigned int> ( nextObjPos, objPos->size()-1)             ).mTime;
-	d1 = targetObjPos->at( std::min<unsigned int> ( nextTargetObjPos, targetObjPos->size()-1) ).mTime;	
-	
+	d1 = targetObjPos->at( std::min<unsigned int> ( nextTargetObjPos, targetObjPos->size()-1) ).mTime;
+
 	// Easiest case - all are identical. In this
 	// case we don't need to interpolate so we can
 	// return earlier
@@ -202,7 +202,7 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 
 	// TODO: in most cases we won't need the extra array
 	std::vector<aiVectorKey>  real;
-	
+
 	std::vector<aiVectorKey>* fill = (distanceTrack == objectPositions ? &real : distanceTrack);
 	fill->reserve(std::max( objectPositions->size(), targetPositions->size() ));
 
@@ -210,7 +210,7 @@ void TargetAnimationHelper::Process(std::vector<aiVectorKey>* distanceTrack)
 	// Then get the corresponding target position, compute the difference
 	// vector between object and target position. Then compute a rotation matrix
 	// that rotates the base vector of the object coordinate system at that time
-	// to match the diff vector. 
+	// to match the diff vector.
 
 	KeyIterator iter(objectPositions,targetPositions,&fixedMain);
 	for (;!iter.Finished();++iter)

@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -80,12 +80,12 @@ LWOImporter::LWOImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 LWOImporter::~LWOImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
@@ -93,9 +93,9 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 		return true;
 	}
 
-	// if check for extension is not enough, check for the magic tokens 
+	// if check for extension is not enough, check for the magic tokens
 	if (!extension.length() || checkSig) {
-		uint32_t tokens[3]; 
+		uint32_t tokens[3];
 		tokens[0] = AI_LWO_FOURCC_LWOB;
 		tokens[1] = AI_LWO_FOURCC_LWO2;
 		tokens[2] = AI_LWO_FOURCC_LXOB;
@@ -109,7 +109,7 @@ bool LWOImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 void LWOImporter::SetupProperties(const Importer* pImp)
 {
 	configSpeedFlag  = ( 0 != pImp->GetPropertyInteger(AI_CONFIG_FAVOUR_SPEED,0) ? true : false);
-	configLayerIndex = pImp->GetPropertyInteger (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,UINT_MAX); 
+	configLayerIndex = pImp->GetPropertyInteger (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,UINT_MAX);
 	configLayerName  = pImp->GetPropertyString  (AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY,"");
 }
 
@@ -121,9 +121,9 @@ const aiImporterDesc* LWOImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void LWOImporter::InternReadFile( const std::string& pFile, 
-	aiScene* pScene, 
+// Imports the given file into the given scene structure.
+void LWOImporter::InternReadFile( const std::string& pFile,
+	aiScene* pScene,
 	IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
@@ -151,13 +151,13 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 	// Initialize some members with their default values
 	hasNamedLayer   = false;
 
-	// Create temporary storage on the stack but store pointers to it in the class 
-	// instance. Therefore everything will be destructed properly if an exception 
+	// Create temporary storage on the stack but store pointers to it in the class
+	// instance. Therefore everything will be destructed properly if an exception
 	// is thrown and we needn't take care of that.
 	LayerList		_mLayers;
-	SurfaceList		_mSurfaces;		
-	TagList			_mTags;		
-	TagMappingTable _mMapping;	
+	SurfaceList		_mSurfaces;
+	TagList			_mTags;
+	TagMappingTable _mMapping;
 
 	mLayers			= &_mLayers;
 	mTags			= &_mTags;
@@ -189,7 +189,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		DefaultLogger::get()->info("LWO file format: LXOB (Modo)");
 	}
 	// we don't know this format
-	else 
+	else
 	{
 		char szBuff[5];
 		szBuff[0] = (char)(fileType >> 24u);
@@ -217,7 +217,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		}
 
 		if (configLayerName.length() && !hasNamedLayer)	{
-			throw DeadlyImportError("LWO2: Unable to find the requested layer: " 
+			throw DeadlyImportError("LWO2: Unable to find the requested layer: "
 				+ configLayerName);
 		}
 	}
@@ -264,7 +264,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 						iDefaultSurface = (unsigned int)mSurfaces->size();
 						mSurfaces->push_back(LWO::Surface());
 						LWO::Surface& surf = mSurfaces->back();
-						surf.mColor.r = surf.mColor.g = surf.mColor.b = 0.6f; 
+						surf.mColor.r = surf.mColor.g = surf.mColor.b = 0.6f;
 						surf.mName = "LWODefaultSurface";
 					}
 					idx = iDefaultSurface;
@@ -279,7 +279,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				if (sorted.empty())
 					continue;
 
-				// generate the mesh 
+				// generate the mesh
 				aiMesh* mesh = new aiMesh();
 				apcMeshes.push_back(mesh);
 				mesh->mNumFaces = (unsigned int)sorted.size();
@@ -317,7 +317,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 					if (UINT_MAX == vUVChannelIndices[mui]) {
 						break;
 					}
-					
+
 					pvUV[mui] = mesh->mTextureCoords[mui] = new aiVector3D[mesh->mNumVertices];
 
 					// LightWave doesn't support more than 2 UV components (?)
@@ -326,7 +326,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
 				if (layer.mNormals.name.length())
 					nrm = mesh->mNormals = new aiVector3D[mesh->mNumVertices];
-		
+
 				aiColor4D* pvVC[AI_MAX_NUMBER_OF_COLOR_SETS];
 				for (unsigned int mui = 0; mui < AI_MAX_NUMBER_OF_COLOR_SETS;++mui)	{
 					if (UINT_MAX == vVColorIndices[mui]) {
@@ -360,7 +360,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 							aiVector3D*& pp = pvUV[w];
 							const aiVector2D& src = ((aiVector2D*)&layer.mUVChannels[vUVChannelIndices[w]].rawData[0])[idx];
 							pp->x = src.x;
-							pp->y = src.y; 
+							pp->y = src.y;
 							pp++;
 						}
 
@@ -405,7 +405,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 				if (!mesh->mNormals)	{
 					// Compute normal vectors for the mesh - we can't use our GenSmoothNormal-
 					// Step here since it wouldn't handle smoothing groups correctly for LWO.
-					// So we use a separate implementation. 
+					// So we use a separate implementation.
 					ComputeNormals(mesh,smoothingGroups,_mSurfaces[i]);
 				}
 				else DefaultLogger::get()->debug("LWO2: No need to compute normals, they're already there");
@@ -487,7 +487,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 	}
 	if (!surface.mMaximumSmoothAngle)return;
 	const float posEpsilon = ComputePositionEpsilon(mesh);
-	
+
 	// Now generate the spatial sort tree
 	SGSpatialSort sSort;
 	std::vector<unsigned int>::const_iterator it = smoothingGroups.begin();
@@ -626,7 +626,7 @@ void LWOImporter::GenerateNodeGraph(std::map<uint16_t,aiNode*>& apcNodes)
 	if (!pScene->mRootNode->mNumChildren)
 		throw DeadlyImportError("LWO: Unable to build a valid node graph");
 
-	// Remove a single root node with no meshes assigned to it ... 
+	// Remove a single root node with no meshes assigned to it ...
 	if (1 == pScene->mRootNode->mNumChildren)	{
 		aiNode* pc = pScene->mRootNode->mChildren[0];
 		pc->mParent = pScene->mRootNode->mChildren[0] = NULL;
@@ -733,7 +733,7 @@ void LWOImporter::LoadLWOTags(unsigned int size)
 void LWOImporter::LoadLWOPoints(unsigned int length)
 {
 	// --- this function is used for both LWO2 and LWOB but for
-	// LWO2 we need to allocate 25% more storage - it could be we'll 
+	// LWO2 we need to allocate 25% more storage - it could be we'll
 	// need to duplicate some points later.
 	const size_t vertexLen = 12;
 	if ((length % vertexLen) != 0)
@@ -830,7 +830,7 @@ void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& face
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
-	uint16_t*& cursor, 
+	uint16_t*& cursor,
 	const uint16_t* const end)
 {
 	while (cursor < end)
@@ -840,7 +840,7 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
 		::memcpy(&numIndices, cursor++, 2);
 		AI_LSWAP2(numIndices);
 		face.mNumIndices = numIndices & 0x03FF;
-		
+
 		if(face.mNumIndices) /* byte swapping has already been done */
 		{
 			face.mIndices = new unsigned int[face.mNumIndices];
@@ -934,7 +934,7 @@ inline void CreateNewEntry(std::vector< T >& list, unsigned int srcIdx)
 }
 
 // ------------------------------------------------------------------------------------------------
-inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead, 
+inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int numRead,
 	unsigned int idx, float* data)
 {
 	ai_assert(NULL != data);
@@ -973,7 +973,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 
 	VMapEntry* base;
 
-	// read the name of the vertex map 
+	// read the name of the vertex map
 	std::string name;
 	GetS0(name,length);
 
@@ -981,8 +981,8 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	{
 	case AI_LWO_TXUV:
 		if (dims != 2)	{
-			DefaultLogger::get()->warn("LWO2: Skipping UV channel \'" 
-			+ name + "\' with !2 components"); 
+			DefaultLogger::get()->warn("LWO2: Skipping UV channel \'"
+			+ name + "\' with !2 components");
 			return;
 		}
 		base = FindEntry(mCurLayer->mUVChannels,name,perPoly);
@@ -990,8 +990,8 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	case AI_LWO_WGHT:
 	case AI_LWO_MNVW:
 		if (dims != 1)	{
-			DefaultLogger::get()->warn("LWO2: Skipping Weight Channel \'" 
-			+ name + "\' with !1 components"); 
+			DefaultLogger::get()->warn("LWO2: Skipping Weight Channel \'"
+			+ name + "\' with !1 components");
 			return;
 		}
 		base = FindEntry((type == AI_LWO_WGHT ? mCurLayer->mWeightChannels
@@ -1000,8 +1000,8 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	case AI_LWO_RGB:
 	case AI_LWO_RGBA:
 		if (dims != 3 && dims != 4)	{
-			DefaultLogger::get()->warn("LWO2: Skipping Color Map \'" 
-			+ name + "\' with a dimension > 4 or < 3"); 
+			DefaultLogger::get()->warn("LWO2: Skipping Color Map \'"
+			+ name + "\' with a dimension > 4 or < 3");
 			return;
 		}
 		base = FindEntry(mCurLayer->mVColorChannels,name,perPoly);
@@ -1016,7 +1016,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 			return;
 
 		DefaultLogger::get()->info("Processing non-standard extension: MODO VMAP.NORM.vert_normals");
-		
+
 		mCurLayer->mNormals.name = name;
 		base = & mCurLayer->mNormals;
 		break;
@@ -1026,17 +1026,17 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 	case AI_LWO_SPOT:
 		return;
 
-	default: 
+	default:
 		if (name == "APS.Level") {
 			// XXX handle this (seems to be subdivision-related).
 		}
-		DefaultLogger::get()->warn("LWO2: Skipping unknown VMAP/VMAD channel \'" + name + "\'"); 
+		DefaultLogger::get()->warn("LWO2: Skipping unknown VMAP/VMAD channel \'" + name + "\'");
 		return;
 	};
 	base->Allocate((unsigned int)mCurLayer->mTempPoints.size());
 
 	// now read all entries in the map
-	type = std::min(dims,base->dims); 
+	type = std::min(dims,base->dims);
 	const unsigned int diff = (dims - type)<<2u;
 
 	LWO::FaceList& list	= mCurLayer->mFaces;
@@ -1086,7 +1086,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 
 					had = true;
 					refList.resize(refList.size()+1, UINT_MAX);
-						
+
 					idx = (unsigned int)pointList.size();
 					src.mIndices[i] = (unsigned int)pointList.size();
 
@@ -1100,7 +1100,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
 					CreateNewEntry(mCurLayer->mUVChannels,		srcIdx );
 					CreateNewEntry(mCurLayer->mWeightChannels,	srcIdx );
 					CreateNewEntry(mCurLayer->mSWeightChannels,	srcIdx );
-					CreateNewEntry(mCurLayer->mNormals, srcIdx );	
+					CreateNewEntry(mCurLayer->mNormals, srcIdx );
 				}
 				if (!had) {
 					DefaultLogger::get()->warn("LWO2: Failure evaluating VMAD entry \'" + name + "\', vertex index wasn't found in that polygon");
@@ -1239,7 +1239,7 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length)
 			AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,PRE,2);
 			envelope.pre = (LWO::PrePostBehaviour)GetU2();
 			break;
-		
+
 			// postcondition
 		case AI_LWO_POST:
 			AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,POST,2);
@@ -1247,10 +1247,10 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length)
 			break;
 
 			// keyframe
-		case AI_LWO_KEY: 
+		case AI_LWO_KEY:
 			{
 			AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,KEY,8);
-			
+
 			envelope.keys.push_back(LWO::Key());
 			LWO::Key& key = envelope.keys.back();
 
@@ -1260,7 +1260,7 @@ void LWOImporter::LoadLWO2Envelope(unsigned int length)
 			}
 
 			// interval interpolation
-		case AI_LWO_SPAN: 
+		case AI_LWO_SPAN:
 			{
 				AI_LWO_VALIDATE_CHUNK_LENGTH(head.length,SPAN,4);
 				if (envelope.keys.size()<2)
@@ -1415,7 +1415,7 @@ void LWOImporter::LoadLWO2File()
 				mCurLayer->mFaceIDXOfs = old;
 				break;
 			}
-			// polygon tags 
+			// polygon tags
 		case AI_LWO_PTAG:
 			{
 				if (skip)

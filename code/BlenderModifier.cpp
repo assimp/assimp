@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -105,7 +105,7 @@ struct SharedModifierData : ElemBase
 };
 
 // ------------------------------------------------------------------------------------------------
-void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_data, const Scene& in, const Object& orig_object ) 
+void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_data, const Scene& in, const Object& orig_object )
 {
 	size_t cnt = 0u, ful = 0u;
 
@@ -183,9 +183,9 @@ bool BlenderModifier_Mirror :: IsActive (const ModifierData& modin)
 }
 
 // ------------------------------------------------------------------------------------------------
-void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier, 
+void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier,
 	const Scene& /*in*/,
-	const Object& orig_object ) 
+	const Object& orig_object )
 {
 	// hijacking the ABI, see the big note in BlenderModifierShowcase::ApplyModifiers()
 	const MirrorModifierData& mir = static_cast<const MirrorModifierData&>(orig_modifier);
@@ -208,7 +208,7 @@ void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  co
 			const aiVector3D center( mir.mirror_ob->obmat[3][0],mir.mirror_ob->obmat[3][1],mir.mirror_ob->obmat[3][2] );
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 				aiVector3D& v = mesh->mVertices[i];
-		
+
 				v.x = center.x + xs*(center.x - v.x);
 				v.y = center.y + ys*(center.y - v.y);
 				v.z = center.z + zs*(center.z - v.z);
@@ -287,16 +287,16 @@ bool BlenderModifier_Subdivision :: IsActive (const ModifierData& modin)
 }
 
 // ------------------------------------------------------------------------------------------------
-void  BlenderModifier_Subdivision :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier, 
+void  BlenderModifier_Subdivision :: DoIt(aiNode& out, ConversionData& conv_data,  const ElemBase& orig_modifier,
 	const Scene& /*in*/,
-	const Object& orig_object ) 
+	const Object& orig_object )
 {
 	// hijacking the ABI, see the big note in BlenderModifierShowcase::ApplyModifiers()
 	const SubsurfModifierData& mir = static_cast<const SubsurfModifierData&>(orig_modifier);
 	ai_assert(mir.modifier.type == ModifierData::eModifierType_Subsurf);
 
 	Subdivider::Algorithm algo;
-	switch (mir.subdivType) 
+	switch (mir.subdivType)
 	{
 	case SubsurfModifierData::TYPE_CatmullClarke:
 		algo = Subdivider::CATMULL_CLARKE;

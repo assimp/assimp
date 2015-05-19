@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ----------------------------------------------------------------------------
 /** @file Implements Assimp::SceneCombiner. This is a smart utility
- *    class that combines multiple scenes, meshes, ... into one. Currently 
+ *    class that combines multiple scenes, meshes, ... into one. Currently
  *    these utilities are used by the IRR and LWS loaders and the
  *    OptimizeGraph step.
  */
@@ -86,7 +86,7 @@ inline void PrefixString(aiString& string,const char* prefix, unsigned int len)
 // Add node identifiers to a hashing set
 void SceneCombiner::AddNodeHashes(aiNode* node, std::set<unsigned int>& hashes)
 {
-	// Add node name to hashing set if it is non-empty - empty nodes are allowed 
+	// Add node name to hashing set if it is non-empty - empty nodes are allowed
 	// and they can't have any anims assigned so its absolutely safe to duplicate them.
 	if (node->mName.length) {
 		hashes.insert( SuperFastHash(node->mName.data,node->mName.length) );
@@ -234,7 +234,7 @@ void SceneCombiner::AttachToGraph (aiNode* attach, std::vector<NodeAttachmentInf
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::AttachToGraph ( aiScene* master, 
+void SceneCombiner::AttachToGraph ( aiScene* master,
 	std::vector<NodeAttachmentInfo>& src)
 {
 	ai_assert(NULL != master);
@@ -242,7 +242,7 @@ void SceneCombiner::AttachToGraph ( aiScene* master,
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master, 
+void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	std::vector<AttachmentInfo>& srcList,
 	unsigned int flags)
 {
@@ -281,7 +281,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		if (duplicates[i] != i && duplicates[i] != UINT_MAX) {
 			continue;
 		}
-			
+
 		duplicates[i] = i;
 		for ( unsigned int a = i+1; a < src.size(); ++a)	{
 			if (src[i].scene == src[a].scene) {
@@ -297,11 +297,11 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// Construct a proper random number generator
 		boost::mt19937 rng(  );
 		boost::uniform_int<> dist(1u,1 << 24u);
-		boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);   
+		boost::variate_generator<boost::mt19937&, boost::uniform_int<> > rndGen(rng, dist);
 #endif
 		for (unsigned int i = 1; i < src.size();++i)
 		{
-			//if (i != duplicates[i]) 
+			//if (i != duplicates[i])
 			//{
 			//	// duplicate scenes share the same UID
 			//	::strcpy( src[i].id, src[duplicates[i]].id );
@@ -313,7 +313,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 			src[i].idlen = ::sprintf(src[i].id,"$%.6X$_",i);
 
 			if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
-				
+
 				// Compute hashes for all identifiers in this scene and store them
 				// in a sorted table (for convenience I'm using std::set). We hash
 				// just the node and animation channel names, all identifiers except
@@ -327,7 +327,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 			}
 		}
 	}
-	
+
 	unsigned int cnt;
 
 	// First find out how large the respective output arrays must be
@@ -381,7 +381,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 	// generate the output material list + an offset table for all material indices
 	if (dest->mNumMaterials)
-	{ 
+	{
 		aiMaterial** pip = dest->mMaterials = new aiMaterial*[dest->mNumMaterials];
 		cnt = 0;
 		for ( unsigned int n = 0; n < src.size();++n )	{
@@ -420,7 +420,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 						// Need to generate new, unique material names?
 						else if (!::strcmp( prop->mKey.data,"$mat.name" ) && flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_MATNAMES)
 						{
-							aiString* pcSrc = (aiString*) prop->mData; 
+							aiString* pcSrc = (aiString*) prop->mData;
 							PrefixString(*pcSrc, (*cur).id, (*cur).idlen);
 						}
 					}
@@ -475,13 +475,13 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	// ----------------------------------------------------------------------------
 
 	// Allocate space for light sources, cameras and animations
-	aiLight** ppLights = dest->mLights = (dest->mNumLights 
+	aiLight** ppLights = dest->mLights = (dest->mNumLights
 		? new aiLight*[dest->mNumLights] : NULL);
 
-	aiCamera** ppCameras = dest->mCameras = (dest->mNumCameras 
+	aiCamera** ppCameras = dest->mCameras = (dest->mNumCameras
 		? new aiCamera*[dest->mNumCameras] : NULL);
 
-	aiAnimation** ppAnims = dest->mAnimations = (dest->mNumAnimations 
+	aiAnimation** ppAnims = dest->mAnimations = (dest->mNumAnimations
 		? new aiAnimation*[dest->mNumAnimations] : NULL);
 
 	for ( int n = src.size()-1; n >= 0 ;--n ) /* !!! important !!! */
@@ -497,7 +497,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 			OffsetNodeMeshIndices(node,offset[duplicates[n]]);
 
 			if (flags & AI_INT_MERGE_SCENE_DUPLICATES_DEEP_CPY)	{
-				// (note:) they are already 'offseted' by offset[duplicates[n]] 
+				// (note:) they are already 'offseted' by offset[duplicates[n]]
 				OffsetNodeMeshIndices(node,offset[n] - offset[duplicates[n]]);
 			}
 		}
@@ -520,7 +520,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 
 			// meshes
 			for (unsigned int i = 0; i < (*cur)->mNumMeshes;++i)	{
-				aiMesh* mesh = (*cur)->mMeshes[i]; 
+				aiMesh* mesh = (*cur)->mMeshes[i];
 
 				// rename all bones
 				for (unsigned int a = 0; a < mesh->mNumBones;++a)	{
@@ -537,7 +537,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// Copy light sources
 		for (unsigned int i = 0; i < (*cur)->mNumLights;++i,++ppLights)
 		{
-			if (n != (int)duplicates[n]) // duplicate scene? 
+			if (n != (int)duplicates[n]) // duplicate scene?
 			{
 				Copy(ppLights, (*cur)->mLights[i]);
 			}
@@ -558,7 +558,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// --------------------------------------------------------------------
 		// Copy cameras
 		for (unsigned int i = 0; i < (*cur)->mNumCameras;++i,++ppCameras)	{
-			if (n != (int)duplicates[n]) // duplicate scene? 
+			if (n != (int)duplicates[n]) // duplicate scene?
 			{
 				Copy(ppCameras, (*cur)->mCameras[i]);
 			}
@@ -578,7 +578,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 		// --------------------------------------------------------------------
 		// Copy animations
 		for (unsigned int i = 0; i < (*cur)->mNumAnimations;++i,++ppAnims)	{
-			if (n != (int)duplicates[n]) // duplicate scene? 
+			if (n != (int)duplicates[n]) // duplicate scene?
 			{
 				Copy(ppAnims, (*cur)->mAnimations[i]);
 			}
@@ -611,7 +611,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 	dest->mRootNode = master->mRootNode;
 
 	// Check whether we succeeded at building the output graph
-	for (std::vector <NodeAttachmentInfo> ::iterator it = nodes.begin(); 
+	for (std::vector <NodeAttachmentInfo> ::iterator it = nodes.begin();
 		it != nodes.end(); ++it)
 	{
 		if (!(*it).resolved) {
@@ -626,7 +626,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
 				}
 			}
 			if (!(*it).resolved) {
-				DefaultLogger::get()->error(std::string("SceneCombiner: Failed to resolve attachment ") 
+				DefaultLogger::get()->error(std::string("SceneCombiner: Failed to resolve attachment ")
 					+ (*it).node->mName.data + " " + (*it).attachToNode->mName.data);
 			}
 		}
@@ -710,7 +710,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 	// at least if we have many bones.
 	std::list<BoneWithHash> asBones;
 	BuildUniqueBoneList(asBones, it,end);
-	
+
 	// now create the output bones
 	out->mNumBones = 0;
 	out->mBones = new aiBone*[asBones.size()];
@@ -727,7 +727,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 			pc->mNumWeights += (*wmit).first->mNumWeights;
 
 			// NOTE: different offset matrices for bones with equal names
-			// are - at the moment - not handled correctly. 
+			// are - at the moment - not handled correctly.
 			if (wmit != (*it).pSrcBones.begin() && pc->mOffsetMatrix != (*wmit).first->mOffsetMatrix)	{
 				DefaultLogger::get()->warn("Bones with equal names but different offset matrices can't be joined at the moment");
 				continue;
@@ -738,7 +738,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
 		// Allocate the vertex weight array
 		aiVertexWeight* avw = pc->mWeights = new aiVertexWeight[pc->mNumWeights];
 
-		// And copy the final weights - adjust the vertex IDs by the 
+		// And copy the final weights - adjust the vertex IDs by the
 		// face index offset of the coresponding mesh.
 		for (std::vector< BoneSrcIndex >::const_iterator wmit = (*it).pSrcBones.begin(); wmit != wend; ++wmit)	{
 			aiBone* pip = (*wmit).first;
@@ -869,7 +869,7 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
 				if (ofs)	{
 					// add the offset to the vertex
 					for (unsigned int q = 0; q < face.mNumIndices; ++q)
-						face.mIndices[q] += ofs;	
+						face.mIndices[q] += ofs;
 				}
 				face.mIndices = NULL;
 			}
@@ -918,7 +918,7 @@ void SceneCombiner::MergeMaterials(aiMaterial** dest,
 		for(unsigned int i = 0; i < (*it)->mNumProperties; ++i) {
 			aiMaterialProperty* sprop = (*it)->mProperties[i];
 
-			// Test if we already have a matching property 
+			// Test if we already have a matching property
 			const aiMaterialProperty* prop_exist;
 			if(aiGetMaterialProperty(out, sprop->mKey.C_Str(), sprop->mSemantic, sprop->mIndex, &prop_exist) != AI_SUCCESS) {
 				// If not, we add it to the new material
@@ -986,7 +986,7 @@ void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src,bool allocate)
 	if (allocate) {
 		*_dest = new aiScene();
 	}
-	aiScene* dest = *_dest; 
+	aiScene* dest = *_dest;
 	ai_assert(dest);
 
 	// copy animations
@@ -1096,7 +1096,7 @@ void SceneCombiner::Copy (aiMaterial** _dest, const aiMaterial* src)
 		prop->mType		= sprop->mType;
 	}
 }
-	
+
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy  (aiTexture** _dest, const aiTexture* src)
 {
@@ -1125,7 +1125,7 @@ void SceneCombiner::Copy  (aiTexture** _dest, const aiTexture* src)
 		::memcpy(dest->pcData, old, cpy);
 	}
 }
-	
+
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy     (aiAnimation** _dest, const aiAnimation* src)
 {

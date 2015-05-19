@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  LWOAnimation.h
- *  @brief LWOAnimationResolver utility class 
+ *  @brief LWOAnimationResolver utility class
  *
  *  This is for all lightwave-related file format, not only LWO.
  *  LWS isthe main purpose.
@@ -90,7 +90,7 @@ enum EnvelopeType
  */
 enum InterpolationType
 {
-	IT_STEP, IT_LINE, IT_TCB, IT_HERM, IT_BEZI, IT_BEZ2	
+	IT_STEP, IT_LINE, IT_TCB, IT_HERM, IT_BEZI, IT_BEZ2
 };
 
 
@@ -144,7 +144,7 @@ struct Envelope
 		:	type	(EnvelopeType_Unknown)
 		,	pre		(PrePostBehaviour_Constant)
 		,	post	(PrePostBehaviour_Constant)
-		
+
 		,	old_first (0)
 		,	old_last  (0)
 	{}
@@ -167,7 +167,7 @@ struct Envelope
 };
 
 // ---------------------------------------------------------------------------
-//! @def AI_LWO_ANIM_FLAG_SAMPLE_ANIMS 
+//! @def AI_LWO_ANIM_FLAG_SAMPLE_ANIMS
 //! Flag for AnimResolver, subsamples the input data with the rate specified
 //! by AnimResolver::SetSampleRate().
 #define AI_LWO_ANIM_FLAG_SAMPLE_ANIMS 0x1
@@ -217,7 +217,7 @@ public:
 	// ------------------------------------------------------------------
 	/** @brief Set the sampling rate for ExtractAnimChannel().
 	 *
-	 *  Non-linear interpolations are subsampled with this rate (keys 
+	 *  Non-linear interpolations are subsampled with this rate (keys
 	 *  per second). Closer sampling positions, if existent, are kept.
 	 *  The sampling rate defaults to 0, if this value is not changed and
 	 *  AI_LWO_ANIM_FLAG_SAMPLE_ANIMS is specified for ExtractAnimChannel(),
@@ -259,7 +259,7 @@ protected:
 	 *  @param flags Any combination of the AI_LWO_ANIM_FLAG_XXX flags.
 	 *  @note Up to two input envelopes may be NULL
 	 */
-	void GetKeys(std::vector<aiVectorKey>& out, 
+	void GetKeys(std::vector<aiVectorKey>& out,
 		LWO::Envelope* envl_x,
 		LWO::Envelope* envl_y,
 		LWO::Envelope* envl_z,
@@ -273,20 +273,20 @@ protected:
 	 *  @param time time to be interpolated
 	 *  @param fill Receives the interpolated output value.
 	 */
-	void DoInterpolation(std::vector<LWO::Key>::const_iterator cur, 
+	void DoInterpolation(std::vector<LWO::Key>::const_iterator cur,
 		LWO::Envelope* envl,double time, float& fill);
 
 	// ------------------------------------------------------------------
-	/** @brief Almost the same, except we won't handle pre/post 
+	/** @brief Almost the same, except we won't handle pre/post
 	 *  conditions here.
 	 *  @see DoInterpolation
 	 */
-	void DoInterpolation2(std::vector<LWO::Key>::const_iterator beg, 
+	void DoInterpolation2(std::vector<LWO::Key>::const_iterator beg,
 		std::vector<LWO::Key>::const_iterator end,double time, float& fill);
 
 	// ------------------------------------------------------------------
 	/** @brief Interpolate 2 tracks if one is given
-	 * 
+	 *
 	 *  @param out Receives extra output keys
 	 *  @param key_out Primary output key
 	 *  @param time Time to interpolate for

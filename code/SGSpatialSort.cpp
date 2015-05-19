@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the helper class to quickly find 
-vertices close to a given position. Special implementation for 
+/** @file Implementation of the helper class to quickly find
+vertices close to a given position. Special implementation for
 the 3ds loader handling smooth groups correctly  */
 
 #include "SGSpatialSort.h"
@@ -51,7 +51,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 SGSpatialSort::SGSpatialSort()
 {
-	// define the reference plane. We choose some arbitrary vector away from all basic axises 
+	// define the reference plane. We choose some arbitrary vector away from all basic axises
 	// in the hope that no model spreads all its vertices along this plane.
 	mPlaneNormal.Set( 0.8523f, 0.34321f, 0.5736f);
 	mPlaneNormal.Normalize();
@@ -68,7 +68,7 @@ void SGSpatialSort::Add(const aiVector3D& vPosition, unsigned int index,
 {
 	// store position by index and distance
 	float distance = vPosition * mPlaneNormal;
-	mPositions.push_back( Entry( index, vPosition, 
+	mPositions.push_back( Entry( index, vPosition,
 		distance, smoothingGroup));
 }
 // ------------------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ void SGSpatialSort::Prepare()
 }
 // ------------------------------------------------------------------------------------------------
 // Returns an iterator for all positions close to the given position.
-void SGSpatialSort::FindPositions( const aiVector3D& pPosition, 
+void SGSpatialSort::FindPositions( const aiVector3D& pPosition,
 	uint32_t pSG,
 	float pRadius,
 	std::vector<unsigned int>& poResults,

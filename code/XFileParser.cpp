@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -82,7 +82,7 @@ static void  dummy_free  (void* /*opaque*/, void* address)	{
 #endif // !! ASSIMP_BUILD_NO_COMPRESSED_X
 
 // ------------------------------------------------------------------------------------------------
-// Constructor. Creates a data structure out of the XFile given in the memory block. 
+// Constructor. Creates a data structure out of the XFile given in the memory block.
 XFileParser::XFileParser( const std::vector<char>& pBuffer)
 {
 	mMajorVersion = mMinorVersion = 0;
@@ -129,7 +129,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 		mIsBinaryFormat = true;
 		compressed = true;
 	}
-	else ThrowException( boost::str(boost::format("Unsupported xfile format '%c%c%c%c'") 
+	else ThrowException( boost::str(boost::format("Unsupported xfile format '%c%c%c%c'")
 		% P[8] % P[9] % P[10] % P[11]));
 
 	// float size
@@ -153,7 +153,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 #ifdef ASSIMP_BUILD_NO_COMPRESSED_X
 		throw DeadlyImportError("Assimp was built without compressed X support");
 #else
-		/* ///////////////////////////////////////////////////////////////////////  
+		/* ///////////////////////////////////////////////////////////////////////
 		 * COMPRESSED X FILE FORMAT
 		 * ///////////////////////////////////////////////////////////////////////
 		 *    [xhead]
@@ -210,14 +210,14 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 			P1 += ofs;
 			est_out += MSZIP_BLOCK; // one decompressed block is 32786 in size
 		}
-		
+
 		// Allocate storage and terminating zero and do the actual uncompressing
 		uncompressed.resize(est_out + 1);
 		char* out = &uncompressed.front();
 		while (P + 3 < End)
 		{
 			uint16_t ofs = *((uint16_t*)P);
-			AI_SWAP2(ofs); 
+			AI_SWAP2(ofs);
 			P += 4;
 
 			if (P + ofs > End + 2) {
@@ -245,7 +245,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 
 		// terminate zlib
 		::inflateEnd(&stream);
-		
+
 		// ok, update pointers to point to the uncompressed file data
 		P = &uncompressed[0];
 		End = out;
@@ -271,7 +271,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor. Destroys all imported data along with it 
+// Destructor. Destroys all imported data along with it
 XFileParser::~XFileParser()
 {
 	// kill everything we created
@@ -312,7 +312,7 @@ void XFileParser::ParseFile()
 		if( objectName == "Material")
 		{
 			// Material outside of a mesh or node
-			Material material; 
+			Material material;
 			ParseDataObjectMaterial( &material);
 			mScene->mGlobalMaterials.push_back( material);
 		} else
@@ -699,7 +699,7 @@ void XFileParser::ParseDataObjectMeshMaterialList( Mesh* pMesh)
 		else
 		if( objectName == "{")
 		{
-			// template materials 
+			// template materials
 			std::string matName = GetNextToken();
 			Material material;
 			material.mIsReference = true;
@@ -735,10 +735,10 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
 	pMaterial->mIsReference = false;
 
 	// read material values
-	pMaterial->mDiffuse = ReadRGBA(); 
+	pMaterial->mDiffuse = ReadRGBA();
 	pMaterial->mSpecularExponent = ReadFloat();
-	pMaterial->mSpecular = ReadRGB(); 
-	pMaterial->mEmissive = ReadRGB(); 
+	pMaterial->mSpecular = ReadRGB();
+	pMaterial->mEmissive = ReadRGB();
 
 	// read other data objects
 	bool running = true;
@@ -1067,7 +1067,7 @@ std::string XFileParser::GetNextToken()
 		unsigned int len;
 
 		// standalone tokens
-		switch( tok) 
+		switch( tok)
 		{
 			case 1:
 				// name token
@@ -1281,7 +1281,7 @@ unsigned int XFileParser::ReadInt()
 			if( tmp == 0x06 && End - P >= 4) // array of ints follows
 				mBinaryNumCount = ReadBinDWord();
 			else // single int follows
-				mBinaryNumCount = 1; 
+				mBinaryNumCount = 1;
 		}
 
 		--mBinaryNumCount;
@@ -1318,7 +1318,7 @@ unsigned int XFileParser::ReadInt()
 			number = number * 10 + (*P - 48);
 			P++;
 		}
-		
+
 		CheckForSeparator();
 		return isNegative ? ((unsigned int) -int( number)) : number;
 	}
@@ -1335,7 +1335,7 @@ float XFileParser::ReadFloat()
 			if( tmp == 0x07 && End - P >= 4) // array of floats following
 				mBinaryNumCount = ReadBinDWord();
 			else // single float following
-				mBinaryNumCount = 1; 
+				mBinaryNumCount = 1;
 		}
 
 		--mBinaryNumCount;
@@ -1368,7 +1368,7 @@ float XFileParser::ReadFloat()
 	// I mean you, Blender!
 	// Reading is safe because of the terminating zero
 	if( strncmp( P, "-1.#IND00", 9) == 0 || strncmp( P, "1.#IND00", 8) == 0)
-	{ 
+	{
 		P += 9;
 		CheckForSeparator();
 		return 0.0f;

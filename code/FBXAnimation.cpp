@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,24 +23,24 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  FBXAnimation.cpp
- *  @brief Assimp::FBX::AnimationCurve, Assimp::FBX::AnimationCurveNode, 
- *         Assimp::FBX::AnimationLayer, Assimp::FBX::AnimationStack 
+ *  @brief Assimp::FBX::AnimationCurve, Assimp::FBX::AnimationCurveNode,
+ *         Assimp::FBX::AnimationLayer, Assimp::FBX::AnimationStack
  */
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
@@ -72,7 +72,7 @@ AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::s
 	if(keys.size() != values.size()) {
 		DOMError("the number of key times does not match the number of keyframe values",&KeyTime);
 	}
-	
+
 	// check if the key times are well-ordered
 	if(!std::equal(keys.begin(), keys.end() - 1, keys.begin() + 1, std::less<KeyTimeList::value_type>())) {
 		DOMError("the keyframes are not in ascending order",&KeyTime);
@@ -98,14 +98,14 @@ AnimationCurve::~AnimationCurve()
 
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc, 
+AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc,
 	const char* const * target_prop_whitelist /*= NULL*/, size_t whitelist_size /*= 0*/)
 : Object(id, element, name)
 , target()
 , doc(doc)
 {
 	const Scope& sc = GetRequiredScope(element);
-	
+
 	// find target node
 	const char* whitelist[] = {"Model","NodeAttribute"};
 	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),whitelist,2);
@@ -140,7 +140,7 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 
 		// XXX support constraints as DOM class
 		//ai_assert(dynamic_cast<const Model*>(ob) || dynamic_cast<const NodeAttribute*>(ob));
-		target = ob; 
+		target = ob;
 		if(!target) {
 			continue;
 		}
@@ -218,7 +218,7 @@ AnimationLayer::~AnimationLayer()
 
 
 // ------------------------------------------------------------------------------------------------
-AnimationCurveNodeList AnimationLayer::Nodes(const char* const * target_prop_whitelist /*= NULL*/, 
+AnimationCurveNodeList AnimationLayer::Nodes(const char* const * target_prop_whitelist /*= NULL*/,
 	size_t whitelist_size /*= 0*/) const
 {
 	AnimationCurveNodeList nodes;

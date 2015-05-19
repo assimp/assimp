@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -106,7 +106,7 @@ public:
 public:
 
 	//! Destructor
-	~SharedPostProcessInfo()	
+	~SharedPostProcessInfo()
 	{
 		Clean();
 	}
@@ -188,7 +188,7 @@ private:
  *
  *  For future use.
  */
- struct PPDependencyTable 
+ struct PPDependencyTable
  {
 	 unsigned int execute_me_before_these;
 	 unsigned int execute_me_after_these;
@@ -204,14 +204,14 @@ private:
 // ---------------------------------------------------------------------------
 /** The BaseProcess defines a common interface for all post processing steps.
  * A post processing step is run after a successful import if the caller
- * specified the corresponding flag when calling ReadFile(). 
- * Enum #aiPostProcessSteps defines which flags are available. 
- * After a successful import the Importer iterates over its internal array 
- * of processes and calls IsActive() on each process to evaluate if the step 
- * should be executed. If the function returns true, the class' Execute() 
+ * specified the corresponding flag when calling ReadFile().
+ * Enum #aiPostProcessSteps defines which flags are available.
+ * After a successful import the Importer iterates over its internal array
+ * of processes and calls IsActive() on each process to evaluate if the step
+ * should be executed. If the function returns true, the class' Execute()
  * function is called subsequently.
  */
-class ASSIMP_API_WINONLY BaseProcess 
+class ASSIMP_API_WINONLY BaseProcess
 {
 	friend class Importer;
 
@@ -229,13 +229,13 @@ public:
 	/** Returns whether the processing step is present in the given flag.
 	 * @param pFlags The processing flags the importer was called with. A
 	 *   bitwise combination of #aiPostProcessSteps.
-	 * @return true if the process is present in this flag fields, 
+	 * @return true if the process is present in this flag fields,
 	 *   false if not.
 	*/
 	virtual bool IsActive( unsigned int pFlags) const = 0;
 
 	// -------------------------------------------------------------------
-	/** Check whether this step expects its input vertex data to be 
+	/** Check whether this step expects its input vertex data to be
 	 *  in verbose format. */
 	virtual bool RequireVerboseFormat() const;
 

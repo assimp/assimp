@@ -21,7 +21,7 @@ public:
 
 	/**	@brief	Destructor	*/
 	~Win32DebugLogStream();
-	
+
 	/**	@brief	Writer	*/
 	void write(const char* messgae);
 };

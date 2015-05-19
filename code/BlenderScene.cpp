@@ -5,8 +5,8 @@ Open Asset Import Library (ASSIMP)
 Copyright (c) 2006-2010, ASSIMP Development Team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the ASSIMP Development Team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -56,7 +56,7 @@ template <> void Structure :: Convert<Object> (
     Object& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
@@ -84,7 +84,7 @@ template <> void Structure :: Convert<Group> (
     Group& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Igno>(dest.layer,"layer",db);
@@ -98,7 +98,7 @@ template <> void Structure :: Convert<MTex> (
     MTex& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Igno>((short&)dest.mapto,"mapto",db);
     ReadField<ErrorPolicy_Igno>((int&)dest.blendtype,"blendtype",db);
@@ -137,7 +137,7 @@ template <> void Structure :: Convert<TFace> (
     TFace& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldArray2<ErrorPolicy_Fail>(dest.uv,"uv",db);
     ReadFieldArray<ErrorPolicy_Fail>(dest.col,"col",db);
@@ -154,7 +154,7 @@ template <> void Structure :: Convert<SubsurfModifierData> (
     SubsurfModifierData& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.modifier,"modifier",db);
     ReadField<ErrorPolicy_Warn>(dest.subdivType,"subdivType",db);
@@ -170,7 +170,7 @@ template <> void Structure :: Convert<MFace> (
     MFace& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.v1,"v1",db);
     ReadField<ErrorPolicy_Fail>(dest.v2,"v2",db);
@@ -187,7 +187,7 @@ template <> void Structure :: Convert<Lamp> (
     Lamp& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
@@ -215,7 +215,7 @@ template <> void Structure :: Convert<MDeformWeight> (
     MDeformWeight& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.def_nr,"def_nr",db);
     ReadField<ErrorPolicy_Fail>(dest.weight,"weight",db);
@@ -228,7 +228,7 @@ template <> void Structure :: Convert<PackedFile> (
     PackedFile& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Warn>(dest.size,"size",db);
     ReadField<ErrorPolicy_Warn>(dest.seek,"seek",db);
@@ -242,7 +242,7 @@ template <> void Structure :: Convert<Base> (
     Base& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 	// note: as per https://github.com/assimp/assimp/issues/128,
 	// reading the Object linked list recursively is prone to stack overflow.
 	// This structure converter is therefore an hand-written exception that
@@ -252,7 +252,7 @@ template <> void Structure :: Convert<Base> (
 
 	std::pair<Base*, int> todo = std::make_pair(&dest, initial_pos);
 	for ( ;; ) {
-	
+
 		Base& cur_dest = *todo.first;
 		db.reader->SetCurrentPos(todo.second);
 
@@ -262,7 +262,7 @@ template <> void Structure :: Convert<Base> (
 
 		ReadFieldPtr<ErrorPolicy_Warn>(cur_dest.object,"*object",db);
 
-		// the return value of ReadFieldPtr indicates whether the object 
+		// the return value of ReadFieldPtr indicates whether the object
 		// was already cached. In this case, we don't need to resolve
 		// it again.
 		if(!ReadFieldPtr<ErrorPolicy_Warn>(cur_dest.next,"*next",db, true) && cur_dest.next) {
@@ -271,7 +271,7 @@ template <> void Structure :: Convert<Base> (
 		}
 		break;
 	}
-	
+
 	db.reader->SetCurrentPos(initial_pos + size);
 }
 
@@ -280,7 +280,7 @@ template <> void Structure :: Convert<MTFace> (
     MTFace& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldArray2<ErrorPolicy_Fail>(dest.uv,"uv",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
@@ -296,7 +296,7 @@ template <> void Structure :: Convert<Material> (
     Material& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Warn>(dest.r,"r",db);
@@ -332,7 +332,7 @@ template <> void Structure :: Convert<MTexPoly> (
     MTexPoly& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     {
         boost::shared_ptr<Image> tpage;
@@ -353,7 +353,7 @@ template <> void Structure :: Convert<Mesh> (
     Mesh& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Fail>(dest.totface,"totface",db);
@@ -387,7 +387,7 @@ template <> void Structure :: Convert<MDeformVert> (
     MDeformVert& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldPtr<ErrorPolicy_Warn>(dest.dw,"*dw",db);
     ReadField<ErrorPolicy_Igno>(dest.totweight,"totweight",db);
@@ -400,7 +400,7 @@ template <> void Structure :: Convert<World> (
     World& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
 
@@ -412,7 +412,7 @@ template <> void Structure :: Convert<MLoopCol> (
     MLoopCol& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Igno>(dest.r,"r",db);
     ReadField<ErrorPolicy_Igno>(dest.g,"g",db);
@@ -427,7 +427,7 @@ template <> void Structure :: Convert<MVert> (
     MVert& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldArray<ErrorPolicy_Fail>(dest.co,"co",db);
     ReadFieldArray<ErrorPolicy_Fail>(dest.no,"no",db);
@@ -443,7 +443,7 @@ template <> void Structure :: Convert<MEdge> (
     MEdge& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.v1,"v1",db);
     ReadField<ErrorPolicy_Fail>(dest.v2,"v2",db);
@@ -459,7 +459,7 @@ template <> void Structure :: Convert<MLoopUV> (
     MLoopUV& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldArray<ErrorPolicy_Igno>(dest.uv,"uv",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
@@ -472,7 +472,7 @@ template <> void Structure :: Convert<GroupObject> (
     GroupObject& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldPtr<ErrorPolicy_Fail>(dest.prev,"*prev",db);
     ReadFieldPtr<ErrorPolicy_Fail>(dest.next,"*next",db);
@@ -486,7 +486,7 @@ template <> void Structure :: Convert<ListBase> (
     ListBase& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldPtr<ErrorPolicy_Igno>(dest.first,"*first",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.last,"*last",db);
@@ -499,7 +499,7 @@ template <> void Structure :: Convert<MLoop> (
     MLoop& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Igno>(dest.v,"v",db);
     ReadField<ErrorPolicy_Igno>(dest.e,"e",db);
@@ -512,7 +512,7 @@ template <> void Structure :: Convert<ModifierData> (
     ModifierData& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldPtr<ErrorPolicy_Warn>(dest.next,"*next",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.prev,"*prev",db);
@@ -528,7 +528,7 @@ template <> void Structure :: Convert<ID> (
     ID& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
@@ -541,7 +541,7 @@ template <> void Structure :: Convert<MCol> (
     MCol& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.r,"r",db);
     ReadField<ErrorPolicy_Fail>(dest.g,"g",db);
@@ -556,7 +556,7 @@ template <> void Structure :: Convert<MPoly> (
     MPoly& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Igno>(dest.loopstart,"loopstart",db);
     ReadField<ErrorPolicy_Igno>(dest.totloop,"totloop",db);
@@ -571,7 +571,7 @@ template <> void Structure :: Convert<Scene> (
     Scene& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.camera,"*camera",db);
@@ -587,7 +587,7 @@ template <> void Structure :: Convert<Library> (
     Library& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);
@@ -602,7 +602,7 @@ template <> void Structure :: Convert<Tex> (
     Tex& dest,
     const FileDatabase& db
     ) const
-{ 
+{
     ReadField<ErrorPolicy_Igno>((short&)dest.imaflag,"imaflag",db);
     ReadField<ErrorPolicy_Fail>((int&)dest.type,"type",db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.ima,"*ima",db);
@@ -615,7 +615,7 @@ template <> void Structure :: Convert<Camera> (
     Camera& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Warn>((int&)dest.type,"type",db);
@@ -630,7 +630,7 @@ template <> void Structure :: Convert<MirrorModifierData> (
     MirrorModifierData& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.modifier,"modifier",db);
     ReadField<ErrorPolicy_Igno>(dest.axis,"axis",db);
@@ -646,7 +646,7 @@ template <> void Structure :: Convert<Image> (
     Image& dest,
     const FileDatabase& db
     ) const
-{ 
+{
 
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadFieldArray<ErrorPolicy_Warn>(dest.name,"name",db);

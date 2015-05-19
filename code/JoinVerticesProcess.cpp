@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -157,7 +157,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	if (!vertexFinder)	{
 		// bad, need to compute it.
 		_vertexFinder.Fill(pMesh->mVertices, pMesh->mNumVertices, sizeof( aiVector3D));
-		vertexFinder = &_vertexFinder; 
+		vertexFinder = &_vertexFinder;
 		// posEpsilonSqr = ComputePositionEpsilon(pMesh);
 	}
 
@@ -193,7 +193,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// Position mismatch is impossible - the vertex finder already discarded all non-matching positions
 
 			// We just test the other attributes even if they're not present in the mesh.
-			// In this case they're initialized to 0 so the comparision succeeds. 
+			// In this case they're initialized to 0 so the comparision succeeds.
 			// By this method the non-present attributes are effectively ignored in the comparision.
 			if( (uv.normal - v.normal).SquareLength() > squareEpsilon)
 				continue;
@@ -208,7 +208,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			// Actually this increases runtime performance slightly, at least if branch
 			// prediction is on our side.
 			if (complex){
-				// manually unrolled because continue wouldn't work as desired in an inner loop, 
+				// manually unrolled because continue wouldn't work as desired in an inner loop,
 				// also because some compilers seem to fail the task. Colors and UV coords
 				// are interleaved since the higher entries are most likely to be
 				// zero and thus useless. By interleaving the arrays, vertices are,
@@ -248,7 +248,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 					continue;
 				if( GetColorDifference( uv.colors[6], v.colors[6]) > squareEpsilon)
 					continue;
-				
+
 				if( GetColorDifference( uv.colors[7], v.colors[7]) > squareEpsilon)
 					continue;
 			}
@@ -290,8 +290,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	pMesh->mNumVertices = (unsigned int)uniqueVertices.size();
 
 	// ----------------------------------------------------------------------------
-	// NOTE - we're *not* calling Vertex::SortBack() because it would check for 
-	// presence of every single vertex component once PER VERTEX. And our CPU 
+	// NOTE - we're *not* calling Vertex::SortBack() because it would check for
+	// presence of every single vertex component once PER VERTEX. And our CPU
 	// dislikes branches, even if they're easily predictable.
 	// ----------------------------------------------------------------------------
 
@@ -385,7 +385,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			memcpy( bone->mWeights, &newWeights[0], bone->mNumWeights * sizeof( aiVertexWeight));
 		}
 		else {
-		
+
 			/*  NOTE:
 			 *
 			 *  In the algorithm above we're assuming that there are no vertices
@@ -394,7 +394,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 			 *  for example generates such input data if two skeleton points
 			 *  share the same position. Again this doesn't make sense but is
 			 *  reality for some model formats (MD5 for example uses these special
-			 *  nodes as attachment tags for its weapons). 
+			 *  nodes as attachment tags for its weapons).
 			 *
 			 *  Then it is possible that a bone has no weights anymore .... as a quick
 			 *  workaround, we're just removing these bones. If they're animated,
@@ -406,7 +406,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 				pMesh->mBones[n] = pMesh->mBones[n+1];
 			}
 
-			--a; 
+			--a;
 			DefaultLogger::get()->warn("Removing bone -> no weights remaining");
 		}
 	}

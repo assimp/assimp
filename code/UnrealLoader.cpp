@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -75,7 +75,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"3d uc" 
+	"3d uc"
 };
 
 
@@ -87,12 +87,12 @@ UnrealImporter::UnrealImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 UnrealImporter::~UnrealImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool UnrealImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
 {
 	return  SimpleExtensionCheck(pFile,"3d","uc");
@@ -109,7 +109,7 @@ const aiImporterDesc* UnrealImporter::GetInfo () const
 // Setup configuration properties for the loader
 void UnrealImporter::SetupProperties(const Importer* pImp)
 {
-	// The 
+	// The
 	// AI_CONFIG_IMPORT_UNREAL_KEYFRAME option overrides the
 	// AI_CONFIG_IMPORT_GLOBAL_KEYFRAME option.
 	configFrameID = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_UNREAL_KEYFRAME,-1);
@@ -122,8 +122,8 @@ void UnrealImporter::SetupProperties(const Importer* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void UnrealImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void UnrealImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	// For any of the 3 files being passed get the three correct paths
@@ -213,7 +213,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 	if (configFrameID >= numFrames)
 		throw DeadlyImportError("UNREAL: The requested frame does not exist");
 
-	uint32_t st = a_reader.GetI2(); 
+	uint32_t st = a_reader.GetI2();
 	if (st != numVert*4)
 		throw DeadlyImportError("UNREAL: Unexpected aniv file length");
 
@@ -227,8 +227,8 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 		Unreal::DecompressVertex(*it,val);
 	}
 
-	// list of textures. 
-	std::vector< std::pair<unsigned int, std::string> > textures; 
+	// list of textures.
+	std::vector< std::pair<unsigned int, std::string> > textures;
 
 	// allocate the output scene
 	aiNode* nd = pScene->mRootNode = new aiNode();
@@ -249,7 +249,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 			if (TokenMatchI(data,"#exec",5))	{
 				SkipSpacesAndLineEnd(&data);
 
-				// #exec TEXTURE IMPORT [...] NAME=jjjjj [...] FILE=jjjj.pcx [...] 
+				// #exec TEXTURE IMPORT [...] NAME=jjjjj [...] FILE=jjjj.pcx [...]
 				if (TokenMatchI(data,"TEXTURE",7))	{
 					SkipSpacesAndLineEnd(&data);
 
@@ -260,12 +260,12 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 							if (!::ASSIMP_strincmp(data,"NAME=",5))	{
 								const char *d = data+=5;
 								for (;!IsSpaceOrNewLine(*data);++data);
-								me.first = std::string(d,(size_t)(data-d)); 
+								me.first = std::string(d,(size_t)(data-d));
 							}
 							else if (!::ASSIMP_strincmp(data,"FILE=",5))	{
 								const char *d = data+=5;
 								for (;!IsSpaceOrNewLine(*data);++data);
-								me.second = std::string(d,(size_t)(data-d)); 
+								me.second = std::string(d,(size_t)(data-d));
 							}
 						}
 						if (!me.first.length() || !me.second.length())
@@ -278,7 +278,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 					SkipSpacesAndLineEnd(&data);
 
 					if (TokenMatchI(data,"SETTEXTURE",10)) {
-					
+
 						textures.push_back(std::pair<unsigned int, std::string>());
 						std::pair<unsigned int, std::string>& me = textures.back();
 
@@ -291,8 +291,8 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 								data += 8;
 								const char *d = data;
 								for (;!IsSpaceOrNewLine(*data);++data);
-								me.second = std::string(d,(size_t)(data-d)); 
-					
+								me.second = std::string(d,(size_t)(data-d));
+
 								// try to find matching path names, doesn't care if we don't find them
 								for (std::vector< std::pair< std::string,std::string > >::const_iterator it = tempTextures.begin();
 									 it != tempTextures.end(); ++it)	{
@@ -301,7 +301,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 										break;
 									}
 								}
-							}	
+							}
 						}
 					}
 					else if (TokenMatchI(data,"SCALE",5)) {
@@ -426,7 +426,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 		aiMesh* mesh = pScene->mMeshes[nt-materials.begin()];
 		aiFace& f    = mesh->mFaces[mesh->mNumFaces++];
 		f.mIndices   = new unsigned int[f.mNumIndices = 3];
-		
+
 		for (unsigned int i = 0; i < 3;++i,mesh->mNumVertices++) {
 			f.mIndices[i] = mesh->mNumVertices;
 

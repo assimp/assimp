@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -84,7 +84,7 @@ struct LogStreamInfo
 	{
 		// empty
 	}
-	
+
 	// Destructor
 	~LogStreamInfo()
 	{
@@ -98,7 +98,7 @@ LogStream* LogStream::createDefaultStream(aiDefaultLogStream	streams,
 	const char* name /*= "AssimpLog.txt"*/,
 	IOSystem* io		    /*= NULL*/)
 {
-	switch (streams)	
+	switch (streams)
 	{
 		// This is a platform-specific feature
 	case aiDefaultLogStream_DEBUGGER:
@@ -154,7 +154,7 @@ Logger *DefaultLogger::create(const char* name /*= "AssimpLog.txt"*/,
 	// Stream the log to CERR?
 	if (defStreams & aiDefaultLogStream_STDERR)
 		 m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_STDERR));
-	
+
 	// Stream the log to a file
 	if (defStreams & aiDefaultLogStream_FILE && name && *name)
 		m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_FILE,name,io));
@@ -176,17 +176,17 @@ void Logger::debug(const char* message)	{
 
 // ----------------------------------------------------------------------------------
 void Logger::info(const char* message)	{
-	
+
 	// SECURITY FIX: see above
 	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
 		return;
 	}
 	return OnInfo(message);
 }
-	
+
 // ----------------------------------------------------------------------------------
 void Logger::warn(const char* message)	{
-	
+
 	// SECURITY FIX: see above
 	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
 		return;
@@ -196,7 +196,7 @@ void Logger::warn(const char* message)	{
 
 // ----------------------------------------------------------------------------------
 void Logger::error(const char* message)	{
-	
+
 	// SECURITY FIX: see above
 	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
 		return;
@@ -310,7 +310,7 @@ bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 			return true;
 		}
 	}
-	
+
 	LogStreamInfo *pInfo = new LogStreamInfo( severity, pStream );
 	m_StreamArray.push_back( pInfo );
 	return true;
@@ -326,7 +326,7 @@ bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 	if (0 == severity)	{
 		severity = SeverityAll;
 	}
-	
+
 	for ( StreamIt it = m_StreamArray.begin();
 		it != m_StreamArray.end();
 		++it )
@@ -350,7 +350,7 @@ bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 
 // ----------------------------------------------------------------------------------
 //	Constructor
-DefaultLogger::DefaultLogger(LogSeverity severity) 
+DefaultLogger::DefaultLogger(LogSeverity severity)
 
 	:	Logger	( severity )
 	,	noRepeatMsg	(false)
@@ -371,7 +371,7 @@ DefaultLogger::~DefaultLogger()
 
 // ----------------------------------------------------------------------------------
 //	Writes message to stream
-void DefaultLogger::WriteToStreams(const char *message, 
+void DefaultLogger::WriteToStreams(const char *message,
 	ErrorSeverity ErrorSev )
 {
 	ai_assert(NULL != message);

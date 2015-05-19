@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2008, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -56,9 +56,9 @@ static const int VERION_Q3LEVEL = 46;						///< Supported version.
 ///	Geometric type enumeration
 enum Q3BSPGeoType {
 	Polygon = 1,
-	Patch, 
+	Patch,
 	TriangleMesh,
-	Billboard 
+	Billboard
 };
 
 ///	Integer vector.
@@ -75,7 +75,7 @@ struct sQ3BSPHeader {
 };
 
 ///	Describes an entry.
-struct sQ3BSPLump 
+struct sQ3BSPLump
 {
 	int iOffset;	///< Offset from start pointer of file
 	int iSize;		///< Size of part
@@ -92,7 +92,7 @@ struct vec3f
 };
 
 ///	Vertex of a Q3 level
-struct sQ3BSPVertex 
+struct sQ3BSPVertex
 {
 	vec3f vPosition;	///< Position of vertex
 	vec2f vTexCoord;	///< (u,v) Texturecoordinate of detailtexture
@@ -102,7 +102,7 @@ struct sQ3BSPVertex
 };
 
 ///	A face in bsp format info
-struct sQ3BSPFace 
+struct sQ3BSPFace
 {
 	int iTextureID;					///< Index in texture array
 	int iEffect;					///< Index in effect array (-1 = no effect)
@@ -130,8 +130,8 @@ struct sQ3BSPTexture {
 ///	A light-map of the level, size 128 x 128, RGB components.
 struct sQ3BSPLightmap {
 	unsigned char bLMapData[ CE_BSP_LIGHTMAPSIZE ];
-	sQ3BSPLightmap() {	
-		::memset(bLMapData, 0, CE_BSP_LIGHTMAPSIZE ); 
+	sQ3BSPLightmap() {
+		::memset(bLMapData, 0, CE_BSP_LIGHTMAPSIZE );
 	}
 };
 

@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -60,10 +60,10 @@ using namespace irr;
 using namespace irr::io;
 
 // Transformation matrix to convert from Assimp to IRR space
-const aiMatrix4x4 Assimp::AI_TO_IRR_MATRIX = aiMatrix4x4 ( 
-	1.0f, 0.0f, 0.0f, 0.0f, 
+const aiMatrix4x4 Assimp::AI_TO_IRR_MATRIX = aiMatrix4x4 (
+	1.0f, 0.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 0.0f, 
+	0.0f, 1.0f, 0.0f, 0.0f,
 	0.0f, 0.0f, 0.0f, 1.0f);
 
 // ------------------------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ void IrrlichtBase::ReadBoolProperty   (BoolProperty&   out)
 		else if (!ASSIMP_stricmp(reader->getAttributeName(i),"value"))
 		{
 			// true or false, case insensitive
-			out.value = (ASSIMP_stricmp( reader->getAttributeValue(i), 
+			out.value = (ASSIMP_stricmp( reader->getAttributeValue(i),
 				"true") ? false : true);
 		}
 	}
@@ -280,7 +280,7 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 				}
 				else if (prop.name == "GouraudShading")
 				{
-					int val = (prop.value ? aiShadingMode_Gouraud 
+					int val = (prop.value ? aiShadingMode_Gouraud
 						: aiShadingMode_NoShading);
 					mat->AddProperty(&val,1,AI_MATKEY_SHADING_MODEL);
 				}
@@ -430,15 +430,15 @@ aiMaterial* IrrlichtBase::ParseMaterial(unsigned int& matFlags)
 						int map = ConvertMappingMode(prop.value);
 						if (matFlags & AI_IRRMESH_MAT_lightmap) {
 							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_LIGHTMAP(0));
-							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_LIGHTMAP(0));	
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_LIGHTMAP(0));
 						}
 						else if (matFlags & (AI_IRRMESH_MAT_normalmap_solid)) {
 							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_NORMALS(0));
-							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_NORMALS(0));	
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_NORMALS(0));
 						}
 						else if (matFlags & AI_IRRMESH_MAT_solid_2layer) {
 							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(1));
-							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(1));	
+							mat->AddProperty(&map,1,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(1));
 						}
 					}
 					else if (prop.name == "TextureWrap3" && cnt >= 3)

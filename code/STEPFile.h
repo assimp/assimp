@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -104,8 +104,8 @@ namespace STEP {
 			class LIST;			/*: public DataType */
 		//	class SELECT;		/*: public DataType */
 
-		// a conversion schema is not exactly an EXPRESS schema, rather it 
-		// is a list of pointers to conversion functions to build up the 
+		// a conversion schema is not exactly an EXPRESS schema, rather it
+		// is a list of pointers to conversion functions to build up the
 		// object tree from an input file.
 		class ConversionSchema;
 	}
@@ -153,7 +153,7 @@ namespace STEP {
 	};
 
 
-	// hack to make a given member template-dependent 
+	// hack to make a given member template-dependent
 	template <typename T, typename T2>
 	T2& Couple(T2& in) {
 		return in;
@@ -165,7 +165,7 @@ namespace STEP {
 		// -------------------------------------------------------------------------------
 		//** Base class for all STEP data types */
 		// -------------------------------------------------------------------------------
-		class DataType 
+		class DataType
 		{
 		public:
 
@@ -214,7 +214,7 @@ namespace STEP {
 
 		public:
 
-			/** parse a variable from a string and set 'inout' to the character 
+			/** parse a variable from a string and set 'inout' to the character
 			 *  behind the last consumed character. An optional schema enables,
 			 *  if specified, automatic conversion of custom data types.
 			 *
@@ -233,7 +233,7 @@ namespace STEP {
 		// -------------------------------------------------------------------------------
 		/** Sentinel class to represent explicitly unset (optional) fields ($) */
 		// -------------------------------------------------------------------------------
-		class UNSET : public DataType 
+		class UNSET : public DataType
 		{
 		public:
 		private:
@@ -242,7 +242,7 @@ namespace STEP {
 		// -------------------------------------------------------------------------------
 		/** Sentinel class to represent explicitly derived fields (*) */
 		// -------------------------------------------------------------------------------
-		class ISDERIVED : public DataType 
+		class ISDERIVED : public DataType
 		{
 		public:
 		private:
@@ -252,7 +252,7 @@ namespace STEP {
 		/** Shared implementation for some of the primitive data type, i.e. int, float */
 		// -------------------------------------------------------------------------------
 		template <typename T>
-		class PrimitiveDataType : public DataType 
+		class PrimitiveDataType : public DataType
 		{
 		public:
 
@@ -263,7 +263,7 @@ namespace STEP {
 		public:
 
 			PrimitiveDataType() {}
-			PrimitiveDataType(const T& val) 
+			PrimitiveDataType(const T& val)
 				: val(val)
 			{}
 
@@ -288,17 +288,17 @@ namespace STEP {
 
 		};
 
-		typedef PrimitiveDataType<int64_t>			INTEGER; 
-		typedef PrimitiveDataType<double>			REAL; 
-		typedef PrimitiveDataType<double>			NUMBER; 
-		typedef PrimitiveDataType<std::string>		STRING; 
-		
+		typedef PrimitiveDataType<int64_t>			INTEGER;
+		typedef PrimitiveDataType<double>			REAL;
+		typedef PrimitiveDataType<double>			NUMBER;
+		typedef PrimitiveDataType<std::string>		STRING;
+
 
 
 		// -------------------------------------------------------------------------------
 		/** Generic base class for all enumerated types */
 		// -------------------------------------------------------------------------------
-		class ENUMERATION : public STRING 
+		class ENUMERATION : public STRING
 		{
 		public:
 
@@ -308,7 +308,7 @@ namespace STEP {
 
 		private:
 		};
-		
+
 		typedef ENUMERATION BOOLEAN;
 
 		// -------------------------------------------------------------------------------
@@ -335,11 +335,11 @@ namespace STEP {
 		// -------------------------------------------------------------------------------
 		/** Wrap any STEP aggregate: LIST, SET, ... */
 		// -------------------------------------------------------------------------------
-		class LIST : public DataType 
+		class LIST : public DataType
 		{
 		public:
 
-			// access a particular list index, throw std::range_error for wrong indices 
+			// access a particular list index, throw std::range_error for wrong indices
 			boost::shared_ptr<const DataType> operator[] (size_t index) const {
 				return members[index];
 			}
@@ -377,7 +377,7 @@ namespace STEP {
 					: name(name)
 					, func(func)
 				{}
-			
+
 				const char* name;
 				ConvertObjectProc func;
 			};
@@ -386,7 +386,7 @@ namespace STEP {
 
 		public:
 
-			template <size_t N> 
+			template <size_t N>
 			explicit ConversionSchema( const SchemaEntry (& schemas)[N]) {
 				*this = schemas;
 			}
@@ -411,7 +411,7 @@ namespace STEP {
 			}
 
 
-			template <size_t N> 
+			template <size_t N>
 			const ConversionSchema& operator=( const SchemaEntry (& schemas)[N]) {
 				for(size_t i = 0; i < N; ++i ) {
 					const SchemaEntry& schema = schemas[i];
@@ -444,7 +444,7 @@ namespace STEP {
 	// ------------------------------------------------------------------------------
 	/** Base class for all concrete object instances */
 	// ------------------------------------------------------------------------------
-	class Object 
+	class Object
 	{
 	public:
 
@@ -505,21 +505,21 @@ namespace STEP {
 	/** CRTP shared base class for use by concrete entity implementation classes */
 	// ------------------------------------------------------------------------------
 	template <typename TDerived, size_t arg_count>
-	struct ObjectHelper : virtual Object  
+	struct ObjectHelper : virtual Object
 	{
 		ObjectHelper() : aux_is_derived(0) {}
 
 		static Object* Construct(const STEP::DB& db, const EXPRESS::LIST& params) {
 			// make sure we don't leak if Fill() throws an exception
-			std::auto_ptr<TDerived> impl(new TDerived()); 
+			std::auto_ptr<TDerived> impl(new TDerived());
 
 			// GenericFill<T> is undefined so we need to have a specialization
 			const size_t num_args = GenericFill<TDerived>(db,params,&*impl);
 			(void)num_args;
-			
+
 			// the following check is commented because it will always trigger if
 			// parts of the entities are generated with dummy wrapper code.
-			// This is currently done to reduce the size of the loader 
+			// This is currently done to reduce the size of the loader
 			// code.
 			//if (num_args != params.GetSize() && impl->GetClassName() != "NotImplemented") {
 			//	DefaultLogger::get()->debug("STEP: not all parameters consumed");
@@ -536,7 +536,7 @@ namespace STEP {
 	/** Class template used to represent OPTIONAL data members in the converted schema */
 	// ------------------------------------------------------------------------------
 	template <typename T>
-	struct Maybe 
+	struct Maybe
 	{
 		Maybe() : have() {}
 		explicit Maybe(const T& ptr) : ptr(ptr), have(true) {
@@ -551,7 +551,7 @@ namespace STEP {
 			have = true;
 		}
 
-		
+
 		bool operator! () const {
 			return !have;
 		}
@@ -666,7 +666,7 @@ namespace STEP {
 		mutable uint64_t id;
 		const char* const type;
 		DB& db;
-	
+
 		mutable const char* args;
 		mutable Object* obj;
 	};
@@ -695,7 +695,7 @@ namespace STEP {
 		operator const T*() const {
 			return obj->ToPtr<T>();
 		}
-		
+
 		operator const T&() const {
 			return obj->To<T>();
 		}
@@ -720,7 +720,7 @@ namespace STEP {
 		typedef typename T::Out OutScalar;
 		typedef ListOf Out;
 
-		
+
 		ListOf() {
 			BOOST_STATIC_ASSERT(min_cnt <= max_cnt || !max_cnt);
 		}
@@ -823,7 +823,7 @@ namespace STEP {
 
 
 	// ------------------------------------------------------------------------------
-	/** Lightweight manager class that holds the map of all objects in a 
+	/** Lightweight manager class that holds the map of all objects in a
 	 *  STEP file. DB's are exclusively maintained by the functions in
 	 *  STEPFileReader.h*/
 	// -------------------------------------------------------------------------------
@@ -839,7 +839,7 @@ namespace STEP {
 
 	public:
 
-		// objects indexed by ID - this can grow pretty large (i.e some hundred million 
+		// objects indexed by ID - this can grow pretty large (i.e some hundred million
 		// entries), so use raw pointers to avoid *any* overhead.
 		typedef std::map<uint64_t,const LazyObject* > ObjectMap;
 
@@ -859,7 +859,7 @@ namespace STEP {
 
 	private:
 
-		DB(boost::shared_ptr<StreamReaderLE> reader) 
+		DB(boost::shared_ptr<StreamReaderLE> reader)
 			: reader(reader)
 			, splitter(*reader,true,true)
 			, evaluated_count()
@@ -960,7 +960,7 @@ namespace STEP {
 
 	private:
 
-		// full access only offered to close friends - they should 
+		// full access only offered to close friends - they should
 		// use the provided getters rather than messing around with
 		// the members directly.
 		LineSplitter& GetSplitter() {
@@ -980,7 +980,7 @@ namespace STEP {
 			schema = &_schema;
 		}
 
-		
+
 		void SetTypesToTrack(const char* const* types, size_t N) {
 			for(size_t i = 0; i < N;++i) {
 				objects_bytype[types[i]] = ObjectSet();

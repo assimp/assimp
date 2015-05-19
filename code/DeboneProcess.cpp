@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -79,7 +79,7 @@ bool DeboneProcess::IsActive( unsigned int pFlags) const
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void DeboneProcess::SetupProperties(const Importer* pImp)
-{	
+{
 	// get the current value of the property
 	mAllOrNone = pImp->GetPropertyInteger(AI_CONFIG_PP_DB_ALL_OR_NONE,0)?true:false;
 	mThreshold = pImp->GetPropertyFloat(AI_CONFIG_PP_DB_THRESHOLD,AI_DEBONE_THRESHOLD);
@@ -95,12 +95,12 @@ void DeboneProcess::Execute( aiScene* pScene)
 		return;
 	}
 
-	std::vector<bool> splitList(pScene->mNumMeshes); 
+	std::vector<bool> splitList(pScene->mNumMeshes);
 	for( unsigned int a = 0; a < pScene->mNumMeshes; a++) {
 		splitList[a] = ConsiderMesh( pScene->mMeshes[a] );
 	}
 
-	int numSplits = 0; 
+	int numSplits = 0;
 
 	if(!!mNumBonesCanDoWithout && (!mAllOrNone||mNumBonesCanDoWithout==mNumBones))	{
 		for(unsigned int a = 0; a < pScene->mNumMeshes; a++)	{
@@ -124,16 +124,16 @@ void DeboneProcess::Execute( aiScene* pScene)
 
 			std::vector<std::pair<aiMesh*,const aiBone*> > newMeshes;
 
-			if(splitList[a]) { 
+			if(splitList[a]) {
 				SplitMesh(srcMesh,newMeshes);
 			}
 
 			// mesh was split
-			if(!newMeshes.empty())	{				
-				unsigned int out = 0, in = srcMesh->mNumBones;				
+			if(!newMeshes.empty())	{
+				unsigned int out = 0, in = srcMesh->mNumBones;
 
 				// store new meshes and indices of the new meshes
-				for(unsigned int b=0;b<newMeshes.size();b++)	{						
+				for(unsigned int b=0;b<newMeshes.size();b++)	{
 					const aiString *find = newMeshes[b].second?&newMeshes[b].second->mName:0;
 
 					aiNode *theNode = find?pScene->mRootNode->FindNode(*find):0;
@@ -144,7 +144,7 @@ void DeboneProcess::Execute( aiScene* pScene)
 
 					out+=newMeshes[b].first->mNumBones;
 				}
-						   
+
 				if(!DefaultLogger::isNullLogger()) {
 					char buffer[1024];
 					::sprintf(buffer,"Removed %u bones. Input bones: %u. Output bones: %u",in-out,in,out);
@@ -159,8 +159,8 @@ void DeboneProcess::Execute( aiScene* pScene)
 				mSubMeshIndices[a].push_back(std::pair<unsigned int,aiNode*>(meshes.size(),(aiNode*)0));
 				meshes.push_back(srcMesh);
 			}
-		}	
-			
+		}
+
 		// rebuild the scene's mesh array
 		pScene->mNumMeshes = meshes.size();
 		delete [] pScene->mMeshes;
@@ -207,14 +207,14 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh)
 				if(vertexBones[vid]!=cUnowned)	{
 					if(vertexBones[vid]==i) //double entry
 					{
-						DefaultLogger::get()->warn("Encountered double entry in bone weights");					
+						DefaultLogger::get()->warn("Encountered double entry in bone weights");
 					}
 					else //TODO: track attraction in order to break tie
 					{
 						vertexBones[vid] = cCoowned;
 					}
 				}
-				else vertexBones[vid] = i;			
+				else vertexBones[vid] = i;
 			}
 
 			if(!isBoneNecessary[i]) {
@@ -235,8 +235,8 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh)
 				unsigned int w = vertexBones[pMesh->mFaces[i].mIndices[j]];
 
 				if(v!=w)	{
-					if(v<pMesh->mNumBones) isBoneNecessary[v] = true; 
-					if(w<pMesh->mNumBones) isBoneNecessary[w] = true; 
+					if(v<pMesh->mNumBones) isBoneNecessary[v] = true;
+					if(w<pMesh->mNumBones) isBoneNecessary[w] = true;
 				}
 			}
 		}
@@ -244,10 +244,10 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh)
 
 	for(unsigned int i=0;i<pMesh->mNumBones;i++)	{
 		if(!isBoneNecessary[i])	{
-			mNumBonesCanDoWithout++; 
+			mNumBonesCanDoWithout++;
 			split = true;
 		}
-		
+
 		mNumBones++;
 	}
 	return split;
@@ -279,14 +279,14 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
 				if(vertexBones[vid]!=cUnowned)  {
 					if(vertexBones[vid]==i) //double entry
 					{
-						//DefaultLogger::get()->warn("Encountered double entry in bone weights");					
+						//DefaultLogger::get()->warn("Encountered double entry in bone weights");
 					}
 					else //TODO: track attraction in order to break tie
 					{
 						vertexBones[vid] = cCoowned;
 					}
 				}
-				else vertexBones[vid] = i;			
+				else vertexBones[vid] = i;
 			}
 
 			if(!isBoneNecessary[i]) {
@@ -309,32 +309,32 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
 			unsigned int w = vertexBones[pMesh->mFaces[i].mIndices[j]];
 
 			if(v!=w)	{
-				if(v<pMesh->mNumBones) isBoneNecessary[v] = true; 
-				if(w<pMesh->mNumBones) isBoneNecessary[w] = true; 
+				if(v<pMesh->mNumBones) isBoneNecessary[v] = true;
+				if(w<pMesh->mNumBones) isBoneNecessary[w] = true;
 			}
 			else nInterstitial++;
 		}
 
-		if(v<pMesh->mNumBones &&nInterstitial==pMesh->mFaces[i].mNumIndices)	{				
+		if(v<pMesh->mNumBones &&nInterstitial==pMesh->mFaces[i].mNumIndices)	{
 			faceBones[i] = v; //primitive belongs to bone #v
 			facesPerBone[v]++;
 		}
-		else nFacesUnowned++; 
+		else nFacesUnowned++;
 	}
 
 	// invalidate any "cojoined" faces
 	for(unsigned int i=0;i<pMesh->mNumFaces;i++) {
-		if(faceBones[i]<pMesh->mNumBones&&isBoneNecessary[faceBones[i]]) 
+		if(faceBones[i]<pMesh->mNumBones&&isBoneNecessary[faceBones[i]])
 		{
 			ai_assert(facesPerBone[faceBones[i]]>0);
-			facesPerBone[faceBones[i]]--; 
-			
-			nFacesUnowned++; 
-			faceBones[i] = cUnowned; 
+			facesPerBone[faceBones[i]]--;
+
+			nFacesUnowned++;
+			faceBones[i] = cUnowned;
 		}
 	}
 
-	if(nFacesUnowned) {	 	
+	if(nFacesUnowned) {
 		std::vector<unsigned int> subFaces;
 
 		for(unsigned int i=0;i<pMesh->mNumFaces;i++)	{
@@ -349,9 +349,9 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
 		poNewMeshes.push_back(push_pair);
 	}
 
-	for(unsigned int i=0;i<pMesh->mNumBones;i++) {			
+	for(unsigned int i=0;i<pMesh->mNumBones;i++) {
 
-		if(!isBoneNecessary[i]&&facesPerBone[i]>0)	{				
+		if(!isBoneNecessary[i]&&facesPerBone[i]>0)	{
 			std::vector<unsigned int> subFaces;
 
 			for(unsigned int j=0;j<pMesh->mNumFaces;j++)	{
@@ -367,7 +367,7 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
 			ApplyTransform(subMesh,pMesh->mBones[i]->mOffsetMatrix);
 			std::pair<aiMesh*,const aiBone*> push_pair(subMesh,pMesh->mBones[i]);
 
-			poNewMeshes.push_back(push_pair);		
+			poNewMeshes.push_back(push_pair);
 		}
 	}
 }
@@ -377,13 +377,13 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
 void DeboneProcess::UpdateNode(aiNode* pNode) const
 {
 	// rebuild the node's mesh index list
-	
+
 	std::vector<unsigned int> newMeshList;
 
 	// this will require two passes
 
 	unsigned int m = pNode->mNumMeshes, n = mSubMeshIndices.size();
-	
+
 	// first pass, look for meshes which have not moved
 
 	for(unsigned int a=0;a<m;a++)	{
@@ -399,7 +399,7 @@ void DeboneProcess::UpdateNode(aiNode* pNode) const
 		}
 	}
 
-	// second pass, collect deboned meshes 
+	// second pass, collect deboned meshes
 
 	for(unsigned int a=0;a<n;a++)
 	{
@@ -436,7 +436,7 @@ void DeboneProcess::ApplyTransform(aiMesh* mesh, const aiMatrix4x4& mat)const
 {
 	// Check whether we need to transform the coordinates at all
 	if (!mat.IsIdentity()) {
-		
+
 		if (mesh->HasPositions()) {
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 				mesh->mVertices[i] = mat * mesh->mVertices[i];

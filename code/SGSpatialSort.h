@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -51,7 +51,7 @@ namespace Assimp	{
 
 // ----------------------------------------------------------------------------------
 /** Specialized version of SpatialSort to support smoothing groups
- *  This is used in by the 3DS, ASE and LWO loaders. 3DS and ASE share their 
+ *  This is used in by the 3DS, ASE and LWO loaders. 3DS and ASE share their
  *  normal computation code in SmoothingGroups.inl, the LWO loader has its own
  *  implementation to handle all details of its file format correctly.
  */
@@ -93,14 +93,14 @@ public:
 	 *   to be counted in.
 	 * @param poResults The container to store the indices of the found
 	 *   positions. Will be emptied by the call so it may contain anything.
-	 * @param exactMatch Specifies whether smoothing groups are bit masks 
+	 * @param exactMatch Specifies whether smoothing groups are bit masks
 	 *   (false) or integral values (true). In the latter case, a vertex
 	 *   cannot belong to more than one smoothing group.
 	 * @return An iterator to iterate over all vertices in the given area.
 	 */
 	// -------------------------------------------------------------------
 	void FindPositions( const aiVector3D& pPosition, uint32_t pSG,
-		float pRadius, std::vector<unsigned int>& poResults, 
+		float pRadius, std::vector<unsigned int>& poResults,
 		bool exactMatch = false) const;
 
 protected:
@@ -108,7 +108,7 @@ protected:
 	aiVector3D mPlaneNormal;
 
 	// -------------------------------------------------------------------
-	/** An entry in a spatially sorted position array. Consists of a 
+	/** An entry in a spatially sorted position array. Consists of a
 	 *  vertex index, its position and its precalculated distance from
 	 *  the reference plane */
 	// -------------------------------------------------------------------
@@ -120,8 +120,8 @@ protected:
 		float mDistance;		///< Distance of this vertex to the sorting plane
 
 		Entry() { /** intentionally not initialized.*/ }
-		Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance,uint32_t pSG) 
-			: 
+		Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance,uint32_t pSG)
+			:
 			mIndex( pIndex),
 			mPosition( pPosition),
 			mSmoothGroups (pSG),

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -58,7 +58,7 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Get a specific property from a material
-aiReturn aiGetMaterialProperty(const aiMaterial* pMat, 
+aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
     unsigned int index,
@@ -69,15 +69,15 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 	ai_assert (pPropOut != NULL);
 
 	/*  Just search for a property with exactly this name ..
-	 *  could be improved by hashing, but it's possibly 
+	 *  could be improved by hashing, but it's possibly
 	 *  no worth the effort (we're bound to C structures,
 	 *  thus std::map or derivates are not applicable. */
 	for (unsigned int i = 0; i < pMat->mNumProperties;++i) {
 		aiMaterialProperty* prop = pMat->mProperties[i];
 
 		if (prop /* just for safety ... */
-			&& 0 == strcmp( prop->mKey.data, pKey ) 
-			&& (UINT_MAX == type  || prop->mSemantic == type) /* UINT_MAX is a wildcard, but this is undocumented :-) */ 
+			&& 0 == strcmp( prop->mKey.data, pKey )
+			&& (UINT_MAX == type  || prop->mSemantic == type) /* UINT_MAX is a wildcard, but this is undocumented :-) */
 			&& (UINT_MAX == index || prop->mIndex == index))
 		{
 			*pPropOut = pMat->mProperties[i];
@@ -90,7 +90,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get an array of floating-point values from the material.
-aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat, 
+aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
     unsigned int index,
@@ -141,13 +141,13 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 		// strings are zero-terminated with a 32 bit length prefix, so this is safe
 		const char* cur =  prop->mData+4;
 		ai_assert(prop->mDataLength>=5 && !prop->mData[prop->mDataLength-1]);
-		for (unsigned int a = 0; ;++a) {	
+		for (unsigned int a = 0; ;++a) {
 			cur = fast_atoreal_move<float>(cur,pOut[a]);
 			if(a==iWrite-1) {
 				break;
 			}
 			if(!IsSpace(*cur)) {
-				DefaultLogger::get()->error("Material property" + std::string(pKey) + 
+				DefaultLogger::get()->error("Material property" + std::string(pKey) +
 					" is a string; failed to parse a float array out of it.");
 				return AI_FAILURE;
 			}
@@ -163,7 +163,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get an array if integers from the material
-aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat, 
+aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
     unsigned int index,
@@ -193,7 +193,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 			*pMax = iWrite;
 		}
 	}
-	// data is given in floats convert to int 
+	// data is given in floats convert to int
 	else if( aiPTI_Float == prop->mType)	{
 		iWrite = prop->mDataLength / sizeof(float);
 		if (pMax) {
@@ -214,13 +214,13 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 		// strings are zero-terminated with a 32 bit length prefix, so this is safe
 		const char* cur =  prop->mData+4;
 		ai_assert(prop->mDataLength>=5 && !prop->mData[prop->mDataLength-1]);
-		for (unsigned int a = 0; ;++a) {	
+		for (unsigned int a = 0; ;++a) {
 			pOut[a] = strtol10(cur,&cur);
 			if(a==iWrite-1) {
 				break;
 			}
 			if(!IsSpace(*cur)) {
-				DefaultLogger::get()->error("Material property" + std::string(pKey) + 
+				DefaultLogger::get()->error("Material property" + std::string(pKey) +
 					" is a string; failed to parse an integer array out of it.");
 				return AI_FAILURE;
 			}
@@ -235,7 +235,7 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a color (3 or 4 floats) from the material
-aiReturn aiGetMaterialColor(const aiMaterial* pMat, 
+aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
 	unsigned int index,
@@ -254,7 +254,7 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a aiUVTransform (4 floats) from the material
-aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat, 
+aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
 	unsigned int index,
@@ -266,7 +266,7 @@ aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get a string from the material
-aiReturn aiGetMaterialString(const aiMaterial* pMat, 
+aiReturn aiGetMaterialString(const aiMaterial* pMat,
 	const char* pKey,
 	unsigned int type,
 	unsigned int index,
@@ -291,8 +291,8 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 	}
 	else {
 		// TODO - implement lexical cast as well
-		DefaultLogger::get()->error("Material property" + std::string(pKey) + 
-			" was found, but is no string" );	
+		DefaultLogger::get()->error("Material property" + std::string(pKey) +
+			" was found, but is no string" );
 		return AI_FAILURE;
 	}
 	return AI_SUCCESS;
@@ -300,7 +300,7 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
 
 // ------------------------------------------------------------------------------------------------
 // Get the number of textures on a particular texture stack
-ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,  
+ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMat,
 	C_ENUM aiTextureType type)
 {
 	ai_assert (pMat != NULL);
@@ -310,10 +310,10 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMa
 	for (unsigned int i = 0; i < pMat->mNumProperties;++i) {
 		aiMaterialProperty* prop = pMat->mProperties[i];
 
-		if (prop /* just a sanity check ... */ 
+		if (prop /* just a sanity check ... */
 			&& 0 == strcmp( prop->mKey.data, _AI_MATKEY_TEXTURE_BASE )
 			&& prop->mSemantic == type) {
-	
+
 			max = std::max(max,prop->mIndex+1);
 		}
 	}
@@ -339,28 +339,28 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
 	if (AI_SUCCESS != aiGetMaterialString(mat,AI_MATKEY_TEXTURE(type,index),path))	{
 		return AI_FAILURE;
 	}
-	// Determine mapping type 
+	// Determine mapping type
 	aiTextureMapping mapping = aiTextureMapping_UV;
 	aiGetMaterialInteger(mat,AI_MATKEY_MAPPING(type,index),(int*)&mapping);
 	if (_mapping)
 		*_mapping = mapping;
 
-	// Get UV index 
+	// Get UV index
 	if (aiTextureMapping_UV == mapping && uvindex)	{
 		aiGetMaterialInteger(mat,AI_MATKEY_UVWSRC(type,index),(int*)uvindex);
 	}
-	// Get blend factor 
+	// Get blend factor
 	if (blend)	{
 		aiGetMaterialFloat(mat,AI_MATKEY_TEXBLEND(type,index),blend);
 	}
-	// Get texture operation 
+	// Get texture operation
 	if (op){
 		aiGetMaterialInteger(mat,AI_MATKEY_TEXOP(type,index),(int*)op);
 	}
 	// Get texture mapping modes
 	if (mapmode)	{
 		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U(type,index),(int*)&mapmode[0]);
-		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V(type,index),(int*)&mapmode[1]);		
+		aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V(type,index),(int*)&mapmode[1]);
 	}
 	// Get texture flags
 	if (flags){
@@ -517,7 +517,7 @@ aiReturn aiMaterial::AddProperty (const aiString* pInput,
 			pInput->length+1+4,
 			pKey,
 			type,
-			index, 
+			index,
 			aiPTI_String);
 	}
 	ai_assert(sizeof(size_t)==4);
@@ -525,7 +525,7 @@ aiReturn aiMaterial::AddProperty (const aiString* pInput,
 		pInput->length+1+4,
 		pKey,
 		type,
-		index, 
+		index,
 		aiPTI_String);
 }
 
@@ -552,7 +552,7 @@ uint32_t Assimp :: ComputeMaterialHash(const aiMaterial* mat, bool includeMatNam
 }
 
 // ------------------------------------------------------------------------------------------------
-void aiMaterial::CopyPropertyList(aiMaterial* pcDest, 
+void aiMaterial::CopyPropertyList(aiMaterial* pcDest,
 	const aiMaterial* pcSrc
 	)
 {

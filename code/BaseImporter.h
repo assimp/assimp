@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -76,7 +76,7 @@ struct ScopeGuard
 			delete obj;
 		}
 		obj = NULL;
-	} 
+	}
 
 	T* dismiss() {
 		mdismiss=true;
@@ -104,13 +104,13 @@ private:
 
 
 // ---------------------------------------------------------------------------
-/** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface 
+/** FOR IMPORTER PLUGINS ONLY: The BaseImporter defines a common interface
  *  for all importer worker classes.
  *
- * The interface defines two functions: CanRead() is used to check if the 
- * importer can handle the format of the given file. If an implementation of 
- * this function returns true, the importer then calls ReadFile() which 
- * imports the given file. ReadFile is not overridable, it just calls 
+ * The interface defines two functions: CanRead() is used to check if the
+ * importer can handle the format of the given file. If an implementation of
+ * this function returns true, the importer then calls ReadFile() which
+ * imports the given file. ReadFile is not overridable, it just calls
  * InternReadFile() and catches any ImportErrorException that might occur.
  */
 class ASSIMP_API BaseImporter
@@ -144,39 +144,39 @@ public:
 	 *   to be able to load files with unknown/not existent file extensions.
 	 * @return true if the class can read this file, false if not.
 	 */
-	virtual bool CanRead( 
-		const std::string& pFile, 
-		IOSystem* pIOHandler, 
+	virtual bool CanRead(
+		const std::string& pFile,
+		IOSystem* pIOHandler,
 		bool checkSig
 		) const = 0;
 
 	// -------------------------------------------------------------------
 	/** Imports the given file and returns the imported data.
-	 * If the import succeeds, ownership of the data is transferred to 
+	 * If the import succeeds, ownership of the data is transferred to
 	 * the caller. If the import fails, NULL is returned. The function
 	 * takes care that any partially constructed data is destroyed
 	 * beforehand.
 	 *
 	 * @param pImp #Importer object hosting this loader.
-	 * @param pFile Path of the file to be imported. 
+	 * @param pFile Path of the file to be imported.
 	 * @param pIOHandler IO-Handler used to open this and possible other files.
-	 * @return The imported data or NULL if failed. If it failed a 
-	 * human-readable error description can be retrieved by calling 
+	 * @return The imported data or NULL if failed. If it failed a
+	 * human-readable error description can be retrieved by calling
 	 * GetErrorText()
 	 *
-	 * @note This function is not intended to be overridden. Implement 
-	 * InternReadFile() to do the import. If an exception is thrown somewhere 
+	 * @note This function is not intended to be overridden. Implement
+	 * InternReadFile() to do the import. If an exception is thrown somewhere
 	 * in InternReadFile(), this function will catch it and transform it into
 	 *  a suitable response to the caller.
 	 */
 	aiScene* ReadFile(
-		const Importer* pImp, 
-		const std::string& pFile, 
+		const Importer* pImp,
+		const std::string& pFile,
 		IOSystem* pIOHandler
 		);
 
 	// -------------------------------------------------------------------
-	/** Returns the error description of the last error that occured. 
+	/** Returns the error description of the last error that occured.
 	 * @return A description of the last error that occured. An empty
 	 * string if there was no error.
 	 */
@@ -194,9 +194,9 @@ public:
 		const Importer* pImp
 		);
 
-	
+
 	// -------------------------------------------------------------------
-	/** Called by #Importer::GetImporterInfo to get a description of 
+	/** Called by #Importer::GetImporterInfo to get a description of
 	 *  some loader features. Importers must provide this information. */
 	virtual const aiImporterDesc* GetInfo() const = 0;
 
@@ -212,10 +212,10 @@ public:
 protected:
 
 	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. The 
-	 * function is expected to throw an ImportErrorException if there is 
-	 * an error. If it terminates normally, the data in aiScene is 
-	 * expected to be correct. Override this function to implement the 
+	/** Imports the given file into the given scene structure. The
+	 * function is expected to throw an ImportErrorException if there is
+	 * an error. If it terminates normally, the data in aiScene is
+	 * expected to be correct. Override this function to implement the
 	 * actual importing.
 	 * <br>
 	 *  The output scene must meet the following requirements:<br>
@@ -240,7 +240,7 @@ protected:
 	 *   default material setting for the file format better than Assimp's
 	 *   generic default material. Note that default materials *should*
 	 *   be named AI_DEFAULT_MATERIAL_NAME if they're just color-shaded
-	 *   or AI_DEFAULT_TEXTURED_MATERIAL_NAME if they define a (dummy) 
+	 *   or AI_DEFAULT_TEXTURED_MATERIAL_NAME if they define a (dummy)
 	 *   texture. </li>
 	 * </ul>
 	 * If the AI_SCENE_FLAGS_INCOMPLETE-Flag is <b>not</b> set:<ul>
@@ -255,9 +255,9 @@ protected:
 	 * NULL is not a valid parameter.
 	 * @param pIOHandler The IO handler to use for any file access.
 	 * NULL is not a valid parameter. */
-	virtual void InternReadFile( 
-		const std::string& pFile, 
-		aiScene* pScene, 
+	virtual void InternReadFile(
+		const std::string& pFile,
+		aiScene* pScene,
 		IOSystem* pIOHandler
 		) = 0;
 
@@ -278,9 +278,9 @@ public: // static utilities
 	 *  @param searchBytes Number of bytes to be searched for the tokens.
 	 */
 	static bool SearchFileHeaderForToken(
-		IOSystem* pIOSystem, 
+		IOSystem* pIOSystem,
 		const std::string&	file,
-		const char** tokens, 
+		const char** tokens,
 		unsigned int numTokens,
 		unsigned int searchBytes = 200,
 		bool tokensSol = false);
@@ -294,7 +294,7 @@ public: // static utilities
 	 *  @note Case-insensitive
 	 */
 	static bool SimpleExtensionCheck (
-		const std::string& pFile, 
+		const std::string& pFile,
 		const char* ext0,
 		const char* ext1 = NULL,
 		const char* ext2 = NULL);
@@ -322,8 +322,8 @@ public: // static utilities
 	 *  tokens of size 2,4.
 	 */
 	static bool CheckMagicToken(
-		IOSystem* pIOHandler, 
-		const std::string& pFile, 
+		IOSystem* pIOHandler,
+		const std::string& pFile,
 		const void* magic,
 		unsigned int num,
 		unsigned int offset = 0,
@@ -333,7 +333,7 @@ public: // static utilities
 	/** An utility for all text file loaders. It converts a file to our
 	 *   UTF8 character set. Errors are reported, but ignored.
 	 *
-	 *  @param data File buffer to be converted to UTF8 data. The buffer 
+	 *  @param data File buffer to be converted to UTF8 data. The buffer
 	 *  is resized as appropriate. */
 	static void ConvertToUTF8(
 		std::vector<char>& data);
@@ -351,7 +351,7 @@ public: // static utilities
 	/** Utility for text file loaders which copies the contents of the
 	 *  file into a memory buffer and converts it to our UTF8
 	 *  representation.
-	 *  @param stream Stream to read from. 
+	 *  @param stream Stream to read from.
 	 *  @param data Output buffer to be resized and filled with the
 	 *   converted text file data. The buffer is terminated with
 	 *   a binary 0. */

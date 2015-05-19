@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -83,7 +83,7 @@ inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 		number = -number;
 	}
 
-	// We begin with the largest number that is not zero. 
+	// We begin with the largest number that is not zero.
 	int32_t cur = 1000000000; // 2147483648
 	bool mustPrint = false;
 	while (written < max)	{
@@ -91,7 +91,7 @@ inline unsigned int ASSIMP_itoa10( char* out, unsigned int max, int32_t number)
 		const unsigned int digit = number / cur;
 		if (mustPrint || digit > 0 || 1 == cur)	{
 			// print all future zeroes from now
-			mustPrint = true;	
+			mustPrint = true;
 
 			*out++ = '0'+static_cast<char>(digit);
 
@@ -125,7 +125,7 @@ inline unsigned int ASSIMP_itoa10( char(& out)[length], int32_t number)
  *
  *  This is required since stricmp() is not consistently available on
  *  all platforms. Some platforms use the '_' prefix, others don't even
- *  have such a function. 
+ *  have such a function.
  *
  *  @param s1 First input string
  *  @param s2 Second input string
@@ -139,15 +139,15 @@ inline int ASSIMP_stricmp(const char *s1, const char *s2)
 
 	return ::_stricmp(s1,s2);
 #elif defined( __GNUC__ )
-	
+
 	return ::strcasecmp(s1,s2);
 #else
-	
+
 	char c1, c2;
 	do	{
 		c1 = tolower(*s1++);
 		c2 = tolower(*s2++);
-	} 
+	}
 	while ( c1 && (c1 == c2) );
 	return c1 - c2;
 #endif
@@ -171,7 +171,7 @@ inline int ASSIMP_stricmp(const std::string& a, const std::string& b)
  *
  *  This is required since strincmp() is not consistently available on
  *  all platforms. Some platforms use the '_' prefix, others don't even
- *  have such a function. 
+ *  have such a function.
  *
  *  @param s1 First input string
  *  @param s2 Second input string
@@ -194,12 +194,12 @@ inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 #else
 	char c1, c2;
 	unsigned int p = 0;
-	do 
+	do
 	{
 		if (p++ >= n)return 0;
 		c1 = tolower(*s1++);
 		c2 = tolower(*s2++);
-	} 
+	}
 	while ( c1 && (c1 == c2) );
 
 	return c1 - c2;
@@ -210,7 +210,7 @@ inline int ASSIMP_strincmp(const char *s1, const char *s2, unsigned int n)
 // -------------------------------------------------------------------------------
 /** @brief Evaluates an integer power
  *
- * todo: move somewhere where it fits better in than here 
+ * todo: move somewhere where it fits better in than here
  */
 inline unsigned int integer_pow (unsigned int base, unsigned int power)
 {

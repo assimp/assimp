@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -64,17 +64,17 @@ namespace Assimp {
 template < typename T,
 	typename CharTraits = std::char_traits<T>,
 	typename Allocator  = std::allocator<T>
-> 
-class basic_formatter 
+>
+class basic_formatter
 {
 
 public:
 
-	typedef class std::basic_string< 
+	typedef class std::basic_string<
 		T,CharTraits,Allocator
 	> string;
 
-	typedef class std::basic_ostringstream< 
+	typedef class std::basic_ostringstream<
 		T,CharTraits,Allocator
 	> stringstream;
 
@@ -101,7 +101,7 @@ public:
 		underlying << (string)other;
 	}
 #endif
-	 
+
 
 public:
 
@@ -111,7 +111,7 @@ public:
 
 
 	/* note - this is declared const because binding temporaries does only
-	 * work for const references, so many function prototypes will 
+	 * work for const references, so many function prototypes will
 	 * include const basic_formatter<T>& s but might still want to
 	 * modify the formatted string without the need for a full copy.*/
 	template <typename TToken>
@@ -157,7 +157,7 @@ private:
 typedef basic_formatter< char > format;
 typedef basic_formatter< wchar_t > wformat;
 
-} // ! namespace Formatter 
+} // ! namespace Formatter
 
 } // ! namespace Assimp
 #endif

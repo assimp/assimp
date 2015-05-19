@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -297,7 +297,7 @@ bool PLY::Property::ParseProperty (const char* pCur,
 			return false;
 		}
 	}
-	
+
 	if (!SkipSpaces(pCur,&pCur))return false;
 	const char* szCur = pCur;
 	pOut->Semantic = PLY::Property::ParseSemantic(pCur, &pCur);
@@ -354,7 +354,7 @@ PLY::EElementSemantic PLY::Element::ParseSemantic(const char* pCur,
 }
 
 // ------------------------------------------------------------------------------------------------
-bool PLY::Element::ParseElement (const char* pCur, 
+bool PLY::Element::ParseElement (const char* pCur,
 	const char** pCurOut,
 	PLY::Element* pOut)
 {
@@ -387,7 +387,7 @@ bool PLY::Element::ParseElement (const char* pCur,
 	}
 
 	if (!SkipSpaces(&pCur))return false;
-	
+
 	//parse the number of occurences of this element
 	pOut->NumOccur = strtoul10(pCur,&pCur);
 
@@ -508,7 +508,7 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
 
 	DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() begin");
 	*pCurOut = pCur;
-	
+
 	alElementData.resize(alElements.size());
 
 	std::vector<PLY::Element>::const_iterator i = alElements.begin();
@@ -574,7 +574,7 @@ bool PLY::DOM::ParseInstance (const char* pCur,DOM* p_pcOut)
 bool PLY::ElementInstanceList::ParseInstanceList (
 	const char* pCur,
 	const char** pCurOut,
-	const PLY::Element* pcElement, 
+	const PLY::Element* pcElement,
 	PLY::ElementInstanceList* p_pcOut)
 {
 	ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
@@ -615,7 +615,7 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (
 
 	// we can add special handling code for unknown element semantics since
 	// we can't skip it as a whole block (we don't know its exact size
-	// due to the fact that lists could be contained in the property list 
+	// due to the fact that lists could be contained in the property list
 	// of the unknown element)
 	for (unsigned int i = 0; i < pcElement->NumOccur;++i)
 	{
@@ -734,7 +734,7 @@ bool PLY::PropertyInstance::ParseInstance (const char* pCur,const char** pCurOut
 bool PLY::PropertyInstance::ParseInstanceBinary (
 	const char*  pCur,
 	const char** pCurOut,
-	const PLY::Property* prop, 
+	const PLY::Property* prop,
 	PLY::PropertyInstance* p_pcOut,
 	bool p_bBE)
 {
@@ -839,7 +839,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 	const char* pCur,
 	const char** pCurOut,
 	PLY::EDataType eType,
-	PLY::PropertyInstance::ValueUnion* out, 
+	PLY::PropertyInstance::ValueUnion* out,
 	bool p_bBE)
 {
 	ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
@@ -850,7 +850,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 	case EDT_UInt:
 		out->iUInt = (uint32_t)*((uint32_t*)pCur);
 		pCur += 4;
-		
+
 		// Swap endianess
 		if (p_bBE)ByteSwap::Swap((int32_t*)&out->iUInt);
 		break;
@@ -876,7 +876,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 	case EDT_Int:
 		out->iInt = *((int32_t*)pCur);
 		pCur += 4;
-		
+
 		// Swap endianess
 		if (p_bBE)ByteSwap::Swap(&out->iInt);
 		break;

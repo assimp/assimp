@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -60,7 +60,7 @@ namespace Assimp	{
 // Worker function for exporting a scene to PLY. Prototyped and registered in Exporter.cpp
 void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-	// invoke the exporter 
+	// invoke the exporter
 	PlyExporter exporter(pFile, pScene);
 
 	// we're still here - export successfully completed. Write the file.
@@ -74,7 +74,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
 void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-	// invoke the exporter 
+	// invoke the exporter
 	PlyExporter exporter(pFile, pScene, true);
 
 	// we're still here - export successfully completed. Write the file.
@@ -134,7 +134,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 		mOutput << "format ascii 1.0" << endl;
 	}
 	mOutput << "comment Created by Open Asset Import Library - http://assimp.sf.net (v"
-		<< aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.' 
+		<< aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
 		<< aiGetVersionRevision() << ")" << endl;
 
 	mOutput << "element vertex " << vertices << endl;
@@ -215,64 +215,64 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 {
 	static const float inf = std::numeric_limits<float>::infinity();
-	
+
 	// If a component (for instance normal vectors) is present in at least one mesh in the scene,
 	// then default values are written for meshes that do not contain this component.
 	for (unsigned int i = 0; i < m->mNumVertices; ++i) {
-		mOutput << 
-			m->mVertices[i].x << " " << 
-			m->mVertices[i].y << " " << 
+		mOutput <<
+			m->mVertices[i].x << " " <<
+			m->mVertices[i].y << " " <<
 			m->mVertices[i].z
 		;
 		if(components & PLY_EXPORT_HAS_NORMALS) {
 			if (m->HasNormals() && is_not_qnan(m->mNormals[i].x) && std::fabs(m->mNormals[i].x) != inf) {
-				mOutput << 
-					" " << m->mNormals[i].x << 
-					" " << m->mNormals[i].y << 
+				mOutput <<
+					" " << m->mNormals[i].x <<
+					" " << m->mNormals[i].y <<
 					" " << m->mNormals[i].z;
 			}
 			else {
-				mOutput << " 0.0 0.0 0.0"; 
+				mOutput << " 0.0 0.0 0.0";
 			}
 		}
 
 		for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
 			if (m->HasTextureCoords(c)) {
-				mOutput << 
-					" " << m->mTextureCoords[c][i].x << 
+				mOutput <<
+					" " << m->mTextureCoords[c][i].x <<
 					" " << m->mTextureCoords[c][i].y;
 			}
 			else {
-				mOutput << " -1.0 -1.0"; 
+				mOutput << " -1.0 -1.0";
 			}
 		}
 
 		for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
 			if (m->HasVertexColors(c)) {
-				mOutput << 
-					" " << m->mColors[c][i].r << 
+				mOutput <<
+					" " << m->mColors[c][i].r <<
 					" " << m->mColors[c][i].g <<
 					" " << m->mColors[c][i].b <<
 					" " << m->mColors[c][i].a;
 			}
 			else {
-				mOutput << " -1.0 -1.0 -1.0 -1.0"; 
+				mOutput << " -1.0 -1.0 -1.0 -1.0";
 			}
 		}
 
 		if(components & PLY_EXPORT_HAS_TANGENTS_BITANGENTS) {
 			if (m->HasTangentsAndBitangents()) {
-				mOutput << 
-				" " << m->mTangents[i].x << 
-				" " << m->mTangents[i].y << 
-				" " << m->mTangents[i].z << 
-				" " << m->mBitangents[i].x << 
-				" " << m->mBitangents[i].y << 
+				mOutput <<
+				" " << m->mTangents[i].x <<
+				" " << m->mTangents[i].y <<
+				" " << m->mTangents[i].z <<
+				" " << m->mBitangents[i].x <<
+				" " << m->mBitangents[i].y <<
 				" " << m->mBitangents[i].z
 				;
 			}
 			else {
-				mOutput << " 0.0 0.0 0.0 0.0 0.0 0.0"; 
+				mOutput << " 0.0 0.0 0.0 0.0 0.0 0.0";
 			}
 		}
 

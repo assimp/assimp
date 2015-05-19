@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  BlenderDNA.h
- *  @brief Blender `DNA` (file format specification embedded in 
+ *  @brief Blender `DNA` (file format specification embedded in
  *    blend file itself) loader.
  */
 #ifndef INCLUDED_AI_BLEND_DNA_H
@@ -89,16 +89,16 @@ struct Error : DeadlyImportError
 /** The only purpose of this structure is to feed a virtual dtor into its
  *  descendents. It serves as base class for all data structure fields. */
 // -------------------------------------------------------------------------------
-struct ElemBase 
+struct ElemBase
 {
 	virtual ~ElemBase() {}
 
-	/** Type name of the element. The type 
-	 * string points is the `c_str` of the `name` attribute of the 
-	 * corresponding `Structure`, that is, it is only valid as long 
+	/** Type name of the element. The type
+	 * string points is the `c_str` of the `name` attribute of the
+	 * corresponding `Structure`, that is, it is only valid as long
 	 * as the DNA is not modified. The dna_type is only set if the
 	 * data type is not static, i.e. a boost::shared_ptr<ElemBase>
-	 * in the scene description would have its type resolved 
+	 * in the scene description would have its type resolved
 	 * at runtime, so this member is always set. */
 	const char* dna_type;
 };
@@ -107,7 +107,7 @@ struct ElemBase
 // -------------------------------------------------------------------------------
 /** Represents a generic pointer to a memory location, which can be either 32
  *  or 64 bits. These pointers are loaded from the BLEND file and finally
- *  fixed to point to the real, converted representation of the objects 
+ *  fixed to point to the real, converted representation of the objects
  *  they used to point to.*/
 // -------------------------------------------------------------------------------
 struct Pointer
@@ -127,7 +127,7 @@ struct FileOffset
 
 // -------------------------------------------------------------------------------
 /** Dummy derivate of std::vector to be able to use it in templates simultaenously
- *  with boost::shared_ptr, which takes only one template argument 
+ *  with boost::shared_ptr, which takes only one template argument
  *  while std::vector takes three. Also we need to provide some special member
  *  functions of shared_ptr */
 // -------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ public:
 // -------------------------------------------------------------------------------
 /** Mixed flags for use in #Field */
 // -------------------------------------------------------------------------------
-enum FieldFlags 
+enum FieldFlags
 {
 	FieldFlag_Pointer = 0x1,
 	FieldFlag_Array   = 0x2
@@ -159,8 +159,8 @@ enum FieldFlags
 // -------------------------------------------------------------------------------
 /** Represents a single member of a data structure in a BLEND file */
 // -------------------------------------------------------------------------------
-struct Field 
-{	
+struct Field
+{
 	std::string name;
 	std::string type;
 
@@ -180,7 +180,7 @@ struct Field
  *  mission critical so we need them, while others can silently be default
  *  initialized and no animations are harmed. */
 // -------------------------------------------------------------------------------
-enum ErrorPolicy 
+enum ErrorPolicy
 {
 	/** Substitute default value and ignore */
 	ErrorPolicy_Igno,
@@ -202,7 +202,7 @@ enum ErrorPolicy
  *  binary `blob` read from the file to such a structure instance with
  *  meaningful contents. */
 // -------------------------------------------------------------------------------
-class Structure 
+class Structure
 {
 	template <template <typename> class> friend class ObjectCache;
 
@@ -271,7 +271,7 @@ public:
 	// --------------------------------------------------------
 	// field parsing for 1d arrays
 	template <int error_policy, typename T, size_t M>
-	void ReadFieldArray(T (& out)[M], const char* name, 
+	void ReadFieldArray(T (& out)[M], const char* name,
 		const FileDatabase& db) const;
 
 	// --------------------------------------------------------
@@ -281,11 +281,11 @@ public:
 		const FileDatabase& db) const;
 
 	// --------------------------------------------------------
-	// field parsing for pointer or dynamic array types 
+	// field parsing for pointer or dynamic array types
 	// (boost::shared_ptr or boost::shared_array)
 	// The return value indicates whether the data was already cached.
 	template <int error_policy, template <typename> class TOUT, typename T>
-	bool ReadFieldPtr(TOUT<T>& out, const char* name, 
+	bool ReadFieldPtr(TOUT<T>& out, const char* name,
 		const FileDatabase& db,
 		bool non_recursive = false) const;
 
@@ -294,31 +294,31 @@ public:
 	// array types (boost::shared_ptr[] or boost::shared_array[])
 	// The return value indicates whether the data was already cached.
 	template <int error_policy, template <typename> class TOUT, typename T, size_t N>
-	bool ReadFieldPtr(TOUT<T> (&out)[N], const char* name, 
+	bool ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
 		const FileDatabase& db) const;
 
 	// --------------------------------------------------------
 	// field parsing for `normal` values
 	// The return value indicates whether the data was already cached.
 	template <int error_policy, typename T>
-	void ReadField(T& out, const char* name, 
+	void ReadField(T& out, const char* name,
 		const FileDatabase& db) const;
 
 private:
 
 	// --------------------------------------------------------
 	template <template <typename> class TOUT, typename T>
-	bool ResolvePointer(TOUT<T>& out, const Pointer & ptrval, 
+	bool ResolvePointer(TOUT<T>& out, const Pointer & ptrval,
 		const FileDatabase& db, const Field& f,
 		bool non_recursive = false) const;
 
 	// --------------------------------------------------------
 	template <template <typename> class TOUT, typename T>
-	bool ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval, 
+	bool ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
 		const FileDatabase& db, const Field& f, bool) const;
 
 	// --------------------------------------------------------
-	bool ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
+	bool ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval,
 		const FileDatabase& db, const Field& f, bool) const;
 
 	// --------------------------------------------------------
@@ -347,7 +347,7 @@ private:
 		template <typename T, unsigned int N>
 		void operator ()(T (& out)[N], const char* = NULL) {
 			for (unsigned int i = 0; i < N; ++i) {
-				out[i] = T(); 
+				out[i] = T();
 			}
 		}
 
@@ -355,7 +355,7 @@ private:
 		void operator ()(T (& out)[N][M], const char* = NULL) {
 			for (unsigned int i = 0; i < N; ++i) {
 				for (unsigned int j = 0; j < M; ++j) {
-					out[i][j] = T(); 
+					out[i][j] = T();
 				}
 			}
 		}
@@ -387,16 +387,16 @@ template <> struct Structure :: _defaultInitializer<ErrorPolicy_Fail> {
 
 	template <typename T>
 	void operator ()(T& /*out*/,const char* = "") {
-		// obviously, it is crucial that _DefaultInitializer is used 
+		// obviously, it is crucial that _DefaultInitializer is used
 		// only from within a catch clause.
 		throw;
 	}
 };
 
 // -------------------------------------------------------------------------------------------------------
-template <> inline bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
-	const Pointer & ptrval, 
-	const FileDatabase& db, 
+template <> inline bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out,
+	const Pointer & ptrval,
+	const FileDatabase& db,
 	const Field& f,
 	bool
 	) const;
@@ -405,7 +405,7 @@ template <> inline bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(
 // -------------------------------------------------------------------------------
 /** Represents the full data structure information for a single BLEND file.
  *  This data is extracted from the DNA1 chunk in the file.
- *  #DNAParser does the reading and represents currently the only place where 
+ *  #DNAParser does the reading and represents currently the only place where
  *  DNA is altered.*/
 // -------------------------------------------------------------------------------
 class DNA
@@ -413,13 +413,13 @@ class DNA
 public:
 
 	typedef void (Structure::*ConvertProcPtr) (
-		boost::shared_ptr<ElemBase> in, 
+		boost::shared_ptr<ElemBase> in,
 		const FileDatabase&
 	) const;
 
 	typedef boost::shared_ptr<ElemBase> (
 		Structure::*AllocProcPtr) () const;
-	
+
 	typedef std::pair< AllocProcPtr, ConvertProcPtr > FactoryPair;
 
 public:
@@ -431,7 +431,7 @@ public:
 public:
 
 	// --------------------------------------------------------
-	/** Access a structure by its canonical name, the pointer version returns NULL on failure 
+	/** Access a structure by its canonical name, the pointer version returns NULL on failure
 	  * while the reference version raises an error. */
 	inline const Structure& operator [] (const std::string& ss) const;
 	inline const Structure* Get (const std::string& ss) const;
@@ -448,19 +448,19 @@ public:
 	void AddPrimitiveStructures();
 
 	// --------------------------------------------------------
-	/** Fill the @c converters member with converters for all 
+	/** Fill the @c converters member with converters for all
 	 *  known data types. The implementation of this method is
 	 *  in BlenderScene.cpp and is machine-generated.
 	 *  Converters are used to quickly handle objects whose
-	 *  exact data type is a runtime-property and not yet 
+	 *  exact data type is a runtime-property and not yet
 	 *  known at compile time (consier Object::data).*/
 	void RegisterConverters();
 
 
 	// --------------------------------------------------------
-	/** Take an input blob from the stream, interpret it according to 
+	/** Take an input blob from the stream, interpret it according to
 	 *  a its structure name and convert it to the intermediate
-	 *  representation. 
+	 *  representation.
 	 *  @param structure Destination structure definition
 	 *  @param db File database.
 	 *  @return A null pointer if no appropriate converter is available.*/
@@ -471,7 +471,7 @@ public:
 
 	// --------------------------------------------------------
 	/** Find a suitable conversion function for a given Structure.
-	 *  Such a converter function takes a blob from the input 
+	 *  Such a converter function takes a blob from the input
 	 *  stream, reads as much as it needs, and builds up a
 	 *  complete object in intermediate representation.
 	 *  @param structure Destination structure definition
@@ -485,7 +485,7 @@ public:
 
 #ifdef ASSIMP_BUILD_BLENDER_DEBUG
 	// --------------------------------------------------------
-	/** Dump the DNA to a text file. This is for debugging purposes. 
+	/** Dump the DNA to a text file. This is for debugging purposes.
 	 *  The output file is `dna.txt` in the current working folder*/
 	void DumpToFile();
 #endif
@@ -500,7 +500,7 @@ public:
 	 *  @throw DeadlyImportError if more than 2 dimensions are
 	 *    encountered. */
 	static void ExtractArraySize(
-		const std::string& out, 
+		const std::string& out,
 		size_t array_sizes[2]
 	);
 };
@@ -517,7 +517,7 @@ template <> inline void Structure :: Convert<Pointer>	(Pointer& dest,const FileD
 /** Describes a master file block header. Each master file sections holds n
  *  elements of a certain SDNA structure (or otherwise unspecified data). */
 // -------------------------------------------------------------------------------
-struct FileBlockHead 
+struct FileBlockHead
 {
 	// points right after the header of the file block
 	StreamReaderAny::pos start;
@@ -555,14 +555,14 @@ inline bool operator< (const Pointer& a, const Pointer& b) {
 // -------------------------------------------------------------------------------
 /** Utility to read all master file blocks in turn. */
 // -------------------------------------------------------------------------------
-class SectionParser 
+class SectionParser
 {
 public:
 
 	// --------------------------------------------------------
-	/** @param stream Inout stream, must point to the 
+	/** @param stream Inout stream, must point to the
 	 *  first section in the file. Call Next() once
-	 *  to have it read. 
+	 *  to have it read.
 	 *  @param ptr64 Pointer size in file is 64 bits? */
 	SectionParser(StreamReaderAny& stream,bool ptr64)
 		: stream(stream)
@@ -577,12 +577,12 @@ public:
 	const FileBlockHead& GetCurrent() const {
 		return current;
 	}
-	
+
 
 public:
 
 	// --------------------------------------------------------
-	/** Advance to the next section. 
+	/** Advance to the next section.
 	 *  @throw DeadlyImportError if the last chunk was passed. */
 	void Next();
 
@@ -602,7 +602,7 @@ class Statistics {
 
 public:
 
-	Statistics () 
+	Statistics ()
 		: fields_read		()
 		, pointers_resolved	()
 		, cache_hits		()
@@ -621,7 +621,7 @@ public:
 	/** number of pointers resolved from the cache */
 	unsigned int cache_hits;
 
-	/** number of blocks (from  FileDatabase::entries) 
+	/** number of blocks (from  FileDatabase::entries)
 	  we did actually read from. */
 	// unsigned int blocks_read;
 
@@ -635,7 +635,7 @@ public:
  *  avoids circular references and avoids object duplication. */
 // -------------------------------------------------------------------------------
 template <template <typename> class TOUT>
-class ObjectCache 
+class ObjectCache
 {
 public:
 
@@ -661,21 +661,21 @@ public:
 	 *   cache doens't know the item yet.
 	 *  @param ptr Item address to look for. */
 	template <typename T> void get (
-		const Structure& s, 
-		TOUT<T>& out, 
+		const Structure& s,
+		TOUT<T>& out,
 		const Pointer& ptr) const;
 
 	// --------------------------------------------------------
-	/** Add an item to the cache after the item has 
+	/** Add an item to the cache after the item has
 	 * been fully read. Do not insert anything that
 	 * may be faulty or might cause the loading
-	 * to abort. 
+	 * to abort.
 	 *  @param s Data type of the item
 	 *  @param out Item to insert into the cache
 	 *  @param ptr address (cache key) of the item. */
-	template <typename T> void set 
-		(const Structure& s, 
-		const TOUT<T>& out, 
+	template <typename T> void set
+		(const Structure& s,
+		const TOUT<T>& out,
 		const Pointer& ptr);
 
 private:
@@ -686,7 +686,7 @@ private:
 
 // -------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------
-template <> class ObjectCache<Blender::vector> 
+template <> class ObjectCache<Blender::vector>
 {
 public:
 
@@ -704,7 +704,7 @@ public:
 /** Memory representation of a full BLEND file and all its dependencies. The
  *  output aiScene is constructed from an instance of this data structure. */
 // -------------------------------------------------------------------------------
-class FileDatabase 
+class FileDatabase
 {
 	template <template <typename> class TOUT> friend class ObjectCache;
 
@@ -715,7 +715,7 @@ public:
 		: _cacheArrays(*this)
 		, _cache(*this)
 		, next_cache_idx()
-	{} 
+	{}
 
 public:
 
@@ -735,7 +735,7 @@ public:
 
 	// For all our templates to work on both shared_ptr's and vector's
 	// using the same code, a dummy cache for arrays is provided. Actually,
-	// arrays of objects are never cached because we can't easily 
+	// arrays of objects are never cached because we can't easily
 	// ensure their proper destruction.
 	template <typename T>
 	ObjectCache<boost::shared_ptr>& cache(boost::shared_ptr<T>& /*in*/) const {
@@ -749,7 +749,7 @@ public:
 
 private:
 
-	
+
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	mutable Statistics _stats;
 #endif
@@ -767,7 +767,7 @@ private:
 // -------------------------------------------------------------------------------
 /** Factory to extract a #DNA from the DNA1 file block in a BLEND file. */
 // -------------------------------------------------------------------------------
-class DNAParser 
+class DNAParser
 {
 
 public:

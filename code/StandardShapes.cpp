@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file   StandardShapes.cpp
  *  @brief  Implementation of the StandardShapes class
  *
- *  The primitive geometry data comes from 
+ *  The primitive geometry data comes from
  *  http://geometrictools.com/Documentation/PlatonicSolids.pdf.
  */
 
@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 
-	
+
 # define ADD_TRIANGLE(n0,n1,n2) \
 	positions.push_back(n0); \
 	positions.push_back(n1); \
@@ -128,7 +128,7 @@ aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
 	aiMesh* out = new aiMesh();
 	switch (numIndices)
 	{
-	case 1: 
+	case 1:
 		out->mPrimitiveTypes = aiPrimitiveType_POINT;
 		break;
 	case 2:
@@ -196,7 +196,7 @@ unsigned int StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 
 	const float t = (1.f + 2.236067977f)/2.f;
 	const float s = std::sqrt(1.f + t*t);
-	
+
 	const aiVector3D v0  = aiVector3D(t,1.f, 0.f)/s;
 	const aiVector3D v1  = aiVector3D(-t,1.f, 0.f)/s;
 	const aiVector3D v2  = aiVector3D(t,-1.f, 0.f)/s;
@@ -371,7 +371,7 @@ void StandardShapes::MakeSphere(unsigned int	tess,
 	// splits each triangle in 4, the icosahedron consists of 60 verts
 	positions.reserve(positions.size()+60 * integer_pow(4, tess));
 
-	// Construct an icosahedron to start with 
+	// Construct an icosahedron to start with
 	MakeIcosahedron(positions);
 
 	// ... and subdivide it until the requested output
@@ -383,7 +383,7 @@ void StandardShapes::MakeSphere(unsigned int	tess,
 // ------------------------------------------------------------------------------------------------
 // Build a cone
 void StandardShapes::MakeCone(float height,float radius1,
-	float radius2,unsigned int tess, 
+	float radius2,unsigned int tess,
 	std::vector<aiVector3D>& positions,bool bOpen /*= false */)
 {
 	// Sorry, a cone with less than 3 segments makes ABSOLUTELY NO SENSE
@@ -398,7 +398,7 @@ void StandardShapes::MakeCone(float height,float radius1,
 
 	float halfHeight = height / 2;
 
-	// radius1 is always the smaller one 
+	// radius1 is always the smaller one
 	if (radius2 > radius1)
 	{
 		std::swap(radius2,radius1);
@@ -446,7 +446,7 @@ void StandardShapes::MakeCone(float height,float radius1,
 			positions.push_back(aiVector3D(s * radius2,  halfHeight, t * radius2 ));
 			positions.push_back(aiVector3D(s2 * radius2,  halfHeight, t2 * radius2 ));
 			positions.push_back(aiVector3D(0.f, halfHeight, 0.f));
-			
+
 
 			if (radius1)
 			{
@@ -454,7 +454,7 @@ void StandardShapes::MakeCone(float height,float radius1,
 				positions.push_back(aiVector3D(s * radius1,  -halfHeight, t * radius1 ));
 				positions.push_back(aiVector3D(s2 * radius1,  -halfHeight, t2 * radius1 ));
 				positions.push_back(aiVector3D(0.f, -halfHeight, 0.f));
-				
+
 			}
 		}
 		s = s2;
@@ -481,7 +481,7 @@ void StandardShapes::MakeCircle(float radius, unsigned int tess,
 
 	radius = std::fabs(radius);
 
-	// We will need 3 vertices per segment 
+	// We will need 3 vertices per segment
 	positions.reserve(positions.size()+tess*3);
 
 	const float angle_delta = (float)AI_MATH_TWO_PI / tess;

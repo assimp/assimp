@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -54,7 +54,7 @@ namespace Ogre
 
 // VertexElement
 
-VertexElement::VertexElement() : 
+VertexElement::VertexElement() :
 	index(0),
 	source(0),
 	offset(0),
@@ -272,7 +272,7 @@ void IVertexData::BoneAssignmentsForVertex(uint32_t currentIndex, uint32_t newIn
 
 AssimpVertexBoneWeightList IVertexData::AssimpBoneWeights(size_t vertices)
 {
-	AssimpVertexBoneWeightList weights;	
+	AssimpVertexBoneWeightList weights;
 	for(size_t vi=0; vi<vertices; ++vi)
 	{
 		VertexBoneAssignmentList &vertexWeights = boneAssignmentsMap[vi];
@@ -386,7 +386,7 @@ IndexData::IndexData() :
 
 IndexData::~IndexData()
 {
-	Reset();	
+	Reset();
 }
 
 void IndexData::Reset()
@@ -533,14 +533,14 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 	if (operationType != OT_TRIANGLE_LIST) {
 		throw DeadlyImportError(Formatter::format() << "Only mesh operation type OT_TRIANGLE_LIST is supported. Found " << operationType);
 	}
-		
+
 	aiMesh *dest = new aiMesh();
 	dest->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 	if (!name.empty())
 		dest->mName = name;
 
-	// Material index	
+	// Material index
 	if (materialIndex != -1)
 		dest->mMaterialIndex = materialIndex;
 
@@ -587,11 +587,11 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 	const size_t vWidthNormal    = (normalsElement ? src->VertexSize(normalsElement->source) : 0);
 	const size_t vWidthUv1       = (uv1Element ? src->VertexSize(uv1Element->source) : 0);
 	const size_t vWidthUv2       = (uv2Element ? src->VertexSize(uv2Element->source) : 0);
-	
+
 	bool boneAssignments = src->HasBoneAssignments();
-	
+
 	// Prepare normals
-	if (normals) 
+	if (normals)
 		dest->mNormals = new aiVector3D[dest->mNumVertices];
 
 	// Prepare UVs, ignoring incompatible UVs.
@@ -600,7 +600,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 		if (uv1Element->type == VertexElement::VET_FLOAT2 || uv1Element->type == VertexElement::VET_FLOAT3)
 		{
 			dest->mNumUVComponents[0] = uv1Element->ComponentCount();
-			dest->mTextureCoords[0] = new aiVector3D[dest->mNumVertices];	
+			dest->mTextureCoords[0] = new aiVector3D[dest->mNumVertices];
 		}
 		else
 		{
@@ -613,7 +613,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 		if (uv2Element->type == VertexElement::VET_FLOAT2 || uv2Element->type == VertexElement::VET_FLOAT3)
 		{
 			dest->mNumUVComponents[1] = uv2Element->ComponentCount();
-			dest->mTextureCoords[1] = new aiVector3D[dest->mNumVertices];	
+			dest->mTextureCoords[1] = new aiVector3D[dest->mNumVertices];
 		}
 		else
 		{
@@ -626,7 +626,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 	aiVector3D *uv2Dest = (uv2 ? dest->mTextureCoords[1] : 0);
 
 	MemoryStream *faces = indexData->buffer.get();
-	for (size_t fi=0, isize=indexData->IndexSize(), fsize=indexData->FaceSize(); 
+	for (size_t fi=0, isize=indexData->IndexSize(), fsize=indexData->FaceSize();
 		 fi<dest->mNumFaces; ++fi)
 	{
 		// Source Ogre face
@@ -665,7 +665,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 			// Ogres vertex index to ref into the source buffers.
 			const size_t ogreVertexIndex = ogreFace.mIndices[v];
 			src->AddVertexMapping(ogreVertexIndex, newIndex);
-			
+
 			// Position
 			positions->Seek((vWidthPosition * ogreVertexIndex) + positionsElement->offset, aiOrigin_SET);
 			positions->Read(&dest->mVertices[newIndex], sizePosition, 1);
@@ -767,7 +767,7 @@ void MeshXml::ConvertToAssimpScene(aiScene* dest)
 		dest->mMeshes[i] = subMeshes[i]->ConvertToAssimpMesh(this);
 		dest->mRootNode->mMeshes[i] = i;
 	}
-	
+
 	// Export skeleton
 	if (skeleton)
 	{
@@ -777,7 +777,7 @@ void MeshXml::ConvertToAssimpScene(aiScene* dest)
 			BoneList rootBones = skeleton->RootBones();
 			dest->mRootNode->mNumChildren = rootBones.size();
 			dest->mRootNode->mChildren = new aiNode*[dest->mRootNode->mNumChildren];
-			
+
 			for(size_t i=0, len=rootBones.size(); i<len; ++i)
 			{
 				dest->mRootNode->mChildren[i] = rootBones[i]->ConvertToAssimpNode(skeleton, dest->mRootNode);
@@ -789,7 +789,7 @@ void MeshXml::ConvertToAssimpScene(aiScene* dest)
 		{
 			dest->mNumAnimations = skeleton->animations.size();
 			dest->mAnimations = new aiAnimation*[dest->mNumAnimations];
-			
+
 			for(size_t i=0, len=skeleton->animations.size(); i<len; ++i)
 			{
 				dest->mAnimations[i] = skeleton->animations[i]->ConvertToAssimpAnimation();
@@ -825,7 +825,7 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 	if (!name.empty())
 		dest->mName = name;
 
-	// Material index	
+	// Material index
 	if (materialIndex != -1)
 		dest->mMaterialIndex = materialIndex;
 
@@ -842,9 +842,9 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 	bool boneAssignments = src->HasBoneAssignments();
 	bool normals = src->HasNormals();
 	size_t uvs = src->NumUvs();
-	
+
 	// Prepare normals
-	if (normals) 
+	if (normals)
 		dest->mNormals = new aiVector3D[dest->mNumVertices];
 
 	// Prepare UVs
@@ -875,14 +875,14 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 			// Ogres vertex index to ref into the source buffers.
 			const size_t ogreVertexIndex = ogreFace.mIndices[v];
 			src->AddVertexMapping(ogreVertexIndex, newIndex);
-			
+
 			// Position
 			dest->mVertices[newIndex] = src->positions[ogreVertexIndex];
 
 			// Normal
 			if (normals)
 				dest->mNormals[newIndex] = src->normals[ogreVertexIndex];
-				
+
 			// UVs
 			for(size_t uvi=0; uvi<uvs; ++uvi)
 			{
@@ -892,7 +892,7 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 			}
 		}
 	}
-	
+
 	// Bones and bone weights
 	if (parent->skeleton && boneAssignments)
 	{
@@ -901,7 +901,7 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 
 		dest->mNumBones = referencedBones.size();
 		dest->mBones = new aiBone*[dest->mNumBones];
-		
+
 		size_t assimpBoneIndex = 0;
 		for(std::set<uint16_t>::const_iterator rbIter=referencedBones.begin(), rbEnd=referencedBones.end(); rbIter != rbEnd; ++rbIter, ++assimpBoneIndex)
 		{
@@ -923,7 +923,7 @@ Animation::Animation(Skeleton *parent) :
 {
 }
 
-Animation::Animation(Mesh *parent) : 
+Animation::Animation(Mesh *parent) :
 	parentMesh(parent),
 	parentSkeleton(0),
 	length(0.0f),
@@ -955,7 +955,7 @@ aiAnimation *Animation::ConvertToAssimpAnimation()
 	{
 		anim->mNumChannels = tracks.size();
 		anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
-		
+
 		for(size_t i=0, len=tracks.size(); i<len; ++i)
 		{
 			anim->mChannels[i] = tracks[i].ConvertToAssimpAnimationNode(parentSkeleton);
@@ -1058,7 +1058,7 @@ void Bone::AddChild(Bone *bone)
 		return;
 	if (bone->IsParented())
 		throw DeadlyImportError("Attaching child Bone that is already parented: " + bone->name);
-		
+
 	bone->parent = this;
 	bone->parentId = id;
 	children.push_back(bone->id);
@@ -1114,7 +1114,7 @@ aiBone *Bone::ConvertToAssimpBone(Skeleton * /*parent*/, const std::vector<aiVer
 	aiBone *bone = new aiBone();
 	bone->mName = name;
 	bone->mOffsetMatrix = worldMatrix;
-	
+
 	if (!boneWeights.empty())
 	{
 		bone->mNumWeights = boneWeights.size();
@@ -1141,7 +1141,7 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
 
 	aiNodeAnim *nodeAnim = new aiNodeAnim();
 	nodeAnim->mNodeName = boneName;
-	
+
 	Bone *bone = skeleton->BoneByName(boneName);
 	if (!bone) {
 		throw DeadlyImportError("VertexAnimationTrack::ConvertToAssimpAnimationNode: Failed to find bone " + boneName + " from parent Skeleton");
@@ -1150,7 +1150,7 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
 	// Keyframes
 	size_t numKeyframes = transformKeyFrames.size();
 
-	nodeAnim->mPositionKeys = new aiVectorKey[numKeyframes];				
+	nodeAnim->mPositionKeys = new aiVectorKey[numKeyframes];
 	nodeAnim->mRotationKeys = new aiQuatKey[numKeyframes];
 	nodeAnim->mScalingKeys = new aiVectorKey[numKeyframes];
 	nodeAnim->mNumPositionKeys = numKeyframes;
@@ -1164,7 +1164,7 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
 		// Calculate the complete transformation from world space to bone space
 		aiVector3D pos; aiQuaternion rot; aiVector3D scale;
 
-		aiMatrix4x4 finalTransform = bone->defaultPose * kfSource.Transform();		
+		aiMatrix4x4 finalTransform = bone->defaultPose * kfSource.Transform();
 		finalTransform.Decompose(scale, rot, pos);
 
 		double t = static_cast<double>(kfSource.timePos);
@@ -1172,7 +1172,7 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
 		nodeAnim->mRotationKeys[kfi].mTime = t;
 		nodeAnim->mScalingKeys[kfi].mTime = t;
 
-		nodeAnim->mPositionKeys[kfi].mValue = pos;					
+		nodeAnim->mPositionKeys[kfi].mValue = pos;
 		nodeAnim->mRotationKeys[kfi].mValue = rot;
 		nodeAnim->mScalingKeys[kfi].mValue = scale;
 	}
@@ -1182,7 +1182,7 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
 
 // TransformKeyFrame
 
-TransformKeyFrame::TransformKeyFrame() : 
+TransformKeyFrame::TransformKeyFrame() :
 	timePos(0.0f),
 	scale(1.0f, 1.0f, 1.0f)
 {

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  SkeletonMeshBuilder.cpp
- *  @brief Implementation of a little class to construct a dummy mesh for a skeleton 
+ *  @brief Implementation of a little class to construct a dummy mesh for a skeleton
  */
 
 #include "../include/assimp/scene.h"
@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-// The constructor processes the given scene and adds a mesh there. 
+// The constructor processes the given scene and adds a mesh there.
 SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root, bool bKnobsOnly)
 {
 	// nothing to do if there's mesh data already present at the scene
@@ -60,7 +60,7 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root, bool bK
 
 	mKnobsOnly = bKnobsOnly;
 
-	// build some faces around each node 
+	// build some faces around each node
 	CreateGeometry( root );
 
 	// create a mesh to hold all the generated faces
@@ -79,13 +79,13 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root, bool bK
 }
 
 // ------------------------------------------------------------------------------------------------
-// Recursively builds a simple mesh representation for the given node 
+// Recursively builds a simple mesh representation for the given node
 void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 {
-	// add a joint entry for the node. 
+	// add a joint entry for the node.
 	const unsigned int vertexStartIndex = mVertices.size();
 
-	// now build the geometry. 
+	// now build the geometry.
 	if( pNode->mNumChildren > 0 && !mKnobsOnly)
 	{
 		// If the node has children, we build little pointers to each of them
@@ -125,7 +125,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 			mFaces.push_back( Face( localVertexStart + 6, localVertexStart + 7, localVertexStart + 8));
 			mFaces.push_back( Face( localVertexStart + 9, localVertexStart + 10, localVertexStart + 11));
 		}
-	} 
+	}
 	else
 	{
 		// if the node has no children, it's an end node. Put a little knob there instead
@@ -227,7 +227,7 @@ aiMesh* SkeletonMeshBuilder::CreateMesh()
 
 		// Compute per-face normals ... we don't want the bones to be smoothed ... they're built to visualize
 		// the skeleton, so it's good if there's a visual difference to the rest of the geometry
-		aiVector3D nor = ((mVertices[inface.mIndices[2]] - mVertices[inface.mIndices[0]]) ^ 
+		aiVector3D nor = ((mVertices[inface.mIndices[2]] - mVertices[inface.mIndices[0]]) ^
 			(mVertices[inface.mIndices[1]] - mVertices[inface.mIndices[0]]));
 
 		if (nor.Length() < 1e-5f) /* ensure that FindInvalidData won't remove us ...*/

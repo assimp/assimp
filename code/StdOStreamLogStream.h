@@ -13,14 +13,14 @@ namespace Assimp	{
 class StdOStreamLogStream : public LogStream
 {
 public:
-	/**	@brief	Construction from an existing std::ostream	
+	/**	@brief	Construction from an existing std::ostream
 	 *  @param _ostream Output stream to be used
 	*/
 	StdOStreamLogStream(std::ostream& _ostream);
 
 	/**	@brief	Destructor	*/
 	~StdOStreamLogStream();
-	
+
 	/**	@brief	Writer	*/
 	void write(const char* message);
 private:

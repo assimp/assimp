@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -103,7 +103,7 @@ public:
 		VES_BINORMAL = 8,
 		/// Tangent (X axis if normal is Z)
 		VES_TANGENT = 9,
-		/// The  number of VertexElementSemantic elements (note - the first value VES_POSITION is 1) 
+		/// The  number of VertexElementSemantic elements (note - the first value VES_POSITION is 1)
 		VES_COUNT = 9
 	};
 
@@ -132,7 +132,7 @@ public:
 		VET_USHORT1 = 16,
 		VET_USHORT2 = 17,
 		VET_USHORT3 = 18,
-		VET_USHORT4 = 19,      
+		VET_USHORT4 = 19,
 		VET_INT1 = 20,
 		VET_INT2 = 21,
 		VET_INT3 = 22,
@@ -147,16 +147,16 @@ public:
 
 	/// Size of the vertex element in bytes.
 	size_t Size() const;
-	
+
 	/// Count of components in this element, eg. VET_FLOAT3 return 3.
 	size_t ComponentCount() const;
-	
+
 	/// Type as string.
 	std::string TypeToString();
-	
+
 	/// Semantic as string.
 	std::string SemanticToString();
-	
+
 	static size_t TypeSize(Type type);
 	static size_t ComponentCount(Type type);
 	static std::string TypeToString(Type type);
@@ -186,10 +186,10 @@ class IVertexData
 {
 public:
 	IVertexData();
-	
+
 	/// Returns if bone assignments are available.
 	bool HasBoneAssignments() const;
-	
+
 	/// Add vertex mapping from old to new index.
 	void AddVertexMapping(uint32_t oldIndex, uint32_t newIndex);
 
@@ -202,13 +202,13 @@ public:
 
 	/// Vertex count.
 	uint32_t count;
-	
+
 	/// Bone assignments.
 	VertexBoneAssignmentList boneAssignments;
-	
+
 private:
 	void BoneAssignmentsForVertex(uint32_t currentIndex, uint32_t newIndex, VertexBoneAssignmentList &dest) const;
-	
+
 	std::map<uint32_t, std::vector<uint32_t> > vertexIndexMapping;
 	VertexBoneAssignmentsMap boneAssignmentsMap;
 };
@@ -257,7 +257,7 @@ public:
 
 	/// Index count.
 	uint32_t count;
-	
+
 	/// Face count.
 	uint32_t faceCount;
 
@@ -284,13 +284,13 @@ public:
 
 	/// Name.
 	std::string name;
-	
+
 	/// Target.
 	uint16_t target;
-	
+
 	/// Does vertices map have normals.
 	bool hasNormals;
-	
+
 	/// Vertex offset and normals.
 	PoseVertexMap vertices;
 };
@@ -328,11 +328,11 @@ typedef std::vector<MorphKeyFrame> MorphKeyFrameList;
 struct TransformKeyFrame
 {
 	TransformKeyFrame();
-	
+
 	aiMatrix4x4 Transform();
 
 	float timePos;
-	
+
 	aiQuaternion rotation;
 	aiVector3D position;
 	aiVector3D scale;
@@ -355,18 +355,18 @@ struct VertexAnimationTrack
 	};
 
 	VertexAnimationTrack();
-	
+
 	/// Convert to Assimp node animation.
 	aiNodeAnim *ConvertToAssimpAnimationNode(Skeleton *skeleton);
 
 	// Animation type.
 	Type type;
-	
+
 	/// Vertex data target.
 	/**  0 == shared geometry
 		>0 == submesh index + 1 */
 	uint16_t target;
-	
+
 	/// Only valid for VAT_TRANSFORM.
 	std::string boneName;
 
@@ -430,13 +430,13 @@ public:
 
 	/// Add child bone.
 	void AddChild(Bone *bone);
-	
+
 	/// Calculates the world matrix for bone and its children.
 	void CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton);
-	
+
 	/// Convert to Assimp node (animation nodes).
 	aiNode *ConvertToAssimpNode(Skeleton *parent, aiNode *parentNode = 0);
-	
+
 	/// Convert to Assimp bone (mesh bones).
 	aiBone *ConvertToAssimpBone(Skeleton *parent, const std::vector<aiVertexWeight> &boneWeights);
 
@@ -450,7 +450,7 @@ public:
 	aiVector3D position;
 	aiQuaternion rotation;
 	aiVector3D scale;
-	
+
 	aiMatrix4x4 worldMatrix;
 	aiMatrix4x4 defaultPose;
 };
@@ -473,22 +473,22 @@ public:
 
 	/// Releases all memory that this data structure owns.
 	void Reset();
-	
+
 	/// Returns unparented root bones.
 	BoneList RootBones() const;
-	
+
 	/// Returns number of unparented root bones.
 	size_t NumRootBones() const;
-	
+
 	/// Get bone by name.
 	Bone *BoneByName(const std::string &name) const;
-	
+
 	/// Get bone by id.
 	Bone *BoneById(uint16_t id) const;
-	
+
 	BoneList bones;
 	AnimationList animations;
-	
+
 	/// @todo Take blend mode into account, but where?
 	BlendMode blendMode;
 };
@@ -508,7 +508,7 @@ public:
 		OT_LINE_STRIP = 3,
 		/// A list of triangles, 3 vertices per triangle
 		OT_TRIANGLE_LIST = 4,
-		/// A strip of triangles, 3 vertices for the first triangle, and 1 per triangle after that 
+		/// A strip of triangles, 3 vertices for the first triangle, and 1 per triangle after that
 		OT_TRIANGLE_STRIP = 5,
 		/// A fan of triangles, 3 vertices for the first triangle, and 1 per triangle after that
 		OT_TRIANGLE_FAN = 6
@@ -532,7 +532,7 @@ public:
 	/// Assimp scene material index used by this submesh.
 	/** -1 if no material or material could not be imported. */
 	int materialIndex;
-	
+
 	/// If submesh uses shared geometry from parent mesh.
 	bool usesSharedVertexData;
 
@@ -546,13 +546,13 @@ class SubMesh : public ISubMesh
 public:
 	SubMesh();
 	~SubMesh();
-	
+
 	/// Releases all memory that this data structure owns.
 	/** @note Vertex and index data contains shared ptrs
 		that are freed automatically. In practice the ref count
 		should be 0 after this reset. */
 	void Reset();
-	
+
 	/// Covert to Assimp mesh.
 	aiMesh *ConvertToAssimpMesh(Mesh *parent);
 
@@ -585,7 +585,7 @@ public:
 
 	/// Mesh has skeletal animations.
 	bool hasSkeletalAnimations;
-	
+
 	/// Skeleton reference.
 	std::string skeletonRef;
 
@@ -610,7 +610,7 @@ class VertexDataXml : public IVertexData
 {
 public:
 	VertexDataXml();
-	
+
 	bool HasPositions() const;
 	bool HasNormals() const;
 	bool HasTangents() const;
@@ -641,10 +641,10 @@ class SubMeshXml : public ISubMesh
 public:
 	SubMeshXml();
 	~SubMeshXml();
-	
+
 	/// Releases all memory that this data structure owns.
 	void Reset();
-	
+
 	aiMesh *ConvertToAssimpMesh(MeshXml *parent);
 
 	IndexDataXml *indexData;

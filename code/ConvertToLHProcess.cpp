@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -85,7 +85,7 @@ void MakeLeftHandedProcess::Execute( aiScene* pScene)
 	ai_assert(pScene->mRootNode != NULL);
 	DefaultLogger::get()->debug("MakeLeftHandedProcess begin");
 
-	// recursively convert all the nodes 
+	// recursively convert all the nodes
 	ProcessNode( pScene->mRootNode, aiMatrix4x4());
 
 	// process the meshes accordingly
@@ -133,7 +133,7 @@ void MakeLeftHandedProcess::ProcessNode( aiNode* pNode, const aiMatrix4x4& pPare
 }
 
 // ------------------------------------------------------------------------------------------------
-// Converts a single mesh to left handed coordinates. 
+// Converts a single mesh to left handed coordinates.
 void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
 {
 	// mirror positions, normals and stuff along the Z axis
@@ -141,7 +141,7 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
 	{
 		pMesh->mVertices[a].z *= -1.0f;
 		if( pMesh->HasNormals())
-			pMesh->mNormals[a].z *= -1.0f;		
+			pMesh->mNormals[a].z *= -1.0f;
 		if( pMesh->HasTangentsAndBitangents())
 		{
 			pMesh->mTangents[a].z *= -1.0f;
@@ -170,7 +170,7 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Converts a single material to left handed coordinates. 
+// Converts a single material to left handed coordinates.
 void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat)
 {
 	aiMaterial* mat = (aiMaterial*)_mat;
@@ -179,7 +179,7 @@ void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat)
 
 		// Mapping axis for UV mappings?
 		if (!::strcmp( prop->mKey.data, "$tex.mapaxis"))	{
-			ai_assert( prop->mDataLength >= sizeof(aiVector3D)); /* something is wrong with the validation if we end up here */ 
+			ai_assert( prop->mDataLength >= sizeof(aiVector3D)); /* something is wrong with the validation if we end up here */
 			aiVector3D* pff = (aiVector3D*)prop->mData;
 
 			pff->z *= -1.f;
@@ -188,27 +188,27 @@ void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Converts the given animation to LH coordinates. 
-void MakeLeftHandedProcess::ProcessAnimation( aiNodeAnim* pAnim) 
-{ 
-	// position keys 
-	for( unsigned int a = 0; a < pAnim->mNumPositionKeys; a++) 
-		pAnim->mPositionKeys[a].mValue.z *= -1.0f; 
+// Converts the given animation to LH coordinates.
+void MakeLeftHandedProcess::ProcessAnimation( aiNodeAnim* pAnim)
+{
+	// position keys
+	for( unsigned int a = 0; a < pAnim->mNumPositionKeys; a++)
+		pAnim->mPositionKeys[a].mValue.z *= -1.0f;
 
-	// rotation keys 
-	for( unsigned int a = 0; a < pAnim->mNumRotationKeys; a++) 
-	{ 
-		/* That's the safe version, but the float errors add up. So we try the short version instead 
-		aiMatrix3x3 rotmat = pAnim->mRotationKeys[a].mValue.GetMatrix(); 
-		rotmat.a3 = -rotmat.a3; rotmat.b3 = -rotmat.b3; 
-		rotmat.c1 = -rotmat.c1; rotmat.c2 = -rotmat.c2; 
-		aiQuaternion rotquat( rotmat); 
-		pAnim->mRotationKeys[a].mValue = rotquat; 
-		*/ 
-		pAnim->mRotationKeys[a].mValue.x *= -1.0f; 
-		pAnim->mRotationKeys[a].mValue.y *= -1.0f; 
-	} 
-} 
+	// rotation keys
+	for( unsigned int a = 0; a < pAnim->mNumRotationKeys; a++)
+	{
+		/* That's the safe version, but the float errors add up. So we try the short version instead
+		aiMatrix3x3 rotmat = pAnim->mRotationKeys[a].mValue.GetMatrix();
+		rotmat.a3 = -rotmat.a3; rotmat.b3 = -rotmat.b3;
+		rotmat.c1 = -rotmat.c1; rotmat.c2 = -rotmat.c2;
+		aiQuaternion rotquat( rotmat);
+		pAnim->mRotationKeys[a].mValue = rotquat;
+		*/
+		pAnim->mRotationKeys[a].mValue.x *= -1.0f;
+		pAnim->mRotationKeys[a].mValue.y *= -1.0f;
+	}
+}
 
 #endif // !!  ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS
 #ifndef  ASSIMP_BUILD_NO_FLIPUVS_PROCESS
@@ -245,7 +245,7 @@ void FlipUVsProcess::Execute( aiScene* pScene)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Converts a single material 
+// Converts a single material
 void FlipUVsProcess::ProcessMaterial (aiMaterial* _mat)
 {
 	aiMaterial* mat = (aiMaterial*)_mat;
@@ -269,7 +269,7 @@ void FlipUVsProcess::ProcessMaterial (aiMaterial* _mat)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Converts a single mesh 
+// Converts a single mesh
 void FlipUVsProcess::ProcessMesh( aiMesh* pMesh)
 {
 	// mirror texture y coordinate
@@ -316,7 +316,7 @@ void FlipWindingOrderProcess::Execute( aiScene* pScene)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Converts a single mesh 
+// Converts a single mesh
 void FlipWindingOrderProcess::ProcessMesh( aiMesh* pMesh)
 {
 	// invert the order of all faces in this mesh

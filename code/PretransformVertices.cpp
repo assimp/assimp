@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file PretransformVertices.cpp
- *  @brief Implementation of the "PretransformVertices" post processing step 
+ *  @brief Implementation of the "PretransformVertices" post processing step
 */
 
 
@@ -128,7 +128,7 @@ void PretransformVertices::CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNo
 {
 	for (unsigned int i = 0; i < pcNode->mNumMeshes;++i)
 	{
-		aiMesh* pcMesh = pcScene->mMeshes[ pcNode->mMeshes[i] ]; 
+		aiMesh* pcMesh = pcScene->mMeshes[ pcNode->mMeshes[i] ];
 		if (iMat == pcMesh->mMaterialIndex && iVFormat == GetMeshVFormat(pcMesh))
 		{
 			*piVertices += pcMesh->mNumVertices;
@@ -145,14 +145,14 @@ void PretransformVertices::CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNo
 // ------------------------------------------------------------------------------------------------
 // Collect vertex/face data
 void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
-	unsigned int iVFormat, aiMesh* pcMeshOut, 
+	unsigned int iVFormat, aiMesh* pcMeshOut,
 	unsigned int aiCurrent[2], unsigned int* num_refs)
 {
 	// No need to multiply if there's no transformation
 	const bool identity = pcNode->mTransformation.IsIdentity();
 	for (unsigned int i = 0; i < pcNode->mNumMeshes;++i)
 	{
-		aiMesh* pcMesh = pcScene->mMeshes[ pcNode->mMeshes[i] ]; 
+		aiMesh* pcMesh = pcScene->mMeshes[ pcNode->mMeshes[i] ];
 		if (iMat == pcMesh->mMaterialIndex && iVFormat == GetMeshVFormat(pcMesh))
 		{
 			// Decrement mesh reference counter
@@ -200,7 +200,7 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
 				{
 					// copy normals, transform them to worldspace
 					for (unsigned int n = 0; n < pcMesh->mNumVertices;++n)	{
-						pcMeshOut->mNormals[aiCurrent[AI_PTVS_VERTEX]+n] = 
+						pcMeshOut->mNormals[aiCurrent[AI_PTVS_VERTEX]+n] =
 							(m * pcMesh->mNormals[n]).Normalize();
 					}
 				}
@@ -232,7 +232,7 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
 				++p;
 			}
 			// now we need to copy all faces. since we will delete the source mesh afterwards,
-			// we don't need to reallocate the array of indices except if this mesh is 
+			// we don't need to reallocate the array of indices except if this mesh is
 			// referenced multiple times.
 			for (unsigned int planck = 0;planck < pcMesh->mNumFaces;++planck)
 			{
@@ -241,11 +241,11 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
 
 				const unsigned int num_idx = f_src.mNumIndices;
 
-				f_dst.mNumIndices = num_idx; 
+				f_dst.mNumIndices = num_idx;
 
 				unsigned int* pi;
 				if (!num_ref) { /* if last time the mesh is referenced -> no reallocation */
-					pi = f_dst.mIndices = f_src.mIndices; 
+					pi = f_dst.mIndices = f_src.mIndices;
 
 					// offset all vertex indices
 					for (unsigned int hahn = 0; hahn < num_idx;++hahn){
@@ -254,7 +254,7 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
 				}
 				else {
 					pi = f_dst.mIndices = new unsigned int[num_idx];
-					
+
 					// copy and offset all vertex indices
 					for (unsigned int hahn = 0; hahn < num_idx;++hahn){
 						pi[hahn] = f_src.mIndices[hahn] + aiCurrent[AI_PTVS_VERTEX];
@@ -298,7 +298,7 @@ void PretransformVertices::GetVFormatList( aiScene* pcScene, unsigned int iMat,
 {
 	for (unsigned int i = 0; i < pcScene->mNumMeshes;++i)
 	{
-		aiMesh* pcMesh = pcScene->mMeshes[ i ]; 
+		aiMesh* pcMesh = pcScene->mMeshes[ i ];
 		if (iMat == pcMesh->mMaterialIndex)	{
 			aiOut.push_back(GetMeshVFormat(pcMesh));
 		}
@@ -324,7 +324,7 @@ void PretransformVertices::ApplyTransform(aiMesh* mesh, const aiMatrix4x4& mat)
 {
 	// Check whether we need to transform the coordinates at all
 	if (!mat.IsIdentity()) {
-		
+
 		if (mesh->HasPositions()) {
 			for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 				mesh->mVertices[i] = mat * mesh->mVertices[i];
@@ -372,12 +372,12 @@ void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in
 			mesh->mNumBones = UINT_MAX;
 		}
 		else {
-		
+
 			// try to find us in the list of newly created meshes
 			for (unsigned int n = 0; n < out.size(); ++n) {
 				aiMesh* ctz = out[n];
 				if (ctz->mNumBones == node->mMeshes[i] && *reinterpret_cast<aiMatrix4x4*>(ctz->mBones) ==  node->mTransformation) {
-					
+
 					// ok, use this one. Update node mesh index
 					node->mMeshes[i] = numIn + n;
 				}
@@ -512,7 +512,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 			aiVFormats.unique();
 			for (std::list<unsigned int>::const_iterator j =  aiVFormats.begin();j != aiVFormats.end();++j)	{
 				unsigned int iVertices = 0;
-				unsigned int iFaces = 0; 
+				unsigned int iFaces = 0;
 				CountVerticesAndFaces(pScene,pScene->mRootNode,i,*j,&iFaces,&iVertices);
 				if (0 != iFaces && 0 != iVertices)
 				{
@@ -548,8 +548,8 @@ void PretransformVertices::Execute( aiScene* pScene)
 			}
 		}
 
-		// If no meshes are referenced in the node graph it is possible that we get no output meshes. 
-		if (apcOutMeshes.empty())	{		
+		// If no meshes are referenced in the node graph it is possible that we get no output meshes.
+		if (apcOutMeshes.empty())	{
 			throw DeadlyImportError("No output meshes: all meshes are orphaned and are not referenced by any nodes");
 		}
 		else
@@ -570,14 +570,14 @@ void PretransformVertices::Execute( aiScene* pScene)
 				delete mesh;
 
 				// Invalidate the contents of the old mesh array. We will most
-				// likely have less output meshes now, so the last entries of 
-				// the mesh array are not overridden. We set them to NULL to 
+				// likely have less output meshes now, so the last entries of
+				// the mesh array are not overridden. We set them to NULL to
 				// make sure the developer gets notified when his application
 				// attempts to access these fields ...
 				mesh = NULL;
 			}
 
-			// It is impossible that we have more output meshes than 
+			// It is impossible that we have more output meshes than
 			// input meshes, so we can easily reuse the old mesh array
 			pScene->mNumMeshes = (unsigned int)apcOutMeshes.size();
 			for (unsigned int i = 0; i < pScene->mNumMeshes;++i) {
@@ -594,7 +594,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 	pScene->mAnimations    = NULL;
 	pScene->mNumAnimations = 0;
 
-	// --- we need to keep all cameras and lights 
+	// --- we need to keep all cameras and lights
 	for (unsigned int i = 0; i < pScene->mNumCameras;++i)
 	{
 		aiCamera* cam = pScene->mCameras[i];
@@ -690,7 +690,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 		// find the dominant axis
 		aiVector3D d = max-min;
 		const float div = std::max(d.x,std::max(d.y,d.z))*0.5f;
-	
+
 		d = min+d*0.5f;
 		for (unsigned int a = 0; a <  pScene->mNumMeshes; ++a) {
 			aiMesh* m = pScene->mMeshes[a];

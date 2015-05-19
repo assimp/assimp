@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -65,7 +65,7 @@ T lerp(const T& one, const T& two, float val)
 inline aiTextureMapMode GetMapMode(LWO::Texture::Wrap in)
 {
 	switch (in)
-	{	
+	{
 		case LWO::Texture::REPEAT:
 			return aiTextureMapMode_Wrap;
 
@@ -97,7 +97,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
 		ret = true;
 
 		// Convert lightwave's mapping modes to ours. We let them
-		// as they are, the GenUVcoords step will compute UV 
+		// as they are, the GenUVcoords step will compute UV
 		// channels if they're not there.
 
 		aiTextureMapping mapping;
@@ -138,7 +138,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
 		};
 
 		if (mapping != aiTextureMapping_UV)	{
-			// Setup the main axis 
+			// Setup the main axis
 			aiVector3D v;
 			switch ((*it).majorAxis)	{
 				case Texture::AXIS_X:
@@ -177,7 +177,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
 				if ((*clip).idx == temp) {
 					candidate = clip;
 				}
-				
+
 			}
 			if (candidate == end)	{
 				DefaultLogger::get()->error("LWO2: Clip index is out of bounds");
@@ -207,7 +207,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
 				pcMat->AddProperty(&flags,1,AI_MATKEY_TEXFLAGS(type,cur));
 			}
 		}
-		else 
+		else
 		{
 			std::string ss = (*it).mFileName;
 			if (!ss.length()) {
@@ -281,7 +281,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
 	// add the refraction index and the bump intensity
 	pcMat->AddProperty(&surf.mIOR,1,AI_MATKEY_REFRACTI);
 	pcMat->AddProperty(&surf.mBumpIntensity,1,AI_MATKEY_BUMPSCALING);
-	
+
 	aiShadingMode m;
 	if (surf.mSpecularValue && surf.mGlossiness)
 	{
@@ -330,7 +330,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
 		pcMat->AddProperty(&f,1,AI_MATKEY_OPACITY);
 		pcMat->AddProperty(&def,1,AI_MATKEY_BLEND_FUNC);
 	}
-	
+
 
 	// ADD TEXTURES to the material
 	// TODO: find out how we can handle COLOR textures correctly...
@@ -343,7 +343,7 @@ void LWOImporter::ConvertMaterial(const LWO::Surface& surf,aiMaterial* pcMat)
 	HandleTextures(pcMat,surf.mReflectionTextures,aiTextureType_REFLECTION);
 
 	// Now we need to know which shader to use .. iterate through the shader list of
-	// the surface and  search for a name which we know ... 
+	// the surface and  search for a name which we know ...
 	for (ShaderList::const_iterator it = surf.mShaders.begin(), end = surf.mShaders.end();it != end;++it)	{
 		//if (!(*it).enabled)continue;
 
@@ -388,10 +388,10 @@ char LWOImporter::FindUVChannels(LWO::TextureList& list,
 		if (!(*it).enabled || !(*it).bCanUse || (*it).mapMode != LWO::Texture::UV)	{
 			continue;
 		}
-		
+
 		if ((*it).mUVChannelIndex == uv.name) {
 			ret = 1;
-		
+
 			// got it.
 			if ((*it).mRealUVIndex == UINT_MAX || (*it).mRealUVIndex == next)
 			{
@@ -409,7 +409,7 @@ char LWOImporter::FindUVChannels(LWO::TextureList& list,
 }
 
 // ------------------------------------------------------------------------------------------------
-void LWOImporter::FindUVChannels(LWO::Surface& surf, 
+void LWOImporter::FindUVChannels(LWO::Surface& surf,
 	LWO::SortedRep& sorted,LWO::Layer& layer,
 	unsigned int out[AI_MAX_NUMBER_OF_TEXTURECOORDS])
 {
@@ -420,7 +420,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
 		LWO::UVChannel& uv = layer.mUVChannels[i];
 
 		for (LWO::SortedRep::const_iterator it = sorted.begin(); it != sorted.end(); ++it)	{
-			
+
 			LWO::Face& face = layer.mFaces[*it];
 
 			for (unsigned int n = 0; n < face.mNumIndices; ++n) {
@@ -449,8 +449,8 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
 						// and are willing to drop unreferenced channels in favour of it.
 						if (had != 0) {
 							if (num_extra) {
-							
-								for (unsigned int a = next; a < std::min( extra, AI_MAX_NUMBER_OF_TEXTURECOORDS-1u ); ++a) {								
+
+								for (unsigned int a = next; a < std::min( extra, AI_MAX_NUMBER_OF_TEXTURECOORDS-1u ); ++a) {
 									out[a+1] = out[a];
 								}
 							}
@@ -638,7 +638,7 @@ void LWOImporter::LoadLWO2TextureBlock(LE_NCONST IFF::SubChunkHeader* head, unsi
 		LoadLWO2Procedural(size,tex);
 		break;
 	case AI_LWO_GRAD:
-		LoadLWO2Gradient(size,tex); 
+		LoadLWO2Gradient(size,tex);
 		break;
 	case AI_LWO_IMAP:
 		LoadLWO2ImageMap(size,tex);

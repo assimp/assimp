@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file  BaseImporter.cpp
- *  @brief Implementation of BaseImporter 
+ *  @brief Implementation of BaseImporter
  */
 
 #include "BaseImporter.h"
@@ -103,7 +103,7 @@ aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, 
 		return NULL;
 	}
 
-	// return what we gathered from the import. 
+	// return what we gathered from the import.
 	sc.dismiss();
 	return sc;
 }
@@ -140,7 +140,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 // ------------------------------------------------------------------------------------------------
 /*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
 	const std::string&	pFile,
-	const char**		tokens, 
+	const char**		tokens,
 	unsigned int		numTokens,
 	unsigned int		searchBytes /* = 200 */,
 	bool				tokensSol /* false */)
@@ -200,7 +200,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 
 // ------------------------------------------------------------------------------------------------
 // Simple check for file extension
-/*static*/ bool BaseImporter::SimpleExtensionCheck (const std::string& pFile, 
+/*static*/ bool BaseImporter::SimpleExtensionCheck (const std::string& pFile,
 	const char* ext0,
 	const char* ext1,
 	const char* ext2)
@@ -210,7 +210,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 	// no file extension - can't read
 	if( pos == std::string::npos)
 		return false;
-	
+
 	const char* ext_real = & pFile[ pos+1 ];
 	if( !ASSIMP_stricmp(ext_real,ext0) )
 		return true;
@@ -242,7 +242,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 
 // ------------------------------------------------------------------------------------------------
 // Check for magic bytes at the beginning of the file.
-/* static */ bool BaseImporter::CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile, 
+/* static */ bool BaseImporter::CheckMagicToken(IOSystem* pIOHandler, const std::string& pFile,
 	const void* _magic, unsigned int num, unsigned int offset, unsigned int size)
 {
 	ai_assert(size <= 16 && _magic);
@@ -277,7 +277,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 			// that's just for convinience, the chance that we cause conflicts
 			// is quite low and it can save some lines and prevent nasty bugs
 			if (2 == size) {
-				uint16_t rev = *magic_u16; 
+				uint16_t rev = *magic_u16;
 				ByteSwap::Swap(&rev);
 				if (data_u16[0] == *magic_u16 || data_u16[0] == rev) {
 					return true;
@@ -335,13 +335,13 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 
 	// UTF 32 BE with BOM
 	if(*((uint32_t*)&data.front()) == 0xFFFE0000) {
-	
+
 		// swap the endianess ..
 		for(uint32_t* p = (uint32_t*)&data.front(), *end = (uint32_t*)&data.back(); p <= end; ++p) {
 			AI_SWAP4P(p);
 		}
 	}
-	
+
 	// UTF 32 LE with BOM
 	if(*((uint32_t*)&data.front()) == 0x0000FFFE) {
 		DefaultLogger::get()->debug("Found UTF-32 BOM ...");
@@ -358,7 +358,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 
 		ReportResult(result);
 
-		// copy to output buffer. 
+		// copy to output buffer.
 		const size_t outlen = (size_t)(dstart-&output.front());
 		data.assign(output.begin(),output.begin()+outlen);
 		return;
@@ -366,13 +366,13 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 
 	// UTF 16 BE with BOM
 	if(*((uint16_t*)&data.front()) == 0xFFFE) {
-	
+
 		// swap the endianess ..
 		for(uint16_t* p = (uint16_t*)&data.front(), *end = (uint16_t*)&data.back(); p <= end; ++p) {
 			ByteSwap::Swap2(p);
 		}
 	}
-	
+
 	// UTF 16 LE with BOM
 	if(*((uint16_t*)&data.front()) == 0xFEFF) {
 		DefaultLogger::get()->debug("Found UTF-16 BOM ...");
@@ -444,8 +444,8 @@ void BaseImporter::TextFileToBuffer(IOStream* stream,
 		throw DeadlyImportError("File is empty");
 	}
 
-	data.reserve(fileSize+1); 
-	data.resize(fileSize); 
+	data.reserve(fileSize+1);
+	data.resize(fileSize);
 	if(fileSize != stream->Read( &data[0], 1, fileSize)) {
 		throw DeadlyImportError("File read error");
 	}
@@ -540,7 +540,7 @@ unsigned int BatchLoader::AddLoadRequest	(const std::string& file,
 	unsigned int steps /*= 0*/, const PropertyMap* map /*= NULL*/)
 {
 	ai_assert(!file.empty());
-	
+
 	// check whether we have this loading request already
 	std::list<LoadRequest>::iterator it;
 	for (it = data->requests.begin();it != data->requests.end(); ++it)	{

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @author: Richard Steffen, 2015
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Bitmap.h"
 #include "BaseImporter.h"
 #include "fast_atof.h"
-#include "SceneCombiner.h" 
+#include "SceneCombiner.h"
 #include "DefaultIOSystem.h"
 #include <iostream>
 #include <ctime>
@@ -93,12 +93,12 @@ namespace Assimp
 void ExportSceneStep(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
 	std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
-	std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));	
+	std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
 
 	// create/copy Properties
 	ExportProperties props(*pProperties);
 
-	// invoke the exporter 
+	// invoke the exporter
 	StepExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
@@ -157,7 +157,7 @@ void StepExporter::WriteFile()
 	// note, that all realnumber values must be comma separated in x files
 	mOutput.setf(std::ios::fixed);
 	mOutput.precision(16); // precission for double
-	
+
 	// standard color
 	aiColor4D fColor;
 	fColor.r = 0.8f;
@@ -174,7 +174,7 @@ void StepExporter::WriteFile()
 
 	for (unsigned int i=0; i<mScene->mNumMeshes; ++i)
 	{
-		aiMesh* mesh = mScene->mMeshes[i];		
+		aiMesh* mesh = mScene->mMeshes[i];
 		for (unsigned int j=0; j<mesh->mNumFaces; ++j)
 		{
 			aiFace* face = &(mesh->mFaces[j]);
@@ -184,7 +184,7 @@ void StepExporter::WriteFile()
 		for (unsigned int j=0; j<mesh->mNumVertices; ++j)
 		{
 			aiVector3D* v = &(mesh->mVertices[j]);
-			it =uniqueVerts.find(v); 
+			it =uniqueVerts.find(v);
 			if (it == uniqueVerts.end())
 			{
 				uniqueVerts[v] = -1; // first mark the vector as not transformed
@@ -197,7 +197,7 @@ void StepExporter::WriteFile()
 	std::time_t date = std::time(NULL);
 	std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
 
-	// write the header	
+	// write the header
 	mOutput << "ISO-10303-21" << endstr;
 	mOutput << "HEADER" << endstr;
 	mOutput << "FILE_DESCRIPTION(('STEP AP214'),'1')" << endstr;
@@ -240,7 +240,7 @@ void StepExporter::WriteFile()
 	mOutput << "#24=PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE(' ','NONE',#17,.NOT_KNOWN.)" << endstr;
 	mOutput << "#25=CARTESIAN_POINT('',(0.0,0.0,0.0))" << endstr;
 	mOutput << "#26=DIRECTION('',(0.0,0.0,1.0))" << endstr;
-	mOutput << "#27=DIRECTION('',(1.0,0.0,0.0))" << endstr;	
+	mOutput << "#27=DIRECTION('',(1.0,0.0,0.0))" << endstr;
 	mOutput << "#28= (NAMED_UNIT(#21)LENGTH_UNIT()SI_UNIT(.MILLI.,.METRE.))" << endstr;
 	mOutput << "#29=CLOSED_SHELL('',(";
 	for (int i=0; i<countFace; ++i)
@@ -274,13 +274,13 @@ void StepExporter::WriteFile()
 	// write the triangles
 	for (unsigned int i=0; i<mScene->mNumMeshes; ++i)
 	{
-		aiMesh* mesh = mScene->mMeshes[i];		
+		aiMesh* mesh = mScene->mMeshes[i];
 		for (unsigned int j=0; j<mesh->mNumFaces; ++j)
 		{
 			aiFace* face = &(mesh->mFaces[j]);
 
 			if (face->mNumIndices != 3) continue;
-	
+
 			aiVector3D* v1 = &(mesh->mVertices[face->mIndices[0]]);
 			aiVector3D* v2 = &(mesh->mVertices[face->mIndices[1]]);
 			aiVector3D* v3 = &(mesh->mVertices[face->mIndices[2]]);
@@ -296,10 +296,10 @@ void StepExporter::WriteFile()
 			int pid1 = uniqueVerts.find(v1)->second;
 			int pid2 = uniqueVerts.find(v2)->second;
 			int pid3 = uniqueVerts.find(v3)->second;
-			
+
 			// mean vertex color for the face if available
 			if (mesh->HasVertexColors(0))
-			{					
+			{
 				fColor.r = 0.0;
 				fColor.g = 0.0;
 				fColor.b = 0.0;
@@ -309,7 +309,7 @@ void StepExporter::WriteFile()
 				fColor /= 3.0f;
 			}
 
-			int sid = ind; // the sub index		
+			int sid = ind; // the sub index
 			mOutput << "#" << sid << "=STYLED_ITEM('',(#" << sid+1 << "),#" << sid+8 << ")" << endstr; /* the item that must be referenced in #1 */
 			/* This is the color information of the Triangle */
 			mOutput << "#" << sid+1 << "=PRESENTATION_STYLE_ASSIGNMENT((#" << sid+2 << "))" << endstr;
@@ -325,7 +325,7 @@ void StepExporter::WriteFile()
 
 			/* 2 directions of the plane */
 			mOutput << "#" << sid+9 << "=PLANE('',#" << sid+10 << ")" << endstr;
-			mOutput << "#" << sid+10 << "=AXIS2_PLACEMENT_3D('',#" << pid1 << ", #" << sid+11 << ",#" << sid+12 << ")" << endstr;									
+			mOutput << "#" << sid+10 << "=AXIS2_PLACEMENT_3D('',#" << pid1 << ", #" << sid+11 << ",#" << sid+12 << ")" << endstr;
 
 			mOutput << "#" << sid+11 << "=DIRECTION('',(" << dv12.x << "," << dv12.y << "," << dv12.z << "))" << endstr;
 			mOutput << "#" << sid+12 << "=DIRECTION('',(" << dv13.x << "," << dv13.y << "," << dv13.z << "))" << endstr;
@@ -356,8 +356,8 @@ void StepExporter::WriteFile()
 			ind += faceEntryLen; // increase counter
 		}
 	}
-		
-	mOutput << "ENDSEC" << endstr; // end of data section	
+
+	mOutput << "ENDSEC" << endstr; // end of data section
 	mOutput << "END-ISO-10303-21" << endstr; // end of file
 }
 

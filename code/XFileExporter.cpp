@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @author: Richard Steffen, 2014
@@ -77,7 +77,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 	// set standard properties if not set
 	if (!props.HasPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT)) props.SetPropertyBool(AI_CONFIG_EXPORT_XFILE_64BIT, false);
 
-	// invoke the exporter 
+	// invoke the exporter
 	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
@@ -285,7 +285,7 @@ void XFileExporter::WriteFrameTransform(aiMatrix4x4& m)
 	mOutput << startstr << m.a1 << ", " << m.b1 << ", " << m.c1 << ", " << m.d1 << "," << endstr;
     mOutput << startstr << m.a2 << ", " << m.b2 << ", " << m.c2 << ", " << m.d2 << "," << endstr;
 	mOutput << startstr << m.a3 << ", " << m.b3 << ", " << m.c3 << ", " << m.d3 << "," << endstr;
-	mOutput << startstr << m.a4 << ", " << m.b4 << ", " << m.c4 << ", " << m.d4 << ";;" << endstr;		
+	mOutput << startstr << m.a4 << ", " << m.b4 << ", " << m.c4 << ", " << m.d4 << ";;" << endstr;
 	PopTag();
 	mOutput << startstr << "}" << endstr << endstr;
 }
@@ -294,7 +294,7 @@ void XFileExporter::WriteFrameTransform(aiMatrix4x4& m)
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
 void XFileExporter::WriteNode( aiNode* pNode)
-{	
+{
 	if (pNode->mName.length==0)
 	{
 		std::stringstream ss;
@@ -328,7 +328,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 	PushTag();
 
 	// write all the vertices
-	mOutput << startstr << mesh->mNumVertices << ";" << endstr;	
+	mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 	for (size_t a = 0; a < mesh->mNumVertices; a++)
 	{
 		aiVector3D &v = mesh->mVertices[a];
@@ -369,7 +369,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 	{
 		const aiMaterial* mat = mScene->mMaterials[mesh->mMaterialIndex];
 		aiString relpath;
-		mat->Get(_AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0, relpath);		
+		mat->Get(_AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0, relpath);
 
 		mOutput << startstr << "MeshMaterialList {" << endstr;
 		PushTag();
@@ -377,14 +377,14 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 		mOutput << startstr << mesh->mNumFaces << ";" << endstr; // number of faces
 		mOutput << startstr;
 		for( size_t a = 0; a < mesh->mNumFaces; ++a )
-		{		
+		{
 			mOutput << "0"; // the material index
 			if (a < mesh->mNumFaces - 1)
 				mOutput << ", ";
 			else
 				mOutput << ";" << endstr;
-		}		
-		mOutput << startstr << "Material {" << endstr;	
+		}
+		mOutput << startstr << "Material {" << endstr;
 		PushTag();
 		mOutput << startstr << "1.0; 1.0; 1.0; 1.000000;;" << endstr;
 		mOutput << startstr << "1.000000;" << endstr; // power
@@ -392,13 +392,13 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 		mOutput << startstr << "0.000000; 0.000000; 0.000000;;" << endstr; // emission
 		mOutput << startstr << "TextureFilename { \"";
 
-		writePath(relpath);		
+		writePath(relpath);
 
-		mOutput << "\"; }" << endstr;	
+		mOutput << "\"; }" << endstr;
 		PopTag();
 		mOutput << startstr << "}" << endstr;
 		PopTag();
-		mOutput << startstr << "}" << endstr;	
+		mOutput << startstr << "}" << endstr;
 	}
 
 	// write normals (every vertex has one)
@@ -407,7 +407,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 		mOutput << endstr << startstr << "MeshNormals {" << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
-		{		
+		{
 			aiVector3D &v = mesh->mNormals[a];
 			// because we have a LHS and also changed wth winding, we need to invert the normals again
 			mOutput << startstr << -v[0] << ";"<< -v[1] << ";" << -v[2] << ";";
@@ -419,7 +419,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 
 		mOutput << startstr << mesh->mNumFaces << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumFaces; a++)
-		{		
+		{
 			const aiFace& face = mesh->mFaces[a];
 			mOutput << startstr << face.mNumIndices << ";";
 
@@ -441,10 +441,10 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 		}
 		mOutput << startstr << "}" << endstr;
 	}
-	
+
 	// write texture UVs if available
 	if (mesh->HasTextureCoords(0))
-	{		
+	{
 		mOutput << endstr << startstr << "MeshTextureCoords {"  << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
@@ -463,7 +463,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 
 	// write color channel if available
 	if (mesh->HasVertexColors(0))
-	{		
+	{
 		mOutput << endstr << startstr << "MeshVertexColors {"  << endstr;
 		mOutput << startstr << mesh->mNumVertices << ";" << endstr;
 		for (size_t a = 0; a < mesh->mNumVertices; a++)
@@ -502,7 +502,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 std::string XFileExporter::toXFileString(aiString &name)
 {
 	std::string pref = ""; // node name prefix to prevent unexpected start of string
-	std::string str = pref + std::string(name.C_Str());	
+	std::string str = pref + std::string(name.C_Str());
 	for (int i=0; i < (int) str.length(); ++i)
 	{
 		if ((str[i] >= '0' && str[i] <= '9') || // 0-9
@@ -526,7 +526,7 @@ void XFileExporter::writePath(aiString path)
 		str.replace( str.find( "\\"), 1, "/");
 
 	mOutput << str;
-			
+
 }
 
 #endif

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2010, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -55,12 +55,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 	namespace IFC {
-		
+
 // ------------------------------------------------------------------------------------------------
 // Calculates intersection between line segment and plane. To catch corner cases, specify which side you prefer.
 // The function then generates a hit only if the end is beyond a certain margin in that direction, filtering out
 // "very close to plane" ghost hits as long as start and end stay directly on or within the given plane side.
-bool IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const IfcVector3& e0, 
+bool IntersectSegmentPlane(const IfcVector3& p,const IfcVector3& n, const IfcVector3& e0,
 	const IfcVector3& e1, bool assumeStartOnWhiteSide, IfcVector3& out)
 {
 	const IfcVector3 pdelta = e0 - p, seg = e1 - e0;
@@ -165,7 +165,7 @@ void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& re
 	const std::vector<IfcVector3>& in = first_operand.verts;
 	std::vector<IfcVector3>& outvert = result.verts;
 
-	std::vector<unsigned int>::const_iterator begin = first_operand.vertcnt.begin(), 
+	std::vector<unsigned int>::const_iterator begin = first_operand.vertcnt.begin(),
 		end = first_operand.vertcnt.end(), iit;
 
 	outvert.reserve(in.size());
@@ -183,7 +183,7 @@ void ProcessBooleanHalfSpaceDifference(const IfcHalfSpaceSolid* hs, TempMesh& re
 			IfcVector3 isectpos;
 			if( IntersectSegmentPlane(p, n, e0, e1, isAtWhiteSide, isectpos) ) {
 				if( isAtWhiteSide ) {
-					// e0 is on the right side, so keep it 
+					// e0 is on the right side, so keep it
 					outvert.push_back(e0);
 					outvert.push_back(isectpos);
 					newcount += 2;
@@ -292,7 +292,7 @@ bool IntersectsBoundaryProfile(const IfcVector3& e0, const IfcVector3& e1, const
 		ai_assert((IfcVector2(check.x, check.y)).SquareLength() < 1e-5);
 #endif
 
-		// also calculate the distance of e0 and e1 to the segment. We need to detect the "starts directly on segment" 
+		// also calculate the distance of e0 and e1 to the segment. We need to detect the "starts directly on segment"
 		// and "ends directly at segment" cases
 		bool startsAtSegment, endsAtSegment;
 		{
@@ -321,7 +321,7 @@ bool IntersectsBoundaryProfile(const IfcVector3& e0, const IfcVector3& e1, const
 			if( isGoingInside == isStartAssumedInside )
 				continue;
 
-			// only insert the point into the list if it is sufficiently far away from the previous intersection point. 
+			// only insert the point into the list if it is sufficiently far away from the previous intersection point.
 			// This way, we avoid duplicate detection if the intersection is directly on the vertex between two segments.
 			if( !intersect_results.empty() && intersect_results.back().first == i - 1 )
 			{
@@ -337,7 +337,7 @@ bool IntersectsBoundaryProfile(const IfcVector3& e0, const IfcVector3& e1, const
 		// hits on two consecutive boundary segments are filtered
 		if( s >= -1e-6 * b_sqlen_inv && s <= 1.0 + 1e-6*b_sqlen_inv && t >= 0.0 && (t <= 1.0 || halfOpen) )
 		{
-			// only insert the point into the list if it is sufficiently far away from the previous intersection point. 
+			// only insert the point into the list if it is sufficiently far away from the previous intersection point.
 			// This way, we avoid duplicate detection if the intersection is directly on the vertex between two segments.
 			if( !intersect_results.empty() && intersect_results.back().first == i - 1 )
 			{
@@ -387,8 +387,8 @@ bool PointInPoly(const IfcVector3& p, const std::vector<IfcVector3>& boundary)
 
 
 // ------------------------------------------------------------------------------------------------
-void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBoundedHalfSpace* hs, TempMesh& result, 
-													   const TempMesh& first_operand, 
+void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBoundedHalfSpace* hs, TempMesh& result,
+													   const TempMesh& first_operand,
 													   ConversionData& conv)
 {
 	ai_assert(hs != NULL);
@@ -444,7 +444,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 	std::vector<unsigned int>::const_iterator iit;
 	for( iit = begin; iit != end; vidx += *iit++ )
 	{
-		// Our new approach: we cut the poly along the plane, then we intersect the part on the black side of the plane 
+		// Our new approach: we cut the poly along the plane, then we intersect the part on the black side of the plane
 		// against the bounding polygon. All the white parts, and the black part outside the boundary polygon, are kept.
 		std::vector<IfcVector3> whiteside, blackside;
 
@@ -467,7 +467,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 			{
 				// otherwise start building one polygon for each side. Whenever the current line segment intersects the plane
 				// we put a point there as an end of the current segment. Then we switch to the other side, put a point there, too,
-				// as a beginning of the current segment, and simply continue accumulating vertices. 
+				// as a beginning of the current segment, and simply continue accumulating vertices.
 				bool isCurrentlyOnWhiteSide = ((srcVertices[0]) - p) * n > -1e-6;
 				for( size_t a = 0; a < srcVtxCount; ++a )
 				{
@@ -501,11 +501,11 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 		// So we now need to construct all the polygons that result from BlackSidePoly minus BoundaryPoly.
 		FilterPolygon(blackside);
 
-		// Complicated, II. We run along the polygon. a) When we're inside the boundary, we run on until we hit an 
-		// intersection, which means we're leaving it. We then start a new out poly there. b) When we're outside the 
-		// boundary, we start collecting vertices until we hit an intersection, then we run along the boundary until we hit 
-		// an intersection, then we switch back to the poly and run on on this one again, and so on until we got a closed 
-		// loop. Then we continue with the path we left to catch potential additional polys on the other side of the 
+		// Complicated, II. We run along the polygon. a) When we're inside the boundary, we run on until we hit an
+		// intersection, which means we're leaving it. We then start a new out poly there. b) When we're outside the
+		// boundary, we start collecting vertices until we hit an intersection, then we run along the boundary until we hit
+		// an intersection, then we switch back to the poly and run on on this one again, and so on until we got a closed
+		// loop. Then we continue with the path we left to catch potential additional polys on the other side of the
 		// boundary as described in a)
 		if( !blackside.empty() )
 		{
@@ -565,7 +565,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 				for( size_t b = 0; b < intersections.size() - 1; ++b )
 					std::swap(intersections[b], intersections[(b + intersections.size() - 1) % intersections.size()]);
 
-				// Filter pairs of out->in->out that lie too close to each other. 
+				// Filter pairs of out->in->out that lie too close to each other.
 				for( size_t a = 0; intersections.size() > 0 && a < intersections.size() - 1; /**/ )
 				{
 					if( (intersections[a].get<1>() - intersections[(a + 1) % intersections.size()].get<1>()).SquareLength() < 1e-10 )
@@ -585,7 +585,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 			// holes if the boundary is smaller and does not touch it anywhere.
 			if( intersections.empty() )
 			{
-				// starting point was outside -> everything is outside the boundary -> nothing is clipped -> add black side 
+				// starting point was outside -> everything is outside the boundary -> nothing is clipped -> add black side
 				// to result mesh unchanged
 				if( !startedInside )
 				{
@@ -595,7 +595,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 				}
 				else
 				{
-					// starting point was inside the boundary -> everything is inside the boundary -> nothing is spared from the 
+					// starting point was inside the boundary -> everything is inside the boundary -> nothing is spared from the
 					// clipping -> nothing left to add to the result mesh
 					continue;
 				}
@@ -630,7 +630,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 						+ nextintsec.get<0>() - currintsec.get<0>();
 					for( size_t a = 1; a <= numPolyPoints; ++a )
 						resultpoly.push_back(blackside[(currintsec.get<0>() + a) % blackside.size()]);
-					// put the out->in intersection 
+					// put the out->in intersection
 					resultpoly.push_back(nextintsec.get<1>());
 
 					// generate segments along the boundary polygon that lie in the poly's plane until we hit another intersection
@@ -657,7 +657,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 						IfcVector3 boundaryPlaneNormal = ((nextBoundaryPoint - currBoundaryPoint) ^ profileNormal).Normalize();
 						IfcVector3 dirAtPolyPlane = (boundaryPlaneNormal ^ polyNormal).Normalize() * (marchBackwardsOnBoundary ? -1.0 : 1.0);
 						// if we can project the direction to the plane, we can calculate a maximum marching distance along that dir
-						// until we finish that boundary segment and continue on the next 
+						// until we finish that boundary segment and continue on the next
 						if( std::abs(polyNormal.z) > 1e-5 )
 						{
 							t = std::min(t, (nextBoundaryPoint - startingPoint).Length());
@@ -715,19 +715,19 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 			}
 		}
 	}
-	IFCImporter::LogDebug("generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)");	
+	IFCImporter::LogDebug("generating CSG geometry by plane clipping with polygonal bounding (IfcBooleanClippingResult)");
 }
 
 // ------------------------------------------------------------------------------------------------
-void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result, 
-											   const TempMesh& first_operand, 
+void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, TempMesh& result,
+											   const TempMesh& first_operand,
 											   ConversionData& conv)
 {
 	ai_assert(as != NULL);
 
 	// This case is handled by reduction to an instance of the quadrify() algorithm.
 	// Obviously, this won't work for arbitrarily complex cases. In fact, the first
-	// operand should be near-planar. Luckily, this is usually the case in Ifc 
+	// operand should be near-planar. Luckily, this is usually the case in Ifc
 	// buildings.
 
 	boost::shared_ptr<TempMesh> meshtmp = boost::shared_ptr<TempMesh>(new TempMesh());
@@ -828,5 +828,5 @@ void ProcessBoolean(const IfcBooleanResult& boolean, TempMesh& result, Conversio
 } // ! IFC
 } // ! Assimp
 
-#endif 
+#endif
 

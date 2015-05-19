@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -171,7 +171,7 @@ void MDLImporter::CreateTextureARGB8_3DGS_MDL3(const unsigned char* szData)
 
 // ------------------------------------------------------------------------------------------------
 // Read a texture from a MDL4 file
-void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData, 
+void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 	unsigned int iType,
 	 unsigned int* piSkip)
 {
@@ -224,7 +224,7 @@ void MDLImporter::CreateTexture_3DGS_MDL4(const unsigned char* szData,
 
 // ------------------------------------------------------------------------------------------------
 // Load color data of a texture and convert it to our output format
-void MDLImporter::ParseTextureColorData(const unsigned char* szData, 
+void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 	unsigned int iType,
 	unsigned int* piSkip,
 	aiTexture* pcNew)
@@ -244,19 +244,19 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if (do_read) 
+		if (do_read)
 		{
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
 				MDL::RGB565 val = ((MDL::RGB565*)szData)[i];
-				AI_SWAP2(val);    
+				AI_SWAP2(val);
 
 				pcNew->pcData[i].a = 0xFF;
 				pcNew->pcData[i].r = (unsigned char)val.b << 3;
 				pcNew->pcData[i].g = (unsigned char)val.g << 2;
 				pcNew->pcData[i].b = (unsigned char)val.r << 3;
 			}
-		} 
+		}
 		else i = pcNew->mWidth*pcNew->mHeight;
 		*piSkip = i * 2;
 
@@ -275,12 +275,12 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if (do_read) 
+		if (do_read)
 		{
 			for (i = 0; i < pcNew->mWidth*pcNew->mHeight;++i)
 			{
 				MDL::ARGB4 val = ((MDL::ARGB4*)szData)[i];
-				AI_SWAP2(val);    
+				AI_SWAP2(val);
 
 				pcNew->pcData[i].a = (unsigned char)val.a << 4;
 				pcNew->pcData[i].r = (unsigned char)val.r << 4;
@@ -317,7 +317,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 				pcNew->pcData[i].g = *_szData++;
 				pcNew->pcData[i].r = *_szData;
 			}
-		} 
+		}
 		else i = pcNew->mWidth*pcNew->mHeight;
 
 
@@ -348,7 +348,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 				pcNew->pcData[i].r = *_szData++;
 				pcNew->pcData[i].a = *_szData;
 			}
-		} 
+		}
 		else i = pcNew->mWidth*pcNew->mHeight;
 
 		// apply MIP maps
@@ -366,7 +366,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 		// copy texture data
 		unsigned int i;
-		if (do_read) 
+		if (do_read)
 		{
 
 			const unsigned char* szColorMap;
@@ -384,7 +384,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 			}
 			this->FreePalette(szColorMap);
 
-		} 
+		}
 		else i = pcNew->mWidth*pcNew->mHeight;
 		*piSkip = i;
 
@@ -394,7 +394,7 @@ void MDLImporter::ParseTextureColorData(const unsigned char* szData,
 
 // ------------------------------------------------------------------------------------------------
 // Get a texture from a MDL5 file
-void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData, 
+void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 	unsigned int iType,
 	unsigned int* piSkip)
 {
@@ -408,11 +408,11 @@ void MDLImporter::CreateTexture_3DGS_MDL5(const unsigned char* szData,
 
 	// first read the size of the texture
 	pcNew->mWidth = *((uint32_t*)szData);
-	AI_SWAP4(pcNew->mWidth); 
+	AI_SWAP4(pcNew->mWidth);
 	szData += sizeof(uint32_t);
 
 	pcNew->mHeight = *((uint32_t*)szData);
-	AI_SWAP4(pcNew->mHeight); 
+	AI_SWAP4(pcNew->mHeight);
 	szData += sizeof(uint32_t);
 
 	if (bNoRead) {
@@ -560,7 +560,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 				{
 					const bool bSet = ((0 == x % 2 && 0 != y % 2) ||
 						(0 != x % 2 && 0 == y % 2));
-				
+
 					aiTexel* pc = &pcNew->pcData[y * 8 + x];
 					pc->r = pc->b = pc->g = (bSet?0xFF:0);
 					pc->a = 0xFF;
@@ -589,7 +589,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	aiColor4D clrTexture;
 	if (pcNew)clrTexture = ReplaceTextureWithColor(pcNew);
 	else clrTexture.r = get_qnan();
-	
+
 	// check whether a material definition is contained in the skin
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL)
 	{
@@ -609,41 +609,41 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
 		// read diffuse color
 		clrTemp.r = pcMatIn->Diffuse.r;
-		AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);
 		clrTemp.g = pcMatIn->Diffuse.g;
-		AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);
 		clrTemp.b = pcMatIn->Diffuse.b;
-		AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_DIFFUSE);
 
 		// read specular color
 		clrTemp.r = pcMatIn->Specular.r;
-		AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);
 		clrTemp.g = pcMatIn->Specular.g;
-		AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);
 		clrTemp.b = pcMatIn->Specular.b;
-		AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_SPECULAR);
 
 		// read ambient color
 		clrTemp.r = pcMatIn->Ambient.r;
-		AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);
 		clrTemp.g = pcMatIn->Ambient.g;
-		AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);
 		clrTemp.b = pcMatIn->Ambient.b;
-		AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);
 		COLOR_MULTIPLY_RGB();
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_AMBIENT);
 
 		// read emissive color
 		clrTemp.r = pcMatIn->Emissive.r;
-		AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);
 		clrTemp.g = pcMatIn->Emissive.g;
-		AI_SWAP4(clrTemp.g);  
+		AI_SWAP4(clrTemp.g);
 		clrTemp.b = pcMatIn->Emissive.b;
-		AI_SWAP4(clrTemp.b);  
+		AI_SWAP4(clrTemp.b);
 		pcMatOut->AddProperty<aiColor3D>(&clrTemp,1,AI_MATKEY_COLOR_EMISSIVE);
 
 #undef COLOR_MULITPLY_RGB
@@ -652,7 +652,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 		// The doc say something else, but it is fact that MED exports the
 		// opacity like this .... oh well.
 		clrTemp.r = pcMatIn->Ambient.a;
-		AI_SWAP4(clrTemp.r);  
+		AI_SWAP4(clrTemp.r);
 		if (is_not_qnan(clrTexture.r)) {
 			clrTemp.r *= clrTexture.a;
 		}
@@ -660,7 +660,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
 		// read phong power
 		int iShadingMode = (int)aiShadingMode_Gouraud;
-		AI_SWAP4(pcMatIn->Power);  
+		AI_SWAP4(pcMatIn->Power);
 		if (0.0f != pcMatIn->Power)
 		{
 			iShadingMode = (int)aiShadingMode_Phong;
@@ -687,7 +687,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	{
 		VALIDATE_FILE_SIZE(szCurrent);
 		int32_t iMe = *((int32_t*)szCurrent);
-		AI_SWAP4(iMe);  
+		AI_SWAP4(iMe);
 		szCurrent += sizeof(char) * iMe + sizeof(int32_t);
 		VALIDATE_FILE_SIZE(szCurrent);
 	}
@@ -787,7 +787,7 @@ void MDLImporter::SkipSkinLump_3DGS_MDL7(
 	if (iType & AI_MDL7_SKINTYPE_MATERIAL_ASCDEF)
 	{
 		int32_t iMe = *((int32_t*)szCurrent);
-		AI_SWAP4(iMe);  
+		AI_SWAP4(iMe);
 		szCurrent += sizeof(char) * iMe + sizeof(int32_t);
 	}
 	*szCurrentOut = szCurrent;
@@ -805,7 +805,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 	*szCurrentOut = szCurrent;
 	BE_NCONST MDL::Skin_MDL7* pcSkin = (BE_NCONST MDL::Skin_MDL7*)szCurrent;
 	AI_SWAP4(pcSkin->width);
-	AI_SWAP4(pcSkin->height); 
+	AI_SWAP4(pcSkin->height);
 	szCurrent += 12;
 
 	// allocate an output material

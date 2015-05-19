@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -55,7 +55,7 @@ struct aiCamera;
 struct aiMaterial;
 
 namespace Assimp	{
-	
+
 	// TinyFormatter.h
 	namespace Formatter {
 		template <typename T,typename TR, typename A> class basic_formatter;
@@ -109,7 +109,7 @@ public:
 public:
 
 	// --------------------
-	bool CanRead( const std::string& pFile, 
+	bool CanRead( const std::string& pFile,
 		IOSystem* pIOHandler,
 		bool checkSig
 	) const;
@@ -126,20 +126,20 @@ protected:
 	void SetupProperties(const Importer* pImp);
 
 	// --------------------
-	void InternReadFile( const std::string& pFile, 
-		aiScene* pScene, 
+	void InternReadFile( const std::string& pFile,
+		aiScene* pScene,
 		IOSystem* pIOHandler
 	);
 
 	// --------------------
-	void ParseBlendFile(Blender::FileDatabase& out, 
+	void ParseBlendFile(Blender::FileDatabase& out,
 		boost::shared_ptr<IOStream> stream
 	);
 
 	// --------------------
-	void ExtractScene(Blender::Scene& out, 
+	void ExtractScene(Blender::Scene& out,
 		const Blender::FileDatabase& file
-	); 
+	);
 
 	// --------------------
 	void ConvertBlendFile(aiScene* out,
@@ -150,33 +150,33 @@ protected:
 private:
 
 	// --------------------
-	aiNode* ConvertNode(const Blender::Scene& in, 
-		const Blender::Object* obj, 
+	aiNode* ConvertNode(const Blender::Scene& in,
+		const Blender::Object* obj,
 		Blender::ConversionData& conv_info,
 		const aiMatrix4x4& parentTransform
-	); 
+	);
 
 	// --------------------
-	void ConvertMesh(const Blender::Scene& in, 
-		const Blender::Object* obj, 
-		const Blender::Mesh* mesh, 
+	void ConvertMesh(const Blender::Scene& in,
+		const Blender::Object* obj,
+		const Blender::Mesh* mesh,
 		Blender::ConversionData& conv_data,
 		Blender::TempArray<std::vector,aiMesh>& temp
-	); 
+	);
 
 	// --------------------
-	aiLight* ConvertLight(const Blender::Scene& in, 
-		const Blender::Object* obj, 
-		const Blender::Lamp* mesh, 
+	aiLight* ConvertLight(const Blender::Scene& in,
+		const Blender::Object* obj,
+		const Blender::Lamp* mesh,
 		Blender::ConversionData& conv_data
-	); 
+	);
 
 	// --------------------
-	aiCamera* ConvertCamera(const Blender::Scene& in, 
-		const Blender::Object* obj, 
-		const Blender::Camera* mesh, 
+	aiCamera* ConvertCamera(const Blender::Scene& in,
+		const Blender::Object* obj,
+		const Blender::Camera* mesh,
 		Blender::ConversionData& conv_data
-	); 
+	);
 
 	// --------------------
 	void BuildMaterials(
@@ -185,37 +185,37 @@ private:
 
 	// --------------------
 	void ResolveTexture(
-		aiMaterial* out, 
-		const Blender::Material* mat, 
+		aiMaterial* out,
+		const Blender::Material* mat,
 		const Blender::MTex* tex,
 		Blender::ConversionData& conv_data
 	);
 
 	// --------------------
 	void ResolveImage(
-		aiMaterial* out, 
-		const Blender::Material* mat, 
-		const Blender::MTex* tex, 
+		aiMaterial* out,
+		const Blender::Material* mat,
+		const Blender::MTex* tex,
 		const Blender::Image* img,
 		Blender::ConversionData& conv_data
 	);
 
 	void AddSentinelTexture(
-		aiMaterial* out, 
+		aiMaterial* out,
 		const Blender::Material* mat,
-		const Blender::MTex* tex, 
+		const Blender::MTex* tex,
 		Blender::ConversionData& conv_data
 	);
 
 private: // static stuff, mostly logging and error reporting.
 
 	// --------------------
-	static void CheckActualType(const Blender::ElemBase* dt, 
+	static void CheckActualType(const Blender::ElemBase* dt,
 		const char* check
 	);
 
 	// --------------------
-	static void NotSupportedObjectType(const Blender::Object* obj, 
+	static void NotSupportedObjectType(const Blender::Object* obj,
 		const char* type
 	);
 

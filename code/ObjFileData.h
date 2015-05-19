@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -73,27 +73,27 @@ struct Face
 	IndexArray *m_pTexturCoords;
 	//!	Pointer to assigned material
 	Material *m_pMaterial;
-	
+
 	//!	\brief	Default constructor
 	//!	\param	pVertices	Pointer to assigned vertex indexbuffer
 	//!	\param	pNormals	Pointer to assigned normals indexbuffer
 	//!	\param	pTexCoords	Pointer to assigned texture indexbuffer
-	Face( std::vector<unsigned int> *pVertices, 
-			std::vector<unsigned int> *pNormals, 
+	Face( std::vector<unsigned int> *pVertices,
+			std::vector<unsigned int> *pNormals,
 			std::vector<unsigned int> *pTexCoords,
-			aiPrimitiveType pt = aiPrimitiveType_POLYGON) : 
-		m_PrimitiveType( pt ), 
-		m_pVertices( pVertices ), 
+			aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
+		m_PrimitiveType( pt ),
+		m_pVertices( pVertices ),
 		m_pNormals( pNormals ),
-		m_pTexturCoords( pTexCoords ), 
+		m_pTexturCoords( pTexCoords ),
 		m_pMaterial( 0L )
 	{
 		// empty
 	}
-	
-	//!	\brief	Destructor	
+
+	//!	\brief	Destructor
 	~Face()
-	{	
+	{
 		delete m_pVertices;
 		m_pVertices = NULL;
 
@@ -131,8 +131,8 @@ struct Object
 	{
 		// empty
 	}
-	
-	//!	\brief	Destructor	
+
+	//!	\brief	Destructor
 	~Object()
 	{
 		for (std::vector<Object*>::iterator it = m_SubObjects.begin();
@@ -177,7 +177,7 @@ struct Material
 	};
 	bool clamp[TextureTypeCount];
 
-	//!	Ambient color 
+	//!	Ambient color
 	aiColor3D ambient;
 	//!	Diffuse color
 	aiColor3D diffuse;
@@ -189,7 +189,7 @@ struct Material
 	float alpha;
 	//!	Shineness factor
 	float shineness;
-	//!	Illumination model 
+	//!	Illumination model
 	int illumination_model;
 	//! Index of refraction
 	float ior;
@@ -246,7 +246,7 @@ struct Mesh
 	}
 
 	///	Destructor
-	~Mesh() 
+	~Mesh()
 	{
 		for (std::vector<Face*>::iterator it = m_Faces.begin();
 			it != m_Faces.end(); ++it)
@@ -310,7 +310,7 @@ struct Model
 	{
 		// empty
 	}
-	
+
 	//!	\brief	The class destructor
 	~Model()
 	{
@@ -320,7 +320,7 @@ struct Model
 			delete *it;
 		}
 		m_Objects.clear();
-		
+
 		// Clear all stored mesh instances
 		for (std::vector<Mesh*>::iterator it = m_Meshes.begin();
 			it != m_Meshes.end(); ++it) {

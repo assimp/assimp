@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -158,11 +158,11 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 		const int absi = index < 0 ? (-index - 1) : index;
 		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor++;
 	}
-	
+
 	// if settings.readAllLayers is true:
 	//  * read all layers, try to load as many vertex channels as possible
 	// if settings.readAllLayers is false:
-	//  * read only the layer with index 0, but warn about any further layers 
+	//  * read only the layer with index 0, but warn about any further layers
 	for (ElementMap::const_iterator it = Layer.first; it != Layer.second; ++it) {
 		const TokenList& tokens = (*it).second->Tokens();
 
@@ -223,7 +223,7 @@ void MeshGeometry::ReadLayerElement(const Scope& layerElement)
 		}
 	}
 
-	FBXImporter::LogError(Formatter::format("failed to resolve vertex layer element: ") 
+	FBXImporter::LogError(Formatter::format("failed to resolve vertex layer element: ")
 		<< type << ", index: " << typedIndex);
 }
 
@@ -238,10 +238,10 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 	const std::string& ReferenceInformationType = ParseTokenAsString(GetRequiredToken(
 		GetRequiredElement(source,"ReferenceInformationType"),0)
 	);
-	
+
 	if (type == "LayerElementUV") {
 		if(index >= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
-			FBXImporter::LogError(Formatter::format("ignoring UV layer, maximum number of UV channels exceeded: ") 
+			FBXImporter::LogError(Formatter::format("ignoring UV layer, maximum number of UV channels exceeded: ")
 				<< index << " (limit is " << AI_MAX_NUMBER_OF_TEXTURECOORDS << ")" );
 			return;
 		}
@@ -319,7 +319,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 	}
 	else if (type == "LayerElementColor") {
 		if(index >= AI_MAX_NUMBER_OF_COLOR_SETS) {
-			FBXImporter::LogError(Formatter::format("ignoring vertex color layer, maximum number of color sets exceeded: ") 
+			FBXImporter::LogError(Formatter::format("ignoring vertex color layer, maximum number of color sets exceeded: ")
 				<< index << " (limit is " << AI_MAX_NUMBER_OF_COLOR_SETS << ")" );
 			return;
 		}
@@ -337,7 +337,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
 // output is in polygon vertex order. This logic is used for reading normals, UVs, colors,
 // tangents ..
 template <typename T>
-void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source, 
+void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType,
 	const char* dataElementName,
@@ -353,7 +353,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 	// handle permutations of Mapping and Reference type - it would be nice to
 	// deal with this more elegantly and with less redundancy, but right
 	// now it seems unavoidable.
-	if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {	
+	if (MappingInformationType == "ByVertice" && ReferenceInformationType == "Direct") {
 		data_out.resize(vertex_count);
 		for (size_t i = 0, e = tempUV.size(); i < e; ++i) {
 
@@ -363,7 +363,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 			}
 		}
 	}
-	else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {	
+	else if (MappingInformationType == "ByVertice" && ReferenceInformationType == "IndexToDirect") {
 		data_out.resize(vertex_count);
 
 		std::vector<int> uvIndices;
@@ -380,9 +380,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 			}
 		}
 	}
-	else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {	
+	else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "Direct") {
 		if (tempUV.size() != vertex_count) {
-			FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygon mapping: ") 
+			FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygon mapping: ")
 				<< tempUV.size() << ", expected " << vertex_count
 			);
 			return;
@@ -390,7 +390,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 
 		data_out.swap(tempUV);
 	}
-	else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "IndexToDirect") {	
+	else if (MappingInformationType == "ByPolygonVertex" && ReferenceInformationType == "IndexToDirect") {
 		data_out.resize(vertex_count);
 
 		std::vector<int> uvIndices;
@@ -411,13 +411,13 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		}
 	}
 	else {
-		FBXImporter::LogError(Formatter::format("ignoring vertex data channel, access type not implemented: ") 
+		FBXImporter::LogError(Formatter::format("ignoring vertex data channel, access type not implemented: ")
 			<< MappingInformationType << "," << ReferenceInformationType);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
-void MeshGeometry::ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, const Scope& source, 
+void MeshGeometry::ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, const Scope& source,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
@@ -432,7 +432,7 @@ void MeshGeometry::ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, c
 
 
 // ------------------------------------------------------------------------------------------------
-void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source, 
+void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
@@ -447,7 +447,7 @@ void MeshGeometry::ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope
 
 
 // ------------------------------------------------------------------------------------------------
-void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source, 
+void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
@@ -462,7 +462,7 @@ void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, cons
 
 
 // ------------------------------------------------------------------------------------------------
-void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source, 
+void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
@@ -478,7 +478,7 @@ void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out,
 
 
 // ------------------------------------------------------------------------------------------------
-void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source, 
+void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
@@ -494,7 +494,7 @@ void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_ou
 
 
 // ------------------------------------------------------------------------------------------------
-void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, const Scope& source, 
+void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, const Scope& source,
 	const std::string& MappingInformationType,
 	const std::string& ReferenceInformationType)
 {
@@ -516,21 +516,21 @@ void MeshGeometry::ReadVertexDataMaterials(std::vector<int>& materials_out, cons
 			FBXImporter::LogWarn(Formatter::format("expected only a single material index, ignoring all except the first one"));
 			materials_out.clear();
 		}
- 
+
 		materials.assign(vertices.size(),materials_out[0]);
 	}
 	else if (MappingInformationType == "ByPolygon" && ReferenceInformationType == "IndexToDirect") {
 		materials.resize(face_count);
 
 		if(materials_out.size() != face_count) {
-			FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygon mapping: ") 
+			FBXImporter::LogError(Formatter::format("length of input data unexpected for ByPolygon mapping: ")
 				<< materials_out.size() << ", expected " << face_count
 			);
 			return;
 		}
 	}
 	else {
-		FBXImporter::LogError(Formatter::format("ignoring material assignments, access type not implemented: ") 
+		FBXImporter::LogError(Formatter::format("ignoring material assignments, access type not implemented: ")
 			<< MappingInformationType << "," << ReferenceInformationType);
 	}
 }

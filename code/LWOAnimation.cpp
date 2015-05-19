@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file  LWOAnimation.cpp
- *  @brief LWOAnimationResolver utility class 
+ *  @brief LWOAnimationResolver utility class
  *
  *  It's a very generic implementation of LightWave's system of
  *  componentwise-animated stuff. The one and only fully free
@@ -124,7 +124,7 @@ AnimResolver::AnimResolver(std::list<Envelope>& _envelopes,double tick)
 void AnimResolver::ClearAnimRangeSetup()
 {
 	for (std::list<LWO::Envelope>::iterator it = envelopes.begin(); it != envelopes.end(); ++it) {
-		
+
 		(*it).keys.erase((*it).keys.begin(),(*it).keys.begin()+(*it).old_first);
 		(*it).keys.erase((*it).keys.begin()+(*it).old_last+1,(*it).keys.end());
 	}
@@ -138,14 +138,14 @@ void AnimResolver::UpdateAnimRangeSetup()
 
 	for (std::list<LWO::Envelope>::iterator it = envelopes.begin(); it != envelopes.end(); ++it) {
 		if ((*it).keys.empty()) continue;
-	
+
 		const double my_first = (*it).keys.front().time;
 		const double my_last  = (*it).keys.back().time;
 
 		const double delta = my_last-my_first;
 		const size_t old_size = (*it).keys.size();
 
-		const float value_delta = (*it).keys.back().value - (*it).keys.front().value; 
+		const float value_delta = (*it).keys.back().value - (*it).keys.front().value;
 
 		// NOTE: We won't handle reset, linear and constant here.
 		// See DoInterpolation() for their implementation.
@@ -157,7 +157,7 @@ void AnimResolver::UpdateAnimRangeSetup()
 			case LWO::PrePostBehaviour_Oscillate:
 				{
 				const double start_time = delta - fmod(my_first-first,delta);
-				std::vector<LWO::Key>::iterator n = std::find_if((*it).keys.begin(),(*it).keys.end(), 
+				std::vector<LWO::Key>::iterator n = std::find_if((*it).keys.begin(),(*it).keys.end(),
 					std::bind1st(std::greater<double>(),start_time)),m;
 
 				size_t ofs = 0;
@@ -183,7 +183,7 @@ void AnimResolver::UpdateAnimRangeSetup()
 						std::reverse(m,m+old_size-1);
 				}
 
-				// update time values 
+				// update time values
 				n = (*it).keys.end() - (old_size+1);
 				double cur_minus = delta;
 				unsigned int tt = 1;
@@ -191,7 +191,7 @@ void AnimResolver::UpdateAnimRangeSetup()
 					m = (delta == tmp ? (*it).keys.begin() :  n - (old_size+1));
 					for (;m != n; --n) {
 						(*n).time -= cur_minus;
-					
+
 						// offset repeat? add delta offset to key value
 						if ((*it).pre == LWO::PrePostBehaviour_OffsetRepeat) {
 							(*n).value += tt * value_delta;
@@ -207,7 +207,7 @@ void AnimResolver::UpdateAnimRangeSetup()
 
 		// process post behaviour
 		switch ((*it).post) {
-			
+
 			case LWO::PrePostBehaviour_OffsetRepeat:
 			case LWO::PrePostBehaviour_Repeat:
 			case LWO::PrePostBehaviour_Oscillate:
@@ -255,8 +255,8 @@ void AnimResolver::ExtractBindPose(aiMatrix4x4& out)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Do a single interpolation on a channel 
-void AnimResolver::DoInterpolation(std::vector<LWO::Key>::const_iterator cur, 
+// Do a single interpolation on a channel
+void AnimResolver::DoInterpolation(std::vector<LWO::Key>::const_iterator cur,
 	LWO::Envelope* envl,double time, float& fill)
 {
 	if (envl->keys.size() == 1) {
@@ -266,7 +266,7 @@ void AnimResolver::DoInterpolation(std::vector<LWO::Key>::const_iterator cur,
 
 	// check whether we're at the beginning of the animation track
 	if (cur == envl->keys.begin()) {
-	
+
 		// ok ... this depends on pre behaviour now
 		// we don't need to handle repeat&offset repeat&oszillate here, see UpdateAnimRangeSetup()
 		switch (envl->pre)
@@ -309,11 +309,11 @@ void AnimResolver::DoInterpolation(std::vector<LWO::Key>::const_iterator cur,
 
 // ------------------------------------------------------------------------------------------------
 // Almost the same, except we won't handle pre/post conditions here
-void AnimResolver::DoInterpolation2(std::vector<LWO::Key>::const_iterator beg, 
+void AnimResolver::DoInterpolation2(std::vector<LWO::Key>::const_iterator beg,
 	std::vector<LWO::Key>::const_iterator end,double time, float& fill)
 {
 	switch ((*end).inter) {
-		
+
 		case LWO::IT_STEP:
 			// no interpolation at all - take the value of the last key
 			fill = (*beg).value;
@@ -382,7 +382,7 @@ void AnimResolver::InterpolateTrack(std::vector<aiVectorKey>& out,aiVectorKey& f
 
 // ------------------------------------------------------------------------------------------------
 // Build linearly subsampled keys from three single envelopes, one for each component (x,y,z)
-void AnimResolver::GetKeys(std::vector<aiVectorKey>& out, 
+void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 	LWO::Envelope* _envl_x,
 	LWO::Envelope* _envl_y,
 	LWO::Envelope* _envl_z,
@@ -398,7 +398,7 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 	LWO::Key key_dummy;
 	key_dummy.time = 0.f;
 	if ((envl_x && envl_x->type == LWO::EnvelopeType_Scaling_X) ||
-		(envl_y && envl_y->type == LWO::EnvelopeType_Scaling_Y) || 
+		(envl_y && envl_y->type == LWO::EnvelopeType_Scaling_Y) ||
 		(envl_z && envl_z->type == LWO::EnvelopeType_Scaling_Z)) {
 		key_dummy.value = 1.f;
 	}
@@ -424,7 +424,7 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 		if (!sample_rate)
 			sr = 100.f;
 		else sr = sample_rate;
-		sample_delta = 1.f / sr; 
+		sample_delta = 1.f / sr;
 
 		reserve = (size_t)(
 			std::max( envl_x->keys.rbegin()->time,
@@ -433,10 +433,10 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 	else reserve = std::max(envl_x->keys.size(),std::max(envl_x->keys.size(),envl_z->keys.size()));
 	out.reserve(reserve+(reserve>>1));
 
-	// Iterate through all three arrays at once - it's tricky, but 
+	// Iterate through all three arrays at once - it's tricky, but
 	// rather interesting to implement.
 	double lasttime = std::min(envl_x->keys[0].time,std::min(envl_y->keys[0].time,envl_z->keys[0].time));
-	
+
 	cur_x = envl_x->keys.begin();
 	cur_y = envl_y->keys.begin();
 	cur_z = envl_z->keys.begin();
@@ -488,7 +488,7 @@ void AnimResolver::GetKeys(std::vector<aiVectorKey>& out,
 			else if (end_x) {
 				InterpolateTrack(out,fill,(end_z ? (*cur_y) : (*cur_z)).time);
 			}
-			else { // if (end_z) 
+			else { // if (end_z)
 				InterpolateTrack(out,fill,(end_y ? (*cur_x) : (*cur_y)).time);
 			}
 		}
@@ -529,7 +529,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 
 
 	//FIXME: crashes if more than one component is animated at different timings, to be resolved.
-	
+
 	// If we have no envelopes, return NULL
 	if (envelopes.empty()) {
 		return;
@@ -542,7 +542,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 	if (!trans && !rotat && !scale)
 		return;
 
-	// Allocate the output animation 
+	// Allocate the output animation
 	aiNodeAnim* anim = *out = new aiNodeAnim();
 
 	// Setup default animation setup if necessary
@@ -566,7 +566,7 @@ void AnimResolver::ExtractAnimChannel(aiNodeAnim** out, unsigned int flags /*= 0
 		GetKeys(keys,rotat_x,rotat_y,rotat_z,flags);
 
 		anim->mRotationKeys = new aiQuatKey[ anim->mNumRotationKeys = keys.size() ];
-		
+
 		// convert heading, pitch, bank to quaternion
 		// mValue.x=Heading=Rot(Y), mValue.y=Pitch=Rot(X), mValue.z=Bank=Rot(Z)
 		// Lightwave's rotation order is ZXY

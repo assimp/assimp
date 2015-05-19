@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file  LWSLoader.cpp
- *  @brief Implementation of the LWS importer class 
+ *  @brief Implementation of the LWS importer class
  */
 
 
@@ -73,7 +73,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"lws mot" 
+	"lws mot"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ static const aiImporterDesc desc = {
 void LWS::Element::Parse (const char*& buffer)
 {
 	for (;SkipSpacesAndLineEnd(&buffer);SkipLine(&buffer)) {
-	
+
 		// begin of a new element with children
 		bool sub = false;
 		if (*buffer == '{') {
@@ -101,7 +101,7 @@ void LWS::Element::Parse (const char*& buffer)
 		children.back().tokens[0] = std::string(cur,(size_t) (buffer-cur));
 		SkipSpaces(&buffer);
 
-		if (children.back().tokens[0] == "Plugin") 
+		if (children.back().tokens[0] == "Plugin")
 		{
 			DefaultLogger::get()->debug("LWS: Skipping over plugin-specific data");
 
@@ -135,14 +135,14 @@ LWSImporter::LWSImporter()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 LWSImporter::~LWSImporter()
 {
 	// nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool LWSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler,bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
@@ -151,7 +151,7 @@ bool LWSImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler,bool c
 
 	// if check for extension is not enough, check for the magic tokens LWSC and LWMO
 	if (!extension.length() || checkSig) {
-		uint32_t tokens[2]; 
+		uint32_t tokens[2];
 		tokens[0] = AI_MAKE_MAGIC("LWSC");
 		tokens[1] = AI_MAKE_MAGIC("LWMO");
 		return CheckMagicToken(pIOHandler,pFile,tokens,2);
@@ -193,7 +193,7 @@ void LWSImporter::SetupProperties(const Importer* pImp)
 void LWSImporter::ReadEnvelope(const LWS::Element& dad, LWO::Envelope& fill )
 {
 	if (dad.children.empty()) {
-		DefaultLogger::get()->error("LWS: Envelope descriptions must not be empty");	
+		DefaultLogger::get()->error("LWS: Envelope descriptions must not be empty");
 		return;
 	}
 
@@ -218,7 +218,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element& dad, LWO::Envelope& fill )
 
 			unsigned int span = strtoul10(c,&c), num = 0;
 			switch (span) {
-			
+
 				case 0:
 					key.inter = LWO::IT_TCB;
 					num = 5;
@@ -260,7 +260,7 @@ void LWSImporter::ReadEnvelope(const LWS::Element& dad, LWO::Envelope& fill )
 // ------------------------------------------------------------------------------------------------
 // Read animation channels in the old LightWave animation format
 void LWSImporter::ReadEnvelope_Old(
-	std::list< LWS::Element >::const_iterator& it, 
+	std::list< LWS::Element >::const_iterator& it,
 	const std::list< LWS::Element >::const_iterator& end,
 	LWS::NodeDesc& nodes,
 	unsigned int /*version*/)
@@ -270,13 +270,13 @@ void LWSImporter::ReadEnvelope_Old(
 
 	num = strtoul10((*it).tokens[0].c_str());
 	for (unsigned int i = 0; i < num; ++i) {
-	
+
 		nodes.channels.push_back(LWO::Envelope());
 		LWO::Envelope& envl = nodes.channels.back();
 
 		envl.index = i;
 		envl.type  = (LWO::EnvelopeType)(i+1);
-	
+
 		if (++it == end)goto unexpected_end;
 		sub_num = strtoul10((*it).tokens[0].c_str());
 
@@ -302,7 +302,7 @@ unexpected_end:
 }
 
 // ------------------------------------------------------------------------------------------------
-// Setup a nice name for a node 
+// Setup a nice name for a node
 void LWSImporter::SetupNodeName(aiNode* nd, LWS::NodeDesc& src)
 {
 	const unsigned int combined = src.number | ((unsigned int)src.type) << 28u;
@@ -317,7 +317,7 @@ void LWSImporter::SetupNodeName(aiNode* nd, LWS::NodeDesc& src)
 				s = 0;
 			else ++s;
             std::string::size_type t = src.path.substr(s).find_last_of(".");
-			
+
 			nd->mName.length = ::sprintf(nd->mName.data,"%s_(%08X)",src.path.substr(s).substr(0,t).c_str(),combined);
 			return;
 		}
@@ -330,7 +330,7 @@ void LWSImporter::SetupNodeName(aiNode* nd, LWS::NodeDesc& src)
 void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<AttachmentInfo>& attach,
 	BatchLoader& batch,
 	aiCamera**& camOut,
-	aiLight**& lightOut, 
+	aiLight**& lightOut,
 	std::vector<aiNodeAnim*>& animOut)
 {
 	// Setup a very cryptic name for the node, we want the user to be happy
@@ -349,14 +349,14 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
             }
             else {
                 if (obj->mRootNode->mNumChildren == 1) {
-					
+
                     //If the pivot is not set for this layer, get it from the external object
                     if (!src.isPivotSet) {
                         src.pivotPos.x = +obj->mRootNode->mTransformation.a4;
                         src.pivotPos.y = +obj->mRootNode->mTransformation.b4;
                         src.pivotPos.z = -obj->mRootNode->mTransformation.c4; //The sign is the RH to LH back conversion
                     }
-					
+
                     //Remove first node from obj (the old pivot), reset transform of second node (the mesh node)
                     aiNode* newRootNode = obj->mRootNode->mChildren[0];
 					obj->mRootNode->mChildren[0] = NULL;
@@ -369,11 +369,11 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
                 }
             }
         }
-		
+
 		//Setup the pivot node (also the animation node), the one we received
         nd->mName = std::string("Pivot:") + nd->mName.data;
 		ndAnim = nd;
-		
+
         //Add the attachment node to it
         nd->mNumChildren = 1;
         nd->mChildren = new aiNode*[1];
@@ -383,10 +383,10 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
         nd->mChildren[0]->mTransformation.b4 = -src.pivotPos.y;
         nd->mChildren[0]->mTransformation.c4 = -src.pivotPos.z;
 		SetupNodeName(nd->mChildren[0], src);
-		
+
 		//Update the attachment node
 		nd = nd->mChildren[0];
-		
+
         //Push attachment, if the object came from an external file
         if (obj) {
             attach.push_back(AttachmentInfo(obj,nd));
@@ -421,7 +421,7 @@ void LWSImporter::BuildGraph(aiNode* nd, LWS::NodeDesc& src, std::vector<Attachm
 			lit->mAttenuationConstant = 1.f;
 		else if (src.lightFalloffType == 1)
 			lit->mAttenuationLinear = 1.f;
-		else 
+		else
 			lit->mAttenuationQuadratic = 1.f;
 	}
 
@@ -477,7 +477,7 @@ std::string LWSImporter::FindLWOFile(const std::string& in)
 		return in;
 	}
 
-	// file is not accessible for us ... maybe it's packed by 
+	// file is not accessible for us ... maybe it's packed by
 	// LightWave's 'Package Scene' command?
 
 	// Relevant for us are the following two directories:
@@ -502,7 +502,7 @@ std::string LWSImporter::FindLWOFile(const std::string& in)
 
 // ------------------------------------------------------------------------------------------------
 // Read file into given scene data structure
-void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene, 
+void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	IOSystem* pIOHandler)
 {
 	io = pIOHandler;
@@ -516,7 +516,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	// Allocate storage and copy the contents of the file to a memory buffer
 	std::vector< char > mBuffer;
 	TextFileToBuffer(file.get(),mBuffer);
-	
+
 	// Parse the file structure
 	LWS::Element root; const char* dummy = &mBuffer[0];
 	root.Parse(dummy);
@@ -534,7 +534,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	// check magic identifier, 'LWSC'
 	bool motion_file = false;
 	std::list< LWS::Element >::const_iterator it = root.children.begin();
-	
+
 	if ((*it).tokens[0] == "LWMO")
 		motion_file = true;
 
@@ -600,11 +600,11 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 		}
 		// 'LoadObject': load a LWO file into the scenegraph
 		else if ((*it).tokens[0] == "LoadObject") {
-			
+
 			// add node to list
 			LWS::NodeDesc d;
 			d.type = LWS::NodeDesc::OBJECT;
-			
+
 			if (version >= 4) { // handle LWSC 4 explicit ID
 				d.number = strtoul16(c,&c) & AI_LWS_MASK;
 				SkipSpaces(&c);
@@ -655,7 +655,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			// important: index of channel
 			nodes.back().channels.push_back(LWO::Envelope());
 			LWO::Envelope& env = nodes.back().channels.back();
-			
+
 			env.index = strtoul10(c);
 
 			// currently we can just interpret the standard channels 0...9
@@ -707,7 +707,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 			if (nodes.empty())
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'ParentObject\'");
 
-			else { 
+			else {
 				nodes.back().parent = strtoul10(c,&c) | (1u << 28u);
 			}
 		}
@@ -761,7 +761,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightIntensity\'");
 
 			else fast_atoreal_move<float>(c, nodes.back().lightIntensity );
-			
+
 		}
 		// 'LightType': set type of currently active light
 		else if ((*it).tokens[0] == "LightType") {
@@ -769,7 +769,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightType\'");
 
 			else nodes.back().lightType = strtoul10(c);
-			
+
 		}
 		// 'LightFalloffType': set falloff type of currently active light
 		else if ((*it).tokens[0] == "LightFalloffType") {
@@ -777,7 +777,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightFalloffType\'");
 
 			else nodes.back().lightFalloffType = strtoul10(c);
-			
+
 		}
 		// 'LightConeAngle': set cone angle of currently active light
 		else if ((*it).tokens[0] == "LightConeAngle") {
@@ -785,7 +785,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightConeAngle\'");
 
 			else nodes.back().lightConeAngle = fast_atof(c);
-			
+
 		}
 		// 'LightEdgeAngle': set area where we're smoothing from min to max intensity
 		else if ((*it).tokens[0] == "LightEdgeAngle") {
@@ -793,7 +793,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 				DefaultLogger::get()->error("LWS: Unexpected keyword: \'LightEdgeAngle\'");
 
 			else nodes.back().lightEdgeAngle = fast_atof(c);
-			
+
 		}
 		// 'LightColor': set color of currently active light
 		else if ((*it).tokens[0] == "LightColor") {
@@ -827,7 +827,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
 	// resolve parenting
 	for (std::list<LWS::NodeDesc>::iterator it = nodes.begin(); it != nodes.end(); ++it) {
-	
+
 		// check whether there is another node which calls us a parent
 		for (std::list<LWS::NodeDesc>::iterator dit = nodes.begin(); dit != nodes.end(); ++dit) {
 			if (dit != it && *it == (*dit).parent) {
@@ -857,7 +857,7 @@ void LWSImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 	batch.LoadAll();
 
 	// and build the final output graph by attaching the loaded external
-	// files to ourselves. first build a master graph 
+	// files to ourselves. first build a master graph
 	aiScene* master = new aiScene();
 	aiNode* nd = master->mRootNode = new aiNode();
 

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -58,13 +58,13 @@ namespace Assimp	{
 // this file serves as input data to the `./scripts/genblenddna.py`
 // script. This script generates the actual binding code to read a
 // blender file with a possibly different DNA into our structures.
-// Only `struct` declarations are considered and the following 
+// Only `struct` declarations are considered and the following
 // rules must be obeyed in order for the script to work properly:
 //
 // * C++ style comments only
 //
 // * Structures may include the primitive types char, int, short,
-//   float, double. Signedness specifiers are not allowed on 
+//   float, double. Signedness specifiers are not allowed on
 //	 integers. Enum types are allowed, but they must have been
 //   defined in this header.
 //
@@ -103,13 +103,13 @@ struct Image;
 // -------------------------------------------------------------------------------
 struct ID : ElemBase {
 
-	char name[24] WARN; 
+	char name[24] WARN;
 	short flag;
 };
 
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
-    
+
 	boost::shared_ptr<ElemBase> first;
 	boost::shared_ptr<ElemBase> last;
 };
@@ -124,7 +124,7 @@ struct PackedFile : ElemBase {
 
 // -------------------------------------------------------------------------------
 struct GroupObject : ElemBase {
-	
+
 	boost::shared_ptr<GroupObject> prev,next FAIL;
 	boost::shared_ptr<Object> ob;
 };
@@ -140,7 +140,7 @@ struct Group : ElemBase {
 // -------------------------------------------------------------------------------
 struct World : ElemBase {
 	ID id FAIL;
-	
+
 };
 
 // -------------------------------------------------------------------------------
@@ -297,7 +297,7 @@ struct Mesh : ElemBase {
 // -------------------------------------------------------------------------------
 struct Library : ElemBase {
 	ID id FAIL;
-	
+
 	char name[240] WARN;
 	char filename[240] FAIL;
 	boost::shared_ptr<Library> parent WARN;
@@ -312,7 +312,7 @@ struct Camera : ElemBase {
 
 	ID id FAIL;
 
-	// struct AnimData *adt;  
+	// struct AnimData *adt;
 
 	Type type,flag WARN;
 	float angle WARN;
@@ -348,29 +348,29 @@ struct Lamp : ElemBase {
 	};
 
       ID id FAIL;
-      //AnimData *adt;  
-      
+      //AnimData *adt;
+
       Type type FAIL;
 	  short flags;
 
       //int mode;
-      
+
       short colormodel, totex;
       float r,g,b,k WARN;
       //float shdwr, shdwg, shdwb;
-      
+
       float energy, dist, spotsize, spotblend;
       //float haint;
-         
-      float att1, att2; 
+
+      float att1, att2;
       //struct CurveMapping *curfalloff;
       FalloffType falloff_type;
-      
+
       //float clipsta, clipend, shadspotsize;
       //float bias, soft, compressthresh;
       //short bufsize, samp, buffers, filtertype;
       //char bufflag, buftype;
-      
+
       //short ray_samp, ray_sampy, ray_sampz;
       //short ray_samp_type;
       //short area_shape;
@@ -402,11 +402,11 @@ struct Lamp : ElemBase {
 
 	  // float YF_glowint, YF_glowofs;
       // short YF_glowtype, YF_pad2;
-      
-      //struct Ipo *ipo;                    
-      //struct MTex *mtex[18];              
+
+      //struct Ipo *ipo;
+      //struct MTex *mtex[18];
       // short pr_texture;
-      
+
       //struct PreviewImage *preview;
 };
 
@@ -459,7 +459,7 @@ struct ModifierData : ElemBase  {
 struct SubsurfModifierData : ElemBase  {
 
 	enum Type {
-		
+
 		TYPE_CatmullClarke = 0x0,
 		TYPE_Simple = 0x1
 	};
@@ -519,7 +519,7 @@ struct Object : ElemBase  {
 	float obmat[4][4] WARN;
 	float parentinv[4][4] WARN;
 	char parsubstr[32] WARN;
-	
+
 	Object* parent WARN;
 	boost::shared_ptr<Object> track WARN;
 
@@ -554,7 +554,7 @@ struct Scene : ElemBase {
 struct Image : ElemBase {
 	ID id FAIL;
 
-	char name[240] WARN;               
+	char name[240] WARN;
 
 	//struct anim *anim;
 
@@ -565,8 +565,8 @@ struct Image : ElemBase {
 	short tpageflag, totbind;
 	short xrep, yrep;
 	short twsta, twend;
-	//unsigned int bindcode;  
-	//unsigned int *repbind; 
+	//unsigned int bindcode;
+	//unsigned int *repbind;
 
 	boost::shared_ptr<PackedFile> packedfile;
 	//struct PreviewImage * preview;
@@ -575,7 +575,7 @@ struct Image : ElemBase {
 	int lastused;
 	short animspeed;
 
-	short gen_x, gen_y, gen_type; 
+	short gen_x, gen_y, gen_type;
 };
 
 // -------------------------------------------------------------------------------
@@ -613,7 +613,7 @@ struct Tex : ElemBase {
 	};
 
 	ID id FAIL;
-	// AnimData *adt; 
+	// AnimData *adt;
 
 	//float noisesize, turbul;
 	//float bright, contrast, rfac, gfac, bfac;
@@ -639,7 +639,7 @@ struct Tex : ElemBase {
 
 	//float cropxmin, cropymin, cropxmax, cropymax;
 	//int texfilter;
-	//int afmax;  
+	//int afmax;
 	//short xrepeat, yrepeat;
 	//short extend;
 
@@ -653,7 +653,7 @@ struct Tex : ElemBase {
 	//ImageUser iuser;
 
 	//bNodeTree *nodetree;
-	//Ipo *ipo;                  
+	//Ipo *ipo;
 	boost::shared_ptr<Image> ima WARN;
 	//PluginTex *plugin;
 	//ColorBand *coba;

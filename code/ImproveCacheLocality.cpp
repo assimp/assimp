@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -126,7 +126,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 	ai_assert(NULL != pMesh);
 
 	// Check whether the input data is valid
-	// - there must be vertices and faces 
+	// - there must be vertices and faces
 	// - all faces must be triangulated or we can't operate on them
 	if (!pMesh->HasFaces() || !pMesh->HasPositions())
 		return 0.f;
@@ -196,7 +196,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 	memset(piCachingStamps,0x0,pMesh->mNumVertices*sizeof(unsigned int));
 
 	// allocate an empty output index buffer. We store the output indices in one large array.
-	// Since the number of triangles won't change the input faces can be reused. This is how 
+	// Since the number of triangles won't change the input faces can be reused. This is how
 	// we save thousands of redundant mini allocations for aiFace::mIndices
 	const unsigned int iIdxCnt = pMesh->mNumFaces*3;
 	unsigned int* const piIBOutput = new unsigned int[iIdxCnt];
@@ -212,7 +212,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 	// create a copy of the piNumTriPtr buffer
 	unsigned int* const piNumTriPtr = adj.mLiveTriangles;
 	const std::vector<unsigned int> piNumTriPtrNoModify(piNumTriPtr, piNumTriPtr + pMesh->mNumVertices);
-	
+
 	// get the largest number of referenced triangles and allocate the "candidate buffer"
 	unsigned int iMaxRefTris = 0; {
 		const unsigned int* piCur = adj.mLiveTriangles;
@@ -259,7 +259,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 	int iStampCnt = configCacheDepth+1;
 	while (ivdx >= 0)	{
 
-		unsigned int icnt = piNumTriPtrNoModify[ivdx]; 
+		unsigned int icnt = piNumTriPtrNoModify[ivdx];
 		unsigned int* piList = adj.GetAdjacentTriangles(ivdx);
 		unsigned int* piCurCandidate = piCandidates;
 
@@ -305,7 +305,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 		piNumTriPtr[ivdx] = 0;
 
 		// get next fanning vertex
-		ivdx = -1; 
+		ivdx = -1;
 		int max_priority = -1;
 		for (unsigned int* piCur = piCandidates;piCur != piCurCandidate;++piCur)	{
 			const unsigned int dp = *piCur;
@@ -329,7 +329,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 		}
 		// did we reach a dead end?
 		if (-1 == ivdx)	{
-			// need to get a non-local vertex for which we have a good chance that it is still 
+			// need to get a non-local vertex for which we have a good chance that it is still
 			// in the cache ...
 			while (!sDeadEndVStack.empty())	{
 				unsigned int iCachedIdx = sDeadEndVStack.top();

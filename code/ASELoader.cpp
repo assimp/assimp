@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -73,7 +73,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"ase ask" 
+	"ase ask"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -83,17 +83,17 @@ ASEImporter::ASEImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 ASEImporter::~ASEImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool ASEImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool cs) const
 {
-	// check file extension 
+	// check file extension
 	const std::string extension = GetExtension(pFile);
-	
+
 	if( extension == "ase" || extension == "ask")
 		return true;
 
@@ -122,8 +122,8 @@ void ASEImporter::SetupProperties(const Importer* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void ASEImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void ASEImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
@@ -164,7 +164,7 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 
 	//------------------------------------------------------------------
 	// Check whether we god at least one mesh. If we did - generate
-	// materials and copy meshes. 
+	// materials and copy meshes.
 	// ------------------------------------------------------------------
 	if ( !mParser->m_vMeshes.empty())	{
 
@@ -221,10 +221,10 @@ void ASEImporter::InternReadFile( const std::string& pFile,
 		+ mParser->m_vCameras.size() + mParser->m_vDummies.size());
 
 	// Lights
-	for (std::vector<ASE::Light>::iterator it = mParser->m_vLights.begin(), 
+	for (std::vector<ASE::Light>::iterator it = mParser->m_vLights.begin(),
 		 end = mParser->m_vLights.end();it != end; ++it)nodes.push_back(&(*it));
 	// Cameras
-	for (std::vector<ASE::Camera>::iterator it = mParser->m_vCameras.begin(), 
+	for (std::vector<ASE::Camera>::iterator it = mParser->m_vCameras.begin(),
 		 end = mParser->m_vCameras.end();it != end; ++it)nodes.push_back(&(*it));
 	// Meshes
 	for (std::vector<ASE::Mesh>::iterator it = mParser->m_vMeshes.begin(),
@@ -325,7 +325,7 @@ void ASEImporter::BuildAnimations(const std::vector<BaseNode*>& nodes)
 		pcAnim->mTicksPerSecond = mParser->iFrameSpeed * mParser->iTicksPerFrame;
 
 		iNum = 0;
-		
+
 		// Now iterate through all meshes and collect all data we can find
 		for (i =  nodes.begin();i != nodes.end();++i)	{
 
@@ -349,7 +349,7 @@ void ASEImporter::BuildAnimations(const std::vector<BaseNode*>& nodes)
 				}
 				else helper.SetMainAnimationChannel (&me->mAnim.akeyPositions);
 				helper.SetTargetAnimationChannel (&me->mTargetAnim.akeyPositions);
-				
+
 				helper.Process(&me->mTargetAnim.akeyPositions);*/
 
 				// Allocate the key array and fill it
@@ -383,7 +383,7 @@ void ASEImporter::BuildAnimations(const std::vector<BaseNode*>& nodes)
 
 					// --------------------------------------------------------------------
 					// Rotation keys are offsets to the previous keys.
-					// We have the quaternion representations of all 
+					// We have the quaternion representations of all
 					// of them, so we just need to concatenate all
 					// (unit-length) quaternions to get the absolute
 					// rotations.
@@ -398,7 +398,7 @@ void ASEImporter::BuildAnimations(const std::vector<BaseNode*>& nodes)
 							cur = (a ? cur*q.mValue : q.mValue);
 							q.mValue = cur.Normalize();
 						}
-						nd->mRotationKeys[a] = q; 
+						nd->mRotationKeys[a] = q;
 
 						// need this to get to Assimp quaternion conventions
 						nd->mRotationKeys[a].mValue.w *= -1.f;
@@ -432,7 +432,7 @@ void ASEImporter::BuildCameras()
 
 			// copy members
 			out->mClipPlaneFar  = in.mFar;
-			out->mClipPlaneNear = (in.mNear ? in.mNear : 0.1f); 
+			out->mClipPlaneNear = (in.mNear ? in.mNear : 0.1f);
 			out->mHorizontalFOV = in.mFOV;
 
 			out->mName.Set(in.mName);
@@ -452,9 +452,9 @@ void ASEImporter::BuildLights()
 			aiLight* out = pcScene->mLights[i] = new aiLight();
 			ASE::Light& in = mParser->m_vLights[i];
 
-			// The direction is encoded in the transformation matrix of the node. 
-			// In 3DS MAX the light source points into negative Z direction if 
-			// the node transformation is the identity. 
+			// The direction is encoded in the transformation matrix of the node.
+			// In 3DS MAX the light source points into negative Z direction if
+			// the node transformation is the identity.
 			out->mDirection = aiVector3D(0.f,0.f,-1.f);
 
 			out->mName.Set(in.mName);
@@ -511,7 +511,7 @@ void ASEImporter::AddMeshes(const ASE::BaseNode* snode,aiNode* node)
 			if (mesh == snode)	{
 				node->mMeshes[p++] = i;
 
-				// Transform all vertices of the mesh back into their local space -> 
+				// Transform all vertices of the mesh back into their local space ->
 				// at the moment they are pretransformed
 				aiMatrix4x4 m  = mesh->mTransform;
 				m.Inverse();
@@ -612,10 +612,10 @@ void ASEImporter::AddNodes (const std::vector<BaseNode*>& nodes,
 
 			nd->mParent = node;
 
-			// The .Target node is always the first child node 
+			// The .Target node is always the first child node
 			for (unsigned int m = 0; m < node->mNumChildren;++m)
-				node->mChildren[m+1] = node->mChildren[m]; 
-		
+				node->mChildren[m+1] = node->mChildren[m];
+
 			node->mChildren[0] = nd;
 			node->mNumChildren++;
 
@@ -671,7 +671,7 @@ void ASEImporter::BuildNodes(std::vector<BaseNode*>& nodes)	{
 
 		// check whether our parent is known
 		bool bKnowParent = false;
-		
+
 		// search the list another time, starting *here* and try to find out whether
 		// there is a node that references *us* as a parent
 		for (std::vector<BaseNode*>::const_iterator it2 = nodes.begin();it2 != end; ++it2) {
@@ -701,7 +701,7 @@ void ASEImporter::BuildNodes(std::vector<BaseNode*>& nodes)	{
 		for (std::vector<const BaseNode*>::/*const_*/iterator i =  aiList.begin();i != aiList.end();++i)	{
 			const ASE::BaseNode* src = *i;
 
-			// The parent is not known, so we can assume that we must add 
+			// The parent is not known, so we can assume that we must add
 			// this node to the root node of the whole scene
 			aiNode* pcNode = new aiNode();
 			pcNode->mParent = pcScene->mRootNode;
@@ -727,7 +727,7 @@ void ASEImporter::BuildNodes(std::vector<BaseNode*>& nodes)	{
 	if (!pcScene->mRootNode->mNumChildren) {
 		throw DeadlyImportError("ASE: No nodes loaded. The file is either empty or corrupt");
 	}
-	
+
 	// Now rotate the whole scene 90 degrees around the x axis to convert to internal coordinate system
 	pcScene->mRootNode->mTransformation = aiMatrix4x4(1.f,0.f,0.f,0.f,
 		0.f,0.f,1.f,0.f,0.f,-1.f,0.f,0.f,0.f,0.f,0.f,1.f);
@@ -994,7 +994,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 				if (!mesh.mBones.empty())	{
 					avOutputBones = new std::vector<std::pair<unsigned int, float> >[mesh.mBones.size()];
 				}
-				
+
 				// allocate enough storage for faces
 				p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
 
@@ -1102,7 +1102,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 	{
 		// Otherwise we can simply copy the data to one output mesh
 		// This codepath needs less memory and uses fast memcpy()s
-		// to do the actual copying. So I think it is worth the 
+		// to do the actual copying. So I think it is worth the
 		// effort here.
 
 		aiMesh* p_pcOut = new aiMesh();
@@ -1167,7 +1167,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 			p_pcOut->mFaces[iFace].mNumIndices = 3;
 			p_pcOut->mFaces[iFace].mIndices = new unsigned int[3];
 
-			// copy indices 
+			// copy indices
 			p_pcOut->mFaces[iFace].mIndices[0] = mesh.mFaces[iFace].mIndices[0];
 			p_pcOut->mFaces[iFace].mIndices[1] = mesh.mFaces[iFace].mIndices[1];
 			p_pcOut->mFaces[iFace].mIndices[2] = mesh.mFaces[iFace].mIndices[2];

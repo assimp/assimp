@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -66,7 +66,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"q3o q3s" 
+	"q3o q3s"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -75,12 +75,12 @@ Q3DImporter::Q3DImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 Q3DImporter::~Q3DImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool Q3DImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
@@ -103,8 +103,8 @@ const aiImporterDesc* Q3DImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void Q3DImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void Q3DImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	StreamReaderLE stream(pIOHandler->Open(pFile,"rb"));
@@ -117,12 +117,12 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 	if (ASSIMP_strincmp( (const char*)stream.GetPtr(), "quick3Do", 8 ) &&
 		ASSIMP_strincmp( (const char*)stream.GetPtr(), "quick3Ds", 8 ))
 	{
-		throw DeadlyImportError("Not a Quick3D file. Signature string is: " + 
+		throw DeadlyImportError("Not a Quick3D file. Signature string is: " +
 			std::string((const char*)stream.GetPtr(),8));
 	}
 
 	// Print the file format version
-	DefaultLogger::get()->info("Quick3D File format version: " + 
+	DefaultLogger::get()->info("Quick3D File format version: " +
 		std::string(&((const char*)stream.GetPtr())[8],2));
 
 	// ... an store it
@@ -254,7 +254,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 			}
 			break;
 
-			// materials chunk 
+			// materials chunk
 		case 'c':
 
 			for (unsigned int i = 0; i < numMats; ++i)
@@ -265,7 +265,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				// read the material name
 				while (( c = stream.GetI1()))
 					mat.name.data[mat.name.length++] = c;
-				
+
 				// add the terminal character
 				mat.name.data[mat.name.length] = '\0';
 
@@ -341,7 +341,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				for (unsigned int i = 0; i < 4;++i)
 					for (unsigned int a = 0; a < 4;++a)
 						pScene->mRootNode->mTransformation[i][a] = stream.GetF4();
-				
+
 				stream.IncPtr(16);
 
 				// now setup a single camera
@@ -388,7 +388,7 @@ void Q3DImporter::InternReadFile( const std::string& pFile,
 				// skip the background file name
 				while (stream.GetI1());
 
-				// skip background texture data + the remaining fields 
+				// skip background texture data + the remaining fields
 				stream.IncPtr(temp*3 + 20); // 4 bytes of unknown data here
 
 				// TODO
@@ -418,7 +418,7 @@ outer:
 	// find out which materials we'll need
 	typedef std::pair<unsigned int, unsigned int> FaceIdx;
 	typedef std::vector< FaceIdx > FaceIdxArray;
-	FaceIdxArray* fidx = new FaceIdxArray[materials.size()]; 
+	FaceIdxArray* fidx = new FaceIdxArray[materials.size()];
 
 	unsigned int p = 0;
 	for (std::vector<Mesh>::iterator it = meshes.begin(), end = meshes.end();
@@ -457,7 +457,7 @@ outer:
 		mat->AddProperty(&srcMat.diffuse,  1,AI_MATKEY_COLOR_DIFFUSE);
 		mat->AddProperty(&srcMat.specular, 1,AI_MATKEY_COLOR_SPECULAR);
 		mat->AddProperty(&srcMat.ambient,  1,AI_MATKEY_COLOR_AMBIENT);
-	
+
 		// NOTE: Ignore transparency for the moment - it seems
 		// unclear how to interpret the data
 #if 0
@@ -515,7 +515,7 @@ outer:
 			Mesh& m    = meshes[(*it).first];
 			Face& face = m.faces[(*it).second];
 			faces->mNumIndices = (unsigned int)face.indices.size();
-			faces->mIndices = new unsigned int [faces->mNumIndices]; 
+			faces->mIndices = new unsigned int [faces->mNumIndices];
 
 
 			aiVector3D faceNormal;

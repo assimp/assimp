@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -68,14 +68,14 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"mdc" 
+	"mdc"
 };
 
 // ------------------------------------------------------------------------------------------------
 void MDC::BuildVertex(const Frame& frame,
 	const BaseVertex& bvert,
 	const CompressedVertex& cvert,
-	aiVector3D& vXYZOut, 
+	aiVector3D& vXYZOut,
 	aiVector3D& vNorOut)
 {
 	// compute the position
@@ -99,21 +99,21 @@ MDCImporter::MDCImporter()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 MDCImporter::~MDCImporter()
 {
 }
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool MDCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	const std::string extension = GetExtension(pFile);
 	if (extension == "mdc")
 		return true;
 
-	// if check for extension is not enough, check for the magic tokens 
+	// if check for extension is not enough, check for the magic tokens
 	if (!extension.length() || checkSig) {
-		uint32_t tokens[1]; 
+		uint32_t tokens[1];
 		tokens[0] = AI_MDC_MAGIC_NUMBER_LE;
 		return CheckMagicToken(pIOHandler,pFile,tokens,1);
 	}
@@ -211,8 +211,8 @@ void MDCImporter::SetupProperties(const Importer* pImp)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void MDCImporter::InternReadFile( 
+// Imports the given file into the given scene structure.
+void MDCImporter::InternReadFile(
 	const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
@@ -286,7 +286,7 @@ void MDCImporter::InternReadFile(
 		{
 			const MDC::Shader* pcShader = (const MDC::Shader*)((int8_t*)pcSurface + pcSurface->ulOffsetShaders);
 			pcMesh->mMaterialIndex = (unsigned int)aszShaders.size();
-			
+
 			// create a new shader
 			aszShaders.push_back(std::string( pcShader->ucName, std::min(
 				::strlen(pcShader->ucName),sizeof(pcShader->ucName)) ));

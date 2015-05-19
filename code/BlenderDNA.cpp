@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -56,10 +56,10 @@ using namespace Assimp::Formatter;
 
 #define for_each BOOST_FOREACH
 bool match4(StreamReaderAny& stream, const char* string) {
-	char tmp[] = { 
-		(stream).GetI1(), 
-		(stream).GetI1(),  
-		(stream).GetI1(), 
+	char tmp[] = {
+		(stream).GetI1(),
+		(stream).GetI1(),
+		(stream).GetI1(),
 		(stream).GetI1()
 	};
 	return (tmp[0]==string[0] && tmp[1]==string[1] && tmp[2]==string[2] && tmp[3]==string[3]);
@@ -71,7 +71,7 @@ struct Type {
 };
 
 // ------------------------------------------------------------------------------------------------
-void DNAParser :: Parse () 
+void DNAParser :: Parse ()
 {
 	StreamReaderAny& stream = *db.reader.get();
 	DNA& dna = db.dna;
@@ -84,7 +84,7 @@ void DNAParser :: Parse ()
 	if(!match4(stream,"NAME")) {
 		throw DeadlyImportError("BlenderDNA: Expected NAME field");
 	}
-	
+
 	std::vector<std::string> names (stream.GetI4());
 	for_each(std::string& s, names) {
 		while (char c = stream.GetI1()) {
@@ -97,7 +97,7 @@ void DNAParser :: Parse ()
 	if(!match4(stream,"TYPE")) {
 		throw DeadlyImportError("BlenderDNA: Expected TYPE field");
 	}
-	
+
 	std::vector<Type> types (stream.GetI4());
 	for_each(Type& s, types) {
 		while (char c = stream.GetI1()) {
@@ -110,7 +110,7 @@ void DNAParser :: Parse ()
 	if(!match4(stream,"TLEN")) {
 		throw DeadlyImportError("BlenderDNA: Expected TLEN field");
 	}
-	
+
 	for_each(Type& s, types) {
 		s.size = stream.GetI2();
 	}
@@ -125,11 +125,11 @@ void DNAParser :: Parse ()
 
 	dna.structures.reserve(end);
 	for(size_t i = 0; i != end; ++i) {
-		
+
 		uint16_t n = stream.GetI2();
 		if (n >= types.size()) {
 			throw DeadlyImportError((format(),
-				"BlenderDNA: Invalid type index in structure name" ,n, 
+				"BlenderDNA: Invalid type index in structure name" ,n,
 				" (there are only ", types.size(), " entries)"
 			));
 		}
@@ -150,8 +150,8 @@ void DNAParser :: Parse ()
 
 			uint16_t j = stream.GetI2();
 			if (j >= types.size()) {
-				throw DeadlyImportError((format(), 
-					"BlenderDNA: Invalid type index in structure field ", j, 
+				throw DeadlyImportError((format(),
+					"BlenderDNA: Invalid type index in structure field ", j,
 					" (there are only ", types.size(), " entries)"
 				));
 			}
@@ -164,15 +164,15 @@ void DNAParser :: Parse ()
 
 			j = stream.GetI2();
 			if (j >= names.size()) {
-				throw DeadlyImportError((format(), 
-					"BlenderDNA: Invalid name index in structure field ", j, 
+				throw DeadlyImportError((format(),
+					"BlenderDNA: Invalid name index in structure field ", j,
 					" (there are only ", names.size(), " entries)"
 				));
 			}
 
 			f.name = names[j];
 			f.flags = 0u;
-			
+
 			// pointers always specify the size of the pointee instead of their own.
 			// The pointer asterisk remains a property of the lookup name.
 			if (f.name[0] == '*') {
@@ -184,18 +184,18 @@ void DNAParser :: Parse ()
 			// need to parse the (possibly multi-dimensional) array declaration
 			// in order to obtain the actual size of the array in the file.
 			// Also we need to alter the lookup name to include no array
-			// brackets anymore or size fixup won't work (if our size does 
+			// brackets anymore or size fixup won't work (if our size does
 			// not match the size read from the DNA).
 			if (*f.name.rbegin() == ']') {
 				const std::string::size_type rb = f.name.find('[');
 				if (rb == std::string::npos) {
-					throw DeadlyImportError((format(), 
+					throw DeadlyImportError((format(),
 						"BlenderDNA: Encountered invalid array declaration ",
 						f.name
 					));
 				}
 
-				f.flags |= FieldFlag_Array; 
+				f.flags |= FieldFlag_Array;
 				DNA::ExtractArraySize(f.name,f.array_sizes);
 				f.name = f.name.substr(0,rb);
 
@@ -251,7 +251,7 @@ void DNA :: DumpToFile()
 
 // ------------------------------------------------------------------------------------------------
 /*static*/ void  DNA :: ExtractArraySize(
-	const std::string& out, 
+	const std::string& out,
 	size_t array_sizes[2]
 )
 {
@@ -273,7 +273,7 @@ void DNA :: DumpToFile()
 boost::shared_ptr< ElemBase > DNA :: ConvertBlobToStructure(
 	const Structure& structure,
 	const FileDatabase& db
-) const 
+) const
 {
 	std::map<std::string, FactoryPair >::const_iterator it = converters.find(structure.name);
 	if (it == converters.end()) {
@@ -282,7 +282,7 @@ boost::shared_ptr< ElemBase > DNA :: ConvertBlobToStructure(
 
 	boost::shared_ptr< ElemBase > ret = (structure.*((*it).second.first))();
 	(structure.*((*it).second.second))(ret,db);
-	
+
 	return ret;
 }
 
@@ -290,7 +290,7 @@ boost::shared_ptr< ElemBase > DNA :: ConvertBlobToStructure(
 DNA::FactoryPair DNA :: GetBlobToStructureConverter(
 	const Structure& structure,
 	const FileDatabase& /*db*/
-) const 
+) const
 {
 	std::map<std::string,  FactoryPair>::const_iterator it = converters.find(structure.name);
 	return it == converters.end() ? FactoryPair() : (*it).second;
@@ -302,7 +302,7 @@ void DNA :: AddPrimitiveStructures()
 {
 	// NOTE: these are just dummies. Their presence enforces
 	// Structure::Convert<target_type> to be called on these
-	// empty structures. These converters are special 
+	// empty structures. These converters are special
 	// overloads which scan the name of the structure and
 	// perform the required data type conversion if one
 	// of these special names is found in the structure

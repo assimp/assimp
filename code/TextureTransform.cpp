@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -85,7 +85,7 @@ void TextureTransformStep::SetupProperties(const Importer* pImp)
 void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 {
 	/*  This function tries to simplify the input UV transformation.
-	 *  That's very important as it allows us to reduce the number 
+	 *  That's very important as it allows us to reduce the number
 	 *  of output UV channels. The oder in which the transformations
 	 *  are applied is - as always - scaling, rotation, translation.
 	 */
@@ -134,7 +134,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 			sprintf(szTemp,"[w] UV U offset %f can be simplified to %f",info.mTranslation.x,out);
 		}
 		else if (aiTextureMapMode_Mirror == info.mapU && 1 != rounded)	{
-			// Mirror 
+			// Mirror
 			if (rounded % 2)
 				rounded--;
 			out = info.mTranslation.x-(float)rounded;
@@ -167,7 +167,7 @@ void TextureTransformStep::PreProcessUVTransform(STransformVecInfo& info)
 			sprintf(szTemp,"[w] UV V offset %f can be simplified to %f",info.mTranslation.y,out);
 		}
 		else if (aiTextureMapMode_Mirror == info.mapV  && 1 != rounded)	{
-			// Mirror 
+			// Mirror
 			if (rounded % 2)
 				rounded--;
 			out = info.mTranslation.x-(float)rounded;
@@ -212,19 +212,19 @@ inline const char* MappingModeToChar(aiTextureMapMode map)
 
 	if (aiTextureMapMode_Mirror == map)
 		return "-m";
-	
+
 	return "-c";
 }
 
 // ------------------------------------------------------------------------------------------------
-void TextureTransformStep::Execute( aiScene* pScene) 
+void TextureTransformStep::Execute( aiScene* pScene)
 {
 	DefaultLogger::get()->debug("TransformUVCoordsProcess begin");
-	
+
 
 	/*  We build a per-mesh list of texture transformations we'll need
-	 *  to apply. To achieve this, we iterate through all materials, 
-	 *  find all textures and get their transformations and UV indices. 
+	 *  to apply. To achieve this, we iterate through all materials,
+	 *  find all textures and get their transformations and UV indices.
 	 *  Then we search for all meshes using this material.
 	 */
 	typedef std::list<STransformVecInfo> MeshTrafoList;
@@ -268,10 +268,10 @@ void TextureTransformStep::Execute( aiScene* pScene)
 					}
 					else if ( !::strcmp( prop2->mKey.data, "$tex.uvtrafo"))  {
 						// ValidateDS should check this
-						ai_assert(prop2->mDataLength >= 20); 
+						ai_assert(prop2->mDataLength >= 20);
 						::memcpy(&info.mTranslation.x,prop2->mData,sizeof(float)*5);
 
-						// Directly remove this property from the list 
+						// Directly remove this property from the list
 						mat->mNumProperties--;
 						for (unsigned int a3 = a2; a3 < mat->mNumProperties;++a3) {
 							mat->mProperties[a3] = mat->mProperties[a3+1];
@@ -280,7 +280,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 						delete prop2;
 
 						// Warn: could be an underflow, but this does not invoke undefined behaviour
-						--a2; 
+						--a2;
 					}
 				}
 
@@ -327,7 +327,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 						// If the requested UV index is not available, take the first one instead.
 						uv = 0;
 					}
-					
+
 					if (mesh->mNumUVComponents[info.uvIndex] >= 3){
 						DefaultLogger::get()->warn("UV transformations on 3D mapping channels are not supported");
 						continue;
@@ -371,7 +371,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 			continue;
 		}
 
-		// Move untransformed UV channels to the first position in the list .... 
+		// Move untransformed UV channels to the first position in the list ....
 		// except if we need a new locked index which should be as small as possible
 		bool veto = false, need = false;
 		unsigned int cnt = 0;
@@ -393,7 +393,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 
 			if (!veto && it != trafo.begin() && (*it).IsUntransformed())	{
 				for (it2 = trafo.begin();it2 != it; ++it2) {
-					if (!(*it2).IsUntransformed()) 
+					if (!(*it2).IsUntransformed())
 						break;
 				}
 				trafo.insert(it2,*it);
@@ -404,7 +404,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 		if (!need)
 			continue;
 
-		// Find all that are not at their 'locked' position and move them to it. 
+		// Find all that are not at their 'locked' position and move them to it.
 		// Conflicts are possible but quite unlikely.
 		cnt = 0;
 		for (it = trafo.begin();it != trafo.end(); ++it,++cnt) {
@@ -447,7 +447,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 		if (size > AI_MAX_NUMBER_OF_TEXTURECOORDS) {
 
 			if (!DefaultLogger::isNullLogger()) {
-				::sprintf(buffer,"%u UV channels required but just %u available", 
+				::sprintf(buffer,"%u UV channels required but just %u available",
 					static_cast<unsigned int>(trafo.size()),AI_MAX_NUMBER_OF_TEXTURECOORDS);
 
 				DefaultLogger::get()->error(buffer);
@@ -501,7 +501,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 				}
 				if (it2 == trafo.begin()){
 					mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
-				} 
+				}
 			}
 			else mesh->mTextureCoords[n] = new aiVector3D[mesh->mNumVertices];
 
@@ -530,7 +530,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 
 				m4.a1 = scl.x;
 				m4.b2 = scl.y;
-				
+
 				m2.a3 = m2.b3 = 0.5f;
 				m3.a3 = m3.b3 = -0.5f;
 
@@ -539,7 +539,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
 
 				m5.a3 += trl.x; m5.b3 += trl.y;
 				matrix = m2 * m4 * matrix * m3 * m5;
-				
+
 				for (src = dest; src != end; ++src)	{ /* manual homogenious divide */
 					src->z = 1.f;
 					*src = matrix * *src;

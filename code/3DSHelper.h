@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -113,7 +113,7 @@ public:
 		KEY_USE_EASE_FROM    = 0x10
 	} ;
 
-	enum 
+	enum
 	{
 
 		// ********************************************************************
@@ -153,7 +153,7 @@ public:
 
 		// Specifies the background image for the whole scene
 		// This value is passed through the material system
-		// to the viewer 
+		// to the viewer
 		CHUNK_BIT_MAP   = 0x1100,
 		CHUNK_BIT_MAP_EXISTS  = 0x1101,
 
@@ -195,33 +195,33 @@ public:
 		CHUNK_MAT_MATERIAL  = 0xAFFF,
 
 			// asciiz containing the name of the material
-			CHUNK_MAT_MATNAME   = 0xA000, 
+			CHUNK_MAT_MATNAME   = 0xA000,
 			CHUNK_MAT_AMBIENT   = 0xA010, // followed by color chunk
 			CHUNK_MAT_DIFFUSE   = 0xA020, // followed by color chunk
 			CHUNK_MAT_SPECULAR  = 0xA030, // followed by color chunk
 
 			// Specifies the shininess of the material
 			// followed by percentage chunk
-			CHUNK_MAT_SHININESS  = 0xA040, 
+			CHUNK_MAT_SHININESS  = 0xA040,
 			CHUNK_MAT_SHININESS_PERCENT  = 0xA041 ,
 
 			// Specifies the shading mode to be used
 			// followed by a short
-			CHUNK_MAT_SHADING  = 0xA100, 
+			CHUNK_MAT_SHADING  = 0xA100,
 
 			// NOTE: Emissive color (self illumination) seems not
 			// to be a color but a single value, type is unknown.
 			// Make the parser accept both of them.
 			// followed by percentage chunk (?)
-			CHUNK_MAT_SELF_ILLUM = 0xA080,  
+			CHUNK_MAT_SELF_ILLUM = 0xA080,
 
 			// Always followed by percentage chunk	(?)
-			CHUNK_MAT_SELF_ILPCT = 0xA084,  
+			CHUNK_MAT_SELF_ILPCT = 0xA084,
 
 			// Always followed by percentage chunk
-			CHUNK_MAT_TRANSPARENCY = 0xA050, 
+			CHUNK_MAT_TRANSPARENCY = 0xA050,
 
-			// Diffuse texture channel 0 
+			// Diffuse texture channel 0
 			CHUNK_MAT_TEXTURE   = 0xA200,
 
 			// Contains opacity information for each texel
@@ -232,7 +232,7 @@ public:
 			CHUNK_MAT_REFLMAP = 0xA220,
 
 			// Self Illumination map (emissive colors)
-			CHUNK_MAT_SELFIMAP = 0xA33d,	
+			CHUNK_MAT_SELFIMAP = 0xA33d,
 
 			// Bumpmap. Not specified whether it is a heightmap
 			// or a normal map. Assme it is a heightmap since
@@ -242,17 +242,17 @@ public:
 			// Specular map. Seems to influence the specular color
 			CHUNK_MAT_SPECMAP = 0xA204,
 
-			// Holds shininess data. 
+			// Holds shininess data.
 			CHUNK_MAT_MAT_SHINMAP = 0xA33C,
 
 			// Scaling in U/V direction.
-			// (need to gen separate UV coordinate set 
+			// (need to gen separate UV coordinate set
 			// and do this by hand)
 			CHUNK_MAT_MAP_USCALE 	  = 0xA354,
 			CHUNK_MAT_MAP_VSCALE 	  = 0xA356,
 
 			// Translation in U/V direction.
-			// (need to gen separate UV coordinate set 
+			// (need to gen separate UV coordinate set
 			// and do this by hand)
 			CHUNK_MAT_MAP_UOFFSET 	  = 0xA358,
 			CHUNK_MAT_MAP_VOFFSET 	  = 0xA35a,
@@ -268,7 +268,7 @@ public:
 			CHUNK_MAPFILE   = 0xA300,
 
 			// Specifies whether a materail requires two-sided rendering
-			CHUNK_MAT_TWO_SIDE = 0xA081,  
+			CHUNK_MAT_TWO_SIDE = 0xA081,
 		// ********************************************************************
 
 		// Main keyframer chunk. Contains translation/rotation/scaling data
@@ -366,7 +366,7 @@ struct Material
 {
 	//! Default constructor. Builds a default name for the material
 	Material()
-		: 
+		:
 	mDiffuse			(0.6f,0.6f,0.6f), // FIX ... we won't want object to be black
 	mSpecularExponent	(0.0f),
 	mShininessStrength	(1.0f),
@@ -376,7 +376,7 @@ struct Material
 	mTwoSided			(false)
 	{
 		static int iCnt = 0;
-		
+
 		char szTemp[128];
 		sprintf(szTemp,"UNNAMED_%i",iCnt++);
 		mName = szTemp;
@@ -431,7 +431,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 	Mesh()
 	{
 		static int iCnt = 0;
-		
+
 		// Generate a default name for the mesh
 		char szTemp[128];
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
@@ -454,7 +454,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 // ---------------------------------------------------------------------------
 /** Float key - quite similar to aiVectorKey and aiQuatKey. Both are in the
     C-API, so it would be difficult to make them a template. */
-struct aiFloatKey 
+struct aiFloatKey
 {
 	double mTime;      ///< The time of this key
 	float mValue;	///< The value of this key
@@ -491,7 +491,7 @@ struct Node
 
 	{
 		static int iCnt = 0;
-		
+
 		// Generate a default name for the node
 		char szTemp[128];
 		::sprintf(szTemp,"UNNAMED_%i",iCnt++);
@@ -520,7 +520,7 @@ struct Node
 	//! InstanceNumber of the node
 	int32_t mInstanceNumber;
 
-	//! Dummy nodes: real name to be combined with the $$$DUMMY 
+	//! Dummy nodes: real name to be combined with the $$$DUMMY
 	std::string mDummyName;
 
 	//! Position of the node in the hierarchy (tree depth)

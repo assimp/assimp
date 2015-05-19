@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,21 +25,21 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 /** @file  XFileImporter.cpp
- *  @brief Implementation of the XFile importer class 
+ *  @brief Implementation of the XFile importer class
  */
 
 
@@ -70,7 +70,7 @@ static const aiImporterDesc desc = {
 	3,
 	1,
 	5,
-	"x" 
+	"x"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -79,12 +79,12 @@ XFileImporter::XFileImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 XFileImporter::~XFileImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool XFileImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
 	std::string extension = GetExtension(pFile);
@@ -107,7 +107,7 @@ const aiImporterDesc* XFileImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
+// Imports the given file into the given scene structure.
 void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	// read file into memory
@@ -201,7 +201,7 @@ void XFileImporter::CreateDataRepresentationFromImport( aiScene* pScene, XFile::
 }
 
 // ------------------------------------------------------------------------------------------------
-// Recursively creates scene nodes from the imported hierarchy. 
+// Recursively creates scene nodes from the imported hierarchy.
 aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFile::Node* pNode)
 {
 	if( !pNode)
@@ -215,7 +215,7 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 	node->mName.data[node->mName.length] = 0;
 	node->mTransformation = pNode->mTrafoMatrix;
 
-	// convert meshes from the source node 
+	// convert meshes from the source node
 	CreateMeshes( pScene, node, pNode->mMeshes);
 
 	// handle childs
@@ -232,7 +232,7 @@ aiNode* XFileImporter::CreateNodes( aiScene* pScene, aiNode* pParent, const XFil
 }
 
 // ------------------------------------------------------------------------------------------------
-// Creates the meshes for the given node. 
+// Creates the meshes for the given node.
 void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vector<XFile::Mesh*>& pMeshes)
 {
 	if( pMeshes.size() == 0)
@@ -292,7 +292,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 			}
 
 			// Create properly sized data arrays in the mesh. We store unique vertices per face,
-			// as specified 
+			// as specified
 			mesh->mNumVertices = numVertices;
 			mesh->mVertices = new aiVector3D[numVertices];
 			mesh->mNumFaces = (unsigned int)faces.size();
@@ -335,7 +335,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 				// collect vertex data for indices of this face
 				for( unsigned int d = 0; d < df.mNumIndices; d++)
 				{
-					df.mIndices[d] = newIndex; 
+					df.mIndices[d] = newIndex;
 					orgPoints[newIndex] = pf.mIndices[d];
 
 					// Position
@@ -429,7 +429,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 	// store all meshes in the mesh library of the scene and store their indices in the node
 	for( unsigned int a = 0; a < meshes.size(); a++)
 	{
-		pScene->mMeshes[pScene->mNumMeshes] = meshes[a];		
+		pScene->mMeshes[pScene->mNumMeshes] = meshes[a];
 		pNode->mMeshes[a] = pScene->mNumMeshes;
 		pScene->mNumMeshes++;
 	}
@@ -496,7 +496,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 					nbone->mScalingKeys[c].mValue = scale;
 
 					// reconstruct rotation matrix without scaling
-					aiMatrix3x3 rotmat( 
+					aiMatrix3x3 rotmat(
 						trafo.a1 / scale.x, trafo.a2 / scale.y, trafo.a3 / scale.z,
 						trafo.b1 / scale.x, trafo.b2 / scale.y, trafo.b3 / scale.z,
 						trafo.c1 / scale.x, trafo.c2 / scale.y, trafo.c3 / scale.z);
@@ -511,7 +511,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 			} else
 			{
 				// separate key sequences for position, rotation, scaling
-				nbone->mNumPositionKeys = (unsigned int)bone->mPosKeys.size(); 
+				nbone->mNumPositionKeys = (unsigned int)bone->mPosKeys.size();
 				nbone->mPositionKeys = new aiVectorKey[nbone->mNumPositionKeys];
 				for( unsigned int c = 0; c < nbone->mNumPositionKeys; c++)
 				{
@@ -522,7 +522,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 				}
 
 				// rotation
-				nbone->mNumRotationKeys = (unsigned int)bone->mRotKeys.size(); 
+				nbone->mNumRotationKeys = (unsigned int)bone->mRotKeys.size();
 				nbone->mRotationKeys = new aiQuatKey[nbone->mNumRotationKeys];
 				for( unsigned int c = 0; c < nbone->mNumRotationKeys; c++)
 				{
@@ -534,7 +534,7 @@ void XFileImporter::CreateAnimations( aiScene* pScene, const XFile::Scene* pData
 				}
 
 				// scaling
-				nbone->mNumScalingKeys = (unsigned int)bone->mScaleKeys.size(); 
+				nbone->mNumScalingKeys = (unsigned int)bone->mScaleKeys.size();
 				nbone->mScalingKeys = new aiVectorKey[nbone->mNumScalingKeys];
 				for( unsigned int c = 0; c < nbone->mNumScalingKeys; c++)
 					nbone->mScalingKeys[c] = bone->mScaleKeys[c];
@@ -617,7 +617,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 		// Shading model: hardcoded to PHONG, there is no such information in an XFile
 		// FIX (aramis): If the specular exponent is 0, use gouraud shading. This is a bugfix
 		// for some models in the SDK (e.g. good old tiny.x)
-		int shadeMode = (int)oldMat.mSpecularExponent == 0.0f 
+		int shadeMode = (int)oldMat.mSpecularExponent == 0.0f
 			? aiShadingMode_Gouraud : aiShadingMode_Phong;
 
 		mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);

@@ -23,9 +23,9 @@
 #include "StringComparison.h"
 
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #  include <stdint.h>
-#else 
+#else
 #include "../include/assimp/Compiler/pstdint.h"
 #endif
 
@@ -200,7 +200,7 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 			break;
 
 		const uint64_t new_value = ( value * 10 ) + ( *in - '0' );
-		
+
 		if (new_value < value) /* numeric overflow, we rely on you */
 			throw std::overflow_error(std::string("Converting the string \"") + in + "\" into a value resulted in overflow.");
 
@@ -210,7 +210,7 @@ inline uint64_t strtoul10_64( const char* in, const char** out=0, unsigned int* 
 		++cur;
 
 		if (max_inout && *max_inout == cur) {
-					
+
 			if (out) { /* skip to end */
 				while (*in >= '0' && *in <= '9')
 					++in;
@@ -303,11 +303,11 @@ inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma 
 		++c;
 
 		// NOTE: The original implementation is highly inaccurate here. The precision of a single
-		// IEEE 754 float is not high enough, everything behind the 6th digit tends to be more 
+		// IEEE 754 float is not high enough, everything behind the 6th digit tends to be more
 		// inaccurate than it would need to be. Casting to double seems to solve the problem.
 		// strtol_64 is used to prevent integer overflow.
 
-		// Another fix: this tends to become 0 for long numbers if we don't limit the maximum 
+		// Another fix: this tends to become 0 for long numbers if we don't limit the maximum
 		// number of digits to be read. AI_FAST_ATOF_RELAVANT_DECIMALS can be a value between
 		// 1 and 15.
 		unsigned int diff = AI_FAST_ATOF_RELAVANT_DECIMALS;

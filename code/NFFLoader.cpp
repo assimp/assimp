@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -69,7 +69,7 @@ static const aiImporterDesc desc = {
 	0,
 	0,
 	0,
-	"enff nff" 
+	"enff nff"
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -78,12 +78,12 @@ NFFImporter::NFFImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 NFFImporter::~NFFImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool NFFImporter::CanRead( const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*checkSig*/) const
 {
 	return SimpleExtensionCheck(pFile,"nff","enff");
@@ -99,13 +99,13 @@ const aiImporterDesc* NFFImporter::GetInfo () const
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_FLOAT(f) \
 	SkipSpaces(&sz); \
-	if (!::IsLineEnd(*sz))sz = fast_atoreal_move<float>(sz, (float&)f); 
+	if (!::IsLineEnd(*sz))sz = fast_atoreal_move<float>(sz, (float&)f);
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_TRIPLE(v) \
 	AI_NFF_PARSE_FLOAT(v[0]) \
 	AI_NFF_PARSE_FLOAT(v[1]) \
-	AI_NFF_PARSE_FLOAT(v[2]) 
+	AI_NFF_PARSE_FLOAT(v[2])
 
 // ------------------------------------------------------------------------------------------------
 #define AI_NFF_PARSE_SHAPE_INFORMATION() \
@@ -189,7 +189,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
 			{
 				if (!curShader)
 				{
-					DefaultLogger::get()->error(std::string("NFF2 material library: Found element ") + 
+					DefaultLogger::get()->error(std::string("NFF2 material library: Found element ") +
 						sz + "but there is no active material");
 					continue;
 				}
@@ -231,8 +231,8 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void NFFImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void NFFImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
@@ -346,7 +346,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						while (!IsSpaceOrNewLine(*sz))++sz;
 						const unsigned int diff = (unsigned int)(sz-sz3);
 						if (!diff)DefaultLogger::get()->warn("NFF2: Found empty mtable token");
-						else 
+						else
 						{
 							// The material table has the file extension .mat.
 							// If it is not there, we need to append it
@@ -357,7 +357,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 							}
 
 							// Now extract the working directory from the path to
-							// this file and append the material library filename 
+							// this file and append the material library filename
 							// to it.
 							std::string::size_type s;
 							if ((std::string::npos == (s = path.find_last_of('\\')) || !s) &&
@@ -378,7 +378,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 
 				// read the numbr of vertices
 				unsigned int num = ::strtoul10(sz,&sz);
-				
+
 				// temporary storage
 				std::vector<aiColor4D>  tempColors;
 				std::vector<aiVector3D> tempPositions,tempTextureCoords,tempNormals;
@@ -478,12 +478,12 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						}
 					}
 
-					// build a temporary shader object for the face. 
+					// build a temporary shader object for the face.
 					ShadingInfo shader;
 					unsigned int matIdx = 0;
 
 					// white material color - we have vertex colors
-					shader.color = aiColor3D(1.f,1.f,1.f); 
+					shader.color = aiColor3D(1.f,1.f,1.f);
 					aiColor4D c  = aiColor4D(1.f,1.f,1.f,1.f);
 					while (true)
 					{
@@ -618,11 +618,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 						// TODO: fix naming of objects in the scenegraph later
 						if (objectName.length())
 						{
-							::strcpy(mesh->name,objectName.c_str()); 
+							::strcpy(mesh->name,objectName.c_str());
 							ASSIMP_itoa10(&mesh->name[objectName.length()],30,subMeshIdx++);
 						}
 
-						// copy the shader to the mesh. 
+						// copy the shader to the mesh.
 						mesh->shader = shader;
 					}
 
@@ -1098,7 +1098,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		c->mUp			= camUp;
 
 		// If the resolution is not specified in the file, we
-		// need to set 1.0 as aspect. 
+		// need to set 1.0 as aspect.
 		c->mAspect		= (!resolution.y ? 0.f : resolution.x / resolution.y);
 		++ppcChildren;
 	}
@@ -1221,7 +1221,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 		s.Set(AI_DEFAULT_MATERIAL_NAME);
 		pcMat->AddProperty(&s, AI_MATKEY_NAME);
 
-		// FIX: Ignore diffuse == 0 
+		// FIX: Ignore diffuse == 0
 		aiColor3D c = src.shader.color * (src.shader.diffuse.r ?  src.shader.diffuse : aiColor3D(1.f,1.f,1.f));
 		pcMat->AddProperty(&c,1,AI_MATKEY_COLOR_DIFFUSE);
 		c = src.shader.color * src.shader.specular;

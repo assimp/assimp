@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2012, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -44,11 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
 
 // no #ifdefing here, Cinema4D support is carried out in a branch of assimp
-// where it is turned on in the CMake settings. 
+// where it is turned on in the CMake settings.
 
 #ifndef _MSC_VER
 #	error C4D support is currently MSVC only
-#endif 
+#endif
 
 #include "C4DImporter.h"
 #include "TinyFormatter.h"
@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	define __C4D_64BIT
 #endif
 
-#define __PC 
+#define __PC
 #include "c4d_file.h"
 #include "default_alien_overloads.h"
 
@@ -66,7 +66,7 @@ using namespace _melange_;
 // overload this function and fill in your own unique data
 void GetWriterInfo(LONG &id, String &appname)
 {
-	id = 2424226; 
+	id = 2424226;
 	appname = "Open Asset Import Library";
 }
 
@@ -127,8 +127,8 @@ void C4DImporter::SetupProperties(const Importer* /*pImp*/)
 
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void C4DImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void C4DImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
@@ -141,7 +141,7 @@ void C4DImporter::InternReadFile( const std::string& pFile,
 
 	std::vector<uint8_t> mBuffer(file_size);
 	file->Read(&mBuffer[0], 1, file_size);
-	
+
 	Filename f;
 	f.SetMemoryReadMode(&mBuffer[0], file_size);
 
@@ -197,7 +197,7 @@ void C4DImporter::InternReadFile( const std::string& pFile,
 
 
 // ------------------------------------------------------------------------------------------------
-bool C4DImporter::ReadShader(aiMaterial* out, _melange_::BaseShader* shader) 
+bool C4DImporter::ReadShader(aiMaterial* out, _melange_::BaseShader* shader)
 {
 	// based on Melange sample code (C4DImportExport.cpp)
 	while(shader) {
@@ -220,13 +220,13 @@ bool C4DImporter::ReadShader(aiMaterial* out, _melange_::BaseShader* shader)
 			{
 				if (lsl->GetType() == TypeFolder)
 				{
-					BlendFolder* const folder = dynamic_cast<BlendFolder*>(lsl); 
+					BlendFolder* const folder = dynamic_cast<BlendFolder*>(lsl);
 					LayerShaderLayer *subLsl = dynamic_cast<LayerShaderLayer*>(folder->m_Children.GetObject(0));
 
 					while (subLsl)
 					{
 						if (subLsl->GetType() == TypeShader) {
-							BlendShader* const shader = dynamic_cast<BlendShader*>(subLsl); 
+							BlendShader* const shader = dynamic_cast<BlendShader*>(subLsl);
 							if(ReadShader(out, static_cast<BaseShader*>(shader->m_pLink->GetLink()))) {
 								return true;
 							}
@@ -236,13 +236,13 @@ bool C4DImporter::ReadShader(aiMaterial* out, _melange_::BaseShader* shader)
 					}
 				}
 				else if (lsl->GetType() == TypeShader) {
-					BlendShader* const shader = dynamic_cast<BlendShader*>(lsl); 
+					BlendShader* const shader = dynamic_cast<BlendShader*>(lsl);
 					if(ReadShader(out, static_cast<BaseShader*>(shader->m_pLink->GetLink()))) {
 						return true;
 					}
 				}
 
-				lsl = lsl->GetNext();	
+				lsl = lsl->GetNext();
 			}
 		}
 		else if ( shader->GetType() == Xbitmap )
@@ -322,8 +322,8 @@ void C4DImporter::RecurseHierarchy(BaseObject* object, aiNode* parent)
 	while (object)
 	{
 		const String& name = object->GetName();
-		const LONG type = object->GetType(); 
-		const Matrix& ml = object->GetMl(); 
+		const LONG type = object->GetType();
+		const Matrix& ml = object->GetMl();
 
 		aiString string;
 		name.GetCString(string.data, MAXLEN-1);
@@ -350,8 +350,8 @@ void C4DImporter::RecurseHierarchy(BaseObject* object, aiNode* parent)
 		nd->mTransformation.c4 = ml.off.z;
 
 		nodes.push_back(nd);
-		
-		GeData data; 
+
+		GeData data;
 		if (type == Ocamera)
 		{
 			object->GetParameter(CAMERAOBJECT_FOV, data);
@@ -374,7 +374,7 @@ void C4DImporter::RecurseHierarchy(BaseObject* object, aiNode* parent)
 		else {
 			LogWarn("ignoring object: " + std::string(GetObjectTypeName(type)));
 		}
-		
+
 		RecurseHierarchy(object->GetDown(), nd);
 		object = object->GetNext();
 	}
@@ -421,7 +421,7 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object)
 	for (LONG i = 0; i < polyCount; i++)
 	{
 		vcount += 3;
-		
+
 		// TODO: do we also need to handle lines or points with similar checks?
 		if (polys[i].c != polys[i].d)
 		{
@@ -538,7 +538,7 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object)
 
 		// copy tangents and bitangents
 		if (tangents_src) {
-			
+
 			for(unsigned int k = 0; k < face->mNumIndices; ++k) {
 				LONG l;
 				switch(k) {

@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2008, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ static void getSupportedExtensions(std::vector<std::string> &supportedExtensions
     supportedExtensions.push_back( ".tga" );
 }
 */
-    
+
 using namespace Q3BSP;
 
 // ------------------------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ Q3BSPFileImporter::Q3BSPFileImporter() :
 Q3BSPFileImporter::~Q3BSPFileImporter() {
 	m_pCurrentMesh = NULL;
 	m_pCurrentFace = NULL;
-	
+
 	// Clear face-to-material map
     for ( FaceMap::iterator it = m_MaterialLookupMap.begin(); it != m_MaterialLookupMap.end(); ++it ) {
 		const std::string &matName = it->first;
@@ -219,7 +219,7 @@ void Q3BSPFileImporter::InternReadFile(const std::string &rFile, aiScene* pScene
 
 // ------------------------------------------------------------------------------------------------
 //	Separates the map name from the import name.
-void Q3BSPFileImporter::separateMapName( const std::string &rImportName, std::string &rArchiveName, 
+void Q3BSPFileImporter::separateMapName( const std::string &rImportName, std::string &rArchiveName,
 										std::string &rMapName )
 {
 	rArchiveName = "";
@@ -245,7 +245,7 @@ bool Q3BSPFileImporter::findFirstMapInArchive( Q3BSPZipArchive &rArchive, std::s
 	rMapName = "";
 	std::vector<std::string> fileList;
 	rArchive.getFileList( fileList );
-	if ( fileList.empty() )  
+	if ( fileList.empty() )
 		return false;
 
 	for ( std::vector<std::string>::iterator it = fileList.begin(); it != fileList.end();
@@ -262,13 +262,13 @@ bool Q3BSPFileImporter::findFirstMapInArchive( Q3BSPZipArchive &rArchive, std::s
 			}
 		}
 	}
-	
+
 	return false;
 }
 
 // ------------------------------------------------------------------------------------------------
 //	Creates the assimp specific data.
-void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, 
+void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
 											 Q3BSPZipArchive *pArchive )
 {
 	if ( NULL == pModel || NULL == pScene )
@@ -280,19 +280,19 @@ void Q3BSPFileImporter::CreateDataFromImport( const Q3BSP::Q3BSPModel *pModel, a
 		pScene->mRootNode->mName.Set( pModel->m_ModelName );
 	}
 
-	// Create the face to material relation map 
+	// Create the face to material relation map
 	createMaterialMap( pModel );
 
 	// Create all nodes
 	CreateNodes( pModel, pScene, pScene->mRootNode );
-	
+
 	// Create the assigned materials
 	createMaterials( pModel, pScene, pArchive );
 }
 
 // ------------------------------------------------------------------------------------------------
 //	Creates all assimp nodes.
-void Q3BSPFileImporter::CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, 
+void Q3BSPFileImporter::CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
 									aiNode *pParent )
 {
 	ai_assert( NULL != pModel );
@@ -354,7 +354,7 @@ void Q3BSPFileImporter::CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* p
 //	Creates the topology.
 aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
 										  unsigned int materialIdx,
-										  std::vector<sQ3BSPFace*> &rArray, 
+										  std::vector<sQ3BSPFace*> &rArray,
 										  aiMesh* pMesh )
 {
 	size_t numVerts = countData( rArray );
@@ -362,7 +362,7 @@ aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
 	{
 		return NULL;
 	}
-	
+
 	size_t numFaces = countFaces( rArray );
 	if ( 0 == numFaces )
 	{
@@ -374,7 +374,7 @@ aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
 
 	pMesh->mFaces = new aiFace[ numTriangles ];
 	pMesh->mNumFaces = numTriangles;
-	
+
 	pMesh->mNumVertices = numVerts;
 	pMesh->mVertices = new aiVector3D[ numVerts ];
 	pMesh->mNormals =  new aiVector3D[ numVerts ];
@@ -400,7 +400,7 @@ aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
 			if ( pQ3BSPFace->iType == Polygon || pQ3BSPFace->iType == TriangleMesh )
 			{
 				createTriangleTopology( pModel, pQ3BSPFace, pMesh, faceIdx, vertIdx );
-			}		
+			}
 		}
 	}
 
@@ -414,13 +414,13 @@ aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
 // ------------------------------------------------------------------------------------------------
 //	Creates the triangle topology from a face array.
 void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
-											  Q3BSP::sQ3BSPFace *pQ3BSPFace, 
+											  Q3BSP::sQ3BSPFace *pQ3BSPFace,
 											  aiMesh* pMesh,
-											  unsigned int &rFaceIdx, 
+											  unsigned int &rFaceIdx,
 											  unsigned int &rVertIdx )
 {
 	ai_assert( rFaceIdx < pMesh->mNumFaces );
-	
+
 	m_pCurrentFace = getNextFace( pMesh, rFaceIdx );
 	ai_assert( NULL != m_pCurrentFace );
 	if ( NULL == m_pCurrentFace )
@@ -430,7 +430,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
 
 	m_pCurrentFace->mNumIndices = 3;
 	m_pCurrentFace->mIndices = new unsigned int[ m_pCurrentFace->mNumIndices ];
-	
+
 	size_t idx = 0;
 	for ( size_t i = 0; i < (size_t) pQ3BSPFace->iNumOfFaceVerts; i++ )
 	{
@@ -450,13 +450,13 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
 
 		pMesh->mVertices[ rVertIdx ].Set( pVertex->vPosition.x, pVertex->vPosition.y, pVertex->vPosition.z );
 		pMesh->mNormals[ rVertIdx ].Set( pVertex->vNormal.x, pVertex->vNormal.y, pVertex->vNormal.z );
-				
+
 		pMesh->mTextureCoords[ 0 ][ rVertIdx ].Set( pVertex->vTexCoord.x, pVertex->vTexCoord.y, 0.0f );
 		pMesh->mTextureCoords[ 1 ][ rVertIdx ].Set( pVertex->vLightmap.x, pVertex->vLightmap.y, 0.0f );
-		
+
 		m_pCurrentFace->mIndices[ idx ] = rVertIdx;
 		rVertIdx++;
-		
+
 		idx++;
 		if ( idx > 2 )
 		{
@@ -499,7 +499,7 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 		pMatHelper->AddProperty( &aiMatName, AI_MATKEY_NAME );
 
 		extractIds( matName, textureId, lightmapId );
-		
+
 		// Adding the texture
 		if ( -1 != textureId )
 		{
@@ -510,7 +510,7 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 				tmp += pTexture->strName;
 				tmp += ".jpg";
 				normalizePathName( tmp, texName );
-				
+
 				if ( !importTextureFromArchive( pModel, pArchive, pScene, pMatHelper, textureId ) )
 				{
 				}
@@ -534,7 +534,7 @@ void Q3BSPFileImporter::createMaterials( const Q3BSP::Q3BSPModel *pModel, aiScen
 size_t Q3BSPFileImporter::countData( const std::vector<sQ3BSPFace*> &rArray ) const
 {
 	size_t numVerts = 0;
-	for ( std::vector<sQ3BSPFace*>::const_iterator it = rArray.begin(); it != rArray.end(); 
+	for ( std::vector<sQ3BSPFace*>::const_iterator it = rArray.begin(); it != rArray.end();
 		++it )
 	{
 		sQ3BSPFace *pQ3BSPFace = *it;
@@ -554,7 +554,7 @@ size_t Q3BSPFileImporter::countData( const std::vector<sQ3BSPFace*> &rArray ) co
 size_t Q3BSPFileImporter::countFaces( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const
 {
 	size_t numFaces = 0;
-	for ( std::vector<sQ3BSPFace*>::const_iterator it = rArray.begin(); it != rArray.end(); 
+	for ( std::vector<sQ3BSPFace*>::const_iterator it = rArray.begin(); it != rArray.end();
 		++it )
 	{
 		Q3BSP::sQ3BSPFace *pQ3BSPFace = *it;
@@ -572,7 +572,7 @@ size_t Q3BSPFileImporter::countFaces( const std::vector<Q3BSP::sQ3BSPFace*> &rAr
 size_t Q3BSPFileImporter::countTriangles( const std::vector<Q3BSP::sQ3BSPFace*> &rArray ) const
 {
 	size_t numTriangles = 0;
-	for ( std::vector<Q3BSP::sQ3BSPFace*>::const_iterator it = rArray.begin(); it != rArray.end(); 
+	for ( std::vector<Q3BSP::sQ3BSPFace*>::const_iterator it = rArray.begin(); it != rArray.end();
 		++it )
 	{
 		const Q3BSP::sQ3BSPFace *pQ3BSPFace = *it;
@@ -693,7 +693,7 @@ bool Q3BSPFileImporter::importTextureFromArchive( const Q3BSP::Q3BSPModel *pMode
 
 // ------------------------------------------------------------------------------------------------
 //	Imports a light map file.
-bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene, 
+bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene* pScene,
 									   aiMaterial *pMatHelper, int lightmapId )
 {
 	if ( NULL == pModel || NULL == pScene || NULL == pMatHelper )
@@ -713,7 +713,7 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 	}
 
 	aiTexture *pTexture = new aiTexture;
-	
+
 	pTexture->mWidth = CE_BSP_LIGHTMAPWIDTH;
 	pTexture->mHeight = CE_BSP_LIGHTMAPHEIGHT;
 	pTexture->pcData = new aiTexel[CE_BSP_LIGHTMAPWIDTH * CE_BSP_LIGHTMAPHEIGHT];
@@ -727,7 +727,7 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 		pTexture->pcData[ i ].b = pLightMap->bLMapData[ p++ ];
 		pTexture->pcData[ i ].a = 0xFF;
 	}
-	
+
 	aiString name;
 	name.data[ 0 ] = '*';
 	name.length = 1 + ASSIMP_itoa10( name.data + 1, MAXLEN-1,  mTextures.size() );
@@ -741,7 +741,7 @@ bool Q3BSPFileImporter::importLightmap( const Q3BSP::Q3BSPModel *pModel, aiScene
 
 // ------------------------------------------------------------------------------------------------
 //	Will search for a supported extension.
-bool Q3BSPFileImporter::expandFile(  Q3BSP::Q3BSPZipArchive *pArchive, const std::string &rFilename, 
+bool Q3BSPFileImporter::expandFile(  Q3BSP::Q3BSPZipArchive *pArchive, const std::string &rFilename,
 								   const std::vector<std::string> &rExtList, std::string &rFile,
 								   std::string &rExt )
 {

@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,21 +25,21 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file Implementation of the post processing step to calculate 
+/** @file Implementation of the post processing step to calculate
  *  tangents and bitangents for all imported meshes
  */
 
@@ -112,7 +112,7 @@ void CalcTangentsProcess::Execute( aiScene* pScene)
 bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
 	// we assume that the mesh is still in the verbose vertex format where each face has its own set
-	// of vertices and no vertices are shared between faces. Sadly I don't know any quick test to 
+	// of vertices and no vertices are shared between faces. Sadly I don't know any quick test to
 	// assert() it here.
     // assert( must be verbose, dammit);
 
@@ -139,7 +139,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 		DefaultLogger::get()->error((Formatter::format("Failed to compute tangents; need UV data in channel"),configSourceUV));
 		return false;
 	}
-	 
+
 	const float angleEpsilon = 0.9999f;
 
 	std::vector<bool> vertexDone( pMesh->mNumVertices, false);
@@ -154,7 +154,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	const aiVector3D* meshTex = pMesh->mTextureCoords[configSourceUV];
 	aiVector3D* meshTang = pMesh->mTangents;
 	aiVector3D* meshBitang = pMesh->mBitangents;
-	
+
 	// calculate the tangent and bitangent for every face
 	for( unsigned int a = 0; a < pMesh->mNumFaces; a++)
 	{
@@ -220,7 +220,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
                     localTangent = meshNorm[p] ^ localBitangent;
                     localTangent.Normalize();
                 } else {
-                    localBitangent = localTangent ^ meshNorm[p]; 
+                    localBitangent = localTangent ^ meshNorm[p];
                     localBitangent.Normalize();
                 }
             }
@@ -256,10 +256,10 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	}
 	std::vector<unsigned int> verticesFound;
 
-	const float fLimit = cosf(configMaxAngle); 
+	const float fLimit = cosf(configMaxAngle);
 	std::vector<unsigned int> closeVertices;
 
-	// in the second pass we now smooth out all tangents and bitangents at the same local position 
+	// in the second pass we now smooth out all tangents and bitangents at the same local position
 	// if they are not too far off.
 	for( unsigned int a = 0; a < pMesh->mNumVertices; a++)
 	{

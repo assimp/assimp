@@ -128,6 +128,7 @@ void ColladaExporter::WriteFile()
 	WriteHeader();
 
 	WriteCamerasLibrary();
+	WriteLightsLibrary();
 	WriteMaterials();
 	WriteGeometryLibrary();
 
@@ -340,6 +341,143 @@ void ColladaExporter::WriteCamera(size_t pIndex){
 	PopTag();
 	mOutput << startstr << "</camera>" << endstr;
 
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// Write the embedded textures
+void ColladaExporter::WriteLightsLibrary() {
+	if(mScene->HasLights()) {
+
+		mOutput << startstr << "<library_lights>" << endstr;
+		PushTag();
+
+		for( size_t a = 0; a < mScene->mNumLights; ++a)
+			WriteLight( a);
+
+		PopTag();
+		mOutput << startstr << "</library_lights>" << endstr;
+
+	}
+}
+
+void ColladaExporter::WriteLight(size_t pIndex){
+
+	const aiLight *light = mScene->mLights[pIndex];
+	const std::string idstrEscaped = XMLEscape(light->mName.C_Str());
+
+	mOutput << startstr << "<light id=\"" << idstrEscaped << "-light\" name=\""
+			<< idstrEscaped << "_name\" >" << endstr;
+	PushTag();
+	mOutput << startstr << "<technique_common>" << endstr;
+	PushTag();
+	switch(light->mType){
+		case aiLightSource_AMBIENT:
+			WriteAmbienttLight(light);
+			break;
+		case aiLightSource_DIRECTIONAL:
+			WriteDirectionalLight(light);
+			break;
+		case aiLightSource_POINT:
+			WritePointLight(light);
+			break;
+		case aiLightSource_SPOT:
+			WriteSpotLight(light);
+			break;
+		case aiLightSource_UNDEFINED:
+		case _aiLightSource_Force32Bit:
+			break;
+	}
+	PopTag();
+	mOutput << startstr << "</technique_common>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</light>" << endstr;
+
+}
+
+void ColladaExporter::WritePointLight(const aiLight *const light){
+	const aiColor3D &color=  light->mColorDiffuse;
+	mOutput << startstr << "<point>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+	mOutput << startstr << "<constant_attenuation>"
+							<< light->mAttenuationConstant
+						<<"</constant_attenuation>" << endstr;
+	mOutput << startstr << "<linear_attenuation>"
+							<< light->mAttenuationLinear
+						<<"</linear_attenuation>" << endstr;
+	mOutput << startstr << "<quadratic_attenuation>"
+							<< light->mAttenuationQuadratic
+						<<"</quadratic_attenuation>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</point>" << endstr;
+
+}
+void ColladaExporter::WriteDirectionalLight(const aiLight *const light){
+	const aiColor3D &color=  light->mColorDiffuse;
+	mOutput << startstr << "<directional>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</directional>" << endstr;
+
+}
+void ColladaExporter::WriteSpotLight(const aiLight *const light){
+	  /*<spot>
+	          <color sid="color">1 1 1</color>
+	          <constant_attenuation>1</constant_attenuation>
+	          <linear_attenuation>0</linear_attenuation>
+	          <quadratic_attenuation>0.001599967</quadratic_attenuation>
+	          <falloff_angle sid="fall_off_angle">45</falloff_angle>
+	          <falloff_exponent sid="fall_off_exponent">0.15</falloff_exponent>
+	        </spot>
+	  */
+	const aiColor3D &color=  light->mColorDiffuse;
+	mOutput << startstr << "<spot>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+	mOutput << startstr << "<constant_attenuation>"
+								<< light->mAttenuationConstant
+							<<"</constant_attenuation>" << endstr;
+	mOutput << startstr << "<linear_attenuation>"
+							<< light->mAttenuationLinear
+						<<"</linear_attenuation>" << endstr;
+	mOutput << startstr << "<quadratic_attenuation>"
+							<< light->mAttenuationQuadratic
+						<<"</quadratic_attenuation>" << endstr;
+/*	mOutput << startstr << "<falloff_angle sid=\"fall_off_angle\">"
+								<< light->
+							<<"</falloff_angle>" << endstr;
+	mOutput << startstr << "<linear_attenuation>"
+							<< light->mAttenuationLinear
+						<<"</linear_attenuation>" << endstr;
+*/
+
+	PopTag();
+	mOutput << startstr << "</spot>" << endstr;
+
+}
+
+void ColladaExporter::WriteAmbienttLight(const aiLight *const light){
+
+	const aiColor3D &color=  light->mColorAmbient;
+	mOutput << startstr << "<ambient>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</ambient>" << endstr;
 }
 
 // ------------------------------------------------------------------------------------------------

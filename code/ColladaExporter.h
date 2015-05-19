@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/ai_assert.h"
 #include "../include/assimp/material.h"
 #include "../include/assimp/mesh.h"
+#include "../include/assimp/light.h"
 #include "../include/assimp/Exporter.hpp"
 #include <sstream>
 #include <vector>
@@ -86,7 +87,18 @@ protected:
 	/// Writes the cameras library
 	void WriteCamerasLibrary();
 
+	// Write a camera entry
 	void WriteCamera(size_t pIndex);
+
+	/// Writes the cameras library
+	void WriteLightsLibrary();
+
+	// Write a camera entry
+	void WriteLight(size_t pIndex);
+	void WritePointLight(const aiLight *const light);
+	void WriteDirectionalLight(const aiLight *const light);
+	void WriteSpotLight(const aiLight *const light);
+	void WriteAmbienttLight(const aiLight *const light);
 
 	/// Writes the geometry library
 	void WriteGeometryLibrary();

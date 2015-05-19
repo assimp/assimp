@@ -502,4 +502,3 @@ inline aiReturn Exporter :: Export( const aiScene* pScene, const std::string& pF
 } // namespace Assimp
 #endif // ASSIMP_BUILD_NO_EXPORT
 #endif // AI_EXPORT_HPP_INC
-

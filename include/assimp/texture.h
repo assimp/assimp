@@ -66,7 +66,7 @@ extern "C" {
  *  (zero-based, in the aiScene::mTextures array)
  */
 #if (!defined AI_MAKE_EMBEDDED_TEXNAME)
-#	define AI_MAKE_EMBEDDED_TEXNAME(_n_) "*" # _n_
+#   define AI_MAKE_EMBEDDED_TEXNAME(_n_) "*" # _n_
 #endif
 
 
@@ -79,28 +79,28 @@ extern "C" {
 */
 struct aiTexel
 {
-	unsigned char b,g,r,a;
+    unsigned char b,g,r,a;
 
 #ifdef __cplusplus
-	//! Comparison operator
-	bool operator== (const aiTexel& other) const
-	{
-		return b == other.b && r == other.r &&
-			   g == other.g && a == other.a;
-	}
+    //! Comparison operator
+    bool operator== (const aiTexel& other) const
+    {
+        return b == other.b && r == other.r &&
+               g == other.g && a == other.a;
+    }
 
-	//! Inverse comparison operator
-	bool operator!= (const aiTexel& other) const
-	{
-		return b != other.b || r != other.r ||
-			   g != other.g || a != other.a;
-	}
+    //! Inverse comparison operator
+    bool operator!= (const aiTexel& other) const
+    {
+        return b != other.b || r != other.r ||
+               g != other.g || a != other.a;
+    }
 
-	//! Conversion to a floating-point 4d color
-	operator aiColor4D() const
-	{
-		return aiColor4D(r/255.f,g/255.f,b/255.f,a/255.f);
-	}
+    //! Conversion to a floating-point 4d color
+    operator aiColor4D() const
+    {
+        return aiColor4D(r/255.f,g/255.f,b/255.f,a/255.f);
+    }
 #endif // __cplusplus
 
 } PACK_STRUCT;
@@ -119,73 +119,73 @@ struct aiTexel
  */
 struct aiTexture
 {
-	/** Width of the texture, in pixels
-	 *
-	 * If mHeight is zero the texture is compressed in a format
-	 * like JPEG. In this case mWidth specifies the size of the
-	 * memory area pcData is pointing to, in bytes.
-	 */
-	unsigned int mWidth;
+    /** Width of the texture, in pixels
+     *
+     * If mHeight is zero the texture is compressed in a format
+     * like JPEG. In this case mWidth specifies the size of the
+     * memory area pcData is pointing to, in bytes.
+     */
+    unsigned int mWidth;
 
-	/** Height of the texture, in pixels
-	 *
-	 * If this value is zero, pcData points to an compressed texture
-	 * in any format (e.g. JPEG).
-	 */
-	unsigned int mHeight;
+    /** Height of the texture, in pixels
+     *
+     * If this value is zero, pcData points to an compressed texture
+     * in any format (e.g. JPEG).
+     */
+    unsigned int mHeight;
 
-	/** A hint from the loader to make it easier for applications
-	 *  to determine the type of embedded compressed textures.
-	 *
-	 * If mHeight != 0 this member is undefined. Otherwise it
-	 * is set set to '\\0\\0\\0\\0' if the loader has no additional
-	 * information about the texture file format used OR the
-	 * file extension of the format without a trailing dot. If there
-	 * are multiple file extensions for a format, the shortest
-	 * extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
-	 * E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
-	 * The fourth character will always be '\\0'.
-	 */
-	char achFormatHint[4];
+    /** A hint from the loader to make it easier for applications
+     *  to determine the type of embedded compressed textures.
+     *
+     * If mHeight != 0 this member is undefined. Otherwise it
+     * is set set to '\\0\\0\\0\\0' if the loader has no additional
+     * information about the texture file format used OR the
+     * file extension of the format without a trailing dot. If there
+     * are multiple file extensions for a format, the shortest
+     * extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
+     * E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
+     * The fourth character will always be '\\0'.
+     */
+    char achFormatHint[4];
 
-	/** Data of the texture.
-	 *
-	 * Points to an array of mWidth * mHeight aiTexel's.
-	 * The format of the texture data is always ARGB8888 to
-	 * make the implementation for user of the library as easy
-	 * as possible. If mHeight = 0 this is a pointer to a memory
-	 * buffer of size mWidth containing the compressed texture
-	 * data. Good luck, have fun!
-	 */
-	C_STRUCT aiTexel* pcData;
+    /** Data of the texture.
+     *
+     * Points to an array of mWidth * mHeight aiTexel's.
+     * The format of the texture data is always ARGB8888 to
+     * make the implementation for user of the library as easy
+     * as possible. If mHeight = 0 this is a pointer to a memory
+     * buffer of size mWidth containing the compressed texture
+     * data. Good luck, have fun!
+     */
+    C_STRUCT aiTexel* pcData;
 
 #ifdef __cplusplus
 
-	//! For compressed textures (mHeight == 0): compare the
-	//! format hint against a given string.
-	//! @param s Input string. 3 characters are maximally processed.
-	//!        Example values: "jpg", "png"
-	//! @return true if the given string matches the format hint
-	bool CheckFormat(const char* s) const
-	{
-		return (0 == ::strncmp(achFormatHint,s,3));
-	}
+    //! For compressed textures (mHeight == 0): compare the
+    //! format hint against a given string.
+    //! @param s Input string. 3 characters are maximally processed.
+    //!        Example values: "jpg", "png"
+    //! @return true if the given string matches the format hint
+    bool CheckFormat(const char* s) const
+    {
+        return (0 == ::strncmp(achFormatHint,s,3));
+    }
 
-	// Construction
-	aiTexture ()
-		: mWidth  (0)
-		, mHeight (0)
-		, pcData  (NULL)
-	{
-		achFormatHint[0] = achFormatHint[1] = 0;
-		achFormatHint[2] = achFormatHint[3] = 0;
-	}
+    // Construction
+    aiTexture ()
+        : mWidth  (0)
+        , mHeight (0)
+        , pcData  (NULL)
+    {
+        achFormatHint[0] = achFormatHint[1] = 0;
+        achFormatHint[2] = achFormatHint[3] = 0;
+    }
 
-	// Destruction
-	~aiTexture ()
-	{
-		delete[] pcData;
-	}
+    // Destruction
+    ~aiTexture ()
+    {
+        delete[] pcData;
+    }
 #endif
 };
 

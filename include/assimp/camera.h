@@ -97,120 +97,120 @@ extern "C" {
 */
 struct aiCamera
 {
-	/** The name of the camera.
-	 *
-	 *  There must be a node in the scenegraph with the same name.
-	 *  This node specifies the position of the camera in the scene
-	 *  hierarchy and can be animated.
-	 */
-	C_STRUCT aiString mName;
+    /** The name of the camera.
+     *
+     *  There must be a node in the scenegraph with the same name.
+     *  This node specifies the position of the camera in the scene
+     *  hierarchy and can be animated.
+     */
+    C_STRUCT aiString mName;
 
-	/** Position of the camera relative to the coordinate space
-	 *  defined by the corresponding node.
-	 *
-	 *  The default value is 0|0|0.
-	 */
-	C_STRUCT aiVector3D mPosition;
-
-
-	/** 'Up' - vector of the camera coordinate system relative to
-	 *  the coordinate space defined by the corresponding node.
-	 *
-	 *  The 'right' vector of the camera coordinate system is
-	 *  the cross product of  the up and lookAt vectors.
-	 *  The default value is 0|1|0. The vector
-	 *  may be normalized, but it needn't.
-	 */
-	C_STRUCT aiVector3D mUp;
+    /** Position of the camera relative to the coordinate space
+     *  defined by the corresponding node.
+     *
+     *  The default value is 0|0|0.
+     */
+    C_STRUCT aiVector3D mPosition;
 
 
-	/** 'LookAt' - vector of the camera coordinate system relative to
-	 *  the coordinate space defined by the corresponding node.
-	 *
-	 *  This is the viewing direction of the user.
-	 *  The default value is 0|0|1. The vector
-	 *  may be normalized, but it needn't.
-	 */
-	C_STRUCT aiVector3D mLookAt;
+    /** 'Up' - vector of the camera coordinate system relative to
+     *  the coordinate space defined by the corresponding node.
+     *
+     *  The 'right' vector of the camera coordinate system is
+     *  the cross product of  the up and lookAt vectors.
+     *  The default value is 0|1|0. The vector
+     *  may be normalized, but it needn't.
+     */
+    C_STRUCT aiVector3D mUp;
 
 
-	/** Half horizontal field of view angle, in radians.
-	 *
-	 *  The field of view angle is the angle between the center
-	 *  line of the screen and the left or right border.
-	 *  The default value is 1/4PI.
-	 */
-	float mHorizontalFOV;
-
-	/** Distance of the near clipping plane from the camera.
-	 *
-	 * The value may not be 0.f (for arithmetic reasons to prevent
-	 * a division through zero). The default value is 0.1f.
-	 */
-	float mClipPlaneNear;
-
-	/** Distance of the far clipping plane from the camera.
-	 *
-	 * The far clipping plane must, of course, be further away than the
-	 * near clipping plane. The default value is 1000.f. The ratio
-	 * between the near and the far plane should not be too
-	 * large (between 1000-10000 should be ok) to avoid floating-point
-	 * inaccuracies which could lead to z-fighting.
-	 */
-	float mClipPlaneFar;
+    /** 'LookAt' - vector of the camera coordinate system relative to
+     *  the coordinate space defined by the corresponding node.
+     *
+     *  This is the viewing direction of the user.
+     *  The default value is 0|0|1. The vector
+     *  may be normalized, but it needn't.
+     */
+    C_STRUCT aiVector3D mLookAt;
 
 
-	/** Screen aspect ratio.
-	 *
-	 * This is the ration between the width and the height of the
-	 * screen. Typical values are 4/3, 1/2 or 1/1. This value is
-	 * 0 if the aspect ratio is not defined in the source file.
-	 * 0 is also the default value.
-	 */
-	float mAspect;
+    /** Half horizontal field of view angle, in radians.
+     *
+     *  The field of view angle is the angle between the center
+     *  line of the screen and the left or right border.
+     *  The default value is 1/4PI.
+     */
+    float mHorizontalFOV;
+
+    /** Distance of the near clipping plane from the camera.
+     *
+     * The value may not be 0.f (for arithmetic reasons to prevent
+     * a division through zero). The default value is 0.1f.
+     */
+    float mClipPlaneNear;
+
+    /** Distance of the far clipping plane from the camera.
+     *
+     * The far clipping plane must, of course, be further away than the
+     * near clipping plane. The default value is 1000.f. The ratio
+     * between the near and the far plane should not be too
+     * large (between 1000-10000 should be ok) to avoid floating-point
+     * inaccuracies which could lead to z-fighting.
+     */
+    float mClipPlaneFar;
+
+
+    /** Screen aspect ratio.
+     *
+     * This is the ration between the width and the height of the
+     * screen. Typical values are 4/3, 1/2 or 1/1. This value is
+     * 0 if the aspect ratio is not defined in the source file.
+     * 0 is also the default value.
+     */
+    float mAspect;
 
 #ifdef __cplusplus
 
-	aiCamera()
-		: mUp				(0.f,1.f,0.f)
-		, mLookAt			(0.f,0.f,1.f)
-		, mHorizontalFOV	(0.25f * (float)AI_MATH_PI)
-		, mClipPlaneNear	(0.1f)
-		, mClipPlaneFar		(1000.f)
-		, mAspect			(0.f)
-	{}
+    aiCamera()
+        : mUp               (0.f,1.f,0.f)
+        , mLookAt           (0.f,0.f,1.f)
+        , mHorizontalFOV    (0.25f * (float)AI_MATH_PI)
+        , mClipPlaneNear    (0.1f)
+        , mClipPlaneFar     (1000.f)
+        , mAspect           (0.f)
+    {}
 
-	/** @brief Get a *right-handed* camera matrix from me
-	 *  @param out Camera matrix to be filled
-	 */
-	void GetCameraMatrix (aiMatrix4x4& out) const
-	{
-		/** todo: test ... should work, but i'm not absolutely sure */
+    /** @brief Get a *right-handed* camera matrix from me
+     *  @param out Camera matrix to be filled
+     */
+    void GetCameraMatrix (aiMatrix4x4& out) const
+    {
+        /** todo: test ... should work, but i'm not absolutely sure */
 
-		/** We don't know whether these vectors are already normalized ...*/
-		aiVector3D zaxis = mLookAt;     zaxis.Normalize();
-		aiVector3D yaxis = mUp;         yaxis.Normalize();
-		aiVector3D xaxis = mUp^mLookAt; xaxis.Normalize();
+        /** We don't know whether these vectors are already normalized ...*/
+        aiVector3D zaxis = mLookAt;     zaxis.Normalize();
+        aiVector3D yaxis = mUp;         yaxis.Normalize();
+        aiVector3D xaxis = mUp^mLookAt; xaxis.Normalize();
 
-		out.a4 = -(xaxis * mPosition);
-		out.b4 = -(yaxis * mPosition);
-		out.c4 = -(zaxis * mPosition);
+        out.a4 = -(xaxis * mPosition);
+        out.b4 = -(yaxis * mPosition);
+        out.c4 = -(zaxis * mPosition);
 
-		out.a1 = xaxis.x;
-		out.a2 = xaxis.y;
-		out.a3 = xaxis.z;
+        out.a1 = xaxis.x;
+        out.a2 = xaxis.y;
+        out.a3 = xaxis.z;
 
-		out.b1 = yaxis.x;
-		out.b2 = yaxis.y;
-		out.b3 = yaxis.z;
+        out.b1 = yaxis.x;
+        out.b2 = yaxis.y;
+        out.b3 = yaxis.z;
 
-		out.c1 = zaxis.x;
-		out.c2 = zaxis.y;
-		out.c3 = zaxis.z;
+        out.c1 = zaxis.x;
+        out.c2 = zaxis.y;
+        out.c3 = zaxis.z;
 
-		out.d1 = out.d2 = out.d3 = 0.f;
-		out.d4 = 1.f;
-	}
+        out.d1 = out.d2 = out.d3 = 0.f;
+        out.d4 = 1.f;
+    }
 
 #endif
 };

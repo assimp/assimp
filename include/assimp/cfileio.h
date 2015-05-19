@@ -75,16 +75,16 @@ typedef char* aiUserData;
  *  or memory locations. */
 struct aiFileIO
 {
-	/** Function used to open a new file
-	 */
-	aiFileOpenProc OpenProc;
+    /** Function used to open a new file
+     */
+    aiFileOpenProc OpenProc;
 
-	/** Function used to close an existing file
-	 */
-	aiFileCloseProc CloseProc;
+    /** Function used to close an existing file
+     */
+    aiFileCloseProc CloseProc;
 
-	/** User-defined, opaque data */
-	aiUserData UserData;
+    /** User-defined, opaque data */
+    aiUserData UserData;
 };
 
 // ----------------------------------------------------------------------------------
@@ -99,34 +99,34 @@ struct aiFileIO
  *  such as ZIP archives or memory locations. */
 struct aiFile
 {
-	/** Callback to read from a file */
-	aiFileReadProc ReadProc;
+    /** Callback to read from a file */
+    aiFileReadProc ReadProc;
 
-	/** Callback to write to a file */
-	aiFileWriteProc WriteProc;
+    /** Callback to write to a file */
+    aiFileWriteProc WriteProc;
 
-	/** Callback to retrieve the current position of
-	 *  the file cursor (ftell())
-	 */
-	aiFileTellProc TellProc;
+    /** Callback to retrieve the current position of
+     *  the file cursor (ftell())
+     */
+    aiFileTellProc TellProc;
 
-	/** Callback to retrieve the size of the file,
-	 *  in bytes
-	 */
-	aiFileTellProc FileSizeProc;
+    /** Callback to retrieve the size of the file,
+     *  in bytes
+     */
+    aiFileTellProc FileSizeProc;
 
-	/** Callback to set the current position
-	 * of the file cursor (fseek())
-	 */
-	aiFileSeek SeekProc;
+    /** Callback to set the current position
+     * of the file cursor (fseek())
+     */
+    aiFileSeek SeekProc;
 
-	/** Callback to flush the file contents
-	 */
-	aiFileFlushProc FlushProc;
+    /** Callback to flush the file contents
+     */
+    aiFileFlushProc FlushProc;
 
-	/** User-defined, opaque data
-	 */
-	aiUserData UserData;
+    /** User-defined, opaque data
+     */
+    aiUserData UserData;
 };
 
 #ifdef __cplusplus

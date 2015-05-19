@@ -75,7 +75,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_GLOB_MEASURE_TIME  \
-	"GLOB_MEASURE_TIME"
+    "GLOB_MEASURE_TIME"
 
 
 // ---------------------------------------------------------------------------
@@ -87,7 +87,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // ---------------------------------------------------------------------------
 #define AI_CONFIG_IMPORT_NO_SKELETON_MESHES \
-	"IMPORT_NO_SKELETON_MESHES"
+    "IMPORT_NO_SKELETON_MESHES"
 
 
 
@@ -108,7 +108,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Property type: int, default value: -1.
  */
 #define AI_CONFIG_GLOB_MULTITHREADING  \
-	"GLOB_MULTITHREADING"
+    "GLOB_MULTITHREADING"
 #endif
 
 // ###########################################################################
@@ -127,12 +127,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // ---------------------------------------------------------------------------
 #define AI_CONFIG_PP_SBBC_MAX_BONES \
-	"PP_SBBC_MAX_BONES"
+    "PP_SBBC_MAX_BONES"
 
 
 // default limit for bone count
 #if (!defined AI_SBBC_DEFAULT_MAX_BONES)
-#	define AI_SBBC_DEFAULT_MAX_BONES		60
+#   define AI_SBBC_DEFAULT_MAX_BONES        60
 #endif
 
 
@@ -145,7 +145,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Property type: float. Default value: 45 degrees
  */
 #define AI_CONFIG_PP_CT_MAX_SMOOTHING_ANGLE \
-	"PP_CT_MAX_SMOOTHING_ANGLE"
+    "PP_CT_MAX_SMOOTHING_ANGLE"
 
 // ---------------------------------------------------------------------------
 /** @brief Source UV channel for tangent space computation.
@@ -155,7 +155,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // ---------------------------------------------------------------------------
 #define AI_CONFIG_PP_CT_TEXTURE_CHANNEL_INDEX \
-	"PP_CT_TEXTURE_CHANNEL_INDEX"
+    "PP_CT_TEXTURE_CHANNEL_INDEX"
 
 // ---------------------------------------------------------------------------
 /** @brief  Specifies the maximum angle that may be between two face normals
@@ -170,7 +170,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * the output quality may be reduced.
  */
 #define AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE \
-	"PP_GSN_MAX_SMOOTHING_ANGLE"
+    "PP_GSN_MAX_SMOOTHING_ANGLE"
 
 
 // ---------------------------------------------------------------------------
@@ -183,8 +183,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * a default palette (from Quake 1) is used.
  * Property type: string.
  */
-#define AI_CONFIG_IMPORT_MDL_COLORMAP		\
-	"IMPORT_MDL_COLORMAP"
+#define AI_CONFIG_IMPORT_MDL_COLORMAP       \
+    "IMPORT_MDL_COLORMAP"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_RemoveRedundantMaterials step to
@@ -205,8 +205,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @note Linefeeds, tabs or carriage returns are treated as whitespace.
  *   Material names are case sensitive.
  */
-#define AI_CONFIG_PP_RRM_EXCLUDE_LIST	\
-	"PP_RRM_EXCLUDE_LIST"
+#define AI_CONFIG_PP_RRM_EXCLUDE_LIST   \
+    "PP_RRM_EXCLUDE_LIST"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PreTransformVertices step to
@@ -220,8 +220,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * any transformations.
  * Property type: bool. Default value: false.
  */
-#define AI_CONFIG_PP_PTV_KEEP_HIERARCHY		\
-	"PP_PTV_KEEP_HIERARCHY"
+#define AI_CONFIG_PP_PTV_KEEP_HIERARCHY     \
+    "PP_PTV_KEEP_HIERARCHY"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PreTransformVertices step to normalize
@@ -230,8 +230,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  meshes are scaled appropriately (uniformly of course!).
  *  This might be useful if you don't know the spatial dimension of the input
  *  data*/
-#define AI_CONFIG_PP_PTV_NORMALIZE	\
-	"PP_PTV_NORMALIZE"
+#define AI_CONFIG_PP_PTV_NORMALIZE  \
+    "PP_PTV_NORMALIZE"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PreTransformVertices step to use
@@ -239,8 +239,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  transforming vertices.
  *  Property type: bool. Default value: false.
  */
-#define AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION	\
-	"PP_PTV_ADD_ROOT_TRANSFORMATION"
+#define AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION    \
+    "PP_PTV_ADD_ROOT_TRANSFORMATION"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PreTransformVertices step to use
@@ -249,8 +249,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  of the transformation matrix.
  *  Property type: aiMatrix4x4.
  */
-#define AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION	\
-	"PP_PTV_ROOT_TRANSFORMATION"
+#define AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION    \
+    "PP_PTV_ROOT_TRANSFORMATION"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_FindDegenerates step to
@@ -263,7 +263,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_PP_FD_REMOVE \
-	"PP_FD_REMOVE"
+    "PP_FD_REMOVE"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_OptimizeGraph step to preserve nodes
@@ -283,8 +283,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @note Linefeeds, tabs or carriage returns are treated as whitespace.
  *   Node names are case sensitive.
  */
-#define AI_CONFIG_PP_OG_EXCLUDE_LIST	\
-	"PP_OG_EXCLUDE_LIST"
+#define AI_CONFIG_PP_OG_EXCLUDE_LIST    \
+    "PP_OG_EXCLUDE_LIST"
 
 // ---------------------------------------------------------------------------
 /** @brief  Set the maximum number of triangles in a mesh.
@@ -294,12 +294,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @note The default value is AI_SLM_DEFAULT_MAX_TRIANGLES
  * Property type: integer.
  */
-#define AI_CONFIG_PP_SLM_TRIANGLE_LIMIT	\
-	"PP_SLM_TRIANGLE_LIMIT"
+#define AI_CONFIG_PP_SLM_TRIANGLE_LIMIT \
+    "PP_SLM_TRIANGLE_LIMIT"
 
 // default value for AI_CONFIG_PP_SLM_TRIANGLE_LIMIT
 #if (!defined AI_SLM_DEFAULT_MAX_TRIANGLES)
-#	define AI_SLM_DEFAULT_MAX_TRIANGLES		1000000
+#   define AI_SLM_DEFAULT_MAX_TRIANGLES     1000000
 #endif
 
 // ---------------------------------------------------------------------------
@@ -311,11 +311,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Property type: integer.
  */
 #define AI_CONFIG_PP_SLM_VERTEX_LIMIT \
-	"PP_SLM_VERTEX_LIMIT"
+    "PP_SLM_VERTEX_LIMIT"
 
 // default value for AI_CONFIG_PP_SLM_VERTEX_LIMIT
 #if (!defined AI_SLM_DEFAULT_MAX_VERTICES)
-#	define AI_SLM_DEFAULT_MAX_VERTICES		1000000
+#   define AI_SLM_DEFAULT_MAX_VERTICES      1000000
 #endif
 
 // ---------------------------------------------------------------------------
@@ -324,12 +324,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This is used by the #aiProcess_LimitBoneWeights PostProcess-Step.
  * @note The default value is AI_LBW_MAX_WEIGHTS
  * Property type: integer.*/
-#define AI_CONFIG_PP_LBW_MAX_WEIGHTS	\
-	"PP_LBW_MAX_WEIGHTS"
+#define AI_CONFIG_PP_LBW_MAX_WEIGHTS    \
+    "PP_LBW_MAX_WEIGHTS"
 
 // default value for AI_CONFIG_PP_LBW_MAX_WEIGHTS
 #if (!defined AI_LMW_MAX_WEIGHTS)
-#	define AI_LMW_MAX_WEIGHTS	0x4
+#   define AI_LMW_MAX_WEIGHTS   0x4
 #endif // !! AI_LMW_MAX_WEIGHTS
 
 // ---------------------------------------------------------------------------
@@ -339,11 +339,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @note The default value is AI_DEBONE_THRESHOLD
  * Property type: float.*/
 #define AI_CONFIG_PP_DB_THRESHOLD \
-	"PP_DB_THRESHOLD"
+    "PP_DB_THRESHOLD"
 
 // default value for AI_CONFIG_PP_LBW_MAX_WEIGHTS
 #if (!defined AI_DEBONE_THRESHOLD)
-#	define AI_DEBONE_THRESHOLD	1.0f
+#   define AI_DEBONE_THRESHOLD  1.0f
 #endif // !! AI_DEBONE_THRESHOLD
 
 // ---------------------------------------------------------------------------
@@ -353,12 +353,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @note The default value is 0
  * Property type: bool.*/
 #define AI_CONFIG_PP_DB_ALL_OR_NONE \
-	"PP_DB_ALL_OR_NONE"
+    "PP_DB_ALL_OR_NONE"
 
 /** @brief Default value for the #AI_CONFIG_PP_ICL_PTCACHE_SIZE property
  */
 #ifndef PP_ICL_PTCACHE_SIZE
-#	define PP_ICL_PTCACHE_SIZE 12
+#   define PP_ICL_PTCACHE_SIZE 12
 #endif
 
 // ---------------------------------------------------------------------------
@@ -372,7 +372,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * performance improvements for most nVidia/AMD cards since 2002.
  * Property type: integer.
  */
-#define AI_CONFIG_PP_ICL_PTCACHE_SIZE	"PP_ICL_PTCACHE_SIZE"
+#define AI_CONFIG_PP_ICL_PTCACHE_SIZE   "PP_ICL_PTCACHE_SIZE"
 
 // ---------------------------------------------------------------------------
 /** @brief Enumerates components of the aiScene and aiMesh data structures
@@ -382,63 +382,63 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 enum aiComponent
 {
-	/** Normal vectors */
+    /** Normal vectors */
 #ifdef SWIG
-	aiComponent_NORMALS = 0x2,
+    aiComponent_NORMALS = 0x2,
 #else
-	aiComponent_NORMALS = 0x2u,
+    aiComponent_NORMALS = 0x2u,
 #endif
 
-	/** Tangents and bitangents go always together ... */
+    /** Tangents and bitangents go always together ... */
 #ifdef SWIG
-	aiComponent_TANGENTS_AND_BITANGENTS = 0x4,
+    aiComponent_TANGENTS_AND_BITANGENTS = 0x4,
 #else
-	aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
+    aiComponent_TANGENTS_AND_BITANGENTS = 0x4u,
 #endif
 
-	/** ALL color sets
-	 * Use aiComponent_COLORn(N) to specify the N'th set */
-	aiComponent_COLORS = 0x8,
+    /** ALL color sets
+     * Use aiComponent_COLORn(N) to specify the N'th set */
+    aiComponent_COLORS = 0x8,
 
-	/** ALL texture UV sets
-	 * aiComponent_TEXCOORDn(N) to specify the N'th set  */
-	aiComponent_TEXCOORDS = 0x10,
+    /** ALL texture UV sets
+     * aiComponent_TEXCOORDn(N) to specify the N'th set  */
+    aiComponent_TEXCOORDS = 0x10,
 
-	/** Removes all bone weights from all meshes.
-	 * The scenegraph nodes corresponding to the bones are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this */
-	aiComponent_BONEWEIGHTS = 0x20,
+    /** Removes all bone weights from all meshes.
+     * The scenegraph nodes corresponding to the bones are NOT removed.
+     * use the #aiProcess_OptimizeGraph step to do this */
+    aiComponent_BONEWEIGHTS = 0x20,
 
-	/** Removes all node animations (aiScene::mAnimations).
-	 * The corresponding scenegraph nodes are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this */
-	aiComponent_ANIMATIONS = 0x40,
+    /** Removes all node animations (aiScene::mAnimations).
+     * The corresponding scenegraph nodes are NOT removed.
+     * use the #aiProcess_OptimizeGraph step to do this */
+    aiComponent_ANIMATIONS = 0x40,
 
-	/** Removes all embedded textures (aiScene::mTextures) */
-	aiComponent_TEXTURES = 0x80,
+    /** Removes all embedded textures (aiScene::mTextures) */
+    aiComponent_TEXTURES = 0x80,
 
-	/** Removes all light sources (aiScene::mLights).
-	 * The corresponding scenegraph nodes are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this */
-	aiComponent_LIGHTS = 0x100,
+    /** Removes all light sources (aiScene::mLights).
+     * The corresponding scenegraph nodes are NOT removed.
+     * use the #aiProcess_OptimizeGraph step to do this */
+    aiComponent_LIGHTS = 0x100,
 
-	/** Removes all cameras (aiScene::mCameras).
-	 * The corresponding scenegraph nodes are NOT removed.
-	 * use the #aiProcess_OptimizeGraph step to do this */
-	aiComponent_CAMERAS = 0x200,
+    /** Removes all cameras (aiScene::mCameras).
+     * The corresponding scenegraph nodes are NOT removed.
+     * use the #aiProcess_OptimizeGraph step to do this */
+    aiComponent_CAMERAS = 0x200,
 
-	/** Removes all meshes (aiScene::mMeshes). */
-	aiComponent_MESHES = 0x400,
+    /** Removes all meshes (aiScene::mMeshes). */
+    aiComponent_MESHES = 0x400,
 
-	/** Removes all materials. One default material will
-	 * be generated, so aiScene::mNumMaterials will be 1. */
-	aiComponent_MATERIALS = 0x800,
+    /** Removes all materials. One default material will
+     * be generated, so aiScene::mNumMaterials will be 1. */
+    aiComponent_MATERIALS = 0x800,
 
 
-	/** This value is not used. It is just there to force the
-	 *  compiler to map this enum to a 32 Bit integer. */
+    /** This value is not used. It is just there to force the
+     *  compiler to map this enum to a 32 Bit integer. */
 #ifndef SWIG
-	_aiComponent_Force32Bit = 0x9fffffff
+    _aiComponent_Force32Bit = 0x9fffffff
 #endif
 };
 
@@ -460,8 +460,8 @@ enum aiComponent
  * of the flags defined above) the import FAILS. Mainly because there is
  * no data to work on anymore ...
  */
-#define AI_CONFIG_PP_RVC_FLAGS				\
-	"PP_RVC_FLAGS"
+#define AI_CONFIG_PP_RVC_FLAGS              \
+    "PP_RVC_FLAGS"
 
 // ---------------------------------------------------------------------------
 /** @brief Input parameter to the #aiProcess_SortByPType step:
@@ -472,8 +472,8 @@ enum aiComponent
  *  be to exclude all line and point meshes from the import. This
  *  is an integer property, its default value is 0.
  */
-#define AI_CONFIG_PP_SBP_REMOVE				\
-	"PP_SBP_REMOVE"
+#define AI_CONFIG_PP_SBP_REMOVE             \
+    "PP_SBP_REMOVE"
 
 // ---------------------------------------------------------------------------
 /** @brief Input parameter to the #aiProcess_FindInvalidData step:
@@ -484,8 +484,8 @@ enum aiComponent
  *  abs(n0-n1)>epsilon holds true for all vector respectively quaternion
  *  components. The default value is 0.f - comparisons are exact then.
  */
-#define AI_CONFIG_PP_FID_ANIM_ACCURACY				\
-	"PP_FID_ANIM_ACCURACY"
+#define AI_CONFIG_PP_FID_ANIM_ACCURACY              \
+    "PP_FID_ANIM_ACCURACY"
 
 
 // TransformUVCoords evaluates UV scalings
@@ -508,8 +508,8 @@ enum aiComponent
  *  property, of course). By default all transformations are enabled
  * (AI_UVTRAFO_ALL).
  */
-#define AI_CONFIG_PP_TUV_EVALUATE				\
-	"PP_TUV_EVALUATE"
+#define AI_CONFIG_PP_TUV_EVALUATE               \
+    "PP_TUV_EVALUATE"
 
 // ---------------------------------------------------------------------------
 /** @brief A hint to assimp to favour speed against import quality.
@@ -520,7 +520,7 @@ enum aiComponent
  * This property is expected to be an integer, != 0 stands for true.
  * The default value is 0.
  */
-#define AI_CONFIG_FAVOUR_SPEED				\
+#define AI_CONFIG_FAVOUR_SPEED              \
  "FAVOUR_SPEED"
 
 
@@ -538,7 +538,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS \
-	"IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS"
+    "IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will read all materials present in the
@@ -550,7 +550,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_READ_ALL_MATERIALS \
-	"IMPORT_FBX_READ_ALL_MATERIALS"
+    "IMPORT_FBX_READ_ALL_MATERIALS"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will read materials.
@@ -559,7 +559,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_READ_MATERIALS \
-	"IMPORT_FBX_READ_MATERIALS"
+    "IMPORT_FBX_READ_MATERIALS"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will read cameras.
@@ -568,7 +568,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_READ_CAMERAS \
-	"IMPORT_FBX_READ_CAMERAS"
+    "IMPORT_FBX_READ_CAMERAS"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will read light sources.
@@ -577,7 +577,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_READ_LIGHTS \
-	"IMPORT_FBX_READ_LIGHTS"
+    "IMPORT_FBX_READ_LIGHTS"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will read animations.
@@ -586,7 +586,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS \
-	"IMPORT_FBX_READ_ANIMATIONS"
+    "IMPORT_FBX_READ_ANIMATIONS"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will act in strict mode in which only
@@ -598,7 +598,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_STRICT_MODE \
-	"IMPORT_FBX_STRICT_MODE"
+    "IMPORT_FBX_STRICT_MODE"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will preserve pivot points for
@@ -609,7 +609,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS \
-	"IMPORT_FBX_PRESERVE_PIVOTS"
+    "IMPORT_FBX_PRESERVE_PIVOTS"
 
 // ---------------------------------------------------------------------------
 /** @brief Specifies whether the importer will drop empty animation curves or
@@ -620,7 +620,7 @@ enum aiComponent
  * Property type: bool
  */
 #define AI_CONFIG_IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES \
-	"IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES"
+    "IMPORT_FBX_OPTIMIZE_EMPTY_ANIMATION_CURVES"
 
 
 
@@ -637,14 +637,14 @@ enum aiComponent
  *   want to override the global setting).
  * Property type: integer.
  */
-#define AI_CONFIG_IMPORT_GLOBAL_KEYFRAME	"IMPORT_GLOBAL_KEYFRAME"
+#define AI_CONFIG_IMPORT_GLOBAL_KEYFRAME    "IMPORT_GLOBAL_KEYFRAME"
 
-#define AI_CONFIG_IMPORT_MD3_KEYFRAME		"IMPORT_MD3_KEYFRAME"
-#define AI_CONFIG_IMPORT_MD2_KEYFRAME		"IMPORT_MD2_KEYFRAME"
-#define AI_CONFIG_IMPORT_MDL_KEYFRAME		"IMPORT_MDL_KEYFRAME"
-#define AI_CONFIG_IMPORT_MDC_KEYFRAME		"IMPORT_MDC_KEYFRAME"
-#define AI_CONFIG_IMPORT_SMD_KEYFRAME		"IMPORT_SMD_KEYFRAME"
-#define AI_CONFIG_IMPORT_UNREAL_KEYFRAME	"IMPORT_UNREAL_KEYFRAME"
+#define AI_CONFIG_IMPORT_MD3_KEYFRAME       "IMPORT_MD3_KEYFRAME"
+#define AI_CONFIG_IMPORT_MD2_KEYFRAME       "IMPORT_MD2_KEYFRAME"
+#define AI_CONFIG_IMPORT_MDL_KEYFRAME       "IMPORT_MDL_KEYFRAME"
+#define AI_CONFIG_IMPORT_MDC_KEYFRAME       "IMPORT_MDC_KEYFRAME"
+#define AI_CONFIG_IMPORT_SMD_KEYFRAME       "IMPORT_SMD_KEYFRAME"
+#define AI_CONFIG_IMPORT_UNREAL_KEYFRAME    "IMPORT_UNREAL_KEYFRAME"
 
 
 // ---------------------------------------------------------------------------
@@ -653,8 +653,8 @@ enum aiComponent
  *
  *  Property type: bool. Default value: true.
  */
-#define AI_CONFIG_IMPORT_AC_SEPARATE_BFCULL	\
-	"IMPORT_AC_SEPARATE_BFCULL"
+#define AI_CONFIG_IMPORT_AC_SEPARATE_BFCULL \
+    "IMPORT_AC_SEPARATE_BFCULL"
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures whether the AC loader evaluates subdivision surfaces (
@@ -664,8 +664,8 @@ enum aiComponent
  *
  * * Property type: bool. Default value: true.
  */
-#define AI_CONFIG_IMPORT_AC_EVAL_SUBDIVISION	\
-	"IMPORT_AC_EVAL_SUBDIVISION"
+#define AI_CONFIG_IMPORT_AC_EVAL_SUBDIVISION    \
+    "IMPORT_AC_EVAL_SUBDIVISION"
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the UNREAL 3D loader to separate faces with different
@@ -674,7 +674,7 @@ enum aiComponent
  * * Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_UNREAL_HANDLE_FLAGS \
-	"UNREAL_HANDLE_FLAGS"
+    "UNREAL_HANDLE_FLAGS"
 
 // ---------------------------------------------------------------------------
 /** @brief Configures the terragen import plugin to compute uv's for
@@ -687,17 +687,17 @@ enum aiComponent
  * * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_IMPORT_TER_MAKE_UVS \
-	"IMPORT_TER_MAKE_UVS"
+    "IMPORT_TER_MAKE_UVS"
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the ASE loader to always reconstruct normal vectors
- *	basing on the smoothing groups loaded from the file.
+ *  basing on the smoothing groups loaded from the file.
  *
  * Some ASE files have carry invalid normals, other don't.
  * * Property type: bool. Default value: true.
  */
-#define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS	\
-	"IMPORT_ASE_RECONSTRUCT_NORMALS"
+#define AI_CONFIG_IMPORT_ASE_RECONSTRUCT_NORMALS    \
+    "IMPORT_ASE_RECONSTRUCT_NORMALS"
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the M3D loader to detect and process multi-part
@@ -709,7 +709,7 @@ enum aiComponent
  * Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART \
-	"IMPORT_MD3_HANDLE_MULTIPART"
+    "IMPORT_MD3_HANDLE_MULTIPART"
 
 // ---------------------------------------------------------------------------
 /** @brief  Tells the MD3 loader which skin files to load.
@@ -721,7 +721,7 @@ enum aiComponent
  * Property type: String. Default value: "default".
  */
 #define AI_CONFIG_IMPORT_MD3_SKIN_NAME \
-	"IMPORT_MD3_SKIN_NAME"
+    "IMPORT_MD3_SKIN_NAME"
 
 // ---------------------------------------------------------------------------
 /** @brief  Specify the Quake 3 shader file to be used for a particular
@@ -739,7 +739,7 @@ enum aiComponent
  * Property type: String. Default value: n/a.
  */
 #define AI_CONFIG_IMPORT_MD3_SHADER_SRC \
-	"IMPORT_MD3_SHADER_SRC"
+    "IMPORT_MD3_SHADER_SRC"
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the LWO loader to load just one layer from the model.
@@ -752,8 +752,8 @@ enum aiComponent
  * layer name may not be empty.<br>
  * Property type: Integer. Default value: all layers are loaded.
  */
-#define AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY			\
-	"IMPORT_LWO_ONE_LAYER_ONLY"
+#define AI_CONFIG_IMPORT_LWO_ONE_LAYER_ONLY         \
+    "IMPORT_LWO_ONE_LAYER_ONLY"
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the MD5 loader to not load the MD5ANIM file for
@@ -766,8 +766,8 @@ enum aiComponent
  *
  * * Property type: bool. Default value: false.
  */
-#define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD			\
-	"IMPORT_MD5_NO_ANIM_AUTOLOAD"
+#define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD           \
+    "IMPORT_MD5_NO_ANIM_AUTOLOAD"
 
 // ---------------------------------------------------------------------------
 /** @brief Defines the begin of the time range for which the LWS loader
@@ -785,10 +785,10 @@ enum aiComponent
  *
  * @see AI_CONFIG_IMPORT_LWS_ANIM_END - end of the imported time range
  */
-#define AI_CONFIG_IMPORT_LWS_ANIM_START			\
-	"IMPORT_LWS_ANIM_START"
-#define AI_CONFIG_IMPORT_LWS_ANIM_END			\
-	"IMPORT_LWS_ANIM_END"
+#define AI_CONFIG_IMPORT_LWS_ANIM_START         \
+    "IMPORT_LWS_ANIM_START"
+#define AI_CONFIG_IMPORT_LWS_ANIM_END           \
+    "IMPORT_LWS_ANIM_END"
 
 // ---------------------------------------------------------------------------
 /** @brief Defines the output frame rate of the IRR loader.
@@ -798,8 +798,8 @@ enum aiComponent
  * are returned by the converter.<br>
  * Property type: integer. Default value: 100
  */
-#define AI_CONFIG_IMPORT_IRR_ANIM_FPS				\
-	"IMPORT_IRR_ANIM_FPS"
+#define AI_CONFIG_IMPORT_IRR_ANIM_FPS               \
+    "IMPORT_IRR_ANIM_FPS"
 
 // ---------------------------------------------------------------------------
 /** @brief Ogre Importer will try to find referenced materials from this file.
@@ -811,8 +811,8 @@ enum aiComponent
  * <br>
  * Property type: String. Default value: Scene.material.
  */
-#define AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE	\
-	"IMPORT_OGRE_MATERIAL_FILE"
+#define AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE \
+    "IMPORT_OGRE_MATERIAL_FILE"
 
 // ---------------------------------------------------------------------------
 /** @brief Ogre Importer detect the texture usage from its filename.
@@ -832,7 +832,7 @@ enum aiComponent
  * Property type: Bool. Default value: false.
  */
 #define AI_CONFIG_IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME \
-	"IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME"
+    "IMPORT_OGRE_TEXTURETYPE_FROM_FILENAME"
 
 /** @brief Specifies whether the IFC loader skips over IfcSpace elements.
  *

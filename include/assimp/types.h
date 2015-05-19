@@ -66,43 +66,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef __cplusplus
 #include <cstring>
-#include <new>		// for std::nothrow_t
-#include <string>	// for aiString::Set(const std::string&)
+#include <new>      // for std::nothrow_t
+#include <string>   // for aiString::Set(const std::string&)
 
-namespace Assimp	{
-	//! @cond never
-namespace Intern		{
-	// --------------------------------------------------------------------
-	/** @brief Internal helper class to utilize our internal new/delete
-	 *    routines for allocating object of this and derived classes.
-	 *
-	 * By doing this you can safely share class objects between Assimp
-	 * and the application - it works even over DLL boundaries. A good
-	 * example is the #IOSystem where the application allocates its custom
-	 * #IOSystem, then calls #Importer::SetIOSystem(). When the Importer
-	 * destructs, Assimp calls operator delete on the stored #IOSystem.
-	 * If it lies on a different heap than Assimp is working with,
-	 * the application is determined to crash.
-	 */
-	// --------------------------------------------------------------------
+namespace Assimp    {
+    //! @cond never
+namespace Intern        {
+    // --------------------------------------------------------------------
+    /** @brief Internal helper class to utilize our internal new/delete
+     *    routines for allocating object of this and derived classes.
+     *
+     * By doing this you can safely share class objects between Assimp
+     * and the application - it works even over DLL boundaries. A good
+     * example is the #IOSystem where the application allocates its custom
+     * #IOSystem, then calls #Importer::SetIOSystem(). When the Importer
+     * destructs, Assimp calls operator delete on the stored #IOSystem.
+     * If it lies on a different heap than Assimp is working with,
+     * the application is determined to crash.
+     */
+    // --------------------------------------------------------------------
 #ifndef SWIG
-	struct ASSIMP_API AllocateFromAssimpHeap	{
-		// http://www.gotw.ca/publications/mill15.htm
+    struct ASSIMP_API AllocateFromAssimpHeap    {
+        // http://www.gotw.ca/publications/mill15.htm
 
-		// new/delete overload
-		void *operator new    ( size_t num_bytes) /* throw( std::bad_alloc ) */;
-		void *operator new    ( size_t num_bytes, const std::nothrow_t& ) throw();
-		void  operator delete ( void* data);
+        // new/delete overload
+        void *operator new    ( size_t num_bytes) /* throw( std::bad_alloc ) */;
+        void *operator new    ( size_t num_bytes, const std::nothrow_t& ) throw();
+        void  operator delete ( void* data);
 
-		// array new/delete overload
-		void *operator new[]    ( size_t num_bytes) /* throw( std::bad_alloc ) */;
-		void *operator new[]    ( size_t num_bytes, const std::nothrow_t& )  throw();
-		void  operator delete[] ( void* data);
+        // array new/delete overload
+        void *operator new[]    ( size_t num_bytes) /* throw( std::bad_alloc ) */;
+        void *operator new[]    ( size_t num_bytes, const std::nothrow_t& )  throw();
+        void  operator delete[] ( void* data);
 
-	}; // struct AllocateFromAssimpHeap
+    }; // struct AllocateFromAssimpHeap
 #endif
 } // namespace Intern
-	//! @endcond
+    //! @endcond
 } // namespace Assimp
 
 extern "C" {
@@ -112,7 +112,7 @@ extern "C" {
 #ifdef __cplusplus
 const size_t MAXLEN = 1024;
 #else
-#	define MAXLEN 1024
+#   define MAXLEN 1024
 #endif
 
 #include "./Compiler/pushpack1.h"
@@ -123,16 +123,16 @@ const size_t MAXLEN = 1024;
 struct aiPlane
 {
 #ifdef __cplusplus
-	aiPlane () : a(0.f), b(0.f), c(0.f), d(0.f) {}
-	aiPlane (float _a, float _b, float _c, float _d)
-		: a(_a), b(_b), c(_c), d(_d) {}
+    aiPlane () : a(0.f), b(0.f), c(0.f), d(0.f) {}
+    aiPlane (float _a, float _b, float _c, float _d)
+        : a(_a), b(_b), c(_c), d(_d) {}
 
-	aiPlane (const aiPlane& o) : a(o.a), b(o.b), c(o.c), d(o.d) {}
+    aiPlane (const aiPlane& o) : a(o.a), b(o.b), c(o.c), d(o.d) {}
 
 #endif // !__cplusplus
 
-	//! Plane equation
-	float a,b,c,d;
+    //! Plane equation
+    float a,b,c,d;
 } PACK_STRUCT; // !struct aiPlane
 
 // ----------------------------------------------------------------------------------
@@ -141,16 +141,16 @@ struct aiPlane
 struct aiRay
 {
 #ifdef __cplusplus
-	aiRay () {}
-	aiRay (const aiVector3D& _pos, const aiVector3D& _dir)
-		: pos(_pos), dir(_dir) {}
+    aiRay () {}
+    aiRay (const aiVector3D& _pos, const aiVector3D& _dir)
+        : pos(_pos), dir(_dir) {}
 
-	aiRay (const aiRay& o) : pos (o.pos), dir (o.dir) {}
+    aiRay (const aiRay& o) : pos (o.pos), dir (o.dir) {}
 
 #endif // !__cplusplus
 
-	//! Position and direction of the ray
-	C_STRUCT aiVector3D pos, dir;
+    //! Position and direction of the ray
+    C_STRUCT aiVector3D pos, dir;
 } PACK_STRUCT; // !struct aiRay
 
 // ----------------------------------------------------------------------------------
@@ -159,71 +159,71 @@ struct aiRay
 struct aiColor3D
 {
 #ifdef __cplusplus
-	aiColor3D () : r(0.0f), g(0.0f), b(0.0f) {}
-	aiColor3D (float _r, float _g, float _b) : r(_r), g(_g), b(_b) {}
-	aiColor3D (float _r) : r(_r), g(_r), b(_r) {}
-	aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
+    aiColor3D () : r(0.0f), g(0.0f), b(0.0f) {}
+    aiColor3D (float _r, float _g, float _b) : r(_r), g(_g), b(_b) {}
+    aiColor3D (float _r) : r(_r), g(_r), b(_r) {}
+    aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
 
-	/** Component-wise comparison */
-	// TODO: add epsilon?
-	bool operator == (const aiColor3D& other) const
-		{return r == other.r && g == other.g && b == other.b;}
+    /** Component-wise comparison */
+    // TODO: add epsilon?
+    bool operator == (const aiColor3D& other) const
+        {return r == other.r && g == other.g && b == other.b;}
 
-	/** Component-wise inverse comparison */
-	// TODO: add epsilon?
-	bool operator != (const aiColor3D& other) const
-		{return r != other.r || g != other.g || b != other.b;}
+    /** Component-wise inverse comparison */
+    // TODO: add epsilon?
+    bool operator != (const aiColor3D& other) const
+        {return r != other.r || g != other.g || b != other.b;}
 
-	/** Component-wise comparison */
-	// TODO: add epsilon?
-	bool operator < (const aiColor3D& other) const {
-		return r < other.r || (
-			r == other.r && (g < other.g ||
-				(g == other.g && b < other.b)
-			)
-		);
-	}
+    /** Component-wise comparison */
+    // TODO: add epsilon?
+    bool operator < (const aiColor3D& other) const {
+        return r < other.r || (
+            r == other.r && (g < other.g ||
+                (g == other.g && b < other.b)
+            )
+        );
+    }
 
-	/** Component-wise addition */
-	aiColor3D operator+(const aiColor3D& c) const {
-		return aiColor3D(r+c.r,g+c.g,b+c.b);
-	}
+    /** Component-wise addition */
+    aiColor3D operator+(const aiColor3D& c) const {
+        return aiColor3D(r+c.r,g+c.g,b+c.b);
+    }
 
-	/** Component-wise subtraction */
-	aiColor3D operator-(const aiColor3D& c) const {
-		return aiColor3D(r-c.r,g-c.g,b-c.b);
-	}
+    /** Component-wise subtraction */
+    aiColor3D operator-(const aiColor3D& c) const {
+        return aiColor3D(r-c.r,g-c.g,b-c.b);
+    }
 
-	/** Component-wise multiplication */
-	aiColor3D operator*(const aiColor3D& c) const {
-		return aiColor3D(r*c.r,g*c.g,b*c.b);
-	}
+    /** Component-wise multiplication */
+    aiColor3D operator*(const aiColor3D& c) const {
+        return aiColor3D(r*c.r,g*c.g,b*c.b);
+    }
 
-	/** Multiply with a scalar */
-	aiColor3D operator*(float f) const {
-		return aiColor3D(r*f,g*f,b*f);
-	}
+    /** Multiply with a scalar */
+    aiColor3D operator*(float f) const {
+        return aiColor3D(r*f,g*f,b*f);
+    }
 
-	/** Access a specific color component */
-	float operator[](unsigned int i) const {
-		return *(&r + i);
-	}
+    /** Access a specific color component */
+    float operator[](unsigned int i) const {
+        return *(&r + i);
+    }
 
-	/** Access a specific color component */
-	float& operator[](unsigned int i) {
-		return *(&r + i);
-	}
+    /** Access a specific color component */
+    float& operator[](unsigned int i) {
+        return *(&r + i);
+    }
 
-	/** Check whether a color is black */
-	bool IsBlack() const {
-		static const float epsilon = 10e-3f;
-		return std::fabs( r ) < epsilon && std::fabs( g ) < epsilon && std::fabs( b ) < epsilon;
-	}
+    /** Check whether a color is black */
+    bool IsBlack() const {
+        static const float epsilon = 10e-3f;
+        return std::fabs( r ) < epsilon && std::fabs( g ) < epsilon && std::fabs( b ) < epsilon;
+    }
 
 #endif // !__cplusplus
 
-	//! Red, green and blue color values
-	float r, g, b;
+    //! Red, green and blue color values
+    float r, g, b;
 } PACK_STRUCT;  // !struct aiColor3D
 #include "./Compiler/poppack1.h"
 
@@ -251,143 +251,143 @@ struct aiColor3D
 struct aiString
 {
 #ifdef __cplusplus
-	/** Default constructor, the string is set to have zero length */
-	aiString() :
-		length(0)
-	{
-		data[0] = '\0';
+    /** Default constructor, the string is set to have zero length */
+    aiString() :
+        length(0)
+    {
+        data[0] = '\0';
 
 #ifdef ASSIMP_BUILD_DEBUG
-		// Debug build: overwrite the string on its full length with ESC (27)
-		memset(data+1,27,MAXLEN-1);
+        // Debug build: overwrite the string on its full length with ESC (27)
+        memset(data+1,27,MAXLEN-1);
 #endif
-	}
+    }
 
-	/** Copy constructor */
-	aiString(const aiString& rOther) :
-		length(rOther.length)
-	{
-		// Crop the string to the maximum length
-		length = length>=MAXLEN?MAXLEN-1:length;
-		memcpy( data, rOther.data, length);
-		data[length] = '\0';
-	}
+    /** Copy constructor */
+    aiString(const aiString& rOther) :
+        length(rOther.length)
+    {
+        // Crop the string to the maximum length
+        length = length>=MAXLEN?MAXLEN-1:length;
+        memcpy( data, rOther.data, length);
+        data[length] = '\0';
+    }
 
-	/** Constructor from std::string */
-	explicit aiString(const std::string& pString) :
-		length(pString.length())
-	{
-		length = length>=MAXLEN?MAXLEN-1:length;
-		memcpy( data, pString.c_str(), length);
-		data[length] = '\0';
-	}
+    /** Constructor from std::string */
+    explicit aiString(const std::string& pString) :
+        length(pString.length())
+    {
+        length = length>=MAXLEN?MAXLEN-1:length;
+        memcpy( data, pString.c_str(), length);
+        data[length] = '\0';
+    }
 
-	/** Copy a std::string to the aiString */
-	void Set( const std::string& pString) {
-		if( pString.length() > MAXLEN - 1) {
-			return;
-		}
-		length = pString.length();
-		memcpy( data, pString.c_str(), length);
-		data[length] = 0;
-	}
+    /** Copy a std::string to the aiString */
+    void Set( const std::string& pString) {
+        if( pString.length() > MAXLEN - 1) {
+            return;
+        }
+        length = pString.length();
+        memcpy( data, pString.c_str(), length);
+        data[length] = 0;
+    }
 
-	/** Copy a const char* to the aiString */
-	void Set( const char* sz) {
-		const size_t len = ::strlen(sz);
-		if( len > MAXLEN - 1) {
-			return;
-		}
-		length = len;
-		memcpy( data, sz, len);
-		data[len] = 0;
-	}
+    /** Copy a const char* to the aiString */
+    void Set( const char* sz) {
+        const size_t len = ::strlen(sz);
+        if( len > MAXLEN - 1) {
+            return;
+        }
+        length = len;
+        memcpy( data, sz, len);
+        data[len] = 0;
+    }
 
-	/** Assign a const char* to the string */
-	aiString& operator = (const char* sz) {
-		Set(sz);
-		return *this;
-	}
+    /** Assign a const char* to the string */
+    aiString& operator = (const char* sz) {
+        Set(sz);
+        return *this;
+    }
 
-	/** Assign a cstd::string to the string */
-	aiString& operator = ( const std::string& pString) {
-		Set(pString);
-		return *this;
-	}
+    /** Assign a cstd::string to the string */
+    aiString& operator = ( const std::string& pString) {
+        Set(pString);
+        return *this;
+    }
 
-	/** Comparison operator */
-	bool operator==(const aiString& other) const {
-		return  (length == other.length && 0 == memcmp(data,other.data,length));
-	}
+    /** Comparison operator */
+    bool operator==(const aiString& other) const {
+        return  (length == other.length && 0 == memcmp(data,other.data,length));
+    }
 
-	/** Inverse comparison operator */
-	bool operator!=(const aiString& other) const {
-		return  (length != other.length || 0 != memcmp(data,other.data,length));
-	}
+    /** Inverse comparison operator */
+    bool operator!=(const aiString& other) const {
+        return  (length != other.length || 0 != memcmp(data,other.data,length));
+    }
 
-	/** Append a string to the string */
-	void Append (const char* app)	{
-		const size_t len = ::strlen(app);
-		if (!len) {
-			return;
-		}
-		if (length + len >= MAXLEN) {
-			return;
-		}
+    /** Append a string to the string */
+    void Append (const char* app)   {
+        const size_t len = ::strlen(app);
+        if (!len) {
+            return;
+        }
+        if (length + len >= MAXLEN) {
+            return;
+        }
 
-		memcpy(&data[length],app,len+1);
-		length += len;
-	}
+        memcpy(&data[length],app,len+1);
+        length += len;
+    }
 
-	/** Clear the string - reset its length to zero */
-	void Clear ()	{
-		length  = 0;
-		data[0] = '\0';
+    /** Clear the string - reset its length to zero */
+    void Clear ()   {
+        length  = 0;
+        data[0] = '\0';
 
 #ifdef ASSIMP_BUILD_DEBUG
-		// Debug build: overwrite the string on its full length with ESC (27)
-		memset(data+1,27,MAXLEN-1);
+        // Debug build: overwrite the string on its full length with ESC (27)
+        memset(data+1,27,MAXLEN-1);
 #endif
-	}
+    }
 
-	/** Returns a pointer to the underlying zero-terminated array of characters */
-	const char* C_Str() const {
-		return data;
-	}
+    /** Returns a pointer to the underlying zero-terminated array of characters */
+    const char* C_Str() const {
+        return data;
+    }
 
 #endif // !__cplusplus
 
-	/** Binary length of the string excluding the terminal 0. This is NOT the
-	 *  logical length of strings containing UTF-8 multibyte sequences! It's
-	 *  the number of bytes from the beginning of the string to its end.*/
-	size_t length;
+    /** Binary length of the string excluding the terminal 0. This is NOT the
+     *  logical length of strings containing UTF-8 multibyte sequences! It's
+     *  the number of bytes from the beginning of the string to its end.*/
+    size_t length;
 
-	/** String buffer. Size limit is MAXLEN */
-	char data[MAXLEN];
+    /** String buffer. Size limit is MAXLEN */
+    char data[MAXLEN];
 } ;  // !struct aiString
 
 
 // ----------------------------------------------------------------------------------
-/**	Standard return type for some library functions.
+/** Standard return type for some library functions.
  * Rarely used, and if, mostly in the C API.
  */
 typedef enum aiReturn
 {
-	/** Indicates that a function was successful */
-	aiReturn_SUCCESS = 0x0,
+    /** Indicates that a function was successful */
+    aiReturn_SUCCESS = 0x0,
 
-	/** Indicates that a function failed */
-	aiReturn_FAILURE = -0x1,
+    /** Indicates that a function failed */
+    aiReturn_FAILURE = -0x1,
 
-	/** Indicates that not enough memory was available
-	 * to perform the requested operation
-	 */
-	aiReturn_OUTOFMEMORY = -0x3,
+    /** Indicates that not enough memory was available
+     * to perform the requested operation
+     */
+    aiReturn_OUTOFMEMORY = -0x3,
 
-	/** @cond never
-	 *  Force 32-bit size enum
-	 */
-	_AI_ENFORCE_ENUM_SIZE = 0x7fffffff
+    /** @cond never
+     *  Force 32-bit size enum
+     */
+    _AI_ENFORCE_ENUM_SIZE = 0x7fffffff
 
     /// @endcond
 } aiReturn;  // !enum aiReturn
@@ -403,21 +403,21 @@ typedef enum aiReturn
  */
 enum aiOrigin
 {
-	/** Beginning of the file */
-	aiOrigin_SET = 0x0,
+    /** Beginning of the file */
+    aiOrigin_SET = 0x0,
 
-	/** Current position of the file pointer */
-	aiOrigin_CUR = 0x1,
+    /** Current position of the file pointer */
+    aiOrigin_CUR = 0x1,
 
-	/** End of the file, offsets must be negative */
-	aiOrigin_END = 0x2,
+    /** End of the file, offsets must be negative */
+    aiOrigin_END = 0x2,
 
-	/**  @cond never
-	 *   Force 32-bit size enum
-	 */
-	_AI_ORIGIN_ENFORCE_ENUM_SIZE = 0x7fffffff
+    /**  @cond never
+     *   Force 32-bit size enum
+     */
+    _AI_ORIGIN_ENFORCE_ENUM_SIZE = 0x7fffffff
 
-	/// @endcond
+    /// @endcond
 }; // !enum aiOrigin
 
 // ----------------------------------------------------------------------------------
@@ -427,25 +427,25 @@ enum aiOrigin
  */
 enum aiDefaultLogStream
 {
-	/** Stream the log to a file */
-	aiDefaultLogStream_FILE = 0x1,
+    /** Stream the log to a file */
+    aiDefaultLogStream_FILE = 0x1,
 
-	/** Stream the log to std::cout */
-	aiDefaultLogStream_STDOUT = 0x2,
+    /** Stream the log to std::cout */
+    aiDefaultLogStream_STDOUT = 0x2,
 
-	/** Stream the log to std::cerr */
-	aiDefaultLogStream_STDERR = 0x4,
+    /** Stream the log to std::cerr */
+    aiDefaultLogStream_STDERR = 0x4,
 
-	/** MSVC only: Stream the log the the debugger
-	 * (this relies on OutputDebugString from the Win32 SDK)
-	 */
-	aiDefaultLogStream_DEBUGGER = 0x8,
+    /** MSVC only: Stream the log the the debugger
+     * (this relies on OutputDebugString from the Win32 SDK)
+     */
+    aiDefaultLogStream_DEBUGGER = 0x8,
 
-	/** @cond never
-	 *  Force 32-bit size enum
-	 */
-	_AI_DLS_ENFORCE_ENUM_SIZE = 0x7fffffff
-	/// @endcond
+    /** @cond never
+     *  Force 32-bit size enum
+     */
+    _AI_DLS_ENFORCE_ENUM_SIZE = 0x7fffffff
+    /// @endcond
 }; // !enum aiDefaultLogStream
 
 // just for backwards compatibility, don't use these constants anymore
@@ -463,43 +463,43 @@ struct aiMemoryInfo
 {
 #ifdef __cplusplus
 
-	/** Default constructor */
-	aiMemoryInfo()
-		: textures   (0)
-		, materials  (0)
-		, meshes     (0)
-		, nodes      (0)
-		, animations (0)
-		, cameras	 (0)
-		, lights	 (0)
-		, total      (0)
-	{}
+    /** Default constructor */
+    aiMemoryInfo()
+        : textures   (0)
+        , materials  (0)
+        , meshes     (0)
+        , nodes      (0)
+        , animations (0)
+        , cameras    (0)
+        , lights     (0)
+        , total      (0)
+    {}
 
 #endif
 
-	/** Storage allocated for texture data */
-	unsigned int textures;
+    /** Storage allocated for texture data */
+    unsigned int textures;
 
-	/** Storage allocated for material data  */
-	unsigned int materials;
+    /** Storage allocated for material data  */
+    unsigned int materials;
 
-	/** Storage allocated for mesh data */
-	unsigned int meshes;
+    /** Storage allocated for mesh data */
+    unsigned int meshes;
 
-	/** Storage allocated for node data */
-	unsigned int nodes;
+    /** Storage allocated for node data */
+    unsigned int nodes;
 
-	/** Storage allocated for animation data */
-	unsigned int animations;
+    /** Storage allocated for animation data */
+    unsigned int animations;
 
-	/** Storage allocated for camera data */
-	unsigned int cameras;
+    /** Storage allocated for camera data */
+    unsigned int cameras;
 
-	/** Storage allocated for light data */
-	unsigned int lights;
+    /** Storage allocated for light data */
+    unsigned int lights;
 
-	/** Total storage allocated for the full import. */
-	unsigned int total;
+    /** Total storage allocated for the full import. */
+    unsigned int total;
 }; // !struct aiMemoryInfo
 
 #ifdef __cplusplus

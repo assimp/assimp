@@ -52,212 +52,212 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 inline aiReturn aiMaterial::GetTexture( aiTextureType type,
    unsigned int  index,
    C_STRUCT aiString* path,
-   aiTextureMapping* mapping	/*= NULL*/,
-   unsigned int* uvindex		/*= NULL*/,
-   float* blend				   /*= NULL*/,
-   aiTextureOp* op				/*= NULL*/,
-   aiTextureMapMode* mapmode	/*= NULL*/) const
+   aiTextureMapping* mapping    /*= NULL*/,
+   unsigned int* uvindex        /*= NULL*/,
+   float* blend                /*= NULL*/,
+   aiTextureOp* op              /*= NULL*/,
+   aiTextureMapMode* mapmode    /*= NULL*/) const
 {
-	return ::aiGetMaterialTexture(this,type,index,path,mapping,uvindex,blend,op,mapmode);
+    return ::aiGetMaterialTexture(this,type,index,path,mapping,uvindex,blend,op,mapmode);
 }
 
 // ---------------------------------------------------------------------------
 inline unsigned int aiMaterial::GetTextureCount(aiTextureType type) const
 {
-	return ::aiGetMaterialTextureCount(this,type);
+    return ::aiGetMaterialTextureCount(this,type);
 }
 
 // ---------------------------------------------------------------------------
 template <typename Type>
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx, Type* pOut,
-	unsigned int* pMax) const
+    unsigned int idx, Type* pOut,
+    unsigned int* pMax) const
 {
-	unsigned int iNum = pMax ? *pMax : 1;
+    unsigned int iNum = pMax ? *pMax : 1;
 
-	const aiMaterialProperty* prop;
-	const aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,
-		(const aiMaterialProperty**)&prop);
-	if ( AI_SUCCESS == ret )	{
+    const aiMaterialProperty* prop;
+    const aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,
+        (const aiMaterialProperty**)&prop);
+    if ( AI_SUCCESS == ret )    {
 
-		if (prop->mDataLength < sizeof(Type)*iNum) {
-			return AI_FAILURE;
-		}
+        if (prop->mDataLength < sizeof(Type)*iNum) {
+            return AI_FAILURE;
+        }
 
-		if (prop->mType != aiPTI_Buffer) {
-			return AI_FAILURE;
-		}
+        if (prop->mType != aiPTI_Buffer) {
+            return AI_FAILURE;
+        }
 
-		iNum = std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
-		::memcpy(pOut,prop->mData,iNum * sizeof(Type));
-		if (pMax) {
-			*pMax = iNum;
-		}
-	}
-	return ret;
+        iNum = std::min((size_t)iNum,prop->mDataLength / sizeof(Type));
+        ::memcpy(pOut,prop->mData,iNum * sizeof(Type));
+        if (pMax) {
+            *pMax = iNum;
+        }
+    }
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
 template <typename Type>
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,Type& pOut) const
+    unsigned int idx,Type& pOut) const
 {
-	const aiMaterialProperty* prop;
-	const aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,
-		(const aiMaterialProperty**)&prop);
-	if ( AI_SUCCESS == ret )	{
+    const aiMaterialProperty* prop;
+    const aiReturn ret = ::aiGetMaterialProperty(this,pKey,type,idx,
+        (const aiMaterialProperty**)&prop);
+    if ( AI_SUCCESS == ret )    {
 
-		if (prop->mDataLength < sizeof(Type)) {
-			return AI_FAILURE;
-		}
+        if (prop->mDataLength < sizeof(Type)) {
+            return AI_FAILURE;
+        }
 
-		if (prop->mType != aiPTI_Buffer) {
-			return AI_FAILURE;
-		}
+        if (prop->mType != aiPTI_Buffer) {
+            return AI_FAILURE;
+        }
 
-		::memcpy(&pOut,prop->mData,sizeof(Type));
-	}
-	return ret;
+        ::memcpy(&pOut,prop->mData,sizeof(Type));
+    }
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,float* pOut,
-	unsigned int* pMax) const
+    unsigned int idx,float* pOut,
+    unsigned int* pMax) const
 {
-	return ::aiGetMaterialFloatArray(this,pKey,type,idx,pOut,pMax);
+    return ::aiGetMaterialFloatArray(this,pKey,type,idx,pOut,pMax);
 }
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,int* pOut,
-	unsigned int* pMax) const
+    unsigned int idx,int* pOut,
+    unsigned int* pMax) const
 {
-	return ::aiGetMaterialIntegerArray(this,pKey,type,idx,pOut,pMax);
+    return ::aiGetMaterialIntegerArray(this,pKey,type,idx,pOut,pMax);
 }
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,float& pOut) const
+    unsigned int idx,float& pOut) const
 {
-	return aiGetMaterialFloat(this,pKey,type,idx,&pOut);
+    return aiGetMaterialFloat(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,int& pOut) const
+    unsigned int idx,int& pOut) const
 {
-	return aiGetMaterialInteger(this,pKey,type,idx,&pOut);
+    return aiGetMaterialInteger(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,aiColor4D& pOut) const
+    unsigned int idx,aiColor4D& pOut) const
 {
-	return aiGetMaterialColor(this,pKey,type,idx,&pOut);
+    return aiGetMaterialColor(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,aiColor3D& pOut) const
+    unsigned int idx,aiColor3D& pOut) const
 {
-	aiColor4D c;
-	const aiReturn ret = aiGetMaterialColor(this,pKey,type,idx,&c);
-	pOut = aiColor3D(c.r,c.g,c.b);
-	return ret;
+    aiColor4D c;
+    const aiReturn ret = aiGetMaterialColor(this,pKey,type,idx,&c);
+    pOut = aiColor3D(c.r,c.g,c.b);
+    return ret;
 }
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,aiString& pOut) const
+    unsigned int idx,aiString& pOut) const
 {
-	return aiGetMaterialString(this,pKey,type,idx,&pOut);
+    return aiGetMaterialString(this,pKey,type,idx,&pOut);
 }
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
-	unsigned int idx,aiUVTransform& pOut) const
+    unsigned int idx,aiUVTransform& pOut) const
 {
-	return aiGetMaterialUVTransform(this,pKey,type,idx,&pOut);
+    return aiGetMaterialUVTransform(this,pKey,type,idx,&pOut);
 }
 
 
 // ---------------------------------------------------------------------------
 template<class TYPE>
 aiReturn aiMaterial::AddProperty (const TYPE* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(TYPE),
-		pKey,type,index,aiPTI_Buffer);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(TYPE),
+        pKey,type,index,aiPTI_Buffer);
 }
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::AddProperty(const float* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(float),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(float),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::AddProperty(const aiUVTransform* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiUVTransform),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiUVTransform),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::AddProperty(const aiColor4D* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiColor4D),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiColor4D),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::AddProperty(const aiColor3D* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiColor3D),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiColor3D),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::AddProperty(const aiVector3D* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiVector3D),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiVector3D),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::AddProperty(const int* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(int),
-		pKey,type,index,aiPTI_Integer);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(int),
+        pKey,type,index,aiPTI_Integer);
 }
 
 
@@ -270,79 +270,79 @@ inline aiReturn aiMaterial::AddProperty(const int* pInput,
 // ---------------------------------------------------------------------------
 template<>
 inline aiReturn aiMaterial::AddProperty<float>(const float* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(float),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(float),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 template<>
 inline aiReturn aiMaterial::AddProperty<aiUVTransform>(const aiUVTransform* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiUVTransform),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiUVTransform),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 template<>
 inline aiReturn aiMaterial::AddProperty<aiColor4D>(const aiColor4D* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiColor4D),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiColor4D),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 template<>
 inline aiReturn aiMaterial::AddProperty<aiColor3D>(const aiColor3D* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiColor3D),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiColor3D),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 template<>
 inline aiReturn aiMaterial::AddProperty<aiVector3D>(const aiVector3D* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(aiVector3D),
-		pKey,type,index,aiPTI_Float);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiVector3D),
+        pKey,type,index,aiPTI_Float);
 }
 
 // ---------------------------------------------------------------------------
 template<>
 inline aiReturn aiMaterial::AddProperty<int>(const int* pInput,
-	const unsigned int pNumValues,
-	const char* pKey,
-	unsigned int type,
-	unsigned int index)
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
 {
-	return AddBinaryProperty((const void*)pInput,
-		pNumValues * sizeof(int),
-		pKey,type,index,aiPTI_Integer);
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(int),
+        pKey,type,index,aiPTI_Integer);
 }
 
 //! @endcond

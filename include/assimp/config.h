@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -42,11 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file config.h
  *  @brief Defines constants for configurable properties for the library
  *
- *  Typically these properties are set via 
+ *  Typically these properties are set via
  *  #Assimp::Importer::SetPropertyFloat,
  *  #Assimp::Importer::SetPropertyInteger or
- *  #Assimp::Importer::SetPropertyString, 
- *  depending on the data type of a property. All properties have a 
+ *  #Assimp::Importer::SetPropertyString,
+ *  depending on the data type of a property. All properties have a
  *  default value. See the doc for the mentioned methods for more details.
  *
  *  <br><br>
@@ -71,7 +71,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  process (i.e. IO time, importing, postprocessing, ..) and dumps
  *  these timings to the DefaultLogger. See the @link perf Performance
  *  Page@endlink for more information on this topic.
- * 
+ *
  * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_GLOB_MEASURE_TIME  \
@@ -130,7 +130,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	"PP_SBBC_MAX_BONES"
 
 
-// default limit for bone count 
+// default limit for bone count
 #if (!defined AI_SBBC_DEFAULT_MAX_BONES)
 #	define AI_SBBC_DEFAULT_MAX_BONES		60
 #endif
@@ -150,7 +150,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief Source UV channel for tangent space computation.
  *
- * The specified channel must exist or an error will be raised. 
+ * The specified channel must exist or an error will be raised.
  * Property type: integer. Default value: 0
  */
 // ---------------------------------------------------------------------------
@@ -163,8 +163,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Sometimes referred to as 'crease angle'.
  * This applies to the GenSmoothNormals-Step. The angle is specified
- * in degrees, so 180 is PI. The default value is 175 degrees (all vertex 
- * normals are smoothed). The maximum value is 175, too. Property type: float. 
+ * in degrees, so 180 is PI. The default value is 175 degrees (all vertex
+ * normals are smoothed). The maximum value is 175, too. Property type: float.
  * Warning: setting this option may cause a severe loss of performance. The
  * performance is unaffected if the #AI_CONFIG_FAVOUR_SPEED flag is set but
  * the output quality may be reduced.
@@ -180,14 +180,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This must be a valid path to a file. The file is 768 (256*3) bytes
  * large and contains RGB triplets for each of the 256 palette entries.
  * The default value is colormap.lmp. If the file is not found,
- * a default palette (from Quake 1) is used. 
+ * a default palette (from Quake 1) is used.
  * Property type: string.
  */
 #define AI_CONFIG_IMPORT_MDL_COLORMAP		\
 	"IMPORT_MDL_COLORMAP"
 
 // ---------------------------------------------------------------------------
-/** @brief Configures the #aiProcess_RemoveRedundantMaterials step to 
+/** @brief Configures the #aiProcess_RemoveRedundantMaterials step to
  *  keep materials matching a name in a given list.
  *
  * This is a list of 1 to n strings, ' ' serves as delimiter character.
@@ -196,10 +196,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * "keep-me and_me_to anotherMaterialToBeKept \'name with whitespace\'"</tt>.
  * If a material matches on of these names, it will not be modified or
  * removed by the postprocessing step nor will other materials be replaced
- * by a reference to it. <br> 
+ * by a reference to it. <br>
  * This option might be useful if you are using some magic material names
  * to pass additional semantics through the content pipeline. This ensures
- * they won't be optimized away, but a general optimization is still 
+ * they won't be optimized away, but a general optimization is still
  * performed for materials not contained in the list.
  * Property type: String. Default value: n/a
  * @note Linefeeds, tabs or carriage returns are treated as whitespace.
@@ -211,11 +211,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PreTransformVertices step to
  *  keep the scene hierarchy. Meshes are moved to worldspace, but
- *  no optimization is performed (read: meshes with equal materials are not 
+ *  no optimization is performed (read: meshes with equal materials are not
  *  joined. The total number of meshes won't change).
  *
  * This option could be of use for you if the scene hierarchy contains
- * important additional information which you intend to parse. 
+ * important additional information which you intend to parse.
  * For rendering, you can still render all meshes in the scene without
  * any transformations.
  * Property type: bool. Default value: false.
@@ -228,7 +228,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  all vertex components into the [-1,1] range. That is, a bounding box
  *  for the whole scene is computed, the maximum component is taken and all
  *  meshes are scaled appropriately (uniformly of course!).
- *  This might be useful if you don't know the spatial dimension of the input 
+ *  This might be useful if you don't know the spatial dimension of the input
  *  data*/
 #define AI_CONFIG_PP_PTV_NORMALIZE	\
 	"PP_PTV_NORMALIZE"
@@ -236,7 +236,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ---------------------------------------------------------------------------
 /** @brief Configures the #aiProcess_PreTransformVertices step to use
  *  a users defined matrix as the scene root node transformation before
- *  transforming vertices. 
+ *  transforming vertices.
  *  Property type: bool. Default value: false.
  */
 #define AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION	\
@@ -274,10 +274,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * quotation marks. For example:<tt>
  * "keep-me and_me_to anotherNodeToBeKept \'name with whitespace\'"</tt>.
  * If a node matches on of these names, it will not be modified or
- * removed by the postprocessing step.<br> 
+ * removed by the postprocessing step.<br>
  * This option might be useful if you are using some magic node names
  * to pass additional semantics through the content pipeline. This ensures
- * they won't be optimized away, but a general optimization is still 
+ * they won't be optimized away, but a general optimization is still
  * performed for nodes not contained in the list.
  * Property type: String. Default value: n/a
  * @note Linefeeds, tabs or carriage returns are treated as whitespace.
@@ -308,7 +308,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This is used by the "SplitLargeMeshes" PostProcess-Step to determine
  * whether a mesh must be split or not.
  * @note The default value is AI_SLM_DEFAULT_MAX_VERTICES
- * Property type: integer. 
+ * Property type: integer.
  */
 #define AI_CONFIG_PP_SLM_VERTEX_LIMIT \
 	"PP_SLM_VERTEX_LIMIT"
@@ -480,7 +480,7 @@ enum aiComponent
  *  Specifies the floating-point accuracy for animation values. The step
  *  checks for animation tracks where all frame values are absolutely equal
  *  and removes them. This tweakable controls the epsilon for floating-point
- *  comparisons - two keys are considered equal if the invariant 
+ *  comparisons - two keys are considered equal if the invariant
  *  abs(n0-n1)>epsilon holds true for all vector respectively quaternion
  *  components. The default value is 0.f - comparisons are exact then.
  */
@@ -505,7 +505,7 @@ enum aiComponent
  *  Specifies which UV transformations are evaluated.
  *
  *  This is a bitwise combination of the AI_UVTRAFO_XXX flags (integer
- *  property, of course). By default all transformations are enabled 
+ *  property, of course). By default all transformations are enabled
  * (AI_UVTRAFO_ALL).
  */
 #define AI_CONFIG_PP_TUV_EVALUATE				\
@@ -516,7 +516,7 @@ enum aiComponent
  *
  * Enabling this option may result in faster loading, but it needn't.
  * It represents just a hint to loaders and post-processing steps to use
- * faster code paths, if possible. 
+ * faster code paths, if possible.
  * This property is expected to be an integer, != 0 stands for true.
  * The default value is 0.
  */
@@ -649,7 +649,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the AC loader to collect all surfaces which have the
- *    "Backface cull" flag set in separate meshes. 
+ *    "Backface cull" flag set in separate meshes.
  *
  *  Property type: bool. Default value: true.
  */
@@ -659,7 +659,7 @@ enum aiComponent
 // ---------------------------------------------------------------------------
 /** @brief  Configures whether the AC loader evaluates subdivision surfaces (
  *  indicated by the presence of the 'subdiv' attribute in the file). By
- *  default, Assimp performs the subdivision using the standard 
+ *  default, Assimp performs the subdivision using the standard
  *  Catmull-Clark algorithm
  *
  * * Property type: bool. Default value: true.
@@ -677,7 +677,7 @@ enum aiComponent
 	"UNREAL_HANDLE_FLAGS"
 
 // ---------------------------------------------------------------------------
-/** @brief Configures the terragen import plugin to compute uv's for 
+/** @brief Configures the terragen import plugin to compute uv's for
  *  terrains, if not given. Furthermore a default texture is assigned.
  *
  * UV coordinates for terrains are so simple to compute that you'll usually
@@ -692,7 +692,7 @@ enum aiComponent
 // ---------------------------------------------------------------------------
 /** @brief  Configures the ASE loader to always reconstruct normal vectors
  *	basing on the smoothing groups loaded from the file.
- * 
+ *
  * Some ASE files have carry invalid normals, other don't.
  * * Property type: bool. Default value: true.
  */
@@ -700,12 +700,12 @@ enum aiComponent
 	"IMPORT_ASE_RECONSTRUCT_NORMALS"
 
 // ---------------------------------------------------------------------------
-/** @brief  Configures the M3D loader to detect and process multi-part 
+/** @brief  Configures the M3D loader to detect and process multi-part
  *    Quake player models.
  *
  * These models usually consist of 3 files, lower.md3, upper.md3 and
  * head.md3. If this property is set to true, Assimp will try to load and
- * combine all three files if one of them is loaded. 
+ * combine all three files if one of them is loaded.
  * Property type: bool. Default value: true.
  */
 #define AI_CONFIG_IMPORT_MD3_HANDLE_MULTIPART \
@@ -714,9 +714,9 @@ enum aiComponent
 // ---------------------------------------------------------------------------
 /** @brief  Tells the MD3 loader which skin files to load.
  *
- * When loading MD3 files, Assimp checks whether a file 
+ * When loading MD3 files, Assimp checks whether a file
  * [md3_file_name]_[skin_name].skin is existing. These files are used by
- * Quake III to be able to assign different skins (e.g. red and blue team) 
+ * Quake III to be able to assign different skins (e.g. red and blue team)
  * to models. 'default', 'red', 'blue' are typical skin names.
  * Property type: String. Default value: "default".
  */
@@ -727,14 +727,14 @@ enum aiComponent
 /** @brief  Specify the Quake 3 shader file to be used for a particular
  *  MD3 file. This can also be a search path.
  *
- * By default Assimp's behaviour is as follows: If a MD3 file 
- * <tt>any_path/models/any_q3_subdir/model_name/file_name.md3</tt> is 
+ * By default Assimp's behaviour is as follows: If a MD3 file
+ * <tt>any_path/models/any_q3_subdir/model_name/file_name.md3</tt> is
  * loaded, the library tries to locate the corresponding shader file in
  * <tt>any_path/scripts/model_name.shader</tt>. This property overrides this
  * behaviour. It can either specify a full path to the shader to be loaded
  * or alternatively the path (relative or absolute) to the directory where
- * the shaders for all MD3s to be loaded reside. Assimp attempts to open 
- * <tt>IMPORT_MD3_SHADER_SRC/model_name.shader</tt> first, <tt>IMPORT_MD3_SHADER_SRC/file_name.shader</tt> 
+ * the shaders for all MD3s to be loaded reside. Assimp attempts to open
+ * <tt>IMPORT_MD3_SHADER_SRC/model_name.shader</tt> first, <tt>IMPORT_MD3_SHADER_SRC/file_name.shader</tt>
  * is the fallback file. Note that IMPORT_MD3_SHADER_SRC should have a terminal (back)slash.
  * Property type: String. Default value: n/a.
  */
@@ -743,7 +743,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief  Configures the LWO loader to load just one layer from the model.
- * 
+ *
  * LWO files consist of layers and in some cases it could be useful to load
  * only one of them. This property can be either a string - which specifies
  * the name of the layer - or an integer - the index of the layer. If the
@@ -758,12 +758,12 @@ enum aiComponent
 // ---------------------------------------------------------------------------
 /** @brief  Configures the MD5 loader to not load the MD5ANIM file for
  *  a MD5MESH file automatically.
- * 
+ *
  * The default strategy is to look for a file with the same name but the
  * MD5ANIM extension in the same directory. If it is found, it is loaded
  * and combined with the MD5MESH file. This configuration option can be
  * used to disable this behaviour.
- * 
+ *
  * * Property type: bool. Default value: false.
  */
 #define AI_CONFIG_IMPORT_MD5_NO_ANIM_AUTOLOAD			\
@@ -772,7 +772,7 @@ enum aiComponent
 // ---------------------------------------------------------------------------
 /** @brief Defines the begin of the time range for which the LWS loader
  *    evaluates animations and computes aiNodeAnim's.
- * 
+ *
  * Assimp provides full conversion of LightWave's envelope system, including
  * pre and post conditions. The loader computes linearly subsampled animation
  * chanels with the frame rate given in the LWS file. This property defines
@@ -792,7 +792,7 @@ enum aiComponent
 
 // ---------------------------------------------------------------------------
 /** @brief Defines the output frame rate of the IRR loader.
- * 
+ *
  * IRR animations are difficult to convert for Assimp and there will
  * always be a loss of quality. This setting defines how many keys per second
  * are returned by the converter.<br>
@@ -805,7 +805,7 @@ enum aiComponent
 /** @brief Ogre Importer will try to find referenced materials from this file.
  *
  * Ogre meshes reference with material names, this does not tell Assimp the file
- * where it is located in. Assimp will try to find the source file in the following 
+ * where it is located in. Assimp will try to find the source file in the following
  * order: <material-name>.material, <mesh-filename-base>.material and
  * lastly the material name defined by this config property.
  * <br>
@@ -821,11 +821,11 @@ enum aiComponent
  * depends on the used shader or Ogre's fixed pipeline. If this config property
  * is true Assimp will try to detect the type from the textures filename postfix:
  * _n, _nrm, _nrml, _normal, _normals and _normalmap for normal map, _s, _spec,
- * _specular and _specularmap for specular map, _l, _light, _lightmap, _occ 
+ * _specular and _specularmap for specular map, _l, _light, _lightmap, _occ
  * and _occlusion for light map, _disp and _displacement for displacement map.
- * The matching is case insensitive. Post fix is taken between the last 
+ * The matching is case insensitive. Post fix is taken between the last
  * underscore and the last period.
- * Default behavior is to detect type from lower cased texture unit name by 
+ * Default behavior is to detect type from lower cased texture unit name by
  * matching against: normalmap, specularmap, lightmap and displacementmap.
  * For both cases if no match is found aiTextureType_DIFFUSE is used.
  * <br>
@@ -852,7 +852,7 @@ enum aiComponent
 
 
 // ---------------------------------------------------------------------------
-/** @brief Specifies whether the IFC loader skips over 
+/** @brief Specifies whether the IFC loader skips over
  *    shape representations of type 'Curve2D'.
  *
  * A lot of files contain both a faceted mesh representation and a outline
@@ -867,7 +867,7 @@ enum aiComponent
  *   algorithm to triangulate wall and floor meshes.
  *
  * If this property is set to false, walls will be either triangulated by
- * #aiProcess_Triangulate or will be passed through as huge polygons with 
+ * #aiProcess_Triangulate or will be passed through as huge polygons with
  * faked holes (i.e. holes that are connected with the outer boundary using
  * a dummy edge). It is highly recommended to set this property to true
  * if you want triangulated data because #aiProcess_Triangulate is known to

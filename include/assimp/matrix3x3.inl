@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -167,10 +167,10 @@ inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::Inverse()
 {
 	// Compute the reciprocal determinant
 	TReal det = Determinant();
-	if(det == static_cast<TReal>(0.0)) 
+	if(det == static_cast<TReal>(0.0))
 	{
 		// Matrix not invertible. Setting all elements to nan is not really
-		// correct in a mathematical sense; but at least qnans are easy to 
+		// correct in a mathematical sense; but at least qnans are easy to
 		// spot. XXX we might throw an exception instead, which would
 		// be even much better to spot :/.
 		const TReal nan = std::numeric_limits<TReal>::quiet_NaN();
@@ -247,7 +247,7 @@ inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::Translation( const aiVector2t<T
  */
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::FromToMatrix(const aiVector3t<TReal>& from, 
+inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::FromToMatrix(const aiVector3t<TReal>& from,
 	const aiVector3t<TReal>& to, aiMatrix3x3t<TReal>& mtx)
 {
 	const TReal e = from * to;
@@ -292,9 +292,9 @@ inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::FromToMatrix(const aiVector3t<T
 		const TReal c2 = static_cast<TReal>(2.0) / (v * v);
 		const TReal c3 = c1 * c2  * (u * v);
 
-		for (unsigned int i = 0; i < 3; i++) 
+		for (unsigned int i = 0; i < 3; i++)
 		{
-			for (unsigned int j = 0; j < 3; j++) 
+			for (unsigned int j = 0; j < 3; j++)
 			{
 				mtx[i][j] =  - c1 * u[i] * u[j] - c2 * v[i] * v[j]
 					+ c3 * v[i] * u[j];

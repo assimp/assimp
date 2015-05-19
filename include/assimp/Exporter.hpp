@@ -7,8 +7,8 @@ Copyright (c) 2006-2011, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -56,22 +56,22 @@ namespace Assimp	{
 
 
 // ----------------------------------------------------------------------------------
-/** CPP-API: The Exporter class forms an C++ interface to the export functionality 
+/** CPP-API: The Exporter class forms an C++ interface to the export functionality
  * of the Open Asset Import Library. Note that the export interface is available
  * only if Assimp has been built with ASSIMP_BUILD_NO_EXPORT not defined.
- * 
+ *
  * The interface is modelled after the importer interface and mostly
  * symmetric. The same rules for threading etc. apply.
  *
  * In a nutshell, there are two export interfaces: #Export, which writes the
- * output file(s) either to the regular file system or to a user-supplied 
+ * output file(s) either to the regular file system or to a user-supplied
  * #IOSystem, and #ExportToBlob which returns a linked list of memory
  * buffers (blob), each referring to one output file (in most cases
  * there will be only one output file of course, but this extra complexity is
- * needed since Assimp aims at supporting a wide range of file formats). 
- * 
- * #ExportToBlob is especially useful if you intend to work 
- * with the data in-memory. 
+ * needed since Assimp aims at supporting a wide range of file formats).
+ *
+ * #ExportToBlob is especially useful if you intend to work
+ * with the data in-memory.
 */
 
 class ASSIMP_API ExportProperties;
@@ -122,7 +122,7 @@ public:
 
 public:
 
-	
+
 	Exporter();
 	~Exporter();
 
@@ -131,18 +131,18 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Supplies a custom IO handler to the exporter to use to open and
-	 * access files. 
-	 * 
-	 * If you need #Export to use custom IO logic to access the files, 
-	 * you need to supply a custom implementation of IOSystem and 
-	 * IOFile to the exporter. 
+	 * access files.
 	 *
-	 * #Exporter takes ownership of the object and will destroy it 
+	 * If you need #Export to use custom IO logic to access the files,
+	 * you need to supply a custom implementation of IOSystem and
+	 * IOFile to the exporter.
+	 *
+	 * #Exporter takes ownership of the object and will destroy it
 	 * afterwards. The previously assigned handler will be deleted.
 	 * Pass NULL to take again ownership of your IOSystem and reset Assimp
 	 * to use its default implementation, which uses plain file IO.
 	 *
-	 * @param pIOHandler The IO handler to be used in all file accesses 
+	 * @param pIOHandler The IO handler to be used in all file accesses
 	 *   of the Importer. */
 	void SetIOHandler( IOSystem* pIOHandler);
 
@@ -156,8 +156,8 @@ public:
 	IOSystem* GetIOHandler() const;
 
 	// -------------------------------------------------------------------
-	/** Checks whether a default IO handler is active 
-	 * A default handler is active as long the application doesn't 
+	/** Checks whether a default IO handler is active
+	 * A default handler is active as long the application doesn't
 	 * supply its own custom IO handler via #SetIOHandler().
 	 * @return true by default */
 	bool IsDefaultIOHandler() const;
@@ -165,20 +165,20 @@ public:
 
 
 	// -------------------------------------------------------------------
-	/** Exports the given scene to a chosen file format. Returns the exported 
+	/** Exports the given scene to a chosen file format. Returns the exported
 	* data as a binary blob which you can write into a file or something.
-	* When you're done with the data, simply let the #Exporter instance go 
+	* When you're done with the data, simply let the #Exporter instance go
 	* out of scope to have it released automatically.
 	* @param pScene The scene to export. Stays in possession of the caller,
 	*   is not changed by the function.
-	* @param pFormatId ID string to specify to which format you want to 
-	*   export to. Use 
-	* #GetExportFormatCount / #GetExportFormatDescription to learn which 
+	* @param pFormatId ID string to specify to which format you want to
+	*   export to. Use
+	* #GetExportFormatCount / #GetExportFormatDescription to learn which
 	*   export formats are available.
 	* @param pPreprocessing See the documentation for #Export
 	* @return the exported data or NULL in case of error.
 	* @note If the Exporter instance did already hold a blob from
-	*   a previous call to #ExportToBlob, it will be disposed. 
+	*   a previous call to #ExportToBlob, it will be disposed.
 	*   Any IO handlers set via #SetIOHandler are ignored here.
 	* @note Use aiCopyScene() to get a modifiable copy of a previously
 	*   imported scene. */
@@ -194,11 +194,11 @@ public:
 	 * @param pPath Full target file name. Target must be accessible.
 	 * @param pPreprocessing Accepts any choice of the #aiPostProcessSteps enumerated
 	 *   flags, but in reality only a subset of them makes sense here. Specifying
-	 *   'preprocessing' flags is useful if the input scene does not conform to 
-	 *   Assimp's default conventions as specified in the @link data Data Structures Page @endlink. 
-	 *   In short, this means the geometry data should use a right-handed coordinate systems, face 
+	 *   'preprocessing' flags is useful if the input scene does not conform to
+	 *   Assimp's default conventions as specified in the @link data Data Structures Page @endlink.
+	 *   In short, this means the geometry data should use a right-handed coordinate systems, face
 	 *   winding should be counter-clockwise and the UV coordinate origin is assumed to be in
-	 *   the upper left. The #aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and 
+	 *   the upper left. The #aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and
 	 *   #aiProcess_FlipWindingOrder flags are used in the import side to allow users
 	 *   to have those defaults automatically adapted to their conventions. Specifying those flags
 	 *   for exporting has the opposite effect, respectively. Some other of the
@@ -206,17 +206,17 @@ public:
 	 *   to try out what their effect on the exported file is. Many formats impose
 	 *   their own restrictions on the structure of the geometry stored therein,
 	 *   so some preprocessing may have little or no effect at all, or may be
-	 *   redundant as exporters would apply them anyhow. A good example 
+	 *   redundant as exporters would apply them anyhow. A good example
 	 *   is triangulation - whilst you can enforce it by specifying
 	 *   the #aiProcess_Triangulate flag, most export formats support only
 	 *   triangulate data so they would run the step even if it wasn't requested.
 	 *
-	 *   If assimp detects that the input scene was directly taken from the importer side of 
-     *   the library (i.e. not copied using aiCopyScene and potetially modified afterwards), 
+	 *   If assimp detects that the input scene was directly taken from the importer side of
+     *   the library (i.e. not copied using aiCopyScene and potetially modified afterwards),
      *   any postprocessing steps already applied to the scene will not be applied again, unless
-     *   they show non-idempotent behaviour (#aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and 
+     *   they show non-idempotent behaviour (#aiProcess_MakeLeftHanded, #aiProcess_FlipUVs and
      *   #aiProcess_FlipWindingOrder).
-	 * @return AI_SUCCESS if everything was fine. 
+	 * @return AI_SUCCESS if everything was fine.
 	 * @note Use aiCopyScene() to get a modifiable copy of a previously
 	 *   imported scene.*/
 	aiReturn Export( const aiScene* pScene, const char* pFormatId, const char* pPath, unsigned int pPreprocessing = 0u, const ExportProperties* pProperties = NULL);
@@ -228,10 +228,10 @@ public:
 	 *    or #ExportToBlob
 	 *
 	 * Returns an empty string if no error occurred.
-	 * @return A description of the last error, an empty string if no 
+	 * @return A description of the last error, an empty string if no
 	 *   error occurred. The string is never NULL.
 	 *
-	 * @note The returned function remains valid until one of the 
+	 * @note The returned function remains valid until one of the
 	 * following methods is called: #Export, #ExportToBlob, #FreeBlob */
 	const char* GetErrorString() const;
 
@@ -251,7 +251,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Frees the current blob.
 	 *
-	 *  The function does nothing if no blob has previously been 
+	 *  The function does nothing if no blob has previously been
 	 *  previously produced via #ExportToBlob. #FreeBlob is called
 	 *  automatically by the destructor. The only reason to call
 	 *  it manually would be to reclain as much storage as possible
@@ -272,17 +272,17 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns a description of the nth export file format. Use #
-	 *  #Exporter::GetExportFormatCount to learn how many export 
-	 *  formats are supported. 
+	 *  #Exporter::GetExportFormatCount to learn how many export
+	 *  formats are supported.
 	 *
 	 * The returned pointer is of static storage duration iff the
 	 * pIndex pertains to a built-in exporter (i.e. one not registered
 	 * via #RegistrerExporter). It is restricted to the life-time of the
 	 * #Exporter instance otherwise.
 	 *
-	 * @param pIndex Index of the export format to retrieve information 
+	 * @param pIndex Index of the export format to retrieve information
 	 *  for. Valid range is 0 to #Exporter::GetExportFormatCount
-	 * @return A description of that specific export format. 
+	 * @return A description of that specific export format.
 	 *  NULL if pIndex is out of range. */
 	const aiExportFormatDesc* GetExportFormatDescription( size_t pIndex ) const;
 
@@ -307,7 +307,7 @@ public:
 	 *  builtin exporters because those are implicitly registered
 	 *  using #RegisterExporter).
 	 *  @param id Format id to be unregistered, this refers to the
-	 *    'id' field of #aiExportFormatDesc. 
+	 *    'id' field of #aiExportFormatDesc.
 	 *  @note Calling this method on a format description not yet registered
 	 *    has no effect.*/
 	void UnregisterExporter(const char* id);
@@ -325,7 +325,7 @@ class ASSIMP_API ExportProperties
 public:
 	// Data type to store the key hash
 	typedef unsigned int KeyType;
-	
+
 	// typedefs for our four configuration maps.
 	// We don't need more, so there is no need for a generic solution
 	typedef std::map<KeyType, int> IntPropertyMap;
@@ -343,7 +343,7 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Copy constructor.
-	 * 
+	 *
 	 * This copies the configuration properties of another ExportProperties.
 	 * @see ExportProperties(const ExportProperties& other)
 	 */
@@ -358,7 +358,7 @@ public:
 	 * @return true if the property was set before. The new value replaces
 	 *   the previous value in this case.
 	 * @note Property of different types (float, int, string ..) are kept
-	 *   on different stacks, so calling SetPropertyInteger() for a 
+	 *   on different stacks, so calling SetPropertyInteger() for a
 	 *   floating-point property has no effect - the loader will call
 	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
@@ -398,15 +398,15 @@ public:
 	 * @param szName Name of the property. All supported properties
 	 *   are defined in the aiConfig.g header (all constants share the
 	 *   prefix AI_CONFIG_XXX).
-	 * @param iErrorReturn Value that is returned if the property 
-	 *   is not found. 
+	 * @param iErrorReturn Value that is returned if the property
+	 *   is not found.
 	 * @return Current value of the property
 	 * @note Property of different types (float, int, string ..) are kept
-	 *   on different lists, so calling SetPropertyInteger() for a 
+	 *   on different lists, so calling SetPropertyInteger() for a
 	 *   floating-point property has no effect - the loader will call
 	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
-	int GetPropertyInteger(const char* szName, 
+	int GetPropertyInteger(const char* szName,
 		int iErrorReturn = 0xffffffff) const;
 
 	// -------------------------------------------------------------------
@@ -424,7 +424,7 @@ public:
 	/** Get a floating-point configuration property
 	 * @see GetPropertyInteger()
 	 */
-	float GetPropertyFloat(const char* szName, 
+	float GetPropertyFloat(const char* szName,
 		float fErrorReturn = 10e10f) const;
 
 	// -------------------------------------------------------------------
@@ -488,7 +488,7 @@ protected:
 
 
 // ----------------------------------------------------------------------------------
-inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,unsigned int pPreprocessing, const ExportProperties* pProperties) 
+inline const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const std::string& pFormatId,unsigned int pPreprocessing, const ExportProperties* pProperties)
 {
 	return ExportToBlob(pScene,pFormatId.c_str(),pPreprocessing, pProperties);
 }

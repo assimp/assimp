@@ -5,8 +5,8 @@ Open Asset Import Library (assimp)
 Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file Logger.hpp
- *  @brief Abstract base class 'Logger', base of the logging system. 
+ *  @brief Abstract base class 'Logger', base of the logging system.
  */
 #ifndef INCLUDED_AI_LOGGER_H
 #define INCLUDED_AI_LOGGER_H
@@ -53,7 +53,7 @@ class LogStream;
 
 // ----------------------------------------------------------------------------------
 /**	@brief CPP-API: Abstract interface for logger implementations.
- *  Assimp provides a default implementation and uses it for almost all 
+ *  Assimp provides a default implementation and uses it for almost all
  *  logging stuff ('DefaultLogger'). This class defines just basic logging
  *  behaviour and is not of interest for you. Instead, take a look at #DefaultLogger. */
 class ASSIMP_API Logger
@@ -139,11 +139,11 @@ public:
 	 *    messages are dispatched to the stream. Provide a bitwise
 	 *    combination of the ErrorSeverity flags.
 	 *  @return true if the stream has been attached, false otherwise.*/
-	virtual bool attachStream(LogStream *pStream, 
+	virtual bool attachStream(LogStream *pStream,
 		unsigned int severity = Debugging | Err | Warn | Info) = 0;
 
 	// ----------------------------------------------------------------------
-	/** @brief	Detach a still attached stream from the logger (or 
+	/** @brief	Detach a still attached stream from the logger (or
 	 *          modify the filter flags bits)
 	 *	 @param	pStream	Log-stream instance for detaching
 	 *  @param severity Provide a bitwise combination of the ErrorSeverity
@@ -151,7 +151,7 @@ public:
 	 *    if the result is 0 the stream is detached from the Logger and
 	 *    the caller retakes the possession of the stream.
 	 *  @return true if the stream has been detached, false otherwise.*/
-	virtual bool detatchStream(LogStream *pStream, 
+	virtual bool detatchStream(LogStream *pStream,
 		unsigned int severity = Debugging | Err | Warn | Info) = 0;
 
 protected:

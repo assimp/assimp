@@ -118,7 +118,7 @@ inline aiMatrix4x4t<TReal>::aiMatrix4x4t (const aiVector3t<TReal>& scaling, cons
 	b2 = m.b2 * scaling.y;
 	b3 = m.b3 * scaling.y;
 	b4 = position.y;
-	
+
 	c1 = m.c1 * scaling.z;
 	c2 = m.c2 * scaling.z;
 	c3 = m.c3 * scaling.z;

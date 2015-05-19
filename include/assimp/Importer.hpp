@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_ASSIMP_HPP
 
 #ifndef __cplusplus
-#	error This header requires C++ to be used. Use assimp.h for plain C. 
+#	error This header requires C++ to be used. Use assimp.h for plain C.
 #endif
 
 // Public ASSIMP data structures
@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp	{
 	// =======================================================================
-	// Public interface to Assimp 
+	// Public interface to Assimp
 	class Importer;
 	class Exporter; // export.hpp
 	class IOStream;
@@ -71,7 +71,7 @@ namespace Assimp	{
 	class BaseImporter;
 	class BaseProcess;
 	class SharedPostProcessInfo;
-	class BatchLoader; 
+	class BatchLoader;
 
 	// =======================================================================
 	// Holy stuff, only for members of the high council of the Jedi.
@@ -90,24 +90,24 @@ struct aiImporterDesc;
 namespace Assimp	{
 
 // ----------------------------------------------------------------------------------
-/** CPP-API: The Importer class forms an C++ interface to the functionality of the 
+/** CPP-API: The Importer class forms an C++ interface to the functionality of the
 *   Open Asset Import Library.
 *
-* Create an object of this class and call ReadFile() to import a file. 
-* If the import succeeds, the function returns a pointer to the imported data. 
-* The data remains property of the object, it is intended to be accessed 
-* read-only. The imported data will be destroyed along with the Importer 
+* Create an object of this class and call ReadFile() to import a file.
+* If the import succeeds, the function returns a pointer to the imported data.
+* The data remains property of the object, it is intended to be accessed
+* read-only. The imported data will be destroyed along with the Importer
 * object. If the import fails, ReadFile() returns a NULL pointer. In this
-* case you can retrieve a human-readable error description be calling 
+* case you can retrieve a human-readable error description be calling
 * GetErrorString(). You can call ReadFile() multiple times with a single Importer
 * instance. Actually, constructing Importer objects involves quite many
 * allocations and may take some time, so it's better to reuse them as often as
 * possible.
 *
 * If you need the Importer to do custom file handling to access the files,
-* implement IOSystem and IOStream and supply an instance of your custom 
+* implement IOSystem and IOStream and supply an instance of your custom
 * IOSystem implementation by calling SetIOHandler() before calling ReadFile().
-* If you do not assign a custion IO handler, a default handler using the 
+* If you do not assign a custion IO handler, a default handler using the
 * standard C++ IO logic will be used.
 *
 * @note One Importer instance is not thread-safe. If you use multiple
@@ -118,8 +118,8 @@ class ASSIMP_API Importer	{
 public:
 
 	// -------------------------------------------------------------------
-	/** Constructor. Creates an empty importer object. 
-	 * 
+	/** Constructor. Creates an empty importer object.
+	 *
 	 * Call ReadFile() to start the import process. The configuration
 	 * property table is initially empty.
 	 */
@@ -127,7 +127,7 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Copy constructor.
-	 * 
+	 *
 	 * This copies the configuration properties of another Importer.
 	 * If this Importer owns a scene it won't be copied.
 	 * Call ReadFile() to start the import process.
@@ -136,7 +136,7 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Destructor. The object kept ownership of the imported data,
-	 * which now will be destroyed along with the object. 
+	 * which now will be destroyed along with the object.
 	 */
 	~Importer();
 
@@ -144,7 +144,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Registers a new loader.
 	 *
-	 * @param pImp Importer to be added. The Importer instance takes 
+	 * @param pImp Importer to be added. The Importer instance takes
 	 *   ownership of the pointer, so it will be automatically deleted
 	 *   with the Importer instance.
 	 * @return AI_SUCCESS if the loader has been added. The registration
@@ -166,11 +166,11 @@ public:
 	// -------------------------------------------------------------------
 	/** Registers a new post-process step.
 	 *
-	 * At the moment, there's a small limitation: new post processing 
-	 * steps are added to end of the list, or in other words, executed 
+	 * At the moment, there's a small limitation: new post processing
+	 * steps are added to end of the list, or in other words, executed
 	 * last, after all built-in steps.
-	 * @param pImp Post-process step to be added. The Importer instance 
-	 *   takes ownership of the pointer, so it will be automatically 
+	 * @param pImp Post-process step to be added. The Importer instance
+	 *   takes ownership of the pointer, so it will be automatically
 	 *   deleted with the Importer instance.
 	 * @return AI_SUCCESS if the step has been added correctly.
 	 */
@@ -179,7 +179,7 @@ public:
 	// -------------------------------------------------------------------
 	/** Unregisters a post-process step.
 	 *
-	 * @param pImp Step to be unregistered. 
+	 * @param pImp Step to be unregistered.
 	 * @return AI_SUCCESS if the step has been removed. The function
 	 *   fails if the step is currently in use (this could happen
 	 *   if the #Importer instance is used by more than one thread) or
@@ -197,7 +197,7 @@ public:
 	 * @return true if the property was set before. The new value replaces
 	 *   the previous value in this case.
 	 * @note Property of different types (float, int, string ..) are kept
-	 *   on different stacks, so calling SetPropertyInteger() for a 
+	 *   on different stacks, so calling SetPropertyInteger() for a
 	 *   floating-point property has no effect - the loader will call
 	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
@@ -237,15 +237,15 @@ public:
 	 * @param szName Name of the property. All supported properties
 	 *   are defined in the aiConfig.g header (all constants share the
 	 *   prefix AI_CONFIG_XXX).
-	 * @param iErrorReturn Value that is returned if the property 
-	 *   is not found. 
+	 * @param iErrorReturn Value that is returned if the property
+	 *   is not found.
 	 * @return Current value of the property
 	 * @note Property of different types (float, int, string ..) are kept
-	 *   on different lists, so calling SetPropertyInteger() for a 
+	 *   on different lists, so calling SetPropertyInteger() for a
 	 *   floating-point property has no effect - the loader will call
 	 *   GetPropertyFloat() to read the property, but it won't be there.
 	 */
-	int GetPropertyInteger(const char* szName, 
+	int GetPropertyInteger(const char* szName,
 		int iErrorReturn = 0xffffffff) const;
 
 	// -------------------------------------------------------------------
@@ -263,7 +263,7 @@ public:
 	/** Get a floating-point configuration property
 	 * @see GetPropertyInteger()
 	 */
-	float GetPropertyFloat(const char* szName, 
+	float GetPropertyFloat(const char* szName,
 		float fErrorReturn = 10e10f) const;
 
 	// -------------------------------------------------------------------
@@ -286,18 +286,18 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Supplies a custom IO handler to the importer to use to open and
-	 * access files. If you need the importer to use custion IO logic to 
-	 * access the files, you need to provide a custom implementation of 
-	 * IOSystem and IOFile to the importer. Then create an instance of 
+	 * access files. If you need the importer to use custion IO logic to
+	 * access the files, you need to provide a custom implementation of
+	 * IOSystem and IOFile to the importer. Then create an instance of
 	 * your custion IOSystem implementation and supply it by this function.
 	 *
-	 * The Importer takes ownership of the object and will destroy it 
+	 * The Importer takes ownership of the object and will destroy it
 	 * afterwards. The previously assigned handler will be deleted.
 	 * Pass NULL to take again ownership of your IOSystem and reset Assimp
 	 * to use its default implementation.
 	 *
-	 * @param pIOHandler The IO handler to be used in all file accesses 
-	 *   of the Importer. 
+	 * @param pIOHandler The IO handler to be used in all file accesses
+	 *   of the Importer.
 	 */
 	void SetIOHandler( IOSystem* pIOHandler);
 
@@ -312,28 +312,28 @@ public:
 	IOSystem* GetIOHandler() const;
 
 	// -------------------------------------------------------------------
-	/** Checks whether a default IO handler is active 
-	 * A default handler is active as long the application doesn't 
+	/** Checks whether a default IO handler is active
+	 * A default handler is active as long the application doesn't
 	 * supply its own custom IO handler via #SetIOHandler().
 	 * @return true by default
 	 */
 	bool IsDefaultIOHandler() const;
 
 	// -------------------------------------------------------------------
-	/** Supplies a custom progress handler to the importer. This 
+	/** Supplies a custom progress handler to the importer. This
 	 *  interface exposes a #Update() callback, which is called
 	 *  more or less periodically (please don't sue us if it
 	 *  isn't as periodically as you'd like it to have ...).
 	 *  This can be used to implement progress bars and loading
-	 *  timeouts. 
-	 *  @param pHandler Progress callback interface. Pass NULL to 
-	 *    disable progress reporting. 
+	 *  timeouts.
+	 *  @param pHandler Progress callback interface. Pass NULL to
+	 *    disable progress reporting.
 	 *  @note Progress handlers can be used to abort the loading
 	 *    at almost any time.*/
 	void SetProgressHandler ( ProgressHandler* pHandler );
 
 	// -------------------------------------------------------------------
-	/** Retrieves the progress handler that is currently set. 
+	/** Retrieves the progress handler that is currently set.
 	 * You can use #IsDefaultProgressHandler() to check whether the returned
 	 * interface is the default handler provided by ASSIMP. The default
 	 * handler is active as long the application doesn't supply its own
@@ -343,8 +343,8 @@ public:
 	ProgressHandler* GetProgressHandler() const;
 
 	// -------------------------------------------------------------------
-	/** Checks whether a default progress handler is active 
-	 * A default handler is active as long the application doesn't 
+	/** Checks whether a default progress handler is active
+	 * A default handler is active as long the application doesn't
 	 * supply its own custom progress handler via #SetProgressHandler().
 	 * @return true by default
 	 */
@@ -356,7 +356,7 @@ public:
 	 *
 	 *  Some flags are mutually exclusive, others are probably
 	 *  not available because your excluded them from your
-	 *  Assimp builds. Calling this function is recommended if 
+	 *  Assimp builds. Calling this function is recommended if
 	 *  you're unsure.
 	 *
 	 *  @param pFlags Bitwise combination of the aiPostProcess flags.
@@ -365,17 +365,17 @@ public:
 	bool ValidateFlags(unsigned int pFlags) const;
 
 	// -------------------------------------------------------------------
-	/** Reads the given file and returns its contents if successful. 
-	 * 
-	 * If the call succeeds, the contents of the file are returned as a 
-	 * pointer to an aiScene object. The returned data is intended to be 
+	/** Reads the given file and returns its contents if successful.
+	 *
+	 * If the call succeeds, the contents of the file are returned as a
+	 * pointer to an aiScene object. The returned data is intended to be
 	 * read-only, the importer object keeps ownership of the data and will
 	 * destroy it upon destruction. If the import fails, NULL is returned.
-	 * A human-readable error description can be retrieved by calling 
+	 * A human-readable error description can be retrieved by calling
 	 * GetErrorString(). The previous scene will be deleted during this call.
 	 * @param pFile Path and filename to the file to be imported.
-	 * @param pFlags Optional post processing steps to be executed after 
-	 *   a successful import. Provide a bitwise combination of the 
+	 * @param pFlags Optional post processing steps to be executed after
+	 *   a successful import. Provide a bitwise combination of the
 	 *   #aiPostProcessSteps flags. If you wish to inspect the imported
 	 *   scene first in order to fine-tune your post-processing setup,
 	 *   consider to use #ApplyPostProcessing().
@@ -384,32 +384,32 @@ public:
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
 	 *
 	 * @note Assimp is able to determine the file format of a file
-	 * automatically. 
+	 * automatically.
 	 */
 	const aiScene* ReadFile(
-		const char* pFile, 
+		const char* pFile,
 		unsigned int pFlags);
 
 	// -------------------------------------------------------------------
 	/** Reads the given file from a memory buffer and returns its
 	 *  contents if successful.
-	 * 
-	 * If the call succeeds, the contents of the file are returned as a 
-	 * pointer to an aiScene object. The returned data is intended to be 
+	 *
+	 * If the call succeeds, the contents of the file are returned as a
+	 * pointer to an aiScene object. The returned data is intended to be
 	 * read-only, the importer object keeps ownership of the data and will
 	 * destroy it upon destruction. If the import fails, NULL is returned.
-	 * A human-readable error description can be retrieved by calling 
+	 * A human-readable error description can be retrieved by calling
 	 * GetErrorString(). The previous scene will be deleted during this call.
 	 * Calling this method doesn't affect the active IOSystem.
 	 * @param pBuffer Pointer to the file data
 	 * @param pLength Length of pBuffer, in bytes
-	 * @param pFlags Optional post processing steps to be executed after 
-	 *   a successful import. Provide a bitwise combination of the 
+	 * @param pFlags Optional post processing steps to be executed after
+	 *   a successful import. Provide a bitwise combination of the
 	 *   #aiPostProcessSteps flags. If you wish to inspect the imported
 	 *   scene first in order to fine-tune your post-processing setup,
 	 *   consider to use #ApplyPostProcessing().
 	 * @param pHint An additional hint to the library. If this is a non
-	 *   empty string, the library looks for a loader to support 
+	 *   empty string, the library looks for a loader to support
 	 *   the file extension specified by pHint and passes the file to
 	 *   the first matching loader. If this loader is unable to completely
 	 *   the request, the library continues and tries to determine the
@@ -420,14 +420,14 @@ public:
 	 *   instance. Use GetOrphanedScene() to take ownership of it.
 	 *
 	 * @note This is a straightforward way to decode models from memory
-	 * buffers, but it doesn't handle model formats that spread their 
+	 * buffers, but it doesn't handle model formats that spread their
 	 * data across multiple files or even directories. Examples include
 	 * OBJ or MD3, which outsource parts of their material info into
 	 * external scripts. If you need full functionality, provide
 	 * a custom IOSystem to make Assimp find these files and use
 	 * the regular ReadFile() API.
 	 */
-	const aiScene* ReadFileFromMemory( 
+	const aiScene* ReadFileFromMemory(
 		const void* pBuffer,
 		size_t pLength,
 		unsigned int pFlags,
@@ -439,7 +439,7 @@ public:
 	 *  This is strictly equivalent to calling #ReadFile() with the same
 	 *  flags. However, you can use this separate function to inspect
 	 *  the imported scene first to fine-tune your post-processing setup.
-	 *  @param pFlags Provide a bitwise combination of the 
+	 *  @param pFlags Provide a bitwise combination of the
 	 *   #aiPostProcessSteps flags.
 	 *  @return A pointer to the post-processed data. This is still the
 	 *   same as the pointer returned by #ReadFile(). However, if
@@ -454,31 +454,31 @@ public:
 	const aiScene* ApplyPostProcessing(unsigned int pFlags);
 
 	// -------------------------------------------------------------------
-	/** @brief Reads the given file and returns its contents if successful. 
+	/** @brief Reads the given file and returns its contents if successful.
 	 *
 	 * This function is provided for backward compatibility.
 	 * See the const char* version for detailled docs.
 	 * @see ReadFile(const char*, pFlags)  */
 	const aiScene* ReadFile(
-		const std::string& pFile, 
+		const std::string& pFile,
 		unsigned int pFlags);
 
 	// -------------------------------------------------------------------
 	/** Frees the current scene.
 	 *
-	 *  The function does nothing if no scene has previously been 
+	 *  The function does nothing if no scene has previously been
 	 *  read via ReadFile(). FreeScene() is called automatically by the
 	 *  destructor and ReadFile() itself.  */
 	void FreeScene( );
 
 	// -------------------------------------------------------------------
-	/** Returns an error description of an error that occurred in ReadFile(). 
+	/** Returns an error description of an error that occurred in ReadFile().
 	 *
 	 * Returns an empty string if no error occurred.
-	 * @return A description of the last error, an empty string if no 
+	 * @return A description of the last error, an empty string if no
 	 *   error occurred. The string is never NULL.
 	 *
-	 * @note The returned function remains valid until one of the 
+	 * @note The returned function remains valid until one of the
 	 * following methods is called: #ReadFile(), #FreeScene(). */
 	const char* GetErrorString() const;
 
@@ -490,7 +490,7 @@ public:
 
 	// -------------------------------------------------------------------
 	/** Returns the scene loaded by the last successful call to ReadFile()
-	 *  and releases the scene from the ownership of the Importer 
+	 *  and releases the scene from the ownership of the Importer
 	 *  instance. The application is now responsible for deleting the
 	 *  scene. Any further calls to GetScene() or GetOrphanedScene()
 	 *  will return NULL - until a new scene has been loaded via ReadFile().
@@ -536,7 +536,7 @@ public:
 	 * mean that ASSIMP is able to load all files with this extension ---
      * it simply means there is an importer loaded which claims to handle
 	 * files with this file extension.
-	 * @param szOut String to receive the extension list. 
+	 * @param szOut String to receive the extension list.
 	 *   Format of the list: "*.3ds;*.obj;*.dae". This is useful for
 	 *   use with the WinAPI call GetOpenFileName(Ex). */
 	void GetExtensionList(aiString& szOut) const;
@@ -601,14 +601,14 @@ public:
 	 * in memory.
 	 *
 	 * This refers to the currently loaded file, see #ReadFile().
-	 * @param in Data structure to be filled. 
+	 * @param in Data structure to be filled.
 	 * @note The returned memory statistics refer to the actual
 	 *   size of the use data of the aiScene. Heap-related overhead
 	 *   is (naturally) not included.*/
 	void GetMemoryRequirements(aiMemoryInfo& in) const;
 
 	// -------------------------------------------------------------------
-	/** Enables "extra verbose" mode. 
+	/** Enables "extra verbose" mode.
 	 *
 	 * 'Extra verbose' means the data structure is validated after *every*
 	 * single post processing step to make sure everyone modifies the data
@@ -631,7 +631,7 @@ protected:
 
 // ----------------------------------------------------------------------------
 // For compatibility, the interface of some functions taking a std::string was
-// changed to const char* to avoid crashes between binary incompatible STL 
+// changed to const char* to avoid crashes between binary incompatible STL
 // versions. This code her is inlined,  so it shouldn't cause any problems.
 // ----------------------------------------------------------------------------
 

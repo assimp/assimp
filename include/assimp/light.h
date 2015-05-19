@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -60,7 +60,7 @@ enum aiLightSourceType
 	aiLightSource_UNDEFINED     = 0x0,
 
 	//! A directional light source has a well-defined direction
-	//! but is infinitely far away. That's quite a good 
+	//! but is infinitely far away. That's quite a good
 	//! approximation for sun light.
 	aiLightSource_DIRECTIONAL   = 0x1,
 
@@ -69,7 +69,7 @@ enum aiLightSourceType
 	//! directions. A normal bulb is a point light.
 	aiLightSource_POINT         = 0x2,
 
-	//! A spot light source emits light in a specific 
+	//! A spot light source emits light in a specific
 	//! angle. It has a position and a direction it is pointing to.
 	//! A good example for a spot light is a light spot in
 	//! sport arenas.
@@ -79,7 +79,7 @@ enum aiLightSourceType
 	//! of all other lightsources.
 	//! Typically, there's at most one ambient light in a scene.
 	//! This light type doesn't have a valid position, direction, or
-	//! other properties, just a color. 
+	//! other properties, just a color.
 	aiLightSource_AMBIENT       = 0x4,
 
 
@@ -135,7 +135,7 @@ struct aiLight
 	 */
 	C_STRUCT aiVector3D mDirection;
 
-	/** Constant light attenuation factor. 
+	/** Constant light attenuation factor.
 	 *
 	 *  The intensity of the light source at a given distance 'd' from
 	 *  the light's position is
@@ -147,7 +147,7 @@ struct aiLight
 	 */
 	float mAttenuationConstant;
 
-	/** Linear light attenuation factor. 
+	/** Linear light attenuation factor.
 	 *
 	 *  The intensity of the light source at a given distance 'd' from
 	 *  the light's position is
@@ -159,8 +159,8 @@ struct aiLight
 	 */
 	float mAttenuationLinear;
 
-	/** Quadratic light attenuation factor. 
-	 *  
+	/** Quadratic light attenuation factor.
+	 *
 	 *  The intensity of the light source at a given distance 'd' from
 	 *  the light's position is
 	 *  @code
@@ -173,7 +173,7 @@ struct aiLight
 
 	/** Diffuse color of the light source
 	 *
-	 *  The diffuse light color is multiplied with the diffuse 
+	 *  The diffuse light color is multiplied with the diffuse
 	 *  material color to obtain the final color that contributes
 	 *  to the diffuse shading term.
 	 */
@@ -200,7 +200,7 @@ struct aiLight
 	/** Inner angle of a spot light's light cone.
 	 *
 	 *  The spot light has maximum influence on objects inside this
-	 *  angle. The angle is given in radians. It is 2PI for point 
+	 *  angle. The angle is given in radians. It is 2PI for point
 	 *  lights and undefined for directional lights.
 	 */
 	float mAngleInnerCone;
@@ -208,12 +208,12 @@ struct aiLight
 	/** Outer angle of a spot light's light cone.
 	 *
 	 *  The spot light does not affect objects outside this angle.
-	 *  The angle is given in radians. It is 2PI for point lights and 
+	 *  The angle is given in radians. It is 2PI for point lights and
 	 *  undefined for directional lights. The outer angle must be
 	 *  greater than or equal to the inner angle.
 	 *  It is assumed that the application uses a smooth
 	 *  interpolation between the inner and the outer cone of the
-	 *  spot light. 
+	 *  spot light.
 	 */
 	float mAngleOuterCone;
 

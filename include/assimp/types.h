@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,22 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
 /** @file types.h
- *  Basic data types and primitives, such as vectors or colors. 
+ *  Basic data types and primitives, such as vectors or colors.
  */
 #ifndef AI_TYPES_H_INC
 #define AI_TYPES_H_INC
@@ -73,7 +73,7 @@ namespace Assimp	{
 	//! @cond never
 namespace Intern		{
 	// --------------------------------------------------------------------
-	/** @brief Internal helper class to utilize our internal new/delete 
+	/** @brief Internal helper class to utilize our internal new/delete
 	 *    routines for allocating object of this and derived classes.
 	 *
 	 * By doing this you can safely share class objects between Assimp
@@ -124,7 +124,7 @@ struct aiPlane
 {
 #ifdef __cplusplus
 	aiPlane () : a(0.f), b(0.f), c(0.f), d(0.f) {}
-	aiPlane (float _a, float _b, float _c, float _d) 
+	aiPlane (float _a, float _b, float _c, float _d)
 		: a(_a), b(_b), c(_c), d(_d) {}
 
 	aiPlane (const aiPlane& o) : a(o.a), b(o.b), c(o.c), d(o.d) {}
@@ -154,7 +154,7 @@ struct aiRay
 } PACK_STRUCT; // !struct aiRay
 
 // ----------------------------------------------------------------------------------
-/** Represents a color in Red-Green-Blue space. 
+/** Represents a color in Red-Green-Blue space.
 */
 struct aiColor3D
 {
@@ -163,7 +163,7 @@ struct aiColor3D
 	aiColor3D (float _r, float _g, float _b) : r(_r), g(_g), b(_b) {}
 	aiColor3D (float _r) : r(_r), g(_r), b(_r) {}
 	aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
-	
+
 	/** Component-wise comparison */
 	// TODO: add epsilon?
 	bool operator == (const aiColor3D& other) const
@@ -198,7 +198,7 @@ struct aiColor3D
 	aiColor3D operator*(const aiColor3D& c) const {
 		return aiColor3D(r*c.r,g*c.g,b*c.b);
 	}
-	
+
 	/** Multiply with a scalar */
 	aiColor3D operator*(float f) const {
 		return aiColor3D(r*f,g*f,b*f);
@@ -233,18 +233,18 @@ struct aiColor3D
  *  The character set of an aiString is explicitly defined to be UTF-8. This Unicode
  *  transformation was chosen in the belief that most strings in 3d files are limited
  *  to ASCII, thus the character set needed to be strictly ASCII compatible.
- *  
+ *
  *  Most text file loaders provide proper Unicode input file handling, special unicode
  *  characters are correctly transcoded to UTF8 and are kept throughout the libraries'
- *  import pipeline. 
+ *  import pipeline.
  *
  *  For most applications, it will be absolutely sufficient to interpret the
- *  aiString as ASCII data and work with it as one would work with a plain char*. 
+ *  aiString as ASCII data and work with it as one would work with a plain char*.
  *  Windows users in need of proper support for i.e asian characters can use the
  *  MultiByteToWideChar(), WideCharToMultiByte() WinAPI functionality to convert the
  *  UTF-8 strings to their working character set (i.e. MBCS, WideChar).
  *
- *  We use this representation instead of std::string to be C-compatible. The 
+ *  We use this representation instead of std::string to be C-compatible. The
  *  (binary) length of such a string is limited to MAXLEN characters (including the
  *  the terminating zero).
 */
@@ -253,7 +253,7 @@ struct aiString
 #ifdef __cplusplus
 	/** Default constructor, the string is set to have zero length */
 	aiString() :
-		length(0) 
+		length(0)
 	{
 		data[0] = '\0';
 
@@ -264,8 +264,8 @@ struct aiString
 	}
 
 	/** Copy constructor */
-	aiString(const aiString& rOther) : 
-		length(rOther.length) 
+	aiString(const aiString& rOther) :
+		length(rOther.length)
 	{
 		// Crop the string to the maximum length
 		length = length>=MAXLEN?MAXLEN-1:length;
@@ -274,8 +274,8 @@ struct aiString
 	}
 
 	/** Constructor from std::string */
-	explicit aiString(const std::string& pString) : 
-		length(pString.length()) 
+	explicit aiString(const std::string& pString) :
+		length(pString.length())
 	{
 		length = length>=MAXLEN?MAXLEN-1:length;
 		memcpy( data, pString.c_str(), length);
@@ -357,7 +357,7 @@ struct aiString
 
 #endif // !__cplusplus
 
-	/** Binary length of the string excluding the terminal 0. This is NOT the 
+	/** Binary length of the string excluding the terminal 0. This is NOT the
 	 *  logical length of strings containing UTF-8 multibyte sequences! It's
 	 *  the number of bytes from the beginning of the string to its end.*/
 	size_t length;
@@ -380,14 +380,14 @@ typedef enum aiReturn
 	aiReturn_FAILURE = -0x1,
 
 	/** Indicates that not enough memory was available
-	 * to perform the requested operation 
+	 * to perform the requested operation
 	 */
 	aiReturn_OUTOFMEMORY = -0x3,
 
-	/** @cond never 
+	/** @cond never
 	 *  Force 32-bit size enum
 	 */
-	_AI_ENFORCE_ENUM_SIZE = 0x7fffffff 
+	_AI_ENFORCE_ENUM_SIZE = 0x7fffffff
 
     /// @endcond
 } aiReturn;  // !enum aiReturn
@@ -404,28 +404,28 @@ typedef enum aiReturn
 enum aiOrigin
 {
 	/** Beginning of the file */
-	aiOrigin_SET = 0x0,	
+	aiOrigin_SET = 0x0,
 
 	/** Current position of the file pointer */
-	aiOrigin_CUR = 0x1,		
+	aiOrigin_CUR = 0x1,
 
 	/** End of the file, offsets must be negative */
 	aiOrigin_END = 0x2,
 
-	/**  @cond never 
-	 *   Force 32-bit size enum 
+	/**  @cond never
+	 *   Force 32-bit size enum
 	 */
-	_AI_ORIGIN_ENFORCE_ENUM_SIZE = 0x7fffffff 
-	
+	_AI_ORIGIN_ENFORCE_ENUM_SIZE = 0x7fffffff
+
 	/// @endcond
 }; // !enum aiOrigin
 
 // ----------------------------------------------------------------------------------
-/** @brief Enumerates predefined log streaming destinations. 
- *  Logging to these streams can be enabled with a single call to 
+/** @brief Enumerates predefined log streaming destinations.
+ *  Logging to these streams can be enabled with a single call to
  *   #LogStream::createDefaultStream.
  */
-enum aiDefaultLogStream	
+enum aiDefaultLogStream
 {
 	/** Stream the log to a file */
 	aiDefaultLogStream_FILE = 0x1,
@@ -441,10 +441,10 @@ enum aiDefaultLogStream
 	 */
 	aiDefaultLogStream_DEBUGGER = 0x8,
 
-	/** @cond never 
-	 *  Force 32-bit size enum 
+	/** @cond never
+	 *  Force 32-bit size enum
 	 */
-	_AI_DLS_ENFORCE_ENUM_SIZE = 0x7fffffff 
+	_AI_DLS_ENFORCE_ENUM_SIZE = 0x7fffffff
 	/// @endcond
 }; // !enum aiDefaultLogStream
 
@@ -500,7 +500,7 @@ struct aiMemoryInfo
 
 	/** Total storage allocated for the full import. */
 	unsigned int total;
-}; // !struct aiMemoryInfo 
+}; // !struct aiMemoryInfo
 
 #ifdef __cplusplus
 }
@@ -513,4 +513,4 @@ struct aiMemoryInfo
 #include "quaternion.inl"
 #include "matrix3x3.inl"
 #include "matrix4x4.inl"
-#endif 
+#endif

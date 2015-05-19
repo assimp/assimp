@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -58,10 +58,10 @@ extern "C" {
 struct aiVectorKey
 {
 	/** The time of this key */
-	double mTime;     
-	
+	double mTime;
+
 	/** The value of this key */
-	C_STRUCT aiVector3D mValue; 
+	C_STRUCT aiVector3D mValue;
 
 #ifdef __cplusplus
 
@@ -96,15 +96,15 @@ struct aiVectorKey
 };
 
 // ---------------------------------------------------------------------------
-/** A time-value pair specifying a rotation for the given time. 
+/** A time-value pair specifying a rotation for the given time.
  *  Rotations are expressed with quaternions. */
 struct aiQuatKey
 {
 	/** The time of this key */
-	double mTime;     
+	double mTime;
 
 	/** The value of this key */
-	C_STRUCT aiQuaternion mValue; 
+	C_STRUCT aiQuaternion mValue;
 
 #ifdef __cplusplus
 	aiQuatKey(){
@@ -138,12 +138,12 @@ struct aiQuatKey
 
 // ---------------------------------------------------------------------------
 /** Binds a anim mesh to a specific point in time. */
-struct aiMeshKey 
+struct aiMeshKey
 {
 	/** The time of this key */
 	double mTime;
 
-	/** Index into the aiMesh::mAnimMeshes array of the 
+	/** Index into the aiMesh::mAnimMeshes array of the
 	 *  mesh coresponding to the #aiMeshAnim hosting this
 	 *  key frame. The referenced anim mesh is evaluated
 	 *  according to the rules defined in the docs for #aiAnimMesh.*/
@@ -183,12 +183,12 @@ struct aiMeshKey
 
 // ---------------------------------------------------------------------------
 /** Defines how an animation channel behaves outside the defined time
- *  range. This corresponds to aiNodeAnim::mPreState and 
+ *  range. This corresponds to aiNodeAnim::mPreState and
  *  aiNodeAnim::mPostState.*/
 enum aiAnimBehaviour
 {
 	/** The value from the default node transformation is taken*/
-	aiAnimBehaviour_DEFAULT  = 0x0,  
+	aiAnimBehaviour_DEFAULT  = 0x0,
 
 	/** The nearest key value is used without interpolation */
 	aiAnimBehaviour_CONSTANT = 0x1,
@@ -213,9 +213,9 @@ enum aiAnimBehaviour
 };
 
 // ---------------------------------------------------------------------------
-/** Describes the animation of a single node. The name specifies the 
+/** Describes the animation of a single node. The name specifies the
  *  bone/node which is affected by this animation channel. The keyframes
- *  are given in three separate series of values, one each for position, 
+ *  are given in three separate series of values, one each for position,
  *  rotation and scaling. The transformation matrix computed from these
  *  values replaces the node's original transformation matrix at a
  *  specific time.
@@ -225,18 +225,18 @@ enum aiAnimBehaviour
  *
  *  @note All keys are returned in their correct, chronological order.
  *  Duplicate keys don't pass the validation step. Most likely there
- *  will be no negative time values, but they are not forbidden also ( so 
+ *  will be no negative time values, but they are not forbidden also ( so
  *  implementations need to cope with them! ) */
 struct aiNodeAnim
 {
-	/** The name of the node affected by this animation. The node 
+	/** The name of the node affected by this animation. The node
 	 *  must exist and it must be unique.*/
 	C_STRUCT aiString mNodeName;
 
 	/** The number of position keys */
 	unsigned int mNumPositionKeys;
 
-	/** The position keys of this animation channel. Positions are 
+	/** The position keys of this animation channel. Positions are
 	 * specified as 3D vector. The array is mNumPositionKeys in size.
 	 *
 	 * If there are position keys, there will also be at least one
@@ -246,8 +246,8 @@ struct aiNodeAnim
 	/** The number of rotation keys */
 	unsigned int mNumRotationKeys;
 
-	/** The rotation keys of this animation channel. Rotations are 
-	 *  given as quaternions,  which are 4D vectors. The array is 
+	/** The rotation keys of this animation channel. Rotations are
+	 *  given as quaternions,  which are 4D vectors. The array is
 	 *  mNumRotationKeys in size.
 	 *
 	 * If there are rotation keys, there will also be at least one
@@ -258,7 +258,7 @@ struct aiNodeAnim
 	/** The number of scaling keys */
 	unsigned int mNumScalingKeys;
 
-	/** The scaling keys of this animation channel. Scalings are 
+	/** The scaling keys of this animation channel. Scalings are
 	 *  specified as 3D vector. The array is mNumScalingKeys in size.
 	 *
 	 * If there are scaling keys, there will also be at least one
@@ -273,7 +273,7 @@ struct aiNodeAnim
 	 *  transformation matrix of the affected node is used).*/
 	C_ENUM aiAnimBehaviour mPreState;
 
-	/** Defines how the animation behaves after the last 
+	/** Defines how the animation behaves after the last
 	 *  key was processed.
 	 *
 	 *  The default value is aiAnimBehaviour_DEFAULT (the original
@@ -283,9 +283,9 @@ struct aiNodeAnim
 #ifdef __cplusplus
 	aiNodeAnim()
 	{
-		mNumPositionKeys = 0; mPositionKeys = NULL; 
-		mNumRotationKeys = 0; mRotationKeys = NULL; 
-		mNumScalingKeys  = 0; mScalingKeys  = NULL; 
+		mNumPositionKeys = 0; mPositionKeys = NULL;
+		mNumRotationKeys = 0; mRotationKeys = NULL;
+		mNumScalingKeys  = 0; mScalingKeys  = NULL;
 
 		mPreState = mPostState = aiAnimBehaviour_DEFAULT;
 	}
@@ -302,7 +302,7 @@ struct aiNodeAnim
 // ---------------------------------------------------------------------------
 /** Describes vertex-based animations for a single mesh or a group of
  *  meshes. Meshes carry the animation data for each frame in their
- *  aiMesh::mAnimMeshes array. The purpose of aiMeshAnim is to 
+ *  aiMesh::mAnimMeshes array. The purpose of aiMeshAnim is to
  *  define keyframes linking each mesh attachment to a particular
  *  point in time. */
 struct aiMeshAnim
@@ -335,12 +335,12 @@ struct aiMeshAnim
 };
 
 // ---------------------------------------------------------------------------
-/** An animation consists of keyframe data for a number of nodes. For 
+/** An animation consists of keyframe data for a number of nodes. For
  *  each node affected by the animation a separate series of data is given.*/
 struct aiAnimation
 {
-	/** The name of the animation. If the modeling package this data was 
-	 *  exported from does support only a single animation channel, this 
+	/** The name of the animation. If the modeling package this data was
+	 *  exported from does support only a single animation channel, this
 	 *  name is usually empty (length is zero). */
 	C_STRUCT aiString mName;
 
@@ -354,7 +354,7 @@ struct aiAnimation
 	 *  a single node. */
 	unsigned int mNumChannels;
 
-	/** The node animation channels. Each channel affects a single node. 
+	/** The node animation channels. Each channel affects a single node.
 	 *  The array is mNumChannels in size. */
 	C_STRUCT aiNodeAnim** mChannels;
 
@@ -363,7 +363,7 @@ struct aiAnimation
 	 *  a single mesh and defines vertex-based animation. */
 	unsigned int mNumMeshChannels;
 
-	/** The mesh animation channels. Each channel affects a single mesh. 
+	/** The mesh animation channels. Each channel affects a single mesh.
 	 *  The array is mNumMeshChannels in size. */
 	C_STRUCT aiMeshAnim** mMeshChannels;
 
@@ -412,8 +412,8 @@ namespace Assimp {
  *  The type of interpolation is choosen automatically depending on the
  *  types of the arguments. */
 template <typename T>
-struct Interpolator		
-{	
+struct Interpolator
+{
 	// ------------------------------------------------------------------
 	/** @brief Get the result of the interpolation between a,b.
 	 *
@@ -428,8 +428,8 @@ struct Interpolator
 //! @cond Never
 
 template <>
-struct Interpolator	<aiQuaternion>	{	
-	void operator () (aiQuaternion& out,const aiQuaternion& a, 
+struct Interpolator	<aiQuaternion>	{
+	void operator () (aiQuaternion& out,const aiQuaternion& a,
 		const aiQuaternion& b, float d) const
 	{
 		aiQuaternion::Interpolate(out,a,b,d);
@@ -437,8 +437,8 @@ struct Interpolator	<aiQuaternion>	{
 }; // ! Interpolator <aiQuaternion>
 
 template <>
-struct Interpolator	<unsigned int>	{	
-	void operator () (unsigned int& out,unsigned int a, 
+struct Interpolator	<unsigned int>	{
+	void operator () (unsigned int& out,unsigned int a,
 		unsigned int b, float d) const
 	{
 		out = d>0.5f ? b : a;
@@ -446,9 +446,9 @@ struct Interpolator	<unsigned int>	{
 }; // ! Interpolator <aiQuaternion>
 
 template <>
-struct Interpolator	 <aiVectorKey>	{	
+struct Interpolator	 <aiVectorKey>	{
 	void operator () (aiVector3D& out,const aiVectorKey& a,
-		const aiVectorKey& b, float d) const	
+		const aiVectorKey& b, float d) const
 	{
 		Interpolator<aiVector3D> ipl;
 		ipl(out,a.mValue,b.mValue,d);

@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -60,7 +60,7 @@ extern "C" {
 
 // --------------------------------------------------------------------------------
 /** @def AI_MAKE_EMBEDDED_TEXNAME
- *  Used to build the reserved path name used by the material system to 
+ *  Used to build the reserved path name used by the material system to
  *  reference textures that are embedded into their corresponding
  *  model files. The parameter specifies the index of the texture
  *  (zero-based, in the aiScene::mTextures array)
@@ -74,7 +74,7 @@ extern "C" {
 
 // --------------------------------------------------------------------------------
 /** @brief Helper structure to represent a texel in a ARGB8888 format
-* 
+*
 *  Used by aiTexture.
 */
 struct aiTexel
@@ -109,11 +109,11 @@ struct aiTexel
 
 // --------------------------------------------------------------------------------
 /** Helper structure to describe an embedded texture
- * 
+ *
  * Normally textures are contained in external files but some file formats embed
- * them directly in the model file. There are two types of embedded textures: 
- * 1. Uncompressed textures. The color data is given in an uncompressed format. 
- * 2. Compressed textures stored in a file format like png or jpg. The raw file 
+ * them directly in the model file. There are two types of embedded textures:
+ * 1. Uncompressed textures. The color data is given in an uncompressed format.
+ * 2. Compressed textures stored in a file format like png or jpg. The raw file
  * bytes are given so the application must utilize an image decoder (e.g. DevIL) to
  * get access to the actual color data.
  */
@@ -140,8 +140,8 @@ struct aiTexture
 	 * If mHeight != 0 this member is undefined. Otherwise it
 	 * is set set to '\\0\\0\\0\\0' if the loader has no additional
 	 * information about the texture file format used OR the
-	 * file extension of the format without a trailing dot. If there 
-	 * are multiple file extensions for a format, the shortest 
+	 * file extension of the format without a trailing dot. If there
+	 * are multiple file extensions for a format, the shortest
 	 * extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
 	 * E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
 	 * The fourth character will always be '\\0'.

@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -74,7 +74,7 @@ public:
 	// -------------------------------------------------------------------
 	/** @brief Default constructor.
 	 *
-	 *  Create an instance of your derived class and assign it to an 
+	 *  Create an instance of your derived class and assign it to an
 	 *  #Assimp::Importer instance by calling Importer::SetIOHandler().
 	 */
 	IOSystem();
@@ -97,7 +97,7 @@ public:
 	AI_FORCE_INLINE bool Exists( const std::string& pFile) const;
 
 	// -------------------------------------------------------------------
-	/** @brief Tests for the existence of a file at the given path. 
+	/** @brief Tests for the existence of a file at the given path.
 	 *
 	 * @param pFile Path to the file
 	 * @return true if there is a file with this path, else false.
@@ -125,9 +125,9 @@ public:
 	 *         "rb", "r", "rt".
 	 *
 	 *  @return New IOStream interface allowing the lib to access
-	 *         the underlying file. 
-	 *  @note When implementing this class to provide custom IO handling, 
-	 *  you probably have to supply an own implementation of IOStream as well. 
+	 *         the underlying file.
+	 *  @note When implementing this class to provide custom IO handling,
+	 *  you probably have to supply an own implementation of IOStream as well.
 	 */
 	virtual IOStream* Open(const char* pFile,
 		const char* pMode = "rb") = 0;
@@ -142,7 +142,7 @@ public:
 
 
 	// -------------------------------------------------------------------
-	/** @brief Closes the given file and releases all resources 
+	/** @brief Closes the given file and releases all resources
 	 *    associated with it.
 	 *  @param pFile The file instance previously created by Open().
 	 */
@@ -151,8 +151,8 @@ public:
 	// -------------------------------------------------------------------
 	/** @brief Compares two paths and check whether the point to
 	 *         identical files.
-	 *  
-	 * The dummy implementation of this virtual member performs a 
+	 *
+	 * The dummy implementation of this virtual member performs a
 	 * case-insensitive comparison of the given strings. The default IO
 	 * system implementation uses OS mechanisms to convert relative into
 	 * absolute paths, so the result can be trusted.
@@ -161,32 +161,32 @@ public:
 	 * @return true if the paths point to the same file. The file needn't
 	 *   be existing, however.
 	 */
-	virtual bool ComparePaths (const char* one, 
+	virtual bool ComparePaths (const char* one,
 		const char* second) const;
 
 	// -------------------------------------------------------------------
 	/** @brief For backward compatibility
 	 *  @see ComparePaths(const char*, const char*)
 	 */
-	inline bool ComparePaths (const std::string& one, 
+	inline bool ComparePaths (const std::string& one,
 		const std::string& second) const;
 };
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::IOSystem() 
+AI_FORCE_INLINE IOSystem::IOSystem()
 {
 	// empty
 }
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::~IOSystem() 
+AI_FORCE_INLINE IOSystem::~IOSystem()
 {
 	// empty
 }
 
 // ----------------------------------------------------------------------------
 // For compatibility, the interface of some functions taking a std::string was
-// changed to const char* to avoid crashes between binary incompatible STL 
+// changed to const char* to avoid crashes between binary incompatible STL
 // versions. This code her is inlined,  so it shouldn't cause any problems.
 // ----------------------------------------------------------------------------
 
@@ -196,7 +196,7 @@ AI_FORCE_INLINE IOStream* IOSystem::Open(const std::string& pFile,
 {
 	// NOTE:
 	// For compatibility, interface was changed to const char* to
-	// avoid crashes between binary incompatible STL versions 
+	// avoid crashes between binary incompatible STL versions
 	return Open(pFile.c_str(),pMode.c_str());
 }
 
@@ -205,17 +205,17 @@ AI_FORCE_INLINE bool IOSystem::Exists( const std::string& pFile) const
 {
 	// NOTE:
 	// For compatibility, interface was changed to const char* to
-	// avoid crashes between binary incompatible STL versions 
+	// avoid crashes between binary incompatible STL versions
 	return Exists(pFile.c_str());
 }
 
 // ----------------------------------------------------------------------------
-inline bool IOSystem::ComparePaths (const std::string& one, 
+inline bool IOSystem::ComparePaths (const std::string& one,
 	const std::string& second) const
 {
 	// NOTE:
 	// For compatibility, interface was changed to const char* to
-	// avoid crashes between binary incompatible STL versions 
+	// avoid crashes between binary incompatible STL versions
 	return ComparePaths(one.c_str(),second.c_str());
 }
 

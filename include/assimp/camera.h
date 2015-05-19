@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -53,16 +53,16 @@ extern "C" {
 #endif
 
 // ---------------------------------------------------------------------------
-/** Helper structure to describe a virtual camera. 
+/** Helper structure to describe a virtual camera.
  *
  * Cameras have a representation in the node graph and can be animated.
  * An important aspect is that the camera itself is also part of the
- * scenegraph. This means, any values such as the look-at vector are not 
+ * scenegraph. This means, any values such as the look-at vector are not
  * *absolute*, they're <b>relative</b> to the coordinate system defined
  * by the node which corresponds to the camera. This allows for camera
  * animations. For static cameras parameters like the 'look-at' or 'up' vectors
  * are usually specified directly in aiCamera, but beware, they could also
- * be encoded in the node transformation. The following (pseudo)code sample 
+ * be encoded in the node transformation. The following (pseudo)code sample
  * shows how to do it: <br><br>
  * @code
  * // Get the camera matrix for a camera at a specific time
@@ -93,7 +93,7 @@ extern "C" {
  * called "<camName>.Target". However this is just additional information
  * then the transformation tracks of the camera main node make the
  * camera already look in the right direction.
- * 
+ *
 */
 struct aiCamera
 {
@@ -134,7 +134,7 @@ struct aiCamera
 	C_STRUCT aiVector3D mLookAt;
 
 
-	/** Half horizontal field of view angle, in radians. 
+	/** Half horizontal field of view angle, in radians.
 	 *
 	 *  The field of view angle is the angle between the center
 	 *  line of the screen and the left or right border.
@@ -183,7 +183,7 @@ struct aiCamera
 	/** @brief Get a *right-handed* camera matrix from me
 	 *  @param out Camera matrix to be filled
 	 */
-	void GetCameraMatrix (aiMatrix4x4& out) const 
+	void GetCameraMatrix (aiMatrix4x4& out) const
 	{
 		/** todo: test ... should work, but i'm not absolutely sure */
 
@@ -199,7 +199,7 @@ struct aiCamera
 		out.a1 = xaxis.x;
 		out.a2 = xaxis.y;
 		out.a3 = xaxis.z;
-		
+
 		out.b1 = yaxis.x;
 		out.b2 = yaxis.y;
 		out.b3 = yaxis.z;

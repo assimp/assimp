@@ -346,8 +346,8 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
 				{
 					// Need to rely on falloff_exponent. I don't know how to interpret it, so I need to guess ....
 					// epsilon chosen to be 0.1
-					out->mAngleOuterCone = AI_DEG_TO_RAD (std::acos(std::pow(0.1f,1.f/srcLight->mFalloffExponent))+
-						srcLight->mFalloffAngle);
+					out->mAngleOuterCone = std::acos(std::pow(0.1f,1.f/srcLight->mFalloffExponent))+
+							out->mAngleInnerCone;
 				}
 				else {
 					out->mAngleOuterCone = out->mAngleInnerCone + AI_DEG_TO_RAD(  srcLight->mPenumbraAngle );

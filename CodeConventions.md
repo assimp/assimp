@@ -7,25 +7,6 @@ If you want to participate as a developer in the **Open Asset Import Library** p
 Spacing
 ==
 
-* No spaces between parentheses and arguments - i.e. ```foo(bar)```, not ```foo( bar )```
-
-Tabs
---
-
-The tab width shall be 4 spaces.  Use spaces instead of tabs.
-
-Class/Struct Initialization
-==
-Constructors shall use initializer lists as follows:
-```cpp
-SomeClass()
-    : mExists(false)
-    , mCounter()
-    , mPtr()
-{}
-```
-
-* Initializations are one-per-line
-* Commas go at the beginning of the line rather than the end
-* The order of the list must match the order of declaration in the class
-* Any member with a default value should leave out the optional *NULL* or *0* - e.g. ```foo()```, not ```foo(NULL)```
+* Use UNIX-style line endings (LF)
+* Remove any trailing whitespace
+* Expand tabs to 4 spaces

@@ -57,22 +57,33 @@ TEST_F(ColladaExportLight, testExportLight)
 
 	EXPECT_TRUE(imported->HasLights());
 	EXPECT_EQ(pTest->mNumLights,imported->mNumLights);
-/*
-	for(size_t i=0; i< pTest->mNumCameras;i++){
 
-		const aiCamera *orig = pTest->mCameras[i];
-		const aiCamera *read = imported->mCameras[i];
+	for(size_t i=0; i< pTest->mNumLights;i++){
+
+		const aiLight *orig = pTest->mLights[i];
+		const aiLight *read = imported->mLights[i];
 
 		EXPECT_TRUE(orig->mName==read->mName);
-		EXPECT_FLOAT_EQ(orig->mHorizontalFOV,read->mHorizontalFOV);
-		EXPECT_FLOAT_EQ(orig->mClipPlaneNear,read->mClipPlaneNear);
-		EXPECT_FLOAT_EQ(orig->mClipPlaneFar,read->mClipPlaneFar);
+		EXPECT_EQ(orig->mType,read->mType);
+		EXPECT_FLOAT_EQ(orig->mAttenuationConstant,read->mAttenuationConstant);
+		EXPECT_FLOAT_EQ(orig->mAttenuationLinear,read->mAttenuationLinear);
+		EXPECT_FLOAT_EQ(orig->mAttenuationQuadratic,read->mAttenuationQuadratic);
 
-		EXPECT_FLOAT_EQ(orig->mPosition.x,read->mPosition.x);
-		EXPECT_FLOAT_EQ(orig->mPosition.y,read->mPosition.y);
-		EXPECT_FLOAT_EQ(orig->mPosition.z,read->mPosition.z);
+		EXPECT_FLOAT_EQ(orig->mColorAmbient.r,read->mColorAmbient.r);
+		EXPECT_FLOAT_EQ(orig->mColorAmbient.g,read->mColorAmbient.g);
+		EXPECT_FLOAT_EQ(orig->mColorAmbient.b,read->mColorAmbient.b);
+
+		EXPECT_FLOAT_EQ(orig->mColorDiffuse.r,read->mColorDiffuse.r);
+		EXPECT_FLOAT_EQ(orig->mColorDiffuse.g,read->mColorDiffuse.g);
+		EXPECT_FLOAT_EQ(orig->mColorDiffuse.b,read->mColorDiffuse.b);
+
+		EXPECT_FLOAT_EQ(orig->mColorSpecular.r,read->mColorSpecular.r);
+		EXPECT_FLOAT_EQ(orig->mColorSpecular.g,read->mColorSpecular.g);
+		EXPECT_FLOAT_EQ(orig->mColorSpecular.b,read->mColorSpecular.b);
+
+		EXPECT_NEAR(orig->mAngleInnerCone,read->mAngleInnerCone,0.001);
+		EXPECT_NEAR(orig->mAngleOuterCone,read->mAngleOuterCone,0.001);
 	}
-*/
 }
 
 

@@ -430,15 +430,7 @@ void ColladaExporter::WriteDirectionalLight(const aiLight *const light){
 
 }
 void ColladaExporter::WriteSpotLight(const aiLight *const light){
-	  /*<spot>
-	          <color sid="color">1 1 1</color>
-	          <constant_attenuation>1</constant_attenuation>
-	          <linear_attenuation>0</linear_attenuation>
-	          <quadratic_attenuation>0.001599967</quadratic_attenuation>
-	          <falloff_angle sid="fall_off_angle">45</falloff_angle>
-	          <falloff_exponent sid="fall_off_exponent">0.15</falloff_exponent>
-	        </spot>
-	  */
+
 	const aiColor3D &color=  light->mColorDiffuse;
 	mOutput << startstr << "<spot>" << endstr;
 	PushTag();
@@ -1056,14 +1048,14 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 		//check if it is a camera node
 		for(size_t i=0; i<mScene->mNumCameras; i++){
 			if(mScene->mCameras[i]->mName == pNode->mName){
-				mOutput << startstr <<"<instance_camera url=\"#" << node_name_escaped << "-camera\">" << endstr;
+				mOutput << startstr <<"<instance_camera url=\"#" << node_name_escaped << "-camera\"/>" << endstr;
 				break;
 			}
 		}
 		//check if it is a light node
 		for(size_t i=0; i<mScene->mNumLights; i++){
 			if(mScene->mLights[i]->mName == pNode->mName){
-				mOutput << startstr <<"<instance_light url=\"#" << node_name_escaped << "-light\">" << endstr;
+				mOutput << startstr <<"<instance_light url=\"#" << node_name_escaped << "-light\"/>" << endstr;
 				break;
 			}
 		}

@@ -919,7 +919,7 @@ void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pPars
 
 // ------------------------------------------------------------------------------------------------
 // Constructs the animations for the given source anim 
-void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string pPrefix)
+void ColladaLoader::StoreAnimations( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string &pPrefix)
 {
 	std::string animName = pPrefix.empty() ? pSrcAnim->mName : pPrefix + "_" + pSrcAnim->mName;
 

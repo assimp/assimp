@@ -167,8 +167,6 @@ void ColladaExporter::WriteHeader()
 	std::time_t date = std::time(NULL);
 	std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
 
-	std::string scene_name = mScene->mRootNode->mName.C_Str();
-
 	aiVector3D scaling;
 	aiQuaternion rotation;
 	aiVector3D position;
@@ -621,8 +619,6 @@ void ColladaExporter::WriteFloatEntry( const Property& pProperty, const std::str
 void ColladaExporter::WriteMaterials()
 {
   materials.resize( mScene->mNumMaterials);
-
-  std::set<std::string> material_names;
 
   /// collect all materials from the scene
   size_t numTextures = 0;

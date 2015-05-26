@@ -423,6 +423,21 @@ const char* aiGetErrorString()
 	return gLastErrorString.c_str();
 }
 
+// -----------------------------------------------------------------------------------------------
+// Return the description of a importer given its index
+const aiImporterDesc* aiGetImportFormatDescription( size_t pIndex)
+{
+	return Importer().GetImporterInfo(pIndex);
+}
+
+// -----------------------------------------------------------------------------------------------
+// Return the number of importers
+size_t aiGetImportFormatCount(void)
+{
+	return Importer().GetImporterCount();
+}
+
+
 // ------------------------------------------------------------------------------------------------
 // Returns the error text of the last failed import process. 
 aiBool aiIsExtensionSupported(const char* szExtension)

@@ -83,6 +83,7 @@ namespace Grammar {
     static const std::string DiffuseColorToken = "diffuse";
     static const std::string SpecularColorToken = "specular";
     static const std::string EmissionColorToken = "emission";
+    static const std::string DiffuseTextureToken = "diffuse";
 
     static const char *TextureType         = "Texture";
 
@@ -808,7 +809,23 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == node ) {
+        return;
+    }
 
+    Property *prop = node->findPropertyByName( "attrib" );
+    if( NULL != prop ) {
+        if( NULL != prop->m_value ) {
+            if( prop->m_value->getString() == Grammar::DiffuseTextureToken ) {
+                aiString tex;
+                Value *val( node->getValue() );
+                if( NULL != val ) {
+                    tex.Set( val->getString() );
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
+                }
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------

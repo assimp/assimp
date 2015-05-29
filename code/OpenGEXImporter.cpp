@@ -497,24 +497,25 @@ static void setMatrix( aiNode *node, DataArrayList *transformData ) {
     }
     
     node->mTransformation.a1 = m[ 0 ];
-    node->mTransformation.a2 = m[ 1 ];
-    node->mTransformation.a3 = m[ 2 ];
-    node->mTransformation.a4 = m[ 3 ];
+    node->mTransformation.a2 = m[ 4 ];
+    node->mTransformation.a3 = m[ 8 ];
+    node->mTransformation.a4 = m[ 12 ];
 
-    node->mTransformation.b1 = m[ 4 ];
+    node->mTransformation.b1 = m[ 1 ];
     node->mTransformation.b2 = m[ 5 ];
-    node->mTransformation.b3 = m[ 6 ];
-    node->mTransformation.b4 = m[ 7 ];
+    node->mTransformation.b3 = m[ 9 ];
+    node->mTransformation.b4 = m[ 13 ];
 
-    node->mTransformation.c1 = m[ 8 ];
-    node->mTransformation.c2 = m[ 9 ];
+    node->mTransformation.c1 = m[ 2 ];
+    node->mTransformation.c2 = m[ 6 ];
     node->mTransformation.c3 = m[ 10 ];
-    node->mTransformation.c4 = m[ 11 ];
+    node->mTransformation.c4 = m[ 14 ];
 
-    node->mTransformation.d1 = m[ 12 ];
-    node->mTransformation.d2 = m[ 13 ];
-    node->mTransformation.d3 = m[ 14 ];
+    node->mTransformation.d1 = m[ 3 ];
+    node->mTransformation.d2 = m[ 7 ];
+    node->mTransformation.d3 = m[ 11 ];
     node->mTransformation.d4 = m[ 15 ];
+
 }
 
 //------------------------------------------------------------------------------------------------

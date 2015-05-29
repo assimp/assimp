@@ -75,7 +75,6 @@ private:
 private:
 
 	const std::string filename;
-	const aiScene* const pScene;
 
 	// this endl() doesn't flush() the stream
 	const std::string endl;

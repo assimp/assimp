@@ -219,13 +219,13 @@ TEST_F(ImporterTest, testMultipleReads)
 		aiProcess_OptimizeMeshes |
 		aiProcess_OptimizeGraph;
 
-	EXPECT_TRUE(pImp->ReadFile("../../test/models/X/test.x",flags));
+	EXPECT_TRUE(pImp->ReadFile("../test/models/X/test.x",flags));
 	//EXPECT_TRUE(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
-	EXPECT_TRUE(pImp->ReadFile("../../test/models/X/Testwuson.X",flags));
-	EXPECT_TRUE(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
+	EXPECT_TRUE(pImp->ReadFile("../test/models/X/Testwuson.X",flags));
+	EXPECT_TRUE(pImp->ReadFile("../test/models/X/anim_test.x",flags));
 	//EXPECT_TRUE(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
 
-	EXPECT_TRUE(pImp->ReadFile("../../test/models/X/anim_test.x",flags));
-	EXPECT_TRUE(pImp->ReadFile("../../test/models/X/BCN_Epileptic.X",flags));
+	EXPECT_TRUE(pImp->ReadFile("../test/models/X/anim_test.x",flags));
+	EXPECT_TRUE(pImp->ReadFile("../test/models/X/BCN_Epileptic.X",flags));
 	//EXPECT_TRUE(pImp->ReadFile("../../test/models/X/dwarf.x",flags)); # is in nonbsd
 }

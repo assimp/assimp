@@ -114,7 +114,7 @@ void ProcessParametrizedProfile(const IfcParameterizedProfileDef& def, TempMesh&
 		meshout.vertcnt.push_back(4);
 	}
 	else if( const IfcCircleProfileDef* const circle = def.ToPtr<IfcCircleProfileDef>()) {
-		if( const IfcCircleHollowProfileDef* const hollow = def.ToPtr<IfcCircleHollowProfileDef>()) {
+		if(def.ToPtr<IfcCircleHollowProfileDef>()) {
 			// TODO
 		}
 		const size_t segments = 32;

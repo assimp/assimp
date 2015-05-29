@@ -127,6 +127,8 @@ void ColladaExporter::WriteFile()
 	WriteTextures();
 	WriteHeader();
 
+	WriteCamerasLibrary();
+	WriteLightsLibrary();
 	WriteMaterials();
 	WriteGeometryLibrary();
 
@@ -164,8 +166,6 @@ void ColladaExporter::WriteHeader()
 	char date_str[date_nb_chars];
 	std::time_t date = std::time(NULL);
 	std::strftime(date_str, date_nb_chars, "%Y-%m-%dT%H:%M:%S", std::localtime(&date));
-
-	std::string scene_name = mScene->mRootNode->mName.C_Str();
 
 	aiVector3D scaling;
 	aiQuaternion rotation;
@@ -284,6 +284,201 @@ void ColladaExporter::WriteTextures() {
 			textures.insert(std::make_pair(i, name));
 		}
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Write the embedded textures
+void ColladaExporter::WriteCamerasLibrary() {
+	if(mScene->HasCameras()) {
+
+		mOutput << startstr << "<library_cameras>" << endstr;
+		PushTag();
+
+		for( size_t a = 0; a < mScene->mNumCameras; ++a)
+			WriteCamera( a);
+
+		PopTag();
+		mOutput << startstr << "</library_cameras>" << endstr;
+
+	}
+}
+
+void ColladaExporter::WriteCamera(size_t pIndex){
+
+	const aiCamera *cam = mScene->mCameras[pIndex];
+	const std::string idstrEscaped = XMLEscape(cam->mName.C_Str());
+
+	mOutput << startstr << "<camera id=\"" << idstrEscaped << "-camera\" name=\"" << idstrEscaped << "_name\" >" << endstr;
+	PushTag();
+	mOutput << startstr << "<optics>" << endstr;
+	PushTag();
+	mOutput << startstr << "<technique_common>" << endstr;
+	PushTag();
+	//assimp doesn't support the import of orthographic cameras! se we write
+	//always perspective
+	mOutput << startstr << "<perspective>" << endstr;
+	PushTag();
+	mOutput << startstr << "<xfov sid=\"xfov\">"<<
+								AI_RAD_TO_DEG(cam->mHorizontalFOV)
+						<<"</xfov>" << endstr;
+	mOutput << startstr << "<aspect_ratio>"
+						<<		cam->mAspect
+						<< "</aspect_ratio>" << endstr;
+	mOutput << startstr << "<znear sid=\"znear\">"
+						<<		cam->mClipPlaneNear
+						<<	"</znear>" << endstr;
+	mOutput << startstr << "<zfar sid=\"zfar\">"
+						<<		cam->mClipPlaneFar
+						<< "</zfar>" << endstr;
+	PopTag();
+	mOutput << startstr << "</perspective>" << endstr;
+	PopTag();
+	mOutput << startstr << "</technique_common>" << endstr;
+	PopTag();
+	mOutput << startstr << "</optics>" << endstr;
+	PopTag();
+	mOutput << startstr << "</camera>" << endstr;
+
+}
+
+
+// ------------------------------------------------------------------------------------------------
+// Write the embedded textures
+void ColladaExporter::WriteLightsLibrary() {
+	if(mScene->HasLights()) {
+
+		mOutput << startstr << "<library_lights>" << endstr;
+		PushTag();
+
+		for( size_t a = 0; a < mScene->mNumLights; ++a)
+			WriteLight( a);
+
+		PopTag();
+		mOutput << startstr << "</library_lights>" << endstr;
+
+	}
+}
+
+void ColladaExporter::WriteLight(size_t pIndex){
+
+	const aiLight *light = mScene->mLights[pIndex];
+	const std::string idstrEscaped = XMLEscape(light->mName.C_Str());
+
+	mOutput << startstr << "<light id=\"" << idstrEscaped << "-light\" name=\""
+			<< idstrEscaped << "_name\" >" << endstr;
+	PushTag();
+	mOutput << startstr << "<technique_common>" << endstr;
+	PushTag();
+	switch(light->mType){
+		case aiLightSource_AMBIENT:
+			WriteAmbienttLight(light);
+			break;
+		case aiLightSource_DIRECTIONAL:
+			WriteDirectionalLight(light);
+			break;
+		case aiLightSource_POINT:
+			WritePointLight(light);
+			break;
+		case aiLightSource_SPOT:
+			WriteSpotLight(light);
+			break;
+		case aiLightSource_UNDEFINED:
+		case _aiLightSource_Force32Bit:
+			break;
+	}
+	PopTag();
+	mOutput << startstr << "</technique_common>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</light>" << endstr;
+
+}
+
+void ColladaExporter::WritePointLight(const aiLight *const light){
+	const aiColor3D &color=  light->mColorDiffuse;
+	mOutput << startstr << "<point>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+	mOutput << startstr << "<constant_attenuation>"
+							<< light->mAttenuationConstant
+						<<"</constant_attenuation>" << endstr;
+	mOutput << startstr << "<linear_attenuation>"
+							<< light->mAttenuationLinear
+						<<"</linear_attenuation>" << endstr;
+	mOutput << startstr << "<quadratic_attenuation>"
+							<< light->mAttenuationQuadratic
+						<<"</quadratic_attenuation>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</point>" << endstr;
+
+}
+void ColladaExporter::WriteDirectionalLight(const aiLight *const light){
+	const aiColor3D &color=  light->mColorDiffuse;
+	mOutput << startstr << "<directional>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</directional>" << endstr;
+
+}
+void ColladaExporter::WriteSpotLight(const aiLight *const light){
+
+	const aiColor3D &color=  light->mColorDiffuse;
+	mOutput << startstr << "<spot>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+	mOutput << startstr << "<constant_attenuation>"
+								<< light->mAttenuationConstant
+							<<"</constant_attenuation>" << endstr;
+	mOutput << startstr << "<linear_attenuation>"
+							<< light->mAttenuationLinear
+						<<"</linear_attenuation>" << endstr;
+	mOutput << startstr << "<quadratic_attenuation>"
+							<< light->mAttenuationQuadratic
+						<<"</quadratic_attenuation>" << endstr;
+	/*
+	out->mAngleOuterCone = AI_DEG_TO_RAD (std::acos(std::pow(0.1f,1.f/srcLight->mFalloffExponent))+
+							srcLight->mFalloffAngle);
+	*/
+
+	const float fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
+	mOutput << startstr <<"<falloff_angle sid=\"fall_off_angle\">"
+								<< fallOffAngle
+						<<"</falloff_angle>" << endstr;
+	double temp = light->mAngleOuterCone-light->mAngleInnerCone;
+
+	temp = std::cos(temp);
+	temp = std::log(temp)/std::log(0.1);
+	temp = 1/temp;
+	mOutput << startstr << "<falloff_exponent sid=\"fall_off_exponent\">"
+							<< temp
+						<<"</falloff_exponent>" << endstr;
+
+
+	PopTag();
+	mOutput << startstr << "</spot>" << endstr;
+
+}
+
+void ColladaExporter::WriteAmbienttLight(const aiLight *const light){
+
+	const aiColor3D &color=  light->mColorAmbient;
+	mOutput << startstr << "<ambient>" << endstr;
+	PushTag();
+	mOutput << startstr << "<color sid=\"color\">"
+							<< color.r<<" "<<color.g<<" "<<color.b
+						<<"</color>" << endstr;
+
+	PopTag();
+	mOutput << startstr << "</ambient>" << endstr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -424,8 +619,6 @@ void ColladaExporter::WriteFloatEntry( const Property& pProperty, const std::str
 void ColladaExporter::WriteMaterials()
 {
   materials.resize( mScene->mNumMaterials);
-
-  std::set<std::string> material_names;
 
   /// collect all materials from the scene
   size_t numTextures = 0;
@@ -847,6 +1040,23 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 	mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
 	mOutput << "</matrix>" << endstr;
 
+	if(pNode->mNumMeshes==0){
+		//check if it is a camera node
+		for(size_t i=0; i<mScene->mNumCameras; i++){
+			if(mScene->mCameras[i]->mName == pNode->mName){
+				mOutput << startstr <<"<instance_camera url=\"#" << node_name_escaped << "-camera\"/>" << endstr;
+				break;
+			}
+		}
+		//check if it is a light node
+		for(size_t i=0; i<mScene->mNumLights; i++){
+			if(mScene->mLights[i]->mName == pNode->mName){
+				mOutput << startstr <<"<instance_light url=\"#" << node_name_escaped << "-light\"/>" << endstr;
+				break;
+			}
+		}
+
+	}else
 	// instance every geometry
 	for( size_t a = 0; a < pNode->mNumMeshes; ++a )
 	{
@@ -854,9 +1064,8 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 	// do not instanciate mesh if empty. I wonder how this could happen
 	if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
 		continue;
-
-		mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
-		PushTag();
+	mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
+	PushTag();
 	mOutput << startstr << "<bind_material>" << endstr;
 	PushTag();
 	mOutput << startstr << "<technique_common>" << endstr;

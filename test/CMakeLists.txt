@@ -46,6 +46,7 @@ SET( TEST_SRCS
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 
+if(AddGTest_FOUND)
 add_executable( unit
     unit/CCompilerTest.c
     unit/Main.cpp
@@ -60,5 +61,6 @@ target_link_libraries( unit assimp
 	debug ${GTEST_DEBUG_LIBRARIES}
 	optimized ${GTEST_RELEASE_LIBRARIES}
 )
+endif(AddGTest_FOUND)
 add_subdirectory(headercheck)
 

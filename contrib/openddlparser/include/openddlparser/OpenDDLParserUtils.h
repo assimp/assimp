@@ -21,8 +21,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -----------------------------------------------------------------------------------------------*/
 #pragma once
-#ifndef OPENDDLPARSER_OPENDDLPARSERUTILS_H_INC
-#define OPENDDLPARSER_OPENDDLPARSERUTILS_H_INC
 
 #include <openddlparser/OpenDDLCommon.h>
 
@@ -109,6 +107,12 @@ bool isNumeric( const T in ) {
 
 template<class T>
 inline
+bool isNotEndOfToken( T *in, T *end ) {
+    return ( '}' != *in && ',' != *in && !isSpace( *in ) && in != end );
+}
+
+template<class T>
+inline
 bool isInteger( T *in, T *end ) {
     if( in != end ) {
         if( *in == '-' ) {
@@ -117,7 +121,7 @@ bool isInteger( T *in, T *end ) {
     }
 
     bool result( false );
-    while( '}' != *in && ',' != *in && !isSpace( *in ) && in != end ) {
+    while( isNotEndOfToken( in, end ) ) {
         result = isNumeric( *in );
         if( !result ) {
             break;
@@ -139,7 +143,7 @@ bool isFloat( T *in, T *end ) {
 
     // check for <1>.0f
     bool result( false );
-    while( !isSpace( *in ) && in != end ) {
+    while( isNotEndOfToken( in, end ) ) {
         if( *in == '.' ) {
             result = true;
             break;
@@ -159,7 +163,7 @@ bool isFloat( T *in, T *end ) {
     }
 
     // check for 1.<0>f
-    while( !isSpace( *in ) && in != end && *in != ',' ) {
+    while( isNotEndOfToken( in, end ) ) {
         result = isNumeric( *in );
         if( !result ) {
             return false;
@@ -246,5 +250,3 @@ int hex2Decimal( char in ) {
 }
 
 END_ODDLPARSER_NS
-
-#endif // OPENDDLPARSER_OPENDDLPARSERUTILS_H_INC

@@ -27,8 +27,42 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
-Value::Value()
-: m_type( ddl_none )
+Value::Iterator::Iterator()
+: m_start( ddl_nullptr )
+, m_current( ddl_nullptr ) {
+    // empty
+}
+
+Value::Iterator::Iterator( Value *start )
+: m_start( start )
+, m_current( start ) {
+    // empty
+}
+
+Value::Iterator::~Iterator() {
+    // empty
+}
+
+bool Value::Iterator::hasNext() const {
+    if( ddl_nullptr == m_current ) {
+        return false;
+    }
+    return ( ddl_nullptr != m_current->getNext() );
+}
+
+Value *Value::Iterator::getNext() {
+    if( !hasNext() ) {
+        return ddl_nullptr;
+    }
+
+    Value *v( m_current->getNext() );
+    m_current = v;
+
+    return v;
+}
+
+Value::Value( ValueType type )
+: m_type( type )
 , m_size( 0 )
 , m_data( ddl_nullptr )
 , m_next( ddl_nullptr ) {
@@ -101,12 +135,11 @@ uint8 Value::getUnsignedInt8() const {
 void Value::setUnsignedInt16( uint16 value ) {
     assert( ddl_unsigned_int16 == m_type );
     ::memcpy( m_data, &value, m_size );
-
 }
+
 uint16 Value::getUnsignedInt16() const {
     assert( ddl_unsigned_int16 == m_type );
     return ( uint8 ) ( *m_data );
-
 }
 
 void Value::setUnsignedInt32( uint32 value ) {
@@ -135,9 +168,15 @@ void Value::setFloat( float value ) {
 }
 
 float Value::getFloat() const {
-    float v;
-    ::memcpy( &v, m_data, m_size );
-    return v;
+    if( m_type == ddl_float ) {
+        float v;
+        ::memcpy( &v, m_data, m_size );
+        return ( float ) v;
+    } else {
+        float tmp;
+        ::memcpy( &tmp, m_data, 4 );
+        return ( float ) tmp;
+    }
 }
 
 void Value::setDouble( double value ) {
@@ -225,7 +264,7 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
         return ddl_nullptr;
     }
 
-    Value *data = new Value;
+    Value *data = new Value( type );
     data->m_type = type;
     switch( type ) {
         case Value::ddl_bool:
@@ -241,7 +280,7 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
             data->m_size = sizeof( int );
             break;
         case Value::ddl_int64:
-            data->m_size = sizeof( long );
+            data->m_size = sizeof( int64 );
             break;
         case Value::ddl_unsigned_int8:
             data->m_size = sizeof( unsigned char );
@@ -250,7 +289,7 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
             data->m_size = sizeof( unsigned int );
             break;
         case Value::ddl_unsigned_int64:
-            data->m_size = sizeof( unsigned long );
+            data->m_size = sizeof( uint64 );
             break;
         case Value::ddl_half:
             data->m_size = sizeof( short );

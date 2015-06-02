@@ -60,7 +60,8 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-ValidateDSProcess::ValidateDSProcess()
+ValidateDSProcess::ValidateDSProcess() :
+    mScene()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -690,8 +691,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
 		if (aiPTI_String == prop->mType)	{
 			// FIX: strings are now stored in a less expensive way, but we can't use the
 			// validation routine for 'normal' aiStrings
-			uint32_t len;
-			if (prop->mDataLength < 5 || prop->mDataLength < 4 + (len=*reinterpret_cast<uint32_t*>(prop->mData)) + 1)	{
+			if (prop->mDataLength < 5 || prop->mDataLength < 4 + (*reinterpret_cast<uint32_t*>(prop->mData)) + 1)	{
 				ReportError("aiMaterial::mProperties[%i].mDataLength is "
 					"too small to contain a string (%i, needed: %i)",
 					i,prop->mDataLength,sizeof(aiString));

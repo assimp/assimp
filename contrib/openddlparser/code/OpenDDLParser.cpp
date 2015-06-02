@@ -87,7 +87,7 @@ static DDLNode *createDDLNode( Identifier *id, OpenDDLParser *parser ) {
         return ddl_nullptr;
     }
 
-    const std::string type( id->m_buffer );
+    const std::string type( id->m_text.m_buffer );
     DDLNode *parent( parser->top() );
     DDLNode *node = DDLNode::create( type, "", parent );
 
@@ -191,8 +191,6 @@ bool OpenDDLParser::parse() {
     
     normalizeBuffer( m_buffer );
 
-    std::cout << &m_buffer[0] << std::endl;
-
     m_context = new Context;
     m_context->m_root = DDLNode::create( "root", "", ddl_nullptr );
     pushNode( m_context->m_root );
@@ -217,7 +215,7 @@ char *OpenDDLParser::parseNextNode( char *in, char *end ) {
 
 static void dumpId( Identifier *id ) {
     if( ddl_nullptr != id ) {
-        std::cout << id->m_buffer << std::endl;
+        std::cout << id->m_text.m_buffer << std::endl;
     }
 }
 
@@ -277,7 +275,7 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
         Name *name( ddl_nullptr );
         in = OpenDDLParser::parseName( in, end, &name );
         if( ddl_nullptr != name ) {
-            const std::string nodeName( name->m_id->m_buffer );
+            const std::string nodeName( name->m_id->m_text.m_buffer );
             node->setName( nodeName );
         }
     }
@@ -500,10 +498,8 @@ char *OpenDDLParser::parseIdentifier( char *in, char *end, Identifier **id ) {
         idLen++;
     }
     
-    const size_t len( idLen + 1 );
-    Identifier *newId = new Identifier( len, new char[ len ] );
-    ::strncpy( newId->m_buffer, start, newId->m_len-1 );
-    newId->m_buffer[ newId->m_len - 1 ] = '\0';
+    const size_t len( idLen );
+    Identifier *newId = new Identifier( start, len );
     *id = newId;
 
     return in;
@@ -714,7 +710,7 @@ char *OpenDDLParser::parseStringLiteral( char *in, char *end, Value **stringData
 static void createPropertyWithData( Identifier *id, Value *primData, Property **prop ) {
     if( ddl_nullptr != primData ) {
         ( *prop ) = new Property( id );
-        ( *prop )->m_primData = primData;
+        ( *prop )->m_value = primData;
     }
 }
 

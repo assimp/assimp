@@ -138,6 +138,6 @@ Will return a NULL-pointer if no assigned importer desc. was found for the given
     \param  extension   [in] The extension to look for
     \return A pointer showing to the ImporterDesc, \see aiImporterDesc.
 */
-ASSIMP_API C_STRUCT const aiImporterDesc* aiGetImporterDesc( const char *extension );
+ASSIMP_API const C_STRUCT aiImporterDesc* aiGetImporterDesc( const char *extension );
 
 #endif 

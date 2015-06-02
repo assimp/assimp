@@ -75,7 +75,7 @@ void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* 
 	STLExporter exporter(pFile, pScene, true);
 
 	// we're still here - export successfully completed. Write the file.
-	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wb"));
 	if(outfile == NULL) {
 		throw DeadlyExportError("could not open output .stl file: " + std::string(pFile));
 	}
@@ -89,8 +89,7 @@ void ExportSceneSTLBinary(const char* pFile,IOSystem* pIOSystem, const aiScene* 
 // ------------------------------------------------------------------------------------------------
 STLExporter :: STLExporter(const char* _filename, const aiScene* pScene, bool binary)
 : filename(_filename)
-, pScene(pScene)
-, endl("\n") 
+, endl("\n")
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	const std::locale& l = std::locale("C");

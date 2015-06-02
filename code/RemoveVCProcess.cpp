@@ -54,7 +54,9 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-RemoveVCProcess::RemoveVCProcess()
+RemoveVCProcess::RemoveVCProcess() :
+    configDeleteFlags()
+  , mScene()
 {}
 
 // ------------------------------------------------------------------------------------------------

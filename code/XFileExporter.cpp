@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
-
+#include "DefaultIOSystem.h"
 #include <ctime>
 #include <set>
 #include <boost/scoped_ptr.hpp>
@@ -68,22 +68,8 @@ namespace Assimp
 // Worker function for exporting a scene to Collada. Prototyped and registered in Exporter.cpp
 void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
 {
-	std::string path = "";
-	std::string file = pFile;
-
-	// We need to test both types of folder separators because pIOSystem->getOsSeparator() is not reliable.
-	// Moreover, the path given by some applications is not even consistent with the OS specific type of separator.
-	const char* end_path = std::max(strrchr(pFile, '\\'), strrchr(pFile, '/'));
-
-	if(end_path != NULL) {
-		path = std::string(pFile, end_path + 1 - pFile);
-		file = file.substr(end_path + 1 - pFile, file.npos);
-
-		std::size_t pos = file.find_last_of('.');
-		if(pos != file.npos) {
-			file = file.substr(0, pos);
-		}
-	}
+	std::string path = DefaultIOSystem::absolutePath(std::string(pFile));
+	std::string file = DefaultIOSystem::completeBaseName(std::string(pFile));
 
 	// create/copy Properties
 	ExportProperties props(*pProperties);
@@ -109,16 +95,17 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mIOSystem(pIOSystem), mPath(path), mFile(file), mProperties(pProperties)
+XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties)
+		: mProperties(pProperties),
+		mIOSystem(pIOSystem),
+		mPath(path),
+		mFile(file),
+		mScene(pScene),
+		mSceneOwned(false),
+		endstr("\n")
 {
 	// make sure that all formatting happens using the standard, C locale and not the user's current locale
 	mOutput.imbue( std::locale("C") );
-
-	mScene = pScene;
-	mSceneOwned = false;
-
-	// set up strings
-	endstr = "\n"; 
 
 	// start writing
 	WriteFile();
@@ -326,8 +313,8 @@ void XFileExporter::WriteNode( aiNode* pNode)
 		WriteMesh(mScene->mMeshes[pNode->mMeshes[i]]);
 
 	// recursive call the Nodes
-	for (size_t a = 0; a < pNode->mNumChildren; a++)
-		WriteNode( mScene->mRootNode->mChildren[a]);
+	for (size_t i = 0; i < pNode->mNumChildren; ++i)
+		WriteNode( mScene->mRootNode->mChildren[i]);
 
 	PopTag();
 
@@ -514,12 +501,16 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
 
 std::string XFileExporter::toXFileString(aiString &name)
 {
-	std::string str = std::string(name.C_Str());
-	std::replace(str.begin(), str.end(), '<', '_');
-	std::replace(str.begin(), str.end(), '>', '_');
-	std::replace(str.begin(), str.end(), '{', '_');
-	std::replace(str.begin(), str.end(), '}', '_');
-	std::replace(str.begin(), str.end(), '$', '_');
+	std::string pref = ""; // node name prefix to prevent unexpected start of string
+	std::string str = pref + std::string(name.C_Str());	
+	for (int i=0; i < (int) str.length(); ++i)
+	{
+		if ((str[i] >= '0' && str[i] <= '9') || // 0-9
+			(str[i] >= 'A' && str[i] <= 'Z') || // A-Z
+			(str[i] >= 'a' && str[i] <= 'z')) // a-z
+			continue;
+		str[i] = '_';
+	}
 	return str;
 }
 

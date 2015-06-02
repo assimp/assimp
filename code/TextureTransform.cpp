@@ -54,7 +54,8 @@ using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-TextureTransformStep::TextureTransformStep()
+TextureTransformStep::TextureTransformStep() :
+    configFlags()
 {
 	// nothing to do here
 }

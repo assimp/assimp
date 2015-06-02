@@ -47,7 +47,7 @@ in <tt>&lt;root&gt;/tools/assimp_cmd/WriteDumb.cpp</tt> (yes, the 'b' is no typo
 -------------------------------------------------------------------------------
 
 ----------------------
-| Header (500 bytes) |
+| Header (512 bytes) |
 ----------------------
 | Variable chunks    |
 ----------------------
@@ -100,11 +100,12 @@ byte[64]	Reserved for future use
 integer		Magic chunk ID (ASSBIN_CHUNK_XXX)
 integer		Chunk data length, in bytes 
                 (unknown chunks are possible, a good reader skips over them)
+                (chunk-data-length does not include the first two integers)
 
-byte[n]		length-of-chunk bytes of data, depending on the chunk type
+byte[n]		chunk-data-length bytes of data, depending on the chunk type
 
 Chunks can contain nested chunks. Nested chunks are ALWAYS at the end of the chunk,
-their size is included in length-of-chunk.
+their size is included in chunk-data-length.
 
 The chunk layout for all ASSIMP data structures is derived from their C declarations.
 The general 'rule' to get from Assimp headers to the serialized layout is:
@@ -133,14 +134,14 @@ The general 'rule' to get from Assimp headers to the serialized layout is:
 
    [number of used uv channels times]
        integer mNumUVComponents[n]
-       float mTextureCoords[n][mNumUVComponents[n]]
+       float mTextureCoords[n][3]
 
        -> more than AI_MAX_TEXCOORD_CHANNELS can be stored. This allows Assimp 
 	   builds with different settings for AI_MAX_TEXCOORD_CHANNELS to exchange
-	   data. Unlike the in-memory format, only the used components of the 
-	   UV coordinates are written to disk. If mNumUVComponents[0] is 1, the
-	   corresponding mTextureCoords array consists of mNumTextureCoords*1 
-	   single floats.
+	   data.
+       -> the on-disk format always uses 3 floats to write UV coordinates.
+	   If mNumUVComponents[0] is 1, the corresponding mTextureCoords array
+	   consists of 3 floats.
 
    - The array member block of aiMesh is prefixed with an integer that specifies 
      the kinds of vertex components actually present in the mesh. This is a 

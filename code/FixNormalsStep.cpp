@@ -158,7 +158,7 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
 		if (!DefaultLogger::isNullLogger())
 		{
 			char buffer[128]; // should be sufficiently large
-			::sprintf(buffer,"Mesh %i: Normals are facing inwards (or the mesh is planar)",index);
+			::sprintf(buffer,"Mesh %u: Normals are facing inwards (or the mesh is planar)",index);
 			DefaultLogger::get()->info(buffer);
 		}
 

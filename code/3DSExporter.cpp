@@ -324,6 +324,7 @@ void Discreet3DSExporter::WriteMaterials()
 				break;
 
 			default:
+				shading_mode_out = Discreet3DS::Flat;
 				ai_assert(false);
 			};
 			writer.PutU2(static_cast<uint16_t>(shading_mode_out));

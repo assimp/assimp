@@ -44,15 +44,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #   define DLL_ODDLPARSER_EXPORT
 #endif // _WIN32
 
+// Namespace declarations, override this to avoid any conflicts
 #define BEGIN_ODDLPARSER_NS namespace ODDLParser {
 #define END_ODDLPARSER_NS   } // namespace ODDLParser
 #define USE_ODDLPARSER_NS   using namespace ODDLParser;
 
 BEGIN_ODDLPARSER_NS
 
+// We will use C++11 optional
 #ifndef OPENDDL_NO_USE_CPP11
+    // All C++11 constructs
 #   define ddl_nullptr nullptr
 #else
+    // Fallback for older compilers
 #   define ddl_nullptr NULL
 #endif // OPENDDL_NO_USE_CPP11
 
@@ -65,26 +69,31 @@ struct Reference;
 struct Property;
 struct DataArrayList;
 
-typedef char           int8;
-typedef short          int16;
-typedef int            int32;
-typedef unsigned char  uint8;
-typedef unsigned short uint16;
-typedef unsigned int   uint32;
-
 #ifdef _WIN32
-typedef __int64           int64;
-typedef unsigned __int64  uint64;
+typedef signed __int64    int64_impl;
+typedef unsigned __int64  uint64_impl;
 #else
-typedef int64_t           int64;
-typedef uint64_t          uint64;
+typedef int64_t           int64_impl;
+typedef uint64_t          uint64_impl;
 #endif
 
+// OpenDDL-specific data typedefs
+typedef signed char       int8;    ///< Signed integer, 1 byte
+typedef signed short      int16;   ///< Signed integer, 2 byte
+typedef signed int        int32;   ///< Signed integer, 4 byte
+typedef int64_impl        int64;   ///< Signed integer, 8 byte
+typedef unsigned char     uint8;   ///< Unsigned integer, 1 byte
+typedef unsigned short    uint16;  ///< Unsigned integer, 2 byte
+typedef unsigned int      uint32;  ///< Unsigned integer, 4 byte
+typedef uint64_impl       uint64;  ///< Unsigned integer, 8 byte
+
+///	@brief  Description of the type of a name.
 enum NameType {
-    GlobalName,
-    LocalName
+    GlobalName, ///< Name is global.
+    LocalName   ///< Name is local.
 };
 
+///	@brief  Stores a text
 struct Text {
     size_t m_capacity;
     size_t m_len;
@@ -124,8 +133,8 @@ struct Text {
             return false;
         }
         const int res( strncmp( m_buffer, name.c_str(), name.size() ) );
+        
         return ( 0 == res );
-
     }
 
     bool operator == ( const Text &rhs ) const {
@@ -133,7 +142,8 @@ struct Text {
             return false;
         }
 
-        const int res ( strncmp( m_buffer, rhs.m_buffer, m_len ) );
+        const int res( strncmp( m_buffer, rhs.m_buffer, m_len ) );
+        
         return ( 0 == res );
     }
 
@@ -142,6 +152,7 @@ private:
     Text &operator = ( const Text & );
 };
 
+///	@brief  Stores an OpenDDL-specific identifier type.
 struct Identifier {
     Text m_text;
 
@@ -164,6 +175,7 @@ private:
     Identifier &operator = ( const Identifier & );
 };
 
+///	@brief  Stores an OpenDDL-specific name
 struct Name {
     NameType    m_type;
     Identifier *m_id;
@@ -179,6 +191,7 @@ private:
     Name &operator = ( const Name& );
 };
 
+///	@brief  Stores a bundle of references.
 struct Reference {
     size_t   m_numRefs;
     Name   **m_referencedName;
@@ -199,11 +212,20 @@ struct Reference {
         }
     }
 
+    ~Reference() {
+        for( size_t i = 0; i < m_numRefs; i++ ) {
+            delete m_referencedName[ i ];
+        }
+        m_numRefs = 0;
+        m_referencedName = ddl_nullptr;
+    }
+
 private:
     Reference( const Reference & );
     Reference &operator = ( const Reference & );
 };
 
+///	@brief  Stores a property list.
 struct Property {
     Identifier *m_key;
     Value *m_value;
@@ -211,11 +233,18 @@ struct Property {
     Property *m_next;
 
     Property( Identifier *id )
-        : m_key( id )
-        , m_value( ddl_nullptr )
-        , m_ref( ddl_nullptr )
-        , m_next( ddl_nullptr ) {
+    : m_key( id )
+    , m_value( ddl_nullptr )
+    , m_ref( ddl_nullptr )
+    , m_next( ddl_nullptr ) {
         // empty
+    }
+
+    ~Property() {
+        m_key = ddl_nullptr;
+        m_value = ddl_nullptr;
+        m_ref = ddl_nullptr;;
+        m_next = ddl_nullptr;;
     }
 
 private:
@@ -223,6 +252,7 @@ private:
     Property &operator = ( const Property & );
 };
 
+///	@brief  Stores a data array list.
 struct DataArrayList {
     size_t m_numItems;
     Value *m_dataList;
@@ -238,15 +268,19 @@ struct DataArrayList {
 private:
     DataArrayList( const DataArrayList & ); 
     DataArrayList &operator = ( const DataArrayList & );
-
 };
 
+///	@brief  Stores the context of a parsed OpenDDL declaration.
 struct Context {
     DDLNode *m_root;
 
     Context()
         : m_root( ddl_nullptr ) {
         // empty
+    }
+
+    ~Context() {
+        m_root = ddl_nullptr;
     }
 
 private:

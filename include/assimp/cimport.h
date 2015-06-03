@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
 #include "types.h"
+#include <assimp/importerdesc.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -539,7 +540,20 @@ ASSIMP_API void aiIdentityMatrix3(
 ASSIMP_API void aiIdentityMatrix4(
 	C_STRUCT aiMatrix4x4* mat);
 
+// --------------------------------------------------------------------------------
+/** Returns the number of import file formats available in the current Assimp build.
+ * Use aiGetImportFormatDescription() to retrieve infos of a specific import format.
+ */
+ASSIMP_API size_t aiGetImportFormatCount(void);
 
+// --------------------------------------------------------------------------------
+/** Returns a description of the nth import file format. Use #aiGetImportFormatCount()
+ * to learn how many import formats are supported. 
+ * @param pIndex Index of the import format to retrieve information for. Valid range is
+ *    0 to #aiGetImportFormatCount()
+ * @return A description of that specific import format. NULL if pIndex is out of range.
+ */
+ASSIMP_API const C_STRUCT aiImporterDesc* aiGetImportFormatDescription( size_t pIndex);
 #ifdef __cplusplus
 }
 #endif

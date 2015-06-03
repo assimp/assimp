@@ -27,8 +27,42 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
-Value::Value()
-: m_type( ddl_none )
+Value::Iterator::Iterator()
+: m_start( ddl_nullptr )
+, m_current( ddl_nullptr ) {
+    // empty
+}
+
+Value::Iterator::Iterator( Value *start )
+: m_start( start )
+, m_current( start ) {
+    // empty
+}
+
+Value::Iterator::~Iterator() {
+    // empty
+}
+
+bool Value::Iterator::hasNext() const {
+    if( ddl_nullptr == m_current ) {
+        return false;
+    }
+    return ( ddl_nullptr != m_current->getNext() );
+}
+
+Value *Value::Iterator::getNext() {
+    if( !hasNext() ) {
+        return ddl_nullptr;
+    }
+
+    Value *v( m_current->getNext() );
+    m_current = v;
+
+    return v;
+}
+
+Value::Value( ValueType type )
+: m_type( type )
 , m_size( 0 )
 , m_data( ddl_nullptr )
 , m_next( ddl_nullptr ) {
@@ -230,7 +264,7 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
         return ddl_nullptr;
     }
 
-    Value *data = new Value;
+    Value *data = new Value( type );
     data->m_type = type;
     switch( type ) {
         case Value::ddl_bool:

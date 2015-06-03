@@ -109,7 +109,14 @@ public:
 			mEnforcePP = pEnforcePP;
 		}
 
-		ExportFormatEntry() : mExportFunction(), mEnforcePP() {}
+		ExportFormatEntry() :
+		    mExportFunction()
+		  , mEnforcePP()
+		{
+			mDescription.id = NULL;
+			mDescription.description = NULL;
+			mDescription.fileExtension = NULL;
+		}
 	};
 
 

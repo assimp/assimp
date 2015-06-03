@@ -93,8 +93,6 @@ namespace {
 void SetUnits(ConversionData& conv);
 void SetCoordinateSpace(ConversionData& conv);
 void ProcessSpatialStructures(ConversionData& conv);
-aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el ,ConversionData& conv);
-void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, ConversionData& conv);
 void MakeTreeRelative(ConversionData& conv);
 void ConvertUnit(const EXPRESS::DataType& dt,ConversionData& conv);
 
@@ -422,16 +420,6 @@ void ResolveObjectPlacement(aiMatrix4x4& m, const IfcObjectPlacement& place, Con
 }
 
 // ------------------------------------------------------------------------------------------------
-void GetAbsTransform(aiMatrix4x4& out, const aiNode* nd, ConversionData& conv)
-{
-	aiMatrix4x4 t;
-	if (nd->mParent) {
-		GetAbsTransform(t,nd->mParent,conv);
-	}
-	out = t*nd->mTransformation;
-}
-
-// ------------------------------------------------------------------------------------------------
 bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, unsigned int matid, ConversionData& conv)
 {
 	// insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
@@ -682,14 +670,14 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 	// skip over space and annotation nodes - usually, these have no meaning in Assimp's context
 	bool skipGeometry = false;
 	if(conv.settings.skipSpaceRepresentations) {
-		if(const IfcSpace* const space = el.ToPtr<IfcSpace>()) {
+		if(el.ToPtr<IfcSpace>()) {
 			IFCImporter::LogDebug("skipping IfcSpace entity due to importer settings");
 			skipGeometry = true;
 		}
 	}
 
 	if(conv.settings.skipAnnotations) {
-		if(const IfcAnnotation* const ann = el.ToPtr<IfcAnnotation>()) {
+		if(el.ToPtr<IfcAnnotation>()) {
 			IFCImporter::LogDebug("skipping IfcAnnotation entity due to importer settings");
 			return NULL;
 		}
@@ -764,7 +752,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 					continue;
 				}
 				BOOST_FOREACH(const IfcProduct& pro, cont->RelatedElements) {		
-					if(const IfcOpeningElement* const open = pro.ToPtr<IfcOpeningElement>()) {
+					if(pro.ToPtr<IfcOpeningElement>()) {
 						// IfcOpeningElement is handled below. Sadly we can't use it here as is:
 						// The docs say that opening elements are USUALLY attached to building storey,
 						// but we want them for the building elements to which they belong.

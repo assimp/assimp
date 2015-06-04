@@ -86,12 +86,6 @@ ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModel
 }
 
 // -------------------------------------------------------------------
-//	Private copy constructor
-ObjFileParser::ObjFileParser(const ObjFileParser& rhs) {
-	// empty
-}
-
-// -------------------------------------------------------------------
 //	Destructor
 ObjFileParser::~ObjFileParser()
 {
@@ -771,12 +765,6 @@ void ObjFileParser::reportErrorTokenInFace()
 {		
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
     DefaultLogger::get()->error("OBJ: Not supported token in face description detected");
-}
-
-// -------------------------------------------------------------------
-//	Private assignment constructor
-ObjFileParser& ObjFileParser::operator=(const ObjFileParser& rhs) {
-	return *this;
 }
 
 // -------------------------------------------------------------------

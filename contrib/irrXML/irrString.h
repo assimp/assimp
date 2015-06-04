@@ -334,7 +334,7 @@ public:
 	bool equalsn(const string<T>& other, int len)
 	{
 		int i;
-		for(i=0; array[i] && other[i] && i < len; ++i)
+		for (i = 0; i < len && array[i] && other[i]; ++i)
 			if (array[i] != other[i])
 				return false;
 
@@ -348,7 +348,7 @@ public:
 	bool equalsn(const T* str, int len)
 	{
 		int i;	
-		for(i=0; array[i] && str[i] && i < len; ++i)
+		for (i = 0; i < len && array[i] && str[i]; ++i)
 			if (array[i] != str[i])
 				return false;
 

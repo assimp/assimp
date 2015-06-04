@@ -197,7 +197,7 @@ DDLNode *DDLNode::create( const std::string &type, const std::string &name, DDLN
 
 void DDLNode::releaseNodes() {
     if( s_allocatedNodes.size() > 0 ) {
-        for( DllNodeList::iterator it = s_allocatedNodes.begin(); it != s_allocatedNodes.end(); it++ ) {
+        for( DllNodeList::iterator it = s_allocatedNodes.begin(); it != s_allocatedNodes.end(); ++it ) {
             if( *it ) {
                 delete *it;
             }

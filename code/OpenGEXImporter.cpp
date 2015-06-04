@@ -300,7 +300,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
     }
 
     DDLNode::DllNodeList childs = node->getChildNodeList();
-    for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); it++ ) {
+    for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); ++it ) {
         Grammar::TokenType tokenType( Grammar::matchTokenType( ( *it )->getType().c_str() ) );
         switch( tokenType ) {
             case Grammar::MetricToken:

@@ -225,7 +225,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 
 		delete[] nd->mChildren;
 
-		if (child_nodes.size())
+		if (!child_nodes.empty())
 			nd->mChildren = new aiNode*[child_nodes.size()];
 		else nd->mChildren = NULL;
 	}
@@ -335,7 +335,7 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 		if ( nodes_in != nodes_out) {
 
 			char buf[512];
-			sprintf(buf,"OptimizeGraphProcess finished; Input nodes: %i, Output nodes: %i",nodes_in,nodes_out);
+			sprintf(buf,"OptimizeGraphProcess finished; Input nodes: %u, Output nodes: %u",nodes_in,nodes_out);
 			DefaultLogger::get()->info(buf);
 		}
 		else DefaultLogger::get()->debug("OptimizeGraphProcess finished");

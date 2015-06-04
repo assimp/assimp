@@ -258,7 +258,7 @@ void DefaultLogger::OnDebug( const char* message )
 		return;
 
 	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Debug, T%i: %s", GetThreadID(), message );
+	::sprintf(msg,"Debug, T%u: %s", GetThreadID(), message );
 
 	WriteToStreams( msg, Logger::Debugging );
 }
@@ -268,7 +268,7 @@ void DefaultLogger::OnDebug( const char* message )
 void DefaultLogger::OnInfo( const char* message )
 {
 	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Info,  T%i: %s", GetThreadID(), message );
+	::sprintf(msg,"Info,  T%u: %s", GetThreadID(), message );
 
 	WriteToStreams( msg , Logger::Info );
 }
@@ -278,7 +278,7 @@ void DefaultLogger::OnInfo( const char* message )
 void DefaultLogger::OnWarn( const char* message )
 {
 	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Warn,  T%i: %s", GetThreadID(), message );
+	::sprintf(msg,"Warn,  T%u: %s", GetThreadID(), message );
 
 	WriteToStreams( msg, Logger::Warn );
 }
@@ -288,7 +288,7 @@ void DefaultLogger::OnWarn( const char* message )
 void DefaultLogger::OnError( const char* message )
 {
 	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Error, T%i: %s", GetThreadID(), message );
+	::sprintf(msg,"Error, T%u: %s", GetThreadID(), message );
 
 	WriteToStreams( msg, Logger::Err );
 }

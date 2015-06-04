@@ -180,7 +180,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 				if (ppcMaterials[idx]) 
 				{
 					aiString sz;
-					sz.length = ::sprintf(sz.data,"JoinedMaterial_#%i",p);
+					sz.length = ::sprintf(sz.data,"JoinedMaterial_#%u",p);
 					((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
 				}
 				else
@@ -207,7 +207,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 	else 
 	{
 		char szBuffer[128]; // should be sufficiently large
-		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %i redundant and %i unused materials.",
+		::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",
 			redundantRemoved,unreferencedRemoved);
 		DefaultLogger::get()->info(szBuffer);
 	}

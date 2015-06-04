@@ -122,6 +122,11 @@ private:
     void reportErrorTokenInFace();
 
 private:
+	// Copy and assignment constructor should be private 
+	// because the class contains pointer to allocated memory
+    ObjFileParser(const ObjFileParser& rhs);
+	ObjFileParser& operator=(const ObjFileParser& rhs);
+
     ///	Default material name
     static const std::string DEFAULT_MATERIAL;
     //!	Iterator to current position in buffer

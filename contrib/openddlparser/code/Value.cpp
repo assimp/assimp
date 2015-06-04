@@ -80,7 +80,7 @@ void Value::setBool( bool value ) {
 
 bool Value::getBool() {
     assert( ddl_bool == m_type );
-    return ( bool ) ( *m_data );
+    return ( *m_data ) ? true : false;
 }
 
 void Value::setInt8( int8 value ) {

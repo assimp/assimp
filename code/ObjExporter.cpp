@@ -167,7 +167,9 @@ void ObjExporter::WriteMaterialFile()
 		}
 
 		float o;
-		if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
+		aiString t;
+		if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o) && AI_FAILURE == mat->Get(AI_MATKEY_TEXTURE_OPACITY(0),t)) {
+			// Do not write 'd' if 'map_d' is set
 			mOutputMat << "d " << o << endl;
 		}
 
@@ -237,34 +239,42 @@ void ObjExporter :: WriteGeometryFile()
 		mOutput << "vn " << v.x << " " << v.y << " " << v.z << endl;
 	}
 	mOutput << endl;
-
+	
 	// now write all mesh instances
 	BOOST_FOREACH(const MeshInstance& m, meshes) {
-		mOutput << "# Mesh \'" << m.name << "\' with " << m.faces.size() << " faces" << endl;
+		// Count faces:
+		size_t nrOfFaces = 0;
+		BOOST_FOREACH(const Face& f, m.faces) {
+			if(f.indices.size() > 0) {
+				++nrOfFaces;
+			}
+		}
+		mOutput << "# Mesh \'" << m.name << "\' with " << nrOfFaces << " faces" << endl;
 		if (!m.name.empty()) {
 			mOutput << "g " << m.name << endl;
 		}
 		mOutput << "usemtl " << m.matname << endl;
 
 		BOOST_FOREACH(const Face& f, m.faces) {
-			mOutput << f.kind << ' ';
-			BOOST_FOREACH(const FaceVertex& fv, f.indices) {
-				mOutput << ' ' << fv.vp;
+			if(f.indices.size() > 0) {
+				mOutput << f.kind << ' ';
+				BOOST_FOREACH(const FaceVertex& fv, f.indices) {
+					mOutput << ' ' << fv.vp;
 
-				if (f.kind != 'p') {
-					if (fv.vt || f.kind == 'f') {
-						mOutput << '/';
-					}
-					if (fv.vt) {
-						mOutput << fv.vt;
-					}
-					if (f.kind == 'f' && fv.vn) {
-						mOutput << '/' << fv.vn;
+					if (f.kind != 'p') {
+						if (fv.vt || f.kind == 'f') {
+							mOutput << '/';
+						}
+						if (fv.vt) {
+							mOutput << fv.vt;
+						}
+						if (f.kind == 'f' && fv.vn) {
+							mOutput << '/' << fv.vn;
+						}
 					}
 				}
+				mOutput << endl;
 			}
-
-			mOutput << endl;
 		}
 		mOutput << endl;
 	}
@@ -288,7 +298,7 @@ int ObjExporter::vecIndexMap::getIndex(const aiVector3D& vec)
 void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 {
 	vecs.resize(vecMap.size());
-	for(vecIndexMap::dataType::iterator it = vecMap.begin(); it != vecMap.end(); it++){
+	for(vecIndexMap::dataType::iterator it = vecMap.begin(); it != vecMap.end(); ++it){
 		vecs[it->second-1] = it->first;
 	}
 }

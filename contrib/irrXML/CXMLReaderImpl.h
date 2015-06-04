@@ -747,7 +747,7 @@ private:
 	bool equalsn(const char_type* str1, const char_type* str2, int len)
 	{
 		int i;
-		for(i=0; str1[i] && str2[i] && i < len; ++i)
+		for (i = 0; i < len && str1[i] && str2[i]; ++i)
 			if (str1[i] != str2[i])
 				return false;
 

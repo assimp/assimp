@@ -377,7 +377,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 		aiColor3D color(1.f,1.f,1.f);
 
 		aiString s;
-		::sprintf(s.data,"mat%i_tx%i_",i,materials[i].tex);
+		::sprintf(s.data,"mat%u_tx%u_",i,materials[i].tex);
 
 		// set the two-sided flag
 		if (materials[i].type == Unreal::MF_NORMAL_TS) {

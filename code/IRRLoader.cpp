@@ -194,7 +194,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
 		aiMaterial* out = ( aiMaterial* ) (*(materials.end()-(6-i)));
 
 		aiString s;
-		s.length = ::sprintf( s.data, "SkyboxSide_%i",i );
+		s.length = ::sprintf( s.data, "SkyboxSide_%u",i );
 		out->AddProperty(&s,AI_MATKEY_NAME);
 
 		int shading = aiShadingMode_NoShading;

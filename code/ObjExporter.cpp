@@ -288,7 +288,7 @@ int ObjExporter::vecIndexMap::getIndex(const aiVector3D& vec)
 void ObjExporter::vecIndexMap::getVectors( std::vector<aiVector3D>& vecs )
 {
 	vecs.resize(vecMap.size());
-	for(vecIndexMap::dataType::iterator it = vecMap.begin(); it != vecMap.end(); it++){
+	for(vecIndexMap::dataType::iterator it = vecMap.begin(); it != vecMap.end(); ++it){
 		vecs[it->second-1] = it->first;
 	}
 }

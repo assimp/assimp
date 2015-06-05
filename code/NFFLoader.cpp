@@ -1115,7 +1115,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
 			aiNode* nd = *ppcChildren  = new aiNode();
 			nd->mParent = root;
 
-			nd->mName.length = ::sprintf(nd->mName.data,"<NFF_Light%i>",i);
+			nd->mName.length = ::sprintf(nd->mName.data,"<NFF_Light%u>",i);
 
 			// allocate the light in the scene data structure
 			aiLight* out = pScene->mLights[i] = new aiLight();

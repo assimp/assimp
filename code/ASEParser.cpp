@@ -143,9 +143,9 @@ void Parser::LogWarning(const char* szWarn)
 
 	char szTemp[1024];
 #if _MSC_VER >= 1400
-	sprintf_s(szTemp,"Line %i: %s",iLineNumber,szWarn);
+	sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
 #else
-	snprintf(szTemp,1024,"Line %i: %s",iLineNumber,szWarn);
+	snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
 	// output the warning to the logger ...
@@ -159,9 +159,9 @@ void Parser::LogInfo(const char* szWarn)
 
 	char szTemp[1024];
 #if _MSC_VER >= 1400
-	sprintf_s(szTemp,"Line %i: %s",iLineNumber,szWarn);
+	sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
 #else
-	snprintf(szTemp,1024,"Line %i: %s",iLineNumber,szWarn);
+	snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
 	// output the information to the logger ...
@@ -175,9 +175,9 @@ AI_WONT_RETURN void Parser::LogError(const char* szWarn)
 
 	char szTemp[1024];
 #if _MSC_VER >= 1400
-	sprintf_s(szTemp,"Line %i: %s",iLineNumber,szWarn);
+	sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
 #else
-	snprintf(szTemp,1024,"Line %i: %s",iLineNumber,szWarn);
+	snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
 	// throw an exception

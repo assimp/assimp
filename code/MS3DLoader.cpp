@@ -531,7 +531,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 		}
 
 		// allocate storage for bones
-		if(mybones.size()) {
+		if(!mybones.empty()) {
 			std::vector<unsigned int> bmap(joints.size());
 			m->mBones = new aiBone*[mybones.size()]();
 			for(BoneSet::const_iterator it = mybones.begin(); it != mybones.end(); ++it) {

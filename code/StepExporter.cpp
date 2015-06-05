@@ -251,7 +251,7 @@ void StepExporter::WriteFile()
 	mOutput << "))" << endstr;
 
 	// write all the unique transformed CARTESIAN and VERTEX
-	for (MeshesByNodeMap::const_iterator it2 = meshes.begin(); it2 != meshes.end(); it2++)
+	for (MeshesByNodeMap::const_iterator it2 = meshes.begin(); it2 != meshes.end(); ++it2)
 	{
 		const aiNode& node = *(*it2).first;
 		unsigned int mesh_idx = (*it2).second;

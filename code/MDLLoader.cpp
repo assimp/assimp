@@ -264,7 +264,7 @@ void MDLImporter::SizeCheck(const void* szPos, const char* szFile, unsigned int 
 
 		char szBuffer[1024];
 		::sprintf(szBuffer,"Invalid MDL file. The file is too small "
-			"or contains invalid data (File: %s Line: %i)",szFilePtr,iLine);
+			"or contains invalid data (File: %s Line: %u)",szFilePtr,iLine);
 
 		throw DeadlyImportError(szBuffer);
 	}
@@ -1536,7 +1536,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 			// setup the name of the node
 			char* const szBuffer = &aszGroupNameBuffer[i*AI_MDL7_MAX_GROUPNAMESIZE];
 			if ('\0' == *szBuffer)
-				pcNode->mName.length = ::sprintf(szBuffer,"Group_%i",p);
+				pcNode->mName.length = ::sprintf(szBuffer,"Group_%u",p);
 			else pcNode->mName.length = ::strlen(szBuffer);
 			::strcpy(pcNode->mName.data,szBuffer);
 			++p;

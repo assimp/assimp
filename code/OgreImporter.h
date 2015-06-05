@@ -81,7 +81,7 @@ private:
 	void AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials);
 	
 	/// Reads material
-	aiMaterial* ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string MaterialName);
+	aiMaterial* ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string &MaterialName);
 
 	// These functions parse blocks from a material file from @c ss. Starting parsing from "{" and ending it to "}".
 	bool ReadTechnique(const std::string &techniqueName, std::stringstream &ss, aiMaterial *material);

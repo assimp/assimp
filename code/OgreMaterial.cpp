@@ -120,7 +120,7 @@ void OgreImporter::AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &ma
 	}
 }
 
-aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string materialName)
+aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSystem *pIOHandler, const std::string &materialName)
 {
 	if (materialName.empty()) {
 		return 0;

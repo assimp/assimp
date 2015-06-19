@@ -71,6 +71,10 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 OptimizeGraphProcess::OptimizeGraphProcess()
+    : mScene()
+    , nodes_in()
+    , nodes_out()
+    , count_merged()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -122,7 +126,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 			++it;
 		}
 
-		if (nd->mNumMeshes || child_nodes.size()) { 
+		if (nd->mNumMeshes || !child_nodes.empty()) { 
 			nodes.push_back(nd);
 		}
 		else {
@@ -172,7 +176,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 			}
 			++it;
 		}
-		if (join_master && join.size()) {
+		if (join_master && !join.empty()) {
 			join_master->mName.length = sprintf(join_master->mName.data,"$MergedNode_%i",count_merged++);
 
 			unsigned int out_meshes = 0;
@@ -221,7 +225,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
 
 		delete[] nd->mChildren;
 
-		if (child_nodes.size())
+		if (!child_nodes.empty())
 			nd->mChildren = new aiNode*[child_nodes.size()];
 		else nd->mChildren = NULL;
 	}
@@ -331,7 +335,7 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
 		if ( nodes_in != nodes_out) {
 
 			char buf[512];
-			sprintf(buf,"OptimizeGraphProcess finished; Input nodes: %i, Output nodes: %i",nodes_in,nodes_out);
+			sprintf(buf,"OptimizeGraphProcess finished; Input nodes: %u, Output nodes: %u",nodes_in,nodes_out);
 			DefaultLogger::get()->info(buf);
 		}
 		else DefaultLogger::get()->debug("OptimizeGraphProcess finished");

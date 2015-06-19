@@ -21,14 +21,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -----------------------------------------------------------------------------------------------*/
 #pragma once
-#ifndef OPENDDLPARSER_VALUE_H_INC
-#define OPENDDLPARSER_VALUE_H_INC
 
 #include <openddlparser/OpenDDLCommon.h>
 
 #include <string>
 
 BEGIN_ODDLPARSER_NS
+
+struct ValueAllocator;
 
 ///------------------------------------------------------------------------------------------------
 ///	@brief  This class implements a value.
@@ -38,7 +38,49 @@ BEGIN_ODDLPARSER_NS
 /// Values can be single items or lists of items. They are implemented as linked lists.
 ///------------------------------------------------------------------------------------------------
 class DLL_ODDLPARSER_EXPORT Value {
+    friend struct ValueAllocator;
+
 public:
+    ///	@brief  This class implements an iterator through a Value list.
+    ///	
+    /// When getting a new value you need to know how to iterate through it. The Value::Iterator 
+    /// will help you here:
+    ///	@code
+    /// Value *val = node->getValue();
+    /// Value::Iterator it( val );
+    /// while( it.hasNext() ) {
+    ///     Value v( it.getNext );
+    /// }
+    /// @endcode
+    class DLL_ODDLPARSER_EXPORT Iterator {
+    public:
+        ///	@brief  The default class constructor.
+        Iterator();
+
+        ///	@brief  The class constructor with the start value.
+        /// @param  start   [in] The first value for iteration,
+        Iterator( Value *start );
+
+        ///	@brief  The class destructor.
+        ~Iterator();
+
+        ///	@brief  Will return true, if another value is in the list.
+        /// @return true if another value is there.
+        bool hasNext() const;
+
+        ///	@brief  Returns the next item and moves the iterator to it.
+        ///	@return The next value, is ddl_nullptr in case of being the last item.
+        Value *getNext();
+
+    private:
+        Value *m_start;
+        Value *m_current;
+
+    private:
+        Iterator( const Iterator & );
+        Iterator &operator = ( const Iterator & );
+    };
+
     ///	@brief  This enum describes the data type stored in the value.
     enum ValueType {
         ddl_none = -1,          ///< Nothing specified
@@ -59,7 +101,7 @@ public:
         ddl_types_max
     };
 
-    Value();
+    Value( ValueType type );
     ~Value();
     void setBool( bool value );
     bool getBool();
@@ -101,5 +143,3 @@ struct DLL_ODDLPARSER_EXPORT ValueAllocator {
 };
 
 END_ODDLPARSER_NS
-
-#endif // OPENDDLPARSER_VALUE_H_INC

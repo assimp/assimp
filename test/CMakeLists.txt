@@ -40,10 +40,13 @@ SET( TEST_SRCS
     unit/utTriangulate.cpp
     unit/utVertexTriangleAdjacency.cpp
     unit/utNoBoostTest.cpp
+    unit/utColladaExportCamera.cpp
+    unit/utColladaExportLight.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 
+if(AddGTest_FOUND)
 add_executable( unit
     unit/CCompilerTest.c
     unit/Main.cpp
@@ -58,5 +61,6 @@ target_link_libraries( unit assimp
 	debug ${GTEST_DEBUG_LIBRARIES}
 	optimized ${GTEST_RELEASE_LIBRARIES}
 )
+endif(AddGTest_FOUND)
 add_subdirectory(headercheck)
 

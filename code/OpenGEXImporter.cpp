@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 
+#include <algorithm>
 #include <vector>
 
 static const aiImporterDesc desc = {
@@ -83,6 +84,14 @@ namespace Grammar {
     static const std::string DiffuseColorToken = "diffuse";
     static const std::string SpecularColorToken = "specular";
     static const std::string EmissionColorToken = "emission";
+    
+    static const std::string DiffuseTextureToken = "diffuse";
+    static const std::string DiffuseSpecularTextureToken = "specular";
+    static const std::string SpecularPowerTextureToken = "specular_power";
+    static const std::string EmissionTextureToken = "emission";
+    static const std::string OpacyTextureToken = "opacity";
+    static const std::string TransparencyTextureToken = "transparency";
+    static const std::string NormalTextureToken = "normal";
 
     static const char *TextureType         = "Texture";
 
@@ -183,12 +192,11 @@ USE_ODDLPARSER_NS
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
-, m_vertices()
+, m_vertices(NULL)
 , m_numNormals( 0 )
-, m_normals()
-, m_textureCoords()
-, m_numUVComps() {
-    // empty
+, m_normals(NULL) {
+    std::fill(&m_numUVComps[0], &m_numUVComps[AI_MAX_NUMBER_OF_TEXTURECOORDS], 0U);
+    std::fill(&m_textureCoords[0], &m_textureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS], static_cast<aiVector3D *>(NULL));
 }
 
 //------------------------------------------------------------------------------------------------
@@ -215,17 +223,18 @@ OpenGEXImporter::RefInfo::~RefInfo() {
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() 
-: m_meshCache()
-, m_root( NULL )
+: m_root( NULL )
 , m_nodeChildMap()
+, m_meshCache()
 , m_mesh2refMap()
 , m_ctx( NULL )
 , m_currentNode( NULL )
 , m_currentMesh( NULL )
 , m_currentMaterial( NULL )
+, m_tokenType( Grammar::NoneType )
 , m_nodeStack()
 , m_unresolvedRefStack() {
-    // empty
+    std::fill(&m_metrics[0], &m_metrics[MetricInfo::Max], MetricInfo());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -291,7 +300,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
     }
 
     DDLNode::DllNodeList childs = node->getChildNodeList();
-    for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); it++ ) {
+    for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); ++it ) {
         Grammar::TokenType tokenType( Grammar::matchTokenType( ( *it )->getType().c_str() ) );
         switch( tokenType ) {
             case Grammar::MetricToken:
@@ -406,7 +415,12 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
         }
 
         const std::string name( val->getString() );
-        m_currentNode->mName.Set( name.c_str() );
+        if( m_tokenType == Grammar::GeometryNodeToken ) {
+            m_currentNode->mName.Set( name.c_str() );
+        } else if( m_tokenType == Grammar::MaterialToken ) {
+            
+        }
+
     }
 }
 
@@ -462,6 +476,7 @@ void OpenGEXImporter::handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene 
 void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
     aiNode *newNode = new aiNode;
     pushNode( newNode, pScene );
+    m_tokenType = Grammar::GeometryNodeToken;
     m_currentNode = newNode;
     handleNodes( node, pScene );
     
@@ -489,24 +504,25 @@ static void setMatrix( aiNode *node, DataArrayList *transformData ) {
     }
     
     node->mTransformation.a1 = m[ 0 ];
-    node->mTransformation.a2 = m[ 1 ];
-    node->mTransformation.a3 = m[ 2 ];
-    node->mTransformation.a4 = m[ 3 ];
+    node->mTransformation.a2 = m[ 4 ];
+    node->mTransformation.a3 = m[ 8 ];
+    node->mTransformation.a4 = m[ 12 ];
 
-    node->mTransformation.b1 = m[ 4 ];
+    node->mTransformation.b1 = m[ 1 ];
     node->mTransformation.b2 = m[ 5 ];
-    node->mTransformation.b3 = m[ 6 ];
-    node->mTransformation.b4 = m[ 7 ];
+    node->mTransformation.b3 = m[ 9 ];
+    node->mTransformation.b4 = m[ 13 ];
 
-    node->mTransformation.c1 = m[ 8 ];
-    node->mTransformation.c2 = m[ 9 ];
+    node->mTransformation.c1 = m[ 2 ];
+    node->mTransformation.c2 = m[ 6 ];
     node->mTransformation.c3 = m[ 10 ];
-    node->mTransformation.c4 = m[ 11 ];
+    node->mTransformation.c4 = m[ 14 ];
 
-    node->mTransformation.d1 = m[ 12 ];
-    node->mTransformation.d2 = m[ 13 ];
-    node->mTransformation.d3 = m[ 14 ];
+    node->mTransformation.d1 = m[ 3 ];
+    node->mTransformation.d2 = m[ 7 ];
+    node->mTransformation.d3 = m[ 11 ];
     node->mTransformation.d4 = m[ 15 ];
+
 }
 
 //------------------------------------------------------------------------------------------------
@@ -658,7 +674,6 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         }
 
         const size_t numItems( countDataArrayListItems( vaList ) );
-        Value *next( vaList->m_dataList );
         if( Position == attribType ) {
             m_currentVertices.m_numVerts = numItems;
             m_currentVertices.m_vertices = new aiVector3D[ numItems ];
@@ -768,9 +783,8 @@ static ColorType getColorType( Identifier *id ) {
 void OpenGEXImporter::handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     m_currentMaterial = new aiMaterial;
     m_materialCache.push_back( m_currentMaterial );
-
+    m_tokenType = Grammar::MaterialToken;
     handleNodes( node, pScene );
-
 }
 
 //------------------------------------------------------------------------------------------------
@@ -802,7 +816,41 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == node ) {
+        return;
+    }
 
+    Property *prop = node->findPropertyByName( "attrib" );
+    if( NULL != prop ) {
+        if( NULL != prop->m_value ) {
+            Value *val( node->getValue() );
+            if( NULL != val ) {
+                aiString tex;
+                tex.Set( val->getString() );
+                if( prop->m_value->getString() == Grammar::DiffuseTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
+                } else if( prop->m_value->getString() == Grammar::SpecularPowerTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_SPECULAR( 0 ) );
+
+                } else if( prop->m_value->getString() == Grammar::EmissionTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_EMISSIVE( 0 ) );
+
+                } else if( prop->m_value->getString() == Grammar::OpacyTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_OPACITY( 0 ) );
+
+                } else if( prop->m_value->getString() == Grammar::TransparencyTextureToken ) {
+                    // ToDo!
+                    // m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
+                } else if( prop->m_value->getString() == Grammar::NormalTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_NORMALS( 0 ) );
+
+                }
+                else {
+                    ai_assert( false );
+                }
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------

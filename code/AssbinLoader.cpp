@@ -199,7 +199,8 @@ template <typename T> void ReadBounds( IOStream * stream, T* /*p*/, unsigned int
 
 void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node )
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AINODE);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AINODE);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	*node = new aiNode();
@@ -230,7 +231,8 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node )
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryBone( IOStream * stream, aiBone* b )
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIBONE );
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AIBONE);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	b->mName = Read<aiString>(stream);
@@ -253,7 +255,8 @@ void AssbinImporter::ReadBinaryBone( IOStream * stream, aiBone* b )
 
 void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIMESH);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AIMESH);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	mesh->mPrimitiveTypes = Read<unsigned int>(stream);
@@ -377,7 +380,8 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 
 void AssbinImporter::ReadBinaryMaterialProperty(IOStream * stream, aiMaterialProperty* prop)
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIMATERIALPROPERTY);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AIMATERIALPROPERTY);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	prop->mKey = Read<aiString>(stream);
@@ -393,7 +397,8 @@ void AssbinImporter::ReadBinaryMaterialProperty(IOStream * stream, aiMaterialPro
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryMaterial(IOStream * stream, aiMaterial* mat)
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIMATERIAL);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AIMATERIAL);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	mat->mNumAllocated = mat->mNumProperties = Read<unsigned int>(stream);
@@ -414,7 +419,8 @@ void AssbinImporter::ReadBinaryMaterial(IOStream * stream, aiMaterial* mat)
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AINODEANIM);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AINODEANIM);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	nd->mNodeName = Read<aiString>(stream);
@@ -462,7 +468,8 @@ void AssbinImporter::ReadBinaryNodeAnim(IOStream * stream, aiNodeAnim* nd)
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryAnim( IOStream * stream, aiAnimation* anim )
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AIANIMATION);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AIANIMATION);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	anim->mName = Read<aiString> (stream);
@@ -482,7 +489,8 @@ void AssbinImporter::ReadBinaryAnim( IOStream * stream, aiAnimation* anim )
 
 void AssbinImporter::ReadBinaryTexture(IOStream * stream, aiTexture* tex)
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AITEXTURE);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AITEXTURE);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	tex->mWidth = Read<unsigned int>(stream);
@@ -505,7 +513,8 @@ void AssbinImporter::ReadBinaryTexture(IOStream * stream, aiTexture* tex)
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryLight( IOStream * stream, aiLight* l )
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AILIGHT);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AILIGHT);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	l->mName = Read<aiString>(stream);
@@ -531,7 +540,8 @@ void AssbinImporter::ReadBinaryLight( IOStream * stream, aiLight* l )
 // -----------------------------------------------------------------------------------
 void AssbinImporter::ReadBinaryCamera( IOStream * stream, aiCamera* cam )
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AICAMERA);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AICAMERA);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	cam->mName = Read<aiString>(stream);
@@ -546,7 +556,8 @@ void AssbinImporter::ReadBinaryCamera( IOStream * stream, aiCamera* cam )
 
 void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 {
-	ai_assert( Read<uint32_t>(stream) == ASSBIN_CHUNK_AISCENE);
+	uint32_t chunkID = Read<uint32_t>(stream);
+	ai_assert(chunkID == ASSBIN_CHUNK_AISCENE);
 	/*uint32_t size =*/ Read<uint32_t>(stream);
 
 	scene->mFlags         = Read<unsigned int>(stream);

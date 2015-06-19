@@ -155,7 +155,7 @@ protected:
 	 * @param pSrcAnim the source animation to process
 	 * @param pPrefix Prefix to the name in case of nested animations
 	 */
-	void StoreAnimations( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string pPrefix);
+	void StoreAnimations( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string& pPrefix);
 
 	/** Constructs the animation for the given source anim */
 	void CreateAnimation( aiScene* pScene, const ColladaParser& pParser, const Collada::Animation* pSrcAnim, const std::string& pName);

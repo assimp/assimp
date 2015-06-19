@@ -95,7 +95,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 /*static*/ AI_WONT_RETURN void MD5Parser::ReportError (const char* error, unsigned int line)
 {
 	char szBuffer[1024];
-	::sprintf(szBuffer,"[MD5] Line %i: %s",line,error);
+	::sprintf(szBuffer,"[MD5] Line %u: %s",line,error);
 	throw DeadlyImportError(szBuffer);
 }
 
@@ -104,7 +104,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 /*static*/ void MD5Parser::ReportWarning (const char* warn, unsigned int line)
 {
 	char szBuffer[1024]; 
-	::sprintf(szBuffer,"[MD5] Line %i: %s",line,warn);
+	::sprintf(szBuffer,"[MD5] Line %u: %s",line,warn);
 	DefaultLogger::get()->warn(szBuffer);
 }
 

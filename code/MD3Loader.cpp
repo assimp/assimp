@@ -791,7 +791,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
 	// Adjust all texture paths in the shader
 	const char* header_name = pcHeader->NAME;
-	if (shaders.blocks.size()) {
+	if (!shaders.blocks.empty()) {
 		for (std::list< Q3Shader::ShaderDataBlock >::iterator dit = shaders.blocks.begin(); dit != shaders.blocks.end(); ++dit) {
 			ConvertPath((*dit).name.c_str(),header_name,(*dit).name);
 
@@ -881,7 +881,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
 		// Now search the current shader for a record with this name (
 		// excluding texture file extension)
-		if (shaders.blocks.size()) {
+		if (!shaders.blocks.empty()) {
 
 			std::string::size_type s = convertedPath.find_last_of('.');
 			if (s == std::string::npos)

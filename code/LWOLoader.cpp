@@ -209,7 +209,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 		// we need to check now whether the requested layer has been found.
 		if (UINT_MAX != configLayerIndex) {
 			unsigned int layerCount = 0;
-			for(std::list<LWO::Layer>::iterator itLayers=mLayers->begin(); itLayers!=mLayers->end(); itLayers++)
+			for(std::list<LWO::Layer>::iterator itLayers=mLayers->begin(); itLayers!=mLayers->end(); ++itLayers)
 				if (!itLayers->skip)
 					layerCount++;
 			if (layerCount!=2)

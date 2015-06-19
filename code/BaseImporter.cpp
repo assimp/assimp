@@ -155,11 +155,11 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 		boost::scoped_array<char> _buffer (new char[searchBytes+1 /* for the '\0' */]);
 		char* buffer = _buffer.get();
 
-		const unsigned int read = pStream->Read(buffer,1,searchBytes);
+		const size_t read = pStream->Read(buffer,1,searchBytes);
 		if (!read)
 			return false;
 
-		for (unsigned int i = 0; i < read;++i)
+		for (size_t i = 0; i < read; ++i)
 			buffer[i] = ::tolower(buffer[i]);
 
 		// It is not a proper handling of unicode files here ...
@@ -392,11 +392,11 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 // Convert to UTF8 data to ISO-8859-1
 void BaseImporter::ConvertUTF8toISO8859_1(std::string& data)
 {
-	unsigned int size = data.size();
-	unsigned int i = 0, j = 0;
+	size_t size = data.size();
+	size_t i = 0, j = 0;
 
 	while(i < size) {
-		if((unsigned char) data[i] < 0x80) {
+		if ((unsigned char) data[i] < (size_t) 0x80) {
 			data[j] = data[i];
 		} else if(i < size - 1) {
 			if((unsigned char) data[i] == 0xC2) {
@@ -480,7 +480,9 @@ namespace Assimp
 struct Assimp::BatchData
 {
 	BatchData()
-		:	next_id(0xffff)
+        : pIOSystem()
+        , pImporter()
+        , next_id(0xffff)
 	{}
 
 	// IO system to be used for all imports

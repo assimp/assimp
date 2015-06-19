@@ -30,35 +30,43 @@ endif()
 
 set(GTEST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/gtest")
 
-ExternalProject_Add(gtest
-	GIT_REPOSITORY https://chromium.googlesource.com/external/googletest
-	TIMEOUT 10
-	PREFIX "${GTEST_PREFIX}"
-	CMAKE_ARGS "${GTEST_CMAKE_ARGS}"
-	LOG_DOWNLOAD ON
-	LOG_CONFIGURE ON
-	LOG_BUILD ON
-	# Disable install
-	INSTALL_COMMAND ""
-)
+# try to find git - if found, setup gtest
+find_package(Git)
+if(NOT GIT_FOUND)
+	set(AddGTest_FOUND false CACHE BOOL "Was gtest setup correctly?")
+else(NOT GIT_FOUND)
+	set(AddGTest_FOUND true CACHE BOOL "Was gtest setup correctly?")
+	
+	ExternalProject_Add(gtest
+		GIT_REPOSITORY https://chromium.googlesource.com/external/googletest
+		TIMEOUT 10
+		PREFIX "${GTEST_PREFIX}"
+		CMAKE_ARGS "${GTEST_CMAKE_ARGS}"
+		LOG_DOWNLOAD ON
+		LOG_CONFIGURE ON
+		LOG_BUILD ON
+		# Disable install
+		INSTALL_COMMAND ""
+	)
 
-set(LIB_PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
-set(LIB_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(GTEST_LOCATION "${GTEST_PREFIX}/src/gtest-build")
-set(GTEST_DEBUG_LIBRARIES
-	"${GTEST_LOCATION}/${DEBUG_LIB_DIR}/${LIB_PREFIX}gtest${LIB_SUFFIX}"
-	"${CMAKE_THREAD_LIBS_INIT}")
-SET(GTEST_RELEASE_LIBRARIES
-	"${GTEST_LOCATION}/${RELEASE_LIB_DIR}/${LIB_PREFIX}gtest${LIB_SUFFIX}"
-	"${CMAKE_THREAD_LIBS_INIT}")
+	set(LIB_PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
+	set(LIB_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+	set(GTEST_LOCATION "${GTEST_PREFIX}/src/gtest-build")
+	set(GTEST_DEBUG_LIBRARIES
+		"${GTEST_LOCATION}/${DEBUG_LIB_DIR}/${LIB_PREFIX}gtest${LIB_SUFFIX}"
+		"${CMAKE_THREAD_LIBS_INIT}")
+	SET(GTEST_RELEASE_LIBRARIES
+		"${GTEST_LOCATION}/${RELEASE_LIB_DIR}/${LIB_PREFIX}gtest${LIB_SUFFIX}"
+		"${CMAKE_THREAD_LIBS_INIT}")
 
-if(MSVC_VERSION EQUAL 1700)
-  add_definitions(-D_VARIADIC_MAX=10)
-endif()
+	if(MSVC_VERSION EQUAL 1700)
+	  add_definitions(-D_VARIADIC_MAX=10)
+	endif()
 
-ExternalProject_Get_Property(gtest source_dir)
-include_directories(${source_dir}/include)
-include_directories(${source_dir}/gtest/include)
+	ExternalProject_Get_Property(gtest source_dir)
+	include_directories(${source_dir}/include)
+	include_directories(${source_dir}/gtest/include)
 
-ExternalProject_Get_Property(gtest binary_dir)
-link_directories(${binary_dir})
+	ExternalProject_Get_Property(gtest binary_dir)
+	link_directories(${binary_dir})
+endif(NOT GIT_FOUND)

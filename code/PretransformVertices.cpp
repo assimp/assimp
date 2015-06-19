@@ -644,7 +644,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 			{
 				aiNode* pcNode = *nodes = new aiNode();
 				pcNode->mParent = pScene->mRootNode;
-				pcNode->mName.length = ::sprintf(pcNode->mName.data,"mesh_%i",i);
+				pcNode->mName.length = ::sprintf(pcNode->mName.data,"mesh_%u",i);
 
 				// setup mesh indices
 				pcNode->mNumMeshes = 1;
@@ -656,7 +656,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 			{
 				aiNode* pcNode = *nodes = new aiNode();
 				pcNode->mParent = pScene->mRootNode;
-				pcNode->mName.length = ::sprintf(pcNode->mName.data,"light_%i",i);
+				pcNode->mName.length = ::sprintf(pcNode->mName.data,"light_%u",i);
 				pScene->mLights[i]->mName = pcNode->mName;
 			}
 			// generate camera nodes
@@ -664,7 +664,7 @@ void PretransformVertices::Execute( aiScene* pScene)
 			{
 				aiNode* pcNode = *nodes = new aiNode();
 				pcNode->mParent = pScene->mRootNode;
-				pcNode->mName.length = ::sprintf(pcNode->mName.data,"cam_%i",i);
+				pcNode->mName.length = ::sprintf(pcNode->mName.data,"cam_%u",i);
 				pScene->mCameras[i]->mName = pcNode->mName;
 			}
 		}
@@ -707,15 +707,15 @@ void PretransformVertices::Execute( aiScene* pScene)
 
 		DefaultLogger::get()->debug("PretransformVerticesProcess finished");
 
-		sprintf(buffer,"Removed %i nodes and %i animation channels (%i output nodes)",
+		sprintf(buffer,"Removed %u nodes and %u animation channels (%u output nodes)",
 			iOldNodes,iOldAnimationChannels,CountNodes(pScene->mRootNode));
 		DefaultLogger::get()->info(buffer);
 
-		sprintf(buffer,"Kept %i lights and %i cameras",
+		sprintf(buffer,"Kept %u lights and %u cameras",
 			pScene->mNumLights,pScene->mNumCameras);
 		DefaultLogger::get()->info(buffer);
 
-		sprintf(buffer,"Moved %i meshes to WCS (number of output meshes: %i)",
+		sprintf(buffer,"Moved %u meshes to WCS (number of output meshes: %u)",
 			iOldMeshes,pScene->mNumMeshes);
 		DefaultLogger::get()->info(buffer);
 	}

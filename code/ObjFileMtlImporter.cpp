@@ -263,16 +263,21 @@ void ObjFileMtlImporter::createMaterial()
     }
     
     std::vector<std::string> token;
-    const unsigned int numToken = tokenize<std::string>( line, token, " " );
-    std::string name( "" );
-    if ( numToken == 1 ) {
-        name = AI_DEFAULT_MATERIAL_NAME;
-    } else {
-        name = token[ 1 ];
-    }
+    const unsigned int numToken = tokenize<std::string>( line, token, " \t" );
+	std::string name( "" );
+	if ( numToken == 1 ) {
+		name = AI_DEFAULT_MATERIAL_NAME;
+	} else {
+		// skip newmtl and all following white spaces
+		std::size_t first_ws_pos = line.find_first_of(" \t");
+		std::size_t first_non_ws_pos = line.find_first_not_of(" \t", first_ws_pos);
+		if (first_non_ws_pos != std::string::npos) {
+			name = line.substr(first_non_ws_pos);
+		}
+	}
 
-    std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( name );
-    if ( m_pModel->m_MaterialMap.end() == it) {
+	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( name );
+	if ( m_pModel->m_MaterialMap.end() == it) {
         // New Material created
         m_pModel->m_pCurrentMaterial = new ObjFile::Material();	
         m_pModel->m_pCurrentMaterial->MaterialName.Set( name );

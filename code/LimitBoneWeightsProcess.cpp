@@ -193,7 +193,7 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 
 		if (!DefaultLogger::isNullLogger()) {
 			char buffer[1024];
-			::sprintf(buffer,"Removed %i weights. Input bones: %i. Output bones: %i",removed,old_bones,pMesh->mNumBones);
+			::sprintf(buffer,"Removed %u weights. Input bones: %u. Output bones: %u",removed,old_bones,pMesh->mNumBones);
 			DefaultLogger::get()->info(buffer);
 		}
 	}

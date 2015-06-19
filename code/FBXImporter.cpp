@@ -152,7 +152,7 @@ void FBXImporter::InternReadFile( const std::string& pFile,
 	// streaming input data would be very low.
 	std::vector<char> contents;
 	contents.resize(stream->FileSize()+1);
-    size_t readcnt = stream->Read( &*contents.begin(), 1, contents.size()-1 );
+    stream->Read( &*contents.begin(), 1, contents.size()-1 );
     contents[ contents.size() - 1 ] = 0;
 	const char* const begin = &*contents.begin();
 

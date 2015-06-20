@@ -414,7 +414,7 @@ void XFileParser::ParseDataObjectFrame( Node* pParent)
 		else
 		if( objectName == "Mesh")
 		{
-			Mesh* mesh = new Mesh;
+			Mesh* mesh = new Mesh(name);
 			node->mMeshes.push_back( mesh);
 			ParseDataObjectMesh( mesh);
 		} else

@@ -294,6 +294,9 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 			mesh->mNumFaces = (unsigned int)faces.size();
 			mesh->mFaces = new aiFace[mesh->mNumFaces];
 
+			// name
+			mesh->mName.Set(sourceMesh->mName);
+
 			// normals?
 			if( sourceMesh->mNormals.size() > 0)
 				mesh->mNormals = new aiVector3D[numVertices];

@@ -110,6 +110,7 @@ struct Bone
 /** Helper structure to represent an XFile mesh */
 struct Mesh
 {
+	std::string mName;
 	std::vector<aiVector3D> mPositions;
 	std::vector<Face> mPosFaces;
 	std::vector<aiVector3D> mNormals;
@@ -124,7 +125,7 @@ struct Mesh
 
 	std::vector<Bone> mBones;
 
-	Mesh() { mNumTextures = 0; mNumColorSets = 0; }
+	Mesh(const std::string &pName = "") { mName = pName; mNumTextures = 0; mNumColorSets = 0; }
 };
 
 /** Helper structure to represent a XFile frame */

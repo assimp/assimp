@@ -284,6 +284,9 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 			SkipSpaces(&buffer);
 
 			unsigned int t = strtoul10(buffer,&buffer);
+			if (t >= std::numeric_limits<int32_t>::max() / sizeof(aiVector3D)) {
+				throw DeadlyImportError("AC3D: Too many vertices, would run out of memory");
+			}
 			obj.vertices.reserve(t);
 			for (unsigned int i = 0; i < t;++i)
 			{
@@ -608,6 +611,9 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 									face.mIndices[i] = cur++;
 
 									// copy vertex positions
+									if ((vertices - mesh->mVertices) >= mesh->mNumVertices) {
+										throw DeadlyImportError("AC3D: Invalid number of vertices");
+									}
 									*vertices = object.vertices[entry.first] + object.translation;
 
 
@@ -639,6 +645,10 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 								face.mIndices[1] = cur++;
 
 								// copy vertex positions
+								if (it2 == (*it).entries.end() ) {
+									throw DeadlyImportError("AC3D: Bad line");
+								}
+								ai_assert((*it2).first < object.vertices.size());
 								*vertices++ = object.vertices[(*it2).first];
 								
 								// copy texture coordinates 

@@ -11,6 +11,11 @@ This is the development trunk containing the latest features and bugfixes. For p
 
 [![Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
 
+Coverity scan status report: <a href="https://scan.coverity.com/projects/5607">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/5607/badge.svg"/>
+</a>
+
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
 #### Supported file formats ####

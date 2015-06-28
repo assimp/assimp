@@ -692,7 +692,7 @@ SET( assimp_src
 )
 add_definitions( -DOPENDDLPARSER_BUILD )
 
-INCLUDE_DIRECTORIES( 
+INCLUDE_DIRECTORIES(
   ../contrib/openddlparser/include
 )
 

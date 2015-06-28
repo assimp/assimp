@@ -548,7 +548,7 @@ ASSIMP_API size_t aiGetImportFormatCount(void);
 
 // --------------------------------------------------------------------------------
 /** Returns a description of the nth import file format. Use #aiGetImportFormatCount()
- * to learn how many import formats are supported. 
+ * to learn how many import formats are supported.
  * @param pIndex Index of the import format to retrieve information for. Valid range is
  *    0 to #aiGetImportFormatCount()
  * @return A description of that specific import format. NULL if pIndex is out of range.

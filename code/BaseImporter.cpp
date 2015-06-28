@@ -154,20 +154,26 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 		// read 200 characters from the file
 		boost::scoped_array<char> _buffer (new char[searchBytes+1 /* for the '\0' */]);
 		char* buffer = _buffer.get();
+        if( NULL == buffer ) {
+            return false;
+        }
 
 		const size_t read = pStream->Read(buffer,1,searchBytes);
-		if (!read)
-			return false;
+        if( !read ) {
+            return false;
+        }
 
-		for (size_t i = 0; i < read; ++i)
-			buffer[i] = ::tolower(buffer[i]);
+        for( size_t i = 0; i < read; ++i ) {
+            buffer[ i ] = ::tolower( buffer[ i ] );
+        }
 
 		// It is not a proper handling of unicode files here ...
 		// ehm ... but it works in most cases.
 		char* cur = buffer,*cur2 = buffer,*end = &buffer[read];
 		while (cur != end)	{
-			if (*cur)
-				*cur2++ = *cur;
+            if( *cur ) {
+                *cur2++ = *cur;
+            }
 			++cur;
 		}
 		*cur2 = '\0';
@@ -177,8 +183,9 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 
 
 			const char* r = strstr(buffer,tokens[i]);
-			if (!r) 
-				continue;
+            if( !r ) {
+                continue;
+            }
 			// We got a match, either we don't care where it is, or it happens to
 			// be in the beginning of the file / line
 			if (!tokensSol || r == buffer || r[-1] == '\r' || r[-1] == '\n') {
@@ -187,6 +194,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 			}
 		}
 	}
+
 	return false;
 }
 

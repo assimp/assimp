@@ -239,8 +239,10 @@ unsigned B3DImporter::ChunkSize(){
 
 template<class T>
 T *B3DImporter::to_array( const vector<T> &v ){
-	if( !v.size() ) return 0;
-	T *p=new T[v.size()];
+    if( v.empty() ) {
+        return 0;
+    }
+	T *p=new T[ v.size() ];
 	for( size_t i=0;i<v.size();++i ){
 		p[i]=v[i];
 	}

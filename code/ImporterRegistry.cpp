@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -51,125 +51,125 @@ corresponding preprocessor flag to selectively disable formats.
 // (include_new_importers_here)
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_NO_X_IMPORTER
-#	include "XFileImporter.h"
+#   include "XFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
-#	include "3DSLoader.h"
+#   include "3DSLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD3_IMPORTER
-#	include "MD3Loader.h"
+#   include "MD3Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
-#	include "MDLLoader.h"
+#   include "MDLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD2_IMPORTER
-#	include "MD2Loader.h"
+#   include "MD2Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_PLY_IMPORTER
-#	include "PlyLoader.h"
+#   include "PlyLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_ASE_IMPORTER
-#	include "ASELoader.h"
+#   include "ASELoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
-#	include "ObjFileImporter.h"
+#   include "ObjFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_HMP_IMPORTER
-#	include "HMPLoader.h"
+#   include "HMPLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_SMD_IMPORTER
-#	include "SMDLoader.h"
+#   include "SMDLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MDC_IMPORTER
-#	include "MDCLoader.h"
+#   include "MDCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MD5_IMPORTER
-#	include "MD5Loader.h"
+#   include "MD5Loader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
-#	include "STLLoader.h"
+#   include "STLLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
-#	include "LWOLoader.h"
+#   include "LWOLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
-#	include "DXFLoader.h"
+#   include "DXFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_NFF_IMPORTER
-#	include "NFFLoader.h"
+#   include "NFFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_RAW_IMPORTER
-#	include "RawLoader.h"
+#   include "RawLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OFF_IMPORTER
-#	include "OFFLoader.h"
+#   include "OFFLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_AC_IMPORTER
-#	include "ACLoader.h"
+#   include "ACLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_BVH_IMPORTER
-#	include "BVHLoader.h"
+#   include "BVHLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
-#	include "IRRMeshLoader.h"
+#   include "IRRMeshLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IRR_IMPORTER
-#	include "IRRLoader.h"
+#   include "IRRLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
-#	include "Q3DLoader.h"
+#   include "Q3DLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
-#	include "B3DImporter.h"
+#   include "B3DImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
-#	include "ColladaLoader.h"
+#   include "ColladaLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_TERRAGEN_IMPORTER
-#	include "TerragenLoader.h"
+#   include "TerragenLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
-#	include "CSMLoader.h"
+#   include "CSMLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_3D_IMPORTER
-#	include "UnrealLoader.h"
+#   include "UnrealLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
-#	include "LWSLoader.h"
+#   include "LWSLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
-#	include "OgreImporter.h"
+#   include "OgreImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 #   include "OpenGEXImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
-#	include "MS3DLoader.h"
+#   include "MS3DLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
-#	include "COBLoader.h"
+#   include "COBLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
-#	include "BlenderLoader.h"
+#   include "BlenderLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
-#	include "Q3BSPFileImporter.h"
+#   include "Q3BSPFileImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
-#	include "NDOLoader.h"
+#   include "NDOLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
-#	include "IFCLoader.h"
+#   include "IFCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 #   include "XGLLoader.h"
-#endif 
+#endif
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 #   include "FBXImporter.h"
-#endif 
+#endif
 #ifndef ASSIMP_BUILD_NO_ASSBIN_IMPORTER
 #   include "AssbinLoader.h"
-#endif 
+#endif
 
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
 #   include "C4DImporter.h"

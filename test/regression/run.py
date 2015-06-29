@@ -294,6 +294,6 @@ def run_test():
 if __name__ == "__main__":
     assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
     print('Using assimp binary: ' + assimp_bin_path)
-    return run_test()
+    sys.exit( run_test() )
 
 # vim: ai ts=4 sts=4 et sw=4

@@ -47,7 +47,7 @@ std::string g_szNormalsShader = std::string(
 
     // World * View * Projection matrix\n"
     // NOTE: Assume that the material uses a WorldViewProjection matrix\n"
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
     "float4 OUTPUT_COLOR;\n"
     
     // Vertex shader input structure
@@ -141,7 +141,7 @@ std::string g_szSkyboxShader = std::string(
 
     // World * View * Projection matrix\n"
     // NOTE: Assume that the material uses a WorldViewProjection matrix\n"
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
     
     // Vertex shader input structure
     "struct VS_INPUT\n"
@@ -243,9 +243,9 @@ std::string g_szDefaultShader = std::string(
 
     // World * View * Projection matrix
     // NOTE: Assume that the material uses a WorldViewProjection matrix
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
-    "float4x4 World					: WORLD;\n"
-    "float4x3 WorldInverseTranspose	: WORLDINVERSETRANSPOSE;\n"
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
+    "float4x4 World                 : WORLD;\n"
+    "float4x3 WorldInverseTranspose : WORLDINVERSETRANSPOSE;\n"
 
     // light colors
     "float3 afLightColor[5];\n"
@@ -256,19 +256,19 @@ std::string g_szDefaultShader = std::string(
     "float3 vCameraPos : CAMERAPOSITION;\n"
 
     // Bone matrices
-//	"#ifdef AV_SKINNING \n"
+//  "#ifdef AV_SKINNING \n"
     "float4x3 gBoneMatrix[60]; \n"
-//	"#endif // AV_SKINNING \n"
+//  "#endif // AV_SKINNING \n"
 
     // Vertex shader input structure
     "struct VS_INPUT\n"
     "{\n"
         "float3 Position : POSITION;\n"
         "float3 Normal : NORMAL;\n"
-//		"#ifdef AV_SKINNING \n"
+//      "#ifdef AV_SKINNING \n"
             "float4 BlendIndices : BLENDINDICES;\n"
             "float4 BlendWeights : BLENDWEIGHT;\n"
-//		"#endif // AV_SKINNING \n"
+//      "#endif // AV_SKINNING \n"
     "};\n"
 
     // Vertex shader output structure for pixel shader usage
@@ -291,7 +291,7 @@ std::string g_szDefaultShader = std::string(
     "{\n"
         "VS_OUTPUT Out;\n"
 
-//		"#ifdef AV_SKINNING \n"
+//      "#ifdef AV_SKINNING \n"
         "float4 weights = IN.BlendWeights; \n"
         "weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
         "float4 localPos = float4( IN.Position, 1.0f); \n"
@@ -299,9 +299,9 @@ std::string g_szDefaultShader = std::string(
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
-//		"#else \n"
-//		"float3 objPos = IN.Position; \n"
-//		"#endif // AV_SKINNING \n"
+//      "#else \n"
+//      "float3 objPos = IN.Position; \n"
+//      "#endif // AV_SKINNING \n"
 
         // Multiply with the WorldViewProjection matrix
         "Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
@@ -317,7 +317,7 @@ std::string g_szDefaultShader = std::string(
     "{\n"
         "VS_OUTPUT_FF Out;\n"
 
-//		"#ifdef AV_SKINNING \n"
+//      "#ifdef AV_SKINNING \n"
         "float4 weights = IN.BlendWeights; \n"
         "weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
         "float4 localPos = float4( IN.Position, 1.0f); \n"
@@ -325,9 +325,9 @@ std::string g_szDefaultShader = std::string(
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
-//		"#else \n"
-//		"float3 objPos = IN.Position; \n"
-//		"#endif // AV_SKINNING \n"
+//      "#else \n"
+//      "float3 objPos = IN.Position; \n"
+//      "#endif // AV_SKINNING \n"
 
         // Multiply with the WorldViewProjection matrix
         "Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
@@ -484,9 +484,9 @@ std::string g_szMaterialShader = std::string(
 
     // World * View * Projection matrix
   // NOTE: Assume that the material uses a WorldViewProjection matrix
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
-    "float4x4 World					: WORLD;\n"
-    "float4x3 WorldInverseTranspose	: WORLDINVERSETRANSPOSE;\n"
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
+    "float4x4 World                 : WORLD;\n"
+    "float4x3 WorldInverseTranspose : WORLDINVERSETRANSPOSE;\n"
 
     "#ifndef AV_DISABLESSS\n"
     "float4x3 ViewProj;\n"
@@ -1369,7 +1369,7 @@ std::string g_szCheckerBackgroundShader = std::string(
     // vertex shader output structure
         "struct VS_OUTPUT\n"
         "{\n"
-            "float4 Position : POSITION;\n"	
+            "float4 Position : POSITION;\n" 
         "};\n"
 
     // vertex shader 

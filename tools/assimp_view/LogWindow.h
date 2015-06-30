@@ -47,20 +47,20 @@ namespace AssimpView
 
 
     //-------------------------------------------------------------------------------
-    /**	\brief Subclass of Assimp::LogStream used to add all log messages to the
+    /** \brief Subclass of Assimp::LogStream used to add all log messages to the
      *         log window.
      */
     //-------------------------------------------------------------------------------
     class CMyLogStream : public Assimp::LogStream
     {
     public:
-        /**	@brief	Implementation of the abstract method	*/
+        /** @brief  Implementation of the abstract method   */
         void write( const char* message );
     };
 
 
     //-------------------------------------------------------------------------------
-    /**	\brief Class to display log strings in a separate window
+    /** \brief Class to display log strings in a separate window
     */
     //-------------------------------------------------------------------------------
     class CLogWindow

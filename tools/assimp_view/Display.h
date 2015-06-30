@@ -47,11 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <commctrl.h>
 
 // see CDisplay::m_aiImageList
-#define AI_VIEW_IMGLIST_NODE			0x0
-#define AI_VIEW_IMGLIST_MATERIAL		0x1
-#define AI_VIEW_IMGLIST_TEXTURE			0x2
+#define AI_VIEW_IMGLIST_NODE            0x0
+#define AI_VIEW_IMGLIST_MATERIAL        0x1
+#define AI_VIEW_IMGLIST_TEXTURE         0x2
 #define AI_VIEW_IMGLIST_TEXTURE_INVALID 0x3
-#define AI_VIEW_IMGLIST_MODEL			0x4
+#define AI_VIEW_IMGLIST_MODEL           0x4
 
 namespace AssimpView
 {

@@ -43,43 +43,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AV_CAMERA_H_INCLUDED
 
 //-------------------------------------------------------------------------------
-/**	\brief Camera class
+/** \brief Camera class
 */
 //-------------------------------------------------------------------------------
 class Camera
-	{
-	public:
+    {
+    public:
 
 
-		Camera ()
-			:
+        Camera ()
+            :
 
-			vPos(0.0f,0.0f,-10.0f),
-			vUp(0.0f,1.0f,0.0f),
-			vLookAt(0.0f,0.0f,1.0f),
-			vRight(0.0f,1.0f,0.0f)
-			{
+            vPos(0.0f,0.0f,-10.0f),
+            vUp(0.0f,1.0f,0.0f),
+            vLookAt(0.0f,0.0f,1.0f),
+            vRight(0.0f,1.0f,0.0f)
+            {
 
-			}
-	public:
+            }
+    public:
 
-		// position of the camera
-		aiVector3D vPos;
+        // position of the camera
+        aiVector3D vPos;
 
-		// up-vector of the camera
-		aiVector3D vUp;
+        // up-vector of the camera
+        aiVector3D vUp;
 
-		// camera's looking point is vPos + vLookAt
-		aiVector3D vLookAt;
+        // camera's looking point is vPos + vLookAt
+        aiVector3D vLookAt;
 
-		// right vector of the camera
-		aiVector3D vRight;
+        // right vector of the camera
+        aiVector3D vRight;
 
 
-		// Equation
-		// (vRight ^ vUp) - vLookAt == 0  
-		// needn't apply
+        // Equation
+        // (vRight ^ vUp) - vLookAt == 0  
+        // needn't apply
 
-	} ;
+    } ;
 
 #endif // !!IG

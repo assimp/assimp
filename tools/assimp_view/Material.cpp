@@ -63,56 +63,56 @@ namespace AssimpView {
 using namespace Assimp;
 
 extern std::string g_szMaterialShader;
-extern HINSTANCE g_hInstance				/*= NULL*/;
-extern HWND g_hDlg							/*= NULL*/;
-extern IDirect3D9* g_piD3D					/*= NULL*/;
-extern IDirect3DDevice9* g_piDevice			/*= NULL*/;
+extern HINSTANCE g_hInstance                /*= NULL*/;
+extern HWND g_hDlg                          /*= NULL*/;
+extern IDirect3D9* g_piD3D                  /*= NULL*/;
+extern IDirect3DDevice9* g_piDevice         /*= NULL*/;
 extern IDirect3DVertexDeclaration9* gDefaultVertexDecl /*= NULL*/;
-extern double g_fFPS						/*= 0.0f*/;
+extern double g_fFPS                        /*= 0.0f*/;
 extern char g_szFileName[ MAX_PATH ];
-extern ID3DXEffect* g_piDefaultEffect		/*= NULL*/;
-extern ID3DXEffect* g_piNormalsEffect		/*= NULL*/;
-extern ID3DXEffect* g_piPassThroughEffect	/*= NULL*/;
-extern ID3DXEffect* g_piPatternEffect		/*= NULL*/;
-extern bool g_bMousePressed					/*= false*/;
-extern bool g_bMousePressedR				/*= false*/;
-extern bool g_bMousePressedM				/*= false*/;
-extern bool g_bMousePressedBoth				/*= false*/;
-extern float g_fElpasedTime					/*= 0.0f*/;
+extern ID3DXEffect* g_piDefaultEffect       /*= NULL*/;
+extern ID3DXEffect* g_piNormalsEffect       /*= NULL*/;
+extern ID3DXEffect* g_piPassThroughEffect   /*= NULL*/;
+extern ID3DXEffect* g_piPatternEffect       /*= NULL*/;
+extern bool g_bMousePressed                 /*= false*/;
+extern bool g_bMousePressedR                /*= false*/;
+extern bool g_bMousePressedM                /*= false*/;
+extern bool g_bMousePressedBoth             /*= false*/;
+extern float g_fElpasedTime                 /*= 0.0f*/;
 extern D3DCAPS9 g_sCaps;
-extern bool g_bLoadingFinished				/*= false*/;
-extern HANDLE g_hThreadHandle				/*= NULL*/;
-extern float g_fWheelPos					/*= -10.0f*/;
-extern bool g_bLoadingCanceled				/*= false*/;
-extern IDirect3DTexture9* g_pcTexture		/*= NULL*/;
+extern bool g_bLoadingFinished              /*= false*/;
+extern HANDLE g_hThreadHandle               /*= NULL*/;
+extern float g_fWheelPos                    /*= -10.0f*/;
+extern bool g_bLoadingCanceled              /*= false*/;
+extern IDirect3DTexture9* g_pcTexture       /*= NULL*/;
 
 extern aiMatrix4x4 g_mWorld;
 extern aiMatrix4x4 g_mWorldRotate;
-extern aiVector3D g_vRotateSpeed			/*= aiVector3D(0.5f,0.5f,0.5f)*/;
+extern aiVector3D g_vRotateSpeed            /*= aiVector3D(0.5f,0.5f,0.5f)*/;
 
 extern aiVector3D g_avLightDirs[ 1 ] /* =
-                                        {	aiVector3D(-0.5f,0.6f,0.2f) ,
+                                        {   aiVector3D(-0.5f,0.6f,0.2f) ,
                                         aiVector3D(-0.5f,0.5f,0.5f)} */;
 
 
-extern POINT g_mousePos						/*= {0,0};*/;
-extern POINT g_LastmousePos					/*= {0,0}*/;
-extern bool g_bFPSView						/*= false*/;
-extern bool g_bInvert						/*= false*/;
+extern POINT g_mousePos                     /*= {0,0};*/;
+extern POINT g_LastmousePos                 /*= {0,0}*/;
+extern bool g_bFPSView                      /*= false*/;
+extern bool g_bInvert                       /*= false*/;
 extern EClickPos g_eClick;
-extern unsigned int g_iCurrentColor			/*= 0*/;
+extern unsigned int g_iCurrentColor         /*= 0*/;
 
 // NOTE: The light intensity is separated from the color, it can
 // directly be manipulated using the middle mouse button.
 // When the user chooses a color from the palette the intensity
 // is reset to 1.0
 // index[2] is the ambient color
-extern float g_fLightIntensity				/*=0.0f*/;
+extern float g_fLightIntensity              /*=0.0f*/;
 extern D3DCOLOR g_avLightColors[ 3 ];
 
 extern RenderOptions g_sOptions;
 extern Camera g_sCamera;
-extern AssetHelper *g_pcAsset				/*= NULL*/;
+extern AssetHelper *g_pcAsset               /*= NULL*/;
 
 
 //
@@ -122,13 +122,13 @@ extern AssetHelper *g_pcAsset				/*= NULL*/;
 // The size of the image is identical to the size of the main 
 // HUD texture
 //
-extern unsigned char* g_szImageMask			/*= NULL*/;
+extern unsigned char* g_szImageMask         /*= NULL*/;
 
 
 extern float g_fACMR /*= 3.0f*/;
 extern IDirect3DQuery9* g_piQuery;
 
-extern bool g_bPlay						/*= false*/;
+extern bool g_bPlay                     /*= false*/;
 
 extern double g_dCurrent;
 extern float g_smoothAngle /*= 80.f*/;
@@ -319,7 +319,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 {
     ai_assert(NULL != p_szString);
     aiString pcpy = *p_szString;
-    if ('*' ==  p_szString->data[0])	{
+    if ('*' ==  p_szString->data[0])    {
         // '*' as first character indicates an embedded file
         return 5;
     }
@@ -1161,7 +1161,7 @@ int CMaterialManager::CreateMaterial(
         ++iCurrent;
 
         int idx;
-        if(AI_SUCCESS == aiGetMaterialInteger(pcMat,AI_MATKEY_UVWSRC_LIGHTMAP(0),&idx) && idx >= 1 && pcSource->mTextureCoords[idx])	{
+        if(AI_SUCCESS == aiGetMaterialInteger(pcMat,AI_MATKEY_UVWSRC_LIGHTMAP(0),&idx) && idx >= 1 && pcSource->mTextureCoords[idx])    {
             sMacro[iCurrent].Name = "AV_TWO_UV";
             sMacro[iCurrent].Definition = "1";
             ++iCurrent;
@@ -1360,9 +1360,9 @@ int CMaterialManager::SetupMaterial (
     D3DXVec4Normalize(&apcVec[1],&apcVec[1]);
     piEnd->SetVectorArray("afLightDir",apcVec,5);
 
-    apcVec[0].x = ((g_avLightColors[0] >> 16)	& 0xFF) / 255.0f;
-    apcVec[0].y = ((g_avLightColors[0] >> 8)	& 0xFF) / 255.0f;
-    apcVec[0].z = ((g_avLightColors[0])			& 0xFF) / 255.0f;
+    apcVec[0].x = ((g_avLightColors[0] >> 16)   & 0xFF) / 255.0f;
+    apcVec[0].y = ((g_avLightColors[0] >> 8)    & 0xFF) / 255.0f;
+    apcVec[0].z = ((g_avLightColors[0])         & 0xFF) / 255.0f;
     apcVec[0].w = 1.0f;
 
     if( g_sOptions.b3Lights)
@@ -1383,14 +1383,14 @@ int CMaterialManager::SetupMaterial (
     apcVec[1] *= g_fLightIntensity;
     piEnd->SetVectorArray("afLightColor",apcVec,5);
 
-    apcVec[0].x = ((g_avLightColors[2] >> 16)	& 0xFF) / 255.0f;
-    apcVec[0].y = ((g_avLightColors[2] >> 8)	& 0xFF) / 255.0f;
-    apcVec[0].z = ((g_avLightColors[2])			& 0xFF) / 255.0f;
+    apcVec[0].x = ((g_avLightColors[2] >> 16)   & 0xFF) / 255.0f;
+    apcVec[0].y = ((g_avLightColors[2] >> 8)    & 0xFF) / 255.0f;
+    apcVec[0].z = ((g_avLightColors[2])         & 0xFF) / 255.0f;
     apcVec[0].w = 1.0f;
 
-    apcVec[1].x = ((g_avLightColors[2] >> 16)	& 0xFF) / 255.0f;
-    apcVec[1].y = ((g_avLightColors[2] >> 8)	& 0xFF) / 255.0f;
-    apcVec[1].z = ((g_avLightColors[2])			& 0xFF) / 255.0f;
+    apcVec[1].x = ((g_avLightColors[2] >> 16)   & 0xFF) / 255.0f;
+    apcVec[1].y = ((g_avLightColors[2] >> 8)    & 0xFF) / 255.0f;
+    apcVec[1].z = ((g_avLightColors[2])         & 0xFF) / 255.0f;
     apcVec[1].w = 0.0f;
 
     // FIX: light intensity doesn't apply to ambient color
@@ -1487,7 +1487,7 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
     // reenable culling if necessary
     if (pcMesh->twosided && g_sOptions.bCulling) {
         g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
-    }		
+    }       
 
     return 1;
 }

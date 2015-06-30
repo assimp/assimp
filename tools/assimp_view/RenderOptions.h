@@ -44,70 +44,70 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //-------------------------------------------------------------------------------
-/**	\brief Class to manage render options. One global instance
+/** \brief Class to manage render options. One global instance
 */
 //-------------------------------------------------------------------------------
 class RenderOptions
-	{
-	public:
+    {
+    public:
 
-		// enumerates different drawing modi. POINT is currently
-		// not supported and probably will never be.
-		enum DrawMode {NORMAL, WIREFRAME, POINT};
+        // enumerates different drawing modi. POINT is currently
+        // not supported and probably will never be.
+        enum DrawMode {NORMAL, WIREFRAME, POINT};
 
-		inline RenderOptions	(void) :
-			bMultiSample	(true),
-			bSuperSample	(false),
-			bRenderMats		(true),
-			bRenderNormals	(false),
-			b3Lights		(false),
-			bLightRotate	(false),
-			bRotate			(true),
-			bLowQuality		(false),
-			bNoSpecular		(false),
-			bStereoView		(false),
-			bNoAlphaBlending(false),
-			eDrawMode		(NORMAL),
-			bCulling		(false),
-			bSkeleton		(false)
-			
-			{}
+        inline RenderOptions    (void) :
+            bMultiSample    (true),
+            bSuperSample    (false),
+            bRenderMats     (true),
+            bRenderNormals  (false),
+            b3Lights        (false),
+            bLightRotate    (false),
+            bRotate         (true),
+            bLowQuality     (false),
+            bNoSpecular     (false),
+            bStereoView     (false),
+            bNoAlphaBlending(false),
+            eDrawMode       (NORMAL),
+            bCulling        (false),
+            bSkeleton       (false)
+            
+            {}
 
-		bool bMultiSample;
+        bool bMultiSample;
 
-		// SuperSampling has not yet been implemented
-		bool bSuperSample;
+        // SuperSampling has not yet been implemented
+        bool bSuperSample;
 
-		// Display the real material of the object
-		bool bRenderMats;
+        // Display the real material of the object
+        bool bRenderMats;
 
-		// Render the normals
-		bool bRenderNormals;
+        // Render the normals
+        bool bRenderNormals;
 
-		// Use 2 directional light sources
-		bool b3Lights;
+        // Use 2 directional light sources
+        bool b3Lights;
 
-		// Automatically rotate the light source(s)
-		bool bLightRotate;
+        // Automatically rotate the light source(s)
+        bool bLightRotate;
 
-		// Automatically rotate the asset around its origin
-		bool bRotate;
+        // Automatically rotate the asset around its origin
+        bool bRotate;
 
-		// use standard lambertian lighting
-		bool bLowQuality;
+        // use standard lambertian lighting
+        bool bLowQuality;
 
-		// disable specular lighting got all elements in the scene
-		bool bNoSpecular;
+        // disable specular lighting got all elements in the scene
+        bool bNoSpecular;
 
-		// enable stereo view
-		bool bStereoView;
+        // enable stereo view
+        bool bStereoView;
 
-		bool bNoAlphaBlending;
+        bool bNoAlphaBlending;
 
-		// wireframe or solid rendering?
-		DrawMode eDrawMode;
+        // wireframe or solid rendering?
+        DrawMode eDrawMode;
 
-		bool bCulling,bSkeleton;
-	};
+        bool bCulling,bSkeleton;
+    };
 
 #endif // !! IG

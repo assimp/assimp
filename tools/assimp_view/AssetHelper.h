@@ -54,7 +54,7 @@ namespace AssimpView {
     class SceneAnimator;
 
     //-------------------------------------------------------------------------------
-    /**	\brief Class to wrap ASSIMP's asset output structures
+    /** \brief Class to wrap ASSIMP's asset output structures
     */
     //-------------------------------------------------------------------------------
     class AssetHelper

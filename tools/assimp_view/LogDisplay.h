@@ -46,7 +46,7 @@ namespace AssimpView
 {
 
     //-------------------------------------------------------------------------------
-    /**	\brief Class to display log strings in the upper right corner of the view
+    /** \brief Class to display log strings in the upper right corner of the view
     */
     //-------------------------------------------------------------------------------
     class CLogDisplay

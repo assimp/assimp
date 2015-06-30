@@ -52,29 +52,29 @@ extern std::string g_szDefaultShader;
 extern std::string g_szPassThroughShader;
 
 //-------------------------------------------------------------------------------
-HINSTANCE g_hInstance				= NULL;
-HWND g_hDlg							= NULL;
-IDirect3D9* g_piD3D					= NULL;
-IDirect3DDevice9* g_piDevice		= NULL;
+HINSTANCE g_hInstance               = NULL;
+HWND g_hDlg                         = NULL;
+IDirect3D9* g_piD3D                 = NULL;
+IDirect3DDevice9* g_piDevice        = NULL;
 IDirect3DVertexDeclaration9* gDefaultVertexDecl = NULL;
-double g_fFPS						= 0.0f;
+double g_fFPS                       = 0.0f;
 char g_szFileName[MAX_PATH];
-ID3DXEffect* g_piDefaultEffect		= NULL;
-ID3DXEffect* g_piNormalsEffect		= NULL;
-ID3DXEffect* g_piPassThroughEffect	= NULL;
-ID3DXEffect* g_piPatternEffect		= NULL;
-bool g_bMousePressed				= false;
-bool g_bMousePressedR				= false;
-bool g_bMousePressedM				= false;
-bool g_bMousePressedBoth			= false;
-float g_fElpasedTime				= 0.0f;
+ID3DXEffect* g_piDefaultEffect      = NULL;
+ID3DXEffect* g_piNormalsEffect      = NULL;
+ID3DXEffect* g_piPassThroughEffect  = NULL;
+ID3DXEffect* g_piPatternEffect      = NULL;
+bool g_bMousePressed                = false;
+bool g_bMousePressedR               = false;
+bool g_bMousePressedM               = false;
+bool g_bMousePressedBoth            = false;
+float g_fElpasedTime                = 0.0f;
 D3DCAPS9 g_sCaps;
-bool g_bLoadingFinished				= false;
-HANDLE g_hThreadHandle				= NULL;
-float g_fWheelPos					= -10.0f;
-bool g_bLoadingCanceled				= false;
-IDirect3DTexture9* g_pcTexture		= NULL;
-bool g_bPlay						= false;
+bool g_bLoadingFinished             = false;
+HANDLE g_hThreadHandle              = NULL;
+float g_fWheelPos                   = -10.0f;
+bool g_bLoadingCanceled             = false;
+IDirect3DTexture9* g_pcTexture      = NULL;
+bool g_bPlay                        = false;
 double g_dCurrent = 0.;
 
 // default pp steps
@@ -89,7 +89,7 @@ unsigned int ppsteps = aiProcess_CalcTangentSpace | // calculate tangents and bi
         aiProcess_TransformUVCoords        | // preprocess UV transformations (scaling, translation ...)
         aiProcess_FindInstances            | // search for instanced meshes and remove them by references to one master
         aiProcess_LimitBoneWeights         | // limit bone weights to 4 per vertex
-        aiProcess_OptimizeMeshes		   | // join small meshes, if possible;
+        aiProcess_OptimizeMeshes           | // join small meshes, if possible;
         aiProcess_SplitByBoneCount         | // split meshes with too many bones. Necessary for our (limited) hardware skinning shader
         0;
 
@@ -97,15 +97,15 @@ unsigned int ppstepsdefault = ppsteps;
 
 bool nopointslines = false;
 
-extern bool g_bWasFlipped			/*= false*/;
+extern bool g_bWasFlipped           /*= false*/;
 
 aiMatrix4x4 g_mWorld;
 aiMatrix4x4 g_mWorldRotate;
-aiVector3D g_vRotateSpeed			= aiVector3D(0.5f,0.5f,0.5f);
+aiVector3D g_vRotateSpeed           = aiVector3D(0.5f,0.5f,0.5f);
 
 // NOTE: The second light direction is now computed from the first
 aiVector3D g_avLightDirs[1] = 
-{	aiVector3D(-0.5f,0.6f,0.2f)  };
+{   aiVector3D(-0.5f,0.6f,0.2f)  };
 
 D3DCOLOR g_avLightColors[3] = 
 {
@@ -116,23 +116,23 @@ D3DCOLOR g_avLightColors[3] =
 
 POINT g_mousePos;
 POINT g_LastmousePos;
-bool g_bFPSView						= false;
-bool g_bInvert						= false;
-EClickPos g_eClick					= EClickPos_Circle;
-unsigned int g_iCurrentColor		= 0;
+bool g_bFPSView                     = false;
+bool g_bInvert                      = false;
+EClickPos g_eClick                  = EClickPos_Circle;
+unsigned int g_iCurrentColor        = 0;
 
-float g_fLightIntensity				= 1.0f;
-float g_fLightColor					= 1.0f;
+float g_fLightIntensity             = 1.0f;
+float g_fLightColor                 = 1.0f;
 
 RenderOptions g_sOptions;
 Camera g_sCamera;
-AssetHelper *g_pcAsset				= NULL;
+AssetHelper *g_pcAsset              = NULL;
 
 //
 // Contains the mask image for the HUD 
 // (used to determine the position of a click)
 //
-unsigned char* g_szImageMask		= NULL;
+unsigned char* g_szImageMask        = NULL;
 
 float g_fLoadTime = 0.0f;
 
@@ -161,10 +161,10 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
     g_pcAsset->pcScene = (aiScene*)aiImportFileExWithProperties(g_szFileName,
 
         ppsteps | /* configurable pp steps */
-        aiProcess_GenSmoothNormals		   | // generate smooth normal vectors if not existing
+        aiProcess_GenSmoothNormals         | // generate smooth normal vectors if not existing
         aiProcess_SplitLargeMeshes         | // split large, unrenderable meshes into submeshes
-        aiProcess_Triangulate			   | // triangulate polygons with more than 3 edges
-        aiProcess_ConvertToLeftHanded	   | // convert everything to D3D left handed space
+        aiProcess_Triangulate              | // triangulate polygons with more than 3 edges
+        aiProcess_ConvertToLeftHanded      | // convert everything to D3D left handed space
         aiProcess_SortByPType              | // make 'clean' meshes which consist of a single typ of primitives
         0,
         NULL,
@@ -175,7 +175,7 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
     // get the end time of zje operation, calculate delta t
     double fEnd = (double)timeGetTime();
     g_fLoadTime = (float)((fEnd - fCur) / 1000);
-//	char szTemp[128];
+//  char szTemp[128];
     g_bLoadingFinished = true;
 
     // check whether the loading process has failed ...
@@ -203,13 +203,13 @@ int LoadAsset(void)
     g_mWorldRotate = aiMatrix4x4();
     g_mWorld = aiMatrix4x4();
 
-//	char szTemp[MAX_PATH+64];
-//	sprintf(szTemp,"Starting to load %s",g_szFileName);
+//  char szTemp[MAX_PATH+64];
+//  sprintf(szTemp,"Starting to load %s",g_szFileName);
     CLogWindow::Instance().WriteLine(
         "----------------------------------------------------------------------------");
-//	CLogWindow::Instance().WriteLine(szTemp);
-//	CLogWindow::Instance().WriteLine(
-//		"----------------------------------------------------------------------------");
+//  CLogWindow::Instance().WriteLine(szTemp);
+//  CLogWindow::Instance().WriteLine(
+//      "----------------------------------------------------------------------------");
     CLogWindow::Instance().SetAutoUpdate(false);
 
     // create a helper thread to load the asset
@@ -478,7 +478,7 @@ int CreateAssetData()
         const aiMesh* mesh = g_pcAsset->pcScene->mMeshes[i];
 
         // create the material for the mesh
-        if (!g_pcAsset->apcMeshes[i]->piEffect)	{
+        if (!g_pcAsset->apcMeshes[i]->piEffect) {
             CMaterialManager::Instance().CreateMaterial(
                 g_pcAsset->apcMeshes[i],mesh);
         }
@@ -488,7 +488,7 @@ int CreateAssetData()
             mesh->mNumVertices,
             D3DUSAGE_WRITEONLY,
             0,
-            D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piVB,NULL)))	{
+            D3DPOOL_DEFAULT, &g_pcAsset->apcMeshes[i]->piVB,NULL))) {
             MessageBox(g_hDlg,"Failed to create vertex buffer",
                 "ASSIMP Viewer Utility",MB_OK);
             return 2;
@@ -510,7 +510,7 @@ int CreateAssetData()
         };
 
         // check whether we can use 16 bit indices
-        if (mesh->mNumFaces * 3 >= 65536)	{
+        if (mesh->mNumFaces * 3 >= 65536)   {
             // create 32 bit index buffer
             if(FAILED( g_piDevice->CreateIndexBuffer( 4 *
                 mesh->mNumFaces * nidx,
@@ -536,7 +536,7 @@ int CreateAssetData()
                 }
             }
         }
-        else	{
+        else    {
             // create 16 bit index buffer
             if(FAILED( g_piDevice->CreateIndexBuffer( 2 *
                 mesh->mNumFaces * nidx,
@@ -566,7 +566,7 @@ int CreateAssetData()
 
         // collect weights on all vertices. Quick and careless
         std::vector<std::vector<aiVertexWeight> > weightsPerVertex( mesh->mNumVertices);
-        for( unsigned int a = 0; a < mesh->mNumBones; a++)	{
+        for( unsigned int a = 0; a < mesh->mNumBones; a++)  {
             const aiBone* bone = mesh->mBones[a];
             for( unsigned int b = 0; b < bone->mNumWeights; b++)
                 weightsPerVertex[bone->mWeights[b].mVertexId].push_back( aiVertexWeight( a, bone->mWeights[b].mWeight));
@@ -583,16 +583,16 @@ int CreateAssetData()
                 pbData2->vNormal = aiVector3D(0.0f,0.0f,0.0f);
             else pbData2->vNormal = mesh->mNormals[x];
 
-            if (NULL == mesh->mTangents)	{
+            if (NULL == mesh->mTangents)    {
                 pbData2->vTangent = aiVector3D(0.0f,0.0f,0.0f);
                 pbData2->vBitangent = aiVector3D(0.0f,0.0f,0.0f);
             }
-            else	{
+            else    {
                 pbData2->vTangent = mesh->mTangents[x];
                 pbData2->vBitangent = mesh->mBitangents[x];
             }
 
-            if (mesh->HasVertexColors( 0))	{
+            if (mesh->HasVertexColors( 0))  {
                 pbData2->dColorDiffuse = D3DCOLOR_ARGB(
                     ((unsigned char)max( min( mesh->mColors[0][x].a * 255.0f, 255.0f),0.0f)),
                     ((unsigned char)max( min( mesh->mColors[0][x].r * 255.0f, 255.0f),0.0f)),
@@ -602,14 +602,14 @@ int CreateAssetData()
             else pbData2->dColorDiffuse = D3DCOLOR_ARGB(0xFF,0xff,0xff,0xff);
 
             // ignore a third texture coordinate component
-            if (mesh->HasTextureCoords( 0))	{
+            if (mesh->HasTextureCoords( 0)) {
                 pbData2->vTextureUV = aiVector2D(
                     mesh->mTextureCoords[0][x].x,
                     mesh->mTextureCoords[0][x].y);
             }
             else pbData2->vTextureUV = aiVector2D(0.5f,0.5f);
 
-            if (mesh->HasTextureCoords( 1))	{
+            if (mesh->HasTextureCoords( 1)) {
                 pbData2->vTextureUV2 = aiVector2D(
                     mesh->mTextureCoords[1][x].x,
                     mesh->mTextureCoords[1][x].y);
@@ -617,7 +617,7 @@ int CreateAssetData()
             else pbData2->vTextureUV2 = aiVector2D(0.5f,0.5f);
 
             // Bone indices and weights
-            if( mesh->HasBones())	{
+            if( mesh->HasBones())   {
                 unsigned char boneIndices[4] = { 0, 0, 0, 0 };
                 unsigned char boneWeights[4] = { 0, 0, 0, 0 };
                 ai_assert( weightsPerVertex[x].size() <= 4);
@@ -640,7 +640,7 @@ int CreateAssetData()
         g_pcAsset->apcMeshes[i]->piVB->Unlock();
 
         // now generate the second vertex buffer, holding all normals
-        if (!g_pcAsset->apcMeshes[i]->piVBNormals)	{
+        if (!g_pcAsset->apcMeshes[i]->piVBNormals)  {
             GenerateNormalsAsLineList(g_pcAsset->apcMeshes[i],mesh);
         }
     }
@@ -679,7 +679,7 @@ int DeleteAssetData(bool bNoMaterials)
         // of the original vertex normals
         //if (g_pcAsset->apcMeshes[i]->pvOriginalNormals)
         //{
-        //	delete[] g_pcAsset->apcMeshes[i]->pvOriginalNormals;
+        //  delete[] g_pcAsset->apcMeshes[i]->pvOriginalNormals;
         //}
 
         if (!bNoMaterials)
@@ -956,14 +956,14 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     g_piD3D->GetAdapterDisplayMode(0,&sMode);
 
     // fill the presentation parameter structure
-    sParams.Windowed				= TRUE;
-    sParams.hDeviceWindow			= GetDlgItem( g_hDlg, IDC_RT );
-    sParams.EnableAutoDepthStencil	= TRUE;
-    sParams.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
-    sParams.BackBufferWidth			= (UINT)sRect.right;
-    sParams.BackBufferHeight		= (UINT)sRect.bottom;
-    sParams.SwapEffect				= D3DSWAPEFFECT_DISCARD;
-    sParams.BackBufferCount			= 1;
+    sParams.Windowed                = TRUE;
+    sParams.hDeviceWindow           = GetDlgItem( g_hDlg, IDC_RT );
+    sParams.EnableAutoDepthStencil  = TRUE;
+    sParams.PresentationInterval    = D3DPRESENT_INTERVAL_ONE;
+    sParams.BackBufferWidth         = (UINT)sRect.right;
+    sParams.BackBufferHeight        = (UINT)sRect.bottom;
+    sParams.SwapEffect              = D3DSWAPEFFECT_DISCARD;
+    sParams.BackBufferCount         = 1;
 
     // check whether we can use a D32 depth buffer format
     if (SUCCEEDED ( g_piD3D->CheckDepthStencilMatch(0,eType,

@@ -58,113 +58,113 @@ const char* AICMD_MSG_EXPORT_HELP_E =
 // -----------------------------------------------------------------------------------
 size_t GetMatchingFormat(const std::string& outf,bool byext=false) 
 {
-	for(size_t i = 0, end = globalExporter->GetExportFormatCount(); i < end; ++i) {
-		const aiExportFormatDesc* const e =  globalExporter->GetExportFormatDescription(i);
-		if (outf == (byext ? e->fileExtension : e->id)) {
-			return i;
-		}
-	}
-	return SIZE_MAX;
+    for(size_t i = 0, end = globalExporter->GetExportFormatCount(); i < end; ++i) {
+        const aiExportFormatDesc* const e =  globalExporter->GetExportFormatDescription(i);
+        if (outf == (byext ? e->fileExtension : e->id)) {
+            return i;
+        }
+    }
+    return SIZE_MAX;
 }
 
 
 // -----------------------------------------------------------------------------------
 int Assimp_Export(const char* const* params, unsigned int num)
 {
-	const char* const invalid = "assimp export: Invalid number of arguments. See \'assimp export --help\'\n";
-	if (num < 1) {
-		printf(invalid);
-		return 1;
-	}
+    const char* const invalid = "assimp export: Invalid number of arguments. See \'assimp export --help\'\n";
+    if (num < 1) {
+        printf(invalid);
+        return 1;
+    }
 
-	// --help
-	if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
-		printf("%s",AICMD_MSG_EXPORT_HELP_E);
-		return 0;
-	}
+    // --help
+    if (!strcmp( params[0], "-h") || !strcmp( params[0], "--help") || !strcmp( params[0], "-?") ) {
+        printf("%s",AICMD_MSG_EXPORT_HELP_E);
+        return 0;
+    }
 
-	std::string in  = std::string(params[0]);
-	std::string out = (num > 1 ? std::string(params[1]) : "-"), outext;
+    std::string in  = std::string(params[0]);
+    std::string out = (num > 1 ? std::string(params[1]) : "-"), outext;
 
-	// 
-	const std::string::size_type s = out.find_last_of('.');
-	if (s != std::string::npos) {
-		outext = out.substr(s+1);
-		out = out.substr(0,s);
-	}
+    // 
+    const std::string::size_type s = out.find_last_of('.');
+    if (s != std::string::npos) {
+        outext = out.substr(s+1);
+        out = out.substr(0,s);
+    }
 
-	// get import flags
-	ImportData import;
-	ProcessStandardArguments(import,params+1,num-1);
+    // get import flags
+    ImportData import;
+    ProcessStandardArguments(import,params+1,num-1);
 
-	// process other flags
-	std::string outf = "";
-	for (unsigned int i = (out[0] == '-' ? 1 : 2); i < num;++i)		{
-		if (!params[i]) {
-			continue;
-		}
-		if (!strncmp( params[i], "-f",2)) {
-			outf = std::string(params[i]+2);
-		}
-		else if ( !strncmp( params[i], "--format=",9)) {
-			outf = std::string(params[i]+9);
-		}
-	}
+    // process other flags
+    std::string outf = "";
+    for (unsigned int i = (out[0] == '-' ? 1 : 2); i < num;++i)     {
+        if (!params[i]) {
+            continue;
+        }
+        if (!strncmp( params[i], "-f",2)) {
+            outf = std::string(params[i]+2);
+        }
+        else if ( !strncmp( params[i], "--format=",9)) {
+            outf = std::string(params[i]+9);
+        }
+    }
 
-	std::transform(outf.begin(),outf.end(),outf.begin(),::tolower);
+    std::transform(outf.begin(),outf.end(),outf.begin(),::tolower);
 
-	// convert the output format to a format id
-	size_t outfi = GetMatchingFormat(outf);
-	if (outfi == SIZE_MAX) {
-		if (outf.length()) {
-			printf("assimp export: warning, format id \'%s\' is unknown\n",outf.c_str());
-		}
+    // convert the output format to a format id
+    size_t outfi = GetMatchingFormat(outf);
+    if (outfi == SIZE_MAX) {
+        if (outf.length()) {
+            printf("assimp export: warning, format id \'%s\' is unknown\n",outf.c_str());
+        }
 
-		// retry to see if we know it as file extension
-		outfi = GetMatchingFormat(outf,true);
-		if (outfi == SIZE_MAX) {
-			// retry to see if we know the file extension of the output file
-			outfi = GetMatchingFormat(outext,true);
+        // retry to see if we know it as file extension
+        outfi = GetMatchingFormat(outf,true);
+        if (outfi == SIZE_MAX) {
+            // retry to see if we know the file extension of the output file
+            outfi = GetMatchingFormat(outext,true);
 
-			if (outfi == SIZE_MAX) {
-				// still no match -> failure
-				printf("assimp export: no output format specified and I failed to guess it\n");
-				return -23;
-			}
-		}
-		else {
-			outext = outf;
-		}
-	}
-	
-	// if no output file is specified, take the file name from input file
-	if (out[0] == '-') {
-		std::string::size_type s = in.find_last_of('.');
-		if (s == std::string::npos) {
-			s = in.length();
-		}
+            if (outfi == SIZE_MAX) {
+                // still no match -> failure
+                printf("assimp export: no output format specified and I failed to guess it\n");
+                return -23;
+            }
+        }
+        else {
+            outext = outf;
+        }
+    }
+    
+    // if no output file is specified, take the file name from input file
+    if (out[0] == '-') {
+        std::string::size_type s = in.find_last_of('.');
+        if (s == std::string::npos) {
+            s = in.length();
+        }
 
-		out = in.substr(0,s);
-	}
+        out = in.substr(0,s);
+    }
 
-	const aiExportFormatDesc* const e =  globalExporter->GetExportFormatDescription(outfi);
-	printf("assimp export: select file format: \'%s\' (%s)\n",e->id,e->description);
-	
-	// import the  model
-	const aiScene* scene = ImportModel(import,in);
-	if (!scene) {
-		return -39;
-	}
+    const aiExportFormatDesc* const e =  globalExporter->GetExportFormatDescription(outfi);
+    printf("assimp export: select file format: \'%s\' (%s)\n",e->id,e->description);
+    
+    // import the  model
+    const aiScene* scene = ImportModel(import,in);
+    if (!scene) {
+        return -39;
+    }
 
-	// derive the final file name
-	out += "."+outext;
+    // derive the final file name
+    out += "."+outext;
 
-	// and call the export routine
-	if(!ExportModel(scene, import, out,e->id)) {
-		return -25;
-	}
-	printf("assimp export: wrote output file: %s\n",out.c_str());
-	return 0;
+    // and call the export routine
+    if(!ExportModel(scene, import, out,e->id)) {
+        return -25;
+    }
+    printf("assimp export: wrote output file: %s\n",out.c_str());
+    return 0;
 }
 
 #endif // no export

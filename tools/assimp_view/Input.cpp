@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -186,7 +186,7 @@ void HandleMouseInputSkyBox( void )
 
             aiVector3D v = aiVector3D(0.0f,1.0f,0.0f);
             D3DXMatrixRotationAxis( (D3DXMATRIX*)&matWorld, (D3DXVECTOR3*)&v, D3DXToRadian((float)nXDiff / 2.0f) );
-            matWorld =  matWorldOld * matWorld;     
+            matWorld =  matWorldOld * matWorld;
             CBackgroundPainter::Instance().RotateSB(&matWorld);
             }
         }
@@ -338,7 +338,7 @@ void HandleKeyboardInputFPS( void )
 
     // Home Key - View elevates up
     if( keys[VK_HOME] & 0x80 )
-        g_sCamera.vPos .y += MOVE_SPEED*g_fElpasedTime; 
+        g_sCamera.vPos .y += MOVE_SPEED*g_fElpasedTime;
 
     // End Key - View elevates down
     if( keys[VK_END] & 0x80 )
@@ -353,19 +353,19 @@ void HandleKeyboardInputTextureView( void )
     unsigned char keys[256];
     GetKeyboardState( keys );
 
-    // Up Arrow Key 
+    // Up Arrow Key
     if( keys[VK_UP] & 0x80 )
         CDisplay::Instance().SetTextureViewOffsetY ( g_fElpasedTime * 150.0f );
 
-    // Down Arrow Key 
+    // Down Arrow Key
     if( keys[VK_DOWN] & 0x80 )
         CDisplay::Instance().SetTextureViewOffsetY ( -g_fElpasedTime * 150.0f );
 
-    // Left Arrow Key 
+    // Left Arrow Key
     if( keys[VK_LEFT] & 0x80 )
         CDisplay::Instance().SetTextureViewOffsetX ( g_fElpasedTime * 150.0f );
 
-    // Right Arrow Key 
+    // Right Arrow Key
     if( keys[VK_RIGHT] & 0x80 )
         CDisplay::Instance().SetTextureViewOffsetX ( -g_fElpasedTime * 150.0f );
     }

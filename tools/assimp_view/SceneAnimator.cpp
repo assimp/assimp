@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -81,7 +81,7 @@ SceneAnimator::~SceneAnimator()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Sets the animation to use for playback. 
+// Sets the animation to use for playback.
 void SceneAnimator::SetAnimIndex( size_t pAnimIndex)
 {
     // no change
@@ -108,7 +108,7 @@ void SceneAnimator::SetAnimIndex( size_t pAnimIndex)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Calculates the node transformations for the scene. 
+// Calculates the node transformations for the scene.
 void SceneAnimator::Calculate( double pTime)
 {
     // invalid anim
@@ -123,7 +123,7 @@ void SceneAnimator::Calculate( double pTime)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Retrieves the most recent local transformation matrix for the given node. 
+// Retrieves the most recent local transformation matrix for the given node.
 const aiMatrix4x4& SceneAnimator::GetLocalTransform( const aiNode* node) const
 {
     NodeMap::const_iterator it = mNodesByName.find( node);
@@ -134,7 +134,7 @@ const aiMatrix4x4& SceneAnimator::GetLocalTransform( const aiNode* node) const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Retrieves the most recent global transformation matrix for the given node. 
+// Retrieves the most recent global transformation matrix for the given node.
 const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const aiNode* node) const
 {
     NodeMap::const_iterator it = mNodesByName.find( node);
@@ -145,7 +145,7 @@ const aiMatrix4x4& SceneAnimator::GetGlobalTransform( const aiNode* node) const
 }
 
 // ------------------------------------------------------------------------------------------------
-// Calculates the bone matrices for the given mesh. 
+// Calculates the bone matrices for the given mesh.
 const std::vector<aiMatrix4x4>& SceneAnimator::GetBoneMatrices( const aiNode* pNode, size_t pMeshIndex /* = 0 */)
 {
     ai_assert( pMeshIndex < pNode->mNumMeshes);

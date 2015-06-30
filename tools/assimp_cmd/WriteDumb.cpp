@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Main.h"
 #include "../code/ProcessHelper.h"
 
-const char* AICMD_MSG_DUMP_HELP = 
+const char* AICMD_MSG_DUMP_HELP =
 "assimp dump <model> [<out>] [-b] [-s] [-z] [common parameters]\n"
 "\t -b Binary output \n"
 "\t -s Shortened  \n"
@@ -106,7 +106,7 @@ inline uint32_t WriteMagic(uint32_t magic)
     return ftell(out)-4;
 }
 
-// use template specializations rather than regular overloading to be able to 
+// use template specializations rather than regular overloading to be able to
 // explicitly select the right 'overload' to leave no doubts on what is called,
 // retaining the possibility of letting the compiler select.
 template <typename T> uint32_t Write(const T&);
@@ -132,7 +132,7 @@ inline uint32_t Write<unsigned int>(const unsigned int& w)
         // this shouldn't happen, integers in Assimp data structures never exceed 2^32
         printf("loss of data due to 64 -> 32 bit integer conversion");
     }
-    
+
     fwrite(&t,4,1,out);
     return 4;
 }
@@ -544,7 +544,7 @@ uint32_t WriteBinaryAnim(const aiAnimation* anim)
 
     for (unsigned int a = 0; a < anim->mNumChannels;++a) {
         const aiNodeAnim* nd = anim->mChannels[a];
-        len += WriteBinaryNodeAnim(nd)+8;   
+        len += WriteBinaryNodeAnim(nd)+8;
     }
 
     ChangeInteger(old,len);
@@ -559,7 +559,7 @@ uint32_t WriteBinaryLight(const aiLight* l)
     len += Write<aiString>(l->mName);
     len += Write<unsigned int>(l->mType);
 
-    if (l->mType != aiLightSource_DIRECTIONAL) { 
+    if (l->mType != aiLightSource_DIRECTIONAL) {
         len += Write<float>(l->mAttenuationConstant);
         len += Write<float>(l->mAttenuationLinear);
         len += Write<float>(l->mAttenuationQuadratic);
@@ -609,7 +609,7 @@ uint32_t WriteBinaryScene(const aiScene* scene)
     len += Write<unsigned int>(scene->mNumTextures);
     len += Write<unsigned int>(scene->mNumLights);
     len += Write<unsigned int>(scene->mNumCameras);
-    
+
     // write node graph
     len += WriteBinaryNode(scene->mRootNode)+8;
 
@@ -656,7 +656,7 @@ uint32_t WriteBinaryScene(const aiScene* scene)
 
 // -----------------------------------------------------------------------------------
 // Write a binary model dump
-void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const char* cmd, 
+void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const char* cmd,
     bool _shortened, bool compressed, ImportData& /*imp*/)
 {
     out = _out;
@@ -677,7 +677,7 @@ void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const ch
     Write<uint16_t>(compressed);
     // ==  20 bytes
 
-    char buff[256]; 
+    char buff[256];
     strncpy(buff,src,256);
     fwrite(buff,256,1,out);
 
@@ -804,8 +804,8 @@ const char* TextureTypeToString(aiTextureType in)
     default:
         break;
     }
-    ai_assert(false); 
-    return  "BUG";    
+    ai_assert(false);
+    return  "BUG";
 }
 
 
@@ -838,7 +838,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
     tm* p     = ::gmtime(&tt);
 
     std::string c = cmd;
-    std::string::size_type s; 
+    std::string::size_type s;
 
     // https://sourceforge.net/tracker/?func=detail&aid=3167364&group_id=226462&atid=1067632
     // -- not allowed in XML comments
@@ -860,7 +860,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
         "-->"
         " \n\n"
         "<Scene flags=\"%i\" postprocessing=\"%i\">\n",
-        
+
         aiGetVersionMajor(),aiGetVersionMinor(),aiGetVersionRevision(),src,c.c_str(),asctime(p),
         scene->mFlags,
         0 /*globalImporter->GetEffectivePostProcessing()*/);
@@ -1245,7 +1245,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
                 fprintf(out,"\t\t<TextureCoords num=\"%i\" set=\"%i\" num_components=\"%i\"> \n",mesh->mNumVertices,
                     a,mesh->mNumUVComponents[a]);
-                
+
                 if (!shortened) {
                     if (mesh->mNumUVComponents[a] == 3) {
                         for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
@@ -1328,7 +1328,7 @@ int Assimp_Dump (const char* const* params, unsigned int num)
     ProcessStandardArguments(import,params+1,num-1);
 
     bool binary = false, shortened = false,compressed=false;
-    
+
     // process other flags
     for (unsigned int i = 1; i < num;++i)       {
         if (!params[i])continue;

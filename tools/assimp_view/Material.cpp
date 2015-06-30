@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -59,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 namespace AssimpView {
-    
+
 using namespace Assimp;
 
 extern std::string g_szMaterialShader;
@@ -116,10 +116,10 @@ extern AssetHelper *g_pcAsset               /*= NULL*/;
 
 
 //
-// Contains the mask image for the HUD 
+// Contains the mask image for the HUD
 // (used to determine the position of a click)
 //
-// The size of the image is identical to the size of the main 
+// The size of the image is identical to the size of the main
 // HUD texture
 //
 extern unsigned char* g_szImageMask         /*= NULL*/;
@@ -144,9 +144,9 @@ CMaterialManager CMaterialManager::s_cInstance;
 //
 // This pattern is used to mark textures which could not be loaded
 //-------------------------------------------------------------------------------
-VOID WINAPI FillFunc(D3DXVECTOR4* pOut, 
-                     CONST D3DXVECTOR2* pTexCoord, 
-                     CONST D3DXVECTOR2* pTexelSize, 
+VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
+                     CONST D3DXVECTOR2* pTexCoord,
+                     CONST D3DXVECTOR2* pTexelSize,
                      LPVOID pData)
 {
     UNREFERENCED_PARAMETER(pData);
@@ -162,7 +162,7 @@ VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
     {
         if ((iY / 32) % 2 == 0)bBlack = true;
     }
-    else 
+    else
     {
         if ((iY / 32) % 2 != 0)bBlack = true;
     }
@@ -224,8 +224,8 @@ int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
     sDefaultTexture->AddRef();
 
     // {9785DA94-1D96-426b-B3CB-BADC36347F5E}
-    static const GUID guidPrivateData = 
-        { 0x9785da94, 0x1d96, 0x426b, 
+    static const GUID guidPrivateData =
+        { 0x9785da94, 0x1d96, 0x426b,
         { 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
 
     uint32_t iData = 0xFFFFFFFF;
@@ -269,7 +269,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                     ++szExtFound;
                     if (0 == ASSIMP_stricmp(szExtFound,szExt))
                     {
-                        const unsigned int iSizeFound = (const unsigned int) ( 
+                        const unsigned int iSizeFound = (const unsigned int) (
                             szExtFound - 1 - info.cFileName);
 
                         for (unsigned int i = 0; i < iSizeFound;++i)
@@ -307,7 +307,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                     }
                 }
             }
-        } 
+        }
         while (FindNextFile(h, &info));
 
         FindClose(h);
@@ -382,21 +382,21 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
                 }
 
                 // patch by mark sibly to look for textures files in the asset's base directory.
-                const char *path=pcpy.data; 
-                const char *p=strrchr( path,'/' ); 
-                if( !p ) p=strrchr( path,'\\' ); 
-                if( p ){ 
-                    char *q=strrchr( tmp2,'/' ); 
-                    if( !q ) q=strrchr( tmp2,'\\' ); 
-                    if( q ){ 
-                        strcpy( q+1,p+1 ); 
-                        if((pFile=fopen( tmp2,"r" ))){ 
-                            fclose( pFile ); 
+                const char *path=pcpy.data;
+                const char *p=strrchr( path,'/' );
+                if( !p ) p=strrchr( path,'\\' );
+                if( p ){
+                    char *q=strrchr( tmp2,'/' );
+                    if( !q ) q=strrchr( tmp2,'\\' );
+                    if( q ){
+                        strcpy( q+1,p+1 );
+                        if((pFile=fopen( tmp2,"r" ))){
+                            fclose( pFile );
                             strcpy(p_szString->data,tmp2);
                             p_szString->length = strlen(tmp2);
                             return 1;
-                        } 
-                    } 
+                        }
+                    }
                 }
                 return 0;
             }
@@ -720,8 +720,8 @@ void CMaterialManager::HMtoNMIfNecessary(
                 clrColor.g /= (float)sDesc.Height;
                 clrColor.b /= (float)sDesc.Height;
 
-                if (!(clrColor.b > 215 && 
-                    clrColor.r > 100 && clrColor.r < 140 && 
+                if (!(clrColor.b > 215 &&
+                    clrColor.r > 100 && clrColor.r < 140 &&
                     clrColor.g > 100 && clrColor.g < 140))
                 {
                     // Unable to detect. Believe the original value obtained from the loader
@@ -1061,31 +1061,31 @@ int CMaterialManager::CreateMaterial(
         }
         AssetHelper::MeshHelper* pc = g_pcAsset->apcMeshes[i];
 
-        if  ((pcMesh->piDiffuseTexture != NULL ? true : false) != 
+        if  ((pcMesh->piDiffuseTexture != NULL ? true : false) !=
             (pc->piDiffuseTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piSpecularTexture != NULL ? true : false) != 
+        if  ((pcMesh->piSpecularTexture != NULL ? true : false) !=
             (pc->piSpecularTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piAmbientTexture != NULL ? true : false) != 
+        if  ((pcMesh->piAmbientTexture != NULL ? true : false) !=
             (pc->piAmbientTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piEmissiveTexture != NULL ? true : false) != 
+        if  ((pcMesh->piEmissiveTexture != NULL ? true : false) !=
             (pc->piEmissiveTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piNormalTexture != NULL ? true : false) != 
+        if  ((pcMesh->piNormalTexture != NULL ? true : false) !=
             (pc->piNormalTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piOpacityTexture != NULL ? true : false) != 
+        if  ((pcMesh->piOpacityTexture != NULL ? true : false) !=
             (pc->piOpacityTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piShininessTexture != NULL ? true : false) != 
+        if  ((pcMesh->piShininessTexture != NULL ? true : false) !=
             (pc->piShininessTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piLightmapTexture != NULL ? true : false) != 
+        if  ((pcMesh->piLightmapTexture != NULL ? true : false) !=
             (pc->piLightmapTexture != NULL ? true : false))
             continue;
-        if ((pcMesh->eShadingMode != aiShadingMode_Gouraud ? true : false) != 
+        if ((pcMesh->eShadingMode != aiShadingMode_Gouraud ? true : false) !=
             (pc->eShadingMode != aiShadingMode_Gouraud ? true : false))
             continue;
 
@@ -1249,7 +1249,7 @@ int CMaterialManager::CreateMaterial(
         (const D3DXMACRO*)sMacro,NULL,0,NULL,&pcMesh->piEffect,&piBuffer)))
     {
         // failed to compile the shader
-        if( piBuffer) 
+        if( piBuffer)
         {
             MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
             piBuffer->Release();
@@ -1487,7 +1487,7 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
     // reenable culling if necessary
     if (pcMesh->twosided && g_sOptions.bCulling) {
         g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
-    }       
+    }
 
     return 1;
 }

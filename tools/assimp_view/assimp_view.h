@@ -7,8 +7,8 @@ Copyright (c) 2006-2012, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -67,7 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/LogStream.hpp>
 #include <assimp/DefaultLogger.hpp>
 
- 
+
 #include "../../code/MaterialSystem.h"   // aiMaterial class
 #include "../../code/StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
 
@@ -81,7 +81,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <time.h>
 
-// default movement speed 
+// default movement speed
 #define MOVE_SPEED 3.f
 
 #include "AssetHelper.h"
@@ -100,7 +100,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AnimEvaluator.h"
 #include "SceneAnimator.h"
 
-namespace AssimpView 
+namespace AssimpView
 {
 
 //-------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ int DeleteAssetData(bool bNoMaterials = false);
 int ScaleAsset(void);
 int DeleteAsset(void);
 int SetupFPSView();
-    
+
 aiVector3D GetCameraMatrix (aiMatrix4x4& p_mOut);
 int CreateMaterial(AssetHelper::MeshHelper* pcMesh,const aiMesh* pcSource);
 
@@ -144,7 +144,7 @@ INT_PTR CALLBACK ProgressMessageProc(HWND hwndDlg,UINT uMsg,
 // Main message procedure of the application
 //
 // The function handles all incoming messages for the main window.
-// However, if does not directly process input commands. 
+// However, if does not directly process input commands.
 // NOTE: Due to the impossibility to process WM_CHAR messages in dialogs
 // properly the code for all hotkeys has been moved to the WndMain
 //-------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ INT_PTR CALLBACK AboutMessageProc(HWND hwndDlg,UINT uMsg,
     WPARAM wParam,LPARAM lParam);
 
 //-------------------------------------------------------------------------------
-// 
+//
 // Dialog procedure for the help dialog
 //
 //-------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ enum EClickPos
 };
 
 #if (!defined AI_VIEW_CAPTION_BASE)
-#   define AI_VIEW_CAPTION_BASE "Open Asset Import Library : Viewer "  
+#   define AI_VIEW_CAPTION_BASE "Open Asset Import Library : Viewer "
 #endif // !! AI_VIEW_CAPTION_BASE
 
 //-------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ enum EClickPos
     extern aiMatrix4x4 g_mWorldRotate;
     extern aiVector3D g_vRotateSpeed            /*= aiVector3D(0.5f,0.5f,0.5f)*/;
 
-    extern aiVector3D g_avLightDirs[1] /* = 
+    extern aiVector3D g_avLightDirs[1] /* =
         {   aiVector3D(-0.5f,0.6f,0.2f) ,
             aiVector3D(-0.5f,0.5f,0.5f)} */;
 
@@ -259,13 +259,13 @@ enum EClickPos
     extern RenderOptions g_sOptions;
     extern Camera g_sCamera;
     extern AssetHelper *g_pcAsset               /*= NULL*/;
-    
+
 
     //
-    // Contains the mask image for the HUD 
+    // Contains the mask image for the HUD
     // (used to determine the position of a click)
     //
-    // The size of the image is identical to the size of the main 
+    // The size of the image is identical to the size of the main
     // HUD texture
     //
     extern unsigned char* g_szImageMask         /*= NULL*/;

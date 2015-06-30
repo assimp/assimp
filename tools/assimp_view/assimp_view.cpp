@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ contributors may be used to endorse or promote products
 derived from this software without specific prior
 written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -104,10 +104,10 @@ aiMatrix4x4 g_mWorldRotate;
 aiVector3D g_vRotateSpeed           = aiVector3D(0.5f,0.5f,0.5f);
 
 // NOTE: The second light direction is now computed from the first
-aiVector3D g_avLightDirs[1] = 
+aiVector3D g_avLightDirs[1] =
 {   aiVector3D(-0.5f,0.6f,0.2f)  };
 
-D3DCOLOR g_avLightColors[3] = 
+D3DCOLOR g_avLightColors[3] =
 {
     D3DCOLOR_ARGB(0xFF,0xFF,0xFF,0xFF),
     D3DCOLOR_ARGB(0xFF,0xFF,0x00,0x00),
@@ -129,7 +129,7 @@ Camera g_sCamera;
 AssetHelper *g_pcAsset              = NULL;
 
 //
-// Contains the mask image for the HUD 
+// Contains the mask image for the HUD
 // (used to determine the position of a click)
 //
 unsigned char* g_szImageMask        = NULL;
@@ -288,7 +288,7 @@ int LoadAsset(void)
     CDisplay::Instance().FillAnimList();
 
     CDisplay::Instance().FillDefaultStatistics();
-    
+
     // render the scene once
     CDisplay::Instance().OnRender();
 
@@ -341,7 +341,7 @@ int DeleteAsset(void)
 // p_avOut Receives the min/max boundaries. Must point to 2 vec3s
 // piMatrix Transformation matrix of the graph at this position
 //-------------------------------------------------------------------------------
-int CalculateBounds(aiNode* piNode, aiVector3D* p_avOut, 
+int CalculateBounds(aiNode* piNode, aiVector3D* p_avOut,
     const aiMatrix4x4& piMatrix)
 {
     ai_assert(NULL != piNode);
@@ -516,7 +516,7 @@ int CreateAssetData()
                 mesh->mNumFaces * nidx,
                 D3DUSAGE_WRITEONLY | dwUsage,
                 D3DFMT_INDEX32,
-                D3DPOOL_DEFAULT, 
+                D3DPOOL_DEFAULT,
                 &g_pcAsset->apcMeshes[i]->piIB,
                 NULL)))
             {
@@ -979,7 +979,7 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
     DWORD dwQuality = 0;
     if (p_bMultiSample)
     {
-        while ((D3DMULTISAMPLE_TYPE)(D3DMULTISAMPLE_16_SAMPLES + 1)  != 
+        while ((D3DMULTISAMPLE_TYPE)(D3DMULTISAMPLE_16_SAMPLES + 1)  !=
             (sMS = (D3DMULTISAMPLE_TYPE)(sMS + 1)))
         {
             if(SUCCEEDED( g_piD3D->CheckDeviceMultiSampleType(0,eType,
@@ -1038,14 +1038,14 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
         NULL,
         &g_piDefaultEffect,&piBuffer)))
     {
-        if( piBuffer) 
+        if( piBuffer)
         {
             MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
             piBuffer->Release();
         }
         return 0;
     }
-    if( piBuffer) 
+    if( piBuffer)
     {
         piBuffer->Release();
         piBuffer = NULL;
@@ -1060,14 +1060,14 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
         g_szPassThroughShader.c_str(),(UINT)g_szPassThroughShader.length(),
         NULL,NULL,AI_SHADER_COMPILE_FLAGS,NULL,&g_piPassThroughEffect,&piBuffer)))
     {
-        if( piBuffer) 
+        if( piBuffer)
         {
             MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
             piBuffer->Release();
         }
         return 0;
     }
-    if( piBuffer) 
+    if( piBuffer)
     {
         piBuffer->Release();
         piBuffer = NULL;
@@ -1082,14 +1082,14 @@ int CreateDevice (bool p_bMultiSample,bool p_bSuperSample,bool bHW /*= true*/)
         g_szNormalsShader.c_str(),(UINT)g_szNormalsShader.length(),
         NULL,NULL,AI_SHADER_COMPILE_FLAGS,NULL,&g_piNormalsEffect, &piBuffer)))
     {
-        if( piBuffer) 
+        if( piBuffer)
         {
             MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
             piBuffer->Release();
         }
         return 0;
     }
-    if( piBuffer) 
+    if( piBuffer)
     {
         piBuffer->Release();
         piBuffer = NULL;

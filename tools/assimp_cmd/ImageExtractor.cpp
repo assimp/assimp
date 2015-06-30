@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <../code/fast_atof.h>
 #include <../code/StringComparison.h>
 
-const char* AICMD_MSG_DUMP_HELP_E = 
+const char* AICMD_MSG_DUMP_HELP_E =
 "assimp extract <model> [<out>] [-t<n>] [-f<fmt>] [-ba] [-s] [common parameters]\n"
 "\t -ba   Writes BMP's with alpha channel\n"
 "\t -t<n> Zero-based index of the texture to be extracted \n"
@@ -63,13 +63,13 @@ const char* AICMD_MSG_DUMP_HELP_E =
 
 // -----------------------------------------------------------------------------------
 // Data structure for the first header of a BMP
-struct BITMAPFILEHEADER 
+struct BITMAPFILEHEADER
 {
     uint16_t  bfType ;
     uint32_t  bfSize;
     uint16_t  bfReserved1 ;
-    uint16_t  bfReserved2; 
-    uint32_t  bfOffBits; 
+    uint16_t  bfReserved2;
+    uint32_t  bfOffBits;
 } PACK_STRUCT;
 
 // -----------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ struct TGA_HEADER
     uint16_t height;             // image height in pixels
     uint8_t  bits;               // image bits per pixel 8,16,24,32
     uint8_t  descriptor;         // image descriptor bits (vh flip bits)
-    
+
     // pixel data follows header
 } PACK_STRUCT;
 
@@ -205,7 +205,7 @@ int SaveAsTGA (FILE* file, const aiTexel* data, unsigned int width, unsigned int
 // -----------------------------------------------------------------------------------
 // Do the texture import for a given aiTexture
 int DoExport(const aiTexture* tx, FILE* p, const std::string& extension,
-    unsigned int flags) 
+    unsigned int flags)
 {
     // export the image to the appropriate decoder
     if (extension == "bmp") {
@@ -226,7 +226,7 @@ int DoExport(const aiTexture* tx, FILE* p, const std::string& extension,
 // Implementation of the assimp extract utility
 int Assimp_Extract (const char* const* params, unsigned int num)
 {
-    const char* const invalid = "assimp extract: Invalid number of arguments. See \'assimp extract --help\'\n"; 
+    const char* const invalid = "assimp extract: Invalid number of arguments. See \'assimp extract --help\'\n";
     if (num < 1) {
         printf(invalid);
         return 1;
@@ -288,7 +288,7 @@ int Assimp_Extract (const char* const* params, unsigned int num)
     }
 
     std::transform(extension.begin(),extension.end(),extension.begin(),::tolower);
-    
+
     if (out[0] == '-') {
         // take file name from input file
         std::string::size_type s = in.find_last_of('.');

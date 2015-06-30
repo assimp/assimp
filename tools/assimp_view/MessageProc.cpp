@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -220,7 +220,7 @@ void UpdatePPSettings()
 //-------------------------------------------------------------------------------
 void ToggleNormals()
 {
-    g_sOptions.bRenderNormals = !g_sOptions.bRenderNormals; 
+    g_sOptions.bRenderNormals = !g_sOptions.bRenderNormals;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -233,7 +233,7 @@ void ToggleNormals()
 //-------------------------------------------------------------------------------
 void ToggleAutoRotate()
 {
-    g_sOptions.bRotate = !g_sOptions.bRotate; 
+    g_sOptions.bRotate = !g_sOptions.bRotate;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -261,7 +261,7 @@ void ToggleFPSView()
 //-------------------------------------------------------------------------------
 void ToggleMultipleLights()
 {
-    g_sOptions.b3Lights = !g_sOptions.b3Lights; 
+    g_sOptions.b3Lights = !g_sOptions.b3Lights;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -274,7 +274,7 @@ void ToggleMultipleLights()
 //-------------------------------------------------------------------------------
 void ToggleLightRotate()
 {
-    g_sOptions.bLightRotate = !g_sOptions.bLightRotate; 
+    g_sOptions.bLightRotate = !g_sOptions.bLightRotate;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -300,7 +300,7 @@ void ToggleTransparency()
 //-------------------------------------------------------------------------------
 void ToggleLowQuality()
 {
-    g_sOptions.bLowQuality = !g_sOptions.bLowQuality; 
+    g_sOptions.bLowQuality = !g_sOptions.bLowQuality;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -313,7 +313,7 @@ void ToggleLowQuality()
 //-------------------------------------------------------------------------------
 void ToggleSpecular()
 {
-    g_sOptions.bNoSpecular = !g_sOptions.bNoSpecular; 
+    g_sOptions.bNoSpecular = !g_sOptions.bNoSpecular;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -329,7 +329,7 @@ void ToggleSpecular()
 //-------------------------------------------------------------------------------
 void ToggleMats()
 {
-    g_sOptions.bRenderMats = !g_sOptions.bRenderMats; 
+    g_sOptions.bRenderMats = !g_sOptions.bRenderMats;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -345,7 +345,7 @@ void ToggleMats()
 //-------------------------------------------------------------------------------
 void ToggleCulling()
 {
-    g_sOptions.bCulling = !g_sOptions.bCulling; 
+    g_sOptions.bCulling = !g_sOptions.bCulling;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -358,7 +358,7 @@ void ToggleCulling()
 //-------------------------------------------------------------------------------
 void ToggleSkeleton()
 {
-    g_sOptions.bSkeleton = !g_sOptions.bSkeleton; 
+    g_sOptions.bSkeleton = !g_sOptions.bSkeleton;
 
     // store this in the registry, too
     DWORD dwValue = 0;
@@ -387,7 +387,7 @@ void ToggleWireFrame()
 //-------------------------------------------------------------------------------
 void ToggleMS()
 {
-    g_sOptions.bMultiSample = !g_sOptions.bMultiSample; 
+    g_sOptions.bMultiSample = !g_sOptions.bMultiSample;
     DeleteAssetData();
     ShutdownDevice();
     if (0 == CreateDevice())
@@ -479,12 +479,12 @@ void LoadBGTexture()
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL), 
-        "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0*.*\0", 
-        NULL, 0, 1, 
-        szFileName, MAX_PATH, NULL, 0, NULL, 
+        g_hDlg,GetModuleHandle(NULL),
+        "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0*.*\0",
+        NULL, 0, 1,
+        szFileName, MAX_PATH, NULL, 0, NULL,
         "Open texture as background",
-        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ".jpg", 0, NULL, NULL
     };
     if(GetOpenFileName(&sFilename1) == 0) return;
@@ -602,11 +602,11 @@ void LoadSkybox()
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL), 
-        "Skyboxes\0*.dds\0*.*\0", NULL, 0, 1, 
-        szFileName, MAX_PATH, NULL, 0, NULL, 
+        g_hDlg,GetModuleHandle(NULL),
+        "Skyboxes\0*.dds\0*.*\0", NULL, 0, 1,
+        szFileName, MAX_PATH, NULL, 0, NULL,
         "Open skybox as background",
-        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ".dds", 0, NULL, NULL
     };
     if(GetOpenFileName(&sFilename1) == 0) return;
@@ -644,11 +644,11 @@ void SaveScreenshot()
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL), 
-        "PNG Images\0*.png", NULL, 0, 1, 
-        szFileName, MAX_PATH, NULL, 0, NULL, 
+        g_hDlg,GetModuleHandle(NULL),
+        "PNG Images\0*.png", NULL, 0, 1,
+        szFileName, MAX_PATH, NULL, 0, NULL,
         "Save Screenshot to file",
-        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ".png", 0, NULL, NULL
     };
     if(GetSaveFileName(&sFilename1) == 0) return;
@@ -876,7 +876,7 @@ void LoadHistory()
 // Clear the file history
 //-------------------------------------------------------------------------------
 void ClearHistory()
-{ 
+{
     for(unsigned int i = 0; i < AI_VIEW_NUM_RECENT_FILES;++i)
         g_aPreviousFiles[i] = std::string("");
 
@@ -958,10 +958,10 @@ void OpenAsset()
 
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL), szList, NULL, 0, 1, 
-        szFileName, MAX_PATH, NULL, 0, NULL, 
+        g_hDlg,GetModuleHandle(NULL), szList, NULL, 0, 1,
+        szFileName, MAX_PATH, NULL, 0, NULL,
         "Import Asset into ASSIMP",
-        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ".x", 0, NULL, NULL
     };
     if(GetOpenFileName(&sFilename1) == 0) return;
@@ -988,7 +988,7 @@ void OpenAsset()
 //-------------------------------------------------------------------------------
 void SetupPPUIState()
 {
-    
+
     // that's ugly. anyone willing to rewrite me from scratch?
     HMENU hMenu = GetMenu(g_hDlg);
     CheckMenuItem(hMenu,ID_VIEWER_PP_JIV,ppsteps & aiProcess_JoinIdenticalVertices ? MF_CHECKED : MF_UNCHECKED);
@@ -1017,7 +1017,7 @@ void PopulateExportMenu()
     // add sub items for all recent files
     Exporter exp;
     HMENU hm = ::CreateMenu();
-    for(size_t i = 0; i < exp.GetExportFormatCount(); ++i) 
+    for(size_t i = 0; i < exp.GetExportFormatCount(); ++i)
     {
         const aiExportFormatDesc* const e = exp.GetExportFormatDescription(i);
         char tmp[256];
@@ -1047,7 +1047,7 @@ void DoExport(size_t formatId)
     if(ERROR_SUCCESS == RegQueryValueEx(g_hRegistry,"ModelExportDest",NULL,NULL,(BYTE*)szFileName, &dwTemp)) {
         ai_assert(strlen(szFileName) <= MAX_PATH);
 
-        // invent a nice default file name 
+        // invent a nice default file name
         char* sz = max(strrchr(szFileName,'\\'),strrchr(szFileName,'/'));
         if (sz) {
             strncpy(sz,max(strrchr(g_szFileName,'\\'),strrchr(g_szFileName,'/')),MAX_PATH);
@@ -1070,18 +1070,18 @@ void DoExport(size_t formatId)
     char desc[256] = {0};
     char* c = strcpy(desc,e->description) + strlen(e->description)+1;
     c += sprintf(c,"*.%s",e->fileExtension)+1;
-    strcpy(c, "*.*\0"); c += 4; 
+    strcpy(c, "*.*\0"); c += 4;
 
     ai_assert(c - &desc[0] <= 256);
 
     const std::string ext = "."+std::string(e->fileExtension);
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
-        g_hDlg,GetModuleHandle(NULL), 
-        desc, NULL, 0, 1, 
-        szFileName, MAX_PATH, NULL, 0, NULL, 
+        g_hDlg,GetModuleHandle(NULL),
+        desc, NULL, 0, 1,
+        szFileName, MAX_PATH, NULL, 0, NULL,
         "Export asset",
-        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
         0, 1, ext.c_str(), 0, NULL, NULL
     };
     if(::GetSaveFileName(&sFilename1) == 0) {
@@ -1191,7 +1191,7 @@ void InitUI()
         g_sOptions.b3Lights = false;
         CheckDlgButton(g_hDlg,IDC_3LIGHTS,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.b3Lights = true;
         CheckDlgButton(g_hDlg,IDC_3LIGHTS,BST_CHECKED);
@@ -1205,7 +1205,7 @@ void InitUI()
         g_sOptions.bLightRotate = false;
         CheckDlgButton(g_hDlg,IDC_LIGHTROTATE,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.bLightRotate = true;
         CheckDlgButton(g_hDlg,IDC_LIGHTROTATE,BST_CHECKED);
@@ -1219,7 +1219,7 @@ void InitUI()
         g_sOptions.bNoSpecular = false;
         CheckDlgButton(g_hDlg,IDC_NOSPECULAR,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.bNoSpecular = true;
         CheckDlgButton(g_hDlg,IDC_NOSPECULAR,BST_CHECKED);
@@ -1233,7 +1233,7 @@ void InitUI()
         g_sOptions.bLowQuality = false;
         CheckDlgButton(g_hDlg,IDC_LOWQUALITY,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.bLowQuality = true;
         CheckDlgButton(g_hDlg,IDC_LOWQUALITY,BST_CHECKED);
@@ -1247,7 +1247,7 @@ void InitUI()
         g_sOptions.bNoAlphaBlending = false;
         CheckDlgButton(g_hDlg,IDC_NOAB,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.bNoAlphaBlending = true;
         CheckDlgButton(g_hDlg,IDC_NOAB,BST_CHECKED);
@@ -1261,7 +1261,7 @@ void InitUI()
         g_sOptions.bRenderNormals = false;
         CheckDlgButton(g_hDlg,IDC_TOGGLENORMALS,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.bRenderNormals = true;
         CheckDlgButton(g_hDlg,IDC_TOGGLENORMALS,BST_CHECKED);
@@ -1275,7 +1275,7 @@ void InitUI()
         g_sOptions.bRenderMats = false;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMAT,BST_CHECKED);
     }
-    else 
+    else
     {
         g_sOptions.bRenderMats = true;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMAT,BST_UNCHECKED);
@@ -1289,7 +1289,7 @@ void InitUI()
         g_sOptions.bMultiSample = false;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMS,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.bMultiSample = true;
         CheckDlgButton(g_hDlg,IDC_TOGGLEMS,BST_CHECKED);
@@ -1303,7 +1303,7 @@ void InitUI()
         g_bFPSView = false;
         CheckDlgButton(g_hDlg,IDC_ZOOM,BST_CHECKED);
     }
-    else 
+    else
     {
         g_bFPSView = true;
         CheckDlgButton(g_hDlg,IDC_ZOOM,BST_UNCHECKED);
@@ -1317,7 +1317,7 @@ void InitUI()
         g_sOptions.eDrawMode = RenderOptions::NORMAL;
         CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_UNCHECKED);
     }
-    else 
+    else
     {
         g_sOptions.eDrawMode = RenderOptions::WIREFRAME;
         CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,BST_CHECKED);
@@ -1375,7 +1375,7 @@ INT_PTR CALLBACK SMMessageProc(HWND hwndDlg,UINT uMsg,
 // Main message procedure of the application
 //
 // The function handles all incoming messages for the main window.
-// However, if does not directly process input commands. 
+// However, if does not directly process input commands.
 // NOTE: Due to the impossibility to process WM_CHAR messages in dialogs
 // properly the code for all hotkeys has been moved to the WndMain
 //-------------------------------------------------------------------------------
@@ -1451,7 +1451,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
         case WM_LBUTTONDBLCLK:
 
             CheckDlgButton(hwndDlg,IDC_AUTOROTATE,
-                IsDlgButtonChecked(hwndDlg,IDC_AUTOROTATE) == BST_CHECKED 
+                IsDlgButtonChecked(hwndDlg,IDC_AUTOROTATE) == BST_CHECKED
                 ? BST_UNCHECKED : BST_CHECKED);
 
             ToggleAutoRotate();
@@ -1525,7 +1525,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
                     HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
 
                     FillRect(pcStruct->hDC,&sRect,hbr);
-                    
+
 
                     SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
@@ -1586,7 +1586,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
                     }
                     HBRUSH hbr = CreateSolidBrush(RGB(r,g,b));
                     FillRect(pcStruct->hDC,&sRect,hbr);
-                
+
                     SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
                     TextOut(pcStruct->hDC,4,1,szText,strlen(szText));
@@ -1630,10 +1630,10 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
                 return TRUE;
                 }
 
-            // need to determine the position of the mouse and the 
+            // need to determine the position of the mouse and the
             // distance from the center
-            //xPos = (int)(short)LOWORD(lParam); 
-            //yPos = (int)(short)HIWORD(lParam); 
+            //xPos = (int)(short)LOWORD(lParam);
+            //yPos = (int)(short)HIWORD(lParam);
 
             POINT sPoint;
             GetCursorPos(&sPoint);
@@ -1669,7 +1669,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
             D3DSURFACE_DESC sDesc;
             g_pcTexture->GetLevelDesc(0,&sDesc);
-    
+
             fHalfX = (int)(((float)sRect.right-(float)sDesc.Width) / 2.0f);
             fHalfY = (int)(((float)sRect.bottom-(float)sDesc.Height) / 2.0f);
 
@@ -1719,7 +1719,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
         case WM_MBUTTONDOWN:
 
-            
+
             g_bMousePressedM = true;
 
             sEvent.cbSize = sizeof(TRACKMOUSEEVENT);
@@ -1786,16 +1786,16 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
                         // header of a dds file (begin)
                         /*
                         DWORD dwMagic
-                        DWORD dwSize 
-                        DWORD dwFlags 
-                        DWORD dwHeight 
-                        DWORD dwWidth 
-                        DWORD dwPitchOrLinearSize 
-                        DWORD dwDepth  
+                        DWORD dwSize
+                        DWORD dwFlags
+                        DWORD dwHeight
+                        DWORD dwWidth
+                        DWORD dwPitchOrLinearSize
+                        DWORD dwDepth
                         DWORD dwMipMapCount           -> total with this: 32
                         DWORD dwReserved1[11]         -> total with this: 76
                         DDPIXELFORMAT ddpfPixelFormat -> total with this: 108
-                        DWORD dwCaps1;                -> total with this: 112   
+                        DWORD dwCaps1;                -> total with this: 112
                         DWORD dwCaps2; ---< here we are!
                         */
                         DWORD dwCaps = 0;
@@ -2461,7 +2461,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     while( uMsg.message != WM_QUIT )
         {
         if( PeekMessage( &uMsg, NULL, 0, 0, PM_REMOVE ) )
-            { 
+            {
             TranslateMessage( &uMsg );
             DispatchMessage( &uMsg );
 
@@ -2474,7 +2474,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'm':
 
                         CheckDlgButton(g_hDlg,IDC_TOGGLEMS,
-                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLEMS) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLEMS) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleMS();
@@ -2484,7 +2484,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'l':
 
                         CheckDlgButton(g_hDlg,IDC_3LIGHTS,
-                            IsDlgButtonChecked(g_hDlg,IDC_3LIGHTS) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_3LIGHTS) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleMultipleLights();
@@ -2494,7 +2494,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'p':
 
                         CheckDlgButton(g_hDlg,IDC_LOWQUALITY,
-                            IsDlgButtonChecked(g_hDlg,IDC_LOWQUALITY) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_LOWQUALITY) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleLowQuality();
@@ -2504,7 +2504,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'd':
 
                         CheckDlgButton(g_hDlg,IDC_TOGGLEMAT,
-                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLEMAT) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLEMAT) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleMats();
@@ -2515,7 +2515,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'n':
 
                         CheckDlgButton(g_hDlg,IDC_TOGGLENORMALS,
-                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLENORMALS) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLENORMALS) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
                         ToggleNormals();
                         break;
@@ -2525,7 +2525,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 's':
 
                         CheckDlgButton(g_hDlg,IDC_NOSPECULAR,
-                            IsDlgButtonChecked(g_hDlg,IDC_NOSPECULAR) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_NOSPECULAR) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleSpecular();
@@ -2535,7 +2535,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'a':
 
                         CheckDlgButton(g_hDlg,IDC_AUTOROTATE,
-                            IsDlgButtonChecked(g_hDlg,IDC_AUTOROTATE) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_AUTOROTATE) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleAutoRotate();
@@ -2546,7 +2546,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'r':
 
                         CheckDlgButton(g_hDlg,IDC_LIGHTROTATE,
-                            IsDlgButtonChecked(g_hDlg,IDC_LIGHTROTATE) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_LIGHTROTATE) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleLightRotate();
@@ -2556,7 +2556,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'z':
 
                         CheckDlgButton(g_hDlg,IDC_ZOOM,
-                            IsDlgButtonChecked(g_hDlg,IDC_ZOOM) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_ZOOM) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleFPSView();
@@ -2567,7 +2567,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'w':
 
                         CheckDlgButton(g_hDlg,IDC_TOGGLEWIRE,
-                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLEWIRE) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_TOGGLEWIRE) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleWireFrame();
@@ -2577,7 +2577,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'k':
 
                         CheckDlgButton(g_hDlg,IDC_SHOWSKELETON,
-                            IsDlgButtonChecked(g_hDlg,IDC_SHOWSKELETON) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_SHOWSKELETON) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleSkeleton();
@@ -2587,7 +2587,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                     case 'c':
 
                         CheckDlgButton(g_hDlg,IDC_BFCULL,
-                            IsDlgButtonChecked(g_hDlg,IDC_BFCULL) == BST_CHECKED 
+                            IsDlgButtonChecked(g_hDlg,IDC_BFCULL) == BST_CHECKED
                             ? BST_UNCHECKED : BST_CHECKED);
 
                         ToggleCulling();
@@ -2606,7 +2606,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                 }
             }
 
-    
+
         // render the scene
         CDisplay::Instance().OnRender();
 

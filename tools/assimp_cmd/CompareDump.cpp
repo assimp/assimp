@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "Main.h"
-const char* AICMD_MSG_CMPDUMP_HELP = 
+const char* AICMD_MSG_CMPDUMP_HELP =
 "assimp cmpdump <actual> <expected>\n"
 "\tCompare two short dumps produced with \'assimp dump <..> -s\' for equality.\n"
 ;
@@ -85,7 +85,7 @@ public:
     enum {MAX_ERR_LEN = 4096};
 
     /* public c'tors */
-    compare_fails_exception(const char* msg) {  
+    compare_fails_exception(const char* msg) {
         strncpy(mywhat,msg,MAX_ERR_LEN-1);
         strcat(mywhat,"\n");
     }
@@ -96,7 +96,7 @@ public:
     }
 
 private:
-    
+
     char mywhat[MAX_ERR_LEN+1];
 };
 
@@ -231,7 +231,7 @@ private:
     AI_WONT_RETURN void failure(const std::string& err, const std::string& name) AI_WONT_RETURN_SUFFIX {
         std::stringstream ss;
         throw compare_fails_exception((ss
-            << "Files are different at " 
+            << "Files are different at "
             << history.back().first
             << "."
             << name
@@ -331,14 +331,14 @@ template <> void comparer_context :: read<aiString>(aiString& filla,aiString& fi
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for float, uses epsilon for comparisons*/
-template<> float comparer_context :: cmp<float>(const std::string& name) 
+template<> float comparer_context :: cmp<float>(const std::string& name)
 {
     float a,e,t;
     read(a,e);
 
     if((t=fabs(a-e)) > MY_FLT_EPSILON) {
         std::stringstream ss;
-        failure((ss<< "Expected " << e << ", but actual is " 
+        failure((ss<< "Expected " << e << ", but actual is "
             << a << " (delta is " << t << ")", ss.str()),name);
     }
     return a;
@@ -346,14 +346,14 @@ template<> float comparer_context :: cmp<float>(const std::string& name)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for double, uses epsilon for comparisons*/
-template<> double comparer_context :: cmp<double>(const std::string& name) 
+template<> double comparer_context :: cmp<double>(const std::string& name)
 {
     double a,e,t;
     read(a,e);
 
     if((t=fabs(a-e)) > MY_DBL_EPSILON) {
         std::stringstream ss;
-        failure((ss<< "Expected " << e << ", but actual is " 
+        failure((ss<< "Expected " << e << ", but actual is "
             << a << " (delta is " << t << ")", ss.str()),name);
     }
     return a;
@@ -361,7 +361,7 @@ template<> double comparer_context :: cmp<double>(const std::string& name)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for aiVector3D */
-template<> aiVector3D comparer_context :: cmp<aiVector3D >(const std::string& name) 
+template<> aiVector3D comparer_context :: cmp<aiVector3D >(const std::string& name)
 {
     const float x = cmp<float>(name+".x");
     const float y = cmp<float>(name+".y");
@@ -372,7 +372,7 @@ template<> aiVector3D comparer_context :: cmp<aiVector3D >(const std::string& na
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for aiColor4D */
-template<> aiColor4D comparer_context :: cmp<aiColor4D >(const std::string& name) 
+template<> aiColor4D comparer_context :: cmp<aiColor4D >(const std::string& name)
 {
     const float r = cmp<float>(name+".r");
     const float g = cmp<float>(name+".g");
@@ -384,7 +384,7 @@ template<> aiColor4D comparer_context :: cmp<aiColor4D >(const std::string& name
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for aiQuaternion */
-template<> aiQuaternion comparer_context :: cmp<aiQuaternion >(const std::string& name) 
+template<> aiQuaternion comparer_context :: cmp<aiQuaternion >(const std::string& name)
 {
     const float w = cmp<float>(name+".w");
     const float x = cmp<float>(name+".x");
@@ -396,7 +396,7 @@ template<> aiQuaternion comparer_context :: cmp<aiQuaternion >(const std::string
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for aiQuatKey */
-template<> aiQuatKey comparer_context :: cmp<aiQuatKey >(const std::string& name) 
+template<> aiQuatKey comparer_context :: cmp<aiQuatKey >(const std::string& name)
 {
     const double mTime = cmp<double>(name+".mTime");
     const aiQuaternion mValue = cmp<aiQuaternion>(name+".mValue");
@@ -406,7 +406,7 @@ template<> aiQuatKey comparer_context :: cmp<aiQuatKey >(const std::string& name
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for aiVectorKey */
-template<> aiVectorKey comparer_context :: cmp<aiVectorKey >(const std::string& name) 
+template<> aiVectorKey comparer_context :: cmp<aiVectorKey >(const std::string& name)
 {
     const double mTime = cmp<double>(name+".mTime");
     const aiVector3D mValue = cmp<aiVector3D>(name+".mValue");
@@ -416,7 +416,7 @@ template<> aiVectorKey comparer_context :: cmp<aiVectorKey >(const std::string& 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for aiMatrix4x4 */
-template<> aiMatrix4x4 comparer_context :: cmp<aiMatrix4x4 >(const std::string& name) 
+template<> aiMatrix4x4 comparer_context :: cmp<aiMatrix4x4 >(const std::string& name)
 {
     aiMatrix4x4 res;
     for(unsigned int i = 0; i < 4; ++i) {
@@ -431,7 +431,7 @@ template<> aiMatrix4x4 comparer_context :: cmp<aiMatrix4x4 >(const std::string& 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Specialization for aiVertexWeight */
-template<> aiVertexWeight comparer_context :: cmp<aiVertexWeight >(const std::string& name) 
+template<> aiVertexWeight comparer_context :: cmp<aiVertexWeight >(const std::string& name)
 {
     const unsigned int mVertexId = cmp<unsigned int>(name+".mVertexId");
     const float mWeight = cmp<float>(name+".mWeight");
@@ -443,7 +443,7 @@ template<> aiVertexWeight comparer_context :: cmp<aiVertexWeight >(const std::st
 /// @class  sliced_chunk_iterator
 ///
 /// @brief  Helper to iterate easily through corresponding chunks of two dumps simultaneously.
-///   
+///
 /// Not a *real* iterator, doesn't fully conform to the isocpp iterator spec
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class sliced_chunk_iterator {
@@ -479,7 +479,7 @@ public:
         load_next();
         return *this;
     }
-    
+
     /* */
     bool is_end() const {
         return endit;
@@ -509,7 +509,7 @@ private:
             endit = true;
             return;
         }
-        
+
         res|=fread(&current.first,4,1,ctx.get_expect());
         res|=fread(&current.second,4,1,ctx.get_expect())    <<1u;
         res|=fread(&actual.first,4,1,ctx.get_actual())      <<2u;
@@ -524,7 +524,7 @@ private:
             ctx.failure((ss
                 <<"Chunk headers do not match. EXPECT: "
                 << std::hex << current.first
-                <<" ACTUAL: " 
+                <<" ACTUAL: "
                 << /*std::hex */actual.first,
                 ss.str()),
                 "<ChunkHead>");
@@ -535,7 +535,7 @@ private:
             ctx.failure((ss
                 <<"Chunk lengths do not match. EXPECT: "
                 <<current.second
-                <<" ACTUAL: " 
+                <<" ACTUAL: "
                 << actual.second,
                 ss.str()),
                 "<ChunkHead>");
@@ -576,7 +576,7 @@ public:
     }
 
 private:
-    
+
     comparer_context& ctx;
 };
 
@@ -589,13 +589,13 @@ class scoped_chunk {
 public:
 
     //
-    scoped_chunk(comparer_context& ctx,const char* msg) 
+    scoped_chunk(comparer_context& ctx,const char* msg)
         : ctx(ctx)
     {
         ctx.push_elem(msg);
     }
 
-    // 
+    //
     ~scoped_chunk()
     {
         ctx.pop_elem();
@@ -617,7 +617,7 @@ void CompareOnTheFlyMaterialProperty(comparer_context& comp)    {
     const aiPropertyTypeInfo type = static_cast<aiPropertyTypeInfo>(
         comp.cmp<uint32_t>("mType"));
 
-    switch (type) 
+    switch (type)
     {
         case aiPTI_Float:
             comp.cmp<float>(length/4,"mData");
@@ -749,7 +749,7 @@ void CompareOnTheFlyLight(comparer_context& comp)   {
     scoped_chunk chunk(comp,"aiLight");
 
     comp.cmp<aiString>("mName");
-    const aiLightSourceType type = static_cast<aiLightSourceType>( 
+    const aiLightSourceType type = static_cast<aiLightSourceType>(
         comp.cmp<uint32_t>("mType"));
 
     if(type!=aiLightSource_DIRECTIONAL) {
@@ -894,12 +894,12 @@ int Assimp_CompareDump (const char* const* params, unsigned int num)
 
     FILE* actual = fopen(params[0],"rb"), *expected = fopen(params[1],"rb");
     if (!actual) {
-        std::cout << "assimp cmpdump: Failure reading ACTUAL data from " << 
+        std::cout << "assimp cmpdump: Failure reading ACTUAL data from " <<
             params[0]  << std::endl;
         return -5;
     }
     if (!expected) {
-        std::cout << "assimp cmpdump: Failure reading EXPECT data from " << 
+        std::cout << "assimp cmpdump: Failure reading EXPECT data from " <<
             params[1]  << std::endl;
         return -6;
     }
@@ -920,7 +920,7 @@ int Assimp_CompareDump (const char* const* params, unsigned int num)
         return -3;
     }
 
-    std::cout << "Success (totally " << std::dec << comp.get_num_chunks() << 
+    std::cout << "Success (totally " << std::dec << comp.get_num_chunks() <<
         " chunks)" << std::endl;
 
     return 0;

@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -60,9 +60,9 @@ extern HKEY g_hRegistry;
 extern float g_fLoadTime;
 
 //-------------------------------------------------------------------------------
-// Table of colors used for normal vectors. 
+// Table of colors used for normal vectors.
 //-------------------------------------------------------------------------------
-D3DXVECTOR4 g_aclNormalColors[14] = 
+D3DXVECTOR4 g_aclNormalColors[14] =
 {
     D3DXVECTOR4(0xFF / 255.0f,0xFF / 255.0f,0xFF / 255.0f, 1.0f), // white
 
@@ -98,7 +98,7 @@ void GetNodeCount(aiNode* pcNode, unsigned int* piCnt)
 }
 
 //-------------------------------------------------------------------------------
-int CDisplay::EnableAnimTools(BOOL hm) 
+int CDisplay::EnableAnimTools(BOOL hm)
 {
     EnableWindow(GetDlgItem(g_hDlg,IDC_PLAY),hm);
     EnableWindow(GetDlgItem(g_hDlg,IDC_SLIDERANIM),hm);
@@ -150,7 +150,7 @@ int CDisplay::ClearDisplayList(void)
 //-------------------------------------------------------------------------------
 // Add a specific node to the display list
 int CDisplay::AddNodeToDisplayList(
-    unsigned int iIndex, 
+    unsigned int iIndex,
     unsigned int iDepth,
     aiNode* pcNode,
     HTREEITEM hRoot)
@@ -176,27 +176,27 @@ int CDisplay::AddNodeToDisplayList(
     }
     sprintf(chTemp+strlen(chTemp),  iIndex ? " (%i)" : " (%i meshes)",pcNode->mNumMeshes);
 
-    TVITEMEXW tvi; 
+    TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
-    
+
     wchar_t tmp[512];
     int t = MultiByteToWideChar(CP_UTF8,0,chTemp,-1,tmp,512);
-    
+
     tvi.pszText = tmp;
     tvi.cchTextMax = (int)t;
 
     tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_PARAM;
     tvi.iImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
     tvi.iSelectedImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
-    tvi.lParam = (LPARAM)5; 
+    tvi.lParam = (LPARAM)5;
 
-    sNew.itemex = tvi; 
-    sNew.hInsertAfter = TVI_LAST; 
+    sNew.itemex = tvi;
+    sNew.hInsertAfter = TVI_LAST;
     sNew.hParent = hRoot;
 
     // add the item to the list
-    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
-        TVM_INSERTITEMW, 
+    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1),
+        TVM_INSERTITEMW,
         0,
         (LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
@@ -229,27 +229,27 @@ int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
     }
     sprintf(chTemp+strlen(chTemp),  iIndex ? " (%i)" : " (%i faces)",pcMesh->mNumFaces);
 
-    TVITEMEXW tvi; 
+    TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
-    
+
     wchar_t tmp[512];
     int t = MultiByteToWideChar(CP_UTF8,0,chTemp,-1,tmp,512);
-    
+
     tvi.pszText = tmp;
     tvi.cchTextMax = (int)t;
 
     tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_PARAM;
     tvi.iImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
     tvi.iSelectedImage = this->m_aiImageList[AI_VIEW_IMGLIST_NODE];
-    tvi.lParam = (LPARAM)5; 
+    tvi.lParam = (LPARAM)5;
 
-    sNew.itemex = tvi; 
-    sNew.hInsertAfter = TVI_LAST; 
+    sNew.itemex = tvi;
+    sNew.hInsertAfter = TVI_LAST;
     sNew.hParent = hRoot;
 
     // add the item to the list
-    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
-        TVM_INSERTITEMW, 
+    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1),
+        TVM_INSERTITEMW,
         0,
         (LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
@@ -282,7 +282,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 
     // we must also change the icon of the corresponding tree
     // view item if the default texture was previously set
-    TVITEMEX tvi; 
+    TVITEMEX tvi;
     tvi.mask = TVIF_SELECTEDIMAGE | TVIF_IMAGE;
     tvi.iImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
     tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
@@ -333,7 +333,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
         case aiTextureType_NORMALS:
         case aiTextureType_HEIGHT:
 
-            // special handling here 
+            // special handling here
             if (pcMesh->piNormalTexture && pcMesh->piNormalTexture != piTexture)    {
                 piTexture->AddRef();
                 pcMesh->piNormalTexture->Release();
@@ -347,7 +347,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
             }
             break;
         default: //case aiTextureType_OPACITY && case aiTextureType_OPACITY | 0x40000000:
-            
+
             tex = &pcMesh->piOpacityTexture;
             tex_string = "OPACITY_TEXTURE";
             break;
@@ -370,7 +370,7 @@ int CDisplay::ReplaceCurrentTexture(const char* szPath)
 int CDisplay::AddTextureToDisplayList(unsigned int iType,
     unsigned int iIndex,
     const aiString* szPath,
-    HTREEITEM hFX, 
+    HTREEITEM hFX,
     unsigned int iUVIndex       /*= 0*/,
     const float fBlendFactor    /*= 0.0f*/,
     aiTextureOp eTextureOp      /*= aiTextureOp_Multiply*/,
@@ -453,10 +453,10 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
     if (bIsExtraOpacity)    {
         sprintf(chTemp,"%s %i (<copy of diffuse #1>)",szType,iIndex+1);
     }
-    else 
+    else
         sprintf(chTemp,"%s %i (%s)",szType,iIndex+1,sz);
 
-    TVITEMEX tvi; 
+    TVITEMEX tvi;
     TVINSERTSTRUCT sNew;
     tvi.pszText = chTemp;
     tvi.cchTextMax = (int)strlen(chTemp);
@@ -467,8 +467,8 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
 
     if (piTexture && *piTexture)    {
         // {9785DA94-1D96-426b-B3CB-BADC36347F5E}
-        static const GUID guidPrivateData = 
-            { 0x9785da94, 0x1d96, 0x426b, 
+        static const GUID guidPrivateData =
+            { 0x9785da94, 0x1d96, 0x426b,
             { 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
 
         uint32_t iData = 0;
@@ -492,13 +492,13 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
         tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_TEXTURE_INVALID];
     }
 
-    sNew.itemex = tvi; 
-    sNew.hInsertAfter = TVI_LAST; 
+    sNew.itemex = tvi;
+    sNew.hInsertAfter = TVI_LAST;
     sNew.hParent = hFX;
 
     // add the item to the list
-    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
-        TVM_INSERTITEM, 
+    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1),
+        TVM_INSERTITEM,
         0,
         (LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
@@ -516,14 +516,14 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
     return 1;
 }
 //-------------------------------------------------------------------------------
-int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot, 
+int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     unsigned int iIndex)
 {
     ai_assert(NULL != hRoot);
 
     aiMaterial* pcMat = g_pcAsset->pcScene->mMaterials[iIndex];
 
-    
+
     // find the first mesh using this material index
     unsigned int iMesh = 0;
     for (unsigned int i = 0; i < g_pcAsset->pcScene->mNumMeshes;++i)
@@ -546,27 +546,27 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     {
         sprintf(chTemp,"%s (%i)",szOut.data,iIndex+1);
     }
-    TVITEMEXW tvi; 
+    TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
 
     wchar_t tmp[512];
     int t = MultiByteToWideChar(CP_UTF8,0,chTemp,-1,tmp,512);
-    
+
     tvi.pszText = tmp;
     tvi.cchTextMax = (int)t;
     tvi.mask = TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_IMAGE | TVIF_HANDLE | TVIF_PARAM ;
     tvi.iImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
     tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_MATERIAL];
-    tvi.lParam = (LPARAM)10; 
+    tvi.lParam = (LPARAM)10;
     //tvi.state = TVIS_EXPANDED | TVIS_EXPANDEDONCE ;
 
-    sNew.itemex = tvi; 
-    sNew.hInsertAfter = TVI_LAST; 
+    sNew.itemex = tvi;
+    sNew.hInsertAfter = TVI_LAST;
     sNew.hParent = hRoot;
 
     // add the item to the list
-    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
-        TVM_INSERTITEMW, 
+    HTREEITEM hTexture = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1),
+        TVM_INSERTITEMW,
         0,
         (LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
@@ -599,8 +599,8 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
         // check whether the diffuse texture is not a default texture
 
         // {9785DA94-1D96-426b-B3CB-BADC36347F5E}
-        static const GUID guidPrivateData = 
-            { 0x9785da94, 0x1d96, 0x426b, 
+        static const GUID guidPrivateData =
+            { 0x9785da94, 0x1d96, 0x426b,
             { 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
 
         uint32_t iData = 0;
@@ -691,7 +691,7 @@ int CDisplay::FillDisplayList(void)
 
     // Initialize the tree view window.
     // fill in the first entry
-    TVITEMEX tvi; 
+    TVITEMEX tvi;
     TVINSERTSTRUCT sNew;
     tvi.pszText = (char*) "Model";
     tvi.cchTextMax = (int)strlen(tvi.pszText);
@@ -699,15 +699,15 @@ int CDisplay::FillDisplayList(void)
     tvi.state = TVIS_EXPANDED;
     tvi.iImage = m_aiImageList[AI_VIEW_IMGLIST_MODEL];
     tvi.iSelectedImage = m_aiImageList[AI_VIEW_IMGLIST_MODEL];
-    tvi.lParam = (LPARAM)0; 
+    tvi.lParam = (LPARAM)0;
 
-    sNew.itemex = tvi; 
-    sNew.hInsertAfter = TVI_ROOT; 
+    sNew.itemex = tvi;
+    sNew.hInsertAfter = TVI_ROOT;
     sNew.hParent = 0;
 
     // add the root item to the tree
-    m_hRoot = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1), 
-        TVM_INSERTITEM, 
+    m_hRoot = (HTREEITEM)SendMessage(GetDlgItem(g_hDlg,IDC_TREE1),
+        TVM_INSERTITEM,
         0,
         (LPARAM)(LPTVINSERTSTRUCT)&sNew);
 
@@ -748,7 +748,7 @@ int CDisplay::OnRender()
             if(  mAnim && mAnim->mDuration > 0.0) {
                 double tps = mAnim->mTicksPerSecond ? mAnim->mTicksPerSecond : 25.f;
                 time = fmod( time, mAnim->mDuration/tps);
-                SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,LPARAM(10000 * (time/(mAnim->mDuration/tps))));            
+                SendDlgItemMessage(g_hDlg,IDC_SLIDERANIM,TBM_SETPOS,TRUE,LPARAM(10000 * (time/(mAnim->mDuration/tps))));
             }
 
             g_pcAsset->mAnimator->Calculate( time );
@@ -782,7 +782,7 @@ int CDisplay::OnRender()
     // don't remove this, problems on some older machines (AMD timing bug)
     Sleep(10);
     return 1;
-}   
+}
 //-------------------------------------------------------------------------------
 // Update UI
 void UpdateColorFieldsInUI()
@@ -1059,8 +1059,8 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
         if (pcNew->piTexture)
         {
             // {9785DA94-1D96-426b-B3CB-BADC36347F5E}
-            static const GUID guidPrivateData = 
-            { 0x9785da94, 0x1d96, 0x426b, 
+            static const GUID guidPrivateData =
+            { 0x9785da94, 0x1d96, 0x426b,
             { 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
 
             uint32_t iData = 0;
@@ -1088,7 +1088,7 @@ int CDisplay::OnSetup(HTREEITEM p_hTreeItem)
     union   {
         TextureInfo* pcNew;
         NodeInfo* pcNew2;
-        MaterialInfo* pcNew3;   
+        MaterialInfo* pcNew3;
     };
 
     pcNew = NULL;
@@ -1325,12 +1325,12 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
         }
         OPENFILENAME sFilename1 = {
             sizeof(OPENFILENAME),
-            g_hDlg,GetModuleHandle(NULL), 
-            "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0*.*\0", 
-            NULL, 0, 1, 
-            szFileName, MAX_PATH, NULL, 0, NULL, 
+            g_hDlg,GetModuleHandle(NULL),
+            "Textures\0*.png;*.dds;*.tga;*.bmp;*.tif;*.ppm;*.ppx;*.jpg;*.jpeg;*.exr\0*.*\0",
+            NULL, 0, 1,
+            szFileName, MAX_PATH, NULL, 0, NULL,
             "Replace this texture",
-            OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+            OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
             0, 1, ".jpg", 0, NULL, NULL
         };
         if(GetOpenFileName(&sFilename1) == 0) return 0;
@@ -1358,11 +1358,11 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
         }
         OPENFILENAME sFilename1 = {
             sizeof(OPENFILENAME),
-            g_hDlg,GetModuleHandle(NULL), 
-            "Textures\0*.png;*.dds;*.bmp;*.tif;*.pfm;*.jpg;*.jpeg;*.hdr\0*.*\0", NULL, 0, 1, 
-            szFileName, MAX_PATH, NULL, 0, NULL, 
+            g_hDlg,GetModuleHandle(NULL),
+            "Textures\0*.png;*.dds;*.bmp;*.tif;*.pfm;*.jpg;*.jpeg;*.hdr\0*.*\0", NULL, 0, 1,
+            szFileName, MAX_PATH, NULL, 0, NULL,
             "Export texture to file",
-            OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
+            OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR,
             0, 1, ".png", 0, NULL, NULL
         };
         if(GetSaveFileName(&sFilename1) == 0) return 0;
@@ -1735,7 +1735,7 @@ int CDisplay::RenderFullScene()
     // setup the stereo view if necessary
     if (g_sOptions.bStereoView)
         SetupStereoView();
-    
+
 
     // draw all opaque objects in the scene
     aiMatrix4x4 m;
@@ -1768,7 +1768,7 @@ int CDisplay::RenderFullScene()
     }
 
     // setup the stereo view if necessary
-    if (g_sOptions.bStereoView) 
+    if (g_sOptions.bStereoView)
         RenderStereoView(m);
 
     // render the skeleton if necessary
@@ -1804,7 +1804,7 @@ int CDisplay::RenderFullScene()
     // pre-projected vertices
     if (!g_bFPSView && g_pcAsset && g_pcTexture)
         DrawHUD();
-    
+
     return 1;
 }
 //-------------------------------------------------------------------------------
@@ -1824,7 +1824,7 @@ int CDisplay::RenderSkeleton (aiNode* piNode,const aiMatrix4x4& piMatrix, const 
     if (piNode->mParent) {
         AssetHelper::LineVertex data[2];
         data[0].dColorDiffuse = data[1].dColorDiffuse = D3DCOLOR_ARGB(0xff,0xff,0,0);
-        
+
         data[0].vPosition.x = parent.d1;
         data[0].vPosition.y = parent.d2;
         data[0].vPosition.z = parent.d3;
@@ -1860,7 +1860,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
             // directly call our children
             for (unsigned int i = 0; i < piNode->mNumChildren;++i)
                 RenderNode(piNode->mChildren[i],piMatrix,bAlpha );
-            
+
             return 1;
         }
         m_iViewMode = VIEWMODE_FULL;
@@ -1937,7 +1937,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
         apcVec[0].z = vPos.z;
         piEnd->SetVector( "vCameraPos",&apcVec[0]);
 
-        // setup the best technique 
+        // setup the best technique
         if( g_sCaps.PixelShaderVersion < D3DPS_VERSION(2,0))
         {
             g_piDefaultEffect->SetTechnique( "DefaultFXSpecular_FF");
@@ -1992,10 +1992,10 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
                     for( unsigned int a = 0; a < mesh->mNumBones; a++)
                     {
                         const aiMatrix4x4& mat = boneMats[a];
-                        *tempmat++ = mat.a1; *tempmat++ = mat.a2; *tempmat++ = mat.a3; *tempmat++ = mat.a4;  
+                        *tempmat++ = mat.a1; *tempmat++ = mat.a2; *tempmat++ = mat.a3; *tempmat++ = mat.a4;
                         *tempmat++ = mat.b1; *tempmat++ = mat.b2; *tempmat++ = mat.b3; *tempmat++ = mat.b4;
-                        *tempmat++ = mat.c1; *tempmat++ = mat.c2; *tempmat++ = mat.c3; *tempmat++ = mat.c4; 
-                        *tempmat++ = mat.d1; *tempmat++ = mat.d2; *tempmat++ = mat.d3; *tempmat++ = mat.d4; 
+                        *tempmat++ = mat.c1; *tempmat++ = mat.c2; *tempmat++ = mat.c3; *tempmat++ = mat.c4;
+                        *tempmat++ = mat.d1; *tempmat++ = mat.d2; *tempmat++ = mat.d3; *tempmat++ = mat.d4;
                         //tempmat += 4;
                     }
 
@@ -2070,7 +2070,7 @@ int CDisplay::RenderNode (aiNode* piNode,const aiMatrix4x4& piMatrix,
     // render all child nodes
     for (unsigned int i = 0; i < piNode->mNumChildren;++i)
         RenderNode(piNode->mChildren[i],piMatrix,bAlpha );
-    
+
     // need to reset the viewmode?
     if (bChangedVM)
         m_iViewMode = VIEWMODE_NODE;
@@ -2096,14 +2096,14 @@ int CDisplay::RenderPatternBG()
                 NULL,
                 &g_piPatternEffect,&piBuffer)))
             {
-                if( piBuffer) 
+                if( piBuffer)
                 {
                     MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
                     piBuffer->Release();
                 }
                 return 0;
             }
-            if( piBuffer) 
+            if( piBuffer)
             {
                 piBuffer->Release();
                 piBuffer = NULL;
@@ -2161,7 +2161,7 @@ int CDisplay::RenderPatternBG()
     as[1].w = 1.0f;
     as[2].w = 1.0f;
     as[3].w = 1.0f;
-    
+
     as[0].x -= 0.5f;as[1].x -= 0.5f;as[2].x -= 0.5f;as[3].x -= 0.5f;
     as[0].y -= 0.5f;as[1].y -= 0.5f;as[2].y -= 0.5f;as[3].y -= 0.5f;
 

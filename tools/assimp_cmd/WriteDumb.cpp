@@ -1390,4 +1390,3 @@ int Assimp_Dump (const char* const* params, unsigned int num)
 	printf("assimp dump: Wrote output dump %s\n",out.c_str());
 	return 0;
 }
-

@@ -168,4 +168,3 @@ int Assimp_Export(const char* const* params, unsigned int num)
 }
 
 #endif // no export
- 

@@ -494,4 +494,3 @@ IDR_HUDMASK             RCDATA                  "HUDMask.png"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-

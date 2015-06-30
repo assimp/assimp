@@ -49,7 +49,7 @@ TEST_F(ColladaExportLight, testExportLight)
 
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
-    EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada","/home/wise/lightsExp.dae"));
+    EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada","lightsExp.dae"));
 
     const aiScene* imported = im->ReadFile(file,0);
 

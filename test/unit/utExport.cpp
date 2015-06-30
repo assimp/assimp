@@ -14,7 +14,7 @@ public:
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
 
-        pTest = im->ReadFile("../../test/models/X/test.x",0);
+        pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/X/test.x",0);
     }
 
     virtual void TearDown()

@@ -3,6 +3,9 @@ build
 .project
 *.kdev4*
 
+# CLion
+.idea
+
 # Visual Studio
 *.sln
 *.ncb

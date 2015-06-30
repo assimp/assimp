@@ -7,8 +7,8 @@ Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -47,9 +47,9 @@ std::string g_szNormalsShader = std::string(
 
     // World * View * Projection matrix\n"
     // NOTE: Assume that the material uses a WorldViewProjection matrix\n"
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
     "float4 OUTPUT_COLOR;\n"
-    
+
     // Vertex shader input structure
     "struct VS_INPUT\n"
     "{\n"
@@ -141,8 +141,8 @@ std::string g_szSkyboxShader = std::string(
 
     // World * View * Projection matrix\n"
     // NOTE: Assume that the material uses a WorldViewProjection matrix\n"
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
-    
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
+
     // Vertex shader input structure
     "struct VS_INPUT\n"
     "{\n"
@@ -167,7 +167,7 @@ std::string g_szSkyboxShader = std::string(
 
         // Set z to w to ensure z becomes 1.0 after the division through w occurs
         "Out.Position.z = Out.Position.w;\n"
-    
+
         // Simply pass through texture coordinates
         "Out.Texture0 = IN.Texture0;\n"
 
@@ -232,7 +232,7 @@ std::string g_szSkyboxShader = std::string(
             "ZWriteEnable = FALSE;\n"
             "FogEnable = FALSE;\n"
             "CullMode = NONE;\n"
-    
+
             "PixelShader = compile ps_2_0 RenderImagePS();\n"
             "VertexShader = compile vs_2_0 RenderImageVS();\n"
         "}\n"
@@ -243,9 +243,9 @@ std::string g_szDefaultShader = std::string(
 
     // World * View * Projection matrix
     // NOTE: Assume that the material uses a WorldViewProjection matrix
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
-    "float4x4 World					: WORLD;\n"
-    "float4x3 WorldInverseTranspose	: WORLDINVERSETRANSPOSE;\n"
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
+    "float4x4 World                 : WORLD;\n"
+    "float4x3 WorldInverseTranspose : WORLDINVERSETRANSPOSE;\n"
 
     // light colors
     "float3 afLightColor[5];\n"
@@ -256,19 +256,19 @@ std::string g_szDefaultShader = std::string(
     "float3 vCameraPos : CAMERAPOSITION;\n"
 
     // Bone matrices
-//	"#ifdef AV_SKINNING \n"
+//  "#ifdef AV_SKINNING \n"
     "float4x3 gBoneMatrix[60]; \n"
-//	"#endif // AV_SKINNING \n"
+//  "#endif // AV_SKINNING \n"
 
     // Vertex shader input structure
     "struct VS_INPUT\n"
     "{\n"
         "float3 Position : POSITION;\n"
         "float3 Normal : NORMAL;\n"
-//		"#ifdef AV_SKINNING \n"
+//      "#ifdef AV_SKINNING \n"
             "float4 BlendIndices : BLENDINDICES;\n"
             "float4 BlendWeights : BLENDWEIGHT;\n"
-//		"#endif // AV_SKINNING \n"
+//      "#endif // AV_SKINNING \n"
     "};\n"
 
     // Vertex shader output structure for pixel shader usage
@@ -291,7 +291,7 @@ std::string g_szDefaultShader = std::string(
     "{\n"
         "VS_OUTPUT Out;\n"
 
-//		"#ifdef AV_SKINNING \n"
+//      "#ifdef AV_SKINNING \n"
         "float4 weights = IN.BlendWeights; \n"
         "weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
         "float4 localPos = float4( IN.Position, 1.0f); \n"
@@ -299,9 +299,9 @@ std::string g_szDefaultShader = std::string(
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
-//		"#else \n"
-//		"float3 objPos = IN.Position; \n"
-//		"#endif // AV_SKINNING \n"
+//      "#else \n"
+//      "float3 objPos = IN.Position; \n"
+//      "#endif // AV_SKINNING \n"
 
         // Multiply with the WorldViewProjection matrix
         "Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
@@ -317,7 +317,7 @@ std::string g_szDefaultShader = std::string(
     "{\n"
         "VS_OUTPUT_FF Out;\n"
 
-//		"#ifdef AV_SKINNING \n"
+//      "#ifdef AV_SKINNING \n"
         "float4 weights = IN.BlendWeights; \n"
         "weights.w = 1.0f - dot( weights.xyz, float3( 1, 1, 1)); \n"
         "float4 localPos = float4( IN.Position, 1.0f); \n"
@@ -325,9 +325,9 @@ std::string g_szDefaultShader = std::string(
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.y]) * weights.y; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.z]) * weights.z; \n"
         "objPos += mul( localPos, gBoneMatrix[IN.BlendIndices.w]) * weights.w; \n"
-//		"#else \n"
-//		"float3 objPos = IN.Position; \n"
-//		"#endif // AV_SKINNING \n"
+//      "#else \n"
+//      "float3 objPos = IN.Position; \n"
+//      "#endif // AV_SKINNING \n"
 
         // Multiply with the WorldViewProjection matrix
         "Out.Position = mul( float4( objPos, 1.0f), WorldViewProjection);\n"
@@ -484,9 +484,9 @@ std::string g_szMaterialShader = std::string(
 
     // World * View * Projection matrix
   // NOTE: Assume that the material uses a WorldViewProjection matrix
-    "float4x4 WorldViewProjection	: WORLDVIEWPROJECTION;\n"
-    "float4x4 World					: WORLD;\n"
-    "float4x3 WorldInverseTranspose	: WORLDINVERSETRANSPOSE;\n"
+    "float4x4 WorldViewProjection   : WORLDVIEWPROJECTION;\n"
+    "float4x4 World                 : WORLD;\n"
+    "float4x3 WorldInverseTranspose : WORLDINVERSETRANSPOSE;\n"
 
     "#ifndef AV_DISABLESSS\n"
     "float4x3 ViewProj;\n"
@@ -702,7 +702,7 @@ std::string g_szMaterialShader = std::string(
         "Out.ViewDir = vCameraPos - WorldPos;\n"
         "Out.Normal = mul(IN.Normal,WorldInverseTranspose);\n"
         "#endif\n"
-        
+
         "#ifdef AV_NORMAL_TEXTURE\n"
         "float3x3 TBNMatrix = float3x3(IN.Tangent, IN.Bitangent, IN.Normal);\n"
         "float3x3 WTTS      = mul(TBNMatrix, (float3x3)WorldInverseTranspose);\n"
@@ -838,7 +838,7 @@ std::string g_szMaterialShader = std::string(
             "OUT.rgb += afLightColor[0].rgb * DIFFUSE_COLOR.rgb * fHalfLambert * IN.Color.rgb +\n"
         "#endif // !AV_DIFFUSE_TEXTURE\n"
 
-        
+
         "#ifdef AV_SPECULAR_COMPONENT\n"
             "#ifndef AV_SKYBOX_LOOKUP\n"
                 "#ifdef AV_SPECULAR_TEXTURE\n"
@@ -898,7 +898,7 @@ std::string g_szMaterialShader = std::string(
         "#endif // !AV_SPECULAR_COMPONENT\n"
 
         "{\n"
-        
+
         "#ifdef AV_NORMAL_TEXTURE\n"
             "float L1 = dot(Normal,IN_Light0) * 0.5f + 0.5f;\n"
             "#define AV_LIGHT_0 IN_Light0\n"
@@ -907,7 +907,7 @@ std::string g_szMaterialShader = std::string(
             "#define AV_LIGHT_0 afLightDir[0]\n"
         "#endif\n"
             "float fHalfLambert = L1*L1;\n"
-            
+
         "#ifdef AV_DIFFUSE_TEXTURE\n"
             "OUT.rgb += afLightColor[0].rgb * DIFFUSE_COLOR.rgb * tex2D(DIFFUSE_SAMPLER,IN.TexCoord0).rgb * fHalfLambert  * IN.Color.rgb +\n"
         "#else\n"
@@ -1369,10 +1369,10 @@ std::string g_szCheckerBackgroundShader = std::string(
     // vertex shader output structure
         "struct VS_OUTPUT\n"
         "{\n"
-            "float4 Position : POSITION;\n"	
+            "float4 Position : POSITION;\n"
         "};\n"
 
-    // vertex shader 
+    // vertex shader
         "VS_OUTPUT DefaultVShader(float4 INPosition : POSITION, float2 INTexCoord0 : TEXCOORD0 )\n"
         "{\n"
             "VS_OUTPUT Out;\n"
@@ -1393,7 +1393,7 @@ std::string g_szCheckerBackgroundShader = std::string(
           "else if (0 != round(fmod(round(fDiv.y),2)))fColor = COLOR_TWO;\n"
           "return float4(fColor,1.0f);"
         "}\n"
-    
+
         // technique to generate a pattern
         "technique MakePattern\n"
         "{\n"

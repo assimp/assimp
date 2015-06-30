@@ -70,7 +70,7 @@ END
 #define COMBO_W 100
 
 IDD_DIALOGMAIN DIALOGEX 0, 0, W+TREE_W, H
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU 
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES | WS_EX_WINDOWEDGE
 CAPTION "Open Asset Import Library - Model Viewer "
 MENU IDR_MENU1
@@ -201,12 +201,12 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
     "#include ""windows.h""\r\n"
@@ -214,7 +214,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\n"
     "\0"
@@ -268,7 +268,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -337,7 +337,7 @@ IDB_BTXI                BITMAP                  "txi.bmp"
 // Menu
 //
 
-IDR_MENU1 MENU 
+IDR_MENU1 MENU
 BEGIN
     POPUP "Viewer"
     BEGIN
@@ -424,7 +424,7 @@ BEGIN
     END
 END
 
-IDR_TXPOPUP MENU 
+IDR_TXPOPUP MENU
 BEGIN
     POPUP "Hey"
     BEGIN
@@ -437,7 +437,7 @@ BEGIN
     MENUITEM "This is not an easter egg",   0
 END
 
-IDR_MATPOPUP MENU 
+IDR_MATPOPUP MENU
 BEGIN
     POPUP "So long"
     BEGIN
@@ -494,4 +494,3 @@ IDR_HUDMASK             RCDATA                  "HUDMask.png"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-

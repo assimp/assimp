@@ -7,8 +7,8 @@ Copyright (c) 2006-2012, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -44,70 +44,70 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //-------------------------------------------------------------------------------
-/**	\brief Class to manage render options. One global instance
+/** \brief Class to manage render options. One global instance
 */
 //-------------------------------------------------------------------------------
 class RenderOptions
-	{
-	public:
+    {
+    public:
 
-		// enumerates different drawing modi. POINT is currently
-		// not supported and probably will never be.
-		enum DrawMode {NORMAL, WIREFRAME, POINT};
+        // enumerates different drawing modi. POINT is currently
+        // not supported and probably will never be.
+        enum DrawMode {NORMAL, WIREFRAME, POINT};
 
-		inline RenderOptions	(void) :
-			bMultiSample	(true),
-			bSuperSample	(false),
-			bRenderMats		(true),
-			bRenderNormals	(false),
-			b3Lights		(false),
-			bLightRotate	(false),
-			bRotate			(true),
-			bLowQuality		(false),
-			bNoSpecular		(false),
-			bStereoView		(false),
-			bNoAlphaBlending(false),
-			eDrawMode		(NORMAL),
-			bCulling		(false),
-			bSkeleton		(false)
-			
-			{}
+        inline RenderOptions    (void) :
+            bMultiSample    (true),
+            bSuperSample    (false),
+            bRenderMats     (true),
+            bRenderNormals  (false),
+            b3Lights        (false),
+            bLightRotate    (false),
+            bRotate         (true),
+            bLowQuality     (false),
+            bNoSpecular     (false),
+            bStereoView     (false),
+            bNoAlphaBlending(false),
+            eDrawMode       (NORMAL),
+            bCulling        (false),
+            bSkeleton       (false)
 
-		bool bMultiSample;
+            {}
 
-		// SuperSampling has not yet been implemented
-		bool bSuperSample;
+        bool bMultiSample;
 
-		// Display the real material of the object
-		bool bRenderMats;
+        // SuperSampling has not yet been implemented
+        bool bSuperSample;
 
-		// Render the normals
-		bool bRenderNormals;
+        // Display the real material of the object
+        bool bRenderMats;
 
-		// Use 2 directional light sources
-		bool b3Lights;
+        // Render the normals
+        bool bRenderNormals;
 
-		// Automatically rotate the light source(s)
-		bool bLightRotate;
+        // Use 2 directional light sources
+        bool b3Lights;
 
-		// Automatically rotate the asset around its origin
-		bool bRotate;
+        // Automatically rotate the light source(s)
+        bool bLightRotate;
 
-		// use standard lambertian lighting
-		bool bLowQuality;
+        // Automatically rotate the asset around its origin
+        bool bRotate;
 
-		// disable specular lighting got all elements in the scene
-		bool bNoSpecular;
+        // use standard lambertian lighting
+        bool bLowQuality;
 
-		// enable stereo view
-		bool bStereoView;
+        // disable specular lighting got all elements in the scene
+        bool bNoSpecular;
 
-		bool bNoAlphaBlending;
+        // enable stereo view
+        bool bStereoView;
 
-		// wireframe or solid rendering?
-		DrawMode eDrawMode;
+        bool bNoAlphaBlending;
 
-		bool bCulling,bSkeleton;
-	};
+        // wireframe or solid rendering?
+        DrawMode eDrawMode;
+
+        bool bCulling,bSkeleton;
+    };
 
 #endif // !! IG

@@ -62,7 +62,7 @@ number of false positives is relatively low.
 ---------------------------------------------------------------------------------
 Get back to <root>/test/results and look at regression_suite_failures.txt.
 It contains a list of all files which failed the test. Failing dumps are copied to
-root>/test/results/tmp. Both an EXPECTED and an ACTUAL file is produced per test.
+<root>/test/results/tmp. Both an EXPECTED and an ACTUAL file is produced per test.
 The output of "assimp cmpdump" is written to regressions_suite_output.txt. Grep
 for the file name in question and locate the log for the failed comparison. It
 contains a full trace of which scene elements have been compared before, which

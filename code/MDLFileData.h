@@ -841,6 +841,9 @@ struct IntGroupInfo_MDL7
     IntGroupInfo_MDL7(BE_NCONST MDL::Group_MDL7* _pcGroup, unsigned int _iIndex)
         :   iIndex(_iIndex)
         ,   pcGroup(_pcGroup)
+        ,   pcGroupUVs()
+        ,   pcGroupTris()
+        ,   pcGroupVerts()
     {}
 
     //! Index of the group
@@ -896,6 +899,8 @@ struct IntSharedData_MDL7
 {
     //! Default constructor
     IntSharedData_MDL7()
+        : apcOutBones(),
+        iNum()
     {
         abNeedMaterials.reserve(10);
     }

@@ -70,7 +70,10 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BVHLoader::BVHLoader()
-: noSkeletonMesh()
+    : mLine(),
+    mAnimTickDuration(),
+    mAnimNumFrames(),
+    noSkeletonMesh()
 {}
 
 // ------------------------------------------------------------------------------------------------

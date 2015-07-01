@@ -126,6 +126,7 @@ struct Bone
     {
         //! Public default constructor
         Animation()
+            : iFirstTimeKey()
         {
             asKeys.reserve(20);
         }

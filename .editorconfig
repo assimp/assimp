@@ -15,3 +15,8 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_size = 4
 indent_style = space
+
+[*.txt]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true

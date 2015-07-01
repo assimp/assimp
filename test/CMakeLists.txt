@@ -54,6 +54,8 @@ add_executable( unit
   ${TEST_SRCS}
 )
 
+add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
+
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 add_dependencies( unit gtest )

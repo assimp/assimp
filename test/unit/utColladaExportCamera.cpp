@@ -43,7 +43,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
 {
     const char* file = "cameraExp.dae";
 
-    const aiScene* pTest = im->ReadFile("../test/models/Collada/cameras.dae",0);
+    const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/cameras.dae",0);
     ASSERT_TRUE(pTest!=NULL);
     ASSERT_TRUE(pTest->HasCameras());
 

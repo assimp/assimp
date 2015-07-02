@@ -354,8 +354,14 @@ void Q3Shader::ConvertShaderToMaterial(aiMaterial* out, const ShaderDataBlock& s
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD3Importer::MD3Importer()
-: configFrameID  (0)
-, configHandleMP (true)
+    : configFrameID  (0)
+    , configHandleMP (true)
+    , configSpeedFlag()
+    , pcHeader()
+    , mBuffer()
+    , fileSize()
+    , mScene()
+    , mIOHandler()
 {}
 
 // ------------------------------------------------------------------------------------------------

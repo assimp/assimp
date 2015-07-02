@@ -145,6 +145,7 @@ namespace AssimpView {
 
             MeshHelper()
                 :
+                eShadingMode(),
                 piVB( NULL ),
                 piIB( NULL ),
                 piVBNormals( NULL ),
@@ -158,6 +159,9 @@ namespace AssimpView {
                 piOpacityTexture( NULL ),
                 piShininessTexture( NULL ),
                 piLightmapTexture( NULL ),
+                fOpacity(),
+                fShininess(),
+                fSpecularStrength()
                 twosided( false ),
                 pvOriginalNormals( NULL )
             {}

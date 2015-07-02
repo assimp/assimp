@@ -168,8 +168,10 @@ void CLogWindow::Save()
     {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
-        if (!sz)sz = strrchr(szFileName,'/');
-        if (!sz)*sz = 0;
+        if (!sz)
+            sz = strrchr(szFileName,'/');
+        if (sz)
+            *sz = 0;
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),

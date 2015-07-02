@@ -77,6 +77,19 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 LWOImporter::LWOImporter()
+    : mIsLWO2(),
+    mIsLXOB(),
+    mLayers(),
+    mCurLayer(),
+    mTags(),
+    mMapping(),
+    mSurfaces(),
+    mFileBuffer(),
+    fileSize(),
+    pScene(),
+    configSpeedFlag(),
+    configLayerIndex(),
+    hasNamedLayer()
 {}
 
 // ------------------------------------------------------------------------------------------------

@@ -169,7 +169,7 @@ int CDisplay::AddNodeToDisplayList(
             iIndex += iDepth  * 100;
         }
         else iIndex += iDepth  * 10;
-        sprintf(chTemp,"Node %i",iIndex);
+        sprintf(chTemp,"Node %u",iIndex);
     }
     else {
         sprintf(chTemp,"%s",pcNode->mName.data);
@@ -222,7 +222,7 @@ int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
     char chTemp[MAXLEN];
 
     if(0 == pcMesh->mName.length)   {
-        sprintf(chTemp,"Mesh %i",iIndex);
+        sprintf(chTemp,"Mesh %u",iIndex);
     }
     else {
         sprintf(chTemp,"%s",pcMesh->mName.data);
@@ -1028,7 +1028,7 @@ int CDisplay::OnSetupTextureView(TextureInfo* pcNew)
         sprintf(szTemp,"%i",(*pcNew->piTexture)->GetLevelCount());
         SetWindowText(GetDlgItem(g_hDlg,IDC_ESHADER),szTemp);
 
-        sprintf(szTemp,"%i",pcNew->iUV);
+        sprintf(szTemp,"%u",pcNew->iUV);
         SetWindowText(GetDlgItem(g_hDlg,IDC_EMAT),szTemp);
 
         sprintf(szTemp,"%f",pcNew->fBlend);

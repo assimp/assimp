@@ -892,12 +892,33 @@ int Assimp_CompareDump (const char* const* params, unsigned int num)
         return 0;
     }
 
-    FILE* actual = fopen(params[0],"rb"), *expected = fopen(params[1],"rb");
+    class file_ptr
+    {
+    public:
+        file_ptr(FILE *p)
+            : m_file(p)
+        {}
+        ~file_ptr()
+        {
+            if (m_file)
+            {
+                fclose(m_file);
+                m_file = NULL;
+            }
+        }
+
+        operator FILE *() { return m_file; }
+
+    private:
+        FILE *m_file;
+    };
+    file_ptr actual(fopen(params[0],"rb"));
     if (!actual) {
         std::cout << "assimp cmpdump: Failure reading ACTUAL data from " <<
             params[0]  << std::endl;
         return -5;
     }
+    file_ptr expected(fopen(params[1],"rb"));
     if (!expected) {
         std::cout << "assimp cmpdump: Failure reading EXPECT data from " <<
             params[1]  << std::endl;

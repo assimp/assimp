@@ -938,7 +938,7 @@ struct IntSplitGroupData_MDL7
     IntSplitGroupData_MDL7(IntSharedData_MDL7& _shared,
         std::vector<aiMesh*>& _avOutList)
 
-        : shared(_shared), avOutList(_avOutList)
+        : aiSplit(), shared(_shared), avOutList(_avOutList)
     {
     }
 

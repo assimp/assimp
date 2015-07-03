@@ -51,6 +51,7 @@ namespace OpenGEX {
     public:
         OpenGEXExporter();
         ~OpenGEXExporter();
+        bool export( const char *filename, const aiScene* pScene );
     };
 } // Namespace openGEX
 } // Namespace Assimp

@@ -129,6 +129,15 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 AC3DImporter::AC3DImporter()
+    : buffer(),
+    configSplitBFCull(),
+    configEvalSubdivision(),
+    mNumMeshes(),
+    mLights(),
+    lights(),
+    groups(),
+    polys(),
+    worlds()
 {
     // nothing to be done here
 }

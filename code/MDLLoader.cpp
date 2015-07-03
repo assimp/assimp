@@ -89,6 +89,12 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MDLImporter::MDLImporter()
+    : configFrameID(),
+    mBuffer(),
+    iGSFileVersion(),
+    pIOHandler(),
+    pScene(),
+    iFileSize()
 {}
 
 // ------------------------------------------------------------------------------------------------

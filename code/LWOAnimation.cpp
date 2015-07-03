@@ -62,6 +62,10 @@ using namespace Assimp::LWO;
 AnimResolver::AnimResolver(std::list<Envelope>& _envelopes,double tick)
     : envelopes   (_envelopes)
     , sample_rate (0.)
+    , envl_x(), envl_y(), envl_z()
+    , end_x(), end_y(), end_z()
+    , flags()
+    , sample_delta()
 {
     trans_x = trans_y = trans_z = NULL;
     rotat_x = rotat_y = rotat_z = NULL;

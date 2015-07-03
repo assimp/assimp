@@ -52,9 +52,10 @@ http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 /** Helper structure representing a face with smoothing groups assigned */
 struct FaceWithSmoothingGroup
 {
-    FaceWithSmoothingGroup() : iSmoothGroup(0)
+    FaceWithSmoothingGroup()
+        : mIndices(),
+        iSmoothGroup(0)
     {
-        // let the rest uninitialized for performance - in release builds.
         // in debug builds set all indices to a common magic value
 #ifdef ASSIMP_BUILD_DEBUG
         this->mIndices[0] = 0xffffffff;
@@ -65,7 +66,7 @@ struct FaceWithSmoothingGroup
 
 
     //! Indices. .3ds is using uint16. However, after
-    //! an unique vrtex set has been generated,
+    //! an unique vertex set has been generated,
     //! individual index values might exceed 2^16
     uint32_t mIndices[3];
 

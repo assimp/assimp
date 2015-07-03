@@ -92,6 +92,10 @@ void MD2::LookupNormalIndex(uint8_t iNormalIndex,aiVector3D& vOut)
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD2Importer::MD2Importer()
+    : configFrameID(),
+    m_pcHeader(),
+    mBuffer(),
+    fileSize()
 {}
 
 // ------------------------------------------------------------------------------------------------

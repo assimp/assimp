@@ -129,7 +129,12 @@ void LWS::Element::Parse (const char*& buffer)
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 LWSImporter::LWSImporter()
-: noSkeletonMesh()
+    : configSpeedFlag(),
+    io(),
+    first(),
+    last(),
+    fps(),
+    noSkeletonMesh()
 {
     // nothing to do here
 }

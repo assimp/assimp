@@ -466,8 +466,9 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
     for( unsigned int a = 0; a < numPosFaces; a++)
     {
         unsigned int numIndices = ReadInt();
-        if( numIndices < 3)
+        if( numIndices < 3) {
             ThrowException( boost::str( boost::format( "Invalid index count %1% for face %2%.") % numIndices % a));
+        }
 
         // read indices
         Face& face = pMesh->mPosFaces[a];

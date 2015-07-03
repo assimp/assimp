@@ -85,7 +85,9 @@ public:
 struct NodeDesc
 {
     NodeDesc()
-        :   number  (0)
+        :   type()
+        ,   id()
+        ,   number  (0)
         ,   parent  (0)
         ,   name    ("")
         ,   isPivotSet (false)
@@ -94,6 +96,7 @@ struct NodeDesc
         ,   lightType (0)
         ,   lightFalloffType (0)
         ,   lightConeAngle (45.f)
+        ,   lightEdgeAngle()
         ,   parent_resolved (NULL)
     {}
 

@@ -95,6 +95,10 @@ void MDC::BuildVertex(const Frame& frame,
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MDCImporter::MDCImporter()
+    : configFrameID(),
+    pcHeader(),
+    mBuffer(),
+    fileSize()
 {
 }
 

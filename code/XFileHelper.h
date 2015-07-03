@@ -87,9 +87,13 @@ struct Material
     aiColor3D mEmissive;
     std::vector<TexEntry> mTextures;
 
-  size_t sceneIndex; ///< the index under which it was stored in the scene's material list
+    size_t sceneIndex; ///< the index under which it was stored in the scene's material list
 
-    Material() { mIsReference = false; sceneIndex = SIZE_MAX; }
+    Material()
+        : mIsReference(false),
+        mSpecularExponent(),
+        sceneIndex(SIZE_MAX)
+    {}
 };
 
 /** Helper structure to represent a bone weight */

@@ -130,6 +130,7 @@ public:
             ,   surfaces()
             ,   numRefs (0)
             ,   subDiv  (0)
+            ,   crease()
         {}
 
         // Type description

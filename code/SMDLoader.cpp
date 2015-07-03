@@ -75,6 +75,14 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 SMDImporter::SMDImporter()
+    : configFrameID(),
+    mBuffer(),
+    pScene(),
+    iFileSize(),
+    iSmallestFrame(),
+    dLengthOfAnim(),
+    bHasUVs(),
+    iLineNumber()
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -694,7 +702,7 @@ void SMDImporter::ParseFile()
     {
         if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
-        // "version <n> \n", <n> should be 1 for hl and hl² SMD files
+        // "version <n> \n", <n> should be 1 for hl and hlï¿½ SMD files
         if (TokenMatch(szCurrent,"version",7))
         {
             if(!SkipSpaces(szCurrent,&szCurrent)) break;

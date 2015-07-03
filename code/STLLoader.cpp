@@ -106,6 +106,9 @@ bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 STLImporter::STLImporter()
+    : mBuffer(),
+    fileSize(),
+    pScene()
 {}
 
 // ------------------------------------------------------------------------------------------------

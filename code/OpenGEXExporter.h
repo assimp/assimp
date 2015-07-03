@@ -56,7 +56,7 @@ namespace OpenGEX {
 } // Namespace openGEX
 } // Namespace Assimp
 
-#endif ASSIMP_BUILD_NO_OPENGEX_IMPORTER
+#endif // ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
 #endif // AI_OPENGEX_EXPORTER_H
 

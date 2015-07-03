@@ -332,6 +332,7 @@ struct Texture
         , mScaleV   (1.0f)
         , mRotation (0.0f)
         , mMapMode  (aiTextureMapMode_Wrap)
+        , bPrivate()
         , iUVSrc    (0)
     {
         mTextureBlend = get_qnan();
@@ -484,11 +485,11 @@ struct aiFloatKey
 struct Node
 {
     Node()
-
-        :   mHierarchyPos       (0)
+        : mParent()
+        , mInstanceNumber()
+        ,   mHierarchyPos       (0)
         ,   mHierarchyIndex     (0)
         ,   mInstanceCount      (1)
-
     {
         static int iCnt = 0;
 

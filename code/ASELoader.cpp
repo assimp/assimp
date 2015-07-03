@@ -79,7 +79,11 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ASEImporter::ASEImporter()
-: noSkeletonMesh()
+    : mParser(),
+    mBuffer(),
+    pcScene(),
+    configRecomputeNormals(),
+    noSkeletonMesh()
 {}
 
 // ------------------------------------------------------------------------------------------------

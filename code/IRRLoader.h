@@ -166,7 +166,9 @@ private:
         Node(ET t)
             :   type                (t)
             ,   scaling             (1.f,1.f,1.f) // assume uniform scaling by default
+            ,   parent()
             ,   framesPerSecond     (0.f)
+            ,   id()
             ,   sphereRadius        (1.f)
             ,   spherePolyCountX    (100)
             ,   spherePolyCountY    (100)

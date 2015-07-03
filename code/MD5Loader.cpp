@@ -82,8 +82,16 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 MD5Importer::MD5Importer()
-: mBuffer()
-, configNoAutoLoad (false)
+    : mIOHandler()
+    , mBuffer()
+    , fileSize()
+    , iLineNumber()
+    , pScene()
+    , pIOHandler()
+    , bHadMD5Mesh()
+    , bHadMD5Anim()
+    , bHadMD5Camera()
+    , configNoAutoLoad (false)
 {}
 
 // ------------------------------------------------------------------------------------------------

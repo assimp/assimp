@@ -82,7 +82,9 @@ struct Triangle {
 // temporary representation for a material
 struct TempMat  {
     TempMat()
-        :   numFaces    (0)
+        :   type()
+        ,   tex()
+        ,   numFaces    (0)
     {}
 
     TempMat(const Triangle& in)

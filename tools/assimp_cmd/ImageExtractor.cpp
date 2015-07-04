@@ -317,13 +317,13 @@ int Assimp_Extract (const char* const* params, unsigned int num)
 
 		// check whether the requested texture is existing
 		if (texIdx >= scene->mNumTextures) {
-			::printf("assimp extract: Texture %i requested, but there are just %i textures\n",
+			::printf("assimp extract: Texture %u requested, but there are just %u textures\n",
 				texIdx, scene->mNumTextures);
 			return 6;
 		}
 	}
 	else {
-		::printf("assimp extract: Exporting %i textures\n",scene->mNumTextures);
+		::printf("assimp extract: Exporting %u textures\n",scene->mNumTextures);
 	}
 
 	// now write all output textures
@@ -347,7 +347,7 @@ int Assimp_Extract (const char* const* params, unsigned int num)
 		// if the texture is a compressed one, we'll export
 		// it to its native file format
 		if (!tex->mHeight) {
-			printf("assimp extract: Texture %i is compressed (%s). Writing native file format.\n",
+			printf("assimp extract: Texture %u is compressed (%s). Writing native file format.\n",
 				i,tex->achFormatHint);
 
 			// modify file extension
@@ -369,7 +369,7 @@ int Assimp_Extract (const char* const* params, unsigned int num)
 		else m = DoExport(tex,p,extension,flags);
 		::fclose(p);
 
-		printf("assimp extract: Wrote texture %i to %s\n",i, out_cpy.c_str());
+		printf("assimp extract: Wrote texture %u to %s\n",i, out_cpy.c_str());
 		if (texIdx != 0xffffffff)
 			return m;
 	}

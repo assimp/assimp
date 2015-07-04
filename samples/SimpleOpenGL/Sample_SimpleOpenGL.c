@@ -14,7 +14,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef __APPLE__
+#include <glut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 /* assimp include files. These three are usually needed. */
 #include <assimp/cimport.h>

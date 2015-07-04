@@ -89,15 +89,21 @@ protected:
     // Write a camera entry
     void WriteCamera(size_t pIndex);
 
-    /// Writes the cameras library
+    /// Writes the Lights library
     void WriteLightsLibrary();
 
     // Write a camera entry
     void WriteLight(size_t pIndex);
+
     void WritePointLight(const aiLight *const light);
     void WriteDirectionalLight(const aiLight *const light);
     void WriteSpotLight(const aiLight *const light);
-    void WriteAmbienttLight(const aiLight *const light);
+    void WriteAmbientLight(const aiLight *const light);
+
+    void WriteControllerLibrary();
+    void WriteControllerForMesh(const size_t pIndex);
+    void WriteJointsNameSourceNode(const aiMesh*const pMesh);
+    void WriteJointsPoseSourceNode(const aiMesh*const pMesh);
 
     /// Writes the geometry library
     void WriteGeometryLibrary();
@@ -105,7 +111,7 @@ protected:
     /// Writes the given mesh
     void WriteGeometry( size_t pIndex);
 
-    enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
+    enum FloatDataType { FloatType_Matrix4x4, FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
 
     /// Writes a float array of the given type
     void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount);

@@ -92,7 +92,7 @@ SET( TEST_SRCS
   unit/utVersion.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
-  unit/utAssimpBone.cpp
+  unit/utColladaExportBone.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )

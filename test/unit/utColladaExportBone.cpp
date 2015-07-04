@@ -12,7 +12,7 @@
 using namespace std;
 using namespace Assimp;
 
-class AssimpBoneTest : public ::testing::Test
+class utColladaExportBone : public ::testing::Test
 {
 public:
 
@@ -79,7 +79,7 @@ public:
 };
 
 // ------------------------------------------------------------------------------------------------
-TEST_F(AssimpBoneTest, exportShouldKeepObjectBones)
+TEST_F(utColladaExportBone, exportShouldKeepObjectBones)
 {
 
 	const aiScene* sc = pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/simpleBone.dae",0);

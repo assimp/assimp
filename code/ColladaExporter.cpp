@@ -132,6 +132,7 @@ void ColladaExporter::WriteFile()
     WriteLightsLibrary();
     WriteMaterials();
     WriteGeometryLibrary();
+    WriteControllerLibrary();
 
     WriteSceneLibrary();
 
@@ -372,7 +373,7 @@ void ColladaExporter::WriteLight(size_t pIndex){
     PushTag();
     switch(light->mType){
         case aiLightSource_AMBIENT:
-            WriteAmbienttLight(light);
+            WriteAmbientLight(light);
             break;
         case aiLightSource_DIRECTIONAL:
             WriteDirectionalLight(light);
@@ -469,7 +470,7 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light){
 
 }
 
-void ColladaExporter::WriteAmbienttLight(const aiLight *const light){
+void ColladaExporter::WriteAmbientLight(const aiLight *const light){
 
     const aiColor3D &color=  light->mColorAmbient;
     mOutput << startstr << "<ambient>" << endstr;
@@ -915,6 +916,140 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     mOutput << startstr << "</geometry>" << endstr;
 }
 
+#include <iostream>
+
+// ------------------------------------------------------------------------------------------------
+// Writes the geometry library
+void ColladaExporter::WriteControllerLibrary()
+{
+    mOutput << startstr << "<library_controllers>" << endstr;
+    PushTag();
+
+    for( size_t a = 0; a < mScene->mNumMeshes; ++a)
+        WriteControllerForMesh( a);
+
+    PopTag();
+    mOutput << startstr << "</library_controllers>" << endstr;
+
+}
+
+static aiNode* findMeshRootNode(aiNode *root,const unsigned int meshId){
+
+	//check the children
+	for(unsigned int j =0 ; j<root->mNumChildren; j++){
+		aiNode *child = root->mChildren[j];
+		std::cerr<<"Node: "<<child->mName.C_Str()<<std::endl;
+		std::cerr<<"\t#mesh: "<<child->mNumMeshes<<std::endl;
+		unsigned int *nodeMeshes = child->mMeshes;
+		for(unsigned int i =0 ; i<child->mNumMeshes ; i++){
+			std::cerr<<"\tHasMesh: "<<nodeMeshes[i]<<std::endl;
+			if(meshId == nodeMeshes[i]){
+				return root;
+			}//if
+		}//for
+	}//for
+
+	//search on the child
+	for(unsigned int j =0 ; j<root->mNumChildren; j++){
+		aiNode *found = findMeshRootNode(root->mChildren[j],meshId);
+		if(found!=NULL)
+			return found;
+	}//for
+
+	return NULL;
+}
+
+void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
+
+	aiMesh *mesh = mScene->mMeshes[pIndex];
+	std::cerr<<"WriteControl: Mesh:"<<pIndex<<" "<<mesh->mName.C_Str()<<" hasBones:"<<mesh->HasBones()<<std::endl;
+	if(!mesh->HasBones())
+		return;
+
+	//has bone is buggy? it return true also if there are no mesh with bones,
+	//see cameras.dae files
+	aiNode *meshNode = findMeshRootNode(mScene->mRootNode,pIndex);
+	if(meshNode==NULL)
+		return ;
+
+	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+
+    mOutput << startstr << "<controller id=\"Armature_"<<meshName<<"-skin\""
+    		<<" name=\"Armature_"<<pIndex<<"\">" << endstr;
+    PushTag();
+
+    mOutput << startstr << "<skin source=\"#"<<meshName<<"-mesh\">"<<endstr;
+    PushTag();
+
+    const aiMatrix4x4& mat = meshNode->mTransformation;
+	mOutput << startstr << "<bind_shape_matrix>";
+	mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
+	mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
+	mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
+	mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
+	mOutput << "</bind_shape_matrix>" << endstr;
+	WriteJointsNameSourceNode(mesh);
+	WriteJointsPoseSourceNode(mesh);
+    PopTag();
+    mOutput << startstr << "</skin>"<<endstr;
+    PopTag();
+    mOutput << startstr << "</controller>" << endstr;
+
+}
+
+#include <sstream>
+
+void ColladaExporter::WriteJointsNameSourceNode(const aiMesh *const mesh){
+	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+	std::stringstream boneNames;
+	for(unsigned int i=0;i<mesh->mNumBones;i++){
+		boneNames<<XMLEscape(mesh->mBones[i]->mName.C_Str())<<' ';
+	}
+
+	mOutput<<startstr<<"<source id=\"Armature_"<<meshName<<"-skin-joints\">"<<endstr;
+	PushTag();
+	const std::string bonesNameArrayId ="Armature_"+meshName+"-skin-joints-array";
+	mOutput<<startstr<<"<Name_array id=\""<<bonesNameArrayId<<"\""
+			<<" count=\""<<mesh->mNumBones<<"\">"<<boneNames.str()<<"</Name_array>"<<endstr;
+	PushTag();
+	mOutput<<startstr<<"<technique_common>"<<endstr;
+	PushTag();
+	mOutput<<startstr<<"<accessor source=\"#"<<bonesNameArrayId<<"\""
+			" count=\""<<mesh->mNumBones<<"\" stride=\"1\">"<<endstr;
+	PushTag();
+	mOutput<<startstr<<"<param name=\"JOINT\" type=\"name\"/>"<<endstr;
+	PopTag();
+	mOutput<<startstr<<"</accessor>"<<endstr;
+	PopTag();
+	mOutput<<startstr<<"</technique_common>"<<endstr;
+	PopTag();
+	mOutput<<startstr<<"</source>"<<endstr;
+
+
+}
+
+void ColladaExporter::WriteJointsPoseSourceNode(const aiMesh *const mesh){
+	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+
+	float * tempBonePose = new float[mesh->mNumBones*16];
+	aiBone **bones = mesh->mBones;
+
+	for(unsigned int i=0;i<mesh->mNumBones;i++){
+		const aiMatrix4x4 &pose = bones[i]->mOffsetMatrix;
+		const unsigned int offset = i*16;
+		//we can do a memcpy since the struct has 16 elements and not an array
+		//of element, we can trust that the elements are consecutive?
+		for(unsigned int j=0;j<16;j++){
+			tempBonePose[offset+j]=*pose[j];
+		}
+	}
+
+	WriteFloatArray("Armature_"+meshName+"-skin-bind_poses",FloatType_Matrix4x4,
+			tempBonePose,mesh->mNumBones);
+
+	delete [] tempBonePose;
+}
+
 // ------------------------------------------------------------------------------------------------
 // Writes a float array of the given type
 void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount)
@@ -922,6 +1057,7 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
     size_t floatsPerElement = 0;
     switch( pType )
     {
+    	case FloatType_Matrix4x4: floatsPerElement = 16; break;
         case FloatType_Vector: floatsPerElement = 3; break;
         case FloatType_TexCoord2: floatsPerElement = 2; break;
         case FloatType_TexCoord3: floatsPerElement = 3; break;
@@ -994,6 +1130,8 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
             mOutput << startstr << "<param name=\"G\" type=\"float\" />" << endstr;
             mOutput << startstr << "<param name=\"B\" type=\"float\" />" << endstr;
             break;
+        case FloatType_Matrix4x4:
+        	 mOutput<< startstr<< "<param name=\"TRANSFORM\" type=\"float4x4\"/>"<<endstr;
     }
 
     PopTag();
@@ -1024,6 +1162,7 @@ void ColladaExporter::WriteSceneLibrary()
     PopTag();
     mOutput << startstr << "</library_visual_scenes>" << endstr;
 }
+
 
 // ------------------------------------------------------------------------------------------------
 // Helper to find a bone by name in the scene

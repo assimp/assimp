@@ -161,7 +161,7 @@ namespace AssimpView {
                 piLightmapTexture( NULL ),
                 fOpacity(),
                 fShininess(),
-                fSpecularStrength()
+                fSpecularStrength(),
                 twosided( false ),
                 pvOriginalNormals( NULL )
             {}

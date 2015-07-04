@@ -45,13 +45,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 
 namespace Assimp {
+
+struct aiScene;
+
 namespace OpenGEX {
 
     class OpenGEXExporter {
     public:
         OpenGEXExporter();
         ~OpenGEXExporter();
-        bool export( const char *filename, const aiScene* pScene );
+        bool exportScene( const char *filename, const aiScene* pScene );
     };
 } // Namespace openGEX
 } // Namespace Assimp

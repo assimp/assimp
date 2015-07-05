@@ -133,6 +133,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${C
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config-version.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" @ONLY IMMEDIATE)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake"             "${CMAKE_CURRENT_BINARY_DIR}/assimp-config-version.cmake" DESTINATION "${ASSIMP_LIB_INSTALL_DIR}/cmake/assimp-${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}" COMPONENT ${LIBASSIMP-DEV_COMPONENT})
 
+FIND_PACKAGE( DirectX )
+
 option ( ASSIMP_NO_EXPORT
   "Disable Assimp's export functionality."
   OFF
@@ -242,9 +244,9 @@ option ( ASSIMP_BUILD_ASSIMP_TOOLS
   ON
 )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
-  IF ( WIN32 )
+  IF ( WIN32 AND DirectX_FOUND )
     ADD_SUBDIRECTORY( tools/assimp_view/ )
-  ENDIF ( WIN32 )
+  ENDIF ( WIN32 AND DirectX_FOUND )
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 

@@ -677,16 +677,26 @@ void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const ch
 	Write<uint16_t>(compressed);
 	// ==  20 bytes
 
-	char buff[256]; 
-	strncpy(buff,src,256);
-	fwrite(buff,256,1,out);
+	{
+		char buff[256] = { 0 };
+		strncpy(buff,src,256);
+		buff[255] = 0;
+		fwrite(buff,256,1,out);
+	}
 
-	strncpy(buff,cmd,128);
-	fwrite(buff,128,1,out);
+	{
+		char buff[128] = { 0 };
+		strncpy(buff,cmd,128);
+		buff[127] = 0;
+		fwrite(buff,128,1,out);
+	}
 
 	// leave 64 bytes free for future extensions
-	memset(buff,0xcd,64);
-	fwrite(buff,64,1,out);
+	{
+		char buff[64];
+		memset(buff,0xcd,64);
+		fwrite(buff,64,1,out);
+	}
 	// == 435 bytes
 
 	// ==== total header size: 512 bytes

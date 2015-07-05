@@ -474,8 +474,10 @@ void LoadBGTexture()
     {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
-        if (!sz)sz = strrchr(szFileName,'/');
-        if (!sz)*sz = 0;
+        if (!sz)
+            sz = strrchr(szFileName,'/');
+        if (sz)
+            *sz = 0;
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
@@ -597,8 +599,10 @@ void LoadSkybox()
     {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
-        if (!sz)sz = strrchr(szFileName,'/');
-        if (!sz)*sz = 0;
+        if (!sz)
+            sz = strrchr(szFileName,'/');
+        if (sz)
+            *sz = 0;
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
@@ -639,8 +643,10 @@ void SaveScreenshot()
     {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
-        if (!sz)sz = strrchr(szFileName,'/');
-        if (!sz)*sz = 0;
+        if (!sz)
+            sz = strrchr(szFileName,'/');
+        if (sz)
+            *sz = 0;
     }
     OPENFILENAME sFilename1 = {
         sizeof(OPENFILENAME),
@@ -938,8 +944,10 @@ void OpenAsset()
     {
         // need to remove the file name
         char* sz = strrchr(szFileName,'\\');
-        if (!sz)sz = strrchr(szFileName,'/');
-        if (!sz)*sz = 0;
+        if (!sz)
+            sz = strrchr(szFileName,'/');
+        if (sz)
+            *sz = 0;
     }
 
     // get a list of all file extensions supported by ASSIMP

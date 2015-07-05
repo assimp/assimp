@@ -1320,8 +1320,10 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
         {
             // need to remove the file name
             char* sz = strrchr(szFileName,'\\');
-            if (!sz)sz = strrchr(szFileName,'/');
-            if (!sz)*sz = 0;
+            if (!sz)
+                sz = strrchr(szFileName,'/');
+            if (sz)
+                *sz = 0;
         }
         OPENFILENAME sFilename1 = {
             sizeof(OPENFILENAME),
@@ -1353,8 +1355,10 @@ int CDisplay::HandleTreeViewPopup2(WPARAM wParam,LPARAM lParam)
         {
             // need to remove the file name
             char* sz = strrchr(szFileName,'\\');
-            if (!sz)sz = strrchr(szFileName,'/');
-            if (!sz)*sz = 0;
+            if (!sz)
+                sz = strrchr(szFileName,'/');
+            if (sz)
+                *sz = 0;
         }
         OPENFILENAME sFilename1 = {
             sizeof(OPENFILENAME),

@@ -69,6 +69,13 @@ limitations under the License.
                 <intensity>1.000000</intensity>
             </technique>
         </light>
+        <light id="ambientLight-lib" name="ambientLight">
+            <technique_common>
+                <ambient>
+                    <color>0.1 0.1 0.2</color>
+                </ambient>
+            </technique_common>
+        </light>
         <light id="pointLightShape1-lib" name="pointLightShape1">
             <technique_common>
                 <point>
@@ -175,6 +182,7 @@ limitations under the License.
                 <rotate sid="rotateY">0 1 0 0</rotate>
                 <rotate sid="rotateX">1 0 0 0</rotate>
                 <instance_light url="#light-lib"/>
+                <instance_light url="#ambientLight-lib"/>
             </node>
             <node id="Box" name="Box">
                 <rotate sid="rotateZ">0 0 1 0</rotate>

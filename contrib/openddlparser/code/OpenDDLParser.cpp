@@ -39,14 +39,14 @@ BEGIN_ODDLPARSER_NS
 static const char *Version = "0.1.0";
 
 namespace Grammar {
-    static const char *OpenBracketToken   = "{";
-    static const char *CloseBracketToken  = "}";
-    static const char *OpenPropertyToken  = "(";
-    static const char *ClosePropertyToken = ")";
-    static const char *BoolTrue           = "true";
-    static const char *BoolFalse          = "false";
-    static const char *RefToken           = "ref";
-    static const char *CommaSeparator     = ",";
+    static const char * const OpenBracketToken   = "{";
+    static const char * const CloseBracketToken  = "}";
+    static const char * const OpenPropertyToken  = "(";
+    static const char * const ClosePropertyToken = ")";
+    static const char * const BoolTrue           = "true";
+    static const char * const BoolFalse          = "false";
+    static const char * const RefToken           = "ref";
+    static const char * const CommaSeparator     = ",";
 
     static const char* PrimitiveTypeToken[ Value::ddl_types_max ] = {
         "bool",

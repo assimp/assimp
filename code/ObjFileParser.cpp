@@ -413,29 +413,33 @@ void ObjFileParser::getFace(aiPrimitiveType type)
         pPtr += iStep;
     }
 
-    if ( pIndices->empty() )
-    {
+    if ( pIndices->empty() ) {
         DefaultLogger::get()->error("Obj: Ignoring empty face");
+        // skip line and clean up 
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+        delete pNormalID;
         delete pTexID;
+        delete pIndices;
+
         return;
     }
 
     ObjFile::Face *face = new ObjFile::Face( pIndices, pNormalID, pTexID, type );
 
     // Set active material, if one set
-    if (NULL != m_pModel->m_pCurrentMaterial)
+    if( NULL != m_pModel->m_pCurrentMaterial ) {
         face->m_pMaterial = m_pModel->m_pCurrentMaterial;
-    else
+    } else {
         face->m_pMaterial = m_pModel->m_pDefaultMaterial;
+    }
 
     // Create a default object, if nothing is there
-    if ( NULL == m_pModel->m_pCurrent )
+    if( NULL == m_pModel->m_pCurrent ) {
         createObject( "defaultobject" );
+    }
 
     // Assign face to mesh
-    if ( NULL == m_pModel->m_pCurrentMesh )
-    {
+    if ( NULL == m_pModel->m_pCurrentMesh ) {
         createMesh();
     }
 
@@ -443,8 +447,7 @@ void ObjFileParser::getFace(aiPrimitiveType type)
     m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
     m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_pVertices->size();
     m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int)face->m_pTexturCoords[0].size();
-    if( !m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal )
-    {
+    if( !m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal ) {
         m_pModel->m_pCurrentMesh->m_hasNormals = true;
     }
     // Skip the rest of the line

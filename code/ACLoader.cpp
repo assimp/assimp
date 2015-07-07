@@ -620,7 +620,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
                                     face.mIndices[i] = cur++;
 
                                     // copy vertex positions
-                                    if ((vertices - mesh->mVertices) >= mesh->mNumVertices) {
+                                    if (static_cast<unsigned>(vertices - mesh->mVertices) >= mesh->mNumVertices) {
                                         throw DeadlyImportError("AC3D: Invalid number of vertices");
                                     }
                                     *vertices = object.vertices[entry.first] + object.translation;

@@ -333,8 +333,16 @@ void ColladaLoader::BuildLightsForNode( const ColladaParser& pParser, const Coll
         out->mAttenuationLinear = srcLight->mAttLinear;
         out->mAttenuationQuadratic = srcLight->mAttQuadratic;
 
-        // collada doesn't differenciate between these color types
         out->mColorDiffuse = out->mColorSpecular = out->mColorAmbient = srcLight->mColor*srcLight->mIntensity;
+        if (out->mType == aiLightSource_AMBIENT) {
+            out->mColorDiffuse = out->mColorSpecular = aiColor3D(0, 0, 0);
+            out->mColorAmbient = srcLight->mColor*srcLight->mIntensity;
+        }
+        else {
+            // collada doesn't differentiate between these color types
+            out->mColorDiffuse = out->mColorSpecular = srcLight->mColor*srcLight->mIntensity;
+            out->mColorAmbient = aiColor3D(0, 0, 0);
+        }
 
         // convert falloff angle and falloff exponent in our representation, if given
         if (out->mType == aiLightSource_SPOT) {

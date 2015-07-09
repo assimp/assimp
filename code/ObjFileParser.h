@@ -112,9 +112,9 @@ private:
     /// Parse object name
     void getObjectName();
     /// Creates a new object.
-    void createObject(const std::string &strObjectName);
+    void createObject( const std::string &strObjectName );
     /// Creates a new mesh.
-    void createMesh();
+    void createMesh( const std::string &meshName );
     /// Returns true, if a new mesh instance must be created.
     bool needsNewMesh( const std::string &rMaterialName );
     /// Error report in token

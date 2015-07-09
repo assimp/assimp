@@ -439,7 +439,7 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 
     // Assign face to mesh
     if ( NULL == m_pModel->m_pCurrentMesh ) {
-        createMesh();
+        createMesh( "defaultobject" );
     }
 
     // Store the face
@@ -495,7 +495,7 @@ void ObjFileParser::getMaterialDesc()
         m_pModel->m_pCurrentMaterial = (*it).second;
         if ( needsNewMesh( strName ))
         {
-            createMesh();
+            createMesh( strName  );
         }
         m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
     }
@@ -584,7 +584,7 @@ void ObjFileParser::getNewMaterial()
         // Set new material
         if ( needsNewMesh( strMat ) )
         {
-            createMesh();
+            createMesh( strMat );
         }
         m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strMat );
     }
@@ -713,7 +713,7 @@ void ObjFileParser::createObject(const std::string &objName)
     m_pModel->m_pCurrent->m_strObjName = objName;
     m_pModel->m_Objects.push_back( m_pModel->m_pCurrent );
 
-    createMesh();
+    createMesh( objName  );
 
     if( m_pModel->m_pCurrentMaterial )
     {
@@ -724,10 +724,10 @@ void ObjFileParser::createObject(const std::string &objName)
 }
 // -------------------------------------------------------------------
 //  Creates a new mesh
-void ObjFileParser::createMesh()
+void ObjFileParser::createMesh( const std::string &meshName )
 {
     ai_assert( NULL != m_pModel );
-    m_pModel->m_pCurrentMesh = new ObjFile::Mesh;
+    m_pModel->m_pCurrentMesh = new ObjFile::Mesh( meshName );
     m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
     unsigned int meshId = m_pModel->m_Meshes.size()-1;
     if ( NULL != m_pModel->m_pCurrent )

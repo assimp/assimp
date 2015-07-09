@@ -706,13 +706,12 @@ void ObjFileParser::getObjectName()
 }
 // -------------------------------------------------------------------
 //  Creates a new object instance
-void ObjFileParser::createObject(const std::string &strObjectName)
+void ObjFileParser::createObject(const std::string &objName)
 {
     ai_assert( NULL != m_pModel );
-    //ai_assert( !strObjectName.empty() );
 
     m_pModel->m_pCurrent = new ObjFile::Object;
-    m_pModel->m_pCurrent->m_strObjName = strObjectName;
+    m_pModel->m_pCurrent->m_strObjName = objName;
     m_pModel->m_Objects.push_back( m_pModel->m_pCurrent );
 
     createMesh();

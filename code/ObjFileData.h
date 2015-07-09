@@ -43,15 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <map>
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
 
-namespace Assimp
-{
+namespace Assimp {
+namespace ObjFile {
 
-namespace ObjFile
-{
-// ------------------------------------------------------------------------------------------------
 struct Object;
 struct Face;
 struct Material;

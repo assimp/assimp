@@ -44,15 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OBJ_EXPORTER
 
 #include "ObjExporter.h"
-#include "../include/assimp/version.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
-#include <boost/scoped_ptr.hpp>
 #include "Exceptional.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/scene.h"
 #include "StringComparison.h"
+#include <assimp/version.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/material.h>
+#include <assimp/scene.h>
 #include <boost/foreach.hpp>
+#include <boost/scoped_ptr.hpp>
 
 
 using namespace Assimp;

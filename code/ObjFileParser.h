@@ -43,21 +43,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 #include <map>
-#include "../include/assimp/vector2.h"
-#include "../include/assimp/vector3.h"
-#include "../include/assimp/mesh.h"
+#include <assimp/vector2.h>
+#include <assimp/vector3.h>
+#include <assimp/mesh.h>
 
-namespace Assimp
-{
+namespace Assimp {
 
-namespace ObjFile
-{
-struct Model;
-struct Object;
-struct Material;
-struct Point3;
-struct Point2;
+namespace ObjFile {
+    struct Model;
+    struct Object;
+    struct Material;
+    struct Point3;
+    struct Point2;
 }
+
 class ObjFileImporter;
 class IOSystem;
 

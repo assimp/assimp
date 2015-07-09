@@ -44,14 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiColor3D;
 
-namespace Assimp
-{
+namespace Assimp {
 
-namespace ObjFile
-{
-struct Model;
-struct Material;
-
+namespace ObjFile {
+    struct Model;
+    struct Material;
 }
 
 

@@ -289,6 +289,10 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     }
     ai_assert( NULL != pObjMesh );
     aiMesh* pMesh = new aiMesh;
+    if( !pObjMesh->m_name.empty() ) {
+        pMesh->mName.Set( pObjMesh->m_name );
+    }
+
     for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
     {
         ObjFile::Face *const inp = pObjMesh->m_Faces[ index ];
@@ -311,19 +315,16 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     }
 
     unsigned int uiIdxCount( 0u );
-    if ( pMesh->mNumFaces > 0 )
-    {
+    if ( pMesh->mNumFaces > 0 ) {
         pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
-        if ( pObjMesh->m_uiMaterialIndex != ObjFile::Mesh::NoMaterial )
-        {
+        if ( pObjMesh->m_uiMaterialIndex != ObjFile::Mesh::NoMaterial ) {
             pMesh->mMaterialIndex = pObjMesh->m_uiMaterialIndex;
         }
 
         unsigned int outIndex( 0 );
 
         // Copy all data from all stored meshes
-        for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++)
-        {
+        for (size_t index = 0; index < pObjMesh->m_Faces.size(); index++) {
             ObjFile::Face* const inp = pObjMesh->m_Faces[ index ];
             if (inp->m_PrimitiveType == aiPrimitiveType_LINE) {
                 for(size_t i = 0; i < inp->m_pVertices->size() - 1; ++i) {

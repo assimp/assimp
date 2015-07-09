@@ -219,10 +219,10 @@ struct Material
 // ------------------------------------------------------------------------------------------------
 //! \struct Mesh
 //! \brief  Data structure to store a mesh
-struct Mesh
-{
+struct Mesh {
     static const unsigned int NoMaterial = ~0u;
-
+    /// The name for the mesh
+    std::string m_name;
     /// Array with pointer to all stored faces
     std::vector<Face*> m_Faces;
     /// Assigned material
@@ -235,13 +235,14 @@ struct Mesh
     unsigned int m_uiMaterialIndex;
     /// True, if normals are stored.
     bool m_hasNormals;
+
     /// Constructor
-    Mesh() :
-        m_pMaterial(NULL),
-        m_uiNumIndices(0),
-        m_uiMaterialIndex( NoMaterial ),
-        m_hasNormals(false)
-    {
+    Mesh( const std::string &name ) 
+    : m_name( name )
+    , m_pMaterial(NULL)
+    , m_uiNumIndices(0)
+    , m_uiMaterialIndex( NoMaterial )
+    , m_hasNormals(false) {
         memset(m_uiUVCoordinates, 0, sizeof( unsigned int ) * AI_MAX_NUMBER_OF_TEXTURECOORDS);
     }
 

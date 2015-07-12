@@ -20,6 +20,5 @@ build:
 
 build_script:
  - cd c:\projects\assimp
- - cd
- - cmake CMakeLists.txt -G"Visual Studio 11" ..
+ - cmake CMakeLists.txt -G "Visual Studio 11" 
  - msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln

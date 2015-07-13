@@ -41,7 +41,8 @@ __Importers__:
 - PLY
 - STL
 - X 
-- OBJ 
+- OBJ
+- OpenGEX
 - SMD
 - LWO 
 - LXO 

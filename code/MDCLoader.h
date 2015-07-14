@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDCFileData.h"
 #include "ByteSwapper.h"
 
-namespace Assimp	{
+namespace Assimp    {
 using namespace MDC;
 
 // ---------------------------------------------------------------------------
@@ -59,67 +59,67 @@ using namespace MDC;
 class MDCImporter : public BaseImporter
 {
 public:
-	MDCImporter();
-	~MDCImporter();
+    MDCImporter();
+    ~MDCImporter();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file.
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+    * See BaseImporter::CanRead() for details.  */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
-	// -------------------------------------------------------------------
-	/** Called prior to ReadFile().
-	* The function is a request to the importer to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
-	void SetupProperties(const Importer* pImp);
-
-protected:
-
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
-
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure.
-	* See BaseImporter::InternReadFile() for details
-	*/
-	void InternReadFile( const std::string& pFile, aiScene* pScene,
-		IOSystem* pIOHandler);
+    // -------------------------------------------------------------------
+    /** Called prior to ReadFile().
+    * The function is a request to the importer to update its configuration
+    * basing on the Importer's configuration property list.
+    */
+    void SetupProperties(const Importer* pImp);
 
 protected:
 
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	// -------------------------------------------------------------------
-	/** Validate the header of the file
-	*/
-	void ValidateHeader();
-
-	// -------------------------------------------------------------------
-	/** Validate the header of a MDC surface
-	*/
-	void ValidateSurfaceHeader(BE_NCONST MDC::Surface* pcSurf);
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+    * See BaseImporter::InternReadFile() for details
+    */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
 protected:
 
 
-	/** Configuration option: frame to be loaded */
-	unsigned int configFrameID;
+    // -------------------------------------------------------------------
+    /** Validate the header of the file
+    */
+    void ValidateHeader();
 
-	/** Header of the MDC file */
-	BE_NCONST MDC::Header* pcHeader;
+    // -------------------------------------------------------------------
+    /** Validate the header of a MDC surface
+    */
+    void ValidateSurfaceHeader(BE_NCONST MDC::Surface* pcSurf);
 
-	/** Buffer to hold the loaded file */
-	unsigned char* mBuffer;
+protected:
 
-	/** size of the file, in bytes */
-	unsigned int fileSize;
+
+    /** Configuration option: frame to be loaded */
+    unsigned int configFrameID;
+
+    /** Header of the MDC file */
+    BE_NCONST MDC::Header* pcHeader;
+
+    /** Buffer to hold the loaded file */
+    unsigned char* mBuffer;
+
+    /** size of the file, in bytes */
+    unsigned int fileSize;
 };
 
 } // end of namespace Assimp

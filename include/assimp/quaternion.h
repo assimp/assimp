@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -55,61 +55,61 @@ template <typename TReal>
 class aiQuaterniont
 {
 public:
-	aiQuaterniont() : w(1.0), x(), y(), z() {}
-	aiQuaterniont(TReal pw, TReal px, TReal py, TReal pz) 
-		: w(pw), x(px), y(py), z(pz) {}
+    aiQuaterniont() : w(1.0), x(), y(), z() {}
+    aiQuaterniont(TReal pw, TReal px, TReal py, TReal pz)
+        : w(pw), x(px), y(py), z(pz) {}
 
-	/** Construct from rotation matrix. Result is undefined if the matrix is not orthonormal. */
-	aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
+    /** Construct from rotation matrix. Result is undefined if the matrix is not orthonormal. */
+    aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
 
-	/** Construct from euler angles */
-	aiQuaterniont( TReal rotx, TReal roty, TReal rotz);
+    /** Construct from euler angles */
+    aiQuaterniont( TReal rotx, TReal roty, TReal rotz);
 
-	/** Construct from an axis-angle pair */
-	aiQuaterniont( aiVector3t<TReal> axis, TReal angle);
+    /** Construct from an axis-angle pair */
+    aiQuaterniont( aiVector3t<TReal> axis, TReal angle);
 
-	/** Construct from a normalized quaternion stored in a vec3 */
-	aiQuaterniont( aiVector3t<TReal> normalized);
+    /** Construct from a normalized quaternion stored in a vec3 */
+    aiQuaterniont( aiVector3t<TReal> normalized);
 
-	/** Returns a matrix representation of the quaternion */
-	aiMatrix3x3t<TReal> GetMatrix() const;
-
-public:
-
-	bool operator== (const aiQuaterniont& o) const;
-	bool operator!= (const aiQuaterniont& o) const;
-
-	bool Equal(const aiQuaterniont& o, TReal epsilon = 1e-6) const;
+    /** Returns a matrix representation of the quaternion */
+    aiMatrix3x3t<TReal> GetMatrix() const;
 
 public:
 
-	/** Normalize the quaternion */
-	aiQuaterniont& Normalize();
+    bool operator== (const aiQuaterniont& o) const;
+    bool operator!= (const aiQuaterniont& o) const;
 
-	/** Compute quaternion conjugate */
-	aiQuaterniont& Conjugate ();
-
-	/** Rotate a point by this quaternion */
-	aiVector3t<TReal> Rotate (const aiVector3t<TReal>& in);
-
-	/** Multiply two quaternions */
-	aiQuaterniont operator* (const aiQuaterniont& two) const;
+    bool Equal(const aiQuaterniont& o, TReal epsilon = 1e-6) const;
 
 public:
 
-	/** Performs a spherical interpolation between two quaternions and writes the result into the third.
-	 * @param pOut Target object to received the interpolated rotation.
-	 * @param pStart Start rotation of the interpolation at factor == 0.
-	 * @param pEnd End rotation, factor == 1.
-	 * @param pFactor Interpolation factor between 0 and 1. Values outside of this range yield undefined results.
-	 */
-	static void Interpolate( aiQuaterniont& pOut, const aiQuaterniont& pStart, 
-		const aiQuaterniont& pEnd, TReal pFactor);
+    /** Normalize the quaternion */
+    aiQuaterniont& Normalize();
+
+    /** Compute quaternion conjugate */
+    aiQuaterniont& Conjugate ();
+
+    /** Rotate a point by this quaternion */
+    aiVector3t<TReal> Rotate (const aiVector3t<TReal>& in);
+
+    /** Multiply two quaternions */
+    aiQuaterniont operator* (const aiQuaterniont& two) const;
 
 public:
 
-	//! w,x,y,z components of the quaternion
-	TReal w, x, y, z;	
+    /** Performs a spherical interpolation between two quaternions and writes the result into the third.
+     * @param pOut Target object to received the interpolated rotation.
+     * @param pStart Start rotation of the interpolation at factor == 0.
+     * @param pEnd End rotation, factor == 1.
+     * @param pFactor Interpolation factor between 0 and 1. Values outside of this range yield undefined results.
+     */
+    static void Interpolate( aiQuaterniont& pOut, const aiQuaterniont& pStart,
+        const aiQuaterniont& pEnd, TReal pFactor);
+
+public:
+
+    //! w,x,y,z components of the quaternion
+    TReal w, x, y, z;
 } ;
 
 typedef aiQuaterniont<float> aiQuaternion;
@@ -117,7 +117,7 @@ typedef aiQuaterniont<float> aiQuaternion;
 #else
 
 struct aiQuaternion {
-	float w, x, y, z;	
+    float w, x, y, z;
 };
 
 #endif

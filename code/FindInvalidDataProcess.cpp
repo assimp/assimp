@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -60,163 +60,163 @@ using namespace Assimp;
 FindInvalidDataProcess::FindInvalidDataProcess()
     : configEpsilon(0.0f)
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 FindInvalidDataProcess::~FindInvalidDataProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool FindInvalidDataProcess::IsActive( unsigned int pFlags) const
 {
-	return 0 != (pFlags & aiProcess_FindInvalidData);
+    return 0 != (pFlags & aiProcess_FindInvalidData);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Setup import configuration
 void FindInvalidDataProcess::SetupProperties(const Importer* pImp)
 {
-	// Get the current value of AI_CONFIG_PP_FID_ANIM_ACCURACY
-	configEpsilon = (0 != pImp->GetPropertyFloat(AI_CONFIG_PP_FID_ANIM_ACCURACY,0.f));
+    // Get the current value of AI_CONFIG_PP_FID_ANIM_ACCURACY
+    configEpsilon = (0 != pImp->GetPropertyFloat(AI_CONFIG_PP_FID_ANIM_ACCURACY,0.f));
 }
 
 // ------------------------------------------------------------------------------------------------
 // Update mesh references in the node graph
 void UpdateMeshReferences(aiNode* node, const std::vector<unsigned int>& meshMapping)
 {
-	if (node->mNumMeshes)	{
-		unsigned int out = 0;
-		for (unsigned int a = 0; a < node->mNumMeshes;++a)	{
+    if (node->mNumMeshes)   {
+        unsigned int out = 0;
+        for (unsigned int a = 0; a < node->mNumMeshes;++a)  {
 
-			unsigned int ref = node->mMeshes[a];
-			if (UINT_MAX != (ref = meshMapping[ref]))	{
-				node->mMeshes[out++] = ref;
-			}
-		}
-		// just let the members that are unused, that's much cheaper
-		// than a full array realloc'n'copy party ...
-		if(!(node->mNumMeshes = out))	{
+            unsigned int ref = node->mMeshes[a];
+            if (UINT_MAX != (ref = meshMapping[ref]))   {
+                node->mMeshes[out++] = ref;
+            }
+        }
+        // just let the members that are unused, that's much cheaper
+        // than a full array realloc'n'copy party ...
+        if(!(node->mNumMeshes = out))   {
 
-			delete[] node->mMeshes;
-			node->mMeshes = NULL;
-		}
-	}
-	// recursively update all children
-	for (unsigned int i = 0; i < node->mNumChildren;++i) {
-		UpdateMeshReferences(node->mChildren[i],meshMapping);
-	}
+            delete[] node->mMeshes;
+            node->mMeshes = NULL;
+        }
+    }
+    // recursively update all children
+    for (unsigned int i = 0; i < node->mNumChildren;++i) {
+        UpdateMeshReferences(node->mChildren[i],meshMapping);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void FindInvalidDataProcess::Execute( aiScene* pScene)
 {
-	DefaultLogger::get()->debug("FindInvalidDataProcess begin");
+    DefaultLogger::get()->debug("FindInvalidDataProcess begin");
 
-	bool out = false;
-	std::vector<unsigned int> meshMapping(pScene->mNumMeshes);
-	unsigned int real = 0;	
+    bool out = false;
+    std::vector<unsigned int> meshMapping(pScene->mNumMeshes);
+    unsigned int real = 0;
 
-	// Process meshes
-	for( unsigned int a = 0; a < pScene->mNumMeshes; a++)	{
+    // Process meshes
+    for( unsigned int a = 0; a < pScene->mNumMeshes; a++)   {
 
-		int result;
-		if ((result = ProcessMesh( pScene->mMeshes[a])))	{
-			out = true;
+        int result;
+        if ((result = ProcessMesh( pScene->mMeshes[a])))    {
+            out = true;
 
-			if (2 == result)	{
-				// remove this mesh
-				delete pScene->mMeshes[a];
-				AI_DEBUG_INVALIDATE_PTR(pScene->mMeshes[a]);
+            if (2 == result)    {
+                // remove this mesh
+                delete pScene->mMeshes[a];
+                AI_DEBUG_INVALIDATE_PTR(pScene->mMeshes[a]);
 
-				meshMapping[a] = UINT_MAX;
-				continue;
-			}
-		}
-		pScene->mMeshes[real] = pScene->mMeshes[a];
-		meshMapping[a] = real++;
-	}
+                meshMapping[a] = UINT_MAX;
+                continue;
+            }
+        }
+        pScene->mMeshes[real] = pScene->mMeshes[a];
+        meshMapping[a] = real++;
+    }
 
-	// Process animations
-	for (unsigned int a = 0; a < pScene->mNumAnimations;++a) {
-		ProcessAnimation( pScene->mAnimations[a]);
-	}
+    // Process animations
+    for (unsigned int a = 0; a < pScene->mNumAnimations;++a) {
+        ProcessAnimation( pScene->mAnimations[a]);
+    }
 
 
-	if (out)	{
-		if ( real != pScene->mNumMeshes)	{
-			if (!real) {
-				throw DeadlyImportError("No meshes remaining");
-			}
-			
-			// we need to remove some meshes.
-			// therefore we'll also need to remove all references
-			// to them from the scenegraph 
-			UpdateMeshReferences(pScene->mRootNode,meshMapping);
-			pScene->mNumMeshes = real;
-		}
+    if (out)    {
+        if ( real != pScene->mNumMeshes)    {
+            if (!real) {
+                throw DeadlyImportError("No meshes remaining");
+            }
 
-		DefaultLogger::get()->info("FindInvalidDataProcess finished. Found issues ...");
-	}
-	else DefaultLogger::get()->debug("FindInvalidDataProcess finished. Everything seems to be OK.");
+            // we need to remove some meshes.
+            // therefore we'll also need to remove all references
+            // to them from the scenegraph
+            UpdateMeshReferences(pScene->mRootNode,meshMapping);
+            pScene->mNumMeshes = real;
+        }
+
+        DefaultLogger::get()->info("FindInvalidDataProcess finished. Found issues ...");
+    }
+    else DefaultLogger::get()->debug("FindInvalidDataProcess finished. Everything seems to be OK.");
 }
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline const char* ValidateArrayContents(const T* arr, unsigned int size,
-	const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
+    const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
 {
-	return NULL;
+    return NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
 template <>
 inline const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsigned int size,
-	const std::vector<bool>& dirtyMask, bool mayBeIdentical , bool mayBeZero )
+    const std::vector<bool>& dirtyMask, bool mayBeIdentical , bool mayBeZero )
 {
-	bool b = false;
-	unsigned int cnt = 0;
-	for (unsigned int i = 0; i < size;++i)	{
+    bool b = false;
+    unsigned int cnt = 0;
+    for (unsigned int i = 0; i < size;++i)  {
 
-		if (dirtyMask.size() && dirtyMask[i]) {
-			continue;
-		}
-		++cnt;
+        if (dirtyMask.size() && dirtyMask[i]) {
+            continue;
+        }
+        ++cnt;
 
-		const aiVector3D& v = arr[i];
-		if (is_special_float(v.x) || is_special_float(v.y) || is_special_float(v.z))	{
-			return "INF/NAN was found in a vector component";
-		}
-		if (!mayBeZero && !v.x && !v.y && !v.z )	{
-			return "Found zero-length vector";
-		}
-		if (i && v != arr[i-1])b = true;
-	}
-	if (cnt > 1 && !b && !mayBeIdentical) {
-		return "All vectors are identical";
-	}
-	return NULL;
+        const aiVector3D& v = arr[i];
+        if (is_special_float(v.x) || is_special_float(v.y) || is_special_float(v.z))    {
+            return "INF/NAN was found in a vector component";
+        }
+        if (!mayBeZero && !v.x && !v.y && !v.z )    {
+            return "Found zero-length vector";
+        }
+        if (i && v != arr[i-1])b = true;
+    }
+    if (cnt > 1 && !b && !mayBeIdentical) {
+        return "All vectors are identical";
+    }
+    return NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline bool ProcessArray(T*& in, unsigned int num,const char* name,
-	const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
+    const std::vector<bool>& dirtyMask, bool mayBeIdentical = false, bool mayBeZero = true)
 {
-	const char* err = ValidateArrayContents(in,num,dirtyMask,mayBeIdentical,mayBeZero);
-	if (err)	{
-		DefaultLogger::get()->error(std::string("FindInvalidDataProcess fails on mesh ") + name + ": " + err);
-		
-		delete[] in;
-		in = NULL;
-		return true;
-	}
-	return false;
+    const char* err = ValidateArrayContents(in,num,dirtyMask,mayBeIdentical,mayBeZero);
+    if (err)    {
+        DefaultLogger::get()->error(std::string("FindInvalidDataProcess fails on mesh ") + name + ": " + err);
+
+        delete[] in;
+        in = NULL;
+        return true;
+    }
+    return false;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -225,198 +225,198 @@ AI_FORCE_INLINE bool EpsilonCompare(const T& n, const T& s, float epsilon);
 
 // ------------------------------------------------------------------------------------------------
 AI_FORCE_INLINE bool EpsilonCompare(float n, float s, float epsilon) {
-	return std::fabs(n-s)>epsilon;
+    return std::fabs(n-s)>epsilon;
 }
 
 // ------------------------------------------------------------------------------------------------
 template <>
-bool EpsilonCompare<aiVectorKey>(const aiVectorKey& n, const aiVectorKey& s, float epsilon)	{
-	return 
-		EpsilonCompare(n.mValue.x,s.mValue.x,epsilon) &&
-		EpsilonCompare(n.mValue.y,s.mValue.y,epsilon) &&
-		EpsilonCompare(n.mValue.z,s.mValue.z,epsilon);
+bool EpsilonCompare<aiVectorKey>(const aiVectorKey& n, const aiVectorKey& s, float epsilon) {
+    return
+        EpsilonCompare(n.mValue.x,s.mValue.x,epsilon) &&
+        EpsilonCompare(n.mValue.y,s.mValue.y,epsilon) &&
+        EpsilonCompare(n.mValue.z,s.mValue.z,epsilon);
 }
 
 // ------------------------------------------------------------------------------------------------
 template <>
-bool EpsilonCompare<aiQuatKey>(const aiQuatKey& n, const aiQuatKey& s, float epsilon)	{
-	return 
-		EpsilonCompare(n.mValue.x,s.mValue.x,epsilon) &&
-		EpsilonCompare(n.mValue.y,s.mValue.y,epsilon) &&
-		EpsilonCompare(n.mValue.z,s.mValue.z,epsilon) &&
-		EpsilonCompare(n.mValue.w,s.mValue.w,epsilon);
+bool EpsilonCompare<aiQuatKey>(const aiQuatKey& n, const aiQuatKey& s, float epsilon)   {
+    return
+        EpsilonCompare(n.mValue.x,s.mValue.x,epsilon) &&
+        EpsilonCompare(n.mValue.y,s.mValue.y,epsilon) &&
+        EpsilonCompare(n.mValue.z,s.mValue.z,epsilon) &&
+        EpsilonCompare(n.mValue.w,s.mValue.w,epsilon);
 }
 
 // ------------------------------------------------------------------------------------------------
 template <typename T>
 inline bool AllIdentical(T* in, unsigned int num, float epsilon)
 {
-	if (num <= 1) {
-		return true;
-	}
+    if (num <= 1) {
+        return true;
+    }
 
-	if (epsilon > 0.f) {
-		for (unsigned int i = 0; i < num-1;++i) {
+    if (epsilon > 0.f) {
+        for (unsigned int i = 0; i < num-1;++i) {
 
-			if (!EpsilonCompare(in[i],in[i+1],epsilon)) {
-				return false;
-			}
-		}
-	}
-	else {
-		for (unsigned int i = 0; i < num-1;++i) {
+            if (!EpsilonCompare(in[i],in[i+1],epsilon)) {
+                return false;
+            }
+        }
+    }
+    else {
+        for (unsigned int i = 0; i < num-1;++i) {
 
-			if (in[i] != in[i+1]) {
-				return false;
-			}
-		}
-	}
-	return true;
+            if (in[i] != in[i+1]) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Search an animation for invalid content
 void FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim)
 {
-	// Process all animation channels
-	for (unsigned int a = 0; a < anim->mNumChannels;++a) {
-		ProcessAnimationChannel( anim->mChannels[a]);
-	}
+    // Process all animation channels
+    for (unsigned int a = 0; a < anim->mNumChannels;++a) {
+        ProcessAnimationChannel( anim->mChannels[a]);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim)
 {
-	int i = 0;
+    int i = 0;
 
-	// ScenePreprocessor's work ...
-	ai_assert((0 != anim->mPositionKeys && 0 != anim->mRotationKeys && 0 != anim->mScalingKeys));
+    // ScenePreprocessor's work ...
+    ai_assert((0 != anim->mPositionKeys && 0 != anim->mRotationKeys && 0 != anim->mScalingKeys));
 
-	// Check whether all values in a tracks are identical - in this case
-	// we can remove al keys except one.
-	// POSITIONS
-	if (anim->mNumPositionKeys > 1 && AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys,configEpsilon))
-	{
-		aiVectorKey v = anim->mPositionKeys[0];
+    // Check whether all values in a tracks are identical - in this case
+    // we can remove al keys except one.
+    // POSITIONS
+    if (anim->mNumPositionKeys > 1 && AllIdentical(anim->mPositionKeys,anim->mNumPositionKeys,configEpsilon))
+    {
+        aiVectorKey v = anim->mPositionKeys[0];
 
-		// Reallocate ... we need just ONE element, it makes no sense to reuse the array
-		delete[] anim->mPositionKeys;
-		anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys = 1];
-		anim->mPositionKeys[0] = v;
-		i = 1;
-	}
+        // Reallocate ... we need just ONE element, it makes no sense to reuse the array
+        delete[] anim->mPositionKeys;
+        anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys = 1];
+        anim->mPositionKeys[0] = v;
+        i = 1;
+    }
 
-	// ROTATIONS
-	if (anim->mNumRotationKeys > 1 && AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys,configEpsilon))
-	{
-		aiQuatKey v = anim->mRotationKeys[0];
+    // ROTATIONS
+    if (anim->mNumRotationKeys > 1 && AllIdentical(anim->mRotationKeys,anim->mNumRotationKeys,configEpsilon))
+    {
+        aiQuatKey v = anim->mRotationKeys[0];
 
-		// Reallocate ... we need just ONE element, it makes no sense to reuse the array
-		delete[] anim->mRotationKeys;
-		anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys = 1];
-		anim->mRotationKeys[0] = v;
-		i = 1;
-	}
+        // Reallocate ... we need just ONE element, it makes no sense to reuse the array
+        delete[] anim->mRotationKeys;
+        anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys = 1];
+        anim->mRotationKeys[0] = v;
+        i = 1;
+    }
 
-	// SCALINGS
-	if (anim->mNumScalingKeys > 1 && AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys,configEpsilon))
-	{
-		aiVectorKey v = anim->mScalingKeys[0];
+    // SCALINGS
+    if (anim->mNumScalingKeys > 1 && AllIdentical(anim->mScalingKeys,anim->mNumScalingKeys,configEpsilon))
+    {
+        aiVectorKey v = anim->mScalingKeys[0];
 
-		// Reallocate ... we need just ONE element, it makes no sense to reuse the array
-		delete[] anim->mScalingKeys;
-		anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys = 1];
-		anim->mScalingKeys[0] = v;
-		i = 1;
-	}
-	if (1 == i)
-		DefaultLogger::get()->warn("Simplified dummy tracks with just one key");
+        // Reallocate ... we need just ONE element, it makes no sense to reuse the array
+        delete[] anim->mScalingKeys;
+        anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys = 1];
+        anim->mScalingKeys[0] = v;
+        i = 1;
+    }
+    if (1 == i)
+        DefaultLogger::get()->warn("Simplified dummy tracks with just one key");
 }
 
 // ------------------------------------------------------------------------------------------------
 // Search a mesh for invalid contents
 int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
 {
-	bool ret = false;
-	std::vector<bool> dirtyMask(pMesh->mNumVertices,(pMesh->mNumFaces ? true : false));
+    bool ret = false;
+    std::vector<bool> dirtyMask(pMesh->mNumVertices,(pMesh->mNumFaces ? true : false));
 
-	// Ignore elements that are not referenced by vertices.
-	// (they are, for example, caused by the FindDegenerates step)
-	for (unsigned int m = 0; m < pMesh->mNumFaces;++m)	{
-		const aiFace& f = pMesh->mFaces[m];
-		
-		for (unsigned int i = 0; i < f.mNumIndices;++i) {
-			dirtyMask[f.mIndices[i]] = false;
-		}
-	}
+    // Ignore elements that are not referenced by vertices.
+    // (they are, for example, caused by the FindDegenerates step)
+    for (unsigned int m = 0; m < pMesh->mNumFaces;++m)  {
+        const aiFace& f = pMesh->mFaces[m];
 
-	// Process vertex positions
-	if(pMesh->mVertices && ProcessArray(pMesh->mVertices,pMesh->mNumVertices,"positions",dirtyMask))	{
-		DefaultLogger::get()->error("Deleting mesh: Unable to continue without vertex positions");
-		return 2;
-	}
+        for (unsigned int i = 0; i < f.mNumIndices;++i) {
+            dirtyMask[f.mIndices[i]] = false;
+        }
+    }
 
-	// process texture coordinates
-	for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i];++i)	{
-		if (ProcessArray(pMesh->mTextureCoords[i],pMesh->mNumVertices,"uvcoords",dirtyMask))	{
+    // Process vertex positions
+    if(pMesh->mVertices && ProcessArray(pMesh->mVertices,pMesh->mNumVertices,"positions",dirtyMask))    {
+        DefaultLogger::get()->error("Deleting mesh: Unable to continue without vertex positions");
+        return 2;
+    }
 
-			// delete all subsequent texture coordinate sets.
-			for (unsigned int a = i+1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)	{
-				delete[] pMesh->mTextureCoords[a]; pMesh->mTextureCoords[a] = NULL;
-			}
-			ret = true;
-		}
-	}
+    // process texture coordinates
+    for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS && pMesh->mTextureCoords[i];++i)    {
+        if (ProcessArray(pMesh->mTextureCoords[i],pMesh->mNumVertices,"uvcoords",dirtyMask))    {
 
-	// -- we don't validate vertex colors, it's difficult to say whether
-	// they are invalid or not.
+            // delete all subsequent texture coordinate sets.
+            for (unsigned int a = i+1; a < AI_MAX_NUMBER_OF_TEXTURECOORDS;++a)  {
+                delete[] pMesh->mTextureCoords[a]; pMesh->mTextureCoords[a] = NULL;
+            }
+            ret = true;
+        }
+    }
 
-	// Normals and tangents are undefined for point and line faces.
-	if (pMesh->mNormals || pMesh->mTangents)	{
+    // -- we don't validate vertex colors, it's difficult to say whether
+    // they are invalid or not.
 
-		if (aiPrimitiveType_POINT & pMesh->mPrimitiveTypes ||
-			aiPrimitiveType_LINE  & pMesh->mPrimitiveTypes)
-		{
-			if (aiPrimitiveType_TRIANGLE & pMesh->mPrimitiveTypes ||
-				aiPrimitiveType_POLYGON  & pMesh->mPrimitiveTypes)
-			{
-				// We need to update the lookup-table
-				for (unsigned int m = 0; m < pMesh->mNumFaces;++m)
-				{
-					const aiFace& f = pMesh->mFaces[m];
+    // Normals and tangents are undefined for point and line faces.
+    if (pMesh->mNormals || pMesh->mTangents)    {
 
-					if (f.mNumIndices < 3)	{
-						dirtyMask[f.mIndices[0]] = true;
+        if (aiPrimitiveType_POINT & pMesh->mPrimitiveTypes ||
+            aiPrimitiveType_LINE  & pMesh->mPrimitiveTypes)
+        {
+            if (aiPrimitiveType_TRIANGLE & pMesh->mPrimitiveTypes ||
+                aiPrimitiveType_POLYGON  & pMesh->mPrimitiveTypes)
+            {
+                // We need to update the lookup-table
+                for (unsigned int m = 0; m < pMesh->mNumFaces;++m)
+                {
+                    const aiFace& f = pMesh->mFaces[m];
 
-						if (f.mNumIndices == 2) {
-							dirtyMask[f.mIndices[1]] = true;
-						}
-					}
-				}
-			}
-			// Normals, tangents and bitangents are undefined for
-			// the whole mesh (and should not even be there)
-			else return ret;
-		}
+                    if (f.mNumIndices < 3)  {
+                        dirtyMask[f.mIndices[0]] = true;
 
-		// Process mesh normals
-		if (pMesh->mNormals && ProcessArray(pMesh->mNormals,pMesh->mNumVertices,
-			"normals",dirtyMask,true,false))
-			ret = true;
+                        if (f.mNumIndices == 2) {
+                            dirtyMask[f.mIndices[1]] = true;
+                        }
+                    }
+                }
+            }
+            // Normals, tangents and bitangents are undefined for
+            // the whole mesh (and should not even be there)
+            else return ret;
+        }
 
-		// Process mesh tangents
-		if (pMesh->mTangents && ProcessArray(pMesh->mTangents,pMesh->mNumVertices,"tangents",dirtyMask))	{
-			delete[] pMesh->mBitangents; pMesh->mBitangents = NULL;
-			ret = true;
-		}
+        // Process mesh normals
+        if (pMesh->mNormals && ProcessArray(pMesh->mNormals,pMesh->mNumVertices,
+            "normals",dirtyMask,true,false))
+            ret = true;
 
-		// Process mesh bitangents
-		if (pMesh->mBitangents && ProcessArray(pMesh->mBitangents,pMesh->mNumVertices,"bitangents",dirtyMask))	{
-			delete[] pMesh->mTangents; pMesh->mTangents = NULL;
-			ret = true;
-		}
-	}
-	return ret ? 1 : 0;
+        // Process mesh tangents
+        if (pMesh->mTangents && ProcessArray(pMesh->mTangents,pMesh->mNumVertices,"tangents",dirtyMask))    {
+            delete[] pMesh->mBitangents; pMesh->mBitangents = NULL;
+            ret = true;
+        }
+
+        // Process mesh bitangents
+        if (pMesh->mBitangents && ProcessArray(pMesh->mBitangents,pMesh->mNumVertices,"bitangents",dirtyMask))  {
+            delete[] pMesh->mTangents; pMesh->mTangents = NULL;
+            ret = true;
+        }
+    }
+    return ret ? 1 : 0;
 }
 
 

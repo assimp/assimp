@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -59,76 +59,76 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 namespace AssimpView {
-    
+
 using namespace Assimp;
 
 extern std::string g_szMaterialShader;
-extern HINSTANCE g_hInstance				/*= NULL*/;
-extern HWND g_hDlg							/*= NULL*/;
-extern IDirect3D9* g_piD3D					/*= NULL*/;
-extern IDirect3DDevice9* g_piDevice			/*= NULL*/;
+extern HINSTANCE g_hInstance                /*= NULL*/;
+extern HWND g_hDlg                          /*= NULL*/;
+extern IDirect3D9* g_piD3D                  /*= NULL*/;
+extern IDirect3DDevice9* g_piDevice         /*= NULL*/;
 extern IDirect3DVertexDeclaration9* gDefaultVertexDecl /*= NULL*/;
-extern double g_fFPS						/*= 0.0f*/;
+extern double g_fFPS                        /*= 0.0f*/;
 extern char g_szFileName[ MAX_PATH ];
-extern ID3DXEffect* g_piDefaultEffect		/*= NULL*/;
-extern ID3DXEffect* g_piNormalsEffect		/*= NULL*/;
-extern ID3DXEffect* g_piPassThroughEffect	/*= NULL*/;
-extern ID3DXEffect* g_piPatternEffect		/*= NULL*/;
-extern bool g_bMousePressed					/*= false*/;
-extern bool g_bMousePressedR				/*= false*/;
-extern bool g_bMousePressedM				/*= false*/;
-extern bool g_bMousePressedBoth				/*= false*/;
-extern float g_fElpasedTime					/*= 0.0f*/;
+extern ID3DXEffect* g_piDefaultEffect       /*= NULL*/;
+extern ID3DXEffect* g_piNormalsEffect       /*= NULL*/;
+extern ID3DXEffect* g_piPassThroughEffect   /*= NULL*/;
+extern ID3DXEffect* g_piPatternEffect       /*= NULL*/;
+extern bool g_bMousePressed                 /*= false*/;
+extern bool g_bMousePressedR                /*= false*/;
+extern bool g_bMousePressedM                /*= false*/;
+extern bool g_bMousePressedBoth             /*= false*/;
+extern float g_fElpasedTime                 /*= 0.0f*/;
 extern D3DCAPS9 g_sCaps;
-extern bool g_bLoadingFinished				/*= false*/;
-extern HANDLE g_hThreadHandle				/*= NULL*/;
-extern float g_fWheelPos					/*= -10.0f*/;
-extern bool g_bLoadingCanceled				/*= false*/;
-extern IDirect3DTexture9* g_pcTexture		/*= NULL*/;
+extern bool g_bLoadingFinished              /*= false*/;
+extern HANDLE g_hThreadHandle               /*= NULL*/;
+extern float g_fWheelPos                    /*= -10.0f*/;
+extern bool g_bLoadingCanceled              /*= false*/;
+extern IDirect3DTexture9* g_pcTexture       /*= NULL*/;
 
 extern aiMatrix4x4 g_mWorld;
 extern aiMatrix4x4 g_mWorldRotate;
-extern aiVector3D g_vRotateSpeed			/*= aiVector3D(0.5f,0.5f,0.5f)*/;
+extern aiVector3D g_vRotateSpeed            /*= aiVector3D(0.5f,0.5f,0.5f)*/;
 
 extern aiVector3D g_avLightDirs[ 1 ] /* =
-                                        {	aiVector3D(-0.5f,0.6f,0.2f) ,
+                                        {   aiVector3D(-0.5f,0.6f,0.2f) ,
                                         aiVector3D(-0.5f,0.5f,0.5f)} */;
 
 
-extern POINT g_mousePos						/*= {0,0};*/;
-extern POINT g_LastmousePos					/*= {0,0}*/;
-extern bool g_bFPSView						/*= false*/;
-extern bool g_bInvert						/*= false*/;
+extern POINT g_mousePos                     /*= {0,0};*/;
+extern POINT g_LastmousePos                 /*= {0,0}*/;
+extern bool g_bFPSView                      /*= false*/;
+extern bool g_bInvert                       /*= false*/;
 extern EClickPos g_eClick;
-extern unsigned int g_iCurrentColor			/*= 0*/;
+extern unsigned int g_iCurrentColor         /*= 0*/;
 
 // NOTE: The light intensity is separated from the color, it can
 // directly be manipulated using the middle mouse button.
 // When the user chooses a color from the palette the intensity
 // is reset to 1.0
 // index[2] is the ambient color
-extern float g_fLightIntensity				/*=0.0f*/;
+extern float g_fLightIntensity              /*=0.0f*/;
 extern D3DCOLOR g_avLightColors[ 3 ];
 
 extern RenderOptions g_sOptions;
 extern Camera g_sCamera;
-extern AssetHelper *g_pcAsset				/*= NULL*/;
+extern AssetHelper *g_pcAsset               /*= NULL*/;
 
 
 //
-// Contains the mask image for the HUD 
+// Contains the mask image for the HUD
 // (used to determine the position of a click)
 //
-// The size of the image is identical to the size of the main 
+// The size of the image is identical to the size of the main
 // HUD texture
 //
-extern unsigned char* g_szImageMask			/*= NULL*/;
+extern unsigned char* g_szImageMask         /*= NULL*/;
 
 
 extern float g_fACMR /*= 3.0f*/;
 extern IDirect3DQuery9* g_piQuery;
 
-extern bool g_bPlay						/*= false*/;
+extern bool g_bPlay                     /*= false*/;
 
 extern double g_dCurrent;
 extern float g_smoothAngle /*= 80.f*/;
@@ -144,9 +144,9 @@ CMaterialManager CMaterialManager::s_cInstance;
 //
 // This pattern is used to mark textures which could not be loaded
 //-------------------------------------------------------------------------------
-VOID WINAPI FillFunc(D3DXVECTOR4* pOut, 
-                     CONST D3DXVECTOR2* pTexCoord, 
-                     CONST D3DXVECTOR2* pTexelSize, 
+VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
+                     CONST D3DXVECTOR2* pTexCoord,
+                     CONST D3DXVECTOR2* pTexelSize,
                      LPVOID pData)
 {
     UNREFERENCED_PARAMETER(pData);
@@ -162,7 +162,7 @@ VOID WINAPI FillFunc(D3DXVECTOR4* pOut,
     {
         if ((iY / 32) % 2 == 0)bBlack = true;
     }
-    else 
+    else
     {
         if ((iY / 32) % 2 != 0)bBlack = true;
     }
@@ -224,8 +224,8 @@ int CMaterialManager::SetDefaultTexture(IDirect3DTexture9** p_ppiOut)
     sDefaultTexture->AddRef();
 
     // {9785DA94-1D96-426b-B3CB-BADC36347F5E}
-    static const GUID guidPrivateData = 
-        { 0x9785da94, 0x1d96, 0x426b, 
+    static const GUID guidPrivateData =
+        { 0x9785da94, 0x1d96, 0x426b,
         { 0xb3, 0xcb, 0xba, 0xdc, 0x36, 0x34, 0x7f, 0x5e } };
 
     uint32_t iData = 0xFFFFFFFF;
@@ -269,7 +269,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                     ++szExtFound;
                     if (0 == ASSIMP_stricmp(szExtFound,szExt))
                     {
-                        const unsigned int iSizeFound = (const unsigned int) ( 
+                        const unsigned int iSizeFound = (const unsigned int) (
                             szExtFound - 1 - info.cFileName);
 
                         for (unsigned int i = 0; i < iSizeFound;++i)
@@ -307,7 +307,7 @@ bool CMaterialManager::TryLongerPath(char* szTemp,aiString* p_szString)
                     }
                 }
             }
-        } 
+        }
         while (FindNextFile(h, &info));
 
         FindClose(h);
@@ -319,7 +319,7 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
 {
     ai_assert(NULL != p_szString);
     aiString pcpy = *p_szString;
-    if ('*' ==  p_szString->data[0])	{
+    if ('*' ==  p_szString->data[0])    {
         // '*' as first character indicates an embedded file
         return 5;
     }
@@ -382,21 +382,21 @@ int CMaterialManager::FindValidPath(aiString* p_szString)
                 }
 
                 // patch by mark sibly to look for textures files in the asset's base directory.
-                const char *path=pcpy.data; 
-                const char *p=strrchr( path,'/' ); 
-                if( !p ) p=strrchr( path,'\\' ); 
-                if( p ){ 
-                    char *q=strrchr( tmp2,'/' ); 
-                    if( !q ) q=strrchr( tmp2,'\\' ); 
-                    if( q ){ 
-                        strcpy( q+1,p+1 ); 
-                        if((pFile=fopen( tmp2,"r" ))){ 
-                            fclose( pFile ); 
+                const char *path=pcpy.data;
+                const char *p=strrchr( path,'/' );
+                if( !p ) p=strrchr( path,'\\' );
+                if( p ){
+                    char *q=strrchr( tmp2,'/' );
+                    if( !q ) q=strrchr( tmp2,'\\' );
+                    if( q ){
+                        strcpy( q+1,p+1 );
+                        if((pFile=fopen( tmp2,"r" ))){
+                            fclose( pFile );
                             strcpy(p_szString->data,tmp2);
                             p_szString->length = strlen(tmp2);
                             return 1;
-                        } 
-                    } 
+                        }
+                    }
                 }
                 return 0;
             }
@@ -720,8 +720,8 @@ void CMaterialManager::HMtoNMIfNecessary(
                 clrColor.g /= (float)sDesc.Height;
                 clrColor.b /= (float)sDesc.Height;
 
-                if (!(clrColor.b > 215 && 
-                    clrColor.r > 100 && clrColor.r < 140 && 
+                if (!(clrColor.b > 215 &&
+                    clrColor.r > 100 && clrColor.r < 140 &&
                     clrColor.g > 100 && clrColor.g < 140))
                 {
                     // Unable to detect. Believe the original value obtained from the loader
@@ -1061,31 +1061,31 @@ int CMaterialManager::CreateMaterial(
         }
         AssetHelper::MeshHelper* pc = g_pcAsset->apcMeshes[i];
 
-        if  ((pcMesh->piDiffuseTexture != NULL ? true : false) != 
+        if  ((pcMesh->piDiffuseTexture != NULL ? true : false) !=
             (pc->piDiffuseTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piSpecularTexture != NULL ? true : false) != 
+        if  ((pcMesh->piSpecularTexture != NULL ? true : false) !=
             (pc->piSpecularTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piAmbientTexture != NULL ? true : false) != 
+        if  ((pcMesh->piAmbientTexture != NULL ? true : false) !=
             (pc->piAmbientTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piEmissiveTexture != NULL ? true : false) != 
+        if  ((pcMesh->piEmissiveTexture != NULL ? true : false) !=
             (pc->piEmissiveTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piNormalTexture != NULL ? true : false) != 
+        if  ((pcMesh->piNormalTexture != NULL ? true : false) !=
             (pc->piNormalTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piOpacityTexture != NULL ? true : false) != 
+        if  ((pcMesh->piOpacityTexture != NULL ? true : false) !=
             (pc->piOpacityTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piShininessTexture != NULL ? true : false) != 
+        if  ((pcMesh->piShininessTexture != NULL ? true : false) !=
             (pc->piShininessTexture != NULL ? true : false))
             continue;
-        if  ((pcMesh->piLightmapTexture != NULL ? true : false) != 
+        if  ((pcMesh->piLightmapTexture != NULL ? true : false) !=
             (pc->piLightmapTexture != NULL ? true : false))
             continue;
-        if ((pcMesh->eShadingMode != aiShadingMode_Gouraud ? true : false) != 
+        if ((pcMesh->eShadingMode != aiShadingMode_Gouraud ? true : false) !=
             (pc->eShadingMode != aiShadingMode_Gouraud ? true : false))
             continue;
 
@@ -1161,7 +1161,7 @@ int CMaterialManager::CreateMaterial(
         ++iCurrent;
 
         int idx;
-        if(AI_SUCCESS == aiGetMaterialInteger(pcMat,AI_MATKEY_UVWSRC_LIGHTMAP(0),&idx) && idx >= 1 && pcSource->mTextureCoords[idx])	{
+        if(AI_SUCCESS == aiGetMaterialInteger(pcMat,AI_MATKEY_UVWSRC_LIGHTMAP(0),&idx) && idx >= 1 && pcSource->mTextureCoords[idx])    {
             sMacro[iCurrent].Name = "AV_TWO_UV";
             sMacro[iCurrent].Definition = "1";
             ++iCurrent;
@@ -1249,7 +1249,7 @@ int CMaterialManager::CreateMaterial(
         (const D3DXMACRO*)sMacro,NULL,0,NULL,&pcMesh->piEffect,&piBuffer)))
     {
         // failed to compile the shader
-        if( piBuffer) 
+        if( piBuffer)
         {
             MessageBox(g_hDlg,(LPCSTR)piBuffer->GetBufferPointer(),"HLSL",MB_OK);
             piBuffer->Release();
@@ -1360,9 +1360,9 @@ int CMaterialManager::SetupMaterial (
     D3DXVec4Normalize(&apcVec[1],&apcVec[1]);
     piEnd->SetVectorArray("afLightDir",apcVec,5);
 
-    apcVec[0].x = ((g_avLightColors[0] >> 16)	& 0xFF) / 255.0f;
-    apcVec[0].y = ((g_avLightColors[0] >> 8)	& 0xFF) / 255.0f;
-    apcVec[0].z = ((g_avLightColors[0])			& 0xFF) / 255.0f;
+    apcVec[0].x = ((g_avLightColors[0] >> 16)   & 0xFF) / 255.0f;
+    apcVec[0].y = ((g_avLightColors[0] >> 8)    & 0xFF) / 255.0f;
+    apcVec[0].z = ((g_avLightColors[0])         & 0xFF) / 255.0f;
     apcVec[0].w = 1.0f;
 
     if( g_sOptions.b3Lights)
@@ -1383,14 +1383,14 @@ int CMaterialManager::SetupMaterial (
     apcVec[1] *= g_fLightIntensity;
     piEnd->SetVectorArray("afLightColor",apcVec,5);
 
-    apcVec[0].x = ((g_avLightColors[2] >> 16)	& 0xFF) / 255.0f;
-    apcVec[0].y = ((g_avLightColors[2] >> 8)	& 0xFF) / 255.0f;
-    apcVec[0].z = ((g_avLightColors[2])			& 0xFF) / 255.0f;
+    apcVec[0].x = ((g_avLightColors[2] >> 16)   & 0xFF) / 255.0f;
+    apcVec[0].y = ((g_avLightColors[2] >> 8)    & 0xFF) / 255.0f;
+    apcVec[0].z = ((g_avLightColors[2])         & 0xFF) / 255.0f;
     apcVec[0].w = 1.0f;
 
-    apcVec[1].x = ((g_avLightColors[2] >> 16)	& 0xFF) / 255.0f;
-    apcVec[1].y = ((g_avLightColors[2] >> 8)	& 0xFF) / 255.0f;
-    apcVec[1].z = ((g_avLightColors[2])			& 0xFF) / 255.0f;
+    apcVec[1].x = ((g_avLightColors[2] >> 16)   & 0xFF) / 255.0f;
+    apcVec[1].y = ((g_avLightColors[2] >> 8)    & 0xFF) / 255.0f;
+    apcVec[1].z = ((g_avLightColors[2])         & 0xFF) / 255.0f;
     apcVec[1].w = 0.0f;
 
     // FIX: light intensity doesn't apply to ambient color
@@ -1487,7 +1487,7 @@ int CMaterialManager::EndMaterial (AssetHelper::MeshHelper* pcMesh)
     // reenable culling if necessary
     if (pcMesh->twosided && g_sOptions.bCulling) {
         g_piDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
-    }		
+    }
 
     return 1;
 }

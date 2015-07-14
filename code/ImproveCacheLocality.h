@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,22 +23,22 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
-/** @file Defines a post processing step to reorder faces for 
+/** @file Defines a post processing step to reorder faces for
  better cache locality*/
 #ifndef AI_IMPROVECACHELOCALITY_H_INC
 #define AI_IMPROVECACHELOCALITY_H_INC
@@ -62,35 +62,35 @@ class ImproveCacheLocalityProcess : public BaseProcess
 {
 public:
 
-	ImproveCacheLocalityProcess();
-	~ImproveCacheLocalityProcess();
+    ImproveCacheLocalityProcess();
+    ~ImproveCacheLocalityProcess();
 
 public:
 
-	// -------------------------------------------------------------------
-	// Check whether the pp step is active
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    // Check whether the pp step is active
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	// Executes the pp step on a given scene
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    // Executes the pp step on a given scene
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	// Configures the pp step
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    // Configures the pp step
+    void SetupProperties(const Importer* pImp);
 
 protected:
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given mesh
-	 * @param pMesh The mesh to process.
-	 * @param meshNum Index of the mesh to process
-	 */
-	float ProcessMesh( aiMesh* pMesh, unsigned int meshNum);
+    // -------------------------------------------------------------------
+    /** Executes the postprocessing step on the given mesh
+     * @param pMesh The mesh to process.
+     * @param meshNum Index of the mesh to process
+     */
+    float ProcessMesh( aiMesh* pMesh, unsigned int meshNum);
 
 private:
-	//! Configuration parameter: specifies the size of the cache to
-	//! optimize the vertex data for.
-	unsigned int configCacheDepth;
+    //! Configuration parameter: specifies the size of the cache to
+    //! optimize the vertex data for.
+    unsigned int configCacheDepth;
 };
 
 } // end of namespace Assimp

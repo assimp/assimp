@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 
-#include <algorithm>
 #include <vector>
 
 static const aiImporterDesc desc = {
@@ -84,7 +83,7 @@ namespace Grammar {
     static const std::string DiffuseColorToken = "diffuse";
     static const std::string SpecularColorToken = "specular";
     static const std::string EmissionColorToken = "emission";
-    
+
     static const std::string DiffuseTextureToken = "diffuse";
     static const std::string DiffuseSpecularTextureToken = "specular";
     static const std::string SpecularPowerTextureToken = "specular_power";
@@ -146,7 +145,7 @@ namespace Grammar {
             return ObjectRefToken;
         }
         else if( 0 == strncmp( MaterialRefType, tokenType, strlen( MaterialRefType ) ) ) {
-            return MaterialRefToken; 
+            return MaterialRefToken;
         }
         else if( 0 == strncmp( MetricKeyType, tokenType, strlen( MetricKeyType ) ) ) {
             return MetricKeyToken;
@@ -194,9 +193,9 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
 , m_vertices(NULL)
 , m_numNormals( 0 )
-, m_normals(NULL) {
-    std::fill(&m_numUVComps[0], &m_numUVComps[AI_MAX_NUMBER_OF_TEXTURECOORDS], 0U);
-    std::fill(&m_textureCoords[0], &m_textureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS], static_cast<aiVector3D *>(NULL));
+, m_normals(NULL)
+, m_numUVComps()
+, m_textureCoords() {
 }
 
 //------------------------------------------------------------------------------------------------
@@ -222,19 +221,19 @@ OpenGEXImporter::RefInfo::~RefInfo() {
 }
 
 //------------------------------------------------------------------------------------------------
-OpenGEXImporter::OpenGEXImporter() 
+OpenGEXImporter::OpenGEXImporter()
 : m_root( NULL )
 , m_nodeChildMap()
 , m_meshCache()
 , m_mesh2refMap()
 , m_ctx( NULL )
+, m_metrics()
 , m_currentNode( NULL )
 , m_currentMesh( NULL )
 , m_currentMaterial( NULL )
 , m_tokenType( Grammar::NoneType )
 , m_nodeStack()
 , m_unresolvedRefStack() {
-    std::fill(&m_metrics[0], &m_metrics[MetricInfo::Max], MetricInfo());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -357,7 +356,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
             case Grammar::TextureToken:
                 handleTextureNode( *it, pScene );
                 break;
-            
+
             default:
                 break;
         }
@@ -418,7 +417,7 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
         if( m_tokenType == Grammar::GeometryNodeToken ) {
             m_currentNode->mName.Set( name.c_str() );
         } else if( m_tokenType == Grammar::MaterialToken ) {
-            
+
         }
 
     }
@@ -479,7 +478,7 @@ void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
     m_tokenType = Grammar::GeometryNodeToken;
     m_currentNode = newNode;
     handleNodes( node, pScene );
-    
+
     popNode();
 }
 
@@ -502,7 +501,7 @@ static void setMatrix( aiNode *node, DataArrayList *transformData ) {
         next = next->m_next;
         i++;
     }
-    
+
     node->mTransformation.a1 = m[ 0 ];
     node->mTransformation.a2 = m[ 4 ];
     node->mTransformation.a3 = m[ 8 ];
@@ -540,7 +539,7 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *p
             return;
         }
         setMatrix( m_currentNode, transformData );
-    } 
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -563,7 +562,7 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
     m_meshCache.push_back( m_currentMesh );
-    
+
     Property *prop = node->getProperties();
     if( NULL != prop ) {
         std::string propName, propKey;
@@ -736,7 +735,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
             m_currentMesh->mTextureCoords[0][ index ].Set( tex.x, tex.y, tex.z );
             current.mIndices[ indices ] = index;
             index++;
-            
+
             next = next->m_next;
         }
         vaList = vaList->m_next;
@@ -748,7 +747,7 @@ static void getColorRGB( aiColor3D *pColor, DataArrayList *colList ) {
     if( NULL == pColor || NULL == colList ) {
         return;
     }
-    
+
     ai_assert( 3 == colList->m_numItems );
     Value *val( colList->m_dataList );
     pColor->r = val->getFloat();
@@ -858,7 +857,7 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
     if( m_meshCache.empty() ) {
         return;
     }
-    
+
     pScene->mNumMeshes = m_meshCache.size();
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
     std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
@@ -947,10 +946,10 @@ aiNode *OpenGEXImporter::popNode() {
     if( m_nodeStack.empty() ) {
         return NULL;
     }
-    
+
     aiNode *node( top() );
     m_nodeStack.pop_back();
-    
+
     return node;
 }
 

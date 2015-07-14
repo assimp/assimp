@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -191,7 +191,7 @@ void PrintHierarchy(const aiNode* root, unsigned int maxnest, unsigned int maxli
 	for(unsigned int i = 0; i < cnest; ++i) {
 		printf("-- ");
 	}
-	printf("\'%s\', meshes: %i\n",root->mName.data,root->mNumMeshes);
+	printf("\'%s\', meshes: %u\n",root->mName.data,root->mNumMeshes);
 	for (unsigned int i = 0; i < root->mNumChildren; ++i ) {
 		PrintHierarchy(root->mChildren[i],maxnest,maxline,cline,cnest+1);
 		if(i == root->mNumChildren-1) {

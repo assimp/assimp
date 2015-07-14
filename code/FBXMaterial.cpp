@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -55,85 +55,85 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-	using namespace Util;
+    using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
 Material::Material(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : Object(id,element,name)
 {
-	const Scope& sc = GetRequiredScope(element);
-	
-	const Element* const ShadingModel = sc["ShadingModel"];
-	const Element* const MultiLayer = sc["MultiLayer"];
+    const Scope& sc = GetRequiredScope(element);
 
-	if(MultiLayer) {
-		multilayer = !!ParseTokenAsInt(GetRequiredToken(*MultiLayer,0));
-	}
+    const Element* const ShadingModel = sc["ShadingModel"];
+    const Element* const MultiLayer = sc["MultiLayer"];
 
-	if(ShadingModel) {
-		shading = ParseTokenAsString(GetRequiredToken(*ShadingModel,0));
-	}
-	else {
-		DOMWarning("shading mode not specified, assuming phong",&element);
-		shading = "phong";
-	}
+    if(MultiLayer) {
+        multilayer = !!ParseTokenAsInt(GetRequiredToken(*MultiLayer,0));
+    }
 
-	std::string templateName;
+    if(ShadingModel) {
+        shading = ParseTokenAsString(GetRequiredToken(*ShadingModel,0));
+    }
+    else {
+        DOMWarning("shading mode not specified, assuming phong",&element);
+        shading = "phong";
+    }
 
-	const char* const sh = shading.c_str();
-	if(!strcmp(sh,"phong")) {
-		templateName = "Material.FbxSurfacePhong";
-	}
-	else if(!strcmp(sh,"lambert")) {
-		templateName = "Material.FbxSurfaceLambert";
-	}
-	else {
-		DOMWarning("shading mode not recognized: " + shading,&element);
-	}
+    std::string templateName;
 
-	props = GetPropertyTable(doc,templateName,element,sc);
+    const char* const sh = shading.c_str();
+    if(!strcmp(sh,"phong")) {
+        templateName = "Material.FbxSurfacePhong";
+    }
+    else if(!strcmp(sh,"lambert")) {
+        templateName = "Material.FbxSurfaceLambert";
+    }
+    else {
+        DOMWarning("shading mode not recognized: " + shading,&element);
+    }
 
-	// resolve texture links
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
-	BOOST_FOREACH(const Connection* con, conns) {
+    props = GetPropertyTable(doc,templateName,element,sc);
 
-		// texture link to properties, not objects
-		if (!con->PropertyName().length()) {
-			continue;
-		}
+    // resolve texture links
+    const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
+    BOOST_FOREACH(const Connection* con, conns) {
 
-		const Object* const ob = con->SourceObject();
-		if(!ob) {
-			DOMWarning("failed to read source object for texture link, ignoring",&element);
-			continue;
-		}
+        // texture link to properties, not objects
+        if (!con->PropertyName().length()) {
+            continue;
+        }
 
-		const Texture* const tex = dynamic_cast<const Texture*>(ob);
-		if(!tex) {
-			const LayeredTexture* const layeredTexture = dynamic_cast<const LayeredTexture*>(ob);
-			if(!layeredTexture) {
-				DOMWarning("source object for texture link is not a texture or layered texture, ignoring",&element);
-				continue;
-			}
-			const std::string& prop = con->PropertyName();
-			if (layeredTextures.find(prop) != layeredTextures.end()) {
-				DOMWarning("duplicate layered texture link: " + prop,&element);
-			}
+        const Object* const ob = con->SourceObject();
+        if(!ob) {
+            DOMWarning("failed to read source object for texture link, ignoring",&element);
+            continue;
+        }
 
-			layeredTextures[prop] = layeredTexture;
-			((LayeredTexture*)layeredTexture)->fillTexture(doc);
-		}
-		else
-		{
-			const std::string& prop = con->PropertyName();
-			if (textures.find(prop) != textures.end()) {
-				DOMWarning("duplicate texture link: " + prop,&element);
-			}
+        const Texture* const tex = dynamic_cast<const Texture*>(ob);
+        if(!tex) {
+            const LayeredTexture* const layeredTexture = dynamic_cast<const LayeredTexture*>(ob);
+            if(!layeredTexture) {
+                DOMWarning("source object for texture link is not a texture or layered texture, ignoring",&element);
+                continue;
+            }
+            const std::string& prop = con->PropertyName();
+            if (layeredTextures.find(prop) != layeredTextures.end()) {
+                DOMWarning("duplicate layered texture link: " + prop,&element);
+            }
 
-			textures[prop] = tex;
-		}
+            layeredTextures[prop] = layeredTexture;
+            ((LayeredTexture*)layeredTexture)->fillTexture(doc);
+        }
+        else
+        {
+            const std::string& prop = con->PropertyName();
+            if (textures.find(prop) != textures.end()) {
+                DOMWarning("duplicate texture link: " + prop,&element);
+            }
 
-	}
+            textures[prop] = tex;
+        }
+
+    }
 }
 
 
@@ -148,57 +148,57 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
 : Object(id,element,name)
 , uvScaling(1.0f,1.0f)
 {
-	const Scope& sc = GetRequiredScope(element);
+    const Scope& sc = GetRequiredScope(element);
 
-	const Element* const Type = sc["Type"];
-	const Element* const FileName = sc["FileName"];
-	const Element* const RelativeFilename = sc["RelativeFilename"];
-	const Element* const ModelUVTranslation = sc["ModelUVTranslation"];
-	const Element* const ModelUVScaling = sc["ModelUVScaling"];
-	const Element* const Texture_Alpha_Source = sc["Texture_Alpha_Source"];
-	const Element* const Cropping = sc["Cropping"];
+    const Element* const Type = sc["Type"];
+    const Element* const FileName = sc["FileName"];
+    const Element* const RelativeFilename = sc["RelativeFilename"];
+    const Element* const ModelUVTranslation = sc["ModelUVTranslation"];
+    const Element* const ModelUVScaling = sc["ModelUVScaling"];
+    const Element* const Texture_Alpha_Source = sc["Texture_Alpha_Source"];
+    const Element* const Cropping = sc["Cropping"];
 
-	if(Type) {
-		type = ParseTokenAsString(GetRequiredToken(*Type,0));
-	}
+    if(Type) {
+        type = ParseTokenAsString(GetRequiredToken(*Type,0));
+    }
 
-	if(FileName) {
-		fileName = ParseTokenAsString(GetRequiredToken(*FileName,0));
-	}
+    if(FileName) {
+        fileName = ParseTokenAsString(GetRequiredToken(*FileName,0));
+    }
 
-	if(RelativeFilename) {
-		relativeFileName = ParseTokenAsString(GetRequiredToken(*RelativeFilename,0));
-	}
+    if(RelativeFilename) {
+        relativeFileName = ParseTokenAsString(GetRequiredToken(*RelativeFilename,0));
+    }
 
-	if(ModelUVTranslation) {
-		uvTrans = aiVector2D(ParseTokenAsFloat(GetRequiredToken(*ModelUVTranslation,0)),
-			ParseTokenAsFloat(GetRequiredToken(*ModelUVTranslation,1))
-		);
-	}
+    if(ModelUVTranslation) {
+        uvTrans = aiVector2D(ParseTokenAsFloat(GetRequiredToken(*ModelUVTranslation,0)),
+            ParseTokenAsFloat(GetRequiredToken(*ModelUVTranslation,1))
+        );
+    }
 
-	if(ModelUVScaling) {
-		uvScaling = aiVector2D(ParseTokenAsFloat(GetRequiredToken(*ModelUVScaling,0)),
-			ParseTokenAsFloat(GetRequiredToken(*ModelUVScaling,1))
-		);
-	}
+    if(ModelUVScaling) {
+        uvScaling = aiVector2D(ParseTokenAsFloat(GetRequiredToken(*ModelUVScaling,0)),
+            ParseTokenAsFloat(GetRequiredToken(*ModelUVScaling,1))
+        );
+    }
 
-	if(Cropping) {
-		crop[0] = ParseTokenAsInt(GetRequiredToken(*Cropping,0));
-		crop[1] = ParseTokenAsInt(GetRequiredToken(*Cropping,1));
-		crop[2] = ParseTokenAsInt(GetRequiredToken(*Cropping,2));
-		crop[3] = ParseTokenAsInt(GetRequiredToken(*Cropping,3));
-	}
-	else {
-		// vc8 doesn't support the crop() syntax in initialization lists
-		// (and vc9 WARNS about the new (i.e. compliant) behaviour).
-		crop[0] = crop[1] = crop[2] = crop[3] = 0;
-	}
+    if(Cropping) {
+        crop[0] = ParseTokenAsInt(GetRequiredToken(*Cropping,0));
+        crop[1] = ParseTokenAsInt(GetRequiredToken(*Cropping,1));
+        crop[2] = ParseTokenAsInt(GetRequiredToken(*Cropping,2));
+        crop[3] = ParseTokenAsInt(GetRequiredToken(*Cropping,3));
+    }
+    else {
+        // vc8 doesn't support the crop() syntax in initialization lists
+        // (and vc9 WARNS about the new (i.e. compliant) behaviour).
+        crop[0] = crop[1] = crop[2] = crop[3] = 0;
+    }
 
-	if(Texture_Alpha_Source) {
-		alphaSource = ParseTokenAsString(GetRequiredToken(*Texture_Alpha_Source,0));
-	}
+    if(Texture_Alpha_Source) {
+        alphaSource = ParseTokenAsString(GetRequiredToken(*Texture_Alpha_Source,0));
+    }
 
-	props = GetPropertyTable(doc,"Texture.FbxFileTexture",element,sc);
+    props = GetPropertyTable(doc,"Texture.FbxFileTexture",element,sc);
 }
 
 
@@ -213,20 +213,20 @@ LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Docume
 ,blendMode(BlendMode_Modulate)
 ,alpha(1)
 {
-	const Scope& sc = GetRequiredScope(element);
+    const Scope& sc = GetRequiredScope(element);
 
-	const Element* const BlendModes = sc["BlendModes"];
-	const Element* const Alphas = sc["Alphas"];
+    const Element* const BlendModes = sc["BlendModes"];
+    const Element* const Alphas = sc["Alphas"];
 
-	
-	if(BlendModes!=0)
-	{
-		blendMode = (BlendMode)ParseTokenAsInt(GetRequiredToken(*BlendModes,0));
-	}
-	if(Alphas!=0)
-	{
-		alpha = ParseTokenAsFloat(GetRequiredToken(*Alphas,0));
-	}
+
+    if(BlendModes!=0)
+    {
+        blendMode = (BlendMode)ParseTokenAsInt(GetRequiredToken(*BlendModes,0));
+    }
+    if(Alphas!=0)
+    {
+        alpha = ParseTokenAsFloat(GetRequiredToken(*Alphas,0));
+    }
 }
 
 LayeredTexture::~LayeredTexture()
@@ -236,21 +236,21 @@ LayeredTexture::~LayeredTexture()
 
 void LayeredTexture::fillTexture(const Document& doc)
 {
-	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
-	for(size_t i = 0; i < conns.size();++i)
-	{
-		const Connection* con = conns.at(i);
+    const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
+    for(size_t i = 0; i < conns.size();++i)
+    {
+        const Connection* con = conns.at(i);
 
-		const Object* const ob = con->SourceObject();
-		if(!ob) {
-			DOMWarning("failed to read source object for texture link, ignoring",&element);
-			continue;
-		}
+        const Object* const ob = con->SourceObject();
+        if(!ob) {
+            DOMWarning("failed to read source object for texture link, ignoring",&element);
+            continue;
+        }
 
-		const Texture* const tex = dynamic_cast<const Texture*>(ob);
+        const Texture* const tex = dynamic_cast<const Texture*>(ob);
 
-		texture = tex;
-	}
+        texture = tex;
+    }
 }
 
 } //!FBX

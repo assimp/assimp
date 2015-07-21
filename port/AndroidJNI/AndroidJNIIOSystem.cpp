@@ -42,7 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file Android extension of DefaultIOSystem using the standard C file functions */
 
 
-#include <code/AssimpPCH.h>
+#include <assimp/config.h>
+#include <android/api-level.h>
 #if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
 
 #include <stdlib.h>
@@ -50,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include <android/native_activity.h>
+#include <assimp/ai_assert.h>
 #include <assimp/port/AndroidJNI/AndroidJNIIOSystem.h>
 #include <code/DefaultIOStream.h>
 #include <fstream>
@@ -114,7 +116,7 @@ bool AndroidJNIIOSystem::AndroidExtractAsset(std::string name)
 	// Open file
 	AAsset* asset = AAssetManager_open(mApkAssetManager, name.c_str(),
 			AASSET_MODE_UNKNOWN);
-	std::string assetContent;
+	std::vector<char> assetContent;
 
 	if (asset != NULL) {
 		// Find size
@@ -138,7 +140,7 @@ bool AndroidJNIIOSystem::AndroidExtractAsset(std::string name)
 		}
 
 		// Write output buffer into a file
-		assetExtracted.write(assetContent.c_str(), strlen(assetContent.c_str()));
+		assetExtracted.write(&assetContent[0], assetContent.size());
 		assetExtracted.close();
 
 		__android_log_print(ANDROID_LOG_DEFAULT, "Assimp", "Asset extracted");

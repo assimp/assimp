@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -45,8 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_TOKENIZER_H
 
 #include <boost/shared_ptr.hpp>
-
 #include "FBXCompileConfig.h"
+#include "../include/assimp/ai_assert.h"
+#include <vector>
+#include <string>
 
 namespace Assimp {
 namespace FBX {
@@ -55,24 +57,24 @@ namespace FBX {
  *  basic scope hierarchy. */
 enum TokenType
 {
-	// {
-	TokenType_OPEN_BRACKET = 0,
-	
-	// }
-	TokenType_CLOSE_BRACKET,
+    // {
+    TokenType_OPEN_BRACKET = 0,
 
-	// '"blablubb"', '2', '*14' - very general token class,
-	// further processing happens at a later stage.
-	TokenType_DATA,
+    // }
+    TokenType_CLOSE_BRACKET,
 
-	//
-	TokenType_BINARY_DATA,
+    // '"blablubb"', '2', '*14' - very general token class,
+    // further processing happens at a later stage.
+    TokenType_DATA,
 
-	// ,
-	TokenType_COMMA,
+    //
+    TokenType_BINARY_DATA,
 
-	// blubb:
-	TokenType_KEY
+    // ,
+    TokenType_COMMA,
+
+    // blubb:
+    TokenType_KEY
 };
 
 
@@ -80,80 +82,80 @@ enum TokenType
  *  classified by the #TokenType enumerated types.
  *
  *  Offers iterator protocol. Tokens are immutable. */
-class Token 
+class Token
 {
 
 private:
 
-	static const unsigned int BINARY_MARKER = static_cast<unsigned int>(-1);
+    static const unsigned int BINARY_MARKER = static_cast<unsigned int>(-1);
 
 public:
 
-	/** construct a textual token */
-	Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
+    /** construct a textual token */
+    Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
 
-	/** construct a binary token */
-	Token(const char* sbegin, const char* send, TokenType type, unsigned int offset);
+    /** construct a binary token */
+    Token(const char* sbegin, const char* send, TokenType type, unsigned int offset);
 
-	~Token();
-
-public:
-
-	std::string StringContents() const {
-		return std::string(begin(),end());
-	}
+    ~Token();
 
 public:
 
-	bool IsBinary() const {
-		return column == BINARY_MARKER;
-	}
+    std::string StringContents() const {
+        return std::string(begin(),end());
+    }
 
-	const char* begin() const {
-		return sbegin;
-	}
+public:
 
-	const char* end() const {
-		return send;
-	}
+    bool IsBinary() const {
+        return column == BINARY_MARKER;
+    }
 
-	TokenType Type() const {
-		return type;
-	}
+    const char* begin() const {
+        return sbegin;
+    }
 
-	unsigned int Offset() const {
-		ai_assert(IsBinary());
-		return offset;
-	}
+    const char* end() const {
+        return send;
+    }
 
-	unsigned int Line() const {
-		ai_assert(!IsBinary());
-		return line;
-	}
+    TokenType Type() const {
+        return type;
+    }
 
-	unsigned int Column() const {
-		ai_assert(!IsBinary());
-		return column;
-	}
+    unsigned int Offset() const {
+        ai_assert(IsBinary());
+        return offset;
+    }
+
+    unsigned int Line() const {
+        ai_assert(!IsBinary());
+        return line;
+    }
+
+    unsigned int Column() const {
+        ai_assert(!IsBinary());
+        return column;
+    }
 
 private:
 
 #ifdef DEBUG
-	// full string copy for the sole purpose that it nicely appears
-	// in msvc's debugger window.
-	const std::string contents;
+    // full string copy for the sole purpose that it nicely appears
+    // in msvc's debugger window.
+    const std::string contents;
 #endif
 
 
-	const char* const sbegin;
-	const char* const send;
-	const TokenType type;
+    const char* const sbegin;
+    const char* const send;
+    const TokenType type;
 
-	union {
-		const unsigned int line;
-		unsigned int offset;
-	};
-	const unsigned int column;
+    union {
+        const unsigned int line;
+        unsigned int offset;
+    };
+    const unsigned int column;
 };
 
 // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03

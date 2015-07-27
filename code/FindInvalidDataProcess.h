@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -45,10 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseProcess.h"
 #include "../include/assimp/types.h"
+#include "../include/assimp/anim.h"
 
 struct aiMesh;
 class FindInvalidDataProcessTest;
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** The FindInvalidData post-processing step. It searches the mesh data
@@ -60,43 +61,43 @@ class ASSIMP_API FindInvalidDataProcess : public BaseProcess
 {
 public:
 
-	FindInvalidDataProcess();
-	~FindInvalidDataProcess();
+    FindInvalidDataProcess();
+    ~FindInvalidDataProcess();
 
 public:
 
-	// -------------------------------------------------------------------
-	// 
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    //
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	// Setup import settings
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    // Setup import settings
+    void SetupProperties(const Importer* pImp);
 
-	// -------------------------------------------------------------------
-	// Run the step
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    // Run the step
+    void Execute( aiScene* pScene);
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given mesh
-	 * @param pMesh The mesh to process.
-	 * @return 0 - nothing, 1 - removed sth, 2 - please delete me  */
-	int ProcessMesh( aiMesh* pMesh);
+    // -------------------------------------------------------------------
+    /** Executes the postprocessing step on the given mesh
+     * @param pMesh The mesh to process.
+     * @return 0 - nothing, 1 - removed sth, 2 - please delete me  */
+    int ProcessMesh( aiMesh* pMesh);
 
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given animation
-	 * @param anim The animation to process.  */
-	void ProcessAnimation (aiAnimation* anim);
+    // -------------------------------------------------------------------
+    /** Executes the postprocessing step on the given animation
+     * @param anim The animation to process.  */
+    void ProcessAnimation (aiAnimation* anim);
 
-	// -------------------------------------------------------------------
-	/** Executes the postprocessing step on the given anim channel
-	 * @param anim The animation channel to process.*/
-	void ProcessAnimationChannel (aiNodeAnim* anim);
+    // -------------------------------------------------------------------
+    /** Executes the postprocessing step on the given anim channel
+     * @param anim The animation channel to process.*/
+    void ProcessAnimationChannel (aiNodeAnim* anim);
 
 private:
-	float configEpsilon;
+    float configEpsilon;
 };
 
 } // end of namespace Assimp

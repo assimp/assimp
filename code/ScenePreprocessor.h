@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -43,8 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_SCENE_PREPROCESSOR_H_INC
 #define AI_SCENE_PREPROCESSOR_H_INC
 
+#include "../include/assimp/defs.h"
+#include <stddef.h>
+
+struct aiScene;
+struct aiAnimation;
+struct aiMesh;
+
 class ScenePreprocessorTest;
-namespace Assimp	{
+namespace Assimp    {
 
 // ----------------------------------------------------------------------------------
 /** ScenePreprocessor: Preprocess a scene before any post-processing
@@ -56,58 +63,58 @@ namespace Assimp	{
 // ----------------------------------------------------------------------------------
 class ASSIMP_API ScenePreprocessor
 {
-	// Make ourselves a friend of the corresponding test unit.
-	friend class ::ScenePreprocessorTest;
+    // Make ourselves a friend of the corresponding test unit.
+    friend class ::ScenePreprocessorTest;
 public:
 
-	// ----------------------------------------------------------------
-	/** Default c'tpr. Use SetScene() to assign a scene to the object.
-	 */
-	ScenePreprocessor()	
-		:	scene	(NULL)
-	{}
+    // ----------------------------------------------------------------
+    /** Default c'tpr. Use SetScene() to assign a scene to the object.
+     */
+    ScenePreprocessor()
+        :   scene   (NULL)
+    {}
 
-	/** Constructs the object and assigns a specific scene to it
-	 */
-	ScenePreprocessor(aiScene* _scene)
-		:	scene	(_scene)
-	{}
+    /** Constructs the object and assigns a specific scene to it
+     */
+    ScenePreprocessor(aiScene* _scene)
+        :   scene   (_scene)
+    {}
 
-	// ----------------------------------------------------------------
-	/** Assign a (new) scene to the object.
-	 *  
-	 *  One 'SceneProcessor' can be used for multiple scenes.
-	 *  Call ProcessScene to have the scene preprocessed.
-	 *  @param sc Scene to be processed.
-	 */
-	void SetScene (aiScene* sc)	{
-		scene = sc;
-	}
+    // ----------------------------------------------------------------
+    /** Assign a (new) scene to the object.
+     *
+     *  One 'SceneProcessor' can be used for multiple scenes.
+     *  Call ProcessScene to have the scene preprocessed.
+     *  @param sc Scene to be processed.
+     */
+    void SetScene (aiScene* sc) {
+        scene = sc;
+    }
 
-	// ----------------------------------------------------------------
-	/** Preprocess the current scene
-	 */
-	void ProcessScene ();
-
-protected:
-
-	// ----------------------------------------------------------------
-	/** Preprocess an animation in the scene
-	 *  @param anim Anim to be preprocessed.
-	 */
-	void ProcessAnimation (aiAnimation* anim);
-	
-	
-	// ----------------------------------------------------------------
-	/** Preprocess a mesh in the scene
-	 *  @param mesh Mesh to be preprocessed.
-	 */
-	void ProcessMesh (aiMesh* mesh);
+    // ----------------------------------------------------------------
+    /** Preprocess the current scene
+     */
+    void ProcessScene ();
 
 protected:
 
-	//! Scene we're currently working on
-	aiScene* scene;
+    // ----------------------------------------------------------------
+    /** Preprocess an animation in the scene
+     *  @param anim Anim to be preprocessed.
+     */
+    void ProcessAnimation (aiAnimation* anim);
+
+
+    // ----------------------------------------------------------------
+    /** Preprocess a mesh in the scene
+     *  @param mesh Mesh to be preprocessed.
+     */
+    void ProcessMesh (aiMesh* mesh);
+
+protected:
+
+    //! Scene we're currently working on
+    aiScene* scene;
 };
 
 

@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -43,22 +43,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of DefaultLogger (and Logger)
  */
 
-#include "AssimpPCH.h"
 #include "DefaultIOSystem.h"
 
 // Default log streams
 #include "Win32DebugLogStream.h"
 #include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
+#include "../include/assimp/NullLogger.hpp"
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/ai_assert.h"
+#include <iostream>
+#include <stdio.h>
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-#	include <boost/thread/thread.hpp>
-#	include <boost/thread/mutex.hpp>
+#   include <boost/thread/thread.hpp>
+#   include <boost/thread/mutex.hpp>
 
 boost::mutex loggerMutex;
 #endif
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ----------------------------------------------------------------------------------
 NullLogger DefaultLogger::s_pNullLogger;
@@ -70,351 +74,347 @@ static const unsigned int SeverityAll = Logger::Info | Logger::Err | Logger::War
 // Represents a log-stream + its error severity
 struct LogStreamInfo
 {
-	unsigned int m_uiErrorSeverity;
-	LogStream *m_pStream;
+    unsigned int m_uiErrorSeverity;
+    LogStream *m_pStream;
 
-	// Constructor
-	LogStreamInfo( unsigned int uiErrorSev, LogStream *pStream ) :
-		m_uiErrorSeverity( uiErrorSev ),
-		m_pStream( pStream )
-	{
-		// empty
-	}
-	
-	// Destructor
-	~LogStreamInfo()
-	{
-		delete m_pStream;
-	}
+    // Constructor
+    LogStreamInfo( unsigned int uiErrorSev, LogStream *pStream ) :
+        m_uiErrorSeverity( uiErrorSev ),
+        m_pStream( pStream )
+    {
+        // empty
+    }
+
+    // Destructor
+    ~LogStreamInfo()
+    {
+        delete m_pStream;
+    }
 };
 
 // ----------------------------------------------------------------------------------
 // Construct a default log stream
-LogStream* LogStream::createDefaultStream(aiDefaultLogStream	streams,
-	const char* name /*= "AssimpLog.txt"*/,
-	IOSystem* io		    /*= NULL*/)
+LogStream* LogStream::createDefaultStream(aiDefaultLogStream    streams,
+    const char* name /*= "AssimpLog.txt"*/,
+    IOSystem* io            /*= NULL*/)
 {
-	switch (streams)	
-	{
-		// This is a platform-specific feature
-	case aiDefaultLogStream_DEBUGGER:
+    switch (streams)
+    {
+        // This is a platform-specific feature
+    case aiDefaultLogStream_DEBUGGER:
 #ifdef WIN32
-		return new Win32DebugLogStream();
+        return new Win32DebugLogStream();
 #else
-		return NULL;
+        return NULL;
 #endif
 
-		// Platform-independent default streams
-	case aiDefaultLogStream_STDERR:
-		return new StdOStreamLogStream(std::cerr);
-	case aiDefaultLogStream_STDOUT:
-		return new StdOStreamLogStream(std::cout);
-	case aiDefaultLogStream_FILE:
-		return (name && *name ? new FileLogStream(name,io) : NULL);
-	default:
-		// We don't know this default log stream, so raise an assertion
-		ai_assert(false);
+        // Platform-independent default streams
+    case aiDefaultLogStream_STDERR:
+        return new StdOStreamLogStream(std::cerr);
+    case aiDefaultLogStream_STDOUT:
+        return new StdOStreamLogStream(std::cout);
+    case aiDefaultLogStream_FILE:
+        return (name && *name ? new FileLogStream(name,io) : NULL);
+    default:
+        // We don't know this default log stream, so raise an assertion
+        ai_assert(false);
 
-	};
+    };
 
-	// For compilers without dead code path detection
-	return NULL;
+    // For compilers without dead code path detection
+    return NULL;
 }
 
 // ----------------------------------------------------------------------------------
-//	Creates the only singleton instance
+//  Creates the only singleton instance
 Logger *DefaultLogger::create(const char* name /*= "AssimpLog.txt"*/,
-	LogSeverity severity                       /*= NORMAL*/,
-	unsigned int defStreams                    /*= aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE*/,
-	IOSystem* io		                       /*= NULL*/)
+    LogSeverity severity                       /*= NORMAL*/,
+    unsigned int defStreams                    /*= aiDefaultLogStream_DEBUGGER | aiDefaultLogStream_FILE*/,
+    IOSystem* io                               /*= NULL*/)
 {
-	// enter the mutex here to avoid concurrency problems
+    // enter the mutex here to avoid concurrency problems
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(loggerMutex);
+    boost::mutex::scoped_lock lock(loggerMutex);
 #endif
 
-	if (m_pLogger && !isNullLogger() )
-		delete m_pLogger;
+    if (m_pLogger && !isNullLogger() )
+        delete m_pLogger;
 
-	m_pLogger = new DefaultLogger( severity );
+    m_pLogger = new DefaultLogger( severity );
 
-	// Attach default log streams
-	// Stream the log to the MSVC debugger?
-	if (defStreams & aiDefaultLogStream_DEBUGGER)
-		m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_DEBUGGER));
+    // Attach default log streams
+    // Stream the log to the MSVC debugger?
+    if (defStreams & aiDefaultLogStream_DEBUGGER)
+        m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_DEBUGGER));
 
-	// Stream the log to COUT?
-	if (defStreams & aiDefaultLogStream_STDOUT)
-		m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_STDOUT));
+    // Stream the log to COUT?
+    if (defStreams & aiDefaultLogStream_STDOUT)
+        m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_STDOUT));
 
-	// Stream the log to CERR?
-	if (defStreams & aiDefaultLogStream_STDERR)
-		 m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_STDERR));
-	
-	// Stream the log to a file
-	if (defStreams & aiDefaultLogStream_FILE && name && *name)
-		m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_FILE,name,io));
+    // Stream the log to CERR?
+    if (defStreams & aiDefaultLogStream_STDERR)
+         m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_STDERR));
 
-	return m_pLogger;
+    // Stream the log to a file
+    if (defStreams & aiDefaultLogStream_FILE && name && *name)
+        m_pLogger->attachStream( LogStream::createDefaultStream(aiDefaultLogStream_FILE,name,io));
+
+    return m_pLogger;
 }
 
 // ----------------------------------------------------------------------------------
-void Logger::debug(const char* message)	{
+void Logger::debug(const char* message) {
 
-	// SECURITY FIX: otherwise it's easy to produce overruns since
-	// sometimes importers will include data from the input file
-	// (i.e. node names) in their messages.
-	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
-		return;
-	}
-	return OnDebug(message);
+    // SECURITY FIX: otherwise it's easy to produce overruns since
+    // sometimes importers will include data from the input file
+    // (i.e. node names) in their messages.
+    if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
+        return;
+    }
+    return OnDebug(message);
 }
 
 // ----------------------------------------------------------------------------------
-void Logger::info(const char* message)	{
-	
-	// SECURITY FIX: see above
-	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
-		return;
-	}
-	return OnInfo(message);
-}
-	
-// ----------------------------------------------------------------------------------
-void Logger::warn(const char* message)	{
-	
-	// SECURITY FIX: see above
-	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
-		return;
-	}
-	return OnWarn(message);
+void Logger::info(const char* message)  {
+
+    // SECURITY FIX: see above
+    if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
+        return;
+    }
+    return OnInfo(message);
 }
 
 // ----------------------------------------------------------------------------------
-void Logger::error(const char* message)	{
-	
-	// SECURITY FIX: see above
-	if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
-		ai_assert(false);
-		return;
-	}
-	return OnError(message);
+void Logger::warn(const char* message)  {
+
+    // SECURITY FIX: see above
+    if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
+        return;
+    }
+    return OnWarn(message);
+}
+
+// ----------------------------------------------------------------------------------
+void Logger::error(const char* message) {
+
+    // SECURITY FIX: see above
+    if (strlen(message)>MAX_LOG_MESSAGE_LENGTH) {
+        return;
+    }
+    return OnError(message);
 }
 
 // ----------------------------------------------------------------------------------
 void DefaultLogger::set( Logger *logger )
 {
-	// enter the mutex here to avoid concurrency problems
+    // enter the mutex here to avoid concurrency problems
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(loggerMutex);
+    boost::mutex::scoped_lock lock(loggerMutex);
 #endif
 
-	if (!logger)logger = &s_pNullLogger;
-	if (m_pLogger && !isNullLogger() )
-		delete m_pLogger;
+    if (!logger)logger = &s_pNullLogger;
+    if (m_pLogger && !isNullLogger() )
+        delete m_pLogger;
 
-	DefaultLogger::m_pLogger = logger;
+    DefaultLogger::m_pLogger = logger;
 }
 
 // ----------------------------------------------------------------------------------
 bool DefaultLogger::isNullLogger()
 {
-	return m_pLogger == &s_pNullLogger;
+    return m_pLogger == &s_pNullLogger;
 }
 
 // ----------------------------------------------------------------------------------
-//	Singleton getter
+//  Singleton getter
 Logger *DefaultLogger::get()
 {
-	return m_pLogger;
+    return m_pLogger;
 }
 
 // ----------------------------------------------------------------------------------
-//	Kills the only instance
+//  Kills the only instance
 void DefaultLogger::kill()
 {
-	// enter the mutex here to avoid concurrency problems
+    // enter the mutex here to avoid concurrency problems
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(loggerMutex);
+    boost::mutex::scoped_lock lock(loggerMutex);
 #endif
 
-	if (m_pLogger == &s_pNullLogger)return;
-	delete m_pLogger;
-	m_pLogger = &s_pNullLogger;
+    if (m_pLogger == &s_pNullLogger)return;
+    delete m_pLogger;
+    m_pLogger = &s_pNullLogger;
 }
 
 // ----------------------------------------------------------------------------------
-//	Debug message
+//  Debug message
 void DefaultLogger::OnDebug( const char* message )
 {
-	if ( m_Severity == Logger::NORMAL )
-		return;
+    if ( m_Severity == Logger::NORMAL )
+        return;
 
-	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Debug, T%i: %s", GetThreadID(), message );
+    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
+    ::sprintf(msg,"Debug, T%u: %s", GetThreadID(), message );
 
-	WriteToStreams( msg, Logger::Debugging );
+    WriteToStreams( msg, Logger::Debugging );
 }
 
 // ----------------------------------------------------------------------------------
-//	Logs an info
+//  Logs an info
 void DefaultLogger::OnInfo( const char* message )
 {
-	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Info,  T%i: %s", GetThreadID(), message );
+    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
+    ::sprintf(msg,"Info,  T%u: %s", GetThreadID(), message );
 
-	WriteToStreams( msg , Logger::Info );
+    WriteToStreams( msg , Logger::Info );
 }
 
 // ----------------------------------------------------------------------------------
-//	Logs a warning
+//  Logs a warning
 void DefaultLogger::OnWarn( const char* message )
 {
-	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Warn,  T%i: %s", GetThreadID(), message );
+    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
+    ::sprintf(msg,"Warn,  T%u: %s", GetThreadID(), message );
 
-	WriteToStreams( msg, Logger::Warn );
+    WriteToStreams( msg, Logger::Warn );
 }
 
 // ----------------------------------------------------------------------------------
-//	Logs an error
+//  Logs an error
 void DefaultLogger::OnError( const char* message )
 {
-	char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-	::sprintf(msg,"Error, T%i: %s", GetThreadID(), message );
+    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
+    ::sprintf(msg,"Error, T%u: %s", GetThreadID(), message );
 
-	WriteToStreams( msg, Logger::Err );
+    WriteToStreams( msg, Logger::Err );
 }
 
 // ----------------------------------------------------------------------------------
-//	Will attach a new stream
+//  Will attach a new stream
 bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 {
-	if (!pStream)
-		return false;
+    if (!pStream)
+        return false;
 
-	if (0 == severity)	{
-		severity = Logger::Info | Logger::Err | Logger::Warn | Logger::Debugging;
-	}
+    if (0 == severity)  {
+        severity = Logger::Info | Logger::Err | Logger::Warn | Logger::Debugging;
+    }
 
-	for ( StreamIt it = m_StreamArray.begin();
-		it != m_StreamArray.end();
-		++it )
-	{
-		if ( (*it)->m_pStream == pStream )
-		{
-			(*it)->m_uiErrorSeverity |= severity;
-			return true;
-		}
-	}
-	
-	LogStreamInfo *pInfo = new LogStreamInfo( severity, pStream );
-	m_StreamArray.push_back( pInfo );
-	return true;
+    for ( StreamIt it = m_StreamArray.begin();
+        it != m_StreamArray.end();
+        ++it )
+    {
+        if ( (*it)->m_pStream == pStream )
+        {
+            (*it)->m_uiErrorSeverity |= severity;
+            return true;
+        }
+    }
+
+    LogStreamInfo *pInfo = new LogStreamInfo( severity, pStream );
+    m_StreamArray.push_back( pInfo );
+    return true;
 }
 
 // ----------------------------------------------------------------------------------
-//	Detatch a stream
+//  Detatch a stream
 bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 {
-	if (!pStream)
-		return false;
+    if (!pStream)
+        return false;
 
-	if (0 == severity)	{
-		severity = SeverityAll;
-	}
-	
-	for ( StreamIt it = m_StreamArray.begin();
-		it != m_StreamArray.end();
-		++it )
-	{
-		if ( (*it)->m_pStream == pStream )
-		{
-			(*it)->m_uiErrorSeverity &= ~severity;
-			if ( (*it)->m_uiErrorSeverity == 0 )
-			{
-				// don't delete the underlying stream 'cause the caller gains ownership again
-				(**it).m_pStream = NULL;
-				delete *it;
-				m_StreamArray.erase( it );
-				break;
-			}
-			return true;
-		}
-	}
-	return false;
+    if (0 == severity)  {
+        severity = SeverityAll;
+    }
+
+    for ( StreamIt it = m_StreamArray.begin();
+        it != m_StreamArray.end();
+        ++it )
+    {
+        if ( (*it)->m_pStream == pStream )
+        {
+            (*it)->m_uiErrorSeverity &= ~severity;
+            if ( (*it)->m_uiErrorSeverity == 0 )
+            {
+                // don't delete the underlying stream 'cause the caller gains ownership again
+                (**it).m_pStream = NULL;
+                delete *it;
+                m_StreamArray.erase( it );
+                break;
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 // ----------------------------------------------------------------------------------
-//	Constructor
-DefaultLogger::DefaultLogger(LogSeverity severity) 
+//  Constructor
+DefaultLogger::DefaultLogger(LogSeverity severity)
 
-	:	Logger	( severity )
-	,	noRepeatMsg	(false)
-	,	lastLen( 0 )
+    :   Logger  ( severity )
+    ,   noRepeatMsg (false)
+    ,   lastLen( 0 )
 {
-	lastMsg[0] = '\0';
+    lastMsg[0] = '\0';
 }
 
 // ----------------------------------------------------------------------------------
-//	Destructor
+//  Destructor
 DefaultLogger::~DefaultLogger()
 {
-	for ( StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it ) {
-		// also frees the underlying stream, we are its owner.
-		delete *it;
-	}
+    for ( StreamIt it = m_StreamArray.begin(); it != m_StreamArray.end(); ++it ) {
+        // also frees the underlying stream, we are its owner.
+        delete *it;
+    }
 }
 
 // ----------------------------------------------------------------------------------
-//	Writes message to stream
-void DefaultLogger::WriteToStreams(const char *message, 
-	ErrorSeverity ErrorSev )
+//  Writes message to stream
+void DefaultLogger::WriteToStreams(const char *message,
+    ErrorSeverity ErrorSev )
 {
-	ai_assert(NULL != message);
+    ai_assert(NULL != message);
 
-	// Check whether this is a repeated message
-	if (! ::strncmp( message,lastMsg, lastLen-1))
-	{
-		if (!noRepeatMsg)
-		{
-			noRepeatMsg = true;
-			message = "Skipping one or more lines with the same contents\n";
-		}
-		else return;
-	}
-	else
-	{
-		// append a new-line character to the message to be printed
-		lastLen = ::strlen(message);
-		::memcpy(lastMsg,message,lastLen+1);
-		::strcat(lastMsg+lastLen,"\n");
+    // Check whether this is a repeated message
+    if (! ::strncmp( message,lastMsg, lastLen-1))
+    {
+        if (!noRepeatMsg)
+        {
+            noRepeatMsg = true;
+            message = "Skipping one or more lines with the same contents\n";
+        }
+        else return;
+    }
+    else
+    {
+        // append a new-line character to the message to be printed
+        lastLen = ::strlen(message);
+        ::memcpy(lastMsg,message,lastLen+1);
+        ::strcat(lastMsg+lastLen,"\n");
 
-		message = lastMsg;
-		noRepeatMsg = false;
-		++lastLen;
-	}
-	for ( ConstStreamIt it = m_StreamArray.begin();
-		it != m_StreamArray.end();
-		++it)
-	{
-		if ( ErrorSev & (*it)->m_uiErrorSeverity )
-			(*it)->m_pStream->write( message);
-	}
+        message = lastMsg;
+        noRepeatMsg = false;
+        ++lastLen;
+    }
+    for ( ConstStreamIt it = m_StreamArray.begin();
+        it != m_StreamArray.end();
+        ++it)
+    {
+        if ( ErrorSev & (*it)->m_uiErrorSeverity )
+            (*it)->m_pStream->write( message);
+    }
 }
 
 // ----------------------------------------------------------------------------------
-//	Returns thread id, if not supported only a zero will be returned.
+//  Returns thread id, if not supported only a zero will be returned.
 unsigned int DefaultLogger::GetThreadID()
 {
-	// fixme: we can get this value via boost::threads
+    // fixme: we can get this value via boost::threads
 #ifdef WIN32
-	return (unsigned int)::GetCurrentThreadId();
+    return (unsigned int)::GetCurrentThreadId();
 #else
-	return 0; // not supported
+    return 0; // not supported
 #endif
 }
 

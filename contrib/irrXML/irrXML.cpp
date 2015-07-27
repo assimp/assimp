@@ -5,7 +5,6 @@
 // Need to include Assimp, too. We're using Assimp's version of fast_atof
 // so we need stdint.h. But no PCH.
 
-#include "./../../code/AssimpPCH.h"
 
 #include "irrXML.h"
 #include "irrString.h"

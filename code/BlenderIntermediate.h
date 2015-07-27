@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -49,132 +49,153 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
+#include <boost/foreach.hpp>
+#include <deque>
+#include "./../include/assimp/material.h"
+
+struct aiTexture;
 
 #define for_each(x,y) BOOST_FOREACH(x,y)
 
 namespace Assimp {
 namespace Blender {
 
-	// --------------------------------------------------------------------
-	/** Mini smart-array to avoid pulling in even more boost stuff. usable with vector and deque */
-	// --------------------------------------------------------------------
-	template <template <typename,typename> class TCLASS, typename T>
-	struct TempArray	{
-		typedef TCLASS< T*,std::allocator<T*> > mywrap;
+    // --------------------------------------------------------------------
+    /** Mini smart-array to avoid pulling in even more boost stuff. usable with vector and deque */
+    // --------------------------------------------------------------------
+    template <template <typename,typename> class TCLASS, typename T>
+    struct TempArray    {
+        typedef TCLASS< T*,std::allocator<T*> > mywrap;
 
-		TempArray() {
-		}
+        TempArray() {
+        }
 
-		~TempArray () {
-			for_each(T* elem, arr) {
-				delete elem;
-			}
-		}
+        ~TempArray () {
+            for_each(T* elem, arr) {
+                delete elem;
+            }
+        }
 
-		void dismiss() {
-			arr.clear();
-		}
+        void dismiss() {
+            arr.clear();
+        }
 
-		mywrap* operator -> () {
-			return &arr;
-		}
+        mywrap* operator -> () {
+            return &arr;
+        }
 
-		operator mywrap& () {
-			return arr;
-		}
+        operator mywrap& () {
+            return arr;
+        }
 
-		operator const mywrap& () const {
-			return arr;
-		}
+        operator const mywrap& () const {
+            return arr;
+        }
 
-		mywrap& get () {
-			return arr;
-		}
+        mywrap& get () {
+            return arr;
+        }
 
-		const mywrap& get () const {
-			return arr;
-		}
+        const mywrap& get () const {
+            return arr;
+        }
 
-		T* operator[] (size_t idx) const {
-			return arr[idx];
-		}
+        T* operator[] (size_t idx) const {
+            return arr[idx];
+        }
 
-		T*& operator[] (size_t idx) {
-			return arr[idx];
-		}
+        T*& operator[] (size_t idx) {
+            return arr[idx];
+        }
 
-	private:
-		// no copy semantics
-		void operator= (const TempArray&)  {
-		}
+    private:
+        // no copy semantics
+        void operator= (const TempArray&)  {
+        }
 
-		TempArray(const TempArray& arr) {
-		}
+        TempArray(const TempArray& arr) {
+        }
 
-	private:
-		mywrap arr;
-	};
-	
+    private:
+        mywrap arr;
+    };
+
 #ifdef _MSC_VER
-#	pragma warning(disable:4351)
+#   pragma warning(disable:4351)
 #endif
-	// --------------------------------------------------------------------
-	/** ConversionData acts as intermediate storage location for
-	 *  the various ConvertXXX routines in BlenderImporter.*/
-	// --------------------------------------------------------------------
-	struct ConversionData	
-	{
-		ConversionData(const FileDatabase& db)
-			: sentinel_cnt()
-			, next_texture()
-			, db(db)
-		{}
 
-		std::set<const Object*> objects;
+    struct ObjectCompare {
+        bool operator() (const Object* left, const Object* right) const {
+            return strcmp(left->id.name, right->id.name) == -1;
+        }
+    };
 
-		TempArray <std::vector, aiMesh> meshes;
-		TempArray <std::vector, aiCamera> cameras;
-		TempArray <std::vector, aiLight> lights;
-		TempArray <std::vector, aiMaterial> materials;
-		TempArray <std::vector, aiTexture> textures;
+    // When keeping objects in sets, sort them by their name.
+    typedef std::set<const Object*, ObjectCompare> ObjectSet;
 
-		// set of all materials referenced by at least one mesh in the scene
-		std::deque< boost::shared_ptr< Material > > materials_raw;
+    // --------------------------------------------------------------------
+    /** ConversionData acts as intermediate storage location for
+     *  the various ConvertXXX routines in BlenderImporter.*/
+    // --------------------------------------------------------------------
+    struct ConversionData
+    {
+        ConversionData(const FileDatabase& db)
+            : sentinel_cnt()
+            , next_texture()
+            , db(db)
+        {}
 
-		// counter to name sentinel textures inserted as substitutes for procedural textures.
-		unsigned int sentinel_cnt;
+        struct ObjectCompare {
+            bool operator() (const Object* left, const Object* right) const {
+                return strcmp(left->id.name, right->id.name) == -1;
+            }
+        };
 
-		// next texture ID for each texture type, respectively
-		unsigned int next_texture[aiTextureType_UNKNOWN+1];
+        ObjectSet objects;
 
-		// original file data
-		const FileDatabase& db;
-	};
+        TempArray <std::vector, aiMesh> meshes;
+        TempArray <std::vector, aiCamera> cameras;
+        TempArray <std::vector, aiLight> lights;
+        TempArray <std::vector, aiMaterial> materials;
+        TempArray <std::vector, aiTexture> textures;
+
+        // set of all materials referenced by at least one mesh in the scene
+        std::deque< boost::shared_ptr< Material > > materials_raw;
+
+        // counter to name sentinel textures inserted as substitutes for procedural textures.
+        unsigned int sentinel_cnt;
+
+        // next texture ID for each texture type, respectively
+        unsigned int next_texture[aiTextureType_UNKNOWN+1];
+
+        // original file data
+        const FileDatabase& db;
+    };
 #ifdef _MSC_VER
-#	pragma warning(default:4351)
+#   pragma warning(default:4351)
 #endif
 
 // ------------------------------------------------------------------------------------------------
 inline const char* GetTextureTypeDisplayString(Tex::Type t)
 {
-	switch (t)	{
-	case Tex::Type_CLOUDS		:  return  "Clouds";			
-	case Tex::Type_WOOD			:  return  "Wood";			
-	case Tex::Type_MARBLE		:  return  "Marble";			
-	case Tex::Type_MAGIC		:  return  "Magic";		
-	case Tex::Type_BLEND		:  return  "Blend";			
-	case Tex::Type_STUCCI		:  return  "Stucci";			
-	case Tex::Type_NOISE		:  return  "Noise";			
-	case Tex::Type_PLUGIN		:  return  "Plugin";			
-	case Tex::Type_MUSGRAVE		:  return  "Musgrave";		
-	case Tex::Type_VORONOI		:  return  "Voronoi";			
-	case Tex::Type_DISTNOISE	:  return  "DistortedNoise";	
-	case Tex::Type_ENVMAP		:  return  "EnvMap";	
-	case Tex::Type_IMAGE		:  return  "Image";	
-	default: 
-		break;
-	}
-	return "<Unknown>";
+    switch (t)  {
+    case Tex::Type_CLOUDS       :  return  "Clouds";
+    case Tex::Type_WOOD         :  return  "Wood";
+    case Tex::Type_MARBLE       :  return  "Marble";
+    case Tex::Type_MAGIC        :  return  "Magic";
+    case Tex::Type_BLEND        :  return  "Blend";
+    case Tex::Type_STUCCI       :  return  "Stucci";
+    case Tex::Type_NOISE        :  return  "Noise";
+    case Tex::Type_PLUGIN       :  return  "Plugin";
+    case Tex::Type_MUSGRAVE     :  return  "Musgrave";
+    case Tex::Type_VORONOI      :  return  "Voronoi";
+    case Tex::Type_DISTNOISE    :  return  "DistortedNoise";
+    case Tex::Type_ENVMAP       :  return  "EnvMap";
+    case Tex::Type_IMAGE        :  return  "Image";
+    default:
+        break;
+    }
+    return "<Unknown>";
 }
 
 } // ! Blender

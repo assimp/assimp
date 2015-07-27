@@ -1,0 +1,24 @@
+# AppVeyor file
+# http://www.appveyor.com/docs/appveyor-yml
+
+# Operating system (build VM template)
+os: Previous Windows Server 2012 R2  # using previous worker images since default worker has problem installing DART-Prerequisites.msi
+
+# clone directory
+clone_folder: c:\projects\assimp
+
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+
+platform: x64
+configuration: Release
+
+build:
+
+build_script:
+ - cd c:\projects\assimp
+ - cmake CMakeLists.txt -G "Visual Studio 11" 
+ - msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln

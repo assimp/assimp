@@ -1,3 +1,4 @@
+.idea
 build
 .project
 *.kdev4*
@@ -10,7 +11,7 @@ build
 # Output
 bin/
 lib/
-contrib/
+
 
 # Generated
 assimp.pc
@@ -54,3 +55,8 @@ tools/assimp_view/assimp_viewer.vcxproj.user
 
 # Unix editor backups
 *~
+test/gtest/src/gtest-stamp/gtest-gitinfo.txt
+test/gtest/src/gtest-stamp/gtest-gitclone-lastrun.txt
+Assimp.opensdf
+contrib/zlib/CTestTestfile.cmake
+ipch/assimp_viewer-44bbbcd1/assimp_viewerd-ccc45335.ipch

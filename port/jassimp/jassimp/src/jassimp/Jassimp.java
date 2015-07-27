@@ -97,6 +97,48 @@ public final class Jassimp {
     
     
     /**
+     * Returns the size of a struct or ptimitive.<p>
+     * 
+     * @return the result of sizeof call
+     */
+    public static native int getVKeysize();
+
+    /**
+     * @see #getVKeysize
+     */
+    public static native int getQKeysize();
+
+    /**
+     * @see #getVKeysize
+     */
+    public static native int getV3Dsize();
+
+    /**
+     * @see #getVKeysize
+     */
+    public static native int getfloatsize();
+
+    /**
+     * @see #getVKeysize
+     */
+    public static native int getintsize();
+
+    /**
+     * @see #getVKeysize
+     */
+    public static native int getuintsize();
+
+    /**
+     * @see #getVKeysize
+     */
+    public static native int getdoublesize();
+
+    /**
+     * @see #getVKeysize
+     */
+    public static native int getlongsize();
+
+    /**
      * Returns a human readable error description.<p>
      * 
      * This method can be called when one of the import methods fails, i.e.,
@@ -249,8 +291,24 @@ public final class Jassimp {
         /* nothing to do */
     }
     
-    
+    public static final int NATIVE_AIVEKTORKEY_SIZE; 
+    public static final int NATIVE_AIQUATKEY_SIZE; 
+    public static final int NATIVE_AIVEKTOR3D_SIZE; 
+    public static final int NATIVE_FLOAT_SIZE; 
+    public static final int NATIVE_INT_SIZE; 
+    public static final int NATIVE_UINT_SIZE; 
+    public static final int NATIVE_DOUBLE_SIZE; 
+    public static final int NATIVE_LONG_SIZE; 
+
     static {
         System.loadLibrary("jassimp");
+    	NATIVE_AIVEKTORKEY_SIZE = getVKeysize();
+    	NATIVE_AIQUATKEY_SIZE = getQKeysize();
+    	NATIVE_AIVEKTOR3D_SIZE = getV3Dsize();
+    	NATIVE_FLOAT_SIZE = getfloatsize();
+    	NATIVE_INT_SIZE = getintsize();
+    	NATIVE_UINT_SIZE = getuintsize();
+    	NATIVE_DOUBLE_SIZE = getdoublesize();
+    	NATIVE_LONG_SIZE = getlongsize();
     }
 }

@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,26 +25,29 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 /** @file Default implementation of IOSystem using the standard C file functions */
 
-#include "AssimpPCH.h"
-
-#include <stdlib.h>
 #include "DefaultIOSystem.h"
 #include "DefaultIOStream.h"
+#include "StringComparison.h"
+
+#include "../include/assimp/DefaultLogger.hpp"
+#include "../include/assimp/ai_assert.h"
+#include <stdlib.h>
+
 
 #ifdef __unix__
 #include <sys/param.h>
@@ -54,50 +57,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-// Constructor. 
+// Constructor.
 DefaultIOSystem::DefaultIOSystem()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
-// Destructor. 
+// Destructor.
 DefaultIOSystem::~DefaultIOSystem()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Tests for the existence of a file at the given path.
 bool DefaultIOSystem::Exists( const char* pFile) const
 {
-	FILE* file = ::fopen( pFile, "rb");
-	if( !file)
-		return false;
+    FILE* file = ::fopen( pFile, "rb");
+    if( !file)
+        return false;
 
-	::fclose( file);
-	return true;
+    ::fclose( file);
+    return true;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Open a new file with a given path.
 IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
 {
-	ai_assert(NULL != strFile);
-	ai_assert(NULL != strMode);
+    ai_assert(NULL != strFile);
+    ai_assert(NULL != strMode);
 
-	FILE* file = ::fopen( strFile, strMode);
-	if( NULL == file) 
-		return NULL;
+    FILE* file = ::fopen( strFile, strMode);
+    if( NULL == file)
+        return NULL;
 
-	return new DefaultIOStream(file, (std::string) strFile);
+    return new DefaultIOStream(file, (std::string) strFile);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Closes the given file and releases all resources associated with it.
 void DefaultIOSystem::Close( IOStream* pFile)
 {
-	delete pFile;
+    delete pFile;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -105,9 +108,9 @@ void DefaultIOSystem::Close( IOStream* pFile)
 char DefaultIOSystem::getOsSeparator() const
 {
 #ifndef _WIN32
-	return '/';
+    return '/';
 #else
-	return '\\';
+    return '\\';
 #endif
 }
 
@@ -115,53 +118,80 @@ char DefaultIOSystem::getOsSeparator() const
 // IOSystem default implementation (ComparePaths isn't a pure virtual function)
 bool IOSystem::ComparePaths (const char* one, const char* second) const
 {
-	return !ASSIMP_stricmp(one,second);
+    return !ASSIMP_stricmp(one,second);
 }
 
 // maximum path length
-// XXX http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html 
+// XXX http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html
 #ifdef PATH_MAX
-#	define PATHLIMIT PATH_MAX
+#   define PATHLIMIT PATH_MAX
 #else
-#	define PATHLIMIT 4096
+#   define PATHLIMIT 4096
 #endif
 
 // ------------------------------------------------------------------------------------------------
 // Convert a relative path into an absolute path
 inline void MakeAbsolutePath (const char* in, char* _out)
 {
-	ai_assert(in && _out);
-	char* ret;
+    ai_assert(in && _out);
+    char* ret;
 #ifdef _WIN32
-	ret = ::_fullpath(_out, in,PATHLIMIT);
+    ret = ::_fullpath(_out, in,PATHLIMIT);
 #else
-    	// use realpath
-    	ret = realpath(in, _out);
-#endif  
-	if(!ret) {
-		// preserve the input path, maybe someone else is able to fix
-		// the path before it is accessed (e.g. our file system filter)
-		DefaultLogger::get()->warn("Invalid path: "+std::string(in));
-		strcpy(_out,in);
-	}  
+        // use realpath
+        ret = realpath(in, _out);
+#endif
+    if(!ret) {
+        // preserve the input path, maybe someone else is able to fix
+        // the path before it is accessed (e.g. our file system filter)
+        DefaultLogger::get()->warn("Invalid path: "+std::string(in));
+        strcpy(_out,in);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 // DefaultIOSystem's more specialized implementation
 bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
 {
-	// chances are quite good both paths are formatted identically,
-	// so we can hopefully return here already
-	if( !ASSIMP_stricmp(one,second) )
-		return true;
+    // chances are quite good both paths are formatted identically,
+    // so we can hopefully return here already
+    if( !ASSIMP_stricmp(one,second) )
+        return true;
 
-	char temp1[PATHLIMIT];
-	char temp2[PATHLIMIT];
-	
-	MakeAbsolutePath (one, temp1);
-	MakeAbsolutePath (second, temp2);
+    char temp1[PATHLIMIT];
+    char temp2[PATHLIMIT];
 
-	return !ASSIMP_stricmp(temp1,temp2);
+    MakeAbsolutePath (one, temp1);
+    MakeAbsolutePath (second, temp2);
+
+    return !ASSIMP_stricmp(temp1,temp2);
+}
+
+
+std::string DefaultIOSystem::fileName(std::string path)
+{
+    std::string ret = path;
+    std::size_t last = ret.find_last_of("\\/");
+    if (last != std::string::npos) ret = ret.substr(last + 1);
+    return ret;
+}
+
+
+std::string DefaultIOSystem::completeBaseName(std::string path)
+{
+    std::string ret = fileName(path);
+    std::size_t pos = ret.find_last_of('.');
+    if(pos != ret.npos) ret = ret.substr(0, pos);
+    return ret;
+}
+
+
+std::string DefaultIOSystem::absolutePath(std::string path)
+{
+    std::string ret = path;
+    std::size_t last = ret.find_last_of("\\/");
+    if (last != std::string::npos) ret = ret.substr(0, last);
+    return ret;
 }
 
 #undef PATHLIMIT

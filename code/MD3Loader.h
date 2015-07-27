@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -45,12 +45,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MD3LOADER_H_INCLUDED
 
 #include "BaseImporter.h"
-#include "ByteSwap.h"
-
+#include "ByteSwapper.h"
+#include "MD3FileData.h"
+#include "StringComparison.h"
 #include "../include/assimp/types.h"
 
-#include "MD3FileData.h"
-namespace Assimp	{
+#include <list>
+
+struct aiMaterial;
+
+namespace Assimp    {
 
 
 using namespace MD3;
@@ -61,22 +65,22 @@ namespace Q3Shader {
  */
 struct SkinData
 {
-	//! A single entryin texture list
-	struct TextureEntry : public std::pair<std::string,std::string>
-	{
-		// did we resolve this texture entry?
-		bool resolved;
+    //! A single entryin texture list
+    struct TextureEntry : public std::pair<std::string,std::string>
+    {
+        // did we resolve this texture entry?
+        bool resolved;
 
-		// for std::find()
-		bool operator == (const std::string& f) const {
-			return f == first;
-		}
-	};
+        // for std::find()
+        bool operator == (const std::string& f) const {
+            return f == first;
+        }
+    };
 
-	//! List of textures
-	std::list<TextureEntry> textures;
+    //! List of textures
+    std::list<TextureEntry> textures;
 
-	// rest is ignored for the moment
+    // rest is ignored for the moment
 };
 
 // ---------------------------------------------------------------------------
@@ -84,9 +88,9 @@ struct SkinData
  */
 enum ShaderCullMode
 {
-	CULL_NONE,
-	CULL_CW,
-	CULL_CCW
+    CULL_NONE,
+    CULL_CW,
+    CULL_CCW
 };
 
 // ---------------------------------------------------------------------------
@@ -94,13 +98,13 @@ enum ShaderCullMode
  */
 enum BlendFunc
 {
-	BLEND_NONE,
-	BLEND_GL_ONE, 
-	BLEND_GL_ZERO,
-	BLEND_GL_DST_COLOR,
-	BLEND_GL_ONE_MINUS_DST_COLOR,
-	BLEND_GL_SRC_ALPHA,
-	BLEND_GL_ONE_MINUS_SRC_ALPHA
+    BLEND_NONE,
+    BLEND_GL_ONE,
+    BLEND_GL_ZERO,
+    BLEND_GL_DST_COLOR,
+    BLEND_GL_ONE_MINUS_DST_COLOR,
+    BLEND_GL_SRC_ALPHA,
+    BLEND_GL_ONE_MINUS_SRC_ALPHA
 };
 
 // ---------------------------------------------------------------------------
@@ -108,10 +112,10 @@ enum BlendFunc
  */
 enum AlphaTestFunc
 {
-	AT_NONE,
-	AT_GT0,
-	AT_LT128, 
-	AT_GE128
+    AT_NONE,
+    AT_GT0,
+    AT_LT128,
+    AT_GE128
 };
 
 // ---------------------------------------------------------------------------
@@ -119,24 +123,24 @@ enum AlphaTestFunc
  */
 struct ShaderMapBlock
 {
-	ShaderMapBlock()
-		 :	blend_src	(BLEND_NONE)
-		 ,	blend_dest	(BLEND_NONE)
-		 ,	alpha_test	(AT_NONE)
-	{}
+    ShaderMapBlock()
+         :  blend_src   (BLEND_NONE)
+         ,  blend_dest  (BLEND_NONE)
+         ,  alpha_test  (AT_NONE)
+    {}
 
-	//! Name of referenced map
-	std::string name;
+    //! Name of referenced map
+    std::string name;
 
-	//! Blend and alpha test settings for texture
-	BlendFunc blend_src,blend_dest;
-	AlphaTestFunc alpha_test;
+    //! Blend and alpha test settings for texture
+    BlendFunc blend_src,blend_dest;
+    AlphaTestFunc alpha_test;
 
 
-	//! For std::find()
-	bool operator== (const std::string& o) const {
-		return !ASSIMP_stricmp(o,name);
-	}
+    //! For std::find()
+    bool operator== (const std::string& o) const {
+        return !ASSIMP_stricmp(o,name);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -144,24 +148,24 @@ struct ShaderMapBlock
  */
 struct ShaderDataBlock
 {
-	ShaderDataBlock()
-		:	cull	(CULL_CW)
-	{}
+    ShaderDataBlock()
+        :   cull    (CULL_CW)
+    {}
 
-	//! Name of referenced data element
-	std::string name;
+    //! Name of referenced data element
+    std::string name;
 
-	//! Cull mode for the element
-	ShaderCullMode cull;
+    //! Cull mode for the element
+    ShaderCullMode cull;
 
-	//! Maps defined in the shader
-	std::list<ShaderMapBlock> maps;
+    //! Maps defined in the shader
+    std::list<ShaderMapBlock> maps;
 
 
-	//! For std::find()
-	bool operator== (const std::string& o) const {
-		return !ASSIMP_stricmp(o,name);
-	}
+    //! For std::find()
+    bool operator== (const std::string& o) const {
+        return !ASSIMP_stricmp(o,name);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -169,8 +173,8 @@ struct ShaderDataBlock
  */
 struct ShaderData
 {
-	//! Shader data blocks
-	std::list<ShaderDataBlock> blocks;
+    //! Shader data blocks
+    std::list<ShaderDataBlock> blocks;
 };
 
 // ---------------------------------------------------------------------------
@@ -212,115 +216,115 @@ bool LoadSkin(SkinData& fill, const std::string& file,IOSystem* io);
 class MD3Importer : public BaseImporter
 {
 public:
-	MD3Importer();
-	~MD3Importer();
+    MD3Importer();
+    ~MD3Importer();
 
 
 public:
 
-	// -------------------------------------------------------------------
-	/** Returns whether the class can handle the format of the given file. 
-	* See BaseImporter::CanRead() for details.	*/
-	bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-		bool checkSig) const;
+    // -------------------------------------------------------------------
+    /** Returns whether the class can handle the format of the given file.
+    * See BaseImporter::CanRead() for details.  */
+    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
+        bool checkSig) const;
 
 
-	// -------------------------------------------------------------------
-	/** Called prior to ReadFile().
-	* The function is a request to the importer to update its configuration
-	* basing on the Importer's configuration property list.
-	*/
-	void SetupProperties(const Importer* pImp);
-
-protected:
-
-	// -------------------------------------------------------------------
-	/** Return importer meta information.
-	 * See #BaseImporter::GetInfo for the details
-	 */
-	const aiImporterDesc* GetInfo () const;
-
-	// -------------------------------------------------------------------
-	/** Imports the given file into the given scene structure. 
-	 * See BaseImporter::InternReadFile() for details
-	 */
-	void InternReadFile( const std::string& pFile, aiScene* pScene, 
-		IOSystem* pIOHandler);
-
-	// -------------------------------------------------------------------
-	/** Validate offsets in the header
-	 */
-	void ValidateHeaderOffsets();
-	void ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurfHeader);
-
-	// -------------------------------------------------------------------
-	/** Read a Q3 multipart file
-	 *  @return true if multi part has been processed
-	 */
-	bool ReadMultipartFile();
-
-	// -------------------------------------------------------------------
-	/** Try to read the skin for a MD3 file
-	 *  @param fill Receives output information
-	 */
-	void ReadSkin(Q3Shader::SkinData& fill) const;
-
-	// -------------------------------------------------------------------
-	/** Try to read the shader for a MD3 file
-	 *  @param fill Receives output information
-	 */
-	void ReadShader(Q3Shader::ShaderData& fill) const;
-
-	// -------------------------------------------------------------------
-	/** Convert a texture path in a MD3 file to a proper value
-	 *  @param[in] texture_name Path to be converted
-	 *  @param[in] header_path Base path specified in MD3 header
-	 *  @param[out] out Receives the converted output string
-	 */
-	void ConvertPath(const char* texture_name, const char* header_path, 
-		std::string& out) const;
+    // -------------------------------------------------------------------
+    /** Called prior to ReadFile().
+    * The function is a request to the importer to update its configuration
+    * basing on the Importer's configuration property list.
+    */
+    void SetupProperties(const Importer* pImp);
 
 protected:
 
-	/** Configuration option: frame to be loaded */
-	unsigned int configFrameID;
+    // -------------------------------------------------------------------
+    /** Return importer meta information.
+     * See #BaseImporter::GetInfo for the details
+     */
+    const aiImporterDesc* GetInfo () const;
 
-	/** Configuration option: process multi-part files */
-	bool configHandleMP;
+    // -------------------------------------------------------------------
+    /** Imports the given file into the given scene structure.
+     * See BaseImporter::InternReadFile() for details
+     */
+    void InternReadFile( const std::string& pFile, aiScene* pScene,
+        IOSystem* pIOHandler);
 
-	/** Configuration option: name of skin file to be read */
-	std::string configSkinFile;
+    // -------------------------------------------------------------------
+    /** Validate offsets in the header
+     */
+    void ValidateHeaderOffsets();
+    void ValidateSurfaceHeaderOffsets(const MD3::Surface* pcSurfHeader);
 
-	/** Configuration option: name or path of shader */
-	std::string configShaderFile;
+    // -------------------------------------------------------------------
+    /** Read a Q3 multipart file
+     *  @return true if multi part has been processed
+     */
+    bool ReadMultipartFile();
 
-	/** Configuration option: speed flag was set? */
-	bool configSpeedFlag;
+    // -------------------------------------------------------------------
+    /** Try to read the skin for a MD3 file
+     *  @param fill Receives output information
+     */
+    void ReadSkin(Q3Shader::SkinData& fill) const;
 
-	/** Header of the MD3 file */
-	BE_NCONST MD3::Header* pcHeader;
+    // -------------------------------------------------------------------
+    /** Try to read the shader for a MD3 file
+     *  @param fill Receives output information
+     */
+    void ReadShader(Q3Shader::ShaderData& fill) const;
 
-	/** File buffer  */
-	BE_NCONST unsigned char* mBuffer;
+    // -------------------------------------------------------------------
+    /** Convert a texture path in a MD3 file to a proper value
+     *  @param[in] texture_name Path to be converted
+     *  @param[in] header_path Base path specified in MD3 header
+     *  @param[out] out Receives the converted output string
+     */
+    void ConvertPath(const char* texture_name, const char* header_path,
+        std::string& out) const;
 
-	/** Size of the file, in bytes */
-	unsigned int fileSize;
+protected:
 
-	/** Current file name */
-	std::string mFile;
+    /** Configuration option: frame to be loaded */
+    unsigned int configFrameID;
 
-	/** Current base directory  */
-	std::string path;
+    /** Configuration option: process multi-part files */
+    bool configHandleMP;
 
-	/** Pure file we're currently reading */
-	std::string filename;
+    /** Configuration option: name of skin file to be read */
+    std::string configSkinFile;
 
-	/** Output scene to be filled */
-	aiScene* mScene;
+    /** Configuration option: name or path of shader */
+    std::string configShaderFile;
 
-	/** IO system to be used to access the data*/
-	IOSystem* mIOHandler;
-	};
+    /** Configuration option: speed flag was set? */
+    bool configSpeedFlag;
+
+    /** Header of the MD3 file */
+    BE_NCONST MD3::Header* pcHeader;
+
+    /** File buffer  */
+    BE_NCONST unsigned char* mBuffer;
+
+    /** Size of the file, in bytes */
+    unsigned int fileSize;
+
+    /** Current file name */
+    std::string mFile;
+
+    /** Current base directory  */
+    std::string path;
+
+    /** Pure file we're currently reading */
+    std::string filename;
+
+    /** Output scene to be filled */
+    aiScene* mScene;
+
+    /** IO system to be used to access the data*/
+    IOSystem* mIOHandler;
+    };
 
 } // end of namespace Assimp
 

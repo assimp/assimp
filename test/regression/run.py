@@ -65,7 +65,7 @@ import utils
 # -------------------------------------------------------------------------------
 EXPECTED_FAILURE_NOT_MET, DATABASE_LENGTH_MISMATCH, \
 DATABASE_VALUE_MISMATCH, IMPORT_FAILURE, \
-FILE_NOT_READABLE, COMPARE_SUCCESS = range(6)
+FILE_NOT_READABLE, COMPARE_SUCCESS, EXPECTED_FAILURE = range(7)
 
 messages = collections.defaultdict(lambda: "<unknown", {
         EXPECTED_FAILURE_NOT_MET:
@@ -88,7 +88,10 @@ messages = collections.defaultdict(lambda: "<unknown", {
 
         COMPARE_SUCCESS:
 """Results match archived reference dump in database\n\
-\tNumber of bytes compared: {0}"""
+\tNumber of bytes compared: {0}""",
+
+        EXPECTED_FAILURE:
+"""Expected failure was met.""",
 })
 
 outfilename_output = "run_regression_suite_output.txt"
@@ -148,6 +151,10 @@ class results:
            print("\nSee " + settings.results + "\\" + outfilename_failur 
                  + " for more details\n\n") 
     
+    def hasFailures( self ):
+        """ Return True, if any failures there. """
+        return 0 != len( self.failures )
+        
 # -------------------------------------------------------------------------------
 def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(settings.results, "tmp", os.path.split(fullpath)[1] + "_" + myhash)
@@ -167,11 +174,11 @@ def process_dir(d, outfile_results, zipin, result):
     print("Processing directory " + d)
     for f in sorted(os.listdir(d)):
         fullpath = os.path.join(d, f)
-        if os.path.isdir(fullpath) and not f == ".svn":
+        if os.path.isdir(fullpath) and not f[:1] == '.':
             process_dir(fullpath, outfile_results, zipin, result)
             continue
 
-        if f in settings.files_to_ignore:
+        if f in settings.files_to_ignore or os.path.splitext(f)[1] in settings.exclude_extensions:
             print("Ignoring " + f)
             continue
 
@@ -190,32 +197,30 @@ def process_dir(d, outfile_results, zipin, result):
                     "regression database? Use gen_db.zip to re-generate.")
                 continue
 
-            # Ignore extensions via settings.py configured list
-            # todo: Fix for multi dot extensions like .skeleton.xml
-            ext = os.path.splitext(fullpath)[1].lower()
-            if ext != "" and ext in settings.exclude_extensions:
-                continue
-
             print("-"*60 + "\n  " + os.path.realpath(fullpath) + " pp: " + pppreset) 
             
             outfile_actual = prepare_output_dir(fullpath, filehash, "ACTUAL")
             outfile_expect = prepare_output_dir(fullpath, filehash, "EXPECT")
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
-
             command = [assimp_bin_path,
                 "dump",
                 fullpath, outfile_actual, "-b", "-s", "-l" ] +\
                 pppreset.split()
-
             r = subprocess.call(command, **shellparams)
-            print(r)
+            outfile_results.flush()
 
             if r and not failure:
                 result.fail(fullpath, outfile_expect, pppreset, IMPORT_FAILURE, r)
+                outfile_results.write("Failed to import\n")
                 continue
             elif failure and not r:
                 result.fail(fullpath, outfile_expect, pppreset, EXPECTED_FAILURE_NOT_MET)
+                outfile_results.write("Expected import to fail\n")
+                continue
+            elif failure and r:
+                result.ok(fullpath, pppreset, EXPECTED_FAILURE) 
+                outfile_results.write("Failed as expected, skipping.\n")
                 continue
             
             with open(outfile_expect, "wb") as s:
@@ -227,21 +232,24 @@ def process_dir(d, outfile_results, zipin, result):
             except IOError:
                 continue
                 
+            outfile_results.write("Expected data length: {0}\n".format(len(input_expected)))
+            outfile_results.write("Actual data length: {0}\n".format(len(input_actual)))
+            failed = False
             if len(input_expected) != len(input_actual):
                 result.fail(fullpath, outfile_expect, pppreset, DATABASE_LENGTH_MISMATCH,
                         len(input_expected), len(input_actual))
-                continue
+                # Still compare the dumps to see what the difference is
+                failed = True
 
             outfile_results.write("assimp cmpdump "+"-"*80+"\n")
             outfile_results.flush()
-
             command = [ assimp_bin_path, 'cmpdump', outfile_actual, outfile_expect ]
             if subprocess.call(command, **shellparams) != 0:
-                result.fail(fullpath, outfile_expect, pppreset, DATABASE_VALUE_MISMATCH)
+                if not failed:
+                    result.fail(fullpath, outfile_expect, pppreset, DATABASE_VALUE_MISMATCH)
                 continue 
             
-            result.ok(fullpath, pppreset, COMPARE_SUCCESS, 
-                len(input_expected))     
+            result.ok(fullpath, pppreset, COMPARE_SUCCESS, len(input_expected))     
 
 # -------------------------------------------------------------------------------
 def del_folder_with_contents(folder):
@@ -276,11 +284,16 @@ def run_test():
             process_dir(tp, outfile, zipin, res)
 
     res.report_results()
+    if res.hasFailures():
+        return 1
+        
+    return 0
+        
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
     assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
     print('Using assimp binary: ' + assimp_bin_path)
-    run_test()
+    sys.exit( run_test() )
 
 # vim: ai ts=4 sts=4 et sw=4

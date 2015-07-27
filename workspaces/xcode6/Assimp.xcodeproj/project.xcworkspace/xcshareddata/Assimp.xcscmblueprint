@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "AE3F0F79FA18959EE39DE06BF81D40ADA159F259",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "AE3F0F79FA18959EE39DE06BF81D40ADA159F259" : 0,
+    "BAB24031A51D728DF843C2AED36E4506ECB1FFC2" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D62E7BFA-CF67-4098-A3F5-28B460E459FD",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "AE3F0F79FA18959EE39DE06BF81D40ADA159F259" : "assimp",
+    "BAB24031A51D728DF843C2AED36E4506ECB1FFC2" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Assimp",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 203,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "workspaces\/xcode6\/Assimp.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/delicious-monster\/assimp.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "AE3F0F79FA18959EE39DE06BF81D40ADA159F259"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "savory:UberDwelling.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "BAB24031A51D728DF843C2AED36E4506ECB1FFC2"
+    }
+  ]
+}

@@ -161,11 +161,11 @@
 		7F7924C21AB43E20005A8E5D /* sweep_context.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5E10483FBE6D4F4594B460E0 /* sweep_context.cc */; };
 		7F7924C31AB43E20005A8E5D /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = AF75E6049338489BB256D295 /* ioapi.c */; };
 		7F7924C41AB43E20005A8E5D /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 973D4231A4AA4925B019FEEE /* unzip.c */; };
+		7F7A93A81B65D0110094C4DA /* DDLNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7F7A93A51B65D0110094C4DA /* DDLNode.cpp */; };
+		7F7A93A91B65D0110094C4DA /* OpenDDLParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7F7A93A61B65D0110094C4DA /* OpenDDLParser.cpp */; };
+		7F7A93AA1B65D0110094C4DA /* Value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7F7A93A71B65D0110094C4DA /* Value.cpp */; };
 		7FBE9FEA1B65AC1200D2115E /* OpenGEXExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBE9FE51B65AC1200D2115E /* OpenGEXExporter.cpp */; };
 		7FBE9FEB1B65AC1200D2115E /* OpenGEXImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBE9FE71B65AC1200D2115E /* OpenGEXImporter.cpp */; };
-		7FBEA00E1B65AF9200D2115E /* DDLNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBEA0061B65AF9200D2115E /* DDLNode.cpp */; };
-		7FBEA00F1B65AF9200D2115E /* OpenDDLParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBEA0091B65AF9200D2115E /* OpenDDLParser.cpp */; };
-		7FBEA0101B65AF9200D2115E /* Value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBEA00C1B65AF9200D2115E /* Value.cpp */; };
 		7FBEA0121B65B11800D2115E /* Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBEA0111B65B11800D2115E /* Version.cpp */; };
 /* End PBXBuildFile section */
 
@@ -368,18 +368,18 @@
 		7F29EF981AB26C4900E9D380 /* libz.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.dylib; path = /usr/lib/libz.1.dylib; sourceTree = "<absolute>"; };
 		7F392D921AB2C7BB00D952EB /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "/usr/lib/libc++.dylib"; sourceTree = "<absolute>"; };
 		7F7922801AB43AC3005A8E5D /* libassimp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libassimp.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F7A93A51B65D0110094C4DA /* DDLNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DDLNode.cpp; path = contrib/openddlparser/code/DDLNode.cpp; sourceTree = "<group>"; };
+		7F7A93A61B65D0110094C4DA /* OpenDDLParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenDDLParser.cpp; path = contrib/openddlparser/code/OpenDDLParser.cpp; sourceTree = "<group>"; };
+		7F7A93A71B65D0110094C4DA /* Value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Value.cpp; path = contrib/openddlparser/code/Value.cpp; sourceTree = "<group>"; };
 		7FBE9FE51B65AC1200D2115E /* OpenGEXExporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenGEXExporter.cpp; path = code/OpenGEXExporter.cpp; sourceTree = "<group>"; };
 		7FBE9FE61B65AC1200D2115E /* OpenGEXExporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenGEXExporter.h; path = code/OpenGEXExporter.h; sourceTree = "<group>"; };
 		7FBE9FE71B65AC1200D2115E /* OpenGEXImporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenGEXImporter.cpp; path = code/OpenGEXImporter.cpp; sourceTree = "<group>"; };
 		7FBE9FE81B65AC1200D2115E /* OpenGEXImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenGEXImporter.h; path = code/OpenGEXImporter.h; sourceTree = "<group>"; };
 		7FBE9FE91B65AC1200D2115E /* OpenGEXStructs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenGEXStructs.h; path = code/OpenGEXStructs.h; sourceTree = "<group>"; };
-		7FBEA0061B65AF9200D2115E /* DDLNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DDLNode.cpp; path = contrib/openddlparser/include/openddlparser/DDLNode.cpp; sourceTree = "<group>"; };
 		7FBEA0071B65AF9200D2115E /* DDLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDLNode.h; path = contrib/openddlparser/include/openddlparser/DDLNode.h; sourceTree = "<group>"; };
 		7FBEA0081B65AF9200D2115E /* OpenDDLCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenDDLCommon.h; path = contrib/openddlparser/include/openddlparser/OpenDDLCommon.h; sourceTree = "<group>"; };
-		7FBEA0091B65AF9200D2115E /* OpenDDLParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenDDLParser.cpp; path = contrib/openddlparser/include/openddlparser/OpenDDLParser.cpp; sourceTree = "<group>"; };
 		7FBEA00A1B65AF9200D2115E /* OpenDDLParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenDDLParser.h; path = contrib/openddlparser/include/openddlparser/OpenDDLParser.h; sourceTree = "<group>"; };
 		7FBEA00B1B65AF9200D2115E /* OpenDDLParserUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenDDLParserUtils.h; path = contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h; sourceTree = "<group>"; };
-		7FBEA00C1B65AF9200D2115E /* Value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Value.cpp; path = contrib/openddlparser/include/openddlparser/Value.cpp; sourceTree = "<group>"; };
 		7FBEA00D1B65AF9200D2115E /* Value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Value.h; path = contrib/openddlparser/include/openddlparser/Value.h; sourceTree = "<group>"; };
 		7FBEA0111B65B11800D2115E /* Version.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Version.cpp; path = code/Version.cpp; sourceTree = "<group>"; };
 		7FF72CB6E99E40E19AE0E64C /* MaterialSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MaterialSystem.cpp; path = code/MaterialSystem.cpp; sourceTree = SOURCE_ROOT; };
@@ -1079,14 +1079,14 @@
 		7FBEA0051B65AF8900D2115E /* openddlparser */ = {
 			isa = PBXGroup;
 			children = (
-				7FBEA0061B65AF9200D2115E /* DDLNode.cpp */,
-				7FBEA0071B65AF9200D2115E /* DDLNode.h */,
 				7FBEA0081B65AF9200D2115E /* OpenDDLCommon.h */,
-				7FBEA0091B65AF9200D2115E /* OpenDDLParser.cpp */,
-				7FBEA00A1B65AF9200D2115E /* OpenDDLParser.h */,
 				7FBEA00B1B65AF9200D2115E /* OpenDDLParserUtils.h */,
-				7FBEA00C1B65AF9200D2115E /* Value.cpp */,
+				7FBEA0071B65AF9200D2115E /* DDLNode.h */,
+				7F7A93A51B65D0110094C4DA /* DDLNode.cpp */,
+				7FBEA00A1B65AF9200D2115E /* OpenDDLParser.h */,
+				7F7A93A61B65D0110094C4DA /* OpenDDLParser.cpp */,
 				7FBEA00D1B65AF9200D2115E /* Value.h */,
+				7F7A93A71B65D0110094C4DA /* Value.cpp */,
 			);
 			name = openddlparser;
 			sourceTree = "<group>";
@@ -1592,11 +1592,11 @@
 				7F79244A1AB43E20005A8E5D /* DeboneProcess.cpp in Sources */,
 				7F79244B1AB43E20005A8E5D /* DefaultIOStream.cpp in Sources */,
 				7F79244C1AB43E20005A8E5D /* DefaultIOSystem.cpp in Sources */,
+				7F7A93A81B65D0110094C4DA /* DDLNode.cpp in Sources */,
 				7F79244D1AB43E20005A8E5D /* DefaultLogger.cpp in Sources */,
 				7F79244E1AB43E20005A8E5D /* Exporter.cpp in Sources */,
 				7F79244F1AB43E20005A8E5D /* FBXAnimation.cpp in Sources */,
 				7F7924501AB43E20005A8E5D /* FBXBinaryTokenizer.cpp in Sources */,
-				7FBEA0101B65AF9200D2115E /* Value.cpp in Sources */,
 				7F7924511AB43E20005A8E5D /* FBXConverter.cpp in Sources */,
 				7F7924521AB43E20005A8E5D /* FBXDeformer.cpp in Sources */,
 				7F7924531AB43E20005A8E5D /* FBXDocument.cpp in Sources */,
@@ -1610,6 +1610,7 @@
 				7F79245B1AB43E20005A8E5D /* FBXProperties.cpp in Sources */,
 				7F79245C1AB43E20005A8E5D /* FBXTokenizer.cpp in Sources */,
 				7F79245D1AB43E20005A8E5D /* FBXUtil.cpp in Sources */,
+				7F7A93A91B65D0110094C4DA /* OpenDDLParser.cpp in Sources */,
 				7F79245E1AB43E20005A8E5D /* FindDegenerates.cpp in Sources */,
 				7F79245F1AB43E20005A8E5D /* FindInstancesProcess.cpp in Sources */,
 				7F7924601AB43E20005A8E5D /* FindInvalidDataProcess.cpp in Sources */,
@@ -1632,7 +1633,6 @@
 				7F7924701AB43E20005A8E5D /* IRRShared.cpp in Sources */,
 				7F7924711AB43E20005A8E5D /* Importer.cpp in Sources */,
 				7F7924721AB43E20005A8E5D /* ImporterRegistry.cpp in Sources */,
-				7FBEA00E1B65AF9200D2115E /* DDLNode.cpp in Sources */,
 				7F7924731AB43E20005A8E5D /* ImproveCacheLocality.cpp in Sources */,
 				7F7924741AB43E20005A8E5D /* JoinVerticesProcess.cpp in Sources */,
 				7F7924751AB43E20005A8E5D /* LWOAnimation.cpp in Sources */,
@@ -1641,7 +1641,6 @@
 				7F7924781AB43E20005A8E5D /* LWOMaterial.cpp in Sources */,
 				7F7924791AB43E20005A8E5D /* LWSLoader.cpp in Sources */,
 				7F79247A1AB43E20005A8E5D /* LimitBoneWeightsProcess.cpp in Sources */,
-				7FBEA00F1B65AF9200D2115E /* OpenDDLParser.cpp in Sources */,
 				7F79247B1AB43E20005A8E5D /* MD2Loader.cpp in Sources */,
 				7F79247C1AB43E20005A8E5D /* MD3Loader.cpp in Sources */,
 				7F79247D1AB43E20005A8E5D /* MD5Loader.cpp in Sources */,
@@ -1673,6 +1672,7 @@
 				7F7924961AB43E20005A8E5D /* PostStepRegistry.cpp in Sources */,
 				7F7924971AB43E20005A8E5D /* PretransformVertices.cpp in Sources */,
 				7F7924981AB43E20005A8E5D /* ProcessHelper.cpp in Sources */,
+				7F7A93AA1B65D0110094C4DA /* Value.cpp in Sources */,
 				7F7924991AB43E20005A8E5D /* Q3BSPFileImporter.cpp in Sources */,
 				7F79249A1AB43E20005A8E5D /* Q3BSPFileParser.cpp in Sources */,
 				7F79249B1AB43E20005A8E5D /* Q3BSPZipArchive.cpp in Sources */,

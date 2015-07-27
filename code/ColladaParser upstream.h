@@ -215,8 +215,7 @@ namespace Assimp
     protected:
         /** Aborts the file reading with an exception */
         AI_WONT_RETURN void ThrowException( const std::string& pError) const AI_WONT_RETURN_SUFFIX;
-        void ReportWarning(const char* msg,...);
-
+        
         /** Skips all data until the end node of the current element */
         void SkipElement();
         

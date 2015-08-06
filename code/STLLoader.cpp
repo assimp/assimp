@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/scene.h"
 #include "../include/assimp/DefaultLogger.hpp"
+
 
 using namespace Assimp;
 
@@ -111,19 +112,19 @@ STLImporter::STLImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Destructor, private as well 
+// Destructor, private as well
 STLImporter::~STLImporter()
 {}
 
 // ------------------------------------------------------------------------------------------------
-// Returns whether the class can handle the format of the given file. 
+// Returns whether the class can handle the format of the given file.
 bool STLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
     const std::string extension = GetExtension(pFile);
 
     if (extension == "stl")
         return true;
-    else if (!extension.length() || checkSig)    {
+    else if (!extension.length() || checkSig)   {
         if (!pIOHandler)
             return true;
         const char* tokens[] = {"STL","solid"};
@@ -152,14 +153,14 @@ void addFacesToMesh(aiMesh* pMesh)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Imports the given file into the given scene structure. 
-void STLImporter::InternReadFile( const std::string& pFile, 
+// Imports the given file into the given scene structure.
+void STLImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
     boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
-    if( file.get() == NULL)    {
+    if( file.get() == NULL) {
         throw DeadlyImportError( "Failed to open STL file " + pFile + ".");
     }
 
@@ -388,7 +389,7 @@ bool STLImporter::LoadBinaryFile()
     // search for an occurence of "COLOR=" in the header
     const unsigned char* sz2 = (const unsigned char*)mBuffer;
     const unsigned char* const szEnd = sz2+80;
-    while (sz2 < szEnd)    {
+    while (sz2 < szEnd) {
 
         if ('C' == *sz2++ && 'O' == *sz2++ && 'L' == *sz2++ &&
             'O' == *sz2++ && 'R' == *sz2++ && '=' == *sz2++)    {
@@ -425,7 +426,7 @@ bool STLImporter::LoadBinaryFile()
     vp = pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
     vn = pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
 
-    for (unsigned int i = 0; i < pMesh->mNumFaces;++i)    {
+    for (unsigned int i = 0; i < pMesh->mNumFaces;++i) {
 
         // NOTE: Blender sometimes writes empty normals ... this is not
         // our fault ... the RemoveInvalidData helper step should fix that

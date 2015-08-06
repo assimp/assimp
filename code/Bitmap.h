@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -48,89 +48,94 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BITMAP_H_INC
 #define AI_BITMAP_H_INC
 
+#include <stdint.h>
+#include <cstddef>
+struct aiTexture;
+
 namespace Assimp {
 
+class IOStream;
 class Bitmap {
 
-	protected:
+    protected:
 
-		struct Header {
+        struct Header {
 
-			uint16_t type;
+            uint16_t type;
 
-			uint32_t size;
+            uint32_t size;
 
-			uint16_t reserved1;
+            uint16_t reserved1;
 
-			uint16_t reserved2;
+            uint16_t reserved2;
 
-			uint32_t offset;
+            uint32_t offset;
 
-			// We define the struct size because sizeof(Header) might return a wrong result because of structure padding.
-			// Moreover, we must use this ugly and error prone syntax because Visual Studio neither support constexpr or sizeof(name_of_field).
-			static const std::size_t header_size =
-				sizeof(uint16_t) + // type
-				sizeof(uint32_t) + // size
-				sizeof(uint16_t) + // reserved1
-				sizeof(uint16_t) + // reserved2
-				sizeof(uint32_t);  // offset
+            // We define the struct size because sizeof(Header) might return a wrong result because of structure padding.
+            // Moreover, we must use this ugly and error prone syntax because Visual Studio neither support constexpr or sizeof(name_of_field).
+            static const std::size_t header_size =
+                sizeof(uint16_t) + // type
+                sizeof(uint32_t) + // size
+                sizeof(uint16_t) + // reserved1
+                sizeof(uint16_t) + // reserved2
+                sizeof(uint32_t);  // offset
 
-		};
+        };
 
-		struct DIB {
+        struct DIB {
 
-			uint32_t size;
+            uint32_t size;
 
-			int32_t width;
+            int32_t width;
 
-			int32_t height;
+            int32_t height;
 
-			uint16_t planes;
+            uint16_t planes;
 
-			uint16_t bits_per_pixel;
+            uint16_t bits_per_pixel;
 
-			uint32_t compression;
+            uint32_t compression;
 
-			uint32_t image_size;
+            uint32_t image_size;
 
-			int32_t x_resolution;
+            int32_t x_resolution;
 
-			int32_t y_resolution;
+            int32_t y_resolution;
 
-			uint32_t nb_colors;
+            uint32_t nb_colors;
 
-			uint32_t nb_important_colors;
+            uint32_t nb_important_colors;
 
-			// We define the struct size because sizeof(DIB) might return a wrong result because of structure padding.
-			// Moreover, we must use this ugly and error prone syntax because Visual Studio neither support constexpr or sizeof(name_of_field).
-			static const std::size_t dib_size =
-				sizeof(uint32_t) + // size
-				sizeof(int32_t) +  // width
-				sizeof(int32_t) +  // height
-				sizeof(uint16_t) + // planes
-				sizeof(uint16_t) + // bits_per_pixel
-				sizeof(uint32_t) + // compression
-				sizeof(uint32_t) + // image_size
-				sizeof(int32_t) +  // x_resolution
-				sizeof(int32_t) +  // y_resolution
-				sizeof(uint32_t) + // nb_colors
-				sizeof(uint32_t);  // nb_important_colors
+            // We define the struct size because sizeof(DIB) might return a wrong result because of structure padding.
+            // Moreover, we must use this ugly and error prone syntax because Visual Studio neither support constexpr or sizeof(name_of_field).
+            static const std::size_t dib_size =
+                sizeof(uint32_t) + // size
+                sizeof(int32_t) +  // width
+                sizeof(int32_t) +  // height
+                sizeof(uint16_t) + // planes
+                sizeof(uint16_t) + // bits_per_pixel
+                sizeof(uint32_t) + // compression
+                sizeof(uint32_t) + // image_size
+                sizeof(int32_t) +  // x_resolution
+                sizeof(int32_t) +  // y_resolution
+                sizeof(uint32_t) + // nb_colors
+                sizeof(uint32_t);  // nb_important_colors
 
-		};
+        };
 
-		static const std::size_t mBytesPerPixel = 4;
+        static const std::size_t mBytesPerPixel = 4;
 
-	public:
+    public:
 
-		static void Save(aiTexture* texture, IOStream* file);
+        static void Save(aiTexture* texture, IOStream* file);
 
-	protected:
+    protected:
 
-		static void WriteHeader(Header& header, IOStream* file);
+        static void WriteHeader(Header& header, IOStream* file);
 
-		static void WriteDIB(DIB& dib, IOStream* file);
+        static void WriteDIB(DIB& dib, IOStream* file);
 
-		static void WriteData(aiTexture* texture, IOStream* file);
+        static void WriteData(aiTexture* texture, IOStream* file);
 
 };
 

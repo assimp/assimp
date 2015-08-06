@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,90 +25,91 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 /** @file  DefaultIOStream.cpp
- *  @brief Default File I/O implementation for #Importer 
+ *  @brief Default File I/O implementation for #Importer
  */
 
-#include "AssimpPCH.h"
 
+#include "../include/assimp/ai_assert.h"
 #include "DefaultIOStream.h"
-#include <sys/types.h> 
-#include <sys/stat.h> 
+#include <boost/static_assert.hpp>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace Assimp;
 
 // ----------------------------------------------------------------------------------
 DefaultIOStream::~DefaultIOStream()
 {
-	if (mFile) {
-		::fclose(mFile);
-	}
+    if (mFile) {
+        ::fclose(mFile);
+    }
 }
 
 // ----------------------------------------------------------------------------------
-size_t DefaultIOStream::Read(void* pvBuffer, 
-	size_t pSize, 
-	size_t pCount)
+size_t DefaultIOStream::Read(void* pvBuffer,
+    size_t pSize,
+    size_t pCount)
 {
-	ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
-	return (mFile ? ::fread(pvBuffer, pSize, pCount, mFile) : 0);
+    ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
+    return (mFile ? ::fread(pvBuffer, pSize, pCount, mFile) : 0);
 }
 
 // ----------------------------------------------------------------------------------
-size_t DefaultIOStream::Write(const void* pvBuffer, 
-	size_t pSize,
-	size_t pCount)
+size_t DefaultIOStream::Write(const void* pvBuffer,
+    size_t pSize,
+    size_t pCount)
 {
-	ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
-	return (mFile ? ::fwrite(pvBuffer, pSize, pCount, mFile) : 0);
+    ai_assert(NULL != pvBuffer && 0 != pSize && 0 != pCount);
+    return (mFile ? ::fwrite(pvBuffer, pSize, pCount, mFile) : 0);
 }
 
 // ----------------------------------------------------------------------------------
 aiReturn DefaultIOStream::Seek(size_t pOffset,
-	 aiOrigin pOrigin)
+     aiOrigin pOrigin)
 {
-	if (!mFile) {
-		return AI_FAILURE;
-	}
+    if (!mFile) {
+        return AI_FAILURE;
+    }
 
-	// Just to check whether our enum maps one to one with the CRT constants
-	BOOST_STATIC_ASSERT(aiOrigin_CUR == SEEK_CUR && 
-		aiOrigin_END == SEEK_END && aiOrigin_SET == SEEK_SET);
+    // Just to check whether our enum maps one to one with the CRT constants
+    BOOST_STATIC_ASSERT(aiOrigin_CUR == SEEK_CUR &&
+        aiOrigin_END == SEEK_END && aiOrigin_SET == SEEK_SET);
 
-	// do the seek
-	return (0 == ::fseek(mFile, (long)pOffset,(int)pOrigin) ? AI_SUCCESS : AI_FAILURE);
+    // do the seek
+    return (0 == ::fseek(mFile, (long)pOffset,(int)pOrigin) ? AI_SUCCESS : AI_FAILURE);
 }
 
 // ----------------------------------------------------------------------------------
 size_t DefaultIOStream::Tell() const
 {
-	if (!mFile) {
-		return 0;
-	}
-	return ::ftell(mFile);
+    if (!mFile) {
+        return 0;
+    }
+    return ::ftell(mFile);
 }
 
 // ----------------------------------------------------------------------------------
 size_t DefaultIOStream::FileSize() const
 {
-	if (! mFile || mFilename.empty()) {
-		return 0;
-	}
-	
-	if (SIZE_MAX == cachedSize) {
+    if (! mFile || mFilename.empty()) {
+        return 0;
+    }
+
+    if (SIZE_MAX == cachedSize) {
 
         // Although fseek/ftell would allow us to reuse the exising file handle here,
         // it is generally unsafe because:
@@ -119,28 +120,28 @@ size_t DefaultIOStream::FileSize() const
         // See here for details:
         // https://www.securecoding.cert.org/confluence/display/seccode/FIO19-C.+Do+not+use+fseek()+and+ftell()+to+compute+the+size+of+a+regular+file
 #if defined _WIN32 && !defined __GNUC__
-		struct __stat64 fileStat; 
-		int err = _stat64(  mFilename.c_str(), &fileStat ); 
-		if (0 != err) 
-			return 0; 
-		cachedSize = (size_t) (fileStat.st_size); 
+        struct __stat64 fileStat;
+        int err = _stat64(  mFilename.c_str(), &fileStat );
+        if (0 != err)
+            return 0;
+        cachedSize = (size_t) (fileStat.st_size);
 #else
-		struct stat fileStat; 
-		int err = stat(mFilename.c_str(), &fileStat ); 
-		if (0 != err) 
-			return 0; 
-		cachedSize = (size_t) (fileStat.st_size); 
+        struct stat fileStat;
+        int err = stat(mFilename.c_str(), &fileStat );
+        if (0 != err)
+            return 0;
+        cachedSize = (size_t) (fileStat.st_size);
 #endif
-	}
-	return cachedSize;
+    }
+    return cachedSize;
 }
 
 // ----------------------------------------------------------------------------------
 void DefaultIOStream::Flush()
 {
-	if (mFile) {
-		::fflush(mFile);
-	}
+    if (mFile) {
+        ::fflush(mFile);
+    }
 }
 
 // ----------------------------------------------------------------------------------

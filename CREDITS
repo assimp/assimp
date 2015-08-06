@@ -153,6 +153,8 @@ Ogre Binary format support
 Android JNI asset extraction support
 
 - Richard Steffen
-Contributed X File exporter
 Contributed ExportProperties interface
+Contributed X File exporter
+Contributed Step (stp) exporter
+
 

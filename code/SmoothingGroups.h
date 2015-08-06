@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -44,50 +44,55 @@ http://www.jalix.org/ressources/graphics/3DS/_unofficials/3ds-unofficial.txt */
 #ifndef AI_SMOOTHINGGROUPS_H_INC
 #define AI_SMOOTHINGGROUPS_H_INC
 
+#include "../include/assimp/vector3.h"
+#include <stdint.h>
+#include <vector>
+
 // ---------------------------------------------------------------------------
 /** Helper structure representing a face with smoothing groups assigned */
 struct FaceWithSmoothingGroup
 {
-	FaceWithSmoothingGroup() : iSmoothGroup(0)
-	{
-		// let the rest uninitialized for performance - in release builds.
-		// in debug builds set all indices to a common magic value
+    FaceWithSmoothingGroup()
+        : mIndices(),
+        iSmoothGroup(0)
+    {
+        // in debug builds set all indices to a common magic value
 #ifdef ASSIMP_BUILD_DEBUG
-		this->mIndices[0] = 0xffffffff;
-		this->mIndices[1] = 0xffffffff;
-		this->mIndices[2] = 0xffffffff;
+        this->mIndices[0] = 0xffffffff;
+        this->mIndices[1] = 0xffffffff;
+        this->mIndices[2] = 0xffffffff;
 #endif
-	}
+    }
 
-	
-	//! Indices. .3ds is using uint16. However, after
-	//! an unique vrtex set has been generated,
-	//! individual index values might exceed 2^16
-	uint32_t mIndices[3];
 
-	//! specifies to which smoothing group the face belongs to
-	uint32_t iSmoothGroup;
+    //! Indices. .3ds is using uint16. However, after
+    //! an unique vertex set has been generated,
+    //! individual index values might exceed 2^16
+    uint32_t mIndices[3];
+
+    //! specifies to which smoothing group the face belongs to
+    uint32_t iSmoothGroup;
 };
 
 // ---------------------------------------------------------------------------
 /** Helper structure representing a mesh whose faces have smoothing
-    groups assigned. This allows us to reuse the code for normal computations 
-	from smoothings groups for several loaders (3DS, ASE). All of them 
-	use face structures which inherit from #FaceWithSmoothingGroup,
-	but as they add extra members and need to be copied by value we
-	need to use a template here.
-	*/
+    groups assigned. This allows us to reuse the code for normal computations
+    from smoothings groups for several loaders (3DS, ASE). All of them
+    use face structures which inherit from #FaceWithSmoothingGroup,
+    but as they add extra members and need to be copied by value we
+    need to use a template here.
+    */
 template <class T>
 struct MeshWithSmoothingGroups
 {
-	//! Vertex positions
-	std::vector<aiVector3D> mPositions;
+    //! Vertex positions
+    std::vector<aiVector3D> mPositions;
 
-	//! Face lists
-	std::vector<T> mFaces;
+    //! Face lists
+    std::vector<T> mFaces;
 
-	//! List of normal vectors
-	std::vector<aiVector3D> mNormals;
+    //! List of normal vectors
+    std::vector<aiVector3D> mNormals;
 };
 
 // ---------------------------------------------------------------------------

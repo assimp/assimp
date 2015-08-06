@@ -284,7 +284,7 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
 	{
-		lprintf("invalid direct buffer, expected %u, got %u\n", size, env->GetDirectBufferCapacity(jBuffer));
+		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 
@@ -315,7 +315,7 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
 	{
-		lprintf("invalid direct buffer, expected %u, got %u\n", size, env->GetDirectBufferCapacity(jBuffer));
+		lprintf("invalid direct buffer, expected %u, got %llu\n", size, env->GetDirectBufferCapacity(jBuffer));
 		return false;
 	}
 
@@ -839,7 +839,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 	{
 		const aiMaterial* cMaterial = cScene->mMaterials[m];
 
-		lprintf("converting material ...\n", m);
+		lprintf("converting material %d ...\n", m);
 
 		jobject jMaterial = NULL;
 
@@ -1339,6 +1339,62 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 	return true;
 }
 
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getVKeysize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(aiVectorKey);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getQKeysize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(aiQuatKey);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getV3Dsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(aiVector3D);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getfloatsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(float);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getintsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(int);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getuintsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(unsigned int);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getdoublesize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(double);
+	return res;
+}
+
+JNIEXPORT jint JNICALL Java_jassimp_Jassimp_getlongsize
+  (JNIEnv *env, jclass jClazz)
+{
+	const int res = sizeof(long);
+	return res;
+}
 
 JNIEXPORT jstring JNICALL Java_jassimp_Jassimp_getErrorString
   (JNIEnv *env, jclass jClazz)

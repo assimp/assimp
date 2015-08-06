@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  FBXDocumentUtil.cpp
  *  @brief Implementation of the FBX DOM utility functions declared in FBXDocumentUtil.h
  */
-#include "AssimpPCH.h"
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
@@ -50,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXUtil.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
+#include <boost/make_shared.hpp>
 
 namespace Assimp {
 namespace FBX {
@@ -59,16 +59,16 @@ namespace Util {
 // signal DOM construction error, this is always unrecoverable. Throws DeadlyImportError.
 void DOMError(const std::string& message, const Token& token)
 {
-	throw DeadlyImportError(Util::AddTokenText("FBX-DOM",message,&token));
+    throw DeadlyImportError(Util::AddTokenText("FBX-DOM",message,&token));
 }
 
 // ------------------------------------------------------------------------------------------------
 void DOMError(const std::string& message, const Element* element /*= NULL*/)
 {
-	if(element) {
-		DOMError(message,element->KeyToken());
-	}
-	throw DeadlyImportError("FBX-DOM " + message);
+    if(element) {
+        DOMError(message,element->KeyToken());
+    }
+    throw DeadlyImportError("FBX-DOM " + message);
 }
 
 
@@ -76,55 +76,55 @@ void DOMError(const std::string& message, const Element* element /*= NULL*/)
 // print warning, do return
 void DOMWarning(const std::string& message, const Token& token)
 {
-	if(DefaultLogger::get()) {
-		DefaultLogger::get()->warn(Util::AddTokenText("FBX-DOM",message,&token));
-	}
+    if(DefaultLogger::get()) {
+        DefaultLogger::get()->warn(Util::AddTokenText("FBX-DOM",message,&token));
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
 void DOMWarning(const std::string& message, const Element* element /*= NULL*/)
 {
-	if(element) {
-		DOMWarning(message,element->KeyToken());
-		return;
-	}
-	if(DefaultLogger::get()) {
-		DefaultLogger::get()->warn("FBX-DOM: " + message);
-	}
+    if(element) {
+        DOMWarning(message,element->KeyToken());
+        return;
+    }
+    if(DefaultLogger::get()) {
+        DefaultLogger::get()->warn("FBX-DOM: " + message);
+    }
 }
 
 
 // ------------------------------------------------------------------------------------------------
-// fetch a property table and the corresponding property template 
-boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
-	const std::string& templateName, 
-	const Element &element, 
-	const Scope& sc,
-	bool no_warn /*= false*/)
+// fetch a property table and the corresponding property template
+boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc,
+    const std::string& templateName,
+    const Element &element,
+    const Scope& sc,
+    bool no_warn /*= false*/)
 {
-	const Element* const Properties70 = sc["Properties70"];
-	boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(
-		static_cast<const PropertyTable*>(NULL));
+    const Element* const Properties70 = sc["Properties70"];
+    boost::shared_ptr<const PropertyTable> templateProps = boost::shared_ptr<const PropertyTable>(
+        static_cast<const PropertyTable*>(NULL));
 
-	if(templateName.length()) {
-		PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName); 
-		if(it != doc.Templates().end()) {
-			templateProps = (*it).second;
-		}
-	}
+    if(templateName.length()) {
+        PropertyTemplateMap::const_iterator it = doc.Templates().find(templateName);
+        if(it != doc.Templates().end()) {
+            templateProps = (*it).second;
+        }
+    }
 
-	if(!Properties70) {
-		if(!no_warn) {
-			DOMWarning("property table (Properties70) not found",&element);
-		}
-		if(templateProps) {
-			return templateProps;
-		}
-		else {
-			return boost::make_shared<const PropertyTable>();
-		}
-	}
-	return boost::make_shared<const PropertyTable>(*Properties70,templateProps);
+    if(!Properties70) {
+        if(!no_warn) {
+            DOMWarning("property table (Properties70) not found",&element);
+        }
+        if(templateProps) {
+            return templateProps;
+        }
+        else {
+            return boost::make_shared<const PropertyTable>();
+        }
+    }
+    return boost::make_shared<const PropertyTable>(*Properties70,templateProps);
 }
 } // !Util
 } // !FBX

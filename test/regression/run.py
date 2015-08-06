@@ -65,7 +65,7 @@ import utils
 # -------------------------------------------------------------------------------
 EXPECTED_FAILURE_NOT_MET, DATABASE_LENGTH_MISMATCH, \
 DATABASE_VALUE_MISMATCH, IMPORT_FAILURE, \
-FILE_NOT_READABLE, COMPARE_SUCCESS = range(6)
+FILE_NOT_READABLE, COMPARE_SUCCESS, EXPECTED_FAILURE = range(7)
 
 messages = collections.defaultdict(lambda: "<unknown", {
         EXPECTED_FAILURE_NOT_MET:
@@ -88,7 +88,10 @@ messages = collections.defaultdict(lambda: "<unknown", {
 
         COMPARE_SUCCESS:
 """Results match archived reference dump in database\n\
-\tNumber of bytes compared: {0}"""
+\tNumber of bytes compared: {0}""",
+
+        EXPECTED_FAILURE:
+"""Expected failure was met.""",
 })
 
 outfilename_output = "run_regression_suite_output.txt"
@@ -148,6 +151,10 @@ class results:
            print("\nSee " + settings.results + "\\" + outfilename_failur 
                  + " for more details\n\n") 
     
+    def hasFailures( self ):
+        """ Return True, if any failures there. """
+        return 0 != len( self.failures )
+        
 # -------------------------------------------------------------------------------
 def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(settings.results, "tmp", os.path.split(fullpath)[1] + "_" + myhash)
@@ -211,6 +218,10 @@ def process_dir(d, outfile_results, zipin, result):
                 result.fail(fullpath, outfile_expect, pppreset, EXPECTED_FAILURE_NOT_MET)
                 outfile_results.write("Expected import to fail\n")
                 continue
+            elif failure and r:
+                result.ok(fullpath, pppreset, EXPECTED_FAILURE) 
+                outfile_results.write("Failed as expected, skipping.\n")
+                continue
             
             with open(outfile_expect, "wb") as s:
                 s.write(input_expected) 
@@ -273,11 +284,16 @@ def run_test():
             process_dir(tp, outfile, zipin, res)
 
     res.report_results()
+    if res.hasFailures():
+        return 1
+        
+    return 0
+        
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
     assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
     print('Using assimp binary: ' + assimp_bin_path)
-    run_test()
+    sys.exit( run_test() )
 
 # vim: ai ts=4 sts=4 et sw=4

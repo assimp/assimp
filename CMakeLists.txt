@@ -94,7 +94,7 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
   "Path the tool executables are installed to." )
 
-SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfitx for lib, samples and tools")
+SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfix for lib, samples and tools")
 
 # Only generate this target if no higher-level project already has
 IF (NOT TARGET uninstall)

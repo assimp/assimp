@@ -68,7 +68,7 @@ class PyAssimp3DViewer:
         pygame.init()
         pygame.display.set_caption(self.base_name)
         pygame.display.set_mode((w,h), pygame.OPENGL | pygame.DOUBLEBUF)
-
+        glutInit()
         self.prepare_shaders()
 
         self.cameras = [DefaultCamera(w,h,fov)]

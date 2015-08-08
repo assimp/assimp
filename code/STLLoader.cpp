@@ -102,7 +102,7 @@ bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
 
     bool isASCII( strncmp( buffer, "solid", 5 ) == 0 );
     if( isASCII ) {
-        // A lot of importers are write solit even if the file is binary. So we have to check for ascii characters.
+        // A lot of importers are write solid even if the file is binary. So we have to check for ASCII-characters.
         if( fileSize >= 500 ) {
             isASCII = true;
             for( unsigned int i = 0; i < 500; i++ ) {

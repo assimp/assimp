@@ -279,7 +279,7 @@ void STLImporter::LoadASCIIFile()
             break;
         }
         // facet normal -0.13 -0.13 -0.98
-        if (!strncmp(sz,"facet",5) && IsSpaceOrNewLine(*(sz+5)))    {
+        if (!strncmp(sz,"facet",5) && IsSpaceOrNewLine(*(sz+5)) && *(sz + 5) != '\0')    {
 
             if (3 != curVertex) {
                 DefaultLogger::get()->warn("STL: A new facet begins but the old is not yet complete");

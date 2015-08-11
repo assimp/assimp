@@ -89,6 +89,9 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // read a string (may be enclosed in double quotation marks). buffer must point to "
 #define AI_AC_GET_STRING(out) \
+    if (*buffer == '\0') { \
+        throw DeadlyImportError("AC3D: Unexpected EOF in string"); \
+    } \
     ++buffer; \
     const char* sz = buffer; \
     while ('\"' != *buffer) \

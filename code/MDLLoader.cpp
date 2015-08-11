@@ -355,6 +355,9 @@ void MDLImporter::InternReadFile_Quake1( )
     for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins;++i)
     {
         union{BE_NCONST MDL::Skin* pcSkin;BE_NCONST MDL::GroupSkin* pcGroupSkin;};
+        if (szCurrent + sizeof(MDL::Skin) > this->mBuffer + this->iFileSize) {
+            throw DeadlyImportError("[Quake 1 MDL] Unexpected EOF");
+        }
         pcSkin = (BE_NCONST MDL::Skin*)szCurrent;
 
         AI_SWAP4( pcSkin->group );

@@ -380,6 +380,11 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 
     // Copy vertices of this mesh instance
     pMesh->mNumVertices = numIndices;
+    if (pMesh->mNumVertices == 0) {
+        throw DeadlyImportError( "OBJ: no vertices" );
+    } else if (pMesh->mNumVertices > std::numeric_limits<int32_t>::max() / sizeof(aiVector3D)) {
+        throw DeadlyImportError( "OBJ: Too many vertices, would run out of memory" );
+    }
     pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
 
     // Allocate buffer for normal vectors

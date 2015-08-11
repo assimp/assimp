@@ -587,9 +587,19 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 
                 // allocate storage for vertices and normals
                 mesh->mNumFaces = (*cit).first;
+                if (mesh->mNumFaces == 0) {
+                    throw DeadlyImportError("AC3D: No faces");
+                } else if (mesh->mNumFaces > std::numeric_limits<int32_t>::max() / sizeof(aiFace)) {
+                    throw DeadlyImportError("AC3D: Too many faces, would run out of memory");
+                }
                 aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces];
 
                 mesh->mNumVertices = (*cit).second;
+                if (mesh->mNumVertices == 0) {
+                    throw DeadlyImportError("AC3D: No vertices");
+                } else if (mesh->mNumVertices > std::numeric_limits<int32_t>::max() / sizeof(aiVector3D)) {
+                    throw DeadlyImportError("AC3D: Too many vertices, would run out of memory");
+                }
                 aiVector3D* vertices = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
                 unsigned int cur = 0;
 

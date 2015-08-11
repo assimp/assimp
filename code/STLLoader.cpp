@@ -304,6 +304,9 @@ void STLImporter::LoadASCIIFile()
                 }
                 else
                 {
+                    if (sz[6] == '\0') {
+                        throw DeadlyImportError("STL: unexpected EOF while parsing facet");
+                    }
                     sz += 7;
                     SkipSpaces(&sz);
                     sz = fast_atoreal_move<float>(sz, (float&)vn->x );
@@ -324,6 +327,9 @@ void STLImporter::LoadASCIIFile()
                 }
                 else
                 {
+                    if (sz[6] == '\0') {
+                        throw DeadlyImportError("STL: unexpected EOF while parsing facet");
+                    }
                     sz += 7;
                     SkipSpaces(&sz);
                     positionBuffer.push_back(aiVector3D());

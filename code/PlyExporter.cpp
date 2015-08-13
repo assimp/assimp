@@ -189,7 +189,12 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     }
 
     mOutput << "element face " << faces << endl;
-    mOutput << "property list uint uint vertex_index" << endl;
+
+    // uchar seems to be the most common type for the number of indices per polygon and int seems to be most common for the vertex indices.
+    // For instance, MeshLab fails to load meshes in which both types are uint. Houdini seems to have problems as well.
+    // Obviously, using uchar will not work for meshes with polygons with more than 255 indices, but how realistic is this case?
+    mOutput << "property list uchar int vertex_index" << endl;
+
     mOutput << "end_header" << endl;
 
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
@@ -342,16 +347,24 @@ void PlyExporter::WriteMeshIndices(const aiMesh* m, unsigned int offset)
     }
 }
 
-void PlyExporter::WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset)
+// Generic method in case we want to use different data types for the indices or make this configurable.
+template<typename NumIndicesType, typename IndexType>
+void WriteMeshIndicesBinary_Generic(const aiMesh* m, unsigned int offset, std::ostringstream& output)
 {
     for (unsigned int i = 0; i < m->mNumFaces; ++i) {
         const aiFace& f = m->mFaces[i];
-        mOutput.write(reinterpret_cast<const char*>(&f.mNumIndices), 4);
+        NumIndicesType numIndices = static_cast<NumIndicesType>(f.mNumIndices);
+        output.write(reinterpret_cast<const char*>(&numIndices), sizeof(NumIndicesType));
         for (unsigned int c = 0; c < f.mNumIndices; ++c) {
-            unsigned int index = f.mIndices[c] + offset;
-            mOutput.write(reinterpret_cast<const char*>(&index), 4);
+            IndexType index = f.mIndices[c] + offset;
+            output.write(reinterpret_cast<const char*>(&index), sizeof(IndexType));
         }
     }
+}
+
+void PlyExporter::WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset)
+{
+    WriteMeshIndicesBinary_Generic<unsigned char, int>(m, offset, mOutput);
 }
 
 #endif

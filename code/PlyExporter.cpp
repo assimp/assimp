@@ -192,7 +192,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
 
     // uchar seems to be the most common type for the number of indices per polygon and int seems to be most common for the vertex indices.
     // For instance, MeshLab fails to load meshes in which both types are uint. Houdini seems to have problems as well.
-    // Obviously, using unchar will not work for meshes with polygons with more than 255 indices, but how realistic is this case?
+    // Obviously, using uchar will not work for meshes with polygons with more than 255 indices, but how realistic is this case?
     mOutput << "property list uchar int vertex_index" << endl;
 
     mOutput << "end_header" << endl;

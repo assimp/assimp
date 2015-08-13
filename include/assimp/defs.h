@@ -276,4 +276,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   define AI_BUILD_BIG_ENDIAN
 #endif
 
+
+/* To avoid running out of memory
+ * This can be adjusted for specific use cases
+ * It's NOT a total limit, just a limit for individual allocations
+ */
+#define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
+
+
 #endif // !! INCLUDED_AI_DEFINES_H

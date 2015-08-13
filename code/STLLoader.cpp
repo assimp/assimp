@@ -75,8 +75,9 @@ static const aiImporterDesc desc = {
 // 2) 4 byte face count
 // 3) 50 bytes per face
 bool IsBinarySTL(const char* buffer, unsigned int fileSize) {
-    if (fileSize < 84)
+    if( fileSize < 84 ) {
         return false;
+    }
 
     const uint32_t faceCount = *reinterpret_cast<const uint32_t*>(buffer + 80);
     const uint32_t expectedBinaryFileSize = faceCount * 50 + 84;
@@ -99,7 +100,20 @@ bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
     if (buffer + 5 >= bufferEnd)
         return false;
 
-    return strncmp(buffer, "solid", 5) == 0;
+    bool isASCII( strncmp( buffer, "solid", 5 ) == 0 );
+    if( isASCII ) {
+        // A lot of importers are write solid even if the file is binary. So we have to check for ASCII-characters.
+        if( fileSize >= 500 ) {
+            isASCII = true;
+            for( unsigned int i = 0; i < 500; i++ ) {
+                if( buffer[ i ] > 127 ) {
+                    isASCII = false;
+                    break;
+                }
+            }
+        }
+    }
+    return isASCII;
 }
 } // namespace
 
@@ -122,20 +136,21 @@ bool STLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
 {
     const std::string extension = GetExtension(pFile);
 
-    if (extension == "stl")
+    if( extension == "stl" ) {
         return true;
-    else if (!extension.length() || checkSig)   {
-        if (!pIOHandler)
+    } else if (!extension.length() || checkSig)   {
+        if( !pIOHandler ) {
             return true;
+        }
         const char* tokens[] = {"STL","solid"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,2);
     }
+    
     return false;
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* STLImporter::GetInfo () const
-{
+const aiImporterDesc* STLImporter::GetInfo () const {
     return &desc;
 }
 
@@ -273,7 +288,7 @@ void STLImporter::LoadASCIIFile()
                 break;
             }
             // facet normal -0.13 -0.13 -0.98
-            if (!strncmp(sz,"facet",5) && IsSpaceOrNewLine(*(sz+5)))    {
+            if (!strncmp(sz,"facet",5) && IsSpaceOrNewLine(*(sz+5)) && *(sz + 5) != '\0')    {
 
                 if (faceVertexCounter != 3) {
                     DefaultLogger::get()->warn("STL: A new facet begins but the old is not yet complete");

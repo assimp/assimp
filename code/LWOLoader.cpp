@@ -954,6 +954,9 @@ inline void LWOImporter::DoRecursiveVMAPAssignment(VMapEntry* base, unsigned int
     LWO::ReferrerList& refList  = mCurLayer->mPointReferrers;
     unsigned int i;
 
+    if (idx >= base->abAssigned.size()) {
+        throw DeadlyImportError("Bad index");
+    }
     base->abAssigned[idx] = true;
     for (i = 0; i < numRead;++i) {
         base->rawData[idx*base->dims+i]= data[i];

@@ -349,8 +349,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
                 {
                     if(!GetNextLine())
                     {
-                        DefaultLogger::get()->error("AC3D: Unexpected EOF: surface is incomplete");
-                        break;
+                        throw DeadlyImportError("AC3D: Unexpected EOF: surface is incomplete");
                     }
                     if (TokenMatch(buffer,"mat",3))
                     {

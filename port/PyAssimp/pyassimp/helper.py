@@ -20,6 +20,7 @@ additional_dirs, ext_whitelist = [],[]
 # populate search directories and lists of allowed file extensions
 # depending on the platform we're running on.
 if os.name=='posix':
+    additional_dirs.append('./')
     additional_dirs.append('/usr/lib/')
     additional_dirs.append('/usr/local/lib/')
 

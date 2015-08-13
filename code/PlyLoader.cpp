@@ -310,6 +310,10 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
                 iNum += (unsigned int)(*avFaces)[aiSplit[p][i]].mIndices.size();
             }
             p_pcOut->mNumVertices = iNum;
+            if( 0 == iNum ) {     // nothing to do 
+                delete[] aiSplit; // cleanup
+                return;
+            }
             p_pcOut->mVertices = new aiVector3D[iNum];
 
             if (!avColors->empty())
@@ -335,20 +339,25 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
                 for (unsigned int q = 0; q <  p_pcOut->mFaces[iNum].mNumIndices;++q)
                 {
                     p_pcOut->mFaces[iNum].mIndices[q] = iVertex;
-                    p_pcOut->mVertices[iVertex] = (*avPositions)[(*avFaces)[*i].mIndices[q]];
+                    const size_t idx = ( *avFaces )[ *i ].mIndices[ q ];
+                    if( idx >= ( *avPositions ).size() ) {
+                        // out of border
+                        continue;
+                    }
+                    p_pcOut->mVertices[ iVertex ] = ( *avPositions )[ idx ];
 
                     if (!avColors->empty())
-                        p_pcOut->mColors[0][iVertex] = (*avColors)[(*avFaces)[*i].mIndices[q]];
+                        p_pcOut->mColors[ 0 ][ iVertex ] = ( *avColors )[ idx ];
 
                     if (!avTexCoords->empty())
                     {
-                        const aiVector2D& vec = (*avTexCoords)[(*avFaces)[*i].mIndices[q]];
+                        const aiVector2D& vec = ( *avTexCoords )[ idx ];
                         p_pcOut->mTextureCoords[0][iVertex].x = vec.x;
                         p_pcOut->mTextureCoords[0][iVertex].y = vec.y;
                     }
 
                     if (!avNormals->empty())
-                        p_pcOut->mNormals[iVertex] = (*avNormals)[(*avFaces)[*i].mIndices[q]];
+                        p_pcOut->mNormals[ iVertex ] = ( *avNormals )[ idx ];
                     iVertex++;
                 }
 

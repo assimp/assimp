@@ -206,7 +206,6 @@ void STLImporter::InternReadFile( const std::string& pFile,
     }
 
     // add all created meshes to the single node
-    pScene->mRootNode = new aiNode();
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
     for (unsigned int i = 0; i < pScene->mNumMeshes; i++)

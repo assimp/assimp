@@ -1227,7 +1227,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
 
             bool side_flag = true;
             if (!is_2d_source) {
-                const IfcVector3& face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
+                const IfcVector3 face_nor = ((profile_verts[vi_total+2] - profile_verts[vi_total]) ^
                     (profile_verts[vi_total+1] - profile_verts[vi_total])).Normalize();
 
                 const IfcFloat abs_dot_face_nor = std::abs(nor * face_nor);
@@ -1692,7 +1692,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
         BOOST_FOREACH(p2t::Triangle* tri, tris) {
             for(int i = 0; i < 3; ++i) {
 
-                const IfcVector2& v = IfcVector2(
+                const IfcVector2 v = IfcVector2(
                     static_cast<IfcFloat>( tri->GetPoint(i)->x ),
                     static_cast<IfcFloat>( tri->GetPoint(i)->y )
                 );

@@ -701,11 +701,19 @@ void AssbinImporter::InternReadFile( const std::string& pFile, aiScene* pScene, 
         uLongf compressedSize = static_cast<uLongf>(stream->FileSize() - stream->Tell());
 
         unsigned char * compressedData = new unsigned char[ compressedSize ];
-        stream->Read( compressedData, 1, compressedSize );
+        size_t len = stream->Read( compressedData, 1, compressedSize );
+        ai_assert(len == compressedSize);
 
         unsigned char * uncompressedData = new unsigned char[ uncompressedSize ];
 
-        uncompress( uncompressedData, &uncompressedSize, compressedData, compressedSize );
+        int res = uncompress( uncompressedData, &uncompressedSize, compressedData, len );
+        if(res != Z_OK)
+        {
+            delete [] uncompressedData;
+            delete [] compressedData;
+            pIOHandler->Close(stream);
+            throw DeadlyImportError("Zlib decompression failed.");
+        }
 
         MemoryIOStream io( uncompressedData, uncompressedSize );
 

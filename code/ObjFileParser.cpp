@@ -544,12 +544,10 @@ void ObjFileParser::getMaterialLib()
     } else {
         absName = strMatName;
     }
-    //IOStream *pFile = m_pIO->Open( strMatName );
     IOStream *pFile = m_pIO->Open( absName );
 
-    if (!pFile )
-    {
-        DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName );
+    if (!pFile ) {
+        DefaultLogger::get()->error( "OBJ: Unable to locate material file " + strMatName );
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
         return;
     }

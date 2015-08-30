@@ -53,6 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "types.h"
+
+#include <vector>
+
 namespace Assimp    {
 class IOStream;
 
@@ -170,10 +173,19 @@ public:
      */
     inline bool ComparePaths (const std::string& one,
         const std::string& second) const;
+
+    virtual bool PushDirectory( const std::string &path );
+    virtual const std::string &CurrentDirectory() const;
+    virtual size_t StackSize() const;
+    virtual bool PopDirectory();
+
+private:
+    std::vector<std::string> m_pathStack;
 };
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::IOSystem()
+AI_FORCE_INLINE IOSystem::IOSystem() :
+    m_pathStack()
 {
     // empty
 }
@@ -220,6 +232,43 @@ inline bool IOSystem::ComparePaths (const std::string& one,
 }
 
 // ----------------------------------------------------------------------------
+inline bool IOSystem::PushDirectory( const std::string &path ) {
+    if ( path.empty() ) {
+        return false;
+    }
+
+    m_pathStack.push_back( path );
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+inline const std::string &IOSystem::CurrentDirectory() const {
+    if ( m_pathStack.empty() ) {
+        static const std::string Dummy("");
+        return Dummy;
+    }
+    return m_pathStack[ m_pathStack.size()-1 ];
+}
+
+// ----------------------------------------------------------------------------
+inline size_t IOSystem::StackSize() const {
+    return m_pathStack.size();
+}
+
+// ----------------------------------------------------------------------------
+inline bool IOSystem::PopDirectory() {
+    if ( m_pathStack.empty() ) {
+        return false;
+    }
+
+    m_pathStack.pop_back();
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+
 } //!ns Assimp
 
 #endif //AI_IOSYSTEM_H_INC

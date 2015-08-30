@@ -62,10 +62,9 @@ class IOSystem;
 
 /// \class  ObjFileParser
 /// \brief  Parser for a obj waveform file
-class ObjFileParser
-{
+class ObjFileParser {
 public:
-    static const size_t BUFFERSIZE = 4096;
+    static const size_t Buffersize = 4096;
     typedef std::vector<char> DataArray;
     typedef std::vector<char>::iterator DataArrayIt;
     typedef std::vector<char>::const_iterator ConstDataArrayIt;
@@ -137,9 +136,10 @@ private:
     //! Current line (for debugging)
     unsigned int m_uiLine;
     //! Helper buffer
-    char m_buffer[BUFFERSIZE];
+    char m_buffer[Buffersize];
     /// Pointer to IO system instance.
     IOSystem *m_pIO;
+    /// Path to the current model
 };
 
 }   // Namespace Assimp

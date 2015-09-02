@@ -63,7 +63,9 @@ if( CMAKE_COMPILER_IS_MINGW )
 endif()
 
 if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC") # this is a very important switch and some libraries seem now to have it....
+  if (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required for shared libs on 64 bit
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  endif()
   # hide all not-exported symbols
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall" )
 elseif(MSVC)

@@ -783,6 +783,13 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
     // Allocate output storage
     pScene->mNumMeshes = pcHeader->NUM_SURFACES;
+    if (pcHeader->NUM_SURFACES == 0) {
+        throw DeadlyImportError("MD3: No surfaces");
+    } else if (pcHeader->NUM_SURFACES > AI_MAX_ALLOC(aiMesh)) {
+        // We allocate pointers but check against the size of aiMesh
+        // since those pointers will eventually have to point to real objects
+        throw DeadlyImportError("MD3: Too many surfaces, would run out of memory");
+    }
     pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 
     pScene->mNumMaterials = pcHeader->NUM_SURFACES;

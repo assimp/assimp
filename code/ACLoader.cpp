@@ -89,6 +89,9 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // read a string (may be enclosed in double quotation marks). buffer must point to "
 #define AI_AC_GET_STRING(out) \
+    if (*buffer == '\0') { \
+        throw DeadlyImportError("AC3D: Unexpected EOF in string"); \
+    } \
     ++buffer; \
     const char* sz = buffer; \
     while ('\"' != *buffer) \
@@ -293,7 +296,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
             SkipSpaces(&buffer);
 
             unsigned int t = strtoul10(buffer,&buffer);
-            if (t >= std::numeric_limits<int32_t>::max() / sizeof(aiVector3D)) {
+            if (t >= AI_MAX_ALLOC(aiVector3D)) {
                 throw DeadlyImportError("AC3D: Too many vertices, would run out of memory");
             }
             obj.vertices.reserve(t);
@@ -349,8 +352,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
                 {
                     if(!GetNextLine())
                     {
-                        DefaultLogger::get()->error("AC3D: Unexpected EOF: surface is incomplete");
-                        break;
+                        throw DeadlyImportError("AC3D: Unexpected EOF: surface is incomplete");
                     }
                     if (TokenMatch(buffer,"mat",3))
                     {
@@ -585,9 +587,19 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 
                 // allocate storage for vertices and normals
                 mesh->mNumFaces = (*cit).first;
+                if (mesh->mNumFaces == 0) {
+                    throw DeadlyImportError("AC3D: No faces");
+                } else if (mesh->mNumFaces > AI_MAX_ALLOC(aiFace)) {
+                    throw DeadlyImportError("AC3D: Too many faces, would run out of memory");
+                }
                 aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces];
 
                 mesh->mNumVertices = (*cit).second;
+                if (mesh->mNumVertices == 0) {
+                    throw DeadlyImportError("AC3D: No vertices");
+                } else if (mesh->mNumVertices > AI_MAX_ALLOC(aiVector3D)) {
+                    throw DeadlyImportError("AC3D: Too many vertices, would run out of memory");
+                }
                 aiVector3D* vertices = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
                 unsigned int cur = 0;
 

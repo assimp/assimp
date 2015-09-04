@@ -103,7 +103,7 @@ struct Image;
 // -------------------------------------------------------------------------------
 struct ID : ElemBase {
 
-    char name[24] WARN;
+    char name[1024] WARN;
     short flag;
 };
 

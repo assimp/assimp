@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include <sstream>
+#include <stdarg.h>
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
@@ -1066,6 +1067,12 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
                 pLight.mFalloffAngle = ReadFloatFromTextContent();
                 TestClosing("hotspot_beam");
             }
+            // OpenCOLLADA extensions
+            // -------------------------------------------------------
+            else if (IsElement("decay_falloff")) {
+                pLight.mOuterAngle = ReadFloatFromTextContent();
+                TestClosing("decay_falloff");
+            }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
             if( strcmp( mReader->getNodeName(), "light") == 0)
@@ -1998,7 +2005,8 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
     }
 
 #ifdef ASSIMP_BUILD_DEBUG
-    if (primType != Prim_TriFans && primType != Prim_TriStrips) {
+	if (primType != Prim_TriFans && primType != Prim_TriStrips &&
+        primType != Prim_Lines) { // this is ONLY to workaround a bug in SketchUp 15.3.331 where it writes the wrong 'count' when it writes out the 'lines'.
         ai_assert(actualPrimitives == numPrimitives);
     }
 #endif
@@ -2107,13 +2115,19 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
         }
     }
 
-    // complain if the index count doesn't fit
-    if( expectedPointCount > 0 && indices.size() != expectedPointCount * numOffsets)
-        ThrowException( "Expected different index count in <p> element.");
-    else if( expectedPointCount == 0 && (indices.size() % numOffsets) != 0)
-        ThrowException( "Expected different index count in <p> element.");
+	// complain if the index count doesn't fit
+    if( expectedPointCount > 0 && indices.size() != expectedPointCount * numOffsets) {
+        if (pPrimType == Prim_Lines) {
+            // HACK: We just fix this number since SketchUp 15.3.331 writes the wrong 'count' for 'lines'
+            ReportWarning( "Expected different index count in <p> element, %d instead of %d.", indices.size(), expectedPointCount * numOffsets);
+            pNumPrimitives = (indices.size() / numOffsets) / 2;
+        } else
+            ThrowException( "Expected different index count in <p> element.");
 
-    // find the data for all sources
+    } else if( expectedPointCount == 0 && (indices.size() % numOffsets) != 0)
+		ThrowException( "Expected different index count in <p> element.");
+
+	// find the data for all sources
   for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
     {
     InputChannel& input = *it;
@@ -2712,6 +2726,21 @@ AI_WONT_RETURN void ColladaParser::ThrowException( const std::string& pError) co
 {
     throw DeadlyImportError( boost::str( boost::format( "Collada: %s - %s") % mFileName % pError));
 }
+void ColladaParser::ReportWarning(const char* msg,...)
+{
+    ai_assert(NULL != msg);
+    
+    va_list args;
+    va_start(args,msg);
+    
+    char szBuffer[3000];
+    const int iLen = vsprintf(szBuffer,msg,args);
+    ai_assert(iLen > 0);
+    
+    va_end(args);
+    DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
+}
+
 
 // ------------------------------------------------------------------------------------------------
 // Skips all data until the end node of the current element

@@ -133,15 +133,16 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
     TextFileToBuffer(file.get(),m_Buffer);
 
     // Get the model name
-    std::string  strModelName;
+    std::string  modelName, folderName;
     std::string::size_type pos = pFile.find_last_of( "\\/" );
-    if ( pos != std::string::npos )
-    {
-        strModelName = pFile.substr(pos+1, pFile.size() - pos - 1);
-    }
-    else
-    {
-        strModelName = pFile;
+    if ( pos != std::string::npos ) {
+        modelName = pFile.substr(pos+1, pFile.size() - pos - 1);
+        folderName = pFile.substr( 0, pos );
+        if ( folderName.empty() ) {
+            pIOHandler->PushDirectory( folderName );
+        }
+    } else {
+        modelName = pFile;
     }
 
     // process all '\'
@@ -161,13 +162,18 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
     }
 
     // parse the file into a temporary representation
-    ObjFileParser parser(m_Buffer, strModelName, pIOHandler);
+    ObjFileParser parser(m_Buffer, modelName, pIOHandler);
 
     // And create the proper return structures out of it
     CreateDataFromImport(parser.GetModel(), pScene);
 
     // Clean up allocated storage for the next import
     m_Buffer.clear();
+
+    // Pop directory stack
+    if ( pIOHandler->StackSize() > 0 ) {
+        pIOHandler->PopDirectory();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -380,6 +386,11 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 
     // Copy vertices of this mesh instance
     pMesh->mNumVertices = numIndices;
+    if (pMesh->mNumVertices == 0) {
+        throw DeadlyImportError( "OBJ: no vertices" );
+    } else if (pMesh->mNumVertices > AI_MAX_ALLOC(aiVector3D)) {
+        throw DeadlyImportError( "OBJ: Too many vertices, would run out of memory" );
+    }
     pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
 
     // Allocate buffer for normal vectors

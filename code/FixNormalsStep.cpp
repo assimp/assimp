@@ -152,8 +152,8 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
     if (fDelta1_z < 0.05f * sqrtf( fDelta1_y * fDelta1_x ))return false;
 
     // now compare the volumes of the bounding boxes
-    if (std::fabs(fDelta0_x * fDelta1_yz) <
-        std::fabs(fDelta1_x * fDelta1_y * fDelta1_z))
+    if (std::fabs(fDelta0_x * fDelta0_y * fDelta0_z) <
+        std::fabs(fDelta1_x * fDelta1_yz))
     {
         if (!DefaultLogger::isNullLogger())
         {

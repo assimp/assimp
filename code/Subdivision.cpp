@@ -399,10 +399,14 @@ void CatmullClarkSubdivider::InternSubdivide (
                     bool haveit = false;
                     for (unsigned int i = 0; i < f.mNumIndices; ++i) {
                         if (maptbl[FLATTEN_VERTEX_IDX(n,f.mIndices[i])]==(unsigned int)t) {
-                            haveit = true; break;
+                            haveit = true;
+                            break;
                         }
                     }
                     ai_assert(haveit);
+                    if (!haveit) {
+                        DefaultLogger::get()->debug("Catmull-Clark Subdivider: Index not used");
+                    }
                     break;
                 }
             }

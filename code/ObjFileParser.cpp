@@ -61,21 +61,21 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem *io ) :
-    m_DataIt(Data.begin()),
-    m_DataItEnd(Data.end()),
+ObjFileParser::ObjFileParser(std::vector<char> &data,const std::string &modelName, IOSystem *io ) :
+    m_DataIt(data.begin()),
+    m_DataItEnd(data.end()),
     m_pModel(NULL),
     m_uiLine(0),
     m_pIO( io )
 {
-    std::fill_n(m_buffer,BUFFERSIZE,0);
+    std::fill_n(m_buffer,Buffersize,0);
 
     // Create the model instance to store all the data
     m_pModel = new ObjFile::Model();
-    m_pModel->m_ModelName = strModelName;
+    m_pModel->m_ModelName = modelName;
 
     // create default material and store it
-    m_pModel->m_pDefaultMaterial = new ObjFile::Material();
+    m_pModel->m_pDefaultMaterial = new ObjFile::Material;
     m_pModel->m_pDefaultMaterial->MaterialName.Set( DEFAULT_MATERIAL );
     m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
     m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
@@ -248,20 +248,20 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     }
     float x, y, z;
     if( 2 == numComponents ) {
-        copyNextWord( m_buffer, BUFFERSIZE );
+        copyNextWord( m_buffer, Buffersize );
         x = ( float ) fast_atof( m_buffer );
 
-        copyNextWord( m_buffer, BUFFERSIZE );
+        copyNextWord( m_buffer, Buffersize );
         y = ( float ) fast_atof( m_buffer );
         z = 0.0;
     } else if( 3 == numComponents ) {
-        copyNextWord( m_buffer, BUFFERSIZE );
+        copyNextWord( m_buffer, Buffersize );
         x = ( float ) fast_atof( m_buffer );
 
-        copyNextWord( m_buffer, BUFFERSIZE );
+        copyNextWord( m_buffer, Buffersize );
         y = ( float ) fast_atof( m_buffer );
 
-        copyNextWord( m_buffer, BUFFERSIZE );
+        copyNextWord( m_buffer, Buffersize );
         z = ( float ) fast_atof( m_buffer );
     } else {
         throw DeadlyImportError( "OBJ: Invalid number of components" );
@@ -274,13 +274,13 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
 //  Get values for a new 3D vector instance
 void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
     float x, y, z;
-    copyNextWord(m_buffer, BUFFERSIZE);
+    copyNextWord(m_buffer, Buffersize);
     x = (float) fast_atof(m_buffer);
 
-    copyNextWord(m_buffer, BUFFERSIZE);
+    copyNextWord(m_buffer, Buffersize);
     y = (float) fast_atof(m_buffer);
 
-    copyNextWord( m_buffer, BUFFERSIZE );
+    copyNextWord( m_buffer, Buffersize );
     z = ( float ) fast_atof( m_buffer );
 
     point3d_array.push_back( aiVector3D( x, y, z ) );
@@ -291,10 +291,10 @@ void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
 //  Get values for a new 2D vector instance
 void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
     float x, y;
-    copyNextWord(m_buffer, BUFFERSIZE);
+    copyNextWord(m_buffer, Buffersize);
     x = (float) fast_atof(m_buffer);
 
-    copyNextWord(m_buffer, BUFFERSIZE);
+    copyNextWord(m_buffer, Buffersize);
     y = (float) fast_atof(m_buffer);
 
     point2d_array.push_back(aiVector2D(x, y));
@@ -306,12 +306,12 @@ void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
 //  Get values for a new face instance
 void ObjFileParser::getFace(aiPrimitiveType type)
 {
-    copyNextLine(m_buffer, BUFFERSIZE);
+    copyNextLine(m_buffer, Buffersize);
     if (m_DataIt == m_DataItEnd)
         return;
 
     char *pPtr = m_buffer;
-    char *pEnd = &pPtr[BUFFERSIZE];
+    char *pEnd = &pPtr[Buffersize];
     pPtr = getNextToken<char*>(pPtr, pEnd);
     if (pPtr == pEnd || *pPtr == '\0')
         return;
@@ -468,8 +468,9 @@ void ObjFileParser::getMaterialDesc()
 
     // Get next data for material data
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
-    if (m_DataIt == m_DataItEnd)
+    if (m_DataIt == m_DataItEnd) {
         return;
+    }
 
     char *pStart = &(*m_DataIt);
     while( m_DataIt != m_DataItEnd && !IsLineEnd( *m_DataIt ) ) {
@@ -483,14 +484,11 @@ void ObjFileParser::getMaterialDesc()
 
     // Search for material
     std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strName );
-    if ( it == m_pModel->m_MaterialMap.end() )
-    {
+    if ( it == m_pModel->m_MaterialMap.end() ) {
         // Not found, use default material
         m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
         DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
-    }
-    else
-    {
+    } else {
         // Found, using detected material
         m_pModel->m_pCurrentMaterial = (*it).second;
         if ( needsNewMesh( strName ))
@@ -539,18 +537,24 @@ void ObjFileParser::getMaterialLib()
 
     // Check for existence
     const std::string strMatName(pStart, &(*m_DataIt));
-    IOStream *pFile = m_pIO->Open(strMatName);
+    std::string absName;
+    if ( m_pIO->StackSize() > 0 ) {
+        const std::string &path = m_pIO->CurrentDirectory();
+        absName = path + strMatName;
+    } else {
+        absName = strMatName;
+    }
+    IOStream *pFile = m_pIO->Open( absName );
 
-    if (!pFile )
-    {
-        DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName);
+    if (!pFile ) {
+        DefaultLogger::get()->error( "OBJ: Unable to locate material file " + strMatName );
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
         return;
     }
 
     // Import material library data from file
     std::vector<char> buffer;
-    BaseImporter::TextFileToBuffer(pFile,buffer);
+    BaseImporter::TextFileToBuffer( pFile, buffer );
     m_pIO->Close( pFile );
 
     // Importing the material library

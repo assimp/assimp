@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -56,354 +56,354 @@ using namespace Assimp;
 // Constructor to be privately used by Importer
 SortByPTypeProcess::SortByPTypeProcess()
 {
-	configRemoveMeshes = 0;
+    configRemoveMeshes = 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
 SortByPTypeProcess::~SortByPTypeProcess()
 {
-	// nothing to do here
+    // nothing to do here
 }
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
 bool SortByPTypeProcess::IsActive( unsigned int pFlags) const
 {
-	return	(pFlags & aiProcess_SortByPType) != 0;
+    return  (pFlags & aiProcess_SortByPType) != 0;
 }
 
 // ------------------------------------------------------------------------------------------------
 void SortByPTypeProcess::SetupProperties(const Importer* pImp)
 {
-	configRemoveMeshes = pImp->GetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,0);
+    configRemoveMeshes = pImp->GetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,0);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Update changed meshes in all nodes
 void UpdateNodes(const std::vector<unsigned int>& replaceMeshIndex, aiNode* node)
 {
-//	std::vector<unsigned int>::const_iterator it;
+//  std::vector<unsigned int>::const_iterator it;
 
-	if (node->mNumMeshes)
-	{
-		unsigned int newSize = 0;
-		for (unsigned int m = 0; m< node->mNumMeshes; ++m)
-		{
-			unsigned int add = node->mMeshes[m]<<2;
-			for (unsigned int i = 0; i < 4;++i)
-			{
-				if (UINT_MAX != replaceMeshIndex[add+i])++newSize;
-			}
-		}
-		if (!newSize)
-		{
-			delete[] node->mMeshes;
-			node->mNumMeshes = 0;
-			node->mMeshes    = NULL;
-		}
-		else
-		{
-			// Try to reuse the old array if possible
-			unsigned int* newMeshes = (newSize > node->mNumMeshes 
-				? new unsigned int[newSize] : node->mMeshes);
+    if (node->mNumMeshes)
+    {
+        unsigned int newSize = 0;
+        for (unsigned int m = 0; m< node->mNumMeshes; ++m)
+        {
+            unsigned int add = node->mMeshes[m]<<2;
+            for (unsigned int i = 0; i < 4;++i)
+            {
+                if (UINT_MAX != replaceMeshIndex[add+i])++newSize;
+            }
+        }
+        if (!newSize)
+        {
+            delete[] node->mMeshes;
+            node->mNumMeshes = 0;
+            node->mMeshes    = NULL;
+        }
+        else
+        {
+            // Try to reuse the old array if possible
+            unsigned int* newMeshes = (newSize > node->mNumMeshes
+                ? new unsigned int[newSize] : node->mMeshes);
 
-			for (unsigned int m = 0; m< node->mNumMeshes; ++m)
-			{
-				unsigned int add = node->mMeshes[m]<<2;
-				for (unsigned int i = 0; i < 4;++i)
-				{
-					if (UINT_MAX != replaceMeshIndex[add+i])
-						*newMeshes++ = replaceMeshIndex[add+i];
-				}
-			}
-			if (newSize > node->mNumMeshes)
-				delete[] node->mMeshes;
+            for (unsigned int m = 0; m< node->mNumMeshes; ++m)
+            {
+                unsigned int add = node->mMeshes[m]<<2;
+                for (unsigned int i = 0; i < 4;++i)
+                {
+                    if (UINT_MAX != replaceMeshIndex[add+i])
+                        *newMeshes++ = replaceMeshIndex[add+i];
+                }
+            }
+            if (newSize > node->mNumMeshes)
+                delete[] node->mMeshes;
 
-			node->mMeshes = newMeshes-(node->mNumMeshes = newSize);
-		}
-	}
+            node->mMeshes = newMeshes-(node->mNumMeshes = newSize);
+        }
+    }
 
-	// call all subnodes recursively
-	for (unsigned int m = 0; m < node->mNumChildren; ++m)
-		UpdateNodes(replaceMeshIndex,node->mChildren[m]);
+    // call all subnodes recursively
+    for (unsigned int m = 0; m < node->mNumChildren; ++m)
+        UpdateNodes(replaceMeshIndex,node->mChildren[m]);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void SortByPTypeProcess::Execute( aiScene* pScene)
 {
-	if (!pScene->mNumMeshes)
-	{
-		DefaultLogger::get()->debug("SortByPTypeProcess skipped, there are no meshes");
-		return;
-	}
+    if (!pScene->mNumMeshes)
+    {
+        DefaultLogger::get()->debug("SortByPTypeProcess skipped, there are no meshes");
+        return;
+    }
 
-	DefaultLogger::get()->debug("SortByPTypeProcess begin");
+    DefaultLogger::get()->debug("SortByPTypeProcess begin");
 
-	unsigned int aiNumMeshesPerPType[4] = {0,0,0,0};
+    unsigned int aiNumMeshesPerPType[4] = {0,0,0,0};
 
-	std::vector<aiMesh*> outMeshes;
-	outMeshes.reserve(pScene->mNumMeshes<<1u);
+    std::vector<aiMesh*> outMeshes;
+    outMeshes.reserve(pScene->mNumMeshes<<1u);
 
-	bool bAnyChanges = false;
+    bool bAnyChanges = false;
 
-	std::vector<unsigned int> replaceMeshIndex(pScene->mNumMeshes*4,UINT_MAX);
-	std::vector<unsigned int>::iterator meshIdx = replaceMeshIndex.begin();
-	for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-	{
-		aiMesh* const mesh = pScene->mMeshes[i];
-		ai_assert(0 != mesh->mPrimitiveTypes);
+    std::vector<unsigned int> replaceMeshIndex(pScene->mNumMeshes*4,UINT_MAX);
+    std::vector<unsigned int>::iterator meshIdx = replaceMeshIndex.begin();
+    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
+    {
+        aiMesh* const mesh = pScene->mMeshes[i];
+        ai_assert(0 != mesh->mPrimitiveTypes);
 
-		// if there's just one primitive type in the mesh there's nothing to do for us
-		unsigned int num = 0;
-		if (mesh->mPrimitiveTypes & aiPrimitiveType_POINT) 
-		{
-			++aiNumMeshesPerPType[0];
-			++num;
-		}
-		if (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)   
-		{
-			++aiNumMeshesPerPType[1];
-			++num;
-		}
-		if (mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)
-		{
-			++aiNumMeshesPerPType[2];
-			++num;
-		}
-		if (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)
-		{
-			++aiNumMeshesPerPType[3];
-			++num;
-		}
+        // if there's just one primitive type in the mesh there's nothing to do for us
+        unsigned int num = 0;
+        if (mesh->mPrimitiveTypes & aiPrimitiveType_POINT)
+        {
+            ++aiNumMeshesPerPType[0];
+            ++num;
+        }
+        if (mesh->mPrimitiveTypes & aiPrimitiveType_LINE)
+        {
+            ++aiNumMeshesPerPType[1];
+            ++num;
+        }
+        if (mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)
+        {
+            ++aiNumMeshesPerPType[2];
+            ++num;
+        }
+        if (mesh->mPrimitiveTypes & aiPrimitiveType_POLYGON)
+        {
+            ++aiNumMeshesPerPType[3];
+            ++num;
+        }
 
-		if (1 == num)
-		{
-			if (!(configRemoveMeshes & mesh->mPrimitiveTypes))
-			{
-				*meshIdx = (unsigned int) outMeshes.size();
-				outMeshes.push_back(mesh);
-			}
-			else bAnyChanges = true;
+        if (1 == num)
+        {
+            if (!(configRemoveMeshes & mesh->mPrimitiveTypes))
+            {
+                *meshIdx = (unsigned int) outMeshes.size();
+                outMeshes.push_back(mesh);
+            }
+            else bAnyChanges = true;
 
-			meshIdx += 4;
-			continue;
-		}
-		bAnyChanges = true;
+            meshIdx += 4;
+            continue;
+        }
+        bAnyChanges = true;
 
-		// reuse our current mesh arrays for the submesh 
-		// with the largest numer of primitives
-		unsigned int aiNumPerPType[4] = {0,0,0,0};
-		aiFace* pFirstFace = mesh->mFaces;
-		aiFace* const pLastFace = pFirstFace + mesh->mNumFaces;
+        // reuse our current mesh arrays for the submesh
+        // with the largest numer of primitives
+        unsigned int aiNumPerPType[4] = {0,0,0,0};
+        aiFace* pFirstFace = mesh->mFaces;
+        aiFace* const pLastFace = pFirstFace + mesh->mNumFaces;
 
-		unsigned int numPolyVerts = 0;
-		for (;pFirstFace != pLastFace; ++pFirstFace)
-		{
-			if (pFirstFace->mNumIndices <= 3)
-				++aiNumPerPType[pFirstFace->mNumIndices-1];
-			else
-			{
-				++aiNumPerPType[3];
-				numPolyVerts += pFirstFace-> mNumIndices;
-			}
-		}
+        unsigned int numPolyVerts = 0;
+        for (;pFirstFace != pLastFace; ++pFirstFace)
+        {
+            if (pFirstFace->mNumIndices <= 3)
+                ++aiNumPerPType[pFirstFace->mNumIndices-1];
+            else
+            {
+                ++aiNumPerPType[3];
+                numPolyVerts += pFirstFace-> mNumIndices;
+            }
+        }
 
-		VertexWeightTable* avw = ComputeVertexBoneWeightTable(mesh);
-		for (unsigned int real = 0; real < 4; ++real,++meshIdx)
-		{
-			if ( !aiNumPerPType[real] || configRemoveMeshes & (1u << real))
-			{
-				continue;
-			}
+        VertexWeightTable* avw = ComputeVertexBoneWeightTable(mesh);
+        for (unsigned int real = 0; real < 4; ++real,++meshIdx)
+        {
+            if ( !aiNumPerPType[real] || configRemoveMeshes & (1u << real))
+            {
+                continue;
+            }
 
-			*meshIdx = (unsigned int) outMeshes.size();
-			outMeshes.push_back(new aiMesh());
-			aiMesh* out = outMeshes.back();
+            *meshIdx = (unsigned int) outMeshes.size();
+            outMeshes.push_back(new aiMesh());
+            aiMesh* out = outMeshes.back();
 
-			// the name carries the adjacency information between the meshes
-			out->mName = mesh->mName;
+            // the name carries the adjacency information between the meshes
+            out->mName = mesh->mName;
 
-			// copy data members
-			out->mPrimitiveTypes = 1u << real;
-			out->mMaterialIndex = mesh->mMaterialIndex;
+            // copy data members
+            out->mPrimitiveTypes = 1u << real;
+            out->mMaterialIndex = mesh->mMaterialIndex;
 
-			// allocate output storage
-			out->mNumFaces = aiNumPerPType[real];
-			aiFace* outFaces = out->mFaces = new aiFace[out->mNumFaces];
+            // allocate output storage
+            out->mNumFaces = aiNumPerPType[real];
+            aiFace* outFaces = out->mFaces = new aiFace[out->mNumFaces];
 
-			out->mNumVertices = (3 == real ? numPolyVerts : out->mNumFaces * (real+1));
+            out->mNumVertices = (3 == real ? numPolyVerts : out->mNumFaces * (real+1));
 
-			aiVector3D *vert(NULL), *nor(NULL), *tan(NULL), *bit(NULL);
-			aiVector3D *uv   [AI_MAX_NUMBER_OF_TEXTURECOORDS];
-			aiColor4D  *cols [AI_MAX_NUMBER_OF_COLOR_SETS];
-		
-			if (mesh->mVertices)
-				vert = out->mVertices = new aiVector3D[out->mNumVertices];
+            aiVector3D *vert(NULL), *nor(NULL), *tan(NULL), *bit(NULL);
+            aiVector3D *uv   [AI_MAX_NUMBER_OF_TEXTURECOORDS];
+            aiColor4D  *cols [AI_MAX_NUMBER_OF_COLOR_SETS];
 
-			if (mesh->mNormals)
-				nor  = out->mNormals  = new aiVector3D[out->mNumVertices];
+            if (mesh->mVertices)
+                vert = out->mVertices = new aiVector3D[out->mNumVertices];
 
-			if (mesh->mTangents)
-			{
-				tan = out->mTangents   = new aiVector3D[out->mNumVertices];
-				bit = out->mBitangents = new aiVector3D[out->mNumVertices];
-			}
+            if (mesh->mNormals)
+                nor  = out->mNormals  = new aiVector3D[out->mNumVertices];
 
-			for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
-			{
-				if (mesh->mTextureCoords[i])
-					uv[i] = out->mTextureCoords[i] = new aiVector3D[out->mNumVertices];
-				else uv[i] = NULL;
+            if (mesh->mTangents)
+            {
+                tan = out->mTangents   = new aiVector3D[out->mNumVertices];
+                bit = out->mBitangents = new aiVector3D[out->mNumVertices];
+            }
 
-				out->mNumUVComponents[i] = mesh->mNumUVComponents[i];
-			}
+            for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS;++i)
+            {
+                if (mesh->mTextureCoords[i])
+                    uv[i] = out->mTextureCoords[i] = new aiVector3D[out->mNumVertices];
+                else uv[i] = NULL;
 
-			for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
-			{
-				if (mesh->mColors[i])
-					cols[i] = out->mColors[i] = new aiColor4D[out->mNumVertices];
-				else cols[i] = NULL;
-			}
+                out->mNumUVComponents[i] = mesh->mNumUVComponents[i];
+            }
 
-			typedef std::vector< aiVertexWeight > TempBoneInfo;
-			std::vector< TempBoneInfo > tempBones(mesh->mNumBones);
+            for (unsigned int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS;++i)
+            {
+                if (mesh->mColors[i])
+                    cols[i] = out->mColors[i] = new aiColor4D[out->mNumVertices];
+                else cols[i] = NULL;
+            }
 
-			// try to guess how much storage we'll need
-			for (unsigned int q = 0; q < mesh->mNumBones;++q)
-			{
-				tempBones[q].reserve(mesh->mBones[q]->mNumWeights / (num-1));
-			}
+            typedef std::vector< aiVertexWeight > TempBoneInfo;
+            std::vector< TempBoneInfo > tempBones(mesh->mNumBones);
 
-			unsigned int outIdx = 0;
-			for (unsigned int m = 0; m < mesh->mNumFaces; ++m)
-			{
-				aiFace& in = mesh->mFaces[m];
-				if ((real == 3  && in.mNumIndices <= 3) || (real != 3 && in.mNumIndices != real+1))
-				{
-					continue;
-				}
-				
-				outFaces->mNumIndices = in.mNumIndices;
-				outFaces->mIndices    = in.mIndices;
+            // try to guess how much storage we'll need
+            for (unsigned int q = 0; q < mesh->mNumBones;++q)
+            {
+                tempBones[q].reserve(mesh->mBones[q]->mNumWeights / (num-1));
+            }
 
-				for (unsigned int q = 0; q < in.mNumIndices; ++q)
-				{
-					unsigned int idx = in.mIndices[q];
+            unsigned int outIdx = 0;
+            for (unsigned int m = 0; m < mesh->mNumFaces; ++m)
+            {
+                aiFace& in = mesh->mFaces[m];
+                if ((real == 3  && in.mNumIndices <= 3) || (real != 3 && in.mNumIndices != real+1))
+                {
+                    continue;
+                }
 
-					// process all bones of this index
-					if (avw)
-					{
-						VertexWeightTable& tbl = avw[idx];
-						for (VertexWeightTable::const_iterator it = tbl.begin(), end = tbl.end();
-							 it != end; ++it)
-						{
-							tempBones[ (*it).first ].push_back( aiVertexWeight(outIdx, (*it).second) );
-						}
-					}
+                outFaces->mNumIndices = in.mNumIndices;
+                outFaces->mIndices    = in.mIndices;
 
-					if (vert)
-					{
-						*vert++ = mesh->mVertices[idx];
-						//mesh->mVertices[idx].x = get_qnan();
-					}
-					if (nor )*nor++  = mesh->mNormals[idx];
-					if (tan )
-					{
-						*tan++  = mesh->mTangents[idx];
-						*bit++  = mesh->mBitangents[idx];
-					}
+                for (unsigned int q = 0; q < in.mNumIndices; ++q)
+                {
+                    unsigned int idx = in.mIndices[q];
 
-					for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++pp)
-					{
-						if (!uv[pp])break;
-						*uv[pp]++ = mesh->mTextureCoords[pp][idx];
-					}
+                    // process all bones of this index
+                    if (avw)
+                    {
+                        VertexWeightTable& tbl = avw[idx];
+                        for (VertexWeightTable::const_iterator it = tbl.begin(), end = tbl.end();
+                             it != end; ++it)
+                        {
+                            tempBones[ (*it).first ].push_back( aiVertexWeight(outIdx, (*it).second) );
+                        }
+                    }
 
-					for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_COLOR_SETS; ++pp)
-					{
-						if (!cols[pp])break;
-						*cols[pp]++ = mesh->mColors[pp][idx];
-					}
+                    if (vert)
+                    {
+                        *vert++ = mesh->mVertices[idx];
+                        //mesh->mVertices[idx].x = get_qnan();
+                    }
+                    if (nor )*nor++  = mesh->mNormals[idx];
+                    if (tan )
+                    {
+                        *tan++  = mesh->mTangents[idx];
+                        *bit++  = mesh->mBitangents[idx];
+                    }
 
-					in.mIndices[q] = outIdx++;
-				}
+                    for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++pp)
+                    {
+                        if (!uv[pp])break;
+                        *uv[pp]++ = mesh->mTextureCoords[pp][idx];
+                    }
 
-				in.mIndices = NULL;
-				++outFaces;
-			}
-			ai_assert(outFaces == out->mFaces + out->mNumFaces);
+                    for (unsigned int pp = 0; pp < AI_MAX_NUMBER_OF_COLOR_SETS; ++pp)
+                    {
+                        if (!cols[pp])break;
+                        *cols[pp]++ = mesh->mColors[pp][idx];
+                    }
 
-			// now generate output bones
-			for (unsigned int q = 0; q < mesh->mNumBones;++q)
-				if (!tempBones[q].empty())++out->mNumBones;
+                    in.mIndices[q] = outIdx++;
+                }
 
-			if (out->mNumBones)
-			{
-				out->mBones = new aiBone*[out->mNumBones];
-				for (unsigned int q = 0, real = 0; q < mesh->mNumBones;++q)
-				{
-					TempBoneInfo& in = tempBones[q];
-					if (in.empty())continue;
+                in.mIndices = NULL;
+                ++outFaces;
+            }
+            ai_assert(outFaces == out->mFaces + out->mNumFaces);
 
-					aiBone* srcBone = mesh->mBones[q];
-					aiBone* bone = out->mBones[real] = new aiBone();
+            // now generate output bones
+            for (unsigned int q = 0; q < mesh->mNumBones;++q)
+                if (!tempBones[q].empty())++out->mNumBones;
 
-					bone->mName = srcBone->mName;
-					bone->mOffsetMatrix = srcBone->mOffsetMatrix;
+            if (out->mNumBones)
+            {
+                out->mBones = new aiBone*[out->mNumBones];
+                for (unsigned int q = 0, real = 0; q < mesh->mNumBones;++q)
+                {
+                    TempBoneInfo& in = tempBones[q];
+                    if (in.empty())continue;
 
-					bone->mNumWeights = (unsigned int)in.size();
-					bone->mWeights = new aiVertexWeight[bone->mNumWeights];
+                    aiBone* srcBone = mesh->mBones[q];
+                    aiBone* bone = out->mBones[real] = new aiBone();
 
-					::memcpy(bone->mWeights,&in[0],bone->mNumWeights*sizeof(aiVertexWeight));
+                    bone->mName = srcBone->mName;
+                    bone->mOffsetMatrix = srcBone->mOffsetMatrix;
 
-					++real;
-				}
-			}
-		}
+                    bone->mNumWeights = (unsigned int)in.size();
+                    bone->mWeights = new aiVertexWeight[bone->mNumWeights];
 
-		// delete the per-vertex bone weights table
-		delete[] avw;
+                    ::memcpy(bone->mWeights,&in[0],bone->mNumWeights*sizeof(aiVertexWeight));
 
-		// delete the input mesh
-		delete mesh;
+                    ++real;
+                }
+            }
+        }
+
+        // delete the per-vertex bone weights table
+        delete[] avw;
+
+        // delete the input mesh
+        delete mesh;
 
         // avoid invalid pointer
         pScene->mMeshes[i] = NULL;
-	}
+    }
 
-	if (outMeshes.empty())
-	{
-		// This should not occur
-		throw DeadlyImportError("No meshes remaining");
-	}
+    if (outMeshes.empty())
+    {
+        // This should not occur
+        throw DeadlyImportError("No meshes remaining");
+    }
 
-	// If we added at least one mesh process all nodes in the node
-	// graph and update their respective mesh indices.
-	if (bAnyChanges)
-	{
-		UpdateNodes(replaceMeshIndex,pScene->mRootNode);
-	}
+    // If we added at least one mesh process all nodes in the node
+    // graph and update their respective mesh indices.
+    if (bAnyChanges)
+    {
+        UpdateNodes(replaceMeshIndex,pScene->mRootNode);
+    }
 
-	if (outMeshes.size() != pScene->mNumMeshes)
-	{
-		delete[] pScene->mMeshes;
-		pScene->mNumMeshes = (unsigned int)outMeshes.size();
-		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-	}
-	::memcpy(pScene->mMeshes,&outMeshes[0],pScene->mNumMeshes*sizeof(void*));
+    if (outMeshes.size() != pScene->mNumMeshes)
+    {
+        delete[] pScene->mMeshes;
+        pScene->mNumMeshes = (unsigned int)outMeshes.size();
+        pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+    }
+    ::memcpy(pScene->mMeshes,&outMeshes[0],pScene->mNumMeshes*sizeof(void*));
 
-	if (!DefaultLogger::isNullLogger())
-	{
-		char buffer[1024];
-		::sprintf(buffer,"Points: %u%s, Lines: %u%s, Triangles: %u%s, Polygons: %u%s (Meshes, X = removed)",
-			aiNumMeshesPerPType[0], ((configRemoveMeshes & aiPrimitiveType_POINT)     ? "X" : ""),
-			aiNumMeshesPerPType[1], ((configRemoveMeshes & aiPrimitiveType_LINE)      ? "X" : ""),
-			aiNumMeshesPerPType[2], ((configRemoveMeshes & aiPrimitiveType_TRIANGLE)  ? "X" : ""),
-			aiNumMeshesPerPType[3], ((configRemoveMeshes & aiPrimitiveType_POLYGON)   ? "X" : ""));
-		DefaultLogger::get()->info(buffer);
-		DefaultLogger::get()->debug("SortByPTypeProcess finished");
-	}
+    if (!DefaultLogger::isNullLogger())
+    {
+        char buffer[1024];
+        ::sprintf(buffer,"Points: %u%s, Lines: %u%s, Triangles: %u%s, Polygons: %u%s (Meshes, X = removed)",
+            aiNumMeshesPerPType[0], ((configRemoveMeshes & aiPrimitiveType_POINT)     ? "X" : ""),
+            aiNumMeshesPerPType[1], ((configRemoveMeshes & aiPrimitiveType_LINE)      ? "X" : ""),
+            aiNumMeshesPerPType[2], ((configRemoveMeshes & aiPrimitiveType_TRIANGLE)  ? "X" : ""),
+            aiNumMeshesPerPType[3], ((configRemoveMeshes & aiPrimitiveType_POLYGON)   ? "X" : ""));
+        DefaultLogger::get()->info(buffer);
+        DefaultLogger::get()->debug("SortByPTypeProcess finished");
+    }
 }
 

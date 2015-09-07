@@ -7,9 +7,15 @@ APIs are provided for C and C++. There are various bindings to other languages (
 
 Additionally, assimp features various __mesh post processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
-This is the development trunk containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories. According to [Travis-CI] (https://travis-ci.org/), the current build status is:
+This is the development trunk containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories.
+The current build status is:
 
-[![Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
+Linux [![Linux Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
+Windows [![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
+Coverity<a href="https://scan.coverity.com/projects/5607">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/5607/badge.svg"/>
+</a>
 
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
@@ -35,7 +41,8 @@ __Importers__:
 - PLY
 - STL
 - X 
-- OBJ 
+- OBJ
+- OpenGEX
 - SMD
 - LWO 
 - LXO 

@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -43,60 +43,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <string>
 #include <map>
-#include "../include/assimp/vector2.h"
-#include "../include/assimp/vector3.h"
-#include "../include/assimp/mesh.h"
+#include <assimp/vector2.h>
+#include <assimp/vector3.h>
+#include <assimp/mesh.h>
 
-namespace Assimp
-{
+namespace Assimp {
 
-namespace ObjFile
-{
-struct Model;
-struct Object;
-struct Material;
-struct Point3;
-struct Point2;
+namespace ObjFile {
+    struct Model;
+    struct Object;
+    struct Material;
+    struct Point3;
+    struct Point2;
 }
+
 class ObjFileImporter;
 class IOSystem;
 
-///	\class	ObjFileParser
-///	\brief	Parser for a obj waveform file
-class ObjFileParser
-{
+/// \class  ObjFileParser
+/// \brief  Parser for a obj waveform file
+class ObjFileParser {
 public:
-    static const size_t BUFFERSIZE = 4096;
+    static const size_t Buffersize = 4096;
     typedef std::vector<char> DataArray;
     typedef std::vector<char>::iterator DataArrayIt;
     typedef std::vector<char>::const_iterator ConstDataArrayIt;
 
 public:
-    ///	\brief	Constructor with data array.
+    /// \brief  Constructor with data array.
     ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* io);
-    ///	\brief	Destructor
+    /// \brief  Destructor
     ~ObjFileParser();
-    ///	\brief	Model getter.
+    /// \brief  Model getter.
     ObjFile::Model *GetModel() const;
 
 private:
-    ///	Parse the loaded file
+    /// Parse the loaded file
     void parseFile();
-    ///	Method to copy the new delimited word in the current line.
+    /// Method to copy the new delimited word in the current line.
     void copyNextWord(char *pBuffer, size_t length);
-    ///	Method to copy the new line.
+    /// Method to copy the new line.
     void copyNextLine(char *pBuffer, size_t length);
-    /// Stores the vector 
+    /// Stores the vector
     void getVector( std::vector<aiVector3D> &point3d_array );
-    ///	Stores the following 3d vector.
+    /// Stores the following 3d vector.
     void getVector3( std::vector<aiVector3D> &point3d_array );
-    ///	Stores the following 3d vector.
+    /// Stores the following 3d vector.
     void getVector2(std::vector<aiVector2D> &point2d_array);
-    ///	Stores the following face.
+    /// Stores the following face.
     void getFace(aiPrimitiveType type);
     /// Reads the material description.
     void getMaterialDesc();
-    ///	Gets a comment.
+    /// Gets a comment.
     void getComment();
     /// Gets a a material library.
     void getMaterialLib();
@@ -113,31 +111,37 @@ private:
     /// Parse object name
     void getObjectName();
     /// Creates a new object.
-    void createObject(const std::string &strObjectName);
-    ///	Creates a new mesh.
-    void createMesh(); 
-    ///	Returns true, if a new mesh instance must be created.
+    void createObject( const std::string &strObjectName );
+    /// Creates a new mesh.
+    void createMesh( const std::string &meshName );
+    /// Returns true, if a new mesh instance must be created.
     bool needsNewMesh( const std::string &rMaterialName );
-    ///	Error report in token
+    /// Error report in token
     void reportErrorTokenInFace();
 
 private:
-    ///	Default material name
+    // Copy and assignment constructor should be private
+    // because the class contains pointer to allocated memory
+    ObjFileParser(const ObjFileParser& rhs);
+    ObjFileParser& operator=(const ObjFileParser& rhs);
+
+    /// Default material name
     static const std::string DEFAULT_MATERIAL;
-    //!	Iterator to current position in buffer
+    //! Iterator to current position in buffer
     DataArrayIt m_DataIt;
-    //!	Iterator to end position of buffer
+    //! Iterator to end position of buffer
     DataArrayIt m_DataItEnd;
-    //!	Pointer to model instance
+    //! Pointer to model instance
     ObjFile::Model *m_pModel;
-    //!	Current line (for debugging)
+    //! Current line (for debugging)
     unsigned int m_uiLine;
-    //!	Helper buffer
-    char m_buffer[BUFFERSIZE];
-    ///	Pointer to IO system instance.
+    //! Helper buffer
+    char m_buffer[Buffersize];
+    /// Pointer to IO system instance.
     IOSystem *m_pIO;
+    /// Path to the current model
 };
 
-}	// Namespace Assimp
+}   // Namespace Assimp
 
 #endif

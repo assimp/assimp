@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -48,11 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileData.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
 
 
-namespace Assimp	{
+namespace Assimp    {
 
 // Material specific token
 static const std::string DiffuseTexture      = "map_Kd";
@@ -68,24 +68,24 @@ static const std::string DisplacementTexture = "disp";
 static const std::string SpecularityTexture  = "map_ns";
 
 // texture option specific token
-static const std::string BlendUOption		= "-blendu";
-static const std::string BlendVOption		= "-blendv";
-static const std::string BoostOption		= "-boost";
-static const std::string ModifyMapOption	= "-mm";
-static const std::string OffsetOption		= "-o";
-static const std::string ScaleOption		= "-s";
-static const std::string TurbulenceOption	= "-t";
-static const std::string ResolutionOption	= "-texres";
-static const std::string ClampOption		= "-clamp";
-static const std::string BumpOption			= "-bm";
-static const std::string ChannelOption		= "-imfchan";
-static const std::string TypeOption			= "-type";
+static const std::string BlendUOption       = "-blendu";
+static const std::string BlendVOption       = "-blendv";
+static const std::string BoostOption        = "-boost";
+static const std::string ModifyMapOption    = "-mm";
+static const std::string OffsetOption       = "-o";
+static const std::string ScaleOption        = "-s";
+static const std::string TurbulenceOption   = "-t";
+static const std::string ResolutionOption   = "-texres";
+static const std::string ClampOption        = "-clamp";
+static const std::string BumpOption         = "-bm";
+static const std::string ChannelOption      = "-imfchan";
+static const std::string TypeOption         = "-type";
 
 
 
 // -------------------------------------------------------------------
-//	Constructor
-ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer, 
+//  Constructor
+ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
                                        const std::string & /*strAbsPath*/,
                                        ObjFile::Model *pModel ) :
     m_DataIt( buffer.begin() ),
@@ -103,28 +103,28 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
 }
 
 // -------------------------------------------------------------------
-//	Destructor
+//  Destructor
 ObjFileMtlImporter::~ObjFileMtlImporter()
 {
     // empty
 }
 
 // -------------------------------------------------------------------
-//	Private copy constructor
+//  Private copy constructor
 ObjFileMtlImporter::ObjFileMtlImporter(const ObjFileMtlImporter & /* rOther */ )
 {
     // empty
 }
-    
+
 // -------------------------------------------------------------------
-//	Private copy constructor
+//  Private copy constructor
 ObjFileMtlImporter &ObjFileMtlImporter::operator = ( const ObjFileMtlImporter & /*rOther */ )
 {
     return *this;
 }
 
 // -------------------------------------------------------------------
-//	Loads the material description
+//  Loads the material description
 void ObjFileMtlImporter::load()
 {
     if ( m_DataIt == m_DataItEnd )
@@ -143,7 +143,7 @@ void ObjFileMtlImporter::load()
                     ++m_DataIt;
                     getColorRGBA( &m_pModel->m_pCurrentMaterial->ambient );
                 }
-                else if (*m_DataIt == 'd')	// Diffuse color
+                else if (*m_DataIt == 'd')  // Diffuse color
                 {
                     ++m_DataIt;
                     getColorRGBA( &m_pModel->m_pCurrentMaterial->diffuse );
@@ -162,11 +162,17 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'd':	// Alpha value
+        case 'd':   
             {
-                ++m_DataIt;
-                getFloatValue( m_pModel->m_pCurrentMaterial->alpha );
-                m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+                if( *(m_DataIt+1) == 'i' && *( m_DataIt + 2 ) == 's' && *( m_DataIt + 3 ) == 'p' ) {
+                    // A displacement map
+                    getTexture();
+                } else {
+                    // Alpha value
+                    ++m_DataIt;
+                    getFloatValue( m_pModel->m_pCurrentMaterial->alpha );
+                    m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+                }
             }
             break;
 
@@ -176,15 +182,15 @@ void ObjFileMtlImporter::load()
                 ++m_DataIt;
                 switch(*m_DataIt)
                 {
-                case 's':	// Specular exponent
+                case 's':   // Specular exponent
                     ++m_DataIt;
                     getFloatValue(m_pModel->m_pCurrentMaterial->shineness);
                     break;
-                case 'i':	// Index Of refraction
+                case 'i':   // Index Of refraction
                     ++m_DataIt;
                     getFloatValue(m_pModel->m_pCurrentMaterial->ior);
                     break;
-                case 'e':	// New material
+                case 'e':   // New material
                     createMaterial();
                     break;
                 }
@@ -192,7 +198,7 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'm':	// Texture
+        case 'm':   // Texture
         case 'b':   // quick'n'dirty - for 'bump' sections
             {
                 getTexture();
@@ -200,7 +206,7 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'i':	// Illumination model
+        case 'i':   // Illumination model
             {
                 m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
                 getIlluminationModel( m_pModel->m_pCurrentMaterial->illumination_model );
@@ -218,15 +224,15 @@ void ObjFileMtlImporter::load()
 }
 
 // -------------------------------------------------------------------
-//	Loads a color definition
+//  Loads a color definition
 void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 {
     ai_assert( NULL != pColor );
-    
+
     float r( 0.0f ), g( 0.0f ), b( 0.0f );
     m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, r );
     pColor->r = r;
-    
+
     // we have to check if color is default 0 with only one token
     if( !IsLineEnd( *m_DataIt ) ) {
         m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, g );
@@ -237,7 +243,7 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 }
 
 // -------------------------------------------------------------------
-//	Loads the kind of illumination model.
+//  Loads the kind of illumination model.
 void ObjFileMtlImporter::getIlluminationModel( int &illum_model )
 {
     m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
@@ -245,7 +251,7 @@ void ObjFileMtlImporter::getIlluminationModel( int &illum_model )
 }
 
 // -------------------------------------------------------------------
-//	Loads a single float value. 
+//  Loads a single float value.
 void ObjFileMtlImporter::getFloatValue( float &value )
 {
     m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
@@ -253,33 +259,33 @@ void ObjFileMtlImporter::getFloatValue( float &value )
 }
 
 // -------------------------------------------------------------------
-//	Creates a material from loaded data.
+//  Creates a material from loaded data.
 void ObjFileMtlImporter::createMaterial()
-{	
+{
     std::string line( "" );
     while( !IsLineEnd( *m_DataIt ) ) {
         line += *m_DataIt;
         ++m_DataIt;
     }
-    
+
     std::vector<std::string> token;
     const unsigned int numToken = tokenize<std::string>( line, token, " \t" );
-	std::string name( "" );
-	if ( numToken == 1 ) {
-		name = AI_DEFAULT_MATERIAL_NAME;
-	} else {
-		// skip newmtl and all following white spaces
-		std::size_t first_ws_pos = line.find_first_of(" \t");
-		std::size_t first_non_ws_pos = line.find_first_not_of(" \t", first_ws_pos);
-		if (first_non_ws_pos != std::string::npos) {
-			name = line.substr(first_non_ws_pos);
-		}
-	}
+    std::string name( "" );
+    if ( numToken == 1 ) {
+        name = AI_DEFAULT_MATERIAL_NAME;
+    } else {
+        // skip newmtl and all following white spaces
+        std::size_t first_ws_pos = line.find_first_of(" \t");
+        std::size_t first_non_ws_pos = line.find_first_not_of(" \t", first_ws_pos);
+        if (first_non_ws_pos != std::string::npos) {
+            name = line.substr(first_non_ws_pos);
+        }
+    }
 
-	std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( name );
-	if ( m_pModel->m_MaterialMap.end() == it) {
+    std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( name );
+    if ( m_pModel->m_MaterialMap.end() == it) {
         // New Material created
-        m_pModel->m_pCurrentMaterial = new ObjFile::Material();	
+        m_pModel->m_pCurrentMaterial = new ObjFile::Material();
         m_pModel->m_pCurrentMaterial->MaterialName.Set( name );
         m_pModel->m_MaterialLib.push_back( name );
         m_pModel->m_MaterialMap[ name ] = m_pModel->m_pCurrentMaterial;
@@ -290,7 +296,7 @@ void ObjFileMtlImporter::createMaterial()
 }
 
 // -------------------------------------------------------------------
-//	Gets a texture name from data.
+//  Gets a texture name from data.
 void ObjFileMtlImporter::getTexture() {
     aiString *out( NULL );
     int clampIndex = -1;
@@ -317,12 +323,12 @@ void ObjFileMtlImporter::getTexture() {
         out = & m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;
     } else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), BumpTexture1.size() ) ||
-                !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) || 
+                !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) ||
                 !ASSIMP_strincmp( pPtr, BumpTexture3.c_str(), BumpTexture3.size() ) ) {
-        // Bump texture 
+        // Bump texture
         out = & m_pModel->m_pCurrentMaterial->textureBump;
         clampIndex = ObjFile::Material::TextureBumpType;
-    } else if (!ASSIMP_strincmp( pPtr,NormalTexture.c_str(), NormalTexture.size())) { 
+    } else if (!ASSIMP_strincmp( pPtr,NormalTexture.c_str(), NormalTexture.size())) {
         // Normal map
         out = & m_pModel->m_pCurrentMaterial->textureNormal;
         clampIndex = ObjFile::Material::TextureNormalType;
@@ -343,9 +349,9 @@ void ObjFileMtlImporter::getTexture() {
     getTextureOption(clamp);
     m_pModel->m_pCurrentMaterial->clamp[clampIndex] = clamp;
 
-    std::string strTexture;
-    m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, strTexture );
-    out->Set( strTexture );
+    std::string texture;
+    m_DataIt = getName<DataArrayIt>( m_DataIt, m_DataItEnd, texture );
+    out->Set( texture );
 }
 
 /* /////////////////////////////////////////////////////////////////////////////
@@ -354,10 +360,10 @@ void ObjFileMtlImporter::getTexture() {
  * According to http://en.wikipedia.org/wiki/Wavefront_.obj_file#Texture_options
  * Texture map statement can contains various texture option, for example:
  *
- *	map_Ka -o 1 1 1 some.png
- *	map_Kd -clamp on some.png
+ *  map_Ka -o 1 1 1 some.png
+ *  map_Kd -clamp on some.png
  *
- * So we need to parse and skip these options, and leave the last part which is 
+ * So we need to parse and skip these options, and leave the last part which is
  * the url of image, otherwise we will get a wrong url like "-clamp on some.png".
  *
  * Because aiMaterial supports clamp option, so we also want to return it

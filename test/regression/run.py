@@ -151,6 +151,10 @@ class results:
            print("\nSee " + settings.results + "\\" + outfilename_failur 
                  + " for more details\n\n") 
     
+    def hasFailures( self ):
+        """ Return True, if any failures there. """
+        return 0 != len( self.failures )
+        
 # -------------------------------------------------------------------------------
 def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(settings.results, "tmp", os.path.split(fullpath)[1] + "_" + myhash)
@@ -280,11 +284,16 @@ def run_test():
             process_dir(tp, outfile, zipin, res)
 
     res.report_results()
+    if res.hasFailures():
+        return 1
+        
+    return 0
+        
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
     assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
     print('Using assimp binary: ' + assimp_bin_path)
-    run_test()
+    sys.exit( run_test() )
 
 # vim: ai ts=4 sts=4 et sw=4

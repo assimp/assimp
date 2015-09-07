@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -57,67 +57,67 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "./../include/assimp/Compiler/pushpack1.h"
 
-namespace Assimp	{
-namespace MD3	{
+namespace Assimp    {
+namespace MD3   {
 
 // to make it easier for us, we test the magic word against both "endianesses"
-#define AI_MD3_MAGIC_NUMBER_BE	AI_MAKE_MAGIC("IDP3")
-#define AI_MD3_MAGIC_NUMBER_LE	AI_MAKE_MAGIC("3PDI")
+#define AI_MD3_MAGIC_NUMBER_BE  AI_MAKE_MAGIC("IDP3")
+#define AI_MD3_MAGIC_NUMBER_LE  AI_MAKE_MAGIC("3PDI")
 
 // common limitations
-#define AI_MD3_VERSION			15
-#define AI_MD3_MAXQPATH			64
-#define AI_MD3_MAXFRAME			16
-#define AI_MD3_MAX_FRAMES		1024
-#define AI_MD3_MAX_TAGS			16
-#define AI_MD3_MAX_SURFACES		32
-#define AI_MD3_MAX_SHADERS		256	
-#define AI_MD3_MAX_VERTS		4096	
-#define AI_MD3_MAX_TRIANGLES	8192	
+#define AI_MD3_VERSION          15
+#define AI_MD3_MAXQPATH         64
+#define AI_MD3_MAXFRAME         16
+#define AI_MD3_MAX_FRAMES       1024
+#define AI_MD3_MAX_TAGS         16
+#define AI_MD3_MAX_SURFACES     32
+#define AI_MD3_MAX_SHADERS      256
+#define AI_MD3_MAX_VERTS        4096
+#define AI_MD3_MAX_TRIANGLES    8192
 
 // master scale factor for all vertices in a MD3 model
-#define AI_MD3_XYZ_SCALE		(1.0f/64.0f)
+#define AI_MD3_XYZ_SCALE        (1.0f/64.0f)
 
 // -------------------------------------------------------------------------------
 /** @brief Data structure for the MD3 main header
  */
 struct Header
 {
-	//! magic number
-	uint32_t IDENT;
+    //! magic number
+    uint32_t IDENT;
 
-	//! file format version
-	uint32_t VERSION;
+    //! file format version
+    uint32_t VERSION;
 
-	//! original name in .pak archive
-	char NAME[ AI_MD3_MAXQPATH ];
+    //! original name in .pak archive
+    char NAME[ AI_MD3_MAXQPATH ];
 
-	//! unknown
-	int32_t FLAGS;
+    //! unknown
+    int32_t FLAGS;
 
-	//! number of frames in the file
-	uint32_t NUM_FRAMES;
+    //! number of frames in the file
+    uint32_t NUM_FRAMES;
 
-	//! number of tags in the file
-	uint32_t NUM_TAGS;
+    //! number of tags in the file
+    uint32_t NUM_TAGS;
 
-	//! number of surfaces in the file
-	uint32_t NUM_SURFACES;
+    //! number of surfaces in the file
+    uint32_t NUM_SURFACES;
 
-	//! number of skins in the file
-	uint32_t NUM_SKINS;
+    //! number of skins in the file
+    uint32_t NUM_SKINS;
 
-	//! offset of the first frame
-	uint32_t OFS_FRAMES;
+    //! offset of the first frame
+    uint32_t OFS_FRAMES;
 
-	//! offset of the first tag
-	uint32_t OFS_TAGS;
+    //! offset of the first tag
+    uint32_t OFS_TAGS;
 
-	//! offset of the first surface
-	uint32_t OFS_SURFACES;
+    //! offset of the first surface
+    uint32_t OFS_SURFACES;
 
-	//! end of file
-	uint32_t OFS_EOF;
+    //! end of file
+    uint32_t OFS_EOF;
 } PACK_STRUCT;
 
 
@@ -126,20 +126,20 @@ struct Header
  */
 struct Frame
 {
-	//! minimum bounds
-	aiVector3D min;
+    //! minimum bounds
+    aiVector3D min;
 
-	//! maximum bounds
-	aiVector3D max;
+    //! maximum bounds
+    aiVector3D max;
 
-	//! local origin for this frame
-	aiVector3D origin;
+    //! local origin for this frame
+    aiVector3D origin;
 
-	//! radius of bounding sphere
-	float radius;
+    //! radius of bounding sphere
+    float radius;
 
-	//! name of frame
-	char name[ AI_MD3_MAXFRAME ];
+    //! name of frame
+    char name[ AI_MD3_MAXFRAME ];
 
 } PACK_STRUCT;
 
@@ -149,12 +149,12 @@ struct Frame
  */
 struct Tag
 {
-	//! name of the tag
-	char NAME[ AI_MD3_MAXQPATH ];
+    //! name of the tag
+    char NAME[ AI_MD3_MAXQPATH ];
 
-	//! Local tag origin and orientation
-	aiVector3D  origin;
-	float  orientation[3][3];
+    //! Local tag origin and orientation
+    aiVector3D  origin;
+    float  orientation[3][3];
 
 } PACK_STRUCT;
 
@@ -164,42 +164,42 @@ struct Tag
  */
 struct Surface
 {
-	//! magic number
-	int32_t IDENT;
+    //! magic number
+    int32_t IDENT;
 
-	//! original name of the surface
-	char NAME[ AI_MD3_MAXQPATH ];
+    //! original name of the surface
+    char NAME[ AI_MD3_MAXQPATH ];
 
-	//! unknown
-	int32_t FLAGS;
+    //! unknown
+    int32_t FLAGS;
 
-	//! number of frames in the surface
-	uint32_t NUM_FRAMES;
+    //! number of frames in the surface
+    uint32_t NUM_FRAMES;
 
-	//! number of shaders in the surface
-	uint32_t NUM_SHADER;
+    //! number of shaders in the surface
+    uint32_t NUM_SHADER;
 
-	//! number of vertices in the surface
-	uint32_t NUM_VERTICES;
+    //! number of vertices in the surface
+    uint32_t NUM_VERTICES;
 
-	//! number of triangles in the surface
-	uint32_t NUM_TRIANGLES;
+    //! number of triangles in the surface
+    uint32_t NUM_TRIANGLES;
 
 
-	//! offset to the triangle data 
-	uint32_t OFS_TRIANGLES;
+    //! offset to the triangle data
+    uint32_t OFS_TRIANGLES;
 
-	//! offset to the shader data
-	uint32_t OFS_SHADERS;
+    //! offset to the shader data
+    uint32_t OFS_SHADERS;
 
-	//! offset to the texture coordinate data
-	uint32_t OFS_ST;
+    //! offset to the texture coordinate data
+    uint32_t OFS_ST;
 
-	//! offset to the vertex/normal data
-	uint32_t OFS_XYZNORMAL;
+    //! offset to the vertex/normal data
+    uint32_t OFS_XYZNORMAL;
 
-	//! offset to the end of the Surface object
-	int32_t OFS_END;
+    //! offset to the end of the Surface object
+    int32_t OFS_END;
 } PACK_STRUCT;
 
 // -------------------------------------------------------------------------------
@@ -207,11 +207,11 @@ struct Surface
  */
 struct Shader
 {
-	//! filename of the shader
-	char NAME[ AI_MD3_MAXQPATH ];
+    //! filename of the shader
+    char NAME[ AI_MD3_MAXQPATH ];
 
-	//! index of the shader
-	uint32_t SHADER_INDEX;
+    //! index of the shader
+    uint32_t SHADER_INDEX;
 } PACK_STRUCT;
 
 
@@ -220,8 +220,8 @@ struct Shader
  */
 struct Triangle
 {
-	//! triangle indices
-	uint32_t INDEXES[3];
+    //! triangle indices
+    uint32_t INDEXES[3];
 } PACK_STRUCT;
 
 
@@ -230,8 +230,8 @@ struct Triangle
  */
 struct TexCoord
 {
-	//! UV coordinates
-	float U,V;
+    //! UV coordinates
+    float U,V;
 } PACK_STRUCT;
 
 
@@ -240,73 +240,73 @@ struct TexCoord
  */
 struct Vertex
 {
-	//! X/Y/Z coordinates
-	int16_t X,Y,Z;
+    //! X/Y/Z coordinates
+    int16_t X,Y,Z;
 
-	//! encoded normal vector
-	uint16_t  NORMAL;
+    //! encoded normal vector
+    uint16_t  NORMAL;
 } PACK_STRUCT;
 
 #include "./../include/assimp/Compiler/poppack1.h"
 
 // -------------------------------------------------------------------------------
-/**	@brief Unpack a Q3 16 bit vector to its full float3 representation
+/** @brief Unpack a Q3 16 bit vector to its full float3 representation
  *
- *	@param p_iNormal Input normal vector in latitude/longitude form
- *	@param p_afOut Pointer to an array of three floats to receive the result
+ *  @param p_iNormal Input normal vector in latitude/longitude form
+ *  @param p_afOut Pointer to an array of three floats to receive the result
  *
- *	@note This has been taken from q3 source (misc_model.c)
+ *  @note This has been taken from q3 source (misc_model.c)
  */
 inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
 {
-	float lat = (float)(( p_iNormal >> 8u ) & 0xff);
-	float lng = (float)(( p_iNormal & 0xff ));
-	lat *= 3.141926f/128.0f;
-	lng *= 3.141926f/128.0f;
+    float lat = (float)(( p_iNormal >> 8u ) & 0xff);
+    float lng = (float)(( p_iNormal & 0xff ));
+    lat *= 3.141926f/128.0f;
+    lng *= 3.141926f/128.0f;
 
-	p_afOut[0] = std::cos(lat) * std::sin(lng);
-	p_afOut[1] = std::sin(lat) * std::sin(lng);
-	p_afOut[2] = std::cos(lng);
-	return;
+    p_afOut[0] = std::cos(lat) * std::sin(lng);
+    p_afOut[1] = std::sin(lat) * std::sin(lng);
+    p_afOut[2] = std::cos(lng);
+    return;
 }
 
 
 // -------------------------------------------------------------------------------
-/**	@brief Pack a Q3 normal into 16bit latitute/longitude representation
- *	@param p_vIn Input vector
- *	@param p_iOut Output normal
+/** @brief Pack a Q3 normal into 16bit latitute/longitude representation
+ *  @param p_vIn Input vector
+ *  @param p_iOut Output normal
  *
- *	@note This has been taken from q3 source (mathlib.c)
+ *  @note This has been taken from q3 source (mathlib.c)
  */
-inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut ) 
+inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
 {
-	// check for singularities
-	if ( 0.0f == p_vIn[0] && 0.0f == p_vIn[1] ) 
-	{
-		if ( p_vIn[2] > 0.0f ) 
-		{
-			((unsigned char*)&p_iOut)[0] = 0;
-			((unsigned char*)&p_iOut)[1] = 0;		// lat = 0, long = 0
-		} 
-		else 
-		{
-			((unsigned char*)&p_iOut)[0] = 128;
-			((unsigned char*)&p_iOut)[1] = 0;		// lat = 0, long = 128
-		}
-	} 
-	else 
-	{
-		int	a, b;
+    // check for singularities
+    if ( 0.0f == p_vIn[0] && 0.0f == p_vIn[1] )
+    {
+        if ( p_vIn[2] > 0.0f )
+        {
+            ((unsigned char*)&p_iOut)[0] = 0;
+            ((unsigned char*)&p_iOut)[1] = 0;       // lat = 0, long = 0
+        }
+        else
+        {
+            ((unsigned char*)&p_iOut)[0] = 128;
+            ((unsigned char*)&p_iOut)[1] = 0;       // lat = 0, long = 128
+        }
+    }
+    else
+    {
+        int a, b;
 
-		a = int(57.2957795f * ( atan2f( p_vIn[1], p_vIn[0] ) ) * (255.0f / 360.0f ));
-		a &= 0xff;
+        a = int(57.2957795f * ( atan2f( p_vIn[1], p_vIn[0] ) ) * (255.0f / 360.0f ));
+        a &= 0xff;
 
-		b = int(57.2957795f * ( acosf( p_vIn[2] ) ) * ( 255.0f / 360.0f ));
-		b &= 0xff;
+        b = int(57.2957795f * ( acosf( p_vIn[2] ) ) * ( 255.0f / 360.0f ));
+        b &= 0xff;
 
-		((unsigned char*)&p_iOut)[0] = b;	// longitude
-		((unsigned char*)&p_iOut)[1] = a;	// lattitude
-	}
+        ((unsigned char*)&p_iOut)[0] = b;   // longitude
+        ((unsigned char*)&p_iOut)[1] = a;   // lattitude
+    }
 }
 
 }

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
@@ -677,16 +677,26 @@ void WriteBinaryDump(const aiScene* scene, FILE* _out, const char* src, const ch
 	Write<uint16_t>(compressed);
 	// ==  20 bytes
 
-	char buff[256]; 
-	strncpy(buff,src,256);
-	fwrite(buff,256,1,out);
+	{
+		char buff[256] = { 0 };
+		strncpy(buff,src,256);
+		buff[255] = 0;
+		fwrite(buff,256,1,out);
+	}
 
-	strncpy(buff,cmd,128);
-	fwrite(buff,128,1,out);
+	{
+		char buff[128] = { 0 };
+		strncpy(buff,cmd,128);
+		buff[127] = 0;
+		fwrite(buff,128,1,out);
+	}
 
 	// leave 64 bytes free for future extensions
-	memset(buff,0xcd,64);
-	fwrite(buff,64,1,out);
+	{
+		char buff[64];
+		memset(buff,0xcd,64);
+		fwrite(buff,64,1,out);
+	}
 	// == 435 bytes
 
 	// ==== total header size: 512 bytes
@@ -748,17 +758,17 @@ void WriteNode(const aiNode* node, FILE* out, unsigned int depth)
 		prefix,m.d1,m.d2,m.d3,m.d4,prefix);
 
 	if (node->mNumMeshes) {
-		fprintf(out, "%s\t<MeshRefs num=\"%i\">\n%s\t",
+		fprintf(out, "%s\t<MeshRefs num=\"%u\">\n%s\t",
 			prefix,node->mNumMeshes,prefix);
 
 		for (unsigned int i = 0; i < node->mNumMeshes;++i) {
-			fprintf(out,"%i ",node->mMeshes[i]);
+			fprintf(out,"%u ",node->mMeshes[i]);
 		}
 		fprintf(out,"\n%s\t</MeshRefs>\n",prefix);
 	}
 
 	if (node->mNumChildren) {
-		fprintf(out,"%s\t<NodeList num=\"%i\">\n",
+		fprintf(out,"%s\t<NodeList num=\"%u\">\n",
 			prefix,node->mNumChildren);
 
 		for (unsigned int i = 0; i < node->mNumChildren;++i) {
@@ -853,13 +863,13 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 		"<ASSIMP format_id=\"1\">\n\n"
 
 		"<!-- XML Model dump produced by assimp dump\n"
-		"  Library version: %i.%i.%i\n"
+		"  Library version: %u.%u.%u\n"
 		"  Source: %s\n"
 		"  Command line: %s\n"
 		"  %s\n"
 		"-->"
 		" \n\n"
-		"<Scene flags=\"%i\" postprocessing=\"%i\">\n",
+		"<Scene flags=\"%u\" postprocessing=\"%i\">\n",
 		
 		aiGetVersionMajor(),aiGetVersionMinor(),aiGetVersionRevision(),src,c.c_str(),asctime(p),
 		scene->mFlags,
@@ -936,7 +946,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 	// write textures
 	if (scene->mNumTextures) {
-		fprintf(out,"<TextureList num=\"%i\">\n",scene->mNumTextures);
+		fprintf(out,"<TextureList num=\"%u\">\n",scene->mNumTextures);
 		for (unsigned int i = 0; i < scene->mNumTextures;++i) {
 			aiTexture* tex  = scene->mTextures[i];
 			bool compressed = (tex->mHeight == 0);
@@ -947,7 +957,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 				(compressed ? "true" : "false"));
 
 			if (compressed) {
-				fprintf(out,"\t\t<Data length=\"%i\"> \n",tex->mWidth);
+				fprintf(out,"\t\t<Data length=\"%u\"> \n",tex->mWidth);
 
 				if (!shortened) {
 					for (unsigned int n = 0; n < tex->mWidth;++n) {
@@ -981,12 +991,12 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 	// write materials
 	if (scene->mNumMaterials) {
-		fprintf(out,"<MaterialList num=\"%i\">\n",scene->mNumMaterials);
+		fprintf(out,"<MaterialList num=\"%u\">\n",scene->mNumMaterials);
 		for (unsigned int i = 0; i< scene->mNumMaterials; ++i) {
 			const aiMaterial* mat = scene->mMaterials[i];
 
 			fprintf(out,"\t<Material>\n");
-			fprintf(out,"\t\t<MatPropertyList  num=\"%i\">\n",mat->mNumProperties);
+			fprintf(out,"\t\t<MatPropertyList  num=\"%u\">\n",mat->mNumProperties);
 			for (unsigned int n = 0; n < mat->mNumProperties;++n) {
 
 				const aiMaterialProperty* prop = mat->mProperties[n];
@@ -1004,7 +1014,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 					sz = "binary_buffer";
 				}
 
-				fprintf(out,"\t\t\t<MatProperty key=\"%s\" \n\t\t\ttype=\"%s\" tex_usage=\"%s\" tex_index=\"%i\"",
+				fprintf(out,"\t\t\t<MatProperty key=\"%s\" \n\t\t\ttype=\"%s\" tex_usage=\"%s\" tex_index=\"%u\"",
 					prop->mKey.data, sz,
 					::TextureTypeToString((aiTextureType)prop->mSemantic),prop->mIndex);
 
@@ -1048,7 +1058,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 	// write animations
 	if (scene->mNumAnimations) {
-		fprintf(out,"<AnimationList num=\"%i\">\n",scene->mNumAnimations);
+		fprintf(out,"<AnimationList num=\"%u\">\n",scene->mNumAnimations);
 		for (unsigned int i = 0; i < scene->mNumAnimations;++i) {
 			aiAnimation* anim = scene->mAnimations[i];
 
@@ -1059,7 +1069,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 			// write bone animation channels
 			if (anim->mNumChannels) {
-				fprintf(out,"\t\t<NodeAnimList num=\"%i\">\n",anim->mNumChannels);
+				fprintf(out,"\t\t<NodeAnimList num=\"%u\">\n",anim->mNumChannels);
 				for (unsigned int n = 0; n < anim->mNumChannels;++n) {
 					aiNodeAnim* nd = anim->mChannels[n];
 
@@ -1070,7 +1080,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 					if (!shortened) {
 						// write position keys
 						if (nd->mNumPositionKeys) {
-							fprintf(out,"\t\t\t\t<PositionKeyList num=\"%i\">\n",nd->mNumPositionKeys);
+							fprintf(out,"\t\t\t\t<PositionKeyList num=\"%u\">\n",nd->mNumPositionKeys);
 							for (unsigned int a = 0; a < nd->mNumPositionKeys;++a) {
 								aiVectorKey* vc = nd->mPositionKeys+a;
 								fprintf(out,"\t\t\t\t\t<PositionKey time=\"%e\">\n"
@@ -1082,7 +1092,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 						// write scaling keys
 						if (nd->mNumScalingKeys) {
-							fprintf(out,"\t\t\t\t<ScalingKeyList num=\"%i\">\n",nd->mNumScalingKeys);
+							fprintf(out,"\t\t\t\t<ScalingKeyList num=\"%u\">\n",nd->mNumScalingKeys);
 							for (unsigned int a = 0; a < nd->mNumScalingKeys;++a) {
 								aiVectorKey* vc = nd->mScalingKeys+a;
 								fprintf(out,"\t\t\t\t\t<ScalingKey time=\"%e\">\n"
@@ -1094,7 +1104,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 						// write rotation keys
 						if (nd->mNumRotationKeys) {
-							fprintf(out,"\t\t\t\t<RotationKeyList num=\"%i\">\n",nd->mNumRotationKeys);
+							fprintf(out,"\t\t\t\t<RotationKeyList num=\"%u\">\n",nd->mNumRotationKeys);
 							for (unsigned int a = 0; a < nd->mNumRotationKeys;++a) {
 								aiQuatKey* vc = nd->mRotationKeys+a;
 								fprintf(out,"\t\t\t\t\t<RotationKey time=\"%e\">\n"
@@ -1115,13 +1125,13 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 	// write meshes
 	if (scene->mNumMeshes) {
-		fprintf(out,"<MeshList num=\"%i\">\n",scene->mNumMeshes);
+		fprintf(out,"<MeshList num=\"%u\">\n",scene->mNumMeshes);
 		for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
 			aiMesh* mesh = scene->mMeshes[i];
 			// const unsigned int width = (unsigned int)log10((double)mesh->mNumVertices)+1;
 
 			// mesh header
-			fprintf(out,"\t<Mesh types=\"%s %s %s %s\" material_index=\"%i\">\n",
+			fprintf(out,"\t<Mesh types=\"%s %s %s %s\" material_index=\"%u\">\n",
 				(mesh->mPrimitiveTypes & aiPrimitiveType_POINT    ? "points"    : ""),
 				(mesh->mPrimitiveTypes & aiPrimitiveType_LINE     ? "lines"     : ""),
 				(mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE ? "triangles" : ""),
@@ -1130,7 +1140,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 			// bones
 			if (mesh->mNumBones) {
-				fprintf(out,"\t\t<BoneList num=\"%i\">\n",mesh->mNumBones);
+				fprintf(out,"\t\t<BoneList num=\"%u\">\n",mesh->mNumBones);
 
 				for (unsigned int n = 0; n < mesh->mNumBones;++n) {
 					aiBone* bone = mesh->mBones[n];
@@ -1151,13 +1161,13 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 						bone->mOffsetMatrix.d1,bone->mOffsetMatrix.d2,bone->mOffsetMatrix.d3,bone->mOffsetMatrix.d4);
 
 					if (!shortened && bone->mNumWeights) {
-						fprintf(out,"\t\t\t\t<WeightList num=\"%i\">\n",bone->mNumWeights);
+						fprintf(out,"\t\t\t\t<WeightList num=\"%u\">\n",bone->mNumWeights);
 
 						// bone weights
 						for (unsigned int a = 0; a < bone->mNumWeights;++a) {
 							aiVertexWeight* wght = bone->mWeights+a;
 
-							fprintf(out,"\t\t\t\t\t<Weight index=\"%i\">\n\t\t\t\t\t\t%f\n\t\t\t\t\t</Weight>\n",
+							fprintf(out,"\t\t\t\t\t<Weight index=\"%u\">\n\t\t\t\t\t\t%f\n\t\t\t\t\t</Weight>\n",
 								wght->mVertexId,wght->mWeight);
 						}
 						fprintf(out,"\t\t\t\t</WeightList>\n");
@@ -1169,14 +1179,14 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 			// faces
 			if (!shortened && mesh->mNumFaces) {
-				fprintf(out,"\t\t<FaceList num=\"%i\">\n",mesh->mNumFaces);
+				fprintf(out,"\t\t<FaceList num=\"%u\">\n",mesh->mNumFaces);
 				for (unsigned int n = 0; n < mesh->mNumFaces; ++n) {
 					aiFace& f = mesh->mFaces[n];
-					fprintf(out,"\t\t\t<Face num=\"%i\">\n"
+					fprintf(out,"\t\t\t<Face num=\"%u\">\n"
 						"\t\t\t\t",f.mNumIndices);
 
 					for (unsigned int j = 0; j < f.mNumIndices;++j)
-						fprintf(out,"%i ",f.mIndices[j]);
+						fprintf(out,"%u ",f.mIndices[j]);
 
 					fprintf(out,"\n\t\t\t</Face>\n");
 				}
@@ -1185,7 +1195,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 			// vertex positions
 			if (mesh->HasPositions()) {
-				fprintf(out,"\t\t<Positions num=\"%i\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
+				fprintf(out,"\t\t<Positions num=\"%u\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
 				if (!shortened) {
 					for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
 						fprintf(out,"\t\t%0 8f %0 8f %0 8f\n",
@@ -1199,7 +1209,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 			// vertex normals
 			if (mesh->HasNormals()) {
-				fprintf(out,"\t\t<Normals num=\"%i\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
+				fprintf(out,"\t\t<Normals num=\"%u\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
 				if (!shortened) {
 					for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
 						fprintf(out,"\t\t%0 8f %0 8f %0 8f\n",
@@ -1215,7 +1225,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 
 			// vertex tangents and bitangents
 			if (mesh->HasTangentsAndBitangents()) {
-				fprintf(out,"\t\t<Tangents num=\"%i\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
+				fprintf(out,"\t\t<Tangents num=\"%u\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
 				if (!shortened) {
 					for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
 						fprintf(out,"\t\t%0 8f %0 8f %0 8f\n",
@@ -1226,7 +1236,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 				}
 				fprintf(out,"\t\t</Tangents>\n");
 
-				fprintf(out,"\t\t<Bitangents num=\"%i\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
+				fprintf(out,"\t\t<Bitangents num=\"%u\" set=\"0\" num_components=\"3\"> \n",mesh->mNumVertices);
 				if (!shortened) {
 					for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
 						fprintf(out,"\t\t%0 8f %0 8f %0 8f\n",
@@ -1243,7 +1253,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 				if (!mesh->mTextureCoords[a])
 					break;
 
-				fprintf(out,"\t\t<TextureCoords num=\"%i\" set=\"%i\" num_components=\"%i\"> \n",mesh->mNumVertices,
+				fprintf(out,"\t\t<TextureCoords num=\"%u\" set=\"%u\" num_components=\"%u\"> \n",mesh->mNumVertices,
 					a,mesh->mNumUVComponents[a]);
 				
 				if (!shortened) {
@@ -1270,7 +1280,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 			for (unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a) {
 				if (!mesh->mColors[a])
 					break;
-				fprintf(out,"\t\t<Colors num=\"%i\" set=\"%i\" num_components=\"4\"> \n",mesh->mNumVertices,a);
+				fprintf(out,"\t\t<Colors num=\"%u\" set=\"%u\" num_components=\"4\"> \n",mesh->mNumVertices,a);
 				if (!shortened) {
 					for (unsigned int n = 0; n < mesh->mNumVertices; ++n) {
 						fprintf(out,"\t\t%0 8f %0 8f %0 8f %0 8f\n",

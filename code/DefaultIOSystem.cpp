@@ -135,7 +135,7 @@ inline void MakeAbsolutePath (const char* in, char* _out)
 {
     ai_assert(in && _out);
     char* ret;
-#if defined _WIN32 && !defined __GNUC__
+#ifdef _MSC_VER
 	ret = ::_fullpath( _out, in, PATHLIMIT );
 #else
         // use realpath

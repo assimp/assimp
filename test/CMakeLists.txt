@@ -24,6 +24,7 @@ SET( TEST_SRCS
   unit/utGenNormals.cpp
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
+  unit/utIOSystem.cpp
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
   unit/utMaterialSystem.cpp

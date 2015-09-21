@@ -1067,6 +1067,12 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
                 pLight.mFalloffAngle = ReadFloatFromTextContent();
                 TestClosing("hotspot_beam");
             }
+            // OpenCOLLADA extensions
+            // -------------------------------------------------------
+            else if (IsElement("decay_falloff")) {
+                pLight.mOuterAngle = ReadFloatFromTextContent();
+                TestClosing("decay_falloff");
+            }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
             if( strcmp( mReader->getNodeName(), "light") == 0)

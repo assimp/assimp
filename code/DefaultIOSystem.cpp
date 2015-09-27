@@ -135,7 +135,7 @@ inline void MakeAbsolutePath (const char* in, char* _out)
 {
     ai_assert(in && _out);
     char* ret;
-if defined( _MSC_VER ) || defined( __MINGW32__ )
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
     ret = ::_fullpath( _out, in, PATHLIMIT );
 #else
     // use realpath

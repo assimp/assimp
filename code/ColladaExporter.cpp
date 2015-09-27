@@ -58,6 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <ctime>
 #include <set>
+#include <map>
+#include <sstream>
+#include <iterator>
 
 using namespace Assimp;
 
@@ -988,8 +991,12 @@ void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
 	mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
 	mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
 	mOutput << "</bind_shape_matrix>" << endstr;
+
 	WriteJointsNameSourceNode(mesh);
 	WriteJointsPoseSourceNode(mesh);
+	WriteJointsWeightSourceNode(mesh);
+	WriteJointsTag(mesh);
+	WriteJointsVertexWeight(mesh);
     PopTag();
     mOutput << startstr << "</skin>"<<endstr;
     PopTag();
@@ -998,6 +1005,80 @@ void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
 }
 
 #include <sstream>
+
+void ColladaExporter::WriteJointsTag(const aiMesh *const mesh){
+	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+	mOutput<<startstr<<"<joints>"<<endstr;
+	PushTag();
+	mOutput<<startstr<<"<input semantic=\"JOINT\" "
+				"source=\"#Armature_"+meshName+"-skin-joints\"/>"<<endstr;
+	mOutput<<startstr<<"<input semantic=\"INV_BIND_MATRIX\" "
+					"source=\"#Armature_"+meshName+"-skin-bind_poses\"/>"<<endstr;
+	mOutput<<startstr<<"</joints>"<<endstr;
+	PopTag();
+}
+
+
+void ColladaExporter::WriteJointsVertexWeight(const aiMesh *const mesh){
+	typedef std::pair<unsigned int,unsigned int> vertexBoneWeightLocationMapElement_t;
+	typedef std::multimap<unsigned int,vertexBoneWeightLocationMapElement_t >
+		vertexBoneWeightLocationMap_t;
+
+	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+	aiBone **bones = mesh->mBones;
+	const unsigned int nBones = mesh->mNumBones;
+
+	mOutput<<startstr<<"<vertex_weights count=\""<<mesh->mNumVertices<<
+			"\">"<<endstr;
+	PushTag();
+	mOutput<<startstr<<"<input semantic=\"JOINT\" "
+				"source=\"#Armature_"+meshName+"-skin-joints\" offset=\"0\"/>"<<endstr;
+	mOutput<<startstr<<"<input semantic=\"WEIGHT\" "
+					"source=\"#Armature_"<<meshName<<"-skin-weights\" offset=\"1\"/>"<<endstr;
+
+	//vertexID -> boneIndex ->globalWeightIndex
+	vertexBoneWeightLocationMap_t vertexBoneWeightLocation;
+
+	unsigned int globalWeightIndex=0;
+	for(unsigned int i=0; i<nBones;i++){
+		const aiVertexWeight *const weights = bones[i]->mWeights;
+		unsigned int nWeight=bones[i]->mNumWeights;
+		for(unsigned int j=0; j<nWeight;j++){
+			vertexBoneWeightLocation.insert(
+					std::pair<unsigned int,vertexBoneWeightLocationMapElement_t >(
+							weights[j].mVertexId,
+							vertexBoneWeightLocationMapElement_t(
+									i,globalWeightIndex++)));
+		}//for weight
+	}//for bones
+
+	std::ostringstream pTag;
+	std::ostringstream vCountTag;
+	for(unsigned int i=0;i<mesh->mNumVertices;i++){
+
+		std::pair<vertexBoneWeightLocationMap_t::const_iterator,
+		vertexBoneWeightLocationMap_t::const_iterator>
+			vertexWeights = vertexBoneWeightLocation.equal_range(i);
+
+		const vertexBoneWeightLocationMap_t::const_iterator start = vertexWeights.first;
+		const vertexBoneWeightLocationMap_t::const_iterator end = vertexWeights.second;
+
+		//number of weigth for the vertex
+		vCountTag<<std::distance(start,end)<<' ';
+		//bone that move the vertex and weight to use for move it
+		for(vertexBoneWeightLocationMap_t::const_iterator it = start; it!=end; ++it ){
+			const vertexBoneWeightLocationMapElement_t &temp = it->second;
+			pTag<<temp.first<<' '<<temp.second<<' ';
+		}//for
+
+	}
+
+	mOutput<<startstr<<"<vcount>"<<vCountTag.str()<<"</vcount>"<<endstr;
+	mOutput<<startstr<<"<v>"<<pTag.str()<<"</v>"<<endstr;
+
+	mOutput<<startstr<<"</vertex_weights>"<<endstr;
+	PopTag();
+}
 
 void ColladaExporter::WriteJointsNameSourceNode(const aiMesh *const mesh){
 	const std::string meshName = XMLEscape(mesh->mName.C_Str());
@@ -1026,6 +1107,34 @@ void ColladaExporter::WriteJointsNameSourceNode(const aiMesh *const mesh){
 	mOutput<<startstr<<"</source>"<<endstr;
 
 
+}
+
+
+void ColladaExporter::WriteJointsWeightSourceNode(const aiMesh *const mesh){
+	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+
+	unsigned int nWeightTot =0;
+	aiBone **bones = mesh->mBones;
+	for(unsigned int i=0;i<mesh->mNumBones;i++){
+		nWeightTot += bones[i]->mNumWeights;
+	}
+
+	float * tempBoneWeight = new float[nWeightTot];
+
+	for(unsigned int i=0;i<mesh->mNumBones;i++){
+		const aiVertexWeight *const weights = bones[i]->mWeights;
+		unsigned int nWeight=bones[i]->mNumWeights;
+		for(unsigned int j=0; j<nWeight;j++){
+			*(tempBoneWeight++)=weights[j].mWeight;
+		}
+	}
+
+	tempBoneWeight-=nWeightTot;
+
+	WriteFloatArray("Armature_"+meshName+"-skin-weights",FloatType_Weight,
+			tempBoneWeight,nWeightTot);
+
+	delete [] tempBoneWeight;
 }
 
 void ColladaExporter::WriteJointsPoseSourceNode(const aiMesh *const mesh){
@@ -1062,6 +1171,7 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
         case FloatType_TexCoord2: floatsPerElement = 2; break;
         case FloatType_TexCoord3: floatsPerElement = 3; break;
         case FloatType_Color: floatsPerElement = 3; break;
+        case FloatType_Weight: floatsPerElement=1; break;
         default:
             return;
     }
@@ -1132,6 +1242,11 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
             break;
         case FloatType_Matrix4x4:
         	 mOutput<< startstr<< "<param name=\"TRANSFORM\" type=\"float4x4\"/>"<<endstr;
+        	 break;
+        case FloatType_Weight:
+        	mOutput<< startstr<< "<param name=\"WEIGHT\" type=\"float\"/>"<<endstr;
+        	break;
+
     }
 
     PopTag();

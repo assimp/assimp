@@ -963,6 +963,7 @@ static aiNode* findMeshRootNode(aiNode *root,const unsigned int meshId){
 }
 
 void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
+	const std::string meshName = XMLEscape(GetMeshId( pIndex));
 
 	aiMesh *mesh = mScene->mMeshes[pIndex];
 	std::cerr<<"WriteControl: Mesh:"<<pIndex<<" "<<mesh->mName.C_Str()<<" hasBones:"<<mesh->HasBones()<<std::endl;
@@ -975,13 +976,11 @@ void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
 	if(meshNode==NULL)
 		return ;
 
-	const std::string meshName = XMLEscape(mesh->mName.C_Str());
-
     mOutput << startstr << "<controller id=\"Armature_"<<meshName<<"-skin\""
     		<<" name=\"Armature_"<<pIndex<<"\">" << endstr;
     PushTag();
 
-    mOutput << startstr << "<skin source=\"#"<<meshName<<"-mesh\">"<<endstr;
+    mOutput << startstr << "<skin source=\"#"<<meshName<<"\">"<<endstr;
     PushTag();
 
     const aiMatrix4x4& mat = meshNode->mTransformation;
@@ -1081,7 +1080,9 @@ void ColladaExporter::WriteJointsVertexWeight(const aiMesh *const mesh){
 }
 
 void ColladaExporter::WriteJointsNameSourceNode(const aiMesh *const mesh){
+
 	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+
 	std::stringstream boneNames;
 	for(unsigned int i=0;i<mesh->mNumBones;i++){
 		boneNames<<XMLEscape(mesh->mBones[i]->mName.C_Str())<<' ';
@@ -1294,6 +1295,51 @@ aiBone* findBone( const aiScene* scene, const char * name) {
     return NULL;
 }
 
+#include <cstring>
+/** object used for compare 2 aiString */
+struct aiStringCompare {
+  /**
+   * @param lhs left operand
+   * @param rhs right operand
+   * @return true if lhs<rhs in the lexicographic order
+   */
+  bool operator() (const aiString& lhs, const aiString& rhs) const {
+	  return strcmp(lhs.data,rhs.data)<0;
+  }//operator()
+};
+
+static aiNode* findRootSkeletonNode(const aiNode *const root,
+		const std::set<aiString> &boneNames){
+
+	for(unsigned int i =0; i<root->mNumChildren; i++){
+		if(boneNames.count(root->mChildren[i]->mName)!=0)
+			return root->mChildren[i];
+	}
+	//we have to check all the childern and then take the node with a minumum
+	//height?
+	for(unsigned int i =0; i<root->mNumChildren; i++){
+		aiNode *temp = findRootSkeletonNode(root->mChildren[i],boneNames);
+		if(temp!=NULL)
+			return temp;
+	}
+	return NULL;
+
+}
+
+
+
+static aiNode* findRootSkeletonNode(const aiMesh *const mesh,
+		const aiNode *const root){
+
+	std::set<aiString> boneNames;
+	for(unsigned int i=0; i<mesh->mNumBones; i++){
+		boneNames.insert(mesh->mBones[i]->mName);
+	}
+
+	return findRootSkeletonNode(root,boneNames);
+
+}
+
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
 void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
@@ -1350,38 +1396,60 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
         }
 
     }else
+    	 /*
+    	<instance_controller url="#Armature_Cube-skin">
+    	          <skeleton>#Bone</skeleton>
+    	          <bind_material>
+    	            <technique_common>
+    	              <instance_material symbol="Material-material" target="#Material-material"/>
+    	            </technique_common>
+    	          </bind_material>
+    	        </instance_controller>
+    */
+
     // instance every geometry
     for( size_t a = 0; a < pNode->mNumMeshes; ++a )
     {
         const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
-    // do not instanciate mesh if empty. I wonder how this could happen
-    if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-        continue;
-    mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
-    PushTag();
-    mOutput << startstr << "<bind_material>" << endstr;
-    PushTag();
-    mOutput << startstr << "<technique_common>" << endstr;
-    PushTag();
-    mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
-    PushTag();
-    for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
-    {
-        if( mesh->HasTextureCoords( a) )
-            // semantic       as in <texture texcoord=...>
-            // input_semantic as in <input semantic=...>
-            // input_set      as in <input set=...>
-            mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
-    }
-    PopTag();
-    mOutput << startstr << "</instance_material>" << endstr;
-    PopTag();
-    mOutput << startstr << "</technique_common>" << endstr;
-    PopTag();
-    mOutput << startstr << "</bind_material>" << endstr;
-    PopTag();
-        mOutput << startstr << "</instance_geometry>" << endstr;
-    }
+		// do not instanciate mesh if empty. I wonder how this could happen
+		if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+			continue;
+		mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
+		PushTag();
+		mOutput << startstr << "<bind_material>" << endstr;
+		PushTag();
+		mOutput << startstr << "<technique_common>" << endstr;
+		PushTag();
+		mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
+		PushTag();
+		for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+		{
+			if( mesh->HasTextureCoords( a) )
+				// semantic       as in <texture texcoord=...>
+				// input_semantic as in <input semantic=...>
+				// input_set      as in <input set=...>
+				mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+		}
+		PopTag();
+		mOutput << startstr << "</instance_material>" << endstr;
+		PopTag();
+		mOutput << startstr << "</technique_common>" << endstr;
+		PopTag();
+		mOutput << startstr << "</bind_material>" << endstr;
+		PopTag();
+		mOutput << startstr << "</instance_geometry>" << endstr;
+		if(mesh->mNumBones!=0){ //if it has bones -> instanziate a controller
+			mOutput << startstr << "<instance_controller url=\"#" <<
+					"Armature_"+XMLEscape(GetMeshId( pNode->mMeshes[a]))+"-skin\">"
+					<< endstr;
+			PushTag();
+			aiNode *skeletonRoot = findRootSkeletonNode(mesh,mScene->mRootNode);
+			mOutput << startstr << "<skeleton>#"<<XMLEscape(skeletonRoot->mName.C_Str())<<"</skeleton>" << endstr;
+			PopTag();
+			mOutput << startstr << "</instance_controller>" << endstr;
+
+		} //if has bones
+    }//for mesh
 
     // recurse into subnodes
     for( size_t a = 0; a < pNode->mNumChildren; ++a )

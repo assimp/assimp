@@ -274,7 +274,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 
         for (unsigned int i = 0; i < num; ++i) {
             // also check against big endian versions of tokens with size 2,4
-            // that's just for convinience, the chance that we cause conflicts
+            // that's just for convenience, the chance that we cause conflicts
             // is quite low and it can save some lines and prevent nasty bugs
             if (2 == size) {
                 uint16_t rev = *magic_u16;

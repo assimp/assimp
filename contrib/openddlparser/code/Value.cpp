@@ -27,6 +27,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
+static Value::Iterator end( ddl_nullptr );
+
 Value::Iterator::Iterator()
 : m_start( ddl_nullptr )
 , m_current( ddl_nullptr ) {
@@ -36,6 +38,12 @@ Value::Iterator::Iterator()
 Value::Iterator::Iterator( Value *start )
 : m_start( start )
 , m_current( start ) {
+    // empty
+}
+
+Value::Iterator::Iterator( const Iterator &rhs )
+: m_start( rhs.m_start )
+, m_current( rhs.m_current ) {
     // empty
 }
 
@@ -61,6 +69,38 @@ Value *Value::Iterator::getNext() {
     return v;
 }
 
+const Value::Iterator Value::Iterator::operator++( int ) {
+    if( ddl_nullptr == m_current ) {
+        return end;
+    }
+
+    m_current = m_current->getNext();
+    Iterator inst( m_current );
+
+    return inst;
+}
+
+Value::Iterator &Value::Iterator::operator++( ) {
+    if( ddl_nullptr == m_current ) {
+        return end;
+    }
+
+    m_current = m_current->getNext();
+
+    return *this;
+}
+
+bool Value::Iterator::operator == ( const Iterator &rhs ) const {
+    return ( m_current == rhs.m_current );
+}
+
+Value *Value::Iterator::operator->( ) const {
+    if( nullptr == m_current ) {
+        return ddl_nullptr;
+    }
+    return m_current;
+}
+
 Value::Value( ValueType type )
 : m_type( type )
 , m_size( 0 )
@@ -80,7 +120,8 @@ void Value::setBool( bool value ) {
 
 bool Value::getBool() {
     assert( ddl_bool == m_type );
-    return ( *m_data ) ? true : false;
+    
+    return ( *m_data == 1 );
 }
 
 void Value::setInt8( int8 value ) {

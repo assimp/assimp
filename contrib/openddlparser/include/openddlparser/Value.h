@@ -61,6 +61,8 @@ public:
         /// @param  start   [in] The first value for iteration,
         Iterator( Value *start );
 
+        Iterator( const Iterator &rhs );
+
         ///	@brief  The class destructor.
         ~Iterator();
 
@@ -71,13 +73,27 @@ public:
         ///	@brief  Returns the next item and moves the iterator to it.
         ///	@return The next value, is ddl_nullptr in case of being the last item.
         Value *getNext();
+        
+        ///	@brief  The post-increment operator.
+        const Iterator operator++( int );
+        
+        ///	@brief  The pre-increment operator.
+        Iterator &operator++( );
+
+        ///	@brief  The compare operator.
+        /// @param  rhs [in] The instance to compare.
+        /// @return true if equal.
+        bool operator == ( const Iterator &rhs ) const;
+
+        /// @brief  The * operator.
+        /// @return The instance or ddl_nullptr if end of list is reached.
+        Value *operator->( ) const;
 
     private:
         Value *m_start;
         Value *m_current;
 
     private:
-        Iterator( const Iterator & );
         Iterator &operator = ( const Iterator & );
     };
 

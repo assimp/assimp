@@ -49,11 +49,7 @@ static void releaseReferencedNames( Reference *ref ) {
         return;
     }
 
-    if( ref->m_referencedName ) {
-        for( size_t i = 0; i < ref->m_numRefs; i++ ) {
-            delete ref->m_referencedName;
-        }
-    }
+    delete ref;
 }
 
 DDLNode::DDLNode( const std::string &type, const std::string &name, size_t idx, DDLNode *parent )
@@ -141,6 +137,10 @@ Property *DDLNode::getProperties() const {
 bool DDLNode::hasProperty( const std::string &name ) {
     const Property *prop( findPropertyByName( name ) );
     return ( ddl_nullptr != prop );
+}
+
+bool DDLNode::hasProperties() const {
+    return( ddl_nullptr != m_properties );
 }
 
 Property *DDLNode::findPropertyByName( const std::string &name ) {

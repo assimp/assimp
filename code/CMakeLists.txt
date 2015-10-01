@@ -632,10 +632,13 @@ SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 SET ( openddl_parser_SRCS
   ../contrib/openddlparser/code/OpenDDLParser.cpp
   ../contrib/openddlparser/code/DDLNode.cpp
+  ../contrib/openddlparser/code/OpenDDLCommon.cpp
+  ../contrib/openddlparser/code/OpenDDLExport.cpp
   ../contrib/openddlparser/code/Value.cpp
   ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
   ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
   ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
+  ../contrib/openddlparser/include/openddlparser/OpenDDLExport.h
   ../contrib/openddlparser/include/openddlparser/DDLNode.h
   ../contrib/openddlparser/include/openddlparser/Value.h
 )

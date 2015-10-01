@@ -15,9 +15,9 @@ TEST(RemoveCommentsTest, testSingleLineComments)
         "\ttrue) { // do something here \n"
         "\t// hello ... and bye //\n";
 
-
-    char* szTest2 = new char[::strlen(szTest)+1];
-    ::strcpy(szTest2,szTest);
+    const size_t len( ::strlen( szTest ) + 1 );
+    char* szTest2 = new char[ len ];
+    ::strncpy( szTest2, szTest, len );
 
     const char* szTestResult = "int i = 0; \n"
         "if (4 ==    \n"
@@ -45,8 +45,9 @@ TEST(RemoveCommentsTest, testMultiLineComments)
         "                                 "
         " / * Incomplete comment */                            */";
 
-    char* szTest2 = new char[::strlen(szTest)+1];
-    ::strcpy(szTest2,szTest);
+    const size_t len( ::strlen( szTest ) + 1 );
+    char* szTest2 = new char[ len ];
+    ::strncpy( szTest2, szTest, len );
 
     CommentRemover::RemoveMultiLineComments("/*","*/",szTest2,' ');
     EXPECT_STREQ(szTestResult, szTest2);

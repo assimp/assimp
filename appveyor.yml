@@ -1,9 +1,6 @@
 # AppVeyor file
 # http://www.appveyor.com/docs/appveyor-yml
 
-# Operating system (build VM template)
-os: Previous Windows Server 2012 R2  # using previous worker images since default worker has problem installing DART-Prerequisites.msi
-
 # clone directory
 clone_folder: c:\projects\assimp
 

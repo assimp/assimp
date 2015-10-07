@@ -53,6 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "types.h"
+
+#include <vector>
+
 namespace Assimp    {
 class IOStream;
 
@@ -102,17 +105,13 @@ public:
      * @param pFile Path to the file
      * @return true if there is a file with this path, else false.
      */
-
     virtual bool Exists( const char* pFile) const = 0;
-
-
 
     // -------------------------------------------------------------------
     /** @brief Returns the system specific directory separator
      *  @return System specific directory separator
      */
     virtual char getOsSeparator() const = 0;
-
 
     // -------------------------------------------------------------------
     /** @brief Open a new file with a given path.
@@ -138,8 +137,6 @@ public:
      */
     inline IOStream* Open(const std::string& pFile,
         const std::string& pMode = std::string("rb"));
-
-
 
     // -------------------------------------------------------------------
     /** @brief Closes the given file and releases all resources
@@ -170,10 +167,41 @@ public:
      */
     inline bool ComparePaths (const std::string& one,
         const std::string& second) const;
+
+    // -------------------------------------------------------------------
+    /** @brief Pushes a new directory onto the directory stack.
+     *  @param path Path to push onto the stack.
+     *  @return True, when push was successful, false if path is empty.
+     */
+    virtual bool PushDirectory( const std::string &path );
+
+    // -------------------------------------------------------------------
+    /** @brief Returns the top directory from the stack.
+     *  @return The directory on the top of the stack.
+     *          Returns empty when no directory was pushed to the stack.
+     */
+    virtual const std::string &CurrentDirectory() const;
+
+    // -------------------------------------------------------------------
+    /** @brief Returns the number of directories stored on the stack.
+     *  @return The number of directories of the stack.
+     */
+    virtual size_t StackSize() const;
+
+    // -------------------------------------------------------------------
+    /** @brief Pops the top directory from the stack.
+     *  @return True, when a directory was on the stack. False if no
+     *          directory was on the stack.
+     */
+    virtual bool PopDirectory();
+
+private:
+    std::vector<std::string> m_pathStack;
 };
 
 // ----------------------------------------------------------------------------
-AI_FORCE_INLINE IOSystem::IOSystem()
+AI_FORCE_INLINE IOSystem::IOSystem() :
+    m_pathStack()
 {
     // empty
 }
@@ -220,6 +248,43 @@ inline bool IOSystem::ComparePaths (const std::string& one,
 }
 
 // ----------------------------------------------------------------------------
+inline bool IOSystem::PushDirectory( const std::string &path ) {
+    if ( path.empty() ) {
+        return false;
+    }
+
+    m_pathStack.push_back( path );
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+inline const std::string &IOSystem::CurrentDirectory() const {
+    if ( m_pathStack.empty() ) {
+        static const std::string Dummy("");
+        return Dummy;
+    }
+    return m_pathStack[ m_pathStack.size()-1 ];
+}
+
+// ----------------------------------------------------------------------------
+inline size_t IOSystem::StackSize() const {
+    return m_pathStack.size();
+}
+
+// ----------------------------------------------------------------------------
+inline bool IOSystem::PopDirectory() {
+    if ( m_pathStack.empty() ) {
+        return false;
+    }
+
+    m_pathStack.pop_back();
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+
 } //!ns Assimp
 
 #endif //AI_IOSYSTEM_H_INC

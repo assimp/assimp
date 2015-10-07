@@ -113,6 +113,7 @@ If the docs don't solve your problem, ask on [StackOverflow](http://stackoverflo
 For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
   [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions) 
 
+And we also have an IRC-channel at freenode: #assetimporterlib .
 ### Contributing ###
 
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit 

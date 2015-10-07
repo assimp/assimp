@@ -63,7 +63,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BaseImporter::BaseImporter()
-: progress()
+: m_progress()
 {
     // nothing to do here
 }
@@ -79,8 +79,8 @@ BaseImporter::~BaseImporter()
 // Imports the given file and returns the imported data.
 aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, IOSystem* pIOHandler)
 {
-    progress = pImp->GetProgressHandler();
-    ai_assert(progress);
+    m_progress = pImp->GetProgressHandler();
+    ai_assert(m_progress);
 
     // Gather configuration properties for this run
     SetupProperties( pImp );
@@ -98,8 +98,8 @@ aiScene* BaseImporter::ReadFile(const Importer* pImp, const std::string& pFile, 
 
     } catch( const std::exception& err )    {
         // extract error description
-        mErrorText = err.what();
-        DefaultLogger::get()->error(mErrorText);
+        m_ErrorText = err.what();
+        DefaultLogger::get()->error(m_ErrorText);
         return NULL;
     }
 
@@ -274,7 +274,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 
         for (unsigned int i = 0; i < num; ++i) {
             // also check against big endian versions of tokens with size 2,4
-            // that's just for convinience, the chance that we cause conflicts
+            // that's just for convenience, the chance that we cause conflicts
             // is quite low and it can save some lines and prevent nasty bugs
             if (2 == size) {
                 uint16_t rev = *magic_u16;

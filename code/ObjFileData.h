@@ -156,6 +156,7 @@ struct Material
     aiString textureEmissive;
     aiString textureBump;
     aiString textureNormal;
+    aiString textureReflection[6];
     aiString textureSpecularity;
     aiString textureOpacity;
     aiString textureDisp;
@@ -167,6 +168,13 @@ struct Material
         TextureEmissiveType,
         TextureBumpType,
         TextureNormalType,
+        TextureReflectionSphereType,
+        TextureReflectionCubeTopType,
+        TextureReflectionCubeBottomType,
+        TextureReflectionCubeFrontType,
+        TextureReflectionCubeBackType,
+        TextureReflectionCubeLeftType,
+        TextureReflectionCubeRightType,
         TextureSpecularityType,
         TextureOpacityType,
         TextureDispType,

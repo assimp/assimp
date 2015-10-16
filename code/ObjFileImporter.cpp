@@ -636,6 +636,22 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
             }
         }
 
+        if( 0 != pCurrentMaterial->textureReflection[0].length )
+        {
+            ObjFile::Material::TextureType type = 0 != pCurrentMaterial->textureReflection[1].length ?
+                ObjFile::Material::TextureReflectionCubeTopType :
+                ObjFile::Material::TextureReflectionSphereType;
+
+            unsigned count = type == ObjFile::Material::TextureReflectionSphereType ? 1 : 6;
+            for( unsigned i = 0; i < count; i++ )
+                mat->AddProperty(&pCurrentMaterial->textureReflection[i], AI_MATKEY_TEXTURE_REFLECTION(i));
+
+            if(pCurrentMaterial->clamp[type])
+                //TODO addTextureMappingModeProperty should accept an index to handle clamp option for each
+                //texture of a cubemap
+                addTextureMappingModeProperty(mat, aiTextureType_REFLECTION);
+        }
+
         if ( 0 != pCurrentMaterial->textureDisp.length )
         {
             mat->AddProperty( &pCurrentMaterial->textureDisp, AI_MATKEY_TEXTURE_DISPLACEMENT(0) );

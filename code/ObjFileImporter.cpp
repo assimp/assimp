@@ -134,11 +134,11 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 
     // Get the model name
     std::string  modelName, folderName;
-    std::string::size_type pos = pFile.find_last_of( "\\/" );
+    std::string::size_type pos = pFile.rfind( '/' );
     if ( pos != std::string::npos ) {
         modelName = pFile.substr(pos+1, pFile.size() - pos - 1);
         folderName = pFile.substr( 0, pos );
-        if ( folderName.empty() ) {
+        if ( !folderName.empty() ) {
             pIOHandler->PushDirectory( folderName );
         }
     } else {

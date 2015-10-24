@@ -35,6 +35,7 @@ if(WIN32) # The only platform it makes sense to check for DirectX SDK
     "C:/Program Files (x86)/Microsoft DirectX SDK*"
     "C:/apps/Microsoft DirectX SDK*"
     "C:/Program Files/Microsoft DirectX SDK*"
+    "C:/Program Files (x86)/Windows Kits/8.1"
     "$ENV{ProgramFiles}/Microsoft DirectX SDK*"
   )
   create_search_paths(DirectX)

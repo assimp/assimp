@@ -181,7 +181,7 @@ public:
      * string if there was no error.
      */
     const std::string& GetErrorText() const {
-        return mErrorText;
+        return m_ErrorText;
     }
 
     // -------------------------------------------------------------------
@@ -362,10 +362,10 @@ public: // static utilities
 protected:
 
     /** Error description in case there was one. */
-    std::string mErrorText;
+    std::string m_ErrorText;
 
     /** Currently set progress handler */
-    ProgressHandler* progress;
+    ProgressHandler* m_progress;
 };
 
 

@@ -135,11 +135,11 @@ inline void MakeAbsolutePath (const char* in, char* _out)
 {
     ai_assert(in && _out);
     char* ret;
-#ifdef _WIN32
-    ret = ::_fullpath(_out, in,PATHLIMIT);
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
+    ret = ::_fullpath( _out, in, PATHLIMIT );
 #else
-        // use realpath
-        ret = realpath(in, _out);
+    // use realpath
+    ret = realpath(in, _out);
 #endif
     if(!ret) {
         // preserve the input path, maybe someone else is able to fix
@@ -167,8 +167,8 @@ bool DefaultIOSystem::ComparePaths (const char* one, const char* second) const
     return !ASSIMP_stricmp(temp1,temp2);
 }
 
-
-std::string DefaultIOSystem::fileName(std::string path)
+// ------------------------------------------------------------------------------------------------
+std::string DefaultIOSystem::fileName( const std::string &path )
 {
     std::string ret = path;
     std::size_t last = ret.find_last_of("\\/");
@@ -177,7 +177,8 @@ std::string DefaultIOSystem::fileName(std::string path)
 }
 
 
-std::string DefaultIOSystem::completeBaseName(std::string path)
+// ------------------------------------------------------------------------------------------------
+std::string DefaultIOSystem::completeBaseName( const std::string &path )
 {
     std::string ret = fileName(path);
     std::size_t pos = ret.find_last_of('.');
@@ -185,13 +186,15 @@ std::string DefaultIOSystem::completeBaseName(std::string path)
     return ret;
 }
 
-
-std::string DefaultIOSystem::absolutePath(std::string path)
+// ------------------------------------------------------------------------------------------------
+std::string DefaultIOSystem::absolutePath( const std::string &path )
 {
     std::string ret = path;
     std::size_t last = ret.find_last_of("\\/");
     if (last != std::string::npos) ret = ret.substr(0, last);
     return ret;
 }
+
+// ------------------------------------------------------------------------------------------------
 
 #undef PATHLIMIT

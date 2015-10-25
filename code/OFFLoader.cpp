@@ -189,6 +189,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
 
     // second: now parse all face indices
     buffer = old;faces = mesh->mFaces;
+    printf("numVertices: %u   mesh->mNumVertices: %u\n", numVertices, mesh->mNumVertices);
     for (unsigned int i = 0, p = 0; i< mesh->mNumFaces;)
     {
         if(!GetNextLine(buffer,line))break;
@@ -199,8 +200,10 @@ void OFFImporter::InternReadFile( const std::string& pFile,
             continue;
 
         faces->mIndices = new unsigned int [faces->mNumIndices];
+        printf("mNumIndices: %u\n", faces->mNumIndices);
         for (unsigned int m = 0; m < faces->mNumIndices;++m)
         {
+            printf("m: %u\n", m);
             SkipSpaces(&sz);
             if ((idx = strtoul10(sz,&sz)) >= numVertices)
             {
@@ -208,6 +211,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
                 idx = numVertices-1;
             }
             faces->mIndices[m] = p++;
+            ai_assert(verts < mesh->mVertices + mesh->mNumVertices);
             *verts++ = tempPositions[idx];
         }
         ++i;

@@ -414,7 +414,7 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 
     if ( pIndices->empty() ) {
         DefaultLogger::get()->error("Obj: Ignoring empty face");
-        // skip line and clean up 
+        // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
         delete pNormalID;
         delete pTexID;
@@ -539,7 +539,10 @@ void ObjFileParser::getMaterialLib()
     const std::string strMatName(pStart, &(*m_DataIt));
     std::string absName;
     if ( m_pIO->StackSize() > 0 ) {
-        const std::string &path = m_pIO->CurrentDirectory();
+        std::string path = m_pIO->CurrentDirectory();
+        if ( '/' != *path.rbegin() ) {
+          path += '/';
+        }
         absName = path + strMatName;
     } else {
         absName = strMatName;

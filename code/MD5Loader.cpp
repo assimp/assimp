@@ -285,9 +285,6 @@ void MD5Importer::AttachChilds_Mesh(int iParentID,aiNode* piParent, BoneList& bo
                 aiQuaternion quat;
                 MD5::ConvertQuaternion ( bones[i].mRotationQuat, quat );
 
-                // FIX to get to Assimp's quaternion conventions
-                quat.w *= -1.f;
-
                 bones[i].mTransform = aiMatrix4x4 ( quat.GetMatrix());
                 bones[i].mTransform.a4 = bones[i].mPositionXYZ.x;
                 bones[i].mTransform.b4 = bones[i].mPositionXYZ.y;
@@ -656,9 +653,6 @@ void MD5Importer::LoadMD5AnimFile ()
 
                     MD5::ConvertQuaternion(vTemp, qKey->mValue);
                     qKey->mTime = vKey->mTime = dTime;
-
-                    // we need this to get to Assimp quaternion conventions
-                    qKey->mValue.w *= -1.f;
                 }
             }
 

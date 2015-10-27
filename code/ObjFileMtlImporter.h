@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 struct aiColor3D;
+struct aiString;
 
 namespace Assimp {
 
@@ -89,7 +90,7 @@ private:
     void createMaterial();
     /// Get texture name from loaded data.
     void getTexture();
-    void getTextureOption(bool &clamp);
+    void getTextureOption(bool &clamp, int &clampIndex, aiString *&out);
 
 private:
     //! Absolute pathname

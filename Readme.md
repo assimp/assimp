@@ -113,7 +113,9 @@ If the docs don't solve your problem, ask on [StackOverflow](http://stackoverflo
 For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
   [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions) 
 
-And we also have an IRC-channel at freenode: #assetimporterlib .
+And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
+> /join #assetimporterlib
+
 ### Contributing ###
 
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit 
@@ -126,4 +128,3 @@ Our license is based on the modified, __3-clause BSD__-License.
 An _informal_ summary is: do whatever you want, but include Assimp's license text with your product - 
 and don't sue us if our code doesn't work. Note that, unlike LGPLed code, you may link statically to Assimp.
 For the legal details, see the `LICENSE` file. 
-

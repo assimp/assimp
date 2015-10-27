@@ -857,7 +857,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
 
     case EDT_UShort:
         {
-        int16_t i = *((uint16_t*)pCur);
+        uint16_t i = *((uint16_t*)pCur);
 
         // Swap endianess
         if (p_bBE)ByteSwap::Swap(&i);

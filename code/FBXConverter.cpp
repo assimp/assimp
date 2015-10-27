@@ -2496,8 +2496,9 @@ private:
         // need to convert from TRS order to SRT?
         if(reverse_order) {
 
-            aiVector3D def_scale, def_translate;
-            aiQuaternion def_rot;
+            aiVector3D def_scale = PropertyGet(props,"Lcl Scaling",aiVector3D(1.f,1.f,1.f));
+            aiVector3D def_translate = PropertyGet(props,"Lcl Translation",aiVector3D(0.f,0.f,0.f));
+            aiVector3D def_rot = PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f));
 
             KeyFrameListList scaling;
             KeyFrameListList translation;
@@ -2506,23 +2507,13 @@ private:
             if(chain[TransformationComp_Scaling] != iter_end) {
                 scaling = GetKeyframeList((*chain[TransformationComp_Scaling]).second, start, stop);
             }
-            else {
-                def_scale = PropertyGet(props,"Lcl Scaling",aiVector3D(1.f,1.f,1.f));
-            }
 
             if(chain[TransformationComp_Translation] != iter_end) {
                 translation = GetKeyframeList((*chain[TransformationComp_Translation]).second, start, stop);
             }
-            else {
-                def_translate = PropertyGet(props,"Lcl Translation",aiVector3D(0.f,0.f,0.f));
-            }
 
             if(chain[TransformationComp_Rotation] != iter_end) {
                 rotation = GetKeyframeList((*chain[TransformationComp_Rotation]).second, start, stop);
-            }
-            else {
-                def_rot = EulerToQuaternion(PropertyGet(props,"Lcl Rotation",aiVector3D(0.f,0.f,0.f)),
-                    target.RotationOrder());
             }
 
             KeyFrameListList joined;
@@ -2740,7 +2731,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     void InterpolateKeys(aiVectorKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs,
-        const bool geom,
+        const aiVector3D& def_value,
         double& max_time,
         double& min_time)
 
@@ -2754,10 +2745,7 @@ private:
         next_pos.resize(inputs.size(),0);
 
         BOOST_FOREACH(KeyTimeList::value_type time, keys) {
-            float result[3] = {0.0f, 0.0f, 0.0f};
-            if(geom) {
-                result[0] = result[1] = result[2] = 1.0f;
-            }
+            float result[3] = {def_value.x, def_value.y, def_value.z};
 
             for (size_t i = 0; i < count; ++i) {
                 const KeyFrameList& kfl = inputs[i];
@@ -2782,12 +2770,7 @@ private:
                 const double factor = timeB == timeA ? 0. : static_cast<double>((time - timeA) / (timeB - timeA));
                 const float interpValue = static_cast<float>(valueA + (valueB - valueA) * factor);
 
-                if(geom) {
-                    result[kfl.get<2>()] *= interpValue;
-                }
-                else {
-                    result[kfl.get<2>()] += interpValue;
-                }
+                result[kfl.get<2>()] = interpValue;
             }
 
             // magic value to convert fbx times to seconds
@@ -2807,7 +2790,7 @@ private:
 
     // ------------------------------------------------------------------------------------------------
     void InterpolateKeys(aiQuatKey* valOut,const KeyTimeList& keys, const KeyFrameListList& inputs,
-        const bool geom,
+        const aiVector3D& def_value,
         double& maxTime,
         double& minTime,
         Model::RotOrder order)
@@ -2816,7 +2799,7 @@ private:
         ai_assert(valOut);
 
         boost::scoped_array<aiVectorKey> temp(new aiVectorKey[keys.size()]);
-        InterpolateKeys(temp.get(),keys,inputs,geom,maxTime, minTime);
+        InterpolateKeys(temp.get(), keys, inputs, def_value, maxTime, minTime);
 
         aiMatrix4x4 m;
 
@@ -2858,20 +2841,20 @@ private:
         Model::RotOrder order,
         const aiVector3D& def_scale,
         const aiVector3D& def_translate,
-        const aiQuaternion& def_rotation)
+        const aiVector3D& def_rotation)
     {
         if (rotation.size()) {
-            InterpolateKeys(out_quat, times, rotation, false, maxTime, minTime, order);
+            InterpolateKeys(out_quat, times, rotation, def_rotation, maxTime, minTime, order);
         }
         else {
             for (size_t i = 0; i < times.size(); ++i) {
                 out_quat[i].mTime = CONVERT_FBX_TIME(times[i]) * anim_fps;
-                out_quat[i].mValue = def_rotation;
+                out_quat[i].mValue = EulerToQuaternion(def_rotation, order);
             }
         }
 
         if (scaling.size()) {
-            InterpolateKeys(out_scale, times, scaling, true, maxTime, minTime);
+            InterpolateKeys(out_scale, times, scaling, def_scale, maxTime, minTime);
         }
         else {
             for (size_t i = 0; i < times.size(); ++i) {
@@ -2881,7 +2864,7 @@ private:
         }
 
         if (translation.size()) {
-            InterpolateKeys(out_translation, times, translation, false, maxTime, minTime);
+            InterpolateKeys(out_translation, times, translation, def_translate, maxTime, minTime);
         }
         else {
             for (size_t i = 0; i < times.size(); ++i) {
@@ -2935,7 +2918,7 @@ private:
         na->mNumScalingKeys = static_cast<unsigned int>(keys.size());
         na->mScalingKeys = new aiVectorKey[keys.size()];
         if (keys.size() > 0)
-            InterpolateKeys(na->mScalingKeys, keys, inputs, true, maxTime, minTime);
+            InterpolateKeys(na->mScalingKeys, keys, inputs, aiVector3D(1.0f, 1.0f, 1.0f), maxTime, minTime);
     }
 
 
@@ -2955,7 +2938,7 @@ private:
         na->mNumPositionKeys = static_cast<unsigned int>(keys.size());
         na->mPositionKeys = new aiVectorKey[keys.size()];
         if (keys.size() > 0)
-            InterpolateKeys(na->mPositionKeys, keys, inputs, false, maxTime, minTime);
+            InterpolateKeys(na->mPositionKeys, keys, inputs, aiVector3D(0.0f, 0.0f, 0.0f), maxTime, minTime);
     }
 
 
@@ -2976,7 +2959,7 @@ private:
         na->mNumRotationKeys = static_cast<unsigned int>(keys.size());
         na->mRotationKeys = new aiQuatKey[keys.size()];
         if (keys.size() > 0)
-            InterpolateKeys(na->mRotationKeys, keys, inputs, false, maxTime, minTime, order);
+            InterpolateKeys(na->mRotationKeys, keys, inputs, aiVector3D(0.0f, 0.0f, 0.0f), maxTime, minTime, order);
     }
 
 

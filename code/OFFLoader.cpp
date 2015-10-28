@@ -192,8 +192,8 @@ void OFFImporter::InternReadFile( const std::string& pFile,
         throw DeadlyImportError("OFF: There are no valid faces");
 
     // allocate storage for the output vertices
-    aiVector3D* verts = new aiVector3D[mesh->mNumVertices];
-    mesh->mVertices = verts;
+    std::vector<aiVector3D> verts;
+    verts.reserve(mesh->mNumVertices);
 
     // second: now parse all face indices
     buffer = old;
@@ -219,12 +219,14 @@ void OFFImporter::InternReadFile( const std::string& pFile,
                 idx = numVertices-1;
             }
             faces->mIndices[m] = p++;
-            *verts++ = tempPositions[idx];
+            verts.push_back(tempPositions[idx]);
         }
         ++i;
         ++faces;
     }
 
+    mesh->mVertices = new aiVector3D[verts.size()];
+    memcpy(mesh->mVertices, &verts[0], verts.size() * sizeof(aiVector3D));
     // generate the output node graph
     pScene->mRootNode = new aiNode();
     pScene->mRootNode->mName.Set("<OFFRoot>");

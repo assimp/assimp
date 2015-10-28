@@ -225,6 +225,9 @@ void OFFImporter::InternReadFile( const std::string& pFile,
         ++faces;
     }
 
+    if (mesh->mNumVertices != verts.size()) {
+        throw DeadlyImportError("OFF: Vertex count mismatch");
+    }
     mesh->mVertices = new aiVector3D[verts.size()];
     memcpy(mesh->mVertices, &verts[0], verts.size() * sizeof(aiVector3D));
     // generate the output node graph

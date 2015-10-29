@@ -129,7 +129,7 @@ struct Mesh
 
     std::vector<Bone> mBones;
 
-    Mesh(const std::string &pName = "") { mName = pName; mNumTextures = 0; mNumColorSets = 0; }
+    explicit Mesh(const std::string &pName = "") { mName = pName; mNumTextures = 0; mNumColorSets = 0; }
 };
 
 /** Helper structure to represent a XFile frame */
@@ -142,7 +142,7 @@ struct Node
     std::vector<Mesh*> mMeshes;
 
     Node() { mParent = NULL; }
-    Node( Node* pParent) { mParent = pParent; }
+    explicit Node( Node* pParent) { mParent = pParent; }
     ~Node()
     {
         for( unsigned int a = 0; a < mChildren.size(); a++)

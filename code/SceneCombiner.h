@@ -166,7 +166,7 @@ struct SceneHelper
         id[0] = 0;
     }
 
-    SceneHelper (aiScene* _scene)
+    explicit SceneHelper (aiScene* _scene)
         : scene     (_scene)
         , idlen     (0)
     {

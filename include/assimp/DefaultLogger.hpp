@@ -135,7 +135,7 @@ private:
     // ----------------------------------------------------------------------
     /** @briefPrivate construction for internal use by create().
      *  @param severity Logging granularity  */
-    DefaultLogger(LogSeverity severity);
+    explicit DefaultLogger(LogSeverity severity);
 
     // ----------------------------------------------------------------------
     /** @briefDestructor    */

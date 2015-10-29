@@ -66,7 +66,7 @@ public:
     /** Construction from a given face array, handling smoothing groups
      *  properly
      */
-    SGSpatialSort(const std::vector<aiVector3D>& vPositions);
+    explicit SGSpatialSort(const std::vector<aiVector3D>& vPositions);
 
     // -------------------------------------------------------------------
     /** Add a vertex to the spatial sort

@@ -269,7 +269,7 @@ struct Face : public aiFace
     {}
 
     //! Construction from given type
-    Face(uint32_t _type)
+    explicit Face(uint32_t _type)
         : surfaceIndex  (0)
         , smoothGroup   (0)
         , type          (_type)
@@ -305,7 +305,7 @@ struct Face : public aiFace
  */
 struct VMapEntry
 {
-    VMapEntry(unsigned int _dims)
+    explicit VMapEntry(unsigned int _dims)
         :  dims(_dims)
     {}
 

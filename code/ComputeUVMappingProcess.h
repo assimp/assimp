@@ -125,7 +125,7 @@ private:
     // temporary structure to describe a mapping
     struct MappingInfo
     {
-        MappingInfo(aiTextureMapping _type)
+        explicit MappingInfo(aiTextureMapping _type)
             : type  (_type)
             , axis  (0.f,1.f,0.f)
             , uv    (0u)

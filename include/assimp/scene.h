@@ -135,7 +135,7 @@ struct aiNode
 
 
     /** Construction from a specific name */
-    aiNode(const std::string& name)
+    explicit aiNode(const std::string& name)
         // set all members to zero by default
         : mName(name)
         , mParent(NULL)

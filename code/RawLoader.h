@@ -88,7 +88,7 @@ private:
 
     struct MeshInformation
     {
-        MeshInformation(const std::string& _name)
+        explicit MeshInformation(const std::string& _name)
             : name(_name)
         {
             vertices.reserve(100);
@@ -103,7 +103,7 @@ private:
 
     struct GroupInformation
     {
-        GroupInformation(const std::string& _name)
+        explicit GroupInformation(const std::string& _name)
             : name(_name)
         {
             meshes.reserve(10);

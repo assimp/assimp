@@ -110,7 +110,7 @@ static boost::mutex gLogStreamMutex;
 class LogToCallbackRedirector : public LogStream
 {
 public:
-    LogToCallbackRedirector(const aiLogStream& s)
+    explicit LogToCallbackRedirector(const aiLogStream& s)
         : stream (s)    {
             ai_assert(NULL != s.callback);
     }

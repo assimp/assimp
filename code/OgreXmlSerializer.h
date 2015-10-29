@@ -69,7 +69,7 @@ public:
     static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
 
 private:
-    OgreXmlSerializer(XmlReader *reader) :
+    explicit OgreXmlSerializer(XmlReader *reader) :
         m_reader(reader)
     {
     }

@@ -242,7 +242,7 @@ struct Mesh {
     bool m_hasNormals;
 
     /// Constructor
-    Mesh( const std::string &name ) 
+    explicit Mesh( const std::string &name ) 
     : m_name( name )
     , m_pMaterial(NULL)
     , m_uiNumIndices(0)

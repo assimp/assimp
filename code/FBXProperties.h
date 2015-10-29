@@ -87,7 +87,7 @@ class TypedProperty : public Property
 {
 public:
 
-    TypedProperty(const T& value)
+    explicit TypedProperty(const T& value)
         : value(value)
     {
     }

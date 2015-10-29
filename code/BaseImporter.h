@@ -70,7 +70,7 @@ class IOStream;
 template <typename T>
 struct ScopeGuard
 {
-    ScopeGuard(T* obj) : obj(obj), mdismiss() {}
+    explicit ScopeGuard(T* obj) : obj(obj), mdismiss() {}
     ~ScopeGuard () throw() {
         if (!mdismiss) {
             delete obj;

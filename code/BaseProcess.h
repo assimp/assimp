@@ -74,7 +74,7 @@ public:
     template <typename T>
     struct THeapData : public Base
     {
-        THeapData(T* in)
+        explicit THeapData(T* in)
             : data (in)
         {}
 
@@ -89,7 +89,7 @@ public:
     template <typename T>
     struct TStaticData : public Base
     {
-        TStaticData(T in)
+        explicit TStaticData(T in)
             : data (in)
         {}
 

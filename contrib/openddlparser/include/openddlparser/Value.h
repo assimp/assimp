@@ -151,11 +151,23 @@ public:
     size_t m_size;
     unsigned char *m_data;
     Value *m_next;
+
+private:
+    Value &operator =( const Value & );
+    Value( const Value  & );
 };
 
+///------------------------------------------------------------------------------------------------
+///	@brief  This class implements the value allocator.
+///------------------------------------------------------------------------------------------------
 struct DLL_ODDLPARSER_EXPORT ValueAllocator {
     static Value *allocPrimData( Value::ValueType type, size_t len = 1 );
     static void releasePrimData( Value **data );
+
+private:
+    ValueAllocator();
+    ValueAllocator( const ValueAllocator  & );
+    ValueAllocator &operator = ( const ValueAllocator & );
 };
 
 END_ODDLPARSER_NS

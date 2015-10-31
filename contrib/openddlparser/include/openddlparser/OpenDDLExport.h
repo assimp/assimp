@@ -23,26 +23,66 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include <openddlparser/OpenDDLCommon.h>
+#include <openddlparser/Value.h>
 
 BEGIN_ODDLPARSER_NS
 
+//-------------------------------------------------------------------------------------------------
+/// @ingroup    IOStreamBase
+///	@brief      This class represents the stream to write out.
+//-------------------------------------------------------------------------------------------------
+class DLL_ODDLPARSER_EXPORT IOStreamBase {
+public:
+    IOStreamBase();
+    virtual ~IOStreamBase();
+    virtual bool open( const std::string &anme );
+    virtual bool close();
+    virtual void write( const std::string &statement );
+
+private:
+    FILE *m_file;
+};
+
+//-------------------------------------------------------------------------------------------------
 ///
 /// @ingroup    OpenDDLParser
 ///	@brief      This class represents the OpenDDLExporter.
 ///
+//-------------------------------------------------------------------------------------------------
 class DLL_ODDLPARSER_EXPORT OpenDDLExport {
 public:
-    OpenDDLExport();
+    ///	@brief  The class constructor
+    OpenDDLExport( IOStreamBase *stream = ddl_nullptr );
+
+    ///	@brief  The class destructor.
     ~OpenDDLExport();
+
+    ///	@brief  Export the data of a parser context.
+    /// @param  ctx         [in] Pointer to the context.
+    /// @param  filename    [in] The filename for the export.
+    /// @return True in case of success, false in case of an error.
     bool exportContext( Context *ctx, const std::string &filename );
+
+    ///	@brief  Handles a node export.
+    /// @param  node        [in] The node to handle with.
+    /// @return True in case of success, false in case of an error.
     bool handleNode( DDLNode *node );
 
+    ///	@brief  Writes the statement to the stream.
+    /// @param  statement   [in]  The content to write.
+    /// @return True in case of success, false in case of an error.
+    bool writeToStream( const std::string &statement );
+
 protected:
-    bool writeNode( DDLNode *node );
-    bool writeProperties( DDLNode *node );
+    bool writeNode( DDLNode *node, std::string &statement );
+    bool writeNodeHeader( DDLNode *node, std::string &statement );
+    bool writeProperties( DDLNode *node, std::string &statement );
+    bool writeValueType( Value::ValueType type, size_t numItems, std::string &statement );
+    bool writeValue( Value *val, std::string &statement );
+    bool writeValueArray( DataArrayList *al, std::string &statement );
 
 private:
-    FILE *m_file;
+    IOStreamBase *m_stream;
 };
 
 END_ODDLPARSER_NS

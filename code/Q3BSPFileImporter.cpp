@@ -325,7 +325,7 @@ void Q3BSPFileImporter::CreateNodes( const Q3BSP::Q3BSPModel *pModel, aiScene* p
         matIdx++;
     }
 
-    pScene->mNumMeshes = MeshArray.size();
+    pScene->mNumMeshes = static_cast<unsigned int>( MeshArray.size() );
     if ( pScene->mNumMeshes > 0 )
     {
         pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];

@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <vector>
 #include <string>
 
+#include <stdio.h>
 #include <string.h>
 #ifndef _WIN32
 #  include <inttypes.h>

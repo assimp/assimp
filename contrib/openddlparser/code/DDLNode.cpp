@@ -117,7 +117,6 @@ const std::string &DDLNode::getType() const {
     return m_type;
 }
 
-
 void DDLNode::setName( const std::string &name ) {
     m_name = name;
 }
@@ -151,6 +150,7 @@ Property *DDLNode::findPropertyByName( const std::string &name ) {
     if( ddl_nullptr == m_properties ) {
         return ddl_nullptr;
     }
+
     Property *current( m_properties );
     while( ddl_nullptr != current ) {
         int res = strncmp( current->m_key->m_text.m_buffer, name.c_str(), name.size() );

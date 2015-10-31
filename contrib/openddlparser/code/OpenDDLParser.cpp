@@ -21,6 +21,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -----------------------------------------------------------------------------------------------*/
 #include <openddlparser/OpenDDLParser.h>
+#include <openddlparser/OpenDDLExport.h>
 
 #include <cassert>
 #include <iostream>
@@ -66,6 +67,10 @@ namespace Grammar {
         "ref"
     };
 } // Namespace Grammar
+
+const char *getTypeToken( Value::ValueType  type ) {
+    return Grammar::PrimitiveTypeToken[ type ];
+}
 
 static void logInvalidTokenError( char *in, const std::string &exp, OpenDDLParser::logCallback callback ) {
     std::stringstream stream;
@@ -211,12 +216,11 @@ bool OpenDDLParser::exportContext( Context *ctx, const std::string &filename ) {
         return false;
     }
     
-    if( filename.empty() ) {
-        return false;
-    }
+    OpenDDLExport myExporter;
+    return myExporter.exportContext( ctx, filename );
+
     return false;
 }
-
 
 char *OpenDDLParser::parseNextNode( char *in, char *end ) {
     in = parseHeader( in, end );
@@ -227,7 +231,8 @@ char *OpenDDLParser::parseNextNode( char *in, char *end ) {
 
 static void dumpId( Identifier *id ) {
     if( ddl_nullptr != id ) {
-        std::cout << id->m_text.m_buffer << std::endl;
+        if ( ddl_nullptr != id->m_text.m_buffer ) { }
+            std::cout << id->m_text.m_buffer << std::endl;
     }
 }
 
@@ -366,7 +371,7 @@ char *OpenDDLParser::parseStructureBody( char *in, char *end, bool &error ) {
             Value *values( ddl_nullptr );
             if( 1 == arrayLen ) {
                 size_t numRefs( 0 ), numValues( 0 );
-                in = parseDataList( in, end, &values, numValues, &refs, numRefs );
+                in = parseDataList( in, end, type, &values, numValues, &refs, numRefs );
                 setNodeValues( top(), values );
                 setNodeReferences( top(), refs );
             } else if( arrayLen > 1 ) {
@@ -548,7 +553,7 @@ char *OpenDDLParser::parsePrimitiveDataType( char *in, char *end, Value::ValueTy
         while ( in != end ) {
             in++;
             if( *in == Grammar::CloseArrayToken[ 0 ] ) {
-                len = atoi( start );
+                len = ::atoi( start );
                 ok = true;
                 in++;
                 break;
@@ -814,7 +819,7 @@ char *OpenDDLParser::parseProperty( char *in, char *end, Property **prop ) {
     return in;
 }
 
-char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, size_t &numValues, Reference **refs, size_t &numRefs ) {
+char *OpenDDLParser::parseDataList( char *in, char *end, Value::ValueType type, Value **data, size_t &numValues, Reference **refs, size_t &numRefs ) {
     *data = ddl_nullptr;
     numValues = numRefs = 0;
     if( ddl_nullptr == in || in == end ) {
@@ -828,21 +833,35 @@ char *OpenDDLParser::parseDataList( char *in, char *end, Value **data, size_t &n
         while( '}' != *in ) {
             current = ddl_nullptr;
             in = lookForNextToken( in, end );
-            if( isInteger( in, end ) ) {
-                in = parseIntegerLiteral( in, end, &current );
-            } else if( isFloat( in, end ) ) {
-                in = parseFloatingLiteral( in, end, &current );
-            } else if( isStringLiteral( *in ) ) {
-                in = parseStringLiteral( in, end, &current );
-            } else if( isHexLiteral( in, end ) ) {
-                in = parseHexaLiteral( in, end, &current );
-            } else {                          // reference data
-                std::vector<Name*> names;
-                in = parseReference( in, end, names );
-                if( !names.empty() ) {
-                    Reference *ref = new Reference( names.size(), &names[ 0 ] );
-                    *refs = ref;
-                    numRefs = names.size();
+            if (Value::ddl_none == type) {
+                if (isInteger( in, end )) {
+                    in = parseIntegerLiteral( in, end, &current );
+                }
+                else if (isFloat( in, end )) {
+                    in = parseFloatingLiteral( in, end, &current );
+                }
+                else if (isStringLiteral( *in )) {
+                    in = parseStringLiteral( in, end, &current );
+                }
+                else if (isHexLiteral( in, end )) {
+                    in = parseHexaLiteral( in, end, &current );
+                }
+                else {                          // reference data
+                    std::vector<Name*> names;
+                    in = parseReference( in, end, names );
+                    if (!names.empty()) {
+                        Reference *ref = new Reference( names.size(), &names[ 0 ] );
+                        *refs = ref;
+                        numRefs = names.size();
+                    }
+                }
+            } else {
+                if (Value::ddl_int32 == type) {
+                    in = parseIntegerLiteral( in, end, &current );
+                } else if (Value::ddl_float == type) {
+                    in = parseFloatingLiteral( in, end, &current );
+                } else if (Value::ddl_string == type) {
+                    in = parseStringLiteral( in, end, &current );
                 }
             }
 
@@ -891,7 +910,8 @@ char *OpenDDLParser::parseDataArrayList( char *in, char *end, DataArrayList **da
         do {
             size_t numRefs( 0 ), numValues( 0 );
             currentValue = ddl_nullptr;
-            in = parseDataList( in, end, &currentValue, numValues, &refs, numRefs );
+            Value::ValueType type( Value::ddl_none );
+            in = parseDataList( in, end, type, &currentValue, numValues, &refs, numRefs );
             if( ddl_nullptr != currentValue ) {
                 if( ddl_nullptr == prev ) {
                     *dataList = createDataArrayList( currentValue, numValues );

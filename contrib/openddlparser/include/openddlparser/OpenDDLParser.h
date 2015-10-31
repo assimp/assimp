@@ -80,6 +80,8 @@ enum LogSeverity {
     ddl_error_msg       ///< Parser errors
 };
 
+DLL_ODDLPARSER_EXPORT const char *getTypeToken( Value::ValueType  type );
+
 //-------------------------------------------------------------------------------------------------
 ///	@class		OpenDDLParser
 ///	@ingroup	OpenDDLParser
@@ -168,7 +170,7 @@ public: // parser helpers
     static char *parseStringLiteral( char *in, char *end, Value **stringData );
     static char *parseHexaLiteral( char *in, char *end, Value **data );
     static char *parseProperty( char *in, char *end, Property **prop );
-    static char *parseDataList( char *in, char *end, Value **data, size_t &numValues, Reference **refs, size_t &numRefs );
+    static char *parseDataList( char *in, char *end, Value::ValueType type, Value **data, size_t &numValues, Reference **refs, size_t &numRefs );
     static char *parseDataArrayList( char *in, char *end, DataArrayList **dataList );
     static const char *getVersion();
 

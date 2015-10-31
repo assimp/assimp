@@ -167,7 +167,7 @@ public:
     // -------------------------------------------------------------------
     /** Construct a batch loader from a given IO system to be used
      *  to acess external files */
-    BatchLoader(IOSystem* pIO);
+    explicit BatchLoader(IOSystem* pIO);
     ~BatchLoader();
 
 

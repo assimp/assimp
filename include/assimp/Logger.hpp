@@ -160,7 +160,7 @@ protected:
     Logger();
 
     /** Construction with a given log severity */
-    Logger(LogSeverity severity);
+    explicit Logger(LogSeverity severity);
 
     // ----------------------------------------------------------------------
     /** @brief Called as a request to write a specific debug message

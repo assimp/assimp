@@ -76,7 +76,7 @@ public:
 
     // ----------------------------------------------------------------------------------
     //! Construction from an existing IOStream
-    CIrrXML_IOStreamReader(IOStream* _stream)
+    explicit CIrrXML_IOStreamReader(IOStream* _stream)
         : stream (_stream)
         , t (0)
     {

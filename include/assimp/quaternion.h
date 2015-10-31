@@ -60,7 +60,7 @@ public:
         : w(pw), x(px), y(py), z(pz) {}
 
     /** Construct from rotation matrix. Result is undefined if the matrix is not orthonormal. */
-    aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
+    explicit aiQuaterniont( const aiMatrix3x3t<TReal>& pRotMatrix);
 
     /** Construct from euler angles */
     aiQuaterniont( TReal rotx, TReal roty, TReal rotz);
@@ -69,7 +69,7 @@ public:
     aiQuaterniont( aiVector3t<TReal> axis, TReal angle);
 
     /** Construct from a normalized quaternion stored in a vec3 */
-    aiQuaterniont( aiVector3t<TReal> normalized);
+    explicit aiQuaterniont( aiVector3t<TReal> normalized);
 
     /** Returns a matrix representation of the quaternion */
     aiMatrix3x3t<TReal> GetMatrix() const;

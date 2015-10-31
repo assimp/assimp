@@ -59,7 +59,7 @@ public:
     aiColor4t () : r(), g(), b(), a() {}
     aiColor4t (TReal _r, TReal _g, TReal _b, TReal _a)
         : r(_r), g(_g), b(_b), a(_a) {}
-    aiColor4t (TReal _r) : r(_r), g(_r), b(_r), a(_r) {}
+    explicit aiColor4t (TReal _r) : r(_r), g(_r), b(_r), a(_r) {}
     aiColor4t (const aiColor4t& o)
         : r(o.r), g(o.g), b(o.b), a(o.a) {}
 

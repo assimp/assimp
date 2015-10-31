@@ -113,7 +113,7 @@ private:
 
         } type;
 
-        Animator(AT t = UNKNOWN)
+        explicit Animator(AT t = UNKNOWN)
             : type              (t)
             , speed             (0.001f)
             , direction         (0.f,1.f,0.f)
@@ -163,7 +163,7 @@ private:
             ANIMMESH
         } type;
 
-        Node(ET t)
+        explicit Node(ET t)
             :   type                (t)
             ,   scaling             (1.f,1.f,1.f) // assume uniform scaling by default
             ,   parent()

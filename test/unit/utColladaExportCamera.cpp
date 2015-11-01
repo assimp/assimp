@@ -49,31 +49,47 @@ TEST_F(ColladaExportCamera, testExportCamera)
 
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
-
+    const unsigned int origNumCams( pTest->mNumCameras );
+    float *origFOV = new float[ origNumCams ];
+    float *orifClipPlaneNear = new float[ origNumCams ];
+    float *orifClipPlaneFar = new float[ origNumCams ];
+    aiString *names = new aiString[ origNumCams ];
+    aiVector3D *pos = new aiVector3D[ origNumCams ];
+    for (size_t i = 0; i < origNumCams; i++) {
+        const aiCamera *orig = pTest->mCameras[ i ];
+        origFOV[ i ] = orig->mHorizontalFOV;
+        orifClipPlaneNear[ i ] = orig->mClipPlaneNear;
+        orifClipPlaneFar[ i ] = orig->mClipPlaneFar;
+        names[ i ] = orig->mName;
+        pos[ i ] = orig->mPosition;
+    }
     const aiScene* imported = im->ReadFile(file,0);
 
     ASSERT_TRUE(imported!=NULL);
 
-    EXPECT_TRUE(imported->HasCameras());
-    EXPECT_EQ(pTest->mNumCameras,imported->mNumCameras);
+    EXPECT_TRUE( imported->HasCameras() );
+    EXPECT_EQ( origNumCams, imported->mNumCameras );
 
-    for(size_t i=0; i< pTest->mNumCameras;i++){
+    for(size_t i=0; i< imported->mNumCameras;i++){
+        //const aiCamera *orig = pTest->mCameras[ i ];
+        const aiCamera *read = imported->mCameras[ i ];
 
-        const aiCamera *orig = pTest->mCameras[i];
-        const aiCamera *read = imported->mCameras[i];
+        EXPECT_TRUE( names[ i ] == read->mName );
+        EXPECT_FLOAT_EQ( origFOV[ i ],read->mHorizontalFOV );
+        EXPECT_FLOAT_EQ( orifClipPlaneNear[ i ], read->mClipPlaneNear);
+        EXPECT_FLOAT_EQ( orifClipPlaneFar[ i ], read->mClipPlaneFar);
 
-        EXPECT_TRUE(orig->mName==read->mName);
-        EXPECT_FLOAT_EQ(orig->mHorizontalFOV,read->mHorizontalFOV);
-        EXPECT_FLOAT_EQ(orig->mClipPlaneNear,read->mClipPlaneNear);
-        EXPECT_FLOAT_EQ(orig->mClipPlaneFar,read->mClipPlaneFar);
-
-        EXPECT_FLOAT_EQ(orig->mPosition.x,read->mPosition.x);
-        EXPECT_FLOAT_EQ(orig->mPosition.y,read->mPosition.y);
-        EXPECT_FLOAT_EQ(orig->mPosition.z,read->mPosition.z);
+        EXPECT_FLOAT_EQ( pos[ i ].x,read->mPosition.x);
+        EXPECT_FLOAT_EQ( pos[ i ].y,read->mPosition.y);
+        EXPECT_FLOAT_EQ( pos[ i ].z,read->mPosition.z);
     }
+    delete [] origFOV;
+    delete [] orifClipPlaneNear;
+    delete [] orifClipPlaneFar;
+    delete [] names;
+    delete [] pos;
 
 }
-
 
 #endif
 

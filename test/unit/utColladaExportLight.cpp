@@ -47,6 +47,11 @@ TEST_F(ColladaExportLight, testExportLight)
     ASSERT_TRUE(pTest!=NULL);
     ASSERT_TRUE(pTest->HasLights());
 
+    const unsigned int origNumLights( pTest->mNumLights );
+    aiLight *origLights = new aiLight[ origNumLights ];
+    for (size_t i = 0; i < origNumLights; i++) {
+        origLights[ i ] = *(pTest->mLights[ i ]);
+    }
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada","lightsExp.dae"));
@@ -56,11 +61,11 @@ TEST_F(ColladaExportLight, testExportLight)
     ASSERT_TRUE(imported!=NULL);
 
     EXPECT_TRUE(imported->HasLights());
-    EXPECT_EQ(pTest->mNumLights,imported->mNumLights);
-
+    EXPECT_EQ( origNumLights,imported->mNumLights );
     for(size_t i=0; i< pTest->mNumLights;i++){
 
-        const aiLight *orig = pTest->mLights[i];
+        const aiLight *orig = &origLights[ i ];
+        
         const aiLight *read = imported->mLights[i];
 
         EXPECT_TRUE(orig->mName==read->mName);

@@ -36,12 +36,12 @@ TEST(NoBoostTest, Tuple) {
     EXPECT_EQ(4U, first.get<1>());
     EXPECT_EQ(4U, first.get<2>());
 
-    boost::tuple<int,float,double,bool,another> second;
+    boost::tuple<int, float, double, bool, another> second;
     bool b = second.get<3>();
-    EXPECT_FALSE(b);
 
-    // check empty tuple, ignore compile warning
+    // check empty tuple
     boost::tuple<> third;
+    third;
 
     // FIXME: Explicit conversion not really required yet
     boost::tuple<float,float,float> last =

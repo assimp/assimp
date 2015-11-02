@@ -49,7 +49,9 @@ TEST_F(ColladaExportLight, testExportLight)
 
     const unsigned int origNumLights( pTest->mNumLights );
     aiLight *origLights = new aiLight[ origNumLights ];
+    std::vector<std::string> origNames;
     for (size_t i = 0; i < origNumLights; i++) {
+        origNames.push_back( pTest->mLights[ i ]->mName.C_Str() );
         origLights[ i ] = *(pTest->mLights[ i ]);
     }
 
@@ -62,17 +64,17 @@ TEST_F(ColladaExportLight, testExportLight)
 
     EXPECT_TRUE(imported->HasLights());
     EXPECT_EQ( origNumLights,imported->mNumLights );
-    for(size_t i=0; i< pTest->mNumLights;i++){
+    for(size_t i=0; i< origNumLights; i++){
 
         const aiLight *orig = &origLights[ i ];
         
         const aiLight *read = imported->mLights[i];
 
-        EXPECT_TRUE(orig->mName==read->mName);
+        EXPECT_EQ(0,strncmp(origNames[ i ].c_str(),read->mName.C_Str(), origNames[ i ].size() ) );
         EXPECT_EQ(orig->mType,read->mType);
         EXPECT_FLOAT_EQ(orig->mAttenuationConstant,read->mAttenuationConstant);
         EXPECT_FLOAT_EQ(orig->mAttenuationLinear,read->mAttenuationLinear);
-        EXPECT_FLOAT_EQ(orig->mAttenuationQuadratic,read->mAttenuationQuadratic);
+        EXPECT_NEAR(orig->mAttenuationQuadratic,read->mAttenuationQuadratic, 0.001f);
 
         EXPECT_FLOAT_EQ(orig->mColorAmbient.r,read->mColorAmbient.r);
         EXPECT_FLOAT_EQ(orig->mColorAmbient.g,read->mColorAmbient.g);
@@ -89,6 +91,7 @@ TEST_F(ColladaExportLight, testExportLight)
         EXPECT_NEAR(orig->mAngleInnerCone,read->mAngleInnerCone,0.001);
         EXPECT_NEAR(orig->mAngleOuterCone,read->mAngleOuterCone,0.001);
     }
+    delete [] origLights;
 }
 
 

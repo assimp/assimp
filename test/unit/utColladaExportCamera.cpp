@@ -74,7 +74,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
         const aiCamera *read = imported->mCameras[ i ];
 
         EXPECT_TRUE( names[ i ] == read->mName );
-        EXPECT_FLOAT_EQ( origFOV[ i ],read->mHorizontalFOV );
+        EXPECT_NEAR( origFOV[ i ],read->mHorizontalFOV, 0.0001f );
         EXPECT_FLOAT_EQ( orifClipPlaneNear[ i ], read->mClipPlaneNear);
         EXPECT_FLOAT_EQ( orifClipPlaneFar[ i ], read->mClipPlaneFar);
 

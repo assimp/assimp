@@ -6,7 +6,7 @@
 #include "ScenePrivate.h"
 
 static const unsigned int MajorVersion = 3;
-static const unsigned int MinorVersion = 1;
+static const unsigned int MinorVersion = 2;
 
 // --------------------------------------------------------------------------------
 // Legal information string - dont't remove this.

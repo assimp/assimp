@@ -47,7 +47,13 @@ class utMatrix4x4Test : public ::testing::Test {
 
 };
 
-TEST_F( utMatrix4x4Test, IndexOperatorTest ) {
+TEST_F( utMatrix4x4Test, badIndexOperatorTest ) {
+    aiMatrix4x4 m;
+    float *a0 = m[ 4 ];
+    EXPECT_EQ( NULL, a0 );
+}
+
+TEST_F( utMatrix4x4Test, indexOperatorTest ) {
     aiMatrix4x4 m;
     float *a0 = m[ 0 ];
     EXPECT_FLOAT_EQ( 1.0f, *a0 );

@@ -1499,7 +1499,7 @@ private:
             path.Set(tex->RelativeFilename());
 
             const Video* media = tex->Media();
-            if(media != 0) {
+            if(media != 0 && media->ContentLength() > 0) {
                 unsigned int index;
 
                 VideoMap::const_iterator it = textures_converted.find(media);

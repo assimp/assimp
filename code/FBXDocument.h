@@ -701,7 +701,6 @@ public:
     uint8_t* RelinquishContent() {
         uint8_t* ptr = content;
         content = 0;
-        contentLength = 0;
         return ptr;
     }
 

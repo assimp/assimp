@@ -180,6 +180,9 @@ const Object* LazyObject::Get(bool dieOnError)
         else if (!strncmp(obtype,"LayeredTexture",length)) {
             object.reset(new LayeredTexture(id,element,doc,name));
         }
+        else if (!strncmp(obtype,"Video",length)) {
+            object.reset(new Video(id,element,doc,name));
+        }
         else if (!strncmp(obtype,"AnimationStack",length)) {
             object.reset(new AnimationStack(id,element,name,doc));
         }

@@ -562,6 +562,15 @@ enum aiComponent
     "IMPORT_FBX_READ_MATERIALS"
 
 // ---------------------------------------------------------------------------
+/** @brief Set whether the fbx importer will read embedded textures.
+ *
+ * The default value is true (1)
+ * Property type: bool
+ */
+#define AI_CONFIG_IMPORT_FBX_READ_TEXTURES \
+    "IMPORT_FBX_READ_TEXTURES"
+
+// ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will read cameras.
  *
  * The default value is true (1)

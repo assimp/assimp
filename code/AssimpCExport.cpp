@@ -63,7 +63,8 @@ ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t index)
 {
     // Note: this is valid as the index always pertains to a built-in exporter,
     // for which the returned structure is guaranteed to be of static storage duration.
-    const aiExportFormatDesc* orig( Exporter().GetExportFormatDescription( index ) );
+    Exporter exporter;
+    const aiExportFormatDesc* orig( exporter.GetExportFormatDescription( index ) );
     if (NULL == orig) {
         return NULL;
     }

@@ -180,6 +180,9 @@ const Object* LazyObject::Get(bool dieOnError)
         else if (!strncmp(obtype,"LayeredTexture",length)) {
             object.reset(new LayeredTexture(id,element,doc,name));
         }
+        else if (!strncmp(obtype,"Video",length)) {
+            object.reset(new Video(id,element,doc,name));
+        }
         else if (!strncmp(obtype,"AnimationStack",length)) {
             object.reset(new AnimationStack(id,element,name,doc));
         }
@@ -483,6 +486,11 @@ void Document::ReadConnections()
     for(ElementMap::const_iterator it = conns.first; it != conns.second; ++it) {
         const Element& el = *(*it).second;
         const std::string& type = ParseTokenAsString(GetRequiredToken(el,0));
+
+        // PP = property-property connection, ignored for now
+        // (tokens: "PP", ID1, "Property1", ID2, "Property2")
+        if(type == "PP") continue;
+
         const uint64_t src = ParseTokenAsID(GetRequiredToken(el,1));
         const uint64_t dest = ParseTokenAsID(GetRequiredToken(el,2));
 

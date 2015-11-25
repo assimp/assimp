@@ -56,6 +56,7 @@ protected:
 
 private:
     aiScene *m_scene;
+    std::vector<char> m_buffer;
 };
 
 } // Namespace assimp

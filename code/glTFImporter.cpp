@@ -38,6 +38,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 #include "glTFImporter.h"
+#include "StreamReader.h"
+#include "DefaultIOSystem.h"
+
+#include <boost/scoped_ptr.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
+#include <assimp/DefaultLogger.hpp>
+
+#include "../contrib/picojson/picojson.h"
 
 namespace Assimp {
 
@@ -55,7 +65,9 @@ namespace Assimp {
     };
 
 glTFImporter::glTFImporter() 
-: BaseImporter() {
+: BaseImporter()
+, m_scene( NULL ) 
+, m_buffer() {
 
 }
 
@@ -72,7 +84,17 @@ const aiImporterDesc* glTFImporter::GetInfo() const {
 }
 
 void glTFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler ) {
+    m_scene = pScene;
+    boost::shared_ptr<IOStream> stream( pIOHandler->Open( pFile, "rb" ) );
+    if (!stream.get()) {
+        throw DeadlyImportError( "Failed to open file " + pFile + "." );
+    }
 
+    // Get the file-size and validate it, throwing an exception when fails
+    size_t fileSize = stream->FileSize();
+
+    // Allocate buffer and read file into it
+    TextFileToBuffer( stream.get(), m_buffer );
 }
 
 }

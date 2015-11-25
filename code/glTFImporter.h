@@ -52,8 +52,10 @@ public:
 
 protected:
     virtual const aiImporterDesc* GetInfo() const;
-    virtual void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler );
+    virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
+
+private:
+    aiScene *m_scene;
 };
 
 } // Namespace assimp

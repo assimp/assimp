@@ -51,18 +51,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
-    static const aiImporterDesc desc = {
-        "glTF Importer",
-        "",
-        "",
-        "",
-        aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportCompressedFlavour,
-        0,
-        0,
-        0,
-        0,
-        "gltf"
-    };
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+    
+static const aiImporterDesc desc = {
+    "glTF Importer",
+    "",
+    "",
+    "",
+    aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportCompressedFlavour,
+    0,
+    0,
+    0,
+    0,
+    "gltf"
+};
 
 glTFImporter::glTFImporter() 
 : BaseImporter()
@@ -95,6 +97,15 @@ void glTFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IO
 
     // Allocate buffer and read file into it
     TextFileToBuffer( stream.get(), m_buffer );
+
+    std::string data( &m_buffer[ 0 ] );
+    picojson::value v;
+    std::string err = picojson::parse( v, data );
+    if (!err.empty()) {
+        throw DeadlyImportError( "Error occurred: " + err + "."  );
+    }
 }
 
-}
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+
+} // Namespace Assimp

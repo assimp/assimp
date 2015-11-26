@@ -37,55 +37,86 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef AI_GLTFIMPORTER_H_INC
-#define AI_GLTFIMPORTER_H_INC
+#ifndef AI_GLTFFILEDATA_H_INC
+#define AI_GLTFFILEDATA_H_INC
 
-#include "BaseImporter.h"
-#include "LogAux.h"
-#include "DefaultIOSystem.h"
-
-#if _MSC_VER > 1500 || (defined __GNUC___)
-#   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   else
-#   define gltf_unordered_map map
-#   define gltf_unordered_multimap multimap
-#endif
-
-#ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   include <unordered_map>
-#   if _MSC_VER > 1600
-#       define gltf_unordered_map unordered_map
-#       define gltf_unordered_multimap unordered_multimap
-#   else
-#       define gltf_unordered_map tr1::unordered_map
-#       define gltf_unordered_multimap tr1::unordered_multimap
-#   endif
-#endif
+#include <stdint.h>
 
 namespace Assimp {
+namespace glTF {
 
-/**
- * Load the glTF format.
- * https://github.com/KhronosGroup/glTF/tree/master/specification
- */
-class glTFImporter : public BaseImporter, public LogFunctions<glTFImporter> {
-public:
-    glTFImporter();
-    virtual ~glTFImporter();
-    virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
 
-protected:
-    virtual const aiImporterDesc* GetInfo() const;
-    virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
+//! Magic number for GLB files
+#define AI_GLB_MAGIC_NUMBER "glTF"
 
-private:
-    void ReadBinaryHeader(IOStream& stream);
 
-    std::size_t mSceneLength;
-    std::size_t mBodyOffset, mBodyLength;
+#include "./../include/assimp/Compiler/pushpack1.h"
+
+// KHR_binary_glTF (binary .glb file)
+// 20-byte header (+ the JSON + a "body" data section)
+struct GLB_Header
+{
+    //! Magic number: "glTF"
+    unsigned char magic[4];  // "glTF"
+
+    //! Version number (always 1 as of the last update)
+    uint32_t version;
+
+    //! Total length of the Binary glTF, including header, scene, and body, in bytes
+    uint32_t length;
+
+    //! Length, in bytes, of the glTF scene
+    uint32_t sceneLength;
+
+    //! Specifies the format of the glTF scene (see the SceneFormat enum)
+    uint32_t sceneFormat;
+} PACK_STRUCT;
+
+#include "./../include/assimp/Compiler/poppack1.h"
+
+
+
+//! Values for the GLB_Header::sceneFormat field
+enum SceneFormat
+{
+    SceneFormat_JSON = 0
 };
 
-} // Namespace assimp
 
-#endif // AI_GLTFIMPORTER_H_INC
+//! Values for the mesh primitive modes
+enum PrimitiveMode
+{
+    PrimitiveMode_POINTS         = 0,
+    PrimitiveMode_LINES          = 1,
+    PrimitiveMode_LINE_LOOP      = 2,
+    PrimitiveMode_LINE_STRIP     = 3,
+    PrimitiveMode_TRIANGLES      = 4,
+    PrimitiveMode_TRIANGLE_STRIP = 5,
+    PrimitiveMode_TRIANGLE_FAN   = 6
+};
+
+
+//! Values for the accessors component type field
+enum ComponentType
+{
+    ComponentType_BYTE           = 5120,
+    ComponentType_UNSIGNED_BYTE  = 5121,
+    ComponentType_SHORT          = 5122,
+    ComponentType_UNSIGNED_SHORT = 5123,
+    ComponentType_FLOAT          = 5126
+};
+
+
+//! Will hold the enabled extensions
+struct Extensions
+{
+    bool KHR_binary_glTF;
+};
+
+
+} // end namespaces
+}
+
+
+#endif // AI_GLTFFILEDATA_H_INC
 

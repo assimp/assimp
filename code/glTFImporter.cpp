@@ -37,6 +37,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+
 #include "glTFImporter.h"
 #include "StreamReader.h"
 #include "DefaultIOSystem.h"
@@ -1078,6 +1081,8 @@ aiNode* glTFReader::LoadNode(const char* id, Value& node)
 
 template<> const std::string LogFunctions<glTFImporter>::log_prefix = "glTF: ";
 
+
+
 static const aiImporterDesc desc = {
     "glTF Importer",
     "",
@@ -1203,3 +1208,6 @@ void glTFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IO
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
     }
 }
+
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+

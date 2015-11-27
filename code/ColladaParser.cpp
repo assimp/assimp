@@ -1509,7 +1509,7 @@ void ColladaParser::ReadEffectParam( Collada::EffectParam& pParam)
                 // don't care for remaining stuff
                 SkipElement( "surface");
             }
-            else if( IsElement( "sampler2D"))
+            else if( IsElement( "sampler2D") && (FV_1_4_n == mFormat || FV_1_3_n == mFormat))
             {
                 // surface ID is given inside <source> tags
                 TestOpening( "source");
@@ -1519,6 +1519,19 @@ void ColladaParser::ReadEffectParam( Collada::EffectParam& pParam)
                 TestClosing( "source");
 
                 // don't care for remaining stuff
+                SkipElement( "sampler2D");
+            }
+            else if( IsElement( "sampler2D"))
+            {
+                // surface ID is given inside <instance_image> tags
+                TestOpening( "instance_image");
+                int attrURL = GetAttribute("url");
+                const char* url = mReader->getAttributeValue( attrURL);
+                if( url[0] != '#')
+                    ThrowException( "Unsupported URL format in instance_image");
+                url++;
+                pParam.mType = Param_Sampler;
+                pParam.mReference = url;
                 SkipElement( "sampler2D");
             } else
             {

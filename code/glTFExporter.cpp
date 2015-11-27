@@ -233,12 +233,12 @@ public:
             children.SetArray();
             for (unsigned int i = 0; i < n->mNumChildren; ++i) {
                 std::string id = AddNode(nodes, n->mChildren[i]);
-                children.PushBack(Value(id, mAl), mAl);
+                children.PushBack(Value(id, mAl).Move(), mAl);
             }
             node.AddMember("children", children, mAl);
         }
 
-        nodes.AddMember(Value(nodeId, mAl), node, mAl);
+        nodes.AddMember(Value(nodeId, mAl).Move(), node, mAl);
 
         return nodeId;
     }
@@ -247,7 +247,7 @@ public:
     {
         const char* sceneName = "defaultScene";
 
-        mDoc.AddMember("scene", Value(sceneName, mAl), mAl);
+        mDoc.AddMember("scene", Value(sceneName, mAl).Move(), mAl);
 
         Value scenes;
         scenes.SetObject();
@@ -264,7 +264,7 @@ public:
 
                 scene.AddMember("nodes", nodes, mAl);
             }
-            scenes.AddMember(Value(sceneName, mAl), scene, mAl);
+            scenes.AddMember(Value(sceneName, mAl).Move(), scene, mAl);
         }
         mDoc.AddMember("scenes", scenes, mAl);
     }
@@ -275,29 +275,29 @@ public:
 
         IdMap::iterator it;
 
-        if (!id.empty()) {
+        do {
+            if (!id.empty()) {
+                it = mUsedIds.find(id);
+                if (it == mUsedIds.end()) break;
+
+                id += "-";
+            }
+
+            id += suffix;
+
             it = mUsedIds.find(id);
-            if (it == mUsedIds.end()) goto found;
+            if (it == mUsedIds.end()) break;
 
-            id += "-";
-        }
+            char buffer[256];
+            int offset = sprintf(buffer, "%s-", id.c_str());
+            for (int i = 0; it == mUsedIds.end(); ++i) {
+                ASSIMP_itoa10(buffer + offset, sizeof(buffer), i);
 
-        id += suffix;
+                id = buffer;
+                it = mUsedIds.find(id);
+            }
+        } while (false); // fake loop to allow using "break"
 
-        it = mUsedIds.find(id);
-        if (it == mUsedIds.end()) goto found;
-
-        char buffer[256];
-        int offset = sprintf(buffer, "%s-", id.c_str());
-        for (int i = 0; ; ++i) {
-            ASSIMP_itoa10(buffer + offset, sizeof(buffer), i);
-
-            id = buffer;
-            it = mUsedIds.find(id);
-            if (it == mUsedIds.end()) goto found;
-        }
-
-    found:
         mUsedIds[id] = true;
         return id;
     }

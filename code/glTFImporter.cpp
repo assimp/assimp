@@ -79,10 +79,8 @@ typedef rapidjson::Value::MemberIterator MemIt;
 // JSON Value reading helpers
 //
 
-inline static void Getf(const Value& v, float& out)
-{
-    if (v.IsNumber()) out = static_cast<float>(v.GetDouble());
-}
+
+#define GETF(VAL, OUT) { if ((VAL).IsNumber()) (OUT) = static_cast<float>((VAL).GetDouble()); }
 
 template<class T>
 struct ReadHelper { };
@@ -109,28 +107,28 @@ template<> struct ReadHelper<std::string> { static bool Read(Value& val, std::st
 
 template<> struct ReadHelper<aiColor3D> { static bool Read(Value& v, aiColor3D& out) {
     if (!v.IsArray() || v.Size() < 3) return false;
-    Getf(v[0], out.r); Getf(v[1], out.g); Getf(v[2], out.b);
+    GETF(v[0], out.r); GETF(v[1], out.g); GETF(v[2], out.b);
     return true;
 }};
 
 template<> struct ReadHelper<aiVector3D> { static bool Read(Value& v, aiVector3D& out) {
     if (!v.IsArray() || v.Size() != 3) return false;
-    Getf(v[0], out.x); Getf(v[1], out.y); Getf(v[2], out.z);
+    GETF(v[0], out.x); GETF(v[1], out.y); GETF(v[2], out.z);
     return true;
 }};
 
 template<> struct ReadHelper<aiQuaternion> { static bool Read(Value& v, aiQuaternion& out) {
     if (!v.IsArray() || v.Size() != 4) return false;
-    Getf(v[0], out.x); Getf(v[1], out.y); Getf(v[2], out.z); Getf(v[3], out.w);
+    GETF(v[0], out.x); GETF(v[1], out.y); GETF(v[2], out.z); GETF(v[3], out.w);
     return true;
 }};
 
 template<> struct ReadHelper<aiMatrix4x4> { static bool Read(Value& v, aiMatrix4x4& o) {
     if (!v.IsArray() || v.Size() != 16) return false;
-    Getf(v[ 0], o.a1); Getf(v[ 1], o.b1); Getf(v[ 2], o.c1); Getf(v[ 3], o.d1);
-    Getf(v[ 4], o.a2); Getf(v[ 5], o.b2); Getf(v[ 6], o.c2); Getf(v[ 7], o.d2);
-    Getf(v[ 8], o.a3); Getf(v[ 9], o.b3); Getf(v[10], o.c3); Getf(v[11], o.d3);
-    Getf(v[12], o.a4); Getf(v[13], o.b4); Getf(v[14], o.c4); Getf(v[15], o.d4);
+    GETF(v[ 0], o.a1); GETF(v[ 1], o.b1); GETF(v[ 2], o.c1); GETF(v[ 3], o.d1);
+    GETF(v[ 4], o.a2); GETF(v[ 5], o.b2); GETF(v[ 6], o.c2); GETF(v[ 7], o.d2);
+    GETF(v[ 8], o.a3); GETF(v[ 9], o.b3); GETF(v[10], o.c3); GETF(v[11], o.d3);
+    GETF(v[12], o.a4); GETF(v[13], o.b4); GETF(v[14], o.c4); GETF(v[15], o.d4);
     return true;
 }};
 
@@ -167,34 +165,32 @@ typedef std::pair<unsigned int, unsigned int> Range;
 // glTFReader class
 //
 
-class glTFReader;
-
 //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
-template<class T, T (glTFReader::*FACTORY_FN)(const char*, Value&)>
+template< class T, class INST, T(INST::*FACTORY_FN)(const char*, Value&)>
 class LazyDict
 {
     typedef typename std::gltf_unordered_map<std::string, T> Map;
 
     Value*      mDict;     //! JSON dictionary object
     const char* mDictId;   //! ID of the dictionary object
-    glTFReader& mInstance; //! The glTFReader instance
+    INST&       mInstance; //! The reader object instance
     Map         mReadObjs; //! The read objects
 
 public:
-    LazyDict(glTFReader& instance, const char* dictId)
+    LazyDict(INST& instance, const char* dictId)
         : mDictId(dictId), mInstance(instance)
     {
         Document& doc = mInstance.GetDocument();
 
         MemIt it = doc.FindMember(dictId);
-        mDict = (it != doc.MemberEnd() && it->value.IsObject()) ? &it->value : nullptr;
+        mDict = (it != doc.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
     }
 
     T Get(const char* id)
     {
         if (!mDict) return T(); // section was missing
 
-        Map::iterator it = mReadObjs.find(id);
+        typename Map::iterator it = mReadObjs.find(id);
         if (it != mReadObjs.end()) { // already created?
             return it->second;
         }
@@ -249,22 +245,22 @@ class glTFReader
 
     typedef glTFReader T; // (to shorten next declarations)
 
-    LazyDict<Ptr<Accessor>,   &T::LoadAccessor>   mAccessors;
-    //LazyDict<Animation*,    &T::LoadAnimation>  mAnimations;
-    //LazyDict<Asset*,        &T::LoadAsset>      mAssets;
-    LazyDict<Ptr<Buffer>,     &T::LoadBuffer>     mBuffers;
-    LazyDict<Ptr<BufferView>, &T::LoadBufferView> mBufferViews;
-    //LazyDict<Camera*,       &T::LoadCamera>     mCameras;
-    LazyDict<Ptr<Image>,      &T::LoadImage>      mImages;
-    LazyDict<unsigned int,    &T::LoadMaterial>   mMaterials;
-    LazyDict<Range,           &T::LoadMesh>       mMeshes;
-    LazyDict<aiNode*,         &T::LoadNode>       mNodes;
-    //LazyDict<Ptr<Program>,  &T::LoadProgram>    mPrograms;
-    //LazyDict<Ptr<Sampler>,  &T::LoadSampler>    mSamplers;
-    //LazyDict<Ptr<Shader>,   &T::LoadShader>     mShaders;
-    //LazyDict<Ptr<Skin>,     &T::LoadSkin>       mSkins;
-    //LazyDict<Ptr<Technique>,&T::LoadTechnique>  mTechniques;
-    LazyDict<Ptr<Texture>,    &T::LoadTexture>    mTextures;
+    LazyDict<Ptr<Accessor>,   T, &T::LoadAccessor>   mAccessors;
+    //LazyDict<Animation*,    T, &T::LoadAnimation>  mAnimations;
+    //LazyDict<Asset*,        T, &T::LoadAsset>      mAssets;
+    LazyDict<Ptr<Buffer>,     T, &T::LoadBuffer>     mBuffers;
+    LazyDict<Ptr<BufferView>, T, &T::LoadBufferView> mBufferViews;
+    //LazyDict<Camera*,       T, &T::LoadCamera>     mCameras;
+    LazyDict<Ptr<Image>,      T, &T::LoadImage>      mImages;
+    LazyDict<unsigned int,    T, &T::LoadMaterial>   mMaterials;
+    LazyDict<Range,           T, &T::LoadMesh>       mMeshes;
+    LazyDict<aiNode*,         T, &T::LoadNode>       mNodes;
+    //LazyDict<Ptr<Program>,  T, &T::LoadProgram>    mPrograms;
+    //LazyDict<Ptr<Sampler>,  T, &T::LoadSampler>    mSamplers;
+    //LazyDict<Ptr<Shader>,   T, &T::LoadShader>     mShaders;
+    //LazyDict<Ptr<Skin>,     T, &T::LoadSkin>       mSkins;
+    //LazyDict<Ptr<Technique>,T, &T::LoadTechnique>  mTechniques;
+    LazyDict<Ptr<Texture>,    T, &T::LoadTexture>    mTextures;
 
 
     void LoadScene(Value& scene)
@@ -477,7 +473,8 @@ Ptr<Buffer> glTFReader::LoadBuffer(const char* id, Value& obj)
             if (isBase64) {
                 uint8_t* data;
                 std::size_t dataLen = DecodeBase64(comma + 1, data);
-                b = new Buffer(shared_ptr<uint8_t>(data), dataLen);
+                shared_ptr<uint8_t> dataptr(data);
+                b = new Buffer(dataptr, dataLen);
             }
         }
         else if (uri) { // Local file
@@ -581,7 +578,8 @@ struct Accessor
         if (outComponents) *outComponents = numComponents;
     }
 
-    template<class T = unsigned int>
+    //! Gets the i-th value as defined by the accessor
+    template<class T>
     T GetValue(int i)
     {
         ai_assert(data);
@@ -590,7 +588,13 @@ struct Accessor
         memcpy(&value, data + i*byteStride, elemSize);
         //value >>= 8 * (sizeof(T) - elemSize);
         return value;
-    }         
+    }
+
+    //! Gets the i-th value as defined by the accessor
+    unsigned int GetUInt(int i)
+    {
+        return GetValue<unsigned int>(i);
+    }
 };
 
 Ptr<Accessor> glTFReader::LoadAccessor(const char* id, Value& obj)
@@ -742,7 +746,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                             nFaces = acc->count;
                             faces = new aiFace[nFaces];
                             for (unsigned int i = 0; i < acc->count; ++i) {
-                                setFace(faces[i], acc->GetValue(i));
+                                setFace(faces[i], acc->GetUInt(i));
                             }
                             break;
                         }
@@ -751,7 +755,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                             nFaces = acc->count / 2;
                             faces = new aiFace[nFaces];
                             for (unsigned int i = 0; i < acc->count; i += 2) {
-                                setFace(faces[i / 2], acc->GetValue(i), acc->GetValue(i + 1));
+                                setFace(faces[i / 2], acc->GetUInt(i), acc->GetUInt(i + 1));
                             }
                             break;
                         }
@@ -760,9 +764,9 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                         case PrimitiveMode_LINE_STRIP: {
                             nFaces = acc->count - ((primitiveMode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                             faces = new aiFace[nFaces];
-                            setFace(faces[0], acc->GetValue(0), acc->GetValue(1));
+                            setFace(faces[0], acc->GetUInt(0), acc->GetUInt(1));
                             for (unsigned int i = 2; i < acc->count; ++i) {
-                                setFace(faces[i - 1], faces[i - 2].mIndices[1], acc->GetValue(i));
+                                setFace(faces[i - 1], faces[i - 2].mIndices[1], acc->GetUInt(i));
                             }
                             if (primitiveMode == PrimitiveMode_LINE_LOOP) { // close the loop
                                 setFace(faces[acc->count - 1], faces[acc->count - 2].mIndices[1], faces[0].mIndices[0]);
@@ -774,25 +778,25 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                             nFaces = acc->count / 3;
                             faces = new aiFace[nFaces];
                             for (unsigned int i = 0; i < acc->count; i += 3) {
-                                setFace(faces[i / 3], acc->GetValue(i), acc->GetValue(i + 1), acc->GetValue(i + 2));
+                                setFace(faces[i / 3], acc->GetUInt(i), acc->GetUInt(i + 1), acc->GetUInt(i + 2));
                             }
                             break;
                         }
                         case PrimitiveMode_TRIANGLE_STRIP: {
                             nFaces = acc->count - 2;
                             faces = new aiFace[nFaces];
-                            setFace(faces[0], acc->GetValue(0), acc->GetValue(1), acc->GetValue(2));
+                            setFace(faces[0], acc->GetUInt(0), acc->GetUInt(1), acc->GetUInt(2));
                             for (unsigned int i = 3; i < acc->count; ++i) {
-                                setFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], acc->GetValue(i));
+                                setFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], acc->GetUInt(i));
                             }
                             break;
                         }
                         case PrimitiveMode_TRIANGLE_FAN:
                             nFaces = acc->count - 2;
                             faces = new aiFace[nFaces];
-                            setFace(faces[0], acc->GetValue(0), acc->GetValue(1), acc->GetValue(2));
+                            setFace(faces[0], acc->GetUInt(0), acc->GetUInt(1), acc->GetUInt(2));
                             for (unsigned int i = 3; i < acc->count; ++i) {
-                                setFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], acc->GetValue(i));
+                                setFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], acc->GetUInt(i));
                             }
                             break;
                     }

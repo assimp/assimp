@@ -37,37 +37,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef AI_GLTFIMPORTER_H_INC
-#define AI_GLTFIMPORTER_H_INC
 
-#include "BaseImporter.h"
-#include "LogAux.h"
-#include "DefaultIOSystem.h"
+/** @file GltfExporter.h
+* Declares the exporter class to write a scene to a gltf/glb file
+*/
+#ifndef AI_GLTFEXPORTER_H_INC
+#define AI_GLTFEXPORTER_H_INC
 
-namespace Assimp {
+#include <assimp/types.h>
+#include <sstream>
+#include <vector>
+#include <map>
 
-/**
- * Load the glTF format.
- * https://github.com/KhronosGroup/glTF/tree/master/specification
- */
-class glTFImporter : public BaseImporter, public LogFunctions<glTFImporter> {
-public:
-    glTFImporter();
-    virtual ~glTFImporter();
-    virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
+struct aiScene;
 
-protected:
-    virtual const aiImporterDesc* GetInfo() const;
-    virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
+namespace Assimp
+{
+    class IOSystem;
+    class IOStream;
+    class ExportProperties;
 
-private:
-    void ReadBinaryHeader(IOStream& stream);
 
-    std::size_t mSceneLength;
-    std::size_t mBodyOffset, mBodyLength;
-};
+    // ------------------------------------------------------------------------------------------------
+    /** Helper class to export a given scene to an glTF file. */
+    // ------------------------------------------------------------------------------------------------
+    class glTFExporter
+    {
+    public:
+        /// Constructor for a specific scene to export
+        glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
+            const ExportProperties* pProperties, bool binary);
 
-} // Namespace assimp
+    private:
 
-#endif // AI_GLTFIMPORTER_H_INC
+        const char* mFilename;
+        IOSystem* mIOSystem;
+        const aiScene* mScene;
+        const ExportProperties* mProperties;
+        bool mIsBinary;
 
+        std::vector<unsigned char> mBodyData;
+
+        void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
+
+    };
+
+}
+
+#endif

@@ -37,37 +37,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef AI_GLTFIMPORTER_H_INC
-#define AI_GLTFIMPORTER_H_INC
+#ifndef AI_GLTFUTIL_H_INC
+#define AI_GLTFUTIL_H_INC
 
-#include "BaseImporter.h"
-#include "LogAux.h"
-#include "DefaultIOSystem.h"
+//#include "StreamReader.h"
+//#include "MemoryIOWrapper.h"
+#include "StringComparison.h"
+
+#if _MSC_VER > 1500 || (defined __GNUC___)
+#   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
+#   else
+#   define gltf_unordered_map map
+#   define gltf_unordered_multimap multimap
+#endif
+
+#ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
+#   include <unordered_map>
+#   if _MSC_VER > 1600
+#       define gltf_unordered_map unordered_map
+#       define gltf_unordered_multimap unordered_multimap
+#   else
+#       define gltf_unordered_map tr1::unordered_map
+#       define gltf_unordered_multimap tr1::unordered_multimap
+#   endif
+#endif
 
 namespace Assimp {
+namespace glTF {
 
-/**
- * Load the glTF format.
- * https://github.com/KhronosGroup/glTF/tree/master/specification
- */
-class glTFImporter : public BaseImporter, public LogFunctions<glTFImporter> {
-public:
-    glTFImporter();
-    virtual ~glTFImporter();
-    virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
+    //
+    // Misc
+    //
 
-protected:
-    virtual const aiImporterDesc* GetInfo() const;
-    virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
+    std::size_t DecodeBase64(const char* in, uint8_t*& out);
+    std::size_t DecodeBase64(const char* in, std::size_t inLength, uint8_t*& out);
 
-private:
-    void ReadBinaryHeader(IOStream& stream);
+    void EncodeBase64(const uint8_t* in, std::size_t inLength, std::string& out);
 
-    std::size_t mSceneLength;
-    std::size_t mBodyOffset, mBodyLength;
-};
 
-} // Namespace assimp
+    bool IsDataURI(const char* uri);
 
-#endif // AI_GLTFIMPORTER_H_INC
+}
+}
+
+
+#endif // AI_GLTFUTIL_H_INC
 

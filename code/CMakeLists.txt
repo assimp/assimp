@@ -562,9 +562,15 @@ ADD_ASSIMP_IMPORTER(X
   XFileExporter.cpp
 )
 
-ADD_ASSIMP_IMPORTER( glFT
-    glTFImporter.cpp
-    glTFImporter.h
+ADD_ASSIMP_IMPORTER(GLTF
+  glTFImporter.cpp
+  glTFImporter.h
+  glTFUtil.cpp
+  glTFUtil.h
+  glTFFileData.h
+
+  glTFExporter.h
+  glTFExporter.cpp
 )
 
 SET( Step_SRCS
@@ -653,6 +659,8 @@ SET( picojson_SRCS
     ../contrib/picojson/picojson.h
 )
 SOURCE_GROUP( picojson FILES ${picojson_SRCS} )
+
+INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
 
 # VC2010 fixes
 if(MSVC10)

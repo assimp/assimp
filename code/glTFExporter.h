@@ -37,49 +37,51 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef AI_GLTFUTIL_H_INC
-#define AI_GLTFUTIL_H_INC
 
-//#include "StreamReader.h"
-//#include "MemoryIOWrapper.h"
-#include "StringComparison.h"
+/** @file GltfExporter.h
+* Declares the exporter class to write a scene to a gltf/glb file
+*/
+#ifndef AI_GLTFEXPORTER_H_INC
+#define AI_GLTFEXPORTER_H_INC
 
-#if _MSC_VER > 1500 || (defined __GNUC___)
-#   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   else
-#   define gltf_unordered_map map
-#   define gltf_unordered_multimap multimap
-#endif
+#include <assimp/types.h>
+#include <sstream>
+#include <vector>
+#include <map>
 
-#ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   include <unordered_map>
-#   if _MSC_VER > 1600
-#       define gltf_unordered_map unordered_map
-#       define gltf_unordered_multimap unordered_multimap
-#   else
-#       define gltf_unordered_map tr1::unordered_map
-#       define gltf_unordered_multimap tr1::unordered_multimap
-#   endif
-#endif
+struct aiScene;
 
-namespace Assimp {
-namespace glTF {
-
-    //
-    // Misc
-    //
-
-    std::size_t DecodeBase64(const char* in, uint8_t*& out);
-    std::size_t DecodeBase64(const char* in, std::size_t inLength, uint8_t*& out);
-
-    void EncodeBase64(const uint8_t* in, std::size_t inLength, std::string& out);
+namespace Assimp
+{
+    class IOSystem;
+    class IOStream;
+    class ExportProperties;
 
 
-    bool IsDataURI(const char* uri);
+    // ------------------------------------------------------------------------------------------------
+    /** Helper class to export a given scene to an glTF file. */
+    // ------------------------------------------------------------------------------------------------
+    class glTFExporter
+    {
+    public:
+        /// Constructor for a specific scene to export
+        glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
+            const ExportProperties* pProperties, bool binary);
+
+    private:
+
+        const char* mFilename;
+        IOSystem* mIOSystem;
+        const aiScene* mScene;
+        const ExportProperties* mProperties;
+        bool mIsBinary;
+
+        std::vector<unsigned char> mBodyData;
+
+        void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
+
+    };
 
 }
-}
 
-
-#endif // AI_GLTFUTIL_H_INC
-
+#endif

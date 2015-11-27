@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glTFFileData.h"
 #include "glTFUtil.h"
 
+#define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
@@ -290,6 +291,10 @@ class glTFReader
                 mScene->mRootNode = root;
             }
         }
+
+        //if (!mScene->mRootNode) {
+            //mScene->mRootNode = new aiNode("EMPTY");
+        //}
     }
 
     void SetMaterialColorProperty(aiMaterial* mat, Value& vals, const char* propName, aiTextureType texType,
@@ -550,12 +555,14 @@ struct Accessor
     template<class T>
     void ExtractData(T*& outData, unsigned int* outCount = 0, unsigned int* outComponents = 0)
     {
-        if (!data) return;
+        ai_assert(data);
 
         const std::size_t totalSize = elemSize * count;
 
         const std::size_t targetElemSize = sizeof(T);
         ai_assert(elemSize <= targetElemSize);
+
+        ai_assert(count*byteStride <= bufferView->byteLength);
 
         outData = new T[count];
         if (byteStride == elemSize && targetElemSize == elemSize) {
@@ -574,6 +581,8 @@ struct Accessor
     template<class T = unsigned int>
     T GetValue(int i)
     {
+        ai_assert(data);
+        ai_assert(i*byteStride < bufferView->byteLength);
         T value = T();
         memcpy(&value, data + i*byteStride, elemSize);
         //value >>= 8 * (sizeof(T) - elemSize);
@@ -708,9 +717,11 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                     else if (strcmp(attr, "NORMAL") == 0) {
                         accessor->ExtractData(aimesh->mNormals);
                     }
-                    else if (strncmp(attr, "TEXCOORD_", 9) == 0) {
+                   else if (strncmp(attr, "TEXCOORD_", 9) == 0) {
                         int idx = attr[9] - '0';
-                        accessor->ExtractData(aimesh->mTextureCoords[idx], 0, &aimesh->mNumUVComponents[idx]);
+                        if (idx >= 0 && idx <= AI_MAX_NUMBER_OF_TEXTURECOORDS) {
+                            accessor->ExtractData(aimesh->mTextureCoords[idx], 0, &aimesh->mNumUVComponents[idx]);
+                        }
                     }
                 }
             }
@@ -727,7 +738,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                         case PrimitiveMode_POINTS: {
                             nFaces = acc->count;
                             faces = new aiFace[nFaces];
-                            for (unsigned i = 0; i < acc->count; ++i) {
+                            for (unsigned int i = 0; i < acc->count; ++i) {
                                 setFace(faces[i], acc->GetValue(i));
                             }
                             break;
@@ -736,7 +747,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                         case PrimitiveMode_LINES: {
                             nFaces = acc->count / 2;
                             faces = new aiFace[nFaces];
-                            for (unsigned i = 0; i < acc->count; i += 2) {
+                            for (unsigned int i = 0; i < acc->count; i += 2) {
                                 setFace(faces[i / 2], acc->GetValue(i), acc->GetValue(i + 1));
                             }
                             break;
@@ -747,7 +758,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                             nFaces = acc->count - ((primitiveMode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                             faces = new aiFace[nFaces];
                             setFace(faces[0], acc->GetValue(0), acc->GetValue(1));
-                            for (unsigned i = 2; i < acc->count; ++i) {
+                            for (unsigned int i = 2; i < acc->count; ++i) {
                                 setFace(faces[i - 1], faces[i - 2].mIndices[1], acc->GetValue(i));
                             }
                             if (primitiveMode == PrimitiveMode_LINE_LOOP) { // close the loop
@@ -759,7 +770,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                         case PrimitiveMode_TRIANGLES: {
                             nFaces = acc->count / 3;
                             faces = new aiFace[nFaces];
-                            for (unsigned i = 0; i < acc->count; i += 3) {
+                            for (unsigned int i = 0; i < acc->count; i += 3) {
                                 setFace(faces[i / 3], acc->GetValue(i), acc->GetValue(i + 1), acc->GetValue(i + 2));
                             }
                             break;
@@ -768,7 +779,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                             nFaces = acc->count - 2;
                             faces = new aiFace[nFaces];
                             setFace(faces[0], acc->GetValue(0), acc->GetValue(1), acc->GetValue(2));
-                            for (unsigned i = 3; i < acc->count; ++i) {
+                            for (unsigned int i = 3; i < acc->count; ++i) {
                                 setFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], acc->GetValue(i));
                             }
                             break;
@@ -777,7 +788,7 @@ Range glTFReader::LoadMesh(const char* id, Value& mesh)
                             nFaces = acc->count - 2;
                             faces = new aiFace[nFaces];
                             setFace(faces[0], acc->GetValue(0), acc->GetValue(1), acc->GetValue(2));
-                            for (unsigned i = 3; i < acc->count; ++i) {
+                            for (unsigned int i = 3; i < acc->count; ++i) {
                                 setFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], acc->GetValue(i));
                             }
                             break;
@@ -986,8 +997,10 @@ aiNode* glTFReader::LoadNode(const char* id, Value& node)
             if (child.IsString()) {
                 // get/create the child node
                 aiNode* aichild = mNodes.Get(child.GetString());
-                aichild->mParent = ainode;
-                ainode->mChildren[ainode->mNumChildren++] = aichild;
+                if (aichild) {
+                    aichild->mParent = ainode;
+                    ainode->mChildren[ainode->mNumChildren++] = aichild;
+                }
             }
         }
     }
@@ -1185,4 +1198,8 @@ void glTFImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IO
     // import the data
     glTFReader reader(pScene, doc, *pIOHandler, bodyBuffer);
     reader.Load();
+
+    if (pScene->mNumMeshes == 0) {
+        pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;
+    }
 }

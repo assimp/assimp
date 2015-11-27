@@ -568,6 +568,9 @@ ADD_ASSIMP_IMPORTER(GLTF
   glTFUtil.cpp
   glTFUtil.h
   glTFFileData.h
+
+  glTFExporter.h
+  glTFExporter.cpp
 )
 
 SET( Step_SRCS

@@ -44,24 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LogAux.h"
 #include "DefaultIOSystem.h"
 
-#if _MSC_VER > 1500 || (defined __GNUC___)
-#   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   else
-#   define gltf_unordered_map map
-#   define gltf_unordered_multimap multimap
-#endif
-
-#ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   include <unordered_map>
-#   if _MSC_VER > 1600
-#       define gltf_unordered_map unordered_map
-#       define gltf_unordered_multimap unordered_multimap
-#   else
-#       define gltf_unordered_map tr1::unordered_map
-#       define gltf_unordered_multimap tr1::unordered_multimap
-#   endif
-#endif
-
 namespace Assimp {
 
 /**

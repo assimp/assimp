@@ -115,7 +115,9 @@ namespace Assimp    {
 */
 class ASSIMP_API Importer   {
 public:
-    ///	@brief The upper limit for hints.
+    /**
+     *  @brief The upper limit for hints.
+     */
     static const unsigned int MaxLenHint = 200; 
 
 public:

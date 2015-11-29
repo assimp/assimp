@@ -754,6 +754,13 @@ namespace glTF
         virtual void WriteObjects(AssetWriter& writer) = 0;
     };
 
+    //! (Stub class that is specialized in glTFAssetWriter.h)
+    template<class T>
+    struct LazyDictWriter
+    {
+        static void Write(T& d, AssetWriter& w) {}
+    };
+
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them
     template<class T>
@@ -774,10 +781,8 @@ namespace glTF
         void AttachToDocument(Document& doc);
         void DetachFromDocument();
 
-        void WriteObjectsImpl(AssetWriter& writer);
-
         void WriteObjects(AssetWriter& writer)
-            { WriteObjectsImpl(writer); }
+            { LazyDictWriter< LazyDict >::Write(*this, writer); }
 
         Ref<T> Add(T* obj);
 

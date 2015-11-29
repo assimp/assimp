@@ -441,48 +441,56 @@ namespace glTF {
             mDoc.AddMember("extensionsUsed", exts, mAl);
     }
 
-    
     template<class T>
-    void LazyDict<T>::WriteObjectsImpl(AssetWriter& w)
+    void AssetWriter::WriteObjects(LazyDict<T>& d)
     {
-        if (mObjs.empty()) return;
+        if (d.mObjs.empty()) return;
 
-        Value* container = &w.mDoc;
+        Value* container = &mDoc;
 
-        if (mExtId) {
-            Value* exts = FindObject(w.mDoc, "extensions");
+        if (d.mExtId) {
+            Value* exts = FindObject(mDoc, "extensions");
             if (!exts) {
-                w.mDoc.AddMember("extensions", Value().SetObject().Move(), w.mDoc.GetAllocator());
-                exts = FindObject(w.mDoc, "extensions");
+                mDoc.AddMember("extensions", Value().SetObject().Move(), mDoc.GetAllocator());
+                exts = FindObject(mDoc, "extensions");
             }
 
-            if (!(container = FindObject(*exts, mExtId))) {
-                exts->AddMember(StringRef(mExtId), Value().SetObject().Move(), w.mDoc.GetAllocator());
-                container = FindObject(*exts, mExtId);
+            if (!(container = FindObject(*exts, d.mExtId))) {
+                exts->AddMember(StringRef(d.mExtId), Value().SetObject().Move(), mDoc.GetAllocator());
+                container = FindObject(*exts, d.mExtId);
             }
         }
 
         Value* dict;
-        if (!(dict = FindObject(*container, mDictId))) {
-            container->AddMember(StringRef(mDictId), Value().SetObject().Move(), w.mDoc.GetAllocator());
-            dict = FindObject(*container, mDictId);
+        if (!(dict = FindObject(*container, d.mDictId))) {
+            container->AddMember(StringRef(d.mDictId), Value().SetObject().Move(), mDoc.GetAllocator());
+            dict = FindObject(*container, d.mDictId);
         }
 
-        for (size_t i = 0; i < mObjs.size(); ++i) {
-            if (mObjs[i]->IsSpecial()) continue;
+        for (size_t i = 0; i < d.mObjs.size(); ++i) {
+            if (d.mObjs[i]->IsSpecial()) continue;
 
             Value obj;
             obj.SetObject();
 
-            if (!mObjs[i]->name.empty()) {
-                obj.AddMember("name", StringRef(mObjs[i]->name.c_str()), w.mAl);
+            if (!d.mObjs[i]->name.empty()) {
+                obj.AddMember("name", StringRef(d.mObjs[i]->name.c_str()), mAl);
             }
 
-            Write(obj, *mObjs[i], w);
+            Write(obj, *d.mObjs[i], *this);
 
-            dict->AddMember(StringRef(mObjs[i]->id), obj, w.mAl);
+            dict->AddMember(StringRef(d.mObjs[i]->id), obj, mAl);
         }
     }
+
+    template<class T>
+    struct LazyDictWriter< LazyDict<T> >
+    {
+        static void Write(LazyDict<T>& d, AssetWriter& w)
+        {
+            w.WriteObjects(d);
+        }
+    };
 
 }
 

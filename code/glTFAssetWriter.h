@@ -57,12 +57,18 @@ using rapidjson::MemoryPoolAllocator;
 
 class AssetWriter
 {
+    template<class T>
+    friend struct LazyDictWriter;
+
 private:
 
     void WriteBinaryData(IOStream* outfile, size_t sceneLength);
 
     void WriteMetadata();
     void WriteExtensionsUsed();
+
+    template<class T>
+    void WriteObjects(LazyDict<T>& d);
 
 public:
     Document mDoc;

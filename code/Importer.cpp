@@ -491,7 +491,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
         pHint = "";
     }
 
-    if (!pBuffer || !pLength || strlen(pHint) > 100) {
+    if (!pBuffer || !pLength || strlen(pHint) > MaxLenHint ) {
         pimpl->mErrorString = "Invalid parameters passed to ReadFileFromMemory()";
         return NULL;
     }

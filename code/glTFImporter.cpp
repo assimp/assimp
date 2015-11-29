@@ -120,10 +120,10 @@ bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
 
 
 
-static void CopyValue(const glTF::vec3& v, aiColor3D& out)
-{
-    out.r = v[0]; out.g = v[1]; out.b = v[2];
-}
+//static void CopyValue(const glTF::vec3& v, aiColor3D& out)
+//{
+//    out.r = v[0]; out.g = v[1]; out.b = v[2];
+//}
 
 static void CopyValue(const glTF::vec4& v, aiColor4D& out)
 {
@@ -421,14 +421,14 @@ void glTFImporter::ImportLights(glTF::Asset& r)
             case Light::Type_directional:
                 ail->mType = aiLightSource_DIRECTIONAL; break;
 
-            case Light::Type_point:
-                ail->mType = aiLightSource_POINT; break;
-
             case Light::Type_spot:
                 ail->mType = aiLightSource_SPOT; break;
 
             case Light::Type_ambient:
                 ail->mType = aiLightSource_AMBIENT; break;
+
+            default: // Light::Type_point
+                ail->mType = aiLightSource_POINT; break;
         }
 
         CopyValue(l.color, ail->mColorAmbient);

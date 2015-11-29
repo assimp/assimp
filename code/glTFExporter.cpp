@@ -338,7 +338,7 @@ void glTFExporter::ExportScene()
 
     // root node will be the first one exported (idx 0)
     if (mAsset->nodes.Size() > 0) {
-        scene->nodes.push_back(mAsset->nodes.Get(0u));
+        scene->nodes.push_back(mAsset->nodes.Get(size_t(0)));
     }
 
     // set as the default scene

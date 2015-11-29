@@ -190,7 +190,7 @@ namespace glTF {
             else {
                 for (size_t i = 0; i < lst.size(); ++i) {
                     char buffer[32];
-                    sprintf(buffer, "%s_%d", semantic, i);
+                    sprintf(buffer, "%s_%d", semantic, int(i));
                     attrs.AddMember(Value(buffer, w.mAl).Move(), Value(lst[i]->id, w.mAl).Move(), w.mAl);
                 }
             }
@@ -304,52 +304,10 @@ namespace glTF {
 
     }
 
-    template<class T>
-    void LazyDict<T>::WriteObjects(AssetWriter& w)
-    {
-        if (mObjs.empty()) return;
-
-        Value* container = &w.mDoc;
-
-        if (mExtId) {
-            Value* exts = FindObject(w.mDoc, "extensions");
-            if (!exts) {
-                w.mDoc.AddMember("extensions", Value().SetObject().Move(), w.mDoc.GetAllocator());
-                exts = FindObject(w.mDoc, "extensions");
-            }
-
-            if (!(container = FindObject(*exts, mExtId))) {
-                exts->AddMember(StringRef(mExtId), Value().SetObject().Move(), w.mDoc.GetAllocator());
-                container = FindObject(*exts, mExtId);
-            }
-        }
-
-        Value* dict;
-        if (!(dict = FindObject(*container, mDictId))) {
-            container->AddMember(StringRef(mDictId), Value().SetObject().Move(), w.mDoc.GetAllocator());
-            dict = FindObject(*container, mDictId);
-        }
-
-        for (size_t i = 0; i < mObjs.size(); ++i) {
-            if (mObjs[i]->IsSpecial()) continue;
-
-            Value obj;
-            obj.SetObject();
-
-            if (!mObjs[i]->name.empty()) {
-                obj.AddMember("name", StringRef(mObjs[i]->name.c_str()), w.mAl);
-            }
-
-            Write(obj, *mObjs[i], w);
-
-            dict->AddMember(StringRef(mObjs[i]->id), obj, w.mAl);
-        }
-    }
-
 
     AssetWriter::AssetWriter(Asset& a)
-        : mAsset(a)
-        , mDoc()
+        : mDoc()
+        , mAsset(a)
         , mAl(mDoc.GetAllocator())
     {
         mDoc.SetObject();
@@ -367,7 +325,6 @@ namespace glTF {
             mDoc.AddMember("scene", StringRef(mAsset.scene->id), mAl);
         }
     }
-
 
     void AssetWriter::WriteFile(const char* path)
     {
@@ -484,6 +441,48 @@ namespace glTF {
             mDoc.AddMember("extensionsUsed", exts, mAl);
     }
 
+    
+    template<class T>
+    void LazyDict<T>::WriteObjectsImpl(AssetWriter& w)
+    {
+        if (mObjs.empty()) return;
+
+        Value* container = &w.mDoc;
+
+        if (mExtId) {
+            Value* exts = FindObject(w.mDoc, "extensions");
+            if (!exts) {
+                w.mDoc.AddMember("extensions", Value().SetObject().Move(), w.mDoc.GetAllocator());
+                exts = FindObject(w.mDoc, "extensions");
+            }
+
+            if (!(container = FindObject(*exts, mExtId))) {
+                exts->AddMember(StringRef(mExtId), Value().SetObject().Move(), w.mDoc.GetAllocator());
+                container = FindObject(*exts, mExtId);
+            }
+        }
+
+        Value* dict;
+        if (!(dict = FindObject(*container, mDictId))) {
+            container->AddMember(StringRef(mDictId), Value().SetObject().Move(), w.mDoc.GetAllocator());
+            dict = FindObject(*container, mDictId);
+        }
+
+        for (size_t i = 0; i < mObjs.size(); ++i) {
+            if (mObjs[i]->IsSpecial()) continue;
+
+            Value obj;
+            obj.SetObject();
+
+            if (!mObjs[i]->name.empty()) {
+                obj.AddMember("name", StringRef(mObjs[i]->name.c_str()), w.mAl);
+            }
+
+            Write(obj, *mObjs[i], w);
+
+            dict->AddMember(StringRef(mObjs[i]->id), obj, w.mAl);
+        }
+    }
 
 }
 

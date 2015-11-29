@@ -61,7 +61,7 @@ namespace {
     
     template<size_t N> struct ReadHelper<float[N]> { static bool Read(Value& val, float (&out)[N]) {
         if (!val.IsArray() || val.Size() != N) return false;
-        for (int i = 0; i < N; ++i) {
+        for (size_t i = 0; i < N; ++i) {
             if (val[i].IsNumber())
                 out[i] = static_cast<float>(val[i].GetDouble());
         }
@@ -446,7 +446,9 @@ T Accessor::Indexer::GetValue(int i)
 }
 
 inline Image::Image()
-    : mData(0)
+    : width(0)
+    , height(0)
+    , mData(0)
     , mDataLength(0)
 {
 
@@ -459,8 +461,8 @@ inline void Image::Read(Value& obj, Asset& r)
         if (r.extensionsUsed.KHR_binary_glTF) {
             if (Value* ext = FindObject(*extensions, "KHR_binary_glTF")) {
 
-                int width  = MemberOrDefault(*ext, "width", 0);
-                int height = MemberOrDefault(*ext, "height", 0);
+                width  = MemberOrDefault(*ext, "width", 0);
+                height = MemberOrDefault(*ext, "height", 0);
 
                 ReadMember(*ext, "mimeType", mimeType);
 
@@ -607,25 +609,25 @@ namespace {
 
     inline bool GetAttribVector(Mesh::Primitive& p, const char* attr, Mesh::AccessorList*& v, int& pos)
     {
-        if (pos = Compare(attr, "POSITION")) {
+        if ((pos = Compare(attr, "POSITION"))) {
             v = &(p.attributes.position);
         }
-        else if (pos = Compare(attr, "NORMAL")) {
+        else if ((pos = Compare(attr, "NORMAL"))) {
             v = &(p.attributes.normal);
         }
-        else if (pos = Compare(attr, "TEXCOORD")) {
+        else if ((pos = Compare(attr, "TEXCOORD"))) {
             v = &(p.attributes.texcoord);
         }
-        else if (pos = Compare(attr, "COLOR")) {
+        else if ((pos = Compare(attr, "COLOR"))) {
             v = &(p.attributes.color);
         }
-        else if (pos = Compare(attr, "JOINT")) {
+        else if ((pos = Compare(attr, "JOINT"))) {
             v = &(p.attributes.joint);
         }
-        else if (pos = Compare(attr, "JOINTMATRIX")) {
+        else if ((pos = Compare(attr, "JOINTMATRIX"))) {
             v = &(p.attributes.jointmatrix);
         }
-        else if (pos = Compare(attr, "WEIGHT")) {
+        else if ((pos = Compare(attr, "WEIGHT"))) {
             v = &(p.attributes.weight);
         }
         else return false;
@@ -647,7 +649,8 @@ inline void Mesh::Read(Value& obj, Asset& r)
                 for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
                     if (!it->value.IsString()) continue;
                     const char* attr = it->name.GetString();
-                    // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX, and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
+                    // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
+                    // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
                     int undPos = 0;
                     Mesh::AccessorList* vec = 0;
@@ -920,7 +923,7 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
 
     if (doc.HasParseError()) {
         char buffer[32];
-        sprintf(buffer, "%u", doc.GetErrorOffset());
+        sprintf(buffer, "%d", static_cast<int>(doc.GetErrorOffset()));
         throw DeadlyImportError(std::string("JSON parse error, offset ") + buffer + ": "
             + GetParseError_En(doc.GetParseError()));
     }
@@ -1107,12 +1110,12 @@ namespace Util
 
     inline char EncodeCharBase64(uint8_t b)
     {
-        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="[b];
+        return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="[size_t(b)];
     }
 
     inline uint8_t DecodeCharBase64(char c)
     {
-        return DATA<true>::tableDecodeBase64[c]; // TODO faster with lookup table or ifs?
+        return DATA<true>::tableDecodeBase64[size_t(c)]; // TODO faster with lookup table or ifs?
         /*if (c >= 'A' && c <= 'Z') return c - 'A';
         if (c >= 'a' && c <= 'z') return c - 'a' + 26;
         if (c >= '0' && c <= '9') return c - '0' + 52;

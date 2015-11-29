@@ -353,6 +353,8 @@ namespace glTF
         //! Objects marked as special are not exported (used to emulate the binary body buffer)
         virtual bool IsSpecial() const
             { return false; }
+
+        virtual ~Object() {}
     };
 
 
@@ -391,8 +393,8 @@ namespace glTF
         {
             friend struct Accessor;
 
-            uint8_t* data;
             Accessor& accessor;
+            uint8_t* data;
             size_t elemSize, stride;
 
             Indexer(Accessor& acc);
@@ -534,6 +536,8 @@ namespace glTF
         Ref<BufferView> bufferView;
 
         std::string mimeType;
+
+        int width, height;
 
     private:
         uint8_t* mData;
@@ -770,7 +774,10 @@ namespace glTF
         void AttachToDocument(Document& doc);
         void DetachFromDocument();
 
-        void WriteObjects(AssetWriter& writer);
+        void WriteObjectsImpl(AssetWriter& writer);
+
+        void WriteObjects(AssetWriter& writer)
+            { WriteObjectsImpl(writer); }
 
         Ref<T> Add(T* obj);
 

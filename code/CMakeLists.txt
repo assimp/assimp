@@ -563,12 +563,14 @@ ADD_ASSIMP_IMPORTER(X
 )
 
 ADD_ASSIMP_IMPORTER(GLTF
+  glTFAsset.h
+  glTFAsset.inl
+  glTFAssetWriter.h
+  glTFAssetWriter.inl
+
   glTFImporter.cpp
   glTFImporter.h
-  glTFUtil.cpp
-  glTFUtil.h
-  glTFFileData.h
-
+  
   glTFExporter.h
   glTFExporter.cpp
 )

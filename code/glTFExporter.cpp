@@ -56,20 +56,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/foreach.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
-#define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/stringbuffer.h>
-
-#include "glTFFileData.h"
-#include "glTFUtil.h"
+#include "glTFAssetWriter.h"
 
 using namespace rapidjson;
 
 using namespace Assimp;
-using namespace Assimp::glTF;
+using namespace glTF;
 
 namespace Assimp {
 
@@ -93,306 +87,278 @@ namespace Assimp {
 
 
 
-class glTFSceneExporter
-{
-    typedef std::gltf_unordered_map<std::string, int> IdMap;
-
-    Document& mDoc;
-    MemoryPoolAllocator<>& mAl;
-
-    const aiScene* mScene;
-
-    std::string mRootNodeId;
-
-    std::vector<std::string> mMeshIds;
-
-    IdMap mUsedIds;
-
-public:
-    glTFSceneExporter(Document& doc, const aiScene* pScene)
-        : mDoc(doc)
-        , mAl(doc.GetAllocator())
-        , mScene(pScene)
-    {
-        doc.SetObject();
-
-        for (unsigned int i = 0; i < pScene->mNumAnimations; ++i) {
-
-        }
-
-        for (unsigned int i = 0; i < pScene->mNumCameras; ++i) {
-
-        }
-
-        for (unsigned int i = 0; i < pScene->mNumLights; ++i) {
-
-        }
-
-        for (unsigned int i = 0; i < pScene->mNumLights; ++i) {
-
-        }
-
-        for (unsigned int i = 0; i < pScene->mNumMaterials; ++i) {
-
-        }
-
-
-        AddMeshes();
-
-        for (unsigned int i = 0; i < pScene->mNumTextures; ++i) {
-
-        }
-
-        AddNodes();
-
-        CreateScene();
-    }
-
-    inline void Pushf(Value& val, float f)
-    {
-        val.PushBack(Value(f).Move(), mAl);
-    }
-
-    inline void SetMatrix(Value& v, const aiMatrix4x4& m)
-    {
-        v.SetArray();
-        v.Reserve(16, mAl);
-
-        Pushf(v, m.a1); Pushf(v, m.b1); Pushf(v, m.c1); Pushf(v, m.d1);
-        Pushf(v, m.a2); Pushf(v, m.b2); Pushf(v, m.c2); Pushf(v, m.d2);
-        Pushf(v, m.a3); Pushf(v, m.b3); Pushf(v, m.c3); Pushf(v, m.d3);
-        Pushf(v, m.a4); Pushf(v, m.b4); Pushf(v, m.c4); Pushf(v, m.d4);
-    }
-
-    void AddMeshes()
-    {
-        if (mScene->mNumMeshes == 0) return;
-
-        Value meshes;
-        meshes.SetObject();
-
-        mMeshIds.reserve(mScene->mNumMeshes);
-        for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
-            aiMesh* m = mScene->mMeshes[i];
-            std::string meshId = FindID(m->mName, "mesh");
-            mMeshIds.push_back(meshId);
-
-            Value mesh;
-            mesh.SetObject();
-            {
-                Value primitives;
-                primitives.SetObject();
-
-                
-                mesh.AddMember("primitives", primitives, mAl);
-            }
-
-            meshes.AddMember(StringRef(mMeshIds.back()), mesh, mAl);
-        }
-
-        mDoc.AddMember("meshes", meshes, mAl);
-    }
-
-    void AddNodes()
-    {
-        if (!mScene->mRootNode) return;
-
-        Value nodes;
-        nodes.SetObject();
-
-        mRootNodeId = AddNode(nodes, mScene->mRootNode);
-
-        mDoc.AddMember("nodes", nodes, mAl);
-    }
-
-
-    std::string AddNode(Value& nodes, const aiNode* n)
-    {
-        std::string nodeId = FindID(n->mName, "node");
-
-        Value node;
-        node.SetObject();
-
-        if (!n->mTransformation.IsIdentity()) {
-            Value matrix;
-            SetMatrix(matrix, n->mTransformation);
-            node.AddMember("matrix", matrix, mAl);
-        }
-
-        if (n->mNumMeshes > 0) {
-            Value meshes;
-            meshes.SetArray();
-            for (unsigned int i = 0; i < n->mNumMeshes; ++i) {
-                meshes.PushBack(StringRef(mMeshIds[n->mMeshes[i]]), mAl);
-            }
-            node.AddMember("meshes", meshes, mAl);
-        }
-
-        if (n->mNumChildren > 0) {
-            Value children;
-            children.SetArray();
-            for (unsigned int i = 0; i < n->mNumChildren; ++i) {
-                std::string id = AddNode(nodes, n->mChildren[i]);
-                children.PushBack(Value(id, mAl).Move(), mAl);
-            }
-            node.AddMember("children", children, mAl);
-        }
-
-        nodes.AddMember(Value(nodeId, mAl).Move(), node, mAl);
-
-        return nodeId;
-    }
-
-    void CreateScene()
-    {
-        const char* sceneName = "defaultScene";
-
-        mDoc.AddMember("scene", Value(sceneName, mAl).Move(), mAl);
-
-        Value scenes;
-        scenes.SetObject();
-        {
-            Value scene;
-            scene.SetObject();
-            {
-                Value nodes;
-                nodes.SetArray();
-
-                if (!mRootNodeId.empty()) {
-                    nodes.PushBack(StringRef(mRootNodeId), mAl);
-                }
-
-                scene.AddMember("nodes", nodes, mAl);
-            }
-            scenes.AddMember(Value(sceneName, mAl).Move(), scene, mAl);
-        }
-        mDoc.AddMember("scenes", scenes, mAl);
-    }
-
-    std::string FindID(const aiString& str, const char* suffix)
-    {
-        std::string id = str.C_Str();
-
-        IdMap::iterator it;
-
-        do {
-            if (!id.empty()) {
-                it = mUsedIds.find(id);
-                if (it == mUsedIds.end()) break;
-
-                id += "-";
-            }
-
-            id += suffix;
-
-            it = mUsedIds.find(id);
-            if (it == mUsedIds.end()) break;
-
-            char buffer[256];
-            int offset = sprintf(buffer, "%s-", id.c_str());
-            for (int i = 0; it == mUsedIds.end(); ++i) {
-                ASSIMP_itoa10(buffer + offset, sizeof(buffer), i);
-
-                id = buffer;
-                it = mUsedIds.find(id);
-            }
-        } while (false); // fake loop to allow using "break"
-
-        mUsedIds[id] = true;
-        return id;
-    }
-};
-
-
-
 glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
                            const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
     , mScene(pScene)
     , mProperties(pProperties)
-    , mIsBinary(isBinary)
 {
-    boost::scoped_ptr<IOStream> outfile(pIOSystem->Open(mFilename, "wt"));
-    if (outfile == 0) {
-        throw DeadlyExportError("Could not open output file: " + std::string(mFilename));
-    }
+    boost::scoped_ptr<Asset> asset(new glTF::Asset(pIOSystem));
+    mAsset = asset.get();
 
     if (isBinary) {
-        // we will write the header later, skip its size
-        outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
+        asset->SetAsBinary();
     }
 
+    ExportMetadata();
 
-    Document doc;
-    StringBuffer docBuffer;
-    {
-        glTFSceneExporter exportScene(doc, mScene);
+    //for (unsigned int i = 0; i < pScene->mNumAnimations; ++i) {}
 
-        bool pretty = true; 
-        if (!isBinary && pretty) {
-            PrettyWriter<StringBuffer> writer(docBuffer);
-            doc.Accept(writer);
-        }
-        else {
-            Writer<StringBuffer> writer(docBuffer);
-            doc.Accept(writer);
-        }
+    //for (unsigned int i = 0; i < pScene->mNumCameras; ++i) {}
+
+    //for (unsigned int i = 0; i < pScene->mNumLights; ++i) {}
+
+
+    ExportMaterials();
+
+    ExportMeshes();
+
+    //for (unsigned int i = 0; i < pScene->mNumTextures; ++i) {}
+
+
+    if (mScene->mRootNode) {
+        ExportNode(mScene->mRootNode);
     }
 
-    if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
-        throw DeadlyExportError("Failed to write scene data!"); 
-    }
+    ExportScene();
 
-    if (isBinary) {
-        WriteBinaryData(outfile.get(), docBuffer.GetSize());
-    }
+
+    glTF::AssetWriter writer(*mAsset);
+    writer.WriteFile(filename);
 }
 
 
-void glTFExporter::WriteBinaryData(IOStream* outfile, std::size_t sceneLength)
+static void CopyValue(const aiMatrix4x4& v, glTF::mat4& o)
+{ 
+    o[ 0] = v.a1; o[ 1] = v.b1; o[ 2] = v.c1; o[ 3] = v.d1;
+    o[ 4] = v.a2; o[ 5] = v.b2; o[ 6] = v.c2; o[ 7] = v.d2;
+    o[ 8] = v.a3; o[ 9] = v.b3; o[10] = v.c3; o[11] = v.d3;
+    o[12] = v.a4; o[13] = v.b4; o[14] = v.c4; o[15] = v.d4;
+}
+
+inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
+    unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
-    //
-    // write the body data
-    //
+    if (!count || !data) return Ref<Accessor>();
 
-    if (!mBodyData.empty()) {
-        std::size_t bodyOffset = sizeof(GLB_Header) + sceneLength;
-        bodyOffset = (bodyOffset + 3) & ~3; // Round up to next multiple of 4
+    unsigned int numCompsIn = AttribType::GetNumComponents(typeIn);
+    unsigned int numCompsOut = AttribType::GetNumComponents(typeOut);
+    unsigned int bytesPerComp = ComponentTypeSize(compType);
 
-        outfile->Seek(bodyOffset, aiOrigin_SET);
+    size_t offset = buffer->byteLength;
+    size_t length = count * numCompsOut * bytesPerComp;
+    buffer->Grow(length);
 
-        if (outfile->Write(&mBodyData[0], mBodyData.size(), 1) != 1) {
-            throw DeadlyExportError("Failed to write body data!");
+    // bufferView
+    Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
+    bv->buffer = buffer;
+    bv->byteOffset = 0;
+    bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
+    bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
+
+    // accessor
+    Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
+    acc->bufferView = bv;
+    acc->byteOffset = offset;
+    acc->byteStride = 0;
+    acc->componentType = compType;
+    acc->count = count;
+    acc->type = typeOut;
+
+    // copy the data
+    acc->WriteData(count, data, numCompsIn*bytesPerComp);
+
+    return acc;
+}
+
+namespace {
+    void GetMatScalar(const aiMaterial* mat, float& val, const char* propName, int type, int idx) {
+        if (mat->Get(propName, type, idx, val) == AI_SUCCESS) {}
+    }
+}
+
+void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
+{
+    aiString tex;
+    aiColor4D col;
+    if (mat->GetTextureCount(tt) > 0) {
+        if (mat->Get(AI_MATKEY_TEXTURE(tt, 0), tex) == AI_SUCCESS) {
+            std::string path = tex.C_Str();
+
+            if (path.size() > 0) {
+                if (path[0] != '*') {
+                    std::map<std::string, size_t>::iterator it = mTexturesByPath.find(path);
+                    if (it != mTexturesByPath.end()) {
+                        prop.texture = mAsset->textures.Get(it->second);
+                    }
+                }
+
+                if (!prop.texture) {
+                    std::string texId = mAsset->FindUniqueID("", "texture");
+                    prop.texture = mAsset->textures.Create(texId);
+                    mTexturesByPath[path] = prop.texture.GetIndex();
+
+                    std::string imgId = mAsset->FindUniqueID("", "image");
+                    prop.texture->source = mAsset->images.Create(imgId);
+
+                    if (path[0] == '*') { // embedded
+                        aiTexture* tex = mScene->mTextures[atoi(&path[1])];
+
+                        uint8_t* data = reinterpret_cast<uint8_t*>(tex->pcData);
+                        prop.texture->source->SetData(data, tex->mWidth, *mAsset);
+
+                        if (tex->achFormatHint[0]) {
+                            std::string mimeType = "image/";
+                            mimeType += (memcmp(tex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : tex->achFormatHint;
+                            prop.texture->source->mimeType = mimeType;
+                        }
+                    }
+                    else {
+                        prop.texture->source->uri = path;
+                    }
+                }
+            }
         }
     }
 
-
-    //
-    // write the header
-    //
-
-    outfile->Seek(0, aiOrigin_SET);
-
-    GLB_Header header;
-    memcpy(header.magic, AI_GLB_MAGIC_NUMBER, sizeof(header.magic));
-
-    header.version = 1;
-    AI_SWAP4(header.version);
-
-    header.length = sizeof(header) + sceneLength + mBodyData.size();
-    AI_SWAP4(header.length);
-
-    header.sceneLength = sceneLength;
-    AI_SWAP4(header.sceneLength);
-
-    header.sceneFormat = SceneFormat_JSON;
-    AI_SWAP4(header.sceneFormat);
-
-    if (outfile->Write(&header, sizeof(header), 1) != 1) {
-        throw DeadlyExportError("Failed to write the header!");
+    if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
+        prop.color[0] = col.r; prop.color[1] = col.g; prop.color[2] = col.b; prop.color[3] = col.a;
     }
 }
+
+void glTFExporter::ExportMaterials()
+{
+    aiString aiName;
+    for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
+        const aiMaterial* mat = mScene->mMaterials[i];
+
+        
+        std::string name;
+        if (mat->Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS) {
+            name = aiName.C_Str();
+        }
+        name = mAsset->FindUniqueID(name, "material");
+
+        Ref<Material> m = mAsset->materials.Create(name);
+
+        GetMatColorOrTex(mat, m->ambient, AI_MATKEY_COLOR_AMBIENT, aiTextureType_AMBIENT);
+        GetMatColorOrTex(mat, m->diffuse, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_DIFFUSE);
+        GetMatColorOrTex(mat, m->specular, AI_MATKEY_COLOR_SPECULAR, aiTextureType_SPECULAR);
+        GetMatColorOrTex(mat, m->emission, AI_MATKEY_COLOR_EMISSIVE, aiTextureType_EMISSIVE);
+
+        GetMatScalar(mat, m->shininess, AI_MATKEY_SHININESS);
+    }
+}
+
+void glTFExporter::ExportMeshes()
+{
+    for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
+        const aiMesh* aim = mScene->mMeshes[i];
+
+        std::string meshId = mAsset->FindUniqueID(aim->mName.C_Str(), "mesh");
+        Ref<Mesh> m = mAsset->meshes.Create(meshId);
+        m->primitives.resize(1);
+        Mesh::Primitive& p = m->primitives.back();
+
+        p.material = mAsset->materials.Get(aim->mMaterialIndex);
+
+        std::string bufferId = mAsset->FindUniqueID(meshId, "buffer");
+
+        Ref<Buffer> b = mAsset->GetBodyBuffer();
+        if (!b) {
+            b = mAsset->buffers.Create(bufferId);
+        }
+
+        Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        if (v) p.attributes.position.push_back(v);
+
+        Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        if (n) p.attributes.normal.push_back(n);
+
+        for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+            if (aim->mNumUVComponents[i] > 0) {
+                AttribType::Value type = (aim->mNumUVComponents[i] == 2) ? AttribType::VEC2 : AttribType::VEC3;
+                Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, true);
+                if (tc) p.attributes.texcoord.push_back(tc);
+            }
+        }
+
+        if (aim->mNumFaces > 0) {
+            unsigned int nIndicesPerFace = aim->mFaces[0].mNumIndices;
+            std::vector<uint16_t> indices;
+            indices.resize(aim->mNumFaces * nIndicesPerFace);
+            for (size_t i = 0; i < aim->mNumFaces; ++i) {
+                for (size_t j = 0; j < nIndicesPerFace; ++j) {
+                    indices[i*nIndicesPerFace + j] = uint16_t(aim->mFaces[i].mIndices[j]);
+                }
+            }
+            p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT);
+        }
+
+        switch (aim->mPrimitiveTypes) {
+            case aiPrimitiveType_POLYGON:
+                p.mode = PrimitiveMode_TRIANGLES; break; // TODO implement this
+            case aiPrimitiveType_LINE:
+                p.mode = PrimitiveMode_LINES; break;
+            case aiPrimitiveType_POINT:
+                p.mode = PrimitiveMode_POINTS; break;
+            default: // aiPrimitiveType_TRIANGLE
+                p.mode = PrimitiveMode_TRIANGLES;
+        }
+    }
+}
+
+size_t glTFExporter::ExportNode(const aiNode* n)
+{
+    Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
+
+    if (!n->mTransformation.IsIdentity()) {
+        node->matrix.isPresent = true;
+        CopyValue(n->mTransformation, node->matrix.value);
+    }
+
+    for (unsigned int i = 0; i < n->mNumMeshes; ++i) {
+        node->meshes.push_back(mAsset->meshes.Get(n->mMeshes[i]));
+    }
+
+    for (unsigned int i = 0; i < n->mNumChildren; ++i) {
+        size_t idx = ExportNode(n->mChildren[i]);
+        node->children.push_back(mAsset->nodes.Get(idx));
+    }
+
+    return node.GetIndex();
+}
+
+
+void glTFExporter::ExportScene()
+{
+    const char* sceneName = "defaultScene";
+    Ref<Scene> scene = mAsset->scenes.Create(sceneName);
+
+    // root node will be the first one exported (idx 0)
+    if (mAsset->nodes.Size() > 0) {
+        scene->nodes.push_back(mAsset->nodes.Get(0u));
+    }
+
+    // set as the default scene
+    mAsset->scene = scene;
+}
+
+void glTFExporter::ExportMetadata()
+{
+    glTF::AssetMetadata& asset = mAsset->asset;
+    asset.version = 1;
+
+    char buffer[256];
+    sprintf(buffer, "Open Asset Import Library (assimp v%d.%d.%d)",
+        aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
+
+    asset.generator = buffer;
+}
+
+
+
 
 
 

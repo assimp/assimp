@@ -37,49 +37,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-#ifndef AI_GLTFUTIL_H_INC
-#define AI_GLTFUTIL_H_INC
 
-//#include "StreamReader.h"
-//#include "MemoryIOWrapper.h"
-#include "StringComparison.h"
+/** @file glTFWriter.h
+ * Declares a class to write gltf/glb files
+ *
+ * glTF Extensions Support:
+ *   KHR_binary_glTF: full
+ *   KHR_materials_common: full
+ */
+#ifndef glTFAssetWriter_H_INC
+#define glTFAssetWriter_H_INC
 
-#if _MSC_VER > 1500 || (defined __GNUC___)
-#   define ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   else
-#   define gltf_unordered_map map
-#   define gltf_unordered_multimap multimap
-#endif
+#include "glTFAsset.h"
 
-#ifdef ASSIMP_GLTF_USE_UNORDERED_MULTIMAP
-#   include <unordered_map>
-#   if _MSC_VER > 1600
-#       define gltf_unordered_map unordered_map
-#       define gltf_unordered_multimap unordered_multimap
-#   else
-#       define gltf_unordered_map tr1::unordered_map
-#       define gltf_unordered_multimap tr1::unordered_multimap
-#   endif
-#endif
+namespace glTF
+{
 
-namespace Assimp {
-namespace glTF {
+using rapidjson::MemoryPoolAllocator;
 
-    //
-    // Misc
-    //
+class AssetWriter
+{
+private:
 
-    std::size_t DecodeBase64(const char* in, uint8_t*& out);
-    std::size_t DecodeBase64(const char* in, std::size_t inLength, uint8_t*& out);
+    void WriteBinaryData(IOStream* outfile, size_t sceneLength);
 
-    void EncodeBase64(const uint8_t* in, std::size_t inLength, std::string& out);
+    void WriteMetadata();
+    void WriteExtensionsUsed();
 
+public:
+    Document mDoc;
+    Asset& mAsset;
 
-    bool IsDataURI(const char* uri);
+    MemoryPoolAllocator<>& mAl;
+
+    AssetWriter(Asset& asset);
+
+    void WriteFile(const char* path);
+};
 
 }
-}
 
+// Include the implementation of the methods
+#include "glTFAssetWriter.inl"
 
-#endif // AI_GLTFUTIL_H_INC
-
+#endif

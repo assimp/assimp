@@ -45,18 +45,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_GLTFEXPORTER_H_INC
 
 #include <assimp/types.h>
+#include <assimp/material.h>
 #include <sstream>
 #include <vector>
 #include <map>
 
+#include "boost/scoped_ptr.hpp"
+
+
 struct aiScene;
+struct aiNode;
+struct aiMaterial;
+
+namespace glTF
+{
+    class Asset;
+
+    struct TexProperty;
+}
 
 namespace Assimp
 {
     class IOSystem;
     class IOStream;
     class ExportProperties;
-
 
     // ------------------------------------------------------------------------------------------------
     /** Helper class to export a given scene to an glTF file. */
@@ -74,12 +86,21 @@ namespace Assimp
         IOSystem* mIOSystem;
         const aiScene* mScene;
         const ExportProperties* mProperties;
-        bool mIsBinary;
+
+        std::map<std::string, size_t> mTexturesByPath;
+
+        glTF::Asset* mAsset;
 
         std::vector<unsigned char> mBodyData;
 
         void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
 
+        void GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
+        void ExportMetadata();
+        void ExportMaterials();
+        void ExportMeshes();
+        size_t ExportNode(const aiNode* node);
+        void ExportScene();
     };
 
 }

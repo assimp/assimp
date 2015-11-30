@@ -655,10 +655,6 @@ SET ( openddl_parser_SRCS
 )
 SOURCE_GROUP( openddl_parser FILES ${openddl_parser_SRCS})
 
-SET( picojson_SRCS
-    ../contrib/picojson/picojson.h
-)
-SOURCE_GROUP( picojson FILES ${picojson_SRCS} )
 
 INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
 
@@ -706,7 +702,6 @@ SET( assimp_src
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
-  ${picojson_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
   ${Boost_SRCS}
 

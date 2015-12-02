@@ -703,7 +703,6 @@ SET( assimp_src
   ${Poly2Tri_SRCS}
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
-  ${picojson_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
   ${Boost_SRCS}
 

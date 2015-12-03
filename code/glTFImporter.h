@@ -41,8 +41,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_GLTFIMPORTER_H_INC
 
 #include "BaseImporter.h"
-#include "LogAux.h"
 #include "DefaultIOSystem.h"
+
+struct aiNode;
+
+
+namespace glTF
+{
+    class Asset;
+}
 
 namespace Assimp {
 
@@ -50,7 +57,7 @@ namespace Assimp {
  * Load the glTF format.
  * https://github.com/KhronosGroup/glTF/tree/master/specification
  */
-class glTFImporter : public BaseImporter, public LogFunctions<glTFImporter> {
+class glTFImporter : public BaseImporter{
 public:
     glTFImporter();
     virtual ~glTFImporter();
@@ -61,10 +68,20 @@ protected:
     virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
 
 private:
-    void ReadBinaryHeader(IOStream& stream);
 
-    std::size_t mSceneLength;
-    std::size_t mBodyOffset, mBodyLength;
+    std::vector<unsigned int> meshOffsets;
+
+    std::vector<int> embeddedTexIdxs;
+
+    aiScene* mScene;
+
+    void ImportEmbeddedTextures(glTF::Asset& a);
+    void ImportMaterials(glTF::Asset& a);
+    void ImportMeshes(glTF::Asset& a);
+    void ImportCameras(glTF::Asset& a);
+    void ImportLights(glTF::Asset& a);
+    void ImportNodes(glTF::Asset& a);
+
 };
 
 } // Namespace assimp

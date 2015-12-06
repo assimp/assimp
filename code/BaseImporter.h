@@ -359,6 +359,27 @@ public: // static utilities
         IOStream* stream,
         std::vector<char>& data);
 
+    // -------------------------------------------------------------------
+    /** Utility function to move a std::vector into a aiScene array
+    *  @param vec The vector to be moved
+    *  @param out The output pointer to the allocated array.
+    *  @param numOut The output count of elements copied. */
+    template<typename T>
+    AI_FORCE_INLINE
+    static void CopyVector(
+        std::vector<T>& vec,
+        T*& out,
+        unsigned int& outLength)
+    {
+        outLength = vec.size();
+        if (outLength) {
+            out = new T[outLength];
+            std::swap_ranges(vec.begin(), vec.end(), out);
+        }
+    }
+
+    
+
 protected:
 
     /** Error description in case there was one. */

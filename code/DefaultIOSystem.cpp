@@ -176,7 +176,6 @@ std::string DefaultIOSystem::fileName( const std::string &path )
     return ret;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 std::string DefaultIOSystem::completeBaseName( const std::string &path )
 {

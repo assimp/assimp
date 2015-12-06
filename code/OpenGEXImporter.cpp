@@ -802,6 +802,19 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
 }
 
 //------------------------------------------------------------------------------------------------
+bool isSpecialRootDir(aiString &texName) {
+    if (texName.length < 2) {
+        return false;
+    }
+
+    if (texName.data[0] = '/' || texName.data[1] == '/') {
+        return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     if( NULL == node ) {
         return;

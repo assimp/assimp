@@ -65,27 +65,46 @@ using namespace Assimp::Collada;
 // Constructor to be privately used by Importer
 ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     : mFileName( pFile)
+    , mReader( NULL )
+    , mDataLibrary()
+    , mAccessorLibrary()
+    , mMeshLibrary()
+    , mNodeLibrary()
+    , mImageLibrary()
+    , mEffectLibrary()
+    , mMaterialLibrary()
+    , mLightLibrary()
+    , mCameraLibrary()
+    , mControllerLibrary()
+    , mRootNode( NULL )
+    , mAnims()
+    , mUnitSize( 1.0f )
+    , mUpDirection( UP_Y )
+    , mFormat(FV_1_5_n )    // We assume the newest file format by default
 {
-    mRootNode = NULL;
-    mUnitSize = 1.0f;
-    mUpDirection = UP_Y;
+    // Validate io-handler instance
+    if ( NULL == pIOHandler ) {
+        throw DeadlyImportError("IOSystem is NULL." );
+    }
 
-    // We assume the newest file format by default
-    mFormat = FV_1_5_n;
-
-  // open the file
-  boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
-  if( file.get() == NULL)
-    throw DeadlyImportError( "Failed to open file " + pFile + ".");
+    // open the file
+    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile ) );
+    if ( file.get() == NULL ) {
+        throw DeadlyImportError( "Failed to open file " + pFile + "." );
+    }
 
     // generate a XML reader for it
-  boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
+    boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
     mReader = irr::io::createIrrXMLReader( mIOWrapper.get());
-    if( !mReader)
-        ThrowException( "Collada: Unable to open file.");
+    if (!mReader) {
+        ThrowException("Collada: Unable to open file.");
+    }
 
     // start reading
     ReadContents();
+
+    // Release file after import
+    pIOHandler->Close( file.get() );
 }
 
 // ------------------------------------------------------------------------------------------------

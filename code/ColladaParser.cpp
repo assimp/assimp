@@ -64,7 +64,7 @@ using namespace Assimp::Collada;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
-    : mFileName( pFile)
+    : mFileName( pFile )
     , mReader( NULL )
     , mDataLibrary()
     , mAccessorLibrary()
@@ -82,7 +82,7 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     , mUpDirection( UP_Y )
     , mFormat(FV_1_5_n )    // We assume the newest file format by default
 {
-    // Validate io-handler instance
+    // validate io-handler instance
     if ( NULL == pIOHandler ) {
         throw DeadlyImportError("IOSystem is NULL." );
     }
@@ -103,8 +103,8 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     // start reading
     ReadContents();
 
-    // Release file after import
-    pIOHandler->Close( file.get() );
+    // release file after import
+    //pIOHandler->Close( file.get() );
 }
 
 // ------------------------------------------------------------------------------------------------

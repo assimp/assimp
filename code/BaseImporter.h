@@ -70,7 +70,7 @@ class IOStream;
 template <typename T>
 struct ScopeGuard
 {
-    ScopeGuard(T* obj) : obj(obj), mdismiss() {}
+    explicit ScopeGuard(T* obj) : obj(obj), mdismiss() {}
     ~ScopeGuard () throw() {
         if (!mdismiss) {
             delete obj;
@@ -181,7 +181,7 @@ public:
      * string if there was no error.
      */
     const std::string& GetErrorText() const {
-        return mErrorText;
+        return m_ErrorText;
     }
 
     // -------------------------------------------------------------------
@@ -359,13 +359,34 @@ public: // static utilities
         IOStream* stream,
         std::vector<char>& data);
 
+    // -------------------------------------------------------------------
+    /** Utility function to move a std::vector into a aiScene array
+    *  @param vec The vector to be moved
+    *  @param out The output pointer to the allocated array.
+    *  @param numOut The output count of elements copied. */
+    template<typename T>
+    AI_FORCE_INLINE
+    static void CopyVector(
+        std::vector<T>& vec,
+        T*& out,
+        unsigned int& outLength)
+    {
+        outLength = vec.size();
+        if (outLength) {
+            out = new T[outLength];
+            std::swap_ranges(vec.begin(), vec.end(), out);
+        }
+    }
+
+    
+
 protected:
 
     /** Error description in case there was one. */
-    std::string mErrorText;
+    std::string m_ErrorText;
 
     /** Currently set progress handler */
-    ProgressHandler* progress;
+    ProgressHandler* m_progress;
 };
 
 

@@ -735,7 +735,7 @@ public:
         C_STRUCT aiString* path,
         aiTextureMapping* mapping   = NULL,
         unsigned int* uvindex       = NULL,
-        float* blend                   = NULL,
+        float* blend                = NULL,
         aiTextureOp* op             = NULL,
         aiTextureMapMode* mapmode   = NULL) const;
 
@@ -1344,9 +1344,9 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
  *   arrays remains unmodified and pMax is set to 0.*/
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
-     const C_STRUCT aiMaterial* pMat,
+    const C_STRUCT aiMaterial* pMat,
     const char* pKey,
-     unsigned int type,
+    unsigned int type,
     unsigned int index,
     float* pOut,
     unsigned int* pMax);
@@ -1376,7 +1376,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
 inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
-   unsigned int index,
+    unsigned int index,
     float* pOut)
 {
     return aiGetMaterialFloatArray(pMat,pKey,type,index,pOut,(unsigned int*)0x0);
@@ -1397,11 +1397,11 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
  *
  * See the sample for aiGetMaterialFloatArray for more information.*/
 ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* pMat,
-    const char* pKey,
+     const char* pKey,
      unsigned int  type,
      unsigned int  index,
-    int* pOut,
-    unsigned int* pMax);
+     int* pOut,
+     unsigned int* pMax);
 
 
 #ifdef __cplusplus
@@ -1437,9 +1437,9 @@ inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
-     unsigned int type,
+    unsigned int type,
     unsigned int index,
-     C_STRUCT aiColor4D* pOut);
+    C_STRUCT aiColor4D* pOut);
 
 
 // ---------------------------------------------------------------------------
@@ -1449,9 +1449,9 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial* pMat,
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialUVTransform(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
-     unsigned int type,
+    unsigned int type,
     unsigned int index,
-     C_STRUCT aiUVTransform* pOut);
+    C_STRUCT aiUVTransform* pOut);
 
 
 // ---------------------------------------------------------------------------
@@ -1461,7 +1461,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialUVTransform(const C_STRUCT aiMaterial* p
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialString(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
-     unsigned int type,
+    unsigned int type,
     unsigned int index,
     C_STRUCT aiString* pOut);
 

@@ -74,7 +74,7 @@ static const aiImporterDesc desc = {
 // 1) 80 byte header
 // 2) 4 byte face count
 // 3) 50 bytes per face
-bool IsBinarySTL(const char* buffer, unsigned int fileSize) {
+static bool IsBinarySTL(const char* buffer, unsigned int fileSize) {
     if( fileSize < 84 ) {
         return false;
     }
@@ -88,7 +88,7 @@ bool IsBinarySTL(const char* buffer, unsigned int fileSize) {
 // An ascii STL buffer will begin with "solid NAME", where NAME is optional.
 // Note: The "solid NAME" check is necessary, but not sufficient, to determine
 // if the buffer is ASCII; a binary header could also begin with "solid NAME".
-bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
+static bool IsAsciiSTL(const char* buffer, unsigned int fileSize) {
     if (IsBinarySTL(buffer, fileSize))
         return false;
 

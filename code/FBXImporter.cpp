@@ -126,6 +126,7 @@ void FBXImporter::SetupProperties(const Importer* pImp)
     settings.readAllLayers = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_GEOMETRY_LAYERS, true);
     settings.readAllMaterials = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ALL_MATERIALS, false);
     settings.readMaterials = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_MATERIALS, true);
+    settings.readTextures = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_TEXTURES, true);
     settings.readCameras = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_CAMERAS, true);
     settings.readLights = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_LIGHTS, true);
     settings.readAnimations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS, true);

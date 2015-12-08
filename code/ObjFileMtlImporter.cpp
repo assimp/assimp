@@ -64,6 +64,7 @@ static const std::string BumpTexture1        = "map_bump";
 static const std::string BumpTexture2        = "map_Bump";
 static const std::string BumpTexture3        = "bump";
 static const std::string NormalTexture       = "map_Kn";
+static const std::string ReflectionTexture   = "refl";
 static const std::string DisplacementTexture = "disp";
 static const std::string SpecularityTexture  = "map_ns";
 
@@ -200,6 +201,7 @@ void ObjFileMtlImporter::load()
 
         case 'm':   // Texture
         case 'b':   // quick'n'dirty - for 'bump' sections
+        case 'r':   // quick'n'dirty - for 'refl' sections
             {
                 getTexture();
                 m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
@@ -332,6 +334,9 @@ void ObjFileMtlImporter::getTexture() {
         // Normal map
         out = & m_pModel->m_pCurrentMaterial->textureNormal;
         clampIndex = ObjFile::Material::TextureNormalType;
+    } else if(!ASSIMP_strincmp( pPtr, ReflectionTexture.c_str(), ReflectionTexture.size() ) ) {
+        // Reflection texture(s)
+        //Do nothing here
     } else if (!ASSIMP_strincmp( pPtr, DisplacementTexture.c_str(), DisplacementTexture.size() ) ) {
         // Displacement texture
         out = &m_pModel->m_pCurrentMaterial->textureDisp;
@@ -346,7 +351,7 @@ void ObjFileMtlImporter::getTexture() {
     }
 
     bool clamp = false;
-    getTextureOption(clamp);
+    getTextureOption(clamp, clampIndex, out);
     m_pModel->m_pCurrentMaterial->clamp[clampIndex] = clamp;
 
     std::string texture;
@@ -369,7 +374,7 @@ void ObjFileMtlImporter::getTexture() {
  * Because aiMaterial supports clamp option, so we also want to return it
  * /////////////////////////////////////////////////////////////////////////////
  */
-void ObjFileMtlImporter::getTextureOption(bool &clamp)
+void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString *&out)
 {
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
 
@@ -392,13 +397,55 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp)
 
             skipToken = 2;
         }
-        else if (  !ASSIMP_strincmp(pPtr, BlendUOption.c_str(), BlendUOption.size())
+        else if( !ASSIMP_strincmp( pPtr, TypeOption.c_str(), TypeOption.size() ) )
+        {
+            DataArrayIt it = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
+            char value[ 12 ];
+            CopyNextWord( it, m_DataItEnd, value, sizeof( value ) / sizeof( *value ) );
+            if( !ASSIMP_strincmp( value, "cube_top", 8 ) )
+            {
+                clampIndex = ObjFile::Material::TextureReflectionCubeTopType;
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[0];
+            }
+            else if( !ASSIMP_strincmp( value, "cube_bottom", 11 ) )
+            {
+                clampIndex = ObjFile::Material::TextureReflectionCubeBottomType;
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[1];
+            }
+            else if( !ASSIMP_strincmp( value, "cube_front", 10 ) )
+            {
+                clampIndex = ObjFile::Material::TextureReflectionCubeFrontType;
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[2];
+            }
+            else if( !ASSIMP_strincmp( value, "cube_back", 9 ) )
+            {
+                clampIndex = ObjFile::Material::TextureReflectionCubeBackType;
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[3];
+            }
+            else if( !ASSIMP_strincmp( value, "cube_left", 9 ) )
+            {
+                clampIndex = ObjFile::Material::TextureReflectionCubeLeftType;
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[4];
+            }
+            else if( !ASSIMP_strincmp( value, "cube_right", 10 ) )
+            {
+                clampIndex = ObjFile::Material::TextureReflectionCubeRightType;
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[5];
+            }
+            else if( !ASSIMP_strincmp( value, "sphere", 6 ) )
+            {
+                clampIndex = ObjFile::Material::TextureReflectionSphereType;
+                out = &m_pModel->m_pCurrentMaterial->textureReflection[0];
+            }
+
+            skipToken = 2;
+        }
+        else if (!ASSIMP_strincmp(pPtr, BlendUOption.c_str(), BlendUOption.size())
                 || !ASSIMP_strincmp(pPtr, BlendVOption.c_str(), BlendVOption.size())
                 || !ASSIMP_strincmp(pPtr, BoostOption.c_str(), BoostOption.size())
                 || !ASSIMP_strincmp(pPtr, ResolutionOption.c_str(), ResolutionOption.size())
                 || !ASSIMP_strincmp(pPtr, BumpOption.c_str(), BumpOption.size())
-                || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), ChannelOption.size())
-                || !ASSIMP_strincmp(pPtr, TypeOption.c_str(), TypeOption.size()) )
+                || !ASSIMP_strincmp(pPtr, ChannelOption.c_str(), ChannelOption.size()))
         {
             skipToken = 2;
         }

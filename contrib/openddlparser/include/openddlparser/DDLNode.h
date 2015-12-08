@@ -101,6 +101,10 @@ public:
     /// @return true, if a corresponding property is assigned to the node, false if not.
     bool hasProperty( const std::string &name );
 
+    ///	@brief  Will return true, if any properties are assigned to the node instance.
+    ///	@return True, if properties are assigned.
+    bool hasProperties() const;
+
     ///	@brief  Search for a given property and returns it. Will return ddl_nullptr if no property was found.
     /// @param  name    [in] The name for the property to look for.
     /// @return The property or ddl_nullptr if no property was found.

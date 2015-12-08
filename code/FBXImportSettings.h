@@ -55,6 +55,7 @@ struct ImportSettings
         , readAllLayers(true)
         , readAllMaterials(false)
         , readMaterials(true)
+        , readTextures(true)
         , readCameras(true)
         , readLights(true)
         , readAnimations(true)
@@ -91,6 +92,9 @@ struct ImportSettings
     /** import materials (true) or skip them and assign a default
      *  material. The default value is true.*/
     bool readMaterials;
+
+    /** import embedded textures? Default value is true.*/
+    bool readTextures;
 
     /** import cameras? Default value is true.*/
     bool readCameras;

@@ -97,7 +97,7 @@ public:
     // being bound to const ref& function parameters. Copying streams is not permitted, though.
     // This workaround avoids this by manually specifying a copy ctor.
 #if !defined(__GNUC__) || !defined(__APPLE__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-    basic_formatter(const basic_formatter& other) {
+    explicit basic_formatter(const basic_formatter& other) {
         underlying << (string)other;
     }
 #endif

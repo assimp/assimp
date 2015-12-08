@@ -70,9 +70,20 @@ public enum AiLightType {
      * direction it is pointing to. A good example for a spot light is a light
      * spot in sport arenas.
      */
-    SPOT(0x3);
+    SPOT(0x3),
 
-    
+
+    /**
+     *  The generic light level of the world, including the bounces of all other
+     *  lightsources. <p>
+     *
+     *  Typically, there's at most one ambient light in a scene.
+     *  This light type doesn't have a valid position, direction, or
+     *  other properties, just a color.
+     */
+    AMBIENT(0x4);
+
+
     /**
      * Utility method for converting from c/c++ based integer enums to java 
      * enums.<p>

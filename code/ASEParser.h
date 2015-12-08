@@ -138,7 +138,7 @@ struct Bone
     }
 
     //! Construction from an existing name
-    Bone( const std::string& name)
+    explicit Bone( const std::string& name)
         :   mName   (name)
     {}
 
@@ -216,7 +216,7 @@ struct BaseNode
     enum Type {Light, Camera, Mesh, Dummy} mType;
 
     //! Constructor. Creates a default name for the node
-    BaseNode(Type _mType)
+    explicit BaseNode(Type _mType)
         : mType         (_mType)
         , mProcessed    (false)
     {

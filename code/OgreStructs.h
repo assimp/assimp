@@ -381,8 +381,8 @@ typedef std::vector<VertexAnimationTrack> VertexAnimationTrackList;
 class Animation
 {
 public:
-    Animation(Skeleton *parent);
-    Animation(Mesh *parent);
+    explicit Animation(Skeleton *parent);
+    explicit Animation(Mesh *parent);
 
     /// Returns the associated vertex data for a track in this animation.
     /** @note Only valid to call when parent Mesh is set. */

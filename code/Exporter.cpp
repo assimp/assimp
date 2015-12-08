@@ -87,6 +87,8 @@ void ExportSceneSTLBinary(const char*,IOSystem*, const aiScene*, const ExportPro
 void ExportScenePly(const char*,IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportScene3DS(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneGLTF(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneGLB(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 
@@ -133,6 +135,13 @@ Exporter::ExportFormatEntry gExporters[] =
 #ifndef ASSIMP_BUILD_NO_3DS_EXPORTER
     Exporter::ExportFormatEntry( "3ds", "Autodesk 3DS (legacy)", "3ds" , &ExportScene3DS,
         aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_JoinIdenticalVertices),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
+    Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
+        aiProcess_JoinIdenticalVertices /*| aiProcess_SortByPType*/),
+    Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
+        aiProcess_JoinIdenticalVertices /*| aiProcess_SortByPType*/),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER

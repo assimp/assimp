@@ -87,7 +87,7 @@ struct TempMat  {
         ,   numFaces    (0)
     {}
 
-    TempMat(const Triangle& in)
+    explicit TempMat(const Triangle& in)
         :   type        ((Unreal::MeshFlags)in.mType)
         ,   tex         (in.mTextureNum)
         ,   numFaces    (0)

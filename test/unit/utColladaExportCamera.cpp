@@ -1,11 +1,43 @@
 /*
- * ColladaCameraExporter.cpp
- *
- *  Created on: May 17, 2015
- *      Author: wise
- */
+---------------------------------------------------------------------------
+Open Asset Import Library (assimp)
+---------------------------------------------------------------------------
 
+Copyright (c) 2006-2014, assimp team
 
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
+conditions are met:
+
+* Redistributions of source code must retain the above
+copyright notice, this list of conditions and the
+following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---------------------------------------------------------------------------
+*/
 #include "UnitTestPCH.h"
 
 #include <assimp/cexport.h>
@@ -49,31 +81,47 @@ TEST_F(ColladaExportCamera, testExportCamera)
 
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
-
+    const unsigned int origNumCams( pTest->mNumCameras );
+    float *origFOV = new float[ origNumCams ];
+    float *orifClipPlaneNear = new float[ origNumCams ];
+    float *orifClipPlaneFar = new float[ origNumCams ];
+    aiString *names = new aiString[ origNumCams ];
+    aiVector3D *pos = new aiVector3D[ origNumCams ];
+    for (size_t i = 0; i < origNumCams; i++) {
+        const aiCamera *orig = pTest->mCameras[ i ];
+        origFOV[ i ] = orig->mHorizontalFOV;
+        orifClipPlaneNear[ i ] = orig->mClipPlaneNear;
+        orifClipPlaneFar[ i ] = orig->mClipPlaneFar;
+        names[ i ] = orig->mName;
+        pos[ i ] = orig->mPosition;
+    }
     const aiScene* imported = im->ReadFile(file,0);
 
     ASSERT_TRUE(imported!=NULL);
 
-    EXPECT_TRUE(imported->HasCameras());
-    EXPECT_EQ(pTest->mNumCameras,imported->mNumCameras);
+    EXPECT_TRUE( imported->HasCameras() );
+    EXPECT_EQ( origNumCams, imported->mNumCameras );
 
-    for(size_t i=0; i< pTest->mNumCameras;i++){
+    for(size_t i=0; i< imported->mNumCameras;i++){
+        const aiCamera *read = imported->mCameras[ i ];
 
-        const aiCamera *orig = pTest->mCameras[i];
-        const aiCamera *read = imported->mCameras[i];
+        EXPECT_TRUE( names[ i ] == read->mName );
+        EXPECT_NEAR( origFOV[ i ],read->mHorizontalFOV, 0.0001f );
+        EXPECT_FLOAT_EQ( orifClipPlaneNear[ i ], read->mClipPlaneNear);
+        EXPECT_FLOAT_EQ( orifClipPlaneFar[ i ], read->mClipPlaneFar);
 
-        EXPECT_TRUE(orig->mName==read->mName);
-        EXPECT_FLOAT_EQ(orig->mHorizontalFOV,read->mHorizontalFOV);
-        EXPECT_FLOAT_EQ(orig->mClipPlaneNear,read->mClipPlaneNear);
-        EXPECT_FLOAT_EQ(orig->mClipPlaneFar,read->mClipPlaneFar);
-
-        EXPECT_FLOAT_EQ(orig->mPosition.x,read->mPosition.x);
-        EXPECT_FLOAT_EQ(orig->mPosition.y,read->mPosition.y);
-        EXPECT_FLOAT_EQ(orig->mPosition.z,read->mPosition.z);
+        EXPECT_FLOAT_EQ( pos[ i ].x,read->mPosition.x);
+        EXPECT_FLOAT_EQ( pos[ i ].y,read->mPosition.y);
+        EXPECT_FLOAT_EQ( pos[ i ].z,read->mPosition.z);
     }
 
-}
+    delete [] origFOV;
+    delete [] orifClipPlaneNear;
+    delete [] orifClipPlaneFar;
+    delete [] names;
+    delete [] pos;
 
+}
 
 #endif
 

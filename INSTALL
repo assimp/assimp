@@ -33,13 +33,12 @@ CMake is the preferred build system for Assimp. The minimum required version
 is 2.6. If you don't have it yet, downloads for CMake can be found on
 http://www.cmake.org/. 
 
-Building Assimp with CMake is 'business as usual' if you've used CMake
-before. All steps can be done either on the command line / shell or
-by using the CMake GUI tool, the choice is up to you. 
+For Unix:
 
-First, invoke CMake to generate build files for a particular
-toolchain (for standard GNU makefiles: cmake -G 'Unix Makefiles').
-Afterwards, use the generated build files to perform the actual
-build. 
+1. cmake CMakeLists.txt -G 'Unix Makefiles'
+2. make
 
-
+For Windows:
+1. Open a command prompt
+2. cmake CMakeLists.txt
+2. Open your default IDE and build it

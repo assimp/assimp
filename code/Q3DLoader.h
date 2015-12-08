@@ -103,7 +103,7 @@ private:
 
     struct Face
     {
-        Face(unsigned int s)
+        explicit Face(unsigned int s)
             :   indices   (s)
             ,   uvindices (s)
             ,   mat       (0)

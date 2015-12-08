@@ -1,4 +1,4 @@
-Open Asset Import Library (assimp) 
+Open Asset Import Library (assimp)
 ========
 
 Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
@@ -28,28 +28,28 @@ __Importers__:
 - BLEND (Blender)
 - DAE/Collada
 - FBX
-- IFC-STEP 
+- IFC-STEP
 - ASE
 - DXF
 - HMP
 - MD2
-- MD3 
+- MD3
 - MD5
 - MDC
 - MDL
 - NFF
 - PLY
 - STL
-- X 
+- X
 - OBJ
 - OpenGEX
 - SMD
-- LWO 
-- LXO 
+- LWO
+- LXO
 - LWS  
-- TER 
-- AC3D 
-- MS3D 
+- TER
+- AC3D
+- MS3D
 - COB
 - Q3BSP
 - XGL
@@ -61,7 +61,8 @@ __Importers__:
 - Ogre XML
 - Q3D
 - ASSBIN (Assimp custom format)
- 
+- glTF
+
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
 - C4D (https://github.com/acgessler/assimp-cinema4d)
@@ -76,7 +77,8 @@ __Exporters__:
 - 3DS
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
-	
+- glTF
+
 ### Building ###
 
 
@@ -96,7 +98,7 @@ Open Asset Import Library is implemented in C++. The directory structure is:
 	/port		Ports to other languages and scripts to maintain those.
 	/test		Unit- and regression tests, test suite of models
 	/tools		Tools (old assimp viewer, command line `assimp`)
-	/samples	A small number of samples to illustrate possible 
+	/samples	A small number of samples to illustrate possible
                         use cases for Assimp
 	/workspaces	Build enviroments for vc,xcode,... (deprecated,
 			CMake has superseeded all legacy build options!)
@@ -111,18 +113,24 @@ For more information, visit [our website](http://assimp.sourceforge.net/). Or ch
 If the docs don't solve your problem, ask on [StackOverflow](http://stackoverflow.com/questions/tagged/assimp?sort=newest). If you think you found a bug, please open an issue on Github.
 
 For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
-  [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions) 
+  [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions)
+
+And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
+> /join #assetimporterlib
 
 ### Contributing ###
 
-Contributions to assimp are highly appreciated. The easiest way to get involved is to submit 
+Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
 
 ### License ###
 
-Our license is based on the modified, __3-clause BSD__-License. 
+Our license is based on the modified, __3-clause BSD__-License.
 
-An _informal_ summary is: do whatever you want, but include Assimp's license text with your product - 
+An _informal_ summary is: do whatever you want, but include Assimp's license text with your product -
 and don't sue us if our code doesn't work. Note that, unlike LGPLed code, you may link statically to Assimp.
-For the legal details, see the `LICENSE` file. 
+For the legal details, see the `LICENSE` file.
 
+### Why this name ###
+
+Sorry, we're germans :-), no english native speakers ...

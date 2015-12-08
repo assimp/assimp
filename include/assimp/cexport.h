@@ -86,13 +86,20 @@ ASSIMP_API size_t aiGetExportFormatCount(void);
 
 // --------------------------------------------------------------------------------
 /** Returns a description of the nth export file format. Use #aiGetExportFormatCount()
- * to learn how many export formats are supported.
+ * to learn how many export formats are supported. The description must be released by 
+ * calling aiReleaseExportFormatDescription afterwards.
  * @param pIndex Index of the export format to retrieve information for. Valid range is
  *    0 to #aiGetExportFormatCount()
  * @return A description of that specific export format. NULL if pIndex is out of range.
  */
 ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex);
 
+// --------------------------------------------------------------------------------
+/** Release a description of the nth export file format. Must be returned by 
+* aiGetExportFormatDescription
+* @param desc Pointer to the description
+*/
+ASSIMP_API void aiReleaseExportFormatDescription( const C_STRUCT aiExportFormatDesc *desc );
 
 // --------------------------------------------------------------------------------
 /** Create a modifiable copy of a scene.

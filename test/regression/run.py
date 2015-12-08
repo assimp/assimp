@@ -264,7 +264,7 @@ def del_folder_with_contents(folder):
 def run_test():
     tmp_target_path = os.path.join(settings.results, "tmp")
     try:
-        print "try to make " + tmp_target_path
+        print( "try to make " + tmp_target_path )
         os.mkdir(tmp_target_path)
     except OSError as oerr:
         # clear contents if tmp folder exists already

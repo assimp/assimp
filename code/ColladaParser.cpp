@@ -104,7 +104,7 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     ReadContents();
 
     // release file after import
-    //pIOHandler->Close( file.get() );
+    pIOHandler->Close( file.get() );
 }
 
 // ------------------------------------------------------------------------------------------------

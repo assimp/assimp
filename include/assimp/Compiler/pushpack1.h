@@ -37,7 +37,7 @@
 
 #if defined(_MSC_VER)
 
-// C4103: Packing was changed after the inclusion of the header, propably missing #pragma pop
+// C4103: Packing was changed after the inclusion of the header, probably missing #pragma pop
 #	pragma warning (disable : 4103) 
 #endif
 

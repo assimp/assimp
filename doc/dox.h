@@ -145,7 +145,7 @@ project dependencies. Link to <assimp_root>/lib/<config-name>/assimp.lib. config
 project configs. For static linking, use release/debug. See the sections below on this page for more information on the
 other build configs.
 If done correctly you should now be able to compile, link,
-run and use the application. If the linker complains about some integral functions being defined twice you propably have
+run and use the application. If the linker complains about some integral functions being defined twice you probably have
 mixed the runtimes. Recheck the project configuration (project properties -&gt; C++ -&gt; Code generation -&gt; Runtime) if you use
 static runtimes (Multithreaded / Multithreaded Debug) or dynamic runtimes (Multithreaded DLL / Multithreaded Debug DLL).
 Choose the assimp linker lib accordingly.
@@ -287,7 +287,7 @@ bool DoTheImportThing( const std::string& pFile)
 
   // And have it read the given file with some example postprocessing
   // Usually - if speed is not the most important aspect for you - you'll
-  // propably to request more postprocessing than we do in this example.
+  // probably to request more postprocessing than we do in this example.
   const aiScene* scene = importer.ReadFile( pFile,
 	aiProcess_CalcTangentSpace       |
 	aiProcess_Triangulate            |

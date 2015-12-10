@@ -848,7 +848,7 @@ void ColladaParser::ReadMaterialLibrary()
         {
             if( IsElement( "material"))
             {
-                // read ID. By now you propably know my opinion about this "specification"
+                // read ID. By now you probably know my opinion about this "specification"
                 int attrID = GetAttribute( "id");
                 std::string id = mReader->getAttributeValue( attrID);
 
@@ -906,7 +906,7 @@ void ColladaParser::ReadLightLibrary()
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if( IsElement( "light"))
             {
-                // read ID. By now you propably know my opinion about this "specification"
+                // read ID. By now you probably know my opinion about this "specification"
                 int attrID = GetAttribute( "id");
                 std::string id = mReader->getAttributeValue( attrID);
 
@@ -940,7 +940,7 @@ void ColladaParser::ReadCameraLibrary()
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if( IsElement( "camera"))
             {
-                // read ID. By now you propably know my opinion about this "specification"
+                // read ID. By now you probably know my opinion about this "specification"
                 int attrID = GetAttribute( "id");
                 std::string id = mReader->getAttributeValue( attrID);
 
@@ -1976,7 +1976,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 
     ai_assert( primType != Prim_Invalid);
 
-    // also a number of <input> elements, but in addition a <p> primitive collection and propably index counts for all primitives
+    // also a number of <input> elements, but in addition a <p> primitive collection and probably index counts for all primitives
     while( mReader->read())
     {
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT)

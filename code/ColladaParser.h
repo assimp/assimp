@@ -49,6 +49,7 @@
 #include "ColladaHelper.h"
 #include "../include/assimp/ai_assert.h"
 #include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace Assimp
 {

@@ -499,7 +499,7 @@ void ObjFileParser::getMaterialDesc()
         }
 
         if (needsNewMesh(strName))
-            createMesh();
+            createMesh(strName);
 
         m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);
     }

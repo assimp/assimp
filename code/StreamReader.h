@@ -253,24 +253,26 @@ public:
      *
      *  @param limit Maximum number of bytes to be read from
      *    the beginning of the file. Specifying UINT_MAX
-     *    resets the limit to the original end of the stream. */
-    void SetReadLimit(unsigned int _limit)  {
-
+     *    resets the limit to the original end of the stream. 
+     *  Returns the previously set limit. */
+    unsigned int SetReadLimit(unsigned int _limit)  {
+        unsigned int prev = GetReadLimit();
         if (UINT_MAX == _limit) {
             limit = end;
-            return;
+            return prev;
         }
 
         limit = buffer + _limit;
         if (limit > end) {
             throw DeadlyImportError("StreamReader: Invalid read limit");
         }
+        return prev;
     }
 
     // ---------------------------------------------------------------------
     /** Get the current read limit in bytes. Reading over this limit
      *  accidentially raises an exception.  */
-    int GetReadLimit() const    {
+    unsigned int GetReadLimit() const    {
         return (unsigned int)(limit - buffer);
     }
 

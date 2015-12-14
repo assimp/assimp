@@ -1,5 +1,5 @@
-Assimp Regression Test Suite
-============================
+Asset Importer Lib Regression Test Suite
+========================================
 
 1) How does it work?
 ---------------------------------------------------------------------------------

@@ -457,15 +457,6 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 //  Get values for a new material description
 void ObjFileParser::getMaterialDesc()
 {
-    // Each material request a new object.
-    // Sometimes the object is already created (see 'o' tag by example), but it is not initialized !
-    // So, we create a new object only if the current on is already initialized !
-    if (m_pModel->m_pCurrent != NULL &&
-        (   m_pModel->m_pCurrent->m_Meshes.size() > 1 ||
-            (m_pModel->m_pCurrent->m_Meshes.size() == 1 && m_pModel->m_Meshes[m_pModel->m_pCurrent->m_Meshes[0]]->m_Faces.size() != 0)  )
-        )
-        m_pModel->m_pCurrent = NULL;
-
     // Get next data for material data
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     if (m_DataIt == m_DataItEnd) {
@@ -477,25 +468,41 @@ void ObjFileParser::getMaterialDesc()
         ++m_DataIt;
     }
 
+    // In some cases we should ignore this 'usemtl' command, this variable helps us to do so
+    bool skip = false;
+
     // Get name
     std::string strName(pStart, &(*m_DataIt));
-    if ( strName.empty())
-        return;
+    strName = trim_whitespaces(strName);
+    if (strName.empty())
+        skip = true;
 
-    // Search for material
-    std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strName );
-    if ( it == m_pModel->m_MaterialMap.end() ) {
-        // Not found, use default material
-        m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-        DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
-    } else {
-        // Found, using detected material
-        m_pModel->m_pCurrentMaterial = (*it).second;
-        if ( needsNewMesh( strName ))
+    // If the current mesh has the same material, we simply ignore that 'usemtl' command
+    // There is no need to create another object or even mesh here
+    if (m_pModel->m_pCurrentMaterial && m_pModel->m_pCurrentMaterial->MaterialName == aiString(strName))
+        skip = true;
+
+    if (!skip)
+    {
+        // Search for material
+        std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
+        if (it == m_pModel->m_MaterialMap.end())
         {
-            createMesh( strName  );
+            // Not found, use default material
+            m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
+            DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
+            strName = m_pModel->m_pDefaultMaterial->MaterialName.C_Str();
         }
-        m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strName );
+        else
+        {
+            // Found, using detected material
+            m_pModel->m_pCurrentMaterial = (*it).second;
+        }
+
+        if (needsNewMesh(strName))
+            createMesh(strName);
+
+        m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);
     }
 
     // Skip rest of line
@@ -762,7 +769,7 @@ bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
     bool newMat = false;
     int matIdx = getMaterialIndex( rMaterialName );
     int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
-    if ( curMatIdx != int(ObjFile::Mesh::NoMaterial) || curMatIdx != matIdx )
+    if ( curMatIdx != int(ObjFile::Mesh::NoMaterial) && curMatIdx != matIdx )
     {
         // New material -> only one material per mesh, so we need to create a new
         // material

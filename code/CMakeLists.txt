@@ -530,6 +530,11 @@ ADD_ASSIMP_IMPORTER(RAW
   RawLoader.h
 )
 
+ADD_ASSIMP_IMPORTER(SIB
+  SIBImporter.cpp
+  SIBImporter.h
+)
+
 ADD_ASSIMP_IMPORTER(SMD
   SMDLoader.cpp
   SMDLoader.h

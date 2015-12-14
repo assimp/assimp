@@ -101,6 +101,14 @@ AI_FORCE_INLINE aiVector3t<TReal>& aiVector3t<TReal>::Normalize() {
 }
 // ------------------------------------------------------------------------------------------------
 template <typename TReal>
+AI_FORCE_INLINE aiVector3t<TReal>& aiVector3t<TReal>::NormalizeSafe() {
+    TReal len = Length();
+    if (len > static_cast<TReal>(0))
+        *this /= Length();
+    return *this;
+}
+// ------------------------------------------------------------------------------------------------
+template <typename TReal>
 AI_FORCE_INLINE const aiVector3t<TReal>& aiVector3t<TReal>::operator += (const aiVector3t<TReal>& o) {
     x += o.x; y += o.y; z += o.z; return *this;
 }

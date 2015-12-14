@@ -192,7 +192,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
                 const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
                 if (is_not_qnan(v.x))pcNor += v;
             }
-            pcNor.Normalize();
+            pcNor.NormalizeSafe();
 
             // Write the smoothed normal back to all affected normals
             for (unsigned int a = 0; a < verticesFound.size(); ++a)
@@ -225,7 +225,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
                 if (v * vr >= fLimit * vrlen * v.Length())
                     pcNor += v;
             }
-            pcNew[i] = pcNor.Normalize();
+            pcNew[i] = pcNor.NormalizeSafe();
         }
     }
 

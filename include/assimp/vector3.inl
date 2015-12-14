@@ -104,7 +104,7 @@ template <typename TReal>
 AI_FORCE_INLINE aiVector3t<TReal>& aiVector3t<TReal>::NormalizeSafe() {
     TReal len = Length();
     if (len > static_cast<TReal>(0))
-        *this /= Length();
+        *this /= len;
     return *this;
 }
 // ------------------------------------------------------------------------------------------------

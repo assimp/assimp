@@ -291,7 +291,7 @@ const aiScene* ImportModel(
 		PrintHorBar();
 	}
 	if (!scene) {
-		printf("ERROR: Failed to load file\n");	
+		printf("ERROR: Failed to load file: %s\n", globalImporter->GetErrorString());
 		return NULL;
 	}
 

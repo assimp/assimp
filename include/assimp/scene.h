@@ -109,7 +109,9 @@ struct aiNode
     /** The number of meshes of this node. */
     unsigned int mNumMeshes;
 
-    /** The meshes of this node. Each entry is an index into the mesh */
+    /** The meshes of this node. Each entry is an index into the 
+      * mesh list of the #aiScene.
+      */
     unsigned int* mMeshes;
 
     /** Metadata associated with this node or NULL if there is no metadata.

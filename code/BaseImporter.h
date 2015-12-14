@@ -347,6 +347,8 @@ public: // static utilities
     static void ConvertUTF8toISO8859_1(
         std::string& data);
 
+	enum TextFileMode { ALLOW_EMPTY, FORBID_EMPTY };
+
     // -------------------------------------------------------------------
     /** Utility for text file loaders which copies the contents of the
      *  file into a memory buffer and converts it to our UTF8
@@ -354,10 +356,12 @@ public: // static utilities
      *  @param stream Stream to read from.
      *  @param data Output buffer to be resized and filled with the
      *   converted text file data. The buffer is terminated with
-     *   a binary 0. */
+     *   a binary 0.
+     *  @param mode Whether it is OK to load empty text files. */
     static void TextFileToBuffer(
         IOStream* stream,
-        std::vector<char>& data);
+        std::vector<char>& data,
+        TextFileMode mode = FORBID_EMPTY);
 
     // -------------------------------------------------------------------
     /** Utility function to move a std::vector into a aiScene array

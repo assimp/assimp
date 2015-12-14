@@ -555,9 +555,12 @@ void ObjFileParser::getMaterialLib()
         return;
     }
 
-    // Import material library data from file
+    // Import material library data from file.
+    // Some exporters (e.g. Silo) will happily write out empty
+    // material files if the model doesn't use any materials, so we
+    // allow that.
     std::vector<char> buffer;
-    BaseImporter::TextFileToBuffer( pFile, buffer );
+    BaseImporter::TextFileToBuffer( pFile, buffer, BaseImporter::ALLOW_EMPTY );
     m_pIO->Close( pFile );
 
     // Importing the material library

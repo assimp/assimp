@@ -578,7 +578,7 @@ struct aiMesh
     C_STRUCT aiBone** mBones;
 
     /** The material used by this mesh.
-     * A mesh does use only a single material. If an imported model uses
+     * A mesh uses only a single material. If an imported model uses
      * multiple materials, the import splits up the mesh. Use this value
      * as index into the scene's material list.
      */

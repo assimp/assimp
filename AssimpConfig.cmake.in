@@ -7,10 +7,10 @@
 # Compute paths
 get_filename_component(FOOBAR_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 if(EXISTS "${FOOBAR_CMAKE_DIR}/CMakeCache.txt")
-   # In build tree
-   include("${FOOBAR_CMAKE_DIR}/FooBarBuildTreeSettings.cmake")
+  # In build tree
+  include("${FOOBAR_CMAKE_DIR}/FooBarBuildTreeSettings.cmake")
 else()
-   set(FOOBAR_INCLUDE_DIRS "${FOOBAR_CMAKE_DIR}/@CONF_REL_INCLUDE_DIR@")
+  set(FOOBAR_INCLUDE_DIRS "${FOOBAR_CMAKE_DIR}/@CONF_REL_INCLUDE_DIR@")
 endif()
 
 # Our library dependencies (contains definitions for IMPORTED targets)

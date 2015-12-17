@@ -127,7 +127,7 @@ struct Matrix {
 struct Transform {
     Matrix *matrix;
     int transformCount;
-    const float	*transformArray;
+    const float *transformArray;
 };
 
 struct Translation {
@@ -143,7 +143,7 @@ struct Scale {
 };
 
 struct Name {
-    std::string	name;
+    std::string name;
 };
 
 
@@ -157,18 +157,18 @@ struct MaterialRef {
 };
 
 struct BoneRefArray {
-    int	boneCount;
+    int boneCount;
     const BoneNode **boneNodeArray;
 };
 
 struct BoneCount {
-    int	vertexCount;
+    int vertexCount;
     const unsigned short *boneCountArray;
     unsigned short *arrayStorage;
 };
 
 struct BoneIndex {
-    int	boneIndexCount;
+    int boneIndexCount;
     const unsigned short *boneIndexArray;
     unsigned short *arrayStorage;
 };

@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,23 +23,23 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
 /** @file RemoveRedundantMaterials.h
- *  @brief Defines a post processing step to remove redundant materials 
+ *  @brief Defines a post processing step to remove redundant materials
  */
 #ifndef AI_REMOVEREDUNDANTMATERIALS_H_INC
 #define AI_REMOVEREDUNDANTMATERIALS_H_INC
@@ -48,55 +48,55 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/mesh.h"
 
 class RemoveRedundantMatsTest;
-namespace Assimp	{
+namespace Assimp    {
 
 // ---------------------------------------------------------------------------
-/** RemoveRedundantMatsProcess: Post-processing step to remove redundant 
+/** RemoveRedundantMatsProcess: Post-processing step to remove redundant
  *  materials from the imported scene.
  */
 class ASSIMP_API RemoveRedundantMatsProcess : public BaseProcess
 {
 public:
     /// The default class constructor.
-	RemoveRedundantMatsProcess();
+    RemoveRedundantMatsProcess();
 
     /// The class destructor.
-	~RemoveRedundantMatsProcess();
+    ~RemoveRedundantMatsProcess();
 
 public:
-	// -------------------------------------------------------------------
-	// Check whether step is active
-	bool IsActive( unsigned int pFlags) const;
+    // -------------------------------------------------------------------
+    // Check whether step is active
+    bool IsActive( unsigned int pFlags) const;
 
-	// -------------------------------------------------------------------
-	// Execute step on a given scene
-	void Execute( aiScene* pScene);
+    // -------------------------------------------------------------------
+    // Execute step on a given scene
+    void Execute( aiScene* pScene);
 
-	// -------------------------------------------------------------------
-	// Setup import settings
-	void SetupProperties(const Importer* pImp);
+    // -------------------------------------------------------------------
+    // Setup import settings
+    void SetupProperties(const Importer* pImp);
 
 
-	// -------------------------------------------------------------------
-	/** @brief Set list of fixed (unmutable) materials
-	 *  @param fixed See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
-	 */
-	void SetFixedMaterialsString(const std::string& fixed = "") {
-		configFixedMaterials = fixed;
-	}
+    // -------------------------------------------------------------------
+    /** @brief Set list of fixed (unmutable) materials
+     *  @param fixed See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
+     */
+    void SetFixedMaterialsString(const std::string& fixed = "") {
+        configFixedMaterials = fixed;
+    }
 
-	// -------------------------------------------------------------------
-	/** @brief Get list of fixed (unmutable) materials
-	 *  @return See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
-	 */
-	const std::string& GetFixedMaterialsString() const {
-		return configFixedMaterials;
-	}
+    // -------------------------------------------------------------------
+    /** @brief Get list of fixed (unmutable) materials
+     *  @return See #AI_CONFIG_PP_RRM_EXCLUDE_LIST
+     */
+    const std::string& GetFixedMaterialsString() const {
+        return configFixedMaterials;
+    }
 
 private:
 
-	//! Configuration option: list of all fixed materials
-	std::string configFixedMaterials;
+    //! Configuration option: list of all fixed materials
+    std::string configFixedMaterials;
 };
 
 } // end of namespace Assimp

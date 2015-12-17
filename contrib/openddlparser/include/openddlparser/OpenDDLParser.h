@@ -39,6 +39,11 @@ struct Identifier;
 struct Reference;
 struct Property;
 
+///	@brief  Utility function to search for the next token or the end of the buffer.
+/// @param  in      [in] The start position in the buffer.
+/// @param  end     [in] The end position in the buffer.
+///	@return Pointer showing to the next token or the end of the buffer.
+///	@detail Will not increase buffer when already a valid buffer was found.
 template<class T>
 inline
 T *lookForNextToken( T *in, T *end ) {
@@ -48,13 +53,19 @@ T *lookForNextToken( T *in, T *end ) {
     return in;
 }
 
+///	@brief  Utility function to go for the next token or the end of the buffer.
+/// @param  in      [in] The start position in the buffer.
+/// @param  end     [in] The end position in the buffer.
+///	@return Pointer showing to the next token or the end of the buffer.
+///	@detail Will  increase buffer by a minimum of one.
 template<class T>
 inline
 T *getNextToken( T *in, T *end ) {
     T *tmp( in );
-    while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
+    in = lookForNextToken( in, end );
+    /*while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
         in++;
-    }
+    }*/
     if( tmp == in ) {
         in++;
     }
@@ -69,22 +80,78 @@ enum LogSeverity {
     ddl_error_msg       ///< Parser errors
 };
 
+DLL_ODDLPARSER_EXPORT const char *getTypeToken( Value::ValueType  type );
+
+//-------------------------------------------------------------------------------------------------
+///	@class		OpenDDLParser
+///	@ingroup	OpenDDLParser
+
+///
+///	@brief  This is the main API for the OpenDDL-parser.
+///
+/// Use instances of this class to manage the parsing and handling of your parser contexts.
+//-------------------------------------------------------------------------------------------------
 class DLL_ODDLPARSER_EXPORT OpenDDLParser {
 public:
+    ///	@brief  The log callback function pointer.
     typedef void( *logCallback )( LogSeverity severity, const std::string &msg );
 
 public:
+    ///	@brief  The default class constructor.
     OpenDDLParser();
+
+    ///	@brief  The class constructor.
+    ///	@param  buffer      [in] The buffer
+    ///	@param  len         [in] Size of the buffer
     OpenDDLParser( char *buffer, size_t len );
+
+    ///	@brief  The class destructor.
     ~OpenDDLParser();
+
+    ///	@brief  Setter for an own log callback function.
+    /// @param  callback    [in] The own callback.
     void setLogCallback( logCallback callback );
+
+    ///	@brief  Getter for the log callback.
+    /// @return The current log callback.
     logCallback getLogCallback() const;
+
+    ///	@brief  Assigns a new buffer to parse.
+    ///	@param  buffer      [in] The buffer
+    ///	@param  len         [in] Size of the buffer
     void setBuffer( char *buffer, size_t len );
+
+    ///	@brief  Assigns a new buffer to parse.
+    /// @param  buffer      [in] The buffer as a std::vector.
     void setBuffer( const std::vector<char> &buffer );
+
+    ///	@brief  Returns the buffer pointer.
+    /// @return The buffer pointer.
     const char *getBuffer() const;
+    
+    /// @brief  Returns the size of the buffer.
+    /// @return The buffer size.
     size_t getBufferSize() const;
+    
+    ///	@brief  Clears all parser data, including buffer and active context.
     void clear();
+
+    ///	@brief  Starts the parsing of the OpenDDL-file.
+    /// @return True in case of success, false in case of an error.
+    /// @remark In case of errors check log.
     bool parse();
+
+    bool exportContext( Context *ctx, const std::string &filename );
+
+    ///	@brief  Returns the root node.
+    /// @return The root node.
+    DDLNode *getRoot() const;
+
+    ///	@brief  Returns the parser context, only available in case of a succeeded parsing.
+    /// @return Pointer to the active context or ddl_nullptr.
+    Context *getContext() const;
+
+public: // parser helpers
     char *parseNextNode( char *current, char *end );
     char *parseHeader( char *in, char *end );
     char *parseStructure( char *in, char *end );
@@ -92,10 +159,6 @@ public:
     void pushNode( DDLNode *node );
     DDLNode *popNode();
     DDLNode *top();
-    DDLNode *getRoot() const;
-    Context *getContext() const;
-
-public: // static parser helpers
     static void normalizeBuffer( std::vector<char> &buffer );
     static char *parseName( char *in, char *end, Name **name );
     static char *parseIdentifier( char *in, char *end, Identifier **id );
@@ -107,7 +170,7 @@ public: // static parser helpers
     static char *parseStringLiteral( char *in, char *end, Value **stringData );
     static char *parseHexaLiteral( char *in, char *end, Value **data );
     static char *parseProperty( char *in, char *end, Property **prop );
-    static char *parseDataList( char *in, char *end, Value **data, size_t &numValues, Reference **refs, size_t &numRefs );
+    static char *parseDataList( char *in, char *end, Value::ValueType type, Value **data, size_t &numValues, Reference **refs, size_t &numRefs );
     static char *parseDataArrayList( char *in, char *end, DataArrayList **dataList );
     static const char *getVersion();
 

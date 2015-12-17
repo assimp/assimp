@@ -27,8 +27,82 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
-Value::Value()
-: m_type( ddl_none )
+static Value::Iterator end( ddl_nullptr );
+
+Value::Iterator::Iterator()
+: m_start( ddl_nullptr )
+, m_current( ddl_nullptr ) {
+    // empty
+}
+
+Value::Iterator::Iterator( Value *start )
+: m_start( start )
+, m_current( start ) {
+    // empty
+}
+
+Value::Iterator::Iterator( const Iterator &rhs )
+: m_start( rhs.m_start )
+, m_current( rhs.m_current ) {
+    // empty
+}
+
+Value::Iterator::~Iterator() {
+    // empty
+}
+
+bool Value::Iterator::hasNext() const {
+    if( ddl_nullptr == m_current ) {
+        return false;
+    }
+    return ( ddl_nullptr != m_current->getNext() );
+}
+
+Value *Value::Iterator::getNext() {
+    if( !hasNext() ) {
+        return ddl_nullptr;
+    }
+
+    Value *v( m_current->getNext() );
+    m_current = v;
+
+    return v;
+}
+
+const Value::Iterator Value::Iterator::operator++( int ) {
+    if( ddl_nullptr == m_current ) {
+        return end;
+    }
+
+    m_current = m_current->getNext();
+    Iterator inst( m_current );
+
+    return inst;
+}
+
+Value::Iterator &Value::Iterator::operator++( ) {
+    if( ddl_nullptr == m_current ) {
+        return end;
+    }
+
+    m_current = m_current->getNext();
+
+    return *this;
+}
+
+bool Value::Iterator::operator == ( const Iterator &rhs ) const {
+    return ( m_current == rhs.m_current );
+}
+
+Value *Value::Iterator::operator->( ) const {
+    if(ddl_nullptr == m_current ) {
+        return ddl_nullptr;
+    }
+    return m_current;
+}
+
+Value::Value( ValueType type )
+: m_type( type )
 , m_size( 0 )
 , m_data( ddl_nullptr )
 , m_next( ddl_nullptr ) {
@@ -46,7 +120,7 @@ void Value::setBool( bool value ) {
 
 bool Value::getBool() {
     assert( ddl_bool == m_type );
-    return ( bool ) ( *m_data );
+    return ( *m_data == 1 );
 }
 
 void Value::setInt8( int8 value ) {
@@ -66,7 +140,9 @@ void Value::setInt16( int16 value ) {
 
 int16 Value::getInt16() {
     assert( ddl_int16 == m_type );
-    return ( int16 ) ( *m_data );
+    int16 i;
+    ::memcpy( &i, m_data, m_size );
+    return i;
 }
 
 void Value::setInt32( int32 value ) {
@@ -76,16 +152,21 @@ void Value::setInt32( int32 value ) {
 
 int32 Value::getInt32() {
     assert( ddl_int32 == m_type );
-    return ( int32 ) ( *m_data );
+    int32 i;
+    ::memcpy( &i, m_data, m_size );
+    return i;
 }
 
 void Value::setInt64( int64 value ) {
-    assert( ddl_int32 == m_type );
+    assert( ddl_int64 == m_type );
     ::memcpy( m_data, &value, m_size );
 }
 
 int64 Value::getInt64() {
-    return ( int64 ) ( *m_data );
+    assert( ddl_int64 == m_type );
+    int64 i;
+    ::memcpy( &i, m_data, m_size );
+    return i;
 }
 
 void Value::setUnsignedInt8( uint8 value ) {
@@ -95,7 +176,9 @@ void Value::setUnsignedInt8( uint8 value ) {
 
 uint8 Value::getUnsignedInt8() const {
     assert( ddl_unsigned_int8 == m_type );
-    return ( uint8 ) ( *m_data );
+    uint8 i;
+    ::memcpy( &i, m_data, m_size );
+    return i;
 }
 
 void Value::setUnsignedInt16( uint16 value ) {
@@ -105,7 +188,9 @@ void Value::setUnsignedInt16( uint16 value ) {
 
 uint16 Value::getUnsignedInt16() const {
     assert( ddl_unsigned_int16 == m_type );
-    return ( uint8 ) ( *m_data );
+    uint16 i;
+    ::memcpy( &i, m_data, m_size );
+    return i;
 }
 
 void Value::setUnsignedInt32( uint32 value ) {
@@ -115,7 +200,9 @@ void Value::setUnsignedInt32( uint32 value ) {
 
 uint32 Value::getUnsignedInt32() const {
     assert( ddl_unsigned_int32 == m_type );
-    return ( uint8 ) ( *m_data );
+    uint32 i;
+    ::memcpy( &i, m_data, m_size );
+    return i;
 }
 
 void Value::setUnsignedInt64( uint64 value ) {
@@ -125,7 +212,9 @@ void Value::setUnsignedInt64( uint64 value ) {
 
 uint64 Value::getUnsignedInt64() const {
     assert( ddl_unsigned_int64 == m_type );
-    return ( uint64 ) ( *m_data );
+    uint64 i;
+    ::memcpy( &i, m_data, m_size );
+    return i;
 }
 
 void Value::setFloat( float value ) {
@@ -151,6 +240,7 @@ void Value::setDouble( double value ) {
 }
 
 double Value::getDouble() const {
+    assert( ddl_double == m_type );
     double v;
     ::memcpy( &v, m_data, m_size );
     return v;
@@ -162,6 +252,7 @@ void Value::setString( const std::string &str ) {
     m_data[ str.size() ] = '\0';
 }
 const char *Value::getString() const {
+    assert( ddl_string == m_type );
     return (const char*) m_data;
 }
 
@@ -230,29 +321,32 @@ Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
         return ddl_nullptr;
     }
 
-    Value *data = new Value;
+    Value *data = new Value( type );
     data->m_type = type;
     switch( type ) {
         case Value::ddl_bool:
             data->m_size = sizeof( bool );
             break;
         case Value::ddl_int8:
-            data->m_size = sizeof( char );
+            data->m_size = sizeof( int8 );
             break;
         case Value::ddl_int16:
-            data->m_size = sizeof( short );
+            data->m_size = sizeof( int16 );
             break;
         case Value::ddl_int32:
-            data->m_size = sizeof( int );
+            data->m_size = sizeof( int32 );
             break;
         case Value::ddl_int64:
             data->m_size = sizeof( int64 );
             break;
         case Value::ddl_unsigned_int8:
-            data->m_size = sizeof( unsigned char );
+            data->m_size = sizeof( uint8 );
+            break;
+        case Value::ddl_unsigned_int16:
+            data->m_size = sizeof( uint16 );
             break;
         case Value::ddl_unsigned_int32:
-            data->m_size = sizeof( unsigned int );
+            data->m_size = sizeof( uint32 );
             break;
         case Value::ddl_unsigned_int64:
             data->m_size = sizeof( uint64 );

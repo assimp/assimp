@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @author: Richard Steffen, 2014
@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct aiScene;
 struct aiNode;
 
-namespace Assimp	
+namespace Assimp
 {
 
 /// Helper class to export a given scene to a StepFile.
@@ -63,44 +63,44 @@ namespace Assimp
 class StepExporter
 {
 public:
-	/// Constructor for a specific scene to export
-	StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
+    /// Constructor for a specific scene to export
+    StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties);
 
 protected:
-	/// Starts writing the contents
-	void WriteFile();	
+    /// Starts writing the contents
+    void WriteFile();
 
 public:
 
-	/// Stringstream to write all output into
-	std::stringstream mOutput;
+    /// Stringstream to write all output into
+    std::stringstream mOutput;
 
 protected:
 
-	/// hold the properties pointer
-	const ExportProperties* mProperties;	
+    /// hold the properties pointer
+    const ExportProperties* mProperties;
 
-	/// The IOSystem for output
-	IOSystem* mIOSystem;
+    /// The IOSystem for output
+    IOSystem* mIOSystem;
 
-	/// Name of the file (without extension) where the scene will be exported
-	std::string mFile;
+    /// Name of the file (without extension) where the scene will be exported
+    std::string mFile;
 
-	/// Path of the directory where the scene will be exported
-	std::string mPath;	
+    /// Path of the directory where the scene will be exported
+    std::string mPath;
 
-	/// The scene to be written
-	const aiScene* mScene;
+    /// The scene to be written
+    const aiScene* mScene;
 
-	/// current line end string for simple stream insertion
-	std::string endstr;
+    /// current line end string for simple stream insertion
+    std::string endstr;
 
-	/// accumultated transformations for nodes
-	std::map<const aiNode*, aiMatrix4x4> trafos;
+    /// accumultated transformations for nodes
+    std::map<const aiNode*, aiMatrix4x4> trafos;
 
-	/// map to all meshed of nodes
-	typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
-	MeshesByNodeMap meshes;
+    /// map to all meshed of nodes
+    typedef std::multimap<const aiNode*, unsigned int> MeshesByNodeMap;
+    MeshesByNodeMap meshes;
 
 };
 

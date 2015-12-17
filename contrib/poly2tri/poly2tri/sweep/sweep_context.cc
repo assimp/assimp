@@ -164,7 +164,7 @@ void SweepContext::RemoveFromMap(Triangle* triangle)
 
 void SweepContext::MeshClean(Triangle& triangle)
 {
-  if (&triangle != NULL && !triangle.IsInterior()) {
+  if (!triangle.IsInterior()) {
     triangle.IsInterior(true);
     triangles_.push_back(&triangle);
     for (int i = 0; i < 3; i++) {

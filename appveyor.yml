@@ -1,0 +1,21 @@
+# AppVeyor file
+# http://www.appveyor.com/docs/appveyor-yml
+
+# clone directory
+clone_folder: c:\projects\assimp
+
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+
+platform: x64
+configuration: Release
+
+build:
+
+build_script:
+ - cd c:\projects\assimp
+ - cmake CMakeLists.txt -G "Visual Studio 11" 
+ - msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln

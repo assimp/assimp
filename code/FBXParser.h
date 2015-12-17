@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -60,18 +60,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-	class Scope;
-	class Parser;
-	class Element;
+    class Scope;
+    class Parser;
+    class Element;
 
-	// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
-	typedef std::vector< Scope* > ScopeList;
-	typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
+    // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+    typedef std::vector< Scope* > ScopeList;
+    typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
-	typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
+    typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
 
-#	define new_Scope new Scope
-#	define new_Element new Element
+#   define new_Scope new Scope
+#   define new_Element new Element
 
 
 /** FBX data entity that consists of a key:value tuple.
@@ -89,28 +89,28 @@ class Element
 {
 public:
 
-	Element(const Token& key_token, Parser& parser);
-	~Element();
+    Element(const Token& key_token, Parser& parser);
+    ~Element();
 
 public:
 
-	const Scope* Compound() const {
-		return compound.get();
-	}
+    const Scope* Compound() const {
+        return compound.get();
+    }
 
-	const Token& KeyToken() const {
-		return key_token;
-	}
+    const Token& KeyToken() const {
+        return key_token;
+    }
 
-	const TokenList& Tokens() const {
-		return tokens;
-	}
+    const TokenList& Tokens() const {
+        return tokens;
+    }
 
 private:
 
-	const Token& key_token;
-	TokenList tokens;
-	boost::scoped_ptr<Scope> compound;
+    const Token& key_token;
+    TokenList tokens;
+    boost::scoped_ptr<Scope> compound;
 };
 
 
@@ -122,7 +122,7 @@ private:
  *  @verbatim
  *    GlobalSettings:  {
  *        Version: 1000
- *        Properties70: 
+ *        Properties70:
  *        [...]
  *    }
  *  @endverbatim  */
@@ -131,73 +131,73 @@ class Scope
 
 public:
 
-	Scope(Parser& parser, bool topLevel = false);
-	~Scope();
+    Scope(Parser& parser, bool topLevel = false);
+    ~Scope();
 
 public:
 
-	const Element* operator[] (const std::string& index) const {
-		ElementMap::const_iterator it = elements.find(index);
-		return it == elements.end() ? NULL : (*it).second;
-	}
+    const Element* operator[] (const std::string& index) const {
+        ElementMap::const_iterator it = elements.find(index);
+        return it == elements.end() ? NULL : (*it).second;
+    }
 
-	ElementCollection GetCollection(const std::string& index) const {
-		return elements.equal_range(index);
-	}
+    ElementCollection GetCollection(const std::string& index) const {
+        return elements.equal_range(index);
+    }
 
-	const ElementMap& Elements() const	{
-		return elements;
-	}
+    const ElementMap& Elements() const  {
+        return elements;
+    }
 
 private:
 
-	ElementMap elements;
+    ElementMap elements;
 };
 
 
 /** FBX parsing class, takes a list of input tokens and generates a hierarchy
  *  of nested #Scope instances, representing the fbx DOM.*/
-class Parser 
+class Parser
 {
 public:
-	
-	/** Parse given a token list. Does not take ownership of the tokens -
-	 *  the objects must persist during the entire parser lifetime */
-	Parser (const TokenList& tokens,bool is_binary);
-	~Parser();
+
+    /** Parse given a token list. Does not take ownership of the tokens -
+     *  the objects must persist during the entire parser lifetime */
+    Parser (const TokenList& tokens,bool is_binary);
+    ~Parser();
 
 public:
 
-	const Scope& GetRootScope() const {
-		return *root.get();
-	}
+    const Scope& GetRootScope() const {
+        return *root.get();
+    }
 
 
-	bool IsBinary() const {
-		return is_binary;
-	}
-
-private:
-
-	friend class Scope;
-	friend class Element;
-
-	TokenPtr AdvanceToNextToken();
-
-	TokenPtr LastToken() const;
-	TokenPtr CurrentToken() const;
-
-	
+    bool IsBinary() const {
+        return is_binary;
+    }
 
 private:
 
-	const TokenList& tokens;
-	
-	TokenPtr last, current;
-	TokenList::const_iterator cursor;
-	boost::scoped_ptr<Scope> root;
+    friend class Scope;
+    friend class Element;
 
-	const bool is_binary;
+    TokenPtr AdvanceToNextToken();
+
+    TokenPtr LastToken() const;
+    TokenPtr CurrentToken() const;
+
+
+
+private:
+
+    const TokenList& tokens;
+
+    TokenPtr last, current;
+    TokenList::const_iterator cursor;
+    boost::scoped_ptr<Scope> root;
+
+    const bool is_binary;
 };
 
 

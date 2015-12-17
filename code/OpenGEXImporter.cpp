@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 
-#include <algorithm>
 #include <vector>
 
 static const aiImporterDesc desc = {
@@ -64,26 +63,34 @@ static const aiImporterDesc desc = {
 };
 
 namespace Grammar {
-    static const char *MetricType          = "Metric";
-    static const char *Metric_DistanceType = "distance";
-    static const char *Metric_AngleType    = "angle";
-    static const char *Metric_TimeType     = "time";
-    static const char *Metric_UpType       = "up";
-    static const char *NameType            = "Name";
-    static const char *ObjectRefType       = "ObjectRef";
-    static const char *MaterialRefType     = "MaterialRef";
-    static const char *MetricKeyType       = "key";
-    static const char *GeometryNodeType    = "GeometryNode";
-    static const char *GeometryObjectType  = "GeometryObject";
-    static const char *TransformType       = "Transform";
-    static const char *MeshType            = "Mesh";
-    static const char *VertexArrayType     = "VertexArray";
-    static const char *IndexArrayType      = "IndexArray";
-    static const char *MaterialType        = "Material";
-    static const char *ColorType           = "Color";
+    static const std::string MetricType = "Metric";
+    static const std::string Metric_DistanceType = "distance";
+    static const std::string Metric_AngleType = "angle";
+    static const std::string Metric_TimeType = "time";
+    static const std::string Metric_UpType = "up";
+    static const std::string NameType = "Name";
+    static const std::string ObjectRefType = "ObjectRef";
+    static const std::string MaterialRefType = "MaterialRef";
+    static const std::string MetricKeyType = "key";
+    static const std::string GeometryNodeType = "GeometryNode";
+    static const std::string GeometryObjectType = "GeometryObject";
+    static const std::string TransformType = "Transform";
+    static const std::string MeshType = "Mesh";
+    static const std::string VertexArrayType = "VertexArray";
+    static const std::string IndexArrayType = "IndexArray";
+    static const std::string MaterialType = "Material";
+    static const std::string ColorType = "Color";
     static const std::string DiffuseColorToken = "diffuse";
     static const std::string SpecularColorToken = "specular";
     static const std::string EmissionColorToken = "emission";
+
+    static const std::string DiffuseTextureToken = "diffuse";
+    static const std::string DiffuseSpecularTextureToken = "specular";
+    static const std::string SpecularPowerTextureToken = "specular_power";
+    static const std::string EmissionTextureToken = "emission";
+    static const std::string OpacyTextureToken = "opacity";
+    static const std::string TransparencyTextureToken = "transparency";
+    static const std::string NormalTextureToken = "normal";
 
     static const char *TextureType         = "Texture";
 
@@ -105,7 +112,7 @@ namespace Grammar {
         TextureToken
     };
 
-    static const char *ValidMetricToken[ 4 ] = {
+    static const std::string ValidMetricToken[ 4 ] = {
         Metric_DistanceType,
         Metric_AngleType,
         Metric_TimeType,
@@ -119,7 +126,7 @@ namespace Grammar {
 
         int idx( -1 );
         for( size_t i = 0; i < 4; i++ ) {
-            if( 0 == strncmp( ValidMetricToken[ i ], token, strlen( token ) ) ) {
+            if( ValidMetricToken[ i ] == token ) {
                 idx = (int) i;
                 break;
             }
@@ -129,45 +136,33 @@ namespace Grammar {
     }
 
     static TokenType matchTokenType( const char *tokenType ) {
-        if( 0 == strncmp( MetricType, tokenType, strlen( MetricType ) ) ) {
+        if( MetricType == tokenType ) {
             return MetricToken;
-        } else if( 0 == strncmp( NameType, tokenType, strlen( NameType ) ) ) {
+        } else if(  NameType == tokenType ) {
             return NameToken;
-        }
-        else if( 0 == strncmp( ObjectRefType, tokenType, strlen( ObjectRefType ) ) ) {
+        } else if( ObjectRefType == tokenType ) {
             return ObjectRefToken;
-        }
-        else if( 0 == strncmp( MaterialRefType, tokenType, strlen( MaterialRefType ) ) ) {
-            return MaterialRefToken; 
-        }
-        else if( 0 == strncmp( MetricKeyType, tokenType, strlen( MetricKeyType ) ) ) {
+        } else if( MaterialRefType == tokenType ) {
+            return MaterialRefToken;
+        } else if( MetricKeyType == tokenType ) {
             return MetricKeyToken;
-        }
-        else if( 0 == strncmp( GeometryNodeType, tokenType, strlen( GeometryNodeType ) ) ) {
+        } else if( GeometryNodeType == tokenType ) {
             return GeometryNodeToken;
-        }
-        else if( 0 == strncmp( GeometryObjectType, tokenType, strlen( GeometryObjectType ) ) ) {
+        } else if( GeometryObjectType == tokenType ) {
             return GeometryObjectToken;
-        }
-        else if( 0 == strncmp( TransformType, tokenType, strlen( TransformType ) ) ) {
+        } else if( TransformType == tokenType ) {
             return TransformToken;
-        }
-        else if( 0 == strncmp( MeshType, tokenType, strlen( MeshType ) ) ) {
+        } else if( MeshType == tokenType ) {
             return MeshToken;
-        }
-        else if( 0 == strncmp( VertexArrayType, tokenType, strlen( VertexArrayType ) ) ) {
+        } else if( VertexArrayType == tokenType ) {
             return VertexArrayToken;
-        }
-        else if( 0 == strncmp( IndexArrayType, tokenType, strlen( IndexArrayType ) ) ) {
+        } else if( IndexArrayType == tokenType ) {
             return IndexArrayToken;
-        }
-        else if( 0 == strncmp( MaterialType, tokenType, strlen( MaterialType ) ) ) {
+        } else if(  MaterialType == tokenType ) {
             return MaterialToken;
-        }
-        else if( 0 == strncmp( ColorType, tokenType, strlen( ColorType ) ) ) {
+        } else if( ColorType == tokenType ) {
             return ColorToken;
-        }
-        else if( 0 == strncmp( TextureType, tokenType, strlen( TextureType ) ) ) {
+        } else if(  TextureType == tokenType ) {
             return TextureToken;
         }
 
@@ -186,9 +181,9 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
 , m_vertices(NULL)
 , m_numNormals( 0 )
-, m_normals(NULL) {
-    std::fill(&m_numUVComps[0], &m_numUVComps[AI_MAX_NUMBER_OF_TEXTURECOORDS], 0U);
-    std::fill(&m_textureCoords[0], &m_textureCoords[AI_MAX_NUMBER_OF_TEXTURECOORDS], static_cast<aiVector3D *>(NULL));
+, m_normals(NULL)
+, m_numUVComps()
+, m_textureCoords() {
 }
 
 //------------------------------------------------------------------------------------------------
@@ -214,19 +209,19 @@ OpenGEXImporter::RefInfo::~RefInfo() {
 }
 
 //------------------------------------------------------------------------------------------------
-OpenGEXImporter::OpenGEXImporter() 
+OpenGEXImporter::OpenGEXImporter()
 : m_root( NULL )
 , m_nodeChildMap()
 , m_meshCache()
 , m_mesh2refMap()
 , m_ctx( NULL )
+, m_metrics()
 , m_currentNode( NULL )
 , m_currentMesh( NULL )
 , m_currentMaterial( NULL )
 , m_tokenType( Grammar::NoneType )
 , m_nodeStack()
 , m_unresolvedRefStack() {
-    std::fill(&m_metrics[0], &m_metrics[MetricInfo::Max], MetricInfo());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -292,7 +287,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
     }
 
     DDLNode::DllNodeList childs = node->getChildNodeList();
-    for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); it++ ) {
+    for( DDLNode::DllNodeList::iterator it = childs.begin(); it != childs.end(); ++it ) {
         Grammar::TokenType tokenType( Grammar::matchTokenType( ( *it )->getType().c_str() ) );
         switch( tokenType ) {
             case Grammar::MetricToken:
@@ -349,7 +344,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
             case Grammar::TextureToken:
                 handleTextureNode( *it, pScene );
                 break;
-            
+
             default:
                 break;
         }
@@ -410,7 +405,7 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
         if( m_tokenType == Grammar::GeometryNodeToken ) {
             m_currentNode->mName.Set( name.c_str() );
         } else if( m_tokenType == Grammar::MaterialToken ) {
-            
+
         }
 
     }
@@ -471,7 +466,7 @@ void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
     m_tokenType = Grammar::GeometryNodeToken;
     m_currentNode = newNode;
     handleNodes( node, pScene );
-    
+
     popNode();
 }
 
@@ -494,26 +489,27 @@ static void setMatrix( aiNode *node, DataArrayList *transformData ) {
         next = next->m_next;
         i++;
     }
-    
+
     node->mTransformation.a1 = m[ 0 ];
-    node->mTransformation.a2 = m[ 1 ];
-    node->mTransformation.a3 = m[ 2 ];
-    node->mTransformation.a4 = m[ 3 ];
+    node->mTransformation.a2 = m[ 4 ];
+    node->mTransformation.a3 = m[ 8 ];
+    node->mTransformation.a4 = m[ 12 ];
 
-    node->mTransformation.b1 = m[ 4 ];
+    node->mTransformation.b1 = m[ 1 ];
     node->mTransformation.b2 = m[ 5 ];
-    node->mTransformation.b3 = m[ 6 ];
-    node->mTransformation.b4 = m[ 7 ];
+    node->mTransformation.b3 = m[ 9 ];
+    node->mTransformation.b4 = m[ 13 ];
 
-    node->mTransformation.c1 = m[ 8 ];
-    node->mTransformation.c2 = m[ 9 ];
+    node->mTransformation.c1 = m[ 2 ];
+    node->mTransformation.c2 = m[ 6 ];
     node->mTransformation.c3 = m[ 10 ];
-    node->mTransformation.c4 = m[ 11 ];
+    node->mTransformation.c4 = m[ 14 ];
 
-    node->mTransformation.d1 = m[ 12 ];
-    node->mTransformation.d2 = m[ 13 ];
-    node->mTransformation.d3 = m[ 14 ];
+    node->mTransformation.d1 = m[ 3 ];
+    node->mTransformation.d2 = m[ 7 ];
+    node->mTransformation.d3 = m[ 11 ];
     node->mTransformation.d4 = m[ 15 ];
+
 }
 
 //------------------------------------------------------------------------------------------------
@@ -531,7 +527,7 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *p
             return;
         }
         setMatrix( m_currentNode, transformData );
-    } 
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -554,7 +550,7 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
     m_currentMesh = new aiMesh;
     const size_t meshidx( m_meshCache.size() );
     m_meshCache.push_back( m_currentMesh );
-    
+
     Property *prop = node->getProperties();
     if( NULL != prop ) {
         std::string propName, propKey;
@@ -727,7 +723,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
             m_currentMesh->mTextureCoords[0][ index ].Set( tex.x, tex.y, tex.z );
             current.mIndices[ indices ] = index;
             index++;
-            
+
             next = next->m_next;
         }
         vaList = vaList->m_next;
@@ -739,7 +735,7 @@ static void getColorRGB( aiColor3D *pColor, DataArrayList *colList ) {
     if( NULL == pColor || NULL == colList ) {
         return;
     }
-    
+
     ai_assert( 3 == colList->m_numItems );
     Value *val( colList->m_dataList );
     pColor->r = val->getFloat();
@@ -806,8 +802,55 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
 }
 
 //------------------------------------------------------------------------------------------------
-void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+bool isSpecialRootDir(aiString &texName) {
+    if (texName.length < 2) {
+        return false;
+    }
 
+    if (texName.data[0] = '/' || texName.data[1] == '/') {
+        return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if( NULL == node ) {
+        return;
+    }
+
+    Property *prop = node->findPropertyByName( "attrib" );
+    if( NULL != prop ) {
+        if( NULL != prop->m_value ) {
+            Value *val( node->getValue() );
+            if( NULL != val ) {
+                aiString tex;
+                tex.Set( val->getString() );
+                if( prop->m_value->getString() == Grammar::DiffuseTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
+                } else if( prop->m_value->getString() == Grammar::SpecularPowerTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_SPECULAR( 0 ) );
+
+                } else if( prop->m_value->getString() == Grammar::EmissionTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_EMISSIVE( 0 ) );
+
+                } else if( prop->m_value->getString() == Grammar::OpacyTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_OPACITY( 0 ) );
+
+                } else if( prop->m_value->getString() == Grammar::TransparencyTextureToken ) {
+                    // ToDo!
+                    // m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
+                } else if( prop->m_value->getString() == Grammar::NormalTextureToken ) {
+                    m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_NORMALS( 0 ) );
+
+                }
+                else {
+                    ai_assert( false );
+                }
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------
@@ -815,7 +858,7 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
     if( m_meshCache.empty() ) {
         return;
     }
-    
+
     pScene->mNumMeshes = m_meshCache.size();
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
     std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
@@ -904,10 +947,10 @@ aiNode *OpenGEXImporter::popNode() {
     if( m_nodeStack.empty() ) {
         return NULL;
     }
-    
+
     aiNode *node( top() );
     m_nodeStack.pop_back();
-    
+
     return node;
 }
 

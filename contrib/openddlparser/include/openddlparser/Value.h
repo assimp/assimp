@@ -28,6 +28,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
+struct ValueAllocator;
+
 ///------------------------------------------------------------------------------------------------
 ///	@brief  This class implements a value.
 ///
@@ -36,7 +38,65 @@ BEGIN_ODDLPARSER_NS
 /// Values can be single items or lists of items. They are implemented as linked lists.
 ///------------------------------------------------------------------------------------------------
 class DLL_ODDLPARSER_EXPORT Value {
+    friend struct ValueAllocator;
+
 public:
+    ///	@brief  This class implements an iterator through a Value list.
+    ///	
+    /// When getting a new value you need to know how to iterate through it. The Value::Iterator 
+    /// will help you here:
+    ///	@code
+    /// Value *val = node->getValue();
+    /// Value::Iterator it( val );
+    /// while( it.hasNext() ) {
+    ///     Value v( it.getNext );
+    /// }
+    /// @endcode
+    class DLL_ODDLPARSER_EXPORT Iterator {
+    public:
+        ///	@brief  The default class constructor.
+        Iterator();
+
+        ///	@brief  The class constructor with the start value.
+        /// @param  start   [in] The first value for iteration,
+        Iterator( Value *start );
+
+        Iterator( const Iterator &rhs );
+
+        ///	@brief  The class destructor.
+        ~Iterator();
+
+        ///	@brief  Will return true, if another value is in the list.
+        /// @return true if another value is there.
+        bool hasNext() const;
+
+        ///	@brief  Returns the next item and moves the iterator to it.
+        ///	@return The next value, is ddl_nullptr in case of being the last item.
+        Value *getNext();
+        
+        ///	@brief  The post-increment operator.
+        const Iterator operator++( int );
+        
+        ///	@brief  The pre-increment operator.
+        Iterator &operator++( );
+
+        ///	@brief  The compare operator.
+        /// @param  rhs [in] The instance to compare.
+        /// @return true if equal.
+        bool operator == ( const Iterator &rhs ) const;
+
+        /// @brief  The * operator.
+        /// @return The instance or ddl_nullptr if end of list is reached.
+        Value *operator->( ) const;
+
+    private:
+        Value *m_start;
+        Value *m_current;
+
+    private:
+        Iterator &operator = ( const Iterator & );
+    };
+
     ///	@brief  This enum describes the data type stored in the value.
     enum ValueType {
         ddl_none = -1,          ///< Nothing specified
@@ -57,7 +117,7 @@ public:
         ddl_types_max
     };
 
-    Value();
+    Value( ValueType type );
     ~Value();
     void setBool( bool value );
     bool getBool();
@@ -91,11 +151,23 @@ public:
     size_t m_size;
     unsigned char *m_data;
     Value *m_next;
+
+private:
+    Value &operator =( const Value & );
+    Value( const Value  & );
 };
 
+///------------------------------------------------------------------------------------------------
+///	@brief  This class implements the value allocator.
+///------------------------------------------------------------------------------------------------
 struct DLL_ODDLPARSER_EXPORT ValueAllocator {
     static Value *allocPrimData( Value::ValueType type, size_t len = 1 );
     static void releasePrimData( Value **data );
+
+private:
+    ValueAllocator();
+    ValueAllocator( const ValueAllocator  & );
+    ValueAllocator &operator = ( const ValueAllocator & );
 };
 
 END_ODDLPARSER_NS

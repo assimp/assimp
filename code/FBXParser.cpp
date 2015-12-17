@@ -125,13 +125,20 @@ Element::Element(const Token& key_token, Parser& parser)
 
         if (n->Type() == TokenType_DATA) {
             tokens.push_back(n);
-
+			TokenPtr prev = n;
             n = parser.AdvanceToNextToken();
             if(!n) {
                 ParseError("unexpected end of file, expected bracket, comma or key",parser.LastToken());
             }
 
-            const TokenType ty = n->Type();
+			const TokenType ty = n->Type();
+
+			// some exporters are missing a comma on the next line
+			if (ty == TokenType_DATA && prev->Type() == TokenType_DATA && (n->Line() == prev->Line() + 1)) {
+				tokens.push_back(n);
+				continue;
+			}
+
             if (ty != TokenType_OPEN_BRACKET && ty != TokenType_CLOSE_BRACKET && ty != TokenType_COMMA && ty != TokenType_KEY) {
                 ParseError("unexpected token; expected bracket, comma or key",n);
             }

@@ -116,6 +116,8 @@ public:
     /** @brief Normalize the vector */
     aiVector3t& Normalize();
 
+    /** @brief Normalize the vector with extra check for zero vectors */
+    aiVector3t& NormalizeSafe();
 
     /** @brief Componentwise multiplication of two vectors
      *

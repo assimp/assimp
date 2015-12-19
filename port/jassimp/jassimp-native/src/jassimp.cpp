@@ -15,9 +15,32 @@
 #define lprintf
 #endif
 
+// Automatically deletes a local ref when it goes out of scope
+class SmartLocalRef {
+private:
+    JNIEnv* mJniEnv;
+    jobject& mJavaObj;
+    SmartLocalRef(const SmartLocalRef&); // non construction-copyable
+    SmartLocalRef& operator=(const SmartLocalRef&); // non copyable
+
+public:
+    template<class T> SmartLocalRef(JNIEnv* env, T& object)
+    : mJniEnv(env)
+    , mJavaObj((jobject&)object)
+    {
+    };
+
+    ~SmartLocalRef() {
+        if (mJavaObj != NULL) {
+            mJniEnv->DeleteLocalRef(mJavaObj);
+        }
+    }
+};
+
 static bool createInstance(JNIEnv *env, const char* className, jobject& newInstance)
 {
 	jclass clazz = env->FindClass(className);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -34,7 +57,6 @@ static bool createInstance(JNIEnv *env, const char* className, jobject& newInsta
 	}
 
 	newInstance = env->NewObject(clazz, ctr_id);
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == newInstance) 
 	{
@@ -49,6 +71,7 @@ static bool createInstance(JNIEnv *env, const char* className, jobject& newInsta
 static bool createInstance(JNIEnv *env, const char* className, const char* signature,/* const*/ jvalue* params, jobject& newInstance)
 {
 	jclass clazz = env->FindClass(className);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -65,7 +88,6 @@ static bool createInstance(JNIEnv *env, const char* className, const char* signa
 	}
 
 	newInstance = env->NewObjectA(clazz, ctr_id, params);
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == newInstance) 
 	{
@@ -80,6 +102,7 @@ static bool createInstance(JNIEnv *env, const char* className, const char* signa
 static bool getField(JNIEnv *env, jobject object, const char* fieldName, const char* signature, jobject& field)
 {
 	jclass clazz = env->GetObjectClass(object);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -88,7 +111,6 @@ static bool getField(JNIEnv *env, jobject object, const char* fieldName, const c
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, signature);
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -105,6 +127,7 @@ static bool getField(JNIEnv *env, jobject object, const char* fieldName, const c
 static bool setIntField(JNIEnv *env, jobject object, const char* fieldName, jint value)
 {
 	jclass clazz = env->GetObjectClass(object);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -113,7 +136,6 @@ static bool setIntField(JNIEnv *env, jobject object, const char* fieldName, jint
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, "I");
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -130,6 +152,7 @@ static bool setIntField(JNIEnv *env, jobject object, const char* fieldName, jint
 static bool setFloatField(JNIEnv *env, jobject object, const char* fieldName, jfloat value)
 {
 	jclass clazz = env->GetObjectClass(object);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -138,7 +161,6 @@ static bool setFloatField(JNIEnv *env, jobject object, const char* fieldName, jf
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, "F");
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -155,6 +177,7 @@ static bool setFloatField(JNIEnv *env, jobject object, const char* fieldName, jf
 static bool setObjectField(JNIEnv *env, jobject object, const char* fieldName, const char* signature, jobject value)
 {
 	jclass clazz = env->GetObjectClass(object);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -163,7 +186,6 @@ static bool setObjectField(JNIEnv *env, jobject object, const char* fieldName, c
 	}
 
 	jfieldID fieldId = env->GetFieldID(clazz, fieldName, signature);
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == fieldId)
 	{
@@ -180,6 +202,7 @@ static bool setObjectField(JNIEnv *env, jobject object, const char* fieldName, c
 static bool getStaticField(JNIEnv *env, const char* className, const char* fieldName, const char* signature, jobject& field)
 {
 	jclass clazz = env->FindClass(className);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -205,6 +228,7 @@ static bool call(JNIEnv *env, jobject object, const char* typeName, const char* 
 	const char* signature,/* const*/ jvalue* params)
 {
 	jclass clazz = env->FindClass(typeName);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -213,7 +237,6 @@ static bool call(JNIEnv *env, jobject object, const char* typeName, const char* 
 	}
 
 	jmethodID mid = env->GetMethodID(clazz, methodName, signature);
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == mid)
 	{
@@ -228,6 +251,7 @@ static bool call(JNIEnv *env, jobject object, const char* typeName, const char* 
 static bool callv(JNIEnv *env, jobject object, const char* typeName,
 		const char* methodName, const char* signature,/* const*/ jvalue* params) {
 	jclass clazz = env->FindClass(typeName);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz) {
 		lprintf("could not find class %s\n", typeName);
@@ -235,7 +259,6 @@ static bool callv(JNIEnv *env, jobject object, const char* typeName,
 	}
 
 	jmethodID mid = env->GetMethodID(clazz, methodName, signature);
-	env->DeleteLocalRef(clazz);
 
 	if (NULL == mid) {
 		lprintf("could not find method %s with signature %s in type %s\n", methodName, signature, typeName);
@@ -252,6 +275,7 @@ static bool callStaticObject(JNIEnv *env, const char* typeName, const char* meth
 	const char* signature,/* const*/ jvalue* params, jobject& returnValue)
 {
 	jclass clazz = env->FindClass(typeName);
+	SmartLocalRef clazzRef(env, clazz);
 
 	if (NULL == clazz)
 	{
@@ -276,6 +300,7 @@ static bool callStaticObject(JNIEnv *env, const char* typeName, const char* meth
 static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void* cData, size_t size)
 {
 	jobject jBuffer = NULL;
+	SmartLocalRef bufferRef(env, jBuffer);
 
 	if (!getField(env, jMesh, jBufferName, "Ljava/nio/ByteBuffer;", jBuffer))
 	{
@@ -305,6 +330,7 @@ static bool copyBuffer(JNIEnv *env, jobject jMesh, const char* jBufferName, void
 static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName, int index, void* cData, size_t size)
 {
 	jobject jBufferArray = NULL;
+	SmartLocalRef bufferArrayRef(env, jBufferArray);
 
 	if (!getField(env, jMesh, jBufferName, "[Ljava/nio/ByteBuffer;", jBufferArray))
 	{
@@ -312,6 +338,7 @@ static bool copyBufferArray(JNIEnv *env, jobject jMesh, const char* jBufferName,
 	}
 
 	jobject jBuffer = env->GetObjectArrayElement((jobjectArray) jBufferArray, index);
+	SmartLocalRef bufferRef(env, jBuffer);
 
 	if (env->GetDirectBufferCapacity(jBuffer) != size)
 	{
@@ -344,6 +371,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 		/* create mesh */
 		jobject jMesh = NULL;
+		SmartLocalRef refMesh(env, jMesh);
 
 		if (!createInstance(env, "jassimp/AiMesh", jMesh)) 
 		{
@@ -353,6 +381,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		
 		/* add mesh to m_meshes java.util.List */
 		jobject jMeshes = NULL;
+		SmartLocalRef refMeshes(env, jMeshes);
 
 		if (!getField(env, jScene, "m_meshes", "Ljava/util/List;", jMeshes))
 		{
@@ -381,7 +410,9 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			return false;
 		}
 
-		if (!setObjectField(env, jMesh, "m_name", "Ljava/lang/String;", env->NewStringUTF(cMesh->mName.C_Str())))
+		jstring nameString = env->NewStringUTF(cMesh->mName.C_Str());
+		SmartLocalRef refNameString(env, nameString);
+		if (!setObjectField(env, jMesh, "m_name", "Ljava/lang/String;", nameString))
 		{
 			return false;
 		}
@@ -651,6 +682,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			aiBone *cBone = cMesh->mBones[b];
 
 			jobject jBone;
+			SmartLocalRef refBone(env, jBone);
 			if (!createInstance(env, "jassimp/AiBone", jBone)) 
 			{
 				return false;
@@ -658,7 +690,7 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 			/* add bone to bone list */
 			jobject jBones = NULL;
-
+			SmartLocalRef refBones(env, jBones);
 			if (!getField(env, jMesh, "m_bones", "Ljava/util/List;", jBones))
 			{
 				return false;
@@ -672,7 +704,9 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			}
 
 			/* set bone data */
-			if (!setObjectField(env, jBone, "m_name", "Ljava/lang/String;", env->NewStringUTF(cBone->mName.C_Str())))
+			jstring boneNameString = env->NewStringUTF(cBone->mName.C_Str());
+			SmartLocalRef refNameString(env, boneNameString);
+			if (!setObjectField(env, jBone, "m_name", "Ljava/lang/String;", boneNameString))
 			{
 				return false;
 			}
@@ -681,27 +715,29 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			for (unsigned int w = 0; w < cBone->mNumWeights; w++)
 			{
 				jobject jBoneWeight;
-				if (!createInstance(env, "jassimp/AiBoneWeight", jBoneWeight)) 
+				SmartLocalRef refBoneWeight(env, jBoneWeight);
+				if (!createInstance(env, "jassimp/AiBoneWeight", jBoneWeight))
 				{
 					return false;
 				}
 
 				/* add boneweight to bone list */
 				jobject jBoneWeights = NULL;
-
+				SmartLocalRef refBoneWeights(env, jBoneWeights);
 				if (!getField(env, jBone, "m_boneWeights", "Ljava/util/List;", jBoneWeights))
 				{
 					return false;
 				}
 
-
 				/* copy offset matrix */
 				jfloatArray jMatrixArr = env->NewFloatArray(16);
+				SmartLocalRef refMatrixArr(env, jMatrixArr);
 				env->SetFloatArrayRegion(jMatrixArr, 0, 16, (jfloat*) &cBone->mOffsetMatrix);
 
 				jvalue wrapParams[1];
 				wrapParams[0].l = jMatrixArr;
 				jobject jMatrix;
+				SmartLocalRef refMatrix(env, jMatrix);
 				
 				if (!callStaticObject(env, "jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapParams, jMatrix))
 				{
@@ -733,8 +769,6 @@ static bool loadMeshes(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 			}
 		}
-		env->DeleteLocalRef(jMeshes);
-		env->DeleteLocalRef(jMesh);
 	}
 
 	return true;
@@ -747,11 +781,13 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 
 	/* wrap matrix */
 	jfloatArray jMatrixArr = env->NewFloatArray(16);
+	SmartLocalRef refMatrixArr(env, jMatrixArr);
 	env->SetFloatArrayRegion(jMatrixArr, 0, 16, (jfloat*) &cNode->mTransformation);
 
 	jvalue wrapMatParams[1];
 	wrapMatParams[0].l = jMatrixArr;
 	jobject jMatrix;
+	SmartLocalRef refMatrix(env, jMatrix);
 				
 	if (!callStaticObject(env, "jassimp/Jassimp", "wrapMatrix", "([F)Ljava/lang/Object;", wrapMatParams, jMatrix))
 	{
@@ -761,6 +797,8 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 
 	/* create mesh references array */
 	jintArray jMeshrefArr = env->NewIntArray(cNode->mNumMeshes);
+	SmartLocalRef refMeshrefArr(env, jMeshrefArr);
+
 	jint *temp = (jint*) malloc(sizeof(jint) * cNode->mNumMeshes);
 
 	for (unsigned int i = 0; i < cNode->mNumMeshes; i++)
@@ -774,7 +812,7 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 
 	/* convert name */
 	jstring jNodeName = env->NewStringUTF(cNode->mName.C_Str());
-
+	SmartLocalRef refNodeName(env, jNodeName);
 
 	/* wrap scene node */
 	jvalue wrapNodeParams[4];
@@ -802,6 +840,8 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	if (NULL != loadedNode)
 	{
 		*loadedNode = jNode;
+	} else {
+	    env->DeleteLocalRef(jNode);
 	}
 
 	return true;
@@ -815,6 +855,7 @@ static bool loadSceneGraph(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 	if (NULL != cScene->mRootNode)
 	{
 		jobject jRoot;
+		SmartLocalRef refRoot(env, jRoot);
 
 		if (!loadSceneNode(env, cScene->mRootNode, NULL, &jRoot))
 		{
@@ -842,6 +883,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		lprintf("converting material %d ...\n", m);
 
 		jobject jMaterial = NULL;
+		SmartLocalRef refMaterial(env, jMaterial);
 
 		if (!createInstance(env, "jassimp/AiMaterial", jMaterial))
 		{
@@ -850,6 +892,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 		/* add material to m_materials java.util.List */
 		jobject jMaterials = NULL;
+		SmartLocalRef refMaterials(env, jMaterials);
 
 		if (!getField(env, jScene, "m_materials", "Ljava/util/List;", jMaterials))
 		{
@@ -894,9 +937,12 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			lprintf("   converting property %s ...\n", cProperty->mKey.C_Str());
 
 			jobject jProperty = NULL;
+			SmartLocalRef refProperty(env, jProperty);
 
 			jvalue constructorParams[5];
-			constructorParams[0].l = env->NewStringUTF(cProperty->mKey.C_Str());
+			jstring keyString = env->NewStringUTF(cProperty->mKey.C_Str());
+			SmartLocalRef refKeyString(env, keyString);
+			constructorParams[0].l = keyString;
 			constructorParams[1].i = cProperty->mSemantic;
 			constructorParams[2].i = cProperty->mIndex;
 			constructorParams[3].i = cProperty->mType;
@@ -908,6 +954,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				cProperty->mDataLength == 3 * sizeof(float)) 
 			{
 				jobject jData = NULL;
+				SmartLocalRef refData(env, jData);
 
 				/* wrap color */
 				jvalue wrapColorParams[3];
@@ -932,6 +979,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				cProperty->mDataLength == 4 * sizeof(float)) 
 			{
 				jobject jData = NULL;
+				SmartLocalRef refData(env, jData);
 
 				/* wrap color */
 				jvalue wrapColorParams[4];
@@ -954,6 +1002,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			else if (cProperty->mType == aiPTI_Float && cProperty->mDataLength == sizeof(float)) 
 			{
 				jobject jData = NULL;
+				SmartLocalRef refData(env, jData);
 
 				jvalue newFloatParams[1];
 				newFloatParams[0].f = ((float*) cProperty->mData)[0];
@@ -972,6 +1021,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			else if (cProperty->mType == aiPTI_Integer && cProperty->mDataLength == sizeof(int)) 
 			{
 				jobject jData = NULL;
+				SmartLocalRef refData(env, jData);
 
 				jvalue newIntParams[1];
 				newIntParams[0].i = ((int*) cProperty->mData)[0];
@@ -991,6 +1041,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			{
 				/* skip length prefix */
 				jobject jData = env->NewStringUTF(cProperty->mData + 4);
+				SmartLocalRef refData(env, jData);
 
 				constructorParams[4].l = jData;
 				if (!createInstance(env, "jassimp/AiMaterial$Property", "(Ljava/lang/String;IIILjava/lang/Object;)V", 
@@ -1010,7 +1061,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 				}
 
 				jobject jBuffer = NULL;
-
+				SmartLocalRef refBuffer(env, jBuffer);
 				if (!getField(env, jProperty, "m_data", "Ljava/lang/Object;", jBuffer))
 				{
 					return false;
@@ -1036,7 +1087,7 @@ static bool loadMaterials(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 			/* add property */
 			jobject jProperties = NULL;
-
+			SmartLocalRef refProperties(env, jProperties);
 			if (!getField(env, jMaterial, "m_properties", "Ljava/util/List;", jProperties))
 			{
 				return false;
@@ -1068,8 +1119,12 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		lprintf("   converting animation %s ...\n", cAnimation->mName.C_Str());
 
 		jobject jAnimation;
+		SmartLocalRef refAnimation(env, jAnimation);
+
 		jvalue newAnimParams[3];
-		newAnimParams[0].l = env->NewStringUTF(cAnimation->mName.C_Str());
+		jstring nameString = env->NewStringUTF(cAnimation->mName.C_Str());
+		SmartLocalRef refNameString(env, nameString);
+		newAnimParams[0].l = nameString;
 		newAnimParams[1].d = cAnimation->mDuration;
 		newAnimParams[2].d = cAnimation->mTicksPerSecond;
 
@@ -1080,6 +1135,7 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 		/* add animation to m_animations java.util.List */
 		jobject jAnimations = NULL;
+		SmartLocalRef refAnimations(env, jAnimations);
 
 		if (!getField(env, jScene, "m_animations", "Ljava/util/List;", jAnimations))
 		{
@@ -1099,8 +1155,12 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 			const aiNodeAnim *cNodeAnim = cAnimation->mChannels[c];
 
 			jobject jNodeAnim;
+			SmartLocalRef refNodeAnim(env, jNodeAnim);
+
 			jvalue newNodeAnimParams[6];
-			newNodeAnimParams[0].l = env->NewStringUTF(cNodeAnim->mNodeName.C_Str());
+			jstring animationName = env->NewStringUTF(cNodeAnim->mNodeName.C_Str());
+			SmartLocalRef refAnimationName(env, animationName);
+			newNodeAnimParams[0].l = animationName;
 			newNodeAnimParams[1].i = cNodeAnim->mNumPositionKeys;
 			newNodeAnimParams[2].i = cNodeAnim->mNumRotationKeys;
 			newNodeAnimParams[3].i = cNodeAnim->mNumScalingKeys;
@@ -1115,6 +1175,7 @@ static bool loadAnimations(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 			/* add nodeanim to m_animations java.util.List */
 			jobject jNodeAnims = NULL;
+			SmartLocalRef refNodeAnims(env, jNodeAnims);
 
 			if (!getField(env, jAnimation, "m_nodeAnims", "Ljava/util/List;", jNodeAnims))
 			{
@@ -1171,6 +1232,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[1].f = cLight->mColorDiffuse.g;
 		wrapColorParams[2].f = cLight->mColorDiffuse.b;
 		jobject jDiffuse;
+		SmartLocalRef refDiffuse(env, jDiffuse);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jDiffuse))
 		{
 			return false;
@@ -1180,6 +1242,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[1].f = cLight->mColorSpecular.g;
 		wrapColorParams[2].f = cLight->mColorSpecular.b;
 		jobject jSpecular;
+		SmartLocalRef refSpecular(env, jSpecular);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jSpecular))
 		{
 			return false;
@@ -1189,6 +1252,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapColorParams[1].f = cLight->mColorAmbient.g;
 		wrapColorParams[2].f = cLight->mColorAmbient.b;
 		jobject jAmbient;
+		SmartLocalRef refAmbient(env, jAmbient);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapColor3", "(FFF)Ljava/lang/Object;", wrapColorParams, jAmbient))
 		{
 			return false;
@@ -1201,6 +1265,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapVec3Params[1].f = cLight->mPosition.y;
 		wrapVec3Params[2].f = cLight->mPosition.z;
 		jobject jPosition;
+		SmartLocalRef refPosition(env, jPosition);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jPosition))
 		{
 			return false;
@@ -1210,6 +1275,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapVec3Params[1].f = cLight->mPosition.y;
 		wrapVec3Params[2].f = cLight->mPosition.z;
 		jobject jDirection;
+		SmartLocalRef refDirection(env, jDirection);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapVec3Params, jDirection))
 		{
 			return false;
@@ -1217,9 +1283,11 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 
 		jobject jLight;
-
+		SmartLocalRef refLight(env, jLight);
 		jvalue params[12];
-		params[0].l = env->NewStringUTF(cLight->mName.C_Str());;
+		jstring lightName = env->NewStringUTF(cLight->mName.C_Str());
+		SmartLocalRef refLightName(env, lightName);
+		params[0].l = lightName;
 		params[1].i = cLight->mType;
 		params[2].l = jPosition;
 		params[3].l = jDirection;
@@ -1240,6 +1308,7 @@ static bool loadLights(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 		/* add light to m_lights java.util.List */
 		jobject jLights = NULL;
+		SmartLocalRef refLights(env, jLights);
 
 		if (!getField(env, jScene, "m_lights", "Ljava/util/List;", jLights))
 		{
@@ -1276,6 +1345,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[1].f = cCamera->mPosition.y;
 		wrapPositionParams[2].f = cCamera->mPosition.z;
 		jobject jPosition;
+		SmartLocalRef refPosition(env, jPosition);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jPosition))
 		{
 			return false;
@@ -1285,6 +1355,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[1].f = cCamera->mUp.y;
 		wrapPositionParams[2].f = cCamera->mUp.z;
 		jobject jUp;
+		SmartLocalRef refUp(env, jUp);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jUp))
 		{
 			return false;
@@ -1294,6 +1365,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 		wrapPositionParams[1].f = cCamera->mLookAt.y;
 		wrapPositionParams[2].f = cCamera->mLookAt.z;
 		jobject jLookAt;
+		SmartLocalRef refLookAt(env, jLookAt);
 		if (!callStaticObject(env, "jassimp/Jassimp", "wrapVec3", "(FFF)Ljava/lang/Object;", wrapPositionParams, jLookAt))
 		{
 			return false;
@@ -1301,9 +1373,12 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 
 		jobject jCamera;
+		SmartLocalRef refCamera(env, jCamera);
 
 		jvalue params[8];
-		params[0].l = env->NewStringUTF(cCamera->mName.C_Str());
+		jstring cameraName = env->NewStringUTF(cCamera->mName.C_Str());
+		SmartLocalRef refCameraName(env, cameraName);
+		params[0].l = cameraName;
 		params[1].l = jPosition;
 		params[2].l = jUp;
 		params[3].l = jLookAt;
@@ -1320,7 +1395,7 @@ static bool loadCameras(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 
 		/* add camera to m_cameras java.util.List */
 		jobject jCameras = NULL;
-
+		SmartLocalRef refCameras(env, jCameras);
 		if (!getField(env, jScene, "m_cameras", "Ljava/util/List;", jCameras))
 		{
 			return false;

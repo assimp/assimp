@@ -20,8 +20,16 @@ class SmartLocalRef {
 private:
     JNIEnv* mJniEnv;
     jobject& mJavaObj;
+    SmartLocalRef(const SmartLocalRef&); // non construction-copyable
+    SmartLocalRef& operator=(const SmartLocalRef&); // non copyable
+
 public:
-    template<class T> SmartLocalRef(JNIEnv* env, T& object) : mJniEnv(env), mJavaObj((jobject&)object) {};
+    template<class T> SmartLocalRef(JNIEnv* env, T& object)
+    : mJniEnv(env)
+    , mJavaObj((jobject&)object)
+    {
+    };
+
     ~SmartLocalRef() {
         if (mJavaObj != NULL) {
             mJniEnv->DeleteLocalRef(mJavaObj);

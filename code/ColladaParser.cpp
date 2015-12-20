@@ -1256,11 +1256,16 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
             else if( IsElement( "transparent")) {
                 pEffect.mHasTransparency = true;
 
-                // In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
-                if(::strcmp(mReader->getAttributeValueSafe("opaque"), "RGB_ZERO") == 0) {
-                    // TODO: handle RGB_ZERO mode completely
+                const char* opaque = mReader->getAttributeValueSafe("opaque");
+ 
+                if(::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "RGB_ONE") == 0) {
                     pEffect.mRGBTransparency = true;
                 }
+
+                // In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
+				if(::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "A_ZERO") == 0) {
+					pEffect.mInvertTransparency = true;
+				}
 
                 ReadEffectColor( pEffect.mTransparent,pEffect.mTexTransparent);
             }

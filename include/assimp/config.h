@@ -895,16 +895,6 @@ enum aiComponent
  */
 #define AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION "IMPORT_COLLADA_IGNORE_UP_DIRECTION"
 
-// ---------------------------------------------------------------------------
-/** @brief Specifies whether the Collada loader will invert the transparency value.
- *
- * If this property is set to true, the transparency value will be interpreted as the
- * inverse of the usual transparency. This is useful because lots of exporters does
- * not respect the standard and do the opposite of what is normally expected.
- * Property type: Bool. Default value: false.
- */
-#define AI_CONFIG_IMPORT_COLLADA_INVERT_TRANSPARENCY "IMPORT_COLLADA_INVERT_TRANSPARENCY"
-
 // ---------- All the Export defines ------------
 
 /** @brief Specifies the xfile use double for real values of float

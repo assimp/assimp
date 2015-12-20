@@ -517,6 +517,7 @@ struct Effect
     float mTransparency;
     bool mHasTransparency;
     bool mRGBTransparency;
+    bool mInvertTransparency;
 
     // local params referring to each other by their SID
     typedef std::map<std::string, Collada::EffectParam> ParamLibrary;
@@ -536,10 +537,11 @@ struct Effect
         , mTransparent  ( 0, 0, 0, 1)
         , mShininess    (10.0f)
         , mRefractIndex (1.f)
-        , mReflectivity (1.f)
+        , mReflectivity (0.f)
         , mTransparency (1.f)
         , mHasTransparency (false)
         , mRGBTransparency(false)
+        , mInvertTransparency(false)
         , mDoubleSided  (false)
         , mWireframe    (false)
         , mFaceted      (false)

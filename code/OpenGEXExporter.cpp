@@ -42,12 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace OpenGEX {
 
+#ifndef ASSIMP_BUILD_NO_OPENGEX_EXPORTER
+
 OpenGEXExporter::OpenGEXExporter() {
 }
 
 OpenGEXExporter::~OpenGEXExporter() {
 }
 
+#endif // ASSIMP_BUILD_NO_OPENGEX_EXPORTER
 
-} // Namespace openGEX
+} // Namespace OpenGEX
 } // Namespace Assimp

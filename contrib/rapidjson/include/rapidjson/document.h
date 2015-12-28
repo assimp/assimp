@@ -513,19 +513,12 @@ public:
             flags_ |= kUintFlag | kUint64Flag;
     }
 
-    //! Constructor for size_t value.
-    explicit GenericValue( size_t u ) RAPIDJSON_NOEXCEPT : data_(), flags_( kNumberUintFlag ) {
-        data_.n.u64 = u;
-        if ( !( u&0x80000000 ) )
-            flags_ |= kIntFlag|kInt64Flag;
-    }
-
     //! Constructor for unsigned value.
-/*    explicit GenericValue(unsigned u) RAPIDJSON_NOEXCEPT : data_(), flags_(kNumberUintFlag) {
+    explicit GenericValue(unsigned u) RAPIDJSON_NOEXCEPT : data_(), flags_(kNumberUintFlag) {
         data_.n.u64 = u; 
         if (!(u & 0x80000000))
             flags_ |= kIntFlag | kInt64Flag;
-    }*/
+    }
 
     //! Constructor for int64_t value.
     explicit GenericValue(int64_t i64) RAPIDJSON_NOEXCEPT : data_(), flags_(kNumberInt64Flag) {
@@ -562,6 +555,13 @@ public:
             flags_ |= kUintFlag;
         if (!(u64 & RAPIDJSON_UINT64_C2(0xFFFFFFFF, 0x80000000)))
             flags_ |= kIntFlag;
+    }
+
+    //! Constructor for size_t value.
+    explicit GenericValue( size_t u ) RAPIDJSON_NOEXCEPT : data_(), flags_( kNumberUintFlag ) {
+        data_.n.u64 = u;
+        if ( !( u&0x80000000 ) )
+            flags_ |= kIntFlag|kInt64Flag;
     }
 #endif
 

@@ -35,8 +35,8 @@ addons:
   coverity_scan:
     project:
       name: "assimp/assimp"
-      description: "<Your project description here>"
+      description: "The Asset Importer Lib coverity run"
       notification_email: kim.kulling@googlemail.com
 	build_command_prepend: cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$SHARED_BUILD
-    build_command:   make< make install
+    build_command: make; make install
     branch_pattern: coverity_scan

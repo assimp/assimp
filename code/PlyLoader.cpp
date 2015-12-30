@@ -312,6 +312,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
             p_pcOut->mNumVertices = iNum;
             if( 0 == iNum ) {     // nothing to do 
                 delete[] aiSplit; // cleanup
+                delete p_pcOut;
                 return;
             }
             p_pcOut->mVertices = new aiVector3D[iNum];

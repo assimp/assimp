@@ -309,12 +309,12 @@ void XFileExporter::WriteNode( aiNode* pNode)
 
     WriteFrameTransform(m);
 
-    for (size_t i = 0; i < pNode->mNumMeshes; i++)
+    for (size_t i = 0; i < pNode->mNumMeshes; ++i)
         WriteMesh(mScene->mMeshes[pNode->mMeshes[i]]);
 
     // recursive call the Nodes
     for (size_t i = 0; i < pNode->mNumChildren; ++i)
-        WriteNode( mScene->mRootNode->mChildren[i]);
+        WriteNode(pNode->mChildren[i]);
 
     PopTag();
 

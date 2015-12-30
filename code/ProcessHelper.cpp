@@ -95,12 +95,16 @@ void FindMeshCenter (aiMesh* mesh, aiVector3D& out, aiVector3D& min, aiVector3D&
 }
 
 // -------------------------------------------------------------------------------
-void FindSceneCenter (aiScene* scene, aiVector3D& out, aiVector3D& min, aiVector3D& max)
-{
-    if (scene->mNumMeshes == 0) return;
+void FindSceneCenter (aiScene* scene, aiVector3D& out, aiVector3D& min, aiVector3D& max) {
+    if ( NULL == scene ) {
+        return;
+    }
+
+    if ( 0 == scene->mNumMeshes ) {
+        return;
+    }
     FindMeshCenter(scene->mMeshes[0], out, min, max);
-    for (unsigned int i = 1; i < scene->mNumMeshes; ++i)
-    {
+    for (unsigned int i = 1; i < scene->mNumMeshes; ++i) {
         aiVector3D tout, tmin, tmax;
         FindMeshCenter(scene->mMeshes[i], tout, tmin, tmax);
         if (min[0] > tmin[0]) min[0] = tmin[0];
@@ -151,6 +155,8 @@ float ComputePositionEpsilon(const aiMesh* pMesh)
 // -------------------------------------------------------------------------------
 float ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
 {
+    ai_assert( NULL != pMeshes );
+
     const float epsilon = 1e-4f;
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against

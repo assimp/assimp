@@ -12,16 +12,17 @@ compiler:
   - gcc
   - clang
 
+before_script:
+  cmake . -DASSIMP_ENABLE_BOOST_WORKAROUND=YES
+  
 script:
-  cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES; make
+  make
 
 addons:
   coverity_scan:
     project:
       name: "assimp/assimp"
-      version: 3.2
-      description: "The Asset Importer Lib coverity run, branch coverity_scan"
     notification_email: kim.kulling@googlemail.com
-    build_command_prepend: cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES
-    build_command: make
+    build_command_prepend: "cmake . -DASSIMP_ENABLE_BOOST_WORKAROUND=YES"
+    build_command: "make"
     branch_pattern: coverity_scan

@@ -10,11 +10,10 @@ language: cpp
 
 compiler:
   - gcc
-  - clang
 
 before_script:
   cmake . -DASSIMP_ENABLE_BOOST_WORKAROUND=YES
-  
+
 script:
   make
 

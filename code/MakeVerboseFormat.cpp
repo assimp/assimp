@@ -172,13 +172,14 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
     for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
     {
         delete pcMesh->mBones[i]->mWeights;
-        if (!newWeights[i].empty())
-        {
+        if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
-            memcpy(pcMesh->mBones[i]->mWeights,&newWeights[i][0],
+            memcpy(pcMesh->mBones[i]->mWeights, &newWeights[i][0],
                 sizeof(aiVertexWeight) * newWeights[i].size());
+            delete[] newWeights;
+        } else {
+            pcMesh->mBones[i]->mWeights = NULL;
         }
-        else pcMesh->mBones[i]->mWeights = NULL;
     }
 
     // delete the old members

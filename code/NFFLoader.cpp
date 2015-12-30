@@ -1139,8 +1139,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
         mesh->mNumFaces = (unsigned int)src.faces.size();
 
         // Generate sub nodes for named meshes
-        if (src.name[0])
-        {
+        if ( src.name[ 0 ] && NULL != ppcChildren  ) {
             aiNode* const node = *ppcChildren = new aiNode();
             node->mParent = root;
             node->mNumMeshes = 1;
@@ -1161,8 +1160,9 @@ void NFFImporter::InternReadFile( const std::string& pFile,
             mat.c4 = src.center.z;
 
             ++ppcChildren;
-        }
-        else *pMeshes++ = m;
+        } else {
+            *pMeshes++ = m;
+        }   
 
         // copy vertex positions
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];

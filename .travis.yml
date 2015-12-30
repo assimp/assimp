@@ -12,7 +12,11 @@ compiler:
   - gcc
   - clang
 
-script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then make ; fi
+before_script:
+   cmake -G "Unix Makefiles" -DASSIMP_ENABLE_BOOST_WORKAROUND=YES
+
+script:
+  if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then make ; fi
 
 addons:
   coverity_scan:

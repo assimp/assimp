@@ -863,6 +863,7 @@ namespace STEP {
             : reader(reader)
             , splitter(*reader,true,true)
             , evaluated_count()
+            , schema( NULL )
         {}
 
     public:

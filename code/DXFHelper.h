@@ -66,6 +66,8 @@ public:
     LineReader(StreamReaderLE& reader)
          // do NOT skip empty lines. In DXF files, they count as valid data.
         : splitter(reader,false,true)
+        , groupcode( 0 )
+        , value()
         , end()
     {
     }

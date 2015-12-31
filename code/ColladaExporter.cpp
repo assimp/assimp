@@ -793,7 +793,7 @@ void ColladaExporter::WriteGeometryLibrary()
 void ColladaExporter::WriteGeometry( size_t pIndex)
 {
     const aiMesh* mesh = mScene->mMeshes[pIndex];
-    const std::string idstr = GetMeshId( pIndex);
+    const std::string idstr = GetMeshId(pIndex);
     const std::string idstrEscaped = XMLEscape(idstr);
 
   if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
@@ -991,11 +991,11 @@ void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
 	mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
 	mOutput << "</bind_shape_matrix>" << endstr;
 
-	WriteJointsNameSourceNode(mesh);
-	WriteJointsPoseSourceNode(mesh);
-	WriteJointsWeightSourceNode(mesh);
-	WriteJointsTag(mesh);
-	WriteJointsVertexWeight(mesh);
+	WriteJointsNameSourceNode(pIndex);
+	WriteJointsPoseSourceNode(pIndex);
+	WriteJointsWeightSourceNode(pIndex);
+	WriteJointsTag(pIndex);
+	WriteJointsVertexWeight(pIndex);
     PopTag();
     mOutput << startstr << "</skin>"<<endstr;
     PopTag();
@@ -1005,25 +1005,28 @@ void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
 
 #include <sstream>
 
-void ColladaExporter::WriteJointsTag(const aiMesh *const mesh){
-	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+void ColladaExporter::WriteJointsTag(const size_t pIndex){
+	const std::string meshName = XMLEscape(GetMeshId(pIndex));
+
 	mOutput<<startstr<<"<joints>"<<endstr;
 	PushTag();
 	mOutput<<startstr<<"<input semantic=\"JOINT\" "
 				"source=\"#Armature_"+meshName+"-skin-joints\"/>"<<endstr;
 	mOutput<<startstr<<"<input semantic=\"INV_BIND_MATRIX\" "
 					"source=\"#Armature_"+meshName+"-skin-bind_poses\"/>"<<endstr;
+    PopTag();
 	mOutput<<startstr<<"</joints>"<<endstr;
-	PopTag();
 }
 
 
-void ColladaExporter::WriteJointsVertexWeight(const aiMesh *const mesh){
+void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
 	typedef std::pair<unsigned int,unsigned int> vertexBoneWeightLocationMapElement_t;
 	typedef std::multimap<unsigned int,vertexBoneWeightLocationMapElement_t >
 		vertexBoneWeightLocationMap_t;
 
-	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+    const aiMesh *const mesh = mScene->mMeshes[pIndex];
+	const std::string meshName = XMLEscape(GetMeshId(pIndex));
+
 	aiBone **bones = mesh->mBones;
 	const unsigned int nBones = mesh->mNumBones;
 
@@ -1075,13 +1078,13 @@ void ColladaExporter::WriteJointsVertexWeight(const aiMesh *const mesh){
 	mOutput<<startstr<<"<vcount>"<<vCountTag.str()<<"</vcount>"<<endstr;
 	mOutput<<startstr<<"<v>"<<pTag.str()<<"</v>"<<endstr;
 
+    PopTag();
 	mOutput<<startstr<<"</vertex_weights>"<<endstr;
-	PopTag();
 }
 
-void ColladaExporter::WriteJointsNameSourceNode(const aiMesh *const mesh){
-
-	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+void ColladaExporter::WriteJointsNameSourceNode(const size_t pIndex){
+    const aiMesh *const mesh = mScene->mMeshes[pIndex];
+	const std::string meshName = XMLEscape(GetMeshId(pIndex));
 
 	std::stringstream boneNames;
 	for(unsigned int i=0;i<mesh->mNumBones;i++){
@@ -1111,8 +1114,9 @@ void ColladaExporter::WriteJointsNameSourceNode(const aiMesh *const mesh){
 }
 
 
-void ColladaExporter::WriteJointsWeightSourceNode(const aiMesh *const mesh){
-	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+void ColladaExporter::WriteJointsWeightSourceNode(const size_t pIndex){
+    const aiMesh *const mesh = mScene->mMeshes[pIndex];
+	const std::string meshName = XMLEscape(GetMeshId(pIndex));
 
 	unsigned int nWeightTot =0;
 	aiBone **bones = mesh->mBones;
@@ -1138,8 +1142,9 @@ void ColladaExporter::WriteJointsWeightSourceNode(const aiMesh *const mesh){
 	delete [] tempBoneWeight;
 }
 
-void ColladaExporter::WriteJointsPoseSourceNode(const aiMesh *const mesh){
-	const std::string meshName = XMLEscape(mesh->mName.C_Str());
+void ColladaExporter::WriteJointsPoseSourceNode(const size_t pIndex){
+    const aiMesh *const mesh = mScene->mMeshes[pIndex];
+	const std::string meshName = XMLEscape(GetMeshId(pIndex));
 
 	float * tempBonePose = new float[mesh->mNumBones*16];
 	aiBone **bones = mesh->mBones;
@@ -1422,13 +1427,14 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 		PushTag();
 		mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
 		PushTag();
-		for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+		for( size_t textureCoords = 0; textureCoords < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++textureCoords )
 		{
-			if( mesh->HasTextureCoords( a) )
+			if( mesh->HasTextureCoords( textureCoords ) )
 				// semantic       as in <texture texcoord=...>
 				// input_semantic as in <input semantic=...>
 				// input_set      as in <input set=...>
-				mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+				mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << textureCoords << "\""
+						" input_semantic=\"TEXCOORD\" input_set=\"" << textureCoords << "\"/>" << endstr;
 		}
 		PopTag();
 		mOutput << startstr << "</instance_material>" << endstr;

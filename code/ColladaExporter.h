@@ -102,11 +102,11 @@ protected:
 
     void WriteControllerLibrary();
     void WriteControllerForMesh(const size_t pIndex);
-    void WriteJointsNameSourceNode(const aiMesh*const pMesh);
-    void WriteJointsPoseSourceNode(const aiMesh*const pMesh);
-    void WriteJointsWeightSourceNode(const aiMesh*const pMesh);
-    void WriteJointsTag(const aiMesh*const pMesh);
-    void WriteJointsVertexWeight(const aiMesh*const pMesh);
+    void WriteJointsNameSourceNode(const size_t pIndex);
+    void WriteJointsPoseSourceNode(const size_t pIndex);
+    void WriteJointsWeightSourceNode(const size_t pIndex);
+    void WriteJointsTag(const size_t pIndex);
+    void WriteJointsVertexWeight(const size_t pIndex);
 
     /// Writes the geometry library
     void WriteGeometryLibrary();

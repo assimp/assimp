@@ -130,6 +130,9 @@ public:
     std::stringstream mOutput;
 
 protected:
+    /// C locale
+    std::locale clocale;
+
     /// The IOSystem for output
     IOSystem* mIOSystem;
 

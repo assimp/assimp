@@ -93,7 +93,8 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
 ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file) : mIOSystem(pIOSystem), mPath(path), mFile(file)
 {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
-    mOutput.imbue( std::locale("C") );
+    clocale = std::locale("C");
+    mOutput.imbue( clocale );
 
     mScene = pScene;
     mSceneOwned = false;
@@ -540,7 +541,7 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
     std::stringstream imageUrlEncoded;
     for( std::string::const_iterator it = pSurface.texture.begin(); it != pSurface.texture.end(); ++it )
     {
-      if( isalnum( (unsigned char) *it) || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
+      if( isalnum( (unsigned char) *it, clocale) || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
         imageUrlEncoded << *it;
       else
         imageUrlEncoded << '%' << std::hex << size_t( (unsigned char) *it) << std::dec;
@@ -633,7 +634,7 @@ void ColladaExporter::WriteMaterials()
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
         // isalnum on MSVC asserts for code points outside [0,255]. Thus prevent unwanted promotion
         // of char to signed int and take the unsigned char value.
-      if( !isalnum( static_cast<uint8_t>(*it) ) ) {
+      if( !isalnum( static_cast<uint8_t>(*it), clocale ) ) {
         *it = '_';
       }
     }

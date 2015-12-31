@@ -492,7 +492,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
         // To offset or not to offset, this is the question
         if (n != (int)duplicates[n])
         {
-            // Get full scenegraph copy
+            // Get full scene-graph copy
             Copy( &node, (*cur)->mRootNode );
             OffsetNodeMeshIndices(node,offset[duplicates[n]]);
 

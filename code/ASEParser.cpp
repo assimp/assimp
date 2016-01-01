@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -1134,7 +1134,7 @@ void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the ádditional information for bezier's and TCBs
+            // we ignore the ï¿½dditional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_SCALE_SAMPLE" ,20))
@@ -1180,7 +1180,7 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the ádditional information for bezier's and TCBs
+            // we ignore the ï¿½dditional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_POS_SAMPLE" ,18))
@@ -1226,7 +1226,7 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the  floats -
-            // we ignore the ádditional information for bezier's and TCBs
+            // we ignore the ï¿½dditional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_ROT_SAMPLE" ,18))

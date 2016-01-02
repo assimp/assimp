@@ -1300,49 +1300,25 @@ aiBone* findBone( const aiScene* scene, const char * name) {
     return NULL;
 }
 
-#include <cstring>
-/** object used for compare 2 aiString */
-struct aiStringCompare {
-  /**
-   * @param lhs left operand
-   * @param rhs right operand
-   * @return true if lhs<rhs in the lexicographic order
-   */
-  bool operator() (const aiString& lhs, const aiString& rhs) const {
-	  return strcmp(lhs.data,rhs.data)<0;
-  }//operator()
-};
-
-static aiNode* findRootSkeletonNode(const aiNode *const root,
-		const std::set<aiString> &boneNames){
-
-	for(unsigned int i =0; i<root->mNumChildren; i++){
-		if(boneNames.count(root->mChildren[i]->mName)!=0)
-			return root->mChildren[i];
-	}
-	//we have to check all the childern and then take the node with a minumum
-	//height?
-	for(unsigned int i =0; i<root->mNumChildren; i++){
-		aiNode *temp = findRootSkeletonNode(root->mChildren[i],boneNames);
-		if(temp!=NULL)
-			return temp;
-	}
-	return NULL;
-
+int getDepthOfBone(const aiNode* node, int depth)
+{
+    if (node->mParent)
+        return getDepthOfBone(node->mParent, depth + 1);
+    return depth + 1;
 }
 
-
-
-static aiNode* findRootSkeletonNode(const aiMesh *const mesh,
-		const aiNode *const root){
-
-	std::set<aiString> boneNames;
-	for(unsigned int i=0; i<mesh->mNumBones; i++){
-		boneNames.insert(mesh->mBones[i]->mName);
-	}
-
-	return findRootSkeletonNode(root,boneNames);
-
+const aiNode* ColladaExporter::getRootOfController(const aiMesh* mesh)
+{
+    aiNode* root = mScene->mRootNode;
+    std::multimap<int, aiNode*> controllerBones;
+    for (unsigned int i = 0; i < mesh->mNumBones; ++i)
+    {
+        aiNode* boneNode = root->FindNode(mesh->mBones[i]->mName);
+        int d = getDepthOfBone(boneNode, 0);
+        controllerBones.emplace(d,boneNode);
+        //controllerBones.insert(std::make_pair<int, aiNode*>(d, boneNode));
+    }
+    return controllerBones.begin()->second;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1426,11 +1402,7 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 		else
 		{
 			mOutput << startstr << "<instance_controller url=\"#Armature_" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "-skin\">" << endstr;
-			PushTag();
-			aiNode *skeletonRoot = findRootSkeletonNode(mesh,mScene->mRootNode);
-			mOutput << startstr << "<skeleton>#"<<XMLEscape(skeletonRoot->mName.C_Str())<<"</skeleton>" << endstr;
-			PopTag();
-
+			mOutput << startstr << "<skeleton>#" << getRootOfController(mesh)->mName.C_Str() << "</skeleton>" << endstr;
 		}
 		PushTag();
 		mOutput << startstr << "<bind_material>" << endstr;

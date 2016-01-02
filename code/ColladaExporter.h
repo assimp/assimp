@@ -133,7 +133,7 @@ protected:
     /// Creates a mesh ID for the given mesh
     std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + std::to_string(pIndex); }
 
-    const aiNode* getRootOfController(aiMesh* mesh);
+    const aiNode* getRootOfController(const aiMesh* mesh);
 
 public:
     /// Stringstream to write all output into

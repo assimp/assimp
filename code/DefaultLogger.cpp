@@ -283,8 +283,9 @@ void DefaultLogger::OnWarn( const char* message )
 //  Logs an error
 void DefaultLogger::OnError( const char* message )
 {
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Error, T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[ Size ];
+    ::snprintf(msg, Size-1, "Error, T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg, Logger::Err );
 }

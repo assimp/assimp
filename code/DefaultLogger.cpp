@@ -226,9 +226,7 @@ bool DefaultLogger::isNullLogger()
 }
 
 // ----------------------------------------------------------------------------------
-//  Singleton getter
-Logger *DefaultLogger::get()
-{
+Logger *DefaultLogger::get() {
     return m_pLogger;
 }
 
@@ -241,7 +239,9 @@ void DefaultLogger::kill()
     boost::mutex::scoped_lock lock(loggerMutex);
 #endif
 
-    if (m_pLogger == &s_pNullLogger)return;
+	if ( m_pLogger == &s_pNullLogger ) {
+		return;
+	}
     delete m_pLogger;
     m_pLogger = &s_pNullLogger;
 }
@@ -253,8 +253,9 @@ void DefaultLogger::OnDebug( const char* message )
     if ( m_Severity == Logger::NORMAL )
         return;
 
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Debug, T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[Size];
+	::snprintf(msg, Size-1, "Debug, T%u: %s", GetThreadID(), message);
 
     WriteToStreams( msg, Logger::Debugging );
 }
@@ -263,8 +264,9 @@ void DefaultLogger::OnDebug( const char* message )
 //  Logs an info
 void DefaultLogger::OnInfo( const char* message )
 {
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Info,  T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[Size];
+    ::snprintf(msg, Size-1, "Info,  T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg , Logger::Info );
 }
@@ -273,8 +275,9 @@ void DefaultLogger::OnInfo( const char* message )
 //  Logs a warning
 void DefaultLogger::OnWarn( const char* message )
 {
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Warn,  T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[Size];
+	::snprintf(msg, Size - 1, "Warn,  T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg, Logger::Warn );
 }

@@ -379,7 +379,7 @@ struct Material
         static int iCnt = 0;
 
         char szTemp[128];
-        sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 
@@ -435,7 +435,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 
         // Generate a default name for the mesh
         char szTemp[128];
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ::snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 
@@ -495,7 +495,7 @@ struct Node
 
         // Generate a default name for the node
         char szTemp[128];
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ::snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
 
         aRotationKeys.reserve (20);

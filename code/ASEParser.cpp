@@ -143,7 +143,7 @@ void Parser::LogWarning(const char* szWarn)
 
     char szTemp[1024];
 #if _MSC_VER >= 1400
-    sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
+    sprintf_s(szTemp, "Line %u: %s",iLineNumber,szWarn);
 #else
     snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
@@ -825,7 +825,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if (!SkipSpaces(&filePtr))
     {
 
-        sprintf(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
+        snprintf(szBuffer, 1023, "Unable to parse %s block: Unexpected EOL",szName);
         LogWarning(szBuffer);
         return false;
     }
@@ -833,7 +833,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if ('\"' != *filePtr)
     {
 
-        sprintf(szBuffer,"Unable to parse %s block: Strings are expected "
+        snprintf(szBuffer, 1023, "Unable to parse %s block: Strings are expected "
             "to be enclosed in double quotation marks",szName);
         LogWarning(szBuffer);
         return false;
@@ -845,7 +845,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
         if ('\"' == *sz)break;
         else if ('\0' == *sz)
         {
-            sprintf(szBuffer,"Unable to parse %s block: Strings are expected to "
+            snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected to "
                 "be enclosed in double quotation marks but EOF was reached before "
                 "a closing quotation mark was encountered",szName);
             LogWarning(szBuffer);

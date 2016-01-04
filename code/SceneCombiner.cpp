@@ -310,7 +310,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
             //  continue;
             //}
 
-            src[i].idlen = ::sprintf(src[i].id,"$%.6X$_",i);
+            src[i].idlen = ::snprintf(src[i].id, 32, "$%.6X$_",i);
 
             if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
 

@@ -196,7 +196,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
         aiMaterial* out = ( aiMaterial* ) (*(materials.end()-(6-i)));
 
         aiString s;
-        s.length = ::sprintf( s.data, "SkyboxSide_%u",i );
+        s.length = ::snprintf( s.data, MAXLEN, "SkyboxSide_%u",i );
         out->AddProperty(&s,AI_MATKEY_NAME);
 
         int shading = aiShadingMode_NoShading;
@@ -347,7 +347,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
         if (cur != total-1) {
             // Build a new name - a prefix instead of a suffix because it is
             // easier to check against
-            anim->mNodeName.length = ::sprintf(anim->mNodeName.data,
+            anim->mNodeName.length = ::snprintf(anim->mNodeName.data, MAXLEN,
                 "$INST_DUMMY_%i_%s",total-1,
                 (root->name.length() ? root->name.c_str() : ""));
 

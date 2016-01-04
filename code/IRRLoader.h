@@ -177,7 +177,7 @@ private:
             // Generate a default name for the node
             char buffer[128];
             static int cnt;
-            ::sprintf(buffer,"IrrNode_%i",cnt++);
+            ::snprintf(buffer, 128, "IrrNode_%i",cnt++);
             name = std::string(buffer);
 
             // reserve space for up to 5 materials

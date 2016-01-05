@@ -744,7 +744,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 
             // there shouldn't be more than one world, but we don't care
         case Object::World:
-            node->mName.length = ::sprintf(node->mName.data,"ACWorld_%i",worlds++);
+            node->mName.length = ::snprintf(node->mName.data, MAXLEN, "ACWorld_%i",worlds++);
             break;
         }
     }

@@ -942,7 +942,7 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7** apcOutBones)
 
                 if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE == pcHeader->bone_stc_size) {
                     // no real name for our poor bone is specified :-(
-                    pcOutBone->mName.length = ::sprintf(pcOutBone->mName.data,
+                    pcOutBone->mName.length = ::snprintf(pcOutBone->mName.data, MAXLEN,
                         "UnnamedBone_%i",iBone);
                 }
                 else    {
@@ -1384,7 +1384,8 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
         avOutList[i].reserve(3);
 
     // buffer to held the names of all groups in the file
-    char* aszGroupNameBuffer = new char[AI_MDL7_MAX_GROUPNAMESIZE*pcHeader->groups_num];
+	const size_t buffersize( AI_MDL7_MAX_GROUPNAMESIZE*pcHeader->groups_num );
+	char* aszGroupNameBuffer = new char[ buffersize ];
 
     // read all groups
     for (unsigned int iGroup = 0; iGroup < (unsigned int)pcHeader->groups_num;++iGroup) {
@@ -1544,9 +1545,12 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 
             // setup the name of the node
             char* const szBuffer = &aszGroupNameBuffer[i*AI_MDL7_MAX_GROUPNAMESIZE];
-            if ('\0' == *szBuffer)
-                pcNode->mName.length = ::sprintf(szBuffer,"Group_%u",p);
-            else pcNode->mName.length = ::strlen(szBuffer);
+			if ('\0' == *szBuffer) {
+				const size_t maxSize(buffersize - (i*AI_MDL7_MAX_GROUPNAMESIZE));
+				pcNode->mName.length = ::snprintf(szBuffer, maxSize, "Group_%u", p);
+			} else {
+				pcNode->mName.length = ::strlen(szBuffer);
+			}
             ::strcpy(pcNode->mName.data,szBuffer);
             ++p;
         }

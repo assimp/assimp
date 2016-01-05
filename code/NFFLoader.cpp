@@ -862,7 +862,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"sphere_%i",sphere++);
+                ::snprintf(currentMesh.name,128,"sphere_%i",sphere++);
             }
             // 'dod' - dodecahedron
             else if (TokenMatch(sz,"dod",3))
@@ -879,7 +879,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"dodecahedron_%i",dodecahedron++);
+                ::snprintf(currentMesh.name,128,"dodecahedron_%i",dodecahedron++);
             }
 
             // 'oct' - octahedron
@@ -897,7 +897,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 currentMesh.faces.resize(currentMesh.vertices.size()/3,3);
 
                 // generate a name for the mesh
-                ::sprintf(currentMesh.name,"octahedron_%i",octahedron++);
+                ::snprintf(currentMesh.name,128,"octahedron_%i",octahedron++);
             }
 
             // 'tet' - tetrahedron

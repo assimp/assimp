@@ -323,11 +323,11 @@ void LWSImporter::SetupNodeName(aiNode* nd, LWS::NodeDesc& src)
             else ++s;
             std::string::size_type t = src.path.substr(s).find_last_of(".");
 
-            nd->mName.length = ::sprintf(nd->mName.data,"%s_(%08X)",src.path.substr(s).substr(0,t).c_str(),combined);
+            nd->mName.length = ::snprintf(nd->mName.data, MAXLEN, "%s_(%08X)",src.path.substr(s).substr(0,t).c_str(),combined);
             return;
         }
     }
-    nd->mName.length = ::sprintf(nd->mName.data,"%s_(%08X)",src.name,combined);
+    nd->mName.length = ::snprintf(nd->mName.data, MAXLEN, "%s_(%08X)",src.name,combined);
 }
 
 // ------------------------------------------------------------------------------------------------

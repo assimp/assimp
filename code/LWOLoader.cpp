@@ -1167,7 +1167,7 @@ void LWOImporter::LoadLWO2Clip(unsigned int length)
             std::ostringstream ss;
             GetS0(s,head.length);
 
-            head.length -= (unsigned int)s.length()+1;
+            head.length -= (uint16_t)s.length()+1;
             ss << s;
             ss << std::setw(digits) << offset + start;
             GetS0(s,head.length);
@@ -1370,7 +1370,7 @@ void LWOImporter::LoadLWO2File()
                 // if the name is empty, generate a default name
                 if (layer.mName.empty())    {
                     char buffer[128]; // should be sufficiently large
-                    ::sprintf(buffer,"Layer_%i", iUnnamed++);
+                    ::snprintf(buffer, 128, "Layer_%i", iUnnamed++);
                     layer.mName = buffer;
                 }
 

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <stdio.h>
 
-namespace Assimp {
+//namespace Assimp {
 
 ///	@fn		ai_snprintf
 ///	@brief	The portable version of the function snprintf ( C99 standard ), which works on visual studio compilers 2013 and earlier.
@@ -53,7 +53,7 @@ namespace Assimp {
 ///	@param	format		The format string
 ///	@param	ap			The additional arguments.
 ///	@return	The number of written characters if the buffer size was big enough. If an encoding error occurs, a negative number is returned.
-#if defined(_MSC_VER) && _MSC_VER < 1900
+//#if defined(_MSC_VER) && _MSC_VER < 1900
 
 	inline int c99_ai_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap) {
 		int count(-1);
@@ -67,32 +67,35 @@ namespace Assimp {
 		return count;
 	}
 
-	inline int ai_snprintf(char *s, size_t n, const char *fmt, ...) {
+#if defined(_MSC_VER) && _MSC_VER < 1900
+
+	inline int ai_snprintf(char *outBuf, size_t size, const char *format, ...) {
 		int count;
 		va_list ap;
 
-		va_start(ap, fmt);
-		count = c99_ai_vsnprintf(outBuf, size, fmt, ap);
+		va_start(ap, format);
+		count = c99_ai_vsnprintf(outBuf, size, format, ap);
 		va_end(ap);
 
 		return count;
 	}
 
 #else
-
-	inline int ai_snprintf(char *s, size_t n, const char *format, ...) {
+#define ai_snprintf snprintf
+	/*inline int ai_snprintf(char *outBuf, size_t size, const char *format, ...) {
 		int count;
-		va_list ap;
-		va_start(ap, format);
-		count = snprintf(s, n, format, ap);
-		va_end(ap);
+		va_list args;
+		va_start(args, format);
+		count = c99_ai_vsnprintf(outBuf, size, format, args);
+//		count = ::snprintf(outBuf, size, format, args);
+		va_end(args);
 
 		return count;
-	}
+	}*/
 
 #endif
 
-} // Namespace Assimp
+//} // Namespace Assimp
 
 #endif // INCLUDED_AI_STRINGUTILS_H
 

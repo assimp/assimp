@@ -656,7 +656,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::sprintf(pcNode->mName.data,"light_%u",i);
+                pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "light_%u",i);
                 pScene->mLights[i]->mName = pcNode->mName;
             }
             // generate camera nodes

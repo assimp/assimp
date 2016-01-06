@@ -216,7 +216,7 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 void SMDImporter::LogErrorNoThrow(const char* msg)
 {
     char szTemp[1024];
-    sprintf(szTemp,"Line %u: %s",iLineNumber,msg);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,msg);
     DefaultLogger::get()->error(szTemp);
 }
 
@@ -226,7 +226,7 @@ void SMDImporter::LogWarning(const char* msg)
 {
     char szTemp[1024];
     ai_assert(strlen(msg) < 1000);
-    sprintf(szTemp,"Line %u: %s",iLineNumber,msg);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,msg);
     DefaultLogger::get()->warn(szTemp);
 }
 
@@ -655,7 +655,7 @@ void SMDImporter::CreateOutputMaterials()
         pScene->mMaterials[iMat] = pcMat;
 
         aiString szName;
-        szName.length = (size_t)::sprintf(szName.data,"Texture_%u",iMat);
+        szName.length = (size_t)ai_snprintf(szName.data,MAXLEN,"Texture_%u",iMat);
         pcMat->AddProperty(&szName,AI_MATKEY_NAME);
 
         if (aszTextures[iMat].length())

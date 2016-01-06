@@ -436,7 +436,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 
         // Generate a default name for the mesh
         char szTemp[128];
-        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
+        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 

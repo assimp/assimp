@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Win32DebugLogStream.h"
 #include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
+#include "StringUtils.h"
 #include "../include/assimp/NullLogger.hpp"
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/ai_assert.h"
@@ -255,7 +256,7 @@ void DefaultLogger::OnDebug( const char* message )
 
 	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
 	char msg[Size];
-	::snprintf(msg, Size-1, "Debug, T%u: %s", GetThreadID(), message);
+	ai_snprintf(msg, Size, "Debug, T%u: %s", GetThreadID(), message);
 
     WriteToStreams( msg, Logger::Debugging );
 }
@@ -266,7 +267,7 @@ void DefaultLogger::OnInfo( const char* message )
 {
 	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
 	char msg[Size];
-    ::snprintf(msg, Size-1, "Info,  T%u: %s", GetThreadID(), message );
+    ai_snprintf(msg, Size, "Info,  T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg , Logger::Info );
 }
@@ -277,7 +278,7 @@ void DefaultLogger::OnWarn( const char* message )
 {
 	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
 	char msg[Size];
-	::snprintf(msg, Size - 1, "Warn,  T%u: %s", GetThreadID(), message );
+	ai_snprintf(msg, Size, "Warn,  T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg, Logger::Warn );
 }
@@ -288,7 +289,7 @@ void DefaultLogger::OnError( const char* message )
 {
 	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
 	char msg[ Size ];
-    ::snprintf(msg, Size-1, "Error, T%u: %s", GetThreadID(), message );
+    ai_snprintf(msg, Size, "Error, T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg, Logger::Err );
 }
@@ -321,7 +322,7 @@ bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 }
 
 // ----------------------------------------------------------------------------------
-//  Detatch a stream
+//  Detach a stream
 bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 {
     if (!pStream)
@@ -355,7 +356,6 @@ bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 // ----------------------------------------------------------------------------------
 //  Constructor
 DefaultLogger::DefaultLogger(LogSeverity severity)
-
     :   Logger  ( severity )
     ,   noRepeatMsg (false)
     ,   lastLen( 0 )
@@ -375,8 +375,7 @@ DefaultLogger::~DefaultLogger()
 
 // ----------------------------------------------------------------------------------
 //  Writes message to stream
-void DefaultLogger::WriteToStreams(const char *message,
-    ErrorSeverity ErrorSev )
+void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev )
 {
     ai_assert(NULL != message);
 

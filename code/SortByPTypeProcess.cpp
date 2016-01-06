@@ -397,7 +397,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
     if (!DefaultLogger::isNullLogger())
     {
         char buffer[1024];
-        ::sprintf(buffer,"Points: %u%s, Lines: %u%s, Triangles: %u%s, Polygons: %u%s (Meshes, X = removed)",
+        ::ai_snprintf(buffer,1024,"Points: %u%s, Lines: %u%s, Triangles: %u%s, Polygons: %u%s (Meshes, X = removed)",
             aiNumMeshesPerPType[0], ((configRemoveMeshes & aiPrimitiveType_POINT)     ? "X" : ""),
             aiNumMeshesPerPType[1], ((configRemoveMeshes & aiPrimitiveType_LINE)      ? "X" : ""),
             aiNumMeshesPerPType[2], ((configRemoveMeshes & aiPrimitiveType_TRIANGLE)  ? "X" : ""),

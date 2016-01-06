@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IRRShared.h"
 #include "SceneCombiner.h"
 #include "Importer.h"
+#include "StringUtils.h"
 #include "../include/assimp/anim.h"
 
 namespace Assimp    {
@@ -177,7 +178,7 @@ private:
             // Generate a default name for the node
             char buffer[128];
             static int cnt;
-            ::snprintf(buffer, 128, "IrrNode_%i",cnt++);
+            ai_snprintf(buffer, 128, "IrrNode_%i",cnt++);
             name = std::string(buffer);
 
             // reserve space for up to 5 materials

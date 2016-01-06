@@ -1370,7 +1370,7 @@ void LWOImporter::LoadLWO2File()
                 // if the name is empty, generate a default name
                 if (layer.mName.empty())    {
                     char buffer[128]; // should be sufficiently large
-                    ::snprintf(buffer, 128, "Layer_%i", iUnnamed++);
+                    ::ai_snprintf(buffer, 128, "Layer_%i", iUnnamed++);
                     layer.mName = buffer;
                 }
 

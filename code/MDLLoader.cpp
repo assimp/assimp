@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
 #include "MD2FileData.h"
+#include "StringUtils.h"
 #include "../include/assimp/Importer.hpp"
 #include <boost/scoped_ptr.hpp>
 #include "../include/assimp/IOSystem.hpp"
@@ -942,7 +943,7 @@ void MDLImporter::CalcAbsBoneMatrices_3DGS_MDL7(MDL::IntBone_MDL7** apcOutBones)
 
                 if (AI_MDL7_BONE_STRUCT_SIZE__NAME_IS_NOT_THERE == pcHeader->bone_stc_size) {
                     // no real name for our poor bone is specified :-(
-                    pcOutBone->mName.length = ::snprintf(pcOutBone->mName.data, MAXLEN,
+                    pcOutBone->mName.length = ai_snprintf(pcOutBone->mName.data, MAXLEN,
                         "UnnamedBone_%i",iBone);
                 }
                 else    {
@@ -1547,7 +1548,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
             char* const szBuffer = &aszGroupNameBuffer[i*AI_MDL7_MAX_GROUPNAMESIZE];
 			if ('\0' == *szBuffer) {
 				const size_t maxSize(buffersize - (i*AI_MDL7_MAX_GROUPNAMESIZE));
-				pcNode->mName.length = ::snprintf(szBuffer, maxSize, "Group_%u", p);
+				pcNode->mName.length = ai_snprintf(szBuffer, maxSize, "Group_%u", p);
 			} else {
 				pcNode->mName.length = ::strlen(szBuffer);
 			}

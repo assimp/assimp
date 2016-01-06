@@ -702,7 +702,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 #if _MSC_VER >= 1400
             sprintf_s(s,"ASSIMP.binary-dump.%s",asctime(p));
 #else
-            snprintf(s,64,"ASSIMP.binary-dump.%s",asctime(p));
+            ai_snprintf(s,64,"ASSIMP.binary-dump.%s",asctime(p));
 #endif
             out->Write( s, 44, 1 );
             // == 44 bytes

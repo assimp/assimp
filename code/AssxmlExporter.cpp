@@ -70,8 +70,8 @@ int ioprintf( IOStream * io, const char * format, ... )
     char sz[4096];
     va_list va;
     va_start( va, format );
-    int nSize = vsnprintf( sz, 4096, format, va );
-  ai_assert( nSize < 4096 );
+    int nSize = ai_snprintf( sz, 4096, format, va );
+   ai_assert( nSize < 4096 );
     va_end( va );
 
     io->Write( sz, sizeof(char), nSize );

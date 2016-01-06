@@ -344,7 +344,7 @@ void CatmullClarkSubdivider::InternSubdivide (
         // faces in the mesh. They occur at outer model boundaries in non-closed
         // shapes.
         char tmp[512];
-        snprintf(tmp, 512, "Catmull-Clark Subdivider: got %u bad edges touching only one face (totally %u edges). ",
+        ai_snprintf(tmp, 512, "Catmull-Clark Subdivider: got %u bad edges touching only one face (totally %u edges). ",
             bad_cnt,static_cast<unsigned int>(edges.size()));
 
         DefaultLogger::get()->debug(tmp);

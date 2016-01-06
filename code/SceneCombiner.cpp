@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // ----------------------------------------------------------------------------
 #include "SceneCombiner.h"
+#include "StringUtils.h"
 #include "fast_atof.h"
 #include "Hash.h"
 #include "time.h"
@@ -310,7 +311,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
             //  continue;
             //}
 
-            src[i].idlen = ::snprintf(src[i].id, 32, "$%.6X$_",i);
+            src[i].idlen = ai_snprintf(src[i].id, 32, "$%.6X$_",i);
 
             if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
 

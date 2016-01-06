@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "LimitBoneWeightsProcess.h"
+#include "StringUtils.h"
 #include "../include/assimp/postprocess.h"
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/scene.h"
@@ -193,7 +194,7 @@ void LimitBoneWeightsProcess::ProcessMesh( aiMesh* pMesh)
 
         if (!DefaultLogger::isNullLogger()) {
             char buffer[1024];
-            ::sprintf(buffer,"Removed %u weights. Input bones: %u. Output bones: %u",removed,old_bones,pMesh->mNumBones);
+            ai_snprintf(buffer,1024,"Removed %u weights. Input bones: %u. Output bones: %u",removed,old_bones,pMesh->mNumBones);
             DefaultLogger::get()->info(buffer);
         }
     }

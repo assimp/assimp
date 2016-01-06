@@ -412,7 +412,7 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
                 {
                     if (!DefaultLogger::isNullLogger())
                     {
-                        sprintf(buffer, "Found non-UV mapped texture (%s,%u). Mapping type: %s",
+                        ai_snprintf(buffer, 1024, "Found non-UV mapped texture (%s,%u). Mapping type: %s",
                             TextureTypeToString((aiTextureType)prop->mSemantic),prop->mIndex,
                             MappingTypeToString(mapping));
 

@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderIntermediate.h"
 #include "BlenderModifier.h"
 #include "BlenderBMesh.h"
+#include "StringUtils.h"
 #include "../include/assimp/scene.h"
 #include "StringComparison.h"
 
@@ -496,7 +497,7 @@ void BlenderImporter::AddSentinelTexture(aiMaterial* out, const Material* mat, c
     (void)mat; (void)tex; (void)conv_data;
 
     aiString name;
-    name.length = snprintf(name.data, MAXLEN, "Procedural,num=%i,type=%s",conv_data.sentinel_cnt++,
+    name.length = ai_snprintf(name.data, MAXLEN, "Procedural,num=%i,type=%s",conv_data.sentinel_cnt++,
         GetTextureTypeDisplayString(tex->tex->type)
     );
     out->AddProperty(&name,AI_MATKEY_TEXTURE_DIFFUSE(

@@ -147,7 +147,7 @@ void DeboneProcess::Execute( aiScene* pScene)
 
                 if(!DefaultLogger::isNullLogger()) {
                     char buffer[1024];
-                    ::sprintf(buffer,"Removed %u bones. Input bones: %u. Output bones: %u",in-out,in,out);
+                    ::ai_snprintf(buffer,1024,"Removed %u bones. Input bones: %u. Output bones: %u",in-out,in,out);
                     DefaultLogger::get()->info(buffer);
                 }
 

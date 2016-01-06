@@ -505,7 +505,7 @@ const aiScene* Importer::ReadFileFromMemory( const void* pBuffer,
     // read the file and recover the previous IOSystem
     static const size_t BufferSize(Importer::MaxLenHint + 28);
     char fbuff[ BufferSize ];
-    snprintf(fbuff, BufferSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
+    ai_snprintf(fbuff, BufferSize, "%s.%s",AI_MEMORYIO_MAGIC_FILENAME,pHint);
 
     ReadFile(fbuff,pFlags);
     SetIOHandler(io);

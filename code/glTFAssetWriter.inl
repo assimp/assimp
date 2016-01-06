@@ -190,7 +190,7 @@ namespace glTF {
             else {
                 for (size_t i = 0; i < lst.size(); ++i) {
                     char buffer[32];
-                    snprintf(buffer, 32, "%s_%d", semantic, int(i));
+					Assimp::ai_snprintf(buffer, 32, "%s_%d", semantic, int(i));
                     attrs.AddMember(Value(buffer, w.mAl).Move(), Value(lst[i]->id, w.mAl).Move(), w.mAl);
                 }
             }

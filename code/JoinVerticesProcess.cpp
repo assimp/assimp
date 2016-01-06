@@ -102,7 +102,7 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
         } else
         {
             char szBuff[128]; // should be sufficiently large in every case
-            sprintf(szBuff,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",
+            ::ai_snprintf(szBuff,128,"JoinVerticesProcess finished | Verts in: %i out: %i | ~%.1f%%",
                 iNumOldVertices,
                 iNumVertices,
                 ((iNumOldVertices - iNumVertices) / (float)iNumOldVertices) * 100.f);

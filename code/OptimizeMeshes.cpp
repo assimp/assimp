@@ -150,7 +150,7 @@ void OptimizeMeshesProcess::Execute( aiScene* pScene)
 
     if (output.size() != num_old) {
         char tmp[512];
-        ::sprintf(tmp,"OptimizeMeshesProcess finished. Input meshes: %u, Output meshes: %u",num_old,pScene->mNumMeshes);
+        ::ai_snprintf(tmp,512,"OptimizeMeshesProcess finished. Input meshes: %u, Output meshes: %u",num_old,pScene->mNumMeshes);
         DefaultLogger::get()->info(tmp);
     } else {
         DefaultLogger::get()->debug( "OptimizeMeshesProcess finished" );

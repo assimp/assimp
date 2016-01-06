@@ -211,7 +211,7 @@ void AC3DImporter::LoadObjectSection(std::vector<Object>& objects)
 
         // Generate a default name for both the light source and the node
         // FIXME - what's the right way to print a size_t? Is 'zu' universally available? stick with the safe version.
-        light->mName.length = ::snprintf(light->mName.data, MAXLEN, "ACLight_%i",static_cast<unsigned int>(mLights->size())-1);
+        light->mName.length = ::ai_snprintf(light->mName.data, MAXLEN, "ACLight_%i",static_cast<unsigned int>(mLights->size())-1);
         obj.name = std::string( light->mName.data );
 
         DefaultLogger::get()->debug("AC3D: Light source encountered");
@@ -733,18 +733,18 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
         switch (object.type)
         {
         case Object::Group:
-            node->mName.length = ::snprintf(node->mName.data, MAXLEN, "ACGroup_%i",groups++);
+            node->mName.length = ::ai_snprintf(node->mName.data, MAXLEN, "ACGroup_%i",groups++);
             break;
         case Object::Poly:
-            node->mName.length = ::snprintf(node->mName.data, MAXLEN, "ACPoly_%i",polys++);
+            node->mName.length = ::ai_snprintf(node->mName.data, MAXLEN, "ACPoly_%i",polys++);
             break;
         case Object::Light:
-            node->mName.length = ::snprintf(node->mName.data, MAXLEN, "ACLight_%i",lights++);
+            node->mName.length = ::ai_snprintf(node->mName.data, MAXLEN, "ACLight_%i",lights++);
             break;
 
             // there shouldn't be more than one world, but we don't care
         case Object::World:
-            node->mName.length = ::snprintf(node->mName.data, MAXLEN, "ACWorld_%i",worlds++);
+            node->mName.length = ::ai_snprintf(node->mName.data, MAXLEN, "ACWorld_%i",worlds++);
             break;
         }
     }

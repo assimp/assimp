@@ -342,7 +342,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                     for(;*loc != ' '; ++loc);
                     *loc++ = '_';
                 }
-                *(loc+sprintf(loc,"%i",i)) = ' ';
+                *(loc+::ai_snprintf(loc, POLY_GRID_XPAD,"%i",i)) = ' ';
             }
 
 

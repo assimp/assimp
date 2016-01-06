@@ -267,7 +267,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
             if (!DefaultLogger::isNullLogger()) {
 
                 char buffer[512];
-                ::sprintf(buffer,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
+                ::ai_snprintf(buffer,512,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
                 DefaultLogger::get()->info(buffer);
             }
             pScene->mNumMeshes = numMeshesOut;

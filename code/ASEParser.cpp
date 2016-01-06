@@ -145,7 +145,7 @@ void Parser::LogWarning(const char* szWarn)
 #if _MSC_VER >= 1400
     sprintf_s(szTemp, "Line %u: %s",iLineNumber,szWarn);
 #else
-    snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
     // output the warning to the logger ...
@@ -161,7 +161,7 @@ void Parser::LogInfo(const char* szWarn)
 #if _MSC_VER >= 1400
     sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
 #else
-    snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
     // output the information to the logger ...
@@ -177,7 +177,7 @@ AI_WONT_RETURN void Parser::LogError(const char* szWarn)
 #if _MSC_VER >= 1400
     sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
 #else
-    snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
     // throw an exception
@@ -825,7 +825,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if (!SkipSpaces(&filePtr))
     {
 
-        snprintf(szBuffer, 1023, "Unable to parse %s block: Unexpected EOL",szName);
+        ai_snprintf(szBuffer, 1023, "Unable to parse %s block: Unexpected EOL",szName);
         LogWarning(szBuffer);
         return false;
     }
@@ -833,7 +833,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if ('\"' != *filePtr)
     {
 
-        snprintf(szBuffer, 1023, "Unable to parse %s block: Strings are expected "
+        ai_snprintf(szBuffer, 1023, "Unable to parse %s block: Strings are expected "
             "to be enclosed in double quotation marks",szName);
         LogWarning(szBuffer);
         return false;
@@ -845,7 +845,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
         if ('\"' == *sz)break;
         else if ('\0' == *sz)
         {
-            snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected to "
+            ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected to "
                 "be enclosed in double quotation marks but EOF was reached before "
                 "a closing quotation mark was encountered",szName);
             LogWarning(szBuffer);

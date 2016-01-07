@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -190,7 +190,7 @@ namespace glTF {
             else {
                 for (size_t i = 0; i < lst.size(); ++i) {
                     char buffer[32];
-                    sprintf(buffer, "%s_%d", semantic, int(i));
+					ai_snprintf(buffer, 32, "%s_%d", semantic, int(i));
                     attrs.AddMember(Value(buffer, w.mAl).Move(), Value(lst[i]->id, w.mAl).Move(), w.mAl);
                 }
             }

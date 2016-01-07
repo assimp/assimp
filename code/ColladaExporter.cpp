@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -875,6 +875,11 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+        {
+            if( mesh->HasTextureCoords( a) )
+                mOutput << startstr << "<input offset=\"0\" semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" set=\"" << a << "\" />" << endstr;
+        }
 
         mOutput << startstr << "<vcount>";
         for( size_t a = 0; a < mesh->mNumFaces; ++a )
@@ -1070,8 +1075,19 @@ void ColladaExporter::WriteNode(aiNode* pNode)
     PushTag();
     mOutput << startstr << "<technique_common>" << endstr;
     PushTag();
-    mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\" />" << endstr;
-        PopTag();
+    mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
+    PushTag();
+    for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+    {
+        if( mesh->HasTextureCoords( a) )
+            // semantic       as in <texture texcoord=...>
+            // input_semantic as in <input semantic=...>
+            // input_set      as in <input set=...>
+            mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+    }
+    PopTag();
+    mOutput << startstr << "</instance_material>" << endstr;
+    PopTag();
     mOutput << startstr << "</technique_common>" << endstr;
     PopTag();
     mOutput << startstr << "</bind_material>" << endstr;

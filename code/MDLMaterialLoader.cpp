@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
+#include "StringUtils.h"
 #include "../include/assimp/texture.h"
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/DefaultLogger.hpp"
@@ -699,7 +700,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
 
         // place this as diffuse texture
         char szCurrent[5];
-        ::sprintf(szCurrent,"*%i",this->pScene->mNumTextures);
+        ai_snprintf(szCurrent,5,"*%i",this->pScene->mNumTextures);
 
         aiString szFile;
         const size_t iLen = strlen((const char*)szCurrent);

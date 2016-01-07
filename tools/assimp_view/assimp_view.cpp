@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "assimp_view.h"
+#include "StringUtils.h"
 #include <map>
 
 using namespace std;
@@ -257,8 +258,9 @@ int LoadAsset(void)
     g_pcAsset->mAnimator = new SceneAnimator( g_pcAsset->pcScene);
 
     // build a new caption string for the viewer
-    char szOut[MAX_PATH + 10];
-    sprintf(szOut,AI_VIEW_CAPTION_BASE " [%s]",g_szFileName);
+	static const size_t Size = MAX_PATH + 10;
+	char szOut[Size];
+    ai_snprintf(szOut, Size,AI_VIEW_CAPTION_BASE " [%s]",g_szFileName);
     SetWindowText(g_hDlg,szOut);
 
     // scale the asset vertices to fit into the viewer window

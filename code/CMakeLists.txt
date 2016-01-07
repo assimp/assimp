@@ -113,6 +113,7 @@ SET( Common_SRCS
   StreamReader.h
   StreamWriter.h
   StringComparison.h
+  StringUtils.h
   SGSpatialSort.cpp
   SGSpatialSort.h
   VertexTriangleAdjacency.cpp

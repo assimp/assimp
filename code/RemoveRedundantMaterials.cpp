@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -181,7 +181,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
                 const unsigned int idx = aiMappingTable[p];
                 if (ppcMaterials[idx]) {
                     aiString sz;
-                    sz.length = ::sprintf(sz.data,"JoinedMaterial_#%u",p);
+                    sz.length = ::ai_snprintf(sz.data,MAXLEN,"JoinedMaterial_#%u",p);
                     ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
                 } else {
                     ppcMaterials[idx] = pScene->mMaterials[p];
@@ -209,7 +209,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
     else
     {
         char szBuffer[128]; // should be sufficiently large
-        ::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",
+        ::ai_snprintf(szBuffer,128,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",
             redundantRemoved,unreferencedRemoved);
         DefaultLogger::get()->info(szBuffer);
     }

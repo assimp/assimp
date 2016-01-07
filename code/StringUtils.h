@@ -37,53 +37,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+#ifndef INCLUDED_AI_STRINGUTILS_H
+#define INCLUDED_AI_STRINGUTILS_H
 
-/** @file glTFWriter.h
- * Declares a class to write gltf/glb files
- *
- * glTF Extensions Support:
- *   KHR_binary_glTF: full
- *   KHR_materials_common: full
- */
-#ifndef glTFAssetWriter_H_INC
-#define glTFAssetWriter_H_INC
+#include <cstdarg>
+#include <string.h>
+#include <stdio.h>
 
-#include "glTFAsset.h"
+///	@fn		ai_snprintf
+///	@brief	The portable version of the function snprintf ( C99 standard ), which works on visual studio compilers 2013 and earlier.
+///	@param	outBuf		The buffer to write in
+///	@param	size		The buffer size
+///	@param	format		The format string
+///	@param	ap			The additional arguments.
+///	@return	The number of written characters if the buffer size was big enough. If an encoding error occurs, a negative number is returned.
+#if defined(_MSC_VER) && _MSC_VER < 1900
 
-namespace glTF
-{
+	inline int c99_ai_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap) {
+		int count(-1);
+		if (0 != size) {
+			count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
+		}
+		if (count == -1) {
+			count = _vscprintf(format, ap);
+		}
 
-using rapidjson::MemoryPoolAllocator;
+		return count;
+	}
 
-class AssetWriter
-{
-    template<class T>
-    friend struct LazyDictWriter;
+	inline int ai_snprintf(char *outBuf, size_t size, const char *format, ...) {
+		int count;
+		va_list ap;
 
-private:
+		va_start(ap, format);
+		count = c99_ai_vsnprintf(outBuf, size, format, ap);
+		va_end(ap);
 
-    void WriteBinaryData(IOStream* outfile, size_t sceneLength);
+		return count;
+	}
 
-    void WriteMetadata();
-    void WriteExtensionsUsed();
-
-    template<class T>
-    void WriteObjects(LazyDict<T>& d);
-
-public:
-    Document mDoc;
-    Asset& mAsset;
-
-    MemoryPoolAllocator<>& mAl;
-
-    AssetWriter(Asset& asset);
-
-    void WriteFile(const char* path);
-};
-
-}
-
-// Include the implementation of the methods
-#include "glTFAssetWriter.inl"
-
+#else
+#   define ai_snprintf snprintf
 #endif
+
+#endif // INCLUDED_AI_STRINGUTILS_H
+

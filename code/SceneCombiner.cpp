@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // ----------------------------------------------------------------------------
 #include "SceneCombiner.h"
+#include "StringUtils.h"
 #include "fast_atof.h"
 #include "Hash.h"
 #include "time.h"
@@ -310,7 +311,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
             //  continue;
             //}
 
-            src[i].idlen = ::sprintf(src[i].id,"$%.6X$_",i);
+            src[i].idlen = ai_snprintf(src[i].id, 32, "$%.6X$_",i);
 
             if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY) {
 
@@ -492,7 +493,7 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
         // To offset or not to offset, this is the question
         if (n != (int)duplicates[n])
         {
-            // Get full scenegraph copy
+            // Get full scene-graph copy
             Copy( &node, (*cur)->mRootNode );
             OffsetNodeMeshIndices(node,offset[duplicates[n]]);
 

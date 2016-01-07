@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -133,7 +133,7 @@ struct Bone
 
         // Generate a default name for the bone
         char szTemp[128];
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 
@@ -223,7 +223,7 @@ struct BaseNode
         // generate a default name for the  node
         static int iCnt = 0;
         char szTemp[128]; // should be sufficiently large
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
 
         // Set mTargetPosition to qnan

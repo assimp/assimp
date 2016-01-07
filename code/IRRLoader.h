@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IRRShared.h"
 #include "SceneCombiner.h"
 #include "Importer.h"
+#include "StringUtils.h"
 #include "../include/assimp/anim.h"
 
 namespace Assimp    {
@@ -177,7 +178,7 @@ private:
             // Generate a default name for the node
             char buffer[128];
             static int cnt;
-            ::sprintf(buffer,"IrrNode_%i",cnt++);
+            ai_snprintf(buffer, 128, "IrrNode_%i",cnt++);
             name = std::string(buffer);
 
             // reserve space for up to 5 materials

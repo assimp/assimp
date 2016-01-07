@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "assimp_view.h"
 #include "AnimEvaluator.h"
 #include "SceneAnimator.h"
+#include "StringUtils.h"
 
 namespace AssimpView {
 
@@ -168,13 +169,14 @@ int CDisplay::AddNodeToDisplayList(
         {
             iIndex += iDepth  * 100;
         }
-        else iIndex += iDepth  * 10;
-        sprintf(chTemp,"Node %u",iIndex);
+        else 
+			iIndex += iDepth  * 10;
+        ai_snprintf(chTemp, MAXLEN,"Node %u",iIndex);
     }
     else {
-        sprintf(chTemp,"%s",pcNode->mName.data);
+        ai_snprintf(chTemp, MAXLEN,"%s",pcNode->mName.data);
     }
-    sprintf(chTemp+strlen(chTemp),  iIndex ? " (%i)" : " (%i meshes)",pcNode->mNumMeshes);
+    ai_snprintf(chTemp+strlen(chTemp), MAXLEN- strlen(chTemp),  iIndex ? " (%i)" : " (%i meshes)",pcNode->mNumMeshes);
 
     TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
@@ -222,12 +224,12 @@ int CDisplay::AddMeshToDisplayList(unsigned int iIndex, HTREEITEM hRoot)
     char chTemp[MAXLEN];
 
     if(0 == pcMesh->mName.length)   {
-        sprintf(chTemp,"Mesh %u",iIndex);
+        ai_snprintf(chTemp,MAXLEN,"Mesh %u",iIndex);
     }
     else {
-        sprintf(chTemp,"%s",pcMesh->mName.data);
+        ai_snprintf(chTemp,MAXLEN,"%s",pcMesh->mName.data);
     }
-    sprintf(chTemp+strlen(chTemp),  iIndex ? " (%i)" : " (%i faces)",pcMesh->mNumFaces);
+    ai_snprintf(chTemp+strlen(chTemp),MAXLEN-strlen(chTemp),  iIndex ? " (%i)" : " (%i faces)",pcMesh->mNumFaces);
 
     TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
@@ -387,7 +389,7 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
         if ('*' == *szPath->data)
         {
             int iIndex = atoi(szPath->data+1);
-            sprintf(chTempEmb,"Embedded #%i",iIndex);
+            ai_snprintf(chTempEmb,256,"Embedded #%i",iIndex);
             sz = chTempEmb;
         }
         else
@@ -451,10 +453,10 @@ int CDisplay::AddTextureToDisplayList(unsigned int iType,
         break;
     };
     if (bIsExtraOpacity)    {
-        sprintf(chTemp,"%s %i (<copy of diffuse #1>)",szType,iIndex+1);
+        ai_snprintf(chTemp,512,"%s %i (<copy of diffuse #1>)",szType,iIndex+1);
     }
     else
-        sprintf(chTemp,"%s %i (%s)",szType,iIndex+1,sz);
+		ai_snprintf(chTemp,512,"%s %i (%s)",szType,iIndex+1,sz);
 
     TVITEMEX tvi;
     TVINSERTSTRUCT sNew;
@@ -540,11 +542,11 @@ int CDisplay::AddMaterialToDisplayList(HTREEITEM hRoot,
     aiString szOut;
     if (AI_SUCCESS != aiGetMaterialString(pcMat,AI_MATKEY_NAME,&szOut))
     {
-        sprintf(chTemp,"Material %i",iIndex+1);
+        ai_snprintf(chTemp,512,"Material %i",iIndex+1);
     }
     else
     {
-        sprintf(chTemp,"%s (%i)",szOut.data,iIndex+1);
+        ai_snprintf(chTemp,512,"%s (%i)",szOut.data,iIndex+1);
     }
     TVITEMEXW tvi;
     TVINSERTSTRUCTW sNew;
@@ -821,24 +823,24 @@ int CDisplay::FillDefaultStatistics(void)
     }
     // and fill the statistic edit controls
     char szOut[1024];
-    sprintf(szOut,"%i",(int)iNumVert);
+    ai_snprintf(szOut,1024,"%i",(int)iNumVert);
     SetDlgItemText(g_hDlg,IDC_EVERT,szOut);
-    sprintf(szOut,"%i",(int)iNumFaces);
+	ai_snprintf(szOut, 1024,"%i",(int)iNumFaces);
     SetDlgItemText(g_hDlg,IDC_EFACE,szOut);
-    sprintf(szOut,"%i",(int)g_pcAsset->pcScene->mNumMaterials);
+	ai_snprintf(szOut, 1024,"%i",(int)g_pcAsset->pcScene->mNumMaterials);
     SetDlgItemText(g_hDlg,IDC_EMAT,szOut);
-    sprintf(szOut,"%i",(int)g_pcAsset->pcScene->mNumMeshes);
+	ai_snprintf(szOut, 1024,"%i",(int)g_pcAsset->pcScene->mNumMeshes);
     SetDlgItemText(g_hDlg,IDC_EMESH,szOut);
 
     // need to get the number of nodes
     iNumVert = 0;
     GetNodeCount(g_pcAsset->pcScene->mRootNode,&iNumVert);
-    sprintf(szOut,"%i",(int)iNumVert);
+	ai_snprintf(szOut, 1024,"%i",(int)iNumVert);
     SetDlgItemText(g_hDlg,IDC_ENODEWND,szOut);
 
     // now get the number of unique shaders generated for the asset
     // (even if the environment changes this number won't change)
-    sprintf(szOut,"%i", CMaterialManager::Instance().GetShaderCount());
+	ai_snprintf(szOut, 1024,"%i", CMaterialManager::Instance().GetShaderCount());
     SetDlgItemText(g_hDlg,IDC_ESHADER,szOut);
 
     sprintf(szOut,"%.5f",(float)g_fLoadTime);

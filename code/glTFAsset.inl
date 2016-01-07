@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -37,6 +37,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
+
+#include "StringUtils.h"
 
 namespace glTF {
 
@@ -840,7 +842,7 @@ inline void AssetMetadata::Read(Document& doc)
 
     if (version != 1) {
         char msg[128];
-        sprintf(msg, "Unsupported glTF version: %d", version);
+		ai_snprintf(msg, 128, "Unsupported glTF version: %d", version);
         throw DeadlyImportError(msg);
     }
 }
@@ -923,7 +925,7 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
 
     if (doc.HasParseError()) {
         char buffer[32];
-        sprintf(buffer, "%d", static_cast<int>(doc.GetErrorOffset()));
+        ai_snprintf(buffer, 32, "%d", static_cast<int>(doc.GetErrorOffset()));
         throw DeadlyImportError(std::string("JSON parse error, offset ") + buffer + ": "
             + GetParseError_En(doc.GetParseError()));
     }
@@ -1027,9 +1029,9 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
         if (it == mUsedIds.end()) break;
 
         char buffer[256];
-        int offset = sprintf(buffer, "%s_", id.c_str());
+        int offset = ai_snprintf(buffer, 256, "%s_", id.c_str());
         for (int i = 0; it != mUsedIds.end(); ++i) {
-            sprintf(buffer + offset, "%d", i);
+			ai_snprintf(buffer + offset, 256, "%d", i);
 
             id = buffer;
             it = mUsedIds.find(id);

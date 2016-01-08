@@ -299,13 +299,13 @@ char *OpenDDLParser::parseHeader( char *in, char *end ) {
         }
 
         // set the properties
-        if( ddl_nullptr != first ) {
+        if( ddl_nullptr != first && ddl_nullptr != node ) {
             node->setProperties( first );
         }
 
         Name *name( ddl_nullptr );
         in = OpenDDLParser::parseName( in, end, &name );
-        if( ddl_nullptr != name ) {
+        if( ddl_nullptr != name && ddl_nullptr != node ) {
             const std::string nodeName( name->m_id->m_text.m_buffer );
             node->setName( nodeName );
         }

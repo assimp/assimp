@@ -249,7 +249,8 @@ struct aiBone
 
     //! Default constructor
     aiBone()
-      : mNumWeights( 0 )
+        : mName()
+        , mNumWeights( 0 )
       , mWeights( NULL )
     {
     }

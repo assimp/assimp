@@ -174,7 +174,8 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
         delete pcMesh->mBones[i]->mWeights;
         if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
-            memcpy(pcMesh->mBones[i]->mWeights, &newWeights[i][0],
+            aiVertexWeight *weightToCopy = &( newWeights[i][0] );
+            memcpy(pcMesh->mBones[i]->mWeights, weightToCopy,
                 sizeof(aiVertexWeight) * newWeights[i].size());
             delete[] newWeights;
         } else {

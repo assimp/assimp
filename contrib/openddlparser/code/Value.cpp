@@ -316,6 +316,16 @@ Value *Value::getNext() const {
     return m_next;
 }
 
+size_t Value::size(){
+    size_t result=1;
+    Value *n=m_next;
+    while( n!=ddl_nullptr) {
+        result++;
+        n=n->m_next;
+    }
+    return result;
+}
+
 Value *ValueAllocator::allocPrimData( Value::ValueType type, size_t len ) {
     if( type == Value::ddl_none || Value::ddl_types_max == type ) {
         return ddl_nullptr;

@@ -128,11 +128,11 @@ public:
     ///	@brief  Returns the buffer pointer.
     /// @return The buffer pointer.
     const char *getBuffer() const;
-    
+
     /// @brief  Returns the size of the buffer.
     /// @return The buffer size.
     size_t getBufferSize() const;
-    
+
     ///	@brief  Clears all parser data, including buffer and active context.
     void clear();
 
@@ -166,12 +166,12 @@ public: // parser helpers
     static char *parseReference( char *in, char *end, std::vector<Name*> &names );
     static char *parseBooleanLiteral( char *in, char *end, Value **boolean );
     static char *parseIntegerLiteral( char *in, char *end, Value **integer, Value::ValueType integerType = Value::ddl_int32 );
-    static char *parseFloatingLiteral( char *in, char *end, Value **floating );
+    static char *parseFloatingLiteral( char *in, char *end, Value **floating, Value::ValueType floatType= Value::ddl_float );
     static char *parseStringLiteral( char *in, char *end, Value **stringData );
     static char *parseHexaLiteral( char *in, char *end, Value **data );
     static char *parseProperty( char *in, char *end, Property **prop );
     static char *parseDataList( char *in, char *end, Value::ValueType type, Value **data, size_t &numValues, Reference **refs, size_t &numRefs );
-    static char *parseDataArrayList( char *in, char *end, DataArrayList **dataList );
+    static char *parseDataArrayList( char *in, char *end, Value::ValueType type, DataArrayList **dataList );
     static const char *getVersion();
 
 private:

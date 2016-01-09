@@ -77,13 +77,21 @@ static const aiImporterDesc desc = {
     "dae"
 };
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-    : noSkeletonMesh()
+    : mFileName()
+	, mMeshIndexByID()
+	, mMaterialIndexByName()
+	, mMeshes()
+	, newMats()
+	, mCameras()
+	, mLights()
+	, mTextures()
+	, mAnims()
+	, noSkeletonMesh( false )
     , ignoreUpDirection(false)
-    , mNodeNameCounter()
+    , mNodeNameCounter( 0 )
 {}
 
 // ------------------------------------------------------------------------------------------------

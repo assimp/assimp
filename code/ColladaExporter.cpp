@@ -941,11 +941,8 @@ static aiNode* findMeshRootNode(aiNode *root,const unsigned int meshId){
 	//check the children
 	for(unsigned int j =0 ; j<root->mNumChildren; j++){
 		aiNode *child = root->mChildren[j];
-		std::cerr<<"Node: "<<child->mName.C_Str()<<std::endl;
-		std::cerr<<"\t#mesh: "<<child->mNumMeshes<<std::endl;
 		unsigned int *nodeMeshes = child->mMeshes;
 		for(unsigned int i =0 ; i<child->mNumMeshes ; i++){
-			std::cerr<<"\tHasMesh: "<<nodeMeshes[i]<<std::endl;
 			if(meshId == nodeMeshes[i]){
 				return root;
 			}//if
@@ -966,7 +963,6 @@ void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
 	const std::string meshName = XMLEscape(GetMeshId( pIndex));
 
 	aiMesh *mesh = mScene->mMeshes[pIndex];
-	std::cerr<<"WriteControl: Mesh:"<<pIndex<<" "<<mesh->mName.C_Str()<<" hasBones:"<<mesh->HasBones()<<std::endl;
 	if(!mesh->HasBones())
 		return;
 
@@ -983,8 +979,12 @@ void ColladaExporter::WriteControllerForMesh(const size_t pIndex){
     mOutput << startstr << "<skin source=\"#"<<meshName<<"\">"<<endstr;
     PushTag();
 
-    const aiMatrix4x4& mat = meshNode->mTransformation;
+
+    //the bind shape is incorporated in the bone when theya are read.
+    //since we can extract it again (find the MCM between matrix?)
+    //when we export we set it as an identiy
 	mOutput << startstr << "<bind_shape_matrix>";
+	aiMatrix4x4 mat;
 	mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
 	mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
 	mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
@@ -1142,6 +1142,11 @@ void ColladaExporter::WriteJointsWeightSourceNode(const size_t pIndex){
 	delete [] tempBoneWeight;
 }
 
+template <typename T>
+static void moveMatrixInArray(const aiMatrix4x4t<T> &matrix, T *outBuffer){
+	std::memcpy(outBuffer,matrix[0],16*sizeof(T));
+}
+
 void ColladaExporter::WriteJointsPoseSourceNode(const size_t pIndex){
     const aiMesh *const mesh = mScene->mMeshes[pIndex];
 	const std::string meshName = XMLEscape(GetMeshId(pIndex));
@@ -1149,14 +1154,11 @@ void ColladaExporter::WriteJointsPoseSourceNode(const size_t pIndex){
 	float * tempBonePose = new float[mesh->mNumBones*16];
 	aiBone **bones = mesh->mBones;
 
+	unsigned int offset = 0;
 	for(unsigned int i=0;i<mesh->mNumBones;i++){
 		const aiMatrix4x4 &pose = bones[i]->mOffsetMatrix;
-		const unsigned int offset = i*16;
-		//we can do a memcpy since the struct has 16 elements and not an array
-		//of element, we can trust that the elements are consecutive?
-		for(unsigned int j=0;j<16;j++){
-			tempBonePose[offset+j]=*pose[j];
-		}
+		moveMatrixInArray(pose,tempBonePose+offset);
+		offset+=16;
 	}
 
 	WriteFloatArray("Armature_"+meshName+"-skin-bind_poses",FloatType_Matrix4x4,
@@ -1321,6 +1323,44 @@ const aiNode* ColladaExporter::getRootOfController(const aiMesh* mesh)
     return controllerBones.begin()->second;
 }
 
+void ColladaExporter::WriteMatrix4x4(const aiMatrix4x4 &mat){
+
+	aiVector3D scale,position;
+	aiQuaternion rotation;
+
+	mat.Decompose(scale,rotation,position);
+	rotation.Normalize();
+	PushTag();
+    mOutput << startstr << "<translate sid=\"location\">" <<
+    		position.x<<" "<<position.y<<" "<<position.z<<"</translate>"<<endstr;
+
+    //we have to write axis + rotation -> we rotate the axis and
+    // compute the angle between vector -> cos(angle(a,b)) = (a.x*b.x + ..) / |a|*|b|
+    //here one vector has only one component to 1 + both vector have lenght 1 ->
+    // we take the only component !=0
+
+    aiVector3D axis(0,0,1);
+    aiVector3D rotAxis = rotation.Rotate(axis);
+    mOutput << startstr << "<rotate sid=\"rotationZ\">0 0 1 "<<
+    		AI_RAD_TO_DEG(std::acos(rotAxis.z))<<"</rotate>"<<endstr;
+    axis.Set(0,1,0);
+    rotAxis = rotation.Rotate(axis);
+    mOutput << startstr << "<rotate sid=\"rotationY\">0 1 0 "<<
+    		AI_RAD_TO_DEG(std::acos(rotAxis.y))<<"</rotate>"<<endstr;
+
+    axis.Set(1,0,0);
+    rotAxis = rotation.Rotate(axis);
+    mOutput << startstr << "<rotate sid=\"rotationX\">1 0 0 "<<
+    		AI_RAD_TO_DEG(std::acos(rotAxis.x))<<"</rotate>"<<endstr;
+
+    mOutput << startstr << "<scale sid=\"scale\">" <<
+    		scale.x<<" "<<scale.y<<" "<<scale.z<<"</scale>"<<endstr;
+    PopTag();
+
+}
+
+
+
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
 void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
@@ -1350,15 +1390,8 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
             << "\">" << endstr;
     PushTag();
 
-    // write transformation - we can directly put the matrix there
-    // TODO: (thom) decompose into scale - rot - quad to allow addressing it by animations afterwards
-    const aiMatrix4x4& mat = pNode->mTransformation;
-    mOutput << startstr << "<matrix>";
-    mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
-    mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
-    mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
-    mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
-    mOutput << "</matrix>" << endstr;
+    //write the node rotation/scale/translation
+    WriteMatrix4x4(pNode->mTransformation);
 
     if(pNode->mNumMeshes==0){
         //check if it is a camera node
@@ -1377,16 +1410,6 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
         }
 
     }else
-    	 /*
-    	<instance_controller url="#Armature_Cube-skin">
-    	          <skeleton>#Bone</skeleton>
-    	          <bind_material>
-    	            <technique_common>
-    	              <instance_material symbol="Material-material" target="#Material-material"/>
-    	            </technique_common>
-    	          </bind_material>
-    	        </instance_controller>
-    */
 
     // instance every geometry
     for( size_t a = 0; a < pNode->mNumMeshes; ++a )

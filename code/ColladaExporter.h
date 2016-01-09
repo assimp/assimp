@@ -205,6 +205,8 @@ protected:
   void WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName);
   /// Writes a scalar property
   void WriteFloatEntry( const Property& pProperty, const std::string& pTypeName);
+  /// Writes a matrix as translation + rotation + scale
+  void WriteMatrix4x4(const aiMatrix4x4 &mat);
 };
 
 }

@@ -1365,7 +1365,7 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
                 effect.mTransparency *= (
                     0.212671f * effect.mTransparent.r +
                     0.715160f * effect.mTransparent.g +
-                    0.072169 * effect.mTransparent.b
+                    0.072169f * effect.mTransparent.b
                 );
 
                 effect.mTransparent.a = 1.f;

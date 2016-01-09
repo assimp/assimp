@@ -1415,7 +1415,6 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     for( size_t a = 0; a < pNode->mNumMeshes; ++a )
     {
         const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
-
 		// do not instanciate mesh if empty. I wonder how this could happen
 		if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
 			continue;
@@ -1449,6 +1448,12 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 		mOutput << startstr << "</technique_common>" << endstr;
 		PopTag();
 		mOutput << startstr << "</bind_material>" << endstr;
+		PopTag();
+
+		if (!mesh->HasBones())
+			mOutput << startstr << "</instance_geometry>" << endstr;
+		else
+			mOutput << startstr << "</instance_controller>" << endstr;
 		PopTag();
     }//for mesh
 

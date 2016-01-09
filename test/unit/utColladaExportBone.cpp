@@ -1,5 +1,7 @@
 #include "UnitTestPCH.h"
 
+#include <assimp/cexport.h>
+#include "../../include/assimp/postprocess.h"
 #include "../../include/assimp/scene.h"
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
@@ -11,22 +13,39 @@
 using namespace std;
 using namespace Assimp;
 
+#define EXPORT_FILE_NAME "simpleBoneExp.dae"
+
 class utColladaExportBone : public ::testing::Test
 {
 public:
 
-	virtual void SetUp() { 
+ virtual void SetUp() {
 		pImp = new Importer();
 		pExp = new Exporter();
 		pImp2 = new Importer();
+		origModel = pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/simpleBone.dae",0);
+
+		ASSERT_TRUE(origModel != NULL);
+		ASSERT_TRUE(origModel->mMeshes[0]->HasBones());
+
+		pExp->Export(origModel,"collada",EXPORT_FILE_NAME);
+
+		readModel = pImp2->ReadFile(EXPORT_FILE_NAME,0);
+
+		ASSERT_TRUE(readModel != NULL);
+
  }
-	virtual void TearDown() { 
+
+ virtual void TearDown() {
+	 unlink(EXPORT_FILE_NAME);
 		delete pImp;
 		delete pImp2;
 		delete pExp;
  }
 
 protected:
+ 	const aiScene* origModel;
+ 	const aiScene* readModel;
 	Importer* pImp;
 	Importer* pImp2;
 	Exporter* pExp;
@@ -84,19 +103,9 @@ public:
 TEST_F(utColladaExportBone, exportShouldKeepObjectBones)
 {
 
-	const aiScene* sc = pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/simpleBone.dae",0);
-
-	ASSERT_TRUE(sc != NULL);
-	ASSERT_TRUE(sc->mMeshes[0]->HasBones());
-	EXPECT_EQ(2, sc->mMeshes[0]->mNumBones);
-
-	pExp->Export(sc,"collada","simpleBoneExp.dae");
-
-	const aiScene* sc2 = pImp2->ReadFile("simpleBoneExp.dae",0);
-
-	ASSERT_TRUE(sc2 != NULL);
-	ASSERT_TRUE(sc2->mMeshes[0]->HasBones());
-	EXPECT_EQ(sc->mMeshes[0]->mNumBones, sc2->mMeshes[0]->mNumBones);
+	ASSERT_TRUE(readModel != NULL);
+	ASSERT_TRUE(readModel->mMeshes[0]->HasBones());
+	EXPECT_EQ(origModel->mMeshes[0]->mNumBones, readModel->mMeshes[0]->mNumBones);
 
 }
 
@@ -126,23 +135,13 @@ static void compareMatrix4x4(const aiMatrix4x4 &orig,const aiMatrix4x4 &read){
 TEST_F(utColladaExportBone, bonesHaveTheSamePosition)
 {
 
-	const aiScene* sc = pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/simpleBone.dae",0);
+	ASSERT_TRUE(readModel != NULL);
+	EXPECT_EQ(origModel->mMeshes[0]->mNumBones, readModel->mMeshes[0]->mNumBones);
 
-	ASSERT_TRUE(sc != NULL);
-	ASSERT_TRUE(sc->mMeshes[0]->HasBones());
-	EXPECT_EQ(2, sc->mMeshes[0]->mNumBones);
+	aiBone **orig = origModel->mMeshes[0]->mBones;
+	aiBone **read = readModel->mMeshes[0]->mBones;
 
-	pExp->Export(sc,"collada","simpleBoneExp.dae");
-
-	const aiScene* sc2 = pImp2->ReadFile("simpleBoneExp.dae",0);
-
-	ASSERT_TRUE(sc2 != NULL);
-	EXPECT_EQ(sc->mMeshes[0]->mNumBones, sc2->mMeshes[0]->mNumBones);
-
-	aiBone **orig = sc->mMeshes[0]->mBones;
-	aiBone **read = sc2->mMeshes[0]->mBones;
-
-	for(unsigned int i=0; i< sc->mMeshes[0]->mNumBones; i++){
+	for(unsigned int i=0; i< origModel->mMeshes[0]->mNumBones; i++){
 		compareMatrix4x4(orig[i]->mOffsetMatrix,read[i]->mOffsetMatrix);
 	}
 }
@@ -150,23 +149,12 @@ TEST_F(utColladaExportBone, bonesHaveTheSamePosition)
 TEST_F(utColladaExportBone, boneHaveTheSameVertexAndWeigth)
 {
 
-	const aiScene* sc = pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/simpleBone.dae",0);
+	EXPECT_EQ(origModel->mMeshes[0]->mNumBones, readModel->mMeshes[0]->mNumBones);
 
-	ASSERT_TRUE(sc != NULL);
-	ASSERT_TRUE(sc->mMeshes[0]->HasBones());
-	EXPECT_EQ(2, sc->mMeshes[0]->mNumBones);
+	aiBone **orig = origModel->mMeshes[0]->mBones;
+	aiBone **read = readModel->mMeshes[0]->mBones;
 
-	pExp->Export(sc,"collada","simpleBoneExp.dae");
-
-	const aiScene* sc2 = pImp2->ReadFile("simpleBoneExp.dae",0);
-
-	ASSERT_TRUE(sc2 != NULL);
-	EXPECT_EQ(sc->mMeshes[0]->mNumBones, sc2->mMeshes[0]->mNumBones);
-
-	aiBone **orig = sc->mMeshes[0]->mBones;
-	aiBone **read = sc2->mMeshes[0]->mBones;
-
-	for(unsigned int i=0; i< sc->mMeshes[0]->mNumBones; i++){
+	for(unsigned int i=0; i< origModel->mMeshes[0]->mNumBones; i++){
 		EXPECT_EQ(orig[i]->mNumWeights,read[i]->mNumWeights);
 		aiVertexWeight *origVertex = orig[i]->mWeights;
 		aiVertexWeight *readVertex = read[i]->mWeights;

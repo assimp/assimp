@@ -131,7 +131,7 @@ Cluster::~Cluster()
 // ------------------------------------------------------------------------------------------------
 Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : Deformer(id,element,doc,name)
-{
+, accuracy( 0.0f ) {
     const Scope& sc = GetRequiredScope(element);
 
     const Element* const Link_DeformAcuracy = sc["Link_DeformAcuracy"];

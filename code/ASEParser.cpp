@@ -825,7 +825,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if (!SkipSpaces(&filePtr))
     {
 
-        ai_snprintf(szBuffer, 1023, "Unable to parse %s block: Unexpected EOL",szName);
+        ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Unexpected EOL",szName);
         LogWarning(szBuffer);
         return false;
     }
@@ -833,7 +833,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if ('\"' != *filePtr)
     {
 
-        ai_snprintf(szBuffer, 1023, "Unable to parse %s block: Strings are expected "
+        ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected "
             "to be enclosed in double quotation marks",szName);
         LogWarning(szBuffer);
         return false;

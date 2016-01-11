@@ -59,6 +59,7 @@ namespace ObjFile {
 
 class ObjFileImporter;
 class IOSystem;
+class ProgressHandler;
 
 /// \class  ObjFileParser
 /// \brief  Parser for a obj waveform file
@@ -71,7 +72,7 @@ public:
 
 public:
     /// \brief  Constructor with data array.
-    ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* io);
+    ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* io, ProgressHandler* progress);
     /// \brief  Destructor
     ~ObjFileParser();
     /// \brief  Model getter.
@@ -139,6 +140,8 @@ private:
     char m_buffer[Buffersize];
     /// Pointer to IO system instance.
     IOSystem *m_pIO;
+    //! Pointer to progress handler
+    ProgressHandler* m_progress;
     /// Path to the current model
 };
 

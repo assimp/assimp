@@ -145,6 +145,13 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
         modelName = pFile;
     }
 
+    // This next stage takes ~ 1/3th of the total readFile task
+    // so should amount for 1/3th of the progress
+    // only update every 100KB or it'll be too slow
+    unsigned int progress = 0;
+    unsigned int progressCounter = 0;
+    const unsigned int updateProgressEveryBytes = 100 * 1024;
+    const unsigned int progressTotal = (3*m_Buffer.size()/updateProgressEveryBytes);
     // process all '\'
     std::vector<char> ::iterator iter = m_Buffer.begin();
     while (iter != m_Buffer.end())
@@ -159,10 +166,19 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
         }
         else
             ++iter;
+
+        if (++progressCounter >= updateProgressEveryBytes)
+        {
+            m_progress->UpdateFileRead(++progress, progressTotal);
+            progressCounter = 0;
+        }
     }
 
+    // 1/3rd progress
+    m_progress->UpdateFileRead(1, 3);
+
     // parse the file into a temporary representation
-    ObjFileParser parser(m_Buffer, modelName, pIOHandler);
+    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress);
 
     // And create the proper return structures out of it
     CreateDataFromImport(parser.GetModel(), pScene);

@@ -61,12 +61,13 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &data,const std::string &modelName, IOSystem *io ) :
+ObjFileParser::ObjFileParser(std::vector<char> &data,const std::string &modelName, IOSystem *io, ProgressHandler* progress ) :
     m_DataIt(data.begin()),
     m_DataItEnd(data.end()),
     m_pModel(NULL),
     m_uiLine(0),
-    m_pIO( io )
+    m_pIO( io ),
+    m_progress(progress)
 {
     std::fill_n(m_buffer,Buffersize,0);
 
@@ -106,8 +107,28 @@ void ObjFileParser::parseFile()
     if (m_DataIt == m_DataItEnd)
         return;
 
+    // only update every 100KB or it'll be too slow
+    const unsigned int updateProgressEveryBytes = 100 * 1024;
+    unsigned int progressCounter = 0;
+    const unsigned int bytesToProcess = std::distance(m_DataIt, m_DataItEnd);
+    const unsigned int progressTotal = 3 * bytesToProcess;
+    const unsigned int progressOffset = bytesToProcess;
+    unsigned int processed = 0;
+
+    DataArrayIt lastDataIt = m_DataIt;
+
     while (m_DataIt != m_DataItEnd)
     {
+        // Handle progress reporting
+        processed += std::distance(lastDataIt, m_DataIt);
+        lastDataIt = m_DataIt;
+        if (processed > (progressCounter * updateProgressEveryBytes))
+        {
+            progressCounter++;
+            m_progress->UpdateFileRead(progressOffset + processed*2, progressTotal);
+        }
+
+        // parse line
         switch (*m_DataIt)
         {
         case 'v': // Parse a vertex texture coordinate

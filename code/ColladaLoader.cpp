@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Defines.h"
 
 #include "time.h"
+#include "math.h"
 #include <boost/foreach.hpp>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/Importer.hpp"
@@ -1181,7 +1182,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 					  float last_eval_angle = last_key_angle + (cur_key_angle - last_key_angle) * (time - last_key_time) / (cur_key_time - last_key_time); 
 					  float delta = std::fabs(cur_key_angle - last_eval_angle);
 				      if (delta >= 180.0f) {
-						int subSampleCount = static_cast<int>(std::floorf(delta / 90.0f));
+						int subSampleCount = static_cast<int>(floorf(delta / 90.0f));
 						if (cur_key_time != time) {
 							float nextSampleTime = time + (cur_key_time - time) / subSampleCount;
 							nextTime = std::min(nextTime, nextSampleTime);

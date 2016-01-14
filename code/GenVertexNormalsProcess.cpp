@@ -56,14 +56,13 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 GenVertexNormalsProcess::GenVertexNormalsProcess()
-{
-    this->configMaxAngle = AI_DEG_TO_RAD(175.f);
+: configMaxAngle( AI_DEG_TO_RAD( 175.f ) ) {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-GenVertexNormalsProcess::~GenVertexNormalsProcess()
-{
+GenVertexNormalsProcess::~GenVertexNormalsProcess() {
     // nothing to do here
 }
 

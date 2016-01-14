@@ -140,7 +140,7 @@ void AllocateFromAssimpHeap::operator delete[] ( void* data)    {
 // ------------------------------------------------------------------------------------------------
 // Importer constructor.
 Importer::Importer()
-{
+ : pimpl( NULL ) {
     // allocate the pimpl first
     pimpl = new ImporterPimpl();
 
@@ -197,7 +197,7 @@ Importer::~Importer()
 // ------------------------------------------------------------------------------------------------
 // Copy constructor - copies the config of another Importer, not the scene
 Importer::Importer(const Importer &other)
-{
+	: pimpl(NULL) {
     new(this) Importer();
 
     pimpl->mIntProperties    = other.pimpl->mIntProperties;

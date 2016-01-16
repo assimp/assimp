@@ -183,7 +183,9 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 , m_numNormals( 0 )
 , m_normals(NULL)
 , m_numUVComps()
-, m_textureCoords() {
+, m_textureCoords()
+ {
+    // empty
 }
 
 //------------------------------------------------------------------------------------------------
@@ -217,6 +219,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_ctx( NULL )
 , m_metrics()
 , m_currentNode( NULL )
+, m_currentVertices()
 , m_currentMesh( NULL )
 , m_currentMaterial( NULL )
 , m_tokenType( Grammar::NoneType )
@@ -661,6 +664,7 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
         }
 
         const size_t numItems( countDataArrayListItems( vaList ) );
+
         if( Position == attribType ) {
             m_currentVertices.m_numVerts = numItems;
             m_currentVertices.m_vertices = new aiVector3D[ numItems ];

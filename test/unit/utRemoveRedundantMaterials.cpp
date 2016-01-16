@@ -60,7 +60,6 @@ protected:
     RemoveRedundantMatsProcess* piProcess;
 
     aiScene* pcScene1;
-    aiScene* pcScene2;
 };
 
 // ------------------------------------------------------------------------------------------------

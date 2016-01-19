@@ -54,7 +54,6 @@ public:
     {
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
-
     }
 
     virtual void TearDown()
@@ -73,7 +72,7 @@ protected:
 // ------------------------------------------------------------------------------------------------
 TEST_F(ColladaExportLight, testExportLight)
 {
-    const char* file = "cameraExp.dae";
+    const char* file = "lightsExp.dae";
 
     const aiScene* pTest = im->ReadFile(ASSIMP_TEST_MODELS_DIR "/Collada/lights.dae",0);
     ASSERT_TRUE(pTest!=NULL);
@@ -88,7 +87,6 @@ TEST_F(ColladaExportLight, testExportLight)
     }
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
-    EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada","lightsExp.dae"));
 
     const aiScene* imported = im->ReadFile(file,0);
 
@@ -123,7 +121,9 @@ TEST_F(ColladaExportLight, testExportLight)
         EXPECT_NEAR(orig->mAngleInnerCone,read->mAngleInnerCone,0.001);
         EXPECT_NEAR(orig->mAngleOuterCone,read->mAngleOuterCone,0.001);
     }
+
     delete [] origLights;
+
 }
 
 

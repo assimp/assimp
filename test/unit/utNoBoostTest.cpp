@@ -76,7 +76,8 @@ TEST(NoBoostTest, Tuple) {
     EXPECT_EQ(4U, first.get<1>());
     EXPECT_EQ(4U, first.get<2>());
 
-    boost::tuple<int, float, double, bool, another> second;
+    boost::tuple<int, float, double, bool, another> second=
+    		boost::make_tuple(1,1.0f,0.0,false,another());
     bool b = second.get<3>();
 
     // check empty tuple

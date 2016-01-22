@@ -111,8 +111,7 @@ void ObjFileParser::parseFile()
     const unsigned int updateProgressEveryBytes = 100 * 1024;
     unsigned int progressCounter = 0;
     const unsigned int bytesToProcess = std::distance(m_DataIt, m_DataItEnd);
-    const unsigned int progressTotal = 3 * bytesToProcess;
-    const unsigned int progressOffset = bytesToProcess;
+    const unsigned int progressTotal = bytesToProcess;
     unsigned int processed = 0;
 
     DataArrayIt lastDataIt = m_DataIt;
@@ -125,7 +124,7 @@ void ObjFileParser::parseFile()
         if (processed > (progressCounter * updateProgressEveryBytes))
         {
             progressCounter++;
-            m_progress->UpdateFileRead(progressOffset + processed*2, progressTotal);
+            m_progress->UpdateFileRead(progressOffset + processed, progressTotal);
         }
 
         // parse line

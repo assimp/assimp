@@ -65,14 +65,13 @@ class ProgressHandler;
 /// \brief  Parser for a obj waveform file
 class ObjFileParser {
 public:
-    static const size_t Buffersize = 4096;
     typedef std::vector<char> DataArray;
     typedef std::vector<char>::iterator DataArrayIt;
     typedef std::vector<char>::const_iterator ConstDataArrayIt;
 
 public:
     /// \brief  Constructor with data array.
-    ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* io, ProgressHandler* progress);
+    ObjFileParser(const std::vector<char> &Data,const std::string &strModelName, IOSystem* io, ProgressHandler* progress);
     /// \brief  Destructor
     ~ObjFileParser();
     /// \brief  Model getter.
@@ -82,27 +81,25 @@ private:
     /// Parse the loaded file
     void parseFile();
     /// Method to copy the new delimited word in the current line.
-    void copyNextWord(char *pBuffer, size_t length);
+    bool getNextFloat(ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd, float &result);
     /// Method to copy the new line.
-    void copyNextLine(char *pBuffer, size_t length);
+    void copyNextLine(std::vector<char> &buffer, ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Stores the vector
-    void getVector( std::vector<aiVector3D> &point3d_array );
+    void getVector( std::vector<aiVector3D> &point3d_array, ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Stores the following 3d vector.
-    void getVector3( std::vector<aiVector3D> &point3d_array );
+    void getVector3(std::vector<aiVector3D> &point3d_array, ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Stores the following 3d vector.
-    void getVector2(std::vector<aiVector2D> &point2d_array);
+    void getVector2(std::vector<aiVector2D> &point2d_array, ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Stores the following face.
-    void getFace(aiPrimitiveType type);
+    void getFace(aiPrimitiveType type, ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Reads the material description.
-    void getMaterialDesc();
-    /// Gets a comment.
-    void getComment();
+    void getMaterialDesc(ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Gets a a material library.
-    void getMaterialLib();
+    void getMaterialLib(ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Creates a new material.
-    void getNewMaterial();
+    void getNewMaterial(ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Gets the group name from file.
-    void getGroupName();
+    void getGroupName(ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Gets the group number from file.
     void getGroupNumber();
     /// Gets the group number and resolution from file.
@@ -110,7 +107,7 @@ private:
     /// Returns the index of the material. Is -1 if not material was found.
     int getMaterialIndex( const std::string &strMaterialName );
     /// Parse object name
-    void getObjectName();
+    void getObjectName(ConstDataArrayIt &dataIt, const ConstDataArrayIt dataItEnd);
     /// Creates a new object.
     void createObject( const std::string &strObjectName );
     /// Creates a new mesh.
@@ -128,16 +125,12 @@ private:
 
     /// Default material name
     static const std::string DEFAULT_MATERIAL;
-    //! Iterator to current position in buffer
-    DataArrayIt m_DataIt;
-    //! Iterator to end position of buffer
-    DataArrayIt m_DataItEnd;
+    //! Data buffer
+    const std::vector<char> &m_DataBuffer;
     //! Pointer to model instance
     ObjFile::Model *m_pModel;
     //! Current line (for debugging)
     unsigned int m_uiLine;
-    //! Helper buffer
-    char m_buffer[Buffersize];
     /// Pointer to IO system instance.
     IOSystem *m_pIO;
     //! Pointer to progress handler

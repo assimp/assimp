@@ -339,6 +339,7 @@ void ObjFileMtlImporter::getTexture() {
     } else if(!ASSIMP_strincmp( pPtr, ReflectionTexture.c_str(), ReflectionTexture.size() ) ) {
         // Reflection texture(s)
         //Do nothing here
+        return;
     } else if (!ASSIMP_strincmp( pPtr, DisplacementTexture.c_str(), DisplacementTexture.size() ) ) {
         // Displacement texture
         out = &m_pModel->m_pCurrentMaterial->textureDisp;

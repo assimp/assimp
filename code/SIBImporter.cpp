@@ -860,9 +860,9 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     pScene->mNumMaterials = sib.mtls.size();
     pScene->mNumMeshes = sib.meshes.size();
     pScene->mNumLights = sib.lights.size();
-    pScene->mMaterials = new aiMaterial* [pScene->mNumMaterials];
-    pScene->mMeshes = new aiMesh* [pScene->mNumMeshes];
-    pScene->mLights = new aiLight* [pScene->mNumLights];
+	pScene->mMaterials = pScene->mNumMaterials ? new aiMaterial*[pScene->mNumMaterials] : 0;
+	pScene->mMeshes = pScene->mNumMeshes ? new aiMesh*[pScene->mNumMeshes] : 0;
+	pScene->mLights = pScene->mNumLights ? new aiLight*[pScene->mNumLights] : 0;
     if (pScene->mNumMaterials)
         memcpy(pScene->mMaterials, &sib.mtls[0], sizeof(aiMaterial*) * pScene->mNumMaterials);
     if (pScene->mNumMeshes)
@@ -875,7 +875,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     aiNode *root = new aiNode();
     root->mName.Set("<SIBRoot>");
     root->mNumChildren = sib.objs.size() + sib.lights.size();
-    root->mChildren = new aiNode* [root->mNumChildren];
+	root->mChildren = root->mNumChildren ? new aiNode*[root->mNumChildren] : 0;
     pScene->mRootNode = root;
 
     // Add nodes for each object.
@@ -889,7 +889,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
         node->mTransformation = obj.axis;
 
         node->mNumMeshes = obj.meshCount;
-        node->mMeshes = new unsigned[node->mNumMeshes];
+		node->mMeshes = node->mNumMeshes ? new unsigned[node->mNumMeshes] : 0;
         for (unsigned i=0;i<node->mNumMeshes;i++)
             node->mMeshes[i] = obj.meshIdx + i;
 

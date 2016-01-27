@@ -834,6 +834,80 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 }
 
 // ------------------------------------------------------------------------------------------------
+const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess, bool requestValidation ) {
+    ASSIMP_BEGIN_EXCEPTION_REGION();
+    
+    // Return immediately if no scene is active
+    if ( NULL == pimpl->mScene ) {
+        return NULL;
+    }
+
+    // If no flags are given, return the current scene with no further action
+    if ( NULL == rootProcess ) {
+        return pimpl->mScene;
+    }
+
+    // In debug builds: run basic flag validation
+    DefaultLogger::get()->info( "Entering customized post processing pipeline" );
+
+#ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
+    // The ValidateDS process plays an exceptional role. It isn't contained in the global
+    // list of post-processing steps, so we need to call it manually.
+    if ( requestValidation )
+    {
+        ValidateDSProcess ds;
+        ds.ExecuteOnScene( this );
+        if ( !pimpl->mScene ) {
+            return NULL;
+        }
+    }
+#endif // no validation
+#ifdef ASSIMP_BUILD_DEBUG
+    if ( pimpl->bExtraVerbose )
+    {
+#ifdef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
+        DefaultLogger::get()->error( "Verbose Import is not available due to build settings" );
+#endif  // no validation
+    }
+#else
+    if ( pimpl->bExtraVerbose ) {
+        DefaultLogger::get()->warn( "Not a debug build, ignoring extra verbose setting" );
+    }
+#endif // ! DEBUG
+
+    boost::scoped_ptr<Profiler> profiler( GetPropertyInteger( AI_CONFIG_GLOB_MEASURE_TIME, 0 ) ? new Profiler() : NULL );
+
+    if ( profiler ) {
+        profiler->BeginRegion( "postprocess" );
+    }
+
+    rootProcess->ExecuteOnScene( this );
+
+    if ( profiler ) {
+        profiler->EndRegion( "postprocess" );
+    }
+
+    // If the extra verbose mode is active, execute the ValidateDataStructureStep again - after each step
+    if ( pimpl->bExtraVerbose || requestValidation  ) {
+        DefaultLogger::get()->debug( "Verbose Import: revalidating data structures" );
+
+        ValidateDSProcess ds;
+        ds.ExecuteOnScene( this );
+        if ( !pimpl->mScene ) {
+            DefaultLogger::get()->error( "Verbose Import: failed to revalidate data structures" );
+        }
+    }
+
+    // clear any data allocated by post-process steps
+    pimpl->mPPShared->Clean();
+    DefaultLogger::get()->info( "Leaving customized post processing pipeline" );
+
+    ASSIMP_END_EXCEPTION_REGION( const aiScene* );
+    
+    return pimpl->mScene;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Helper function to check whether an extension is supported by ASSIMP
 bool Importer::IsExtensionSupported(const char* szExtension) const
 {

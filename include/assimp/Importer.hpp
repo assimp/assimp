@@ -458,6 +458,8 @@ public:
      *    to the #Importer instance.  */
     const aiScene* ApplyPostProcessing(unsigned int pFlags);
 
+    const aiScene* ApplyCustomizedPostProcessing( BaseProcess *rootProcess, bool requestValidation );
+
     // -------------------------------------------------------------------
     /** @brief Reads the given file and returns its contents if successful.
      *

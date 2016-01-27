@@ -312,18 +312,10 @@ struct Camera : ElemBase {
 
     ID id FAIL;
 
-    // struct AnimData *adt;
-
     Type type,flag WARN;
-    float angle WARN;
-    //float passepartalpha, angle;
-    //float clipsta, clipend;
-    //float lens, ortho_scale, drawsize;
-    //float shiftx, shifty;
-
-    //float YF_dofdist, YF_aperture;
-    //short YF_bkhtype, YF_bkhbias;
-    //float YF_bkhrot;
+    float lens WARN;
+    float sensor_x WARN;
+    float clipsta, clipend;
 };
 
 

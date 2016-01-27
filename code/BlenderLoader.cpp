@@ -1011,13 +1011,19 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 }
 
 // ------------------------------------------------------------------------------------------------
-aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj, const Camera* /*camera*/, ConversionData& /*conv_data*/)
+aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj, const Camera* cam, ConversionData& /*conv_data*/)
 {
     ScopeGuard<aiCamera> out(new aiCamera());
     out->mName = obj->id.name+2;
     out->mPosition = aiVector3D(0.f, 0.f, 0.f);
     out->mUp = aiVector3D(0.f, 1.f, 0.f);
     out->mLookAt = aiVector3D(0.f, 0.f, -1.f);
+    if (cam->sensor_x && cam->lens) {
+        out->mHorizontalFOV = atan2(cam->sensor_x,  2.f * cam->lens);
+    }
+    out->mClipPlaneNear = cam->clipsta;
+    out->mClipPlaneFar = cam->clipend;
+
     return out.dismiss();
 }
 

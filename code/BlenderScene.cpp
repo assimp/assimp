@@ -620,7 +620,10 @@ template <> void Structure :: Convert<Camera> (
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Warn>((int&)dest.type,"type",db);
     ReadField<ErrorPolicy_Warn>((int&)dest.flag,"flag",db);
-    ReadField<ErrorPolicy_Warn>(dest.angle,"angle",db);
+    ReadField<ErrorPolicy_Warn>(dest.lens,"lens",db);
+    ReadField<ErrorPolicy_Warn>(dest.sensor_x,"sensor_x",db);
+    ReadField<ErrorPolicy_Igno>(dest.clipsta,"clipsta",db);
+    ReadField<ErrorPolicy_Igno>(dest.clipend,"clipend",db);
 
     db.reader->IncPtr(size);
 }

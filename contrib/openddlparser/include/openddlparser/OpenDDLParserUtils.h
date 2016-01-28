@@ -243,7 +243,7 @@ bool isComment( T *in, T *end ) {
         if ( in+1!=end ) {
             if ( *( in+1 )=='/' ) {
                 char *drive( ( in+2 ) );
-                if ( isUpperCase<T>( *drive )||isLowerCase<T>( *drive )&&*( drive+1 )=='/' )  {
+                if ( (isUpperCase<T>( *drive )||isLowerCase<T>( *drive ))&&*( drive+1 )=='/' )  {
                     return false;
                 } else {
                     return true;

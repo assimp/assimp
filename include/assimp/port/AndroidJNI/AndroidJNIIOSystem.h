@@ -54,7 +54,7 @@ namespace Assimp	{
 
 // ---------------------------------------------------------------------------
 /** Android extension to DefaultIOSystem using the standard C file functions */
-class AndroidJNIIOSystem : public DefaultIOSystem
+class ASSIMP_API AndroidJNIIOSystem : public DefaultIOSystem
 {
 public:
 

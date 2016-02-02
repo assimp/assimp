@@ -83,6 +83,9 @@ Take a look into the `INSTALL` file. Our build system is CMake, if you used CMak
 
 ### Ports ###
 * [Android](port/AndroidJNI/README.md)
+* [Python](port/PyAssimp/README.md)
+* [.NET](port/AssimpNET/Readme.md)
+* [Pascal](port/AssimpPascal/Readme.md)
 
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure is:

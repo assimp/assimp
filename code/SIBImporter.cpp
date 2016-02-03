@@ -164,10 +164,10 @@ static aiColor3D ReadColor(StreamReaderLE* stream)
 static void UnknownChunk(StreamReaderLE* stream, const SIBChunk& chunk)
 {
     char temp[5] = { 
-        ( char ) ( chunk.Tag>>24 ) & 0xff, 
-        ( char ) ( chunk.Tag>>16 ) & 0xff, 
-        ( char ) ( chunk.Tag>>8 ) & 0xff, 
-        ( char ) chunk.Tag & 0xff, '\0'
+        static_cast<char>(( chunk.Tag>>24 ) & 0xff),
+        static_cast<char>(( chunk.Tag>>16 ) & 0xff),
+        static_cast<char>(( chunk.Tag>>8 ) & 0xff),
+        static_cast<char>(chunk.Tag & 0xff), '\0'
     };
     
     DefaultLogger::get()->warn((Formatter::format(), "SIB: Skipping unknown '",temp,"' chunk."));

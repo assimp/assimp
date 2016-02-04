@@ -44,6 +44,7 @@ SET( TEST_SRCS
   unit/utNoBoostTest.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
+  unit/utIssues.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )

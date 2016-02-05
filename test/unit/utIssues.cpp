@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -49,6 +49,8 @@ using namespace Assimp;
 class utIssues : public ::testing::Test {
 
 };
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
 
 TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     aiScene *scene( new aiScene );
@@ -103,3 +105,5 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
         }*/
     }
 }
+
+#endif // ASSIMP_BUILD_NO_EXPORT

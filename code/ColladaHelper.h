@@ -597,6 +597,18 @@ struct Animation
         for( std::vector<Animation*>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it)
             delete *it;
     }
+
+	void CollectChannelsRecursively(std::vector<AnimationChannel> &channels)
+	{
+		channels.insert(channels.end(), mChannels.begin(), mChannels.end());
+
+		for (std::vector<Animation*>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it)
+		{
+			Animation *pAnim = (*it);
+
+			pAnim->CollectChannelsRecursively(channels);
+		}
+	}
 };
 
 /** Description of a collada animation channel which has been determined to affect the current node */

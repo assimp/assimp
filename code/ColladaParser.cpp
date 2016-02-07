@@ -187,6 +187,8 @@ void ColladaParser::ReadStructure()
                 ReadAssetInfo();
             else if( IsElement( "library_animations"))
                 ReadAnimationLibrary();
+			else if (IsElement("library_animation_clips"))
+				ReadAnimationClipLibrary();
             else if( IsElement( "library_controllers"))
                 ReadControllerLibrary();
             else if( IsElement( "library_images"))
@@ -272,6 +274,131 @@ void ColladaParser::ReadAssetInfo()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Reads the animation clips
+void ColladaParser::ReadAnimationClipLibrary()
+{
+	if (mReader->isEmptyElement())
+		return;
+
+	while (mReader->read())
+	{
+		if (mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if (IsElement("animation_clip"))
+			{
+				// optional name given as an attribute
+				std::string animName;
+				int indexName = TestAttribute("name");
+				int indexID = TestAttribute("id");
+				if (indexName >= 0)
+					animName = mReader->getAttributeValue(indexName);
+				else if (indexID >= 0)
+					animName = mReader->getAttributeValue(indexID);
+				else
+					animName = "animation_" + mAnimationClipLibrary.size();
+
+				std::pair<std::string, std::vector<std::string>> clip;
+
+				clip.first = animName;
+
+				while (mReader->read())
+				{
+					if (mReader->getNodeType() == irr::io::EXN_ELEMENT)
+					{
+						if (IsElement("instance_animation"))
+						{
+							int indexUrl = TestAttribute("url");
+							if (indexUrl >= 0)
+							{
+								const char* url = mReader->getAttributeValue(indexUrl);
+								if (url[0] != '#')
+									ThrowException("Unknown reference format");
+
+								url++;
+
+								clip.second.push_back(url);
+							}
+						}
+						else
+						{
+							// ignore the rest
+							SkipElement();
+						}
+					}
+					else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+					{
+						if (strcmp(mReader->getNodeName(), "animation_clip") != 0)
+							ThrowException("Expected end of <animation_clip> element.");
+
+						break;
+					}
+				}
+
+				if (clip.second.size() > 0)
+				{
+					mAnimationClipLibrary.push_back(clip);
+				}
+			}
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if (strcmp(mReader->getNodeName(), "library_animation_clips") != 0)
+				ThrowException("Expected end of <library_animation_clips> element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Re-build animations from animation clip library, if present.
+void ColladaParser::RebuildRootAnimationsFromClips()
+{
+	if (mAnimationClipLibrary.size() > 0)
+	{
+		Animation temp;
+
+		for (AnimationClipLibrary::iterator it = mAnimationClipLibrary.begin(); it != mAnimationClipLibrary.end(); ++it)
+		{
+			std::string clipName = it->first;
+
+			printf("Clip: %s\n", clipName.c_str());
+
+			Animation *clip = new Animation();
+			clip->mName = clipName;
+
+			temp.mSubAnims.push_back(clip);
+
+			for (std::vector<std::string>::iterator a = it->second.begin(); a != it->second.end(); ++a)
+			{
+				std::string animationID = *a;
+
+				printf("  Animation instance: %s\n", animationID.c_str());
+
+				AnimationLibrary::iterator animation = mAnimationLibrary.find(animationID);
+
+				if (animation != mAnimationLibrary.end())
+				{
+					Animation *pSourceAnimation = animation->second;
+
+					pSourceAnimation->CollectChannelsRecursively(clip->mChannels);
+				}
+			}
+		}
+
+		mAnims = temp;
+
+		// Ensure no double deletes.
+		temp.mSubAnims.clear();
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the animation library
 void ColladaParser::ReadAnimationLibrary()
 {
@@ -318,12 +445,17 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 
     // optional name given as an attribute
     std::string animName;
+	std::string animID;
     int indexName = TestAttribute( "name");
     int indexID = TestAttribute( "id");
+
+	if (indexID >= 0)
+		animID = mReader->getAttributeValue(indexID);
+
     if( indexName >= 0)
         animName = mReader->getAttributeValue( indexName);
     else if( indexID >= 0)
-        animName = mReader->getAttributeValue( indexID);
+        animName = animID;
     else
         animName = "animation";
 
@@ -395,11 +527,17 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
     // it turned out to have channels - add them
     if( !channels.empty())
     {
+		// FIXME: Is this essentially doing the same as "single-anim-node" codepath in 
+		//        ColladaLoader::StoreAnimations? If not, defer this to where animation
+		//        clip instances are set up. Due to handling of <library_animation_clips>
+		//        this cannot be done here, as the channel owner is lost.
+/*
         // special filtering for stupid exporters packing each channel into a separate animation
         if( channels.size() == 1)
         {
             pParent->mChannels.push_back( channels.begin()->second);
         } else
+*/
         {
             // else create the animation, if not done yet, and store the channels
             if( !anim)
@@ -410,6 +548,11 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
             }
             for( ChannelMap::const_iterator it = channels.begin(); it != channels.end(); ++it)
                 anim->mChannels.push_back( it->second);
+
+			if (indexID >= 0)
+			{
+				mAnimationLibrary[animID] = anim;
+			}
         }
     }
 }

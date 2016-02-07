@@ -73,31 +73,14 @@ bool Text::operator == ( const Text &rhs ) const {
     return ( 0 == res );
 }
 
-Identifier::Identifier( const char buffer[], size_t len )
-: m_text( buffer, len ) {
-    // empty
-}
-
-Identifier::Identifier( const char buffer[] )
-: m_text( buffer, strlen( buffer ) ) {
-    // empty
-}
-
-Identifier::~Identifier() {
-    // empty
-}
-
-bool Identifier::operator == ( const Identifier &rhs ) const {
-    return m_text == rhs.m_text;
-}
-
-Name::Name( NameType type, Identifier *id )
+Name::Name( NameType type, Text *id )
 : m_type( type )
 , m_id( id ) {
     // empty
 }
 
 Name::~Name() {
+    delete m_id;
     m_id = ddl_nullptr;
 }
 
@@ -110,10 +93,12 @@ Reference::Reference()
 Reference::Reference( size_t numrefs, Name **names )
 : m_numRefs( numrefs )
 , m_referencedName( ddl_nullptr ) {
-    m_referencedName = new Name *[ numrefs ];
-    for( size_t i = 0; i < numrefs; i++ ) {
-        Name *name = new Name( names[ i ]->m_type, names[ i ]->m_id );
-        m_referencedName[ i ] = name;
+    if ( numrefs > 0 ) {
+        m_referencedName = new Name *[ numrefs ];
+        for ( size_t i = 0; i < numrefs; i++ ) {
+            Name *name = new Name( names[ i ]->m_type, names[ i ]->m_id );
+            m_referencedName[ i ] = name;
+        }
     }
 }
 
@@ -125,7 +110,23 @@ Reference::~Reference() {
     m_referencedName = ddl_nullptr;
 }
 
-Property::Property( Identifier *id )
+size_t Reference::sizeInBytes() {
+    if ( 0 == m_numRefs ) {
+        return 0;
+    }
+
+    size_t size( 0 );
+    for ( size_t i = 0; i < m_numRefs; i++ ) {
+        Name *name( m_referencedName[ i ] );
+        if ( ddl_nullptr != name ) {
+            size += name->m_id->m_len;
+        }
+    }
+
+    return size;
+}
+
+Property::Property( Text *id )
 : m_key( id )
 , m_value( ddl_nullptr )
 , m_ref( ddl_nullptr )
@@ -152,7 +153,7 @@ DataArrayList::~DataArrayList() {
 }
 
 size_t DataArrayList::size() {
-    size_t result=1;
+    size_t result( 0 );
     DataArrayList *n=m_next;
     while( n!=ddl_nullptr ) {
         result++;
@@ -167,7 +168,7 @@ Context::Context()
 }
 
 Context::~Context() {
-    m_root = ddl_nullptr;
+    clear();
 }
 
 void Context::clear() {

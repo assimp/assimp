@@ -144,8 +144,8 @@ public:
 private:
     DDLNode( const std::string &type, const std::string &name, size_t idx, DDLNode *parent = ddl_nullptr );
     DDLNode();
-    DDLNode( const DDLNode & );
-    DDLNode &operator = ( const DDLNode & );
+    DDLNode( const DDLNode & ) ddl_no_copy;
+    DDLNode &operator = ( const DDLNode & ) ddl_no_copy;
     static void releaseNodes();
 
 private:

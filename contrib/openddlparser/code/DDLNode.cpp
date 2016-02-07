@@ -153,7 +153,7 @@ Property *DDLNode::findPropertyByName( const std::string &name ) {
 
     Property *current( m_properties );
     while( ddl_nullptr != current ) {
-        int res = strncmp( current->m_key->m_text.m_buffer, name.c_str(), name.size() );
+        int res = strncmp( current->m_key->m_buffer, name.c_str(), name.size() );
         if( 0 == res ) {
             return current;
         }

@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  SIBImporter.cpp
- *  @brief Implementation of the SIB importer class
+ *  @brief Implementation of the SIB importer class.
  *
  *  The Nevercenter Silo SIB format is undocumented.
  *  All details here have been reverse engineered from

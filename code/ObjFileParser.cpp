@@ -293,7 +293,7 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
 
 // -------------------------------------------------------------------
 //  Get values for a new 3D vector instance
-void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
+void ObjFileParser::getVector3( std::vector<aiVector3D> &point3d_array ) {
     float x, y, z;
     copyNextWord(m_buffer, Buffersize);
     x = (float) fast_atof(m_buffer);
@@ -328,8 +328,8 @@ void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
 void ObjFileParser::getFace(aiPrimitiveType type)
 {
     copyNextLine(m_buffer, Buffersize);
-    if (m_DataIt == m_DataItEnd)
-        return;
+    /*if (m_DataIt == m_DataItEnd)
+        return;*/
 
     char *pPtr = m_buffer;
     char *pEnd = &pPtr[Buffersize];

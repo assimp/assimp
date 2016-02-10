@@ -217,6 +217,8 @@ void ColladaParser::ReadStructure()
             break;
         }
     }
+
+	PostProcessRootAnimations();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -356,8 +358,8 @@ void ColladaParser::ReadAnimationClipLibrary()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Re-build animations from animation clip library, if present.
-void ColladaParser::RebuildRootAnimationsFromClips()
+// Re-build animations from animation clip library, if present, otherwise combine single-channel animations
+void ColladaParser::PostProcessRootAnimations()
 {
 	if (mAnimationClipLibrary.size() > 0)
 	{
@@ -367,8 +369,6 @@ void ColladaParser::RebuildRootAnimationsFromClips()
 		{
 			std::string clipName = it->first;
 
-			printf("Clip: %s\n", clipName.c_str());
-
 			Animation *clip = new Animation();
 			clip->mName = clipName;
 
@@ -377,8 +377,6 @@ void ColladaParser::RebuildRootAnimationsFromClips()
 			for (std::vector<std::string>::iterator a = it->second.begin(); a != it->second.end(); ++a)
 			{
 				std::string animationID = *a;
-
-				printf("  Animation instance: %s\n", animationID.c_str());
 
 				AnimationLibrary::iterator animation = mAnimationLibrary.find(animationID);
 
@@ -395,6 +393,10 @@ void ColladaParser::RebuildRootAnimationsFromClips()
 
 		// Ensure no double deletes.
 		temp.mSubAnims.clear();
+	}
+	else
+	{
+		mAnims.CombineSingleChannelAnimations();
 	}
 }
 
@@ -528,9 +530,11 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
     if( !channels.empty())
     {
 		// FIXME: Is this essentially doing the same as "single-anim-node" codepath in 
-		//        ColladaLoader::StoreAnimations? If not, defer this to where animation
-		//        clip instances are set up. Due to handling of <library_animation_clips>
-		//        this cannot be done here, as the channel owner is lost.
+		//        ColladaLoader::StoreAnimations? For now, this has been deferred to after
+		//        all animations and all clips have been read. Due to handling of 
+		//        <library_animation_clips> this cannot be done here, as the channel owner 
+		//        is lost, and some exporters make up animations by referring to multiple
+		//        single-channel animations from an <instance_animation>.
 /*
         // special filtering for stupid exporters packing each channel into a separate animation
         if( channels.size() == 1)

@@ -86,8 +86,8 @@ namespace Assimp
 		/** Reads the animation clip library */
 		void ReadAnimationClipLibrary();
 
-		/** Re-build animations from animation clip library, if present */
-		void RebuildRootAnimationsFromClips();
+		/** Re-build animations from animation clip library, if present, otherwise combine single-channel animations */
+		void PostProcessRootAnimations();
         
         /** Reads an animation into the given parent structure */
         void ReadAnimation( Collada::Animation* pParent);

@@ -775,7 +775,7 @@ void ObjFileParser::createMesh( const std::string &meshName )
 
 // -------------------------------------------------------------------
 //  Returns true, if a new mesh must be created.
-bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
+bool ObjFileParser::needsNewMesh( const std::string &materialName )
 {
     // If no mesh data yet
     if(m_pModel->m_pCurrentMesh == 0)
@@ -783,7 +783,7 @@ bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
         return true;
     }
     bool newMat = false;
-    int matIdx = getMaterialIndex( rMaterialName );
+    int matIdx = getMaterialIndex( materialName );
     int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
     if ( curMatIdx != int(ObjFile::Mesh::NoMaterial) && curMatIdx != matIdx )
     {

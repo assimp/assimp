@@ -299,7 +299,7 @@ void ColladaParser::ReadAnimationClipLibrary()
 				else
 					animName = "animation_" + mAnimationClipLibrary.size();
 
-				std::pair<std::string, std::vector<std::string>> clip;
+				std::pair<std::string, std::vector<std::string> > clip;
 
 				clip.first = animName;
 

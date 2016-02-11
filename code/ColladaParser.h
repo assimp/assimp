@@ -324,7 +324,7 @@ namespace Assimp
 		AnimationLibrary mAnimationLibrary;
 
 		/** Animation clip library: clip animation references by ID */
-		typedef std::vector<std::pair<std::string, std::vector<std::string>>> AnimationClipLibrary;
+		typedef std::vector<std::pair<std::string, std::vector<std::string> > > AnimationClipLibrary;
 		AnimationClipLibrary mAnimationClipLibrary;
         
         /** Pointer to the root node. Don't delete, it just points to one of

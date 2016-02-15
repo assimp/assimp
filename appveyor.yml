@@ -13,6 +13,10 @@ branches:
 platform:
     - x86
     - x64
+os:
+    - Visual Studio 2010
+    - Visual Studio 2015
+
 configuration: Release
 
 build:

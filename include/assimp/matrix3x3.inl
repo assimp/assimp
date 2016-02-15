@@ -266,22 +266,26 @@ inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::FromToMatrix(const aiVector3t<T
         {
             if (x.x < x.z)
             {
-                x.x = static_cast<TReal>(1.0); x.y = x.z = static_cast<TReal>(0.0);
+                x.x = static_cast<TReal>(1.0);
+                x.y = x.z = static_cast<TReal>(0.0);
             }
             else
             {
-                x.z = static_cast<TReal>(1.0); x.y = x.z = static_cast<TReal>(0.0);
+                x.z = static_cast<TReal>(1.0);
+                x.x = x.y = static_cast<TReal>(0.0);
             }
         }
         else
         {
             if (x.y < x.z)
             {
-                x.y = static_cast<TReal>(1.0); x.x = x.z = static_cast<TReal>(0.0);
+                x.y = static_cast<TReal>(1.0);
+                x.x = x.z = static_cast<TReal>(0.0);
             }
             else
             {
-                x.z = static_cast<TReal>(1.0); x.x = x.y = static_cast<TReal>(0.0);
+                x.z = static_cast<TReal>(1.0);
+                x.x = x.y = static_cast<TReal>(0.0);
             }
         }
 

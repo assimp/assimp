@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  SIBImporter.cpp
- *  @brief Implementation of the SIB importer class
+ *  @brief Implementation of the SIB importer class.
  *
  *  The Nevercenter Silo SIB format is undocumented.
  *  All details here have been reverse engineered from
@@ -517,7 +517,7 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
     aiString name;
 
     while (stream->GetRemainingSizeToLimit() >= sizeof(SIBChunk))
-	{
+    {
         SIBChunk chunk = ReadChunk(stream);
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
@@ -725,7 +725,7 @@ static void ReadLight(SIB* sib, StreamReaderLE* stream)
     aiLight* light = new aiLight();
 
     while (stream->GetRemainingSizeToLimit() >= sizeof(SIBChunk))
-	{
+    {
         SIBChunk chunk = ReadChunk(stream);
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
@@ -773,18 +773,18 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
     uint32_t shapeIndex = 0;
 
     while (stream->GetRemainingSizeToLimit() >= sizeof(SIBChunk))
-	{
+    {
         SIBChunk chunk = ReadChunk(stream);
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
         switch (chunk.Tag)
         {
-		case TAG('D','I','N','F'): break; // display info, not needed
-		case TAG('P','I','N','F'): break; // ?
+        case TAG('D','I','N','F'): break; // display info, not needed
+        case TAG('P','I','N','F'): break; // ?
         case TAG('A','X','I','S'): ReadAxis(inst.axis, stream); break;
-		case TAG('I','N','S','I'): shapeIndex = stream->GetU4(); break;
-		case TAG('S','M','T','X'): ReadScale(inst.axis, stream); break;
-		case TAG('S','N','A','M'): inst.name = ReadString(stream, chunk.Size/2); break;
+        case TAG('I','N','S','I'): shapeIndex = stream->GetU4(); break;
+        case TAG('S','M','T','X'): ReadScale(inst.axis, stream); break;
+        case TAG('S','N','A','M'): inst.name = ReadString(stream, chunk.Size/2); break;
         default:                   UnknownChunk(stream, chunk); break;
         }
 
@@ -813,7 +813,7 @@ static void ReadScene(SIB* sib, StreamReaderLE* stream)
 {
     // Parse each chunk in turn.
     while (stream->GetRemainingSizeToLimit() >= sizeof(SIBChunk))
-	{
+    {
         SIBChunk chunk = ReadChunk(stream);
         unsigned oldLimit = stream->SetReadLimit(stream->GetCurrentPos() + chunk.Size);
 
@@ -865,9 +865,9 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     pScene->mNumMaterials = sib.mtls.size();
     pScene->mNumMeshes = sib.meshes.size();
     pScene->mNumLights = sib.lights.size();
-    pScene->mMaterials = new aiMaterial* [pScene->mNumMaterials];
-    pScene->mMeshes = new aiMesh* [pScene->mNumMeshes];
-    pScene->mLights = new aiLight* [pScene->mNumLights];
+    pScene->mMaterials = pScene->mNumMaterials ? new aiMaterial*[pScene->mNumMaterials] : NULL;
+    pScene->mMeshes = pScene->mNumMeshes ? new aiMesh*[pScene->mNumMeshes] : NULL;
+    pScene->mLights = pScene->mNumLights ? new aiLight*[pScene->mNumLights] : NULL;
     if (pScene->mNumMaterials)
         memcpy(pScene->mMaterials, &sib.mtls[0], sizeof(aiMaterial*) * pScene->mNumMaterials);
     if (pScene->mNumMeshes)
@@ -880,7 +880,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     aiNode *root = new aiNode();
     root->mName.Set("<SIBRoot>");
     root->mNumChildren = sib.objs.size() + sib.lights.size();
-    root->mChildren = new aiNode* [root->mNumChildren];
+    root->mChildren = root->mNumChildren ? new aiNode*[root->mNumChildren] : NULL;
     pScene->mRootNode = root;
 
     // Add nodes for each object.
@@ -894,7 +894,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
         node->mTransformation = obj.axis;
 
         node->mNumMeshes = obj.meshCount;
-        node->mMeshes = new unsigned[node->mNumMeshes];
+        node->mMeshes = node->mNumMeshes ? new unsigned[node->mNumMeshes] : NULL;
         for (unsigned i=0;i<node->mNumMeshes;i++)
             node->mMeshes[i] = obj.meshIdx + i;
 

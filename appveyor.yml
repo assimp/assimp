@@ -26,7 +26,7 @@ init:
 
 install:
 # Make compiler command line tools available
-- call appveyor\compiler_setup.bat
+- call c:\projects\assimp\appveyor\compiler_setup.bat
 
 build_script:
  - cd c:\projects\assimp

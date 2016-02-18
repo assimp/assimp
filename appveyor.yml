@@ -13,11 +13,22 @@ branches:
 platform:
     - x86
     - x64
-configuration: Release
 
-build:
+configuration:
+  - 2015
+  - 2013
+  - 2012
+  #- MinGW
+  - 2010 # only works for x86
+
+init:
+- if "%platform%" EQU "x64" ( for %%a in (2008 2010 MinGW) do ( if "%Configuration%"=="%%a" (echo "Skipping unsupported configuration" && exit /b 1 ) ) )
+
+install:
+# Make compiler command line tools available
+- call c:\projects\assimp\appveyor\compiler_setup.bat
 
 build_script:
  - cd c:\projects\assimp
- - cmake CMakeLists.txt -G "Visual Studio 11"
+ - cmake CMakeLists.txt -G "Visual Studio %Configuration%"
  - msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln

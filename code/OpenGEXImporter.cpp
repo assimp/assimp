@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -225,6 +225,7 @@ OpenGEXImporter::OpenGEXImporter()
 , m_tokenType( Grammar::NoneType )
 , m_nodeStack()
 , m_unresolvedRefStack() {
+    // empty
 }
 
 //------------------------------------------------------------------------------------------------
@@ -423,7 +424,7 @@ static void getRefNames( DDLNode *node, std::vector<std::string> &names ) {
         for( size_t i = 0; i < ref->m_numRefs; i++ )  {
             Name *currentName( ref->m_referencedName[ i ] );
             if( NULL != currentName && NULL != currentName->m_id ) {
-                const std::string name( currentName->m_id->m_text.m_buffer );
+                const std::string name( currentName->m_id->m_buffer );
                 if( !name.empty() ) {
                     names.push_back( name );
                 }
@@ -541,7 +542,7 @@ static void propId2StdString( Property *prop, std::string &name, std::string &ke
     }
 
     if( NULL != prop->m_key ) {
-        name = prop->m_key->m_text.m_buffer;
+        name = prop->m_key->m_buffer;
         if( Value::ddl_string == prop->m_value->m_type ) {
             key = prop->m_value->getString();
         }
@@ -714,7 +715,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         current.mIndices = new unsigned int[ current.mNumIndices ];
         Value *next( vaList->m_dataList );
         for( size_t indices = 0; indices < current.mNumIndices; indices++ ) {
-            const int idx = next->getInt32();
+            const int idx( next->getUnsignedInt32() );
             ai_assert( static_cast<size_t>( idx ) <= m_currentVertices.m_numVerts );
 
             aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
@@ -758,12 +759,16 @@ enum ColorType {
 };
 
 //------------------------------------------------------------------------------------------------
-static ColorType getColorType( Identifier *id ) {
-    if( id->m_text == Grammar::DiffuseColorToken ) {
+static ColorType getColorType( Text *id ) {
+    if ( NULL == id ) {
+        return NoneColor;
+    }
+
+    if( *id == Grammar::DiffuseColorToken ) {
         return DiffuseColor;
-    } else if( id->m_text == Grammar::SpecularColorToken ) {
+    } else if( *id == Grammar::SpecularColorToken ) {
         return SpecularColor;
-    } else if( id->m_text == Grammar::EmissionColorToken ) {
+    } else if( *id == Grammar::EmissionColorToken ) {
         return EmissionColor;
     }
 

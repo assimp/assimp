@@ -220,6 +220,14 @@ public:
     /// @return The std::string value.
     const char *getString() const;
 
+    /// @brief  Set the reference.
+    /// @param  ref     [in] Pointer showing to the reference.
+    void setRef( Reference *ref );
+
+    /// @brief  Returns the pointer showing to the reference.
+    /// @return Pointer showing to the reference.
+    Reference *getRef() const;
+
     ///	@brief  Dumps the value.
     void dump();
 
@@ -241,8 +249,8 @@ public:
     Value *m_next;
 
 private:
-    Value &operator =( const Value & );
-    Value( const Value  & );
+    Value &operator =( const Value & ) ddl_no_copy;
+    Value( const Value  & ) ddl_no_copy;
 };
 
 ///------------------------------------------------------------------------------------------------
@@ -253,9 +261,9 @@ struct DLL_ODDLPARSER_EXPORT ValueAllocator {
     static void releasePrimData( Value **data );
 
 private:
-    ValueAllocator();
-    ValueAllocator( const ValueAllocator  & );
-    ValueAllocator &operator = ( const ValueAllocator & );
+    ValueAllocator() ddl_no_copy;
+    ValueAllocator( const ValueAllocator  & ) ddl_no_copy;
+    ValueAllocator &operator = ( const ValueAllocator & ) ddl_no_copy;
 };
 
 END_ODDLPARSER_NS

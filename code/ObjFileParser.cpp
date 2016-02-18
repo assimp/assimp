@@ -293,7 +293,7 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
 
 // -------------------------------------------------------------------
 //  Get values for a new 3D vector instance
-void ObjFileParser::getVector3(std::vector<aiVector3D> &point3d_array) {
+void ObjFileParser::getVector3( std::vector<aiVector3D> &point3d_array ) {
     float x, y, z;
     copyNextWord(m_buffer, Buffersize);
     x = (float) fast_atof(m_buffer);
@@ -323,19 +323,18 @@ void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
+static const std::string DefaultObjName = "defaultobject";
+
 // -------------------------------------------------------------------
 //  Get values for a new face instance
-void ObjFileParser::getFace(aiPrimitiveType type)
-{
+void ObjFileParser::getFace(aiPrimitiveType type) {
     copyNextLine(m_buffer, Buffersize);
-    if (m_DataIt == m_DataItEnd)
-        return;
-
     char *pPtr = m_buffer;
     char *pEnd = &pPtr[Buffersize];
     pPtr = getNextToken<char*>(pPtr, pEnd);
-    if (pPtr == pEnd || *pPtr == '\0')
+    if ( pPtr == pEnd || *pPtr == '\0' ) {
         return;
+    }
 
     std::vector<unsigned int> *pIndices = new std::vector<unsigned int>;
     std::vector<unsigned int> *pTexID = new std::vector<unsigned int>;
@@ -349,20 +348,18 @@ void ObjFileParser::getFace(aiPrimitiveType type)
     const bool vt = (!m_pModel->m_TextureCoord.empty());
     const bool vn = (!m_pModel->m_Normals.empty());
     int iStep = 0, iPos = 0;
-    while (pPtr != pEnd)
-    {
+    while (pPtr != pEnd) {
         iStep = 1;
 
-        if (IsLineEnd(*pPtr))
+        if ( IsLineEnd( *pPtr ) ) {
             break;
+        }
 
-        if (*pPtr=='/' )
-        {
+        if (*pPtr=='/' ) {
             if (type == aiPrimitiveType_POINT) {
                 DefaultLogger::get()->error("Obj: Separator unexpected in point statement");
             }
-            if (iPos == 0)
-            {
+            if (iPos == 0) {
                 //if there are no texture coordinates in the file, but normals
                 if (!vt && vn) {
                     iPos = 1;
@@ -370,22 +367,20 @@ void ObjFileParser::getFace(aiPrimitiveType type)
                 }
             }
             iPos++;
-        }
-        else if( IsSpaceOrNewLine( *pPtr ) )
-        {
+        } else if( IsSpaceOrNewLine( *pPtr ) ) {
             iPos = 0;
-        }
-        else
-        {
+        } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            const int iVal = atoi( pPtr );
+            const int iVal( ::atoi( pPtr ) );
 
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;
-            if (iVal < 0)
+            if ( iVal < 0 ) {
                 ++iStep;
-            while ( ( tmp = tmp / 10 )!=0 )
+            }
+            while ( ( tmp = tmp / 10 ) != 0 ) {
                 ++iStep;
+            }
 
             if ( iVal > 0 )
             {
@@ -455,12 +450,12 @@ void ObjFileParser::getFace(aiPrimitiveType type)
 
     // Create a default object, if nothing is there
     if( NULL == m_pModel->m_pCurrent ) {
-        createObject( "defaultobject" );
+        createObject( DefaultObjName );
     }
 
     // Assign face to mesh
     if ( NULL == m_pModel->m_pCurrentMesh ) {
-        createMesh( "defaultobject" );
+        createMesh( DefaultObjName );
     }
 
     // Store the face
@@ -780,15 +775,15 @@ void ObjFileParser::createMesh( const std::string &meshName )
 
 // -------------------------------------------------------------------
 //  Returns true, if a new mesh must be created.
-bool ObjFileParser::needsNewMesh( const std::string &rMaterialName )
+bool ObjFileParser::needsNewMesh( const std::string &materialName )
 {
+    // If no mesh data yet
     if(m_pModel->m_pCurrentMesh == 0)
     {
-        // No mesh data yet
         return true;
     }
     bool newMat = false;
-    int matIdx = getMaterialIndex( rMaterialName );
+    int matIdx = getMaterialIndex( materialName );
     int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
     if ( curMatIdx != int(ObjFile::Mesh::NoMaterial) && curMatIdx != matIdx )
     {

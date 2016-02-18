@@ -84,12 +84,7 @@ static const unsigned char chartype_table[ 256 ] = {
 template<class T>
 inline
 bool isNumeric( const T in ) {
-    return ( in >= '0' && in <= '9' );
-	//return ( chartype_table[in] );
-    /*if (in >= '0' &&  in <= '9' )
-    return true;
-
-    return false;*/
+	return ( chartype_table[ in ] == 1 );
 }
 
 template<class T>

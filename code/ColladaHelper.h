@@ -597,6 +597,48 @@ struct Animation
         for( std::vector<Animation*>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it)
             delete *it;
     }
+
+	/** Collect all channels in the animation hierarchy into a single channel list. */
+	void CollectChannelsRecursively(std::vector<AnimationChannel> &channels)
+	{
+		channels.insert(channels.end(), mChannels.begin(), mChannels.end());
+
+		for (std::vector<Animation*>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it)
+		{
+			Animation *pAnim = (*it);
+
+			pAnim->CollectChannelsRecursively(channels);
+		}
+	}
+
+	/** Combine all single-channel animations' channel into the same (parent) animation channel list. */
+	void CombineSingleChannelAnimations()
+	{
+		CombineSingleChannelAnimationsRecursively(this);
+	}
+
+	void CombineSingleChannelAnimationsRecursively(Animation *pParent)
+	{
+		for (std::vector<Animation*>::iterator it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();)
+		{
+			Animation *anim = *it;
+
+			CombineSingleChannelAnimationsRecursively(anim);
+
+			if (anim->mChannels.size() == 1)
+			{
+				pParent->mChannels.push_back(anim->mChannels[0]);
+
+				it = pParent->mSubAnims.erase(it);
+
+				delete anim;
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
 };
 
 /** Description of a collada animation channel which has been determined to affect the current node */

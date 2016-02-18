@@ -429,12 +429,18 @@ ASSIMP_API void aiDetachAllLogStreams(void)
 #ifndef ASSIMP_BUILD_SINGLETHREADED
     boost::mutex::scoped_lock lock(gLogStreamMutex);
 #endif
+    Logger *logger( DefaultLogger::get() );
+    if ( NULL == logger ) {
+        return;
+    }
+
     for (LogStreamMap::iterator it = gActiveLogStreams.begin(); it != gActiveLogStreams.end(); ++it) {
-        DefaultLogger::get()->detatchStream( it->second );
+        logger->detatchStream( it->second );
         delete it->second;
     }
     gActiveLogStreams.clear();
     DefaultLogger::kill();
+    
     ASSIMP_END_EXCEPTION_REGION(void);
 }
 

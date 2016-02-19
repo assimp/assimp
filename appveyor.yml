@@ -31,3 +31,10 @@ build_script:
  - cd c:\projects\assimp
  - cmake CMakeLists.txt -G "Visual Studio %Configuration%"
  - msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln
+
+after_build:
+  - 7z a assimp.zip c:\projects\assimp\bin\release\*
+
+artifacts:
+  - path: c:\projects\assimp\bin\release\assimp.zip
+  - name: assimp_lib

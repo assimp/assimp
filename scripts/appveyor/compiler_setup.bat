@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 
 :: Now we declare a scope
 Setlocal EnableDelayedExpansion EnableExtensions

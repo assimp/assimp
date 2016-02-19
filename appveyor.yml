@@ -33,8 +33,8 @@ build_script:
  - msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln
 
 after_build:
-  - 7z a assimp.zip c:\projects\assimp\bin\release\*
+  - 7z a assimp.7z c:\projects\assimp\bin\release\*
 
 artifacts:
-  - path: c:\projects\assimp\bin\release\assimp.zip
+  - path: assimp.7z
     name: assimp_lib

@@ -37,4 +37,4 @@ after_build:
 
 artifacts:
   - path: c:\projects\assimp\bin\release\assimp.zip
-  - name: assimp_lib
+    name: assimp_lib

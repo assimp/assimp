@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -160,7 +160,7 @@ protected:
     Logger();
 
     /** Construction with a given log severity */
-    Logger(LogSeverity severity);
+    explicit Logger(LogSeverity severity);
 
     // ----------------------------------------------------------------------
     /** @brief Called as a request to write a specific debug message

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SpatialSort.h"
 #include "SmoothingGroups.h"
+#include "StringUtils.h"
 #include "qnan.h"
 #include "./../include/assimp/material.h"
 #include "./../include/assimp/camera.h"
@@ -379,7 +380,7 @@ struct Material
         static int iCnt = 0;
 
         char szTemp[128];
-        sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 
@@ -435,7 +436,7 @@ struct Mesh : public MeshWithSmoothingGroups<D3DS::Face>
 
         // Generate a default name for the mesh
         char szTemp[128];
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
     }
 
@@ -484,18 +485,18 @@ struct aiFloatKey
 /** Helper structure to represent a 3ds file node */
 struct Node
 {
-    Node()
-        : mParent()
-        , mInstanceNumber()
-        ,   mHierarchyPos       (0)
-        ,   mHierarchyIndex     (0)
-        ,   mInstanceCount      (1)
+    Node():
+    	mParent(NULL)
+		,	mInstanceNumber(0)
+		,	mHierarchyPos		(0)
+		,	mHierarchyIndex		(0)
+		,	mInstanceCount		(1)
     {
         static int iCnt = 0;
 
         // Generate a default name for the node
         char szTemp[128];
-        ::sprintf(szTemp,"UNNAMED_%i",iCnt++);
+        ::ai_snprintf(szTemp, 128, "UNNAMED_%i",iCnt++);
         mName = szTemp;
 
         aRotationKeys.reserve (20);

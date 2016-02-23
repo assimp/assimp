@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -64,25 +64,41 @@ using namespace Assimp::Collada;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
-    : mFileName( pFile)
+    : mFileName( pFile )
+    , mReader( NULL )
+    , mDataLibrary()
+    , mAccessorLibrary()
+    , mMeshLibrary()
+    , mNodeLibrary()
+    , mImageLibrary()
+    , mEffectLibrary()
+    , mMaterialLibrary()
+    , mLightLibrary()
+    , mCameraLibrary()
+    , mControllerLibrary()
+    , mRootNode( NULL )
+    , mAnims()
+    , mUnitSize( 1.0f )
+    , mUpDirection( UP_Y )
+    , mFormat(FV_1_5_n )    // We assume the newest file format by default
 {
-    mRootNode = NULL;
-    mUnitSize = 1.0f;
-    mUpDirection = UP_Y;
+    // validate io-handler instance
+    if ( NULL == pIOHandler ) {
+        throw DeadlyImportError("IOSystem is NULL." );
+    }
 
-    // We assume the newest file format by default
-    mFormat = FV_1_5_n;
-
-  // open the file
-  boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
-  if( file.get() == NULL)
-    throw DeadlyImportError( "Failed to open file " + pFile + ".");
+    // open the file
+    boost::scoped_ptr<IOStream> file( pIOHandler->Open(pFile ) );
+    if (file.get() == NULL) {
+        throw DeadlyImportError( "Failed to open file " + pFile + "." );
+    }
 
     // generate a XML reader for it
-  boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
+    boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
     mReader = irr::io::createIrrXMLReader( mIOWrapper.get());
-    if( !mReader)
-        ThrowException( "Collada: Unable to open file.");
+    if (!mReader) {
+        ThrowException("Collada: Unable to open file.");
+    }
 
     // start reading
     ReadContents();
@@ -171,6 +187,8 @@ void ColladaParser::ReadStructure()
                 ReadAssetInfo();
             else if( IsElement( "library_animations"))
                 ReadAnimationLibrary();
+			else if (IsElement("library_animation_clips"))
+				ReadAnimationClipLibrary();
             else if( IsElement( "library_controllers"))
                 ReadControllerLibrary();
             else if( IsElement( "library_images"))
@@ -199,6 +217,8 @@ void ColladaParser::ReadStructure()
             break;
         }
     }
+
+	PostProcessRootAnimations();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -256,6 +276,131 @@ void ColladaParser::ReadAssetInfo()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Reads the animation clips
+void ColladaParser::ReadAnimationClipLibrary()
+{
+	if (mReader->isEmptyElement())
+		return;
+
+	while (mReader->read())
+	{
+		if (mReader->getNodeType() == irr::io::EXN_ELEMENT)
+		{
+			if (IsElement("animation_clip"))
+			{
+				// optional name given as an attribute
+				std::string animName;
+				int indexName = TestAttribute("name");
+				int indexID = TestAttribute("id");
+				if (indexName >= 0)
+					animName = mReader->getAttributeValue(indexName);
+				else if (indexID >= 0)
+					animName = mReader->getAttributeValue(indexID);
+				else
+					animName = "animation_" + mAnimationClipLibrary.size();
+
+				std::pair<std::string, std::vector<std::string> > clip;
+
+				clip.first = animName;
+
+				while (mReader->read())
+				{
+					if (mReader->getNodeType() == irr::io::EXN_ELEMENT)
+					{
+						if (IsElement("instance_animation"))
+						{
+							int indexUrl = TestAttribute("url");
+							if (indexUrl >= 0)
+							{
+								const char* url = mReader->getAttributeValue(indexUrl);
+								if (url[0] != '#')
+									ThrowException("Unknown reference format");
+
+								url++;
+
+								clip.second.push_back(url);
+							}
+						}
+						else
+						{
+							// ignore the rest
+							SkipElement();
+						}
+					}
+					else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+					{
+						if (strcmp(mReader->getNodeName(), "animation_clip") != 0)
+							ThrowException("Expected end of <animation_clip> element.");
+
+						break;
+					}
+				}
+
+				if (clip.second.size() > 0)
+				{
+					mAnimationClipLibrary.push_back(clip);
+				}
+			}
+			else
+			{
+				// ignore the rest
+				SkipElement();
+			}
+		}
+		else if (mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
+		{
+			if (strcmp(mReader->getNodeName(), "library_animation_clips") != 0)
+				ThrowException("Expected end of <library_animation_clips> element.");
+
+			break;
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
+// Re-build animations from animation clip library, if present, otherwise combine single-channel animations
+void ColladaParser::PostProcessRootAnimations()
+{
+	if (mAnimationClipLibrary.size() > 0)
+	{
+		Animation temp;
+
+		for (AnimationClipLibrary::iterator it = mAnimationClipLibrary.begin(); it != mAnimationClipLibrary.end(); ++it)
+		{
+			std::string clipName = it->first;
+
+			Animation *clip = new Animation();
+			clip->mName = clipName;
+
+			temp.mSubAnims.push_back(clip);
+
+			for (std::vector<std::string>::iterator a = it->second.begin(); a != it->second.end(); ++a)
+			{
+				std::string animationID = *a;
+
+				AnimationLibrary::iterator animation = mAnimationLibrary.find(animationID);
+
+				if (animation != mAnimationLibrary.end())
+				{
+					Animation *pSourceAnimation = animation->second;
+
+					pSourceAnimation->CollectChannelsRecursively(clip->mChannels);
+				}
+			}
+		}
+
+		mAnims = temp;
+
+		// Ensure no double deletes.
+		temp.mSubAnims.clear();
+	}
+	else
+	{
+		mAnims.CombineSingleChannelAnimations();
+	}
+}
+
+// ------------------------------------------------------------------------------------------------
 // Reads the animation library
 void ColladaParser::ReadAnimationLibrary()
 {
@@ -302,12 +447,17 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
 
     // optional name given as an attribute
     std::string animName;
+	std::string animID;
     int indexName = TestAttribute( "name");
     int indexID = TestAttribute( "id");
+
+	if (indexID >= 0)
+		animID = mReader->getAttributeValue(indexID);
+
     if( indexName >= 0)
         animName = mReader->getAttributeValue( indexName);
     else if( indexID >= 0)
-        animName = mReader->getAttributeValue( indexID);
+        animName = animID;
     else
         animName = "animation";
 
@@ -379,11 +529,19 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
     // it turned out to have channels - add them
     if( !channels.empty())
     {
+		// FIXME: Is this essentially doing the same as "single-anim-node" codepath in 
+		//        ColladaLoader::StoreAnimations? For now, this has been deferred to after
+		//        all animations and all clips have been read. Due to handling of 
+		//        <library_animation_clips> this cannot be done here, as the channel owner 
+		//        is lost, and some exporters make up animations by referring to multiple
+		//        single-channel animations from an <instance_animation>.
+/*
         // special filtering for stupid exporters packing each channel into a separate animation
         if( channels.size() == 1)
         {
             pParent->mChannels.push_back( channels.begin()->second);
         } else
+*/
         {
             // else create the animation, if not done yet, and store the channels
             if( !anim)
@@ -394,6 +552,11 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
             }
             for( ChannelMap::const_iterator it = channels.begin(); it != channels.end(); ++it)
                 anim->mChannels.push_back( it->second);
+
+			if (indexID >= 0)
+			{
+				mAnimationLibrary[animID] = anim;
+			}
         }
     }
 }
@@ -832,7 +995,7 @@ void ColladaParser::ReadMaterialLibrary()
         {
             if( IsElement( "material"))
             {
-                // read ID. By now you propably know my opinion about this "specification"
+                // read ID. By now you probably know my opinion about this "specification"
                 int attrID = GetAttribute( "id");
                 std::string id = mReader->getAttributeValue( attrID);
 
@@ -890,7 +1053,7 @@ void ColladaParser::ReadLightLibrary()
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if( IsElement( "light"))
             {
-                // read ID. By now you propably know my opinion about this "specification"
+                // read ID. By now you probably know my opinion about this "specification"
                 int attrID = GetAttribute( "id");
                 std::string id = mReader->getAttributeValue( attrID);
 
@@ -924,7 +1087,7 @@ void ColladaParser::ReadCameraLibrary()
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if( IsElement( "camera"))
             {
-                // read ID. By now you propably know my opinion about this "specification"
+                // read ID. By now you probably know my opinion about this "specification"
                 int attrID = GetAttribute( "id");
                 std::string id = mReader->getAttributeValue( attrID);
 
@@ -1240,11 +1403,16 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
             else if( IsElement( "transparent")) {
                 pEffect.mHasTransparency = true;
 
-                // In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
-                if(::strcmp(mReader->getAttributeValueSafe("opaque"), "RGB_ZERO") == 0) {
-                    // TODO: handle RGB_ZERO mode completely
+                const char* opaque = mReader->getAttributeValueSafe("opaque");
+ 
+                if(::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "RGB_ONE") == 0) {
                     pEffect.mRGBTransparency = true;
                 }
+
+                // In RGB_ZERO mode, the transparency is interpreted in reverse, go figure...
+				if(::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "A_ZERO") == 0) {
+					pEffect.mInvertTransparency = true;
+				}
 
                 ReadEffectColor( pEffect.mTransparent,pEffect.mTexTransparent);
             }
@@ -1509,7 +1677,7 @@ void ColladaParser::ReadEffectParam( Collada::EffectParam& pParam)
                 // don't care for remaining stuff
                 SkipElement( "surface");
             }
-            else if( IsElement( "sampler2D"))
+            else if( IsElement( "sampler2D") && (FV_1_4_n == mFormat || FV_1_3_n == mFormat))
             {
                 // surface ID is given inside <source> tags
                 TestOpening( "source");
@@ -1519,6 +1687,19 @@ void ColladaParser::ReadEffectParam( Collada::EffectParam& pParam)
                 TestClosing( "source");
 
                 // don't care for remaining stuff
+                SkipElement( "sampler2D");
+            }
+            else if( IsElement( "sampler2D"))
+            {
+                // surface ID is given inside <instance_image> tags
+                TestOpening( "instance_image");
+                int attrURL = GetAttribute("url");
+                const char* url = mReader->getAttributeValue( attrURL);
+                if( url[0] != '#')
+                    ThrowException( "Unsupported URL format in instance_image");
+                url++;
+                pParam.mType = Param_Sampler;
+                pParam.mReference = url;
                 SkipElement( "sampler2D");
             } else
             {
@@ -1947,7 +2128,7 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 
     ai_assert( primType != Prim_Invalid);
 
-    // also a number of <input> elements, but in addition a <p> primitive collection and propably index counts for all primitives
+    // also a number of <input> elements, but in addition a <p> primitive collection and probably index counts for all primitives
     while( mReader->read())
     {
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT)

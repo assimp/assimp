@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -69,7 +69,7 @@ public:
     static bool ImportSkeleton(Assimp::IOSystem *pIOHandler, Mesh *mesh);
 
 private:
-    OgreXmlSerializer(XmlReader *reader) :
+    explicit OgreXmlSerializer(XmlReader *reader) :
         m_reader(reader)
     {
     }

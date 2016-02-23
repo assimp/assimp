@@ -28,19 +28,6 @@ BEGIN_ODDLPARSER_NS
 
 template<class T>
 inline
-bool isComment( T *in, T *end ) {
-    if( *in == '/' ) {
-        if( in + 1 != end ) {
-            if( *( in + 1 ) == '/' ) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-template<class T>
-inline
 bool isUpperCase( T in ) {
     return ( in >= 'A' && in <= 'Z' );
 }
@@ -51,8 +38,8 @@ bool isLowerCase( T in ) {
     return ( in >= 'a' && in <= 'z' );
 }
 
-template<class T> 
-inline 
+template<class T>
+inline
 bool isSpace( const T in ) {
     return ( ' ' == in || '\t' == in );
 }
@@ -66,7 +53,7 @@ bool isNewLine( const T in ) {
 template<class T>
 inline
 bool isSeparator( T in ) {
-    if( isSpace( in ) || ',' == in || '{' == in || '}' == in || '[' == in ) {
+    if( isSpace( in ) || ',' == in || '{' == in || '}' == in || '[' == in || '(' == in || ')' == in ) {
         return true;
     }
     return false;
@@ -83,7 +70,7 @@ static const unsigned char chartype_table[ 256 ] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 96-111
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 112-127
 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // > 127 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // > 127
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -97,18 +84,13 @@ static const unsigned char chartype_table[ 256 ] = {
 template<class T>
 inline
 bool isNumeric( const T in ) {
-    return ( in >= '0' && in <= '9' );
-    //return ( chartype_table[in] );
-    /*if (in >= '0' &&  in <= '9' )
-    return true;
-
-    return false;*/
+	return ( chartype_table[ in ] == 1 );
 }
 
 template<class T>
 inline
 bool isNotEndOfToken( T *in, T *end ) {
-    return ( '}' != *in && ',' != *in && !isSpace( *in ) && in != end );
+    return ( '}' != *in && ',' != *in && !isSpace( *in ) && ')' != *in && in != end );
 }
 
 template<class T>
@@ -238,7 +220,7 @@ int hex2Decimal( char in ) {
     if( isNumeric( in ) ) {
         return ( in - 48 );
     }
-    
+
     char hexCodeLower( 'a' ), hexCodeUpper( 'A' );
     for( int i = 0; i<16; i++ ) {
         if( in == hexCodeLower + i || in == hexCodeUpper + i ) {
@@ -249,4 +231,24 @@ int hex2Decimal( char in ) {
     return ErrorHex2Decimal;
 }
 
+template<class T>
+inline
+bool isComment( T *in, T *end ) {
+    if ( *in=='/' ) {
+        if ( in+1!=end ) {
+            if ( *( in+1 )=='/' ) {
+                char *drive( ( in+2 ) );
+                if ( (isUpperCase<T>( *drive )||isLowerCase<T>( *drive ))&&*( drive+1 )=='/' )  {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 END_ODDLPARSER_NS
+

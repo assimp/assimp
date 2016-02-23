@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -435,22 +435,27 @@ void BaseImporter::ConvertUTF8toISO8859_1(std::string& data)
 
 // ------------------------------------------------------------------------------------------------
 void BaseImporter::TextFileToBuffer(IOStream* stream,
-    std::vector<char>& data)
+    std::vector<char>& data,
+    TextFileMode mode)
 {
     ai_assert(NULL != stream);
 
     const size_t fileSize = stream->FileSize();
-    if(!fileSize) {
-        throw DeadlyImportError("File is empty");
+    if (mode == FORBID_EMPTY) {
+        if(!fileSize) {
+            throw DeadlyImportError("File is empty");
+        }
     }
 
     data.reserve(fileSize+1);
     data.resize(fileSize);
-    if(fileSize != stream->Read( &data[0], 1, fileSize)) {
-        throw DeadlyImportError("File read error");
-    }
+    if(fileSize > 0) {
+        if(fileSize != stream->Read( &data[0], 1, fileSize)) {
+            throw DeadlyImportError("File read error");
+        }
 
-    ConvertToUTF8(data);
+        ConvertToUTF8(data);
+    }
 
     // append a binary zero to simplify string parsing
     data.push_back(0);

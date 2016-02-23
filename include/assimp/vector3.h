@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -116,6 +116,8 @@ public:
     /** @brief Normalize the vector */
     aiVector3t& Normalize();
 
+    /** @brief Normalize the vector with extra check for zero vectors */
+    aiVector3t& NormalizeSafe();
 
     /** @brief Componentwise multiplication of two vectors
      *
@@ -123,7 +125,12 @@ public:
      *  @param o Second factor */
     const aiVector3t SymMul(const aiVector3t& o);
 
-    TReal x, y, z;
+    union {
+        struct {
+            TReal x, y, z;
+        };
+        TReal v[ 3 ];
+    };
 } PACK_STRUCT;
 
 
@@ -132,8 +139,12 @@ typedef aiVector3t<float> aiVector3D;
 #else
 
 struct aiVector3D {
-
-    float x,y,z;
+    union {
+        struct {
+            float x, y, z;
+        };
+        float v[ 3 ];
+    };
 } PACK_STRUCT;
 
 #endif // __cplusplus

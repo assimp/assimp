@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -175,7 +175,6 @@ std::string DefaultIOSystem::fileName( const std::string &path )
     if (last != std::string::npos) ret = ret.substr(last + 1);
     return ret;
 }
-
 
 // ------------------------------------------------------------------------------------------------
 std::string DefaultIOSystem::completeBaseName( const std::string &path )

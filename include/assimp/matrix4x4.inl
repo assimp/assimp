@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -238,16 +238,22 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Inverse()
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-inline TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex)
-{
+inline TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) {
+    if (p_iIndex > 3) {
+        return NULL;
+    }
+
     // XXX this is UB. Has been for years. The fact that it works now does not make it better.
     return &this->a1 + p_iIndex * 4;
 }
 
 // ----------------------------------------------------------------------------------------
 template <typename TReal>
-inline const TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) const
-{
+inline const TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) const {
+    if (p_iIndex > 3) {
+        return NULL;
+    }
+
     // XXX same
     return &this->a1 + p_iIndex * 4;
 }
@@ -516,7 +522,7 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Scaling( const aiVector3t<TReal
  * "from" into another vector called "to".
  * Input : from[3], to[3] which both must be *normalized* non-zero vectors
  * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
- * Authors: Tomas Möller, John Hughes
+ * Authors: Tomas Mï¿½ller, John Hughes
  *          "Efficiently Building a Matrix to Rotate One Vector to Another"
  *          Journal of Graphics Tools, 4(4):1-4, 1999
  */

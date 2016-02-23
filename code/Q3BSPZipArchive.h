@@ -90,7 +90,7 @@ class ZipFile : public IOStream {
 
     public:
 
-        ZipFile(size_t size);
+        explicit ZipFile(size_t size);
 
         ~ZipFile();
 

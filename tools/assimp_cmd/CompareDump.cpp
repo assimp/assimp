@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -881,7 +881,7 @@ int Assimp_CompareDump (const char* const* params, unsigned int num)
     }
 
     // assimp cmpdump actual expected
-    if (num < 1) {
+    if (num < 2) {
         std::cout << "assimp cmpdump: Invalid number of arguments. "
             "See \'assimp cmpdump --help\'\r\n" << std::endl;
         return 1;

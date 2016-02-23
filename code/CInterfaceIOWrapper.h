@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -57,7 +57,7 @@ class CIOStreamWrapper : public IOStream
     friend class CIOSystemWrapper;
 public:
 
-    CIOStreamWrapper(aiFile* pFile)
+    explicit CIOStreamWrapper(aiFile* pFile)
         : mFile(pFile)
     {}
 
@@ -110,7 +110,7 @@ private:
 class CIOSystemWrapper : public IOSystem
 {
 public:
-    CIOSystemWrapper(aiFileIO* pFile)
+    explicit CIOSystemWrapper(aiFileIO* pFile)
         : mFileSystem(pFile)
     {}
 

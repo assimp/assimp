@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -114,6 +114,11 @@ namespace Assimp    {
 * threads for loading, each thread should maintain its own Importer instance.
 */
 class ASSIMP_API Importer   {
+public:
+    /**
+     *  @brief The upper limit for hints.
+     */
+    static const unsigned int MaxLenHint = 200; 
 
 public:
 
@@ -452,6 +457,8 @@ public:
      *  @note The method does nothing if no scene is currently bound
      *    to the #Importer instance.  */
     const aiScene* ApplyPostProcessing(unsigned int pFlags);
+
+    const aiScene* ApplyCustomizedPostProcessing( BaseProcess *rootProcess, bool requestValidation );
 
     // -------------------------------------------------------------------
     /** @brief Reads the given file and returns its contents if successful.

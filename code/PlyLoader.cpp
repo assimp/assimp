@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -312,6 +312,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
             p_pcOut->mNumVertices = iNum;
             if( 0 == iNum ) {     // nothing to do 
                 delete[] aiSplit; // cleanup
+                delete p_pcOut;
                 return;
             }
             p_pcOut->mVertices = new aiVector3D[iNum];

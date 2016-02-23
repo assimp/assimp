@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -236,6 +236,14 @@ unsigned int tokenize( const string_type& str, std::vector<string_type>& tokens,
     }
 
     return static_cast<unsigned int>( tokens.size() );
+}
+
+template <class string_type>
+string_type trim_whitespaces(string_type str)
+{
+    while (!str.empty() && IsSpace(str[0])) str.erase(0);
+    while (!str.empty() && IsSpace(str[str.length() - 1])) str.erase(str.length() - 1);
+    return str;
 }
 
 } // Namespace Assimp

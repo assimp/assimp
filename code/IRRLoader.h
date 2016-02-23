@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IRRShared.h"
 #include "SceneCombiner.h"
 #include "Importer.h"
+#include "StringUtils.h"
 #include "../include/assimp/anim.h"
 
 namespace Assimp    {
@@ -113,7 +114,7 @@ private:
 
         } type;
 
-        Animator(AT t = UNKNOWN)
+        explicit Animator(AT t = UNKNOWN)
             : type              (t)
             , speed             (0.001f)
             , direction         (0.f,1.f,0.f)
@@ -163,7 +164,7 @@ private:
             ANIMMESH
         } type;
 
-        Node(ET t)
+        explicit Node(ET t)
             :   type                (t)
             ,   scaling             (1.f,1.f,1.f) // assume uniform scaling by default
             ,   parent()
@@ -177,7 +178,7 @@ private:
             // Generate a default name for the node
             char buffer[128];
             static int cnt;
-            ::sprintf(buffer,"IrrNode_%i",cnt++);
+            ai_snprintf(buffer, 128, "IrrNode_%i",cnt++);
             name = std::string(buffer);
 
             // reserve space for up to 5 materials

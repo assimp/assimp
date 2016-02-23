@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -269,7 +269,7 @@ struct Face : public aiFace
     {}
 
     //! Construction from given type
-    Face(uint32_t _type)
+    explicit Face(uint32_t _type)
         : surfaceIndex  (0)
         , smoothGroup   (0)
         , type          (_type)
@@ -305,7 +305,7 @@ struct Face : public aiFace
  */
 struct VMapEntry
 {
-    VMapEntry(unsigned int _dims)
+    explicit VMapEntry(unsigned int _dims)
         :  dims(_dims)
     {}
 

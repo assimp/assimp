@@ -3,13 +3,13 @@
  *  BSD License:
  ****************************************************************************
  *
- *  Copyright (c) 2005-2007 Paul Hsieh
+ *  Copyright (c) 2005-2011 Paul Hsieh
  *  All rights reserved.
- *
+ *  
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
- *
+ *  
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
  *  2. Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *     documentation and/or other materials provided with the distribution.
  *  3. The name of the author may not be used to endorse or promote products
  *     derived from this software without specific prior written permission.
- *
+ *  
  *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -31,7 +31,7 @@
  *
  ****************************************************************************
  *
- *  Version 0.1.10
+ *  Version 0.1.12
  *
  *  The ANSI C standard committee, for the C99 standard, specified the
  *  inclusion of a new standard include file called stdint.h.  This is
@@ -172,12 +172,15 @@
  *
  *  Acknowledgements
  *
+ *  Edited by Philip G. Lee <rocketman768@gmail.com> 2011 to avoid overlap with sys/types.h
+ *
  *  The following people have made significant contributions to the
  *  development and testing of this file:
  *
  *  Chris Howie
  *  John Steele Scott
  *  Dave Thorup
+ *  John Dill
  *
  */
 
@@ -190,7 +193,7 @@
  *  do nothing else.  On the Mac OS X version of gcc this is _STDINT_H_.
  */
 
-#if ((defined(__STDC__) && __STDC__ && __STDC_VERSION__ >= 199901L) || (defined (__WATCOMC__) && (defined (_STDINT_H_INCLUDED) || __WATCOMC__ >= 1250)) || (defined(__GNUC__) && (defined(_STDINT_H) || defined(_STDINT_H_)))) && !defined (_PSTDINT_H_INCLUDED) && !defined(_STDINT)
+#if ((defined(__STDC__) && __STDC__ && __STDC_VERSION__ >= 199901L) || (defined (__WATCOMC__) && (defined (_STDINT_H_INCLUDED) || __WATCOMC__ >= 1250)) || (defined(__GNUC__) && (defined(_STDINT_H) || defined(_STDINT_H_) || defined (__UINT_FAST64_TYPE__)) )) && !defined (_PSTDINT_H_INCLUDED)
 #include <stdint.h>
 #define _PSTDINT_H_INCLUDED
 # ifndef PRINTF_INT64_MODIFIER
@@ -300,17 +303,10 @@
  *  definitions.
  */
 
-#ifndef UINT8_MAX
-# define UINT8_MAX 0xff
-#endif
-#ifndef uint8_t
-# if (UCHAR_MAX == UINT8_MAX) || defined (S_SPLINT_S)
-    typedef unsigned char uint8_t;
-#   define UINT8_C(v) ((uint8_t) v)
-# else
-#   error "Platform not supported"
-# endif
-#endif
+
+// Avoid overlap with sys/types.h
+#ifndef __int8_t_defined
+#define __int8_t_defined
 
 #ifndef INT8_MAX
 # define INT8_MAX 0x7f
@@ -320,8 +316,105 @@
 #endif
 #ifndef int8_t
 # if (SCHAR_MAX == INT8_MAX) || defined (S_SPLINT_S)
-    typedef signed char int8_t;
+typedef signed char int8_t;
 #   define INT8_C(v) ((int8_t) v)
+# else
+#   error "Platform not supported"
+# endif
+#endif
+
+#ifndef INT16_MAX
+# define INT16_MAX 0x7fff
+#endif
+#ifndef INT16_MIN
+# define INT16_MIN INT16_C(0x8000)
+#endif
+#ifndef int16_t
+#if (INT_MAX == INT16_MAX) || defined (S_SPLINT_S)
+typedef signed int int16_t;
+# define INT16_C(v) ((int16_t) (v))
+# ifndef PRINTF_INT16_MODIFIER
+#  define PRINTF_INT16_MODIFIER ""
+# endif
+#elif (SHRT_MAX == INT16_MAX)
+typedef signed short int16_t;
+# define INT16_C(v) ((int16_t) (v))
+# ifndef PRINTF_INT16_MODIFIER
+#  define PRINTF_INT16_MODIFIER "h"
+# endif
+#else
+#error "Platform not supported"
+#endif
+#endif
+
+#ifndef INT32_MAX
+# define INT32_MAX (0x7fffffffL)
+#endif
+#ifndef INT32_MIN
+# define INT32_MIN INT32_C(0x80000000)
+#endif
+#ifndef int32_t
+#if ((LONG_MAX == INT32_MAX) || defined (S_SPLINT_S)) && ! defined(__FreeBSD__)
+typedef signed long int32_t;
+# define INT32_C(v) v ## L
+# ifndef PRINTF_INT32_MODIFIER
+#  define PRINTF_INT32_MODIFIER "l"
+# endif
+#elif (INT_MAX == INT32_MAX)
+typedef signed int int32_t;
+# define INT32_C(v) v
+# ifndef PRINTF_INT32_MODIFIER
+#  define PRINTF_INT32_MODIFIER ""
+# endif
+#elif (SHRT_MAX == INT32_MAX)
+typedef signed short int32_t;
+# define INT32_C(v) ((short) (v))
+# ifndef PRINTF_INT32_MODIFIER
+#  define PRINTF_INT32_MODIFIER ""
+# endif
+#else
+#error "Platform not supported"
+#endif
+#endif
+
+// 64-bit shit seems more tricky. Philip Lee <rocketman768@gmail.com>
+/*
+*  The macro stdint_int64_defined is temporarily used to record
+*  whether or not 64 integer support is available.  It must be
+*  defined for any 64 integer extensions for new platforms that are
+*  added.
+*/
+#undef stdint_int64_defined
+#if (defined(__STDC__) && defined(__STDC_VERSION__)) || defined (S_SPLINT_S)
+# if (__STDC__ && __STDC_VERSION__ >= 199901L) || defined (S_SPLINT_S)
+#  define stdint_int64_defined
+typedef long long int64_t;
+# endif
+#endif
+#if !defined (stdint_int64_defined)
+# if defined(__GNUC__)
+#  define stdint_int64_defined
+#  ifndef __FreeBSD__
+      __extension__ typedef long long int64_t;
+#  endif
+# elif defined(__MWERKS__) || defined (__SUNPRO_C) || defined (__SUNPRO_CC) || defined (__APPLE_CC__) || defined (_LONG_LONG) || defined (_CRAYC) || defined (S_SPLINT_S)
+#  define stdint_int64_defined
+typedef long long int64_t;
+# elif (defined(__WATCOMC__) && defined(__WATCOM_INT64__)) || (defined(_MSC_VER) && _INTEGRAL_MAX_BITS >= 64) || (defined (__BORLANDC__) && __BORLANDC__ > 0x460) || defined (__alpha) || defined (__DECC)
+#  define stdint_int64_defined
+typedef __int64 int64_t;
+# endif
+#endif
+
+#endif /*ifndef __int8_t_defined*/
+
+#ifndef UINT8_MAX
+# define UINT8_MAX 0xff
+#endif
+#ifndef uint8_t
+# if (UCHAR_MAX == UINT8_MAX) || defined (S_SPLINT_S)
+    typedef unsigned char uint8_t;
+#   define UINT8_C(v) ((uint8_t) v)
 # else
 #   error "Platform not supported"
 # endif
@@ -348,35 +441,11 @@
 #endif
 #endif
 
-#ifndef INT16_MAX
-# define INT16_MAX 0x7fff
-#endif
-#ifndef INT16_MIN
-# define INT16_MIN INT16_C(0x8000)
-#endif
-#ifndef int16_t
-#if (INT_MAX == INT16_MAX) || defined (S_SPLINT_S)
-  typedef signed int int16_t;
-# define INT16_C(v) ((int16_t) (v))
-# ifndef PRINTF_INT16_MODIFIER
-#  define PRINTF_INT16_MODIFIER ""
-# endif
-#elif (SHRT_MAX == INT16_MAX)
-  typedef signed short int16_t;
-# define INT16_C(v) ((int16_t) (v))
-# ifndef PRINTF_INT16_MODIFIER
-#  define PRINTF_INT16_MODIFIER "h"
-# endif
-#else
-#error "Platform not supported"
-#endif
-#endif
-
 #ifndef UINT32_MAX
 # define UINT32_MAX (0xffffffffUL)
 #endif
 #ifndef uint32_t
-#if (ULONG_MAX == UINT32_MAX) || defined (S_SPLINT_S)
+#if ((ULONG_MAX == UINT32_MAX) || defined (S_SPLINT_S)) && ! defined(__FreeBSD__)
   typedef unsigned long uint32_t;
 # define UINT32_C(v) v ## UL
 # ifndef PRINTF_INT32_MODIFIER
@@ -399,36 +468,6 @@
 #endif
 #endif
 
-#ifndef INT32_MAX
-# define INT32_MAX (0x7fffffffL)
-#endif
-#ifndef INT32_MIN
-# define INT32_MIN INT32_C(0x80000000)
-#endif
-#ifndef int32_t
-#if (LONG_MAX == INT32_MAX) || defined (S_SPLINT_S)
-  typedef signed long int32_t;
-# define INT32_C(v) v ## L
-# ifndef PRINTF_INT32_MODIFIER
-#  define PRINTF_INT32_MODIFIER "l"
-# endif
-#elif (INT_MAX == INT32_MAX)
-  typedef signed int int32_t;
-# define INT32_C(v) v
-# ifndef PRINTF_INT32_MODIFIER
-#  define PRINTF_INT32_MODIFIER ""
-# endif
-#elif (SHRT_MAX == INT32_MAX)
-  typedef signed short int32_t;
-# define INT32_C(v) ((short) (v))
-# ifndef PRINTF_INT32_MODIFIER
-#  define PRINTF_INT32_MODIFIER ""
-# endif
-#else
-#error "Platform not supported"
-#endif
-#endif
-
 /*
  *  The macro stdint_int64_defined is temporarily used to record
  *  whether or not 64 integer support is available.  It must be
@@ -438,10 +477,11 @@
 
 #undef stdint_int64_defined
 #if (defined(__STDC__) && defined(__STDC_VERSION__)) || defined (S_SPLINT_S)
-# if (__STDC__ && __STDC_VERSION >= 199901L) || defined (S_SPLINT_S)
+# if (__STDC__ && __STDC_VERSION__ >= 199901L) || defined (S_SPLINT_S)
 #  define stdint_int64_defined
-   typedef long long int64_t;
-   typedef unsigned long long uint64_t;
+#  ifndef __FreeBSD__
+      typedef unsigned long long uint64_t;
+#  endif
 #  define UINT64_C(v) v ## ULL
 #  define  INT64_C(v) v ## LL
 #  ifndef PRINTF_INT64_MODIFIER
@@ -453,8 +493,9 @@
 #if !defined (stdint_int64_defined)
 # if defined(__GNUC__)
 #  define stdint_int64_defined
-   __extension__ typedef long long int64_t;
-   __extension__ typedef unsigned long long uint64_t;
+#  ifndef __FreeBSD__
+      __extension__ typedef unsigned long long uint64_t;
+#  endif
 #  define UINT64_C(v) v ## ULL
 #  define  INT64_C(v) v ## LL
 #  ifndef PRINTF_INT64_MODIFIER
@@ -462,7 +503,6 @@
 #  endif
 # elif defined(__MWERKS__) || defined (__SUNPRO_C) || defined (__SUNPRO_CC) || defined (__APPLE_CC__) || defined (_LONG_LONG) || defined (_CRAYC) || defined (S_SPLINT_S)
 #  define stdint_int64_defined
-   typedef long long int64_t;
    typedef unsigned long long uint64_t;
 #  define UINT64_C(v) v ## ULL
 #  define  INT64_C(v) v ## LL
@@ -471,7 +511,6 @@
 #  endif
 # elif (defined(__WATCOMC__) && defined(__WATCOM_INT64__)) || (defined(_MSC_VER) && _INTEGRAL_MAX_BITS >= 64) || (defined (__BORLANDC__) && __BORLANDC__ > 0x460) || defined (__alpha) || defined (__DECC)
 #  define stdint_int64_defined
-   typedef __int64 int64_t;
    typedef unsigned __int64 uint64_t;
 #  define UINT64_C(v) v ## UI64
 #  define  INT64_C(v) v ## I64
@@ -616,10 +655,12 @@
  *  stdint.h.
  */
 
+#ifndef __FreeBSD__
 typedef   int_least8_t   int_fast8_t;
 typedef  uint_least8_t  uint_fast8_t;
 typedef  int_least16_t  int_fast16_t;
 typedef uint_least16_t uint_fast16_t;
+#endif
 typedef  int_least32_t  int_fast32_t;
 typedef uint_least32_t uint_fast32_t;
 #define  UINT_FAST8_MAX  UINT_LEAST8_MAX
@@ -677,7 +718,7 @@ typedef uint_least32_t uint_fast32_t;
 # elif defined (__i386__) || defined (_WIN32) || defined (WIN32)
 #  define stdint_intptr_bits 32
 # elif defined (__INTEL_COMPILER)
-/* TODO -- what will Intel do about x86-64? */
+/* TODO -- what did Intel do about x86-64? */
 # endif
 
 # ifdef stdint_intptr_bits
@@ -707,8 +748,15 @@ typedef uint_least32_t uint_fast32_t;
 #  ifndef UINTPTR_C
 #    define UINTPTR_C(x)                stdint_intptr_glue3(UINT,stdint_intptr_bits,_C)(x)
 #  endif
-  typedef stdint_intptr_glue3(uint,stdint_intptr_bits,_t) uintptr_t;
-  typedef stdint_intptr_glue3( int,stdint_intptr_bits,_t)  intptr_t;
+// Philip <rocketman768@gmail.com>, need to check if [u]intprt_t is already defined...
+#  ifndef __uintptr_t_defined
+#    define __uintptr_t_defined
+     typedef stdint_intptr_glue3(uint,stdint_intptr_bits,_t) uintptr_t;
+#  endif /*uintptr_t*/
+#  ifndef __intptr_t_defined
+#    define __intptr_t_defined
+     typedef stdint_intptr_glue3( int,stdint_intptr_bits,_t)  intptr_t;
+#  endif /*__intptr_t_defined*/
 # else
 /* TODO -- This following is likely wrong for some platforms, and does
    nothing for the definition of uintptr_t. */
@@ -727,3 +775,73 @@ typedef uint_least32_t uint_fast32_t;
 
 #endif
 
+#if defined (__TEST_PSTDINT_FOR_CORRECTNESS)
+
+/* 
+ *  Please compile with the maximum warning settings to make sure macros are not
+ *  defined more than once.
+ */
+ 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+ 
+#define glue3_aux(x,y,z) x ## y ## z
+#define glue3(x,y,z) glue3_aux(x,y,z)
+
+#define DECLU(bits) glue3(uint,bits,_t) glue3(u,bits,=) glue3(UINT,bits,_C) (0);
+#define DECLI(bits) glue3(int,bits,_t) glue3(i,bits,=) glue3(INT,bits,_C) (0);
+
+#define DECL(us,bits) glue3(DECL,us,) (bits)
+
+#define TESTUMAX(bits) glue3(u,bits,=) glue3(~,u,bits); if (glue3(UINT,bits,_MAX) glue3(!=,u,bits)) printf ("Something wrong with UINT%d_MAX\n", bits)
+ 
+int main () {
+   DECL(I,8)
+   DECL(U,8)
+   DECL(I,16)
+   DECL(U,16)
+   DECL(I,32)
+   DECL(U,32)
+#ifdef INT64_MAX
+   DECL(I,64)
+   DECL(U,64)
+#endif
+   intmax_t imax = INTMAX_C(0);
+   uintmax_t umax = UINTMAX_C(0);
+   char str0[256], str1[256];
+
+   sprintf (str0, "%d %x\n", 0, ~0);
+   
+   sprintf (str1, "%d %x\n",  i8, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with i8 : %s\n", str1);
+   sprintf (str1, "%u %x\n",  u8, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with u8 : %s\n", str1);
+   sprintf (str1, "%d %x\n",  i16, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with i16 : %s\n", str1);
+   sprintf (str1, "%u %x\n",  u16, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with u16 : %s\n", str1);  
+   sprintf (str1, "%" PRINTF_INT32_MODIFIER "d %x\n",  i32, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with i32 : %s\n", str1);
+   sprintf (str1, "%" PRINTF_INT32_MODIFIER "u %x\n",  u32, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with u32 : %s\n", str1);
+#ifdef INT64_MAX  
+   sprintf (str1, "%" PRINTF_INT64_MODIFIER "d %x\n",  i64, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with i64 : %s\n", str1);
+#endif
+   sprintf (str1, "%" PRINTF_INTMAX_MODIFIER "d %x\n",  imax, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with imax : %s\n", str1);
+   sprintf (str1, "%" PRINTF_INTMAX_MODIFIER "u %x\n",  umax, ~0);
+   if (0 != strcmp (str0, str1)) printf ("Something wrong with umax : %s\n", str1); 
+   
+   TESTUMAX(8);
+   TESTUMAX(16);
+   TESTUMAX(32);
+#ifdef INT64_MAX
+   TESTUMAX(64);
+#endif
+
+   return EXIT_SUCCESS;
+}
+
+#endif

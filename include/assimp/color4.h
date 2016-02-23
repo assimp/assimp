@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -59,7 +59,7 @@ public:
     aiColor4t () : r(), g(), b(), a() {}
     aiColor4t (TReal _r, TReal _g, TReal _b, TReal _a)
         : r(_r), g(_g), b(_b), a(_a) {}
-    aiColor4t (TReal _r) : r(_r), g(_r), b(_r), a(_r) {}
+    explicit aiColor4t (TReal _r) : r(_r), g(_r), b(_r), a(_r) {}
     aiColor4t (const aiColor4t& o)
         : r(o.r), g(o.g), b(o.b), a(o.a) {}
 
@@ -86,7 +86,12 @@ public:
 public:
 
     // Red, green, blue and alpha color values
-    TReal r, g, b, a;
+    union {
+        struct {
+            TReal r, g, b, a;
+        };
+        TReal c[ 4 ];
+    };
 } PACK_STRUCT;  // !struct aiColor4D
 
 typedef aiColor4t<float> aiColor4D;
@@ -94,7 +99,12 @@ typedef aiColor4t<float> aiColor4D;
 #else
 
 struct aiColor4D {
-    float r, g, b, a;
+    union {
+        struct {
+            float r, g, b, a;
+        };
+        float c[ 4 ];
+    };
 } PACK_STRUCT;
 
 #endif // __cplusplus

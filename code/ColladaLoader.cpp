@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Defines.h"
 
 #include "time.h"
+#include "math.h"
 #include <boost/foreach.hpp>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/Importer.hpp"
@@ -77,14 +78,21 @@ static const aiImporterDesc desc = {
     "dae"
 };
 
-
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 ColladaLoader::ColladaLoader()
-    : noSkeletonMesh()
+    : mFileName()
+	, mMeshIndexByID()
+	, mMaterialIndexByName()
+	, mMeshes()
+	, newMats()
+	, mCameras()
+	, mLights()
+	, mTextures()
+	, mAnims()
+	, noSkeletonMesh( false )
     , ignoreUpDirection(false)
-    , invertTransparency(false)
-    , mNodeNameCounter()
+    , mNodeNameCounter( 0 )
 {}
 
 // ------------------------------------------------------------------------------------------------
@@ -120,7 +128,6 @@ void ColladaLoader::SetupProperties(const Importer* pImp)
 {
     noSkeletonMesh = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_NO_SKELETON_MESHES,0) != 0;
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
-    invertTransparency = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_INVERT_TRANSPARENCY,0) != 0;
 }
 
 
@@ -1163,6 +1170,25 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                       }
                       ++pos;
                   }
+				  
+				  // https://github.com/assimp/assimp/issues/458
+			  	  // Sub-sample axis-angle channels if the delta between two consecutive
+                  // key-frame angles is >= 180 degrees.
+				  if (transforms[e.mTransformIndex].mType == Collada::TF_ROTATE && e.mSubElement == 3 && pos > 0 && pos < e.mTimeAccessor->mCount) {
+					  float cur_key_angle = ReadFloat(*e.mValueAccessor, *e.mValueData, pos, 0);
+					  float last_key_angle = ReadFloat(*e.mValueAccessor, *e.mValueData, pos - 1, 0);
+					  float cur_key_time = ReadFloat(*e.mTimeAccessor, *e.mTimeData, pos, 0);
+					  float last_key_time = ReadFloat(*e.mTimeAccessor, *e.mTimeData, pos - 1, 0);
+					  float last_eval_angle = last_key_angle + (cur_key_angle - last_key_angle) * (time - last_key_time) / (cur_key_time - last_key_time); 
+					  float delta = std::fabs(cur_key_angle - last_eval_angle);
+				      if (delta >= 180.0f) {
+						int subSampleCount = static_cast<int>(floorf(delta / 90.0f));
+						if (cur_key_time != time) {
+							float nextSampleTime = time + (cur_key_time - time) / subSampleCount;
+							nextTime = std::min(nextTime, nextSampleTime);
+						  }
+					  }
+				  }
               }
 
               // no more keys on any channel after the current time -> we're done
@@ -1341,7 +1367,6 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
         mat.AddProperty( &effect.mDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
         mat.AddProperty( &effect.mSpecular, 1,AI_MATKEY_COLOR_SPECULAR);
         mat.AddProperty( &effect.mEmissive, 1,  AI_MATKEY_COLOR_EMISSIVE);
-        mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
         mat.AddProperty( &effect.mReflective, 1, AI_MATKEY_COLOR_REFLECTIVE);
 
         // scalar properties
@@ -1354,20 +1379,29 @@ void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pSce
         // therefore, we let the opportunity for the user to manually invert
         // the transparency if necessary and we add preliminary support for RGB_ZERO mode
         if(effect.mTransparency >= 0.f && effect.mTransparency <= 1.f) {
-            // Trying some support for RGB_ZERO mode
+            // handle RGB transparency completely, cf Collada specs 1.5.0 pages 249 and 304
             if(effect.mRGBTransparency) {
-                effect.mTransparency = 1.f - effect.mTransparent.a;
+				// use luminance as defined by ISO/CIE color standards (see ITU-R Recommendation BT.709-4)
+                effect.mTransparency *= (
+                    0.212671f * effect.mTransparent.r +
+                    0.715160f * effect.mTransparent.g +
+                    0.072169f * effect.mTransparent.b
+                );
+
+                effect.mTransparent.a = 1.f;
+
+                mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
+            } else {
+                effect.mTransparency *=  effect.mTransparent.a;
             }
 
-            // Global option
-            if(invertTransparency) {
+            if(effect.mInvertTransparency) {
                 effect.mTransparency = 1.f - effect.mTransparency;
             }
 
             // Is the material finally transparent ?
             if (effect.mHasTransparency || effect.mTransparency < 1.f) {
                 mat.AddProperty( &effect.mTransparency, 1, AI_MATKEY_OPACITY );
-                mat.AddProperty( &effect.mTransparent, 1, AI_MATKEY_COLOR_TRANSPARENT );
             }
         }
 

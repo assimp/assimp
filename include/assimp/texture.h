@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -116,6 +116,10 @@ struct aiTexel
  * 2. Compressed textures stored in a file format like png or jpg. The raw file
  * bytes are given so the application must utilize an image decoder (e.g. DevIL) to
  * get access to the actual color data.
+ *
+ * Embedded textures are referenced from materials using strings like "*0", "*1", etc.
+ * as the texture paths (a single asterisk character followed by the
+ * zero-based index of the texture in the aiScene::mTextures array).
  */
 struct aiTexture
 {

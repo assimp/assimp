@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -137,10 +137,12 @@ namespace {
 
 // ------------------------------------------------------------------------------------------------
 // Constructor for a specific scene to export
-StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path, const std::string& file, const ExportProperties* pProperties) : mProperties(pProperties), mIOSystem(pIOSystem), mFile(file), mPath(path), mScene(pScene), endstr(";\n")
-{
-    CollectTrafos(pScene->mRootNode, trafos);
-    CollectMeshes(pScene->mRootNode, meshes);
+StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std::string& path,
+		const std::string& file, const ExportProperties* pProperties):
+				 mProperties(pProperties),mIOSystem(pIOSystem),mFile(file), mPath(path),
+				 mScene(pScene), endstr(";\n") {
+	CollectTrafos(pScene->mRootNode, trafos);
+	CollectMeshes(pScene->mRootNode, meshes);
 
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );

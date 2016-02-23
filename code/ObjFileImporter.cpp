@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -114,37 +114,43 @@ const aiImporterDesc* ObjFileImporter::GetInfo () const
 
 // ------------------------------------------------------------------------------------------------
 //  Obj-file import implementation
-void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
-{
+void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, IOSystem* pIOHandler) {
     // Read file into memory
-    const std::string mode = "rb";
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
-    if( !file.get() ) {
-        throw DeadlyImportError( "Failed to open file " + pFile + "." );
+    static const std::string mode = "rb";
+    boost::scoped_ptr<IOStream> fileStream( pIOHandler->Open( file, mode));
+    if( !fileStream.get() ) {
+        throw DeadlyImportError( "Failed to open file " + file + "." );
     }
 
     // Get the file-size and validate it, throwing an exception when fails
-    size_t fileSize = file->FileSize();
+    size_t fileSize = fileStream->FileSize();
     if( fileSize < ObjMinSize ) {
         throw DeadlyImportError( "OBJ-file is too small.");
     }
 
     // Allocate buffer and read file into it
-    TextFileToBuffer(file.get(),m_Buffer);
+    TextFileToBuffer( fileStream.get(),m_Buffer);
 
     // Get the model name
     std::string  modelName, folderName;
-    std::string::size_type pos = pFile.find_last_of( "\\/" );
+    std::string::size_type pos = file.find_last_of( "\\/" );
     if ( pos != std::string::npos ) {
-        modelName = pFile.substr(pos+1, pFile.size() - pos - 1);
-        folderName = pFile.substr( 0, pos );
-        if ( folderName.empty() ) {
+        modelName = file.substr(pos+1, file.size() - pos - 1);
+        folderName = file.substr( 0, pos );
+        if ( !folderName.empty() ) {
             pIOHandler->PushDirectory( folderName );
         }
     } else {
-        modelName = pFile;
+        modelName = file;
     }
 
+    // This next stage takes ~ 1/3th of the total readFile task
+    // so should amount for 1/3th of the progress
+    // only update every 100KB or it'll be too slow
+    unsigned int progress = 0;
+    unsigned int progressCounter = 0;
+    const unsigned int updateProgressEveryBytes = 100 * 1024;
+    const unsigned int progressTotal = (3*m_Buffer.size()/updateProgressEveryBytes);
     // process all '\'
     std::vector<char> ::iterator iter = m_Buffer.begin();
     while (iter != m_Buffer.end())
@@ -159,10 +165,19 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
         }
         else
             ++iter;
+
+        if (++progressCounter >= updateProgressEveryBytes)
+        {
+            m_progress->UpdateFileRead(++progress, progressTotal);
+            progressCounter = 0;
+        }
     }
 
+    // 1/3rd progress
+    m_progress->UpdateFileRead(1, 3);
+
     // parse the file into a temporary representation
-    ObjFileParser parser(m_Buffer, modelName, pIOHandler);
+    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress);
 
     // And create the proper return structures out of it
     CreateDataFromImport(parser.GetModel(), pScene);

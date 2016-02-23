@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -177,7 +177,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
             ++it;
         }
         if (join_master && !join.empty()) {
-            join_master->mName.length = sprintf(join_master->mName.data,"$MergedNode_%i",count_merged++);
+            join_master->mName.length = ::ai_snprintf(join_master->mName.data, MAXLEN, "$MergedNode_%i",count_merged++);
 
             unsigned int out_meshes = 0;
             for (std::list<aiNode*>::iterator it = join.begin(); it != join.end(); ++it) {
@@ -335,7 +335,7 @@ void OptimizeGraphProcess::Execute( aiScene* pScene)
         if ( nodes_in != nodes_out) {
 
             char buf[512];
-            sprintf(buf,"OptimizeGraphProcess finished; Input nodes: %u, Output nodes: %u",nodes_in,nodes_out);
+            ::ai_snprintf(buf,512,"OptimizeGraphProcess finished; Input nodes: %u, Output nodes: %u",nodes_in,nodes_out);
             DefaultLogger::get()->info(buf);
         }
         else DefaultLogger::get()->debug("OptimizeGraphProcess finished");

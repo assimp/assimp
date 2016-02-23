@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -59,13 +59,38 @@ ASSIMP_API size_t aiGetExportFormatCount(void)
 
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex)
+ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t index)
 {
-    // Note: this is valid as the index always pertains to a builtin exporter,
+    // Note: this is valid as the index always pertains to a built-in exporter,
     // for which the returned structure is guaranteed to be of static storage duration.
-    return Exporter().GetExportFormatDescription(pIndex);
+    Exporter exporter;
+    const aiExportFormatDesc* orig( exporter.GetExportFormatDescription( index ) );
+    if (NULL == orig) {
+        return NULL;
+    }
+
+    aiExportFormatDesc *desc = new aiExportFormatDesc;
+    desc->description = new char[ strlen( orig->description ) + 1 ];
+    ::strncpy( (char*) desc->description, orig->description, strlen( orig->description ) );
+    desc->fileExtension = new char[ strlen( orig->fileExtension ) + 1 ];
+    ::strncpy( ( char* ) desc->fileExtension, orig->fileExtension, strlen( orig->fileExtension ) );
+    desc->id = new char[ strlen( orig->id ) + 1 ];
+    ::strncpy( ( char* ) desc->id, orig->id, strlen( orig->id ) );
+
+    return desc;
 }
 
+// ------------------------------------------------------------------------------------------------
+ASSIMP_API void aiReleaseExportFormatDescription( const aiExportFormatDesc *desc ) {
+    if (NULL == desc) {
+        return;
+    }
+
+    delete [] desc->description;
+    delete [] desc->fileExtension;
+    delete [] desc->id;
+    delete desc;
+}
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API void aiCopyScene(const aiScene* pIn, aiScene** pOut)

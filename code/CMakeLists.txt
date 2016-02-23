@@ -113,6 +113,7 @@ SET( Common_SRCS
   StreamReader.h
   StreamWriter.h
   StringComparison.h
+  StringUtils.h
   SGSpatialSort.cpp
   SGSpatialSort.h
   VertexTriangleAdjacency.cpp
@@ -530,6 +531,11 @@ ADD_ASSIMP_IMPORTER(RAW
   RawLoader.h
 )
 
+ADD_ASSIMP_IMPORTER(SIB
+  SIBImporter.cpp
+  SIBImporter.h
+)
+
 ADD_ASSIMP_IMPORTER(SMD
   SMDLoader.cpp
   SMDLoader.h
@@ -560,6 +566,19 @@ ADD_ASSIMP_IMPORTER(X
   XFileParser.h
   XFileExporter.h
   XFileExporter.cpp
+)
+
+ADD_ASSIMP_IMPORTER(GLTF
+  glTFAsset.h
+  glTFAsset.inl
+  glTFAssetWriter.h
+  glTFAssetWriter.inl
+
+  glTFImporter.cpp
+  glTFImporter.h
+  
+  glTFExporter.h
+  glTFExporter.cpp
 )
 
 SET( Step_SRCS
@@ -632,14 +651,19 @@ SOURCE_GROUP( unzip FILES ${unzip_SRCS})
 SET ( openddl_parser_SRCS
   ../contrib/openddlparser/code/OpenDDLParser.cpp
   ../contrib/openddlparser/code/DDLNode.cpp
+  ../contrib/openddlparser/code/OpenDDLCommon.cpp
+  ../contrib/openddlparser/code/OpenDDLExport.cpp
   ../contrib/openddlparser/code/Value.cpp
   ../contrib/openddlparser/include/openddlparser/OpenDDLParser.h
   ../contrib/openddlparser/include/openddlparser/OpenDDLParserUtils.h
   ../contrib/openddlparser/include/openddlparser/OpenDDLCommon.h
+  ../contrib/openddlparser/include/openddlparser/OpenDDLExport.h
   ../contrib/openddlparser/include/openddlparser/DDLNode.h
   ../contrib/openddlparser/include/openddlparser/Value.h
 )
 SOURCE_GROUP( openddl_parser FILES ${openddl_parser_SRCS})
+
+INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
 
 # VC2010 fixes
 if(MSVC10)
@@ -733,8 +757,10 @@ if( MSVC )
     set(MSVC_PREFIX "vc110")
   elseif( MSVC12 )
     set(MSVC_PREFIX "vc120")
+  elseif( MSVC14 )
+    set(MSVC_PREFIX "vc140")
   else()
-    set(MSVC_PREFIX "vc130")
+    set(MSVC_PREFIX "vc150")
   endif()
   set(LIBRARY_SUFFIX "${ASSIMP_LIBRARY_SUFFIX}-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library")
 endif()
@@ -766,13 +792,13 @@ INSTALL( TARGETS assimp
 INSTALL( FILES ${PUBLIC_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp COMPONENT assimp-dev)
 INSTALL( FILES ${COMPILER_HEADERS} DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/Compiler COMPONENT assimp-dev)
 if (ASSIMP_ANDROID_JNIIOSYSTEM)
-  INSTALL(FILES ${HEADER_PATH}/../${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
+  INSTALL(FILES ${HEADER_PATH}/${ASSIMP_ANDROID_JNIIOSYSTEM_PATH}/AndroidJNIIOSystem.h
     DESTINATION ${ASSIMP_INCLUDE_INSTALL_DIR}
     COMPONENT assimp-dev)
 endif(ASSIMP_ANDROID_JNIIOSYSTEM)
 
 if(MSVC AND ASSIMP_INSTALL_PDB)
-  install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${CMAKE_DEBUG_POSTFIX}.pdb
+  install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
     DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
     CONFIGURATIONS Debug
   )

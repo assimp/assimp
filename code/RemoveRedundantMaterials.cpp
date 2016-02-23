@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -55,7 +55,7 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 RemoveRedundantMatsProcess::RemoveRedundantMatsProcess()
-{
+: configFixedMaterials() {
     // nothing to do here
 }
 
@@ -126,16 +126,18 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
             }
         }
 
-        // TODO: reimplement this algorithm to work in-place
-        unsigned int* aiMappingTable = new unsigned int[pScene->mNumMaterials];
+        // TODO: re-implement this algorithm to work in-place
+        unsigned int *aiMappingTable = new unsigned int[pScene->mNumMaterials];
+        for ( unsigned int i=0; i<pScene->mNumMaterials; i++ ) {
+            aiMappingTable[ i ] = 0;
+        }
         unsigned int iNewNum = 0;
 
         // Iterate through all materials and calculate a hash for them
         // store all hashes in a list and so a quick search whether
         // we do already have a specific hash. This allows us to
         // determine which materials are identical.
-        uint32_t* aiHashes;
-        aiHashes = new uint32_t[pScene->mNumMaterials];
+        uint32_t *aiHashes = new uint32_t[ pScene->mNumMaterials ];;
         for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
         {
             // No mesh is referencing this material, remove it.
@@ -177,18 +179,18 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
 
                 // generate new names for all modified materials
                 const unsigned int idx = aiMappingTable[p];
-                if (ppcMaterials[idx])
-                {
+                if (ppcMaterials[idx]) {
                     aiString sz;
-                    sz.length = ::sprintf(sz.data,"JoinedMaterial_#%u",p);
+                    sz.length = ::ai_snprintf(sz.data,MAXLEN,"JoinedMaterial_#%u",p);
                     ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
-                }
-                else
+                } else {
                     ppcMaterials[idx] = pScene->mMaterials[p];
+                }
             }
             // update all material indices
             for (unsigned int p = 0; p < pScene->mNumMeshes;++p) {
                 aiMesh* mesh = pScene->mMeshes[p];
+                ai_assert( NULL!=mesh );
                 mesh->mMaterialIndex = aiMappingTable[mesh->mMaterialIndex];
             }
             // delete the old material list
@@ -207,7 +209,7 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
     else
     {
         char szBuffer[128]; // should be sufficiently large
-        ::sprintf(szBuffer,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",
+        ::ai_snprintf(szBuffer,128,"RemoveRedundantMatsProcess finished. Removed %u redundant and %u unused materials.",
             redundantRemoved,unreferencedRemoved);
         DefaultLogger::get()->info(szBuffer);
     }

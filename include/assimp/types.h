@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -160,7 +160,7 @@ struct aiColor3D
 #ifdef __cplusplus
     aiColor3D () : r(0.0f), g(0.0f), b(0.0f) {}
     aiColor3D (float _r, float _g, float _b) : r(_r), g(_g), b(_b) {}
-    aiColor3D (float _r) : r(_r), g(_r), b(_r) {}
+    explicit aiColor3D (float _r) : r(_r), g(_r), b(_r) {}
     aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
 
     /** Component-wise comparison */

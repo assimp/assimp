@@ -4,7 +4,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -517,6 +517,7 @@ struct Effect
     float mTransparency;
     bool mHasTransparency;
     bool mRGBTransparency;
+    bool mInvertTransparency;
 
     // local params referring to each other by their SID
     typedef std::map<std::string, Collada::EffectParam> ParamLibrary;
@@ -536,10 +537,11 @@ struct Effect
         , mTransparent  ( 0, 0, 0, 1)
         , mShininess    (10.0f)
         , mRefractIndex (1.f)
-        , mReflectivity (1.f)
+        , mReflectivity (0.f)
         , mTransparency (1.f)
         , mHasTransparency (false)
         , mRGBTransparency(false)
+        , mInvertTransparency(false)
         , mDoubleSided  (false)
         , mWireframe    (false)
         , mFaceted      (false)
@@ -595,6 +597,48 @@ struct Animation
         for( std::vector<Animation*>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it)
             delete *it;
     }
+
+	/** Collect all channels in the animation hierarchy into a single channel list. */
+	void CollectChannelsRecursively(std::vector<AnimationChannel> &channels)
+	{
+		channels.insert(channels.end(), mChannels.begin(), mChannels.end());
+
+		for (std::vector<Animation*>::iterator it = mSubAnims.begin(); it != mSubAnims.end(); ++it)
+		{
+			Animation *pAnim = (*it);
+
+			pAnim->CollectChannelsRecursively(channels);
+		}
+	}
+
+	/** Combine all single-channel animations' channel into the same (parent) animation channel list. */
+	void CombineSingleChannelAnimations()
+	{
+		CombineSingleChannelAnimationsRecursively(this);
+	}
+
+	void CombineSingleChannelAnimationsRecursively(Animation *pParent)
+	{
+		for (std::vector<Animation*>::iterator it = pParent->mSubAnims.begin(); it != pParent->mSubAnims.end();)
+		{
+			Animation *anim = *it;
+
+			CombineSingleChannelAnimationsRecursively(anim);
+
+			if (anim->mChannels.size() == 1)
+			{
+				pParent->mChannels.push_back(anim->mChannels[0]);
+
+				it = pParent->mSubAnims.erase(it);
+
+				delete anim;
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
 };
 
 /** Description of a collada animation channel which has been determined to affect the current node */

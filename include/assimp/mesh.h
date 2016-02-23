@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -249,7 +249,8 @@ struct aiBone
 
     //! Default constructor
     aiBone()
-      : mNumWeights( 0 )
+        : mName()
+        , mNumWeights( 0 )
       , mWeights( NULL )
     {
     }
@@ -578,7 +579,7 @@ struct aiMesh
     C_STRUCT aiBone** mBones;
 
     /** The material used by this mesh.
-     * A mesh does use only a single material. If an imported model uses
+     * A mesh uses only a single material. If an imported model uses
      * multiple materials, the import splits up the mesh. Use this value
      * as index into the scene's material list.
      */

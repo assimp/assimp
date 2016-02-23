@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -74,7 +74,7 @@ public:
     template <typename T>
     struct THeapData : public Base
     {
-        THeapData(T* in)
+        explicit THeapData(T* in)
             : data (in)
         {}
 
@@ -89,7 +89,7 @@ public:
     template <typename T>
     struct TStaticData : public Base
     {
-        TStaticData(T in)
+        explicit TStaticData(T in)
             : data (in)
         {}
 

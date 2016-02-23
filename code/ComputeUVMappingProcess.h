@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -125,7 +125,7 @@ private:
     // temporary structure to describe a mapping
     struct MappingInfo
     {
-        MappingInfo(aiTextureMapping _type)
+        explicit MappingInfo(aiTextureMapping _type)
             : type  (_type)
             , axis  (0.f,1.f,0.f)
             , uv    (0u)

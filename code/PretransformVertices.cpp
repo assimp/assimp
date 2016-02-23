@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -644,7 +644,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::sprintf(pcNode->mName.data,"mesh_%u",i);
+                pcNode->mName.length = ::ai_snprintf(pcNode->mName.data,MAXLEN,"mesh_%u",i);
 
                 // setup mesh indices
                 pcNode->mNumMeshes = 1;
@@ -656,7 +656,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::sprintf(pcNode->mName.data,"light_%u",i);
+                pcNode->mName.length = ai_snprintf(pcNode->mName.data, MAXLEN, "light_%u",i);
                 pScene->mLights[i]->mName = pcNode->mName;
             }
             // generate camera nodes
@@ -664,7 +664,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             {
                 aiNode* pcNode = *nodes = new aiNode();
                 pcNode->mParent = pScene->mRootNode;
-                pcNode->mName.length = ::sprintf(pcNode->mName.data,"cam_%u",i);
+                pcNode->mName.length = ::ai_snprintf(pcNode->mName.data,MAXLEN,"cam_%u",i);
                 pScene->mCameras[i]->mName = pcNode->mName;
             }
         }
@@ -707,15 +707,15 @@ void PretransformVertices::Execute( aiScene* pScene)
 
         DefaultLogger::get()->debug("PretransformVerticesProcess finished");
 
-        sprintf(buffer,"Removed %u nodes and %u animation channels (%u output nodes)",
+        ::ai_snprintf(buffer,4096,"Removed %u nodes and %u animation channels (%u output nodes)",
             iOldNodes,iOldAnimationChannels,CountNodes(pScene->mRootNode));
         DefaultLogger::get()->info(buffer);
 
-        sprintf(buffer,"Kept %u lights and %u cameras",
+        ai_snprintf(buffer, 4096,"Kept %u lights and %u cameras",
             pScene->mNumLights,pScene->mNumCameras);
         DefaultLogger::get()->info(buffer);
 
-        sprintf(buffer,"Moved %u meshes to WCS (number of output meshes: %u)",
+        ai_snprintf(buffer, 4096,"Moved %u meshes to WCS (number of output meshes: %u)",
             iOldMeshes,pScene->mNumMeshes);
         DefaultLogger::get()->info(buffer);
     }

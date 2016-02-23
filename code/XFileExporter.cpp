@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -309,12 +309,12 @@ void XFileExporter::WriteNode( aiNode* pNode)
 
     WriteFrameTransform(m);
 
-    for (size_t i = 0; i < pNode->mNumMeshes; i++)
+    for (size_t i = 0; i < pNode->mNumMeshes; ++i)
         WriteMesh(mScene->mMeshes[pNode->mMeshes[i]]);
 
     // recursive call the Nodes
     for (size_t i = 0; i < pNode->mNumChildren; ++i)
-        WriteNode( mScene->mRootNode->mChildren[i]);
+        WriteNode(pNode->mChildren[i]);
 
     PopTag();
 

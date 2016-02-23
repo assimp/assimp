@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -56,14 +56,13 @@ using namespace Assimp;
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 GenVertexNormalsProcess::GenVertexNormalsProcess()
-{
-    this->configMaxAngle = AI_DEG_TO_RAD(175.f);
+: configMaxAngle( AI_DEG_TO_RAD( 175.f ) ) {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-GenVertexNormalsProcess::~GenVertexNormalsProcess()
-{
+GenVertexNormalsProcess::~GenVertexNormalsProcess() {
     // nothing to do here
 }
 
@@ -192,7 +191,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
                 const aiVector3D& v = pMesh->mNormals[verticesFound[a]];
                 if (is_not_qnan(v.x))pcNor += v;
             }
-            pcNor.Normalize();
+            pcNor.NormalizeSafe();
 
             // Write the smoothed normal back to all affected normals
             for (unsigned int a = 0; a < verticesFound.size(); ++a)
@@ -225,7 +224,7 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
                 if (v * vr >= fLimit * vrlen * v.Length())
                     pcNor += v;
             }
-            pcNew[i] = pcNor.Normalize();
+            pcNew[i] = pcNor.NormalizeSafe();
         }
     }
 

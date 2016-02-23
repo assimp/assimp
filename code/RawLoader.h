@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -88,7 +88,7 @@ private:
 
     struct MeshInformation
     {
-        MeshInformation(const std::string& _name)
+        explicit MeshInformation(const std::string& _name)
             : name(_name)
         {
             vertices.reserve(100);
@@ -103,7 +103,7 @@ private:
 
     struct GroupInformation
     {
-        GroupInformation(const std::string& _name)
+        explicit GroupInformation(const std::string& _name)
             : name(_name)
         {
             meshes.reserve(10);

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -527,6 +527,13 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
 }
 
 // ------------------------------------------------------------------------------------------------
+// Reimplementation of isalnum(,C locale), because AppVeyor does not see standard version.
+static bool isalnum_C(char c)
+{
+  return strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Writes an image entry for the given surface
 void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::string& pNameAdd)
 {
@@ -540,7 +547,7 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
     std::stringstream imageUrlEncoded;
     for( std::string::const_iterator it = pSurface.texture.begin(); it != pSurface.texture.end(); ++it )
     {
-      if( isalnum( *it) || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
+      if( isalnum_C( (unsigned char) *it) || *it == ':' || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
         imageUrlEncoded << *it;
       else
         imageUrlEncoded << '%' << std::hex << size_t( (unsigned char) *it) << std::dec;
@@ -631,9 +638,7 @@ void ColladaExporter::WriteMaterials()
       name = "mat";
     materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
-        // isalnum on MSVC asserts for code points outside [0,255]. Thus prevent unwanted promotion
-        // of char to signed int and take the unsigned char value.
-      if( !isalnum( static_cast<uint8_t>(*it) ) ) {
+      if( !isalnum_C( *it ) ) {
         *it = '_';
       }
     }
@@ -875,6 +880,11 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+        {
+            if( mesh->HasTextureCoords( a) )
+                mOutput << startstr << "<input offset=\"0\" semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" set=\"" << a << "\" />" << endstr;
+        }
 
         mOutput << startstr << "<vcount>";
         for( size_t a = 0; a < mesh->mNumFaces; ++a )
@@ -1070,8 +1080,19 @@ void ColladaExporter::WriteNode(aiNode* pNode)
     PushTag();
     mOutput << startstr << "<technique_common>" << endstr;
     PushTag();
-    mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\" />" << endstr;
-        PopTag();
+    mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
+    PushTag();
+    for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+    {
+        if( mesh->HasTextureCoords( a) )
+            // semantic       as in <texture texcoord=...>
+            // input_semantic as in <input semantic=...>
+            // input_set      as in <input set=...>
+            mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+    }
+    PopTag();
+    mOutput << startstr << "</instance_material>" << endstr;
+    PopTag();
     mOutput << startstr << "</technique_common>" << endstr;
     PopTag();
     mOutput << startstr << "</bind_material>" << endstr;

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -267,7 +267,7 @@ void FindInstancesProcess::Execute( aiScene* pScene)
             if (!DefaultLogger::isNullLogger()) {
 
                 char buffer[512];
-                ::sprintf(buffer,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
+                ::ai_snprintf(buffer,512,"FindInstancesProcess finished. Found %i instances",pScene->mNumMeshes-numMeshesOut);
                 DefaultLogger::get()->info(buffer);
             }
             pScene->mNumMeshes = numMeshesOut;

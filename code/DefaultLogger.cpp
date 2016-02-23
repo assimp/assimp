@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Win32DebugLogStream.h"
 #include "StdOStreamLogStream.h"
 #include "FileLogStream.h"
+#include "StringUtils.h"
 #include "../include/assimp/NullLogger.hpp"
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/ai_assert.h"
@@ -226,9 +227,7 @@ bool DefaultLogger::isNullLogger()
 }
 
 // ----------------------------------------------------------------------------------
-//  Singleton getter
-Logger *DefaultLogger::get()
-{
+Logger *DefaultLogger::get() {
     return m_pLogger;
 }
 
@@ -241,7 +240,9 @@ void DefaultLogger::kill()
     boost::mutex::scoped_lock lock(loggerMutex);
 #endif
 
-    if (m_pLogger == &s_pNullLogger)return;
+	if ( m_pLogger == &s_pNullLogger ) {
+		return;
+	}
     delete m_pLogger;
     m_pLogger = &s_pNullLogger;
 }
@@ -253,8 +254,9 @@ void DefaultLogger::OnDebug( const char* message )
     if ( m_Severity == Logger::NORMAL )
         return;
 
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Debug, T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[Size];
+	ai_snprintf(msg, Size, "Debug, T%u: %s", GetThreadID(), message);
 
     WriteToStreams( msg, Logger::Debugging );
 }
@@ -263,8 +265,9 @@ void DefaultLogger::OnDebug( const char* message )
 //  Logs an info
 void DefaultLogger::OnInfo( const char* message )
 {
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Info,  T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[Size];
+    ai_snprintf(msg, Size, "Info,  T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg , Logger::Info );
 }
@@ -273,8 +276,9 @@ void DefaultLogger::OnInfo( const char* message )
 //  Logs a warning
 void DefaultLogger::OnWarn( const char* message )
 {
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Warn,  T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[Size];
+	ai_snprintf(msg, Size, "Warn,  T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg, Logger::Warn );
 }
@@ -283,8 +287,9 @@ void DefaultLogger::OnWarn( const char* message )
 //  Logs an error
 void DefaultLogger::OnError( const char* message )
 {
-    char msg[MAX_LOG_MESSAGE_LENGTH + 16];
-    ::sprintf(msg,"Error, T%u: %s", GetThreadID(), message );
+	static const size_t Size = MAX_LOG_MESSAGE_LENGTH + 16;
+	char msg[ Size ];
+    ai_snprintf(msg, Size, "Error, T%u: %s", GetThreadID(), message );
 
     WriteToStreams( msg, Logger::Err );
 }
@@ -317,7 +322,7 @@ bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity )
 }
 
 // ----------------------------------------------------------------------------------
-//  Detatch a stream
+//  Detach a stream
 bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 {
     if (!pStream)
@@ -351,7 +356,6 @@ bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity )
 // ----------------------------------------------------------------------------------
 //  Constructor
 DefaultLogger::DefaultLogger(LogSeverity severity)
-
     :   Logger  ( severity )
     ,   noRepeatMsg (false)
     ,   lastLen( 0 )
@@ -371,8 +375,7 @@ DefaultLogger::~DefaultLogger()
 
 // ----------------------------------------------------------------------------------
 //  Writes message to stream
-void DefaultLogger::WriteToStreams(const char *message,
-    ErrorSeverity ErrorSev )
+void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev )
 {
     ai_assert(NULL != message);
 

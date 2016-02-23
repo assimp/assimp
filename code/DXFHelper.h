@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -66,6 +66,8 @@ public:
     LineReader(StreamReaderLE& reader)
          // do NOT skip empty lines. In DXF files, they count as valid data.
         : splitter(reader,false,true)
+        , groupcode( 0 )
+        , value()
         , end()
     {
     }

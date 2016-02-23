@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -457,7 +457,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
                             ++extra;
                             out[next++] = i;
                         }
-                        // Bäh ... seems not to be used at all. Push to end if enough space is available.
+                        // Bï¿½h ... seems not to be used at all. Push to end if enough space is available.
                         else {
                             out[extra++] = i;
                             ++num_extra;

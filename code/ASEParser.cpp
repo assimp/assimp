@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -143,9 +143,9 @@ void Parser::LogWarning(const char* szWarn)
 
     char szTemp[1024];
 #if _MSC_VER >= 1400
-    sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
+    sprintf_s(szTemp, "Line %u: %s",iLineNumber,szWarn);
 #else
-    snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
     // output the warning to the logger ...
@@ -161,7 +161,7 @@ void Parser::LogInfo(const char* szWarn)
 #if _MSC_VER >= 1400
     sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
 #else
-    snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
     // output the information to the logger ...
@@ -177,7 +177,7 @@ AI_WONT_RETURN void Parser::LogError(const char* szWarn)
 #if _MSC_VER >= 1400
     sprintf_s(szTemp,"Line %u: %s",iLineNumber,szWarn);
 #else
-    snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
+    ai_snprintf(szTemp,1024,"Line %u: %s",iLineNumber,szWarn);
 #endif
 
     // throw an exception
@@ -825,7 +825,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if (!SkipSpaces(&filePtr))
     {
 
-        sprintf(szBuffer,"Unable to parse %s block: Unexpected EOL",szName);
+        ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Unexpected EOL",szName);
         LogWarning(szBuffer);
         return false;
     }
@@ -833,7 +833,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
     if ('\"' != *filePtr)
     {
 
-        sprintf(szBuffer,"Unable to parse %s block: Strings are expected "
+        ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected "
             "to be enclosed in double quotation marks",szName);
         LogWarning(szBuffer);
         return false;
@@ -845,7 +845,7 @@ bool Parser::ParseString(std::string& out,const char* szName)
         if ('\"' == *sz)break;
         else if ('\0' == *sz)
         {
-            sprintf(szBuffer,"Unable to parse %s block: Strings are expected to "
+            ai_snprintf(szBuffer, 1024, "Unable to parse %s block: Strings are expected to "
                 "be enclosed in double quotation marks but EOF was reached before "
                 "a closing quotation mark was encountered",szName);
             LogWarning(szBuffer);
@@ -1134,7 +1134,7 @@ void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the ádditional information for bezier's and TCBs
+            // we ignore the ï¿½dditional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_SCALE_SAMPLE" ,20))
@@ -1180,7 +1180,7 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the ádditional information for bezier's and TCBs
+            // we ignore the ï¿½dditional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_POS_SAMPLE" ,18))
@@ -1226,7 +1226,7 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the  floats -
-            // we ignore the ádditional information for bezier's and TCBs
+            // we ignore the ï¿½dditional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_ROT_SAMPLE" ,18))

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -342,7 +342,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                     for(;*loc != ' '; ++loc);
                     *loc++ = '_';
                 }
-                *(loc+sprintf(loc,"%i",i)) = ' ';
+                *(loc+::ai_snprintf(loc, POLY_GRID_XPAD,"%i",i)) = ' ';
             }
 
 

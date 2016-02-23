@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -73,9 +73,11 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root, bool bK
     root->mMeshes[0] = 0;
 
     // create a dummy material for the mesh
-    pScene->mNumMaterials = 1;
-    pScene->mMaterials = new aiMaterial*[1];
-    pScene->mMaterials[0] = CreateMaterial();
+    if(pScene->mNumMaterials==0){
+		pScene->mNumMaterials = 1;
+		pScene->mMaterials = new aiMaterial*[1];
+		pScene->mMaterials[0] = CreateMaterial();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

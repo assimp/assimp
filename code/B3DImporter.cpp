@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "B3DImporter.h"
 #include "TextureTransform.h"
 #include "ConvertToLHProcess.h"
+#include "StringUtils.h"
 #include <boost/scoped_ptr.hpp>
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/anim.h"
@@ -571,7 +572,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
         
         if (!DefaultLogger::isNullLogger()) {
             char dmp[128];
-            sprintf(dmp,"B3D file format version: %i",version);
+            ai_snprintf(dmp, 128, "B3D file format version: %i",version);
             DefaultLogger::get()->info(dmp);
         }
 

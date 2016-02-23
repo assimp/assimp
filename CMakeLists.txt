@@ -10,8 +10,8 @@ endif(NOT BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
 set (ASSIMP_VERSION_MAJOR 3)
-set (ASSIMP_VERSION_MINOR 1)
-set (ASSIMP_VERSION_PATCH 1) # subversion revision?
+set (ASSIMP_VERSION_MINOR 2)
+set (ASSIMP_VERSION_PATCH 0) # subversion revision?
 set (ASSIMP_VERSION ${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_MINOR}.${ASSIMP_VERSION_PATCH})
 set (ASSIMP_SOVERSION 3)
 set (PROJECT_VERSION "${ASSIMP_VERSION}")
@@ -98,10 +98,10 @@ SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
 SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
   "Path the tool executables are installed to." )
 
-IF (CMAKE_BUILD_TYPE STREQUAL "Release")
-  SET(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Debug Postfix for lib, samples and tools")
-ELSE()
+IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
   SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Debug Postfix for lib, samples and tools")
+ELSE()
+  SET(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Debug Postfix for lib, samples and tools")
 ENDIF()
 
 # Only generate this target if no higher-level project already has
@@ -340,3 +340,31 @@ if(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
   include(CPack)
   include(DebSourcePPA)
 endif()
+
+if(WIN32)
+	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(BIN_DIR "${PROJECT_SOURCE_DIR}/bin64/")
+		set(LIB_DIR "${PROJECT_SOURCE_DIR}/lib64/")
+	elseif()
+		set(BIN_DIR "${PROJECT_SOURCE_DIR}/bin32/")
+		set(LIB_DIR "${PROJECT_SOURCE_DIR}/lib32/")
+	endif()
+	
+	if(MSVC12)
+		set(ASSIMP_MSVC_VERSION "vc120")
+	elseif(MSVC14)	
+		set(ASSIMP_MSVC_VERSION "vc140")
+	endif(MSVC12)
+
+	if(MSVC12 OR MSVC14)
+		add_custom_target(UpdateAssimpLibsDebugSymbolsAndDLLs COMMENT "Copying Assimp Libraries ..." VERBATIM)	
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll	${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.dll VERBATIM)
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.exp	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.exp VERBATIM)
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.lib	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.lib VERBATIM)
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll		${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.dll  VERBATIM)
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.exp		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.exp VERBATIM)
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk VERBATIM)
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.lib		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.lib VERBATIM)
+		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
+	endif(MSVC12 OR MSVC14)
+endif (WIN32)

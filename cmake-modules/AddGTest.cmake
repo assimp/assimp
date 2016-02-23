@@ -10,6 +10,9 @@ endif()
 if (MSVC)
   set(RELEASE_LIB_DIR ReleaseLibs)
   set(DEBUG_LIB_DIR DebugLibs)
+elseif(XCODE_VERSION)
+  set(RELEASE_LIB_DIR Release)
+  set(DEBUG_LIB_DIR Debug)
 else()
   set(RELEASE_LIB_DIR "")
   set(DEBUG_LIB_DIR "")
@@ -18,7 +21,8 @@ endif()
 set(GTEST_CMAKE_ARGS
   "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
   "-Dgtest_force_shared_crt=ON"
-  "-Dgtest_disable_pthreads:BOOL=${DISABLE_PTHREADS}")
+  "-Dgtest_disable_pthreads:BOOL=${DISABLE_PTHREADS}"
+  "-DBUILD_GTEST=ON")
 set(GTEST_RELEASE_LIB_DIR "")
 set(GTEST_DEBUGLIB_DIR "")
 if (MSVC)
@@ -38,7 +42,7 @@ else(NOT GIT_FOUND)
   set(AddGTest_FOUND true CACHE BOOL "Was gtest setup correctly?")
 
   ExternalProject_Add(gtest
-    GIT_REPOSITORY https://chromium.googlesource.com/external/googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
     TIMEOUT 10
     PREFIX "${GTEST_PREFIX}"
     CMAKE_ARGS "${GTEST_CMAKE_ARGS}"
@@ -53,10 +57,10 @@ else(NOT GIT_FOUND)
   set(LIB_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(GTEST_LOCATION "${GTEST_PREFIX}/src/gtest-build")
   set(GTEST_DEBUG_LIBRARIES
-    "${GTEST_LOCATION}/${DEBUG_LIB_DIR}/${LIB_PREFIX}gtest${LIB_SUFFIX}"
+    "${LIB_PREFIX}gtest${LIB_SUFFIX}"
     "${CMAKE_THREAD_LIBS_INIT}")
   SET(GTEST_RELEASE_LIBRARIES
-    "${GTEST_LOCATION}/${RELEASE_LIB_DIR}/${LIB_PREFIX}gtest${LIB_SUFFIX}"
+    "${LIB_PREFIX}gtest${LIB_SUFFIX}"
     "${CMAKE_THREAD_LIBS_INIT}")
 
   if(MSVC_VERSION EQUAL 1700)
@@ -64,9 +68,11 @@ else(NOT GIT_FOUND)
   endif()
 
   ExternalProject_Get_Property(gtest source_dir)
-  include_directories(${source_dir}/include)
+  include_directories(${source_dir}/googletest/include)
   include_directories(${source_dir}/gtest/include)
 
   ExternalProject_Get_Property(gtest binary_dir)
-  link_directories(${binary_dir})
+  link_directories(${binary_dir}/googlemock/gtest)
+  link_directories(${binary_dir}/googlemock/gtest/${RELEASE_LIB_DIR})
+  link_directories(${binary_dir}/googlemock/gtest/${DEBUG_LIB_DIR})
 endif(NOT GIT_FOUND)

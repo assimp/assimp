@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -213,8 +213,8 @@ public:
     /** @brief A function for creating a rotation matrix that rotates a
      *  vector called "from" into another vector called "to".
      * Input : from[3], to[3] which both must be *normalized* non-zero vectors
-     * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
-     * Authors: Tomas Möller, John Hughes
+     * Output: mtx[3][3] -- a 3x3 matrix in column-major form
+     * Authors: Tomas Mueller, John Hughes
      *          "Efficiently Building a Matrix to Rotate One Vector to Another"
      *          Journal of Graphics Tools, 4(4):1-4, 1999
      */
@@ -222,12 +222,16 @@ public:
         const aiVector3t<TReal>& to, aiMatrix4x4t& out);
 
 public:
-
-    TReal a1, a2, a3, a4;
-    TReal b1, b2, b3, b4;
-    TReal c1, c2, c3, c4;
-    TReal d1, d2, d3, d4;
-
+    union {
+        struct {
+            TReal a1, a2, a3, a4;
+            TReal b1, b2, b3, b4;
+            TReal c1, c2, c3, c4;
+            TReal d1, d2, d3, d4;
+        };
+        TReal m[ 4 ][ 4 ];
+        TReal mData[ 16 ];
+    };
 } PACK_STRUCT;
 
 typedef aiMatrix4x4t<float> aiMatrix4x4;
@@ -235,11 +239,17 @@ typedef aiMatrix4x4t<float> aiMatrix4x4;
 #else
 
 struct aiMatrix4x4 {
-    float a1, a2, a3, a4;
-    float b1, b2, b3, b4;
-    float c1, c2, c3, c4;
-    float d1, d2, d3, d4;
-};
+    union {
+        struct {
+            float a1, a2, a3, a4;
+            float b1, b2, b3, b4;
+            float c1, c2, c3, c4;
+            float d1, d2, d3, d4;
+        };
+        float m[ 4 ][ 4 ];
+        float mData[ 16 ];
+    };
+} PACK_STRUCT;
 
 
 #endif // __cplusplus

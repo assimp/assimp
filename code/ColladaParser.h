@@ -2,7 +2,7 @@
  Open Asset Import Library (assimp)
  ----------------------------------------------------------------------
  
- Copyright (c) 2006-2015, assimp team
+ Copyright (c) 2006-2016, assimp team
  All rights reserved.
  
  Redistribution and use of this software in source and binary forms,
@@ -49,6 +49,7 @@
 #include "ColladaHelper.h"
 #include "../include/assimp/ai_assert.h"
 #include <boost/format.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace Assimp
 {
@@ -81,6 +82,12 @@ namespace Assimp
         
         /** Reads the animation library */
         void ReadAnimationLibrary();
+
+		/** Reads the animation clip library */
+		void ReadAnimationClipLibrary();
+
+		/** Re-build animations from animation clip library, if present, otherwise combine single-channel animations */
+		void PostProcessRootAnimations();
         
         /** Reads an animation into the given parent structure */
         void ReadAnimation( Collada::Animation* pParent);
@@ -311,6 +318,14 @@ namespace Assimp
         /** Controller library: joint controllers by ID */
         typedef std::map<std::string, Collada::Controller> ControllerLibrary;
         ControllerLibrary mControllerLibrary;
+
+		/** Animation library: animation references by ID */
+		typedef std::map<std::string, Collada::Animation*> AnimationLibrary;
+		AnimationLibrary mAnimationLibrary;
+
+		/** Animation clip library: clip animation references by ID */
+		typedef std::vector<std::pair<std::string, std::vector<std::string> > > AnimationClipLibrary;
+		AnimationClipLibrary mAnimationClipLibrary;
         
         /** Pointer to the root node. Don't delete, it just points to one of
          the nodes in the node library. */

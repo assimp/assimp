@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -312,18 +312,10 @@ struct Camera : ElemBase {
 
     ID id FAIL;
 
-    // struct AnimData *adt;
-
     Type type,flag WARN;
-    float angle WARN;
-    //float passepartalpha, angle;
-    //float clipsta, clipend;
-    //float lens, ortho_scale, drawsize;
-    //float shiftx, shifty;
-
-    //float YF_dofdist, YF_aperture;
-    //short YF_bkhtype, YF_bkhbias;
-    //float YF_bkhrot;
+    float lens WARN;
+    float sensor_x WARN;
+    float clipsta, clipend;
 };
 
 

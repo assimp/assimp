@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -72,6 +72,8 @@ namespace FBX {
     class Document;
     class Material;
     class Geometry;
+
+    class Video;
 
     class AnimationCurve;
     class AnimationCurveNode;
@@ -571,6 +573,10 @@ public:
         return crop;
     }
 
+    const Video* Media() const {
+        return media;
+    }
+
 private:
 
     aiVector2D uvTrans;
@@ -583,6 +589,8 @@ private:
     boost::shared_ptr<const PropertyTable> props;
 
     unsigned int crop[4];
+
+    const Video* media;
 };
 
 /** DOM class for layered FBX textures */
@@ -653,6 +661,59 @@ private:
 typedef std::fbx_unordered_map<std::string, const Texture*> TextureMap;
 typedef std::fbx_unordered_map<std::string, const LayeredTexture*> LayeredTextureMap;
 
+
+/** DOM class for generic FBX videos */
+class Video : public Object
+{
+public:
+
+    Video(uint64_t id, const Element& element, const Document& doc, const std::string& name);
+    ~Video();
+
+public:
+
+    const std::string& Type() const {
+        return type;
+    }
+
+    const std::string& FileName() const {
+        return fileName;
+    }
+
+    const std::string& RelativeFilename() const {
+        return relativeFileName;
+    }
+
+    const PropertyTable& Props() const {
+        ai_assert(props.get());
+        return *props.get();
+    }
+
+    const uint8_t* Content() const {
+        ai_assert(content);
+        return content;
+    }
+
+    const uint32_t ContentLength() const {
+        return contentLength;
+    }
+
+    uint8_t* RelinquishContent() {
+        uint8_t* ptr = content;
+        content = 0;
+        return ptr;
+    }
+
+private:
+
+    std::string type;
+    std::string relativeFileName;
+    std::string fileName;
+    boost::shared_ptr<const PropertyTable> props;
+
+    uint32_t contentLength;
+    uint8_t* content;
+};
 
 /** DOM class for generic FBX materials */
 class Material : public Object

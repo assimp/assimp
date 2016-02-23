@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -135,7 +135,7 @@ private:
     // ----------------------------------------------------------------------
     /** @briefPrivate construction for internal use by create().
      *  @param severity Logging granularity  */
-    DefaultLogger(LogSeverity severity);
+    explicit DefaultLogger(LogSeverity severity);
 
     // ----------------------------------------------------------------------
     /** @briefDestructor    */

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -85,7 +85,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 
     if ( !DefaultLogger::isNullLogger())    {
         char szBuffer[128]; // should be sufficiently large
-        ::sprintf(szBuffer,"MD5Parser end. Parsed %i sections",(int)mSections.size());
+        ::ai_snprintf(szBuffer,128,"MD5Parser end. Parsed %i sections",(int)mSections.size());
         DefaultLogger::get()->debug(szBuffer);
     }
 }
@@ -95,7 +95,7 @@ MD5Parser::MD5Parser(char* _buffer, unsigned int _fileSize )
 /*static*/ AI_WONT_RETURN void MD5Parser::ReportError (const char* error, unsigned int line)
 {
     char szBuffer[1024];
-    ::sprintf(szBuffer,"[MD5] Line %u: %s",line,error);
+    ::ai_snprintf(szBuffer, 1024, "[MD5] Line %u: %s",line,error);
     throw DeadlyImportError(szBuffer);
 }
 

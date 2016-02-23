@@ -9,34 +9,34 @@
 #
 # All rights reserved.
 #
-# Redistribution and use of this software in source and binary forms, 
-# with or without modification, are permitted provided that the following 
+# Redistribution and use of this software in source and binary forms,
+# with or without modification, are permitted provided that the following
 # conditions are met:
-# 
+#
 # * Redistributions of source code must retain the above
 #   copyright notice, this list of conditions and the
 #   following disclaimer.
-# 
+#
 # * Redistributions in binary form must reproduce the above
 #   copyright notice, this list of conditions and the
 #   following disclaimer in the documentation and/or other
 #   materials provided with the distribution.
-# 
+#
 # * Neither the name of the ASSIMP team, nor the names of its
 #   contributors may be used to endorse or promote products
 #   derived from this software without specific prior
 #   written permission of the ASSIMP Development Team.
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 # OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 # LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ---------------------------------------------------------------------------
 
@@ -98,7 +98,7 @@ outfilename_output = "run_regression_suite_output.txt"
 outfilename_failur = "run_regression_suite_failures.csv"
 # -------------------------------------------------------------------------------
 class results:
-    
+
     """ Handle formatting of results"""
 
     def __init__(self, zipin):
@@ -106,15 +106,15 @@ class results:
         self.failures = []
         self.success = []
         self.zipin = zipin
-    
-    
+
+
     def fail(self, failfile, filename_expect, pp, msg, *args):
         """
         Report failure of a sub-test
-        
-        File f failed a test for pp config pp, failure notice is msg, 
+
+        File f failed a test for pp config pp, failure notice is msg,
         *args is format()ting args for msg
-        
+
         """
         print("[FAILURE] " + messages[msg].format(*args))
         self.failures.append((failfile, filename_expect, pp))
@@ -124,11 +124,11 @@ class results:
         """
         Report success of a sub-test
 
-        File f passed the test, msg is a happy success note, 
+        File f passed the test, msg is a happy success note,
         *args is format()ing args for msg.
 
         """
-        print("[SUCCESS] " + messages[msg].format(*args)) 
+        print("[SUCCESS] " + messages[msg].format(*args))
         self.success.append(f)
 
 
@@ -139,22 +139,22 @@ class results:
         count_fail = len(self.failures)
         percent_good = float(count_success) / (count_success + count_fail)
         print("\n" + ('='*60) + "\n" + "SUCCESS: {0}\nFAILURE: {1}\nPercentage good: {2}".format(
-            count_success, count_fail, percent_good) + 
+            count_success, count_fail, percent_good) +
               "\n" + ('='*60) + "\n")
 
         with open(os.path.join('..', 'results',outfilename_failur), "wt") as f:
             f.write("ORIGINAL FILE;EXPECTED DUMP\n")
             f.writelines(map(
                 lambda x: x[0] + ' ' + x[2] + ";" + x[1] + "\n", self.failures))
-        
+
         if self.failures:
-           print("\nSee " + settings.results + "\\" + outfilename_failur 
-                 + " for more details\n\n") 
-    
+           print("\nSee " + settings.results + "\\" + outfilename_failur
+                 + " for more details\n\n")
+
     def hasFailures( self ):
         """ Return True, if any failures there. """
         return 0 != len( self.failures )
-        
+
 # -------------------------------------------------------------------------------
 def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(settings.results, "tmp", os.path.split(fullpath)[1] + "_" + myhash)
@@ -162,7 +162,7 @@ def prepare_output_dir(fullpath, myhash, app):
         os.mkdir(outfile)
     except OSError:
         pass
-    
+
     outfile = os.path.join(outfile, app)
     return outfile
 
@@ -197,8 +197,8 @@ def process_dir(d, outfile_results, zipin, result):
                     "regression database? Use gen_db.zip to re-generate.")
                 continue
 
-            print("-"*60 + "\n  " + os.path.realpath(fullpath) + " pp: " + pppreset) 
-            
+            print("-"*60 + "\n  " + os.path.realpath(fullpath) + " pp: " + pppreset)
+
             outfile_actual = prepare_output_dir(fullpath, filehash, "ACTUAL")
             outfile_expect = prepare_output_dir(fullpath, filehash, "EXPECT")
             outfile_results.write("assimp dump    "+"-"*80+"\n")
@@ -219,19 +219,19 @@ def process_dir(d, outfile_results, zipin, result):
                 outfile_results.write("Expected import to fail\n")
                 continue
             elif failure and r:
-                result.ok(fullpath, pppreset, EXPECTED_FAILURE) 
+                result.ok(fullpath, pppreset, EXPECTED_FAILURE)
                 outfile_results.write("Failed as expected, skipping.\n")
                 continue
-            
-            with open(outfile_expect, "wb") as s:
-                s.write(input_expected) 
 
-            try:    
+            with open(outfile_expect, "wb") as s:
+                s.write(input_expected)
+
+            try:
                 with open(outfile_actual, "rb") as s:
-                    input_actual = s.read() 
+                    input_actual = s.read()
             except IOError:
                 continue
-                
+
             outfile_results.write("Expected data length: {0}\n".format(len(input_expected)))
             outfile_results.write("Actual data length: {0}\n".format(len(input_actual)))
             failed = False
@@ -247,9 +247,9 @@ def process_dir(d, outfile_results, zipin, result):
             if subprocess.call(command, **shellparams) != 0:
                 if not failed:
                     result.fail(fullpath, outfile_expect, pppreset, DATABASE_VALUE_MISMATCH)
-                continue 
-            
-            result.ok(fullpath, pppreset, COMPARE_SUCCESS, len(input_expected))     
+                continue
+
+            result.ok(fullpath, pppreset, COMPARE_SUCCESS, len(input_expected))
 
 # -------------------------------------------------------------------------------
 def del_folder_with_contents(folder):
@@ -258,13 +258,14 @@ def del_folder_with_contents(folder):
             os.remove(os.path.join(root, name))
         for name in dirs:
             os.rmdir(os.path.join(root, name))
-    
+
 
 # -------------------------------------------------------------------------------
 def run_test():
     tmp_target_path = os.path.join(settings.results, "tmp")
-    try: 
-        os.mkdir(tmp_target_path) 
+    try:
+        print( "try to make " + tmp_target_path )
+        os.mkdir(tmp_target_path)
     except OSError as oerr:
         # clear contents if tmp folder exists already
        del_folder_with_contents(tmp_target_path)
@@ -272,7 +273,7 @@ def run_test():
     try:
         zipin = zipfile.ZipFile(settings.database_name + ".zip",
             "r", zipfile.ZIP_STORED)
-    
+
     except IOError:
         print("Regression database ", settings.database_name,
               ".zip was not found")
@@ -286,13 +287,16 @@ def run_test():
     res.report_results()
     if res.hasFailures():
         return 1
-        
+
     return 0
-        
+
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
-    assimp_bin_path = sys.argv[1] if len(sys.argv) > 1 else 'assimp'
+    if len(sys.argv) > 1:
+        assimp_bin_path = sys.argv[1]
+    else:
+        assimp_bin_path = 'assimp'
     print('Using assimp binary: ' + assimp_bin_path)
     sys.exit( run_test() )
 

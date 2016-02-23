@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -242,7 +242,7 @@ struct Mesh {
     bool m_hasNormals;
 
     /// Constructor
-    Mesh( const std::string &name ) 
+    explicit Mesh( const std::string &name ) 
     : m_name( name )
     , m_pMaterial(NULL)
     , m_uiNumIndices(0)

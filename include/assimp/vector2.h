@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -95,7 +95,13 @@ public:
     template <typename TOther>
     operator aiVector2t<TOther> () const;
 
-    TReal x, y;
+    union {
+        struct {
+            TReal x, y;
+        };
+        TReal v[ 2 ];
+    };
+
 } PACK_STRUCT;
 
 typedef aiVector2t<float> aiVector2D;
@@ -103,7 +109,12 @@ typedef aiVector2t<float> aiVector2D;
 #else
 
 struct aiVector2D {
-    float x,y;
+    union {
+        struct {
+            float x, y;
+        };
+        float v[ 2 ];
+    };
 };
 
 #endif // __cplusplus

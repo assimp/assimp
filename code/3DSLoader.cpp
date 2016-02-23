@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -86,8 +86,8 @@ static const aiImporterDesc desc = {
     int chunkSize = chunk.Size-sizeof(Discreet3DS::Chunk);               \
     if(chunkSize <= 0)                                                   \
         continue;                                                        \
-    const int oldReadLimit = stream->GetReadLimit();                     \
-    stream->SetReadLimit(stream->GetCurrentPos() + chunkSize);           \
+    const unsigned int oldReadLimit = stream->SetReadLimit(              \
+        stream->GetCurrentPos() + chunkSize);                            \
 
 
 // ------------------------------------------------------------------------------------------------

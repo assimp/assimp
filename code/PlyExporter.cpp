@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "qnan.h"
 
 
-using namespace Assimp;
+//using namespace Assimp;
 namespace Assimp    {
 
 // ------------------------------------------------------------------------------------------------
@@ -85,8 +85,6 @@ void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene*
 
     outfile->Write(exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()), 1);
 }
-
-} // end of namespace Assimp
 
 #define PLY_EXPORT_HAS_NORMALS 0x1
 #define PLY_EXPORT_HAS_TANGENTS_BITANGENTS 0x2
@@ -214,6 +212,11 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
         }
         ofs += pScene->mMeshes[i]->mNumVertices;
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+PlyExporter::~PlyExporter() {
+    // empty
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -367,4 +370,6 @@ void PlyExporter::WriteMeshIndicesBinary(const aiMesh* m, unsigned int offset)
     WriteMeshIndicesBinary_Generic<unsigned char, int>(m, offset, mOutput);
 }
 
-#endif
+} // end of namespace Assimp
+
+#endif // !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_PLY_EXPORTER)

@@ -256,7 +256,7 @@ bool OpenDDLExport::writeProperties( DDLNode *node, std::string &statement ) {
             } else {
                 first = false;
             }
-            statement += std::string( prop->m_key->m_text.m_buffer );
+            statement += std::string( prop->m_key->m_buffer );
             statement += " = ";
             writeValue( prop->m_value, statement );
             prop = prop->m_next;

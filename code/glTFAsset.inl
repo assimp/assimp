@@ -1041,11 +1041,14 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
     return id;
 }
 
-namespace Util
-{
+namespace Util {
 
-    inline bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out)
-    {
+    inline 
+    bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
+        if ( NULL == const_uri ) {
+            return false;
+        }
+
         if (const_uri[0] != 0x10) { // we already parsed this uri?
             if (strncmp(const_uri, "data:", 5) != 0) // not a data uri?
                 return false;
@@ -1064,28 +1067,40 @@ namespace Util
             size_t i = 5, j;
             if (uri[i] != ';' && uri[i] != ',') { // has media type?
                 uri[1] = i;
-                for (; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {}
+                for (; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {
+                    // nothing to do!
+                }
             }
             while (uri[i] == ';' && i < uriLen) {
                 uri[i++] = '\0';
-                for (j = i; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {}
+                for (j = i; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {
+                    // nothing to do!
+                }
 
-                if (strncmp(uri + j, "charset=", 8) == 0) uri[2] = j + 8;
-                else if (strncmp(uri + j, "base64", 6) == 0) uri[3] = j;
+                if ( strncmp( uri + j, "charset=", 8 ) == 0 ) {
+                    uri[ 2 ] = j + 8;
+                } else if ( strncmp( uri + j, "base64", 6 ) == 0 ) {
+                    uri[ 3 ] = j;
+                }
             }
             if (i < uriLen) {
                 uri[i++] = '\0';
                 uri[4] = i;
-            }
-            else {
+            } else {
                 uri[1] = uri[2] = uri[3] = 0;
                 uri[4] = 5;
             }
         }
 
-        if (uri[1] != 0) out.mediaType = uri + uri[1];
-        if (uri[2] != 0) out.charset = uri + uri[2];
-        if (uri[3] != 0) out.base64 = true;
+        if ( uri[ 1 ] != 0 ) {
+            out.mediaType = uri + uri[ 1 ];
+        }
+        if ( uri[ 2 ] != 0 ) {
+            out.charset = uri + uri[ 2 ];
+        }
+        if ( uri[ 3 ] != 0 ) {
+            out.base64 = true;
+        }
         out.data = uri + uri[4];
         out.dataLength = (uri + uriLen) - out.data;
 

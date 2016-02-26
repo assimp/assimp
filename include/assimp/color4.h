@@ -86,7 +86,12 @@ public:
 public:
 
     // Red, green, blue and alpha color values
-    TReal r, g, b, a;
+    union {
+        struct {
+            TReal r, g, b, a;
+        };
+        TReal c[ 4 ];
+    };
 } PACK_STRUCT;  // !struct aiColor4D
 
 typedef aiColor4t<float> aiColor4D;
@@ -94,7 +99,12 @@ typedef aiColor4t<float> aiColor4D;
 #else
 
 struct aiColor4D {
-    float r, g, b, a;
+    union {
+        struct {
+            float r, g, b, a;
+        };
+        float c[ 4 ];
+    };
 } PACK_STRUCT;
 
 #endif // __cplusplus

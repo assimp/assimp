@@ -38,59 +38,62 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+
 #include "UnitTestPCH.h"
+#include <iostream>
 
-#include <RemoveComments.h>
-
-
-using namespace std;
 using namespace Assimp;
 
+class utMatrix3x3Test : public ::testing::Test {
 
-// ------------------------------------------------------------------------------------------------
-TEST(RemoveCommentsTest, testSingleLineComments)
-{
-    const char* szTest = "int i = 0; \n"
-        "if (4 == //)\n"
-        "\ttrue) { // do something here \n"
-        "\t// hello ... and bye //\n";
+};
 
-    const size_t len( ::strlen( szTest ) + 1 );
-    char* szTest2 = new char[ len ];
-    ::strncpy( szTest2, szTest, len );
+TEST_F( utMatrix3x3Test, FromToMatrixTest ) {
+    aiVector3D res;
+    aiMatrix3x3 trafo;
 
-    const char* szTestResult = "int i = 0; \n"
-        "if (4 ==    \n"
-        "\ttrue) {                      \n"
-        "\t                       \n";
+    const double PRECISION = 0.000001;
 
-    CommentRemover::RemoveLineComments("//",szTest2,' ');
-    EXPECT_STREQ(szTestResult, szTest2);
+    // axes test
+    aiVector3D axes[] =
+        { aiVector3D(1, 0, 0)
+        , aiVector3D(0, 1, 0)
+        , aiVector3D(0, 0, 1)
+        };
 
-    delete[] szTest2;
-}
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            aiMatrix3x3::FromToMatrix( axes[i], axes[j], trafo );
+            res = trafo * axes[i];
 
-// ------------------------------------------------------------------------------------------------
-TEST(RemoveCommentsTest, testMultiLineComments)
-{
-    const char* szTest =
-        "/* comment to be removed */\n"
-        "valid text /* \n "
-        " comment across multiple lines */"
-        " / * Incomplete comment */ /* /* multiple comments */ */";
+            ASSERT_NEAR( axes[j].x, res.x, PRECISION );
+            ASSERT_NEAR( axes[j].y, res.y, PRECISION );
+            ASSERT_NEAR( axes[j].z, res.z, PRECISION );
+        }
+    }
 
-    const char* szTestResult =
-        "                           \n"
-        "valid text      "
-        "                                 "
-        " / * Incomplete comment */                            */";
+    // random test
+    const int NUM_SAMPLES = 10000;
 
-    const size_t len( ::strlen( szTest ) + 1 );
-    char* szTest2 = new char[ len ];
-    ::strncpy( szTest2, szTest, len );
+    aiVector3D from, to;
 
-    CommentRemover::RemoveMultiLineComments("/*","*/",szTest2,' ');
-    EXPECT_STREQ(szTestResult, szTest2);
+    for (int i = 0; i < NUM_SAMPLES; ++i) {
+        from = aiVector3D
+            ( 1.f * rand() / RAND_MAX
+            , 1.f * rand() / RAND_MAX
+            , 1.f * rand() / RAND_MAX
+            ).Normalize();
+        to = aiVector3D
+            ( 1.f * rand() / RAND_MAX
+            , 1.f * rand() / RAND_MAX
+            , 1.f * rand() / RAND_MAX
+            ).Normalize();
 
-    delete[] szTest2;
+        aiMatrix3x3::FromToMatrix( from, to, trafo );
+        res = trafo * from;
+
+        ASSERT_NEAR( to.x, res.x, PRECISION );
+        ASSERT_NEAR( to.y, res.y, PRECISION );
+        ASSERT_NEAR( to.z, res.z, PRECISION );
+    }
 }

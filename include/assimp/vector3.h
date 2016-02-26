@@ -125,7 +125,12 @@ public:
      *  @param o Second factor */
     const aiVector3t SymMul(const aiVector3t& o);
 
-    TReal x, y, z;
+    union {
+        struct {
+            TReal x, y, z;
+        };
+        TReal v[ 3 ];
+    };
 } PACK_STRUCT;
 
 
@@ -134,8 +139,12 @@ typedef aiVector3t<float> aiVector3D;
 #else
 
 struct aiVector3D {
-
-    float x,y,z;
+    union {
+        struct {
+            float x, y, z;
+        };
+        float v[ 3 ];
+    };
 } PACK_STRUCT;
 
 #endif // __cplusplus

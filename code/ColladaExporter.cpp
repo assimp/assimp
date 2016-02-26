@@ -527,6 +527,13 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
 }
 
 // ------------------------------------------------------------------------------------------------
+// Reimplementation of isalnum(,C locale), because AppVeyor does not see standard version.
+static bool isalnum_C(char c)
+{
+  return strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Writes an image entry for the given surface
 void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::string& pNameAdd)
 {
@@ -540,7 +547,7 @@ void ColladaExporter::WriteImageEntry( const Surface& pSurface, const std::strin
     std::stringstream imageUrlEncoded;
     for( std::string::const_iterator it = pSurface.texture.begin(); it != pSurface.texture.end(); ++it )
     {
-      if( isalnum( *it) || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
+      if( isalnum_C( (unsigned char) *it) || *it == ':' || *it == '_' || *it == '.' || *it == '/' || *it == '\\' )
         imageUrlEncoded << *it;
       else
         imageUrlEncoded << '%' << std::hex << size_t( (unsigned char) *it) << std::dec;
@@ -631,9 +638,7 @@ void ColladaExporter::WriteMaterials()
       name = "mat";
     materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
-        // isalnum on MSVC asserts for code points outside [0,255]. Thus prevent unwanted promotion
-        // of char to signed int and take the unsigned char value.
-      if( !isalnum( static_cast<uint8_t>(*it) ) ) {
+      if( !isalnum_C( *it ) ) {
         *it = '_';
       }
     }

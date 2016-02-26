@@ -321,4 +321,12 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 }
 
+/** will delete all registered importers. */
+void DeleteImporterInstanceList(std::vector< BaseImporter* >& deleteList){
+	for(size_t i= 0; i<deleteList.size();++i){
+		delete deleteList[i];
+		deleteList[i]=NULL;
+	}//for
+}
+
 } // namespace Assimp

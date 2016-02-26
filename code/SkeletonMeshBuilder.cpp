@@ -73,9 +73,11 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root, bool bK
     root->mMeshes[0] = 0;
 
     // create a dummy material for the mesh
-    pScene->mNumMaterials = 1;
-    pScene->mMaterials = new aiMaterial*[1];
-    pScene->mMaterials[0] = CreateMaterial();
+    if(pScene->mNumMaterials==0){
+		pScene->mNumMaterials = 1;
+		pScene->mMaterials = new aiMaterial*[1];
+		pScene->mMaterials[0] = CreateMaterial();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

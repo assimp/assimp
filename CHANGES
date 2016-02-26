@@ -2,6 +2,24 @@
 CHANGELOG
 ----------------------------------------------------------------------
 
+3.2.0 (2015-11-03)
+
+FEATURES:
+  - OpenDDL-Parser is part of contrib-source.
+  - Experimental OpenGEX-support
+  - CI-check for linux and windows
+  - Coverity check added
+  - New regression testsuite.
+
+FIXES/HOUSEKEEPING:
+  - Hundreds of bugfixes  in all parts of the library
+  - Unified line endings
+
+
+API COMPATIBILITY:
+  - Removed precompiled header to increase build speed for linux
+
+
 3.1.1 (2014-06-15)
 
 FEATURES:
@@ -18,18 +36,18 @@ FEATURES:
 FIXES/HOUSEKEEPING:
     - Hundreds of bugfixes in all parts of the library
     - CMake is now the primary build system
-    
+
 API COMPATIBILITY:
     - 3.1.1 is not binary compatible to 3.0 due to aiNode::mMetaData
       and aiMesh::mName
     - Export interface has been cleaned up and unified
     - Other than that no relevant changes
-   
+
 
 3.0 (2012-07-07)
 
 FEATURES:
-   - new export interface similar to the import API. 
+   - new export interface similar to the import API.
    - Supported export formats: Collada, OBJ, PLY and STL
    - added new import formats: XGL/ZGL, M3 (experimental)
    - new postprocessing steps: Debone
@@ -46,11 +64,11 @@ FIXES/HOUSEKEEPING:
    - improved CMake build system
    - templatized math library
    - reduce dependency on boost.thread, only remaining spot
-     is synchronization for the C logging API 
+     is synchronization for the C logging API
 
 API COMPATIBILITY:
    - renamed headers, export interface, C API properties and meta data
-     prevent compatibility with code written for 2.0, but in 
+     prevent compatibility with code written for 2.0, but in
      most cases these can be easily resolved
    - Note: 3.0 is not binary compatible with 2.0
 
@@ -68,9 +86,9 @@ FEATURES:
      spatial structure) in some expensive postprocessing steps
    - AssimpView now uses a reworked layout which leaves more space
      to the scene hierarchy window
-     
+
    - Add C# bindings ('Assimp.NET')
-   - Keep BSD-licensed and otherwise free test files in separate 
+   - Keep BSD-licensed and otherwise free test files in separate
      folders (./test/models and ./test/models-nonbsd).
 
 FIXES:
@@ -80,20 +98,20 @@ FIXES:
    - OpenGL-sample now works with MinGW
    - Fix Importer::FindLoader failing on uppercase file extensions
    - Fix flawed path handling when locating external files
-   - Limit the maximum number of vertices, faces, face indices and 
+   - Limit the maximum number of vertices, faces, face indices and
      weights that Assimp is able to handle. This is to avoid
      crashes due to overflowing counters.
-   
+
    - Updated XCode project files
    - Further CMAKE build improvements
-   
+
 
 API CHANGES:
    - Add data structures for vertex-based animations (These are not
      currently used, however ...)
    - Some Assimp::Importer methods are const now.
- 
- 
+
+
 
 
 

@@ -178,7 +178,8 @@ public:
 
     // -------------------------------------------------------------------
     /** Closes the given file and releases all resources associated with it. */
-    void Close( IOStream* /*pFile*/) {
+    void Close( IOStream* pFile) {
+    	delete pFile;
     }
 
     // -------------------------------------------------------------------

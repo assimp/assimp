@@ -1128,10 +1128,11 @@ void SceneCombiner::Copy  (aiTexture** _dest, const aiTexture* src)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::Copy     (aiAnimation** _dest, const aiAnimation* src)
+void SceneCombiner::Copy( aiAnimation** _dest, const aiAnimation* src )
 {
-    ai_assert(NULL != _dest && NULL != src);
-
+    ai_assert( NULL != _dest );
+    ai_assert( NULL != src );
+    
     aiAnimation* dest = *_dest = new aiAnimation();
 
     // get a flat copy

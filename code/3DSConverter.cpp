@@ -70,8 +70,9 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
     for (unsigned int i = 0; i < mScene->mMaterials.size();++i)
     {
         std::string s = mScene->mMaterials[i].mName;
-        for (std::string::iterator it = s.begin(); it != s.end(); ++it)
-            *it = ::tolower(*it);
+        for ( std::string::iterator it = s.begin(); it != s.end(); ++it ) {
+            *it = static_cast< char >( ::tolower( *it ) );
+        }
 
         if (std::string::npos == s.find("default"))continue;
 
@@ -663,14 +664,14 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
             nda->mRotationKeys = new aiQuatKey[nda->mNumRotationKeys];
 
             // Rotations are quaternion offsets
-            aiQuaternion abs;
+            aiQuaternion abs1;
             for (unsigned int n = 0; n < nda->mNumRotationKeys;++n)
             {
                 const aiQuatKey& q = pcIn->aRotationKeys[n];
 
-                abs = (n ? abs * q.mValue : q.mValue);
+                abs1 = (n ? abs1 * q.mValue : q.mValue);
                 nda->mRotationKeys[n].mTime  = q.mTime;
-                nda->mRotationKeys[n].mValue = abs.Normalize();
+                nda->mRotationKeys[n].mValue = abs1.Normalize();
             }
         }
 

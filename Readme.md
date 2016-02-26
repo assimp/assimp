@@ -1,6 +1,5 @@
 Open Asset Import Library (assimp)
-========
-
+==================================
 Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
@@ -80,14 +79,15 @@ __Exporters__:
 - glTF
 
 ### Building ###
-
-
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
 
+### Ports ###
+* [Android](port/AndroidJNI/README.md)
+* [Python](port/PyAssimp/README.md)
+* [.NET](port/AssimpNET/Readme.md)
+* [Pascal](port/AssimpPascal/Readme.md)
 
 #### Repository structure ####
-
-
 Open Asset Import Library is implemented in C++. The directory structure is:
 
 	/code		Source code
@@ -105,8 +105,6 @@ Open Asset Import Library is implemented in C++. The directory structure is:
 
 
 ### Where to get help ###
-
-
 For more information, visit [our website](http://assimp.sourceforge.net/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.
 (CHMs for Windows are included in some release packages and should be located right here in the root folder).
 
@@ -119,12 +117,10 @@ And we also have an IRC-channel at freenode: #assetimporterlib . You can easily 
 > /join #assetimporterlib
 
 ### Contributing ###
-
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
 
 ### License ###
-
 Our license is based on the modified, __3-clause BSD__-License.
 
 An _informal_ summary is: do whatever you want, but include Assimp's license text with your product -
@@ -132,5 +128,4 @@ and don't sue us if our code doesn't work. Note that, unlike LGPLed code, you ma
 For the legal details, see the `LICENSE` file.
 
 ### Why this name ###
-
 Sorry, we're germans :-), no english native speakers ...

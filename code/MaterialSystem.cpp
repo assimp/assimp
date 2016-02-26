@@ -53,7 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/DefaultLogger.hpp"
 #include "Macros.h"
 
-
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
@@ -571,9 +570,11 @@ void aiMaterial::CopyPropertyList(aiMaterial* pcDest,
         for (unsigned int i = 0; i < iOldNum;++i) {
             pcDest->mProperties[i] = pcOld[i];
         }
-
-        delete[] pcOld;
     }
+
+    if(pcOld)
+    	delete[] pcOld;
+
     for (unsigned int i = iOldNum; i< pcDest->mNumProperties;++i)   {
         aiMaterialProperty* propSrc = pcSrc->mProperties[i];
 
@@ -605,4 +606,3 @@ void aiMaterial::CopyPropertyList(aiMaterial* pcDest,
     }
     return;
 }
-

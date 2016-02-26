@@ -471,32 +471,38 @@ void MeshGeometry::ReadVertexDataColors(std::vector<aiColor4D>& colors_out, cons
         mappings);
 }
 
-
 // ------------------------------------------------------------------------------------------------
+static const std::string TangentIndexToken = "TangentIndex";
+static const std::string TangentsIndexToken = "TangentsIndex";
+
 void MeshGeometry::ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source,
     const std::string& MappingInformationType,
     const std::string& ReferenceInformationType)
 {
     const char * str = source.Elements().count( "Tangents" ) > 0 ? "Tangents" : "Tangent";
+    const char * strIdx = source.Elements().count( "Tangents" ) > 0 ? TangentsIndexToken.c_str() : TangentIndexToken.c_str();
     ResolveVertexDataArray(tangents_out,source,MappingInformationType,ReferenceInformationType,
         str,
-        "TangentIndex",
+        strIdx,
         vertices.size(),
         mapping_counts,
         mapping_offsets,
         mappings);
 }
 
-
 // ------------------------------------------------------------------------------------------------
+static const std::string BinormalIndexToken = "BinormalIndex";
+static const std::string BinormalsIndexToken = "BinormalsIndex";
+
 void MeshGeometry::ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source,
     const std::string& MappingInformationType,
     const std::string& ReferenceInformationType)
 {
     const char * str = source.Elements().count( "Binormals" ) > 0 ? "Binormals" : "Binormal";
+    const char * strIdx = source.Elements().count( "Binormals" ) > 0 ? BinormalsIndexToken.c_str() : BinormalIndexToken.c_str();
     ResolveVertexDataArray(binormals_out,source,MappingInformationType,ReferenceInformationType,
         str,
-        "BinormalIndex",
+        strIdx,
         vertices.size(),
         mapping_counts,
         mapping_offsets,

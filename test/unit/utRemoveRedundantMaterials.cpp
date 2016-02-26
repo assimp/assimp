@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -60,7 +60,6 @@ protected:
     RemoveRedundantMatsProcess* piProcess;
 
     aiScene* pcScene1;
-    aiScene* pcScene2;
 };
 
 // ------------------------------------------------------------------------------------------------

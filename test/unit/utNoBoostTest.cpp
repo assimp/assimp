@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -76,7 +76,8 @@ TEST(NoBoostTest, Tuple) {
     EXPECT_EQ(4U, first.get<1>());
     EXPECT_EQ(4U, first.get<2>());
 
-    boost::tuple<int, float, double, bool, another> second;
+    boost::tuple<int, float, double, bool, another> second=
+    		boost::make_tuple(1,1.0f,0.0,false,another());
     bool b = second.get<3>();
 
     // check empty tuple

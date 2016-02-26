@@ -283,7 +283,7 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
         if (!pMesh->mTextureCoords[i])break;
         if (configDeleteFlags & aiComponent_TEXCOORDSn(real) || b)
         {
-            delete pMesh->mTextureCoords[i];
+            delete [] pMesh->mTextureCoords[i];
             pMesh->mTextureCoords[i] = NULL;
             ret = true;
 

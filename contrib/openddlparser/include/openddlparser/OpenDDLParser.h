@@ -63,9 +63,6 @@ inline
 T *getNextToken( T *in, T *end ) {
     T *tmp( in );
     in = lookForNextToken( in, end );
-    /*while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
-        in++;
-    }*/
     if( tmp == in ) {
         in++;
     }
@@ -103,7 +100,7 @@ public:
     ///	@brief  The class constructor.
     ///	@param  buffer      [in] The buffer
     ///	@param  len         [in] Size of the buffer
-    OpenDDLParser( char *buffer, size_t len );
+    OpenDDLParser( const char *buffer, size_t len );
 
     ///	@brief  The class destructor.
     ~OpenDDLParser();
@@ -119,7 +116,7 @@ public:
     ///	@brief  Assigns a new buffer to parse.
     ///	@param  buffer      [in] The buffer
     ///	@param  len         [in] Size of the buffer
-    void setBuffer( char *buffer, size_t len );
+    void setBuffer( const char *buffer, size_t len );
 
     ///	@brief  Assigns a new buffer to parse.
     /// @param  buffer      [in] The buffer as a std::vector.
@@ -161,7 +158,7 @@ public: // parser helpers
     DDLNode *top();
     static void normalizeBuffer( std::vector<char> &buffer );
     static char *parseName( char *in, char *end, Name **name );
-    static char *parseIdentifier( char *in, char *end, Identifier **id );
+    static char *parseIdentifier( char *in, char *end, Text **id );
     static char *parsePrimitiveDataType( char *in, char *end, Value::ValueType &type, size_t &len );
     static char *parseReference( char *in, char *end, std::vector<Name*> &names );
     static char *parseBooleanLiteral( char *in, char *end, Value **boolean );
@@ -175,8 +172,8 @@ public: // parser helpers
     static const char *getVersion();
 
 private:
-    OpenDDLParser( const OpenDDLParser & );
-    OpenDDLParser &operator = ( const OpenDDLParser & );
+    OpenDDLParser( const OpenDDLParser & ) ddl_no_copy;
+    OpenDDLParser &operator = ( const OpenDDLParser & ) ddl_no_copy;
 
 private:
     logCallback m_logCallback;

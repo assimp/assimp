@@ -28,6 +28,7 @@ SET( TEST_SRCS
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
   unit/utMaterialSystem.cpp
+  unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
   unit/utPretransformVertices.cpp
   unit/utRemoveComments.cpp
@@ -44,26 +45,27 @@ SET( TEST_SRCS
   unit/utNoBoostTest.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
+  unit/utIssues.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 
 if(AddGTest_FOUND)
-add_executable( unit
-  unit/CCompilerTest.c
-  unit/Main.cpp
-  ../code/Version.cpp
-  ${TEST_SRCS}
-)
+    add_executable( unit
+      unit/CCompilerTest.c
+      unit/Main.cpp
+      ../code/Version.cpp
+      ${TEST_SRCS}
+    )
 
-add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
+    add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
 
-SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
+    SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
-add_dependencies( unit gtest )
-target_link_libraries( unit assimp
-  debug ${GTEST_DEBUG_LIBRARIES}
-  optimized ${GTEST_RELEASE_LIBRARIES}
-)
+    add_dependencies( unit gtest )
+    target_link_libraries( unit assimp
+      debug ${GTEST_DEBUG_LIBRARIES}
+      optimized ${GTEST_RELEASE_LIBRARIES}
+    )
 endif(AddGTest_FOUND)
 add_subdirectory(headercheck)

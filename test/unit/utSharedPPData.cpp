@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -59,28 +59,16 @@ protected:
     SharedPostProcessInfo* shared;
 };
 
-static bool destructed;
-
-struct TestType
-{
-    ~TestType()
-    {
-        destructed = true;
-    }
-};
-
-
 // ------------------------------------------------------------------------------------------------
 void SharedPPDataTest::SetUp()
 {
     shared = new SharedPostProcessInfo();
-    destructed = false;
 }
 
 // ------------------------------------------------------------------------------------------------
 void SharedPPDataTest::TearDown()
 {
-
+	delete shared;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -112,14 +100,26 @@ TEST_F(SharedPPDataTest, testPropertyPointer)
     EXPECT_FALSE(shared->GetProperty("test16",o));
 }
 
+static bool destructed;
+
+struct TestType
+{
+    ~TestType()
+    {
+        destructed = true;
+    }
+};
 // ------------------------------------------------------------------------------------------------
 TEST_F(SharedPPDataTest, testPropertyDeallocation)
 {
-    TestType *out, * pip = new TestType();
-    shared->AddProperty("quak",pip);
-    EXPECT_TRUE(shared->GetProperty("quak",out));
+	SharedPostProcessInfo* localShared = new SharedPostProcessInfo();
+	destructed = false;
+
+	TestType *out, * pip = new TestType();
+	localShared->AddProperty("quak",pip);
+    EXPECT_TRUE(localShared->GetProperty("quak",out));
     EXPECT_EQ(pip, out);
 
-    delete shared;
+    delete localShared;
     EXPECT_TRUE(destructed);
 }

@@ -94,6 +94,10 @@ protected:
     bool writeValueArray( DataArrayList *al, std::string &statement );
 
 private:
+    OpenDDLExport( const OpenDDLExport & ) ddl_no_copy;
+    OpenDDLExport &operator = ( const OpenDDLExport  & ) ddl_no_copy;
+
+private:
     IOStreamBase *m_stream;
 };
 

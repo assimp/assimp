@@ -292,7 +292,7 @@ bool Q3BSPZipArchive::mapArchive() {
                         // The file has EXACTLY the size of uncompressed_size. In C
                         // you need to mark the last character with '\0', so add
                         // another character
-                        if(unzOpenCurrentFile(m_ZipFileHandle) == UNZ_OK) {
+                        if(fileInfo.uncompressed_size != 0 && unzOpenCurrentFile(m_ZipFileHandle) == UNZ_OK) {
                             std::pair<std::map<std::string, ZipFile*>::iterator, bool> result = m_ArchiveMap.insert(std::make_pair(filename, new ZipFile(fileInfo.uncompressed_size)));
 
                             if(unzReadCurrentFile(m_ZipFileHandle, result.first->second->m_Buffer, fileInfo.uncompressed_size) == (long int) fileInfo.uncompressed_size) {

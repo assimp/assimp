@@ -357,23 +357,24 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
 
     // adjust bone vertex weights.
-    for( int a = 0; a < (int)pMesh->mNumBones; a++)
-    {
+    for( int a = 0; a < (int)pMesh->mNumBones; a++) {
         aiBone* bone = pMesh->mBones[a];
         std::vector<aiVertexWeight> newWeights;
         newWeights.reserve( bone->mNumWeights);
 
-        for( unsigned int b = 0; b < bone->mNumWeights; b++)
-        {
-            const aiVertexWeight& ow = bone->mWeights[b];
-            // if the vertex is a unique one, translate it
-            if( !(replaceIndex[ow.mVertexId] & 0x80000000))
-            {
-                aiVertexWeight nw;
-                nw.mVertexId = replaceIndex[ow.mVertexId];
-                nw.mWeight = ow.mWeight;
-                newWeights.push_back( nw);
+        if ( NULL != bone->mWeights ) {
+            for ( unsigned int b = 0; b < bone->mNumWeights; b++ ) {
+                const aiVertexWeight& ow = bone->mWeights[ b ];
+                // if the vertex is a unique one, translate it
+                if ( !( replaceIndex[ ow.mVertexId ] & 0x80000000 ) ) {
+                    aiVertexWeight nw;
+                    nw.mVertexId = replaceIndex[ ow.mVertexId ];
+                    nw.mWeight = ow.mWeight;
+                    newWeights.push_back( nw );
+                }
             }
+        } else {
+            DefaultLogger::get()->error( "X-Export: aiBone shall contain weights, but pointer to them is NULL." );
         }
 
         if (newWeights.size() > 0) {

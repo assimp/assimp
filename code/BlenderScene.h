@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 
 namespace Assimp    {
-    namespace Blender {
+namespace Blender {
 
 // Minor parts of this file are extracts from blender data structures,
 // declared in the ./source/blender/makesdna directory.

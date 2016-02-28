@@ -48,8 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderScene.h"
 
 namespace Assimp    {
-    namespace Blender {
-
+namespace Blender {
 
 template <> void Structure :: Convert<Object> (
     Object& dest,

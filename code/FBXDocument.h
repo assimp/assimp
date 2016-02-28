@@ -44,16 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_DOCUMENT_H
 #define INCLUDED_AI_FBX_DOCUMENT_H
 
-#include <vector>
-#include <map>
-#include <string>
-#include <stdint.h>
 #include <numeric>
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/vector3.h"
-#include "../include/assimp/vector2.h"
-#include "../include/assimp/color4.h"
 #include "../include/assimp/mesh.h"
 #include "FBXProperties.h"
 #include "FBXParser.h"
@@ -179,7 +170,7 @@ class NodeAttribute : public Object
 public:
 
     NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~NodeAttribute();
+    virtual ~NodeAttribute();
 
 public:
 
@@ -200,7 +191,7 @@ class CameraSwitcher : public NodeAttribute
 public:
 
     CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~CameraSwitcher();
+    virtual ~CameraSwitcher();
 
 public:
 
@@ -251,7 +242,7 @@ class Camera : public NodeAttribute
 public:
 
     Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Camera();
+    virtual  ~Camera();
 
 public:
 
@@ -280,7 +271,7 @@ class Null : public NodeAttribute
 public:
 
     Null(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Null();
+    virtual ~Null();
 };
 
 
@@ -290,7 +281,7 @@ class LimbNode : public NodeAttribute
 public:
 
     LimbNode(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~LimbNode();
+    virtual ~LimbNode();
 };
 
 
@@ -298,9 +289,8 @@ public:
 class Light : public NodeAttribute
 {
 public:
-
     Light(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Light();
+    virtual ~Light();
 
 public:
 
@@ -370,7 +360,7 @@ class Model : public Object
 public:
 
     Model(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Model();
+    virtual ~Model();
 
 public:
 
@@ -535,7 +525,7 @@ class Texture : public Object
 public:
 
     Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Texture();
+    virtual ~Texture();
 
 public:
 
@@ -599,7 +589,7 @@ class LayeredTexture : public Object
 public:
 
     LayeredTexture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~LayeredTexture();
+    virtual ~LayeredTexture();
 
     //Can only be called after construction of the layered texture object due to construction flag.
     void fillTexture(const Document& doc);
@@ -668,7 +658,7 @@ class Video : public Object
 public:
 
     Video(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Video();
+    virtual ~Video();
 
 public:
 
@@ -721,7 +711,7 @@ class Material : public Object
 public:
 
     Material(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Material();
+    virtual ~Material();
 
 public:
 
@@ -763,7 +753,7 @@ class Geometry : public Object
 public:
 
     Geometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~Geometry();
+    virtual ~Geometry();
 
 public:
 
@@ -788,7 +778,7 @@ class MeshGeometry : public Geometry
 public:
 
     MeshGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~MeshGeometry();
+    virtual ~MeshGeometry();
 
 public:
 
@@ -891,8 +881,6 @@ public:
         return static_cast<unsigned int>(std::distance(facesVertexStartIndices.begin(), it - 1));
     }
 
-public:
-
 private:
 
     void ReadLayer(const Scope& layer);
@@ -952,7 +940,7 @@ class AnimationCurve : public Object
 public:
 
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~AnimationCurve();
+    virtual ~AnimationCurve();
 
 public:
 
@@ -995,13 +983,13 @@ class AnimationCurveNode : public Object
 {
 public:
 
-    /* the optional whitelist specifies a list of property names for which the caller
+    /* the optional white list specifies a list of property names for which the caller
     wants animations for. If the curve node does not match one of these, std::range_error
     will be thrown. */
     AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc,
         const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0);
 
-    ~AnimationCurveNode();
+    virtual ~AnimationCurveNode();
 
 public:
 
@@ -1053,7 +1041,7 @@ public:
 
 
     AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~AnimationLayer();
+    virtual ~AnimationLayer();
 
 public:
 
@@ -1062,7 +1050,7 @@ public:
         return *props.get();
     }
 
-    /* the optional whitelist specifies a list of property names for which the caller
+    /* the optional white list specifies a list of property names for which the caller
     wants animations for. Curves not matching this list will not be added to the
     animation layer. */
     AnimationCurveNodeList Nodes(const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0) const;
@@ -1083,7 +1071,7 @@ class AnimationStack : public Object
 public:
 
     AnimationStack(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~AnimationStack();
+    virtual ~AnimationStack();
 
 public:
 
@@ -1117,7 +1105,7 @@ class Deformer : public Object
 public:
 
     Deformer(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Deformer();
+    virtual ~Deformer();
 
 public:
 
@@ -1191,7 +1179,7 @@ class Skin : public Deformer
 public:
 
     Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Skin();
+    virtual ~Skin();
 
 public:
 

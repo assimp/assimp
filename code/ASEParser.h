@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_ASEFILEHELPER_H_INC
 
 // STL/CRT headers
-#include <string>
-#include <vector>
-#include <list>
+//#include <string>
+//#include <vector>
+//#include <list>
 
 // public ASSIMP headers
 #include "../include/assimp/types.h"

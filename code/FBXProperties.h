@@ -45,7 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_PROPERTIES_H
 
 #include <map>
-#include <string>
 #include "FBXCompileConfig.h"
 #include <boost/shared_ptr.hpp>
 

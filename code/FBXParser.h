@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_PARSER_H
 
 #include <stdint.h>
+#include <map>
 #include <boost/scoped_ptr.hpp>
 #include "LogAux.h"
 

@@ -658,7 +658,12 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         }
 
         // Dispatch the reading to the worker class for this format
-        DefaultLogger::get()->info("Found a matching importer for this file format");
+        const aiImporterDesc *desc( imp->GetInfo() );
+        std::string ext( "unknown" );
+        if ( NULL != desc ) {
+            ext = desc->mName;
+        }
+        DefaultLogger::get()->info("Found a matching importer for this file format: " + ext + "." );
         pimpl->mProgressHandler->UpdateFileRead( 0, fileSize );
 
         if (profiler) {

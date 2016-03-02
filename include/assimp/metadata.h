@@ -177,6 +177,9 @@ struct aiMetadata
                 case AI_AIVECTOR3D:
                     delete static_cast<aiVector3D*>(data);
                     break;
+#ifndef SWIG
+                case FORCE_32BIT:
+#endif
                 default:
                     assert(false);
                     break;

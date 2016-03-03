@@ -446,6 +446,7 @@ ADD_ASSIMP_IMPORTER(FBX
   FBXDocument.cpp
   FBXProperties.h
   FBXProperties.cpp
+  FBXMeshGeometry.h
   FBXMeshGeometry.cpp
   FBXMaterial.cpp
   FBXModel.cpp

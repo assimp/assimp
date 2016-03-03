@@ -51,12 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp    {
 
-    // TinyFormatter.h
-    namespace Formatter {
-        template <typename T,typename TR, typename A> class basic_formatter;
-        typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
-    }
-
+// TinyFormatter.h
+namespace Formatter {
+    template <typename T,typename TR, typename A> class basic_formatter;
+    typedef class basic_formatter< char, std::char_traits<char>, std::allocator<char> > format;
+}
 
 // -------------------------------------------------------------------------------------------
 /** Load the Autodesk FBX file format.
@@ -68,10 +67,7 @@ class FBXImporter : public BaseImporter, public LogFunctions<FBXImporter>
 {
 public:
     FBXImporter();
-    ~FBXImporter();
-
-
-public:
+    virtual ~FBXImporter();
 
     // --------------------
     bool CanRead( const std::string& pFile,
@@ -94,12 +90,7 @@ protected:
     );
 
 private:
-
-
-private:
-
     FBX::ImportSettings settings;
-
 }; // !class FBXImporter
 
 } // end of namespace Assimp

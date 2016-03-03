@@ -44,17 +44,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
-#include <functional>
-
-#include "FBXParser.h"
 #include "FBXDocument.h"
+#include "FBXMeshGeometry.h"
+#include "FBXParser.h"
 #include "FBXUtil.h"
 #include "FBXImporter.h"
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
+
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
+#include <functional>
+
 
 namespace Assimp {
 namespace FBX {
@@ -135,6 +137,8 @@ const Object* LazyObject::Get(bool dieOnError)
         // so avoid constructing strings all the time.
         const char* obtype = key.begin();
         const size_t length = static_cast<size_t>(key.end()-key.begin());
+        DefaultLogger::get()->debug( "obtype: " + std::string(obtype ));
+        DefaultLogger::get()->debug( "Classtag: " + classtag );
         if (!strncmp(obtype,"Geometry",length)) {
             if (!strcmp(classtag.c_str(),"Mesh")) {
                 object.reset(new MeshGeometry(id,element,name,doc));
@@ -165,10 +169,10 @@ const Object* LazyObject::Get(bool dieOnError)
                 object.reset(new Skin(id,element,doc,name));
             }
         }
-        else if (!strncmp(obtype,"Model",length)) {
+        else if ( !strncmp( obtype, "Model", length ) ) {
             // FK and IK effectors are not supported
-            if (strcmp(classtag.c_str(),"IKEffector") && strcmp(classtag.c_str(),"FKEffector")) {
-                object.reset(new Model(id,element,doc,name));
+            if ( strcmp( classtag.c_str(), "IKEffector" ) && strcmp( classtag.c_str(), "FKEffector" ) ) {
+                object.reset( new Model( id, element, doc, name ) );
             }
         }
         else if (!strncmp(obtype,"Material",length)) {
@@ -407,7 +411,6 @@ void Document::ReadObjects()
         }
     }
 }
-
 
 // ------------------------------------------------------------------------------------------------
 void Document::ReadPropertyTemplates()

@@ -55,15 +55,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-    class Scope;
-    class Parser;
-    class Element;
+class Scope;
+class Parser;
+class Element;
 
-    // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
-    typedef std::vector< Scope* > ScopeList;
-    typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
+// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+typedef std::vector< Scope* > ScopeList;
+typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
-    typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
+typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
 
 #   define new_Scope new Scope
 #   define new_Element new Element
@@ -162,7 +162,6 @@ public:
     ~Parser();
 
 public:
-
     const Scope& GetRootScope() const {
         return *root.get();
     }
@@ -173,7 +172,6 @@ public:
     }
 
 private:
-
     friend class Scope;
     friend class Element;
 
@@ -183,9 +181,7 @@ private:
     TokenPtr CurrentToken() const;
 
 
-
 private:
-
     const TokenList& tokens;
 
     TokenPtr last, current;

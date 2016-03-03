@@ -58,7 +58,8 @@ namespace FBX {
 
 // ------------------------------------------------------------------------------------------------
 NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name)
-    : Object(id,element,name)
+: Object(id,element,name)
+, props()
 {
     const Scope& sc = GetRequiredScope(element);
 

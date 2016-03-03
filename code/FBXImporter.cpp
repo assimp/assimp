@@ -86,7 +86,8 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by #Importer
 FBXImporter::FBXImporter()
-{}
+{
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
@@ -104,7 +105,7 @@ bool FBXImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
     }
 
     else if ((!extension.length() || checkSig) && pIOHandler)   {
-        // at least ascii FBX files usually have a 'FBX' somewhere in their head
+        // at least ASCII-FBX files usually have a 'FBX' somewhere in their head
         const char* tokens[] = {"fbx"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }

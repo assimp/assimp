@@ -54,13 +54,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 
 #include "../include/assimp/scene.h"
-#include <iterator>
-#include <sstream>
 #include <boost/tuple/tuple.hpp>
-#include <vector>
 #include <boost/foreach.hpp>
 #include <boost/scoped_array.hpp>
 
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 namespace Assimp {
 namespace FBX {
@@ -79,8 +79,9 @@ using namespace Util;
 class Converter
 {
 public:
-
-    /** the different parts that make up the final local transformation of a fbx node */
+    /** 
+     *  The different parts that make up the final local transformation of a fbx-node 
+     */
     enum TransformationComp
     {
         TransformationComp_Translation = 0,
@@ -102,7 +103,6 @@ public:
     };
 
 public:
-
     Converter(aiScene* out, const Document& doc)
         : defaultMaterialIndex()
         , out(out)
@@ -858,7 +858,7 @@ private:
             }
         }
 
-        // faster codepath, just copy the data
+        // faster code-path, just copy the data
         temp.push_back(ConvertMeshSingleMaterial(mesh, model, node_global_transform));
         return temp;
     }
@@ -961,7 +961,8 @@ private:
             }
 
             if(binormals) {
-                ai_assert(tangents.size() == vertices.size() && binormals->size() == vertices.size());
+                ai_assert( tangents.size() == vertices.size() );
+                ai_assert( binormals->size() == vertices.size() );
 
                 out_mesh->mTangents = new aiVector3D[vertices.size()];
                 std::copy(tangents.begin(),tangents.end(),out_mesh->mTangents);
@@ -1216,10 +1217,12 @@ private:
 
 
     // ------------------------------------------------------------------------------------------------
-    /** - if materialIndex == NO_MATERIAL_SEPARATION, materials are not taken into
-     *  account when determining which weights to include.
+    /** 
+     *  - if materialIndex == NO_MATERIAL_SEPARATION, materials are not taken into
+     *    account when determining which weights to include.
      *  - outputVertStartIndices is only used when a material index is specified, it gives for
-     *    each output vertex the DOM index it maps to. */
+     *    each output vertex the DOM index it maps to. 
+     */
     void ConvertWeights(aiMesh* out, const Model& model, const MeshGeometry& geo,
         const aiMatrix4x4& node_global_transform = aiMatrix4x4(),
         unsigned int materialIndex = NO_MATERIAL_SEPARATION,

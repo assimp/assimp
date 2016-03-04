@@ -308,7 +308,11 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     if( !pObjMesh ) {
         return NULL;
     }
-    ai_assert( NULL != pObjMesh );
+
+    if( pObjMesh->m_Faces.empty() ) {
+        return NULL;
+    }
+
     aiMesh* pMesh = new aiMesh;
     if( !pObjMesh->m_name.empty() ) {
         pMesh->mName.Set( pObjMesh->m_name );

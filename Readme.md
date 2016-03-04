@@ -116,6 +116,9 @@ For development discussions, there is also a (very low-volume) mailing list, _as
 And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
 > /join #assetimporterlib
 
+And if you like assimp, consider buying us a beer (or two):
+[Donate](http://sourceforge.net/donate/index.php?group_id=226462")
+
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.

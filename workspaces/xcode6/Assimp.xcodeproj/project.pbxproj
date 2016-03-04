@@ -167,6 +167,11 @@
 		7FBE9FEA1B65AC1200D2115E /* OpenGEXExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBE9FE51B65AC1200D2115E /* OpenGEXExporter.cpp */; };
 		7FBE9FEB1B65AC1200D2115E /* OpenGEXImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBE9FE71B65AC1200D2115E /* OpenGEXImporter.cpp */; };
 		7FBEA0121B65B11800D2115E /* Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FBEA0111B65B11800D2115E /* Version.cpp */; };
+		AFB7F8521C882F1A00D7B6E9 /* OpenDDLCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFB7F8501C882F1A00D7B6E9 /* OpenDDLCommon.cpp */; };
+		AFB7F8531C882F1A00D7B6E9 /* OpenDDLExport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFB7F8511C882F1A00D7B6E9 /* OpenDDLExport.cpp */; };
+		AFB7F85D1C882F8200D7B6E9 /* glTFExporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFB7F8591C882F8200D7B6E9 /* glTFExporter.cpp */; };
+		AFB7F85E1C882F8200D7B6E9 /* glTFImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFB7F85B1C882F8200D7B6E9 /* glTFImporter.cpp */; };
+		AFB7F8631C88302500D7B6E9 /* SIBImporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AFB7F8611C88302500D7B6E9 /* SIBImporter.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -467,6 +472,18 @@
 		AE1C2E2C9C424B3684AD9D4A /* texture.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = texture.h; path = include/assimp/texture.h; sourceTree = SOURCE_ROOT; };
 		AF75E6049338489BB256D295 /* ioapi.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = ioapi.c; path = contrib/unzip/ioapi.c; sourceTree = SOURCE_ROOT; };
 		AFA8B6DE5B3A4E52A85041C9 /* LWOFileData.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = LWOFileData.h; path = code/LWOFileData.h; sourceTree = SOURCE_ROOT; };
+		AFB7F8501C882F1A00D7B6E9 /* OpenDDLCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenDDLCommon.cpp; path = contrib/openddlparser/code/OpenDDLCommon.cpp; sourceTree = "<group>"; };
+		AFB7F8511C882F1A00D7B6E9 /* OpenDDLExport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenDDLExport.cpp; path = contrib/openddlparser/code/OpenDDLExport.cpp; sourceTree = "<group>"; };
+		AFB7F8551C882F8200D7B6E9 /* glTFAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glTFAsset.h; path = code/glTFAsset.h; sourceTree = "<group>"; };
+		AFB7F8561C882F8200D7B6E9 /* glTFAsset.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = glTFAsset.inl; path = code/glTFAsset.inl; sourceTree = "<group>"; };
+		AFB7F8571C882F8200D7B6E9 /* glTFAssetWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glTFAssetWriter.h; path = code/glTFAssetWriter.h; sourceTree = "<group>"; };
+		AFB7F8581C882F8200D7B6E9 /* glTFAssetWriter.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = glTFAssetWriter.inl; path = code/glTFAssetWriter.inl; sourceTree = "<group>"; };
+		AFB7F8591C882F8200D7B6E9 /* glTFExporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glTFExporter.cpp; path = code/glTFExporter.cpp; sourceTree = "<group>"; };
+		AFB7F85A1C882F8200D7B6E9 /* glTFExporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glTFExporter.h; path = code/glTFExporter.h; sourceTree = "<group>"; };
+		AFB7F85B1C882F8200D7B6E9 /* glTFImporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glTFImporter.cpp; path = code/glTFImporter.cpp; sourceTree = "<group>"; };
+		AFB7F85C1C882F8200D7B6E9 /* glTFImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glTFImporter.h; path = code/glTFImporter.h; sourceTree = "<group>"; };
+		AFB7F8611C88302500D7B6E9 /* SIBImporter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SIBImporter.cpp; path = code/SIBImporter.cpp; sourceTree = "<group>"; };
+		AFB7F8621C88302500D7B6E9 /* SIBImporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SIBImporter.h; path = code/SIBImporter.h; sourceTree = "<group>"; };
 		AFF41974881F466A9561BE4B /* LWSLoader.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = LWSLoader.cpp; path = code/LWSLoader.cpp; sourceTree = SOURCE_ROOT; };
 		B04FE3598E344EC09B59CA2F /* IRRShared.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = IRRShared.h; path = code/IRRShared.h; sourceTree = SOURCE_ROOT; };
 		B05DC38593F04180B322360B /* camera.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = camera.h; path = include/assimp/camera.h; sourceTree = SOURCE_ROOT; };
@@ -733,6 +750,7 @@
 				09D1759329AB410E92DC273A /* Collada */,
 				5F3147F7FF1044D49A824DBC /* DXF */,
 				DD5B35196B184EFB820D1FBB /* CSM */,
+				AFB7F8541C882F6E00D7B6E9 /* glTF */,
 				723B9CB1C871444FBB302576 /* HMP */,
 				6CB3C1AECE8A4745861D913D /* Irr */,
 				873AA0EB80814B0A9461BB7E /* LWO */,
@@ -752,6 +770,7 @@
 				F0273EDFDBD34EDAA6678613 /* Q3D */,
 				C3D412701D614559B698CED1 /* Q3BSP */,
 				9A8E68D1ECFC49B9BB435F1C /* Raw */,
+				AFB7F8601C88301600D7B6E9 /* SIB */,
 				8C2B1B7516DD4C4798F5048F /* SMD */,
 				2E29D94CA6DA405EB4AF90E0 /* STL */,
 				3A5EB041B5CD4F98802B2540 /* Terragen */,
@@ -1079,6 +1098,8 @@
 		7FBEA0051B65AF8900D2115E /* openddlparser */ = {
 			isa = PBXGroup;
 			children = (
+				AFB7F8501C882F1A00D7B6E9 /* OpenDDLCommon.cpp */,
+				AFB7F8511C882F1A00D7B6E9 /* OpenDDLExport.cpp */,
 				7FBEA0081B65AF9200D2115E /* OpenDDLCommon.h */,
 				7FBEA00B1B65AF9200D2115E /* OpenDDLParserUtils.h */,
 				7FBEA0071B65AF9200D2115E /* DDLNode.h */,
@@ -1250,6 +1271,30 @@
 				7F7922801AB43AC3005A8E5D /* libassimp.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		AFB7F8541C882F6E00D7B6E9 /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				AFB7F8551C882F8200D7B6E9 /* glTFAsset.h */,
+				AFB7F8561C882F8200D7B6E9 /* glTFAsset.inl */,
+				AFB7F8571C882F8200D7B6E9 /* glTFAssetWriter.h */,
+				AFB7F8581C882F8200D7B6E9 /* glTFAssetWriter.inl */,
+				AFB7F8591C882F8200D7B6E9 /* glTFExporter.cpp */,
+				AFB7F85A1C882F8200D7B6E9 /* glTFExporter.h */,
+				AFB7F85B1C882F8200D7B6E9 /* glTFImporter.cpp */,
+				AFB7F85C1C882F8200D7B6E9 /* glTFImporter.h */,
+			);
+			name = glTF;
+			sourceTree = "<group>";
+		};
+		AFB7F8601C88301600D7B6E9 /* SIB */ = {
+			isa = PBXGroup;
+			children = (
+				AFB7F8611C88302500D7B6E9 /* SIBImporter.cpp */,
+				AFB7F8621C88302500D7B6E9 /* SIBImporter.h */,
+			);
+			name = SIB;
 			sourceTree = "<group>";
 		};
 		BCC52F1D5AF74E54A2D69524 = {
@@ -1577,6 +1622,7 @@
 				7F79243B1AB43E20005A8E5D /* BlenderBMesh.cpp in Sources */,
 				7F79243C1AB43E20005A8E5D /* BlenderDNA.cpp in Sources */,
 				7F79243D1AB43E20005A8E5D /* BlenderLoader.cpp in Sources */,
+				AFB7F85D1C882F8200D7B6E9 /* glTFExporter.cpp in Sources */,
 				7F79243E1AB43E20005A8E5D /* BlenderModifier.cpp in Sources */,
 				7F79243F1AB43E20005A8E5D /* BlenderScene.cpp in Sources */,
 				7F7924401AB43E20005A8E5D /* BlenderTessellator.cpp in Sources */,
@@ -1612,6 +1658,7 @@
 				7F79245D1AB43E20005A8E5D /* FBXUtil.cpp in Sources */,
 				7F7A93A91B65D0110094C4DA /* OpenDDLParser.cpp in Sources */,
 				7F79245E1AB43E20005A8E5D /* FindDegenerates.cpp in Sources */,
+				AFB7F8531C882F1A00D7B6E9 /* OpenDDLExport.cpp in Sources */,
 				7F79245F1AB43E20005A8E5D /* FindInstancesProcess.cpp in Sources */,
 				7F7924601AB43E20005A8E5D /* FindInvalidDataProcess.cpp in Sources */,
 				7F7924611AB43E20005A8E5D /* FixNormalsStep.cpp in Sources */,
@@ -1620,6 +1667,7 @@
 				7F7924641AB43E20005A8E5D /* HMPLoader.cpp in Sources */,
 				7F7924651AB43E20005A8E5D /* IFCBoolean.cpp in Sources */,
 				7F7924661AB43E20005A8E5D /* IFCCurve.cpp in Sources */,
+				AFB7F85E1C882F8200D7B6E9 /* glTFImporter.cpp in Sources */,
 				7F7924671AB43E20005A8E5D /* IFCGeometry.cpp in Sources */,
 				7F7924681AB43E20005A8E5D /* IFCLoader.cpp in Sources */,
 				7F7924691AB43E20005A8E5D /* IFCMaterial.cpp in Sources */,
@@ -1640,6 +1688,7 @@
 				7F7924771AB43E20005A8E5D /* LWOLoader.cpp in Sources */,
 				7F7924781AB43E20005A8E5D /* LWOMaterial.cpp in Sources */,
 				7F7924791AB43E20005A8E5D /* LWSLoader.cpp in Sources */,
+				AFB7F8521C882F1A00D7B6E9 /* OpenDDLCommon.cpp in Sources */,
 				7F79247A1AB43E20005A8E5D /* LimitBoneWeightsProcess.cpp in Sources */,
 				7F79247B1AB43E20005A8E5D /* MD2Loader.cpp in Sources */,
 				7F79247C1AB43E20005A8E5D /* MD3Loader.cpp in Sources */,
@@ -1695,6 +1744,7 @@
 				7F7924AB1AB43E20005A8E5D /* SpatialSort.cpp in Sources */,
 				7F7924AC1AB43E20005A8E5D /* SplitByBoneCountProcess.cpp in Sources */,
 				7F7924AD1AB43E20005A8E5D /* SplitLargeMeshes.cpp in Sources */,
+				AFB7F8631C88302500D7B6E9 /* SIBImporter.cpp in Sources */,
 				7F7924AE1AB43E20005A8E5D /* StandardShapes.cpp in Sources */,
 				7F7924AF1AB43E20005A8E5D /* Subdivision.cpp in Sources */,
 				7F7924B01AB43E20005A8E5D /* TargetAnimation.cpp in Sources */,
@@ -1777,7 +1827,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include include $(inherited)";
+				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include contrib/rapidjson/include include $(inherited)";
 			};
 			name = Debug;
 		};
@@ -1823,7 +1873,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include include $(inherited)";
+				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include contrib/rapidjson/include include $(inherited)";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -1869,7 +1919,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include include $(inherited)";
+				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include contrib/rapidjson/include include $(inherited)";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = MinSizeRel;
@@ -1915,7 +1965,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include include $(inherited)";
+				USER_HEADER_SEARCH_PATHS = "code code/BoostWorkaround contrib/openddlparser/include contrib/rapidjson/include include $(inherited)";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = RelWithDebInfo;

@@ -420,7 +420,10 @@ bool PLY::DOM::SkipComments (const char* pCur,
 
     if (TokenMatch(pCur,"comment",7))
     {
-        SkipLine(pCur,&pCur);
+	     if ( !IsLineEnd(pCur[-1]) )
+	     {
+	         SkipLine(pCur,&pCur);
+	     }
         SkipComments(pCur,&pCur);
         *pCurOut = pCur;
         return true;

@@ -705,7 +705,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     m_currentMesh->mNumVertices = numItems * 3;
     m_currentMesh->mVertices = new aiVector3D[ m_currentMesh->mNumVertices ];
     m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
-    m_currentMesh->mNumUVComponents[ 0 ] = numItems * 3;
+    m_currentMesh->mNumUVComponents[ 0 ] = m_currentMesh->mNumVertices;
     m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ m_currentMesh->mNumVertices ];
 
     unsigned int index( 0 );

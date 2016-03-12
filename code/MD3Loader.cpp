@@ -407,6 +407,14 @@ void MD3Importer::ValidateHeaderOffsets()
         throw DeadlyImportError("Invalid MD3 header: some offsets are outside the file");
     }
 
+	if (pcHeader->NUM_SURFACES > AI_MAX_ALLOC(MD3::Surface)) {
+        throw DeadlyImportError("Invalid MD3 header: too many surfaces, would overflow");
+	}
+
+    if (pcHeader->OFS_SURFACES + pcHeader->NUM_SURFACES * sizeof(MD3::Surface) >= fileSize) {
+        throw DeadlyImportError("Invalid MD3 header: some surfaces are outside the file");
+    }
+
     if (pcHeader->NUM_FRAMES <= configFrameID )
         throw DeadlyImportError("The requested frame is not existing the file");
 }

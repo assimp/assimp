@@ -576,9 +576,13 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 
     // current cursor position in the file
     const unsigned char* szCurrent = (const unsigned char*)(pcHeader+1);
+    const unsigned char* szEnd = mBuffer + iFileSize;
 
     // need to read all textures
     for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins;++i) {
+        if (szCurrent >= szEnd) {
+            throw DeadlyImportError( "Texture data past end of file.");
+        }
         BE_NCONST MDL::Skin* pcSkin;
         pcSkin = (BE_NCONST  MDL::Skin*)szCurrent;
         AI_SWAP4( pcSkin->group);

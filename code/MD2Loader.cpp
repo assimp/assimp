@@ -169,10 +169,33 @@ void MD2Importer::ValidateHeader( )
     if (m_pcHeader->offsetEnd > (uint32_t)fileSize)
         throw DeadlyImportError( "Invalid md2 file: File is too small");
 
+    if (m_pcHeader->numSkins > AI_MAX_ALLOC(MD2::Skin)) {
+        throw DeadlyImportError("Invalid MD2 header: too many skins, would overflow");
+    }
+
+    if (m_pcHeader->numVertices > AI_MAX_ALLOC(MD2::Vertex)) {
+        throw DeadlyImportError("Invalid MD2 header: too many vertices, would overflow");
+    }
+
+    if (m_pcHeader->numTexCoords > AI_MAX_ALLOC(MD2::TexCoord)) {
+        throw DeadlyImportError("Invalid MD2 header: too many texcoords, would overflow");
+    }
+
+    if (m_pcHeader->numTriangles > AI_MAX_ALLOC(MD2::Triangle)) {
+        throw DeadlyImportError("Invalid MD2 header: too many triangles, would overflow");
+    }
+
+    if (m_pcHeader->numFrames > AI_MAX_ALLOC(MD2::Frame)) {
+        throw DeadlyImportError("Invalid MD2 header: too many frames, would overflow");
+    }
+
+    // -1 because Frame already contains one
+    unsigned int frameSize = sizeof (MD2::Frame) + (m_pcHeader->numVertices - 1) * sizeof(MD2::Vertex);
+
     if (m_pcHeader->offsetSkins     + m_pcHeader->numSkins * sizeof (MD2::Skin)         >= fileSize ||
         m_pcHeader->offsetTexCoords + m_pcHeader->numTexCoords * sizeof (MD2::TexCoord) >= fileSize ||
         m_pcHeader->offsetTriangles + m_pcHeader->numTriangles * sizeof (MD2::Triangle) >= fileSize ||
-        m_pcHeader->offsetFrames        + m_pcHeader->numFrames * sizeof (MD2::Frame)           >= fileSize ||
+        m_pcHeader->offsetFrames    + m_pcHeader->numFrames * frameSize                 >= fileSize ||
         m_pcHeader->offsetEnd           > fileSize)
     {
         throw DeadlyImportError("Invalid MD2 header: some offsets are outside the file");

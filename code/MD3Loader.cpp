@@ -407,6 +407,14 @@ void MD3Importer::ValidateHeaderOffsets()
         throw DeadlyImportError("Invalid MD3 header: some offsets are outside the file");
     }
 
+	if (pcHeader->NUM_SURFACES > AI_MAX_ALLOC(MD3::Surface)) {
+        throw DeadlyImportError("Invalid MD3 header: too many surfaces, would overflow");
+	}
+
+    if (pcHeader->OFS_SURFACES + pcHeader->NUM_SURFACES * sizeof(MD3::Surface) >= fileSize) {
+        throw DeadlyImportError("Invalid MD3 header: some surfaces are outside the file");
+    }
+
     if (pcHeader->NUM_FRAMES <= configFrameID )
         throw DeadlyImportError("The requested frame is not existing the file");
 }
@@ -1000,9 +1008,13 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
                 // Read vertices
                 aiVector3D& vec = pcMesh->mVertices[iCurrent];
-                vec.x = pcVertices[ pcTriangles->INDEXES[c]].X*AI_MD3_XYZ_SCALE;
-                vec.y = pcVertices[ pcTriangles->INDEXES[c]].Y*AI_MD3_XYZ_SCALE;
-                vec.z = pcVertices[ pcTriangles->INDEXES[c]].Z*AI_MD3_XYZ_SCALE;
+                uint32_t index = pcTriangles->INDEXES[c];
+                if (index >= pcSurfaces->NUM_VERTICES) {
+                    throw DeadlyImportError( "MD3: Invalid vertex index");
+                }
+                vec.x = pcVertices[index].X*AI_MD3_XYZ_SCALE;
+                vec.y = pcVertices[index].Y*AI_MD3_XYZ_SCALE;
+                vec.z = pcVertices[index].Z*AI_MD3_XYZ_SCALE;
 
                 // Convert the normal vector to uncompressed float3 format
                 aiVector3D& nor = pcMesh->mNormals[iCurrent];

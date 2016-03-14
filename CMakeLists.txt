@@ -72,7 +72,7 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall" )
 elseif(MSVC)
   # enable multi-core compilation with MSVC
-  add_definitions(/MP)
+  add_compile_options(/MP)
 endif()
 
 INCLUDE (FindPkgConfig)

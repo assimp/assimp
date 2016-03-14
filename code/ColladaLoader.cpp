@@ -1174,7 +1174,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 				  // https://github.com/assimp/assimp/issues/458
 			  	  // Sub-sample axis-angle channels if the delta between two consecutive
                   // key-frame angles is >= 180 degrees.
-				  if (transforms[e.mTransformIndex].mType == Collada::TF_ROTATE && e.mSubElement == 3 && pos > 0 && pos < e.mTimeAccessor->mCount) {
+				  /*if (transforms[e.mTransformIndex].mType == Collada::TF_ROTATE && e.mSubElement == 3 && pos > 0 && pos < e.mTimeAccessor->mCount) {
 					  float cur_key_angle = ReadFloat(*e.mValueAccessor, *e.mValueData, pos, 0);
 					  float last_key_angle = ReadFloat(*e.mValueAccessor, *e.mValueData, pos - 1, 0);
 					  float cur_key_time = ReadFloat(*e.mTimeAccessor, *e.mTimeData, pos, 0);
@@ -1188,7 +1188,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 							nextTime = std::min(nextTime, nextSampleTime);
 						  }
 					  }
-				  }
+				  }*/
               }
 
               // no more keys on any channel after the current time -> we're done

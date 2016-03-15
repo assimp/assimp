@@ -292,8 +292,10 @@ Document::~Document()
     // |dest_connections| contain the same Connection objects as the |src_connections|
 }
 
-
 // ------------------------------------------------------------------------------------------------
+static const int LowerSupportedVersion = 7100;
+static const int UpperSupportedVersion = 7400;
+
 void Document::ReadHeader()
 {
     // Read ID objects from "Objects" section
@@ -308,10 +310,10 @@ void Document::ReadHeader()
 
     // While we maye have some success with newer files, we don't support
     // the older 6.n fbx format
-    if(fbxVersion < 7100) {
+    if(fbxVersion < LowerSupportedVersion ) {
         DOMError("unsupported, old format version, supported are only FBX 2011, FBX 2012 and FBX 2013");
     }
-    if(fbxVersion > 7300) {
+    if(fbxVersion > UpperSupportedVersion ) {
         if(Settings().strictMode) {
             DOMError("unsupported, newer format version, supported are only FBX 2011, FBX 2012 and FBX 2013"
                 " (turn off strict mode to try anyhow) ");

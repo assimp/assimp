@@ -58,7 +58,6 @@ const char* AICMD_MSG_DUMP_HELP =
 ;
 
 #include "../../code/assbin_chunks.h"
-#include <boost/static_assert.hpp>
 
 FILE* out = NULL;
 bool shortened = false;
@@ -151,7 +150,7 @@ inline uint32_t Write<uint16_t>(const uint16_t& w)
 template <>
 inline uint32_t Write<float>(const float& f)
 {
-	BOOST_STATIC_ASSERT(sizeof(float)==4);
+	static_assert(sizeof(float)==4, "sizeof(float)==4");
 	fwrite(&f,4,1,out);
 	return 4;
 }
@@ -161,7 +160,7 @@ inline uint32_t Write<float>(const float& f)
 template <>
 inline uint32_t Write<double>(const double& f)
 {
-	BOOST_STATIC_ASSERT(sizeof(double)==8);
+	static_assert(sizeof(double)==8, "sizeof(double)==8");
 	fwrite(&f,8,1,out);
 	return 8;
 }
@@ -424,7 +423,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 				uint32_t tmp = f.mNumIndices;
 				hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
 				for (unsigned int i = 0; i < f.mNumIndices; ++i) {
-					BOOST_STATIC_ASSERT(AI_MAX_VERTICES <= 0xffffffff);
+					static_assert(AI_MAX_VERTICES <= 0xffffffff, "AI_MAX_VERTICES <= 0xffffffff");
 					tmp = static_cast<uint32_t>( f.mIndices[i] );
 					hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
 				}
@@ -438,7 +437,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 		for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
 			const aiFace& f = mesh->mFaces[i];
 
-			BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
+			static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
 			len += Write<uint16_t>(f.mNumIndices);
 
 			for (unsigned int a = 0; a < f.mNumIndices;++a) {

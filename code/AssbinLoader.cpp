@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/anim.h"
 #include "../include/assimp/scene.h"
-#include <boost/static_assert.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #   include <zlib.h>
@@ -351,7 +350,7 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
         for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
             aiFace& f = mesh->mFaces[i];
 
-            BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
+            static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
             f.mNumIndices = Read<uint16_t>(stream);
             f.mIndices = new unsigned int[f.mNumIndices];
 

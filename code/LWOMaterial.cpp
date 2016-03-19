@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "LWOLoader.h"
 #include "ByteSwapper.h"
-#include <boost/static_assert.hpp>
 
 
 using namespace Assimp;
@@ -160,7 +159,7 @@ bool LWOImporter::HandleTextures(aiMaterial* pcMat, const TextureList& in, aiTex
                 trafo.mScaling.x = (*it).wrapAmountW;
                 trafo.mScaling.y = (*it).wrapAmountH;
 
-                BOOST_STATIC_ASSERT(sizeof(aiUVTransform)/sizeof(float) == 5);
+                static_assert(sizeof(aiUVTransform)/sizeof(float) == 5, "sizeof(aiUVTransform)/sizeof(float) == 5");
                 pcMat->AddProperty(&trafo,1,AI_MATKEY_UVTRANSFORM(type,cur));
             }
             DefaultLogger::get()->debug("LWO2: Setting up non-UV mapping");

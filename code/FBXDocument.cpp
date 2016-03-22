@@ -80,6 +80,12 @@ LazyObject::~LazyObject()
 }
 
 // ------------------------------------------------------------------------------------------------
+static void dumpObjectClassInfo( const char* obtype, const std::string &classtag ) {
+    DefaultLogger::get()->debug( "obtype: " + std::string(obtype ));
+    DefaultLogger::get()->debug( "Classtag: " + classtag );
+}
+
+// ------------------------------------------------------------------------------------------------
 const Object* LazyObject::Get(bool dieOnError)
 {
     if(IsBeingConstructed() || FailedToConstruct()) {
@@ -137,8 +143,10 @@ const Object* LazyObject::Get(bool dieOnError)
         // so avoid constructing strings all the time.
         const char* obtype = key.begin();
         const size_t length = static_cast<size_t>(key.end()-key.begin());
-        DefaultLogger::get()->debug( "obtype: " + std::string(obtype ));
-        DefaultLogger::get()->debug( "Classtag: " + classtag );
+
+        // For debugging
+        //dumpObjectClassInfo( objtype, classtag );
+        
         if (!strncmp(obtype,"Geometry",length)) {
             if (!strcmp(classtag.c_str(),"Mesh")) {
                 object.reset(new MeshGeometry(id,element,name,doc));

@@ -655,13 +655,13 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
                     static_cast<float>(d[1]),
                     static_cast<float>(d[2])));
             }
-
-            for ( size_t i = 0; i < out.size(); i++ ) {
+            // for debugging
+            /*for ( size_t i = 0; i < out.size(); i++ ) {
                 aiVector3D vec3( out[ i ] );
                 std::stringstream stream;
                 stream << " vec3.x = " << vec3.x << " vec3.y = " << vec3.y << " vec3.z = " << vec3.z << std::endl;
                 DefaultLogger::get()->info( stream.str() );
-            }
+            }*/
         }
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);

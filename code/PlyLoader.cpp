@@ -123,7 +123,9 @@ const aiImporterDesc* PLYImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
-static bool isBigEndian( char* szMe ) {
+static bool isBigEndian( const char* szMe ) {
+    ai_assert( NULL != szMe );
+
     // binary_little_endian
     // binary_big_endian
     bool isBigEndian( false );

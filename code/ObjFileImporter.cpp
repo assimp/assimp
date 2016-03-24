@@ -177,7 +177,7 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     m_progress->UpdateFileRead(1, 3);
 
     // parse the file into a temporary representation
-    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress);
+    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress, file);
 
     // And create the proper return structures out of it
     CreateDataFromImport(parser.GetModel(), pScene);

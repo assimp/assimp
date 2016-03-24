@@ -123,6 +123,24 @@ const aiImporterDesc* PLYImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
+static bool isBigEndian( char* szMe ) {
+    // binary_little_endian
+    // binary_big_endian
+    bool isBigEndian( false );
+#if (defined AI_BUILD_BIG_ENDIAN)
+    if ( 'l' == *szMe || 'L' == *szMe ) {
+        isBigEndian = true;
+}
+#else
+    if ( 'b' == *szMe || 'B' == *szMe ) {
+        isBigEndian = true;
+    }
+#endif // ! AI_BUILD_BIG_ENDIAN
+
+    return isBigEndian;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void PLYImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
@@ -151,33 +169,24 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 
     // determine the format of the file data
     PLY::DOM sPlyDom;
-    if (TokenMatch(szMe,"format",6))
-    {
-        if (TokenMatch(szMe,"ascii",5))
-        {
+    if (TokenMatch(szMe,"format",6)) {
+        if (TokenMatch(szMe,"ascii",5)) {
             SkipLine(szMe,(const char**)&szMe);
             if(!PLY::DOM::ParseInstance(szMe,&sPlyDom))
                 throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#1)");
-        }
-        else if (!::strncmp(szMe,"binary_",7))
+        } else if (!::strncmp(szMe,"binary_",7))
         {
-            bool bIsBE = false;
-            szMe+=7;
-
-            // binary_little_endian
-            // binary_big_endian
-#if (defined AI_BUILD_BIG_ENDIAN)
-            if ('l' == *szMe || 'L' == *szMe)bIsBE = true;
-#else
-            if ('b' == *szMe || 'B' == *szMe)bIsBE = true;
-#endif // ! AI_BUILD_BIG_ENDIAN
+            szMe += 7;
+            const bool bIsBE( isBigEndian( szMe ) );
 
             // skip the line, parse the rest of the header and build the DOM
             SkipLine(szMe,(const char**)&szMe);
-            if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE))
-                throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#2)");
+            if ( !PLY::DOM::ParseInstanceBinary( szMe, &sPlyDom, bIsBE ) ) {
+                throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#2)" );
+            }
+        } else {
+            throw DeadlyImportError( "Invalid .ply file: Unknown file format" );
         }
-        else throw DeadlyImportError( "Invalid .ply file: Unknown file format");
     }
     else
     {
@@ -186,13 +195,14 @@ void PLYImporter::InternReadFile( const std::string& pFile,
     }
     this->pcDOM = &sPlyDom;
 
-    // now load a list of vertices. This must be sucessfull in order to procede
+    // now load a list of vertices. This must be successfully in order to procedure
     std::vector<aiVector3D> avPositions;
     this->LoadVertices(&avPositions,false);
 
-    if (avPositions.empty())
+    if ( avPositions.empty() ) {
         throw DeadlyImportError( "Invalid .ply file: No vertices found. "
-            "Unable to parse the data format of the PLY file.");
+            "Unable to parse the data format of the PLY file." );
+    }
 
     // now load a list of normals.
     std::vector<aiVector3D> avNormals;
@@ -246,28 +256,32 @@ void PLYImporter::InternReadFile( const std::string& pFile,
     ConvertMeshes(&avFaces,&avPositions,&avNormals,
         &avColors,&avTexCoords,&avMaterials,&avMeshes);
 
-    if (avMeshes.empty())
-        throw DeadlyImportError( "Invalid .ply file: Unable to extract mesh data ");
+    if ( avMeshes.empty() ) {
+        throw DeadlyImportError( "Invalid .ply file: Unable to extract mesh data " );
+    }
 
     // now generate the output scene object. Fill the material list
     pScene->mNumMaterials = (unsigned int)avMaterials.size();
     pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
-    for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-        pScene->mMaterials[i] = avMaterials[i];
+    for ( unsigned int i = 0; i < pScene->mNumMaterials; ++i ) {
+        pScene->mMaterials[ i ] = avMaterials[ i ];
+    }
 
     // fill the mesh list
     pScene->mNumMeshes = (unsigned int)avMeshes.size();
     pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-        pScene->mMeshes[i] = avMeshes[i];
+    for ( unsigned int i = 0; i < pScene->mNumMeshes; ++i ) {
+        pScene->mMeshes[ i ] = avMeshes[ i ];
+    }
 
     // generate a simple node structure
     pScene->mRootNode = new aiNode();
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
 
-    for (unsigned int i = 0; i < pScene->mRootNode->mNumMeshes;++i)
-        pScene->mRootNode->mMeshes[i] = i;
+    for ( unsigned int i = 0; i < pScene->mRootNode->mNumMeshes; ++i ) {
+        pScene->mRootNode->mMeshes[ i ] = i;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -291,7 +305,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
     for (std::vector<PLY::Face>::const_iterator i = avFaces->begin();i != avFaces->end();++i,++iNum)
         aiSplit[(*i).iMaterialIndex].push_back(iNum);
 
-    // now generate submeshes
+    // now generate sub-meshes
     for (unsigned int p = 0; p < avMaterials->size();++p)
     {
         if (aiSplit[p].size() != 0)
@@ -491,7 +505,7 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
     PLY::ElementInstanceList* pcList = NULL;
     unsigned int cnt = 0;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i =  pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)

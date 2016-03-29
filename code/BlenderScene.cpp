@@ -313,9 +313,11 @@ template <> void Structure :: Convert<Material> (
     ReadField<ErrorPolicy_Igno>(dest.mirg,"mirg",db);
     ReadField<ErrorPolicy_Igno>(dest.mirb,"mirb",db);
     ReadField<ErrorPolicy_Warn>(dest.emit,"emit",db);
+    ReadField<ErrorPolicy_Igno>(dest.ray_mirror,"ray_mirror",db);
     ReadField<ErrorPolicy_Warn>(dest.alpha,"alpha",db);
     ReadField<ErrorPolicy_Igno>(dest.ref,"ref",db);
     ReadField<ErrorPolicy_Igno>(dest.translucency,"translucency",db);
+    ReadField<ErrorPolicy_Igno>(dest.mode,"mode",db);
     ReadField<ErrorPolicy_Igno>(dest.roughness,"roughness",db);
     ReadField<ErrorPolicy_Igno>(dest.darkness,"darkness",db);
     ReadField<ErrorPolicy_Igno>(dest.refrac,"refrac",db);

@@ -631,6 +631,12 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
         col = aiColor3D(mat->ambr,mat->ambg,mat->ambb);
         mout->AddProperty(&col,1,AI_MATKEY_COLOR_AMBIENT);
 
+        // is mirror enabled?
+        if( mat->mode & MA_RAYMIRROR ) {
+            const float ray_mirror = mat->ray_mirror;
+            mout->AddProperty(&ray_mirror,1,AI_MATKEY_REFLECTIVITY);
+        }
+
         col = aiColor3D(mat->mirr,mat->mirg,mat->mirb);
         mout->AddProperty(&col,1,AI_MATKEY_COLOR_REFLECTIVE);
 

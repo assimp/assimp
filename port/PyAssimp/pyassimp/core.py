@@ -8,6 +8,11 @@ import sys
 if sys.version_info < (2,6):
     raise 'pyassimp: need python 2.6 or newer'
 
+# xrange was renamed range in Python 3 and the original range from Python 2 was removed.
+# To keep compatibility with both Python 2 and 3, xrange is set to range for version 3.0 and up.
+if sys.version_info >= (3,0):
+    xrange = range
+
 import ctypes
 import os
 

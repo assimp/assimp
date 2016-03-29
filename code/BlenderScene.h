@@ -239,6 +239,8 @@ struct MDeformVert : ElemBase  {
 };
 
 // -------------------------------------------------------------------------------
+#define MA_RAYMIRROR    0x40000
+
 struct Material : ElemBase {
     ID id FAIL;
 
@@ -248,9 +250,11 @@ struct Material : ElemBase {
     float ambr,ambg,ambb WARN;
     float mirr,mirg,mirb;
     float emit WARN;
+    float ray_mirror;
     float alpha WARN;
     float ref;
     float translucency;
+    int mode;
     float roughness;
     float darkness;
     float refrac;

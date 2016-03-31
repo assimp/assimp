@@ -20,6 +20,7 @@ set(ASSIMP_PACKAGE_VERSION "0" CACHE STRING "the package-specific version used f
 
 # Needed for openddl_parser config, no use of c++11 at this moment
 add_definitions( -DOPENDDL_NO_USE_CPP11 )
+set_property( GLOBAL PROPERTY CXX_STANDARD 11 )
 
 # Get the current working branch
 execute_process(
@@ -69,10 +70,12 @@ if((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
   endif()
   # hide all not-exported symbols
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall" )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -std=c++0x" )
 elseif(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
+elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
 endif()
 
 INCLUDE (FindPkgConfig)

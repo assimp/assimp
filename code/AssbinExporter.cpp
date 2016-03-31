@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/Exporter.hpp"
 #include "ProcessHelper.h"
 #include "Exceptional.h"
-#include <boost/static_assert.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #   include <zlib.h>
@@ -103,7 +102,7 @@ inline size_t Write<unsigned int>(IOStream * stream, const unsigned int& w)
 template <>
 inline size_t Write<uint16_t>(IOStream * stream, const uint16_t& w)
 {
-    BOOST_STATIC_ASSERT(sizeof(uint16_t)==2);
+    static_assert(sizeof(uint16_t)==2, "sizeof(uint16_t)==2");
     stream->Write(&w,2,1);
     return 2;
 }
@@ -113,7 +112,7 @@ inline size_t Write<uint16_t>(IOStream * stream, const uint16_t& w)
 template <>
 inline size_t Write<float>(IOStream * stream, const float& f)
 {
-    BOOST_STATIC_ASSERT(sizeof(float)==4);
+    static_assert(sizeof(float)==4, "sizeof(float)==4");
     stream->Write(&f,4,1);
     return 4;
 }
@@ -123,7 +122,7 @@ inline size_t Write<float>(IOStream * stream, const float& f)
 template <>
 inline size_t Write<double>(IOStream * stream, const double& f)
 {
-    BOOST_STATIC_ASSERT(sizeof(double)==8);
+    static_assert(sizeof(double)==8, "sizeof(double)==8");
     stream->Write(&f,8,1);
     return 8;
 }
@@ -472,7 +471,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                         uint32_t tmp = f.mNumIndices;
                         hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
                         for (unsigned int i = 0; i < f.mNumIndices; ++i) {
-                            BOOST_STATIC_ASSERT(AI_MAX_VERTICES <= 0xffffffff);
+                            static_assert(AI_MAX_VERTICES <= 0xffffffff, "AI_MAX_VERTICES <= 0xffffffff");
                             tmp = static_cast<uint32_t>( f.mIndices[i] );
                             hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
                         }
@@ -486,7 +485,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                 for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
                     const aiFace& f = mesh->mFaces[i];
 
-                    BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
+                    static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
                     Write<uint16_t>(&chunk,f.mNumIndices);
 
                     for (unsigned int a = 0; a < f.mNumIndices;++a) {

@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_STEPFILE_H
 
 #include <boost/noncopyable.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/foreach.hpp>
 #include <bitset>
 #include <memory>
@@ -722,7 +721,7 @@ namespace STEP {
 
 
         ListOf() {
-            BOOST_STATIC_ASSERT(min_cnt <= max_cnt || !max_cnt);
+            static_assert(min_cnt <= max_cnt || !max_cnt, "min_cnt <= max_cnt || !max_cnt");
         }
 
     };

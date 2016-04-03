@@ -765,7 +765,7 @@ void LWOImporter::LoadLWOPoints(unsigned int length)
     }
     else mCurLayer->mTempPoints.resize( regularSize );
 
-    // perform endianess conversions
+    // perform endianness conversions
 #ifndef AI_BUILD_BIG_ENDIAN
     for (unsigned int i = 0; i < length>>2;++i)
         ByteSwap::Swap4( mFileBuffer + (i << 2));

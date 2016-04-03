@@ -103,7 +103,7 @@ enum aiTextureOp
 // ---------------------------------------------------------------------------
 /** @brief Defines how UV coordinates outside the [0...1] range are handled.
  *
- *  Commonly refered to as 'wrapping mode'.
+ *  Commonly referred to as 'wrapping mode'.
  */
 enum aiTextureMapMode
 {

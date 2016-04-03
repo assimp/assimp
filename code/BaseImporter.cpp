@@ -336,7 +336,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     // UTF 32 BE with BOM
     if(*((uint32_t*)&data.front()) == 0xFFFE0000) {
 
-        // swap the endianess ..
+        // swap the endianness ..
         for(uint32_t* p = (uint32_t*)&data.front(), *end = (uint32_t*)&data.back(); p <= end; ++p) {
             AI_SWAP4P(p);
         }
@@ -367,7 +367,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     // UTF 16 BE with BOM
     if(*((uint16_t*)&data.front()) == 0xFFFE) {
 
-        // swap the endianess ..
+        // swap the endianness ..
         for(uint16_t* p = (uint16_t*)&data.front(), *end = (uint16_t*)&data.back(); p <= end; ++p) {
             ByteSwap::Swap2(p);
         }
@@ -534,7 +534,7 @@ BatchLoader::~BatchLoader()
 
         delete (*it).scene;
     }
-    data->pImporter->SetIOHandler(NULL); /* get pointer back into our posession */
+    data->pImporter->SetIOHandler(NULL); /* get pointer back into our possession */
     delete data->pImporter;
     delete data;
 }

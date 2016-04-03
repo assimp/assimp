@@ -1290,7 +1290,7 @@ void MDLImporter::SortByMaterials_3DGS_MDL7(
                     iMatIndex2 = iNumMaterials-1;
                 }
 
-                // do a slow seach in the list ...
+                // do a slow search in the list ...
                 iNum = 0;
                 bool bFound = false;
                 for (std::vector<MDL::IntMaterial_MDL7>::iterator i =  avMats.begin();i != avMats.end();++i,++iNum){

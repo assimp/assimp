@@ -234,7 +234,7 @@ namespace {
 } // namespace
 
 // ------------------------------------------------------------------------------------------------
-// Fills an array with indices of all positions indentical to the given position. In opposite to
+// Fills an array with indices of all positions identical to the given position. In opposite to
 // FindPositions(), not an epsilon is used but a (very low) tolerance of four floating-point units.
 void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
     std::vector<unsigned int>& poResults) const

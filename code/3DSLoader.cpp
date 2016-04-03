@@ -197,7 +197,7 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
         ComputeNormalsWithSmoothingsGroups<D3DS::Face>(*i);
     }
 
-    // Replace all occurences of the default material with a
+    // Replace all occurrences of the default material with a
     // valid material. Generate it if no material containing
     // DEFAULT in its name has been found in the file
     ReplaceDefaultMaterial();

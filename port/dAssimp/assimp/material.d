@@ -110,7 +110,7 @@ extern ( C ) {
     * Defines how UV coordinates outside the <code>[0..1]</code> range are
     * handled.
     *
-    * Commonly refered to as 'wrapping mode'.
+    * Commonly referred to as 'wrapping mode'.
     */
    enum aiTextureMapMode : uint {
       /**

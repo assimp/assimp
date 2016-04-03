@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines the StreamWriter class which writes data to
- *  a binary stream with a well-defined endianess. */
+ *  a binary stream with a well-defined endianness. */
 
 #ifndef AI_STREAMWRITER_H_INCLUDED
 #define AI_STREAMWRITER_H_INCLUDED
@@ -57,7 +57,7 @@ namespace Assimp {
 /** Wrapper class around IOStream to allow for consistent writing of binary data in both
  *  little and big endian format. Don't attempt to instance the template directly. Use
  *  StreamWriterLE to read from a little-endian stream and StreamWriterBE to read from a
- *  BE stream. Alternatively, there is StreamWriterAny if the endianess of the output
+ *  BE stream. Alternatively, there is StreamWriterAny if the endianness of the output
  *  stream is to be determined at runtime.
  */
 // --------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ class StreamWriter
 public:
 
     // ---------------------------------------------------------------------
-    /** Construction from a given stream with a well-defined endianess.
+    /** Construction from a given stream with a well-defined endianness.
      *
      *  The StreamReader holds a permanent strong reference to the
      *  stream, which is released upon destruction.
@@ -79,7 +79,7 @@ public:
           continues at the current position of the stream cursor.
      *  @param le If @c RuntimeSwitch is true: specifies whether the
      *    stream is in little endian byte order. Otherwise the
-     *    endianess information is defined by the @c SwapEndianess
+     *    endianness information is defined by the @c SwapEndianess
      *    template parameter and this parameter is meaningless.  */
     StreamWriter(boost::shared_ptr<IOStream> stream, bool le = false)
         : stream(stream)

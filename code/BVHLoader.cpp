@@ -368,7 +368,7 @@ void BVHLoader::ReadMotion( aiScene* /*pScene*/)
 // Retrieves the next token
 std::string BVHLoader::GetNextToken()
 {
-    // skip any preceeding whitespace
+    // skip any preceding whitespace
     while( mReader != mBuffer.end())
     {
         if( !isspace( *mReader))

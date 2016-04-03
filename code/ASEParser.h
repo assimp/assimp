@@ -604,7 +604,7 @@ private:
     //! \param out Output string
     //! \param szName Name of the enclosing element -> used in error
     //! messages.
-    //! \return false if an error occured
+    //! \return false if an error occurred
     bool ParseString(std::string& out,const char* szName);
 
 public:

@@ -73,7 +73,7 @@
  *       include stdint.h.  The hope is that one or the other can be
  *       used with no real difference.
  *
- *    5) In the current verison, if your platform can't represent
+ *    5) In the current version, if your platform can't represent
  *       int32_t, int16_t and int8_t, it just dumps out with a compiler
  *       error.
  *

@@ -1298,7 +1298,7 @@ unsigned int XFileParser::ReadInt()
 
         // TODO: consider using strtol10 instead???
 
-        // check preceeding minus sign
+        // check preceding minus sign
         bool isNegative = false;
         if( *P == '-')
         {
@@ -1453,7 +1453,7 @@ AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText)
 void XFileParser::FilterHierarchy( XFile::Node* pNode)
 {
     // if the node has just a single unnamed child containing a mesh, remove
-    // the anonymous node inbetween. The 3DSMax kwXport plugin seems to produce this
+    // the anonymous node between. The 3DSMax kwXport plugin seems to produce this
     // mess in some cases
     if( pNode->mChildren.size() == 1 && pNode->mMeshes.empty() )
     {

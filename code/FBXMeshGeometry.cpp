@@ -354,7 +354,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
         // sometimes, there will be only negative entries. Drop the material
         // layer in such a case (I guess it means a default material should
         // be used). This is what the converter would do anyway, and it
-        // avoids loosing the material if there are more material layers
+        // avoids losing the material if there are more material layers
         // coming of which at least one contains actual data (did observe
         // that with one test file).
         const size_t count_neg = std::count_if(temp_materials.begin(),temp_materials.end(),std::bind2nd(std::less<int>(),0));

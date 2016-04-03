@@ -71,7 +71,7 @@ extern( C ) {
    /**
     * Represents a row-major 3x3 matrix
     *
-    * There is much confusion about matrix layouts (colum vs. row order). This
+    * There is much confusion about matrix layouts (column vs. row order). This
     * is <em>always</em> a row-major matrix, even when using the
     * <code>ConvertToLeftHanded</code> post processing step.
     */
@@ -84,7 +84,7 @@ extern( C ) {
    /**
     * Represents a row-major 3x3 matrix
     *
-    * There is much confusion about matrix layouts (colum vs. row order). This
+    * There is much confusion about matrix layouts (column vs. row order). This
     * is <em>always</em> a row-major matrix, even when using the
     * <code>ConvertToLeftHanded</code> post processing step.
     */

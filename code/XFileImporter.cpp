@@ -668,7 +668,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
                     sz[sExt] = '\0';
                 }
 
-                // convert to lower case for easier comparision
+                // convert to lower case for easier comparison
                 for( unsigned int c = 0; c < sz.length(); c++)
                     if( isalpha( sz[c]))
                         sz[c] = tolower( sz[c]);

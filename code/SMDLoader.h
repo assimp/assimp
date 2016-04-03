@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  SMDLoader.h
- *  @brief Defintion of the Valve SMD file format
+ *  @brief Definition of the Valve SMD file format
  */
 
 #ifndef AI_SMDLOADER_H_INCLUDED

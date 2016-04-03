@@ -604,7 +604,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
             FreeScene();
         }
 
-        // First check if the file is accessable at all
+        // First check if the file is accessible at all
         if( !pimpl->mIOHandler->Exists( pFile)) {
 
             pimpl->mErrorString = "Unable to open file \"" + pFile + "\".";
@@ -723,7 +723,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
     catch (std::exception &e)
     {
 #if (defined _MSC_VER) &&   (defined _CPPRTTI)
-        // if we have RTTI get the full name of the exception that occured
+        // if we have RTTI get the full name of the exception that occurred
         pimpl->mErrorString = std::string(typeid( e ).name()) + ": " + e.what();
 #else
         pimpl->mErrorString = std::string("std::exception: ") + e.what();

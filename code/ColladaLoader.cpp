@@ -663,7 +663,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
         // joint vertex_weight name list - should refer to the same list as the joint names above. If not, report and reconsider
         const Collada::Accessor& weightNamesAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mWeightInputJoints.mAccessor);
         if( &weightNamesAcc != &jointNamesAcc)
-            throw DeadlyImportError( "Temporary implementational lazyness. If you read this, please report to the author.");
+            throw DeadlyImportError( "Temporary implementational laziness. If you read this, please report to the author.");
         // vertex weights
         const Collada::Accessor& weightsAcc = pParser.ResolveLibraryReference( pParser.mAccessorLibrary, pSrcController->mWeightInputWeights.mAccessor);
         const Collada::Data& weights = pParser.ResolveLibraryReference( pParser.mDataLibrary, weightsAcc.mSource);
@@ -1148,7 +1148,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
               // Calculate resulting transformation
               aiMatrix4x4 mat = pParser.CalculateResultTransform( transforms);
 
-              // out of lazyness: we store the time in matrix.d4
+              // out of laziness: we store the time in matrix.d4
               mat.d4 = time;
               resultTrafos.push_back( mat);
 
@@ -1294,7 +1294,7 @@ void ColladaLoader::AddTexture ( aiMaterial& mat, const ColladaParser& pParser,
         _AI_MATKEY_TEXBLEND_BASE, type, idx);
 
     // UV source index ... if we didn't resolve the mapping, it is actually just
-    // a guess but it works in most cases. We search for the frst occurence of a
+    // a guess but it works in most cases. We search for the frst occurrence of a
     // number in the channel name. We assume it is the zero-based index into the
     // UV channel array of all corresponding meshes. It could also be one-based
     // for some exporters, but we won't care of it unless someone complains about.

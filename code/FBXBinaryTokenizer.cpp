@@ -191,7 +191,7 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
         // 32 bit int
     case 'I':
-        // <- fall thru
+        // <- fall through
 
         // float
     case 'F':

@@ -884,7 +884,7 @@ void AC3DImporter::InternReadFile( const std::string& pFile,
     // copy meshes
     if (meshes.empty())
     {
-        throw DeadlyImportError("An unknown error occured during converting");
+        throw DeadlyImportError("An unknown error occurred during converting");
     }
     pScene->mNumMeshes = (unsigned int)meshes.size();
     pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];

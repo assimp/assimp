@@ -126,7 +126,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
     if( file == NULL)
         throw DeadlyImportError( "Failed to open TERRAGEN TERRAIN file " + pFile + ".");
 
-    // Construct a stream reader to read all data in the correct endianess
+    // Construct a stream reader to read all data in the correct endianness
     StreamReaderLE reader(file);
     if(reader.GetRemainingSize() < 16)
         throw DeadlyImportError( "TER: file is too small" );

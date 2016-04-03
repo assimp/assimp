@@ -227,7 +227,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
 
                         // read x,y,z
                         if(!SkipSpacesAndLineEnd(&buffer))
-                            throw DeadlyImportError("CSM: Unexpected EOF occured reading sample x coord");
+                            throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample x coord");
 
                         if (TokenMatchI(buffer, "DROPOUT", 7))  {
                             // seems this is invalid marker data; at least the doc says it's possible
@@ -239,11 +239,11 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                             buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.x);
 
                             if(!SkipSpacesAndLineEnd(&buffer))
-                                throw DeadlyImportError("CSM: Unexpected EOF occured reading sample y coord");
+                                throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample y coord");
                             buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.y);
 
                             if(!SkipSpacesAndLineEnd(&buffer))
-                                throw DeadlyImportError("CSM: Unexpected EOF occured reading sample z coord");
+                                throw DeadlyImportError("CSM: Unexpected EOF occurred reading sample z coord");
                             buffer = fast_atoreal_move<float>(buffer, (float&)sub->mValue.z);
 
                             ++s->mNumPositionKeys;

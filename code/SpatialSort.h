@@ -121,7 +121,7 @@ public:
         std::vector<unsigned int>& poResults) const;
 
     // ------------------------------------------------------------------------------------
-    /** Fills an array with indices of all positions indentical to the given position. In
+    /** Fills an array with indices of all positions identical to the given position. In
      *  opposite to FindPositions(), not an epsilon is used but a (very low) tolerance of
      *  four floating-point units.
      * @param pPosition The position to look for vertices.

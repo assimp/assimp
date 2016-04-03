@@ -1104,7 +1104,7 @@ int CDisplay::OnSetup(HTREEITEM p_hTreeItem)
         return OnSetupTextureView(pcNew);
     }
 
-    // seach the node list
+    // search the node list
     for (std::vector<NodeInfo>::iterator i =  m_asNodes.begin(); i != m_asNodes.end();++i){
         if (p_hTreeItem == (*i).hTreeItem)  {
             pcNew2 = &(*i);
@@ -1115,7 +1115,7 @@ int CDisplay::OnSetup(HTREEITEM p_hTreeItem)
         return OnSetupNodeView(pcNew2);
     }
 
-    // seach the material list
+    // search the material list
     for (std::vector<MaterialInfo>::iterator i =  m_asMaterials.begin();i != m_asMaterials.end();++i){
         if (p_hTreeItem == (*i).hTreeItem){
             pcNew3 = &(*i);

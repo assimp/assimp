@@ -230,7 +230,7 @@ CHANGES/FIXES:
     (Oct 3, '01)
     x  Fixed bug in getVisualInfoFromString(): visuals not reloaded on 
        display mode change.  Reload visuals each time they are queried.
-       This fixes a problem with Win32 because the list of availabe Visuals
+       This fixes a problem with Win32 because the list of available Visuals
        (Pixelformats) changes after a change in displaymode. The problem 
        occurs when switching to gamemode and back.  Thanks to Michael 
        Wimmer for pointing this out & providing the fix.
@@ -435,7 +435,7 @@ CHANGES/FIXES:
        by the structure that I used in the previous port of GLUT.
        Therefore I decided that it would be best to "get back to
        the roots".  I re-implemented most of glut trying to stick
-       with the structure layed out by Mark.  The result is a much
+       with the structure laid out by Mark.  The result is a much
        more stable version that passes ALL (!) (except overlay)
        the tests provided by Mark.  In addition, this new
        structure will allow future enhancements by Mark to be
@@ -492,7 +492,7 @@ CHANGES/FIXES:
     x  I don't know if this is avoidable.  If you have a tight rendering
        loop, it may be that the processor time is going to be sucked up
        no matter what.  You can add a sleep() to the end of your render
-       loop if you would like to yeild to other processes and you don't
+       loop if you would like to yield to other processes and you don't
        care too much about the speed of your rendering loop.  If you have
        Hardware that supports OpenGL (like a 3Dpro card, or GLint card) 
        then this should be less of a problem, since it won't be rendering

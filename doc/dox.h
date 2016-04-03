@@ -98,7 +98,7 @@ more work. Both ways are described at the @link install Installation page. @endl
 
 When you're done integrating the library into your IDE / project, you can now start using it. There are two separate
 interfaces by which you can access the library: a C++ interface and a C interface using flat functions. While the former
-is easier to handle, the latter also forms a point where other programming languages can connect to. Upto the moment, though,
+is easier to handle, the latter also forms a point where other programming languages can connect to. Up to the moment, though,
 there are no bindings for any other language provided. Have a look at the @link usage Usage page @endlink for a detailed explanation and code examples.
 
 @section main_data Data Structures
@@ -137,7 +137,7 @@ If you develop at Visual Studio 2005 or 2008, you can simply use the pre-built l
 Extract all files to a place of your choice. A directory called "assimp" will be created there. Add the assimp/include path
 to your include paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Include files)
 and the assimp/lib/&lt;Compiler&gt; path to your linker paths (Menu-&gt;Extras-&gt;Options-&gt;Projects and Solutions-&gt;VC++ Directories-&gt;Library files).
-This is neccessary only once to setup all paths inside you IDE.
+This is necessary only once to setup all paths inside you IDE.
 
 To use the library in your C++ project you have to include either &lt;assimp/Importer.hpp&gt; or &lt;assimp/cimport.h&gt; plus some others starting with &lt;types.h&gt;.
 If you set up your IDE correctly the compiler should be able to find the files. Then you have to add the linker library to your
@@ -310,7 +310,7 @@ bool DoTheImportThing( const std::string& pFile)
 @endcode
 
 What exactly is read from the files and how you interpret it is described at the @ref data page. @endlink The post processing steps that the assimp library can apply to the
-imported data are listed at #aiPostProcessSteps. See the @ref pp Post proccessing page for more details.
+imported data are listed at #aiPostProcessSteps. See the @ref pp Post processing page for more details.
 
 Note that the aiScene data structure returned is declared 'const'. Yes, you can get rid of
 these 5 letters with a simple cast. Yes, you may do that. No, it's not recommended (and it's
@@ -660,7 +660,7 @@ an index into this array.
 
 An aiMesh is defined by a series of data channels. The presence of these data channels is defined
 by the contents of the imported file: by default there are only those data channels present in the mesh
-that were also found in the file. The only channels guarenteed to be always present are aiMesh::mVertices
+that were also found in the file. The only channels guaranteed to be always present are aiMesh::mVertices
 and aiMesh::mFaces. You can test for the presence of other data by testing the pointers against NULL
 or use the helper functions provided by aiMesh. You may also specify several post processing flags
 at Importer::ReadFile() to let assimp calculate or recalculate additional data channels for you.
@@ -753,7 +753,7 @@ both Direct3D and OpenGL (swizzling the order of the color components might be n
 RGBA8888 has been chosen because it is well-known, easy to use and natively
 supported by nearly all graphics APIs.
 <br>
-<b>2)</b> This applies if aiTexture::mHeight == 0 is fullfilled. Then, texture is stored in a
+<b>2)</b> This applies if aiTexture::mHeight == 0 is fulfilled. Then, texture is stored in a
 "compressed" format such as DDS or PNG. The term "compressed" does not mean that the
 texture data must actually be compressed, however the texture was found in the
 model file as if it was stored in a separate file on the harddisk. Appropriate
@@ -780,7 +780,7 @@ presence of certain properties in a material and retrieve their values.
 
 @section mat_tex Textures
 
-Textures are organized in stacks, each stack being evaluated independently. The final color value from a particular texture stack is used in the shading equation. For example, the computed color value of the diffuse texture stack (aiTextureType_DIFFUSE) is multipled with the amount of incoming diffuse light to obtain the final diffuse color of a pixel.
+Textures are organized in stacks, each stack being evaluated independently. The final color value from a particular texture stack is used in the shading equation. For example, the computed color value of the diffuse texture stack (aiTextureType_DIFFUSE) is multiplied with the amount of incoming diffuse light to obtain the final diffuse color of a pixel.
 
 @code
 
@@ -938,7 +938,7 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td><tt>TEXBLEND(t,n)</tt></td>
     <td>float</td>
     <td>n/a</td>
-	<td>Defines the strength the n'th texture on the stack 't'. All color components (rgb) are multipled with this factor *before* any further processing is done.</td>
+	<td>Defines the strength the n'th texture on the stack 't'. All color components (rgb) are multiplied with this factor *before* any further processing is done.</td>
 	<td>-</td>
   </tr>
 
@@ -1466,7 +1466,7 @@ The skeleton file must have the same name as the mesh file, e.g. fish.mesh.xml a
 The material file can have the same name as the mesh file (if the file is model.mesh or model.mesh.xml the
 loader will try to load model.material),
 or you can use Importer::Importer::SetPropertyString(AI_CONFIG_IMPORT_OGRE_MATERIAL_FILE, "materiafile.material")
-to specify the name of the material file. This is especially usefull if multiply materials a stored in a single file.
+to specify the name of the material file. This is especially useful if multiply materials a stored in a single file.
 The importer will first try to load the material with the same name as the mesh and only if this can't be open try
 to load the alternate material file. The default material filename is "Scene.material".
 
@@ -1574,7 +1574,7 @@ But the general rule of thumb is <i>be strict in what you write and tolerant in 
 
 <ul>
 <li>
-Take care of endianess issues! Assimp importers mostly support big-endian platforms, which define the <tt>AI_BUILD_BIG_ENDIAN</tt> constant.
+Take care of endianness issues! Assimp importers mostly support big-endian platforms, which define the <tt>AI_BUILD_BIG_ENDIAN</tt> constant.
 See the next section for a list of utilities to simplify this task.
 </li>
 <li>

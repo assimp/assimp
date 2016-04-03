@@ -74,7 +74,7 @@ const char* TokenTypeString(TokenType t);
  *  @param prefix Message prefix to be preprended to the location info.
  *  @param text Message text
  *  @param line Line index, 1-based
- *  @param column Colum index, 1-based
+ *  @param column Column index, 1-based
  *  @return A string of the following format: {prefix} (offset 0x{offset}) {text}*/
 std::string AddOffset(const std::string& prefix, const std::string& text, unsigned int offset);
 
@@ -84,7 +84,7 @@ std::string AddOffset(const std::string& prefix, const std::string& text, unsign
  *  @param prefix Message prefix to be preprended to the location info.
  *  @param text Message text
  *  @param line Line index, 1-based
- *  @param column Colum index, 1-based
+ *  @param column Column index, 1-based
  *  @return A string of the following format: {prefix} (line {line}, col {column}) {text}*/
 std::string AddLineAndColumn(const std::string& prefix, const std::string& text, unsigned int line, unsigned int column);
 

@@ -100,7 +100,7 @@ Open Asset Import Library is implemented in C++. The directory structure is:
 	/tools		Tools (old assimp viewer, command line `assimp`)
 	/samples	A small number of samples to illustrate possible
                         use cases for Assimp
-	/workspaces	Build enviroments for vc,xcode,... (deprecated,
+	/workspaces	Build environments for vc,xcode,... (deprecated,
 			CMake has superseeded all legacy build options!)
 
 

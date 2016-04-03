@@ -872,7 +872,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "</lines>" << endstr;
     }
 
-    // triangle - dont use it, because compatibility problems
+    // triangle - don't use it, because compatibility problems
 
     // polygons
     if (countPoly)
@@ -1041,7 +1041,7 @@ void ColladaExporter::WriteNode(aiNode* pNode)
     PushTag();
 
     // write transformation - we can directly put the matrix there
-    // TODO: (thom) decompose into scale - rot - quad to allow adressing it by animations afterwards
+    // TODO: (thom) decompose into scale - rot - quad to allow addressing it by animations afterwards
     const aiMatrix4x4& mat = pNode->mTransformation;
     mOutput << startstr << "<matrix>";
     mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";

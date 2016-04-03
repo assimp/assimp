@@ -763,7 +763,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
     pcHeader = (BE_NCONST MD3::Header*)mBuffer;
 
-    // Ensure correct endianess
+    // Ensure correct endianness
 #ifdef AI_BUILD_BIG_ENDIAN
 
     AI_SWAP4(pcHeader->VERSION);
@@ -832,7 +832,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
     unsigned int iNumMaterials = 0;
     while (iNum-- > 0)  {
 
-        // Ensure correct endianess
+        // Ensure correct endianness
 #ifdef AI_BUILD_BIG_ENDIAN
 
         AI_SWAP4(pcSurfaces->FLAGS);
@@ -965,7 +965,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
         pScene->mMaterials[iNumMaterials] = (aiMaterial*)pcHelper;
         pcMesh->mMaterialIndex = iNumMaterials++;
 
-            // Ensure correct endianess
+            // Ensure correct endianness
 #ifdef AI_BUILD_BIG_ENDIAN
 
         for (uint32_t i = 0; i < pcSurfaces->NUM_VERTICES;++i)  {

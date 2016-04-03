@@ -194,7 +194,7 @@ enum EClickPos
 {
     // The click was inside the inner circle (x,y axis)
     EClickPos_Circle,
-    // The click was inside one of tghe vertical snap-ins
+    // The click was inside one of the vertical snap-ins
     EClickPos_CircleVert,
     // The click was inside onf of the horizontal snap-ins
     EClickPos_CircleHor,

@@ -406,7 +406,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
                 desc.mValues.reserve(mNumAnimatedComponents);
             }
 
-            // now read all elements (continous list of floats)
+            // now read all elements (continuous list of floats)
             for (ElementList::const_iterator eit = (*iter).mElements.begin(), eitEnd = (*iter).mElements.end(); eit != eitEnd; ++eit){
                 const char* sz = (*eit).szStart;
                 while (SkipSpacesAndLineEnd(&sz))   {

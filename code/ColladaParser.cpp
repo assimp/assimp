@@ -616,7 +616,7 @@ void ColladaParser::ReadControllerLibrary()
         {
             if( IsElement( "controller"))
             {
-                // read ID. Ask the spec if it's neccessary or optional... you might be surprised.
+                // read ID. Ask the spec if it's necessary or optional... you might be surprised.
                 int attrID = GetAttribute( "id");
                 std::string id = mReader->getAttributeValue( attrID);
 
@@ -2282,7 +2282,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
     if( expectedPointCount > 0)
         indices.reserve( expectedPointCount * numOffsets);
 
-    if (pNumPrimitives > 0) // It is possible to not contain any indicies
+    if (pNumPrimitives > 0) // It is possible to not contain any indices
     {
         const char* content = GetTextContent();
         while( *content != 0)
@@ -2317,7 +2317,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 
         // find accessor
         input.mResolved = &ResolveLibraryReference( mAccessorLibrary, input.mAccessor);
-        // resolve accessor's data pointer as well, if neccessary
+        // resolve accessor's data pointer as well, if necessary
         const Accessor* acc = input.mResolved;
         if( !acc->mData)
             acc->mData = &ResolveLibraryReference( mDataLibrary, acc->mSource);
@@ -2340,7 +2340,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 
         // find accessor
         input.mResolved = &ResolveLibraryReference( mAccessorLibrary, input.mAccessor);
-        // resolve accessor's data pointer as well, if neccessary
+        // resolve accessor's data pointer as well, if necessary
         const Accessor* acc = input.mResolved;
         if( !acc->mData)
             acc->mData = &ResolveLibraryReference( mDataLibrary, acc->mSource);
@@ -2876,7 +2876,7 @@ void ColladaParser::ReadScene()
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
             if( IsElement( "instance_visual_scene"))
             {
-                // should be the first and only occurence
+                // should be the first and only occurrence
                 if( mRootNode)
                     ThrowException( "Invalid scene containing multiple root nodes in <instance_visual_scene> element");
 

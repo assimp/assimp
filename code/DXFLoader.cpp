@@ -175,7 +175,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
         }
 
         // skip unneeded sections entirely to avoid any problems with them
-        // alltogether.
+        // altogether.
         else if (reader.Is(2,"CLASSES") || reader.Is(2,"TABLES")) {
             SkipSection(reader);
             continue;

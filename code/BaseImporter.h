@@ -176,8 +176,8 @@ public:
         );
 
     // -------------------------------------------------------------------
-    /** Returns the error description of the last error that occured.
-     * @return A description of the last error that occured. An empty
+    /** Returns the error description of the last error that occurred.
+     * @return A description of the last error that occurred. An empty
      * string if there was no error.
      */
     const std::string& GetErrorText() const {

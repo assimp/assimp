@@ -192,8 +192,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             // Position mismatch is impossible - the vertex finder already discarded all non-matching positions
 
             // We just test the other attributes even if they're not present in the mesh.
-            // In this case they're initialized to 0 so the comparision succeeds.
-            // By this method the non-present attributes are effectively ignored in the comparision.
+            // In this case they're initialized to 0 so the comparison succeeds.
+            // By this method the non-present attributes are effectively ignored in the comparison.
             if( (uv.normal - v.normal).SquareLength() > squareEpsilon)
                 continue;
             if( (uv.texcoords[0] - v.texcoords[0]).SquareLength() > squareEpsilon)
@@ -265,7 +265,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         }
         else
         {
-            // no unique vertex matches it upto now -> so add it
+            // no unique vertex matches it up to now -> so add it
             replaceIndex[a] = (unsigned int)uniqueVertices.size();
             uniqueVertices.push_back( v);
         }

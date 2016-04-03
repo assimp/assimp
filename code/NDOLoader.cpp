@@ -262,7 +262,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces=face_table.size()];
 
         vertices.clear();
-        vertices.reserve(4 * face_table.size()); // arbitrarily choosen
+        vertices.reserve(4 * face_table.size()); // arbitrarily chosen
         for_each(FaceTable::value_type& v, face_table) {
             indices.clear();
 

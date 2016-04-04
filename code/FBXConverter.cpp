@@ -2525,7 +2525,7 @@ void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
 
             const std::string& chain_name = NameTransformationChainNode( fixed_name, comp );
 
-            aiNodeAnim* na;
+            aiNodeAnim* na = nullptr;
             switch ( comp )
             {
             case TransformationComp_Rotation:

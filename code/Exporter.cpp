@@ -491,7 +491,7 @@ const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex 
 // ------------------------------------------------------------------------------------------------
 aiReturn Exporter :: RegisterExporter(const ExportFormatEntry& desc)
 {
-    BOOST_FOREACH(const ExportFormatEntry& e, pimpl->mExporters) {
+    for(const ExportFormatEntry& e : pimpl->mExporters) {
         if (!strcmp(e.mDescription.id,desc.mDescription.id)) {
             return aiReturn_FAILURE;
         }

@@ -53,7 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 
-#include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
 #include <functional>
 
@@ -146,7 +145,7 @@ const Object* LazyObject::Get(bool dieOnError)
 
         // For debugging
         //dumpObjectClassInfo( objtype, classtag );
-        
+
         if (!strncmp(obtype,"Geometry",length)) {
             if (!strcmp(classtag.c_str(),"Mesh")) {
                 object.reset(new MeshGeometry(id,element,name,doc));
@@ -290,11 +289,11 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 // ------------------------------------------------------------------------------------------------
 Document::~Document()
 {
-    BOOST_FOREACH(ObjectMap::value_type& v, objects) {
+    for(ObjectMap::value_type& v : objects) {
         delete v.second;
     }
 
-    BOOST_FOREACH(ConnectionMap::value_type& v, src_connections) {
+    for(ConnectionMap::value_type& v : src_connections) {
         delete v.second;
     }
     // |dest_connections| contain the same Connection objects as the |src_connections|
@@ -388,7 +387,7 @@ void Document::ReadObjects()
     objects[0] = new LazyObject(0L, *eobjects, *this);
 
     const Scope& sobjects = *eobjects->Compound();
-    BOOST_FOREACH(const ElementMap::value_type& el, sobjects.Elements()) {
+    for(const ElementMap::value_type& el : sobjects.Elements()) {
 
         // extract ID
         const TokenList& tok = el.second->Tokens();
@@ -538,7 +537,7 @@ const std::vector<const AnimationStack*>& Document::AnimationStacks() const
     }
 
     animationStacksResolved.reserve(animationStacks.size());
-    BOOST_FOREACH(uint64_t id, animationStacks) {
+    for(uint64_t id : animationStacks) {
         LazyObject* const lazy = GetObject(id);
         const AnimationStack* stack;
         if(!lazy || !(stack = lazy->Get<AnimationStack>())) {

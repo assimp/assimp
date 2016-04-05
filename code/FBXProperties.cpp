@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
-#include <boost/foreach.hpp>
 
 namespace Assimp {
 namespace FBX {
@@ -145,7 +144,7 @@ PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const Pro
 , element(&element)
 {
     const Scope& scope = GetRequiredScope(element);
-    BOOST_FOREACH(const ElementMap::value_type& v, scope.Elements()) {
+    for(const ElementMap::value_type& v : scope.Elements()) {
         if(v.first != "P") {
             DOMWarning("expected only P elements in property table",v.second);
             continue;
@@ -171,7 +170,7 @@ PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const Pro
 // ------------------------------------------------------------------------------------------------
 PropertyTable::~PropertyTable()
 {
-    BOOST_FOREACH(PropertyMap::value_type& v, props) {
+    for(PropertyMap::value_type& v : props) {
         delete v.second;
     }
 }
@@ -209,7 +208,7 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
     DirectPropertyMap result;
 
     // Loop through all the lazy properties (which is all the properties)
-    BOOST_FOREACH(const LazyPropertyMap::value_type& element, lazyProps) {
+    for(const LazyPropertyMap::value_type& element : lazyProps) {
 
         // Skip parsed properties
         if (props.end() != props.find(element.first)) continue;

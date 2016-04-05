@@ -305,7 +305,7 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
     const Structure& ss = file.dna.structures[(*it).second];
 
     // we need a scene somewhere to start with.
-    for_each(const FileBlockHead& bl,file.entries) {
+    for(const FileBlockHead& bl :file.entries) {
 
         // Fix: using the DNA index is more reliable to locate scenes
         //if (bl.id == "SC") {
@@ -560,7 +560,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
     // add a default material if necessary
     unsigned int index = static_cast<unsigned int>( -1 );
-    for_each( aiMesh* mesh, conv_data.meshes.get() ) {
+    for( aiMesh* mesh : conv_data.meshes.get() ) {
         if (mesh->mMaterialIndex == static_cast<unsigned int>( -1 )) {
 
             if (index == static_cast<unsigned int>( -1 )) {
@@ -589,7 +589,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
         }
     }
 
-    for_each(boost::shared_ptr<Material> mat, conv_data.materials_raw) {
+    for(boost::shared_ptr<Material> mat : conv_data.materials_raw) {
 
         // reset per material global counters
         for (size_t i = 0; i < sizeof(conv_data.next_texture)/sizeof(conv_data.next_texture[0]);++i) {
@@ -722,7 +722,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
     temp->reserve(temp->size() + per_mat.size());
 
     std::map<size_t,size_t> mat_num_to_mesh_idx;
-    for_each(MyPair& it, per_mat) {
+    for(MyPair& it : per_mat) {
 
         mat_num_to_mesh_idx[it.first] = temp->size();
         temp->push_back(new aiMesh());
@@ -1157,7 +1157,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
     if (children.size()) {
         node->mNumChildren = static_cast<unsigned int>(children.size());
         aiNode** nd = node->mChildren = new aiNode*[node->mNumChildren]();
-        for_each (const Object* nobj,children) {
+        for (const Object* nobj :children) {
             *nd = ConvertNode(in,nobj,conv_data,node->mTransformation * parentTransform);
             (*nd++)->mParent = node;
         }

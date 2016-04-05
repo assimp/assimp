@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DXFHelper.h"
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/scene.h"
-#include <boost/foreach.hpp>
 #include <numeric>
 
 using namespace Assimp;
@@ -222,8 +221,8 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
     if (!DefaultLogger::isNullLogger()) {
 
         unsigned int vcount = 0, icount = 0;
-        BOOST_FOREACH (const DXF::Block& bl, output.blocks) {
-            BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, bl.lines) {
+        for (const DXF::Block& bl : output.blocks) {
+            for (boost::shared_ptr<const DXF::PolyLine> pl : bl.lines) {
                 vcount += pl->positions.size();
                 icount += pl->counts.size();
             }
@@ -242,7 +241,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
     // index blocks by name
     DXF::BlockMap blocks_by_name;
-    BOOST_FOREACH (DXF::Block& bl, output.blocks) {
+    for (DXF::Block& bl : output.blocks) {
         blocks_by_name[bl.name] = &bl;
         if ( !entities && bl.name == AI_DXF_ENTITIES_MAGIC_BLOCK ) {
             entities = &bl;
@@ -263,7 +262,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
     ExpandBlockReferences(*entities,blocks_by_name);
 
     unsigned int cur = 0;
-    BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl, entities->lines) {
+    for (boost::shared_ptr<const DXF::PolyLine> pl : entities->lines) {
         if (pl->positions.size()) {
 
             std::map<std::string, unsigned int>::iterator it = layers.find(pl->layer);
@@ -289,12 +288,12 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ] ();
 
-    BOOST_FOREACH(const LayerMap::value_type& elem, layers){
+    for(const LayerMap::value_type& elem : layers){
         aiMesh* const mesh =  pScene->mMeshes[elem.second] = new aiMesh();
         mesh->mName.Set(elem.first);
 
         unsigned int cvert = 0,cface = 0;
-        BOOST_FOREACH(const DXF::PolyLine* pl, corr[elem.second]){
+        for(const DXF::PolyLine* pl : corr[elem.second]){
             // sum over all faces since we need to 'verbosify' them.
             cvert += std::accumulate(pl->counts.begin(),pl->counts.end(),0);
             cface += pl->counts.size();
@@ -309,10 +308,10 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
         unsigned int prims = 0;
         unsigned int overall_indices = 0;
-        BOOST_FOREACH(const DXF::PolyLine* pl, corr[elem.second]){
+        for(const DXF::PolyLine* pl : corr[elem.second]){
 
             std::vector<unsigned int>::const_iterator it = pl->indices.begin();
-            BOOST_FOREACH(unsigned int facenumv,pl->counts) {
+            for(unsigned int facenumv : pl->counts) {
                 aiFace& face = *faces++;
                 face.mIndices = new unsigned int[face.mNumIndices = facenumv];
 
@@ -358,7 +357,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& blocks_by_name)
 {
-    BOOST_FOREACH (const DXF::InsertBlock& insert, bl.insertions) {
+    for (const DXF::InsertBlock& insert : bl.insertions) {
 
         // first check if the referenced blocks exists ...
         const DXF::BlockMap::const_iterator it = blocks_by_name.find(insert.name);
@@ -372,7 +371,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         // XXX this would be the place to implement recursive expansion if needed.
         const DXF::Block& bl_src = *(*it).second;
 
-        BOOST_FOREACH (boost::shared_ptr<const DXF::PolyLine> pl_in, bl_src.lines) {
+        for (boost::shared_ptr<const DXF::PolyLine> pl_in : bl_src.lines) {
             boost::shared_ptr<DXF::PolyLine> pl_out = boost::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
             if (bl_src.base.Length() || insert.scale.x!=1.f || insert.scale.y!=1.f || insert.scale.z!=1.f || insert.angle || insert.pos.Length()) {
@@ -388,7 +387,7 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
                     DefaultLogger::get()->warn("DXF: BLOCK rotation not currently implemented");
                 }
 
-                BOOST_FOREACH (aiVector3D& v, pl_out->positions) {
+                for (aiVector3D& v : pl_out->positions) {
                     v *= trafo;
                 }
             }

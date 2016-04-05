@@ -740,7 +740,7 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
     TempMesh temp;
 
     std::vector<IfcVector3>::const_iterator vit = first_operand.verts.begin();
-    BOOST_FOREACH(unsigned int pcount, first_operand.vertcnt) {
+    for(unsigned int pcount : first_operand.vertcnt) {
         temp.Clear();
 
         temp.verts.insert(temp.verts.end(), vit, vit + pcount);

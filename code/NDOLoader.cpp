@@ -50,10 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/scene.h"
 #include "StreamReader.h"
-#include <boost/foreach.hpp>
 
 using namespace Assimp;
-#define for_each BOOST_FOREACH
 
 static const aiImporterDesc desc = {
     "Nendo Mesh Importer",
@@ -241,7 +239,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
     std::vector<aiVector3D> vertices;
     std::vector<unsigned int> indices;
 
-    for_each(const Object& obj,objects) {
+    for(const Object& obj : objects) {
         aiNode* nd = *cc++ = new aiNode(obj.name);
         nd->mParent = root;
 
@@ -250,7 +248,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         FaceTable face_table;
 
         unsigned int n = 0;
-        for_each(const Edge& edge, obj.edges) {
+        for(const Edge& edge : obj.edges) {
 
             face_table[edge.edge[2]] = n;
             face_table[edge.edge[3]] = n;
@@ -263,7 +261,7 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 
         vertices.clear();
         vertices.reserve(4 * face_table.size()); // arbitrarily chosen
-        for_each(FaceTable::value_type& v, face_table) {
+        for(FaceTable::value_type& v : face_table) {
             indices.clear();
 
             aiFace& f = *faces++;

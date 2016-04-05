@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_STEPFILE_H
 
 #include <boost/noncopyable.hpp>
-#include <boost/foreach.hpp>
 #include <bitset>
 #include <memory>
 #include <typeinfo>
@@ -868,7 +867,7 @@ namespace STEP {
     public:
 
         ~DB() {
-            BOOST_FOREACH(ObjectMap::value_type& o, objects) {
+            for(ObjectMap::value_type& o : objects) {
                 delete o.second;
             }
         }
@@ -950,7 +949,7 @@ namespace STEP {
 
         // evaluate *all* entities in the file. this is a power test for the loader
         void EvaluateAll() {
-            BOOST_FOREACH(ObjectMap::value_type& e,objects) {
+            for(ObjectMap::value_type& e :objects) {
                 **e.second;
             }
             ai_assert(evaluated_count == objects.size());

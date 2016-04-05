@@ -55,7 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/scene.h"
 #include <boost/tuple/tuple.hpp>
-#include <boost/foreach.hpp>
 #include <boost/scoped_array.hpp>
 
 #include <iterator>
@@ -79,8 +78,8 @@ using namespace Util;
 class Converter
 {
 public:
-    /** 
-     *  The different parts that make up the final local transformation of a fbx-node 
+    /**
+     *  The different parts that make up the final local transformation of a fbx-node
      */
     enum TransformationComp
     {
@@ -144,8 +143,8 @@ private:
     // ------------------------------------------------------------------------------------------------
     void GetRotationMatrix( Model::RotOrder mode, const aiVector3D& rotation, aiMatrix4x4& out );
     // ------------------------------------------------------------------------------------------------
-    /** 
-     *  checks if a node has more than just scaling, rotation and translation components 
+    /**
+     *  checks if a node has more than just scaling, rotation and translation components
      */
     bool NeedsComplexTransformationChain( const Model& model );
 
@@ -154,8 +153,8 @@ private:
     std::string NameTransformationChainNode( const std::string& name, TransformationComp comp );
 
     // ------------------------------------------------------------------------------------------------
-    /** 
-     *  note: memory for output_nodes will be managed by the caller 
+    /**
+     *  note: memory for output_nodes will be managed by the caller
      */
     void GenerateTransformationNodeChain( const Model& model, std::vector<aiNode*>& output_nodes );
 
@@ -192,11 +191,11 @@ private:
 
 
     // ------------------------------------------------------------------------------------------------
-    /** 
+    /**
      *  - if materialIndex == NO_MATERIAL_SEPARATION, materials are not taken into
      *    account when determining which weights to include.
      *  - outputVertStartIndices is only used when a material index is specified, it gives for
-     *    each output vertex the DOM index it maps to. 
+     *    each output vertex the DOM index it maps to.
      */
     void ConvertWeights( aiMesh* out, const Model& model, const MeshGeometry& geo,
         const aiMatrix4x4& node_global_transform = aiMatrix4x4(),
@@ -457,7 +456,7 @@ Converter::Converter( aiScene* out, const Document& doc )
 
     if ( doc.Settings().readAllMaterials ) {
         // unfortunately this means we have to evaluate all objects
-        BOOST_FOREACH( const ObjectMap::value_type& v, doc.Objects() ) {
+        for( const ObjectMap::value_type& v : doc.Objects() ) {
 
             const Object* ob = v.second->Get();
             if ( !ob ) {
@@ -515,7 +514,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
     std::vector<aiNode*> nodes_chain;
 
     try {
-        BOOST_FOREACH( const Connection* con, conns ) {
+        for( const Connection* con : conns ) {
 
             // ignore object-property links
             if ( con->PropertyName().length() ) {
@@ -550,7 +549,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
                 // preserve the name - people might have scripts etc. that rely
                 // on specific node names.
                 aiNode* name_carrier = NULL;
-                BOOST_FOREACH( aiNode* prenode, nodes_chain ) {
+                for( aiNode* prenode : nodes_chain ) {
                     if ( !strcmp( prenode->mName.C_Str(), original_name.c_str() ) ) {
                         name_carrier = prenode;
                         break;
@@ -567,7 +566,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 
                 // link all nodes in a row
                 aiNode* last_parent = &parent;
-                BOOST_FOREACH( aiNode* prenode, nodes_chain ) {
+                for( aiNode* prenode : nodes_chain ) {
                     ai_assert( prenode );
 
                     if ( last_parent != &parent ) {
@@ -619,7 +618,7 @@ void Converter::ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& pa
 void Converter::ConvertLights( const Model& model )
 {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
-    BOOST_FOREACH( const NodeAttribute* attr, node_attrs ) {
+    for( const NodeAttribute* attr : node_attrs ) {
         const Light* const light = dynamic_cast<const Light*>( attr );
         if ( light ) {
             ConvertLight( model, *light );
@@ -630,7 +629,7 @@ void Converter::ConvertLights( const Model& model )
 void Converter::ConvertCameras( const Model& model )
 {
     const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
-    BOOST_FOREACH( const NodeAttribute* attr, node_attrs ) {
+    for( const NodeAttribute* attr : node_attrs ) {
         const Camera* const cam = dynamic_cast<const Camera*>( attr );
         if ( cam ) {
             ConvertCamera( model, *cam );
@@ -1089,7 +1088,7 @@ void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
     data->Set( index++, "IsNull", model.IsNull() ? true : false );
 
     // add unparsed properties to the node's metadata
-    BOOST_FOREACH( const DirectPropertyMap::value_type& prop, unparsedProperties ) {
+    for( const DirectPropertyMap::value_type& prop : unparsedProperties ) {
 
         // Interpret the property as a concrete type
         if ( const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >() )
@@ -1116,7 +1115,7 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
     std::vector<unsigned int> meshes;
     meshes.reserve( geos.size() );
 
-    BOOST_FOREACH( const Geometry* geo, geos ) {
+    for( const Geometry* geo : geos ) {
 
         const MeshGeometry* const mesh = dynamic_cast< const MeshGeometry* >( geo );
         if ( mesh ) {
@@ -1160,7 +1159,7 @@ std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, cons
     const MatIndexArray& mindices = mesh.GetMaterialIndices();
     if ( doc.Settings().readMaterials && !mindices.empty() ) {
         const MatIndexArray::value_type base = mindices[ 0 ];
-        BOOST_FOREACH( MatIndexArray::value_type index, mindices ) {
+        for( MatIndexArray::value_type index : mindices ) {
             if ( index != base ) {
                 return ConvertMeshMultiMaterial( mesh, model, node_global_transform );
             }
@@ -1212,7 +1211,7 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
     aiFace* fac = out_mesh->mFaces = new aiFace[ faces.size() ]();
 
     unsigned int cursor = 0;
-    BOOST_FOREACH( unsigned int pcount, faces ) {
+    for( unsigned int pcount : faces ) {
         aiFace& f = *fac++;
         f.mNumIndices = pcount;
         f.mIndices = new unsigned int[ pcount ];
@@ -1287,7 +1286,7 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
         }
 
         aiVector3D* out_uv = out_mesh->mTextureCoords[ i ] = new aiVector3D[ vertices.size() ];
-        BOOST_FOREACH( const aiVector2D& v, uvs ) {
+        for( const aiVector2D& v : uvs ) {
             *out_uv++ = aiVector3D( v.x, v.y, 0.0f );
         }
 
@@ -1329,7 +1328,7 @@ std::vector<unsigned int> Converter::ConvertMeshMultiMaterial( const MeshGeometr
     std::set<MatIndexArray::value_type> had;
     std::vector<unsigned int> indices;
 
-    BOOST_FOREACH( MatIndexArray::value_type index, mindices ) {
+    for( MatIndexArray::value_type index : mindices ) {
         if ( had.find( index ) == had.end() ) {
 
             indices.push_back( ConvertMeshMultiMaterial( mesh, model, index, node_global_transform ) );
@@ -1537,7 +1536,7 @@ void Converter::ConvertWeights( aiMesh* out, const Model& model, const MeshGeome
 
     try {
 
-        BOOST_FOREACH( const Cluster* cluster, sk.Clusters() ) {
+        for( const Cluster* cluster : sk.Clusters() ) {
             ai_assert( cluster );
 
             const WeightIndexArray& indices = cluster->GetIndices();
@@ -1558,7 +1557,7 @@ void Converter::ConvertWeights( aiMesh* out, const Model& model, const MeshGeome
 
             // now check if *any* of these weights is contained in the output mesh,
             // taking notes so we don't need to do it twice.
-            BOOST_FOREACH( WeightIndexArray::value_type index, indices ) {
+            for( WeightIndexArray::value_type index : indices ) {
 
                 unsigned int count = 0;
                 const unsigned int* const out_idx = geo.ToOutputVertexIndex( index, count );
@@ -1839,7 +1838,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
                 uvIndex = -1;
                 if ( !mesh )
                 {
-                    BOOST_FOREACH( const MeshMap::value_type& v, meshes_converted ) {
+                    for( const MeshMap::value_type& v : meshes_converted ) {
                         const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> ( v.first );
                         if ( !mesh ) {
                             continue;
@@ -1957,7 +1956,7 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const LayeredTextu
             uvIndex = -1;
             if ( !mesh )
             {
-                BOOST_FOREACH( const MeshMap::value_type& v, meshes_converted ) {
+                for( const MeshMap::value_type& v : meshes_converted ) {
                     const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> ( v.first );
                     if ( !mesh ) {
                         continue;
@@ -2190,7 +2189,7 @@ void Converter::ConvertAnimations()
     anim_fps = FrameRateToDouble( fps, custom );
 
     const std::vector<const AnimationStack*>& animations = doc.AnimationStacks();
-    BOOST_FOREACH( const AnimationStack* stack, animations ) {
+    for( const AnimationStack* stack : animations ) {
         ConvertAnimationStack( *stack );
     }
 }
@@ -2205,21 +2204,21 @@ void Converter::RenameNode( const std::string& fixed_name, const std::string& ne
 
     const aiString fn( fixed_name );
 
-    BOOST_FOREACH( aiCamera* cam, cameras ) {
+    for( aiCamera* cam : cameras ) {
         if ( cam->mName == fn ) {
             cam->mName.Set( new_name );
             break;
         }
     }
 
-    BOOST_FOREACH( aiLight* light, lights ) {
+    for( aiLight* light : lights ) {
         if ( light->mName == fn ) {
             light->mName.Set( new_name );
             break;
         }
     }
 
-    BOOST_FOREACH( aiAnimation* anim, animations ) {
+    for( aiAnimation* anim : animations ) {
         for ( unsigned int i = 0; i < anim->mNumChannels; ++i ) {
             aiNodeAnim* const na = anim->mChannels[ i ];
             if ( na->mNodeName == fn ) {
@@ -2299,11 +2298,11 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
         "Lcl Translation"
     };
 
-    BOOST_FOREACH( const AnimationLayer* layer, layers ) {
+    for( const AnimationLayer* layer : layers ) {
         ai_assert( layer );
 
         const AnimationCurveNodeList& nodes = layer->Nodes( prop_whitelist, 3 );
-        BOOST_FOREACH( const AnimationCurveNode* node, nodes ) {
+        for( const AnimationCurveNode* node : nodes ) {
             ai_assert( node );
 
             const Model* const model = dynamic_cast<const Model*>( node->Target() );
@@ -2331,7 +2330,7 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
     double stop_timeF = CONVERT_FBX_TIME( stop_time );
 
     try {
-        BOOST_FOREACH( const NodeMap::value_type& kv, node_map ) {
+        for( const NodeMap::value_type& kv : node_map ) {
             GenerateNodeAnimations( node_anims,
                 kv.first,
                 kv.second,
@@ -2389,7 +2388,7 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
 static void validateAnimCurveNodes( const std::vector<const AnimationCurveNode*>& curves,
     bool strictMode ) {
     const Object* target( NULL );
-    BOOST_FOREACH( const AnimationCurveNode* node, curves ) {
+    for( const AnimationCurveNode* node : curves ) {
         if ( !target ) {
             target = node->Target();
         }
@@ -2419,7 +2418,7 @@ void Converter::GenerateNodeAnimations( std::vector<aiNodeAnim*>& node_anims,
     validateAnimCurveNodes( curves, doc.Settings().strictMode );
 #endif
     const AnimationCurveNode* curve_node = NULL;
-    BOOST_FOREACH( const AnimationCurveNode* node, curves ) {
+    for( const AnimationCurveNode* node : curves ) {
         ai_assert( node );
 
         if ( node->TargetProperty().empty() ) {
@@ -2927,11 +2926,11 @@ Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const 
     int64_t adj_start = start - 10000;
     int64_t adj_stop = stop + 10000;
 
-    BOOST_FOREACH( const AnimationCurveNode* node, nodes ) {
+    for( const AnimationCurveNode* node : nodes ) {
         ai_assert( node );
 
         const AnimationCurveMap& curves = node->Curves();
-        BOOST_FOREACH( const AnimationCurveMap::value_type& kv, curves ) {
+        for( const AnimationCurveMap::value_type& kv : curves ) {
 
             unsigned int mapto;
             if ( kv.first == "d|X" ) {
@@ -2984,7 +2983,7 @@ KeyTimeList Converter::GetKeyTimeList( const KeyFrameListList& inputs )
     KeyTimeList keys;
 
     size_t estimate = 0;
-    BOOST_FOREACH( const KeyFrameList& kfl, inputs ) {
+    for( const KeyFrameList& kfl : inputs ) {
         estimate = std::max( estimate, kfl.get<0>()->size() );
     }
 
@@ -3037,7 +3036,7 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
 
     next_pos.resize( inputs.size(), 0 );
 
-    BOOST_FOREACH( KeyTimeList::value_type time, keys ) {
+    for( KeyTimeList::value_type time : keys ) {
         float result[ 3 ] = { def_value.x, def_value.y, def_value.z };
 
         for ( size_t i = 0; i < count; ++i ) {

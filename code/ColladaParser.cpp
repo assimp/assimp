@@ -52,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include <boost/scoped_ptr.hpp>
-#include <boost/foreach.hpp>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/light.h"
@@ -529,10 +528,10 @@ void ColladaParser::ReadAnimation( Collada::Animation* pParent)
     // it turned out to have channels - add them
     if( !channels.empty())
     {
-		// FIXME: Is this essentially doing the same as "single-anim-node" codepath in 
+		// FIXME: Is this essentially doing the same as "single-anim-node" codepath in
 		//        ColladaLoader::StoreAnimations? For now, this has been deferred to after
-		//        all animations and all clips have been read. Due to handling of 
-		//        <library_animation_clips> this cannot be done here, as the channel owner 
+		//        all animations and all clips have been read. Due to handling of
+		//        <library_animation_clips> this cannot be done here, as the channel owner
 		//        is lost, and some exporters make up animations by referring to multiple
 		//        single-channel animations from an <instance_animation>.
 /*
@@ -1404,7 +1403,7 @@ void ColladaParser::ReadEffectProfileCommon( Collada::Effect& pEffect)
                 pEffect.mHasTransparency = true;
 
                 const char* opaque = mReader->getAttributeValueSafe("opaque");
- 
+
                 if(::strcmp(opaque, "RGB_ZERO") == 0 || ::strcmp(opaque, "RGB_ONE") == 0) {
                     pEffect.mRGBTransparency = true;
                 }
@@ -2249,7 +2248,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
     // find the offset index for all per-vertex channels
     size_t numOffsets = 1;
     size_t perVertexOffset = SIZE_MAX; // invalid value
-    BOOST_FOREACH( const InputChannel& channel, pPerIndexChannels)
+    for( const InputChannel& channel : pPerIndexChannels)
     {
         numOffsets = std::max( numOffsets, channel.mOffset+1);
         if( channel.mType == IT_Vertex)
@@ -2262,7 +2261,7 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
     {
         case Prim_Polylist:
         {
-            BOOST_FOREACH( size_t i, pVCount)
+            for( size_t i : pVCount)
                 expectedPointCount += i;
             break;
         }
@@ -2910,14 +2909,14 @@ AI_WONT_RETURN void ColladaParser::ThrowException( const std::string& pError) co
 void ColladaParser::ReportWarning(const char* msg,...)
 {
     ai_assert(NULL != msg);
-    
+
     va_list args;
     va_start(args,msg);
-    
+
     char szBuffer[3000];
     const int iLen = vsprintf(szBuffer,msg,args);
     ai_assert(iLen > 0);
-    
+
     va_end(args);
     DefaultLogger::get()->warn("Validation warning: " + std::string(szBuffer,iLen));
 }

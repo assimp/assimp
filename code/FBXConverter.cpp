@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 
 #include "../include/assimp/scene.h"
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 #include <memory>
 
 #include <iterator>
@@ -338,7 +338,7 @@ private:
         bool reverse_order = false );
 
     // key (time), value, mapto (component index)
-    typedef boost::tuple<std::shared_ptr<KeyTimeList>, std::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
+    typedef std::tuple<std::shared_ptr<KeyTimeList>, std::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
     typedef std::vector<KeyFrameList> KeyFrameListList;
 
 
@@ -2966,7 +2966,7 @@ Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const 
                 }
             }
 
-            inputs.push_back( boost::make_tuple( Keys, Values, mapto ) );
+            inputs.push_back( std::make_tuple( Keys, Values, mapto ) );
         }
     }
     return inputs; // pray for NRVO :-)
@@ -2984,7 +2984,7 @@ KeyTimeList Converter::GetKeyTimeList( const KeyFrameListList& inputs )
 
     size_t estimate = 0;
     for( const KeyFrameList& kfl : inputs ) {
-        estimate = std::max( estimate, kfl.get<0>()->size() );
+        estimate = std::max( estimate, std::get<0>(kfl)->size() );
     }
 
     keys.reserve( estimate );
@@ -2999,8 +2999,8 @@ KeyTimeList Converter::GetKeyTimeList( const KeyFrameListList& inputs )
         for ( size_t i = 0; i < count; ++i ) {
             const KeyFrameList& kfl = inputs[ i ];
 
-            if ( kfl.get<0>()->size() > next_pos[ i ] && kfl.get<0>()->at( next_pos[ i ] ) < min_tick ) {
-                min_tick = kfl.get<0>()->at( next_pos[ i ] );
+            if ( std::get<0>(kfl)->size() > next_pos[ i ] && std::get<0>(kfl)->at( next_pos[ i ] ) < min_tick ) {
+                min_tick = std::get<0>(kfl)->at( next_pos[ i ] );
             }
         }
 
@@ -3013,7 +3013,7 @@ KeyTimeList Converter::GetKeyTimeList( const KeyFrameListList& inputs )
             const KeyFrameList& kfl = inputs[ i ];
 
 
-            while ( kfl.get<0>()->size() > next_pos[ i ] && kfl.get<0>()->at( next_pos[ i ] ) == min_tick ) {
+            while ( std::get<0>(kfl)->size() > next_pos[ i ] && std::get<0>(kfl)->at( next_pos[ i ] ) == min_tick ) {
                 ++next_pos[ i ];
             }
         }
@@ -3042,8 +3042,8 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
         for ( size_t i = 0; i < count; ++i ) {
             const KeyFrameList& kfl = inputs[ i ];
 
-            const size_t ksize = kfl.get<0>()->size();
-            if ( ksize > next_pos[ i ] && kfl.get<0>()->at( next_pos[ i ] ) == time ) {
+            const size_t ksize = std::get<0>(kfl)->size();
+            if ( ksize > next_pos[ i ] && std::get<0>(kfl)->at( next_pos[ i ] ) == time ) {
                 ++next_pos[ i ];
             }
 
@@ -3051,18 +3051,18 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
             const size_t id1 = next_pos[ i ] == ksize ? ksize - 1 : next_pos[ i ];
 
             // use lerp for interpolation
-            const KeyValueList::value_type valueA = kfl.get<1>()->at( id0 );
-            const KeyValueList::value_type valueB = kfl.get<1>()->at( id1 );
+            const KeyValueList::value_type valueA = std::get<1>(kfl)->at( id0 );
+            const KeyValueList::value_type valueB = std::get<1>(kfl)->at( id1 );
 
-            const KeyTimeList::value_type timeA = kfl.get<0>()->at( id0 );
-            const KeyTimeList::value_type timeB = kfl.get<0>()->at( id1 );
+            const KeyTimeList::value_type timeA = std::get<0>(kfl)->at( id0 );
+            const KeyTimeList::value_type timeB = std::get<0>(kfl)->at( id1 );
 
             // do the actual interpolation in double-precision arithmetics
             // because it is a bit sensitive to rounding errors.
             const double factor = timeB == timeA ? 0. : static_cast<double>( ( time - timeA ) / ( timeB - timeA ) );
             const float interpValue = static_cast<float>( valueA + ( valueB - valueA ) * factor );
 
-            result[ kfl.get<2>() ] = interpValue;
+            result[ std::get<2>(kfl) ] = interpValue;
         }
 
         // magic value to convert fbx times to seconds

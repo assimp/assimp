@@ -636,7 +636,7 @@ void ColladaExporter::WriteMaterials()
     aiString name;
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
-    materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
+    materials[a].name = std::string( "m") + std::to_string(a) + name.C_Str();
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
       if( !isalnum_C( *it ) ) {
         *it = '_';
@@ -812,7 +812,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     {
         if( mesh->HasTextureCoords( a) )
         {
-            WriteFloatArray( idstr + "-tex" + boost::lexical_cast<std::string> (a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
+            WriteFloatArray( idstr + "-tex" + std::to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
                 (float*) mesh->mTextureCoords[a], mesh->mNumVertices);
         }
     }
@@ -821,7 +821,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
         if( mesh->HasVertexColors( a) )
-            WriteFloatArray( idstr + "-color" + boost::lexical_cast<std::string> (a), FloatType_Color, (float*) mesh->mColors[a], mesh->mNumVertices);
+            WriteFloatArray( idstr + "-color" + std::to_string(a), FloatType_Color, (float*) mesh->mColors[a], mesh->mNumVertices);
     }
 
     // assemble vertex structure

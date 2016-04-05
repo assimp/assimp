@@ -52,7 +52,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include "../include/assimp/scene.h"
 #include "../include/assimp/DefaultLogger.hpp"
-#include <boost/format.hpp>
 #include "Defines.h"
 #include "TinyFormatter.h"
 #include <cctype>

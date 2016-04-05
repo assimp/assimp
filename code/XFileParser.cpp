@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "Exceptional.h"
 #include "TinyFormatter.h"
-#include <boost/lexical_cast.hpp>
 #include "ByteSwapper.h"
 #include "../include/assimp/DefaultLogger.hpp"
 
@@ -731,7 +730,7 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
     std::string matName;
     readHeadOfDataObject( &matName);
     if( matName.empty())
-        matName = std::string( "material") + boost::lexical_cast<std::string>( mLineNumber);
+        matName = std::string( "material") + std::to_string( mLineNumber );
     pMaterial->mName = matName;
     pMaterial->mIsReference = false;
 

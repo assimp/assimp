@@ -75,7 +75,7 @@ aiMesh* TempMesh::ToMesh()
         return NULL;
     }
 
-    std::auto_ptr<aiMesh> mesh(new aiMesh());
+    std::unique_ptr<aiMesh> mesh(new aiMesh());
 
     // copy vertices
     mesh->mNumVertices = static_cast<unsigned int>(verts.size());

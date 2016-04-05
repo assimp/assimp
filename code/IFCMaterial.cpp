@@ -154,7 +154,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
                             IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: " + side);
                         }
 
-                        std::auto_ptr<aiMaterial> mat(new aiMaterial());
+                        std::unique_ptr<aiMaterial> mat(new aiMaterial());
 
                         FillMaterial(mat.get(), surf, conv);
 
@@ -190,7 +190,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
     }
 
     // we're here, yet - no default material with suitable color available. Generate one
-    std::auto_ptr<aiMaterial> mat(new aiMaterial());
+    std::unique_ptr<aiMaterial> mat(new aiMaterial());
     mat->AddProperty(&name,AI_MATKEY_NAME);
 
     const aiColor4D col = aiColor4D( 0.6f, 0.6f, 0.6f, 1.0f); // aiColor4D( color.r, color.g, color.b, 1.0f);

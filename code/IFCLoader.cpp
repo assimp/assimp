@@ -423,7 +423,7 @@ void ResolveObjectPlacement(aiMatrix4x4& m, const IfcObjectPlacement& place, Con
 bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, unsigned int matid, ConversionData& conv)
 {
     // insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
-    std::auto_ptr<aiNode> nd(new aiNode());
+    std::unique_ptr<aiNode> nd(new aiNode());
     nd->mName.Set("IfcMappedItem");
 
     // handle the Cartesian operator
@@ -684,7 +684,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
     }
 
     // add an output node for this spatial structure
-    std::auto_ptr<aiNode> nd(new aiNode());
+    std::unique_ptr<aiNode> nd(new aiNode());
     nd->mName.Set(el.GetClassName()+"_"+(el.Name?el.Name.Get():"Unnamed")+"_"+el.GlobalId);
     nd->mParent = parent;
 
@@ -771,7 +771,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                     const IfcFeatureElementSubtraction& open = fills->RelatedOpeningElement;
 
                     // move opening elements to a separate node since they are semantically different than elements that are just 'contained'
-                    std::auto_ptr<aiNode> nd_aggr(new aiNode());
+                    std::unique_ptr<aiNode> nd_aggr(new aiNode());
                     nd_aggr->mName.Set("$RelVoidsElement");
                     nd_aggr->mParent = nd.get();
 
@@ -816,7 +816,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
                 }
 
                 // move aggregate elements to a separate node since they are semantically different than elements that are just 'contained'
-                std::auto_ptr<aiNode> nd_aggr(new aiNode());
+                std::unique_ptr<aiNode> nd_aggr(new aiNode());
                 nd_aggr->mName.Set("$RelAggregates");
                 nd_aggr->mParent = nd.get();
 

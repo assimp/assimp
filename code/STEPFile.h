@@ -509,7 +509,7 @@ namespace STEP {
 
         static Object* Construct(const STEP::DB& db, const EXPRESS::LIST& params) {
             // make sure we don't leak if Fill() throws an exception
-            std::auto_ptr<TDerived> impl(new TDerived());
+            std::unique_ptr<TDerived> impl(new TDerived());
 
             // GenericFill<T> is undefined so we need to have a specialization
             const size_t num_args = GenericFill<TDerived>(db,params,&*impl);

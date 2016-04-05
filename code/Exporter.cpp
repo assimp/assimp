@@ -324,7 +324,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
                 aiScene* scenecopy_tmp;
                 SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
 
-                std::auto_ptr<aiScene> scenecopy(scenecopy_tmp);
+                std::unique_ptr<aiScene> scenecopy(scenecopy_tmp);
                 const ScenePrivateData* const priv = ScenePriv(pScene);
 
                 // steps that are not idempotent, i.e. we might need to run them again, usually to get back to the

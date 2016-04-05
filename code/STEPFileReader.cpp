@@ -88,7 +88,7 @@ STEP::TypeError::TypeError (const std::string& s,uint64_t entity /* = ENTITY_NOT
 STEP::DB* STEP::ReadFileHeader(boost::shared_ptr<IOStream> stream)
 {
     boost::shared_ptr<StreamReaderLE> reader = boost::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
-    std::auto_ptr<STEP::DB> db = std::auto_ptr<STEP::DB>(new STEP::DB(reader));
+    std::unique_ptr<STEP::DB> db = std::unique_ptr<STEP::DB>(new STEP::DB(reader));
 
     LineSplitter& splitter = db->GetSplitter();
     if (!splitter || *splitter != "ISO-10303-21;") {

@@ -164,7 +164,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
     // in |Exporter::ExportFormatEntry|.
     aiScene* scenecopy_tmp;
     SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
-    std::auto_ptr<aiScene> scenecopy(scenecopy_tmp);
+    std::unique_ptr<aiScene> scenecopy(scenecopy_tmp);
 
     SplitLargeMeshesProcess_Triangle tri_splitter;
     tri_splitter.SetLimit(0xffff);

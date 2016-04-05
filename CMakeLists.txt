@@ -299,7 +299,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
   # Packing information
   set(CPACK_PACKAGE_NAME                    "assimp{ASSIMP_VERSION_MAJOR}")
   set(CPACK_PACKAGE_CONTACT "" CACHE STRING "Package maintainer and PGP signer.")
-  set(CPACK_PACKAGE_VENDOR                  "http://assimp.sourceforge.net/")
+  set(CPACK_PACKAGE_VENDOR                  "https://github.com/assimp")
   set(CPACK_PACKAGE_DISPLAY_NAME            "Assimp ${ASSIMP_VERSION}")
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY     " - Open Asset Import Library ${ASSIMP_VERSION}")
   set(CPACK_PACKAGE_VERSION                 "${ASSIMP_VERSION}.${ASSIMP_PACKAGE_VERSION}" )

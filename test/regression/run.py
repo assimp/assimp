@@ -96,6 +96,8 @@ messages = collections.defaultdict(lambda: "<unknown", {
 
 outfilename_output = "run_regression_suite_output.txt"
 outfilename_failur = "run_regression_suite_failures.csv"
+Environment        = {}
+
 # -------------------------------------------------------------------------------
 class results:
 
@@ -156,6 +158,18 @@ class results:
         return 0 != len( self.failures )
 
 # -------------------------------------------------------------------------------
+def setEnvVar( var, value ):
+    Environment[ var ] = value
+
+# -------------------------------------------------------------------------------
+def getEnvVar( var ):
+    if Environment.has_key( var ):
+        return Environment[ var ]
+    else:
+        print "Error: cannot find ", var
+    return ""
+    
+# -------------------------------------------------------------------------------
 def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(settings.results, "tmp", os.path.split(fullpath)[1] + "_" + myhash)
     try:
@@ -168,7 +182,7 @@ def prepare_output_dir(fullpath, myhash, app):
 
 
 # -------------------------------------------------------------------------------
-def process_dir(d, outfile_results, zipin, result):
+def process_dir(d, outfile_results, zipin, result ):
     shellparams = {'stdout':outfile_results, 'stderr':outfile_results, 'shell':False}
 
     print("Processing directory " + d)
@@ -203,10 +217,13 @@ def process_dir(d, outfile_results, zipin, result):
             outfile_expect = prepare_output_dir(fullpath, filehash, "EXPECT")
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
+            assimp_bin_path = getEnvVar("assimp_path")
+            print "assimp_bin_path = ", assimp_bin_path
             command = [assimp_bin_path,
                 "dump",
                 fullpath, outfile_actual, "-b", "-s", "-l" ] +\
                 pppreset.split()
+            print "command = ", command
             r = subprocess.call(command, **shellparams)
             outfile_results.flush()
 

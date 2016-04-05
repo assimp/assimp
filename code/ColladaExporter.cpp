@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exceptional.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <ctime>
 #include <set>
 
@@ -75,7 +75,7 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
     ColladaExporter iDoTheExportThing( pScene, pIOSystem, path, file);
 
     // we're still here - export successfully completed. Write result to the given IOSYstem
-    boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+    std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if(outfile == NULL) {
         throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
     }
@@ -268,7 +268,7 @@ void ColladaExporter::WriteTextures() {
 
             std::string name = mFile + "_texture_" + (i < 1000 ? "0" : "") + (i < 100 ? "0" : "") + (i < 10 ? "0" : "") + str + "." + ((const char*) texture->achFormatHint);
 
-            boost::scoped_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
+            std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
             if(outfile == NULL) {
                 throw DeadlyExportError("could not open output texture file: " + mPath + name);
             }

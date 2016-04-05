@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 
 using namespace Assimp;
@@ -66,14 +66,14 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
     // we're still here - export successfully completed. Write both the main OBJ file and the material script
     {
-        boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+        std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
         if(outfile == NULL) {
             throw DeadlyExportError("could not open output .obj file: " + std::string(pFile));
         }
         outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
     }
     {
-        boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(exporter.GetMaterialLibFileName(),"wt"));
+        std::unique_ptr<IOStream> outfile (pIOSystem->Open(exporter.GetMaterialLibFileName(),"wt"));
         if(outfile == NULL) {
             throw DeadlyExportError("could not open output .mtl file: " + std::string(exporter.GetMaterialLibFileName()));
         }

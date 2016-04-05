@@ -167,7 +167,7 @@ namespace STEP {
         {
         public:
 
-            typedef boost::shared_ptr<const DataType> Out;
+            typedef std::shared_ptr<const DataType> Out;
 
         public:
 
@@ -218,7 +218,7 @@ namespace STEP {
              *
              *  @throw SyntaxError
              */
-            static boost::shared_ptr<const EXPRESS::DataType> Parse(const char*& inout,
+            static std::shared_ptr<const EXPRESS::DataType> Parse(const char*& inout,
                 uint64_t line                           = SyntaxError::LINE_NOT_SPECIFIED,
                 const EXPRESS::ConversionSchema* schema = NULL);
 
@@ -338,7 +338,7 @@ namespace STEP {
         public:
 
             // access a particular list index, throw std::range_error for wrong indices
-            boost::shared_ptr<const DataType> operator[] (size_t index) const {
+            std::shared_ptr<const DataType> operator[] (size_t index) const {
                 return members[index];
             }
 
@@ -349,13 +349,13 @@ namespace STEP {
         public:
 
             /** @see DaraType::Parse */
-            static boost::shared_ptr<const EXPRESS::LIST> Parse(const char*& inout,
+            static std::shared_ptr<const EXPRESS::LIST> Parse(const char*& inout,
                 uint64_t line                           = SyntaxError::LINE_NOT_SPECIFIED,
                 const EXPRESS::ConversionSchema* schema = NULL);
 
 
         private:
-            typedef std::vector< boost::shared_ptr<const DataType> > MemberList;
+            typedef std::vector< std::shared_ptr<const DataType> > MemberList;
             MemberList members;
         };
 
@@ -670,12 +670,12 @@ namespace STEP {
     };
 
     template <typename T>
-    inline bool operator==( boost::shared_ptr<LazyObject> lo, T whatever ) {
+    inline bool operator==( std::shared_ptr<LazyObject> lo, T whatever ) {
         return *lo == whatever; // XXX use std::forward if we have 0x
     }
 
     template <typename T>
-    inline bool operator==( const std::pair<uint64_t, boost::shared_ptr<LazyObject> >& lo, T whatever ) {
+    inline bool operator==( const std::pair<uint64_t, std::shared_ptr<LazyObject> >& lo, T whatever ) {
         return *(lo.second) == whatever; // XXX use std::forward if we have 0x
     }
 
@@ -737,12 +737,12 @@ namespace STEP {
         typedef EXPRESS::ENTITY Type;
     };
 
-    template <> struct PickBaseType< boost::shared_ptr< const EXPRESS::DataType > >;
+    template <> struct PickBaseType< std::shared_ptr< const EXPRESS::DataType > >;
 
     // ------------------------------------------------------------------------------
     template <typename T>
     struct InternGenericConvert {
-        void operator()(T& out, const boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& /*db*/) {
+        void operator()(T& out, const std::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& /*db*/) {
             try{
                 out = dynamic_cast< const typename PickBaseType<T>::Type& > ( *in );
             }
@@ -753,15 +753,15 @@ namespace STEP {
     };
 
     template <>
-    struct InternGenericConvert< boost::shared_ptr< const EXPRESS::DataType > > {
-        void operator()(boost::shared_ptr< const EXPRESS::DataType >& out, const boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& /*db*/) {
+    struct InternGenericConvert< std::shared_ptr< const EXPRESS::DataType > > {
+        void operator()(std::shared_ptr< const EXPRESS::DataType >& out, const std::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& /*db*/) {
             out = in;
         }
     };
 
     template <typename T>
     struct InternGenericConvert< Maybe<T> > {
-        void operator()(Maybe<T>& out, const boost::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
+        void operator()(Maybe<T>& out, const std::shared_ptr< const EXPRESS::DataType >& in, const STEP::DB& db) {
             GenericConvert((T&)out,in,db);
             out.flag_valid();
         }
@@ -769,7 +769,7 @@ namespace STEP {
 
     template <typename T,uint64_t min_cnt, uint64_t max_cnt>
     struct InternGenericConvertList {
-        void operator()(ListOf<T, min_cnt, max_cnt>& out, const boost::shared_ptr< const EXPRESS::DataType >& inp_base, const STEP::DB& db) {
+        void operator()(ListOf<T, min_cnt, max_cnt>& out, const std::shared_ptr< const EXPRESS::DataType >& inp_base, const STEP::DB& db) {
 
             const EXPRESS::LIST* inp = dynamic_cast<const EXPRESS::LIST*>(inp_base.get());
             if (!inp) {
@@ -800,7 +800,7 @@ namespace STEP {
 
     template <typename T>
     struct InternGenericConvert< Lazy<T> > {
-        void operator()(Lazy<T>& out, const boost::shared_ptr< const EXPRESS::DataType >& in_base, const STEP::DB& db) {
+        void operator()(Lazy<T>& out, const std::shared_ptr< const EXPRESS::DataType >& in_base, const STEP::DB& db) {
             const EXPRESS::ENTITY* in = dynamic_cast<const EXPRESS::ENTITY*>(in_base.get());
             if (!in) {
                 throw TypeError("type error reading entity");
@@ -810,12 +810,12 @@ namespace STEP {
     };
 
     template <typename T1>
-    inline void GenericConvert(T1& a, const boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
+    inline void GenericConvert(T1& a, const std::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
         return InternGenericConvert<T1>()(a,b,db);
     }
 
     template <typename T1,uint64_t N1, uint64_t N2>
-    inline void GenericConvert(ListOf<T1,N1,N2>& a, const boost::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
+    inline void GenericConvert(ListOf<T1,N1,N2>& a, const std::shared_ptr< const EXPRESS::DataType >& b, const STEP::DB& db) {
         return InternGenericConvertList<T1,N1,N2>()(a,b,db);
     }
 
@@ -827,7 +827,7 @@ namespace STEP {
     // -------------------------------------------------------------------------------
     class DB
     {
-        friend DB* ReadFileHeader(boost::shared_ptr<IOStream> stream);
+        friend DB* ReadFileHeader(std::shared_ptr<IOStream> stream);
         friend void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme,
             const char* const* types_to_track, size_t len,
             const char* const* inverse_indices_to_track, size_t len2
@@ -857,7 +857,7 @@ namespace STEP {
 
     private:
 
-        DB(boost::shared_ptr<StreamReaderLE> reader)
+        DB(std::shared_ptr<StreamReaderLE> reader)
             : reader(reader)
             , splitter(*reader,true,true)
             , evaluated_count()
@@ -1012,7 +1012,7 @@ namespace STEP {
         RefMap refs;
         InverseWhitelist inv_whitelist;
 
-        boost::shared_ptr<StreamReaderLE> reader;
+        std::shared_ptr<StreamReaderLE> reader;
         LineSplitter splitter;
 
         uint64_t evaluated_count;

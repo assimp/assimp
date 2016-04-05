@@ -330,7 +330,7 @@ namespace glTF {
     {
         bool isBinary = mAsset.extensionsUsed.KHR_binary_glTF;
 
-        boost::scoped_ptr<IOStream> outfile
+        std::unique_ptr<IOStream> outfile
             (mAsset.OpenFile(path, isBinary ? "wb" : "wt", true));
 
         if (outfile == 0) {

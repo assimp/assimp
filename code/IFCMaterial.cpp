@@ -76,7 +76,7 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
     mat->AddProperty(&name,AI_MATKEY_NAME);
 
     // now see which kinds of surface information are present
-    for(boost::shared_ptr< const IFC::IfcSurfaceStyleElementSelect > sel2 : surf->Styles) {
+    for(std::shared_ptr< const IFC::IfcSurfaceStyleElementSelect > sel2 : surf->Styles) {
         if (const IFC::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleShading>(conv.db)) {
             aiColor4D col_base,col;
 
@@ -140,7 +140,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
     for(;range.first != range.second; ++range.first) {
         if(const IFC::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::IfcStyledItem>()) {
             for(const IFC::IfcPresentationStyleAssignment& as : styled->Styles) {
-                for(boost::shared_ptr<const IFC::IfcPresentationStyleSelect> sel : as.Styles) {
+                for(std::shared_ptr<const IFC::IfcPresentationStyleSelect> sel : as.Styles) {
 
                     if( const IFC::IfcSurfaceStyle* const surf = sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db) ) {
                         // try to satisfy from cache

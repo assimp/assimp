@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../contrib/poly2tri/poly2tri/poly2tri.h"
 #include "../contrib/clipper/clipper.hpp"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <iterator>
 
@@ -170,7 +170,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
         opening.extrusionDir = master_normal;
         opening.solid = NULL;
 
-        opening.profileMesh = boost::make_shared<TempMesh>();
+        opening.profileMesh = std::make_shared<TempMesh>();
         opening.profileMesh->verts.reserve(*iit);
         opening.profileMesh->vertcnt.push_back(*iit);
 
@@ -660,10 +660,10 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
     // it was created from. Return an empty mesh to the caller.
     if( collect_openings && !result.IsEmpty() ) {
         ai_assert(conv.collect_openings);
-        boost::shared_ptr<TempMesh> profile = boost::shared_ptr<TempMesh>(new TempMesh());
+        std::shared_ptr<TempMesh> profile = std::shared_ptr<TempMesh>(new TempMesh());
         profile->Swap(result);
 
-        boost::shared_ptr<TempMesh> profile2D = boost::shared_ptr<TempMesh>(new TempMesh());
+        std::shared_ptr<TempMesh> profile2D = std::shared_ptr<TempMesh>(new TempMesh());
         profile2D->verts.insert(profile2D->verts.end(), in.begin(), in.end());
         profile2D->vertcnt.push_back(in.size());
         conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
@@ -732,9 +732,9 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
     ConversionData& conv)
 {
     bool fix_orientation = false;
-    boost::shared_ptr< TempMesh > meshtmp = boost::make_shared<TempMesh>();
+    std::shared_ptr< TempMesh > meshtmp = std::make_shared<TempMesh>();
     if(const IfcShellBasedSurfaceModel* shellmod = geo.ToPtr<IfcShellBasedSurfaceModel>()) {
-        for(boost::shared_ptr<const IfcShell> shell :shellmod->SbsmBoundary) {
+        for(std::shared_ptr<const IfcShell> shell :shellmod->SbsmBoundary) {
             try {
                 const EXPRESS::ENTITY& e = shell->To<ENTITY>();
                 const IfcConnectedFaceSet& fs = conv.db.MustGetObject(e).To<IfcConnectedFaceSet>();
@@ -791,7 +791,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
             conv.collect_openings->push_back(TempOpening(geo.ToPtr<IfcSolidModel>(),
                 IfcVector3(0,0,0),
                 meshtmp,
-                boost::shared_ptr<TempMesh>()));
+                std::shared_ptr<TempMesh>()));
         }
         return true;
     }

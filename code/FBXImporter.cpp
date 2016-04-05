@@ -142,7 +142,7 @@ void FBXImporter::SetupProperties(const Importer* pImp)
 void FBXImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
+    std::unique_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
     if (!stream) {
         ThrowException("Could not open file for reading");
     }

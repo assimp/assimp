@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 #include "../include/assimp/IOStream.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Assimp {
@@ -81,7 +81,7 @@ public:
      *    stream is in little endian byte order. Otherwise the
      *    endianness information is defined by the @c SwapEndianess
      *    template parameter and this parameter is meaningless.  */
-    StreamWriter(boost::shared_ptr<IOStream> stream, bool le = false)
+    StreamWriter(std::shared_ptr<IOStream> stream, bool le = false)
         : stream(stream)
         , le(le)
         , cursor()
@@ -92,7 +92,7 @@ public:
 
     // ---------------------------------------------------------------------
     StreamWriter(IOStream* stream, bool le = false)
-        : stream(boost::shared_ptr<IOStream>(stream))
+        : stream(std::shared_ptr<IOStream>(stream))
         , le(le)
         , cursor()
     {
@@ -212,7 +212,7 @@ private:
 
 private:
 
-    boost::shared_ptr<IOStream> stream;
+    std::shared_ptr<IOStream> stream;
     bool le;
 
     std::vector<uint8_t> buffer;

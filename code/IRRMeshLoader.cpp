@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IRRMeshLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/DefaultLogger.hpp"
@@ -121,7 +121,7 @@ const aiImporterDesc* IRRMeshImporter::GetInfo () const
 void IRRMeshImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL)

@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // We need boost::common_factor to compute the lcm/gcd of a number
 #include <boost/math/common_factor_rt.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/material.h"
@@ -902,7 +902,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 void IRRImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL)

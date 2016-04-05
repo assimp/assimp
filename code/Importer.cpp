@@ -77,7 +77,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include "Profiler.h"
 #include <set>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <cctype>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
@@ -612,7 +612,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
             return NULL;
         }
 
-        boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+        std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
         if (profiler) {
             profiler->BeginRegion("total");
         }
@@ -785,7 +785,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
     }
 #endif // ! DEBUG
 
-    boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+    std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)   {
 
         BaseProcess* process = pimpl->mPostProcessingSteps[a];
@@ -841,7 +841,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 // ------------------------------------------------------------------------------------------------
 const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess, bool requestValidation ) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
-    
+
     // Return immediately if no scene is active
     if ( NULL == pimpl->mScene ) {
         return NULL;
@@ -880,7 +880,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     }
 #endif // ! DEBUG
 
-    boost::scoped_ptr<Profiler> profiler( GetPropertyInteger( AI_CONFIG_GLOB_MEASURE_TIME, 0 ) ? new Profiler() : NULL );
+    std::unique_ptr<Profiler> profiler( GetPropertyInteger( AI_CONFIG_GLOB_MEASURE_TIME, 0 ) ? new Profiler() : NULL );
 
     if ( profiler ) {
         profiler->BeginRegion( "postprocess" );
@@ -908,7 +908,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     DefaultLogger::get()->info( "Leaving customized post processing pipeline" );
 
     ASSIMP_END_EXCEPTION_REGION( const aiScene* );
-    
+
     return pimpl->mScene;
 }
 

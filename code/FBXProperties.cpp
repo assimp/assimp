@@ -139,7 +139,7 @@ PropertyTable::PropertyTable()
 
 
 // ------------------------------------------------------------------------------------------------
-PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps)
+PropertyTable::PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps)
 : templateProps(templateProps)
 , element(&element)
 {
@@ -216,7 +216,7 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
         // Read the element's value.
         // Wrap the naked pointer (since the call site is required to acquire ownership)
         // std::unique_ptr from C++11 would be preferred both as a wrapper and a return value.
-        boost::shared_ptr<Property> prop = boost::shared_ptr<Property>(ReadTypedProperty(*element.second));
+        std::shared_ptr<Property> prop = std::shared_ptr<Property>(ReadTypedProperty(*element.second));
 
         // Element could not be read. Skip it.
         if (!prop) continue;

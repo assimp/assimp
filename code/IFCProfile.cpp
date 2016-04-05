@@ -65,7 +65,7 @@ void ProcessPolyLine(const IfcPolyline& def, TempMesh& meshout, ConversionData& 
 // ------------------------------------------------------------------------------------------------
 bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& conv)
 {
-    boost::scoped_ptr<const Curve> cv(Curve::Convert(curve,conv));
+    std::unique_ptr<const Curve> cv(Curve::Convert(curve,conv));
     if (!cv) {
         IFCImporter::LogWarn("skipping unknown IfcCurve entity, type is " + curve.GetClassName());
         return false;

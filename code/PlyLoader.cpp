@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "PlyLoader.h"
 #include "Macros.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/scene.h"
 
@@ -147,7 +147,7 @@ static bool isBigEndian( const char* szMe ) {
 void PLYImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {

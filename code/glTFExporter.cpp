@@ -54,8 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <memory>
 
 #include "glTFAssetWriter.h"
 
@@ -93,7 +93,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     , mScene(pScene)
     , mProperties(pProperties)
 {
-    boost::scoped_ptr<Asset> asset(new glTF::Asset(pIOSystem));
+    std::unique_ptr<Asset> asset(new glTF::Asset(pIOSystem));
     mAsset = asset.get();
 
     if (isBinary) {

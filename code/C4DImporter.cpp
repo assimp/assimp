@@ -131,7 +131,7 @@ void C4DImporter::SetupProperties(const Importer* /*pImp*/)
 void C4DImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     if( file.get() == NULL) {
         ThrowException("failed to open file " + pFile);

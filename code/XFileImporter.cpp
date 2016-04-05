@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "XFileParser.h"
 #include "ConvertToLHProcess.h"
 #include "../include/assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/scene.h"
 #include "../include/assimp/DefaultLogger.hpp"
 #include <boost/format.hpp>
@@ -111,7 +111,7 @@ const aiImporterDesc* XFileImporter::GetInfo () const
 void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     // read file into memory
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
     if( file.get() == NULL)
         throw DeadlyImportError( "Failed to open file " + pFile + ".");
 

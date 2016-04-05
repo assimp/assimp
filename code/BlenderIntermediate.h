@@ -157,7 +157,7 @@ namespace Blender {
         TempArray <std::vector, aiTexture> textures;
 
         // set of all materials referenced by at least one mesh in the scene
-        std::deque< boost::shared_ptr< Material > > materials_raw;
+        std::deque< std::shared_ptr< Material > > materials_raw;
 
         // counter to name sentinel textures inserted as substitutes for procedural textures.
         unsigned int sentinel_cnt;

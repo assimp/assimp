@@ -63,7 +63,7 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "ConvertToLHProcess.h"
 #include "Exceptional.h"
 #include "ScenePrivate.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "../include/assimp/Exporter.hpp"
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/postprocess.h"
@@ -184,7 +184,7 @@ public:
 public:
 
     aiExportDataBlob* blob;
-    boost::shared_ptr< Assimp::IOSystem > mIOSystem;
+    std::shared_ptr< Assimp::IOSystem > mIOSystem;
     bool mIsDefaultIOHandler;
 
     /** Post processing steps we can apply at the imported data. */
@@ -254,10 +254,10 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
     }
 
 
-    boost::shared_ptr<IOSystem> old = pimpl->mIOSystem;
+    std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
 
     BlobIOSystem* blobio = new BlobIOSystem();
-    pimpl->mIOSystem = boost::shared_ptr<IOSystem>( blobio );
+    pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
 
     if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName())) {
         pimpl->mIOSystem = old;

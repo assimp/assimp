@@ -168,7 +168,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 void IFCImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
+    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
     if (!stream) {
         ThrowException("Could not open file for reading");
     }
@@ -233,7 +233,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 #endif
     }
 
-    boost::scoped_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
+    std::unique_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
     const STEP::HeaderInfo& head = static_cast<const STEP::DB&>(*db).GetHeader();
 
     if(!head.fileSchema.size() || head.fileSchema.substr(0,3) != "IFC") {

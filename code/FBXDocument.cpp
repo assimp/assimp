@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <functional>
 
 
@@ -248,7 +248,7 @@ Object::~Object()
 
 
 // ------------------------------------------------------------------------------------------------
-FileGlobalSettings::FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props)
+FileGlobalSettings::FileGlobalSettings(const Document& doc, std::shared_ptr<const PropertyTable> props)
 : props(props)
 , doc(doc)
 {
@@ -358,11 +358,11 @@ void Document::ReadGlobalSettings()
     if(!ehead || !ehead->Compound()) {
         DOMWarning("no GlobalSettings dictionary found");
 
-        globals.reset(new FileGlobalSettings(*this, boost::make_shared<const PropertyTable>()));
+        globals.reset(new FileGlobalSettings(*this, std::make_shared<const PropertyTable>()));
         return;
     }
 
-    boost::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);
+    std::shared_ptr<const PropertyTable> props = GetPropertyTable(*this, "", *ehead, *ehead->Compound(), true);
 
     if(!props) {
         DOMError("GlobalSettings dictionary contains no property table");
@@ -469,8 +469,8 @@ void Document::ReadPropertyTemplates()
 
             const Element* Properties70 = (*sc)["Properties70"];
             if(Properties70) {
-                boost::shared_ptr<const PropertyTable> props = boost::make_shared<const PropertyTable>(
-                    *Properties70,boost::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
+                std::shared_ptr<const PropertyTable> props = std::make_shared<const PropertyTable>(
+                    *Properties70,std::shared_ptr<const PropertyTable>(static_cast<const PropertyTable*>(NULL))
                 );
 
                 templates[oname+"."+pname] = props;

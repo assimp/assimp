@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "SkeletonMeshBuilder.h"
 #include "../include/assimp/Importer.hpp"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <boost/format.hpp>
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/scene.h"
@@ -118,7 +118,7 @@ void BVHLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSys
     mFileName = pFile;
 
     // read file into memory
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
     if( file.get() == NULL)
         throw DeadlyImportError( "Failed to open file " + pFile + ".");
 

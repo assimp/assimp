@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
 
 #include "MemoryIOWrapper.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "../include/assimp/mesh.h"
 #include <map>
 #include <vector>
@@ -76,7 +76,7 @@ class Skeleton;
 
 // Typedefs
 typedef Assimp::MemoryIOStream MemoryStream;
-typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
+typedef std::shared_ptr<MemoryStream> MemoryStreamPtr;
 typedef std::map<uint16_t, MemoryStreamPtr> VertexBufferBindings;
 
 // Ogre Vertex Element

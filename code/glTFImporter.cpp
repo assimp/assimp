@@ -44,13 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StringComparison.h"
 
-#include "boost/scoped_ptr.hpp"
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "glTFAsset.h"
 
@@ -76,7 +74,7 @@ static const aiImporterDesc desc = {
     "gltf glb"
 };
 
-glTFImporter::glTFImporter() 
+glTFImporter::glTFImporter()
 : BaseImporter()
 , meshOffsets()
 , embeddedTexIdxs()
@@ -103,7 +101,7 @@ bool glTFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool 
     if ((checkSig || !extension.length()) && pIOHandler) {
         char buffer[4];
 
-        boost::scoped_ptr<IOStream> pStream(pIOHandler->Open(pFile));
+        std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile));
         if (pStream && pStream->Read(buffer, sizeof(buffer), 1) == 1) {
             if (memcmp(buffer, AI_GLB_MAGIC_NUMBER, sizeof(buffer)) == 0) {
                 return true; // Has GLB header
@@ -377,7 +375,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
     }
 
     meshOffsets.push_back(k);
-    
+
     CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
 }
 
@@ -394,7 +392,7 @@ void glTFImporter::ImportCameras(glTF::Asset& r)
         aiCamera* aicam = mScene->mCameras[i] = new aiCamera();
 
         if (cam.type == Camera::Perspective) {
-            
+
             aicam->mAspect        = cam.perspective.aspectRatio;
             aicam->mHorizontalFOV = cam.perspective.yfov * aicam->mAspect;
             aicam->mClipPlaneFar  = cam.perspective.zfar;
@@ -435,7 +433,7 @@ void glTFImporter::ImportLights(glTF::Asset& r)
         CopyValue(l.color, ail->mColorAmbient);
         CopyValue(l.color, ail->mColorDiffuse);
         CopyValue(l.color, ail->mColorSpecular);
-        
+
         ail->mAngleOuterCone = l.falloffAngle;
         ail->mAngleInnerCone = l.falloffExponent; // TODO fix this, it does not look right at all
 
@@ -598,7 +596,7 @@ void glTFImporter::ImportEmbeddedTextures(glTF::Asset& r)
 void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler) {
 
     this->mScene = pScene;
-    
+
     // read the asset file
     glTF::Asset asset(pIOHandler);
     asset.Load(pFile, GetExtension(pFile) == "glb");

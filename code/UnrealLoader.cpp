@@ -61,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace Assimp;
 
@@ -235,7 +235,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
     nd->mName.Set("<UnrealRoot>");
 
     // we can live without the uc file if necessary
-    boost::scoped_ptr<IOStream> pb (pIOHandler->Open(uc_path));
+    std::unique_ptr<IOStream> pb (pIOHandler->Open(uc_path));
     if (pb.get())   {
 
         std::vector<char> _data;

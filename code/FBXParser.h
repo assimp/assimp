@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdint.h>
 #include <map>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "LogAux.h"
 
 #include "FBXCompileConfig.h"
@@ -105,7 +105,7 @@ private:
 
     const Token& key_token;
     TokenList tokens;
-    boost::scoped_ptr<Scope> compound;
+    std::unique_ptr<Scope> compound;
 };
 
 
@@ -186,7 +186,7 @@ private:
 
     TokenPtr last, current;
     TokenList::const_iterator cursor;
-    boost::scoped_ptr<Scope> root;
+    std::unique_ptr<Scope> root;
 
     const bool is_binary;
 };

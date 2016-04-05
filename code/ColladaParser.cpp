@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/light.h"
@@ -87,13 +87,13 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
     }
 
     // open the file
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open(pFile ) );
+    std::unique_ptr<IOStream> file( pIOHandler->Open(pFile ) );
     if (file.get() == NULL) {
         throw DeadlyImportError( "Failed to open file " + pFile + "." );
     }
 
     // generate a XML reader for it
-    boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
+    std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
     mReader = irr::io::createIrrXMLReader( mIOWrapper.get());
     if (!mReader) {
         ThrowException("Collada: Unable to open file.");

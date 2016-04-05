@@ -229,7 +229,7 @@ private:
 class CompositeCurve : public BoundedCurve
 {
 
-    typedef std::pair< boost::shared_ptr< BoundedCurve >, bool > CurveEntry;
+    typedef std::pair< std::shared_ptr< BoundedCurve >, bool > CurveEntry;
 
 public:
 
@@ -241,8 +241,8 @@ public:
         curves.reserve(entity.Segments.size());
         for(const IfcCompositeCurveSegment& curveSegment :entity.Segments) {
             // according to the specification, this must be a bounded curve
-            boost::shared_ptr< Curve > cv(Curve::Convert(curveSegment.ParentCurve,conv));
-            boost::shared_ptr< BoundedCurve > bc = boost::dynamic_pointer_cast<BoundedCurve>(cv);
+            std::shared_ptr< Curve > cv(Curve::Convert(curveSegment.ParentCurve,conv));
+            std::shared_ptr< BoundedCurve > bc = std::dynamic_pointer_cast<BoundedCurve>(cv);
 
             if (!bc) {
                 IFCImporter::LogError("expected segment of composite curve to be a bounded curve");
@@ -346,9 +346,9 @@ public:
     TrimmedCurve(const IfcTrimmedCurve& entity, ConversionData& conv)
         : BoundedCurve(entity,conv)
     {
-        base = boost::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
+        base = std::shared_ptr<const Curve>(Curve::Convert(entity.BasisCurve,conv));
 
-        typedef boost::shared_ptr<const STEP::EXPRESS::DataType> Entry;
+        typedef std::shared_ptr<const STEP::EXPRESS::DataType> Entry;
 
         // for some reason, trimmed curves can either specify a parametric value
         // or a point on the curve, or both. And they can even specify which of the
@@ -446,7 +446,7 @@ private:
     IfcFloat maxval;
     bool agree_sense;
 
-    boost::shared_ptr<const Curve> base;
+    std::shared_ptr<const Curve> base;
 };
 
 

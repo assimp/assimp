@@ -133,7 +133,7 @@ void DXFImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene,
     IOSystem* pIOHandler)
 {
-    boost::shared_ptr<IOStream> file = boost::shared_ptr<IOStream>( pIOHandler->Open( pFile) );
+    std::shared_ptr<IOStream> file = std::shared_ptr<IOStream>( pIOHandler->Open( pFile) );
 
     // Check whether we can read the file
     if( file.get() == NULL) {
@@ -222,7 +222,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
 
         unsigned int vcount = 0, icount = 0;
         for (const DXF::Block& bl : output.blocks) {
-            for (boost::shared_ptr<const DXF::PolyLine> pl : bl.lines) {
+            for (std::shared_ptr<const DXF::PolyLine> pl : bl.lines) {
                 vcount += pl->positions.size();
                 icount += pl->counts.size();
             }
@@ -262,7 +262,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
     ExpandBlockReferences(*entities,blocks_by_name);
 
     unsigned int cur = 0;
-    for (boost::shared_ptr<const DXF::PolyLine> pl : entities->lines) {
+    for (std::shared_ptr<const DXF::PolyLine> pl : entities->lines) {
         if (pl->positions.size()) {
 
             std::map<std::string, unsigned int>::iterator it = layers.find(pl->layer);
@@ -371,8 +371,8 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
         // XXX this would be the place to implement recursive expansion if needed.
         const DXF::Block& bl_src = *(*it).second;
 
-        for (boost::shared_ptr<const DXF::PolyLine> pl_in : bl_src.lines) {
-            boost::shared_ptr<DXF::PolyLine> pl_out = boost::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
+        for (std::shared_ptr<const DXF::PolyLine> pl_in : bl_src.lines) {
+            std::shared_ptr<DXF::PolyLine> pl_out = std::shared_ptr<DXF::PolyLine>(new DXF::PolyLine(*pl_in));
 
             if (bl_src.base.Length() || insert.scale.x!=1.f || insert.scale.y!=1.f || insert.scale.z!=1.f || insert.angle || insert.pos.Length()) {
                 // manual coordinate system transformation
@@ -617,7 +617,7 @@ void DXFImporter::ParseInsertion(DXF::LineReader& reader, DXF::FileData& output)
 // ------------------------------------------------------------------------------------------------
 void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 {
-    output.blocks.back().lines.push_back( boost::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
+    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() ) );
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     unsigned int iguess = 0, vguess = 0;
@@ -799,7 +799,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
     // (note) this is also used for for parsing line entities, so we
     // must handle the vertex_count == 2 case as well.
 
-    output.blocks.back().lines.push_back( boost::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() )  );
+    output.blocks.back().lines.push_back( std::shared_ptr<DXF::PolyLine>( new DXF::PolyLine() )  );
     DXF::PolyLine& line = *output.blocks.back().lines.back();
 
     aiVector3D vip[4];

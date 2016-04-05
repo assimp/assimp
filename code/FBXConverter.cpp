@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../include/assimp/scene.h"
 #include <boost/tuple/tuple.hpp>
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 #include <iterator>
 #include <sstream>
@@ -338,7 +338,7 @@ private:
         bool reverse_order = false );
 
     // key (time), value, mapto (component index)
-    typedef boost::tuple<boost::shared_ptr<KeyTimeList>, boost::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
+    typedef boost::tuple<std::shared_ptr<KeyTimeList>, std::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
     typedef std::vector<KeyFrameList> KeyFrameListList;
 
 
@@ -2951,8 +2951,8 @@ Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const 
             ai_assert( curve->GetKeys().size() == curve->GetValues().size() && curve->GetKeys().size() );
 
             //get values within the start/stop time window
-            boost::shared_ptr<KeyTimeList> Keys( new KeyTimeList() );
-            boost::shared_ptr<KeyValueList> Values( new KeyValueList() );
+            std::shared_ptr<KeyTimeList> Keys( new KeyTimeList() );
+            std::shared_ptr<KeyValueList> Values( new KeyValueList() );
             const int count = curve->GetKeys().size();
             Keys->reserve( count );
             Values->reserve( count );
@@ -3089,7 +3089,7 @@ void Converter::InterpolateKeys( aiQuatKey* valOut, const KeyTimeList& keys, con
     ai_assert( keys.size() );
     ai_assert( valOut );
 
-    boost::scoped_array<aiVectorKey> temp( new aiVectorKey[ keys.size() ] );
+    std::unique_ptr<aiVectorKey[]> temp( new aiVectorKey[ keys.size() ] );
     InterpolateKeys( temp.get(), keys, inputs, def_value, maxTime, minTime );
 
     aiMatrix4x4 m;

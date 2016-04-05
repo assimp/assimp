@@ -48,7 +48,7 @@
 #include "irrXMLWrapper.h"
 #include "ColladaHelper.h"
 #include "../include/assimp/ai_assert.h"
-#include <boost/format.hpp>
+#include "TinyFormatter.h"
 #include <memory>
 
 namespace Assimp
@@ -359,7 +359,7 @@ namespace Assimp
     {
         typename std::map<std::string, Type>::const_iterator it = pLibrary.find( pURL);
         if( it == pLibrary.end())
-            ThrowException( boost::str( boost::format( "Unable to resolve library reference \"%s\".") % pURL));
+            ThrowException( Formatter::format() << "Unable to resolve library reference \"" << pURL << "\"." );
         return it->second;
     }
 

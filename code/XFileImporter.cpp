@@ -54,11 +54,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/DefaultLogger.hpp"
 #include <boost/format.hpp>
 #include "Defines.h"
+#include "TinyFormatter.h"
 #include <cctype>
 
 
 
 using namespace Assimp;
+using namespace Assimp::Formatter;
 
 static const aiImporterDesc desc = {
     "Direct3D XFile Importer",
@@ -602,7 +604,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 
       if( oldMat.sceneIndex == SIZE_MAX )
       {
-        DefaultLogger::get()->warn( boost::str( boost::format( "Could not resolve global material reference \"%s\"") % oldMat.mName));
+        DefaultLogger::get()->warn( format() << "Could not resolve global material reference \"" << oldMat.mName << "\"" );
         oldMat.sceneIndex = 0;
       }
 

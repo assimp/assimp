@@ -55,10 +55,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/light.h"
+#include "TinyFormatter.h"
 
 
 using namespace Assimp;
 using namespace Assimp::Collada;
+using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -163,7 +165,7 @@ void ColladaParser::ReadContents()
                 ReadStructure();
             } else
             {
-                DefaultLogger::get()->debug( boost::str( boost::format( "Ignoring global element <%s>.") % mReader->getNodeName()));
+                DefaultLogger::get()->debug( format() << "Ignoring global element <" << mReader->getNodeName() << ">." );
                 SkipElement();
             }
         } else
@@ -724,7 +726,7 @@ void ColladaParser::ReadControllerJoints( Collada::Controller& pController)
 
                 // local URLS always start with a '#'. We don't support global URLs
                 if( attrSource[0] != '#')
-                    ThrowException( boost::str( boost::format( "Unsupported URL format in \"%s\" in source attribute of <joints> data <input> element") % attrSource));
+                    ThrowException( format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <joints> data <input> element" );
                 attrSource++;
 
                 // parse source URL to corresponding source
@@ -733,7 +735,7 @@ void ColladaParser::ReadControllerJoints( Collada::Controller& pController)
                 else if( strcmp( attrSemantic, "INV_BIND_MATRIX") == 0)
                     pController.mJointOffsetMatrixSource = attrSource;
                 else
-                    ThrowException( boost::str( boost::format( "Unknown semantic \"%s\" in <joints> data <input> element") % attrSemantic));
+                    ThrowException( format() << "Unknown semantic \"" << attrSemantic << "\" in <joints> data <input> element" );
 
                 // skip inner data, if present
                 if( !mReader->isEmptyElement())
@@ -783,7 +785,7 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 
                 // local URLS always start with a '#'. We don't support global URLs
                 if( attrSource[0] != '#')
-                    ThrowException( boost::str( boost::format( "Unsupported URL format in \"%s\" in source attribute of <vertex_weights> data <input> element") % attrSource));
+                    ThrowException( format() << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <vertex_weights> data <input> element" );
                 channel.mAccessor = attrSource + 1;
 
                 // parse source URL to corresponding source
@@ -792,7 +794,7 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
                 else if( strcmp( attrSemantic, "WEIGHT") == 0)
                     pController.mWeightInputWeights = channel;
                 else
-                    ThrowException( boost::str( boost::format( "Unknown semantic \"%s\" in <vertex_weights> data <input> element") % attrSemantic));
+                    ThrowException( format() << "Unknown semantic \"" << attrSemantic << "\" in <vertex_weights> data <input> element" );
 
                 // skip inner data, if present
                 if( !mReader->isEmptyElement())
@@ -1962,7 +1964,7 @@ void ColladaParser::ReadAccessor( const std::string& pID)
     int attrSource = GetAttribute( "source");
     const char* source = mReader->getAttributeValue( attrSource);
     if( source[0] != '#')
-        ThrowException( boost::str( boost::format( "Unknown reference format in url \"%s\" in source attribute of <accessor> element.") % source));
+        ThrowException( format() << "Unknown reference format in url \"" << source << "\" in source attribute of <accessor> element." );
     int attrCount = GetAttribute( "count");
     unsigned int count = (unsigned int) mReader->getAttributeValueAsInt( attrCount);
     int attrOffset = TestAttribute( "offset");
@@ -2021,7 +2023,7 @@ void ColladaParser::ReadAccessor( const std::string& pID)
                     else if( name == "U") acc.mSubOffset[0] = acc.mParams.size();
                     else if( name == "V") acc.mSubOffset[1] = acc.mParams.size();
                     //else
-                    //  DefaultLogger::get()->warn( boost::str( boost::format( "Unknown accessor parameter \"%s\". Ignoring data channel.") % name));
+                    //  DefaultLogger::get()->warn( format() << "Unknown accessor parameter \"" << name << "\". Ignoring data channel." );
                 }
 
                 // read data type
@@ -2044,7 +2046,7 @@ void ColladaParser::ReadAccessor( const std::string& pID)
                 SkipElement();
             } else
             {
-                ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <accessor>") % mReader->getNodeName()));
+                ThrowException( format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <accessor>" );
             }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
@@ -2074,7 +2076,7 @@ void ColladaParser::ReadVertexData( Mesh* pMesh)
                 ReadInputChannel( pMesh->mPerVertexData);
             } else
             {
-                ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <vertices>") % mReader->getNodeName()));
+                ThrowException( format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <vertices>" );
             }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
@@ -2172,13 +2174,13 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
                 SkipElement("extra");
             } else
             {
-                ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <%s>") % mReader->getNodeName() % elementName));
+                ThrowException( format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">" );
             }
         }
         else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
         {
             if( mReader->getNodeName() != elementName)
-                ThrowException( boost::str( boost::format( "Expected end of <%s> element.") % elementName));
+                ThrowException( format() << "Expected end of <" << elementName << "> element." );
 
             break;
         }
@@ -2211,7 +2213,7 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
     int attrSource = GetAttribute( "source");
     const char* source = mReader->getAttributeValue( attrSource);
     if( source[0] != '#')
-        ThrowException( boost::str( boost::format( "Unknown reference format in url \"%s\" in source attribute of <input> element.") % source));
+        ThrowException( format() << "Unknown reference format in url \"" << source << "\" in source attribute of <input> element." );
     channel.mAccessor = source+1; // skipping the leading #, hopefully the remaining text is the accessor ID only
 
     // read index offset, if per-index <input>
@@ -2225,7 +2227,7 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
         if(attrSet > -1){
             attrSet = mReader->getAttributeValueAsInt( attrSet);
             if(attrSet < 0)
-                ThrowException( boost::str( boost::format( "Invalid index \"%i\" in set attribute of <input> element") % (attrSet)));
+                ThrowException( format() << "Invalid index \"" << (attrSet) << "\" in set attribute of <input> element" );
 
             channel.mIndex = attrSet;
         }
@@ -2449,7 +2451,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
 
     const Accessor& acc = *pInput.mResolved;
     if( pLocalIndex >= acc.mCount)
-        ThrowException( boost::str( boost::format( "Invalid data index (%d/%d) in primitive specification") % pLocalIndex % acc.mCount));
+        ThrowException( format() << "Invalid data index (" << pLocalIndex << "/" << acc.mCount << ") in primitive specification" );
 
     // get a pointer to the start of the data object referred to by the accessor and the local index
     const float* dataObject = &(acc.mData->mValues[0]) + acc.mOffset + pLocalIndex* acc.mStride;
@@ -2904,7 +2906,7 @@ void ColladaParser::ReadScene()
 // Aborts the file reading with an exception
 AI_WONT_RETURN void ColladaParser::ThrowException( const std::string& pError) const
 {
-    throw DeadlyImportError( boost::str( boost::format( "Collada: %s - %s") % mFileName % pError));
+    throw DeadlyImportError( format() << "Collada: " << mFileName << " - " << pError );
 }
 void ColladaParser::ReportWarning(const char* msg,...)
 {
@@ -2955,14 +2957,14 @@ void ColladaParser::TestOpening( const char* pName)
 {
     // read element start
     if( !mReader->read())
-        ThrowException( boost::str( boost::format( "Unexpected end of file while beginning of <%s> element.") % pName));
+        ThrowException( format() << "Unexpected end of file while beginning of <" << pName << "> element." );
     // whitespace in front is ok, just read again if found
     if( mReader->getNodeType() == irr::io::EXN_TEXT)
         if( !mReader->read())
-            ThrowException( boost::str( boost::format( "Unexpected end of file while reading beginning of <%s> element.") % pName));
+            ThrowException( format() << "Unexpected end of file while reading beginning of <" << pName << "> element." );
 
     if( mReader->getNodeType() != irr::io::EXN_ELEMENT || strcmp( mReader->getNodeName(), pName) != 0)
-        ThrowException( boost::str( boost::format( "Expected start of <%s> element.") % pName));
+        ThrowException( format() << "Expected start of <" << pName << "> element." );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2975,15 +2977,15 @@ void ColladaParser::TestClosing( const char* pName)
 
     // if not, read some more
     if( !mReader->read())
-        ThrowException( boost::str( boost::format( "Unexpected end of file while reading end of <%s> element.") % pName));
+        ThrowException( format() << "Unexpected end of file while reading end of <" << pName << "> element." );
     // whitespace in front is ok, just read again if found
     if( mReader->getNodeType() == irr::io::EXN_TEXT)
         if( !mReader->read())
-            ThrowException( boost::str( boost::format( "Unexpected end of file while reading end of <%s> element.") % pName));
+            ThrowException( format() << "Unexpected end of file while reading end of <" << pName << "> element." );
 
     // but this has the be the closing tag, or we're lost
     if( mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp( mReader->getNodeName(), pName) != 0)
-        ThrowException( boost::str( boost::format( "Expected end of <%s> element.") % pName));
+        ThrowException( format() << "Expected end of <" << pName << "> element." );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2995,7 +2997,7 @@ int ColladaParser::GetAttribute( const char* pAttr) const
         return index;
 
     // attribute not found -> throw an exception
-    ThrowException( boost::str( boost::format( "Expected attribute \"%s\" for element <%s>.") % pAttr % mReader->getNodeName()));
+    ThrowException( format() << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">." );
     return -1;
 }
 
@@ -3130,7 +3132,7 @@ Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemant
     else if( pSemantic == "TANGENT" || pSemantic == "TEXTANGENT")
         return IT_Tangent;
 
-    DefaultLogger::get()->warn( boost::str( boost::format( "Unknown vertex input type \"%s\". Ignoring.") % pSemantic));
+    DefaultLogger::get()->warn( format() << "Unknown vertex input type \"" << pSemantic << "\". Ignoring." );
     return IT_Invalid;
 }
 

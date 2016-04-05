@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "XFileHelper.h"
 #include "fast_atof.h"
 #include "Exceptional.h"
-#include <boost/format.hpp>
+#include "TinyFormatter.h"
 #include <boost/lexical_cast.hpp>
 #include "ByteSwapper.h"
 #include "../include/assimp/DefaultLogger.hpp"
@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 using namespace Assimp::XFile;
+using namespace Assimp::Formatter;
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_X
 
@@ -129,8 +130,8 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
         mIsBinaryFormat = true;
         compressed = true;
     }
-    else ThrowException( boost::str(boost::format("Unsupported xfile format '%c%c%c%c'")
-        % P[8] % P[9] % P[10] % P[11]));
+    else ThrowException( format() << "Unsupported xfile format '" <<
+       P[8] << P[9] << P[10] << P[11] << "'");
 
     // float size
     mBinaryFloatSize = (unsigned int)(P[12] - 48) * 1000
@@ -139,8 +140,7 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
         + (unsigned int)(P[15] - 48);
 
     if( mBinaryFloatSize != 32 && mBinaryFloatSize != 64)
-        ThrowException( boost::str( boost::format( "Unknown float size %1% specified in xfile header.")
-            % mBinaryFloatSize));
+        ThrowException( format() << "Unknown float size " << mBinaryFloatSize << " specified in xfile header." );
 
     // The x format specifies size in bits, but we work in bytes
     mBinaryFloatSize /= 8;
@@ -467,7 +467,7 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
     {
         unsigned int numIndices = ReadInt();
         if( numIndices < 3) {
-            ThrowException( boost::str( boost::format( "Invalid index count %1% for face %2%.") % numIndices % a));
+            ThrowException( format() << "Invalid index count " << numIndices << " for face " << a << "." );
         }
 
         // read indices
@@ -929,7 +929,7 @@ void XFileParser::ParseDataObjectAnimationKey( AnimBone* pAnimBone)
             }
 
             default:
-                ThrowException( boost::str( boost::format( "Unknown key type %1% in animation.") % keyType));
+                ThrowException( format() << "Unknown key type " << keyType << " in animation." );
                 break;
         } // end switch
 
@@ -1444,7 +1444,7 @@ AI_WONT_RETURN void XFileParser::ThrowException( const std::string& pText)
     if( mIsBinaryFormat)
         throw DeadlyImportError( pText);
     else
-        throw DeadlyImportError( boost::str( boost::format( "Line %d: %s") % mLineNumber % pText));
+        throw DeadlyImportError( format() << "Line " << mLineNumber << ": " << pText );
 }
 
 

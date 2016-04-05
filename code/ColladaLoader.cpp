@@ -63,6 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 using namespace Assimp;
+using namespace Assimp::Formatter;
 
 static const aiImporterDesc desc = {
     "Collada Importer",
@@ -467,7 +468,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
 
             if( !srcMesh)
             {
-                DefaultLogger::get()->warn( boost::str( boost::format( "Collada: Unable to find geometry for ID \"%s\". Skipping.") % mid.mMeshOrController));
+                DefaultLogger::get()->warn( format() << "Collada: Unable to find geometry for ID \"" << mid.mMeshOrController << "\". Skipping." );
                 continue;
             }
         } else
@@ -496,7 +497,7 @@ void ColladaLoader::BuildMeshesForNode( const ColladaParser& pParser, const Coll
             }
             else
             {
-                DefaultLogger::get()->warn( boost::str( boost::format( "Collada: No material specified for subgroup <%s> in geometry <%s>.") % submesh.mMaterial % mid.mMeshOrController));
+                DefaultLogger::get()->warn( format() << "Collada: No material specified for subgroup <" << submesh.mMaterial << "> in geometry <" << mid.mMeshOrController << ">." );
                 if( !mid.mMaterials.empty() )
                     meshMaterial = mid.mMaterials.begin()->second.mMatName;
             }
@@ -784,7 +785,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
             if( bnode)
                 bone->mName.Set( FindNameForNode( bnode));
             else
-                DefaultLogger::get()->warn( boost::str( boost::format( "ColladaLoader::CreateMesh(): could not find corresponding node for joint \"%s\".") % bone->mName.data));
+                DefaultLogger::get()->warn( format() << "ColladaLoader::CreateMesh(): could not find corresponding node for joint \"" << bone->mName.data << "\"." );
 
             // and insert bone
             dstMesh->mBones[boneCount++] = bone;
@@ -1004,7 +1005,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                 else if( subElement == "Z")
                     entry.mSubElement = 2;
                 else
-                    DefaultLogger::get()->warn( boost::str( boost::format( "Unknown anim subelement <%s>. Ignoring") % subElement));
+                    DefaultLogger::get()->warn( format() << "Unknown anim subelement <" << subElement << ">. Ignoring" );
             } else
             {
                 // no subelement following, transformId is remaining string
@@ -1082,7 +1083,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
             // time count and value count must match
             if( e.mTimeAccessor->mCount != e.mValueAccessor->mCount)
-                throw DeadlyImportError( boost::str( boost::format( "Time count / value count mismatch in animation channel \"%s\".") % e.mChannel->mTarget));
+                throw DeadlyImportError( format() << "Time count / value count mismatch in animation channel \"" << e.mChannel->mTarget << "\"." );
 
       if( e.mTimeAccessor->mCount > 0 )
       {
@@ -1498,8 +1499,8 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
     ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
     if( imIt == pParser.mImageLibrary.end())
     {
-        throw DeadlyImportError( boost::str( boost::format(
-            "Collada: Unable to resolve effect texture entry \"%s\", ended up at ID \"%s\".") % pName % name));
+        throw DeadlyImportError( format() <<
+            "Collada: Unable to resolve effect texture entry \"" << pName << "\", ended up at ID \"" << name << "\"." );
     }
 
     aiString result;
@@ -1665,7 +1666,7 @@ std::string ColladaLoader::FindNameForNode( const Collada::Node* pNode)
     {
         // No need to worry. Unnamed nodes are no problem at all, except
         // if cameras or lights need to be assigned to them.
-    return boost::str( boost::format( "$ColladaAutoName$_%d") % mNodeNameCounter++);
+    return format() << "$ColladaAutoName$_" << mNodeNameCounter++;
     }
 }
 

@@ -219,9 +219,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      * without threading support. The library doesn't utilize
      * threads then and is itself not threadsafe. */
     //////////////////////////////////////////////////////////////////////////
-// #ifndef ASSIMP_BUILD_SINGLETHREADED
-// #   define ASSIMP_BUILD_SINGLETHREADED
-// #endif
+#ifndef ASSIMP_BUILD_SINGLETHREADED
+#   define ASSIMP_BUILD_SINGLETHREADED
+#endif
 
 #if defined(_DEBUG) || ! defined(NDEBUG)
 #   define ASSIMP_BUILD_DEBUG

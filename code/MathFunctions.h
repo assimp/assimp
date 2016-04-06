@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  Math.h
+/** @file  MathFunctions.h
  *  @brief Implementation of the math functions (gcd and lcm)
  *
  *  Copied from BoostWorkaround/math

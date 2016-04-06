@@ -56,8 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StandardShapes.h"
 #include "Importer.h"
 
-// We need Math.h to compute the lcm/gcd of a number
-#include "Math.h"
+// We need MathFunctions.h to compute the lcm/gcd of a number
+#include "MathFunctions.h"
 #include <memory>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/mesh.h"

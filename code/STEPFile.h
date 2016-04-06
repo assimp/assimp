@@ -598,6 +598,8 @@ namespace STEP {
 
         LazyObject( LazyObject const& ) = delete;
         LazyObject operator=( LazyObject const& ) = delete;
+        LazyObject( LazyObject && ) = delete;
+        LazyObject operator=( LazyObject  && ) = delete;
 
     public:
 

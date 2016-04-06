@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SkeletonMeshBuilder.h"
 #include "../include/assimp/Importer.hpp"
 #include "../include/assimp/scene.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/DefaultLogger.hpp"
 
@@ -354,7 +354,7 @@ void MD5Importer::AttachChilds_Anim(int iParentID,aiNode* piParent, AnimBoneList
 void MD5Importer::LoadMD5MeshFile ()
 {
     std::string pFile = mFile + "md5mesh";
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( file.get() == NULL || !file->FileSize())    {
@@ -569,7 +569,7 @@ void MD5Importer::LoadMD5MeshFile ()
 void MD5Importer::LoadMD5AnimFile ()
 {
     std::string pFile = mFile + "md5anim";
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( !file.get() || !file->FileSize())   {
@@ -681,7 +681,7 @@ void MD5Importer::LoadMD5AnimFile ()
 void MD5Importer::LoadMD5CameraFile ()
 {
     std::string pFile = mFile + "md5camera";
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( !file.get() || !file->FileSize())   {

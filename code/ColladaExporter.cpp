@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exceptional.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <ctime>
 #include <set>
 
@@ -75,7 +75,7 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
     ColladaExporter iDoTheExportThing( pScene, pIOSystem, path, file);
 
     // we're still here - export successfully completed. Write result to the given IOSYstem
-    boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+    std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if(outfile == NULL) {
         throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
     }
@@ -268,7 +268,7 @@ void ColladaExporter::WriteTextures() {
 
             std::string name = mFile + "_texture_" + (i < 1000 ? "0" : "") + (i < 100 ? "0" : "") + (i < 10 ? "0" : "") + str + "." + ((const char*) texture->achFormatHint);
 
-            boost::scoped_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
+            std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
             if(outfile == NULL) {
                 throw DeadlyExportError("could not open output texture file: " + mPath + name);
             }
@@ -636,7 +636,7 @@ void ColladaExporter::WriteMaterials()
     aiString name;
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
-    materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
+    materials[a].name = std::string( "m") + std::to_string(a) + name.C_Str();
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
       if( !isalnum_C( *it ) ) {
         *it = '_';
@@ -812,7 +812,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     {
         if( mesh->HasTextureCoords( a) )
         {
-            WriteFloatArray( idstr + "-tex" + boost::lexical_cast<std::string> (a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
+            WriteFloatArray( idstr + "-tex" + std::to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
                 (float*) mesh->mTextureCoords[a], mesh->mNumVertices);
         }
     }
@@ -821,7 +821,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
         if( mesh->HasVertexColors( a) )
-            WriteFloatArray( idstr + "-color" + boost::lexical_cast<std::string> (a), FloatType_Color, (float*) mesh->mColors[a], mesh->mNumVertices);
+            WriteFloatArray( idstr + "-color" + std::to_string(a), FloatType_Color, (float*) mesh->mColors[a], mesh->mNumVertices);
     }
 
     // assemble vertex structure

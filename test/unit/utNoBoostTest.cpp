@@ -44,13 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define ASSIMP_FORCE_NOBOOST
 #include "BoostWorkaround/boost/format.hpp"
+#include "TinyFormatter.h"
 
 
 using namespace std;
 using namespace Assimp;
-
-using boost::format;
-using boost::str;
+using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 TEST(NoBoostTest, testFormat)

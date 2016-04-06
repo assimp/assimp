@@ -73,7 +73,7 @@ namespace Blender {
 //
 // * Pointers to other structures or primitive types are allowed.
 //   No references or double pointers or arrays of pointers.
-//   A pointer to a T is normally written as boost::shared_ptr, while a
+//   A pointer to a T is normally written as std::shared_ptr, while a
 //   pointer to an array of elements is written as boost::
 //   shared_array. To avoid cyclic pointers, use raw pointers in
 //   one direction.
@@ -98,6 +98,8 @@ struct Object;
 struct MTex;
 struct Image;
 
+#include <memory>
+
 #define AI_BLEND_MESH_MAX_VERTS 2000000000L
 
 // -------------------------------------------------------------------------------
@@ -110,8 +112,8 @@ struct ID : ElemBase {
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
 
-    boost::shared_ptr<ElemBase> first;
-    boost::shared_ptr<ElemBase> last;
+    std::shared_ptr<ElemBase> first;
+    std::shared_ptr<ElemBase> last;
 };
 
 
@@ -119,14 +121,14 @@ struct ListBase : ElemBase {
 struct PackedFile : ElemBase {
      int size WARN;
      int seek WARN;
-     boost::shared_ptr< FileOffset > data WARN;
+     std::shared_ptr< FileOffset > data WARN;
 };
 
 // -------------------------------------------------------------------------------
 struct GroupObject : ElemBase {
 
-    boost::shared_ptr<GroupObject> prev,next FAIL;
-    boost::shared_ptr<Object> ob;
+    std::shared_ptr<GroupObject> prev,next FAIL;
+    std::shared_ptr<Object> ob;
 };
 
 // -------------------------------------------------------------------------------
@@ -134,7 +136,7 @@ struct Group : ElemBase {
     ID id FAIL;
     int layer;
 
-    boost::shared_ptr<GroupObject> gobject;
+    std::shared_ptr<GroupObject> gobject;
 };
 
 // -------------------------------------------------------------------------------
@@ -222,7 +224,7 @@ struct MTFace : ElemBase {
     short tile;
     short unwrap;
 
-    // boost::shared_ptr<Image> tpage;
+    // std::shared_ptr<Image> tpage;
 };
 
 // -------------------------------------------------------------------------------
@@ -259,12 +261,12 @@ struct Material : ElemBase {
     float darkness;
     float refrac;
 
-    boost::shared_ptr<Group> group;
+    std::shared_ptr<Group> group;
 
     short diff_shader WARN;
     short spec_shader WARN;
 
-    boost::shared_ptr<MTex> mtex[18];
+    std::shared_ptr<MTex> mtex[18];
 };
 
 // -------------------------------------------------------------------------------
@@ -295,7 +297,7 @@ struct Mesh : ElemBase {
     vector<MDeformVert> dvert;
     vector<MCol> mcol;
 
-    vector< boost::shared_ptr<Material> > mat FAIL;
+    vector< std::shared_ptr<Material> > mat FAIL;
 };
 
 // -------------------------------------------------------------------------------
@@ -304,7 +306,7 @@ struct Library : ElemBase {
 
     char name[240] WARN;
     char filename[240] FAIL;
-    boost::shared_ptr<Library> parent WARN;
+    std::shared_ptr<Library> parent WARN;
 };
 
 // -------------------------------------------------------------------------------
@@ -444,8 +446,8 @@ struct ModifierData : ElemBase  {
       eModifierType_ShapeKey
     };
 
-    boost::shared_ptr<ElemBase> next WARN;
-    boost::shared_ptr<ElemBase> prev WARN;
+    std::shared_ptr<ElemBase> next WARN;
+    std::shared_ptr<ElemBase> prev WARN;
 
     int type, mode;
     char name[32];
@@ -489,7 +491,7 @@ struct MirrorModifierData : ElemBase {
 
     short axis, flag;
     float tolerance;
-    boost::shared_ptr<Object> mirror_ob;
+    std::shared_ptr<Object> mirror_ob;
 };
 
 // -------------------------------------------------------------------------------
@@ -517,11 +519,11 @@ struct Object : ElemBase  {
     char parsubstr[32] WARN;
 
     Object* parent WARN;
-    boost::shared_ptr<Object> track WARN;
+    std::shared_ptr<Object> track WARN;
 
-    boost::shared_ptr<Object> proxy,proxy_from,proxy_group WARN;
-    boost::shared_ptr<Group> dup_group WARN;
-    boost::shared_ptr<ElemBase> data FAIL;
+    std::shared_ptr<Object> proxy,proxy_from,proxy_group WARN;
+    std::shared_ptr<Group> dup_group WARN;
+    std::shared_ptr<ElemBase> data FAIL;
 
     ListBase modifiers;
 };
@@ -530,17 +532,17 @@ struct Object : ElemBase  {
 // -------------------------------------------------------------------------------
 struct Base : ElemBase {
     Base* prev WARN;
-    boost::shared_ptr<Base> next WARN;
-    boost::shared_ptr<Object> object WARN;
+    std::shared_ptr<Base> next WARN;
+    std::shared_ptr<Object> object WARN;
 };
 
 // -------------------------------------------------------------------------------
 struct Scene : ElemBase {
     ID id FAIL;
 
-    boost::shared_ptr<Object> camera WARN;
-    boost::shared_ptr<World> world WARN;
-    boost::shared_ptr<Base> basact WARN;
+    std::shared_ptr<Object> camera WARN;
+    std::shared_ptr<World> world WARN;
+    std::shared_ptr<Base> basact WARN;
 
     ListBase base;
 };
@@ -564,7 +566,7 @@ struct Image : ElemBase {
     //unsigned int bindcode;
     //unsigned int *repbind;
 
-    boost::shared_ptr<PackedFile> packedfile;
+    std::shared_ptr<PackedFile> packedfile;
     //struct PreviewImage * preview;
 
     float lastupdate;
@@ -650,7 +652,7 @@ struct Tex : ElemBase {
 
     //bNodeTree *nodetree;
     //Ipo *ipo;
-    boost::shared_ptr<Image> ima WARN;
+    std::shared_ptr<Image> ima WARN;
     //PluginTex *plugin;
     //ColorBand *coba;
     //EnvMap *env;
@@ -717,8 +719,8 @@ struct MTex : ElemBase {
     MapType mapto;
 
     BlendType blendtype;
-    boost::shared_ptr<Object> object;
-    boost::shared_ptr<Tex> tex;
+    std::shared_ptr<Object> object;
+    std::shared_ptr<Tex> tex;
     char uvname[32];
 
     Projection projx,projy,projz;

@@ -48,9 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/DefaultLogger.hpp"
 
 #include <limits>
-#include <boost/format.hpp>
+#include "TinyFormatter.h"
 
 using namespace Assimp;
+using namespace Assimp::Formatter;
 
 // ------------------------------------------------------------------------------------------------
 // Constructor
@@ -95,7 +96,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
 
     if( !isNecessary )
     {
-        DefaultLogger::get()->debug( boost::str( boost::format( "SplitByBoneCountProcess early-out: no meshes with more than %d bones.") % mMaxBoneCount));
+        DefaultLogger::get()->debug( format() << "SplitByBoneCountProcess early-out: no meshes with more than " << mMaxBoneCount << " bones." );
         return;
     }
 
@@ -143,7 +144,7 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
     // recurse through all nodes and translate the node's mesh indices to fit the new mesh array
     UpdateNode( pScene->mRootNode);
 
-    DefaultLogger::get()->debug( boost::str( boost::format( "SplitByBoneCountProcess end: split %d meshes into %d submeshes.") % mSubMeshIndices.size() % meshes.size()));
+    DefaultLogger::get()->debug( format() << "SplitByBoneCountProcess end: split " << mSubMeshIndices.size() << " meshes into " << meshes.size() << " submeshes." );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -234,7 +235,7 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
         // create a new mesh to hold this subset of the source mesh
         aiMesh* newMesh = new aiMesh;
         if( pMesh->mName.length > 0 )
-            newMesh->mName.Set( boost::str( boost::format( "%s_sub%d") % pMesh->mName.data % poNewMeshes.size()));
+            newMesh->mName.Set( format() << pMesh->mName.data << "_sub" << poNewMeshes.size());
         newMesh->mMaterialIndex = pMesh->mMaterialIndex;
         newMesh->mPrimitiveTypes = pMesh->mPrimitiveTypes;
         poNewMeshes.push_back( newMesh);

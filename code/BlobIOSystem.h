@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "./../include/assimp/cexport.h"
 #include "./../include/assimp/IOSystem.hpp"
 #include "./../include/assimp/DefaultLogger.hpp"
-#include <boost/foreach.hpp>
 #include <stdint.h>
 #include <set>
 #include <vector>
@@ -224,7 +223,7 @@ public:
 
     virtual ~BlobIOSystem()
     {
-        BOOST_FOREACH(BlobEntry& blobby, blobs) {
+        for(BlobEntry& blobby : blobs) {
             delete blobby.second;
         }
     }
@@ -243,7 +242,7 @@ public:
     {
         // one must be the master
         aiExportDataBlob* master = NULL, *cur;
-        BOOST_FOREACH(const BlobEntry& blobby, blobs) {
+        for(const BlobEntry& blobby : blobs) {
             if (blobby.first == AI_BLOBIO_MAGIC) {
                 master = blobby.second;
                 break;
@@ -257,7 +256,7 @@ public:
         master->name.Set("");
 
         cur = master;
-        BOOST_FOREACH(const BlobEntry& blobby, blobs) {
+        for(const BlobEntry& blobby : blobs) {
             if (blobby.second == master) {
                 continue;
             }

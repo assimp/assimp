@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/scene.h"
 #include "../include/assimp/DefaultLogger.hpp"
 #include "StringComparison.h"
-#include <boost/scoped_array.hpp>
+#include <memory>
 #include <cctype>
 
 using namespace Assimp;
@@ -359,7 +359,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 
     // we need to split all meshes by their materials
     for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin(); i != mScene->mMeshes.end();++i)    {
-        boost::scoped_array< std::vector<unsigned int> > aiSplit(new std::vector<unsigned int>[mScene->mMaterials.size()]);
+        std::unique_ptr< std::vector<unsigned int>[] > aiSplit(new std::vector<unsigned int>[mScene->mMaterials.size()]);
 
         name.length = ASSIMP_itoa10(name.data,num++);
 

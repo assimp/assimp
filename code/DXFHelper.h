@@ -213,7 +213,7 @@ struct InsertBlock
 // keeps track of all geometry in a single BLOCK.
 struct Block
 {
-    std::vector< boost::shared_ptr<PolyLine> > lines;
+    std::vector< std::shared_ptr<PolyLine> > lines;
     std::vector<InsertBlock> insertions;
 
     std::string name;

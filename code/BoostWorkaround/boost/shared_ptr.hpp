@@ -67,7 +67,7 @@ namespace boost {
 	}
 
 // ------------------------------
-// Small replacement for boost::shared_ptr, not threadsafe because no
+// Small replacement for std::shared_ptr, not threadsafe because no
 // atomic reference counter is in use.
 // ------------------------------
 template <class T>

@@ -58,7 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include <boost/foreach.hpp>
 #include "ByteSwapper.h"
 
 #include <iostream>
@@ -208,7 +207,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 // ------------------------------------------------------------------------------------------------
 Scope::~Scope()
 {
-    BOOST_FOREACH(ElementMap::value_type& v, elements) {
+    for(ElementMap::value_type& v : elements) {
         delete v.second;
     }
 }

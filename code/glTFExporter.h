@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 
-#include "boost/scoped_ptr.hpp"
+#include <memory>
 
 
 struct aiScene;

@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_PLY_EXPORTER)
 
 #include "PlyExporter.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <cmath>
 #include "Exceptional.h"
 #include "../include/assimp/scene.h"
@@ -64,7 +64,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     PlyExporter exporter(pFile, pScene);
 
     // we're still here - export successfully completed. Write the file.
-    boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+    std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if(outfile == NULL) {
         throw DeadlyExportError("could not open output .ply file: " + std::string(pFile));
     }
@@ -78,7 +78,7 @@ void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene*
     PlyExporter exporter(pFile, pScene, true);
 
     // we're still here - export successfully completed. Write the file.
-    boost::scoped_ptr<IOStream> outfile(pIOSystem->Open(pFile, "wb"));
+    std::unique_ptr<IOStream> outfile(pIOSystem->Open(pFile, "wb"));
     if (outfile == NULL) {
         throw DeadlyExportError("could not open output .ply file: " + std::string(pFile));
     }

@@ -114,32 +114,7 @@ IF (NOT TARGET uninstall)
   add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 ENDIF()
 
-# Globally enable Boost resp. the Boost workaround – it is also needed by the
-# tools which include the Assimp headers.
-option ( ASSIMP_ENABLE_BOOST_WORKAROUND
-  "If a simple implementation of the used Boost functions is used. Slightly reduces functionality, but enables builds without Boost available."
-  ON
-)
-IF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
-  INCLUDE_DIRECTORIES( code/BoostWorkaround )
-  ADD_DEFINITIONS( -DASSIMP_BUILD_BOOST_WORKAROUND )
-  MESSAGE( STATUS "Building a non-boost version of Assimp." )
-ELSE ( ASSIMP_ENABLE_BOOST_WORKAROUND )
-  SET( Boost_DETAILED_FAILURE_MSG ON )
-  IF ( NOT Boost_ADDITIONAL_VERSIONS )
-    SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0")
-  ENDIF ( NOT Boost_ADDITIONAL_VERSIONS )
-  FIND_PACKAGE( Boost )
-  IF ( NOT Boost_FOUND )
-    MESSAGE( FATAL_ERROR
-      "Boost libraries (http://www.boost.org/) not found. "
-      "You can build a non-boost version of Assimp with slightly reduced "
-      "functionality by specifying -DASSIMP_ENABLE_BOOST_WORKAROUND=ON."
-    )
-  ENDIF ( NOT Boost_FOUND )
 
-  INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
-ENDIF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 
 # cmake configuration files
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/assimp-config.cmake.in"         "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake" @ONLY IMMEDIATE)
@@ -207,7 +182,7 @@ MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
 
 
 SET ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL
-  "Build the C4D importer, which relies on the non-free Melange SDK." 
+  "Build the C4D importer, which relies on the non-free Melange SDK."
 )
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
@@ -222,26 +197,26 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
     ELSEIF(MSVC90)
       SET(C4D_LIB_POSTFIX "_2008md")
     ELSE()
-      MESSAGE( FATAL_ERROR 
+      MESSAGE( FATAL_ERROR
         "C4D is currently only supported with MSVC 9, 10, 11"
       )
     ENDIF()
-      
+
     IF(CMAKE_CL_64)
       SET(C4D_LIB_ARCH_POSTFIX "_x64")
     ELSE()
       SET(C4D_LIB_ARCH_POSTFIX "")
     ENDIF()
-    
+
     SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/_melange/lib/WIN")
-    
+
     SET(C4D_DEBUG_LIBRARY "${C4D_LIB_BASE_PATH}/debug/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
     SET(C4D_RELEASE_LIBRARY "${C4D_LIB_BASE_PATH}/release/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
-    
+
     # winsock and winmm are necessary dependencies of melange (this is undocumented, but true.)
     SET(C4D_EXTRA_LIBRARIES WSock32.lib Winmm.lib)
   ELSE ()
-    MESSAGE( FATAL_ERROR 
+    MESSAGE( FATAL_ERROR
       "C4D is currently only available on Windows with melange SDK installed in contrib/Melange"
     )
   ENDIF ( MSVC )
@@ -319,7 +294,7 @@ if(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
   set(CPACK_COMPONENT_${LIBASSIMP-DEV_COMPONENT_UPPER}_DEPENDS $    "{LIBASSIMP_COMPONENT}" )
   set(CPACK_COMPONENT_ASSIMP-DEV_DISPLAY_NAME                       "${CPACK_COMPONENT_${LIBASSIMP-DEV_COMPONENT}_DISPLAY_NAME}" )
   set(CPACK_COMPONENT_ASSIMP-DEV_DEPENDS                            "${LIBASSIMP-DEV_COMPONENT}" )
-  set(CPACK_DEBIAN_BUILD_DEPENDS debhelper cmake libboost-dev libboost-thread-dev libboost-math-dev zlib1g-dev pkg-config)
+  set(CPACK_DEBIAN_BUILD_DEPENDS debhelper cmake zlib1g-dev pkg-config)
 
   # debian
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
@@ -352,15 +327,15 @@ if(WIN32)
 		set(BIN_DIR "${PROJECT_SOURCE_DIR}/bin32/")
 		set(LIB_DIR "${PROJECT_SOURCE_DIR}/lib32/")
 	endif()
-	
+
 	if(MSVC12)
 		set(ASSIMP_MSVC_VERSION "vc120")
-	elseif(MSVC14)	
+	elseif(MSVC14)
 		set(ASSIMP_MSVC_VERSION "vc140")
 	endif(MSVC12)
 
 	if(MSVC12 OR MSVC14)
-		add_custom_target(UpdateAssimpLibsDebugSymbolsAndDLLs COMMENT "Copying Assimp Libraries ..." VERBATIM)	
+		add_custom_target(UpdateAssimpLibsDebugSymbolsAndDLLs COMMENT "Copying Assimp Libraries ..." VERBATIM)
 		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll	${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.dll VERBATIM)
 		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.exp	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.exp VERBATIM)
 		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.lib	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.lib VERBATIM)

@@ -51,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
 #include "ByteSwapper.h"
-#include <boost/foreach.hpp>
 
 namespace Assimp {
 namespace FBX {
@@ -96,7 +95,7 @@ Material::Material(uint64_t id, const Element& element, const Document& doc, con
 
     // resolve texture links
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
-    BOOST_FOREACH(const Connection* con, conns) {
+    for(const Connection* con : conns) {
 
         // texture link to properties, not objects
         if (!con->PropertyName().length()) {
@@ -205,7 +204,7 @@ Texture::Texture(uint64_t id, const Element& element, const Document& doc, const
     // resolve video links
     if(doc.Settings().readTextures) {
         const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID());
-        BOOST_FOREACH(const Connection* con, conns) {
+        for(const Connection* con : conns) {
             const Object* const ob = con->SourceObject();
             if(!ob) {
                 DOMWarning("failed to read source object for texture link, ignoring",&element);

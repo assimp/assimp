@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StandardShapes.h"
 #include "fast_atof.h"
 #include "RemoveComments.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/scene.h"
@@ -133,7 +133,7 @@ const aiImporterDesc* NFFImporter::GetInfo () const
 void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
     const std::string& path, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( path, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( path, "rb"));
 
     // Check whether we can read from the file
     if( !file.get())    {
@@ -235,7 +235,7 @@ void NFFImporter::LoadNFF2MaterialTable(std::vector<ShadingInfo>& output,
 void NFFImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( !file.get())

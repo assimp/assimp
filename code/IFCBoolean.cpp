@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Defines.h"
 
 #include <iterator>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 
 namespace Assimp {
@@ -413,7 +413,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
     n.Normalize();
 
     // obtain the polygonal bounding volume
-    boost::shared_ptr<TempMesh> profile = boost::shared_ptr<TempMesh>(new TempMesh());
+    std::shared_ptr<TempMesh> profile = std::shared_ptr<TempMesh>(new TempMesh());
     if(!ProcessCurve(hs->PolygonalBoundary, *profile.get(), conv)) {
         IFCImporter::LogError("expected valid polyline for boundary of boolean halfspace");
         return;
@@ -510,7 +510,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
         if( !blackside.empty() )
         {
             // poly edge index, intersection point, edge index in boundary poly
-            std::vector<boost::tuple<size_t, IfcVector3, size_t> > intersections;
+            std::vector<std::tuple<size_t, IfcVector3, size_t> > intersections;
             bool startedInside = PointInPoly(proj * blackside.front(), profile->verts);
             bool isCurrentlyInside = startedInside;
 
@@ -542,7 +542,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
                 }
                 // now add them to the list of intersections
                 for( size_t b = 0; b < intersected_boundary.size(); ++b )
-                    intersections.push_back(boost::make_tuple(a, proj_inv * intersected_boundary[b].second, intersected_boundary[b].first));
+                    intersections.push_back(std::make_tuple(a, proj_inv * intersected_boundary[b].second, intersected_boundary[b].first));
 
                 // and calculate our new inside/outside state
                 if( intersected_boundary.size() & 1 )
@@ -568,12 +568,12 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
                 // Filter pairs of out->in->out that lie too close to each other.
                 for( size_t a = 0; intersections.size() > 0 && a < intersections.size() - 1; /**/ )
                 {
-                    if( (intersections[a].get<1>() - intersections[(a + 1) % intersections.size()].get<1>()).SquareLength() < 1e-10 )
+                    if( (std::get<1>(intersections[a]) - std::get<1>(intersections[(a + 1) % intersections.size()])).SquareLength() < 1e-10 )
                         intersections.erase(intersections.begin() + a, intersections.begin() + a + 2);
                     else
                         a++;
                 }
-                if( intersections.size() > 1 && (intersections.back().get<1>() - intersections.front().get<1>()).SquareLength() < 1e-10 )
+                if( intersections.size() > 1 && (std::get<1>(intersections.back()) - std::get<1>(intersections.front())).SquareLength() < 1e-10 )
                 {
                     intersections.pop_back(); intersections.erase(intersections.begin());
                 }
@@ -619,23 +619,23 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
                 while( true )
                 {
                     ai_assert(intersections.size() > currentIntersecIdx + 1);
-                    boost::tuple<size_t, IfcVector3, size_t> currintsec = intersections[currentIntersecIdx + 0];
-                    boost::tuple<size_t, IfcVector3, size_t> nextintsec = intersections[currentIntersecIdx + 1];
+                    std::tuple<size_t, IfcVector3, size_t> currintsec = intersections[currentIntersecIdx + 0];
+                    std::tuple<size_t, IfcVector3, size_t> nextintsec = intersections[currentIntersecIdx + 1];
                     intersections.erase(intersections.begin() + currentIntersecIdx, intersections.begin() + currentIntersecIdx + 2);
 
                     // we start with an in->out intersection
-                    resultpoly.push_back(currintsec.get<1>());
+                    resultpoly.push_back(std::get<1>(currintsec));
                     // climb along the polygon to the next intersection, which should be an out->in
-                    size_t numPolyPoints = (currintsec.get<0>() > nextintsec.get<0>() ? blackside.size() : 0)
-                        + nextintsec.get<0>() - currintsec.get<0>();
+                    size_t numPolyPoints = (std::get<0>(currintsec) > std::get<0>(nextintsec) ? blackside.size() : 0)
+                        + std::get<0>(nextintsec) - std::get<0>(currintsec);
                     for( size_t a = 1; a <= numPolyPoints; ++a )
-                        resultpoly.push_back(blackside[(currintsec.get<0>() + a) % blackside.size()]);
+                        resultpoly.push_back(blackside[(std::get<0>(currintsec) + a) % blackside.size()]);
                     // put the out->in intersection
-                    resultpoly.push_back(nextintsec.get<1>());
+                    resultpoly.push_back(std::get<1>(nextintsec));
 
                     // generate segments along the boundary polygon that lie in the poly's plane until we hit another intersection
-                    IfcVector3 startingPoint = proj * nextintsec.get<1>();
-                    size_t currentBoundaryEdgeIdx = (nextintsec.get<2>() + (marchBackwardsOnBoundary ? 1 : 0)) % profile->verts.size();
+                    IfcVector3 startingPoint = proj * std::get<1>(nextintsec);
+                    size_t currentBoundaryEdgeIdx = (std::get<2>(nextintsec) + (marchBackwardsOnBoundary ? 1 : 0)) % profile->verts.size();
                     size_t nextIntsecIdx = SIZE_MAX;
                     while( nextIntsecIdx == SIZE_MAX )
                     {
@@ -676,7 +676,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
                         // to marching along the poly border from that intersection point
                         for( size_t a = 0; a < intersections.size(); a += 2 )
                         {
-                            dirToThatPoint = proj * intersections[a].get<1>() - startingPoint;
+                            dirToThatPoint = proj * std::get<1>(intersections[a]) - startingPoint;
                             tpt = dirToThatPoint * dirAtPolyPlane;
                             if( tpt > -1e-6 && tpt <= t && (dirToThatPoint - tpt * dirAtPolyPlane).SquareLength() < 1e-10 )
                             {
@@ -730,17 +730,17 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
     // operand should be near-planar. Luckily, this is usually the case in Ifc
     // buildings.
 
-    boost::shared_ptr<TempMesh> meshtmp = boost::shared_ptr<TempMesh>(new TempMesh());
+    std::shared_ptr<TempMesh> meshtmp = std::shared_ptr<TempMesh>(new TempMesh());
     ProcessExtrudedAreaSolid(*as,*meshtmp,conv,false);
 
-    std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,boost::shared_ptr<TempMesh>()));
+    std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,std::shared_ptr<TempMesh>()));
 
     result = first_operand;
 
     TempMesh temp;
 
     std::vector<IfcVector3>::const_iterator vit = first_operand.verts.begin();
-    BOOST_FOREACH(unsigned int pcount, first_operand.vertcnt) {
+    for(unsigned int pcount : first_operand.vertcnt) {
         temp.Clear();
 
         temp.verts.insert(temp.verts.end(), vit, vit + pcount);

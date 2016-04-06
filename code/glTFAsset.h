@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/error/en.h>
 
 #ifdef ASSIMP_API
-#   include "boost/shared_ptr.hpp"
+#   include <memory>
 #   include "DefaultIOSystem.h"
 #   include "ByteSwapper.h"
 #else
@@ -90,7 +90,7 @@ namespace glTF
 #ifdef ASSIMP_API
     using Assimp::IOStream;
     using Assimp::IOSystem;
-    using boost::shared_ptr;
+    using std::shared_ptr;
 #else
     using std::shared_ptr;
 
@@ -428,12 +428,12 @@ namespace glTF
         {
 
         };
-        
+
         struct Target
         {
 
         };
-        
+
         struct Sampler
         {
 
@@ -467,7 +467,7 @@ namespace glTF
         void Read(Value& obj, Asset& r);
 
         void LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
-        
+
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
 
@@ -476,7 +476,7 @@ namespace glTF
 
         void MarkAsSpecial()
             { mIsSpecial = true; }
-        
+
         bool IsSpecial() const
             { return mIsSpecial; }
     };
@@ -553,7 +553,7 @@ namespace glTF
 
         inline size_t GetDataLength() const
             { return mDataLength; }
-        
+
         inline const uint8_t* GetData() const
             { return mData; }
 

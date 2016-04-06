@@ -6,7 +6,7 @@
 
 namespace boost {
 
-// small replacement for boost::scoped_ptr
+// small replacement for std::unique_ptr
 template <class T>
 class scoped_ptr
 {

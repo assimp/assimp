@@ -76,7 +76,7 @@ void FillMaterial(aiMaterial* mat,const IFC::IfcSurfaceStyle* surf,ConversionDat
     mat->AddProperty(&name,AI_MATKEY_NAME);
 
     // now see which kinds of surface information are present
-    BOOST_FOREACH(boost::shared_ptr< const IFC::IfcSurfaceStyleElementSelect > sel2, surf->Styles) {
+    for(std::shared_ptr< const IFC::IfcSurfaceStyleElementSelect > sel2 : surf->Styles) {
         if (const IFC::IfcSurfaceStyleShading* shade = sel2->ResolveSelectPtr<IFC::IfcSurfaceStyleShading>(conv.db)) {
             aiColor4D col_base,col;
 
@@ -139,8 +139,8 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
     STEP::DB::RefMapRange range = conv.db.GetRefs().equal_range(id);
     for(;range.first != range.second; ++range.first) {
         if(const IFC::IfcStyledItem* const styled = conv.db.GetObject((*range.first).second)->ToPtr<IFC::IfcStyledItem>()) {
-            BOOST_FOREACH(const IFC::IfcPresentationStyleAssignment& as, styled->Styles) {
-                BOOST_FOREACH(boost::shared_ptr<const IFC::IfcPresentationStyleSelect> sel, as.Styles) {
+            for(const IFC::IfcPresentationStyleAssignment& as : styled->Styles) {
+                for(std::shared_ptr<const IFC::IfcPresentationStyleSelect> sel : as.Styles) {
 
                     if( const IFC::IfcSurfaceStyle* const surf = sel->ResolveSelectPtr<IFC::IfcSurfaceStyle>(conv.db) ) {
                         // try to satisfy from cache
@@ -154,7 +154,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
                             IFCImporter::LogWarn("ignoring surface side marker on IFC::IfcSurfaceStyle: " + side);
                         }
 
-                        std::auto_ptr<aiMaterial> mat(new aiMaterial());
+                        std::unique_ptr<aiMaterial> mat(new aiMaterial());
 
                         FillMaterial(mat.get(), surf, conv);
 
@@ -190,7 +190,7 @@ unsigned int ProcessMaterials(uint64_t id, unsigned int prevMatId, ConversionDat
     }
 
     // we're here, yet - no default material with suitable color available. Generate one
-    std::auto_ptr<aiMaterial> mat(new aiMaterial());
+    std::unique_ptr<aiMaterial> mat(new aiMaterial());
     mat->AddProperty(&name,AI_MATKEY_NAME);
 
     const aiColor4D col = aiColor4D( 0.6f, 0.6f, 0.6f, 1.0f); // aiColor4D( color.r, color.g, color.b, 1.0f);

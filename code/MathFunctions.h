@@ -1,13 +1,15 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2016, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the
-following conditions are met:
+with or without modification, are permitted provided that the following
+conditions are met:
 
 * Redistributions of source code must retain the above
   copyright notice, this list of conditions and the
@@ -34,31 +36,42 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
 
-#ifndef INCLUDED_AI_STEPFILEREADER_H
-#define INCLUDED_AI_STEPFILEREADER_H
-
-#include "STEPFile.h"
+/** @file  MathFunctions.h
+ *  @brief Implementation of the math functions (gcd and lcm)
+ *
+ *  Copied from BoostWorkaround/math
+ */
 
 namespace Assimp {
-namespace STEP {
+namespace Math {
 
-    // ### Parsing a STEP file is a twofold procedure ###
-    // --------------------------------------------------------------------------
-    // 1) read file header and return to caller, who checks if the
-    //    file is of a supported schema ..
-    DB* ReadFileHeader(std::shared_ptr<IOStream> stream);
-    // --------------------------------------------------------------------------
-    // 2) read the actual file contents using a user-supplied set of
-    //    conversion functions to interpret the data.
-    void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const* types_to_track, size_t len, const char* const* inverse_indices_to_track, size_t len2);
-    template <size_t N, size_t N2> inline void ReadFile(DB& db,const EXPRESS::ConversionSchema& scheme, const char* const (&arr)[N], const char* const (&arr2)[N2]) {
-        return ReadFile(db,scheme,arr,N,arr2,N2);
-    }
-} // ! STEP
-} // ! Assimp
+// TODO: use binary GCD for unsigned integers ....
+template < typename IntegerType >
+IntegerType  gcd( IntegerType a, IntegerType b )
+{
+	const IntegerType zero = (IntegerType)0;
+	while ( true )
+	{
+		if ( a == zero )
+			return b;
+		b %= a;
 
-#endif
+		if ( b == zero )
+			return a;
+		a %= b;
+	}
+}
+
+template < typename IntegerType >
+IntegerType  lcm( IntegerType a, IntegerType b )
+{
+	const IntegerType t = gcd (a,b);
+	if (!t)return t;
+	return a / t * b;
+}
+
+}
+}

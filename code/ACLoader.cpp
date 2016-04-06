@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/scene.h"
 #include "../include/assimp/config.h"
 #include "../include/assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace Assimp;
 
@@ -708,7 +708,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
             // collect all meshes using the same material group.
             if (object.subDiv)  {
                 if (configEvalSubdivision) {
-                    boost::scoped_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
+                    std::unique_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
                     DefaultLogger::get()->info("AC3D: Evaluating subdivision surface: "+object.name);
 
                     std::vector<aiMesh*> cpy(meshes.size()-oldm,NULL);
@@ -787,7 +787,7 @@ void AC3DImporter::SetupProperties(const Importer* pImp)
 void AC3DImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( file.get() == NULL)

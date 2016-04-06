@@ -49,16 +49,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "XFileParser.h"
 #include "ConvertToLHProcess.h"
 #include "../include/assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/scene.h"
 #include "../include/assimp/DefaultLogger.hpp"
-#include <boost/format.hpp>
 #include "Defines.h"
+#include "TinyFormatter.h"
 #include <cctype>
 
 
 
 using namespace Assimp;
+using namespace Assimp::Formatter;
 
 static const aiImporterDesc desc = {
     "Direct3D XFile Importer",
@@ -111,7 +112,7 @@ const aiImporterDesc* XFileImporter::GetInfo () const
 void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
     // read file into memory
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
     if( file.get() == NULL)
         throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
@@ -602,7 +603,7 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 
       if( oldMat.sceneIndex == SIZE_MAX )
       {
-        DefaultLogger::get()->warn( boost::str( boost::format( "Could not resolve global material reference \"%s\"") % oldMat.mName));
+        DefaultLogger::get()->warn( format() << "Could not resolve global material reference \"" << oldMat.mName << "\"" );
         oldMat.sceneIndex = 0;
       }
 

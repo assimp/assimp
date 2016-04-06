@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_STEPFILE_H
 #define INCLUDED_AI_STEPFILE_H
 
-#include <boost/noncopyable.hpp>
 #include <bitset>
 #include <memory>
 #include <typeinfo>
@@ -589,13 +588,16 @@ namespace STEP {
     /** A LazyObject is created when needed. Before this happens, we just keep
        the text line that contains the object definition. */
     // -------------------------------------------------------------------------------
-    class LazyObject : public boost::noncopyable
+    class LazyObject
     {
         friend class DB;
     public:
 
         LazyObject(DB& db, uint64_t id, uint64_t line, const char* type,const char* args);
         ~LazyObject();
+
+        LazyObject( LazyObject const& ) = delete;
+        LazyObject operator=( LazyObject const& ) = delete;
 
     public:
 

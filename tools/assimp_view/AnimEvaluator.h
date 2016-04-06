@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AV_ANIMEVALUATOR_H_INCLUDED
 
 #include <tuple>
+#include <vector>
 
 namespace AssimpView
 {

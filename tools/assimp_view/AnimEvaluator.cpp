@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "assimp_view.h"
+#include <tuple>
 
 using namespace AssimpView;
 
@@ -49,7 +50,7 @@ AnimEvaluator::AnimEvaluator( const aiAnimation* pAnim)
 {
     mAnim = pAnim;
     mLastTime = 0.0;
-    mLastPositions.resize( pAnim->mNumChannels, boost::make_tuple( 0, 0, 0));
+    mLastPositions.resize( pAnim->mNumChannels, std::make_tuple( 0, 0, 0));
 }
 
 // ------------------------------------------------------------------------------------------------

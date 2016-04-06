@@ -18,7 +18,7 @@ configuration:
   - 14 2015
   - 12 2013
   #- MinGW
-  - 10 2010 # only works for x86
+  #- 10 2010 # only works for x86
 
 init:
 - if "%platform%" EQU "x64" ( for %%a in (2008 2010 MinGW) do ( if "%Configuration%"=="%%a" (echo "Skipping unsupported configuration" && exit /b 1 ) ) )

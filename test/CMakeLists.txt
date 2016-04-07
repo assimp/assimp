@@ -42,7 +42,6 @@ SET( TEST_SRCS
   unit/utTextureTransform.cpp
   unit/utTriangulate.cpp
   unit/utVertexTriangleAdjacency.cpp
-  unit/utNoBoostTest.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
   unit/utIssues.cpp

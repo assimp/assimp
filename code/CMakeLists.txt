@@ -61,20 +61,6 @@ SET( Core_SRCS
   Assimp.cpp
 )
 
-SET( Boost_SRCS
-  BoostWorkaround/boost/math/common_factor_rt.hpp
-  BoostWorkaround/boost/foreach.hpp
-  BoostWorkaround/boost/format.hpp
-  BoostWorkaround/boost/scoped_array.hpp
-  BoostWorkaround/boost/scoped_ptr.hpp
-  BoostWorkaround/boost/shared_array.hpp
-  BoostWorkaround/boost/shared_ptr.hpp
-  BoostWorkaround/boost/make_shared.hpp
-  BoostWorkaround/boost/static_assert.hpp
-  BoostWorkaround/boost/tuple/tuple.hpp
-)
-SOURCE_GROUP(Boost FILES ${Boost_SRCS})
-
 SET( Logging_SRCS
   ${HEADER_PATH}/DefaultLogger.hpp
   ${HEADER_PATH}/LogStream.hpp
@@ -711,7 +697,6 @@ SET( assimp_src
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
-  ${Boost_SRCS}
 
   ${PUBLIC_HEADERS}
   ${COMPILER_HEADERS}

@@ -180,7 +180,6 @@ def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(outfile, app)
     return outfile
 
-
 # -------------------------------------------------------------------------------
 def process_dir(d, outfile_results, zipin, result ):
     shellparams = {'stdout':outfile_results, 'stderr':outfile_results, 'shell':False}
@@ -191,10 +190,10 @@ def process_dir(d, outfile_results, zipin, result ):
         if os.path.isdir(fullpath) and not f[:1] == '.':
             process_dir(fullpath, outfile_results, zipin, result)
             continue
-
+                
         if f in settings.files_to_ignore or os.path.splitext(f)[1] in settings.exclude_extensions:
             print("Ignoring " + f)
-            continue
+            return
 
         for pppreset in settings.pp_configs_to_test:
             filehash = utils.hashing(fullpath, pppreset)

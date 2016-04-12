@@ -166,7 +166,7 @@ def getEnvVar( var ):
     if Environment.has_key( var ):
         return Environment[ var ]
     else:
-        print "Error: cannot find ", var
+        print "Error: cannot find " + var
     return ""
     
 # -------------------------------------------------------------------------------

@@ -166,7 +166,7 @@ def getEnvVar( var ):
     if Environment.has_key( var ):
         return Environment[ var ]
     else:
-        print "Error: cannot find " + var
+        print ( "Error: cannot find " + var )
     return ""
     
 # -------------------------------------------------------------------------------
@@ -217,12 +217,12 @@ def process_dir(d, outfile_results, zipin, result ):
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
             assimp_bin_path = getEnvVar("assimp_path")
-            print "assimp_bin_path = ", assimp_bin_path
+            print( assimp_bin_path = " + assimp_bin_pat )
             command = [assimp_bin_path,
                 "dump",
                 fullpath, outfile_actual, "-b", "-s", "-l" ] +\
                 pppreset.split()
-            print "command = ", command
+            print(command = " + command )
             r = subprocess.call(command, **shellparams)
             outfile_results.flush()
 

@@ -39,7 +39,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ---------------------------------------------------------------------------
-from Tkinter import *
+from tkinter import *
 import sys
 import run
 import result_checker as rc
@@ -54,7 +54,7 @@ class RegDialog( object ):
         
         
     def run_reg(self):
-        print "run_reg"
+        print( "run_reg" )
         run.setEnvVar( "assimp_path", self.assimp_bin_path )
         run.run_test()
         rc.run()
@@ -62,11 +62,11 @@ class RegDialog( object ):
         return 0
 
     def reg_update(self):
-        print "ToDo!"
+        print( "ToDo!" )
         return 0
     
     def quit(self):
-        print "quit"
+        print( "quit" )
         sys.exit( 0 )
 
     def initUi(self):
@@ -78,9 +78,9 @@ class RegDialog( object ):
         self.b_run_.grid( row = 0, column = 0, sticky = W+E)
         self.b_update_.grid( row = 1, column = 0, sticky = W+E)
         self.b_quit_.grid( row = 2, column = 0, sticky = W+E)
-        self.b_run_.pack()
-        self.b_update_.pack()
-        self.b_quit_.pack()
+        #self.b_run_.pack()
+        #self.b_update_.pack()
+        #self.b_quit_.pack()
         self.b_update_.config( state=DISABLED )
         root.mainloop()
 

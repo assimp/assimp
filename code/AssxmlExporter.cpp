@@ -180,23 +180,22 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
     time_t tt = ::time(NULL);
     tm* p     = ::gmtime(&tt);
 
-    aiString name;
-
     // write header
-    ioprintf(io,
+    std::string header(
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
         "<ASSIMP format_id=\"1\">\n\n"
-
         "<!-- XML Model dump produced by assimp dump\n"
         "  Library version: %i.%i.%i\n"
         "  %s\n"
         "-->"
         " \n\n"
-        "<Scene flags=\"%i\" postprocessing=\"%i\">\n",
+        "<Scene flags=\"%i\" postprocessing=\"%i\">\n"
+    );
 
-        aiGetVersionMajor(),aiGetVersionMinor(),aiGetVersionRevision(),asctime(p),
+    ioprintf( io, header.c_str(),
+        aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision(), asctime( p ),
         scene->mFlags,
-        0 /*globalImporter->GetEffectivePostProcessing()*/);
+        0 /*globalImporter->GetEffectivePostProcessing()*/ );
 
     // write the node graph
     WriteNode(scene->mRootNode, io, 0);
@@ -266,6 +265,7 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
         ioprintf(io,"\t</Light>\n");
     }
 #endif
+    aiString name;
 
     // write textures
     if (scene->mNumTextures) {

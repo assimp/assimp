@@ -217,7 +217,7 @@ def process_dir(d, outfile_results, zipin, result ):
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
             assimp_bin_path = getEnvVar("assimp_path")
-            print( assimp_bin_path = " + assimp_bin_pat )
+            print( "assimp_bin_path = " + assimp_bin_pat )
             command = [assimp_bin_path,
                 "dump",
                 fullpath, outfile_actual, "-b", "-s", "-l" ] +\

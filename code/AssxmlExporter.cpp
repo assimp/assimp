@@ -65,13 +65,20 @@ namespace Assimp    {
 
 namespace AssxmlExport  {
 
-int ioprintf( IOStream * io, const char * format, ... )
-{
-    char sz[4096];
+// -----------------------------------------------------------------------------------
+int ioprintf( IOStream * io, const char *format, ... ) {
+    if ( nullptr == io ) {
+        return -1;
+    }
+
+    static const size_t Size = 4096;
+    char sz[ Size ];
+    size_t len( strlen( format ) );
+    ::memset( sz, '\0', Size );
     va_list va;
     va_start( va, format );
-    int nSize = ai_snprintf( sz, 4096, format, va );
-   ai_assert( nSize < 4096 );
+    int nSize = std::vsnprintf( sz, Size-1, format, va );
+    ai_assert( nSize < Size );
     va_end( va );
 
     io->Write( sz, sizeof(char), nSize );
@@ -175,10 +182,10 @@ static std::string encodeXML(const std::string& data) {
 
 // -----------------------------------------------------------------------------------
 // Write a text model dump
-void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
-{
-    time_t tt = ::time(NULL);
-    tm* p     = ::gmtime(&tt);
+void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
+    time_t tt = ::time( NULL );
+    tm* p     = ::gmtime( &tt );
+    ai_assert( nullptr != p );
 
     // write header
     std::string header(
@@ -189,13 +196,14 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened)
         "  %s\n"
         "-->"
         " \n\n"
-        "<Scene flags=\"%i\" postprocessing=\"%i\">\n"
+        "<Scene flags=\"%d\" postprocessing=\"%i\">\n"
     );
 
-    ioprintf( io, header.c_str(),
-        aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision(), asctime( p ),
-        scene->mFlags,
-        0 /*globalImporter->GetEffectivePostProcessing()*/ );
+    const unsigned int major( aiGetVersionMajor() );
+    const unsigned int minor( aiGetVersionMinor() );
+    const unsigned int rev( aiGetVersionRevision() );
+    const char *curtime( asctime( p ) );
+    ioprintf( io, header.c_str(), major, minor, rev, curtime, scene->mFlags, 0 );
 
     // write the node graph
     WriteNode(scene->mRootNode, io, 0);

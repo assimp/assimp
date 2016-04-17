@@ -66,7 +66,7 @@ namespace Assimp    {
 namespace AssxmlExport  {
 
 // -----------------------------------------------------------------------------------
-int ioprintf( IOStream * io, const char *format, ... ) {
+static int ioprintf( IOStream * io, const char *format, ... ) {
     if ( nullptr == io ) {
         return -1;
     }
@@ -88,8 +88,7 @@ int ioprintf( IOStream * io, const char *format, ... ) {
 
 // -----------------------------------------------------------------------------------
 // Convert a name to standard XML format
-void ConvertName(aiString& out, const aiString& in)
-{
+static void ConvertName(aiString& out, const aiString& in) {
     out.length = 0;
     for (unsigned int i = 0; i < in.length; ++i)  {
         switch (in.data[i]) {
@@ -112,8 +111,7 @@ void ConvertName(aiString& out, const aiString& in)
 
 // -----------------------------------------------------------------------------------
 // Write a single node as text dump
-void WriteNode(const aiNode* node, IOStream * io, unsigned int depth)
-{
+static void WriteNode(const aiNode* node, IOStream * io, unsigned int depth) {
     char prefix[512];
     for (unsigned int i = 0; i < depth;++i)
         prefix[i] = '\t';
@@ -163,26 +161,24 @@ void WriteNode(const aiNode* node, IOStream * io, unsigned int depth)
 // Some chuncks of text will need to be encoded for XML
 // http://stackoverflow.com/questions/5665231/most-efficient-way-to-escape-xml-html-in-c-string#5665377
 static std::string encodeXML(const std::string& data) {
-        std::string buffer;
-        buffer.reserve(data.size());
-        for(size_t pos = 0; pos != data.size(); ++pos) {
-                switch(data[pos]) {
-                        case '&':  buffer.append("&amp;");              break;
-                        case '\"': buffer.append("&quot;");             break;
-                        case '\'': buffer.append("&apos;");             break;
-                        case '<':  buffer.append("&lt;");                   break;
-                        case '>':  buffer.append("&gt;");                   break;
-                        default:   buffer.append(&data[pos], 1);    break;
-                }
-        }
-        return buffer;
+    std::string buffer;
+    buffer.reserve(data.size());
+    for(size_t pos = 0; pos != data.size(); ++pos) {
+            switch(data[pos]) {
+                    case '&':  buffer.append("&amp;");              break;
+                    case '\"': buffer.append("&quot;");             break;
+                    case '\'': buffer.append("&apos;");             break;
+                    case '<':  buffer.append("&lt;");                   break;
+                    case '>':  buffer.append("&gt;");                   break;
+                    default:   buffer.append(&data[pos], 1);    break;
+            }
+    }
+    return buffer;
 }
-
-
 
 // -----------------------------------------------------------------------------------
 // Write a text model dump
-void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
+static void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
     time_t tt = ::time( NULL );
     tm* p     = ::gmtime( &tt );
     ai_assert( nullptr != p );

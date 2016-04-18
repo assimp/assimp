@@ -42,16 +42,20 @@
 from tkinter import *
 import sys
 import run
+import subprocess
 import result_checker as rc
 
 class RegDialog( object ):
+    """
+    This class is used to create a simplified user interface for running the regression test suite.
+    """
     def __init__(self, bin_path ):
         self.assimp_bin_path = bin_path
         self.b_run_ = None
         self.b_update_ = None
         self.b_res_checker_ = None
         self.b_quit_ = None
-        
+        self.editor = "notepad"
         
     def run_reg(self):
         print( "run_reg" )
@@ -65,6 +69,12 @@ class RegDialog( object ):
         print( "ToDo!" )
         return 0
     
+    def open_log(self):
+        command = [ self.editor, "../results/run_regression_suite_output.txt", ]
+        print( "command = " + str( command ) )
+        r = subprocess.call(command)
+        return 0
+
     def quit(self):
         print( "quit" )
         sys.exit( 0 )
@@ -74,13 +84,12 @@ class RegDialog( object ):
         root.title( "Assimp-Regression")
         self.b_run_ = Button( root, text="Run regression ", command=self.run_reg,    width = 50 )
         self.b_update_ = Button( root, text="Update database", command=self.reg_update, width = 50 )
+        self.b_log_ = Button( root, text="Open log", command=self.open_log, width = 50 )
         self.b_quit_ = Button( root, text="Quit           ", command=self.quit,       width = 50 )
         self.b_run_.grid( row = 0, column = 0, sticky = W+E)
         self.b_update_.grid( row = 1, column = 0, sticky = W+E)
-        self.b_quit_.grid( row = 2, column = 0, sticky = W+E)
-        #self.b_run_.pack()
-        #self.b_update_.pack()
-        #self.b_quit_.pack()
+        self.b_log_.grid( row = 2, column = 0, sticky = W+E )
+        self.b_quit_.grid( row = 3, column = 0, sticky = W+E)
         self.b_update_.config( state=DISABLED )
         root.mainloop()
 

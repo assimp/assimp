@@ -185,6 +185,7 @@ def process_dir(d, outfile_results, zipin, result ):
     shellparams = {'stdout':outfile_results, 'stderr':outfile_results, 'shell':False}
 
     print("Processing directory " + d)
+    all = ""
     for f in sorted(os.listdir(d)):
         fullpath = os.path.join(d, f)
         if os.path.isdir(fullpath) and not f[:1] == '.':

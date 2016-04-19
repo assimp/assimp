@@ -209,7 +209,7 @@ class Structure
 public:
 
     Structure()
-        :   cache_idx(-1)
+        :   cache_idx(static_cast<size_t>(-1) )
     {}
 
 public:

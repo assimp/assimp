@@ -159,6 +159,7 @@ class results:
 
 # -------------------------------------------------------------------------------
 def setEnvVar( var, value ):
+    print ( "set var " + var +" to" + value)
     Environment[ var ] = value
 
 # -------------------------------------------------------------------------------
@@ -218,7 +219,6 @@ def process_dir(d, outfile_results, zipin, result ):
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
             assimp_bin_path = getEnvVar("assimp_path")
-            print( "assimp_bin_path = " + assimp_bin_path )
             command = [assimp_bin_path,
                 "dump",
                 fullpath, outfile_actual, "-b", "-s", "-l" ] +\
@@ -290,7 +290,6 @@ def run_test():
     try:
         zipin = zipfile.ZipFile(settings.database_name + ".zip",
             "r", zipfile.ZIP_STORED)
-
     except IOError:
         print("Regression database ", settings.database_name,
               ".zip was not found")
@@ -306,7 +305,6 @@ def run_test():
         return 1
 
     return 0
-
 
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":

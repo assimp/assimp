@@ -178,7 +178,8 @@ static std::string encodeXML(const std::string& data) {
 
 // -----------------------------------------------------------------------------------
 // Write a text model dump
-static void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
+static 
+void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
     time_t tt = ::time( NULL );
     tm* p     = ::gmtime( &tt );
     ai_assert( nullptr != p );
@@ -305,9 +306,10 @@ static void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
                         unsigned int r = tx->r,g=tx->g,b=tx->b,a=tx->a;
                         ioprintf(io,"\t\t\t%2x %2x %2x %2x",r,g,b,a);
 
-                        // group by four for readibility
-                        if (0 == (x+y*tex->mWidth) % 4)
-                            ioprintf(io,"\n");
+                        // group by four for readability
+                        if ( 0 == ( x + y*tex->mWidth ) % 4 ) {
+                            ioprintf( io, "\n" );
+                        }
                     }
                 }
             }

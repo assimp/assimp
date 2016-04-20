@@ -206,6 +206,10 @@ template <> void Structure :: Convert<Lamp> (
     ReadField<ErrorPolicy_Igno>(dest.att2,"att2",db);
     ReadField<ErrorPolicy_Igno>((int&)dest.falloff_type,"falloff_type",db);
     ReadField<ErrorPolicy_Igno>(dest.sun_brightness,"sun_brightness",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_size,"area_size",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_sizey,"area_sizey",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_sizez,"area_sizez",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_shape,"area_shape",db);
 
     db.reader->IncPtr(size);
 }

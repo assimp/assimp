@@ -179,7 +179,7 @@ static std::string encodeXML(const std::string& data) {
 
 // -----------------------------------------------------------------------------------
 // Write a text model dump
-static 
+static
 void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
     time_t tt = ::time( NULL );
     tm* p     = ::gmtime( &tt );

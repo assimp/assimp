@@ -1049,7 +1049,24 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
 
             // blender orients directional lights as facing toward -z
             out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
             break;
+
+        case Lamp::Type_Area:
+            out->mType = aiLightSource_AREA;
+
+            if (lamp->area_shape == 0) {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_size);
+            }
+            else {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_sizey);
+            }
+
+            // blender orients directional lights as facing toward -z
+            out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
+            break;
+
         default:
             break;
     }

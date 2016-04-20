@@ -76,6 +76,8 @@ elseif(MSVC)
   add_compile_options(/MP)
 elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
+ELSEIF( CMAKE_COMPILER_IS_MINGW )
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
 endif()
 
 INCLUDE (FindPkgConfig)

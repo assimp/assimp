@@ -223,11 +223,7 @@ def process_dir(d, outfile_results, zipin, result ):
                 "dump",
                 fullpath, outfile_actual, "-b", "-s", "-l" ] +\
                 pppreset.split()
-<<<<<<< HEAD
             print( "command = " + str( command ) )
-=======
-            print "command = " + command )
->>>>>>> fe60654c1ad4d665e2fed05b257a06815c7c113f
             r = subprocess.call(command, **shellparams)
             outfile_results.flush()
 

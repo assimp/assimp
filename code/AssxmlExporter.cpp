@@ -196,11 +196,11 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
         "<Scene flags=\"%d\" postprocessing=\"%i\">\n"
     );
 
-    const unsigned int major( aiGetVersionMajor() );
-    const unsigned int minor( aiGetVersionMinor() );
+    const unsigned int majorVersion( aiGetVersionMajor() );
+    const unsigned int minorVersion( aiGetVersionMinor() );
     const unsigned int rev( aiGetVersionRevision() );
     const char *curtime( asctime( p ) );
-    ioprintf( io, header.c_str(), major, minor, rev, curtime, scene->mFlags, 0 );
+    ioprintf( io, header.c_str(), majorVersion, minorVersion, rev, curtime, scene->mFlags, 0 );
 
     // write the node graph
     WriteNode(scene->mRootNode, io, 0);

@@ -312,6 +312,7 @@ if __name__ == "__main__":
         assimp_bin_path = sys.argv[1]
     else:
         assimp_bin_path = 'assimp'
+    setEnvVar("assimp_path", assimp_bin_path)
     print('Using assimp binary: ' + assimp_bin_path)
     sys.exit( run_test() )
 

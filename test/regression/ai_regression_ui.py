@@ -195,7 +195,10 @@ class RegDialog( object ):
         self.b_update_ = None
         self.b_res_checker_ = None
         self.b_quit_ = None
-        self.editor = "notepad"
+        if platform.system() == "Windows":
+            self.editor = "notepad"
+        elif platform.system() == "Linux":
+            self.editor = "vim"
         self.root = None
         self.width=40
         

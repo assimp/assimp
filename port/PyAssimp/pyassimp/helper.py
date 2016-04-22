@@ -205,26 +205,27 @@ def search_library():
     candidates = []
     # test every file
     for curfolder in [folder]+additional_dirs:
-        for filename in os.listdir(curfolder):
-            # our minimum requirement for candidates is that
-            # they should contain 'assimp' somewhere in 
-            # their name
-            if filename.lower().find('assimp')==-1 or\
-                os.path.splitext(filename)[-1].lower() not in ext_whitelist:
-                continue
+        if os.path.isdir(curfolder):
+            for filename in os.listdir(curfolder):
+                # our minimum requirement for candidates is that
+                # they should contain 'assimp' somewhere in 
+                # their name
+                if filename.lower().find('assimp')==-1 or\
+                    os.path.splitext(filename)[-1].lower() not in ext_whitelist:
+                    continue
 
-            library_path = os.path.join(curfolder, filename)
-            logger.debug('Try ' + library_path)
-            try:
-                dll = ctypes.cdll.LoadLibrary(library_path)
-            except Exception as e:
-                logger.warning(str(e))
-                # OK, this except is evil. But different OSs will throw different
-                # errors. So just ignore any errors.
-                continue
-            # see if the functions we need are in the dll
-            loaded = try_load_functions(library_path, dll)
-            if loaded: candidates.append(loaded)
+                library_path = os.path.join(curfolder, filename)
+                logger.debug('Try ' + library_path)
+                try:
+                    dll = ctypes.cdll.LoadLibrary(library_path)
+                except Exception as e:
+                    logger.warning(str(e))
+                    # OK, this except is evil. But different OSs will throw different
+                    # errors. So just ignore any errors.
+                    continue
+                # see if the functions we need are in the dll
+                loaded = try_load_functions(library_path, dll)
+                if loaded: candidates.append(loaded)
 
     if not candidates:
         # no library found

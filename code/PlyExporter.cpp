@@ -309,10 +309,10 @@ void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
 
         for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
             if (m->HasTextureCoords(c)) {
-                mOutput.write(reinterpret_cast<const char*>(&m->mTextureCoords[c][i].x), 6);
+                mOutput.write(reinterpret_cast<const char*>(&m->mTextureCoords[c][i].x), 8);
             }
             else {
-                mOutput.write(reinterpret_cast<const char*>(&defaultUV.x), 6);
+                mOutput.write(reinterpret_cast<const char*>(&defaultUV.x), 8);
             }
         }
 

@@ -407,10 +407,13 @@ size_t IndexData::FaceSize() const
 
 // Mesh
 
-Mesh::Mesh() :
-    hasSkeletalAnimations(false),
-    skeleton(NULL),
-    sharedVertexData(NULL)
+Mesh::Mesh() 
+    : hasSkeletalAnimations(false)
+    , skeleton(NULL)
+    , sharedVertexData(NULL)
+    , subMeshes()
+    , animations()
+    , poses()
 {
 }
 
@@ -443,16 +446,22 @@ size_t Mesh::NumSubMeshes() const
     return subMeshes.size();
 }
 
-SubMesh *Mesh::GetSubMesh(uint16_t index) const
+SubMesh *Mesh::GetSubMesh( size_t index ) const
 {
-    for(size_t i=0; i<subMeshes.size(); ++i)
-        if (subMeshes[i]->index == index)
-            return subMeshes[i];
+    for ( size_t i = 0; i < subMeshes.size(); ++i ) {
+        if ( subMeshes[ i ]->index == index ) {
+            return subMeshes[ i ];
+        }
+    }
     return 0;
 }
 
 void Mesh::ConvertToAssimpScene(aiScene* dest)
 {
+    if ( nullptr == dest ) {
+        return;
+    }
+
     // Setup
     dest->mNumMeshes = NumSubMeshes();
     dest->mMeshes = new aiMesh*[dest->mNumMeshes];
@@ -463,8 +472,7 @@ void Mesh::ConvertToAssimpScene(aiScene* dest)
     dest->mRootNode->mMeshes = new unsigned int[dest->mRootNode->mNumMeshes];
 
     // Export meshes
-    for(size_t i=0; i<dest->mNumMeshes; ++i)
-    {
+    for(size_t i=0; i<dest->mNumMeshes; ++i) {
         dest->mMeshes[i] = subMeshes[i]->ConvertToAssimpMesh(this);
         dest->mRootNode->mMeshes[i] = i;
     }

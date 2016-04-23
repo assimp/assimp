@@ -568,7 +568,10 @@ typedef std::vector<SubMesh*> SubMeshList;
 class Mesh
 {
 public:
+    /// Constructor.
     Mesh();
+
+    /// Destructor.
     ~Mesh();
 
     /// Releases all memory that this data structure owns.
@@ -578,7 +581,7 @@ public:
     size_t NumSubMeshes() const;
 
     /// Returns submesh for @c index.
-    SubMesh *GetSubMesh(uint16_t index) const;
+    SubMesh *GetSubMesh( size_t index) const;
 
     /// Convert mesh to Assimp scene.
     void ConvertToAssimpScene(aiScene* dest);

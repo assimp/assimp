@@ -239,10 +239,12 @@ void DNA :: DumpToFile()
     for(const Structure& s : structures) {
         f << s.name << " " << s.size << "\n\n";
         for(const Field& ff : s.fields) {
-            f << "\t" << ff.type << " " << ff.name << " " << ff.offset << " " << ff.size << std::endl;
+            f << "\t" << ff.type << " " << ff.name << " " << ff.offset << " " << ff.size << "\n";
         }
-        f << std::endl;
+        f << "\n";
     }
+    f << std::flush;
+
     DefaultLogger::get()->info("BlenderDNA: Dumped dna to dna.txt");
 }
 #endif

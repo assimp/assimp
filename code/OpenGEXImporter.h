@@ -52,8 +52,11 @@ namespace ODDLParser {
     class DDLNode;
     struct Context;
 }
+
 struct aiNode;
 struct aiMaterial;
+struct aiCamera;
+struct aiLight;
 
 namespace Assimp {
 namespace OpenGEX {
@@ -110,7 +113,11 @@ protected:
     void handleObjectRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleCameraNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleLightNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryObject( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleCameraObject( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleLightObject( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene );
@@ -181,6 +188,8 @@ private:
     aiMaterial *m_currentMaterial;
     int m_tokenType;
     std::vector<aiMaterial*> m_materialCache;
+    std::vector<aiCamera*> m_cameraCache;
+    std::vector<aiLight*> m_lightCache;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;
 };

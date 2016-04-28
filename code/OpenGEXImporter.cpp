@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "OpenGEXImporter.h"
 #include "DefaultIOSystem.h"
+#include <assimp/DefaultLogger.hpp>
 #include "MakeVerboseFormat.h"
 
 #include <openddlparser/OpenDDLParser.h>
@@ -63,36 +64,41 @@ static const aiImporterDesc desc = {
 };
 
 namespace Grammar {
-    static const std::string MetricType = "Metric";
+    static const std::string MetricType          = "Metric";
     static const std::string Metric_DistanceType = "distance";
-    static const std::string Metric_AngleType = "angle";
-    static const std::string Metric_TimeType = "time";
-    static const std::string Metric_UpType = "up";
-    static const std::string NameType = "Name";
-    static const std::string ObjectRefType = "ObjectRef";
-    static const std::string MaterialRefType = "MaterialRef";
-    static const std::string MetricKeyType = "key";
-    static const std::string GeometryNodeType = "GeometryNode";
-    static const std::string GeometryObjectType = "GeometryObject";
-    static const std::string TransformType = "Transform";
-    static const std::string MeshType = "Mesh";
-    static const std::string VertexArrayType = "VertexArray";
-    static const std::string IndexArrayType = "IndexArray";
-    static const std::string MaterialType = "Material";
-    static const std::string ColorType = "Color";
-    static const std::string DiffuseColorToken = "diffuse";
+    static const std::string Metric_AngleType    = "angle";
+    static const std::string Metric_TimeType     = "time";
+    static const std::string Metric_UpType       = "up";
+    static const std::string NameType            = "Name";
+    static const std::string ObjectRefType       = "ObjectRef";
+    static const std::string MaterialRefType     = "MaterialRef";
+    static const std::string MetricKeyType       = "key";
+    static const std::string GeometryNodeType    = "GeometryNode";
+    static const std::string CameraNodeType      = "CameraNode";
+    static const std::string LightNodeType       = "LightNode";
+    static const std::string GeometryObjectType  = "GeometryObject";
+    static const std::string CameraObjectType    = "CameraObject";
+    static const std::string LightObjectType     = "LightObject";
+    static const std::string TransformType       = "Transform";
+    static const std::string MeshType            = "Mesh";
+    static const std::string VertexArrayType     = "VertexArray";
+    static const std::string IndexArrayType      = "IndexArray";
+    static const std::string MaterialType        = "Material";
+    static const std::string ColorType           = "Color";
+    static const std::string ParamType           = "Param";
+    static const std::string TextureType         = "Texture";
+
+    static const std::string DiffuseColorToken  = "diffuse";
     static const std::string SpecularColorToken = "specular";
     static const std::string EmissionColorToken = "emission";
 
-    static const std::string DiffuseTextureToken = "diffuse";
+    static const std::string DiffuseTextureToken         = "diffuse";
     static const std::string DiffuseSpecularTextureToken = "specular";
-    static const std::string SpecularPowerTextureToken = "specular_power";
-    static const std::string EmissionTextureToken = "emission";
-    static const std::string OpacyTextureToken = "opacity";
-    static const std::string TransparencyTextureToken = "transparency";
-    static const std::string NormalTextureToken = "normal";
-
-    static const char *TextureType         = "Texture";
+    static const std::string SpecularPowerTextureToken   = "specular_power";
+    static const std::string EmissionTextureToken        = "emission";
+    static const std::string OpacyTextureToken           = "opacity";
+    static const std::string TransparencyTextureToken    = "transparency";
+    static const std::string NormalTextureToken          = "normal";
 
     enum TokenType {
         NoneType = -1,
@@ -102,14 +108,19 @@ namespace Grammar {
         MaterialRefToken,
         MetricKeyToken,
         GeometryNodeToken,
+        CameraNodeToken,
+        LightNodeToken,
         GeometryObjectToken,
+        CameraObjectToken,
+        LightObjectToken,
         TransformToken,
         MeshToken,
         VertexArrayToken,
         IndexArrayToken,
         MaterialToken,
         ColorToken,
-        TextureToken
+        Paramtype,
+        TextureToken, 
     };
 
     static const std::string ValidMetricToken[ 4 ] = {
@@ -146,8 +157,12 @@ namespace Grammar {
             return MaterialRefToken;
         } else if( MetricKeyType == tokenType ) {
             return MetricKeyToken;
-        } else if( GeometryNodeType == tokenType ) {
+        } else if ( GeometryNodeType == tokenType ) {
             return GeometryNodeToken;
+        } else if ( CameraNodeType == tokenType ) {
+            return CameraNodeToken;
+        } else if ( LightNodeType == tokenType ) {
+            return LightNodeToken;
         } else if( GeometryObjectType == tokenType ) {
             return GeometryObjectToken;
         } else if( TransformType == tokenType ) {
@@ -192,6 +207,7 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_normals;
+    
     for( size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ ) {
         delete [] m_textureCoords[ i ];
     }
@@ -223,6 +239,9 @@ OpenGEXImporter::OpenGEXImporter()
 , m_currentMesh( NULL )
 , m_currentMaterial( NULL )
 , m_tokenType( Grammar::NoneType )
+, m_materialCache()
+, m_cameraCache()
+, m_lightCache()
 , m_nodeStack()
 , m_unresolvedRefStack() {
     // empty
@@ -317,6 +336,14 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
                 handleGeometryNode( *it, pScene );
                 break;
 
+            case Grammar::CameraNodeToken:
+                handleCameraNode( *it, pScene );
+                break;
+
+            case Grammar::LightNodeToken:
+                handleLightNode( *it, pScene );
+                break;
+
             case Grammar::GeometryObjectToken:
                 handleGeometryObject( *it, pScene );
                 break;
@@ -394,7 +421,7 @@ void OpenGEXImporter::handleMetricNode( DDLNode *node, aiScene *pScene ) {
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
     if( NULL == m_currentNode ) {
-        throw DeadlyImportError( "No parent node for name." );
+        throw DeadlyImportError( "No current node for name." );
         return;
     }
 
@@ -406,12 +433,12 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
         }
 
         const std::string name( val->getString() );
-        if( m_tokenType == Grammar::GeometryNodeToken ) {
+        if( m_tokenType == Grammar::GeometryNodeToken || m_tokenType == Grammar::LightNodeToken  
+                || m_tokenType == Grammar::CameraNodeToken ) {
             m_currentNode->mName.Set( name.c_str() );
         } else if( m_tokenType == Grammar::MaterialToken ) {
 
         }
-
     }
 }
 
@@ -475,7 +502,47 @@ void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
 }
 
 //------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleCameraNode( DDLNode *node, aiScene *pScene ) {
+    aiCamera *camera( new aiCamera );
+    const size_t camIdx( m_cameraCache.size() );
+    m_cameraCache.push_back( camera );
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleLightNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    aiLight *light( new aiLight );
+    const size_t lightIdx( m_lightCache.size() );
+    m_lightCache.push_back( light );
+
+    aiNode *newNode = new aiNode;
+    m_tokenType = Grammar::LightNodeToken;
+    m_currentNode = newNode;
+    pushNode( newNode, pScene );
+
+    handleNodes( node, pScene );
+
+    popNode();
+
+    light->mName.Set( newNode->mName.C_Str() );
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
+    // parameters will be parsed normally in the tree, so just go for it
+    handleNodes( node, pScene );
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleCameraObject( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    // parameters will be parsed normally in the tree, so just go for it
+    handleNodes( node, pScene );
+
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleLightObject( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    // parameters will be parsed normally in the tree, so just go for it
     handleNodes( node, pScene );
 }
 
@@ -513,7 +580,6 @@ static void setMatrix( aiNode *node, DataArrayList *transformData ) {
     node->mTransformation.d2 = m[ 7 ];
     node->mTransformation.d3 = m[ 11 ];
     node->mTransformation.d4 = m[ 15 ];
-
 }
 
 //------------------------------------------------------------------------------------------------
@@ -522,7 +588,6 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *p
         throw DeadlyImportError( "No parent node for name." );
         return;
     }
-
 
     DataArrayList *transformData( node->getDataArrayList() );
     if( NULL != transformData ) {
@@ -560,8 +625,16 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
         std::string propName, propKey;
         propId2StdString( prop, propName, propKey );
         if( "primitive" == propName ) {
-            if( "triangles" == propKey ) {
+            if ( "points" == propKey ) {
+                m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
+            } else if ( "lines" == propKey ) {
+                m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
+            } else if( "triangles" == propKey ) {
                 m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
+            } else if ( "quads" == propKey ) {
+                m_currentMesh->mPrimitiveTypes |= aiPrimitiveType_POLYGON;
+            } else {
+                DefaultLogger::get()->warn( propKey + " is not supported primitive type." );
             }
         }
     }
@@ -839,9 +912,7 @@ void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pSc
                     // m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
                 } else if( prop->m_value->getString() == Grammar::NormalTextureToken ) {
                     m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_NORMALS( 0 ) );
-
-                }
-                else {
+                } else {
                     ai_assert( false );
                 }
             }

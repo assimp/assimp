@@ -815,16 +815,22 @@ namespace glTF
     {
         std::string copyright; //!< A copyright message suitable for display to credit the content creator.
         std::string generator; //!< Tool that generated this glTF model.Useful for debugging.
-        bool premultipliedAlpha = false; //!< Specifies if the shaders were generated with premultiplied alpha. (default: false)
+        bool premultipliedAlpha; //!< Specifies if the shaders were generated with premultiplied alpha. (default: false)
 
         struct {
             std::string api;     //!< Specifies the target rendering API (default: "WebGL")
             std::string version; //!< Specifies the target rendering API (default: "1.0.3")
         } profile; //!< Specifies the target rendering API and version, e.g., WebGL 1.0.3. (default: {})
 
-        int version = 0; //!< The glTF format version (should be 1)
+        int version; //!< The glTF format version (should be 1)
 
         void Read(Document& doc);
+        
+        AssetMetadata()
+            : premultipliedAlpha(false),
+            , version(0)
+        {
+        }
     };
 
     //

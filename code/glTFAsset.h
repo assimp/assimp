@@ -827,7 +827,7 @@ namespace glTF
         void Read(Document& doc);
         
         AssetMetadata()
-            : premultipliedAlpha(false),
+            : premultipliedAlpha(false)
             , version(0)
         {
         }

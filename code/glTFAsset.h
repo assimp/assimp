@@ -211,7 +211,7 @@ namespace glTF
         ComponentType_FLOAT = 5126
     };
 
-    inline size_t ComponentTypeSize(ComponentType t)
+    inline unsigned int ComponentTypeSize(ComponentType t)
     {
         switch (t) {
             case ComponentType_SHORT:
@@ -313,13 +313,13 @@ namespace glTF
     class Ref
     {
         std::vector<T*>* vector;
-        int index;
+        unsigned int index;
 
     public:
         Ref() : vector(0), index(0) {}
-        Ref(std::vector<T*>& vec, int idx) : vector(&vec), index(idx) {}
+        Ref(std::vector<T*>& vec, unsigned int idx) : vector(&vec), index(idx) {}
 
-        inline size_t GetIndex() const
+        inline unsigned int GetIndex() const
             { return index; }
 
         operator bool() const
@@ -384,7 +384,7 @@ namespace glTF
         inline uint8_t* GetPointer();
 
         template<class T>
-        void ExtractData(T*& outData);
+        bool ExtractData(T*& outData);
 
         void WriteData(size_t count, const void* src_buffer, size_t src_stride);
 
@@ -409,6 +409,11 @@ namespace glTF
             inline unsigned int GetUInt(int i)
             {
                 return GetValue<unsigned int>(i);
+            }
+
+            inline bool IsValid() const
+            {
+                return data != 0;
             }
         };
 
@@ -466,7 +471,7 @@ namespace glTF
 
         void Read(Value& obj, Asset& r);
 
-        void LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
+        bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
 
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
@@ -769,7 +774,7 @@ namespace glTF
         friend class Asset;
         friend class AssetWriter;
 
-        typedef typename std::gltf_unordered_map< std::string, size_t > Dict;
+        typedef typename std::gltf_unordered_map< std::string, unsigned int > Dict;
 
         std::vector<T*>  mObjs;      //! The read objects
         Dict             mObjsById;  //! The read objects accesible by id
@@ -791,14 +796,14 @@ namespace glTF
         ~LazyDict();
 
         Ref<T> Get(const char* id);
-        Ref<T> Get(size_t i);
+        Ref<T> Get(unsigned int i);
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)
             { return Create(id.c_str()); }
 
-        inline size_t Size() const
-            { return mObjs.size(); }
+        inline unsigned int Size() const
+            { return unsigned(mObjs.size()); }
 
         inline T& operator[](size_t i)
             { return *mObjs[i]; }

@@ -347,7 +347,7 @@ public: // static utilities
     static void ConvertUTF8toISO8859_1(
         std::string& data);
 
-	enum TextFileMode { ALLOW_EMPTY, FORBID_EMPTY };
+    enum TextFileMode { ALLOW_EMPTY, FORBID_EMPTY };
 
     // -------------------------------------------------------------------
     /** Utility for text file loaders which copies the contents of the
@@ -375,7 +375,7 @@ public: // static utilities
         T*& out,
         unsigned int& outLength)
     {
-        outLength = vec.size();
+        outLength = unsigned(vec.size());
         if (outLength) {
             out = new T[outLength];
             std::swap_ranges(vec.begin(), vec.end(), out);

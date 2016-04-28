@@ -159,7 +159,7 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
     acc->bufferView = bv;
-    acc->byteOffset = offset;
+    acc->byteOffset = unsigned(offset);
     acc->byteStride = 0;
     acc->componentType = compType;
     acc->count = count;
@@ -187,7 +187,7 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
 
             if (path.size() > 0) {
                 if (path[0] != '*') {
-                    std::map<std::string, size_t>::iterator it = mTexturesByPath.find(path);
+                    std::map<std::string, unsigned int>::iterator it = mTexturesByPath.find(path);
                     if (it != mTexturesByPath.end()) {
                         prop.texture = mAsset->textures.Get(it->second);
                     }
@@ -292,7 +292,7 @@ void glTFExporter::ExportMeshes()
                     indices[i*nIndicesPerFace + j] = uint16_t(aim->mFaces[i].mIndices[j]);
                 }
             }
-            p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT);
+            p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT);
         }
 
         switch (aim->mPrimitiveTypes) {
@@ -308,7 +308,7 @@ void glTFExporter::ExportMeshes()
     }
 }
 
-size_t glTFExporter::ExportNode(const aiNode* n)
+unsigned int glTFExporter::ExportNode(const aiNode* n)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
 
@@ -322,7 +322,7 @@ size_t glTFExporter::ExportNode(const aiNode* n)
     }
 
     for (unsigned int i = 0; i < n->mNumChildren; ++i) {
-        size_t idx = ExportNode(n->mChildren[i]);
+        unsigned int idx = ExportNode(n->mChildren[i]);
         node->children.push_back(mAsset->nodes.Get(idx));
     }
 
@@ -337,7 +337,7 @@ void glTFExporter::ExportScene()
 
     // root node will be the first one exported (idx 0)
     if (mAsset->nodes.Size() > 0) {
-        scene->nodes.push_back(mAsset->nodes.Get(size_t(0)));
+        scene->nodes.push_back(mAsset->nodes.Get(0u));
     }
 
     // set as the default scene

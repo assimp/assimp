@@ -58,7 +58,7 @@ using rapidjson::MemoryPoolAllocator;
 class AssetWriter
 {
     template<class T>
-    friend struct LazyDictWriter;
+    friend void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
 
 private:
 

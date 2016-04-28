@@ -61,9 +61,9 @@ namespace {
         return val.IsNumber() ? out = static_cast<float>(val.GetDouble()), true : false;
     }};
     
-    template<size_t N> struct ReadHelper<float[N]> { static bool Read(Value& val, float (&out)[N]) {
+    template<unsigned int N> struct ReadHelper<float[N]> { static bool Read(Value& val, float (&out)[N]) {
         if (!val.IsArray() || val.Size() != N) return false;
-        for (size_t i = 0; i < N; ++i) {
+        for (unsigned int i = 0; i < N; ++i) {
             if (val[i].IsNumber())
                 out[i] = static_cast<float>(val[i].GetDouble());
         }
@@ -71,11 +71,11 @@ namespace {
     }};
 
     template<> struct ReadHelper<const char*> { static bool Read(Value& val, const char*& out) {
-        return val.IsString() ? out = val.GetString(), true : false;
+        return val.IsString() ? (out = val.GetString(), true) : false;
     }};
 
     template<> struct ReadHelper<std::string> { static bool Read(Value& val, std::string& out) {
-        return val.IsString() ? out = val.GetString(), true : false;
+        return val.IsString() ? (out = std::string(val.GetString(), val.GetStringLength()), true) : false;
     }};
 
     template<class T> struct ReadHelper< Nullable<T> > { static bool Read(Value& val, Nullable<T>& out) {
@@ -176,7 +176,7 @@ inline void LazyDict<T>::DetachFromDocument()
 }
 
 template<class T>
-Ref<T> LazyDict<T>::Get(size_t i)
+Ref<T> LazyDict<T>::Get(unsigned int i)
 {
     return Ref<T>(mObjs, i);
 }
@@ -196,10 +196,10 @@ Ref<T> LazyDict<T>::Get(const char* id)
 
     Value::MemberIterator obj = mDict->FindMember(id);
     if (obj == mDict->MemberEnd()) {
-        throw DeadlyImportError("Missing object with id \"" + std::string(id) + "\" in \"" + mDictId + "\"");
+        throw DeadlyImportError("GLTF: Missing object with id \"" + std::string(id) + "\" in \"" + mDictId + "\"");
     }
     if (!obj->value.IsObject()) {
-        throw DeadlyImportError("Object with id \"" + std::string(id) + "\" is not a JSON object!");
+        throw DeadlyImportError("GLTF: Object with id \"" + std::string(id) + "\" is not a JSON object");
     }
 
     // create an instance of the given type
@@ -213,7 +213,7 @@ Ref<T> LazyDict<T>::Get(const char* id)
 template<class T>
 Ref<T> LazyDict<T>::Add(T* obj)
 {
-    size_t idx = mObjs.size();
+    unsigned int idx = unsigned(mObjs.size());
     mObjs.push_back(obj);
     mObjsById[obj->id] = idx;
     mAsset.mUsedIds[obj->id] = true;
@@ -225,7 +225,7 @@ Ref<T> LazyDict<T>::Create(const char* id)
 {
     Asset::IdMap::iterator it = mAsset.mUsedIds.find(id);
     if (it != mAsset.mUsedIds.end()) {
-        throw DeadlyImportError("Two objects with the same ID exist!");
+        throw DeadlyImportError("GLTF: two objects with the same ID exist");
     }
     T* inst = new T();
     inst->id = id;
@@ -249,7 +249,12 @@ inline void Buffer::Read(Value& obj, Asset& r)
     byteLength = statedLength;
 
     Value* it = FindString(obj, "uri");
-    if (!it) return;
+    if (!it) {
+        if (statedLength > 0) {
+            throw DeadlyImportError("GLTF: buffer with non-zero length missing the \"uri\" attribute");
+        }
+        return;
+    }
 
     const char* uri = it->GetString();
 
@@ -261,22 +266,32 @@ inline void Buffer::Read(Value& obj, Asset& r)
             this->mData.reset(data);
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                // error?
+                throw DeadlyImportError("GLTF: buffer length mismatch");
             }
+        }
+        else { // assume raw data
+            this->mData.reset(new uint8_t[dataURI.dataLength]);
+            memcmp(dataURI.data, this->mData.get(), dataURI.dataLength);
         }
     }
     else { // Local file
         if (byteLength > 0) {
             IOStream* file = r.OpenFile(uri, "rb");
             if (file) {
-                LoadFromStream(*file, byteLength);
+                bool ok = LoadFromStream(*file, byteLength);
                 delete file;
+                
+                if (!ok)
+                    throw DeadlyImportError("GLTF: error while reading referenced file \"" + std::string(uri) + "\"" );
+            }
+            else {
+                throw DeadlyImportError("GLTF: could not open referenced file \"" + std::string(uri) + "\"");
             }
         }
     }
 }
 
-inline void Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseOffset)
+inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseOffset)
 {
     byteLength = length ? length : stream.FileSize();
 
@@ -287,8 +302,9 @@ inline void Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
     mData.reset(new uint8_t[byteLength]);
 
     if (stream.Read(mData.get(), byteLength, 1) != 1) {
-        throw DeadlyImportError("Unable to load buffer from file!");
+        return false;
     }
+    return true;
 }
 
 inline size_t Buffer::AppendData(uint8_t* data, size_t length)
@@ -345,7 +361,7 @@ inline unsigned int Accessor::GetNumComponents()
 
 inline unsigned int Accessor::GetBytesPerComponent()
 {
-    return ComponentTypeSize(componentType);
+    return int(ComponentTypeSize(componentType));
 }
 
 inline unsigned int Accessor::GetElementSize()
@@ -356,9 +372,11 @@ inline unsigned int Accessor::GetElementSize()
 inline uint8_t* Accessor::GetPointer()
 {
     if (!bufferView || !bufferView->buffer) return 0;
+    uint8_t* basePtr = bufferView->buffer->GetPointer();
+    if (!basePtr) return 0;
 
     size_t offset = byteOffset + bufferView->byteOffset;
-    return bufferView->buffer->GetPointer() + offset;
+    return basePtr + offset;
 }
 
 namespace {
@@ -384,10 +402,10 @@ namespace {
 }
 
 template<class T>
-void Accessor::ExtractData(T*& outData)
+bool Accessor::ExtractData(T*& outData)
 {
     uint8_t* data = GetPointer();
-    ai_assert(data);
+    if (!data) return false;
 
     const size_t elemSize = GetElementSize();
     const size_t totalSize = elemSize * count;
@@ -408,6 +426,8 @@ void Accessor::ExtractData(T*& outData)
             memcpy(outData + i, data + i*stride, elemSize);
         }
     }
+
+    return true;
 }
 
 inline void Accessor::WriteData(size_t count, const void* src_buffer, size_t src_stride)
@@ -683,7 +703,7 @@ inline void Camera::Read(Value& obj, Asset& r)
     const char* subobjId = (type == Camera::Orthographic) ? "ortographic" : "perspective";
 
     Value* it = FindObject(obj, subobjId);
-    if (!it) throw DeadlyImportError("Camera missing its parameters!");
+    if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");
 
     if (type == Camera::Perspective) {
         perspective.aspectRatio = MemberOrDefault(*it, "aspectRatio", 0.f);
@@ -770,12 +790,12 @@ inline void Node::Read(Value& obj, Asset& r)
     }
 
     if (Value* meshes = FindArray(obj, "meshes")) {
-        size_t numMeshes = (size_t)meshes->Size();
+        unsigned numMeshes = (unsigned)meshes->Size();
 
         std::vector<unsigned int> meshList;
 
         this->meshes.reserve(numMeshes);
-        for (size_t i = 0; i < numMeshes; ++i) {
+        for (unsigned i = 0; i < numMeshes; ++i) {
             if ((*meshes)[i].IsString()) {
                 Ref<Mesh> mesh = r.meshes.Get((*meshes)[i].GetString());
                 if (mesh) this->meshes.push_back(mesh);
@@ -842,7 +862,7 @@ inline void AssetMetadata::Read(Document& doc)
 
     if (version != 1) {
         char msg[128];
-		ai_snprintf(msg, 128, "Unsupported glTF version: %d", version);
+        ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %d", version);
         throw DeadlyImportError(msg);
     }
 }
@@ -857,22 +877,22 @@ inline void Asset::ReadBinaryHeader(IOStream& stream)
 {
     GLB_Header header;
     if (stream.Read(&header, sizeof(header), 1) != 1) {
-        throw DeadlyImportError("Unable to read the file header");
+        throw DeadlyImportError("GLTF: Unable to read the file header");
     }
 
     if (strncmp((char*)header.magic, AI_GLB_MAGIC_NUMBER, sizeof(header.magic)) != 0) {
-        throw DeadlyImportError("Invalid binary glTF file");
+        throw DeadlyImportError("GLTF: Invalid binary glTF file");
     }
 
     AI_SWAP4(header.version);
     asset.version = header.version;
     if (header.version != 1) {
-        throw DeadlyImportError("Unsupported binary glTF version");
+        throw DeadlyImportError("GLTF: Unsupported binary glTF version");
     }
 
     AI_SWAP4(header.sceneFormat);
     if (header.sceneFormat != SceneFormat_JSON) {
-        throw DeadlyImportError("Unsupported binary glTF scene format");
+        throw DeadlyImportError("GLTF: Unsupported binary glTF scene format");
     }
 
     AI_SWAP4(header.length);
@@ -894,7 +914,7 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
 
     shared_ptr<IOStream> stream(OpenFile(pFile.c_str(), "rb", true));
     if (!stream) {
-        throw DeadlyImportError("Could not open file for reading");
+        throw DeadlyImportError("GLTF: Could not open file for reading");
     }
 
     // is binary? then read the header
@@ -914,7 +934,7 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
     sceneData[mSceneLength] = '\0';
 
     if (stream->Read(&sceneData[0], 1, mSceneLength) != mSceneLength) {
-        throw DeadlyImportError("Could not read the file contents");
+        throw DeadlyImportError("GLTF: Could not read the file contents");
     }
 
 
@@ -926,17 +946,19 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
     if (doc.HasParseError()) {
         char buffer[32];
         ai_snprintf(buffer, 32, "%d", static_cast<int>(doc.GetErrorOffset()));
-        throw DeadlyImportError(std::string("JSON parse error, offset ") + buffer + ": "
+        throw DeadlyImportError(std::string("GLTF: JSON parse error, offset ") + buffer + ": "
             + GetParseError_En(doc.GetParseError()));
     }
 
     if (!doc.IsObject()) {
-        throw DeadlyImportError("gltf file must be a JSON object!");
+        throw DeadlyImportError("GLTF: JSON document root must be a JSON object");
     }
 
     // Fill the buffer instance for the current file embedded contents
     if (mBodyLength > 0) {
-        mBodyBuffer->LoadFromStream(*stream, mBodyLength, mBodyOffset);
+        if (!mBodyBuffer->LoadFromStream(*stream, mBodyLength, mBodyOffset)) {
+            throw DeadlyImportError("GLTF: Unable to read gltf file");
+        }
     }
 
 
@@ -967,7 +989,7 @@ inline void Asset::SetAsBinary()
 {
     if (!extensionsUsed.KHR_binary_glTF) {
         extensionsUsed.KHR_binary_glTF = true;
-        mBodyBuffer = buffers.Create("KHR_binary_glTF");
+        mBodyBuffer = buffers.Create("binary_glTF");
         mBodyBuffer->MarkAsSpecial();
     }
 }
@@ -1013,30 +1035,26 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
 {
     std::string id = str;
 
-    Asset::IdMap::iterator it;
+    if (!id.empty()) {
+        if (mUsedIds.find(id) == mUsedIds.end())
+            return id;
 
-    do {
-        if (!id.empty()) {
-            it = mUsedIds.find(id);
-            if (it == mUsedIds.end()) break;
+        id += "_";
+    }
 
-            id += "_";
-        }
+    id += suffix;
 
-        id += suffix;
+    Asset::IdMap::iterator it = mUsedIds.find(id);
+    if (it == mUsedIds.end())
+        return id;
 
+    char buffer[256];
+    int offset = ai_snprintf(buffer, sizeof(buffer), "%s_", id.c_str());
+    for (int i = 0; it != mUsedIds.end(); ++i) {
+        ai_snprintf(buffer + offset, sizeof(buffer) - offset, "%d", i);
+        id = buffer;
         it = mUsedIds.find(id);
-        if (it == mUsedIds.end()) break;
-
-        char buffer[256];
-        int offset = ai_snprintf(buffer, 256, "%s_", id.c_str());
-        for (int i = 0; it != mUsedIds.end(); ++i) {
-			ai_snprintf(buffer + offset, 256, "%d", i);
-
-            id = buffer;
-            it = mUsedIds.find(id);
-        }
-    } while (false); // fake loop to allow using "break"
+    }
     
     return id;
 }
@@ -1066,7 +1084,7 @@ namespace Util {
 
             size_t i = 5, j;
             if (uri[i] != ';' && uri[i] != ',') { // has media type?
-                uri[1] = i;
+                uri[1] = char(i);
                 for (; uri[i] != ';' && uri[i] != ',' && i < uriLen; ++i) {
                     // nothing to do!
                 }
@@ -1078,14 +1096,14 @@ namespace Util {
                 }
 
                 if ( strncmp( uri + j, "charset=", 8 ) == 0 ) {
-                    uri[ 2 ] = j + 8;
+                    uri[2] = char(j + 8);
                 } else if ( strncmp( uri + j, "base64", 6 ) == 0 ) {
-                    uri[ 3 ] = j;
+                    uri[3] = char(j);
                 }
             }
             if (i < uriLen) {
                 uri[i++] = '\0';
-                uri[4] = i;
+                uri[4] = char(i);
             } else {
                 uri[1] = uri[2] = uri[3] = 0;
                 uri[4] = 5;

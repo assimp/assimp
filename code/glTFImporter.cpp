@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <memory>
 
+#include "MakeVerboseFormat.h"
+
 #include "glTFAsset.h"
 
 using namespace Assimp;
@@ -180,7 +182,7 @@ inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& r
 
 void glTFImporter::ImportMaterials(glTF::Asset& r)
 {
-    mScene->mNumMaterials = r.materials.Size();
+    mScene->mNumMaterials = unsigned(r.materials.Size());
     mScene->mMaterials = new aiMaterial*[mScene->mNumMaterials];
 
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
@@ -244,7 +246,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
         Mesh& mesh = r.meshes[m];
 
         meshOffsets.push_back(k);
-        k += mesh.primitives.size();
+        k += unsigned(mesh.primitives.size());
 
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
             Mesh::Primitive& prim = mesh.primitives[p];
@@ -256,7 +258,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
             if (mesh.primitives.size() > 1) {
                 size_t& len = aim->mName.length;
                 aim->mName.data[len] = '-';
-                len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, MAXLEN - len - 1, p);
+                len += 1 + ASSIMP_itoa10(aim->mName.data + len + 1, unsigned(MAXLEN - len - 1), p);
             }
 
             switch (prim.mode) {
@@ -295,11 +297,12 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
             if (prim.indices) {
                 aiFace* faces = 0;
-                size_t nFaces = 0;
+                unsigned int nFaces = 0;
 
                 unsigned int count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
+                assert(data.IsValid());
 
                 switch (prim.mode) {
                     case PrimitiveMode_POINTS: {
@@ -451,7 +454,7 @@ aiNode* ImportNode(aiScene* pScene, glTF::Asset& r, std::vector<unsigned int>& m
     aiNode* ainode = new aiNode(node.id);
 
     if (!node.children.empty()) {
-        ainode->mNumChildren = node.children.size();
+        ainode->mNumChildren = unsigned(node.children.size());
         ainode->mChildren = new aiNode*[ainode->mNumChildren];
 
         for (unsigned int i = 0; i < ainode->mNumChildren; ++i) {
@@ -503,7 +506,7 @@ aiNode* ImportNode(aiScene* pScene, glTF::Asset& r, std::vector<unsigned int>& m
         int k = 0;
         for (size_t i = 0; i < node.meshes.size(); ++i) {
             int idx = node.meshes[i].GetIndex();
-            for (size_t j = meshOffsets[idx]; j < meshOffsets[idx + 1]; ++j, ++k) {
+            for (unsigned int j = meshOffsets[idx]; j < meshOffsets[idx + 1]; ++j, ++k) {
                 ainode->mMeshes[k] = j;
             }
         }
@@ -527,7 +530,7 @@ void glTFImporter::ImportNodes(glTF::Asset& r)
     std::vector< Ref<Node> > rootNodes = r.scene->nodes;
 
     // The root nodes
-    unsigned int numRootNodes = rootNodes.size();
+    unsigned int numRootNodes = unsigned(rootNodes.size());
     if (numRootNodes == 1) { // a single root node: use it
         mScene->mRootNode = ImportNode(mScene, r, meshOffsets, rootNodes[0]);
     }
@@ -617,7 +620,10 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     ImportNodes(asset);
 
     // TODO: it does not split the loaded vertices, should it?
-    pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+    //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+    Assimp::MakeVerboseFormatProcess process;
+    process.Execute(pScene);
+    
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

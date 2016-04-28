@@ -446,6 +446,9 @@ ADD_ASSIMP_IMPORTER(IFC
   STEPFileEncoding.cpp
   STEPFileEncoding.h
 )
+if (MSVC AND ASSIMP_BUILD_IFC_IMPORTER)
+  set_source_files_properties(IFCReaderGen.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+endif (MSVC AND ASSIMP_BUILD_IFC_IMPORTER)
 
 ADD_ASSIMP_IMPORTER(XGL
   XGLLoader.cpp

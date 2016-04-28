@@ -754,12 +754,12 @@ namespace glTF
         virtual void WriteObjects(AssetWriter& writer) = 0;
     };
 
-    //! (Stub class that is specialized in glTFAssetWriter.h)
     template<class T>
-    struct LazyDictWriter
-    {
-        static void Write(T& d, AssetWriter& w) {}
-    };
+    class LazyDict;
+
+    //! (Implemented in glTFAssetWriter.h)
+    template<class T>
+    void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
 
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them
@@ -782,7 +782,7 @@ namespace glTF
         void DetachFromDocument();
 
         void WriteObjects(AssetWriter& writer)
-            { LazyDictWriter< LazyDict >::Write(*this, writer); }
+            { WriteLazyDict<T>(*this, writer); }
 
         Ref<T> Add(T* obj);
 
@@ -810,14 +810,14 @@ namespace glTF
     {
         std::string copyright; //!< A copyright message suitable for display to credit the content creator.
         std::string generator; //!< Tool that generated this glTF model.Useful for debugging.
-        bool premultipliedAlpha; //!< Specifies if the shaders were generated with premultiplied alpha. (default: false)
+        bool premultipliedAlpha = false; //!< Specifies if the shaders were generated with premultiplied alpha. (default: false)
 
         struct {
             std::string api;     //!< Specifies the target rendering API (default: "WebGL")
             std::string version; //!< Specifies the target rendering API (default: "1.0.3")
         } profile; //!< Specifies the target rendering API and version, e.g., WebGL 1.0.3. (default: {})
 
-        int version; //!< The glTF format version (should be 1)
+        int version = 0; //!< The glTF format version (should be 1)
 
         void Read(Document& doc);
     };
@@ -894,6 +894,7 @@ namespace glTF
     public:
         Asset(IOSystem* io = 0)
             : mIOSystem(io)
+            , asset()
             , accessors     (*this, "accessors")
             , animations    (*this, "animations")
             , buffers       (*this, "buffers")
@@ -913,7 +914,6 @@ namespace glTF
             , lights        (*this, "lights", "KHR_materials_common")
         {
             memset(&extensionsUsed, 0, sizeof(extensionsUsed));
-            memset(&asset, 0, sizeof(asset));
         }
 
         //! Main function

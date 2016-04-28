@@ -269,9 +269,13 @@ option ( ASSIMP_BUILD_ASSIMP_TOOLS
   ON
 )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
-  IF ( WIN32 AND DirectX_FOUND )
-    ADD_SUBDIRECTORY( tools/assimp_view/ )
-  ENDIF ( WIN32 AND DirectX_FOUND )
+  IF ( WIN32 )
+    option ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" ${DirectX_FOUND} )
+    IF ( ASSIMP_BUILD_ASSIMP_VIEW )
+      ADD_SUBDIRECTORY( tools/assimp_view/ )
+    ENDIF ( ASSIMP_BUILD_ASSIMP_VIEW )
+  ENDIF ( WIN32 )
+  
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 

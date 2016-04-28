@@ -484,13 +484,10 @@ namespace glTF {
     }
 
     template<class T>
-    struct LazyDictWriter< LazyDict<T> >
+    void WriteLazyDict(LazyDict<T>& d, AssetWriter& w)
     {
-        static void Write(LazyDict<T>& d, AssetWriter& w)
-        {
-            w.WriteObjects(d);
-        }
-    };
+        w.WriteObjects(d);
+    }
 
 }
 

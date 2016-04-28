@@ -71,11 +71,11 @@ namespace {
     }};
 
     template<> struct ReadHelper<const char*> { static bool Read(Value& val, const char*& out) {
-        return val.IsString() ? out = val.GetString(), true : false;
+        return val.IsString() ? (out = val.GetString(), true) : false;
     }};
 
     template<> struct ReadHelper<std::string> { static bool Read(Value& val, std::string& out) {
-        return val.IsString() ? out = val.GetString(), true : false;
+        return val.IsString() ? (out = std::string(val.GetString(), val.GetStringLength()), true) : false;
     }};
 
     template<class T> struct ReadHelper< Nullable<T> > { static bool Read(Value& val, Nullable<T>& out) {
@@ -842,7 +842,7 @@ inline void AssetMetadata::Read(Document& doc)
 
     if (version != 1) {
         char msg[128];
-		ai_snprintf(msg, 128, "Unsupported glTF version: %d", version);
+        ai_snprintf(msg, 128, "Unsupported glTF version: %d", version);
         throw DeadlyImportError(msg);
     }
 }
@@ -1013,30 +1013,26 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
 {
     std::string id = str;
 
-    Asset::IdMap::iterator it;
+    if (!id.empty()) {
+        if (mUsedIds.find(id) == mUsedIds.end())
+            return id;
 
-    do {
-        if (!id.empty()) {
-            it = mUsedIds.find(id);
-            if (it == mUsedIds.end()) break;
+        id += "_";
+    }
 
-            id += "_";
-        }
+    id += suffix;
 
-        id += suffix;
+    Asset::IdMap::iterator it = mUsedIds.find(id);
+    if (it == mUsedIds.end())
+        return id;
 
+    char buffer[256];
+    int offset = ai_snprintf(buffer, sizeof(buffer), "%s_", id.c_str());
+    for (int i = 0; it != mUsedIds.end(); ++i) {
+        ai_snprintf(buffer + offset, sizeof(buffer) - offset, "%d", i);
+        id = buffer;
         it = mUsedIds.find(id);
-        if (it == mUsedIds.end()) break;
-
-        char buffer[256];
-        int offset = ai_snprintf(buffer, 256, "%s_", id.c_str());
-        for (int i = 0; it != mUsedIds.end(); ++i) {
-			ai_snprintf(buffer + offset, 256, "%d", i);
-
-            id = buffer;
-            it = mUsedIds.find(id);
-        }
-    } while (false); // fake loop to allow using "break"
+    }
     
     return id;
 }

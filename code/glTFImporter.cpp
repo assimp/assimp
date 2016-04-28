@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <memory>
 
+#include "MakeVerboseFormat.h"
+
 #include "glTFAsset.h"
 
 using namespace Assimp;
@@ -617,7 +619,10 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
     ImportNodes(asset);
 
     // TODO: it does not split the loaded vertices, should it?
-    pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+    //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+    Assimp::MakeVerboseFormatProcess process;
+    process.Execute(pScene);
+    
 
     if (pScene->mNumMeshes == 0) {
         pScene->mFlags |= AI_SCENE_FLAGS_INCOMPLETE;

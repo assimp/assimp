@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef glTFAssetWriter_H_INC
 #define glTFAssetWriter_H_INC
 
+#define GLTF_ASSET_WITH_EXPORT_SUPPORT
 #include "glTFAsset.h"
 
 namespace glTF

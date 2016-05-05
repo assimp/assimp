@@ -67,6 +67,7 @@ namespace AssxmlExport  {
 
 // -----------------------------------------------------------------------------------
 static int ioprintf( IOStream * io, const char *format, ... ) {
+	using namespace std;
     if ( nullptr == io ) {
         return -1;
     }

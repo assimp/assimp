@@ -77,7 +77,7 @@ static int ioprintf( IOStream * io, const char *format, ... ) {
     ::memset( sz, '\0', Size );
     va_list va;
     va_start( va, format );
-    int nSize = std::vsnprintf( sz, Size-1, format, va );
+    int nSize = vsnprintf( sz, Size-1, format, va );
     ai_assert( nSize < Size );
     va_end( va );
 

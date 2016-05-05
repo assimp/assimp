@@ -756,15 +756,19 @@ namespace glTF
         virtual void AttachToDocument(Document& doc) = 0;
         virtual void DetachFromDocument() = 0;
 
+#ifdef  GLTF_ASSET_WITH_EXPORT_SUPPORT
         virtual void WriteObjects(AssetWriter& writer) = 0;
+#endif
     };
 
+#ifdef GLTF_ASSET_WITH_EXPORT_SUPPORT
     template<class T>
     class LazyDict;
 
     //! (Implemented in glTFAssetWriter.h)
     template<class T>
     void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
+#endif
 
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them
@@ -786,8 +790,10 @@ namespace glTF
         void AttachToDocument(Document& doc);
         void DetachFromDocument();
 
+#ifdef  GLTF_ASSET_WITH_EXPORT_SUPPORT
         void WriteObjects(AssetWriter& writer)
             { WriteLazyDict<T>(*this, writer); }
+#endif
 
         Ref<T> Add(T* obj);
 

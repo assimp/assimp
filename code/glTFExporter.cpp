@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
 
 #include "glTFExporter.h"
+
 #include "Exceptional.h"
 #include "StringComparison.h"
 #include "ByteSwapper.h"
@@ -54,7 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-#include <memory>
 #include <memory>
 
 #include "glTFAssetWriter.h"

@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MakeVerboseFormat.h"
 
 #include "glTFAsset.h"
+// This is included here so WriteLazyDict<T>'s definition is found.
+#include "glTFAssetWriter.h"
 
 using namespace Assimp;
 using namespace glTF;

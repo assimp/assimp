@@ -1211,6 +1211,11 @@ void SceneCombiner::Copy     (aiNode** _dest, const aiNode* src)
     // and reallocate all arrays
     GetArrayCopy( dest->mMeshes, dest->mNumMeshes );
     CopyPtrArray( dest->mChildren, src->mChildren,dest->mNumChildren);
+
+	// need to set the mParent fields to the created aiNode.
+	for( unsigned int i = 0; i < dest->mNumChildren; i ++ ) {
+		dest->mChildren[i]->mParent = dest;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------

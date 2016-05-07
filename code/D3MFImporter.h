@@ -56,12 +56,12 @@ public:
 
     // BaseImporter interface
 public:
-    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const override;
-    void SetupProperties(const Importer *pImp) override;
-    const aiImporterDesc *GetInfo() const override;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
+    void SetupProperties(const Importer *pImp);
+    const aiImporterDesc *GetInfo() const;
 
 protected:
-    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler) override;
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
 
 };
 }

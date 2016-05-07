@@ -490,14 +490,13 @@ public:
 
     }
     void ParseChildNode(XmlReader* xmlReader)
-    {
+    {        
+        OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
 
-        OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship
-        {
-            xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_ID.c_str()),
-            xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TYPE.c_str()),
-            xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TARGET.c_str())
-         });
+        relPtr->id = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_ID.c_str());
+        relPtr->type = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TYPE.c_str());
+        relPtr->target = xmlReader->getAttributeValue(XmlTag::RELS_ATTRIB_TARGET.c_str());
+
         m_relationShips.push_back(relPtr);
     }
     std::vector<OpcPackageRelationshipPtr> m_relationShips;

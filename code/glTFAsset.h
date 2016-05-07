@@ -759,12 +759,14 @@ namespace glTF
         virtual void WriteObjects(AssetWriter& writer) = 0;
     };
 
+
     template<class T>
     class LazyDict;
 
     //! (Implemented in glTFAssetWriter.h)
     template<class T>
     void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
+
 
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them

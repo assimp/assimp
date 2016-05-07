@@ -179,6 +179,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
 #   include "C4DImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
+#   include "D3MFImporter.h"
+#endif
 
 namespace Assimp {
 
@@ -318,6 +321,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #if ( !defined ASSIMP_BUILD_NO_C4D_IMPORTER )
     out.push_back( new C4DImporter() );
+#endif
+#if ( !defined ASSIMP_BUILD_NO_3MF_IMPORTER )
+    out.push_back(new D3MFImporter() );
 #endif
 }
 

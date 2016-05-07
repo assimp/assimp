@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# 
+#
 # Copyright (c) 2006-2016, assimp team
 # All rights reserved.
 #
@@ -604,10 +604,20 @@ ADD_ASSIMP_IMPORTER(GLTF
 
   glTFImporter.cpp
   glTFImporter.h
-  
+
   glTFExporter.h
   glTFExporter.cpp
 )
+
+
+ADD_ASSIMP_IMPORTER(3MF
+    D3MFImporter.h
+    D3MFImporter.cpp
+    D3MFOpcPackage.h
+    D3MFOpcPackage.cpp
+
+)
+
 
 SET( Step_SRCS
   StepExporter.h

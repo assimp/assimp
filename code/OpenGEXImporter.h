@@ -127,6 +127,9 @@ protected:
     void handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleParamNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void copyMeshes( aiScene *pScene );
+    void copyCameras( aiScene *pScene );
+    void copyLights( aiScene *pScene );
+
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();

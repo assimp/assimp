@@ -192,6 +192,21 @@ namespace OpenGEX {
 USE_ODDLPARSER_NS
 
 //------------------------------------------------------------------------------------------------
+static void propId2StdString( Property *prop, std::string &name, std::string &key ) {
+    name = key = "";
+    if ( NULL == prop ) {
+        return;
+    }
+
+    if ( NULL != prop->m_key ) {
+        name = prop->m_key->m_buffer;
+        if ( Value::ddl_string == prop->m_value->m_type ) {
+            key = prop->m_value->getString();
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
 , m_vertices(NULL)
@@ -238,6 +253,8 @@ OpenGEXImporter::OpenGEXImporter()
 , m_currentVertices()
 , m_currentMesh( NULL )
 , m_currentMaterial( NULL )
+, m_currentLight( NULL )
+, m_currentCamera( nullptr )
 , m_tokenType( Grammar::NoneType )
 , m_materialCache()
 , m_cameraCache()
@@ -346,6 +363,14 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
 
             case Grammar::GeometryObjectToken:
                 handleGeometryObject( *it, pScene );
+                break;
+
+            case Grammar::CameraObjectToken:
+                handleCameraObject( *it, pScene );
+                break;
+
+            case Grammar::LightObjectToken:
+                handleCameraObject( *it, pScene );
                 break;
 
             case Grammar::TransformToken:
@@ -506,7 +531,18 @@ void OpenGEXImporter::handleCameraNode( DDLNode *node, aiScene *pScene ) {
     aiCamera *camera( new aiCamera );
     const size_t camIdx( m_cameraCache.size() );
     m_cameraCache.push_back( camera );
+    m_currentCamera = camera;
 
+    aiNode *newNode = new aiNode;
+    m_tokenType = Grammar::CameraNodeToken;
+    m_currentNode = newNode;
+    pushNode( newNode, pScene );
+
+    handleNodes( node, pScene );
+
+    popNode();
+
+    m_currentCamera->mName.Set( newNode->mName.C_Str() );
 }
 
 //------------------------------------------------------------------------------------------------
@@ -514,6 +550,7 @@ void OpenGEXImporter::handleLightNode( ODDLParser::DDLNode *node, aiScene *pScen
     aiLight *light( new aiLight );
     const size_t lightIdx( m_lightCache.size() );
     m_lightCache.push_back( light );
+    m_currentLight = light;
 
     aiNode *newNode = new aiNode;
     m_tokenType = Grammar::LightNodeToken;
@@ -524,7 +561,7 @@ void OpenGEXImporter::handleLightNode( ODDLParser::DDLNode *node, aiScene *pScen
 
     popNode();
 
-    light->mName.Set( newNode->mName.C_Str() );
+    m_currentLight->mName.Set( newNode->mName.C_Str() );
 }
 
 //------------------------------------------------------------------------------------------------
@@ -596,21 +633,6 @@ void OpenGEXImporter::handleTransformNode( ODDLParser::DDLNode *node, aiScene *p
             return;
         }
         setMatrix( m_currentNode, transformData );
-    }
-}
-
-//------------------------------------------------------------------------------------------------
-static void propId2StdString( Property *prop, std::string &name, std::string &key ) {
-    name = key = "";
-    if( NULL == prop ) {
-        return;
-    }
-
-    if( NULL != prop->m_key ) {
-        name = prop->m_key->m_buffer;
-        if( Value::ddl_string == prop->m_value->m_type ) {
-            key = prop->m_value->getString();
-        }
     }
 }
 
@@ -777,9 +799,16 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     m_currentMesh->mFaces = new aiFace[ numItems ];
     m_currentMesh->mNumVertices = numItems * 3;
     m_currentMesh->mVertices = new aiVector3D[ m_currentMesh->mNumVertices ];
-    m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
-    m_currentMesh->mNumUVComponents[ 0 ] = 3;
-    m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ m_currentMesh->mNumVertices ];
+    bool hasNormalCoords( false );
+    if ( m_currentVertices.m_numNormals > 0 ) {
+        m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
+        hasNormalCoords = true;
+    }
+    bool hasTexCoords( false );
+    if ( m_currentVertices.m_numUVComps[ 0 ] > 0 ) {
+        m_currentMesh->mTextureCoords[ 0 ] = new aiVector3D[ m_currentMesh->mNumVertices ];
+        hasTexCoords = true;
+    }
 
     unsigned int index( 0 );
     for( size_t i = 0; i < m_currentMesh->mNumFaces; i++ ) {
@@ -790,15 +819,17 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
         for( size_t indices = 0; indices < current.mNumIndices; indices++ ) {
             const int idx( next->getUnsignedInt32() );
             ai_assert( static_cast<size_t>( idx ) <= m_currentVertices.m_numVerts );
-
-            aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
-            aiVector3D &normal = ( m_currentVertices.m_normals[ idx ] );
-            aiVector3D &tex = ( m_currentVertices.m_textureCoords[ 0 ][ idx ] );
-
             ai_assert( index < m_currentMesh->mNumVertices );
+            aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
             m_currentMesh->mVertices[ index ].Set( pos.x, pos.y, pos.z );
-            m_currentMesh->mNormals[ index ].Set( normal.x, normal.y, normal.z );
-            m_currentMesh->mTextureCoords[0][ index ].Set( tex.x, tex.y, tex.z );
+            if ( hasNormalCoords ) {
+                aiVector3D &normal = ( m_currentVertices.m_normals[ idx ] );
+                m_currentMesh->mNormals[ index ].Set( normal.x, normal.y, normal.z );
+            }
+            if ( hasTexCoords ) {
+                aiVector3D &tex = ( m_currentVertices.m_textureCoords[ 0 ][ idx ] );
+                m_currentMesh->mTextureCoords[ 0 ][ index ].Set( tex.x, tex.y, tex.z );
+            }
             current.mIndices[ indices ] = index;
             index++;
 
@@ -914,6 +945,30 @@ void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pSc
                     m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_NORMALS( 0 ) );
                 } else {
                     ai_assert( false );
+                }
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleParamNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if ( NULL == node ) {
+        return;
+    }
+
+    Property *prop = node->findPropertyByName( "attrib" );
+    
+    if ( nullptr != prop ) {
+        if ( NULL != prop->m_value ) {
+            Value *val( node->getValue() );
+            if ( NULL != val ) {
+                if ( "fov" == val->getString() ) {
+                    
+                } else if ( "near" == val->getString() ) {
+
+                }else if ( "far" == val->getString() ) {
+                
                 }
             }
         }

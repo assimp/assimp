@@ -60,7 +60,8 @@ __Importers__:
 - Ogre XML
 - Q3D
 - ASSBIN (Assimp custom format)
-- glTF
+- glTF (partial)
+- 3MF
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
@@ -76,7 +77,7 @@ __Exporters__:
 - 3DS
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
-- glTF
+- glTF (partial)
 
 ### Building ###
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.

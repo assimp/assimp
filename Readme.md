@@ -77,6 +77,7 @@ __Exporters__:
 - 3DS
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
+- STEP
 - glTF (partial)
 
 ### Building ###

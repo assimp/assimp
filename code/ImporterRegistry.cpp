@@ -253,7 +253,7 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #if (!defined ASSIMP_BUILD_NO_BVH_IMPORTER)
     out.push_back( new BVHLoader());
 #endif
-#if (!defined ASSIMP_BUILD_NO_IRR_IMPORTER)
+#if (!defined ASSIMP_BUILD_NO_IRRMESH_IMPORTER)
     out.push_back( new IRRMeshImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_IRR_IMPORTER)

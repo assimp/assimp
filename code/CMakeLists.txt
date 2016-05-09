@@ -273,12 +273,16 @@ ADD_ASSIMP_IMPORTER(HMP
   HalfLifeFileData.h
 )
 
-#FIXME: allow to set IRRMESH by option
+ADD_ASSIMP_IMPORTER(IRRMESH
+  IRRMeshLoader.cpp
+  IRRMeshLoader.h
+  IRRShared.cpp
+  IRRShared.h
+)
+
 ADD_ASSIMP_IMPORTER(IRR
   IRRLoader.cpp
   IRRLoader.h
-  IRRMeshLoader.cpp
-  IRRMeshLoader.h
   IRRShared.cpp
   IRRShared.h
 )

@@ -125,7 +125,12 @@ protected:
     void handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleParamNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleAttenNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void copyMeshes( aiScene *pScene );
+    void copyCameras( aiScene *pScene );
+    void copyLights( aiScene *pScene );
+
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();
@@ -186,6 +191,8 @@ private:
     VertexContainer m_currentVertices;
     aiMesh *m_currentMesh;
     aiMaterial *m_currentMaterial;
+    aiLight *m_currentLight;
+    aiCamera *m_currentCamera;
     int m_tokenType;
     std::vector<aiMaterial*> m_materialCache;
     std::vector<aiCamera*> m_cameraCache;

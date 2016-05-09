@@ -87,6 +87,7 @@ namespace Grammar {
     static const std::string ColorType           = "Color";
     static const std::string ParamType           = "Param";
     static const std::string TextureType         = "Texture";
+    static const std::string AttenType           = "Atten";
 
     static const std::string DiffuseColorToken  = "diffuse";
     static const std::string SpecularColorToken = "specular";
@@ -121,6 +122,7 @@ namespace Grammar {
         ColorToken,
         ParamToken,
         TextureToken, 
+        AttenToken
     };
 
     static const std::string ValidMetricToken[ 4 ] = {
@@ -186,6 +188,8 @@ namespace Grammar {
             return ParamToken;
         } else if(  TextureType == tokenType ) {
             return TextureToken;
+        } else if ( AttenType == tokenType ) {
+            return AttenToken;
         }
 
         return NoneType;
@@ -590,12 +594,27 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleCameraObject( ODDLParser::DDLNode *node, aiScene *pScene ) {
     // parameters will be parsed normally in the tree, so just go for it
-    
+   
     handleNodes( node, pScene );
 }
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleLightObject( ODDLParser::DDLNode *node, aiScene *pScene ) {
+
+    Property *prop( node->findPropertyByName( "type" ) );
+    if ( nullptr != prop ) {
+        if ( NULL != prop->m_value ) {
+            std::string typeStr( prop->m_value->getString() );
+            if ( "point" == typeStr ) {
+                m_currentLight->mType = aiLightSource_POINT;
+            } else if ( "spot" == typeStr ) {
+                m_currentLight->mType = aiLightSource_SPOT;
+            } else if ( "infinite" == typeStr ) {
+                m_currentLight->mType = aiLightSource_DIRECTIONAL;
+            }
+        }
+    }
+
     // parameters will be parsed normally in the tree, so just go for it
     handleNodes( node, pScene );
 }
@@ -876,7 +895,8 @@ enum ColorType {
     NoneColor = 0,
     DiffuseColor,
     SpecularColor,
-    EmissionColor
+    EmissionColor,
+    LightColor
 };
 
 //------------------------------------------------------------------------------------------------
@@ -891,6 +911,8 @@ static ColorType getColorType( Text *id ) {
         return SpecularColor;
     } else if( *id == Grammar::EmissionColorToken ) {
         return EmissionColor;
+    } else if ( *id == "light" ) {
+        return LightColor;
     }
 
     return NoneColor;
@@ -926,6 +948,8 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
                 m_currentMaterial->AddProperty( &col, 1, AI_MATKEY_COLOR_SPECULAR );
             } else if( EmissionColor == colType ) {
                 m_currentMaterial->AddProperty( &col, 1, AI_MATKEY_COLOR_EMISSIVE );
+            } else if ( LightColor == colType ) {
+                m_currentLight->mColorDiffuse = col;
             }
         }
     }
@@ -951,10 +975,8 @@ void OpenGEXImporter::handleTextureNode( ODDLParser::DDLNode *node, aiScene *pSc
 
                 } else if( prop->m_value->getString() == Grammar::EmissionTextureToken ) {
                     m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_EMISSIVE( 0 ) );
-
                 } else if( prop->m_value->getString() == Grammar::OpacyTextureToken ) {
                     m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_OPACITY( 0 ) );
-
                 } else if( prop->m_value->getString() == Grammar::TransparencyTextureToken ) {
                     // ToDo!
                     // m_currentMaterial->AddProperty( &tex, AI_MATKEY_TEXTURE_DIFFUSE( 0 ) );
@@ -988,6 +1010,24 @@ void OpenGEXImporter::handleParamNode( ODDLParser::DDLNode *node, aiScene *pScen
                 } else if ( "far" == prop->m_value->getString() ) {
                     m_currentCamera->mClipPlaneFar = floatVal;
                 }
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+void OpenGEXImporter::handleAttenNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    if ( nullptr == node ) {
+        return;
+    }
+
+    Property *prop = node->findPropertyByName( "curve" );
+    if ( nullptr != prop ) {
+        if ( nullptr != prop->m_value ) {
+            Value *val( node->getValue() );
+            const float floatVal( val->getFloat() );
+            if ( "scale" == prop->m_value->getString() ) {
+                m_currentLight->mAttenuationQuadratic = floatVal;
             }
         }
     }

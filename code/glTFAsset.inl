@@ -184,6 +184,8 @@ Ref<T> LazyDict<T>::Get(unsigned int i)
 template<class T>
 Ref<T> LazyDict<T>::Get(const char* id)
 {
+    id = T::TranslateId(mAsset, id);
+
     typename Dict::iterator it = mObjsById.find(id);
     if (it != mObjsById.end()) { // already created?
         return Ref<T>(mObjs, it->second);
@@ -191,7 +193,7 @@ Ref<T> LazyDict<T>::Get(const char* id)
 
     // read it from the JSON object
     if (!mDict) {
-        return Ref<T>(); // section is missing
+        throw DeadlyImportError("GLTF: Missing section \"" + std::string(mDictId) + "\"");
     }
 
     Value::MemberIterator obj = mDict->FindMember(id);
@@ -242,6 +244,15 @@ inline Buffer::Buffer()
 : byteLength(0), type(Type_arraybuffer), mIsSpecial(false)
 { }
 
+inline const char* Buffer::TranslateId(Asset& r, const char* id)
+{
+    // Compatibility with old spec
+    if (r.extensionsUsed.KHR_binary_glTF && strcmp(id, "KHR_binary_glTF") == 0) {
+        return "binary_glTF";
+    }
+
+    return id;
+}
 
 inline void Buffer::Read(Value& obj, Asset& r)
 {
@@ -266,10 +277,16 @@ inline void Buffer::Read(Value& obj, Asset& r)
             this->mData.reset(data);
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                throw DeadlyImportError("GLTF: buffer length mismatch");
+                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + std::to_string(statedLength) +
+                    " bytes, but found " + std::to_string(dataURI.dataLength));
             }
         }
         else { // assume raw data
+            if (statedLength != dataURI.dataLength) {
+                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + std::to_string(statedLength) +
+                                        " bytes, but found " + std::to_string(dataURI.dataLength));
+            }
+
             this->mData.reset(new uint8_t[dataURI.dataLength]);
             memcmp(dataURI.data, this->mData.get(), dataURI.dataLength);
         }
@@ -589,14 +606,16 @@ inline void Material::Read(Value& material, Asset& r)
                     else if (strcmp(t, "CONSTANT") == 0) technique = Technique_CONSTANT;
                 }
 
-                ReadMaterialProperty(r, *ext, "ambient", this->ambient);
-                ReadMaterialProperty(r, *ext, "diffuse", this->diffuse);
-                ReadMaterialProperty(r, *ext, "specular", this->specular);
+                if (Value* values = FindObject(*ext, "values")) {
+                    ReadMaterialProperty(r, *values, "ambient", this->ambient);
+                    ReadMaterialProperty(r, *values, "diffuse", this->diffuse);
+                    ReadMaterialProperty(r, *values, "specular", this->specular);
 
-                ReadMember(*ext, "doubleSided", doubleSided);
-                ReadMember(*ext, "transparent", transparent);
-                ReadMember(*ext, "transparency", transparency);
-                ReadMember(*ext, "shininess", shininess);
+                    ReadMember(*values, "doubleSided", doubleSided);
+                    ReadMember(*values, "transparent", transparent);
+                    ReadMember(*values, "transparency", transparency);
+                    ReadMember(*values, "shininess", shininess);
+                }
             }
         }
     }

@@ -355,6 +355,10 @@ namespace glTF
             { return false; }
 
         virtual ~Object() {}
+
+        //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
+        static const char* TranslateId(Asset& r, const char* id)
+            { return id; }
     };
 
 
@@ -484,6 +488,8 @@ namespace glTF
 
         bool IsSpecial() const
             { return mIsSpecial; }
+
+        static const char* TranslateId(Asset& r, const char* id);
     };
 
 
@@ -766,7 +772,7 @@ namespace glTF
     //! (Implemented in glTFAssetWriter.h)
     template<class T>
     void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
-
+    
 
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them

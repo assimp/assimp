@@ -214,14 +214,14 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
 }
 
 
-inline void SetFace(aiFace& face, int a)
+static inline void SetFace(aiFace& face, int a)
 {
     face.mNumIndices = 1;
     face.mIndices = new unsigned int[1];
     face.mIndices[0] = a;
 }
 
-inline void SetFace(aiFace& face, int a, int b)
+static inline void SetFace(aiFace& face, int a, int b)
 {
     face.mNumIndices = 2;
     face.mIndices = new unsigned int[2];
@@ -229,13 +229,25 @@ inline void SetFace(aiFace& face, int a, int b)
     face.mIndices[1] = b;
 }
 
-inline void SetFace(aiFace& face, int a, int b, int c)
+static inline void SetFace(aiFace& face, int a, int b, int c)
 {
     face.mNumIndices = 3;
     face.mIndices = new unsigned int[3];
     face.mIndices[0] = a;
     face.mIndices[1] = b;
     face.mIndices[2] = c;
+}
+
+static inline bool CheckValidFacesIndices(aiFace* faces, unsigned nFaces, unsigned nVerts)
+{
+    for (unsigned i = 0; i < nFaces; ++i) {
+        for (unsigned j = 0; j < faces[i].mNumIndices; ++j) {
+            unsigned idx = faces[i].mIndices[j];
+            if (idx >= nVerts)
+                return false;
+        }
+    }
+    return true;
 }
 
 void glTFImporter::ImportMeshes(glTF::Asset& r)
@@ -294,6 +306,11 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
             for (size_t tc = 0; tc < attr.texcoord.size() && tc <= AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
+
+                aiVector3D* values = aim->mTextureCoords[tc];
+                for (unsigned int i = 0; i < aim->mNumVertices; ++i) {
+                    values[i].y = 1 - values[i].y; // Flip Y coords
+                }
             }
 
 
@@ -304,7 +321,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                 unsigned int count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
-                assert(data.IsValid());
+                ai_assert(data.IsValid());
 
                 switch (prim.mode) {
                     case PrimitiveMode_POINTS: {
@@ -369,6 +386,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                 if (faces) {
                     aim->mFaces = faces;
                     aim->mNumFaces = nFaces;
+                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
                 }
             }
 
@@ -466,7 +484,7 @@ aiNode* ImportNode(aiScene* pScene, glTF::Asset& r, std::vector<unsigned int>& m
         }
     }
 
-    aiMatrix4x4 matrix = ainode->mTransformation;
+    aiMatrix4x4& matrix = ainode->mTransformation;
     if (node.matrix.isPresent) {
         CopyValue(node.matrix.value, matrix);
     }

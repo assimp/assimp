@@ -44,16 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_DOCUMENT_H
 #define INCLUDED_AI_FBX_DOCUMENT_H
 
-#include <vector>
-#include <map>
-#include <string>
-#include <stdint.h>
 #include <numeric>
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/vector3.h"
-#include "../include/assimp/vector2.h"
-#include "../include/assimp/color4.h"
+#include <stdint.h>
 #include "../include/assimp/mesh.h"
 #include "FBXProperties.h"
 #include "FBXParser.h"
@@ -64,24 +56,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-    class Parser;
-    class Object;
-    struct ImportSettings;
+class Parser;
+class Object;
+struct ImportSettings;
 
-    class PropertyTable;
-    class Document;
-    class Material;
-    class Geometry;
+class PropertyTable;
+class Document;
+class Material;
+class Geometry;
 
-    class Video;
+class Video;
 
-    class AnimationCurve;
-    class AnimationCurveNode;
-    class AnimationLayer;
-    class AnimationStack;
+class AnimationCurve;
+class AnimationCurveNode;
+class AnimationLayer;
+class AnimationStack;
 
-    class Skin;
-    class Cluster;
+class Skin;
+class Cluster;
 
 
 /** Represents a delay-parsed FBX objects. Many objects in the scene
@@ -90,7 +82,6 @@ namespace FBX {
 class LazyObject
 {
 public:
-
     LazyObject(uint64_t id, const Element& element, const Document& doc);
     ~LazyObject();
 
@@ -125,10 +116,9 @@ public:
     }
 
 private:
-
     const Document& doc;
     const Element& element;
-    boost::scoped_ptr<const Object> object;
+    std::unique_ptr<const Object> object;
 
     const uint64_t id;
 
@@ -146,11 +136,9 @@ private:
 class Object
 {
 public:
-
     Object(uint64_t id, const Element& element, const std::string& name);
-    virtual ~Object();
 
-public:
+    virtual ~Object();
 
     const Element& SourceElement() const {
         return element;
@@ -177,11 +165,8 @@ protected:
 class NodeAttribute : public Object
 {
 public:
-
     NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~NodeAttribute();
-
-public:
+    virtual ~NodeAttribute();
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -189,8 +174,7 @@ public:
     }
 
 private:
-
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
 };
 
 
@@ -198,11 +182,8 @@ private:
 class CameraSwitcher : public NodeAttribute
 {
 public:
-
     CameraSwitcher(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~CameraSwitcher();
-
-public:
+    virtual ~CameraSwitcher();
 
     int CameraID() const {
         return cameraId;
@@ -212,13 +193,11 @@ public:
         return cameraName;
     }
 
-
     const std::string& CameraIndexName() const {
         return cameraIndexName;
     }
 
 private:
-
     int cameraId;
     std::string cameraName;
     std::string cameraIndexName;
@@ -244,17 +223,14 @@ private:
 }
 
 
-
 /** DOM base class for FBX cameras attached to a node */
 class Camera : public NodeAttribute
 {
 public:
-
     Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Camera();
+    virtual  ~Camera();
 
 public:
-
     fbx_simple_property(Position, aiVector3D, aiVector3D(0,0,0))
     fbx_simple_property(UpVector, aiVector3D, aiVector3D(0,1,0))
     fbx_simple_property(InterestPosition, aiVector3D, aiVector3D(0,0,0))
@@ -269,8 +245,6 @@ public:
 
     fbx_simple_property(FieldOfView, float, 1.0f)
     fbx_simple_property(FocalLength, float, 1.0f)
-
-private:
 };
 
 
@@ -278,9 +252,8 @@ private:
 class Null : public NodeAttribute
 {
 public:
-
     Null(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Null();
+    virtual ~Null();
 };
 
 
@@ -288,9 +261,8 @@ public:
 class LimbNode : public NodeAttribute
 {
 public:
-
     LimbNode(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~LimbNode();
+    virtual ~LimbNode();
 };
 
 
@@ -298,12 +270,10 @@ public:
 class Light : public NodeAttribute
 {
 public:
-
     Light(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Light();
+    virtual ~Light();
 
 public:
-
     enum Type
     {
         Type_Point,
@@ -326,7 +296,6 @@ public:
     };
 
 public:
-
     fbx_simple_property(Color, aiVector3D, aiVector3D(1,1,1))
     fbx_simple_enum_property(LightType, Type, 0)
     fbx_simple_property(CastLightOnObject, bool, false)
@@ -358,9 +327,6 @@ public:
     fbx_simple_property(TopBarnDoor, float, 20.0f)
     fbx_simple_property(BottomBarnDoor, float, 20.0f)
     fbx_simple_property(EnableBarnDoor, bool, true)
-
-
-private:
 };
 
 
@@ -368,12 +334,10 @@ private:
 class Model : public Object
 {
 public:
-
     Model(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Model();
+    virtual ~Model();
 
 public:
-
     enum RotOrder
     {
         RotOrder_EulerXYZ = 0,
@@ -399,7 +363,6 @@ public:
     };
 
 public:
-
     fbx_simple_property(QuaternionInterpolate, int, 0)
 
     fbx_simple_property(RotationOffset, aiVector3D, aiVector3D())
@@ -477,7 +440,6 @@ public:
     fbx_simple_property(Freeze, bool, false)
 
 public:
-
     const std::string& Shading() const {
         return shading;
     }
@@ -508,37 +470,31 @@ public:
         return attributes;
     }
 
-public:
-
     /** convenience method to check if the node has a Null node marker */
     bool IsNull() const;
 
 
 private:
-
     void ResolveLinks(const Element& element, const Document& doc);
 
 private:
-
     std::vector<const Material*> materials;
     std::vector<const Geometry*> geometry;
     std::vector<const NodeAttribute*> attributes;
 
     std::string shading;
     std::string culling;
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
 };
 
 /** DOM class for generic FBX textures */
 class Texture : public Object
 {
 public:
-
     Texture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Texture();
+    virtual ~Texture();
 
 public:
-
     const std::string& Type() const {
         return type;
     }
@@ -578,7 +534,6 @@ public:
     }
 
 private:
-
     aiVector2D uvTrans;
     aiVector2D uvScaling;
 
@@ -586,7 +541,7 @@ private:
     std::string relativeFileName;
     std::string fileName;
     std::string alphaSource;
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
 
     unsigned int crop[4];
 
@@ -597,9 +552,8 @@ private:
 class LayeredTexture : public Object
 {
 public:
-
     LayeredTexture(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~LayeredTexture();
+    virtual ~LayeredTexture();
 
     //Can only be called after construction of the layered texture object due to construction flag.
     void fillTexture(const Document& doc);
@@ -644,14 +598,17 @@ public:
     {
         return texture;
     }
+
     BlendMode GetBlendMode()
     {
         return blendMode;
     }
+    
     float Alpha()
     {
         return alpha;
     }
+
 private:
     const Texture* texture;
     BlendMode blendMode;
@@ -666,12 +623,10 @@ typedef std::fbx_unordered_map<std::string, const LayeredTexture*> LayeredTextur
 class Video : public Object
 {
 public:
-
     Video(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Video();
+    virtual ~Video();
 
 public:
-
     const std::string& Type() const {
         return type;
     }
@@ -705,11 +660,10 @@ public:
     }
 
 private:
-
     std::string type;
     std::string relativeFileName;
     std::string fileName;
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
 
     uint32_t contentLength;
     uint8_t* content;
@@ -719,11 +673,8 @@ private:
 class Material : public Object
 {
 public:
-
     Material(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Material();
-
-public:
+    virtual ~Material();
 
     const std::string& GetShadingModel() const {
         return shading;
@@ -747,200 +698,12 @@ public:
     }
 
 private:
-
     std::string shading;
     bool multilayer;
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
 
     TextureMap textures;
     LayeredTextureMap layeredTextures;
-};
-
-
-/** DOM base class for all kinds of FBX geometry */
-class Geometry : public Object
-{
-public:
-
-    Geometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~Geometry();
-
-public:
-
-    /** Get the Skin attached to this geometry or NULL */
-    const Skin* DeformerSkin() const {
-        return skin;
-    }
-
-private:
-
-    const Skin* skin;
-};
-
-
-typedef std::vector<int> MatIndexArray;
-
-
-/** DOM class for FBX geometry of type "Mesh"*/
-class MeshGeometry : public Geometry
-{
-
-public:
-
-    MeshGeometry(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~MeshGeometry();
-
-public:
-
-    /** Get a list of all vertex points, non-unique*/
-    const std::vector<aiVector3D>& GetVertices() const {
-        return vertices;
-    }
-
-    /** Get a list of all vertex normals or an empty array if
-     *  no normals are specified. */
-    const std::vector<aiVector3D>& GetNormals() const {
-        return normals;
-    }
-
-    /** Get a list of all vertex tangents or an empty array
-     *  if no tangents are specified */
-    const std::vector<aiVector3D>& GetTangents() const {
-        return tangents;
-    }
-
-    /** Get a list of all vertex binormals or an empty array
-     *  if no binormals are specified */
-    const std::vector<aiVector3D>& GetBinormals() const {
-        return binormals;
-    }
-
-    /** Return list of faces - each entry denotes a face and specifies
-     *  how many vertices it has. Vertices are taken from the
-     *  vertex data arrays in sequential order. */
-    const std::vector<unsigned int>& GetFaceIndexCounts() const {
-        return faces;
-    }
-
-    /** Get a UV coordinate slot, returns an empty array if
-     *  the requested slot does not exist. */
-    const std::vector<aiVector2D>& GetTextureCoords(unsigned int index) const {
-        static const std::vector<aiVector2D> empty;
-        return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? empty : uvs[index];
-    }
-
-
-    /** Get a UV coordinate slot, returns an empty array if
-     *  the requested slot does not exist. */
-    std::string GetTextureCoordChannelName(unsigned int index) const {
-        return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? "" : uvNames[index];
-    }
-
-    /** Get a vertex color coordinate slot, returns an empty array if
-     *  the requested slot does not exist. */
-    const std::vector<aiColor4D>& GetVertexColors(unsigned int index) const {
-        static const std::vector<aiColor4D> empty;
-        return index >= AI_MAX_NUMBER_OF_COLOR_SETS ? empty : colors[index];
-    }
-
-
-    /** Get per-face-vertex material assignments */
-    const MatIndexArray& GetMaterialIndices() const {
-        return materials;
-    }
-
-
-    /** Convert from a fbx file vertex index (for example from a #Cluster weight) or NULL
-      * if the vertex index is not valid. */
-    const unsigned int* ToOutputVertexIndex(unsigned int in_index, unsigned int& count) const {
-        if(in_index >= mapping_counts.size()) {
-            return NULL;
-        }
-
-        ai_assert(mapping_counts.size() == mapping_offsets.size());
-        count = mapping_counts[in_index];
-
-        ai_assert(count != 0);
-        ai_assert(mapping_offsets[in_index] + count <= mappings.size());
-
-        return &mappings[mapping_offsets[in_index]];
-    }
-
-
-    /** Determine the face to which a particular output vertex index belongs.
-     *  This mapping is always unique. */
-    unsigned int FaceForVertexIndex(unsigned int in_index) const {
-        ai_assert(in_index < vertices.size());
-
-        // in the current conversion pattern this will only be needed if
-        // weights are present, so no need to always pre-compute this table
-        if (facesVertexStartIndices.empty()) {
-            facesVertexStartIndices.resize(faces.size() + 1, 0);
-
-            std::partial_sum(faces.begin(), faces.end(), facesVertexStartIndices.begin() + 1);
-            facesVertexStartIndices.pop_back();
-        }
-
-        ai_assert(facesVertexStartIndices.size() == faces.size());
-        const std::vector<unsigned int>::iterator it = std::upper_bound(
-            facesVertexStartIndices.begin(),
-            facesVertexStartIndices.end(),
-            in_index
-        );
-
-        return static_cast<unsigned int>(std::distance(facesVertexStartIndices.begin(), it - 1));
-    }
-
-public:
-
-private:
-
-    void ReadLayer(const Scope& layer);
-    void ReadLayerElement(const Scope& layerElement);
-    void ReadVertexData(const std::string& type, int index, const Scope& source);
-
-    void ReadVertexDataUV(std::vector<aiVector2D>& uv_out, const Scope& source,
-        const std::string& MappingInformationType,
-        const std::string& ReferenceInformationType);
-
-    void ReadVertexDataNormals(std::vector<aiVector3D>& normals_out, const Scope& source,
-        const std::string& MappingInformationType,
-        const std::string& ReferenceInformationType);
-
-    void ReadVertexDataColors(std::vector<aiColor4D>& colors_out, const Scope& source,
-        const std::string& MappingInformationType,
-        const std::string& ReferenceInformationType);
-
-    void ReadVertexDataTangents(std::vector<aiVector3D>& tangents_out, const Scope& source,
-        const std::string& MappingInformationType,
-        const std::string& ReferenceInformationType);
-
-    void ReadVertexDataBinormals(std::vector<aiVector3D>& binormals_out, const Scope& source,
-        const std::string& MappingInformationType,
-        const std::string& ReferenceInformationType);
-
-    void ReadVertexDataMaterials(MatIndexArray& materials_out, const Scope& source,
-        const std::string& MappingInformationType,
-        const std::string& ReferenceInformationType);
-
-private:
-
-    // cached data arrays
-    MatIndexArray materials;
-    std::vector<aiVector3D> vertices;
-    std::vector<unsigned int> faces;
-    mutable std::vector<unsigned int> facesVertexStartIndices;
-    std::vector<aiVector3D> tangents;
-    std::vector<aiVector3D> binormals;
-    std::vector<aiVector3D> normals;
-
-    std::string uvNames[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-    std::vector<aiVector2D> uvs[AI_MAX_NUMBER_OF_TEXTURECOORDS];
-    std::vector<aiColor4D> colors[AI_MAX_NUMBER_OF_COLOR_SETS];
-
-    std::vector<unsigned int> mapping_counts;
-    std::vector<unsigned int> mapping_offsets;
-    std::vector<unsigned int> mappings;
 };
 
 typedef std::vector<int64_t> KeyTimeList;
@@ -950,11 +713,8 @@ typedef std::vector<float> KeyValueList;
 class AnimationCurve : public Object
 {
 public:
-
     AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~AnimationCurve();
-
-public:
+    virtual ~AnimationCurve();
 
     /** get list of keyframe positions (time).
      *  Invariant: |GetKeys()| > 0 */
@@ -979,7 +739,6 @@ public:
     }
 
 private:
-
     KeyTimeList keys;
     KeyValueList values;
     std::vector<float> attributes;
@@ -994,16 +753,13 @@ typedef std::map<std::string, const AnimationCurve*> AnimationCurveMap;
 class AnimationCurveNode : public Object
 {
 public:
-
-    /* the optional whitelist specifies a list of property names for which the caller
+    /* the optional white list specifies a list of property names for which the caller
     wants animations for. If the curve node does not match one of these, std::range_error
     will be thrown. */
     AnimationCurveNode(uint64_t id, const Element& element, const std::string& name, const Document& doc,
         const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0);
 
-    ~AnimationCurveNode();
-
-public:
+    virtual ~AnimationCurveNode();
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -1034,9 +790,8 @@ public:
     }
 
 private:
-
     const Object* target;
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
     mutable AnimationCurveMap curves;
 
     std::string prop;
@@ -1050,26 +805,21 @@ typedef std::vector<const AnimationCurveNode*> AnimationCurveNodeList;
 class AnimationLayer : public Object
 {
 public:
-
-
     AnimationLayer(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~AnimationLayer();
-
-public:
+    virtual ~AnimationLayer();
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
         return *props.get();
     }
 
-    /* the optional whitelist specifies a list of property names for which the caller
+    /* the optional white list specifies a list of property names for which the caller
     wants animations for. Curves not matching this list will not be added to the
     animation layer. */
     AnimationCurveNodeList Nodes(const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0) const;
 
 private:
-
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
     const Document& doc;
 };
 
@@ -1081,32 +831,26 @@ typedef std::vector<const AnimationLayer*> AnimationLayerList;
 class AnimationStack : public Object
 {
 public:
-
     AnimationStack(uint64_t id, const Element& element, const std::string& name, const Document& doc);
-    ~AnimationStack();
+    virtual ~AnimationStack();
 
 public:
-
     fbx_simple_property(LocalStart, int64_t, 0L)
     fbx_simple_property(LocalStop, int64_t, 0L)
     fbx_simple_property(ReferenceStart, int64_t, 0L)
     fbx_simple_property(ReferenceStop, int64_t, 0L)
-
-
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
         return *props.get();
     }
 
-
     const AnimationLayerList& Layers() const {
         return layers;
     }
 
 private:
-
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
     AnimationLayerList layers;
 };
 
@@ -1115,11 +859,8 @@ private:
 class Deformer : public Object
 {
 public:
-
     Deformer(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Deformer();
-
-public:
+    virtual ~Deformer();
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -1127,8 +868,7 @@ public:
     }
 
 private:
-
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
 };
 
 typedef std::vector<float> WeightArray;
@@ -1139,11 +879,8 @@ typedef std::vector<unsigned int> WeightIndexArray;
 class Cluster : public Deformer
 {
 public:
-
     Cluster(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Cluster();
-
-public:
+    virtual ~Cluster();
 
     /** get the list of deformer weights associated with this cluster.
      *  Use #GetIndices() to get the associated vertices. Both arrays
@@ -1173,7 +910,6 @@ public:
     }
 
 private:
-
     WeightArray weights;
     WeightIndexArray indices;
 
@@ -1189,34 +925,26 @@ private:
 class Skin : public Deformer
 {
 public:
-
     Skin(uint64_t id, const Element& element, const Document& doc, const std::string& name);
-    ~Skin();
-
-public:
+    virtual ~Skin();
 
     float DeformAccuracy() const {
         return accuracy;
     }
-
 
     const std::vector<const Cluster*>& Clusters() const {
         return clusters;
     }
 
 private:
-
     float accuracy;
     std::vector<const Cluster*> clusters;
 };
-
-
 
 /** Represents a link between two FBX objects. */
 class Connection
 {
 public:
-
     Connection(uint64_t insertionOrder,  uint64_t src, uint64_t dest, const std::string& prop, const Document& doc);
     ~Connection();
 
@@ -1242,6 +970,8 @@ public:
     }
 
     int CompareTo(const Connection* c) const {
+        ai_assert( NULL != c );
+
         // note: can't subtract because this would overflow uint64_t
         if(InsertionOrder() > c->InsertionOrder()) {
             return 1;
@@ -1253,11 +983,12 @@ public:
     }
 
     bool Compare(const Connection* c) const {
+        ai_assert( NULL != c );
+
         return InsertionOrder() < c->InsertionOrder();
     }
 
 public:
-
     uint64_t insertionOrder;
     const std::string prop;
 
@@ -1265,17 +996,16 @@ public:
     const Document& doc;
 };
 
+// XXX again, unique_ptr would be useful. shared_ptr is too
+// bloated since the objects have a well-defined single owner
+// during their entire lifetime (Document). FBX files have
+// up to many thousands of objects (most of which we never use),
+// so the memory overhead for them should be kept at a minimum.
+typedef std::map<uint64_t, LazyObject*> ObjectMap;
+typedef std::fbx_unordered_map<std::string, std::shared_ptr<const PropertyTable> > PropertyTemplateMap;
 
-    // XXX again, unique_ptr would be useful. shared_ptr is too
-    // bloated since the objects have a well-defined single owner
-    // during their entire lifetime (Document). FBX files have
-    // up to many thousands of objects (most of which we never use),
-    // so the memory overhead for them should be kept at a minimum.
-    typedef std::map<uint64_t, LazyObject*> ObjectMap;
-    typedef std::fbx_unordered_map<std::string, boost::shared_ptr<const PropertyTable> > PropertyTemplateMap;
 
-
-    typedef std::multimap<uint64_t, const Connection*> ConnectionMap;
+typedef std::multimap<uint64_t, const Connection*> ConnectionMap;
 
 
 /** DOM class for global document settings, a single instance per document can
@@ -1283,11 +1013,8 @@ public:
 class FileGlobalSettings
 {
 public:
-
-    FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props);
+    FileGlobalSettings(const Document& doc, std::shared_ptr<const PropertyTable> props);
     ~FileGlobalSettings();
-
-public:
 
     const PropertyTable& Props() const {
         ai_assert(props.get());
@@ -1297,7 +1024,6 @@ public:
     const Document& GetDocument() const {
         return doc;
     }
-
 
     fbx_simple_property(UpAxis, int, 1)
     fbx_simple_property(UpAxisSign, int, 1)
@@ -1338,10 +1064,8 @@ public:
     fbx_simple_property(TimeSpanStop, uint64_t, 0L)
     fbx_simple_property(CustomFrameRate, float, -1.0f)
 
-
 private:
-
-    boost::shared_ptr<const PropertyTable> props;
+    std::shared_ptr<const PropertyTable> props;
     const Document& doc;
 };
 
@@ -1352,11 +1076,8 @@ private:
 class Document
 {
 public:
-
     Document(const Parser& parser, const ImportSettings& settings);
     ~Document();
-
-public:
 
     LazyObject* GetObject(uint64_t id) const;
 
@@ -1372,7 +1093,7 @@ public:
         return creator;
     }
 
-    // elements (in this order): Uear, Month, Day, Hour, Second, Millisecond
+    // elements (in this order): Year, Month, Day, Hour, Second, Millisecond
     const unsigned int* CreationTimeStamp() const {
         return creationTimeStamp;
     }
@@ -1423,7 +1144,6 @@ public:
     const std::vector<const AnimationStack*>& AnimationStacks() const;
 
 private:
-
     std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, const ConnectionMap&) const;
     std::vector<const Connection*> GetConnectionsSequenced(uint64_t id, bool is_src,
         const ConnectionMap&,
@@ -1431,7 +1151,6 @@ private:
         size_t count) const;
 
 private:
-
     void ReadHeader();
     void ReadObjects();
     void ReadPropertyTemplates();
@@ -1439,7 +1158,6 @@ private:
     void ReadGlobalSettings();
 
 private:
-
     const ImportSettings& settings;
 
     ObjectMap objects;
@@ -1456,10 +1174,10 @@ private:
     std::vector<uint64_t> animationStacks;
     mutable std::vector<const AnimationStack*> animationStacksResolved;
 
-    boost::scoped_ptr<FileGlobalSettings> globals;
+    std::unique_ptr<FileGlobalSettings> globals;
 };
 
-}
-}
+} // Namespace FBX
+} // Namespace Assimp
 
-#endif
+#endif // INCLUDED_AI_FBX_DOCUMENT_H

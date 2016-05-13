@@ -45,9 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FBX_PROPERTIES_H
 
 #include <map>
-#include <string>
 #include "FBXCompileConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Assimp {
 namespace FBX {
@@ -66,15 +65,12 @@ namespace FBX {
 class Property
 {
 protected:
-
     Property();
 
 public:
-
     virtual ~Property();
 
 public:
-
     template <typename T>
     const T* As() const {
         return dynamic_cast<const T*>(this);
@@ -86,14 +82,12 @@ template<typename T>
 class TypedProperty : public Property
 {
 public:
-
     explicit TypedProperty(const T& value)
         : value(value)
     {
     }
 
 public:
-
     const T& Value() const {
         return value;
     }
@@ -103,23 +97,22 @@ private:
 };
 
 
-typedef std::fbx_unordered_map<std::string,boost::shared_ptr<Property> > DirectPropertyMap;
+typedef std::fbx_unordered_map<std::string,std::shared_ptr<Property> > DirectPropertyMap;
 typedef std::fbx_unordered_map<std::string,const Property*> PropertyMap;
 typedef std::fbx_unordered_map<std::string,const Element*> LazyPropertyMap;
 
-/** Represents a property table as can be found in the newer FBX files (Properties60, Properties70)*/
+/** 
+ *  Represents a property table as can be found in the newer FBX files (Properties60, Properties70)
+ */
 class PropertyTable
 {
 public:
-
     // in-memory property table with no source element
     PropertyTable();
-
-    PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps);
+    PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps);
     ~PropertyTable();
 
 public:
-
     const Property* Get(const std::string& name) const;
 
     // PropertyTable's need not be coupled with FBX elements so this can be NULL
@@ -134,10 +127,9 @@ public:
     DirectPropertyMap GetUnparsedProperties() const;
 
 private:
-
     LazyPropertyMap lazyProps;
     mutable PropertyMap props;
-    const boost::shared_ptr<const PropertyTable> templateProps;
+    const std::shared_ptr<const PropertyTable> templateProps;
     const Element* const element;
 };
 
@@ -188,4 +180,4 @@ inline T PropertyGet(const PropertyTable& in, const std::string& name,
 } //! FBX
 } //! Assimp
 
-#endif //
+#endif // INCLUDED_AI_FBX_PROPERTIES_H

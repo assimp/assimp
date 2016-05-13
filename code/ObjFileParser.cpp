@@ -61,13 +61,14 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &data,const std::string &modelName, IOSystem *io, ProgressHandler* progress ) :
+ObjFileParser::ObjFileParser(std::vector<char> &data, const std::string &modelName, IOSystem *io, ProgressHandler* progress, const std::string &originalObjFileName) :
     m_DataIt(data.begin()),
     m_DataItEnd(data.end()),
     m_pModel(NULL),
     m_uiLine(0),
     m_pIO( io ),
-    m_progress(progress)
+    m_progress(progress),
+    m_originalObjFileName(originalObjFileName)
 {
     std::fill_n(m_buffer,Buffersize,0);
 
@@ -573,9 +574,15 @@ void ObjFileParser::getMaterialLib()
     IOStream *pFile = m_pIO->Open( absName );
 
     if (!pFile ) {
-        DefaultLogger::get()->error( "OBJ: Unable to locate material file " + strMatName );
-        m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-        return;
+        DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName);
+        std::string strMatFallbackName = m_originalObjFileName.substr(0, m_originalObjFileName.length() - 3) + "mtl";
+        DefaultLogger::get()->info("OBJ: Opening fallback material file " + strMatFallbackName);
+        pFile = m_pIO->Open(strMatFallbackName);
+        if (!pFile) {
+            DefaultLogger::get()->error("OBJ: Unable to locate fallback material file " + strMatName);
+            m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            return;
+        }
     }
 
     // Import material library data from file.

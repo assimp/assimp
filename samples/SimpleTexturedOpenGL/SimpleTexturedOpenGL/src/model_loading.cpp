@@ -234,14 +234,14 @@ int LoadGLTextures(const aiScene* scene)
 		std::string fileloc = basepath + filename;	/* Loading of image */
 		success = ilLoadImage(fileloc.c_str());
 
-		if (success) /* If no error occured: */
+		if (success) /* If no error occurred: */
 		{
             // Convert every colour component into unsigned byte.If your image contains 
             // alpha channel you can replace IL_RGB with IL_RGBA
             success = ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
 			if (!success)
 			{
-				/* Error occured */
+				/* Error occurred */
 				abortGLInit("Couldn't convert image");
 				return -1;
 			}
@@ -264,7 +264,7 @@ int LoadGLTextures(const aiScene* scene)
 		}
 		else
 		{
-			/* Error occured */
+			/* Error occurred */
 			MessageBox(NULL, ("Couldn't load Image: " + fileloc).c_str() , "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		}
 	}

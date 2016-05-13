@@ -370,14 +370,14 @@ public:
     // -------------------------------------------------------------------
     /** Report a specific error message and throw an exception
      *  @param error Error message to be reported
-     *  @param line Index of the line where the error occured
+     *  @param line Index of the line where the error occurred
      */
     AI_WONT_RETURN static void ReportError (const char* error, unsigned int line) AI_WONT_RETURN_SUFFIX;
 
     // -------------------------------------------------------------------
     /** Report a specific warning
      *  @param warn Warn message to be reported
-     *  @param line Index of the line where the error occured
+     *  @param line Index of the line where the error occurred
      */
     static void ReportWarning (const char* warn, unsigned int line);
 

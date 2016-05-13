@@ -46,19 +46,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <functional>
 
-#include "FBXParser.h"
+#include "FBXMeshGeometry.h"
 #include "FBXDocument.h"
 #include "FBXImporter.h"
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
-#include <boost/foreach.hpp>
 
 
 namespace Assimp {
 namespace FBX {
 
-    using namespace Util;
-
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
 Geometry::Geometry(uint64_t id, const Element& element, const std::string& name, const Document& doc)
@@ -66,7 +64,7 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
     , skin()
 {
     const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
-    BOOST_FOREACH(const Connection* con, conns) {
+    for(const Connection* con : conns) {
         const Skin* const sk = ProcessSimpleConnection<Skin>(*con, false, "Skin -> Geometry", element);
         if(sk) {
             skin = sk;
@@ -82,6 +80,9 @@ Geometry::~Geometry()
 
 }
 
+const Skin* Geometry::DeformerSkin() const {
+    return skin;
+}
 
 
 // ------------------------------------------------------------------------------------------------
@@ -128,7 +129,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     // generate output vertices, computing an adjacency table to
     // preserve the mapping from fbx indices to *this* indexing.
     unsigned int count = 0;
-    BOOST_FOREACH(int index, tempFaces) {
+    for(int index : tempFaces) {
         const int absi = index < 0 ? (-index - 1) : index;
         if(static_cast<size_t>(absi) >= vertex_count) {
             DOMError("polygon vertex index out of range",&PolygonVertexIndex);
@@ -154,7 +155,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     }
 
     cursor = 0;
-    BOOST_FOREACH(int index, tempFaces) {
+    for(int index : tempFaces) {
         const int absi = index < 0 ? (-index - 1) : index;
         mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor++;
     }
@@ -182,14 +183,93 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 MeshGeometry::~MeshGeometry()
 {
 
 }
 
+// ------------------------------------------------------------------------------------------------
+const std::vector<aiVector3D>& MeshGeometry::GetVertices() const {
+    return vertices;
+}
 
+// ------------------------------------------------------------------------------------------------
+const std::vector<aiVector3D>& MeshGeometry::GetNormals() const {
+    return normals;
+}
+
+// ------------------------------------------------------------------------------------------------
+const std::vector<aiVector3D>& MeshGeometry::GetTangents() const {
+    return tangents;
+}
+
+// ------------------------------------------------------------------------------------------------
+const std::vector<aiVector3D>& MeshGeometry::GetBinormals() const {
+    return binormals;
+}
+
+// ------------------------------------------------------------------------------------------------
+const std::vector<unsigned int>& MeshGeometry::GetFaceIndexCounts() const {
+    return faces;
+}
+
+// ------------------------------------------------------------------------------------------------
+const std::vector<aiVector2D>& MeshGeometry::GetTextureCoords( unsigned int index ) const {
+    static const std::vector<aiVector2D> empty;
+    return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? empty : uvs[ index ];
+}
+
+std::string MeshGeometry::GetTextureCoordChannelName( unsigned int index ) const {
+    return index >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? "" : uvNames[ index ];
+}
+
+const std::vector<aiColor4D>& MeshGeometry::GetVertexColors( unsigned int index ) const {
+    static const std::vector<aiColor4D> empty;
+    return index >= AI_MAX_NUMBER_OF_COLOR_SETS ? empty : colors[ index ];
+}
+
+const MatIndexArray& MeshGeometry::GetMaterialIndices() const {
+    return materials;
+}
+
+// ------------------------------------------------------------------------------------------------
+const unsigned int* MeshGeometry::ToOutputVertexIndex( unsigned int in_index, unsigned int& count ) const {
+    if ( in_index >= mapping_counts.size() ) {
+        return NULL;
+    }
+
+    ai_assert( mapping_counts.size() == mapping_offsets.size() );
+    count = mapping_counts[ in_index ];
+
+    ai_assert( count != 0 );
+    ai_assert( mapping_offsets[ in_index ] + count <= mappings.size() );
+
+    return &mappings[ mapping_offsets[ in_index ] ];
+}
+
+// ------------------------------------------------------------------------------------------------
+unsigned int MeshGeometry::FaceForVertexIndex( unsigned int in_index ) const {
+    ai_assert( in_index < vertices.size() );
+
+    // in the current conversion pattern this will only be needed if
+    // weights are present, so no need to always pre-compute this table
+    if ( facesVertexStartIndices.empty() ) {
+        facesVertexStartIndices.resize( faces.size() + 1, 0 );
+
+        std::partial_sum( faces.begin(), faces.end(), facesVertexStartIndices.begin() + 1 );
+        facesVertexStartIndices.pop_back();
+    }
+
+    ai_assert( facesVertexStartIndices.size() == faces.size() );
+    const std::vector<unsigned int>::iterator it = std::upper_bound(
+        facesVertexStartIndices.begin(),
+        facesVertexStartIndices.end(),
+        in_index
+        );
+
+    return static_cast< unsigned int >( std::distance( facesVertexStartIndices.begin(), it - 1 ) );
+}
 
 // ------------------------------------------------------------------------------------------------
 void MeshGeometry::ReadLayer(const Scope& layer)
@@ -273,7 +353,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
         // sometimes, there will be only negative entries. Drop the material
         // layer in such a case (I guess it means a default material should
         // be used). This is what the converter would do anyway, and it
-        // avoids loosing the material if there are more material layers
+        // avoids losing the material if there are more material layers
         // coming of which at least one contains actual data (did observe
         // that with one test file).
         const size_t count_neg = std::count_if(temp_materials.begin(),temp_materials.end(),std::bind2nd(std::less<int>(),0));
@@ -413,7 +493,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         }
 
         unsigned int next = 0;
-        BOOST_FOREACH(int i, uvIndices) {
+        for(int i : uvIndices) {
 			if (static_cast<size_t>(i) >= tempData.size()) {
                 DOMError("index out of range",&GetRequiredElement(source,indexDataElementName));
             }

@@ -67,7 +67,7 @@ namespace glTF {
             if (v.empty()) return;
             Value lst;
             lst.SetArray();
-            lst.Reserve(v.size(), al);
+            lst.Reserve(unsigned(v.size()), al);
             for (size_t i = 0; i < v.size(); ++i) {
                 lst.PushBack(StringRef(v[i]->id), al);
             }
@@ -190,7 +190,7 @@ namespace glTF {
             else {
                 for (size_t i = 0; i < lst.size(); ++i) {
                     char buffer[32];
-					ai_snprintf(buffer, 32, "%s_%d", semantic, int(i));
+                    ai_snprintf(buffer, 32, "%s_%d", semantic, int(i));
                     attrs.AddMember(Value(buffer, w.mAl).Move(), Value(lst[i]->id, w.mAl).Move(), w.mAl);
                 }
             }
@@ -201,7 +201,7 @@ namespace glTF {
     {
         Value primitives;
         primitives.SetArray();
-        primitives.Reserve(m.primitives.size(), w.mAl);
+        primitives.Reserve(unsigned(m.primitives.size()), w.mAl);
 
         for (size_t i = 0; i < m.primitives.size(); ++i) {
             Mesh::Primitive& p = m.primitives[i];
@@ -305,7 +305,7 @@ namespace glTF {
     }
 
 
-    AssetWriter::AssetWriter(Asset& a)
+    inline AssetWriter::AssetWriter(Asset& a)
         : mDoc()
         , mAsset(a)
         , mAl(mDoc.GetAllocator())
@@ -326,11 +326,11 @@ namespace glTF {
         }
     }
 
-    void AssetWriter::WriteFile(const char* path)
+    inline void AssetWriter::WriteFile(const char* path)
     {
         bool isBinary = mAsset.extensionsUsed.KHR_binary_glTF;
 
-        boost::scoped_ptr<IOStream> outfile
+        std::unique_ptr<IOStream> outfile
             (mAsset.OpenFile(path, isBinary ? "wb" : "wt", true));
 
         if (outfile == 0) {
@@ -363,7 +363,7 @@ namespace glTF {
         }
     }
 
-    void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
+    inline void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
     {
         //
         // write the body data
@@ -396,10 +396,10 @@ namespace glTF {
         header.version = 1;
         AI_SWAP4(header.version);
 
-        header.length = sizeof(header) + sceneLength + bodyLength;
+        header.length = uint32_t(sizeof(header) + sceneLength + bodyLength);
         AI_SWAP4(header.length);
 
-        header.sceneLength = sceneLength;
+        header.sceneLength = uint32_t(sceneLength);
         AI_SWAP4(header.sceneLength);
 
         header.sceneFormat = SceneFormat_JSON;
@@ -413,7 +413,7 @@ namespace glTF {
     }
 
     
-    void AssetWriter::WriteMetadata()
+    inline void AssetWriter::WriteMetadata()
     {
         Value asset;
         asset.SetObject();
@@ -425,7 +425,7 @@ namespace glTF {
         mDoc.AddMember("asset", asset, mAl);
     }
 
-    void AssetWriter::WriteExtensionsUsed()
+    inline void AssetWriter::WriteExtensionsUsed()
     {
         Value exts;
         exts.SetArray();
@@ -484,13 +484,10 @@ namespace glTF {
     }
 
     template<class T>
-    struct LazyDictWriter< LazyDict<T> >
+    void WriteLazyDict(LazyDict<T>& d, AssetWriter& w)
     {
-        static void Write(LazyDict<T>& d, AssetWriter& w)
-        {
-            w.WriteObjects(d);
-        }
-    };
+        w.WriteObjects(d);
+    }
 
 }
 

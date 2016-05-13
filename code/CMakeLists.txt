@@ -1,3 +1,41 @@
+# Open Asset Import Library (assimp)
+# ----------------------------------------------------------------------
+#
+# Copyright (c) 2006-2016, assimp team
+# All rights reserved.
+#
+# Redistribution and use of this software in source and binary forms,
+# with or without modification, are permitted provided that the
+# following conditions are met:
+#
+# * Redistributions of source code must retain the above
+#   copyright notice, this list of conditions and the
+#   following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above
+#   copyright notice, this list of conditions and the
+#   following disclaimer in the documentation and/or other
+#   materials provided with the distribution.
+#
+# * Neither the name of the assimp team, nor the names of its
+#   contributors may be used to endorse or promote products
+#   derived from this software without specific prior
+#   written permission of the assimp team.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#----------------------------------------------------------------------
+
 # Listing and grouping of all the source files.
 # 1) Set the file lists for each component
 # 2) Create a Source Group for each component, for IDE project orginization
@@ -60,20 +98,6 @@ SET( PUBLIC_HEADERS
 SET( Core_SRCS
   Assimp.cpp
 )
-
-SET( Boost_SRCS
-  BoostWorkaround/boost/math/common_factor_rt.hpp
-  BoostWorkaround/boost/foreach.hpp
-  BoostWorkaround/boost/format.hpp
-  BoostWorkaround/boost/scoped_array.hpp
-  BoostWorkaround/boost/scoped_ptr.hpp
-  BoostWorkaround/boost/shared_array.hpp
-  BoostWorkaround/boost/shared_ptr.hpp
-  BoostWorkaround/boost/make_shared.hpp
-  BoostWorkaround/boost/static_assert.hpp
-  BoostWorkaround/boost/tuple/tuple.hpp
-)
-SOURCE_GROUP(Boost FILES ${Boost_SRCS})
 
 SET( Logging_SRCS
   ${HEADER_PATH}/DefaultLogger.hpp
@@ -422,6 +446,9 @@ ADD_ASSIMP_IMPORTER(IFC
   STEPFileEncoding.cpp
   STEPFileEncoding.h
 )
+if (MSVC AND ASSIMP_BUILD_IFC_IMPORTER)
+  set_source_files_properties(IFCReaderGen.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+endif (MSVC AND ASSIMP_BUILD_IFC_IMPORTER)
 
 ADD_ASSIMP_IMPORTER(XGL
   XGLLoader.cpp
@@ -446,6 +473,7 @@ ADD_ASSIMP_IMPORTER(FBX
   FBXDocument.cpp
   FBXProperties.h
   FBXProperties.cpp
+  FBXMeshGeometry.h
   FBXMeshGeometry.cpp
   FBXMaterial.cpp
   FBXModel.cpp
@@ -576,10 +604,20 @@ ADD_ASSIMP_IMPORTER(GLTF
 
   glTFImporter.cpp
   glTFImporter.h
-  
+
   glTFExporter.h
   glTFExporter.cpp
 )
+
+
+ADD_ASSIMP_IMPORTER(3MF
+    D3MFImporter.h
+    D3MFImporter.cpp
+    D3MFOpcPackage.h
+    D3MFOpcPackage.cpp
+
+)
+
 
 SET( Step_SRCS
   StepExporter.h
@@ -710,13 +748,12 @@ SET( assimp_src
   ${Clipper_SRCS}
   ${openddl_parser_SRCS}
   # Necessary to show the headers in the project when using the VC++ generator:
-  ${Boost_SRCS}
 
   ${PUBLIC_HEADERS}
   ${COMPILER_HEADERS}
 
 )
-add_definitions( -DOPENDDLPARSER_BUILD )
+ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
 
 INCLUDE_DIRECTORIES(
   ../contrib/openddlparser/include

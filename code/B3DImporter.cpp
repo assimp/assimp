@@ -7,8 +7,8 @@ Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TextureTransform.h"
 #include "ConvertToLHProcess.h"
 #include "StringUtils.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "../include/assimp/IOSystem.hpp"
 #include "../include/assimp/anim.h"
 #include "../include/assimp/scene.h"
@@ -71,11 +71,11 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "b3d" 
+    "b3d"
 };
 
 // (fixme, Aramis) quick workaround to get rid of all those signed to unsigned warnings
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #	pragma warning (disable: 4018)
 #endif
 
@@ -114,7 +114,7 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     cout<<"Hello world from the B3DImporter!"<<endl;
 #endif
 
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL)
@@ -280,12 +280,12 @@ void B3DImporter::ReadBRUS(){
 
         aiMaterial *mat=new aiMaterial;
         _materials.push_back( mat );
-        
+
         // Name
         aiString ainame( name );
         mat->AddProperty( &ainame,AI_MATKEY_NAME );
-        
-        // Diffuse color 
+
+        // Diffuse color
         mat->AddProperty( &color,1,AI_MATKEY_COLOR_DIFFUSE );
 
         // Opacity
@@ -294,16 +294,16 @@ void B3DImporter::ReadBRUS(){
         // Specular color
         aiColor3D speccolor( shiny,shiny,shiny );
         mat->AddProperty( &speccolor,1,AI_MATKEY_COLOR_SPECULAR );
-        
+
         // Specular power
         float specpow=shiny*128;
         mat->AddProperty( &specpow,1,AI_MATKEY_SHININESS );
-        
+
         // Double sided
         if( fx & 0x10 ){
-            int i=1; 
+            int i=1;
             mat->AddProperty( &i,1,AI_MATKEY_TWOSIDED );
-        } 		
+        }
 
         //Textures
         for( int i=0;i<n_texs;++i ){
@@ -569,7 +569,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
     string t=ReadChunk();
     if( t=="BB3D" ){
         int version=ReadInt();
-        
+
         if (!DefaultLogger::isNullLogger()) {
             char dmp[128];
             ai_snprintf(dmp, 128, "B3D file format version: %i",version);
@@ -669,7 +669,7 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
     }
     scene->mNumMaterials=_materials.size();
     scene->mMaterials=to_array( _materials );
-    
+
     //meshes
     scene->mNumMeshes=_meshes.size();
     scene->mMeshes=to_array( _meshes );

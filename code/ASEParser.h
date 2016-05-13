@@ -43,11 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASEFILEHELPER_H_INC
 #define AI_ASEFILEHELPER_H_INC
 
-// STL/CRT headers
-#include <string>
-#include <vector>
-#include <list>
-
 // public ASSIMP headers
 #include "../include/assimp/types.h"
 #include "../include/assimp/mesh.h"
@@ -609,7 +604,7 @@ private:
     //! \param out Output string
     //! \param szName Name of the enclosing element -> used in error
     //! messages.
-    //! \return false if an error occured
+    //! \return false if an error occurred
     bool ParseString(std::string& out,const char* szName);
 
 public:

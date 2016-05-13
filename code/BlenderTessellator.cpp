@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2013, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -140,7 +140,7 @@ void BlenderTessellatorGL::TriangulateDrawCalls( const TessDataGL& tessData )
 {
     // NOTE - Because we are supplying a callback to GLU_TESS_EDGE_FLAG_DATA we don't technically
     //        need support for GL_TRIANGLE_STRIP and GL_TRIANGLE_FAN but we'll keep it here in case
-    //        GLU tessellate changes or tristrips and fans are wanted.
+    //        GLU tessellate changes or tri-strips and fans are wanted.
     //        See: http://www.opengl.org/sdk/docs/man2/xhtml/gluTessCallback.xml
     for ( unsigned int i = 0; i < tessData.drawCalls.size( ); ++i )
     {
@@ -164,7 +164,7 @@ void BlenderTessellatorGL::TriangulateDrawCalls( const TessDataGL& tessData )
 // ------------------------------------------------------------------------------------------------
 void BlenderTessellatorGL::MakeFacesFromTris( const VertexGL* vertices, int vertexCount )
 {
-    int triangleCount = vertexCount / 3;
+    const int triangleCount = vertexCount / 3;
     for ( int i = 0; i < triangleCount; ++i )
     {
         int vertexBase = i * 3;
@@ -175,7 +175,7 @@ void BlenderTessellatorGL::MakeFacesFromTris( const VertexGL* vertices, int vert
 // ------------------------------------------------------------------------------------------------
 void BlenderTessellatorGL::MakeFacesFromTriStrip( const VertexGL* vertices, int vertexCount )
 {
-    int triangleCount = vertexCount - 2;
+    const int triangleCount = vertexCount - 2;
     for ( int i = 0; i < triangleCount; ++i )
     {
         int vertexBase = i;
@@ -186,7 +186,7 @@ void BlenderTessellatorGL::MakeFacesFromTriStrip( const VertexGL* vertices, int 
 // ------------------------------------------------------------------------------------------------
 void BlenderTessellatorGL::MakeFacesFromTriFan( const VertexGL* vertices, int vertexCount )
 {
-    int triangleCount = vertexCount - 2;
+    const int triangleCount = vertexCount - 2;
     for ( int i = 0; i < triangleCount; ++i )
     {
         int vertexBase = i;
@@ -353,7 +353,7 @@ aiMatrix4x4 BlenderTessellatorP2T::GeneratePointTransformMatrix( const Blender::
 // ------------------------------------------------------------------------------------------------
 void BlenderTessellatorP2T::TransformAndFlattenVectices( const aiMatrix4x4& transform, std::vector< Blender::PointP2T >& vertices ) const
 {
-    for ( unsigned int i = 0; i < vertices.size( ); ++i )
+    for ( size_t i = 0; i < vertices.size( ); ++i )
     {
         PointP2T& point = vertices[ i ];
         point.point3D = transform * point.point3D;
@@ -365,7 +365,7 @@ void BlenderTessellatorP2T::TransformAndFlattenVectices( const aiMatrix4x4& tran
 void BlenderTessellatorP2T::ReferencePoints( std::vector< Blender::PointP2T >& points, std::vector< p2t::Point* >& pointRefs ) const
 {
     pointRefs.resize( points.size( ) );
-    for ( unsigned int i = 0; i < points.size( ); ++i )
+    for ( size_t i = 0; i < points.size( ); ++i )
     {
         pointRefs[ i ] = &points[ i ].point2D;
     }
@@ -391,7 +391,7 @@ inline PointP2T& BlenderTessellatorP2T::GetActualPointStructure( p2t::Point& poi
 // ------------------------------------------------------------------------------------------------
 void BlenderTessellatorP2T::MakeFacesFromTriangles( std::vector< p2t::Triangle* >& triangles ) const
 {
-    for ( unsigned int i = 0; i < triangles.size( ); ++i )
+    for ( size_t i = 0; i < triangles.size( ); ++i )
     {
         p2t::Triangle& Triangle = *triangles[ i ];
 
@@ -415,9 +415,9 @@ float BlenderTessellatorP2T::FindLargestMatrixElem( const aiMatrix3x3& mtx ) con
 {
     float result = 0.0f;
 
-    for ( int x = 0; x < 3; ++x )
+    for ( size_t x = 0; x < 3; ++x )
     {
-        for ( int y = 0; y < 3; ++y )
+        for ( size_t y = 0; y < 3; ++y )
         {
             result = p2tMax( std::fabs( mtx[ x ][ y ] ), result );
         }
@@ -427,14 +427,14 @@ float BlenderTessellatorP2T::FindLargestMatrixElem( const aiMatrix3x3& mtx ) con
 }
 
 // ------------------------------------------------------------------------------------------------
-// Aparently Assimp doesn't have matrix scaling
+// Apparently Assimp doesn't have matrix scaling
 aiMatrix3x3 BlenderTessellatorP2T::ScaleMatrix( const aiMatrix3x3& mtx, float scale ) const
 {
     aiMatrix3x3 result;
 
-    for ( int x = 0; x < 3; ++x )
+    for ( size_t x = 0; x < 3; ++x )
     {
-        for ( int y = 0; y < 3; ++y )
+        for ( size_t y = 0; y < 3; ++y )
         {
             result[ x ][ y ] = mtx[ x ][ y ] * scale;
         }
@@ -448,7 +448,7 @@ aiMatrix3x3 BlenderTessellatorP2T::ScaleMatrix( const aiMatrix3x3& mtx, float sc
 // Adapted from: http://missingbytes.blogspot.co.uk/2012/06/fitting-plane-to-point-cloud.html
 aiVector3D BlenderTessellatorP2T::GetEigenVectorFromLargestEigenValue( const aiMatrix3x3& mtx ) const
 {
-    float scale = FindLargestMatrixElem( mtx );
+    const float scale = FindLargestMatrixElem( mtx );
     aiMatrix3x3 mc = ScaleMatrix( mtx, 1.0f / scale );
     mc = mc * mc * mc;
 
@@ -474,7 +474,7 @@ PlaneP2T BlenderTessellatorP2T::FindLLSQPlane( const std::vector< PointP2T >& po
     PlaneP2T result;
 
     aiVector3D sum( 0.0f );
-    for ( unsigned int i = 0; i < points.size( ); ++i )
+    for ( size_t i = 0; i < points.size( ); ++i )
     {
         sum += points[ i ].point3D;
     }
@@ -486,7 +486,7 @@ PlaneP2T BlenderTessellatorP2T::FindLLSQPlane( const std::vector< PointP2T >& po
     float sumYY = 0.0f;
     float sumYZ = 0.0f;
     float sumZZ = 0.0f;
-    for ( unsigned int i = 0; i < points.size( ); ++i )
+    for ( size_t i = 0; i < points.size( ); ++i )
     {
         aiVector3D offset = points[ i ].point3D - result.centre;
         sumXX += offset.x * offset.x;
@@ -499,7 +499,7 @@ PlaneP2T BlenderTessellatorP2T::FindLLSQPlane( const std::vector< PointP2T >& po
 
     aiMatrix3x3 mtx( sumXX, sumXY, sumXZ, sumXY, sumYY, sumYZ, sumXZ, sumYZ, sumZZ );
 
-    float det = mtx.Determinant( );
+    const float det = mtx.Determinant( );
     if ( det == 0.0f )
     {
         result.normal = aiVector3D( 0.0f );

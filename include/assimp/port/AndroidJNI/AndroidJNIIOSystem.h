@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Android implementation of IOSystem using the standard C file functions.
- * Aimed to ease the acces to android assets */
+ * Aimed to ease the access to android assets */
 
 #if __ANDROID__ and __ANDROID_API__ > 9 and defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
 #ifndef AI_ANDROIDJNIIOSYSTEM_H_INC

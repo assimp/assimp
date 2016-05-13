@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_PLY_EXPORTER)
 
 #include "PlyExporter.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <cmath>
 #include "Exceptional.h"
 #include "../include/assimp/scene.h"
@@ -64,7 +64,7 @@ void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
     PlyExporter exporter(pFile, pScene);
 
     // we're still here - export successfully completed. Write the file.
-    boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+    std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if(outfile == NULL) {
         throw DeadlyExportError("could not open output .ply file: " + std::string(pFile));
     }
@@ -78,7 +78,7 @@ void ExportScenePlyBinary(const char* pFile, IOSystem* pIOSystem, const aiScene*
     PlyExporter exporter(pFile, pScene, true);
 
     // we're still here - export successfully completed. Write the file.
-    boost::scoped_ptr<IOStream> outfile(pIOSystem->Open(pFile, "wb"));
+    std::unique_ptr<IOStream> outfile(pIOSystem->Open(pFile, "wb"));
     if (outfile == NULL) {
         throw DeadlyExportError("could not open output .ply file: " + std::string(pFile));
     }
@@ -309,10 +309,10 @@ void PlyExporter::WriteMeshVertsBinary(const aiMesh* m, unsigned int components)
 
         for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
             if (m->HasTextureCoords(c)) {
-                mOutput.write(reinterpret_cast<const char*>(&m->mTextureCoords[c][i].x), 6);
+                mOutput.write(reinterpret_cast<const char*>(&m->mTextureCoords[c][i].x), 8);
             }
             else {
-                mOutput.write(reinterpret_cast<const char*>(&defaultUV.x), 6);
+                mOutput.write(reinterpret_cast<const char*>(&defaultUV.x), 8);
             }
         }
 

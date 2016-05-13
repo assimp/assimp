@@ -52,8 +52,11 @@ namespace ODDLParser {
     class DDLNode;
     struct Context;
 }
+
 struct aiNode;
 struct aiMaterial;
+struct aiCamera;
+struct aiLight;
 
 namespace Assimp {
 namespace OpenGEX {
@@ -110,7 +113,11 @@ protected:
     void handleObjectRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMaterialRefNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleCameraNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleLightNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleGeometryObject( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleCameraObject( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleLightObject( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleTransformNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene );
@@ -118,7 +125,12 @@ protected:
     void handleMaterialNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleColorNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void handleTextureNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleParamNode( ODDLParser::DDLNode *node, aiScene *pScene );
+    void handleAttenNode( ODDLParser::DDLNode *node, aiScene *pScene );
     void copyMeshes( aiScene *pScene );
+    void copyCameras( aiScene *pScene );
+    void copyLights( aiScene *pScene );
+
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();
@@ -179,8 +191,12 @@ private:
     VertexContainer m_currentVertices;
     aiMesh *m_currentMesh;
     aiMaterial *m_currentMaterial;
+    aiLight *m_currentLight;
+    aiCamera *m_currentCamera;
     int m_tokenType;
     std::vector<aiMaterial*> m_materialCache;
+    std::vector<aiCamera*> m_cameraCache;
+    std::vector<aiLight*> m_lightCache;
     std::vector<aiNode*> m_nodeStack;
     std::vector<RefInfo*> m_unresolvedRefStack;
 };

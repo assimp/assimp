@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
 #include "LogAux.h"
-#include <boost/foreach.hpp>
 #include "../include/assimp/material.h"
 #include "../include/assimp/Importer.hpp"
 #include "../include/assimp/mesh.h"
@@ -102,11 +101,11 @@ private:
 
         ~TempScope()
         {
-            BOOST_FOREACH(aiMesh* m, meshes_linear) {
+            for(aiMesh* m : meshes_linear) {
                 delete m;
             }
 
-            BOOST_FOREACH(aiMaterial* m, materials_linear) {
+            for(aiMaterial* m : materials_linear) {
                 delete m;
             }
 

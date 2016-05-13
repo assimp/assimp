@@ -52,7 +52,7 @@ namespace Ogre
 {
 
 typedef irr::io::IrrXMLReader XmlReader;
-typedef boost::shared_ptr<XmlReader> XmlReaderPtr;
+typedef std::shared_ptr<XmlReader> XmlReaderPtr;
 
 class OgreXmlSerializer
 {

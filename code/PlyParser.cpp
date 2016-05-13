@@ -388,7 +388,7 @@ bool PLY::Element::ParseElement (const char* pCur,
 
     if (!SkipSpaces(&pCur))return false;
 
-    //parse the number of occurences of this element
+    //parse the number of occurrences of this element
     pOut->NumOccur = strtoul10(pCur,&pCur);
 
     // go to the next line
@@ -420,7 +420,10 @@ bool PLY::DOM::SkipComments (const char* pCur,
 
     if (TokenMatch(pCur,"comment",7))
     {
-        SkipLine(pCur,&pCur);
+	     if ( !IsLineEnd(pCur[-1]) )
+	     {
+	         SkipLine(pCur,&pCur);
+	     }
         SkipComments(pCur,&pCur);
         *pCurOut = pCur;
         return true;
@@ -851,7 +854,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         out->iUInt = (uint32_t)*((uint32_t*)pCur);
         pCur += 4;
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap((int32_t*)&out->iUInt);
         break;
 
@@ -859,7 +862,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         uint16_t i = *((uint16_t*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap(&i);
         out->iUInt = (uint32_t)i;
         pCur += 2;
@@ -877,7 +880,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         out->iInt = *((int32_t*)pCur);
         pCur += 4;
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap(&out->iInt);
         break;
 
@@ -885,7 +888,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         int16_t i = *((int16_t*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap(&i);
         out->iInt = (int32_t)i;
         pCur += 2;
@@ -901,7 +904,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         out->fFloat = *((float*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap((int32_t*)&out->fFloat);
         pCur += 4;
         break;
@@ -910,7 +913,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         out->fDouble = *((double*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap((int64_t*)&out->fDouble);
         pCur += 8;
         break;

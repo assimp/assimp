@@ -273,7 +273,7 @@ public:
     /** Merges two or more materials
      *
      *  The materials should be complementary as much as possible. In case
-     *  of a property present in different materials, the first occurence
+     *  of a property present in different materials, the first occurrence
      *  is used.
      *
      *  @param dest Destination material. Must be empty.
@@ -323,7 +323,7 @@ public:
      *    the master graph), a scene is attached to the root of the master
      *    graph (as an additional child node)
      *  @duplicates List of duplicates. If elem[n] == n the scene is not
-     *    a duplicate. Otherwise elem[n] links scene n to its first occurence.
+     *    a duplicate. Otherwise elem[n] links scene n to its first occurrence.
      */
     static void AttachToGraph ( aiScene* master,
         std::vector<NodeAttachmentInfo>& srcList);

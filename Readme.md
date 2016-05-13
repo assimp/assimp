@@ -60,7 +60,8 @@ __Importers__:
 - Ogre XML
 - Q3D
 - ASSBIN (Assimp custom format)
-- glTF
+- glTF (partial)
+- 3MF
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
@@ -76,7 +77,8 @@ __Exporters__:
 - 3DS
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
-- glTF
+- STEP
+- glTF (partial)
 
 ### Building ###
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
@@ -100,7 +102,7 @@ Open Asset Import Library is implemented in C++. The directory structure is:
 	/tools		Tools (old assimp viewer, command line `assimp`)
 	/samples	A small number of samples to illustrate possible
                         use cases for Assimp
-	/workspaces	Build enviroments for vc,xcode,... (deprecated,
+	/workspaces	Build environments for vc,xcode,... (deprecated,
 			CMake has superseeded all legacy build options!)
 
 
@@ -119,6 +121,10 @@ And we also have an IRC-channel at freenode: #assetimporterlib . You can easily 
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
+
+### Donate ###
+If you like assimp, consider buying us a beer (or two):
+[Donate](http://sourceforge.net/donate/index.php?group_id=226462)
 
 ### License ###
 Our license is based on the modified, __3-clause BSD__-License.

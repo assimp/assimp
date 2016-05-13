@@ -75,7 +75,7 @@ aiMesh* TempMesh::ToMesh()
         return NULL;
     }
 
-    std::auto_ptr<aiMesh> mesh(new aiMesh());
+    std::unique_ptr<aiMesh> mesh(new aiMesh());
 
     // copy vertices
     mesh->mNumVertices = static_cast<unsigned int>(verts.size());
@@ -115,7 +115,7 @@ void TempMesh::Clear()
 // ------------------------------------------------------------------------------------------------
 void TempMesh::Transform(const IfcMatrix4& mat)
 {
-    BOOST_FOREACH(IfcVector3& v, verts) {
+    for(IfcVector3& v : verts) {
         v *= mat;
     }
 }
@@ -222,7 +222,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
     }
 
     if(normalize) {
-        BOOST_FOREACH(IfcVector3& n, normals) {
+        for(IfcVector3& n : normals) {
             n.Normalize();
         }
     }
@@ -383,7 +383,7 @@ void TempMesh::RemoveAdjacentDuplicates()
 
     bool drop = false;
     std::vector<IfcVector3>::iterator base = verts.begin();
-    BOOST_FOREACH(unsigned int& cnt, vertcnt) {
+    for(unsigned int& cnt : vertcnt) {
         if (cnt < 2){
             base += cnt;
             continue;

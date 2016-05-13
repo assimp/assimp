@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_PROFILER_H
 #define INCLUDED_PROFILER_H
 
-#include "boost/timer.hpp"
+#include <chrono>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "TinyFormatter.h"
 
@@ -71,7 +71,7 @@ public:
 
     /** Start a named timer */
     void BeginRegion(const std::string& region) {
-        regions[region] = boost::timer();
+        regions[region] = std::chrono::system_clock::now();
         DefaultLogger::get()->debug((format("START `"),region,"`"));
     }
 
@@ -83,12 +83,13 @@ public:
             return;
         }
 
-        DefaultLogger::get()->debug((format("END   `"),region,"`, dt= ",(*it).second.elapsed()," s"));
+        auto elapsedSeconds = std::chrono::system_clock::now() - regions[region];
+        DefaultLogger::get()->debug((format("END   `"),region,"`, dt= ", elapsedSeconds.count()," s"));
     }
 
 private:
 
-    typedef std::map<std::string,boost::timer> RegionMap;
+    typedef std::map<std::string,std::chrono::time_point<std::chrono::system_clock>> RegionMap;
     RegionMap regions;
 };
 

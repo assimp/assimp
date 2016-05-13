@@ -8,6 +8,11 @@ import sys
 if sys.version_info < (2,6):
     raise 'pyassimp: need python 2.6 or newer'
 
+# xrange was renamed range in Python 3 and the original range from Python 2 was removed.
+# To keep compatibility with both Python 2 and 3, xrange is set to range for version 3.0 and up.
+if sys.version_info >= (3,0):
+    xrange = range
+
 import ctypes
 import os
 
@@ -30,7 +35,7 @@ class AssimpLib(object):
     """
     Assimp-Singleton
     """
-    load, load_mem, release, dll = helper.search_library()
+    load, load_mem, export, release, dll = helper.search_library()
 _assimp_lib = AssimpLib()
 
 def make_tuple(ai_obj, type = None):
@@ -310,6 +315,33 @@ def load(filename,
     scene = _init(model.contents)
     recur_pythonize(scene.rootnode, scene)
     return scene
+
+def export(scene,
+           filename, 
+           file_type  = None,
+           processing = postprocess.aiProcess_Triangulate):
+    '''
+    Export a scene. On failure throws AssimpError.
+    
+    Arguments
+    ---------
+    scene: scene to export.
+    filename: Filename that the scene should be exported to.  
+    file_type: string of file exporter to use. For example "collada".
+    processing: assimp postprocessing parameters. Verbose keywords are imported
+                from postprocessing, and the parameters can be combined bitwise to
+                generate the final processing value. Note that the default value will
+                triangulate quad faces. Example of generating other possible values:
+                processing = (pyassimp.postprocess.aiProcess_Triangulate | 
+                              pyassimp.postprocess.aiProcess_OptimizeMeshes)
+
+    '''
+
+    from ctypes import pointer
+    exportStatus = _assimp_lib.export(pointer(scene), file_type.encode("ascii"), filename.encode("ascii"), processing)
+
+    if exportStatus != 0:
+        raise AssimpError('Could not export scene!')
 
 def release(scene):
     from ctypes import pointer

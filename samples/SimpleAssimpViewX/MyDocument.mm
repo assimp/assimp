@@ -486,7 +486,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,const CVTimeS
             for (unsigned int a = 0; a < nidx; ++a)
             {
                 //                 if(mesh->mFaces[x].mNumIndices != 3)
-                //                     NSLog(@"whoa dont have 3 indices...");
+                //                     NSLog(@"whoa don't have 3 indices...");
                 
                 *indices++ = mesh->mFaces[x].mIndices[a];
             }

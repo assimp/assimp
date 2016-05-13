@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 
 #include "../contrib/ConvertUTF/ConvertUTF.h"
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 using namespace Assimp;
 
@@ -354,7 +354,7 @@ bool STEP::StringToUTF8(std::string& s)
                             }
 
                             const size_t count = (j-basei)/4;
-                            boost::scoped_array<UTF16> src(new UTF16[count]);
+                            std::unique_ptr<UTF16[]> src(new UTF16[count]);
 
                             const char* cur = s.c_str() + basei;
                             for (size_t k = 0; k < count; ++k, cur += 4) {
@@ -363,7 +363,7 @@ bool STEP::StringToUTF8(std::string& s)
                             }
 
                             const size_t dcount = count * 3; // this is enough to hold all possible outputs
-                            boost::scoped_array<UTF8> dest(new UTF8[dcount]);
+                            std::unique_ptr<UTF8[]> dest(new UTF8[dcount]);
 
                             const UTF16* srct = src.get();
                             UTF8* destt = dest.get();
@@ -387,7 +387,7 @@ bool STEP::StringToUTF8(std::string& s)
                             }
 
                             const size_t count = (j-basei)/8;
-                            boost::scoped_array<UTF32> src(new UTF32[count]);
+                            std::unique_ptr<UTF32[]> src(new UTF32[count]);
 
                             const char* cur = s.c_str() + basei;
                             for (size_t k = 0; k < count; ++k, cur += 8) {
@@ -398,7 +398,7 @@ bool STEP::StringToUTF8(std::string& s)
                             }
 
                             const size_t dcount = count * 5; // this is enough to hold all possible outputs
-                            boost::scoped_array<UTF8> dest(new UTF8[dcount]);
+                            std::unique_ptr<UTF8[]> dest(new UTF8[dcount]);
 
                             const UTF32* srct = src.get();
                             UTF8* destt = dest.get();

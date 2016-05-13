@@ -52,8 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../include/assimp/postprocess.h"
 #include <ios>
 #include <list>
-#include <boost/scoped_ptr.hpp>
-#include <boost/scoped_array.hpp>
+#include <memory>
 #include <sstream>
 #include <cctype>
 
@@ -149,10 +148,10 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
     if (!pIOHandler)
         return false;
 
-    boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
+    std::unique_ptr<IOStream> pStream (pIOHandler->Open(pFile));
     if (pStream.get() ) {
         // read 200 characters from the file
-        boost::scoped_array<char> _buffer (new char[searchBytes+1 /* for the '\0' */]);
+        std::unique_ptr<char[]> _buffer (new char[searchBytes+1 /* for the '\0' */]);
         char* buffer = _buffer.get();
         if( NULL == buffer ) {
             return false;
@@ -256,7 +255,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
         const uint32_t* magic_u32;
     };
     magic = reinterpret_cast<const char*>(_magic);
-    boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
+    std::unique_ptr<IOStream> pStream (pIOHandler->Open(pFile));
     if (pStream.get() ) {
 
         // skip to offset
@@ -336,7 +335,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     // UTF 32 BE with BOM
     if(*((uint32_t*)&data.front()) == 0xFFFE0000) {
 
-        // swap the endianess ..
+        // swap the endianness ..
         for(uint32_t* p = (uint32_t*)&data.front(), *end = (uint32_t*)&data.back(); p <= end; ++p) {
             AI_SWAP4P(p);
         }
@@ -367,7 +366,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     // UTF 16 BE with BOM
     if(*((uint16_t*)&data.front()) == 0xFFFE) {
 
-        // swap the endianess ..
+        // swap the endianness ..
         for(uint16_t* p = (uint16_t*)&data.front(), *end = (uint16_t*)&data.back(); p <= end; ++p) {
             ByteSwap::Swap2(p);
         }
@@ -534,7 +533,7 @@ BatchLoader::~BatchLoader()
 
         delete (*it).scene;
     }
-    data->pImporter->SetIOHandler(NULL); /* get pointer back into our posession */
+    data->pImporter->SetIOHandler(NULL); /* get pointer back into our possession */
     delete data->pImporter;
     delete data;
 }

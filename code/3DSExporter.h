@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_3DSEXPORTER_H_INC
 
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "StreamWriter.h"
 #include "./../include/assimp/material.h"
@@ -64,7 +64,7 @@ namespace Assimp
 class Discreet3DSExporter
 {
 public:
-    Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, const aiScene* pScene);
+    Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* pScene);
 
 private:
 

@@ -176,8 +176,8 @@ public:
         );
 
     // -------------------------------------------------------------------
-    /** Returns the error description of the last error that occured.
-     * @return A description of the last error that occured. An empty
+    /** Returns the error description of the last error that occurred.
+     * @return A description of the last error that occurred. An empty
      * string if there was no error.
      */
     const std::string& GetErrorText() const {
@@ -347,7 +347,7 @@ public: // static utilities
     static void ConvertUTF8toISO8859_1(
         std::string& data);
 
-	enum TextFileMode { ALLOW_EMPTY, FORBID_EMPTY };
+    enum TextFileMode { ALLOW_EMPTY, FORBID_EMPTY };
 
     // -------------------------------------------------------------------
     /** Utility for text file loaders which copies the contents of the
@@ -375,7 +375,7 @@ public: // static utilities
         T*& out,
         unsigned int& outLength)
     {
-        outLength = vec.size();
+        outLength = unsigned(vec.size());
         if (outLength) {
             out = new T[outLength];
             std::swap_ranges(vec.begin(), vec.end(), out);

@@ -96,6 +96,8 @@ messages = collections.defaultdict(lambda: "<unknown", {
 
 outfilename_output = "run_regression_suite_output.txt"
 outfilename_failur = "run_regression_suite_failures.csv"
+Environment        = {}
+
 # -------------------------------------------------------------------------------
 class results:
 
@@ -156,6 +158,19 @@ class results:
         return 0 != len( self.failures )
 
 # -------------------------------------------------------------------------------
+def setEnvVar( var, value ):
+    print ( "set var " + var +" to" + value)
+    Environment[ var ] = value
+
+# -------------------------------------------------------------------------------
+def getEnvVar( var ):
+    if var in Environment:
+        return Environment[ var ]
+    else:
+        print ( "Error: cannot find " + var )
+    return ""
+    
+# -------------------------------------------------------------------------------
 def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(settings.results, "tmp", os.path.split(fullpath)[1] + "_" + myhash)
     try:
@@ -166,21 +181,21 @@ def prepare_output_dir(fullpath, myhash, app):
     outfile = os.path.join(outfile, app)
     return outfile
 
-
 # -------------------------------------------------------------------------------
-def process_dir(d, outfile_results, zipin, result):
+def process_dir(d, outfile_results, zipin, result ):
     shellparams = {'stdout':outfile_results, 'stderr':outfile_results, 'shell':False}
 
     print("Processing directory " + d)
+    all = ""
     for f in sorted(os.listdir(d)):
         fullpath = os.path.join(d, f)
         if os.path.isdir(fullpath) and not f[:1] == '.':
             process_dir(fullpath, outfile_results, zipin, result)
             continue
-
+                
         if f in settings.files_to_ignore or os.path.splitext(f)[1] in settings.exclude_extensions:
             print("Ignoring " + f)
-            continue
+            return
 
         for pppreset in settings.pp_configs_to_test:
             filehash = utils.hashing(fullpath, pppreset)
@@ -203,10 +218,12 @@ def process_dir(d, outfile_results, zipin, result):
             outfile_expect = prepare_output_dir(fullpath, filehash, "EXPECT")
             outfile_results.write("assimp dump    "+"-"*80+"\n")
             outfile_results.flush()
+            assimp_bin_path = getEnvVar("assimp_path")
             command = [assimp_bin_path,
                 "dump",
                 fullpath, outfile_actual, "-b", "-s", "-l" ] +\
                 pppreset.split()
+            print( "command = " + str( command ) )
             r = subprocess.call(command, **shellparams)
             outfile_results.flush()
 
@@ -273,7 +290,6 @@ def run_test():
     try:
         zipin = zipfile.ZipFile(settings.database_name + ".zip",
             "r", zipfile.ZIP_STORED)
-
     except IOError:
         print("Regression database ", settings.database_name,
               ".zip was not found")
@@ -290,13 +306,13 @@ def run_test():
 
     return 0
 
-
 # -------------------------------------------------------------------------------
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         assimp_bin_path = sys.argv[1]
     else:
         assimp_bin_path = 'assimp'
+    setEnvVar("assimp_path", assimp_bin_path)
     print('Using assimp binary: ' + assimp_bin_path)
     sys.exit( run_test() )
 

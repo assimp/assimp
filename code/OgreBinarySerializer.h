@@ -52,7 +52,7 @@ namespace Ogre
 {
 
 typedef Assimp::StreamReaderLE MemoryStreamReader;
-typedef boost::shared_ptr<MemoryStreamReader> MemoryStreamReaderPtr;
+typedef std::shared_ptr<MemoryStreamReader> MemoryStreamReaderPtr;
 
 class OgreBinarySerializer
 {

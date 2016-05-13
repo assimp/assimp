@@ -77,7 +77,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include "Profiler.h"
 #include <set>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <cctype>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
@@ -604,7 +604,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
             FreeScene();
         }
 
-        // First check if the file is accessable at all
+        // First check if the file is accessible at all
         if( !pimpl->mIOHandler->Exists( pFile)) {
 
             pimpl->mErrorString = "Unable to open file \"" + pFile + "\".";
@@ -612,7 +612,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
             return NULL;
         }
 
-        boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+        std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
         if (profiler) {
             profiler->BeginRegion("total");
         }
@@ -658,7 +658,12 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         }
 
         // Dispatch the reading to the worker class for this format
-        DefaultLogger::get()->info("Found a matching importer for this file format");
+        const aiImporterDesc *desc( imp->GetInfo() );
+        std::string ext( "unknown" );
+        if ( NULL != desc ) {
+            ext = desc->mName;
+        }
+        DefaultLogger::get()->info("Found a matching importer for this file format: " + ext + "." );
         pimpl->mProgressHandler->UpdateFileRead( 0, fileSize );
 
         if (profiler) {
@@ -718,7 +723,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
     catch (std::exception &e)
     {
 #if (defined _MSC_VER) &&   (defined _CPPRTTI)
-        // if we have RTTI get the full name of the exception that occured
+        // if we have RTTI get the full name of the exception that occurred
         pimpl->mErrorString = std::string(typeid( e ).name()) + ": " + e.what();
 #else
         pimpl->mErrorString = std::string("std::exception: ") + e.what();
@@ -780,7 +785,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
     }
 #endif // ! DEBUG
 
-    boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+    std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)   {
 
         BaseProcess* process = pimpl->mPostProcessingSteps[a];
@@ -836,7 +841,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 // ------------------------------------------------------------------------------------------------
 const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess, bool requestValidation ) {
     ASSIMP_BEGIN_EXCEPTION_REGION();
-    
+
     // Return immediately if no scene is active
     if ( NULL == pimpl->mScene ) {
         return NULL;
@@ -875,7 +880,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     }
 #endif // ! DEBUG
 
-    boost::scoped_ptr<Profiler> profiler( GetPropertyInteger( AI_CONFIG_GLOB_MEASURE_TIME, 0 ) ? new Profiler() : NULL );
+    std::unique_ptr<Profiler> profiler( GetPropertyInteger( AI_CONFIG_GLOB_MEASURE_TIME, 0 ) ? new Profiler() : NULL );
 
     if ( profiler ) {
         profiler->BeginRegion( "postprocess" );
@@ -903,7 +908,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
     DefaultLogger::get()->info( "Leaving customized post processing pipeline" );
 
     ASSIMP_END_EXCEPTION_REGION( const aiScene* );
-    
+
     return pimpl->mScene;
 }
 

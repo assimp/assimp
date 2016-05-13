@@ -45,17 +45,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 
 #include "FBXParser.h"
+#include "FBXMeshGeometry.h"
 #include "FBXDocument.h"
 #include "FBXImporter.h"
 #include "FBXImportSettings.h"
 #include "FBXDocumentUtil.h"
 #include "FBXProperties.h"
-#include <boost/foreach.hpp>
 
 namespace Assimp {
 namespace FBX {
 
-    using namespace Util;
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
 Model::Model(uint64_t id, const Element& element, const Document& doc, const std::string& name)
@@ -97,7 +97,7 @@ void Model::ResolveLinks(const Element& element, const Document& doc)
     materials.reserve(conns.size());
     geometry.reserve(conns.size());
     attributes.reserve(conns.size());
-    BOOST_FOREACH(const Connection* con, conns) {
+    for(const Connection* con : conns) {
 
         // material and geometry links should be Object-Object connections
         if (con->PropertyName().length()) {
@@ -138,7 +138,7 @@ void Model::ResolveLinks(const Element& element, const Document& doc)
 bool Model::IsNull() const
 {
     const std::vector<const NodeAttribute*>& attrs = GetAttributes();
-    BOOST_FOREACH(const NodeAttribute* att, attrs) {
+    for(const NodeAttribute* att : attrs) {
 
         const Null* null_tag = dynamic_cast<const Null*>(att);
         if(null_tag) {

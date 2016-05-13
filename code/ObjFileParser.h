@@ -72,7 +72,7 @@ public:
 
 public:
     /// \brief  Constructor with data array.
-    ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* io, ProgressHandler* progress);
+    ObjFileParser(std::vector<char> &Data, const std::string &strModelName, IOSystem* io, ProgressHandler* progress, const std::string &originalObjFileName);
     /// \brief  Destructor
     ~ObjFileParser();
     /// \brief  Model getter.
@@ -143,6 +143,8 @@ private:
     //! Pointer to progress handler
     ProgressHandler* m_progress;
     /// Path to the current model
+    // name of the obj file where the buffer comes from
+    const std::string& m_originalObjFileName;
 };
 
 }   // Namespace Assimp

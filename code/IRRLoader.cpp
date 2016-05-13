@@ -56,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StandardShapes.h"
 #include "Importer.h"
 
-// We need boost::common_factor to compute the lcm/gcd of a number
-#include <boost/math/common_factor_rt.hpp>
-#include <boost/scoped_ptr.hpp>
+// We need MathFunctions.h to compute the lcm/gcd of a number
+#include "MathFunctions.h"
+#include <memory>
 #include "../include/assimp/DefaultLogger.hpp"
 #include "../include/assimp/mesh.h"
 #include "../include/assimp/material.h"
@@ -402,13 +402,13 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 int lcm = 360;
 
                 if (angles[0])
-                    lcm  = boost::math::lcm(lcm,angles[0]);
+                    lcm  = Math::lcm(lcm,angles[0]);
 
                 if (angles[1])
-                    lcm  = boost::math::lcm(lcm,angles[1]);
+                    lcm  = Math::lcm(lcm,angles[1]);
 
                 if (angles[2])
-                    lcm  = boost::math::lcm(lcm,angles[2]);
+                    lcm  = Math::lcm(lcm,angles[2]);
 
                 if (360 == lcm)
                     break;
@@ -902,7 +902,7 @@ void IRRImporter::GenerateGraph(Node* root,aiNode* rootOut ,aiScene* scene,
 void IRRImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL)

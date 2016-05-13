@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <map>
 
-#include "boost/scoped_ptr.hpp"
+#include <memory>
 
 
 struct aiScene;
@@ -87,7 +87,7 @@ namespace Assimp
         const aiScene* mScene;
         const ExportProperties* mProperties;
 
-        std::map<std::string, size_t> mTexturesByPath;
+        std::map<std::string, unsigned int> mTexturesByPath;
 
         glTF::Asset* mAsset;
 
@@ -99,7 +99,7 @@ namespace Assimp
         void ExportMetadata();
         void ExportMaterials();
         void ExportMeshes();
-        size_t ExportNode(const aiNode* node);
+        unsigned int ExportNode(const aiNode* node);
         void ExportScene();
     };
 

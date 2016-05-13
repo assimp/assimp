@@ -120,8 +120,8 @@ struct TempOpening
     const IFC::IfcSolidModel* solid;
     IfcVector3 extrusionDir;
 
-    boost::shared_ptr<TempMesh> profileMesh;
-    boost::shared_ptr<TempMesh> profileMesh2D;
+    std::shared_ptr<TempMesh> profileMesh;
+    std::shared_ptr<TempMesh> profileMesh2D;
 
     // list of points generated for this opening. This is used to
     // create connections between two opposing holes created
@@ -140,8 +140,8 @@ struct TempOpening
 
     // ------------------------------------------------------------------------------
     TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,
-        boost::shared_ptr<TempMesh> profileMesh,
-        boost::shared_ptr<TempMesh> profileMesh2D)
+        std::shared_ptr<TempMesh> profileMesh,
+        std::shared_ptr<TempMesh> profileMesh2D)
         : solid(solid)
         , extrusionDir(extrusionDir)
         , profileMesh(profileMesh)

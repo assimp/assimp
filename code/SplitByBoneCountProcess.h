@@ -101,7 +101,7 @@ public:
     size_t mMaxBoneCount;
 
     /// Per mesh index: Array of indices of the new submeshes.
-    std::vector< std::vector<size_t> > mSubMeshIndices;
+    std::vector< std::vector<unsigned int> > mSubMeshIndices;
 };
 
 } // end of namespace Assimp

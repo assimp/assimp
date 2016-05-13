@@ -131,7 +131,7 @@ void C4DImporter::SetupProperties(const Importer* /*pImp*/)
 void C4DImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     if( file.get() == NULL) {
         ThrowException("failed to open file " + pFile);
@@ -161,7 +161,7 @@ void C4DImporter::InternReadFile( const std::string& pFile,
         RecurseHierarchy(doc->GetFirstObject(), pScene->mRootNode);
     }
     catch(...) {
-        BOOST_FOREACH(aiMesh* mesh, meshes) {
+        for(aiMesh* mesh : meshes) {
             delete mesh;
         }
         BaseDocument::Free(doc);
@@ -176,7 +176,7 @@ void C4DImporter::InternReadFile( const std::string& pFile,
 
     // copy materials over, adding a default material if necessary
     unsigned int mat_count = static_cast<unsigned int>(materials.size());
-    BOOST_FOREACH(aiMesh* mesh, meshes) {
+    for(aiMesh* mesh : meshes) {
         ai_assert(mesh->mMaterialIndex <= mat_count);
         if(mesh->mMaterialIndex >= mat_count) {
             ++mat_count;

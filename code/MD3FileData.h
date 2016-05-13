@@ -305,7 +305,7 @@ inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
         b &= 0xff;
 
         ((unsigned char*)&p_iOut)[0] = b;   // longitude
-        ((unsigned char*)&p_iOut)[1] = a;   // lattitude
+        ((unsigned char*)&p_iOut)[1] = a;   // latitude
     }
 }
 

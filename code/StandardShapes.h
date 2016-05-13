@@ -182,7 +182,7 @@ public:
     // ----------------------------------------------------------------
     /** @brief Generates a flat circle
      *
-     *  The circle is constructed in the planed formed by the x,z
+     *  The circle is constructed in the planned formed by the x,z
      *  axes of the cartesian coordinate system.
      *
      *  @param radius Radius of the circle

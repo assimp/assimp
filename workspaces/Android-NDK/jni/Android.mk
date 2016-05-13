@@ -21,7 +21,7 @@ LOCAL_CPP_FEATURES := exceptions
 # but next breaks blender and other importer
 # LOCAL_CFLAGS += -std=c++11
   
-# cant be disabled? rudamentary function?
+# can't be disabled? rudamentary function?
 #       -DASSIMP_BUILD_NO_FLIPWINDING_PROCESS  \
 #
 DontBuildProcess = \

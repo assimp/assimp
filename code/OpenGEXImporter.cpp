@@ -43,12 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DefaultIOSystem.h"
 #include <assimp/DefaultLogger.hpp>
 #include "MakeVerboseFormat.h"
+#include "StringComparison.h"
 
 #include <openddlparser/OpenDDLParser.h>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 
 #include <vector>
+
+static const std::string OpenGexExt = "ogex";
 
 static const aiImporterDesc desc = {
     "Open Game Engine Exchange",
@@ -60,7 +63,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "ogex"
+    OpenGexExt.c_str()
 };
 
 namespace Grammar {
@@ -283,7 +286,7 @@ OpenGEXImporter::~OpenGEXImporter() {
 bool OpenGEXImporter::CanRead( const std::string &file, IOSystem *pIOHandler, bool checkSig ) const {
     bool canRead( false );
     if( !checkSig ) {
-        canRead = SimpleExtensionCheck( file, "ogex" );
+        canRead = SimpleExtensionCheck( file, OpenGexExt.c_str() );
     } else {
         static const char *token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
         canRead = BaseImporter::SearchFileHeaderForToken( pIOHandler, file, token, 4 );
@@ -1007,11 +1010,11 @@ void OpenGEXImporter::handleParamNode( ODDLParser::DDLNode *node, aiScene *pScen
         }
         const float floatVal( val->getFloat() );
         if ( prop->m_value  != nullptr ) {
-            if ( "fov" == prop->m_value->getString() ) {
+            if ( 0 == ASSIMP_strincmp( "fov", prop->m_value->getString(), 3 ) ) {
                 m_currentCamera->mHorizontalFOV = floatVal;
-            } else if ( "near" == prop->m_value->getString() ) {
+            } else if ( 0 == ASSIMP_strincmp( "near", prop->m_value->getString(), 3 ) ) {
                 m_currentCamera->mClipPlaneNear = floatVal;
-            } else if ( "far" == prop->m_value->getString() ) {
+            } else if ( 0 == ASSIMP_strincmp( "far", prop->m_value->getString(), 3 ) ) {
                 m_currentCamera->mClipPlaneFar = floatVal;
             }
         }
@@ -1029,7 +1032,8 @@ void OpenGEXImporter::handleAttenNode( ODDLParser::DDLNode *node, aiScene *pScen
         if ( nullptr != prop->m_value ) {
             Value *val( node->getValue() );
             const float floatVal( val->getFloat() );
-            if ( "scale" == prop->m_value->getString() ) {
+            if ( 0 == strncmp( "scale", prop->m_value->getString(), strlen( "scale" ) ) ) {
+            //if ( "scale" == prop->m_value->getString() ) {
                 m_currentLight->mAttenuationQuadratic = floatVal;
             }
         }
@@ -1106,7 +1110,7 @@ void OpenGEXImporter::resolveReferences() {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::createNodeTree( aiScene *pScene ) {
-    if( NULL == m_root ) {
+    if( nullptr == m_root ) {
         return;
     }
 
@@ -1121,13 +1125,13 @@ void OpenGEXImporter::createNodeTree( aiScene *pScene ) {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
-    ai_assert( NULL != pScene );
+    ai_assert( nullptr != pScene );
 
     if ( NULL == node ) {
         return;
     }
         
-    ChildInfo *info( NULL );
+    ChildInfo *info( nullptr );
     if( m_nodeStack.empty() ) {
         node->mParent = pScene->mRootNode;
         NodeChildMap::iterator it( m_nodeChildMap.find( node->mParent ) );
@@ -1141,7 +1145,7 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
         info->m_children.push_back( node );
     } else {
         aiNode *parent( m_nodeStack.back() );
-        ai_assert( NULL != parent );
+        ai_assert( nullptr != parent );
         node->mParent = parent;
         NodeChildMap::iterator it( m_nodeChildMap.find( node->mParent ) );
         if( m_nodeChildMap.end() == it ) {
@@ -1158,7 +1162,7 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
 //------------------------------------------------------------------------------------------------
 aiNode *OpenGEXImporter::popNode() {
     if( m_nodeStack.empty() ) {
-        return NULL;
+        return nullptr;
     }
 
     aiNode *node( top() );
@@ -1170,7 +1174,7 @@ aiNode *OpenGEXImporter::popNode() {
 //------------------------------------------------------------------------------------------------
 aiNode *OpenGEXImporter::top() const {
     if( m_nodeStack.empty() ) {
-        return NULL;
+        return nullptr;
     }
 
     return m_nodeStack.back();

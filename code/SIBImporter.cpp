@@ -914,10 +914,12 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     for (size_t n=0;n<sib.lights.size();n++)
     {
         aiLight* light = sib.lights[n];
-        aiNode* node = new aiNode;
-        root->mChildren[childIdx++] = node;
-        node->mName = light->mName;
-        node->mParent = root;
+        if ( nullptr != light ) {
+            aiNode* node = new aiNode;
+            root->mChildren[ childIdx++ ] = node;
+            node->mName = light->mName;
+            node->mParent = root;
+        }
     }
 }
 

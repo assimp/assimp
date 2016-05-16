@@ -246,6 +246,7 @@ struct MDeformVert : ElemBase  {
 struct Material : ElemBase {
     ID id FAIL;
 
+    short flag;
     float r,g,b WARN;
     float specr,specg,specb WARN;
     short har;

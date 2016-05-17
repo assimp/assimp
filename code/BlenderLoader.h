@@ -179,9 +179,18 @@ private:
     );
 
     // --------------------
+    void BuildDefaultMaterial(
+        Blender::ConversionData& conv_data
+    );
+
+    void AddBlendParams(
+        aiMaterial* result,
+        const Blender::Material* source
+    );
+
     void BuildMaterials(
         Blender::ConversionData& conv_data
-    ) ;
+    );
 
     // --------------------
     void ResolveTexture(

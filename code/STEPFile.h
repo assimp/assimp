@@ -596,11 +596,6 @@ namespace STEP {
         LazyObject(DB& db, uint64_t id, uint64_t line, const char* type,const char* args);
         ~LazyObject();
 
-        LazyObject( LazyObject const& ) = delete;
-        LazyObject operator=( LazyObject const& ) = delete;
-        LazyObject( LazyObject && ) = delete;
-        LazyObject operator=( LazyObject  && ) = delete;
-
     public:
 
         Object& operator * () {

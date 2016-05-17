@@ -305,7 +305,7 @@ namespace glTF {
     }
 
 
-    AssetWriter::AssetWriter(Asset& a)
+    inline AssetWriter::AssetWriter(Asset& a)
         : mDoc()
         , mAsset(a)
         , mAl(mDoc.GetAllocator())
@@ -326,7 +326,7 @@ namespace glTF {
         }
     }
 
-    void AssetWriter::WriteFile(const char* path)
+    inline void AssetWriter::WriteFile(const char* path)
     {
         bool isBinary = mAsset.extensionsUsed.KHR_binary_glTF;
 
@@ -363,7 +363,7 @@ namespace glTF {
         }
     }
 
-    void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
+    inline void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
     {
         //
         // write the body data
@@ -413,7 +413,7 @@ namespace glTF {
     }
 
     
-    void AssetWriter::WriteMetadata()
+    inline void AssetWriter::WriteMetadata()
     {
         Value asset;
         asset.SetObject();
@@ -425,7 +425,7 @@ namespace glTF {
         mDoc.AddMember("asset", asset, mAl);
     }
 
-    void AssetWriter::WriteExtensionsUsed()
+    inline void AssetWriter::WriteExtensionsUsed()
     {
         Value exts;
         exts.SetArray();

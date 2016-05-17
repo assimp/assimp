@@ -38,62 +38,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file IRRMeshLoader.h
- *  @brief Declaration of the .irrMesh (Irrlight Engine Mesh Format)
- *  importer class.
- */
-#ifndef AI_IRRMESHLOADER_H_INCLUDED
-#define AI_IRRMESHLOADER_H_INCLUDED
+#ifndef D3MFOPCPACKAGE_H
+#define D3MFOPCPACKAGE_H
 
-#include "BaseImporter.h"
-#include "IRRShared.h"
+#include <string>
+#include <memory>
 
-#ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
+#include "../include/assimp/IOSystem.hpp"
+#include "irrXMLWrapper.h"
 
-namespace Assimp    {
+namespace Assimp {
 
-// ---------------------------------------------------------------------------
-/** IrrMesh importer class.
- *
- * IrrMesh is the native file format of the Irrlight engine and its editor
- * irrEdit. As IrrEdit itself is capable of importing quite many file formats,
- * it might be a good file format for data exchange.
- */
-class IRRMeshImporter : public BaseImporter, public IrrlichtBase
+namespace D3MF {
+
+typedef irr::io::IrrXMLReader XmlReader;
+typedef std::shared_ptr<XmlReader> XmlReaderPtr;
+
+class D3MFZipArchive;
+
+class D3MFOpcPackage
 {
 public:
-    IRRMeshImporter();
-    ~IRRMeshImporter();
+    D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile);
+    ~D3MFOpcPackage();
 
-
-public:
-
-    // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     *  See BaseImporter::CanRead() for details.
-     */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
-
-protected:
-
-    // -------------------------------------------------------------------
-    /** Return importer meta information.
-     * See #BaseImporter::GetInfo for the details
-     */
-    const aiImporterDesc* GetInfo () const;
-
-    // -------------------------------------------------------------------
-    /** Imports the given file into the given scene structure.
-     * See BaseImporter::InternReadFile() for details
-     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
-
+    IOStream* RootStream() const;
+private:
+    std::string ReadPackageRootRelationship(IOStream* stream);
+private:
+    IOStream* m_RootStream;
+    std::unique_ptr<D3MFZipArchive> zipArchive;
 };
 
-} // end of namespace Assimp
+}
+}
 
-#endif // ASSIMP_BUILD_NO_IRRMESH_IMPORTER
-
-#endif // AI_IRRMESHIMPORTER_H_INC
+#endif // D3MFOPCPACKAGE_H

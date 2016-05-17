@@ -38,62 +38,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-/** @file IRRMeshLoader.h
- *  @brief Declaration of the .irrMesh (Irrlight Engine Mesh Format)
- *  importer class.
- */
-#ifndef AI_IRRMESHLOADER_H_INCLUDED
-#define AI_IRRMESHLOADER_H_INCLUDED
+#ifndef AI_D3MFLOADER_H_INCLUDED
+#define AI_D3MFLOADER_H_INCLUDED
+
+#include <vector>
+#include <cstdint>
 
 #include "BaseImporter.h"
-#include "IRRShared.h"
 
-#ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
+namespace Assimp {
 
-namespace Assimp    {
-
-// ---------------------------------------------------------------------------
-/** IrrMesh importer class.
- *
- * IrrMesh is the native file format of the Irrlight engine and its editor
- * irrEdit. As IrrEdit itself is capable of importing quite many file formats,
- * it might be a good file format for data exchange.
- */
-class IRRMeshImporter : public BaseImporter, public IrrlichtBase
+class D3MFImporter : public BaseImporter
 {
 public:
-    IRRMeshImporter();
-    ~IRRMeshImporter();
+    D3MFImporter();
+    ~D3MFImporter();
 
-
+    // BaseImporter interface
 public:
-
-    // -------------------------------------------------------------------
-    /** Returns whether the class can handle the format of the given file.
-     *  See BaseImporter::CanRead() for details.
-     */
-    bool CanRead( const std::string& pFile, IOSystem* pIOHandler,
-        bool checkSig) const;
+    bool CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const;
+    void SetupProperties(const Importer *pImp);
+    const aiImporterDesc *GetInfo() const;
 
 protected:
-
-    // -------------------------------------------------------------------
-    /** Return importer meta information.
-     * See #BaseImporter::GetInfo for the details
-     */
-    const aiImporterDesc* GetInfo () const;
-
-    // -------------------------------------------------------------------
-    /** Imports the given file into the given scene structure.
-     * See BaseImporter::InternReadFile() for details
-     */
-    void InternReadFile( const std::string& pFile, aiScene* pScene,
-        IOSystem* pIOHandler);
+    void InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler);
 
 };
-
-} // end of namespace Assimp
-
-#endif // ASSIMP_BUILD_NO_IRRMESH_IMPORTER
-
-#endif // AI_IRRMESHIMPORTER_H_INC
+}
+#endif // AI_D3MFLOADER_H_INCLUDED

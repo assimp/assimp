@@ -618,6 +618,7 @@ void PretransformVertices::Execute( aiScene* pScene)
         // transformation of the corresponding node
         l->mPosition   = nd->mTransformation * l->mPosition;
         l->mDirection  = aiMatrix3x3( nd->mTransformation ) * l->mDirection;
+        l->mUp         = aiMatrix3x3( nd->mTransformation ) * l->mUp;
     }
 
     if( !configKeepHierarchy ) {

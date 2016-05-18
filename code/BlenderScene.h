@@ -371,8 +371,8 @@ struct Lamp : ElemBase {
 
       //short ray_samp, ray_sampy, ray_sampz;
       //short ray_samp_type;
-      //short area_shape;
-      //float area_size, area_sizey, area_sizez;
+      short area_shape;
+      float area_size, area_sizey, area_sizez;
       //float adapt_thresh;
       //short ray_samp_method;
 

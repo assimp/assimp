@@ -324,8 +324,8 @@ D3MFZipArchive::D3MFZipArchive(IOSystem* pIOHandler, const std::string& rFile)
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 D3MFZipArchive::~D3MFZipArchive() {
-    for( std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it ) {
-        delete it->second;
+    for(auto &file : m_ArchiveMap) {
+        delete file.second;
     }
     m_ArchiveMap.clear();
 
@@ -398,8 +398,8 @@ void D3MFZipArchive::Close(IOStream *pFile) {
 void D3MFZipArchive::getFileList(std::vector<std::string> &rFileList) {
     rFileList.clear();
 
-    for(std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it) {
-        rFileList.push_back(it->first);
+    for(const auto &file : m_ArchiveMap) {
+        rFileList.push_back(file.first);
     }
 }
 

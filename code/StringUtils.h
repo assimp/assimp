@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdarg>
 #include <string.h>
 #include <stdio.h>
+#include <sstream>
 
 ///	@fn		ai_snprintf
 ///	@brief	The portable version of the function snprintf ( C99 standard ), which works on visual studio compilers 2013 and earlier.
@@ -79,6 +80,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #   define ai_snprintf snprintf
 #endif
+
+template <typename T>
+std::string to_string( T value ) {
+    std::ostringstream os;
+    os << value;
+    return os.str();
+}
 
 #endif // INCLUDED_AI_STRINGUTILS_H
 

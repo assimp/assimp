@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include "TinyFormatter.h"
 #include "ByteSwapper.h"
+#include "StringUtils.h"
 #include "../include/assimp/DefaultLogger.hpp"
 
 

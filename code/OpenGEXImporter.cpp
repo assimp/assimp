@@ -1033,7 +1033,6 @@ void OpenGEXImporter::handleAttenNode( ODDLParser::DDLNode *node, aiScene *pScen
             Value *val( node->getValue() );
             const float floatVal( val->getFloat() );
             if ( 0 == strncmp( "scale", prop->m_value->getString(), strlen( "scale" ) ) ) {
-            //if ( "scale" == prop->m_value->getString() ) {
                 m_currentLight->mAttenuationQuadratic = floatVal;
             }
         }

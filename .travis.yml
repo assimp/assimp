@@ -19,10 +19,6 @@ env:
     - ANDROID=1
 
 language: cpp
-
-os:
-  - linux
-  - osx
   
 compiler:
   - gcc

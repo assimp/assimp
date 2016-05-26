@@ -131,11 +131,11 @@ static void normalizePathName( const std::string &rPath, std::string &rNormalize
     static const unsigned int numDelimiters = 2;
     const char delimiters[ numDelimiters ] = { '/', '\\' };
     rNormalizedPath = rPath;
-    for ( unsigned int i=0; i<numDelimiters; i++ )
+    for (const char delimiter : delimiters)
     {
         for ( size_t j=0; j<rNormalizedPath.size(); j++ )
         {
-            if ( rNormalizedPath[j] == delimiters[ i ] )
+            if ( rNormalizedPath[j] == delimiter )
             {
                 rNormalizedPath[ j ] = sep[ 0 ];
             }

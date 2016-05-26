@@ -459,11 +459,9 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
             if (iBase)
             {
                 // we can't use memset here we unsigned int needn' be 32 bits
-                for (std::vector<unsigned int>::iterator
-                    iter = avWasCopied.begin(),end = avWasCopied.end();
-                    iter != end;++iter)
+                for (auto &elem : avWasCopied)
                 {
-                    (*iter) = 0xffffffff;
+                    elem = 0xffffffff;
                 }
             }
 

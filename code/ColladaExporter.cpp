@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <ctime>
 #include <set>
-#include <map>
+#include <unordered_map>
 #include <sstream>
 #include <iterator>
 
@@ -286,7 +286,7 @@ void ColladaExporter::WriteTextures() {
 
             outfile->Flush();
 
-            textures.insert(std::make_pair(i, name));
+            textures.emplace(i, name);
         }
     }
 }
@@ -510,7 +510,7 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
             throw DeadlyExportError(error.what());
         }
 
-        std::map<unsigned int, std::string>::const_iterator name = textures.find(index);
+        auto name = textures.find(index);
 
         if(name != textures.end()) {
             poSurface.texture = name->second;
@@ -1020,9 +1020,8 @@ void ColladaExporter::WriteJointsTag(const size_t pIndex){
 
 
 void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
-	typedef std::pair<unsigned int,unsigned int> vertexBoneWeightLocationMapElement_t;
-	typedef std::multimap<unsigned int,vertexBoneWeightLocationMapElement_t >
-		vertexBoneWeightLocationMap_t;
+    using vertexBoneWeightLocationMapElement_t = std::pair<unsigned int,unsigned int>;
+	using vertexBoneWeightLocationMap_t = std::unordered_multimap<unsigned int,vertexBoneWeightLocationMapElement_t >;
 
     const aiMesh *const mesh = mScene->mMeshes[pIndex];
 	const std::string meshName = XMLEscape(GetMeshId(pIndex));
@@ -1046,11 +1045,10 @@ void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
 		const aiVertexWeight *const weights = bones[i]->mWeights;
 		unsigned int nWeight=bones[i]->mNumWeights;
 		for(unsigned int j=0; j<nWeight;j++){
-			vertexBoneWeightLocation.insert(
-					std::pair<unsigned int,vertexBoneWeightLocationMapElement_t >(
+			vertexBoneWeightLocation.emplace(
 							weights[j].mVertexId,
 							vertexBoneWeightLocationMapElement_t(
-									i,globalWeightIndex++)));
+									i,globalWeightIndex++));
 		}//for weight
 	}//for bones
 
@@ -1058,17 +1056,15 @@ void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
 	std::ostringstream vCountTag;
 	for(unsigned int i=0;i<mesh->mNumVertices;i++){
 
-		std::pair<vertexBoneWeightLocationMap_t::const_iterator,
-		vertexBoneWeightLocationMap_t::const_iterator>
-			vertexWeights = vertexBoneWeightLocation.equal_range(i);
+		auto vertexWeights = vertexBoneWeightLocation.equal_range(i);
 
-		const vertexBoneWeightLocationMap_t::const_iterator start = vertexWeights.first;
-		const vertexBoneWeightLocationMap_t::const_iterator end = vertexWeights.second;
+		auto start = vertexWeights.first;
+		const auto end = vertexWeights.second;
 
 		//number of weigth for the vertex
 		vCountTag<<std::distance(start,end)<<' ';
 		//bone that move the vertex and weight to use for move it
-		for(vertexBoneWeightLocationMap_t::const_iterator it = start; it!=end; ++it ){
+		for(auto &it = start; it!=end; ++it ){
 			const vertexBoneWeightLocationMapElement_t &temp = it->second;
 			pTag<<temp.first<<' '<<temp.second<<' ';
 		}//for
@@ -1312,13 +1308,12 @@ int getDepthOfBone(const aiNode* node, int depth)
 const aiNode* ColladaExporter::getRootOfController(const aiMesh* mesh)
 {
     aiNode* root = mScene->mRootNode;
-    std::multimap<int, aiNode*> controllerBones;
+    std::unordered_multimap<int, aiNode*> controllerBones;
     for (unsigned int i = 0; i < mesh->mNumBones; ++i)
     {
         aiNode* boneNode = root->FindNode(mesh->mBones[i]->mName);
         int d = getDepthOfBone(boneNode, 0);
-        controllerBones.emplace(d,boneNode);
-        //controllerBones.insert(std::make_pair<int, aiNode*>(d, boneNode));
+        controllerBones.emplace(d, boneNode);
     }
     return controllerBones.begin()->second;
 }

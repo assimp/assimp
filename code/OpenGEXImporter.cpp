@@ -236,8 +236,8 @@ OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_normals;
     
-    for( size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ ) {
-        delete [] m_textureCoords[ i ];
+    for(auto &texcoords : m_textureCoords) {
+        delete [] texcoords;
     }
 }
 

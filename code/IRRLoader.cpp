@@ -1372,8 +1372,7 @@ void IRRImporter::InternReadFile( const std::string& pFile,
 
     /*  Now iterate through all cameras and compute their final (horizontal) FOV
      */
-    for (std::vector<aiCamera*>::iterator it = cameras.begin(), end = cameras.end();it != end; ++it)    {
-        aiCamera* cam = *it;
+    for (aiCamera *cam : cameras) {
 
         // screen aspect could be missing
         if (cam->mAspect)   {

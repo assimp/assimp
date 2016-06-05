@@ -222,16 +222,10 @@ public:
         const aiVector3t<TReal>& to, aiMatrix4x4t& out);
 
 public:
-    union {
-        struct {
-            TReal a1, a2, a3, a4;
-            TReal b1, b2, b3, b4;
-            TReal c1, c2, c3, c4;
-            TReal d1, d2, d3, d4;
-        };
-        TReal m[ 4 ][ 4 ];
-        TReal mData[ 16 ];
-    };
+    TReal a1, a2, a3, a4;
+    TReal b1, b2, b3, b4;
+    TReal c1, c2, c3, c4;
+    TReal d1, d2, d3, d4;
 } PACK_STRUCT;
 
 typedef aiMatrix4x4t<float> aiMatrix4x4;
@@ -239,16 +233,10 @@ typedef aiMatrix4x4t<float> aiMatrix4x4;
 #else
 
 struct aiMatrix4x4 {
-    union {
-        struct {
-            float a1, a2, a3, a4;
-            float b1, b2, b3, b4;
-            float c1, c2, c3, c4;
-            float d1, d2, d3, d4;
-        };
-        float m[ 4 ][ 4 ];
-        float mData[ 16 ];
-    };
+    float a1, a2, a3, a4;
+    float b1, b2, b3, b4;
+    float c1, c2, c3, c4;
+    float d1, d2, d3, d4;
 } PACK_STRUCT;
 
 

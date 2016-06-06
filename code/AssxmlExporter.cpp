@@ -43,14 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdarg.h>
 #include "./../include/assimp/version.h"
 #include "ProcessHelper.h"
-#include "../include/assimp/IOStream.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #   include <zlib.h>
 #else
-#   include "../contrib/zlib/zlib.h"
+#   include <contrib/zlib/zlib.h>
 #endif
 
 #include <time.h>

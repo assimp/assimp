@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 #include "FBXCompileConfig.h"
-#include "../include/assimp/ai_assert.h"
+#include <assimp/ai_assert.h>
 #include <vector>
 #include <string>
 

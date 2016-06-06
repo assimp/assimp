@@ -47,14 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
-#include "ConvertToLHProcess.h"
-#include "../include/assimp/IOSystem.hpp"
-#include <memory>
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
 #include "Defines.h"
 #include "TinyFormatter.h"
+#include "ConvertToLHProcess.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include <cctype>
+#include <memory>
 
 
 

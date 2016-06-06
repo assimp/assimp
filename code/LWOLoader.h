@@ -42,9 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_LWOLOADER_H_INCLUDED
 #define AI_LWOLOADER_H_INCLUDED
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/types.h>
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
 
 #include "LWOFileData.h"
 #include "BaseImporter.h"

@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "SplitLargeMeshes.h"
 #include "StringComparison.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Exporter.hpp>
 #include <memory>
 
 using namespace Assimp;

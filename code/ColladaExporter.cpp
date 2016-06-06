@@ -49,9 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "DefaultIOSystem.h"
 #include "XMLTools.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
 
 #include "Exceptional.h"
 

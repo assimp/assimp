@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PlyLoader.h"
 #include "fast_atof.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 #include "ByteSwapper.h"
 
 

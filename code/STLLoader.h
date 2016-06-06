@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_STLLOADER_H_INCLUDED
 
 #include "BaseImporter.h"
-#include "../include/assimp/types.h"
+#include <assimp/types.h>
 
 namespace Assimp    {
 

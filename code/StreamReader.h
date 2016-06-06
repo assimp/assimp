@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 #include "Exceptional.h"
 #include <memory>
-#include "../include/assimp/IOStream.hpp"
+#include <assimp/IOStream.hpp>
 #include "Defines.h"
 
 namespace Assimp {

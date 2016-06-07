@@ -40,6 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "D3MFOpcPackage.h"
+#include "Exceptional.h"
+
+#include <contrib/unzip/unzip.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/ai_assert.h>
 
 #include <memory>
 #include <vector>
@@ -47,19 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-
-
-#include "../contrib/unzip/unzip.h"
-#include "../include/assimp/IOStream.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-
-
-#include "../include/assimp/ai_assert.h"
-
-#include "Exceptional.h"
-
-
 
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 

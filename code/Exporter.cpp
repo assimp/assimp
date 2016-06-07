@@ -64,10 +64,10 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "Exceptional.h"
 #include "ScenePrivate.h"
 #include <memory>
-#include "../include/assimp/Exporter.hpp"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/scene.h"
+#include <assimp/Exporter.hpp>
+#include <assimp/mesh.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <memory>
 
 namespace Assimp {

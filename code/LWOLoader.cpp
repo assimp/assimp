@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
+#include <assimp/IOSystem.hpp>
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
 #include <sstream>
 #include <iomanip>
 

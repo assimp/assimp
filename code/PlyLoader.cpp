@@ -49,8 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PlyLoader.h"
 #include "Macros.h"
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
 
 
 using namespace Assimp;

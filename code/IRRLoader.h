@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "Importer.h"
 #include "StringUtils.h"
-#include "../include/assimp/anim.h"
+#include <assimp/anim.h>
 
 namespace Assimp    {
 

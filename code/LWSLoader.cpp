@@ -55,9 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SkeletonMeshBuilder.h"
 #include "ConvertToLHProcess.h"
 #include "Importer.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/IOSystem.hpp"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
+#include <assimp/IOSystem.hpp>
 #include <memory>
 
 

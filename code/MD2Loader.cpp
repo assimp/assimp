@@ -46,17 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MD2Loader.h"
 #include "ByteSwapper.h"
 #include "MD2NormalTable.h" // shouldn't be included by other units
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/Importer.hpp"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-
-
 
 using namespace Assimp;
 using namespace Assimp::MD2;
-
 
 // helper macro to determine the size of an array
 #if (!defined ARRAYSIZE)

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 
-#include "../include/assimp/types.h"
+#include <assimp/types.h>
 #include "GenericProperty.h"
 
 struct aiScene;

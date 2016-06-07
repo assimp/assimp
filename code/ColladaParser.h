@@ -47,7 +47,7 @@
 
 #include "irrXMLWrapper.h"
 #include "ColladaHelper.h"
-#include "../include/assimp/ai_assert.h"
+#include <assimp/ai_assert.h>
 #include "TinyFormatter.h"
 #include <memory>
 

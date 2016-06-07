@@ -56,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <memory>
 #include "Exceptional.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/light.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/light.h>
 
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)

@@ -54,8 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "Hash.h"
 #include "time.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 #include <stdio.h>
 #include "ScenePrivate.h"
 

@@ -41,12 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_PROCESS_HELPER_H_INCLUDED
 #define AI_PROCESS_HELPER_H_INCLUDED
 
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/postprocess.h>
+#include <assimp/anim.h>
+#include <assimp/mesh.h>
+#include <assimp/material.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 
 #include "SpatialSort.h"
 #include "BaseProcess.h"

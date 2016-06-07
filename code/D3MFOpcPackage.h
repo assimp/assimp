@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <memory>
 
-#include "../include/assimp/IOSystem.hpp"
+#include <assimp/IOSystem.hpp>
 #include "irrXMLWrapper.h"
 
 namespace Assimp {

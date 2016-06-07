@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJ_FILE_IMPORTER_H_INC
 
 #include "BaseImporter.h"
-#include "../include/assimp/material.h"
+#include <assimp/material.h>
 #include <vector>
 
 struct aiMesh;

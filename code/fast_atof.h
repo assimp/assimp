@@ -26,7 +26,7 @@
 #ifdef _MSC_VER
 #  include <stdint.h>
 #else
-#include "../include/assimp/Compiler/pstdint.h"
+#  include <assimp/Compiler/pstdint.h>
 #endif
 
 namespace Assimp

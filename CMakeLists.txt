@@ -85,7 +85,10 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/revision.h
 )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(
+    ./
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 OPTION(ASSIMP_OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)
 SET(CMAKE_MODULE_PATH       "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules" )

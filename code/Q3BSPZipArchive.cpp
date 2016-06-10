@@ -46,8 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include "../include/assimp/ai_assert.h"
-
+#include <assimp/ai_assert.h>
 
 namespace Assimp {
 namespace Q3BSP {

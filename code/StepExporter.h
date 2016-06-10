@@ -46,9 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STEPEXPORTER_H_INC
 #define AI_STEPEXPORTER_H_INC
 
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/matrix4x4.h"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/ai_assert.h>
+#include <assimp/matrix4x4.h>
+#include <assimp/Exporter.hpp>
 #include <sstream>
 
 

@@ -48,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
 #include "StringUtils.h"
-#include "../include/assimp/texture.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/texture.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 #include "qnan.h"
 #include "Defines.h"
 

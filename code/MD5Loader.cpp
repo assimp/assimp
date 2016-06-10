@@ -52,13 +52,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 #include "fast_atof.h"
 #include "SkeletonMeshBuilder.h"
-#include "../include/assimp/Importer.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-
-
 
 using namespace Assimp;
 

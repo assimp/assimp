@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "TinyFormatter.h"
 #include "StreamReader.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 #include <stdint.h>
 #include <memory>
 

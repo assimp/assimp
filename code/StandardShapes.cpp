@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 #include "Defines.h"
 #include <stddef.h>
-#include "../include/assimp/mesh.h"
+#include <assimp/mesh.h>
 
 namespace Assimp    {
 

@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the CPP-API class #Importer
  */
 
-#include "../include/assimp/version.h"
+#include <assimp/version.h>
 
 // ------------------------------------------------------------------------------------------------
 /* Uncomment this line to prevent Assimp from catching unknown exceptions.

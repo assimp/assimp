@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
-#include "../include/assimp/Importer.hpp"
+#include <assimp/Importer.hpp>
 
 namespace Assimp {
     template<> const std::string LogFunctions<FBXImporter>::log_prefix = "FBX: ";

@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ASELoader.h"
 #include "MaterialSystem.h"
 #include "fast_atof.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 
 using namespace Assimp;
 using namespace Assimp::ASE;

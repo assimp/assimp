@@ -40,11 +40,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "D3MFImporter.h"
 
-#include "../include/assimp/scene.h"
-#include "../contrib/unzip/unzip.h"
-#include "../include/assimp/IOStream.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/scene.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <contrib/unzip/unzip.h>
 #include "irrXMLWrapper.h"
 #include "StringComparison.h"
 
@@ -58,7 +58,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <memory>
 
-#include "../include/assimp/ai_assert.h"
+#include <assimp/ai_assert.h>
 
 #include "D3MFOpcPackage.h"
 

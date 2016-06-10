@@ -152,14 +152,14 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
     bv->buffer = buffer;
-	bv->byteOffset = unsigned(offset);
-	bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
+    bv->byteOffset = unsigned(offset);
+    bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
     acc->bufferView = bv;
-	acc->byteOffset = 0;
+    acc->byteOffset = 0;
     acc->byteStride = 0;
     acc->componentType = compType;
     acc->count = count;

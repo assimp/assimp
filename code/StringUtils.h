@@ -89,5 +89,22 @@ std::string to_string( T value ) {
     return os.str();
 }
 
+inline
+float ai_strtof( const char *begin, const char *end ) {
+    if ( nullptr == begin ) {
+        return 0.0f;
+    }
+    float val( 0.0f );
+    if ( nullptr == end ) {
+        val = static_cast< float >( ::atof( begin ) );
+    } else {
+        std::string::size_type len( end - begin );
+        std::string token( begin, len );
+        val = static_cast< float >( ::atof( token.c_str() ) );
+    }
+    
+    return val;
+}
+
 #endif // INCLUDED_AI_STRINGUTILS_H
 

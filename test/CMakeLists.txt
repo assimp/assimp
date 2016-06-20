@@ -78,6 +78,7 @@ SET( TEST_SRCS
   unit/utRemoveRedundantMaterials.cpp
   unit/utScenePreprocessor.cpp
   unit/utSharedPPData.cpp
+  unit/utStringUtils.cpp
   unit/utSortByPType.cpp
   unit/utSplitLargeMeshes.cpp
   unit/utTargetAnimation.cpp

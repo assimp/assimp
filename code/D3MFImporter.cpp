@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <contrib/unzip/unzip.h>
 #include "irrXMLWrapper.h"
 #include "StringComparison.h"
+#include "StringUtils.h"
 
 
 #include <string>
@@ -224,9 +225,9 @@ private:
     aiVector3D ReadVertex()
     {        
         aiVector3D vertex;
-        vertex.x = std::strtof(xmlReader->getAttributeValue(D3MF::XmlTag::x.c_str()), nullptr);
-        vertex.y = std::strtof(xmlReader->getAttributeValue(D3MF::XmlTag::y.c_str()), nullptr);
-        vertex.z = std::strtof(xmlReader->getAttributeValue(D3MF::XmlTag::z.c_str()), nullptr);        
+        vertex.x = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::x.c_str()), nullptr);
+        vertex.y = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::y.c_str()), nullptr);
+        vertex.z = ai_strtof>(xmlReader->getAttributeValue(D3MF::XmlTag::z.c_str()), nullptr);
 
         return vertex;
     }

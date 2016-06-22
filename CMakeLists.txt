@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# 
+#
 # Copyright (c) 2006-2016, assimp team
 # All rights reserved.
 #
@@ -175,7 +175,15 @@ ENDIF( CMAKE_COMPILER_IS_GNUCXX )
 
 # Search for external dependencies, and build them from source if not found
 # Search for zlib
-find_package(ZLIB)
+OPTION(ASSIMP_BUILD_ZLIB
+    "Build your own zlib"
+    OFF
+)
+
+IF ( NOT ASSIMP_BUILD_ZLIB )
+    find_package(ZLIB)
+ENDIF(ASSIMP_BUILD_ZLIB)
+
 IF( NOT ZLIB_FOUND )
   message(STATUS "compiling zlib from souces")
   include(CheckIncludeFile)
@@ -278,7 +286,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ( ASSIMP_BUILD_ASSIMP_VIEW )
   ENDIF ( WIN32 )
-  
+
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 

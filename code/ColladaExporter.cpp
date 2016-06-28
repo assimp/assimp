@@ -530,7 +530,7 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
 // Reimplementation of isalnum(,C locale), because AppVeyor does not see standard version.
 static bool isalnum_C(char c)
 {
-  return strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c);
+  return ( nullptr != strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c) );
 }
 
 // ------------------------------------------------------------------------------------------------

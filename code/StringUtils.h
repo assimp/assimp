@@ -83,6 +83,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 template <typename T>
+inline
 std::string to_string( T value ) {
     std::ostringstream os;
     os << value;

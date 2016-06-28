@@ -90,9 +90,9 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     Assimp::Importer importer;
     Assimp::Exporter exporter;
     for ( std::size_t i( 0 ); i < exporter.GetExportFormatCount(); ++i ) {
-        /*const aiExportFormatDesc *desc( exporter.GetExportFormatDescription( i ) );
-        std::cout << "[" << desc->id << "] ";
-        std::string path( "scene." );
+        std::string path;
+        const aiExportFormatDesc *desc( exporter.GetExportFormatDescription( i ) );
+        EXPECT_NE( desc, nullptr );
         path.append( desc->fileExtension );
 
         ASSERT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
@@ -102,7 +102,7 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
         if ( newScene->mNumMaterials > 0 ) {
             //ASSERT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
             //EXPECT_EQ( opacity, newOpacity );
-        }*/
+        }
     }
 }
 

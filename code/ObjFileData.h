@@ -240,6 +240,8 @@ struct Mesh {
     unsigned int m_uiMaterialIndex;
     /// True, if normals are stored.
     bool m_hasNormals;
+    /// True, if vertex colors are stored.
+    bool m_hasVertexColors;
 
     /// Constructor
     explicit Mesh( const std::string &name ) 
@@ -289,6 +291,8 @@ struct Model
     std::vector<aiVector3D> m_Vertices;
     //! vector with all generated normals
     std::vector<aiVector3D> m_Normals;
+    //! vector with all vertex colors
+    std::vector<aiVector3D> m_VertexColors;
     //! Group map
     GroupMap m_Groups;
     //! Group to face id assignment

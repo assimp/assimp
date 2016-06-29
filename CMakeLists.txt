@@ -81,7 +81,8 @@ IF(NOT GIT_COMMIT_HASH)
 ENDIF(NOT GIT_COMMIT_HASH)
 
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/revision.h.in
+  ${CMAKE_CURRENT_LIST_DIR}/revision.h.in
+#  ${CMAKE_CURRENT_SOURCE_DIR}/revision.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/revision.h
 )
 

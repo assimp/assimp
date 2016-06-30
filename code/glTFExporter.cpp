@@ -152,14 +152,14 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
     bv->buffer = buffer;
-    bv->byteOffset = 0;
+    bv->byteOffset = unsigned(offset);
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
     acc->bufferView = bv;
-    acc->byteOffset = unsigned(offset);
+    acc->byteOffset = 0;
     acc->byteStride = 0;
     acc->componentType = compType;
     acc->count = count;
@@ -292,7 +292,7 @@ void glTFExporter::ExportMeshes()
                     indices[i*nIndicesPerFace + j] = uint16_t(aim->mFaces[i].mIndices[j]);
                 }
             }
-            p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT);
+            p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);
         }
 
         switch (aim->mPrimitiveTypes) {

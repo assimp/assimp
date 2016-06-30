@@ -58,9 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 #include "TinyFormatter.h"
 #include "../contrib/ConvertUTF/ConvertUTF.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 
 
 using namespace Assimp;
@@ -914,10 +914,12 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     for (size_t n=0;n<sib.lights.size();n++)
     {
         aiLight* light = sib.lights[n];
-        aiNode* node = new aiNode;
-        root->mChildren[childIdx++] = node;
-        node->mName = light->mName;
-        node->mParent = root;
+        if ( nullptr != light ) {
+            aiNode* node = new aiNode;
+            root->mChildren[ childIdx++ ] = node;
+            node->mName = light->mName;
+            node->mParent = root;
+        }
     }
 }
 

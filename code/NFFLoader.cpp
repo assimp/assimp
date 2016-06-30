@@ -48,13 +48,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NFFLoader.h"
 #include "ParsingUtils.h"
 #include "StandardShapes.h"
+#include "qnan.h"
 #include "fast_atof.h"
 #include "RemoveComments.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
-#include "qnan.h"
 
 
 using namespace Assimp;
@@ -673,12 +673,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 if ('t' == line[0])
                 {
                     currentMeshWithUVCoords = NULL;
-                    for (std::vector<MeshInfo>::iterator it = meshesWithUVCoords.begin(), end = meshesWithUVCoords.end();
-                        it != end;++it)
+                    for (auto &mesh : meshesWithUVCoords)
                     {
-                        if ((*it).shader == s)
+                        if (mesh.shader == s)
                         {
-                            currentMeshWithUVCoords = &(*it);
+                            currentMeshWithUVCoords = &mesh;
                             break;
                         }
                     }
@@ -695,12 +694,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 else if ('p' == line[1])
                 {
                     currentMeshWithNormals = NULL;
-                    for (std::vector<MeshInfo>::iterator it = meshesWithNormals.begin(), end = meshesWithNormals.end();
-                        it != end;++it)
+                    for (auto &mesh : meshesWithNormals)
                     {
-                        if ((*it).shader == s)
+                        if (mesh.shader == s)
                         {
-                            currentMeshWithNormals = &(*it);
+                            currentMeshWithNormals = &mesh;
                             break;
                         }
                     }
@@ -717,12 +715,11 @@ void NFFImporter::InternReadFile( const std::string& pFile,
                 else
                 {
                     currentMesh = NULL;
-                    for (std::vector<MeshInfo>::iterator it = meshes.begin(), end = meshes.end();
-                        it != end;++it)
+                    for (auto &mesh : meshes)
                     {
-                        if ((*it).shader == s)
+                        if (mesh.shader == s)
                         {
-                            currentMesh = &(*it);
+                            currentMesh = &mesh;
                             break;
                         }
                     }

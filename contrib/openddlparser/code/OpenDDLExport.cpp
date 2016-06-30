@@ -334,7 +334,7 @@ bool OpenDDLExport::writeValue( Value *val, std::string &statement ) {
                 const int i = static_cast< int >( val->getInt64() );
                 stream << i;
                 statement += stream.str();
-        }
+            }
             break;
         case Value::ddl_unsigned_int8:
             {
@@ -378,6 +378,11 @@ bool OpenDDLExport::writeValue( Value *val, std::string &statement ) {
             }
             break;
         case Value::ddl_double:
+            {
+                std::stringstream stream;
+                stream << val->getDouble();
+                statement += stream.str();
+            }
             break;
         case Value::ddl_string:
             {

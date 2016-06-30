@@ -160,16 +160,9 @@ public:
         const aiVector3t<TReal>& to, aiMatrix3x3t& out);
 
 public:
-
-    union {
-        struct {
-            TReal a1, a2, a3;
-            TReal b1, b2, b3;
-            TReal c1, c2, c3;
-        };
-        TReal m[ 3 ][ 3 ];
-        TReal mData[ 9 ];
-    };
+    TReal a1, a2, a3;
+    TReal b1, b2, b3;
+    TReal c1, c2, c3;
 } PACK_STRUCT;
 
 typedef aiMatrix3x3t<float> aiMatrix3x3;
@@ -177,15 +170,9 @@ typedef aiMatrix3x3t<float> aiMatrix3x3;
 #else
 
 struct aiMatrix3x3 {
-    union {
-        struct {
-            float a1, a2, a3;
-            float b1, b2, b3;
-            float c1, c2, c3;
-        };
-        float m[ 3 ][ 3 ];
-        float mData[ 9 ];
-    };
+    float a1, a2, a3;
+    float b1, b2, b3;
+    float c1, c2, c3;
 } PACK_STRUCT;
 
 #endif // __cplusplus

@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "3DSLoader.h"
 #include "Macros.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include "StringComparison.h"
 
 using namespace Assimp;
@@ -186,15 +186,14 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
     // internal verbose representation. Finally compute normal
     // vectors from the smoothing groups we read from the
     // file.
-    for (std::vector<D3DS::Mesh>::iterator i = mScene->mMeshes.begin(),
-         end = mScene->mMeshes.end(); i != end;++i) {
-        if ((*i).mFaces.size() > 0 && (*i).mPositions.size() == 0)  {
+    for (auto &mesh : mScene->mMeshes) {
+        if (mesh.mFaces.size() > 0 && mesh.mPositions.size() == 0)  {
             delete mScene;
             throw DeadlyImportError("3DS file contains faces but no vertices: " + pFile);
         }
-        CheckIndices(*i);
-        MakeUnique  (*i);
-        ComputeNormalsWithSmoothingsGroups<D3DS::Face>(*i);
+        CheckIndices(mesh);
+        MakeUnique  (mesh);
+        ComputeNormalsWithSmoothingsGroups<D3DS::Face>(mesh);
     }
 
     // Replace all occurrences of the default material with a

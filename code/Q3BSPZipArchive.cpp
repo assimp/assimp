@@ -46,8 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include "../include/assimp/ai_assert.h"
-
+#include <assimp/ai_assert.h>
 
 namespace Assimp {
 namespace Q3BSP {
@@ -195,8 +194,8 @@ Q3BSPZipArchive::Q3BSPZipArchive(IOSystem* pIOHandler, const std::string& rFile)
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 Q3BSPZipArchive::~Q3BSPZipArchive() {
-    for( std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it ) {
-        delete it->second;
+    for(auto &file : m_ArchiveMap) {
+        delete file.second;
     }
     m_ArchiveMap.clear();
 
@@ -269,8 +268,8 @@ void Q3BSPZipArchive::Close(IOStream *pFile) {
 void Q3BSPZipArchive::getFileList(std::vector<std::string> &rFileList) {
     rFileList.clear();
 
-    for(std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it) {
-        rFileList.push_back(it->first);
+    for(auto &file : m_ArchiveMap) {
+        rFileList.push_back(file.first);
     }
 }
 

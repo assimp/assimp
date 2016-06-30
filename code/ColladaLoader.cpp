@@ -44,9 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
-#include "../include/assimp/anim.h"
-#include "../include/assimp/scene.h"
 #include "ColladaLoader.h"
+#include <assimp/anim.h>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Importer.hpp>
 #include "ColladaParser.h"
 
 #include "fast_atof.h"
@@ -56,8 +58,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "time.h"
 #include "math.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/Importer.hpp"
 #include <numeric>
 #include "Defines.h"
 
@@ -276,21 +276,20 @@ void ColladaLoader::ResolveNodeInstances( const ColladaParser& pParser, const Co
     resolved.reserve(pNode->mNodeInstances.size());
 
     // ... and iterate through all nodes to be instanced as children of pNode
-    for (std::vector<Collada::NodeInstance>::const_iterator it = pNode->mNodeInstances.begin(),
-         end = pNode->mNodeInstances.end(); it != end; ++it)
+    for (const auto &nodeInst: pNode->mNodeInstances)
     {
         // find the corresponding node in the library
-        const ColladaParser::NodeLibrary::const_iterator itt = pParser.mNodeLibrary.find((*it).mNode);
+        const ColladaParser::NodeLibrary::const_iterator itt = pParser.mNodeLibrary.find(nodeInst.mNode);
         const Collada::Node* nd = itt == pParser.mNodeLibrary.end() ? NULL : (*itt).second;
 
         // FIX for http://sourceforge.net/tracker/?func=detail&aid=3054873&group_id=226462&atid=1067632
         // need to check for both name and ID to catch all. To avoid breaking valid files,
         // the workaround is only enabled when the first attempt to resolve the node has failed.
         if (!nd) {
-            nd = FindNode(pParser.mRootNode,(*it).mNode);
+            nd = FindNode(pParser.mRootNode, nodeInst.mNode);
         }
         if (!nd)
-            DefaultLogger::get()->error("Collada: Unable to resolve reference to instanced node " + (*it).mNode);
+            DefaultLogger::get()->error("Collada: Unable to resolve reference to instanced node " + nodeInst.mNode);
 
         else {
             //  attach this node to the list of children
@@ -1320,11 +1319,10 @@ void ColladaLoader::AddTexture ( aiMaterial& mat, const ColladaParser& pParser,
 // Fills materials from the collada material definitions
 void ColladaLoader::FillMaterials( const ColladaParser& pParser, aiScene* /*pScene*/)
 {
-    for (std::vector<std::pair<Collada::Effect*, aiMaterial*> >::iterator it = newMats.begin(),
-        end = newMats.end(); it != end; ++it)
+    for (auto &elem : newMats)
     {
-        aiMaterial&  mat = (aiMaterial&)*it->second;
-        Collada::Effect& effect = *it->first;
+        aiMaterial&  mat = (aiMaterial&)*elem.second;
+        Collada::Effect& effect = *elem.first;
 
         // resolve shading mode
         int shadeMode;

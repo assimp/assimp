@@ -154,10 +154,17 @@ DataArrayList::~DataArrayList() {
 
 size_t DataArrayList::size() {
     size_t result( 0 );
-    DataArrayList *n=m_next;
-    while( n!=ddl_nullptr ) {
+    if ( ddl_nullptr == m_next ) {
+        if ( m_dataList != ddl_nullptr ) {
+            result = 1;
+        }
+        return result;
+    }
+
+    DataArrayList *n( m_next );
+    while( ddl_nullptr != n ) {
         result++;
-        n=n->m_next;
+        n = n->m_next;
     }
     return result;
 }

@@ -50,24 +50,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
-#include <memory>
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
 #include <cctype>
-
-
+#include <memory>
 
 using namespace Assimp;
 using namespace irr;
 using namespace irr::io;
-
 
 // zlib is needed for compressed XGL files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
 #   ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #       include <zlib.h>
 #   else
-#       include "../contrib/zlib/zlib.h"
+#       include <contrib/zlib/zlib.h>
 #   endif
 #endif
 

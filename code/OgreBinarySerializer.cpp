@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OgreParsingUtils.h"
 
 #include "TinyFormatter.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 
 
 #ifndef ASSIMP_BUILD_NO_OGRE_IMPORTER
@@ -501,10 +501,8 @@ void OgreBinarySerializer::NormalizeBoneWeights(VertexData *vertexData) const
         Some exporters wont care if the sum of all bone weights
         for a single vertex equals 1 or not, so validate here. */
     const float epsilon = 0.05f;
-    for(std::set<uint32_t>::const_iterator iter=influencedVertices.begin(), end=influencedVertices.end(); iter != end; ++iter)
+    for (const uint32_t vertexIndex : influencedVertices)
     {
-        const uint32_t vertexIndex = (*iter);
-
         float sum = 0.0f;
         for (VertexBoneAssignmentList::const_iterator baIter=vertexData->boneAssignments.begin(), baEnd=vertexData->boneAssignments.end(); baIter != baEnd; ++baIter)
         {
@@ -513,10 +511,10 @@ void OgreBinarySerializer::NormalizeBoneWeights(VertexData *vertexData) const
         }
         if ((sum < (1.0f - epsilon)) || (sum > (1.0f + epsilon)))
         {
-            for (VertexBoneAssignmentList::iterator baIter=vertexData->boneAssignments.begin(), baEnd=vertexData->boneAssignments.end(); baIter != baEnd; ++baIter)
+            for (auto &boneAssign : vertexData->boneAssignments)
             {
-                if (baIter->vertexIndex == vertexIndex)
-                    baIter->weight /= sum;
+                if (boneAssign.vertexIndex == vertexIndex)
+                    boneAssign.weight /= sum;
             }
         }
     }

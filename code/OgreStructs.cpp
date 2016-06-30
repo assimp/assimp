@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "OgreStructs.h"
 #include "TinyFormatter.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include "Exceptional.h"
 
 
@@ -258,12 +258,11 @@ void IVertexData::AddVertexMapping(uint32_t oldIndex, uint32_t newIndex)
 
 void IVertexData::BoneAssignmentsForVertex(uint32_t currentIndex, uint32_t newIndex, VertexBoneAssignmentList &dest) const
 {
-    for (VertexBoneAssignmentList::const_iterator iter=boneAssignments.begin(), end=boneAssignments.end();
-        iter!=end; ++iter)
+    for (const auto &boneAssign : boneAssignments)
     {
-        if (iter->vertexIndex == currentIndex)
+        if (boneAssign.vertexIndex == currentIndex)
         {
-            VertexBoneAssignment a = (*iter);
+            VertexBoneAssignment a = boneAssign;
             a.vertexIndex = newIndex;
             dest.push_back(a);
         }
@@ -289,10 +288,9 @@ AssimpVertexBoneWeightList IVertexData::AssimpBoneWeights(size_t vertices)
 std::set<uint16_t> IVertexData::ReferencedBonesByWeights() const
 {
     std::set<uint16_t> referenced;
-    for (VertexBoneAssignmentList::const_iterator iter=boneAssignments.begin(), end=boneAssignments.end();
-        iter!=end; ++iter)
+    for (const auto &boneAssign : boneAssignments)
     {
-        referenced.insert(iter->boneIndex);
+        referenced.insert(boneAssign.boneIndex);
     }
     return referenced;
 }
@@ -318,10 +316,10 @@ void VertexData::Reset()
 uint32_t VertexData::VertexSize(uint16_t source) const
 {
     uint32_t size = 0;
-    for(VertexElementList::const_iterator iter=vertexElements.begin(), end=vertexElements.end(); iter != end; ++iter)
+    for(const auto &element : vertexElements)
     {
-        if (iter->source == source)
-            size += iter->Size();
+        if (element.source == source)
+            size += element.Size();
     }
     return size;
 }
@@ -335,9 +333,8 @@ MemoryStream *VertexData::VertexBuffer(uint16_t source)
 
 VertexElement *VertexData::GetVertexElement(VertexElement::Semantic semantic, uint16_t index)
 {
-    for(VertexElementList::iterator iter=vertexElements.begin(), end=vertexElements.end(); iter != end; ++iter)
+    for(auto & element : vertexElements)
     {
-        VertexElement &element = (*iter);
         if (element.semantic == semantic && element.index == index)
             return &element;
     }
@@ -427,16 +424,16 @@ void Mesh::Reset()
     OGRE_SAFE_DELETE(skeleton)
     OGRE_SAFE_DELETE(sharedVertexData)
 
-    for(size_t i=0, len=subMeshes.size(); i<len; ++i) {
-        OGRE_SAFE_DELETE(subMeshes[i])
+    for(auto &mesh : subMeshes) {
+        OGRE_SAFE_DELETE(mesh)
     }
     subMeshes.clear();
-    for(size_t i=0, len=animations.size(); i<len; ++i) {
-        OGRE_SAFE_DELETE(animations[i])
+    for(auto &anim : animations) {
+        OGRE_SAFE_DELETE(anim)
     }
     animations.clear();
-    for(size_t i=0, len=poses.size(); i<len; ++i) {
-        OGRE_SAFE_DELETE(poses[i])
+    for(auto &pose : poses) {
+        OGRE_SAFE_DELETE(pose)
     }
     poses.clear();
 }
@@ -739,8 +736,8 @@ void MeshXml::Reset()
     OGRE_SAFE_DELETE(skeleton)
     OGRE_SAFE_DELETE(sharedVertexData)
 
-    for(size_t i=0, len=subMeshes.size(); i<len; ++i) {
-        OGRE_SAFE_DELETE(subMeshes[i])
+    for(auto &mesh : subMeshes) {
+        OGRE_SAFE_DELETE(mesh)
     }
     subMeshes.clear();
 }
@@ -988,12 +985,12 @@ Skeleton::~Skeleton()
 
 void Skeleton::Reset()
 {
-    for(size_t i=0, len=bones.size(); i<len; ++i) {
-        OGRE_SAFE_DELETE(bones[i])
+    for(auto &bone : bones) {
+        OGRE_SAFE_DELETE(bone)
     }
     bones.clear();
-    for(size_t i=0, len=animations.size(); i<len; ++i) {
-        OGRE_SAFE_DELETE(animations[i])
+    for(auto &anim : animations) {
+        OGRE_SAFE_DELETE(anim)
     }
     animations.clear();
 }
@@ -1082,11 +1079,11 @@ void Bone::CalculateWorldMatrixAndDefaultPose(Skeleton *skeleton)
     defaultPose = aiMatrix4x4(scale, rotation, position);
 
     // Recursively for all children now that the parent matrix has been calculated.
-    for (size_t i=0, len=children.size(); i<len; ++i)
+    for (auto boneId : children)
     {
-        Bone *child = skeleton->BoneById(children[i]);
+        Bone *child = skeleton->BoneById(boneId);
         if (!child) {
-            throw DeadlyImportError(Formatter::format() << "CalculateWorldMatrixAndDefaultPose: Failed to find child bone " << children[i] << " for parent " << id << " " << name);
+            throw DeadlyImportError(Formatter::format() << "CalculateWorldMatrixAndDefaultPose: Failed to find child bone " << boneId << " for parent " << id << " " << name);
         }
         child->CalculateWorldMatrixAndDefaultPose(skeleton);
     }

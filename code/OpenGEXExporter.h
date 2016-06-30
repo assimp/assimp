@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_OPENGEX_EXPORTER_H
 #define AI_OPENGEX_EXPORTER_H
 
-#include "../include/assimp/types.h"
+#include <assimp/types.h>
 
 #ifndef ASSIMP_BUILD_NO_OPENGEX_EXPORTER
 

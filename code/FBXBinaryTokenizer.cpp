@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXTokenizer.h"
 #include "FBXUtil.h"
-#include "../include/assimp/defs.h"
+#include <assimp/defs.h>
 #include <stdint.h>
 #include "Exceptional.h"
 #include "ByteSwapper.h"

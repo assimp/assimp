@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_ASEFILEHELPER_H_INC
 
 // public ASSIMP headers
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/anim.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/anim.h>
 
 // for some helper routines like IsSpace()
 #include "ParsingUtils.h"

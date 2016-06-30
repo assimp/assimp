@@ -44,11 +44,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAEXPORTER_H_INC
 #define AI_COLLADAEXPORTER_H_INC
 
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/light.h"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/ai_assert.h>
+#include <assimp/material.h>
+#include <assimp/mesh.h>
+#include <assimp/light.h>
+#include <assimp/Exporter.hpp>
 #include <sstream>
 #include <vector>
 #include <map>
@@ -114,7 +114,7 @@ protected:
     void WriteSceneLibrary();
 
     /// Recursively writes the given node
-    void WriteNode( aiNode* pNode);
+    void WriteNode( const aiScene* scene, aiNode* pNode);
 
     /// Enters a new xml element, which increases the indentation
     void PushTag() { startstr.append( "  "); }

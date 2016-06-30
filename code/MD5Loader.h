@@ -49,7 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "MD5Parser.h"
 
-#include "../include/assimp/types.h"
+#include <assimp/types.h>
+
 struct aiNode;
 struct aiNodeAnim;
 

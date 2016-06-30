@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderModifier.h"
 #include "BlenderBMesh.h"
 #include "StringUtils.h"
-#include "../include/assimp/scene.h"
+#include <assimp/scene.h>
 #include "StringComparison.h"
 
 #include "StreamReader.h"
@@ -554,10 +554,8 @@ void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::BuildMaterials(ConversionData& conv_data)
+void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData& conv_data)
 {
-    conv_data.materials->reserve(conv_data.materials_raw.size());
-
     // add a default material if necessary
     unsigned int index = static_cast<unsigned int>( -1 );
     for( aiMesh* mesh : conv_data.meshes.get() ) {
@@ -588,6 +586,124 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
             mesh->mMaterialIndex = index;
         }
     }
+}
+
+void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
+{
+    aiColor3D diffuseColor(source->r, source->g, source->b);
+    result->AddProperty(&diffuseColor, 1, "$mat.blend.diffuse.color", 0, 0);
+
+    float diffuseIntensity = source->ref;
+    result->AddProperty(&diffuseIntensity, 1, "$mat.blend.diffuse.intensity", 0, 0);
+
+    int diffuseShader = source->diff_shader;
+    result->AddProperty(&diffuseShader, 1, "$mat.blend.diffuse.shader", 0, 0);
+
+    int diffuseRamp = 0;
+    result->AddProperty(&diffuseRamp, 1, "$mat.blend.diffuse.ramp", 0, 0);
+
+
+    aiColor3D specularColor(source->specr, source->specg, source->specb);
+    result->AddProperty(&specularColor, 1, "$mat.blend.specular.color", 0, 0);
+
+    float specularIntensity = source->spec;
+    result->AddProperty(&specularIntensity, 1, "$mat.blend.specular.intensity", 0, 0);
+
+    int specularShader = source->spec_shader;
+    result->AddProperty(&specularShader, 1, "$mat.blend.specular.shader", 0, 0);
+
+    int specularRamp = 0;
+    result->AddProperty(&specularRamp, 1, "$mat.blend.specular.ramp", 0, 0);
+
+    int specularHardness = source->har;
+    result->AddProperty(&specularHardness, 1, "$mat.blend.specular.hardness", 0, 0);
+
+
+    int transparencyUse = source->mode & MA_TRANSPARENCY ? 1 : 0;
+    result->AddProperty(&transparencyUse, 1, "$mat.blend.transparency.use", 0, 0);
+
+    int transparencyMethod = source->mode & MA_RAYTRANSP ? 2 : (source->mode & MA_ZTRANSP ? 1 : 0);
+    result->AddProperty(&transparencyMethod, 1, "$mat.blend.transparency.method", 0, 0);
+
+    float transparencyAlpha = source->alpha;
+    result->AddProperty(&transparencyAlpha, 1, "$mat.blend.transparency.alpha", 0, 0);
+
+    float transparencySpecular = source->spectra;
+    result->AddProperty(&transparencySpecular, 1, "$mat.blend.transparency.specular", 0, 0);
+
+    float transparencyFresnel = source->fresnel_tra;
+    result->AddProperty(&transparencyFresnel, 1, "$mat.blend.transparency.fresnel", 0, 0);
+
+    float transparencyBlend = source->fresnel_tra_i;
+    result->AddProperty(&transparencyBlend, 1, "$mat.blend.transparency.blend", 0, 0);
+
+    float transparencyIor = source->ang;
+    result->AddProperty(&transparencyIor, 1, "$mat.blend.transparency.ior", 0, 0);
+
+    float transparencyFilter = source->filter;
+    result->AddProperty(&transparencyFilter, 1, "$mat.blend.transparency.filter", 0, 0);
+
+    float transparencyFalloff = source->tx_falloff;
+    result->AddProperty(&transparencyFalloff, 1, "$mat.blend.transparency.falloff", 0, 0);
+
+    float transparencyLimit = source->tx_limit;
+    result->AddProperty(&transparencyLimit, 1, "$mat.blend.transparency.limit", 0, 0);
+
+    int transparencyDepth = source->ray_depth_tra;
+    result->AddProperty(&transparencyDepth, 1, "$mat.blend.transparency.depth", 0, 0);
+
+    float transparencyGlossAmount = source->gloss_tra;
+    result->AddProperty(&transparencyGlossAmount, 1, "$mat.blend.transparency.glossAmount", 0, 0);
+
+    float transparencyGlossThreshold = source->adapt_thresh_tra;
+    result->AddProperty(&transparencyGlossThreshold, 1, "$mat.blend.transparency.glossThreshold", 0, 0);
+
+    int transparencyGlossSamples = source->samp_gloss_tra;
+    result->AddProperty(&transparencyGlossSamples, 1, "$mat.blend.transparency.glossSamples", 0, 0);
+
+
+    int mirrorUse = source->mode & MA_RAYMIRROR ? 1 : 0;
+    result->AddProperty(&mirrorUse, 1, "$mat.blend.mirror.use", 0, 0);
+
+    float mirrorReflectivity = source->ray_mirror;
+    result->AddProperty(&mirrorReflectivity, 1, "$mat.blend.mirror.reflectivity", 0, 0);
+
+    aiColor3D mirrorColor(source->mirr, source->mirg, source->mirb);
+    result->AddProperty(&mirrorColor, 1, "$mat.blend.mirror.color", 0, 0);
+
+    float mirrorFresnel = source->fresnel_mir;
+    result->AddProperty(&mirrorFresnel, 1, "$mat.blend.mirror.fresnel", 0, 0);
+
+    float mirrorBlend = source->fresnel_mir_i;
+    result->AddProperty(&mirrorBlend, 1, "$mat.blend.mirror.blend", 0, 0);
+
+    int mirrorDepth = source->ray_depth;
+    result->AddProperty(&mirrorDepth, 1, "$mat.blend.mirror.depth", 0, 0);
+
+    float mirrorMaxDist = source->dist_mir;
+    result->AddProperty(&mirrorMaxDist, 1, "$mat.blend.mirror.maxDist", 0, 0);
+
+    int mirrorFadeTo = source->fadeto_mir;
+    result->AddProperty(&mirrorFadeTo, 1, "$mat.blend.mirror.fadeTo", 0, 0);
+
+    float mirrorGlossAmount = source->gloss_mir;
+    result->AddProperty(&mirrorGlossAmount, 1, "$mat.blend.mirror.glossAmount", 0, 0);
+
+    float mirrorGlossThreshold = source->adapt_thresh_mir;
+    result->AddProperty(&mirrorGlossThreshold, 1, "$mat.blend.mirror.glossThreshold", 0, 0);
+
+    int mirrorGlossSamples = source->samp_gloss_mir;
+    result->AddProperty(&mirrorGlossSamples, 1, "$mat.blend.mirror.glossSamples", 0, 0);
+
+    float mirrorGlossAnisotropic = source->aniso_gloss_mir;
+    result->AddProperty(&mirrorGlossAnisotropic, 1, "$mat.blend.mirror.glossAnisotropic", 0, 0);
+}
+
+void BlenderImporter::BuildMaterials(ConversionData& conv_data)
+{
+    conv_data.materials->reserve(conv_data.materials_raw.size());
+
+    BuildDefaultMaterial(conv_data);
 
     for(std::shared_ptr<Material> mat : conv_data.materials_raw) {
 
@@ -603,7 +719,6 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
         // set material name
         aiString name = aiString(mat->id.name+2); // skip over the name prefix 'MA'
         mout->AddProperty(&name,AI_MATKEY_NAME);
-
 
         // basic material colors
         aiColor3D col(mat->r,mat->g,mat->b);
@@ -647,6 +762,8 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
             ResolveTexture(mout,mat.get(),mat->mtex[i].get(),conv_data);
         }
+
+        AddBlendParams(mout, mat.get());
     }
 }
 
@@ -1049,7 +1166,24 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
 
             // blender orients directional lights as facing toward -z
             out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
             break;
+
+        case Lamp::Type_Area:
+            out->mType = aiLightSource_AREA;
+
+            if (lamp->area_shape == 0) {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_size);
+            }
+            else {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_sizey);
+            }
+
+            // blender orients directional lights as facing toward -z
+            out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
+            break;
+
         default:
             break;
     }

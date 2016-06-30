@@ -136,8 +136,14 @@ void ObjFileParser::parseFile()
             {
                 ++m_DataIt;
                 if (*m_DataIt == ' ' || *m_DataIt == '\t') {
-                    // read in vertex definition
-                    getVector3(m_pModel->m_Vertices);
+                    size_t numComponents = getNumComponentsInLine();
+                    if (numComponents == 3) {
+                        // read in vertex definition
+                        getVector3(m_pModel->m_Vertices);
+                    } else if (numComponents == 6) {
+                        // read vertex and vertex-color
+                        getTwoVectors3(m_pModel->m_Vertices, m_pModel->m_VertexColors);
+                    }
                 } else if (*m_DataIt == 't') {
                     // read in texture coordinate ( 2D or 3D )
                                         ++m_DataIt;
@@ -257,8 +263,7 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
     pBuffer[ index ] = '\0';
 }
 
-// -------------------------------------------------------------------
-void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
+size_t ObjFileParser::getNumComponentsInLine() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
     while( !IsLineEnd( *tmp ) ) {
@@ -268,6 +273,12 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
         SkipToken( tmp );
         ++numComponents;
     }
+    return numComponents;
+}
+
+// -------------------------------------------------------------------
+void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
+    size_t numComponents = getNumComponentsInLine();
     float x, y, z;
     if( 2 == numComponents ) {
         copyNextWord( m_buffer, Buffersize );
@@ -306,6 +317,35 @@ void ObjFileParser::getVector3( std::vector<aiVector3D> &point3d_array ) {
     z = ( float ) fast_atof( m_buffer );
 
     point3d_array.push_back( aiVector3D( x, y, z ) );
+    m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+}
+
+// -------------------------------------------------------------------
+//  Get values for two 3D vectors on the same line
+void ObjFileParser::getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b ) {
+    float x, y, z;
+    copyNextWord(m_buffer, Buffersize);
+    x = (float) fast_atof(m_buffer);
+
+    copyNextWord(m_buffer, Buffersize);
+    y = (float) fast_atof(m_buffer);
+
+    copyNextWord( m_buffer, Buffersize );
+    z = ( float ) fast_atof( m_buffer );
+
+    point3d_array_a.push_back( aiVector3D( x, y, z ) );
+
+    copyNextWord(m_buffer, Buffersize);
+    x = (float) fast_atof(m_buffer);
+
+    copyNextWord(m_buffer, Buffersize);
+    y = (float) fast_atof(m_buffer);
+
+    copyNextWord( m_buffer, Buffersize );
+    z = ( float ) fast_atof( m_buffer );
+
+    point3d_array_b.push_back( aiVector3D( x, y, z ) );
+
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 

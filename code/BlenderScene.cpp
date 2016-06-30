@@ -206,6 +206,10 @@ template <> void Structure :: Convert<Lamp> (
     ReadField<ErrorPolicy_Igno>(dest.att2,"att2",db);
     ReadField<ErrorPolicy_Igno>((int&)dest.falloff_type,"falloff_type",db);
     ReadField<ErrorPolicy_Igno>(dest.sun_brightness,"sun_brightness",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_size,"area_size",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_sizey,"area_sizey",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_sizez,"area_sizez",db);
+    ReadField<ErrorPolicy_Igno>(dest.area_shape,"area_shape",db);
 
     db.reader->IncPtr(size);
 }
@@ -297,7 +301,6 @@ template <> void Structure :: Convert<Material> (
     const FileDatabase& db
     ) const
 {
-
     ReadField<ErrorPolicy_Fail>(dest.id,"id",db);
     ReadField<ErrorPolicy_Warn>(dest.r,"r",db);
     ReadField<ErrorPolicy_Warn>(dest.g,"g",db);
@@ -325,6 +328,91 @@ template <> void Structure :: Convert<Material> (
     ReadField<ErrorPolicy_Warn>(dest.diff_shader,"diff_shader",db);
     ReadField<ErrorPolicy_Warn>(dest.spec_shader,"spec_shader",db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.mtex,"*mtex",db);
+
+
+    ReadField<ErrorPolicy_Igno>(dest.amb, "amb", db);
+    ReadField<ErrorPolicy_Igno>(dest.ang, "ang", db);
+    ReadField<ErrorPolicy_Igno>(dest.spectra, "spectra", db);
+    ReadField<ErrorPolicy_Igno>(dest.spec, "spec", db);
+    ReadField<ErrorPolicy_Igno>(dest.zoffs, "zoffs", db);
+    ReadField<ErrorPolicy_Igno>(dest.add, "add", db);
+    ReadField<ErrorPolicy_Igno>(dest.fresnel_mir, "fresnel_mir", db);
+    ReadField<ErrorPolicy_Igno>(dest.fresnel_mir_i, "fresnel_mir_i", db);
+    ReadField<ErrorPolicy_Igno>(dest.fresnel_tra, "fresnel_tra", db);
+    ReadField<ErrorPolicy_Igno>(dest.fresnel_tra_i, "fresnel_tra_i", db);
+    ReadField<ErrorPolicy_Igno>(dest.filter, "filter", db);
+    ReadField<ErrorPolicy_Igno>(dest.tx_limit, "tx_limit", db);
+    ReadField<ErrorPolicy_Igno>(dest.tx_falloff, "tx_falloff", db);
+    ReadField<ErrorPolicy_Igno>(dest.gloss_mir, "gloss_mir", db);
+    ReadField<ErrorPolicy_Igno>(dest.gloss_tra, "gloss_tra", db);
+    ReadField<ErrorPolicy_Igno>(dest.adapt_thresh_mir, "adapt_thresh_mir", db);
+    ReadField<ErrorPolicy_Igno>(dest.adapt_thresh_tra, "adapt_thresh_tra", db);
+    ReadField<ErrorPolicy_Igno>(dest.aniso_gloss_mir, "aniso_gloss_mir", db);
+    ReadField<ErrorPolicy_Igno>(dest.dist_mir, "dist_mir", db);
+    ReadField<ErrorPolicy_Igno>(dest.hasize, "hasize", db);
+    ReadField<ErrorPolicy_Igno>(dest.flaresize, "flaresize", db);
+    ReadField<ErrorPolicy_Igno>(dest.subsize, "subsize", db);
+    ReadField<ErrorPolicy_Igno>(dest.flareboost, "flareboost", db);
+    ReadField<ErrorPolicy_Igno>(dest.strand_sta, "strand_sta", db);
+    ReadField<ErrorPolicy_Igno>(dest.strand_end, "strand_end", db);
+    ReadField<ErrorPolicy_Igno>(dest.strand_ease, "strand_ease", db);
+    ReadField<ErrorPolicy_Igno>(dest.strand_surfnor, "strand_surfnor", db);
+    ReadField<ErrorPolicy_Igno>(dest.strand_min, "strand_min", db);
+    ReadField<ErrorPolicy_Igno>(dest.strand_widthfade, "strand_widthfade", db);
+    ReadField<ErrorPolicy_Igno>(dest.sbias, "sbias", db);
+    ReadField<ErrorPolicy_Igno>(dest.lbias, "lbias", db);
+    ReadField<ErrorPolicy_Igno>(dest.shad_alpha, "shad_alpha", db);
+    ReadField<ErrorPolicy_Igno>(dest.param, "param", db);
+    ReadField<ErrorPolicy_Igno>(dest.rms, "rms", db);
+    ReadField<ErrorPolicy_Igno>(dest.rampfac_col, "rampfac_col", db);
+    ReadField<ErrorPolicy_Igno>(dest.rampfac_spec, "rampfac_spec", db);
+    ReadField<ErrorPolicy_Igno>(dest.friction, "friction", db);
+    ReadField<ErrorPolicy_Igno>(dest.fh, "fh", db);
+    ReadField<ErrorPolicy_Igno>(dest.reflect, "reflect", db);
+    ReadField<ErrorPolicy_Igno>(dest.fhdist, "fhdist", db);
+    ReadField<ErrorPolicy_Igno>(dest.xyfrict, "xyfrict", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_radius, "sss_radius", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_col, "sss_col", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_error, "sss_error", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_scale, "sss_scale", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_ior, "sss_ior", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_colfac, "sss_colfac", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_texfac, "sss_texfac", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_front, "sss_front", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_back, "sss_back", db);
+
+    ReadField<ErrorPolicy_Igno>(dest.material_type, "material_type", db);
+    ReadField<ErrorPolicy_Igno>(dest.flag, "flag", db);
+    ReadField<ErrorPolicy_Igno>(dest.ray_depth, "ray_depth", db);
+    ReadField<ErrorPolicy_Igno>(dest.ray_depth_tra, "ray_depth_tra", db);
+    ReadField<ErrorPolicy_Igno>(dest.samp_gloss_mir, "samp_gloss_mir", db);
+    ReadField<ErrorPolicy_Igno>(dest.samp_gloss_tra, "samp_gloss_tra", db);
+    ReadField<ErrorPolicy_Igno>(dest.fadeto_mir, "fadeto_mir", db);
+    ReadField<ErrorPolicy_Igno>(dest.shade_flag, "shade_flag", db);
+    ReadField<ErrorPolicy_Igno>(dest.flarec, "flarec", db);
+    ReadField<ErrorPolicy_Igno>(dest.starc, "starc", db);
+    ReadField<ErrorPolicy_Igno>(dest.linec, "linec", db);
+    ReadField<ErrorPolicy_Igno>(dest.ringc, "ringc", db);
+    ReadField<ErrorPolicy_Igno>(dest.pr_lamp, "pr_lamp", db);
+    ReadField<ErrorPolicy_Igno>(dest.pr_texture, "pr_texture", db);
+    ReadField<ErrorPolicy_Igno>(dest.ml_flag, "ml_flag", db);
+    ReadField<ErrorPolicy_Igno>(dest.diff_shader, "diff_shader", db);
+    ReadField<ErrorPolicy_Igno>(dest.spec_shader, "spec_shader", db);
+    ReadField<ErrorPolicy_Igno>(dest.texco, "texco", db);
+    ReadField<ErrorPolicy_Igno>(dest.mapto, "mapto", db);
+    ReadField<ErrorPolicy_Igno>(dest.ramp_show, "ramp_show", db);
+    ReadField<ErrorPolicy_Igno>(dest.pad3, "pad3", db);
+    ReadField<ErrorPolicy_Igno>(dest.dynamode, "dynamode", db);
+    ReadField<ErrorPolicy_Igno>(dest.pad2, "pad2", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_flag, "sss_flag", db);
+    ReadField<ErrorPolicy_Igno>(dest.sss_preset, "sss_preset", db);
+    ReadField<ErrorPolicy_Igno>(dest.shadowonly_flag, "shadowonly_flag", db);
+    ReadField<ErrorPolicy_Igno>(dest.index, "index", db);
+    ReadField<ErrorPolicy_Igno>(dest.vcol_alpha, "vcol_alpha", db);
+    ReadField<ErrorPolicy_Igno>(dest.pad4, "pad4", db);
+
+    ReadField<ErrorPolicy_Igno>(dest.seed1, "seed1", db);
+    ReadField<ErrorPolicy_Igno>(dest.seed2, "seed2", db);
 
     db.reader->IncPtr(size);
 }

@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DefaultIOStream.h"
 #include "StringComparison.h"
 
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/ai_assert.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/ai_assert.h>
 #include <stdlib.h>
 
 

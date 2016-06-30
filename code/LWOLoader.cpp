@@ -53,8 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
+#include <assimp/IOSystem.hpp>
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
 #include <sstream>
 #include <iomanip>
 
@@ -246,8 +246,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
     apcMeshes.reserve(mLayers->size()*std::min(((unsigned int)mSurfaces->size()/2u), 1u));
 
     unsigned int iDefaultSurface = UINT_MAX; // index of the default surface
-    for (LayerList::iterator lit = mLayers->begin(), lend = mLayers->end();lit != lend;++lit)   {
-        LWO::Layer& layer = *lit;
+	for (LWO::Layer &layer : *mLayers) {
         if (layer.skip)
             continue;
 
@@ -909,12 +908,12 @@ void LWOImporter::LoadLWO2PolygonTags(unsigned int length)
 template <class T>
 VMapEntry* FindEntry(std::vector< T >& list,const std::string& name, bool perPoly)
 {
-    for (typename std::vector< T >::iterator it = list.begin(), end = list.end();it != end; ++it)   {
-        if ((*it).name == name) {
+    for (auto & elem : list)   {
+        if (elem.name == name) {
             if (!perPoly)   {
                 DefaultLogger::get()->warn("LWO2: Found two VMAP sections with equal names");
             }
-            return &(*it);
+            return &elem;
         }
     }
     list.push_back( T() );
@@ -941,8 +940,8 @@ inline void CreateNewEntry(T& chan, unsigned int srcIdx)
 template <class T>
 inline void CreateNewEntry(std::vector< T >& list, unsigned int srcIdx)
 {
-    for (typename std::vector< T >::iterator it =  list.begin(), end = list.end();it != end;++it)   {
-        CreateNewEntry( *it, srcIdx );
+    for (auto &elem : list)   {
+        CreateNewEntry( elem, srcIdx );
     }
 }
 

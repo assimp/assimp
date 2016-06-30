@@ -40,13 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "D3MFImporter.h"
 
-#include "../include/assimp/scene.h"
-#include "../contrib/unzip/unzip.h"
-#include "../include/assimp/IOStream.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/scene.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <contrib/unzip/unzip.h>
 #include "irrXMLWrapper.h"
 #include "StringComparison.h"
+#include "StringUtils.h"
 
 
 #include <string>
@@ -58,7 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 #include <memory>
 
-#include "../include/assimp/ai_assert.h"
+#include <assimp/ai_assert.h>
 
 #include "D3MFOpcPackage.h"
 
@@ -224,9 +225,9 @@ private:
     aiVector3D ReadVertex()
     {        
         aiVector3D vertex;
-        vertex.x = std::strtof(xmlReader->getAttributeValue(D3MF::XmlTag::x.c_str()), nullptr);
-        vertex.y = std::strtof(xmlReader->getAttributeValue(D3MF::XmlTag::y.c_str()), nullptr);
-        vertex.z = std::strtof(xmlReader->getAttributeValue(D3MF::XmlTag::z.c_str()), nullptr);        
+        vertex.x = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::x.c_str()), nullptr);
+        vertex.y = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::y.c_str()), nullptr);
+        vertex.z = ai_strtof>(xmlReader->getAttributeValue(D3MF::XmlTag::z.c_str()), nullptr);
 
         return vertex;
     }

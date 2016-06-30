@@ -51,11 +51,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
-#include <memory>
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/light.h"
+#include "StringUtils.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/light.h>
 #include "TinyFormatter.h"
+
+#include <memory>
 
 
 using namespace Assimp;
@@ -3115,24 +3117,29 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 
 // ------------------------------------------------------------------------------------------------
 // Determines the input data type for the given semantic string
-Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemantic)
+Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& semantic)
 {
-    if( pSemantic == "POSITION")
+    if ( semantic.empty() ) {
+        DefaultLogger::get()->warn( format() << "Vertex input type is empty." );
+        return IT_Invalid;
+    }
+
+    if( semantic == "POSITION")
         return IT_Position;
-    else if( pSemantic == "TEXCOORD")
+    else if( semantic == "TEXCOORD")
         return IT_Texcoord;
-    else if( pSemantic == "NORMAL")
+    else if( semantic == "NORMAL")
         return IT_Normal;
-    else if( pSemantic == "COLOR")
+    else if( semantic == "COLOR")
         return IT_Color;
-    else if( pSemantic == "VERTEX")
+    else if( semantic == "VERTEX")
         return IT_Vertex;
-    else if( pSemantic == "BINORMAL" || pSemantic ==  "TEXBINORMAL")
+    else if( semantic == "BINORMAL" || semantic ==  "TEXBINORMAL")
         return IT_Bitangent;
-    else if( pSemantic == "TANGENT" || pSemantic == "TEXTANGENT")
+    else if( semantic == "TANGENT" || semantic == "TEXTANGENT")
         return IT_Tangent;
 
-    DefaultLogger::get()->warn( format() << "Unknown vertex input type \"" << pSemantic << "\". Ignoring." );
+    DefaultLogger::get()->warn( format() << "Unknown vertex input type \"" << semantic << "\". Ignoring." );
     return IT_Invalid;
 }
 

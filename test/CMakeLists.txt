@@ -1,6 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-# 
+#
 # Copyright (c) 2006-2016, assimp team
 # All rights reserved.
 #
@@ -54,6 +54,10 @@ SOURCE_GROUP( unit FILES
 
 SET( TEST_SRCS
   unit/AssimpAPITest.cpp
+  unit/utBlendImportAreaLight.cpp
+  unit/utBlendImportMaterials.cpp
+  unit/utColladaExportCamera.cpp
+  unit/utColladaExportLight.cpp
   unit/utFastAtof.cpp
   unit/utFindDegenerates.cpp
   unit/utFindInvalidData.cpp
@@ -62,6 +66,7 @@ SET( TEST_SRCS
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
   unit/utIOSystem.cpp
+  unit/utIssues.cpp
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
   unit/utMaterialSystem.cpp
@@ -73,15 +78,13 @@ SET( TEST_SRCS
   unit/utRemoveRedundantMaterials.cpp
   unit/utScenePreprocessor.cpp
   unit/utSharedPPData.cpp
+  unit/utStringUtils.cpp
   unit/utSortByPType.cpp
   unit/utSplitLargeMeshes.cpp
   unit/utTargetAnimation.cpp
   unit/utTextureTransform.cpp
   unit/utTriangulate.cpp
   unit/utVertexTriangleAdjacency.cpp
-  unit/utColladaExportCamera.cpp
-  unit/utColladaExportLight.cpp
-  unit/utIssues.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )

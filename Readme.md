@@ -1,6 +1,5 @@
 Open Asset Import Library (assimp)
 ==================================
-Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
 
@@ -15,7 +14,8 @@ Coverity<a href="https://scan.coverity.com/projects/5607">
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
 </a>
-
+Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
 #### Supported file formats ####
@@ -114,6 +114,8 @@ If the docs don't solve your problem, ask on [StackOverflow](http://stackoverflo
 
 For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
   [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions)
+
+Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
 
 And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
 > /join #assetimporterlib

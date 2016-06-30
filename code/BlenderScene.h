@@ -242,6 +242,9 @@ struct MDeformVert : ElemBase  {
 
 // -------------------------------------------------------------------------------
 #define MA_RAYMIRROR    0x40000
+#define MA_TRANSPARENCY 0x10000
+#define MA_RAYTRANSP    0x20000
+#define MA_ZTRANSP      0x00040
 
 struct Material : ElemBase {
     ID id FAIL;
@@ -260,6 +263,89 @@ struct Material : ElemBase {
     float roughness;
     float darkness;
     float refrac;
+
+
+    float amb;
+    float ang;
+    float spectra;
+    float spec;
+    float zoffs;
+    float add;
+    float fresnel_mir;
+    float fresnel_mir_i;
+    float fresnel_tra;
+    float fresnel_tra_i;
+    float filter;
+    float tx_limit;
+    float tx_falloff;
+    float gloss_mir;
+    float gloss_tra;
+    float adapt_thresh_mir;
+    float adapt_thresh_tra;
+    float aniso_gloss_mir;
+    float dist_mir;
+    float hasize;
+    float flaresize;
+    float subsize;
+    float flareboost;
+    float strand_sta;
+    float strand_end;
+    float strand_ease;
+    float strand_surfnor;
+    float strand_min;
+    float strand_widthfade;
+    float sbias;
+    float lbias;
+    float shad_alpha;
+    float param;
+    float rms;
+    float rampfac_col;
+    float rampfac_spec;
+    float friction;
+    float fh;
+    float reflect;
+    float fhdist;
+    float xyfrict;
+    float sss_radius;
+    float sss_col;
+    float sss_error;
+    float sss_scale;
+    float sss_ior;
+    float sss_colfac;
+    float sss_texfac;
+    float sss_front;
+    float sss_back;
+
+    short material_type;
+    short flag;
+    short ray_depth;
+    short ray_depth_tra;
+    short samp_gloss_mir;
+    short samp_gloss_tra;
+    short fadeto_mir;
+    short shade_flag;
+    short flarec;
+    short starc;
+    short linec;
+    short ringc;
+    short pr_lamp;
+    short pr_texture;
+    short ml_flag;
+    short texco;
+    short mapto;
+    short ramp_show;
+    short pad3;
+    short dynamode;
+    short pad2;
+    short sss_flag;
+    short sss_preset;
+    short shadowonly_flag;
+    short index;
+    short vcol_alpha;
+    short pad4;
+
+    char seed1;
+    char seed2;
 
     std::shared_ptr<Group> group;
 
@@ -371,8 +457,8 @@ struct Lamp : ElemBase {
 
       //short ray_samp, ray_sampy, ray_sampz;
       //short ray_samp_type;
-      //short area_shape;
-      //float area_size, area_sizey, area_sizez;
+      short area_shape;
+      float area_size, area_sizey, area_sizez;
       //float adapt_thresh;
       //short ray_samp_method;
 

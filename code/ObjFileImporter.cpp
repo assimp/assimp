@@ -416,6 +416,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
     if ( !pModel->m_Normals.empty() && pObjMesh->m_hasNormals )
         pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
 
+    // Allocate buffer for vertex-color vectors
+    if ( !pModel->m_VertexColors.empty() )
+        pMesh->mColors[0] = new aiColor4D[ pMesh->mNumVertices ];
+
     // Allocate buffer for texture coordinates
     if ( !pModel->m_TextureCoord.empty() && pObjMesh->m_uiUVCoordinates[0] )
     {
@@ -447,6 +451,13 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
                     throw DeadlyImportError("OBJ: vertex normal index out of range");
 
                 pMesh->mNormals[ newIndex ] = pModel->m_Normals[ normal ];
+            }
+
+            // Copy all vertex colors
+            if ( !pModel->m_VertexColors.empty())
+            {
+                const aiVector3D color = pModel->m_VertexColors[ vertex ];
+                pMesh->mColors[0][ newIndex ] = aiColor4D(color.x, color.y, color.z, 1.0);
             }
 
             // Copy all texture coordinates

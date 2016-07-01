@@ -511,7 +511,7 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object)
 
         // copy normals
         if (normals_src) {
-                if(i >= normals_src->GetDataCount()) {
+            if(i >= normals_src->GetDataCount()) {
                 LogError("unexpected number of normals, ignoring");
             }
             else {

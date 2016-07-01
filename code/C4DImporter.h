@@ -103,17 +103,17 @@ protected:
 
 private:
 
-	void ReadMaterials(melange::BaseMaterial* mat);
-	void RecurseHierarchy(melange::BaseObject* object, aiNode* parent);
-	aiMesh* ReadMesh(melange::BaseObject* object);
-	unsigned int ResolveMaterial(melange::PolygonObject* obj);
+    void ReadMaterials(melange::BaseMaterial* mat);
+    void RecurseHierarchy(melange::BaseObject* object, aiNode* parent);
+    aiMesh* ReadMesh(melange::BaseObject* object);
+    unsigned int ResolveMaterial(melange::PolygonObject* obj);
 
-	bool ReadShader(aiMaterial* out, melange::BaseShader* shader);
+    bool ReadShader(aiMaterial* out, melange::BaseShader* shader);
 
     std::vector<aiMesh*> meshes;
     std::vector<aiMaterial*> materials;
 
-	typedef std::map<melange::BaseMaterial*, unsigned int> MaterialMap;
+    typedef std::map<melange::BaseMaterial*, unsigned int> MaterialMap;
     MaterialMap material_mapping;
 
 }; // !class C4DImporter

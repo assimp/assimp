@@ -292,7 +292,7 @@ void C4DImporter::ReadMaterials(melange::BaseMaterial* mat)
                 mat->GetParameter(MATERIAL_COLOR_COLOR, data);
                 Vector color = data.GetVector();
                 mat->GetParameter(MATERIAL_COLOR_BRIGHTNESS, data);
-				const Float brightness = data.GetFloat();
+                const Float brightness = data.GetFloat();
 
                 color *= brightness;
 
@@ -511,13 +511,13 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object)
 
         // copy normals
         if (normals_src) {
-			if(i >= normals_src->GetDataCount()) {
+                if(i >= normals_src->GetDataCount()) {
                 LogError("unexpected number of normals, ignoring");
             }
             else {
-				ConstNormalHandle normal_handle = normals_src->GetDataAddressR();
-				NormalStruct nor;
-				NormalTag::Get(normal_handle, i, nor);
+                ConstNormalHandle normal_handle = normals_src->GetDataAddressR();
+                NormalStruct nor;
+                NormalTag::Get(normal_handle, i, nor);
                 normals->x = nor.a.x;
                 normals->y = nor.a.y;
                 normals->z = nor.a.z;

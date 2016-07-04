@@ -22,6 +22,8 @@ CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
 CPP_STD_LIB_LIST=(libc++ libstdc++)
 CPP_STD_LIB=
+CPP_STD_LIST=(c++03 c++11 c++14)
+CPP_STD=
 
 function join { local IFS="$1"; shift; echo "$*"; }
 
@@ -46,7 +48,7 @@ build_arch()
     export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -$CPP_DEV_TARGET=$IOS_SDK_TARGET -I$SDKROOT/usr/include/"
     export LDFLAGS="-L$SDKROOT/usr/lib/"
     export CPPFLAGS=$CFLAGS
-    export CXXFLAGS=$CFLAGS
+    export CXXFLAGS="$CFLAGS -std=$CPP_STD"
 
     rm CMakeCache.txt
 
@@ -65,11 +67,16 @@ build_arch()
 echo "[!] $0 - assimp iOS build script"
 
 CPP_STD_LIB=${CPP_STD_LIB_LIST[0]}
+CPP_STD=${CPP_STD_LIST[0]}
 DEPLOY_ARCHS=${BUILD_ARCHS_ALL[*]}
 DEPLOY_FAT=1
 
 for i in "$@"; do
     case $i in
+    -s=*|--std=*)
+        CPP_STD=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
+        echo "[!] Selecting c++ standard: $CPP_STD"
+    ;;
     -l=*|--stdlib=*)
         CPP_STD_LIB=`echo $i | sed 's/[-a-zA-Z0-9]*=//'`
         echo "[!] Selecting c++ std lib: $CPP_STD_LIB"
@@ -85,7 +92,8 @@ for i in "$@"; do
     -h|--help)
         echo " - don't build fat library (--no-fat)."
         echo " - supported architectures (--archs):  $(echo $(join , ${BUILD_ARCHS_ALL[*]}) | sed 's/,/, /g')"
-        echo " - supported C++ STD libs. (--stdlib): $(echo $(join , ${CPP_STD_LIB_LIST[*]}) | sed 's/,/, /g')"
+        echo " - supported C++ STD libs (--stdlib): $(echo $(join , ${CPP_STD_LIB_LIST[*]}) | sed 's/,/, /g')"
+        echo " - supported C++ standards (--std): $(echo $(join , ${CPP_STD_LIST[*]}) | sed 's/,/, /g')"
         exit
     ;;
     *)

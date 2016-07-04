@@ -46,15 +46,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <BaseImporter.h>
 
 
-using namespace std;
-using namespace Assimp;
+using namespace ::std;
+using namespace ::Assimp;
 
 class ImporterTest : public ::testing::Test
 {
 public:
-
-    virtual void SetUp() { pImp = new Importer(); }
-    virtual void TearDown() { delete pImp; }
+    virtual void SetUp() { 
+        pImp = new Importer(); 
+    }
+    
+    virtual void TearDown() { 
+        delete pImp; 
+    }
 
 protected:
     Importer* pImp;
@@ -109,7 +113,6 @@ static unsigned char InputData_abRawBlock[1310] = {
 
 #define AIUT_DEF_ERROR_TEXT "sorry, this is a test"
 
-
 static const aiImporterDesc desc = {
     "UNIT TEST - IMPORTER",
     "",
@@ -123,11 +126,9 @@ static const aiImporterDesc desc = {
     "apple mac linux windows"
 };
 
-
 class TestPlugin : public BaseImporter
 {
 public:
-
     virtual bool CanRead(
         const std::string& pFile, IOSystem* /*pIOHandler*/, bool /*test*/) const
     {

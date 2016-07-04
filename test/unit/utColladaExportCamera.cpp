@@ -79,21 +79,20 @@ TEST_F(ColladaExportCamera, testExportCamera)
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
     const unsigned int origNumCams( pTest->mNumCameras );
-    //float *origFOV = new float[ origNumCams ];
-    TDataArray<float> origFOV( origNumCams );
-    TDataArray<float> orifClipPlaneNear( origNumCams );
-    TDataArray<float> orifClipPlaneFar( origNumCams );
-    TDataArray<aiString> names( origNumCams );
-    TDataArray<aiVector3D> pos( origNumCams );
+    std::unique_ptr<float[]> origFOV( new float[ origNumCams ] );
+    std::unique_ptr<float[]> orifClipPlaneNear( new float[ origNumCams ] );
+    std::unique_ptr<float[]> orifClipPlaneFar( new float[ origNumCams ] );
+    std::unique_ptr<aiString[]> names( new aiString[ origNumCams ] );
+    std::unique_ptr<aiVector3D[]> pos( new aiVector3D[ origNumCams ] );
     for (size_t i = 0; i < origNumCams; i++) {
         const aiCamera *orig = pTest->mCameras[ i ];
         ASSERT_TRUE( orig != nullptr );
 
-        origFOV.m_items[ i ] = orig->mHorizontalFOV;
-        orifClipPlaneNear.m_items[ i ] = orig->mClipPlaneNear;
-        orifClipPlaneFar.m_items[ i ] = orig->mClipPlaneFar;
-        names.m_items[ i ] = orig->mName;
-        pos.m_items[ i ] = orig->mPosition;
+        origFOV[ i ] = orig->mHorizontalFOV;
+        orifClipPlaneNear[ i ] = orig->mClipPlaneNear;
+        orifClipPlaneFar[ i ] = orig->mClipPlaneFar;
+        names[ i ] = orig->mName;
+        pos[ i ] = orig->mPosition;
     }
     const aiScene* imported = im->ReadFile(file,0);
 

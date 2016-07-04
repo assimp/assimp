@@ -237,31 +237,33 @@ SET ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER OFF CACHE BOOL
 
 IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   IF ( MSVC )
-    SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/_melange/includes")
+    SET(C4D_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/includes")
 
     # pick the correct prebuilt library
-    IF(MSVC11)
-      SET(C4D_LIB_POSTFIX "_2012md")
+    IF(MSVC14)
+      SET(C4D_LIB_POSTFIX "_2015")
+    ELSEIF(MSVC12)
+      SET(C4D_LIB_POSTFIX "_2013")
+    ELSEIF(MSVC11)
+      SET(C4D_LIB_POSTFIX "_2012")
     ELSEIF(MSVC10)
-      SET(C4D_LIB_POSTFIX "_2010md")
-    ELSEIF(MSVC90)
-      SET(C4D_LIB_POSTFIX "_2008md")
+      SET(C4D_LIB_POSTFIX "_2010")
     ELSE()
       MESSAGE( FATAL_ERROR
-        "C4D is currently only supported with MSVC 9, 10, 11"
+        "C4D is currently only supported with MSVC 10, 11, 12, 14"
       )
     ENDIF()
 
-    IF(CMAKE_CL_64)
-      SET(C4D_LIB_ARCH_POSTFIX "_x64")
-    ELSE()
-      SET(C4D_LIB_ARCH_POSTFIX "")
-    ENDIF()
+    SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/libraries/win")
 
-    SET(C4D_LIB_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/contrib/Melange/_melange/lib/WIN")
-
-    SET(C4D_DEBUG_LIBRARY "${C4D_LIB_BASE_PATH}/debug/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
-    SET(C4D_RELEASE_LIBRARY "${C4D_LIB_BASE_PATH}/release/_melange_lib${C4D_LIB_ARCH_POSTFIX}${C4D_LIB_POSTFIX}.lib")
+    SET(C4D_DEBUG_LIBRARIES
+      "${C4D_LIB_BASE_PATH}/melangelib${C4D_LIB_POSTFIX}/melangelib_debug.lib"
+      "${C4D_LIB_BASE_PATH}/jpeglib${C4D_LIB_POSTFIX}/jpeglib_debug.lib"
+    )
+    SET(C4D_RELEASE_LIBRARIES
+      "${C4D_LIB_BASE_PATH}/melangelib${C4D_LIB_POSTFIX}/melangelib_release.lib"
+      "${C4D_LIB_BASE_PATH}/jpeglib${C4D_LIB_POSTFIX}/jpeglib_release.lib"
+    )
 
     # winsock and winmm are necessary dependencies of melange (this is undocumented, but true.)
     SET(C4D_EXTRA_LIBRARIES WSock32.lib Winmm.lib)

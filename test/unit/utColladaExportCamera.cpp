@@ -64,13 +64,10 @@ public:
     }
 
 protected:
-
-
     Assimp::Exporter* ex;
     Assimp::Importer* im;
 };
 
-// ------------------------------------------------------------------------------------------------
 TEST_F(ColladaExportCamera, testExportCamera)
 {
     const char* file = "cameraExp.dae";
@@ -82,18 +79,21 @@ TEST_F(ColladaExportCamera, testExportCamera)
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
     const unsigned int origNumCams( pTest->mNumCameras );
-    float *origFOV = new float[ origNumCams ];
-    float *orifClipPlaneNear = new float[ origNumCams ];
-    float *orifClipPlaneFar = new float[ origNumCams ];
-    aiString *names = new aiString[ origNumCams ];
-    aiVector3D *pos = new aiVector3D[ origNumCams ];
+    //float *origFOV = new float[ origNumCams ];
+    TDataArray<float> origFOV( origNumCams );
+    TDataArray<float> orifClipPlaneNear( origNumCams );
+    TDataArray<float> orifClipPlaneFar( origNumCams );
+    TDataArray<aiString> names( origNumCams );
+    TDataArray<aiVector3D> pos( origNumCams );
     for (size_t i = 0; i < origNumCams; i++) {
         const aiCamera *orig = pTest->mCameras[ i ];
-        origFOV[ i ] = orig->mHorizontalFOV;
-        orifClipPlaneNear[ i ] = orig->mClipPlaneNear;
-        orifClipPlaneFar[ i ] = orig->mClipPlaneFar;
-        names[ i ] = orig->mName;
-        pos[ i ] = orig->mPosition;
+        ASSERT_TRUE( orig != nullptr );
+
+        origFOV.m_items[ i ] = orig->mHorizontalFOV;
+        orifClipPlaneNear.m_items[ i ] = orig->mClipPlaneNear;
+        orifClipPlaneFar.m_items[ i ] = orig->mClipPlaneFar;
+        names.m_items[ i ] = orig->mName;
+        pos.m_items[ i ] = orig->mPosition;
     }
     const aiScene* imported = im->ReadFile(file,0);
 
@@ -114,15 +114,8 @@ TEST_F(ColladaExportCamera, testExportCamera)
         EXPECT_FLOAT_EQ( pos[ i ].y,read->mPosition.y);
         EXPECT_FLOAT_EQ( pos[ i ].z,read->mPosition.z);
     }
-
-    delete [] origFOV;
-    delete [] orifClipPlaneNear;
-    delete [] orifClipPlaneFar;
-    delete [] names;
-    delete [] pos;
-
 }
 
-#endif
+#endif // ASSIMP_BUILD_NO_EXPORT
 
 

@@ -94,6 +94,7 @@ STLExporter :: STLExporter(const char* _filename, const aiScene* pScene, bool bi
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
     mOutput.imbue(l);
+    mOutput.precision(17);
     if (binary) {
         char buf[80] = {0} ;
         buf[0] = 'A'; buf[1] = 's'; buf[2] = 's'; buf[3] = 'i'; buf[4] = 'm'; buf[5] = 'p';

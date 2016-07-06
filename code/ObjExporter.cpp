@@ -94,9 +94,9 @@ ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
     mOutput.imbue(l);
-    mOutput.precision(17);
+    mOutput.precision(16);
     mOutputMat.imbue(l);
-    mOutputMat.precision(17);
+    mOutputMat.precision(16);
 
     WriteGeometryFile();
     WriteMaterialFile();

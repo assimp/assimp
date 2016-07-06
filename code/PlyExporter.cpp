@@ -99,7 +99,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
     mOutput.imbue(l);
-    mOutput.precision(17);
+    mOutput.precision(16);
 
     unsigned int faces = 0u, vertices = 0u, components = 0u;
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {

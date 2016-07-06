@@ -94,7 +94,7 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
 {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
-    mOutput.precision(17);
+    mOutput.precision(16);
 
     mScene = pScene;
     mSceneOwned = false;

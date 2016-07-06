@@ -146,7 +146,7 @@ StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std
 
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
-    mOutput.precision(17);
+    mOutput.precision(16);
 
     // start writing
     WriteFile();
@@ -161,7 +161,7 @@ void StepExporter::WriteFile()
     mOutput.setf(std::ios::fixed);
     // precission for double
     // see http://stackoverflow.com/questions/554063/how-do-i-print-a-double-value-with-full-precision-using-cout
-    mOutput.precision(17);
+    mOutput.precision(16);
 
     // standard color
     aiColor4D fColor;

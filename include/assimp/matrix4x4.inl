@@ -243,8 +243,7 @@ inline TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) {
         return NULL;
     }
 
-    // XXX this is UB. Has been for years. The fact that it works now does not make it better.
-    return &this->a1 + p_iIndex * 4;
+    return &(&a1)[p_iIndex];
 }
 
 // ----------------------------------------------------------------------------------------
@@ -254,8 +253,7 @@ inline const TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) const
         return NULL;
     }
 
-    // XXX same
-    return &this->a1 + p_iIndex * 4;
+    return &(&a1)[p_iIndex];
 }
 
 // ----------------------------------------------------------------------------------------

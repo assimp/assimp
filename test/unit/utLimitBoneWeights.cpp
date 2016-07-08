@@ -43,18 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <LimitBoneWeightsProcess.h>
 
-
 using namespace std;
 using namespace Assimp;
 
 class LimitBoneWeightsTest : public ::testing::Test {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     LimitBoneWeightsProcess* piProcess;
     aiMesh* pcMesh;
 };

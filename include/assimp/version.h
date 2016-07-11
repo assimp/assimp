@@ -43,8 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Functions to query the version of the Assimp runtime, check
  *    compile flags, ...
  */
-#ifndef INCLUDED_AI_VERSION_H
-#define INCLUDED_AI_VERSION_H
+#pragma once
+#ifndef AI_VERSION_H_INC
+#define AI_VERSION_H_INC
 
 #include "defs.h"
 
@@ -102,4 +103,4 @@ ASSIMP_API unsigned int aiGetCompileFlags (void);
 } // end extern "C"
 #endif
 
-#endif // !! #ifndef INCLUDED_AI_VERSION_H
+#endif // !! #ifndef AI_VERSION_H_INC

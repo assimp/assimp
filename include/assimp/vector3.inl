@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  vector3.inl
  *  @brief Inline implementation of aiVector3t<TReal> operators
  */
+#pragma once
 #ifndef AI_VECTOR3D_INL_INC
 #define AI_VECTOR3D_INL_INC
 

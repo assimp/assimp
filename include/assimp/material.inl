@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Defines the C++ getters for the material system
  */
 
+#pragma once
 #ifndef AI_MATERIAL_INL_INC
 #define AI_MATERIAL_INL_INC
 

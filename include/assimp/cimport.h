@@ -42,8 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  cimport.h
  *  @brief Defines the C-API to the Open Asset Import Library.
  */
+#pragma once
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
+
 #include "types.h"
 #include "importerdesc.h"
 

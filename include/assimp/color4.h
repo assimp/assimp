@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file color4.h
  *  @brief RGBA color structure, including operators when compiling in C++
  */
+#pragma once
 #ifndef AI_COLOR4D_H_INC
 #define AI_COLOR4D_H_INC
 

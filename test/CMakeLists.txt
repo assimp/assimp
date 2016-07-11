@@ -85,6 +85,7 @@ SET( TEST_SRCS
   unit/utTextureTransform.cpp
   unit/utTriangulate.cpp
   unit/utVertexTriangleAdjacency.cpp
+  unit/utVersion.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )

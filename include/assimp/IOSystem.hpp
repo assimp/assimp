@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  custom file handling logic to the Import library.
 */
 
+#pragma once
 #ifndef AI_IOSYSTEM_H_INC
 #define AI_IOSYSTEM_H_INC
 

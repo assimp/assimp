@@ -42,8 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file matrix3x3.h
  *  @brief Definition of a 3x3 matrix, including operators when compiling in C++
  */
-#ifndef AI_MATRIX3x3_H_INC
-#define AI_MATRIX3x3_H_INC
+#pragma once
+#ifndef AI_MATRIX3X3_H_INC
+#define AI_MATRIX3X3_H_INC
 
 #include "./Compiler/pushpack1.h"
 
@@ -179,4 +180,4 @@ struct aiMatrix3x3 {
 
 #include "./Compiler/poppack1.h"
 
-#endif // AI_MATRIX3x3_H_INC
+#endif // AI_MATRIX3X3_H_INC

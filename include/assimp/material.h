@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file material.h
  *  @brief Defines the material system of the library
  */
-
+#pragma once
 #ifndef AI_MATERIAL_H_INC
 #define AI_MATERIAL_H_INC
 

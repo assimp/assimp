@@ -42,12 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  Importer.hpp
  *  @brief Defines the C++-API to the Open Asset Import Library.
  */
-#ifndef INCLUDED_AI_ASSIMP_HPP
-#define INCLUDED_AI_ASSIMP_HPP
+#pragma once
+#ifndef AI_ASSIMP_HPP_INC
+#define AI_ASSIMP_HPP_INC
 
 #ifndef __cplusplus
 #   error This header requires C++ to be used. Use assimp.h for plain C.
-#endif
+#endif // __cplusplus
 
 // Public ASSIMP data structures
 #include "types.h"
@@ -658,4 +659,5 @@ AI_FORCE_INLINE bool Importer::IsExtensionSupported(const std::string& szExtensi
 }
 
 } // !namespace Assimp
-#endif // INCLUDED_AI_ASSIMP_HPP
+
+#endif // AI_ASSIMP_HPP_INC

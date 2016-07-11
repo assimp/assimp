@@ -1,5 +1,4 @@
-/*
----------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -12,18 +11,18 @@ with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
+copyright notice, this list of conditions and the
+following disclaimer.
 
 * Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
 
 * Neither the name of the assimp team, nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission of the assimp team.
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -36,17 +35,35 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
-*/
-#pragma once
-#ifndef AI_ASSERT_H_INC
-#define AI_ASSERT_H_INC
+-------------------------------------------------------------------------*/
+#include "UnitTestPCH.h"
+#include <assimp/version.h>
 
-#ifdef ASSIMP_BUILD_DEBUG
-#   include <assert.h>
-#   define  ai_assert(expression) assert(expression)
-#else
-#   define  ai_assert(expression)
-#endif // 
+class utVersion : public ::testing::Test {
+    // empty
+};
 
-#endif // AI_ASSERT_H_INC
+TEST_F( utVersion, aiGetLegalStringTest ) {
+    const char *lv( aiGetLegalString() );
+    EXPECT_NE( lv, nullptr );
+    std::string text( lv );
+
+    size_t pos( text.find( std::string( "2016" ) ) );
+    EXPECT_NE( pos, std::string::npos );
+}
+
+TEST_F( utVersion, aiGetVersionMinorTest ) {
+    EXPECT_EQ( aiGetVersionMinor(), 3 );
+}
+    
+TEST_F( utVersion, aiGetVersionMajorTest ) {
+    EXPECT_EQ( aiGetVersionMajor(), 3 );
+}
+
+TEST_F( utVersion, aiGetCompileFlagsTest ) {
+    EXPECT_NE( aiGetCompileFlags(), 0 );
+}
+
+TEST_F( utVersion, aiGetVersionRevisionTest ) {
+    EXPECT_NE( aiGetVersionRevision(), 0 );
+}

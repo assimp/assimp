@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  quaternion.inl
  *  @brief Inline implementation of aiQuaterniont<TReal> operators
  */
+#pragma once
 #ifndef AI_QUATERNION_INL_INC
 #define AI_QUATERNION_INL_INC
 
@@ -280,4 +281,4 @@ inline aiVector3t<TReal> aiQuaterniont<TReal>::Rotate (const aiVector3t<TReal>& 
 }
 
 #endif
-#endif
+#endif // AI_QUATERNION_INL_INC

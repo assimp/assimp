@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file vector3.h
  *  @brief 3D vector structure, including operators when compiling in C++
  */
+#pragma once
 #ifndef AI_VECTOR3D_H_INC
 #define AI_VECTOR3D_H_INC
 

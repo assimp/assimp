@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderBMesh.h"
 #include "BlenderTessellator.h"
 
+#include <stddef.h> 
+
 static const unsigned int BLEND_TESS_MAGIC = 0x83ed9ac3;
 
 #if ASSIMP_BLEND_WITH_GLU_TESSELLATE
@@ -372,14 +374,9 @@ void BlenderTessellatorP2T::ReferencePoints( std::vector< Blender::PointP2T >& p
 }
 
 // ------------------------------------------------------------------------------------------------
-// Yes this is filthy... but we have no choice
-#define OffsetOf( Class, Member ) ( static_cast< unsigned int >( \
-    reinterpret_cast<uint8_t*>(&( reinterpret_cast< Class* >( NULL )->*( &Class::Member ) )) - \
-    static_cast<uint8_t*>(NULL) ) )
-
 inline PointP2T& BlenderTessellatorP2T::GetActualPointStructure( p2t::Point& point ) const
 {
-    unsigned int pointOffset = OffsetOf( PointP2T, point2D );
+    unsigned int pointOffset = offsetof( PointP2T, point2D );
     PointP2T& pointStruct = *reinterpret_cast< PointP2T* >( reinterpret_cast< char* >( &point ) - pointOffset );
     if ( pointStruct.magic != static_cast<int>( BLEND_TESS_MAGIC ) )
     {

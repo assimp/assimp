@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file types.h
  *  Basic data types and primitives, such as vectors or colors.
  */
+#pragma once
 #ifndef AI_TYPES_H_INC
 #define AI_TYPES_H_INC
 
@@ -512,4 +513,5 @@ struct aiMemoryInfo
 #include "quaternion.inl"
 #include "matrix3x3.inl"
 #include "matrix4x4.inl"
-#endif
+
+#endif // AI_TYPES_H_INC

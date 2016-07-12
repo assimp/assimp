@@ -42,8 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file metadata.h
  *  @brief Defines the data structures for holding node meta information.
  */
-#ifndef __AI_METADATA_H_INC__
-#define __AI_METADATA_H_INC__
+#pragma once
+#ifndef AI_METADATA_H_INC
+#define AI_METADATA_H_INC
 
 #include <assert.h>
 
@@ -246,6 +247,6 @@ struct aiMetadata
 
 };
 
-#endif // __AI_METADATA_H_INC__
+#endif // AI_METADATA_H_INC
 
 

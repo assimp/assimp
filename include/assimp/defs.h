@@ -44,8 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  blocks to find out how to customize _your_ Assimp build.
  */
 
-#ifndef INCLUDED_AI_DEFINES_H
-#define INCLUDED_AI_DEFINES_H
+#pragma once
+#ifndef AI_DEFINES_H_INC
+#define AI_DEFINES_H_INC
 
     //////////////////////////////////////////////////////////////////////////
     /* Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
@@ -269,4 +270,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
 
 
-#endif // !! INCLUDED_AI_DEFINES_H
+#endif // !! AI_DEFINES_H_INC

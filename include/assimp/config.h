@@ -55,8 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  #aiSetImportPropertyFloat,
  *  #aiSetImportPropertyString
  */
-#ifndef INCLUDED_AI_CONFIG_H
-#define INCLUDED_AI_CONFIG_H
+#pragma once
+#ifndef AI_CONFIG_H_INC
+#define AI_CONFIG_H_INC
 
 
 // ###########################################################################

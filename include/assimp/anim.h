@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Defines the data structures in which the imported animations
  *  are returned.
  */
+#pragma once
 #ifndef AI_ANIM_H_INC
 #define AI_ANIM_H_INC
 

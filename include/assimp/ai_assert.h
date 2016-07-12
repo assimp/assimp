@@ -38,15 +38,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#ifndef AI_DEBUG_H_INC
-#define AI_DEBUG_H_INC
+#pragma once
+#ifndef AI_ASSERT_H_INC
+#define AI_ASSERT_H_INC
 
 #ifdef ASSIMP_BUILD_DEBUG
 #   include <assert.h>
 #   define  ai_assert(expression) assert(expression)
 #else
 #   define  ai_assert(expression)
-#endif
+#endif // 
 
-
-#endif
+#endif // AI_ASSERT_H_INC

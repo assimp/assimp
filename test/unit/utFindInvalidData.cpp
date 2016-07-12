@@ -50,12 +50,10 @@ using namespace Assimp;
 class FindInvalidDataProcessTest : public ::testing::Test
 {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     aiMesh* pcMesh;
     FindInvalidDataProcess* piProcess;
 };

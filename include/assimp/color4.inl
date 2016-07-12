@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  color4.inl
  *  @brief Inline implementation of aiColor4t<TReal> operators
  */
+#pragma once
 #ifndef AI_COLOR4D_INL_INC
 #define AI_COLOR4D_INL_INC
 

@@ -1,5 +1,4 @@
-/*
----------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -36,54 +35,35 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
-*/
+-------------------------------------------------------------------------*/
 #include "UnitTestPCH.h"
-#include <GenVertexNormalsProcess.h>
+#include <assimp/version.h>
 
-using namespace ::std;
-using namespace ::Assimp;
-
-class GenNormalsTest : public ::testing::Test
-{
-public:
-    virtual void SetUp();
-    virtual void TearDown();
-
-protected:
-    aiMesh* pcMesh;
-    GenVertexNormalsProcess* piProcess;
+class utVersion : public ::testing::Test {
+    // empty
 };
 
-// ------------------------------------------------------------------------------------------------
-void GenNormalsTest::SetUp()
-{
-    piProcess = new GenVertexNormalsProcess();
-    pcMesh = new aiMesh();
-    pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
-    pcMesh->mNumFaces = 1;
-    pcMesh->mFaces = new aiFace[1];
-    pcMesh->mFaces[0].mIndices = new unsigned int[pcMesh->mFaces[0].mNumIndices = 3];
-    pcMesh->mFaces[0].mIndices[0] = 0;
-    pcMesh->mFaces[0].mIndices[1] = 1;
-    pcMesh->mFaces[0].mIndices[2] = 1;
-    pcMesh->mNumVertices = 3;
-    pcMesh->mVertices = new aiVector3D[3];
-    pcMesh->mVertices[0] = aiVector3D(0.0f,1.0f,6.0f);
-    pcMesh->mVertices[1] = aiVector3D(2.0f,3.0f,1.0f);
-    pcMesh->mVertices[2] = aiVector3D(3.0f,2.0f,4.0f);
+TEST_F( utVersion, aiGetLegalStringTest ) {
+    const char *lv( aiGetLegalString() );
+    EXPECT_NE( lv, nullptr );
+    std::string text( lv );
+
+    size_t pos( text.find( std::string( "2016" ) ) );
+    EXPECT_NE( pos, std::string::npos );
 }
 
-// ------------------------------------------------------------------------------------------------
-void GenNormalsTest::TearDown()
-{
-    delete this->pcMesh;
-    delete this->piProcess;
+TEST_F( utVersion, aiGetVersionMinorTest ) {
+    EXPECT_EQ( aiGetVersionMinor(), 3 );
+}
+    
+TEST_F( utVersion, aiGetVersionMajorTest ) {
+    EXPECT_EQ( aiGetVersionMajor(), 3 );
 }
 
-// ------------------------------------------------------------------------------------------------
-TEST_F(GenNormalsTest, testSimpleTriangle)
-{
-    piProcess->GenMeshVertexNormals(pcMesh, 0);
-    EXPECT_TRUE(pcMesh->mNormals != NULL);
+TEST_F( utVersion, aiGetCompileFlagsTest ) {
+    EXPECT_NE( aiGetCompileFlags(), 0 );
+}
+
+TEST_F( utVersion, aiGetVersionRevisionTest ) {
+    EXPECT_NE( aiGetVersionRevision(), 0 );
 }

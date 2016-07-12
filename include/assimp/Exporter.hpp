@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  Exporter.hpp
 *  @brief Defines the CPP-API for the Assimp export interface
 */
+#pragma once
 #ifndef AI_EXPORT_HPP_INC
 #define AI_EXPORT_HPP_INC
 

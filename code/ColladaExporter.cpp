@@ -94,6 +94,7 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
 {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
+    mOutput.precision(16);
 
     mScene = pScene;
     mSceneOwned = false;
@@ -1061,9 +1062,9 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     }
 
     const std::string node_name_escaped = XMLEscape(pNode->mName.data);
-    mOutput << startstr 
-            << "<node id=\"" << node_name_escaped 
-            << "\" name=\"" << node_name_escaped 
+    mOutput << startstr
+            << "<node id=\"" << node_name_escaped
+            << "\" name=\"" << node_name_escaped
             << "\" type=\"" << node_type
             << "\">" << endstr;
     PushTag();

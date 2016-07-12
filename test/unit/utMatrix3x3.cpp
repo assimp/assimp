@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include <iostream>
 
-using namespace Assimp;
+using namespace ::Assimp;
 
 class utMatrix3x3Test : public ::testing::Test {
 

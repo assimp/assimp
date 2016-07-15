@@ -477,13 +477,14 @@ struct aiUVTransform
      *  rotation center is 0.5f|0.5f. The default value
      *  0.f.
      */
-    float mRotation;
+    ai_real mRotation;
 
 
 #ifdef __cplusplus
     aiUVTransform()
-        :   mScaling    (1.f,1.f)
-        ,   mRotation   (0.f)
+        :   mTranslation (0.0,0.0)
+        ,   mScaling    (1.0,1.0)
+        ,   mRotation   (0.0)
     {
         // nothing to be done here ...
     }

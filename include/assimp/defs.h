@@ -242,10 +242,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MATH_TWO_PI_F    (AI_MATH_PI_F * 2.0f)
 #define AI_MATH_HALF_PI_F   (AI_MATH_PI_F * 0.5f)
 
-/* Tiny macro to convert from radians to degrees and back */
-#define AI_DEG_TO_RAD(x) ((x)*0.0174532925f)
-#define AI_RAD_TO_DEG(x) ((x)*57.2957795f)
-
 /* Support for big-endian builds */
 #if defined(__BYTE_ORDER__)
 #   if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
@@ -269,5 +265,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #define AI_MAX_ALLOC(type) ((256U * 1024 * 1024) / sizeof(type))
 
+#ifdef AI_DOUBLE_PRECISION
+    typedef double ai_real;
+    /* Tiny macro to convert from radians to degrees and back */
+    #define AI_DEG_TO_RAD(x) ((x)*0.0174532925)
+    #define AI_RAD_TO_DEG(x) ((x)*57.2957795)
+#else
+    typedef float ai_real;
+    /* Tiny macro to convert from radians to degrees and back */
+    #define AI_DEG_TO_RAD(x) ((x)*0.0174532925f)
+    #define AI_RAD_TO_DEG(x) ((x)*57.2957795f)
+#endif // AI_SINGLEPRECISION
 
 #endif // !! AI_DEFINES_H_INC

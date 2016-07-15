@@ -136,7 +136,7 @@ struct Frame
     aiVector3D origin;
 
     //! radius of bounding sphere
-    float radius;
+    ai_real radius;
 
     //! name of frame
     char name[ AI_MD3_MAXFRAME ];
@@ -154,7 +154,7 @@ struct Tag
 
     //! Local tag origin and orientation
     aiVector3D  origin;
-    float  orientation[3][3];
+    ai_real  orientation[3][3];
 
 } PACK_STRUCT;
 
@@ -231,7 +231,7 @@ struct Triangle
 struct TexCoord
 {
     //! UV coordinates
-    float U,V;
+    ai_real U,V;
 } PACK_STRUCT;
 
 
@@ -257,12 +257,12 @@ struct Vertex
  *
  *  @note This has been taken from q3 source (misc_model.c)
  */
-inline void LatLngNormalToVec3(uint16_t p_iNormal, float* p_afOut)
+inline void LatLngNormalToVec3(uint16_t p_iNormal, ai_real* p_afOut)
 {
-    float lat = (float)(( p_iNormal >> 8u ) & 0xff);
-    float lng = (float)(( p_iNormal & 0xff ));
-    lat *= 3.141926f/128.0f;
-    lng *= 3.141926f/128.0f;
+    ai_real lat = (ai_real)(( p_iNormal >> 8u ) & 0xff);
+    ai_real lng = (ai_real)(( p_iNormal & 0xff ));
+    lat *= 3.141926/128.0;
+    lng *= 3.141926/128.0;
 
     p_afOut[0] = std::cos(lat) * std::sin(lng);
     p_afOut[1] = std::sin(lat) * std::sin(lng);
@@ -313,4 +313,3 @@ inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
 }
 
 #endif // !! AI_MD3FILEHELPER_H_INC
-

@@ -182,7 +182,7 @@ namespace {
     //  and then use them to work with ULPs (Units in the Last Place, for high-precision
     //  computations) or to compare them (integer comparisons are faster than floating-point
     //  comparisons on many platforms).
-    typedef signed int BinFloat;
+    typedef ai_int BinFloat;
 
     // --------------------------------------------------------------------------------------------
     // Converts the bit pattern of a floating-point number to its signed integer representation.
@@ -308,7 +308,7 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 }
 
 // ------------------------------------------------------------------------------------------------
-unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill,float pRadius) const
+unsigned int SpatialSort::GenerateMappingTable(std::vector<unsigned int>& fill, ai_real pRadius) const
 {
     fill.resize(mPositions.size(),UINT_MAX);
     ai_real dist, maxDist;

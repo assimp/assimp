@@ -509,6 +509,14 @@ enum aiPropertyTypeInfo
     */
     aiPTI_Float   = 0x1,
 
+    /** Array of double-precision (64 Bit) floats
+     *
+     *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API
+     *  aiMaterial::Get()) to query properties stored in floating-point format.
+     *  The material system performs the type conversion automatically.
+    */
+    aiPTI_Double   = 0x2,
+
     /** The material property is an aiString.
      *
      *  Arrays of strings aren't possible, aiGetMaterialString() (or the
@@ -813,6 +821,12 @@ public:
         unsigned int index = 0);
 
     aiReturn AddProperty (const float* pInput,
+        unsigned int pNumValues,
+        const char* pKey,
+        unsigned int type  = 0,
+        unsigned int index = 0);
+
+    aiReturn AddProperty (const double* pInput,
         unsigned int pNumValues,
         const char* pKey,
         unsigned int type  = 0,

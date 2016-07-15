@@ -119,7 +119,7 @@ public:
     /**
      *  @brief The upper limit for hints.
      */
-    static const unsigned int MaxLenHint = 200; 
+    static const unsigned int MaxLenHint = 200;
 
 public:
 
@@ -224,7 +224,7 @@ public:
     /** Set a floating-point configuration property.
      * @see SetPropertyInteger()
      */
-    bool SetPropertyFloat(const char* szName, float fValue);
+    bool SetPropertyFloat(const char* szName, ai_real fValue);
 
     // -------------------------------------------------------------------
     /** Set a string configuration property.
@@ -269,8 +269,8 @@ public:
     /** Get a floating-point configuration property
      * @see GetPropertyInteger()
      */
-    float GetPropertyFloat(const char* szName,
-        float fErrorReturn = 10e10f) const;
+    ai_real GetPropertyFloat(const char* szName,
+        ai_real fErrorReturn = 10e10) const;
 
     // -------------------------------------------------------------------
     /** Get a string configuration property

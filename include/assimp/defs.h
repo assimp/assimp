@@ -267,11 +267,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef AI_DOUBLE_PRECISION
     typedef double ai_real;
+    typedef signed long long int ai_int;
     /* Tiny macro to convert from radians to degrees and back */
     #define AI_DEG_TO_RAD(x) ((x)*0.0174532925)
     #define AI_RAD_TO_DEG(x) ((x)*57.2957795)
 #else
     typedef float ai_real;
+    typedef signed int ai_int;
     /* Tiny macro to convert from radians to degrees and back */
     #define AI_DEG_TO_RAD(x) ((x)*0.0174532925f)
     #define AI_RAD_TO_DEG(x) ((x)*57.2957795f)

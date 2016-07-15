@@ -49,45 +49,45 @@ class utMatrix4x4Test : public ::testing::Test {
 
 TEST_F( utMatrix4x4Test, badIndexOperatorTest ) {
     aiMatrix4x4 m;
-    float *a0 = m[ 4 ];
+    ai_real *a0 = m[ 4 ];
     EXPECT_EQ( NULL, a0 );
 }
 
 TEST_F( utMatrix4x4Test, indexOperatorTest ) {
     aiMatrix4x4 m;
-    float *a0 = m[ 0 ];
-    EXPECT_FLOAT_EQ( 1.0f, *a0 );
-    float *a1 = a0+1;
-    EXPECT_FLOAT_EQ( 0.0f, *a1 );
-    float *a2 = a0 + 2;
-    EXPECT_FLOAT_EQ( 0.0f, *a2 );
-    float *a3 = a0 + 3;
-    EXPECT_FLOAT_EQ( 0.0f, *a3 );
+    ai_real *a0 = m[ 0 ];
+    EXPECT_FLOAT_EQ( 1.0, *a0 );
+    ai_real *a1 = a0+1;
+    EXPECT_FLOAT_EQ( 0.0, *a1 );
+    ai_real *a2 = a0 + 2;
+    EXPECT_FLOAT_EQ( 0.0, *a2 );
+    ai_real *a3 = a0 + 3;
+    EXPECT_FLOAT_EQ( 0.0, *a3 );
 
-    float *a4 = m[ 1 ];
-    EXPECT_FLOAT_EQ( 0.0f, *a4 );
-    float *a5 = a4 + 1;
-    EXPECT_FLOAT_EQ( 1.0f, *a5 );
-    float *a6 = a4 + 2;
-    EXPECT_FLOAT_EQ( 0.0f, *a6 );
-    float *a7 = a4 + 3;
-    EXPECT_FLOAT_EQ( 0.0f, *a7 );
+    ai_real *a4 = m[ 1 ];
+    EXPECT_FLOAT_EQ( 0.0, *a4 );
+    ai_real *a5 = a4 + 1;
+    EXPECT_FLOAT_EQ( 1.0, *a5 );
+    ai_real *a6 = a4 + 2;
+    EXPECT_FLOAT_EQ( 0.0, *a6 );
+    ai_real *a7 = a4 + 3;
+    EXPECT_FLOAT_EQ( 0.0, *a7 );
 
-    float *a8 = m[ 2 ];
-    EXPECT_FLOAT_EQ( 0.0f, *a8 );
-    float *a9 = a8 + 1;
-    EXPECT_FLOAT_EQ( 0.0f, *a9 );
-    float *a10 = a8 + 2;
-    EXPECT_FLOAT_EQ( 1.0f, *a10 );
-    float *a11 = a8 + 3;
-    EXPECT_FLOAT_EQ( 0.0f, *a11 );
+    ai_real *a8 = m[ 2 ];
+    EXPECT_FLOAT_EQ( 0.0, *a8 );
+    ai_real *a9 = a8 + 1;
+    EXPECT_FLOAT_EQ( 0.0, *a9 );
+    ai_real *a10 = a8 + 2;
+    EXPECT_FLOAT_EQ( 1.0, *a10 );
+    ai_real *a11 = a8 + 3;
+    EXPECT_FLOAT_EQ( 0.0, *a11 );
 
-    float *a12 = m[ 3 ];
-    EXPECT_FLOAT_EQ( 0.0f, *a12 );
-    float *a13 = a12 + 1;
-    EXPECT_FLOAT_EQ( 0.0f, *a13 );
-    float *a14 = a12 + 2;
-    EXPECT_FLOAT_EQ( 0.0f, *a14 );
-    float *a15 = a12 + 3;
-    EXPECT_FLOAT_EQ( 1.0f, *a15 );
+    ai_real *a12 = m[ 3 ];
+    EXPECT_FLOAT_EQ( 0.0, *a12 );
+    ai_real *a13 = a12 + 1;
+    EXPECT_FLOAT_EQ( 0.0, *a13 );
+    ai_real *a14 = a12 + 2;
+    EXPECT_FLOAT_EQ( 0.0, *a14 );
+    ai_real *a15 = a12 + 3;
+    EXPECT_FLOAT_EQ( 1.0, *a15 );
 }

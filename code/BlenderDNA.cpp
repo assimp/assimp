@@ -53,7 +53,8 @@ using namespace Assimp;
 using namespace Assimp::Blender;
 using namespace Assimp::Formatter;
 
-bool match4(StreamReaderAny& stream, const char* string) {
+static bool match4(StreamReaderAny& stream, const char* string) {
+    ai_assert( nullptr != string );
     char tmp[] = {
         (stream).GetI1(),
         (stream).GetI1(),
@@ -69,7 +70,7 @@ struct Type {
 };
 
 // ------------------------------------------------------------------------------------------------
-void DNAParser :: Parse ()
+void DNAParser::Parse ()
 {
     StreamReaderAny& stream = *db.reader.get();
     DNA& dna = db.dna;

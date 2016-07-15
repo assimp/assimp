@@ -534,9 +534,9 @@ bool ExportProperties :: SetPropertyInteger(const char* szName, int iValue)
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool ExportProperties :: SetPropertyFloat(const char* szName, float iValue)
+bool ExportProperties :: SetPropertyFloat(const char* szName, ai_real iValue)
 {
-    return SetGenericProperty<float>(mFloatProperties, szName,iValue);
+    return SetGenericProperty<ai_real>(mFloatProperties, szName,iValue);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -563,10 +563,10 @@ int ExportProperties :: GetPropertyInteger(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-float ExportProperties :: GetPropertyFloat(const char* szName,
-    float iErrorReturn /*= 10e10*/) const
+ai_real ExportProperties :: GetPropertyFloat(const char* szName,
+    ai_real iErrorReturn /*= 10e10*/) const
 {
-    return GetGenericProperty<float>(mFloatProperties,szName,iErrorReturn);
+    return GetGenericProperty<ai_real>(mFloatProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -603,7 +603,7 @@ bool ExportProperties :: HasPropertyBool(const char* szName) const
 // Has a configuration property
 bool ExportProperties :: HasPropertyFloat(const char* szName) const
 {
-    return HasGenericProperty<float>(mFloatProperties, szName);
+    return HasGenericProperty<ai_real>(mFloatProperties, szName);
 };
 
 // ------------------------------------------------------------------------------------------------

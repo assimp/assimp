@@ -546,11 +546,11 @@ ASSIMP_API void aiSetImportPropertyInteger(aiPropertyStore* p, const char* szNam
 
 // ------------------------------------------------------------------------------------------------
 // Importer::SetPropertyFloat
-ASSIMP_API void aiSetImportPropertyFloat(aiPropertyStore* p, const char* szName, float value)
+ASSIMP_API void aiSetImportPropertyFloat(aiPropertyStore* p, const char* szName, ai_real value)
 {
     ASSIMP_BEGIN_EXCEPTION_REGION();
     PropertyMap* pp = reinterpret_cast<PropertyMap*>(p);
-    SetGenericProperty<float>(pp->floats,szName,value);
+    SetGenericProperty<ai_real>(pp->floats,szName,value);
     ASSIMP_END_EXCEPTION_REGION(void);
 }
 

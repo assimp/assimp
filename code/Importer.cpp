@@ -1017,11 +1017,11 @@ bool Importer::SetPropertyInteger(const char* szName, int iValue)
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool Importer::SetPropertyFloat(const char* szName, float iValue)
+bool Importer::SetPropertyFloat(const char* szName, ai_real iValue)
 {
     bool exising;
     ASSIMP_BEGIN_EXCEPTION_REGION();
-        exising = SetGenericProperty<float>(pimpl->mFloatProperties, szName,iValue);
+        exising = SetGenericProperty<ai_real>(pimpl->mFloatProperties, szName,iValue);
     ASSIMP_END_EXCEPTION_REGION(bool);
     return exising;
 }
@@ -1058,10 +1058,10 @@ int Importer::GetPropertyInteger(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-float Importer::GetPropertyFloat(const char* szName,
-    float iErrorReturn /*= 10e10*/) const
+ai_real Importer::GetPropertyFloat(const char* szName,
+    ai_real iErrorReturn /*= 10e10*/) const
 {
-    return GetGenericProperty<float>(pimpl->mFloatProperties,szName,iErrorReturn);
+    return GetGenericProperty<ai_real>(pimpl->mFloatProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------

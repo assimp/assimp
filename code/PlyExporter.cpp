@@ -223,7 +223,7 @@ PlyExporter::~PlyExporter() {
 // ------------------------------------------------------------------------------------------------
 void PlyExporter::WriteMeshVerts(const aiMesh* m, unsigned int components)
 {
-    static const float inf = std::numeric_limits<float>::infinity();
+    static const ai_real inf = std::numeric_limits<ai_real>::infinity();
 
     // If a component (for instance normal vectors) is present in at least one mesh in the scene,
     // then default values are written for meshes that do not contain this component.

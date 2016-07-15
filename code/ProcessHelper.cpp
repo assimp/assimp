@@ -142,9 +142,9 @@ void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,
 }
 
 // -------------------------------------------------------------------------------
-float ComputePositionEpsilon(const aiMesh* pMesh)
+ai_real ComputePositionEpsilon(const aiMesh* pMesh)
 {
-    const float epsilon = 1e-4f;
+    const ai_real epsilon = 1e-4;
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec;
@@ -153,11 +153,11 @@ float ComputePositionEpsilon(const aiMesh* pMesh)
 }
 
 // -------------------------------------------------------------------------------
-float ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
+ai_real ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
 {
     ai_assert( NULL != pMeshes );
 
-    const float epsilon = 1e-4f;
+    const ai_real epsilon = 1e-4;
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec, mi, ma;

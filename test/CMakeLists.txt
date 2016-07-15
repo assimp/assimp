@@ -58,6 +58,7 @@ SET( TEST_SRCS
   unit/utBlendImportMaterials.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
+  unit/utDefaultIOStream.cpp
   unit/utFastAtof.cpp
   unit/utFindDegenerates.cpp
   unit/utFindInvalidData.cpp

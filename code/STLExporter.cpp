@@ -162,12 +162,12 @@ void STLExporter :: WriteMeshBinary(const aiMesh* m)
             }
             nor.Normalize();
         }
-        float nx = nor.x, ny = nor.y, nz = nor.z;
+        ai_real nx = nor.x, ny = nor.y, nz = nor.z;
         AI_SWAP4(nx); AI_SWAP4(ny); AI_SWAP4(nz);
         mOutput.write((char *)&nx, 4); mOutput.write((char *)&ny, 4); mOutput.write((char *)&nz, 4);
         for(unsigned int a = 0; a < f.mNumIndices; ++a) {
             const aiVector3D& v  = m->mVertices[f.mIndices[a]];
-            float vx = v.x, vy = v.y, vz = v.z;
+            ai_real vx = v.x, vy = v.y, vz = v.z;
             AI_SWAP4(vx); AI_SWAP4(vy); AI_SWAP4(vz);
             mOutput.write((char *)&vx, 4); mOutput.write((char *)&vy, 4); mOutput.write((char *)&vz, 4);
         }

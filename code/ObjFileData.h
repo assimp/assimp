@@ -191,21 +191,21 @@ struct Material
     //! Emissive color
     aiColor3D emissive;
     //! Alpha value
-    float alpha;
+    ai_real alpha;
     //! Shineness factor
-    float shineness;
+    ai_real shineness;
     //! Illumination model
     int illumination_model;
     //! Index of refraction
-    float ior;
+    ai_real ior;
 
     //! Constructor
     Material()
-        :   diffuse (0.6f,0.6f,0.6f)
-        ,   alpha   (1.f)
-        ,   shineness (0.0f)
+        :   diffuse (0.6,0.6,0.6)
+        ,   alpha   (1.0)
+        ,   shineness (0.0)
         ,   illumination_model (1)
-        ,   ior     (1.f)
+        ,   ior     (1.0)
     {
         // empty
         for (size_t i = 0; i < TextureTypeCount; ++i)
@@ -244,7 +244,7 @@ struct Mesh {
     bool m_hasVertexColors;
 
     /// Constructor
-    explicit Mesh( const std::string &name ) 
+    explicit Mesh( const std::string &name )
     : m_name( name )
     , m_pMaterial(NULL)
     , m_uiNumIndices(0)

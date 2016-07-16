@@ -108,7 +108,7 @@ protected:
     enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
 
     /// Writes a float array of the given type
-    void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount);
+    void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount);
 
     /// Writes the scene library
     void WriteSceneLibrary();
@@ -160,10 +160,10 @@ protected:
   struct Property
   {
     bool exist;
-     float value;
+     ai_real value;
      Property()
          : exist(false)
-         , value(0.0f)
+         , value(0.0)
      {}
   };
 

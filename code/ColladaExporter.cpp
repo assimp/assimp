@@ -149,7 +149,7 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-    static const float epsilon = 0.00001f;
+    static const ai_real epsilon = 0.00001;
     static const aiQuaternion x_rot(aiMatrix3x3(
         0, -1,  0,
         1,  0,  0,
@@ -176,9 +176,9 @@ void ColladaExporter::WriteHeader()
 
     bool add_root_node = false;
 
-    float scale = 1.0;
+    ai_real scale = 1.0;
     if(std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
-        scale = (float) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
+        scale = (ai_real) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
     } else {
         add_root_node = true;
     }
@@ -450,7 +450,7 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light){
                             srcLight->mFalloffAngle);
     */
 
-    const float fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
+    const ai_real fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
     mOutput << startstr <<"<falloff_angle sid=\"fall_off_angle\">"
                                 << fallOffAngle
                         <<"</falloff_angle>" << endstr;
@@ -803,10 +803,10 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     PushTag();
 
     // Positions
-    WriteFloatArray( idstr + "-positions", FloatType_Vector, (float*) mesh->mVertices, mesh->mNumVertices);
+    WriteFloatArray( idstr + "-positions", FloatType_Vector, (ai_real*) mesh->mVertices, mesh->mNumVertices);
     // Normals, if any
     if( mesh->HasNormals() )
-        WriteFloatArray( idstr + "-normals", FloatType_Vector, (float*) mesh->mNormals, mesh->mNumVertices);
+        WriteFloatArray( idstr + "-normals", FloatType_Vector, (ai_real*) mesh->mNormals, mesh->mNumVertices);
 
     // texture coords
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
@@ -814,7 +814,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         if( mesh->HasTextureCoords( a) )
         {
             WriteFloatArray( idstr + "-tex" + std::to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
-                (float*) mesh->mTextureCoords[a], mesh->mNumVertices);
+                (ai_real*) mesh->mTextureCoords[a], mesh->mNumVertices);
         }
     }
 
@@ -822,7 +822,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
         if( mesh->HasVertexColors( a) )
-            WriteFloatArray( idstr + "-color" + std::to_string(a), FloatType_Color, (float*) mesh->mColors[a], mesh->mNumVertices);
+            WriteFloatArray( idstr + "-color" + std::to_string(a), FloatType_Color, (ai_real*) mesh->mColors[a], mesh->mNumVertices);
     }
 
     // assemble vertex structure
@@ -917,7 +917,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 
 // ------------------------------------------------------------------------------------------------
 // Writes a float array of the given type
-void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount)
+void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount)
 {
     size_t floatsPerElement = 0;
     switch( pType )

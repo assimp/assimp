@@ -179,19 +179,10 @@ protected:
 };
 
 struct FastAtofWrapper {
-    float operator()(const char* str) { return Assimp::fast_atof(str); }
-};
-
-struct FastAtodWrapper {
-    double operator()(const char* str) { return Assimp::fast_atod(str); }
+    ai_real operator()(const char* str) { return Assimp::fast_atof(str); }
 };
 
 TEST_F(FastAtofTest, FastAtof)
 {
-    RunTest<float>(FastAtofWrapper());
-}
-
-TEST_F(FastAtofTest, FastAtod)
-{
-    RunTest<double>(FastAtodWrapper());
+    RunTest<ai_real>(FastAtofWrapper());
 }

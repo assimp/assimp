@@ -56,6 +56,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //using namespace Assimp;
 namespace Assimp    {
 
+// make sure typeof returns consistent output across different platforms
+// also consider using: typeid(VAR).name()
+template <typename T> const char* typeof(T&) { return "unknown"; }
+template<> const char* typeof(float&) { return "float"; }
+template<> const char* typeof(double&) { return "double"; }
+
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to PLY. Prototyped and registered in Exporter.cpp
 void ExportScenePly(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
@@ -136,15 +142,21 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
         << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.'
         << aiGetVersionRevision() << ")" << endl;
 
+    // TODO: probably want to check here rather than just assume something
+    //       definitely not good to always write float even if we might have double precision
+
+    ai_real tmp = 0.0;
+    const char * typeName = typeof(tmp);
+
     mOutput << "element vertex " << vertices << endl;
-    mOutput << "property float x" << endl;
-    mOutput << "property float y" << endl;
-    mOutput << "property float z" << endl;
+    mOutput << "property " << typeName << " x" << endl;
+    mOutput << "property " << typeName << " y" << endl;
+    mOutput << "property " << typeName << " z" << endl;
 
     if(components & PLY_EXPORT_HAS_NORMALS) {
-        mOutput << "property float nx" << endl;
-        mOutput << "property float ny" << endl;
-        mOutput << "property float nz" << endl;
+        mOutput << "property " << typeName << " nx" << endl;
+        mOutput << "property " << typeName << " ny" << endl;
+        mOutput << "property " << typeName << " nz" << endl;
     }
 
     // write texcoords first, just in case an importer does not support tangents
@@ -154,37 +166,37 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     // and texture coordinates).
     for (unsigned int n = PLY_EXPORT_HAS_TEXCOORDS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_TEXTURECOORDS; n <<= 1, ++c) {
         if (!c) {
-            mOutput << "property float s" << endl;
-            mOutput << "property float t" << endl;
+            mOutput << "property " << typeName << " s" << endl;
+            mOutput << "property " << typeName << " t" << endl;
         }
         else {
-            mOutput << "property float s" << c << endl;
-            mOutput << "property float t" << c << endl;
+            mOutput << "property " << typeName << " s" << c << endl;
+            mOutput << "property " << typeName << " t" << c << endl;
         }
     }
 
     for (unsigned int n = PLY_EXPORT_HAS_COLORS, c = 0; (components & n) && c != AI_MAX_NUMBER_OF_COLOR_SETS; n <<= 1, ++c) {
         if (!c) {
-            mOutput << "property float r" << endl;
-            mOutput << "property float g" << endl;
-            mOutput << "property float b" << endl;
-            mOutput << "property float a" << endl;
+            mOutput << "property " << typeName << " r" << endl;
+            mOutput << "property " << typeName << " g" << endl;
+            mOutput << "property " << typeName << " b" << endl;
+            mOutput << "property " << typeName << " a" << endl;
         }
         else {
-            mOutput << "property float r" << c << endl;
-            mOutput << "property float g" << c << endl;
-            mOutput << "property float b" << c << endl;
-            mOutput << "property float a" << c << endl;
+            mOutput << "property " << typeName << " r" << c << endl;
+            mOutput << "property " << typeName << " g" << c << endl;
+            mOutput << "property " << typeName << " b" << c << endl;
+            mOutput << "property " << typeName << " a" << c << endl;
         }
     }
 
     if(components & PLY_EXPORT_HAS_TANGENTS_BITANGENTS) {
-        mOutput << "property float tx" << endl;
-        mOutput << "property float ty" << endl;
-        mOutput << "property float tz" << endl;
-        mOutput << "property float bx" << endl;
-        mOutput << "property float by" << endl;
-        mOutput << "property float bz" << endl;
+        mOutput << "property " << typeName << " tx" << endl;
+        mOutput << "property " << typeName << " ty" << endl;
+        mOutput << "property " << typeName << " tz" << endl;
+        mOutput << "property " << typeName << " bx" << endl;
+        mOutput << "property " << typeName << " by" << endl;
+        mOutput << "property " << typeName << " bz" << endl;
     }
 
     mOutput << "element face " << faces << endl;

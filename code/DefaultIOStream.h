@@ -55,7 +55,7 @@ namespace Assimp    {
 //! @note   An instance of this class can exist without a valid file handle
 //!         attached to it. All calls fail, but the instance can nevertheless be
 //!         used with no restrictions.
-class DefaultIOStream : public IOStream
+class ASSIMP_API DefaultIOStream : public IOStream
 {
     friend class DefaultIOSystem;
 #if __ANDROID__

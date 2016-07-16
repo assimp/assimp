@@ -326,7 +326,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
                 iNum += (unsigned int)(*avFaces)[aiSplit[p][i]].mIndices.size();
             }
             p_pcOut->mNumVertices = iNum;
-            if( 0 == iNum ) {     // nothing to do 
+            if( 0 == iNum ) {     // nothing to do
                 delete[] aiSplit; // cleanup
                 delete p_pcOut;
                 return;
@@ -481,13 +481,13 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 
             if (0xFFFFFFFF != aiPositions[0])
             {
-                vOut.x = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[0]).avList.front(),aiTypes[0]);
             }
 
             if (0xFFFFFFFF != aiPositions[1])
             {
-                vOut.y = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[1]).avList.front(),aiTypes[1]);
             }
             // and add them to our nice list
@@ -502,7 +502,7 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 {
     ai_assert(NULL != pvOut);
 
-    unsigned int aiPositions[3] = {0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF};
+    ai_uint aiPositions[3] = {0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF};
     PLY::EDataType aiTypes[3] = {EDT_Char,EDT_Char,EDT_Char};
     PLY::ElementInstanceList* pcList = NULL;
     unsigned int cnt = 0;
@@ -591,19 +591,19 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 
             if (0xFFFFFFFF != aiPositions[0])
             {
-                vOut.x = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[0]).avList.front(),aiTypes[0]);
             }
 
             if (0xFFFFFFFF != aiPositions[1])
             {
-                vOut.y = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[1]).avList.front(),aiTypes[1]);
             }
 
             if (0xFFFFFFFF != aiPositions[2])
             {
-                vOut.z = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[2]).avList.front(),aiTypes[2]);
             }
 
@@ -615,7 +615,7 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 
 // ------------------------------------------------------------------------------------------------
 // Convert a color component to [0...1]
-float PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
+ai_real PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
     PLY::EDataType eType)
 {
     switch (eType)
@@ -623,20 +623,20 @@ float PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
     case EDT_Float:
         return val.fFloat;
     case EDT_Double:
-        return (float)val.fDouble;
+        return (ai_real)val.fDouble;
 
     case EDT_UChar:
-        return (float)val.iUInt / (float)0xFF;
+        return (ai_real)val.iUInt / (ai_real)0xFF;
     case EDT_Char:
-        return (float)(val.iInt+(0xFF/2)) / (float)0xFF;
+        return (ai_real)(val.iInt+(0xFF/2)) / (ai_real)0xFF;
     case EDT_UShort:
-        return (float)val.iUInt / (float)0xFFFF;
+        return (ai_real)val.iUInt / (ai_real)0xFFFF;
     case EDT_Short:
-        return (float)(val.iInt+(0xFFFF/2)) / (float)0xFFFF;
+        return (ai_real)(val.iInt+(0xFFFF/2)) / (ai_real)0xFFFF;
     case EDT_UInt:
-        return (float)val.iUInt / (float)0xFFFF;
+        return (ai_real)val.iUInt / (ai_real)0xFFFF;
     case EDT_Int:
-        return ((float)val.iInt / (float)0xFF) + 0.5f;
+        return ((ai_real)val.iInt / (ai_real)0xFF) + 0.5f;
     default: ;
     };
     return 0.0f;
@@ -727,7 +727,7 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
             }
 
             // assume 1.0 for the alpha channel ifit is not set
-            if (0xFFFFFFFF == aiPositions[3])vOut.a = 1.0f;
+            if (0xFFFFFFFF == aiPositions[3])vOut.a = 1.0;
             else
             {
                 vOut.a = NormalizeColorValue(GetProperty((*i).alProperties,
@@ -1076,14 +1076,14 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
             // handle phong power and shading mode
             int iMode;
             if (0xFFFFFFFF != iPhong)   {
-                float fSpec = PLY::PropertyInstance::ConvertTo<float>(GetProperty((*i).alProperties, iPhong).avList.front(),ePhong);
+                ai_real fSpec = PLY::PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(),ePhong);
 
                 // if shininess is 0 (and the pow() calculation would therefore always
                 // become 1, not depending on the angle), use gouraud lighting
                 if (fSpec)  {
                     // scale this with 15 ... hopefully this is correct
                     fSpec *= 15;
-                    pcHelper->AddProperty<float>(&fSpec, 1, AI_MATKEY_SHININESS);
+                    pcHelper->AddProperty<ai_real>(&fSpec, 1, AI_MATKEY_SHININESS);
 
                     iMode = (int)aiShadingMode_Phong;
                 }
@@ -1094,8 +1094,8 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 
             // handle opacity
             if (0xFFFFFFFF != iOpacity) {
-                float fOpacity = PLY::PropertyInstance::ConvertTo<float>(GetProperty((*i).alProperties, iPhong).avList.front(),eOpacity);
-                pcHelper->AddProperty<float>(&fOpacity, 1, AI_MATKEY_OPACITY);
+                ai_real fOpacity = PLY::PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(),eOpacity);
+                pcHelper->AddProperty<ai_real>(&fOpacity, 1, AI_MATKEY_OPACITY);
             }
 
             // The face order is absolutely undefined for PLY, so we have to

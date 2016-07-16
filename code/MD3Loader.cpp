@@ -1018,7 +1018,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
                 // Convert the normal vector to uncompressed float3 format
                 aiVector3D& nor = pcMesh->mNormals[iCurrent];
-                LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,(float*)&nor);
+                LatLngNormalToVec3(pcVertices[pcTriangles->INDEXES[c]].NORMAL,(ai_real*)&nor);
 
                 // Read texture coordinates
                 pcMesh->mTextureCoords[0][iCurrent].x = pcUVs[ pcTriangles->INDEXES[c]].U;

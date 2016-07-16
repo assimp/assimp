@@ -190,7 +190,7 @@ protected:
      * @param pOffset Offset into the element, for multipart elements such as vectors or matrices
      * @return the specified value
      */
-    float ReadFloat( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex, size_t pOffset) const;
+    ai_real ReadFloat( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex, size_t pOffset) const;
 
     /** Reads a string value from an accessor and its data array.
      * @param pAccessor The accessor to use for reading

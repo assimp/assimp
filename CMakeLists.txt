@@ -80,15 +80,30 @@ IF(NOT GIT_COMMIT_HASH)
   SET(GIT_COMMIT_HASH 0)
 ENDIF(NOT GIT_COMMIT_HASH)
 
+OPTION(ASSIMP_DOUBLE_PRECISION
+    "Set to ON to enable double precision processing"
+    OFF
+)
+
+IF(ASSIMP_DOUBLE_PRECISION)
+  ADD_DEFINITIONS(-DAI_DOUBLE_PRECISION)
+ENDIF(ASSIMP_DOUBLE_PRECISION)
+
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/revision.h.in
 #  ${CMAKE_CURRENT_SOURCE_DIR}/revision.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/revision.h
 )
 
+configure_file(
+  ${CMAKE_CURRENT_LIST_DIR}/include/assimp/config.h.in
+  ${CMAKE_CURRENT_LIST_DIR}/include/assimp/config.h
+)
+
 include_directories(
     ./
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
 OPTION(ASSIMP_OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)
@@ -136,11 +151,11 @@ IF ( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR )
 ENDIF ( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR )
 
 # Cache these to allow the user to override them manually.
-SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE PATH
+SET( ASSIMP_LIB_INSTALL_DIR "lib" CACHE STRING
   "Path the built library files are installed to." )
-SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE PATH
+SET( ASSIMP_INCLUDE_INSTALL_DIR "include" CACHE STRING
   "Path the header files are installed to." )
-SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE PATH
+SET( ASSIMP_BIN_INSTALL_DIR "bin" CACHE STRING
   "Path the tool executables are installed to." )
 
 IF (CMAKE_BUILD_TYPE STREQUAL "Debug")

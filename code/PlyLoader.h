@@ -155,7 +155,7 @@ protected:
     /** Static helper to parse a color channel value. The input value
     *  is normalized to 0-1.
     */
-    static float NormalizeColorValue (
+    static ai_real NormalizeColorValue (
         PLY::PropertyInstance::ValueUnion val,
         PLY::EDataType eType);
 

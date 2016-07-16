@@ -1,5 +1,4 @@
-/*
----------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -36,58 +35,30 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
-*/
+-------------------------------------------------------------------------*/
+#include <gtest/gtest.h>
+#include "DefaultIOStream.h"
 
-#include "UnitTestPCH.h"
+using namespace ::Assimp;
 
-using namespace Assimp;
-
-class utMatrix4x4Test : public ::testing::Test {
-
+class utDefaultIOStream : public ::testing::Test {
+    // empty
 };
 
-TEST_F( utMatrix4x4Test, badIndexOperatorTest ) {
-    aiMatrix4x4 m;
-    ai_real *a0 = m[ 4 ];
-    EXPECT_EQ( NULL, a0 );
-}
+class TestDefaultIOStream : public DefaultIOStream {
+public:
+    TestDefaultIOStream()
+        : DefaultIOStream() {
+        // empty
+    }
 
-TEST_F( utMatrix4x4Test, indexOperatorTest ) {
-    aiMatrix4x4 m;
-    ai_real *a0 = m[ 0 ];
-    EXPECT_FLOAT_EQ( 1.0, *a0 );
-    ai_real *a1 = a0+1;
-    EXPECT_FLOAT_EQ( 0.0, *a1 );
-    ai_real *a2 = a0 + 2;
-    EXPECT_FLOAT_EQ( 0.0, *a2 );
-    ai_real *a3 = a0 + 3;
-    EXPECT_FLOAT_EQ( 0.0, *a3 );
+    virtual ~TestDefaultIOStream() {
+        // empty
+    }
+};
 
-    ai_real *a4 = m[ 1 ];
-    EXPECT_FLOAT_EQ( 0.0, *a4 );
-    ai_real *a5 = a4 + 1;
-    EXPECT_FLOAT_EQ( 1.0, *a5 );
-    ai_real *a6 = a4 + 2;
-    EXPECT_FLOAT_EQ( 0.0, *a6 );
-    ai_real *a7 = a4 + 3;
-    EXPECT_FLOAT_EQ( 0.0, *a7 );
-
-    ai_real *a8 = m[ 2 ];
-    EXPECT_FLOAT_EQ( 0.0, *a8 );
-    ai_real *a9 = a8 + 1;
-    EXPECT_FLOAT_EQ( 0.0, *a9 );
-    ai_real *a10 = a8 + 2;
-    EXPECT_FLOAT_EQ( 1.0, *a10 );
-    ai_real *a11 = a8 + 3;
-    EXPECT_FLOAT_EQ( 0.0, *a11 );
-
-    ai_real *a12 = m[ 3 ];
-    EXPECT_FLOAT_EQ( 0.0, *a12 );
-    ai_real *a13 = a12 + 1;
-    EXPECT_FLOAT_EQ( 0.0, *a13 );
-    ai_real *a14 = a12 + 2;
-    EXPECT_FLOAT_EQ( 0.0, *a14 );
-    ai_real *a15 = a12 + 3;
-    EXPECT_FLOAT_EQ( 1.0, *a15 );
+TEST_F( utDefaultIOStream, FileSizeTest ) {
+    TestDefaultIOStream myStream;
+    size_t size = myStream.FileSize();
+    EXPECT_EQ( size, 0 );
 }

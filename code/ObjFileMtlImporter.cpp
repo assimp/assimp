@@ -164,7 +164,7 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'd':   
+        case 'd':
             {
                 if( *(m_DataIt+1) == 'i' && *( m_DataIt + 2 ) == 's' && *( m_DataIt + 3 ) == 'p' ) {
                     // A displacement map
@@ -232,7 +232,7 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 {
     ai_assert( NULL != pColor );
 
-    float r( 0.0f ), g( 0.0f ), b( 0.0f );
+    ai_real r( 0.0 ), g( 0.0 ), b( 0.0 );
     m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, r );
     pColor->r = r;
 
@@ -255,10 +255,10 @@ void ObjFileMtlImporter::getIlluminationModel( int &illum_model )
 
 // -------------------------------------------------------------------
 //  Loads a single float value.
-void ObjFileMtlImporter::getFloatValue( float &value )
+void ObjFileMtlImporter::getFloatValue( ai_real &value )
 {
     m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
-    value = (float) fast_atof(m_buffer);
+    value = (ai_real) fast_atof(m_buffer);
 }
 
 // -------------------------------------------------------------------

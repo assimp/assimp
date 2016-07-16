@@ -477,13 +477,14 @@ struct aiUVTransform
      *  rotation center is 0.5f|0.5f. The default value
      *  0.f.
      */
-    float mRotation;
+    ai_real mRotation;
 
 
 #ifdef __cplusplus
     aiUVTransform()
-        :   mScaling    (1.f,1.f)
-        ,   mRotation   (0.f)
+        :   mTranslation (0.0,0.0)
+        ,   mScaling    (1.0,1.0)
+        ,   mRotation   (0.0)
     {
         // nothing to be done here ...
     }
@@ -507,6 +508,14 @@ enum aiPropertyTypeInfo
      *  The material system performs the type conversion automatically.
     */
     aiPTI_Float   = 0x1,
+
+    /** Array of double-precision (64 Bit) floats
+     *
+     *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API
+     *  aiMaterial::Get()) to query properties stored in floating-point format.
+     *  The material system performs the type conversion automatically.
+    */
+    aiPTI_Double   = 0x2,
 
     /** The material property is an aiString.
      *
@@ -812,6 +821,12 @@ public:
         unsigned int index = 0);
 
     aiReturn AddProperty (const float* pInput,
+        unsigned int pNumValues,
+        const char* pKey,
+        unsigned int type  = 0,
+        unsigned int index = 0);
+
+    aiReturn AddProperty (const double* pInput,
         unsigned int pNumValues,
         const char* pKey,
         unsigned int type  = 0,

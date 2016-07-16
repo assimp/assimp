@@ -167,7 +167,7 @@ void ObjExporter::WriteMaterialFile()
             mOutputMat << "Ke " << c.r << " " << c.g << " " << c.b << endl;
         }
 
-        float o;
+        ai_real o;
         if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
             mOutputMat << "d " << o << endl;
         }

@@ -369,7 +369,7 @@ namespace glTF
 
     //! A typed view into a BufferView. A BufferView contains raw binary data.
     //! An accessor provides a typed view into a BufferView or a subset of a BufferView
-    // !similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
+    //! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
     struct Accessor : public Object
     {
         Ref<BufferView> bufferView;  //!< The ID of the bufferView. (required)

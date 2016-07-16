@@ -58,6 +58,7 @@ SET( TEST_SRCS
   unit/utBlendImportMaterials.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
+  unit/utDefaultIOStream.cpp
   unit/utFastAtof.cpp
   unit/utFindDegenerates.cpp
   unit/utFindInvalidData.cpp
@@ -99,7 +100,7 @@ if(AddGTest_FOUND)
     )
 
     add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
-
+    
     SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
     add_dependencies( unit gtest )

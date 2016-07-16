@@ -95,9 +95,17 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/revision.h
 )
 
+SET( HEADER_PATH include/assimp )
+
+configure_file(
+  ${HEADER_PATH}/config.h.in
+  ${ASSIMP_INCLUDE_INSTALL_DIR}/assimp/config.h
+)
+
 include_directories(
     ./
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
 OPTION(ASSIMP_OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)

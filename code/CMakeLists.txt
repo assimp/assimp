@@ -58,7 +58,6 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/camera.h
   ${HEADER_PATH}/color4.h
   ${HEADER_PATH}/color4.inl
-  ${HEADER_PATH}/config.h
   ${HEADER_PATH}/defs.h
   ${HEADER_PATH}/cfileio.h
   ${HEADER_PATH}/light.h

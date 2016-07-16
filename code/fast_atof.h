@@ -19,6 +19,7 @@
 #include <limits>
 #include <stdint.h>
 #include <stdexcept>
+#include <assimp/defs.h>
 
 #include "StringComparison.h"
 
@@ -350,51 +351,26 @@ inline const char* fast_atoreal_move(const char* c, Real& out, bool check_comma 
 
 // ------------------------------------------------------------------------------------
 // The same but more human.
-inline float fast_atof(const char* c)
+inline ai_real fast_atof(const char* c)
 {
-    float ret;
-    fast_atoreal_move<float>(c, ret);
+    ai_real ret;
+    fast_atoreal_move<ai_real>(c, ret);
     return ret;
 }
 
 
-inline float fast_atof( const char* c, const char** cout)
+inline ai_real fast_atof( const char* c, const char** cout)
 {
-    float ret;
-    *cout = fast_atoreal_move<float>(c, ret);
+    ai_real ret;
+    *cout = fast_atoreal_move<ai_real>(c, ret);
 
     return ret;
 }
 
-inline float fast_atof( const char** inout)
+inline ai_real fast_atof( const char** inout)
 {
-    float ret;
-    *inout = fast_atoreal_move<float>(*inout, ret);
-
-    return ret;
-}
-
-
-inline double fast_atod(const char* c)
-{
-    double ret;
-    fast_atoreal_move<double>(c, ret);
-    return ret;
-}
-
-
-inline double fast_atod( const char* c, const char** cout)
-{
-    double ret;
-    *cout = fast_atoreal_move<double>(c, ret);
-
-    return ret;
-}
-
-inline double fast_atod( const char** inout)
-{
-    double ret;
-    *inout = fast_atoreal_move<double>(*inout, ret);
+    ai_real ret;
+    *inout = fast_atoreal_move<ai_real>(*inout, ret);
 
     return ret;
 }
@@ -402,4 +378,3 @@ inline double fast_atod( const char** inout)
 } // end of namespace Assimp
 
 #endif
-

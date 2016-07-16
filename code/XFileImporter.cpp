@@ -373,7 +373,7 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
             {
                 const XFile::Bone& obone = bones[c];
                 // set up a vertex-linear array of the weights for quick searching if a bone influences a vertex
-                std::vector<float> oldWeights( sourceMesh->mPositions.size(), 0.0f);
+                std::vector<ai_real> oldWeights( sourceMesh->mPositions.size(), 0.0);
                 for( unsigned int d = 0; d < obone.mWeights.size(); d++)
                     oldWeights[obone.mWeights[d].mVertex] = obone.mWeights[d].mWeight;
 
@@ -383,8 +383,8 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
                 for( unsigned int d = 0; d < orgPoints.size(); d++)
                 {
                     // does the new vertex stem from an old vertex which was influenced by this bone?
-                    float w = oldWeights[orgPoints[d]];
-                    if( w > 0.0f)
+                    ai_real w = oldWeights[orgPoints[d]];
+                    if( w > 0.0)
                         newWeights.push_back( aiVertexWeight( d, w));
                 }
 
@@ -713,4 +713,3 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 }
 
 #endif // !! ASSIMP_BUILD_NO_X_IMPORTER
-

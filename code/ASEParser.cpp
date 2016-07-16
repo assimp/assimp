@@ -431,7 +431,7 @@ void Parser::ParseLV1SoftSkinBlock()
                             ParseString(bone,"*MESH_SOFTSKINVERTS.Bone");
 
                             // Find the bone in the mesh's list
-                            std::pair<int,float> me;
+                            std::pair<int,ai_real> me;
                             me.first = -1;
 
                             for (unsigned int n = 0; n < curMesh->mBones.size();++n)
@@ -618,12 +618,12 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
             if (TokenMatch(filePtr,"MATERIAL_TRANSPARENCY",21))
             {
                 ParseLV4MeshFloat(mat.mTransparency);
-                mat.mTransparency = 1.0f - mat.mTransparency;continue;
+                mat.mTransparency = 1.0 - mat.mTransparency;continue;
             }
             // material self illumination
             if (TokenMatch(filePtr,"MATERIAL_SELFILLUM",18))
             {
-                float f = 0.0f;
+                ai_real f = 0.0;
                 ParseLV4MeshFloat(f);
 
                 mat.mEmissive.r = f;
@@ -1251,7 +1251,7 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation& anim)
             {
                 anim.akeyRotations.push_back(aiQuatKey());
                 aiQuatKey& key = anim.akeyRotations.back();
-                aiVector3D v;float f;
+                aiVector3D v;ai_real f;
                 ParseLV4MeshFloatTriple(&v.x,iIndex);
                 ParseLV4MeshFloat(f);
                 key.mTime = (double)iIndex;
@@ -1604,7 +1604,7 @@ void Parser::ParseLV4MeshBonesVertices(unsigned int iNumVertices,ASE::Mesh& mesh
                 }
 
                 // --- ignored
-                float afVert[3];
+                ai_real afVert[3];
                 ParseLV4MeshFloatTriple(afVert);
 
                 std::pair<int,float> pairOut;
@@ -2102,7 +2102,7 @@ void Parser::ParseLV4MeshLongTriple(unsigned int* apOut, unsigned int& rIndexOut
     ParseLV4MeshLongTriple(apOut);
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut)
+void Parser::ParseLV4MeshFloatTriple(ai_real* apOut, unsigned int& rIndexOut)
 {
     ai_assert(NULL != apOut);
 
@@ -2113,7 +2113,7 @@ void Parser::ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut)
     ParseLV4MeshFloatTriple(apOut);
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV4MeshFloatTriple(float* apOut)
+void Parser::ParseLV4MeshFloatTriple(ai_real* apOut)
 {
     ai_assert(NULL != apOut);
 
@@ -2121,19 +2121,19 @@ void Parser::ParseLV4MeshFloatTriple(float* apOut)
         ParseLV4MeshFloat(apOut[i]);
 }
 // ------------------------------------------------------------------------------------------------
-void Parser::ParseLV4MeshFloat(float& fOut)
+void Parser::ParseLV4MeshFloat(ai_real& fOut)
 {
     // skip spaces and tabs
     if(!SkipSpaces(&filePtr))
     {
         // LOG
         LogWarning("Unable to parse float: unexpected EOL [#1]");
-        fOut = 0.0f;
+        fOut = 0.0;
         ++iLineNumber;
         return;
     }
     // parse the first float
-    filePtr = fast_atoreal_move<float>(filePtr,fOut);
+    filePtr = fast_atoreal_move<ai_real>(filePtr,fOut);
 }
 // ------------------------------------------------------------------------------------------------
 void Parser::ParseLV4MeshLong(unsigned int& iOut)

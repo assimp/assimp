@@ -704,7 +704,7 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
                 size_t jointIndex = iit->first;
                 size_t vertexIndex = iit->second;
 
-                float weight = ReadFloat( weightsAcc, weights, vertexIndex, 0);
+                ai_real weight = ReadFloat( weightsAcc, weights, vertexIndex, 0);
 
                 // one day I gonna kill that XSI Collada exporter
                 if( weight > 0.0f)
@@ -1071,7 +1071,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
             continue;
 
         // resolve the data pointers for all anim channels. Find the minimum time while we're at it
-        float startTime = 1e20f, endTime = -1e20f;
+        ai_real startTime = 1e20, endTime = -1e20;
         for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
         {
             Collada::ChannelEntry& e = *it;
@@ -1100,7 +1100,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
           // now for every unique point in time, find or interpolate the key values for that time
           // and apply them to the transform chain. Then the node's present transformation can be calculated.
-          float time = startTime;
+          ai_real time = startTime;
           while( 1)
           {
               for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
@@ -1109,7 +1109,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 
                   // find the keyframe behind the current point in time
                   size_t pos = 0;
-                  float postTime = 0.f;
+                  ai_real postTime = 0.0;
                   while( 1)
                   {
                       if( pos >= e.mTimeAccessor->mCount)
@@ -1123,19 +1123,19 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                   pos = std::min( pos, e.mTimeAccessor->mCount-1);
 
                   // read values from there
-                  float temp[16];
+                  ai_real temp[16];
                   for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
                       temp[c] = ReadFloat( *e.mValueAccessor, *e.mValueData, pos, c);
 
                   // if not exactly at the key time, interpolate with previous value set
                   if( postTime > time && pos > 0)
                   {
-                      float preTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos-1, 0);
-                      float factor = (time - postTime) / (preTime - postTime);
+                      ai_real preTime = ReadFloat( *e.mTimeAccessor, *e.mTimeData, pos-1, 0);
+                      ai_real factor = (time - postTime) / (preTime - postTime);
 
                       for( size_t c = 0; c < e.mValueAccessor->mSize; ++c)
                       {
-                          float v = ReadFloat( *e.mValueAccessor, *e.mValueData, pos-1, c);
+                          ai_real v = ReadFloat( *e.mValueAccessor, *e.mValueData, pos-1, c);
                           temp[c] += (v - temp[c]) * factor;
                       }
                   }
@@ -1152,7 +1152,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
               resultTrafos.push_back( mat);
 
               // find next point in time to evaluate. That's the closest frame larger than the current in any channel
-              float nextTime = 1e20f;
+              ai_real nextTime = 1e20;
               for( std::vector<Collada::ChannelEntry>::iterator it = entries.begin(); it != entries.end(); ++it)
               {
                   Collada::ChannelEntry& channelElement = *it;
@@ -1161,7 +1161,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                   size_t pos = 0;
                   while( pos < channelElement.mTimeAccessor->mCount)
                   {
-                      const float t = ReadFloat( *channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
+                      const ai_real t = ReadFloat( *channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
                       if( t > time)
                       {
                           nextTime = std::min( nextTime, t);
@@ -1174,16 +1174,16 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
 			  	  // Sub-sample axis-angle channels if the delta between two consecutive
                   // key-frame angles is >= 180 degrees.
 				  if (transforms[channelElement.mTransformIndex].mType == Collada::TF_ROTATE && channelElement.mSubElement == 3 && pos > 0 && pos < channelElement.mTimeAccessor->mCount) {
-					  const float cur_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos, 0);
-                      const float last_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos - 1, 0);
-                      const float cur_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
-                      const float last_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos - 1, 0);
-                      const float last_eval_angle = last_key_angle + (cur_key_angle - last_key_angle) * (time - last_key_time) / (cur_key_time - last_key_time);
-                      const float delta = std::fabs(cur_key_angle - last_eval_angle);
-				      if (delta >= 180.0f) {
-						const int subSampleCount = static_cast<int>(floorf(delta / 90.0f));
+					  const ai_real cur_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos, 0);
+                      const ai_real last_key_angle = ReadFloat(*channelElement.mValueAccessor, *channelElement.mValueData, pos - 1, 0);
+                      const ai_real cur_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos, 0);
+                      const ai_real last_key_time = ReadFloat(*channelElement.mTimeAccessor, *channelElement.mTimeData, pos - 1, 0);
+                      const ai_real last_eval_angle = last_key_angle + (cur_key_angle - last_key_angle) * (time - last_key_time) / (cur_key_time - last_key_time);
+                      const ai_real delta = std::abs(cur_key_angle - last_eval_angle);
+				      if (delta >= 180.0) {
+						const int subSampleCount = static_cast<int>(floorf(delta / 90.0));
 						if (cur_key_time != time) {
-							const float nextSampleTime = time + (cur_key_time - time) / subSampleCount;
+							const ai_real nextSampleTime = time + (cur_key_time - time) / subSampleCount;
 							nextTime = std::min(nextTime, nextSampleTime);
 						  }
 					  }
@@ -1289,7 +1289,7 @@ void ColladaLoader::AddTexture ( aiMaterial& mat, const ColladaParser& pParser,
         _AI_MATKEY_TEXBLEND_BASE, type, idx);
 
     // Blend factor
-    mat.AddProperty((float*)&sampler.mWeighting , 1,
+    mat.AddProperty((ai_real*)&sampler.mWeighting , 1,
         _AI_MATKEY_TEXBLEND_BASE, type, idx);
 
     // UV source index ... if we didn't resolve the mapping, it is actually just
@@ -1464,11 +1464,11 @@ void ColladaLoader::BuildMaterials( ColladaParser& pParser, aiScene* /*pScene*/)
 
         const int shadeMode = aiShadingMode_Phong;
         mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
-        aiColor4D colAmbient( 0.2f, 0.2f, 0.2f, 1.0f), colDiffuse( 0.8f, 0.8f, 0.8f, 1.0f), colSpecular( 0.5f, 0.5f, 0.5f, 0.5f);
+        aiColor4D colAmbient( 0.2, 0.2, 0.2, 1.0), colDiffuse( 0.8, 0.8, 0.8, 1.0), colSpecular( 0.5, 0.5, 0.5, 0.5);
         mat->AddProperty( &colAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
         mat->AddProperty( &colDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
         mat->AddProperty( &colSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-        const float specExp = 5.0f;
+        const ai_real specExp = 5.0;
         mat->AddProperty( &specExp, 1, AI_MATKEY_SHININESS);
     }
 #endif
@@ -1587,7 +1587,7 @@ void ColladaLoader::ConvertPath (aiString& ss)
 
 // ------------------------------------------------------------------------------------------------
 // Reads a float value from an accessor and its data array.
-float ColladaLoader::ReadFloat( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex, size_t pOffset) const
+ai_real ColladaLoader::ReadFloat( const Collada::Accessor& pAccessor, const Collada::Data& pData, size_t pIndex, size_t pOffset) const
 {
     // FIXME: (thom) Test for data type here in every access? For the moment, I leave this to the caller
     size_t pos = pAccessor.mStride * pIndex + pAccessor.mOffset + pOffset;

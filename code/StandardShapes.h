@@ -174,8 +174,8 @@ public:
      *    no 'end caps'
      *  @param positions Receives output triangles
      */
-    static void MakeCone(float height,float radius1,
-        float radius2,unsigned int tess,
+    static void MakeCone(ai_real height,ai_real radius1,
+        ai_real radius2,unsigned int tess,
         std::vector<aiVector3D>& positions,bool bOpen= false);
 
 
@@ -189,7 +189,7 @@ public:
      *  @param tess Number of segments.
      *  @param positions Receives output triangles.
      */
-    static void MakeCircle(float radius, unsigned int tess,
+    static void MakeCircle(ai_real radius, unsigned int tess,
         std::vector<aiVector3D>& positions);
 
 };

@@ -207,54 +207,54 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
     // by six single planes with different textures, so we'll
     // need to build six meshes.
 
-    const float l = 10.f; // the size used by Irrlicht
+    const ai_real l = 10.0; // the size used by Irrlicht
 
     // FRONT SIDE
     meshes.push_back( BuildSingleQuadMesh(
-        SkyboxVertex(-l,-l,-l,  0, 0, 1,   1.f,1.f),
-        SkyboxVertex( l,-l,-l,  0, 0, 1,   0.f,1.f),
-        SkyboxVertex( l, l,-l,  0, 0, 1,   0.f,0.f),
-        SkyboxVertex(-l, l,-l,  0, 0, 1,   1.f,0.f)) );
+        SkyboxVertex(-l,-l,-l,  0, 0, 1,   1.0,1.0),
+        SkyboxVertex( l,-l,-l,  0, 0, 1,   0.0,1.0),
+        SkyboxVertex( l, l,-l,  0, 0, 1,   0.0,0.0),
+        SkyboxVertex(-l, l,-l,  0, 0, 1,   1.0,0.0)) );
     meshes.back()->mMaterialIndex = materials.size()-6u;
 
     // LEFT SIDE
     meshes.push_back( BuildSingleQuadMesh(
-        SkyboxVertex( l,-l,-l,  -1, 0, 0,   1.f,1.f),
-        SkyboxVertex( l,-l, l,  -1, 0, 0,   0.f,1.f),
-        SkyboxVertex( l, l, l,  -1, 0, 0,   0.f,0.f),
-        SkyboxVertex( l, l,-l,  -1, 0, 0,   1.f,0.f)) );
+        SkyboxVertex( l,-l,-l,  -1, 0, 0,   1.0,1.0),
+        SkyboxVertex( l,-l, l,  -1, 0, 0,   0.0,1.0),
+        SkyboxVertex( l, l, l,  -1, 0, 0,   0.0,0.0),
+        SkyboxVertex( l, l,-l,  -1, 0, 0,   1.0,0.0)) );
     meshes.back()->mMaterialIndex = materials.size()-5u;
 
     // BACK SIDE
     meshes.push_back( BuildSingleQuadMesh(
-        SkyboxVertex( l,-l, l,  0, 0, -1,   1.f,1.f),
-        SkyboxVertex(-l,-l, l,  0, 0, -1,   0.f,1.f),
-        SkyboxVertex(-l, l, l,  0, 0, -1,   0.f,0.f),
-        SkyboxVertex( l, l, l,  0, 0, -1,   1.f,0.f)) );
+        SkyboxVertex( l,-l, l,  0, 0, -1,   1.0,1.0),
+        SkyboxVertex(-l,-l, l,  0, 0, -1,   0.0,1.0),
+        SkyboxVertex(-l, l, l,  0, 0, -1,   0.0,0.0),
+        SkyboxVertex( l, l, l,  0, 0, -1,   1.0,0.0)) );
     meshes.back()->mMaterialIndex = materials.size()-4u;
 
     // RIGHT SIDE
     meshes.push_back( BuildSingleQuadMesh(
-        SkyboxVertex(-l,-l, l,  1, 0, 0,   1.f,1.f),
-        SkyboxVertex(-l,-l,-l,  1, 0, 0,   0.f,1.f),
-        SkyboxVertex(-l, l,-l,  1, 0, 0,   0.f,0.f),
-        SkyboxVertex(-l, l, l,  1, 0, 0,   1.f,0.f)) );
+        SkyboxVertex(-l,-l, l,  1, 0, 0,   1.0,1.0),
+        SkyboxVertex(-l,-l,-l,  1, 0, 0,   0.0,1.0),
+        SkyboxVertex(-l, l,-l,  1, 0, 0,   0.0,0.0),
+        SkyboxVertex(-l, l, l,  1, 0, 0,   1.0,0.0)) );
     meshes.back()->mMaterialIndex = materials.size()-3u;
 
     // TOP SIDE
     meshes.push_back( BuildSingleQuadMesh(
-        SkyboxVertex( l, l,-l,  0, -1, 0,   1.f,1.f),
-        SkyboxVertex( l, l, l,  0, -1, 0,   0.f,1.f),
-        SkyboxVertex(-l, l, l,  0, -1, 0,   0.f,0.f),
-        SkyboxVertex(-l, l,-l,  0, -1, 0,   1.f,0.f)) );
+        SkyboxVertex( l, l,-l,  0, -1, 0,   1.0,1.0),
+        SkyboxVertex( l, l, l,  0, -1, 0,   0.0,1.0),
+        SkyboxVertex(-l, l, l,  0, -1, 0,   0.0,0.0),
+        SkyboxVertex(-l, l,-l,  0, -1, 0,   1.0,0.0)) );
     meshes.back()->mMaterialIndex = materials.size()-2u;
 
     // BOTTOM SIDE
     meshes.push_back( BuildSingleQuadMesh(
-        SkyboxVertex( l,-l, l,  0,  1, 0,   0.f,0.f),
-        SkyboxVertex( l,-l,-l,  0,  1, 0,   1.f,0.f),
-        SkyboxVertex(-l,-l,-l,  0,  1, 0,   1.f,1.f),
-        SkyboxVertex(-l,-l, l,  0,  1, 0,   0.f,1.f)) );
+        SkyboxVertex( l,-l, l,  0,  1, 0,   0.0,0.0),
+        SkyboxVertex( l,-l,-l,  0,  1, 0,   1.0,0.0),
+        SkyboxVertex(-l,-l,-l,  0,  1, 0,   1.0,1.0),
+        SkyboxVertex(-l,-l, l,  0,  1, 0,   0.0,1.0)) );
     meshes.back()->mMaterialIndex = materials.size()-1u;
 }
 
@@ -479,7 +479,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                     aiVectorKey& key = anim->mPositionKeys[i];
                     key.mTime = i * tdelta;
 
-                    const float t = (float) ( in.speed * key.mTime );
+                    const ai_real t = (ai_real) ( in.speed * key.mTime );
                     key.mValue = in.circleCenter  + in.circleRadius * ((vecU * std::cos(t)) + (vecV * std::sin(t)));
                 }
 
@@ -498,7 +498,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
 
                 aiVector3D diff = in.direction - in.circleCenter;
-                const float lengthOfWay = diff.Length();
+                const ai_real lengthOfWay = diff.Length();
                 diff.Normalize();
 
                 const double timeFactor = lengthOfWay / in.timeForWay;
@@ -507,7 +507,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 for (unsigned int i = 0; i < anim->mNumPositionKeys;++i)    {
                     aiVectorKey& key = anim->mPositionKeys[i];
                     key.mTime = i * tdelta;
-                    key.mValue = in.circleCenter + diff * float(timeFactor * key.mTime);
+                    key.mValue = in.circleCenter + diff * ai_real(timeFactor * key.mTime);
                 }
             }
             break;
@@ -542,8 +542,8 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 {
                     aiVectorKey& key = anim->mPositionKeys[i];
 
-                    const float dt = (i * in.speed * 0.001f );
-                    const float u = dt - std::floor(dt);
+                    const ai_real dt = (i * in.speed * 0.001 );
+                    const ai_real u = dt - std::floor(dt);
                     const int idx = (int)std::floor(dt) % size;
 
                     // get the 4 current points to evaluate the spline
@@ -553,13 +553,13 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                     const aiVector3D& p3 = in.splineKeys[ ClampSpline( idx + 2, size ) ].mValue;
 
                     // compute polynomials
-                    const float u2 = u*u;
-                    const float u3 = u2*2;
+                    const ai_real u2 = u*u;
+                    const ai_real u3 = u2*2;
 
-                    const float h1 = 2.0f * u3 - 3.0f * u2 + 1.0f;
-                    const float h2 = -2.0f * u3 + 3.0f * u3;
-                    const float h3 = u3 - 2.0f * u3;
-                    const float h4 = u3 - u2;
+                    const ai_real h1 = 2.0 * u3 - 3.0 * u2 + 1.0;
+                    const ai_real h2 = -2.0 * u3 + 3.0 * u3;
+                    const ai_real h3 = u3 - 2.0 * u3;
+                    const ai_real h4 = u3 - u2;
 
                     // compute the spline tangents
                     const aiVector3D t1 = ( p2 - p0 ) * in.tightness;

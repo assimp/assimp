@@ -147,7 +147,7 @@ namespace Assimp
         void ReadEffectColor( aiColor4D& pColor, Collada::Sampler& pSampler);
 
         /** Reads an effect entry containing a float */
-        void ReadEffectFloat( float& pFloat);
+        void ReadEffectFloat( ai_real& pFloat);
 
         /** Reads an effect parameter specification of any kind */
         void ReadEffectParam( Collada::EffectParam& pParam);
@@ -259,7 +259,7 @@ namespace Assimp
         bool ReadBoolFromTextContent();
 
         /** Reads a single float from current text content */
-        float ReadFloatFromTextContent();
+        ai_real ReadFloatFromTextContent();
 
         /** Calculates the resulting transformation from all the given transform steps */
         aiMatrix4x4 CalculateResultTransform( const std::vector<Collada::Transform>& pTransforms) const;
@@ -335,7 +335,7 @@ namespace Assimp
         Collada::Animation mAnims;
 
         /** Size unit: how large compared to a meter */
-        float mUnitSize;
+        ai_real mUnitSize;
 
         /** Which is the up vector */
         enum { UP_X, UP_Y, UP_Z } mUpDirection;

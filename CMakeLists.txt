@@ -80,15 +80,30 @@ IF(NOT GIT_COMMIT_HASH)
   SET(GIT_COMMIT_HASH 0)
 ENDIF(NOT GIT_COMMIT_HASH)
 
+OPTION(ASSIMP_DOUBLE_PRECISION
+    "Set to ON to enable double precision processing"
+    OFF
+)
+
+IF(ASSIMP_DOUBLE_PRECISION)
+  ADD_DEFINITIONS(-DAI_DOUBLE_PRECISION)
+ENDIF(ASSIMP_DOUBLE_PRECISION)
+
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/revision.h.in
 #  ${CMAKE_CURRENT_SOURCE_DIR}/revision.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/revision.h
 )
 
+configure_file(
+  ${CMAKE_CURRENT_LIST_DIR}/include/assimp/config.h.in
+  ${CMAKE_CURRENT_LIST_DIR}/include/assimp/config.h
+)
+
 include_directories(
     ./
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
 OPTION(ASSIMP_OPT_BUILD_PACKAGES "Set to ON to generate CPack configuration files and packaging targets" OFF)

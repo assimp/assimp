@@ -202,6 +202,18 @@ inline aiReturn aiMaterial::AddProperty(const float* pInput,
 }
 
 // ---------------------------------------------------------------------------
+inline aiReturn aiMaterial::AddProperty(const double* pInput,
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
+{
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(float),
+        pKey,type,index,aiPTI_Double);
+}
+
+// ---------------------------------------------------------------------------
 inline aiReturn aiMaterial::AddProperty(const aiUVTransform* pInput,
     const unsigned int pNumValues,
     const char* pKey,

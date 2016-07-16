@@ -1132,7 +1132,7 @@ void SceneCombiner::Copy( aiAnimation** _dest, const aiAnimation* src )
 {
     ai_assert( NULL != _dest );
     ai_assert( NULL != src );
-    
+
     aiAnimation* dest = *_dest = new aiAnimation();
 
     // get a flat copy
@@ -1245,6 +1245,9 @@ void SceneCombiner::Copy (aiMetadata** _dest, const aiMetadata* src)
             break;
         case AI_FLOAT:
             out.mData = new float(*static_cast<float*>(in.mData));
+            break;
+        case AI_DOUBLE:
+            out.mData = new double(*static_cast<double*>(in.mData));
             break;
         case AI_AISTRING:
             out.mData = new aiString(*static_cast<aiString*>(in.mData));

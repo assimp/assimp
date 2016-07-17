@@ -61,15 +61,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // #define ASSIMP_BUILD_BLENDER_NO_STATS
 
 namespace Assimp    {
-    template <bool,bool> class StreamReader;
-    typedef StreamReader<true,true> StreamReaderAny;
 
-    namespace Blender {
-        class  FileDatabase;
-        struct FileBlockHead;
+template <bool,bool> class StreamReader;
+typedef StreamReader<true,true> StreamReaderAny;
 
-        template <template <typename> class TOUT>
-        class ObjectCache;
+namespace Blender {
+
+class  FileDatabase;
+struct FileBlockHead;
+
+template <template <typename> class TOUT>
+class ObjectCache;
 
 // -------------------------------------------------------------------------------
 /** Exception class used by the blender loader to selectively catch exceptions
@@ -78,20 +80,21 @@ namespace Assimp    {
  *  the loader itself, it will still be caught by Assimp due to its
  *  ancestry. */
 // -------------------------------------------------------------------------------
-struct Error : DeadlyImportError
-{
+struct Error : DeadlyImportError {
     Error (const std::string& s)
-        : DeadlyImportError(s)
-    {}
+    : DeadlyImportError(s) {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
 /** The only purpose of this structure is to feed a virtual dtor into its
  *  descendents. It serves as base class for all data structure fields. */
 // -------------------------------------------------------------------------------
-struct ElemBase
-{
-    virtual ~ElemBase() {}
+struct ElemBase {
+    virtual ~ElemBase() {
+        // empty
+    }
 
     /** Type name of the element. The type
      * string points is the `c_str` of the `name` attribute of the
@@ -103,25 +106,28 @@ struct ElemBase
     const char* dna_type;
 };
 
-
 // -------------------------------------------------------------------------------
 /** Represents a generic pointer to a memory location, which can be either 32
  *  or 64 bits. These pointers are loaded from the BLEND file and finally
  *  fixed to point to the real, converted representation of the objects
  *  they used to point to.*/
 // -------------------------------------------------------------------------------
-struct Pointer
-{
-    Pointer() : val() {}
+struct Pointer {
+    Pointer()
+    : val() {
+        // empty
+    }
     uint64_t val;
 };
 
 // -------------------------------------------------------------------------------
 /** Represents a generic offset within a BLEND file */
 // -------------------------------------------------------------------------------
-struct FileOffset
-{
-    FileOffset() : val() {}
+struct FileOffset {
+    FileOffset()
+    : val() {
+        // empty
+    }
     uint64_t val;
 };
 
@@ -132,8 +138,7 @@ struct FileOffset
  *  functions of shared_ptr */
 // -------------------------------------------------------------------------------
 template <typename T>
-class vector : public std::vector<T>
-{
+class vector : public std::vector<T> {
 public:
     using std::vector<T>::resize;
     using std::vector<T>::empty;
@@ -150,8 +155,7 @@ public:
 // -------------------------------------------------------------------------------
 /** Mixed flags for use in #Field */
 // -------------------------------------------------------------------------------
-enum FieldFlags
-{
+enum FieldFlags {
     FieldFlag_Pointer = 0x1,
     FieldFlag_Array   = 0x2
 };
@@ -159,8 +163,7 @@ enum FieldFlags
 // -------------------------------------------------------------------------------
 /** Represents a single member of a data structure in a BLEND file */
 // -------------------------------------------------------------------------------
-struct Field
-{
+struct Field {
     std::string name;
     std::string type;
 
@@ -180,8 +183,7 @@ struct Field
  *  mission critical so we need them, while others can silently be default
  *  initialized and no animations are harmed. */
 // -------------------------------------------------------------------------------
-enum ErrorPolicy
-{
+enum ErrorPolicy {
     /** Substitute default value and ignore */
     ErrorPolicy_Igno,
     /** Substitute default value and write to log */
@@ -202,15 +204,14 @@ enum ErrorPolicy
  *  binary `blob` read from the file to such a structure instance with
  *  meaningful contents. */
 // -------------------------------------------------------------------------------
-class Structure
-{
+class Structure {
     template <template <typename> class> friend class ObjectCache;
 
 public:
-
     Structure()
-        :   cache_idx(static_cast<size_t>(-1) )
-    {}
+    : cache_idx(static_cast<size_t>(-1) ){
+        // empty
+    }
 
 public:
 
@@ -709,8 +710,6 @@ class FileDatabase
     template <template <typename> class TOUT> friend class ObjectCache;
 
 public:
-
-
     FileDatabase()
         : _cacheArrays(*this)
         , _cache(*this)
@@ -718,7 +717,6 @@ public:
     {}
 
 public:
-
     // publicly accessible fields
     bool i64bit;
     bool little;

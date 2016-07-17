@@ -54,6 +54,7 @@ SOURCE_GROUP( unit FILES
 
 SET( TEST_SRCS
   unit/AssimpAPITest.cpp
+  unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp
   unit/utBlendImportMaterials.cpp
   unit/utColladaExportCamera.cpp

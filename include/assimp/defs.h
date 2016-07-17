@@ -229,19 +229,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
     //////////////////////////////////////////////////////////////////////////
-    /* Define AI_DOUBLE_PRECISION to compile assimp
+    /* Define ASSIMP_DOUBLE_PRECISION to compile assimp
      * with double precision support (64-bit). */
     //////////////////////////////////////////////////////////////////////////
 
-#ifdef AI_DOUBLE_PRECISION
+#ifdef ASSIMP_DOUBLE_PRECISION
     typedef double ai_real;
     typedef signed long long int ai_int;
     typedef unsigned long long int ai_uint;
-#else // AI_DOUBLE_PRECISION
+#else // ASSIMP_DOUBLE_PRECISION
     typedef float ai_real;
     typedef signed int ai_int;
     typedef unsigned int ai_uint;
-#endif // AI_DOUBLE_PRECISION
+#endif // ASSIMP_DOUBLE_PRECISION
 
     //////////////////////////////////////////////////////////////////////////
     /* Useful constants */

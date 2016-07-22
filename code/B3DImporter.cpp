@@ -378,6 +378,7 @@ void B3DImporter::ReadTRIS( int v0 ){
 
     int n_tris=ChunkSize()/12;
     aiFace *face=mesh->mFaces=new aiFace[n_tris];
+    mesh->mIndices = new unsigned int[n_tris * 3];
 
     for( int i=0;i<n_tris;++i ){
         int i0=ReadInt()+v0;
@@ -391,10 +392,10 @@ void B3DImporter::ReadTRIS( int v0 ){
             continue;
         }
         face->mNumIndices=3;
-        face->mIndices=new unsigned[3];
-        face->mIndices[0]=i0;
-        face->mIndices[1]=i1;
-        face->mIndices[2]=i2;
+        face->mIndices=i*3;
+        mesh->mIndices[face->mIndices + 0]=i0;
+        mesh->mIndices[face->mIndices + 1]=i1;
+        mesh->mIndices[face->mIndices + 2]=i2;
         ++mesh->mNumFaces;
         ++face;
     }
@@ -614,13 +615,13 @@ void B3DImporter::ReadBB3D( aiScene *scene ){
 
             for( int i=0;i<n_verts;i+=3 ){
                 for( int j=0;j<3;++j ){
-                    Vertex &v=_vertices[face->mIndices[j]];
+                    Vertex &v=_vertices[mesh->mIndices[face->mIndices + j]];
 
                     *mv++=v.vertex;
                     if( mn ) *mn++=v.normal;
                     if( mc ) *mc++=v.texcoords;
 
-                    face->mIndices[j]=i+j;
+                    mesh->mIndices[face->mIndices + j]=i+j;
 
                     for( int k=0;k<4;++k ){
                         if( !v.weights[k] ) break;

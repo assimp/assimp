@@ -472,7 +472,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                         hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
                         for (unsigned int i = 0; i < f.mNumIndices; ++i) {
                             static_assert(AI_MAX_VERTICES <= 0xffffffff, "AI_MAX_VERTICES <= 0xffffffff");
-                            tmp = static_cast<uint32_t>( f.mIndices[i] );
+                            tmp = static_cast<uint32_t>( mesh->mIndices[f.mIndices + i] );
                             hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
                         }
                     }
@@ -490,9 +490,9 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 
                     for (unsigned int a = 0; a < f.mNumIndices;++a) {
                         if (mesh->mNumVertices < (1u<<16)) {
-                            Write<uint16_t>(&chunk,f.mIndices[a]);
+                            Write<uint16_t>(&chunk, mesh->mIndices[f.mIndices + a]);
                         }
-                        else Write<unsigned int>(&chunk,f.mIndices[a]);
+                        else Write<unsigned int>(&chunk, mesh->mIndices[f.mIndices + a]);
                     }
                 }
             }

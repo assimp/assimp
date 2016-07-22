@@ -343,20 +343,28 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
             if (!avNormals->empty())
                 p_pcOut->mNormals = new aiVector3D[iNum];
 
+            for (std::vector<unsigned int>::const_iterator i = aiSplit[p].begin(); i != aiSplit[p].end(); ++i)
+            {
+                p_pcOut->mNumIndices += (unsigned int)(*avFaces)[*i].mIndices.size();
+            }
+            p_pcOut->mIndices = new unsigned int[p_pcOut->mNumIndices];
+
             // add all faces
             iNum = 0;
             unsigned int iVertex = 0;
+            unsigned int iIndices = 0;
             for (std::vector<unsigned int>::const_iterator i =  aiSplit[p].begin();
                 i != aiSplit[p].end();++i,++iNum)
             {
-                p_pcOut->mFaces[iNum].mNumIndices = (unsigned int)(*avFaces)[*i].mIndices.size();
-                p_pcOut->mFaces[iNum].mIndices = new unsigned int[p_pcOut->mFaces[iNum].mNumIndices];
+                p_pcOut->mFaces[iNum].mNumIndices = (unsigned int)(*avFaces)[*i].mIndices.size(); 
+                p_pcOut->mFaces[iNum].mIndices = iIndices;
+                iIndices += p_pcOut->mFaces[iNum].mNumIndices;
 
                 // build an unique set of vertices/colors for this face
                 for (unsigned int q = 0; q <  p_pcOut->mFaces[iNum].mNumIndices;++q)
                 {
-                    p_pcOut->mFaces[iNum].mIndices[q] = iVertex;
-                    const size_t idx = ( *avFaces )[ *i ].mIndices[ q ];
+                    p_pcOut->mIndices[p_pcOut->mFaces[iNum].mIndices + q] = iVertex;
+                    const size_t idx = p_pcOut->mIndices[p_pcOut->mFaces[iNum].mIndices + q];
                     if( idx >= ( *avPositions ).size() ) {
                         // out of border
                         continue;

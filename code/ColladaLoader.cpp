@@ -635,15 +635,18 @@ aiMesh* ColladaLoader::CreateMesh( const ColladaParser& pParser, const Collada::
     // create faces. Due to the fact that each face uses unique vertices, we can simply count up on each vertex
     size_t vertex = 0;
     dstMesh->mNumFaces = pSubMesh.mNumFaces;
+    dstMesh->mNumIndices = std::accumulate(pSrcMesh->mFaceSize.begin(), pSrcMesh->mFaceSize.end(), 0);
     dstMesh->mFaces = new aiFace[dstMesh->mNumFaces];
-    for( size_t a = 0; a < dstMesh->mNumFaces; ++a)
+    dstMesh->mIndices = new unsigned int[dstMesh->mNumIndices];
+    for( size_t a = 0, curIndex = 0; a < dstMesh->mNumFaces; ++a)
     {
         size_t s = pSrcMesh->mFaceSize[ pStartFace + a];
         aiFace& face = dstMesh->mFaces[a];
         face.mNumIndices = s;
-        face.mIndices = new unsigned int[s];
+        face.mIndices = curIndex;
+        curIndex += face.mNumIndices;
         for( size_t b = 0; b < s; ++b)
-            face.mIndices[b] = vertex++;
+            dstMesh->mIndices[face.mIndices + b] = vertex++;
     }
 
     // create bones if given

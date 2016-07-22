@@ -134,19 +134,19 @@ bool GenVertexNormalsProcess::GenMeshVertexNormals (aiMesh* pMesh, unsigned int 
         {
             // either a point or a line -> no normal vector
             for (unsigned int i = 0;i < face.mNumIndices;++i) {
-                pMesh->mNormals[face.mIndices[i]] = aiVector3D(qnan);
+                pMesh->mNormals[pMesh->mIndices[face.mIndices + i]] = aiVector3D(qnan);
             }
 
             continue;
         }
 
-        const aiVector3D* pV1 = &pMesh->mVertices[face.mIndices[0]];
-        const aiVector3D* pV2 = &pMesh->mVertices[face.mIndices[1]];
-        const aiVector3D* pV3 = &pMesh->mVertices[face.mIndices[face.mNumIndices-1]];
+        const aiVector3D* pV1 = &pMesh->mVertices[pMesh->mIndices[face.mIndices + 0]];
+        const aiVector3D* pV2 = &pMesh->mVertices[pMesh->mIndices[face.mIndices + 1]];
+        const aiVector3D* pV3 = &pMesh->mVertices[pMesh->mIndices[face.mIndices + face.mNumIndices-1]];
         const aiVector3D vNor = ((*pV2 - *pV1) ^ (*pV3 - *pV1));
 
         for (unsigned int i = 0;i < face.mNumIndices;++i) {
-            pMesh->mNormals[face.mIndices[i]] = vNor;
+            pMesh->mNormals[pMesh->mIndices[face.mIndices + i]] = vNor;
         }
     }
 

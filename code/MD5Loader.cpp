@@ -240,19 +240,19 @@ void MD5Importer::MakeDataUnique (MD5::MeshDesc& meshSrc)
     for (FaceList::const_iterator iter = meshSrc.mFaces.begin(),iterEnd = meshSrc.mFaces.end();iter != iterEnd;++iter){
         const aiFace& face = *iter;
         for (unsigned int i = 0; i < 3;++i) {
-            if (face.mIndices[0] >= meshSrc.mVertices.size()) {
+            if (meshSrc.mIndices[face.mIndices + 0] >= meshSrc.mVertices.size()) {
                 throw DeadlyImportError("MD5MESH: Invalid vertex index");
             }
 
-            if (abHad[face.mIndices[i]])    {
+            if (abHad[meshSrc.mIndices[face.mIndices + i]])    {
                 // generate a new vertex
-                meshSrc.mVertices[iNewIndex] = meshSrc.mVertices[face.mIndices[i]];
-                face.mIndices[i] = iNewIndex++;
+                meshSrc.mVertices[iNewIndex] = meshSrc.mVertices[meshSrc.mIndices[face.mIndices + i]];
+                meshSrc.mIndices[face.mIndices + i] = iNewIndex++;
             }
-            else abHad[face.mIndices[i]] = true;
+            else abHad[meshSrc.mIndices[face.mIndices + i]] = true;
         }
         // swap face order
-        std::swap(face.mIndices[0],face.mIndices[2]);
+        std::swap(meshSrc.mIndices[face.mIndices + 0], meshSrc.mIndices[face.mIndices + 2]);
     }
 }
 

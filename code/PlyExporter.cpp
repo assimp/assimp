@@ -358,7 +358,7 @@ void PlyExporter::WriteMeshIndices(const aiMesh* m, unsigned int offset)
         const aiFace& f = m->mFaces[i];
         mOutput << f.mNumIndices << " ";
         for(unsigned int c = 0; c < f.mNumIndices; ++c) {
-            mOutput << (f.mIndices[c] + offset) << (c == f.mNumIndices-1 ? endl : " ");
+            mOutput << (m->mIndices[f.mIndices + c] + offset) << (c == f.mNumIndices-1 ? endl : " ");
         }
     }
 }
@@ -372,7 +372,7 @@ void WriteMeshIndicesBinary_Generic(const aiMesh* m, unsigned int offset, std::o
         NumIndicesType numIndices = static_cast<NumIndicesType>(f.mNumIndices);
         output.write(reinterpret_cast<const char*>(&numIndices), sizeof(NumIndicesType));
         for (unsigned int c = 0; c < f.mNumIndices; ++c) {
-            IndexType index = f.mIndices[c] + offset;
+            IndexType index = m->mIndices[f.mIndices + c] + offset;
             output.write(reinterpret_cast<const char*>(&index), sizeof(IndexType));
         }
     }

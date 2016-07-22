@@ -516,7 +516,7 @@ void WriteDump(const aiScene* scene, IOStream* io, bool shortened) {
                         "\t\t\t\t",f.mNumIndices);
 
                     for (unsigned int j = 0; j < f.mNumIndices;++j)
-                        ioprintf(io,"%i ",f.mIndices[j]);
+                        ioprintf(io,"%i ",mesh->mIndices[f.mIndices + j]);
 
                     ioprintf(io,"\n\t\t\t</Face>\n");
                 }

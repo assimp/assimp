@@ -481,16 +481,17 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
             meshes.push_back(new aiMesh());
             aiMesh* mesh = meshes.back();
 
-            mesh->mNumFaces = mesh->mNumVertices = (unsigned int)object.vertices.size();
+            mesh->mNumFaces = mesh->mNumIndices = mesh->mNumVertices = (unsigned int)object.vertices.size();
             aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces];
+            unsigned int* indices = mesh->mIndices = new unsigned int[mesh->mNumIndices];
             aiVector3D* verts = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
 
-            for (unsigned int i = 0; i < mesh->mNumVertices;++i,++faces,++verts)
+            for (unsigned int i = 0; i < mesh->mNumVertices;++i,++faces,++verts,++indices)
             {
                 *verts = object.vertices[i];
+                *indices = i;
                 faces->mNumIndices = 1;
-                faces->mIndices = new unsigned int[1];
-                faces->mIndices[0] = i;
+                faces->mIndices = i;
             }
 
             // use the primary material in this case. this should be the
@@ -612,6 +613,34 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
                     mesh->mNumUVComponents[0] = 2;
                 }
 
+                // calculate and allocate storage for indices
+                mesh->mNumIndices = 0;
+                for (it = object.surfaces.begin(); it != end; ++it)
+                {
+                    if (mat == (*it).mat)
+                    {
+                        const Surface& src = *it;
+
+                        // closed polygon
+                        unsigned int type = (*it).flags & 0xf; 
+                        if (!type)
+                        {
+                            mesh->mNumIndices += (unsigned int)src.entries.size();
+                        }
+                        else
+                        {
+                            it2 = (*it).entries.begin();
+
+                            // either a closed or an unclosed line
+                            register unsigned int tmp = (unsigned int)(*it).entries.size();
+                            if (0x2 == type)--tmp;
+                            mesh->mNumIndices += tmp * 2;
+                        }
+                    }
+                }
+                mesh->mIndices = new unsigned int[mesh->mNumIndices];
+
+                unsigned int currentIndicesIndex = 0;
                 for (it = object.surfaces.begin(); it != end; ++it)
                 {
                     if (mat == (*it).mat)
@@ -625,11 +654,12 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
                             aiFace& face = *faces++;
                             if((face.mNumIndices = (unsigned int)src.entries.size()))
                             {
-                                face.mIndices = new unsigned int[face.mNumIndices];
+                                face.mIndices = currentIndicesIndex;
+                                currentIndicesIndex += face.mNumIndices;
                                 for (unsigned int i = 0; i < face.mNumIndices;++i,++vertices)
                                 {
                                     const Surface::SurfaceEntry& entry = src.entries[i];
-                                    face.mIndices[i] = cur++;
+                                    mesh->mIndices[face.mIndices + i] = cur++;
 
                                     // copy vertex positions
                                     if (static_cast<unsigned>(vertices - mesh->mVertices) >= mesh->mNumVertices) {
@@ -661,9 +691,10 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
                                 aiFace& face = *faces++;
 
                                 face.mNumIndices = 2;
-                                face.mIndices = new unsigned int[2];
-                                face.mIndices[0] = cur++;
-                                face.mIndices[1] = cur++;
+                                face.mIndices = currentIndicesIndex;
+                                currentIndicesIndex += face.mNumIndices;
+                                mesh->mIndices[face.mIndices + 0] = cur++;
+                                mesh->mIndices[face.mIndices + 1] = cur++;
 
                                 // copy vertex positions
                                 if (it2 == (*it).entries.end() ) {

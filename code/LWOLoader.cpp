@@ -304,6 +304,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
                 aiVector3D *nrm = NULL, * pv = mesh->mVertices = new aiVector3D[mesh->mNumVertices];
                 aiFace* pf = mesh->mFaces = new aiFace[mesh->mNumFaces];
+                mesh->mIndices = new unsigned int[mesh->mNumIndices = mesh->mNumVertices];
                 mesh->mMaterialIndex = i;
 
                 // find out which vertex color channels and which texture coordinate
@@ -361,7 +362,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
 
                     // copy all vertices
                     for (unsigned int q = 0; q  < face.mNumIndices;++q,++vert)  {
-                        unsigned int idx = face.mIndices[q];
+                        unsigned int idx = layer.mIndices[face.mIndices + q];
                         *pv++ = layer.mTempPoints[idx] /*- layer.mPivot*/;
 
                         // process UV coordinates
@@ -406,7 +407,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
                         }
 #endif
 
-                        face.mIndices[q] = vert;
+                        layer.mIndices[face.mIndices + q] = vert;
                     }
                     pf->mIndices = face.mIndices;
                     pf->mNumIndices = face.mNumIndices;
@@ -489,13 +490,13 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
         }
 
         // LWO doc: "the normal is defined as the cross product of the first and last edges"
-        aiVector3D* pV1 = mesh->mVertices + face.mIndices[0];
-        aiVector3D* pV2 = mesh->mVertices + face.mIndices[1];
-        aiVector3D* pV3 = mesh->mVertices + face.mIndices[face.mNumIndices-1];
+        aiVector3D* pV1 = mesh->mVertices + mesh->mIndices[face.mIndices + 0];
+        aiVector3D* pV2 = mesh->mVertices + mesh->mIndices[face.mIndices + 1];
+        aiVector3D* pV3 = mesh->mVertices + mesh->mIndices[face.mIndices + face.mNumIndices-1];
 
         aiVector3D vNor = ((*pV2 - *pV1) ^(*pV3 - *pV1)).Normalize();
         for (unsigned int i = 0; i < face.mNumIndices;++i)
-            out[face.mIndices[i]] = vNor;
+            out[mesh->mIndices[face.mIndices + i]] = vNor;
     }
     if (!surface.mMaximumSmoothAngle)return;
     const float posEpsilon = ComputePositionEpsilon(mesh);
@@ -508,7 +509,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
         aiFace& face = *begin;
         for (unsigned int i = 0; i < face.mNumIndices;++i)
         {
-            unsigned int tt = face.mIndices[i];
+            unsigned int tt = mesh->mIndices[face.mIndices + i];
             sSort.Add(mesh->mVertices[tt],tt,*it);
         }
     }
@@ -524,7 +525,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
 
         for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)  {
             const aiFace& face = *begin;
-            unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
+            unsigned int* beginIdx = mesh->mIndices + face.mIndices, *const endIdx = mesh->mIndices + face.mIndices + face.mNumIndices;
             for (; beginIdx != endIdx; ++beginIdx)
             {
                 unsigned int idx = *beginIdx;
@@ -547,7 +548,7 @@ void LWOImporter::ComputeNormals(aiMesh* mesh, const std::vector<unsigned int>& 
         std::vector<bool> vertexDone(mesh->mNumVertices,false);
         for( begin =  mesh->mFaces, it = smoothingGroups.begin(); begin != end; ++begin, ++it)  {
             const aiFace& face = *begin;
-            unsigned int* beginIdx = face.mIndices, *const endIdx = face.mIndices+face.mNumIndices;
+            unsigned int* beginIdx = mesh->mIndices + face.mIndices, *const endIdx = mesh->mIndices + face.mIndices + face.mNumIndices;
             for (; beginIdx != endIdx; ++beginIdx)
             {
                 unsigned int idx = *beginIdx;
@@ -815,7 +816,7 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
 
         mCurLayer->mFaces.resize(iNumFaces,LWO::Face(type));
         FaceList::iterator it = mCurLayer->mFaces.begin();
-        CopyFaceIndicesLWO2(it,cursor,end);
+        CopyFaceIndicesLWO2(it,mCurLayer->mIndices,cursor,end);
     }
 }
 
@@ -842,6 +843,7 @@ void LWOImporter::CountVertsAndFacesLWO2(unsigned int& verts, unsigned int& face
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
+    IndicesList& indices,
     uint16_t*& cursor,
     const uint16_t* const end)
 {
@@ -855,14 +857,14 @@ void LWOImporter::CopyFaceIndicesLWO2(FaceList::iterator& it,
 
         if(face.mNumIndices) /* byte swapping has already been done */
         {
-            face.mIndices = new unsigned int[face.mNumIndices];
+            face.mIndices = indices.size();
             for(unsigned int i = 0; i < face.mNumIndices; i++)
             {
-                face.mIndices[i] = ReadVSizedIntLWO2((uint8_t*&)cursor) + mCurLayer->mPointIDXOfs;
-                if(face.mIndices[i] > mCurLayer->mTempPoints.size())
+                indices.push_back(ReadVSizedIntLWO2((uint8_t*&)cursor) + mCurLayer->mPointIDXOfs);
+                if(indices.back() > mCurLayer->mTempPoints.size())
                 {
                     DefaultLogger::get()->warn("LWO2: Failure evaluating face record, index is out of range");
-                    face.mIndices[i] = (unsigned int)mCurLayer->mTempPoints.size()-1;
+                    indices.back() = (unsigned int)mCurLayer->mTempPoints.size()-1;
                 }
             }
         }
@@ -1089,7 +1091,7 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
                 bool had = false;
                 for (unsigned int i = 0; i < src.mNumIndices;++i)   {
 
-                    unsigned int srcIdx = src.mIndices[i], tmp = idx;
+                    unsigned int srcIdx = mCurLayer->mIndices[src.mIndices + i], tmp = idx;
                     do {
                         if (tmp == srcIdx)
                             break;
@@ -1103,12 +1105,12 @@ void LWOImporter::LoadLWO2VertexMap(unsigned int length, bool perPoly)
                     refList.resize(refList.size()+1, UINT_MAX);
 
                     idx = (unsigned int)pointList.size();
-                    src.mIndices[i] = (unsigned int)pointList.size();
+                    mCurLayer->mIndices[src.mIndices + i] = (unsigned int)pointList.size();
 
                     // store the index of the new vertex in the old vertex
                     // so we get a single linked list we can traverse in
                     // only one direction
-                    AddToSingleLinkedList(refList,srcIdx,src.mIndices[i]);
+                    AddToSingleLinkedList(refList,srcIdx, mCurLayer->mIndices[src.mIndices + i]);
                     pointList.push_back(pointList[srcIdx]);
 
                     CreateNewEntry(mCurLayer->mVColorChannels,  srcIdx );

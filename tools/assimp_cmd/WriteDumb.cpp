@@ -424,7 +424,7 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 				hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
 				for (unsigned int i = 0; i < f.mNumIndices; ++i) {
 					static_assert(AI_MAX_VERTICES <= 0xffffffff, "AI_MAX_VERTICES <= 0xffffffff");
-					tmp = static_cast<uint32_t>( f.mIndices[i] );
+					tmp = static_cast<uint32_t>( mesh->mIndices[f.mIndices+i] );
 					hash = SuperFastHash(reinterpret_cast<const char*>(&tmp),sizeof tmp,hash);
 				}
 			}
@@ -442,9 +442,9 @@ uint32_t WriteBinaryMesh(const aiMesh* mesh)
 
 			for (unsigned int a = 0; a < f.mNumIndices;++a) {
 				if (mesh->mNumVertices < (1u<<16)) {
-					len += Write<uint16_t>(f.mIndices[a]);
+					len += Write<uint16_t>(mesh->mIndices[f.mIndices+a]);
 				}
-				else len += Write<unsigned int>(f.mIndices[a]);
+				else len += Write<unsigned int>(mesh->mIndices[f.mIndices+a]);
 			}
 		}
 	}
@@ -1185,7 +1185,7 @@ void WriteDump(const aiScene* scene, FILE* out, const char* src, const char* cmd
 						"\t\t\t\t",f.mNumIndices);
 
 					for (unsigned int j = 0; j < f.mNumIndices;++j)
-						fprintf(out,"%u ",f.mIndices[j]);
+						fprintf(out,"%u ",mesh->mIndices[f.mIndices+j]);
 
 					fprintf(out,"\n\t\t\t</Face>\n");
 				}

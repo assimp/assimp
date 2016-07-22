@@ -289,7 +289,7 @@ void glTFExporter::ExportMeshes()
             indices.resize(aim->mNumFaces * nIndicesPerFace);
             for (size_t i = 0; i < aim->mNumFaces; ++i) {
                 for (size_t j = 0; j < nIndicesPerFace; ++j) {
-                    indices[i*nIndicesPerFace + j] = uint16_t(aim->mFaces[i].mIndices[j]);
+                    indices[i*nIndicesPerFace + j] = uint16_t(aim->mIndices[aim->mFaces[i].mIndices + j]);
                 }
             }
             p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);

@@ -129,23 +129,23 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
         // lies on a UV seam should work for most cases.
         for (unsigned int n = 0; n < face.mNumIndices;++n)
         {
-            if (out[face.mIndices[n]].x < LOWER_LIMIT)
+            if (out[mesh->mIndices[face.mIndices + n]].x < LOWER_LIMIT)
             {
                 small = n;
 
                 // If we have a U value very close to 0 we can't
                 // round the others to 0, too.
-                if (out[face.mIndices[n]].x <= LOWER_EPSILON)
+                if (out[mesh->mIndices[face.mIndices + n]].x <= LOWER_EPSILON)
                     zero = true;
                 else round_to_zero = true;
             }
-            if (out[face.mIndices[n]].x > UPPER_LIMIT)
+            if (out[mesh->mIndices[face.mIndices + n]].x > UPPER_LIMIT)
             {
                 large = n;
 
                 // If we have a U value very close to 1 we can't
                 // round the others to 1, too.
-                if (out[face.mIndices[n]].x >= UPPER_EPSILON)
+                if (out[mesh->mIndices[face.mIndices + n]].x >= UPPER_EPSILON)
                     one = true;
             }
         }
@@ -155,13 +155,13 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
             {
                 // If the u value is over the upper limit and no other u
                 // value of that face is 0, round it to 0
-                if (out[face.mIndices[n]].x > UPPER_LIMIT && !zero)
-                    out[face.mIndices[n]].x = 0.0;
+                if (out[mesh->mIndices[face.mIndices + n]].x > UPPER_LIMIT && !zero)
+                    out[mesh->mIndices[face.mIndices + n]].x = 0.f;
 
                 // If the u value is below the lower limit and no other u
                 // value of that face is 1, round it to 1
-                else if (out[face.mIndices[n]].x < LOWER_LIMIT && !one)
-                    out[face.mIndices[n]].x = 1.0;
+                else if (out[mesh->mIndices[face.mIndices + n]].x < LOWER_LIMIT && !one)
+                    out[mesh->mIndices[face.mIndices + n]].x = 1.f;
 
                 // The face contains both 0 and 1 as UV coords. This can occur
                 // for faces which have an edge that lies directly on the seam.
@@ -170,10 +170,10 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
                 // to which side we must round to.
                 else if (one && zero)
                 {
-                    if (round_to_zero && out[face.mIndices[n]].x >=  UPPER_EPSILON)
-                        out[face.mIndices[n]].x = 0.0;
-                    else if (!round_to_zero && out[face.mIndices[n]].x <= LOWER_EPSILON)
-                        out[face.mIndices[n]].x = 1.0;
+                    if (round_to_zero && out[mesh->mIndices[face.mIndices + n]].x >=  UPPER_EPSILON)
+                        out[mesh->mIndices[face.mIndices + n]].x = 0.f;
+                    else if (!round_to_zero && out[mesh->mIndices[face.mIndices + n]].x <= LOWER_EPSILON)
+                        out[mesh->mIndices[face.mIndices + n]].x = 1.f;
                 }
             }
         }

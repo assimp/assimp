@@ -281,7 +281,7 @@ void CatmullClarkSubdivider::InternSubdivide (
             Vertex& c = centroids[n];
 
             for (unsigned int a = 0; a < face.mNumIndices;++a) {
-                c += Vertex(mesh,face.mIndices[a]);
+                c += Vertex(mesh,mesh->mIndices[face.mIndices + a]);
             }
 
             c /= static_cast<float>(face.mNumIndices);
@@ -306,8 +306,8 @@ void CatmullClarkSubdivider::InternSubdivide (
 
             for (unsigned int p =0; p< face.mNumIndices; ++p) {
                 const unsigned int id[] = {
-                    face.mIndices[p],
-                    face.mIndices[p==face.mNumIndices-1?0:p+1]
+                    mesh->mIndices[face.mIndices + p],
+                    mesh->mIndices[(face.mIndices + p)==face.mNumIndices-1?0:p+1]
                 };
                 const unsigned int mp[] = {
                     maptbl[FLATTEN_VERTEX_IDX(t,id[0])],
@@ -363,7 +363,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 
             const aiFace& f = minp->mFaces[i];
             for (unsigned int n = 0; n < f.mNumIndices; ++n) {
-                ++cntadjfac[maptbl[FLATTEN_VERTEX_IDX(t,f.mIndices[n])]];
+                ++cntadjfac[maptbl[FLATTEN_VERTEX_IDX(t,minp->mIndices[f.mIndices + n])]];
             }
         }
     }
@@ -378,7 +378,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 
             const aiFace& f = minp->mFaces[i];
             for (unsigned int n = 0; n < f.mNumIndices; ++n) {
-                faceadjac[ofsadjvec[1+maptbl[FLATTEN_VERTEX_IDX(t,f.mIndices[n])]]++] = FLATTEN_FACE_IDX(t,i);
+                faceadjac[ofsadjvec[1+maptbl[FLATTEN_VERTEX_IDX(t,minp->mIndices[f.mIndices + n])]]++] = FLATTEN_FACE_IDX(t,i);
             }
         }
     }
@@ -398,7 +398,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 
                     bool haveit = false;
                     for (unsigned int i = 0; i < f.mNumIndices; ++i) {
-                        if (maptbl[FLATTEN_VERTEX_IDX(n,f.mIndices[i])]==(unsigned int)t) {
+                        if (maptbl[FLATTEN_VERTEX_IDX(n,msh->mIndices[f.mIndices + i])]==(unsigned int)t) {
                             haveit = true;
                             break;
                         }
@@ -436,6 +436,9 @@ void CatmullClarkSubdivider::InternSubdivide (
         // We need random access to the old face buffer, so reuse is not possible.
         mout->mFaces = new aiFace[mout->mNumFaces];
 
+        mout->mNumIndices = mout->mNumFaces*4;
+        mout->mIndices = new unsigned int[mout->mNumIndices];
+
         mout->mNumVertices = mout->mNumFaces*4;
         mout->mVertices = new aiVector3D[mout->mNumVertices];
 
@@ -469,24 +472,25 @@ void CatmullClarkSubdivider::InternSubdivide (
 
                 // Get a clean new face.
                 aiFace& faceOut = mout->mFaces[n++];
-                faceOut.mIndices = new unsigned int [faceOut.mNumIndices = 4];
+                faceOut.mNumIndices = 4;
+                faceOut.mIndices = faceOut.mNumIndices * a;
 
                 // Spawn a new quadrilateral (ccw winding) for this original point between:
                 // a) face centroid
-                centroids[FLATTEN_FACE_IDX(t,i)].SortBack(mout,faceOut.mIndices[0]=v++);
+                centroids[FLATTEN_FACE_IDX(t,i)].SortBack(mout,mout->mIndices[faceOut.mIndices + 0]=v++);
 
                 // b) adjacent edge on the left, seen from the centroid
-                const Edge& e0 = edges[MAKE_EDGE_HASH(maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a])],
-                    maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a==face.mNumIndices-1?0:a+1])
+                const Edge& e0 = edges[MAKE_EDGE_HASH(maptbl[FLATTEN_VERTEX_IDX(t,minp->mIndices[face.mIndices + a])],
+                    maptbl[FLATTEN_VERTEX_IDX(t, minp->mIndices[face.mIndices + (!a==face.mNumIndices-1?0:a+1)])
                     ])];  // fixme: replace with mod face.mNumIndices?
 
                 // c) adjacent edge on the right, seen from the centroid
-                const Edge& e1 = edges[MAKE_EDGE_HASH(maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a])],
-                    maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[!a?face.mNumIndices-1:a-1])
+                const Edge& e1 = edges[MAKE_EDGE_HASH(maptbl[FLATTEN_VERTEX_IDX(t, minp->mIndices[face.mIndices + a])],
+                    maptbl[FLATTEN_VERTEX_IDX(t, minp->mIndices[face.mIndices + (!a?face.mNumIndices-1:a-1)])
                     ])];  // fixme: replace with mod face.mNumIndices?
 
-                e0.edge_point.SortBack(mout,faceOut.mIndices[3]=v++);
-                e1.edge_point.SortBack(mout,faceOut.mIndices[1]=v++);
+                e0.edge_point.SortBack(mout,mout->mIndices[faceOut.mIndices + 3]=v++);
+                e1.edge_point.SortBack(mout,mout->mIndices[faceOut.mIndices + 1]=v++);
 
                 // d= original point P with distinct index i
                 // F := 0
@@ -498,7 +502,7 @@ void CatmullClarkSubdivider::InternSubdivide (
                 //    n := n+1
                 //
                 // (F+2R+(n-3)P)/n
-                const unsigned int org = maptbl[FLATTEN_VERTEX_IDX(t,face.mIndices[a])];
+                const unsigned int org = maptbl[FLATTEN_VERTEX_IDX(t,minp->mIndices[face.mIndices + a])];
                 TouchedOVertex& ov = new_points[org];
 
                 if (!ov.first) {
@@ -508,7 +512,7 @@ void CatmullClarkSubdivider::InternSubdivide (
                     GET_ADJACENT_FACES_AND_CNT(org,adj,cnt);
 
                     if (cnt < 3) {
-                        ov.second = Vertex(minp,face.mIndices[a]);
+                        ov.second = Vertex(minp, minp->mIndices[face.mIndices + a]);
                     }
                     else {
 
@@ -541,7 +545,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 
                             // find our original point in the face
                             for (unsigned int m = 0; m < f.mNumIndices; ++m) {
-                                if (maptbl[FLATTEN_VERTEX_IDX(nidx,f.mIndices[m])] == org) {
+                                if (maptbl[FLATTEN_VERTEX_IDX(nidx,mp->mIndices[f.mIndices + m])] == org) {
 
                                     // add *both* edges. this way, we can be sure that we add
                                     // *all* adjacent edges to R. In a closed shape, every
@@ -550,11 +554,11 @@ void CatmullClarkSubdivider::InternSubdivide (
                                     // result.
 
                                     const Edge& c0 = edges[MAKE_EDGE_HASH(org,maptbl[FLATTEN_VERTEX_IDX(
-                                        nidx,f.mIndices[!m?f.mNumIndices-1:m-1])])];
+                                        nidx, mp->mIndices[f.mIndices + (!m?f.mNumIndices-1:m-1)])])];
                                     // fixme: replace with mod face.mNumIndices?
 
                                     const Edge& c1 = edges[MAKE_EDGE_HASH(org,maptbl[FLATTEN_VERTEX_IDX(
-                                        nidx,f.mIndices[m==f.mNumIndices-1?0:m+1])])];
+                                        nidx, mp->mIndices[f.mIndices + (m==f.mNumIndices-1?0:m+1)])])];
                                     // fixme: replace with mod face.mNumIndices?
                                     R += c0.midpoint+c1.midpoint;
 
@@ -570,10 +574,10 @@ void CatmullClarkSubdivider::InternSubdivide (
                         }
 
                         const float div = static_cast<float>(cnt), divsq = 1.f/(div*div);
-                        ov.second = Vertex(minp,face.mIndices[a])*((div-3.f) / div) + R*divsq + F*divsq;
+                        ov.second = Vertex(minp,minp->mIndices[face.mIndices + a])*((div-3.f) / div) + R*divsq + F*divsq;
                     }
                 }
-                ov.second.SortBack(mout,faceOut.mIndices[2]=v++);
+                ov.second.SortBack(mout,mout->mIndices[faceOut.mIndices + 2]=v++);
             }
         }
     }

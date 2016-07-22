@@ -312,6 +312,8 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 
     pcMesh->mNumFaces = m_pcHeader->numTriangles;
     pcMesh->mFaces = new aiFace[m_pcHeader->numTriangles];
+    pcMesh->mNumIndices = pcMesh->mNumFaces * 3;
+    pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
 
     // allocate output storage
     pcMesh->mNumVertices = (unsigned int)pcMesh->mNumFaces*3;
@@ -399,7 +401,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 
     for (unsigned int i = 0; i < (unsigned int)m_pcHeader->numTriangles;++i)    {
         // Allocate the face
-        pScene->mMeshes[0]->mFaces[i].mIndices = new unsigned int[3];
+        pScene->mMeshes[0]->mFaces[i].mIndices = i * 3;
         pScene->mMeshes[0]->mFaces[i].mNumIndices = 3;
 
         // copy texture coordinates
@@ -449,7 +451,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
                 pcOut.x = pcTexCoords[iIndex].s / fDivisorU;
                 pcOut.y = 1.f-pcTexCoords[iIndex].t / fDivisorV;
             }
-            pScene->mMeshes[0]->mFaces[i].mIndices[c] = iCurrent;
+            pScene->mMeshes[0]->mIndices[pScene->mMeshes[0]->mFaces[i].mIndices + c] = iCurrent;
         }
     }
 }

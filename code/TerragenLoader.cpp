@@ -216,6 +216,7 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
 
             // We return quads
             aiFace* f = m->mFaces = new aiFace[m->mNumFaces = (x-1)*(y-1)];
+            m->mIndices = new unsigned int[m->mNumIndices = m->mNumFaces * 4];
             aiVector3D* pv = m->mVertices = new aiVector3D[m->mNumVertices = m->mNumFaces*4];
 
             aiVector3D *uv( NULL );
@@ -247,9 +248,10 @@ void TerragenImporter::InternReadFile( const std::string& pFile,
                     }
 
                     // make indices
-                    f->mIndices = new unsigned int[f->mNumIndices = 4];
+                    f->mNumIndices = 4;
+                    f->mIndices = ((x - 1) * yy + xx) * 4;
                     for (unsigned int i = 0; i < 4;++i)
-                        f->mIndices[i] = t++;
+                        m->mIndices[f->mIndices + i] = t++;
                 }
             }
 

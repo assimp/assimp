@@ -279,7 +279,7 @@ bool IsVerboseFormat(const aiMesh* mesh)
     for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
         const aiFace& f = mesh->mFaces[i];
         for(unsigned int j = 0; j < f.mNumIndices; ++j) {
-            if(++seen[f.mIndices[j]] == 2) {
+            if(++seen[mesh->mIndices[f.mIndices + j]] == 2) {
                 // found a duplicate index
                 return false;
             }

@@ -232,6 +232,8 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
             // allocate output storage
             out->mNumFaces = aiNumPerPType[real];
             aiFace* outFaces = out->mFaces = new aiFace[out->mNumFaces];
+            out->mNumIndices = mesh->mNumIndices;
+            out->mIndices = new unsigned int[out->mNumIndices];
 
             out->mNumVertices = (3 == real ? numPolyVerts : out->mNumFaces * (real+1));
 
@@ -288,9 +290,9 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
                 outFaces->mNumIndices = in.mNumIndices;
                 outFaces->mIndices    = in.mIndices;
 
-                for (unsigned int q = 0; q < in.mNumIndices; ++q)
+                for (unsigned int q = 0; q < outFaces->mNumIndices; ++q)
                 {
-                    unsigned int idx = in.mIndices[q];
+                    unsigned int idx = mesh->mIndices[outFaces->mIndices + q];
 
                     // process all bones of this index
                     if (avw)
@@ -327,7 +329,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene)
                         *cols[pp]++ = mesh->mColors[pp][idx];
                     }
 
-                    in.mIndices[q] = outIdx++;
+                    out->mIndices[outFaces->mIndices + q] = outIdx++;
                 }
 
                 in.mIndices = NULL;

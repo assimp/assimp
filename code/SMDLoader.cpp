@@ -297,6 +297,7 @@ void SMDImporter::CreateOutputMeshes()
         pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
         pcMesh->mNumVertices = (unsigned int)aaiFaces[i].size()*3;
         pcMesh->mNumFaces = (unsigned int)aaiFaces[i].size();
+        pcMesh->mNumIndices = (unsigned int)aaiFaces[i].size();
         pcMesh->mMaterialIndex = i;
 
         // storage for bones
@@ -313,6 +314,7 @@ void SMDImporter::CreateOutputMeshes()
 
         // allocate storage
         pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
+        pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
         aiVector3D* pcNormals = pcMesh->mNormals = new aiVector3D[pcMesh->mNumVertices];
         aiVector3D* pcVerts = pcMesh->mVertices = new aiVector3D[pcMesh->mNumVertices];
 
@@ -326,7 +328,7 @@ void SMDImporter::CreateOutputMeshes()
         iNum = 0;
         for (unsigned int iFace = 0; iFace < pcMesh->mNumFaces;++iFace)
         {
-            pcMesh->mFaces[iFace].mIndices = new unsigned int[3];
+            pcMesh->mFaces[iFace].mIndices = iFace * 3;
             pcMesh->mFaces[iFace].mNumIndices = 3;
 
             // fill the vertices
@@ -404,7 +406,7 @@ void SMDImporter::CreateOutputMeshes()
                             TempWeightListEntry(iNum,1.0f-fSum));
                     }
                 }
-                pcMesh->mFaces[iFace].mIndices[iVert] = iNum++;
+                pcMesh->mIndices[pcMesh->mFaces[iFace].mIndices + iVert] = iNum++;
             }
         }
 

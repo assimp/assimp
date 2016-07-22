@@ -229,11 +229,13 @@ private:
     /** Read vertices and faces in a LWOB/LWO2 file
     */
     void CopyFaceIndicesLWO2(LWO::FaceList::iterator& it,
+        LWO::IndicesList& indices,
         uint16_t*& cursor,
         const uint16_t* const end);
 
     // -------------------------------------------------------------------
     void CopyFaceIndicesLWOB(LWO::FaceList::iterator& it,
+        LWO::IndicesList& indices,
         LE_NCONST uint16_t*& cursor,
         const uint16_t* const end,
         unsigned int max = UINT_MAX);

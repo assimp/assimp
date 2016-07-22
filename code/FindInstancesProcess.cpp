@@ -225,11 +225,11 @@ void FindInstancesProcess::Execute( aiScene* pScene)
                         for (unsigned int tt = 0; tt < orig->mNumFaces;++tt) {
                             aiFace& f = orig->mFaces[tt];
                             for (unsigned int nn = 0; nn < f.mNumIndices;++nn)
-                                ftbl_orig[f.mIndices[nn]] = tt;
+                                ftbl_orig[orig->mIndices[f.mIndices + nn]] = tt;
 
                             aiFace& f2 = inst->mFaces[tt];
                             for (unsigned int nn = 0; nn < f2.mNumIndices;++nn)
-                                ftbl_inst[f2.mIndices[nn]] = tt;
+                                ftbl_inst[inst->mIndices[f2.mIndices + nn]] = tt;
                         }
                         if (0 != ::memcmp(ftbl_inst.get(),ftbl_orig.get(),orig->mNumVertices*sizeof(unsigned int)))
                             continue;

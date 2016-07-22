@@ -388,10 +388,12 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 
             // convert vertices
             meshOut->mNumFaces = (unsigned int)aiSplit[p].size();
+            meshOut->mNumIndices = meshOut->mNumFaces * 3;
             meshOut->mNumVertices = meshOut->mNumFaces*3;
 
             // allocate enough storage for faces
             meshOut->mFaces = new aiFace[meshOut->mNumFaces];
+            meshOut->mIndices = new unsigned int[meshOut->mNumIndices];
             iFaceCnt += meshOut->mNumFaces;
 
             meshOut->mVertices = new aiVector3D[meshOut->mNumVertices];
@@ -405,7 +407,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
                 unsigned int index = aiSplit[p][q];
                 aiFace& face = meshOut->mFaces[q];
 
-                face.mIndices = new unsigned int[3];
+                face.mIndices = q * 3;
                 face.mNumIndices = 3;
 
                 for (unsigned int a = 0; a < 3;++a,++base)
@@ -417,7 +419,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
                     if ((*i).mTexCoords.size())
                         meshOut->mTextureCoords[0][base] = (*i).mTexCoords[idx];
 
-                    face.mIndices[a] = base;
+                    meshOut->mIndices[face.mIndices + a] = base;
                 }
             }
         }

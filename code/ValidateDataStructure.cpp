@@ -362,14 +362,16 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
                 break;
             };
         }
-
-        if (!face.mIndices)
-            ReportError("aiMesh::mFaces[%i].mIndices is NULL",i);
     }
 
     // positions must always be there ...
     if (!pMesh->mNumVertices || (!pMesh->mVertices && !mScene->mFlags)) {
         ReportError("The mesh contains no vertices");
+    }
+
+    // indices must always be there ...
+    if (!pMesh->mNumIndices || (!pMesh->mIndices && !mScene->mFlags)) {
+        ReportError("The mesh contains no indices");
     }
 
     if (pMesh->mNumVertices > AI_MAX_VERTICES) {
@@ -402,18 +404,18 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 
         for (unsigned int a = 0; a < face.mNumIndices;++a)
         {
-            if (face.mIndices[a] >= pMesh->mNumVertices)    {
-                ReportError("aiMesh::mFaces[%i]::mIndices[%i] is out of range",i,a);
+            if (pMesh->mIndices[face.mIndices + a] >= pMesh->mNumVertices)    {
+                ReportError("aiMesh::mIndices[aiMesh::mFaces[%i]::mIndices + %i] is out of range",i,a);
             }
             // the MSB flag is temporarily used by the extra verbose
-            // mode to tell us that the JoinVerticesProcess might have
+            // mode to tell us that the JoinVerticesProcess might have 
             // been executed already.
-            if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && abRefList[face.mIndices[a]])
+            if ( !(this->mScene->mFlags & AI_SCENE_FLAGS_NON_VERBOSE_FORMAT ) && abRefList[pMesh->mIndices[face.mIndices + a]])
             {
                 ReportError("aiMesh::mVertices[%i] is referenced twice - second "
-                    "time by aiMesh::mFaces[%i]::mIndices[%i]",face.mIndices[a],i,a);
+                    "time by aiMesh::mIndices[aiMesh::mFaces[%i]::mIndices + %i]", pMesh->mIndices[face.mIndices + a],i,a);
             }
-            abRefList[face.mIndices[a]] = true;
+            abRefList[pMesh->mIndices[face.mIndices + a]] = true;
         }
     }
 

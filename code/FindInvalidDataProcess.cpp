@@ -346,7 +346,7 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
         const aiFace& f = pMesh->mFaces[m];
 
         for (unsigned int i = 0; i < f.mNumIndices;++i) {
-            dirtyMask[f.mIndices[i]] = false;
+            dirtyMask[pMesh->mIndices[f.mIndices + i]] = false;
         }
     }
 
@@ -386,10 +386,10 @@ int FindInvalidDataProcess::ProcessMesh (aiMesh* pMesh)
                     const aiFace& f = pMesh->mFaces[m];
 
                     if (f.mNumIndices < 3)  {
-                        dirtyMask[f.mIndices[0]] = true;
+                        dirtyMask[pMesh->mIndices[f.mIndices + 0]] = true;
 
                         if (f.mNumIndices == 2) {
-                            dirtyMask[f.mIndices[1]] = true;
+                            dirtyMask[pMesh->mIndices[f.mIndices + 1]] = true;
                         }
                     }
                 }

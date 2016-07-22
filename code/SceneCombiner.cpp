@@ -870,7 +870,7 @@ void SceneCombiner::MergeMeshes(aiMesh** _out,unsigned int /*flags*/,
                 if (ofs)    {
                     // add the offset to the vertex
                     for (unsigned int q = 0; q < face.mNumIndices; ++q)
-                        face.mIndices[q] += ofs;
+                        (*it)->mIndices[face.mIndices + q] += ofs;
                 }
                 face.mIndices = NULL;
             }
@@ -1061,11 +1061,7 @@ void SceneCombiner::Copy     (aiMesh** _dest, const aiMesh* src)
 
     // make a deep copy of all faces
     GetArrayCopy(dest->mFaces,dest->mNumFaces);
-    for (unsigned int i = 0; i < dest->mNumFaces;++i)
-    {
-        aiFace& f = dest->mFaces[i];
-        GetArrayCopy(f.mIndices,f.mNumIndices);
-    }
+    GetArrayCopy(dest->mIndices,dest->mNumIndices);
 }
 
 // ------------------------------------------------------------------------------------------------

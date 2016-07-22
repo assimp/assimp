@@ -130,7 +130,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
                 for (unsigned int a = 0;  a < pcMesh->mBones[i]->mNumWeights;a++)
                 {
                     const aiVertexWeight& w = pcMesh->mBones[i]->mWeights[a];
-                    if(pcFace->mIndices[q] == w.mVertexId)
+                    if(pcMesh->mIndices[pcFace->mIndices + q] == w.mVertexId)
                     {
                         aiVertexWeight wNew;
                         wNew.mVertexId = iIndex;
@@ -140,31 +140,31 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
                 }
             }
 
-            pvPositions[iIndex] = pcMesh->mVertices[pcFace->mIndices[q]];
+            pvPositions[iIndex] = pcMesh->mVertices[pcMesh->mIndices[pcFace->mIndices + q]];
 
             if (pcMesh->HasNormals())
             {
-                pvNormals[iIndex] = pcMesh->mNormals[pcFace->mIndices[q]];
+                pvNormals[iIndex] = pcMesh->mNormals[pcMesh->mIndices[pcFace->mIndices + q]];
             }
             if (pcMesh->HasTangentsAndBitangents())
             {
-                pvTangents[iIndex] = pcMesh->mTangents[pcFace->mIndices[q]];
-                pvBitangents[iIndex] = pcMesh->mBitangents[pcFace->mIndices[q]];
+                pvTangents[iIndex] = pcMesh->mTangents[pcMesh->mIndices[pcFace->mIndices + q]];
+                pvBitangents[iIndex] = pcMesh->mBitangents[pcMesh->mIndices[pcFace->mIndices + q]];
             }
 
             unsigned int p = 0;
             while (pcMesh->HasTextureCoords(p))
             {
-                apvTextureCoords[p][iIndex] = pcMesh->mTextureCoords[p][pcFace->mIndices[q]];
+                apvTextureCoords[p][iIndex] = pcMesh->mTextureCoords[p][pcMesh->mIndices[pcFace->mIndices + q]];
                 ++p;
             }
             p = 0;
             while (pcMesh->HasVertexColors(p))
             {
-                apvColorSets[p][iIndex] = pcMesh->mColors[p][pcFace->mIndices[q]];
+                apvColorSets[p][iIndex] = pcMesh->mColors[p][pcMesh->mIndices[pcFace->mIndices + q]];
                 ++p;
             }
-            pcFace->mIndices[q] = iIndex;
+            pcMesh->mIndices[pcFace->mIndices + q] = iIndex;
         }
     }
 

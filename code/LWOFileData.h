@@ -619,6 +619,7 @@ struct Surface
 // some typedefs ... to make life with loader monsters like this easier
 typedef std::vector <   aiVector3D      >   PointList;
 typedef std::vector <   LWO::Face       >   FaceList;
+typedef std::vector <   unsigned int    >   IndicesList;
 typedef std::vector <   LWO::Surface    >   SurfaceList;
 typedef std::vector <   std::string     >   TagList;
 typedef std::vector <   unsigned int    >   TagMappingTable;
@@ -668,6 +669,9 @@ struct Layer
 
     /** Temporary face list from the file*/
     FaceList mFaces;
+
+    /** Temprorary indices list from the file*/
+    IndicesList mIndices;
 
     /** Current face indexing offset from the beginning of the buffers*/
     unsigned int mFaceIDXOfs;

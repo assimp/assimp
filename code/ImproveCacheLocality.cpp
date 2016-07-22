@@ -160,7 +160,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
                 bool bInCache = false;
 
                 for (unsigned int* pp = piFIFOStack;pp < piCurEnd;++pp) {
-                    if (*pp == pcFace->mIndices[qq])    {
+                    if (*pp == pMesh->mIndices[pcFace->mIndices + qq])    {
                         // the vertex is in cache
                         bInCache = true;
                         break;
@@ -171,7 +171,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
                     if (piCurEnd == piCur) {
                         piCur = piFIFOStack;
                     }
-                    *piCur++ = pcFace->mIndices[qq];
+                    *piCur++ = pMesh->mIndices[pcFace->mIndices + qq];
                 }
             }
         }
@@ -190,7 +190,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
     }
 
     // first we need to build a vertex-triangle adjacency list
-    VertexTriangleAdjacency adj(pMesh->mFaces,pMesh->mNumFaces, pMesh->mNumVertices,true);
+    VertexTriangleAdjacency adj(pMesh, pMesh->mFaces,pMesh->mNumFaces, pMesh->mNumVertices,true);
 
     // build a list to store per-vertex caching time stamps
     unsigned int* const piCachingStamps = new unsigned int[pMesh->mNumVertices];
@@ -273,7 +273,7 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
 
                 // so iterate through all vertices of the current triangle
                 const aiFace* pcFace = &pMesh->mFaces[ fidx ];
-                for (unsigned int* p = pcFace->mIndices, *p2 = pcFace->mIndices+3;p != p2;++p)  {
+                for (unsigned int* p = pMesh->mIndices + pcFace->mIndices, *p2 = pMesh->mIndices + pcFace->mIndices+3;p != p2;++p)  {
                     const unsigned int dp = *p;
 
                     // the current vertex won't have any free triangles after this step
@@ -372,9 +372,9 @@ float ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int mesh
     // sort the output index buffer back to the input array
     piCSIter = piIBOutput;
     for (aiFace* pcFace = pMesh->mFaces; pcFace != pcEnd;++pcFace)  {
-        pcFace->mIndices[0] = *piCSIter++;
-        pcFace->mIndices[1] = *piCSIter++;
-        pcFace->mIndices[2] = *piCSIter++;
+        pMesh->mIndices[pcFace->mIndices + 0] = *piCSIter++;
+        pMesh->mIndices[pcFace->mIndices + 1] = *piCSIter++;
+        pMesh->mIndices[pcFace->mIndices + 2] = *piCSIter++;
     }
 
     // delete temporary storage

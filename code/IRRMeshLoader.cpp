@@ -273,6 +273,9 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
                     continue;
                 }
 
+                curMesh->mNumIndices = curMesh->mNumFaces * 3;
+                curMesh->mIndices = new unsigned int[curMesh->mNumIndices];
+
                 if (curMesh->mNumVertices % 3)  {
                     DefaultLogger::get()->warn("IRRMESH: Number if indices isn't divisible by 3");
                 }
@@ -430,16 +433,16 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
                     }
                     if (!curIdx)    {
                         curFace->mNumIndices = 3;
-                        curFace->mIndices = new unsigned int[3];
+                        curFace->mIndices = (unsigned int)(curFace - curMesh->mFaces) * 3;
                     }
+
+                    curMesh->mIndices[curFace->mIndices + curIdx] = total++;
 
                     unsigned int idx = strtoul10(sz,&sz);
                     if (idx >= curVertices.size())  {
                         DefaultLogger::get()->error("IRRMESH: Index out of range");
                         idx = 0;
                     }
-
-                    curFace->mIndices[curIdx] = total++;
 
                     *pcV++ = curVertices[idx];
                     if (pcN)*pcN++ = curNormals[idx];

@@ -63,10 +63,13 @@ void GenNormalsTest::SetUp()
     pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
     pcMesh->mNumFaces = 1;
     pcMesh->mFaces = new aiFace[1];
-    pcMesh->mFaces[0].mIndices = new unsigned int[pcMesh->mFaces[0].mNumIndices = 3];
-    pcMesh->mFaces[0].mIndices[0] = 0;
-    pcMesh->mFaces[0].mIndices[1] = 1;
-    pcMesh->mFaces[0].mIndices[2] = 1;
+    pcMesh->mFaces[0].mNumIndices = 3;
+    pcMesh->mFaces[0].mIndices = 0;
+    pcMesh->mNumIndices = 3;
+    pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
+    pcMesh->mIndices[pcMesh->mFaces[0].mIndices + 0] = 0;
+    pcMesh->mIndices[pcMesh->mFaces[0].mIndices + 1] = 1;
+    pcMesh->mIndices[pcMesh->mFaces[0].mIndices + 2] = 1;
     pcMesh->mNumVertices = 3;
     pcMesh->mVertices = new aiVector3D[3];
     pcMesh->mVertices[0] = aiVector3D(0.0f,1.0f,6.0f);

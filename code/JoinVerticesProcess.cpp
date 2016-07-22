@@ -351,7 +351,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     {
         aiFace& face = pMesh->mFaces[a];
         for( unsigned int b = 0; b < face.mNumIndices; b++) {
-            face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~0x80000000;
+            pMesh->mIndices[face.mIndices + b] = replaceIndex[pMesh->mIndices[face.mIndices + b]] & ~0x80000000;
         }
     }
 

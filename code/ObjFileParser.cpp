@@ -377,9 +377,9 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         return;
     }
 
-    std::vector<unsigned int> *pIndices = new std::vector<unsigned int>;
-    std::vector<unsigned int> *pTexID = new std::vector<unsigned int>;
-    std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
+    unsigned int VertexID = (unsigned int)m_pModel->m_pCurrentMesh->m_Vertices.size();
+    unsigned int TexID = (unsigned int)m_pModel->m_pCurrentMesh->m_TexturCoords.size();
+    unsigned int NormalID = (unsigned int)m_pModel->m_pCurrentMesh->m_Normals.size();
     bool hasNormal = false;
 
     const int vSize = m_pModel->m_Vertices.size();
@@ -428,15 +428,15 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 // Store parsed index
                 if ( 0 == iPos )
                 {
-                    pIndices->push_back( iVal-1 );
+                    m_pModel->m_pCurrentMesh->m_Vertices.push_back( iVal-1 );
                 }
                 else if ( 1 == iPos )
                 {
-                    pTexID->push_back( iVal-1 );
+                    m_pModel->m_pCurrentMesh->m_TexturCoords.push_back( iVal-1 );
                 }
                 else if ( 2 == iPos )
                 {
-                    pNormalID->push_back( iVal-1 );
+                    m_pModel->m_pCurrentMesh->m_Normals.push_back( iVal-1 );
                     hasNormal = true;
                 }
                 else
@@ -449,15 +449,15 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 // Store relatively index
                 if ( 0 == iPos )
                 {
-                    pIndices->push_back( vSize + iVal );
+                    m_pModel->m_pCurrentMesh->m_Vertices.push_back( vSize + iVal );
                 }
                 else if ( 1 == iPos )
                 {
-                    pTexID->push_back( vtSize + iVal );
+                    m_pModel->m_pCurrentMesh->m_TexturCoords.push_back( vtSize + iVal );
                 }
                 else if ( 2 == iPos )
                 {
-                    pNormalID->push_back( vnSize + iVal );
+                    m_pModel->m_pCurrentMesh->m_Normals.push_back( vnSize + iVal );
                     hasNormal = true;
                 }
                 else
@@ -469,24 +469,30 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         pPtr += iStep;
     }
 
-    if ( pIndices->empty() ) {
+    if ((unsigned int)m_pModel->m_pCurrentMesh->m_Vertices.size() == VertexID) {
         DefaultLogger::get()->error("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-        delete pNormalID;
-        delete pTexID;
-        delete pIndices;
 
         return;
     }
 
-    ObjFile::Face *face = new ObjFile::Face( pIndices, pNormalID, pTexID, type );
+    unsigned int numVertices = (unsigned int)m_pModel->m_pCurrentMesh->m_Vertices.size() - VertexID;
+    unsigned int numNormals = (unsigned int)m_pModel->m_pCurrentMesh->m_Normals.size() - NormalID;
+    unsigned int numTextureCoords = (unsigned int)m_pModel->m_pCurrentMesh->m_TexturCoords.size() - TexID;
+
+    // If an "f" line was supposed to be output as a "p" or "l"
+    if ((type == aiPrimitiveType_POLYGON || type == aiPrimitiveType_TRIANGLE) && numVertices < 3) {
+        type = numVertices == 2 ? aiPrimitiveType_LINE : aiPrimitiveType_POINT;
+    }
+
+    ObjFile::Face face = ObjFile::Face( numVertices, VertexID, numNormals, NormalID, numTextureCoords, TexID, type );
 
     // Set active material, if one set
     if( NULL != m_pModel->m_pCurrentMaterial ) {
-        face->m_pMaterial = m_pModel->m_pCurrentMaterial;
+        face.m_pMaterial = m_pModel->m_pCurrentMaterial;
     } else {
-        face->m_pMaterial = m_pModel->m_pDefaultMaterial;
+        face.m_pMaterial = m_pModel->m_pDefaultMaterial;
     }
 
     // Create a default object, if nothing is there
@@ -501,8 +507,8 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
     // Store the face
     m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
-    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_pVertices->size();
-    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int)face->m_pTexturCoords[0].size();
+    m_pModel->m_pCurrentMesh->m_uiNumIndices += numVertices;
+    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += numTextureCoords;
     if( !m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal ) {
         m_pModel->m_pCurrentMesh->m_hasNormals = true;
     }

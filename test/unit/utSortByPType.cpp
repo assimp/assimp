@@ -106,7 +106,9 @@ void SortByPTypeProcessTest::SetUp()
     {
         aiMesh* mesh = scene->mMeshes[i] = new aiMesh();
         mesh->mNumFaces = 1000;
+        mesh->mNumIndices = mesh->mNumFaces * 5;
         aiFace* faces =  mesh->mFaces = new aiFace[1000];
+        mesh->mIndices = new unsigned int[mesh->mNumIndices];
         aiVector3D* pv = mesh->mVertices = new aiVector3D[mesh->mNumFaces*5];
         aiVector3D* pn = mesh->mNormals = new aiVector3D[mesh->mNumFaces*5];
 
@@ -135,10 +137,10 @@ void SortByPTypeProcessTest::SetUp()
                 if(five)++faces->mNumIndices;
                 five = !five;
             }
-            faces->mIndices = new unsigned int[faces->mNumIndices];
+            faces->mIndices = n;
             for (unsigned int q = 0; q <faces->mNumIndices;++q,++n)
             {
-                faces->mIndices[q] = n;
+                mesh->mIndices[faces->mIndices + q] = n;
                 float f = (float)remaining[idx];
 
                 // (the values need to be unique - otherwise all degenerates would be removed)

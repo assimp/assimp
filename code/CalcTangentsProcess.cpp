@@ -166,7 +166,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
             // their tangent vectors are set to qnan.
             for (unsigned int i = 0; i < face.mNumIndices;++i)
             {
-                unsigned int idx = face.mIndices[i];
+                unsigned int idx = pMesh->mIndices[face.mIndices + i];
                 vertexDone  [idx] = true;
                 meshTang    [idx] = aiVector3D(qnan);
                 meshBitang  [idx] = aiVector3D(qnan);
@@ -178,7 +178,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
         // triangle or polygon... we always use only the first three indices. A polygon
         // is supposed to be planar anyways....
         // FIXME: (thom) create correct calculation for multi-vertex polygons maybe?
-        const unsigned int p0 = face.mIndices[0], p1 = face.mIndices[1], p2 = face.mIndices[2];
+        const unsigned int p0 = pMesh->mIndices[face.mIndices + 0], p1 = pMesh->mIndices[face.mIndices + 1], p2 = pMesh->mIndices[face.mIndices + 2];
 
         // position differences p1->p2 and p1->p3
         aiVector3D v = meshPos[p1] - meshPos[p0], w = meshPos[p2] - meshPos[p0];
@@ -205,7 +205,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 
         // store for every vertex of that face
         for( unsigned int b = 0; b < face.mNumIndices; ++b ) {
-            unsigned int p = face.mIndices[b];
+            unsigned int p = pMesh->mIndices[face.mIndices + b];
 
             // project tangent and bitangent into the plane formed by the vertex' normal
             aiVector3D localTangent = tangent - meshNorm[p] * (tangent * meshNorm[p]);

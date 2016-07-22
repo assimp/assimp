@@ -228,6 +228,7 @@ struct WeightDesc
 
 typedef std::vector< WeightDesc > WeightList;
 typedef std::vector< aiFace > FaceList;
+typedef std::vector< unsigned int > IndicesList;
 
 // ---------------------------------------------------------------------------
 /** Represents a mesh in a MD5 file
@@ -242,6 +243,9 @@ struct MeshDesc
 
     //! Faces of the mesh
     FaceList mFaces;
+
+    //! Indices of the mesh
+    IndicesList mIndices;
 
     //! Name of the shader (=texture) to be assigned to the mesh
     aiString mShader;

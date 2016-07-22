@@ -534,7 +534,7 @@ int CreateAssetData()
             {
                 for (unsigned int a = 0; a < nidx;++a)
                 {
-                    *pbData++ = mesh->mFaces[x].mIndices[a];
+                    *pbData++ = mesh->mIndices[mesh->mFaces[x].mIndices+a];
                 }
             }
         }
@@ -560,7 +560,7 @@ int CreateAssetData()
             {
                 for (unsigned int a = 0; a < nidx;++a)
                 {
-                    *pbData++ = (uint16_t)mesh->mFaces[x].mIndices[a];
+                    *pbData++ = (uint16_t)mesh->mIndices[mesh->mFaces[x].mIndices+a];
                 }
             }
         }

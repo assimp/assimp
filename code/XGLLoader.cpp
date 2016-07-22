@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <cctype>
 #include <memory>
+#include <numeric>
 
 using namespace Assimp;
 using namespace irr;
@@ -553,14 +554,15 @@ aiMesh* XGLImporter::ToOutputMesh(const TempMaterialMesh& m)
 
     mesh->mNumFaces =  static_cast<unsigned int>(m.vcounts.size());
     mesh->mFaces = new aiFace[m.vcounts.size()];
+    mesh->mNumIndices = std::accumulate(m.vcounts.begin(), m.vcounts.end(), 0);
+    mesh->mIndices = new unsigned int[mesh->mNumIndices];
 
     unsigned int idx = 0;
     for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
         aiFace& f = mesh->mFaces[i];
         f.mNumIndices = m.vcounts[i];
-        f.mIndices = new unsigned int[f.mNumIndices];
         for(unsigned int c = 0; c < f.mNumIndices; ++c) {
-            f.mIndices[c] = idx++;
+            mesh->mIndices[f.mIndices + c] = idx++;
         }
     }
 

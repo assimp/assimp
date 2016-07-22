@@ -293,14 +293,16 @@ void RAWImporter::InternReadFile( const std::string& pFile,
             // generate triangles
             ai_assert(0 == mesh->mNumVertices % 3);
             aiFace* fc = mesh->mFaces = new aiFace[ mesh->mNumFaces = mesh->mNumVertices/3 ];
+            mesh->mIndices = new unsigned int[mesh->mNumIndices = mesh->mNumFaces * 3];
             aiFace* const fcEnd = fc + mesh->mNumFaces;
             unsigned int n = 0;
             while (fc != fcEnd)
             {
                 aiFace& f = *fc++;
-                f.mIndices = new unsigned int[f.mNumIndices = 3];
+                f.mNumIndices = 3;
+                f.mIndices = n;
                 for (unsigned int m = 0; m < 3;++m)
-                    f.mIndices[m] = n++;
+                    mesh->mIndices[f.mIndices + m] = n++;
             }
 
             // generate a material for the mesh

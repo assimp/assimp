@@ -866,7 +866,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
             const aiFace& face = mesh->mFaces[a];
             if (face.mNumIndices != 2) continue;
             for( size_t b = 0; b < face.mNumIndices; ++b )
-                mOutput << face.mIndices[b] << " ";
+                mOutput << mesh->mIndices[face.mIndices + b] << " ";
         }
         mOutput << "</p>" << endstr;
         PopTag();
@@ -901,7 +901,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
             const aiFace& face = mesh->mFaces[a];
             if (face.mNumIndices < 3) continue;
             for( size_t b = 0; b < face.mNumIndices; ++b )
-                mOutput << face.mIndices[b] << " ";
+                mOutput << mesh->mIndices[face.mIndices + b] << " ";
         }
         mOutput << "</p>" << endstr;
         PopTag();

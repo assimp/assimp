@@ -404,7 +404,7 @@ size_t IndexData::FaceSize() const
 
 // Mesh
 
-Mesh::Mesh() 
+Mesh::Mesh()
     : hasSkeletalAnimations(false)
     , skeleton(NULL)
     , sharedVertexData(NULL)
@@ -568,7 +568,9 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 
     // Faces
     dest->mNumFaces = indexData->faceCount;
+    dest->mNumIndices = dest->mNumFaces * 3;
     dest->mFaces = new aiFace[dest->mNumFaces];
+    dest->mIndices = new unsigned int[dest->mNumIndices];
 
     // Assimp required unique vertices, we need to convert from Ogres shared indexing.
     size_t uniqueVertexCount = dest->mNumFaces * 3;
@@ -634,15 +636,12 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
     for (size_t fi=0, isize=indexData->IndexSize(), fsize=indexData->FaceSize();
          fi<dest->mNumFaces; ++fi)
     {
-        // Source Ogre face
-        aiFace ogreFace;
-        ogreFace.mNumIndices = 3;
-        ogreFace.mIndices = new unsigned int[3];
+        unsigned int ogreIndices[3];
 
         faces->Seek(fi * fsize, aiOrigin_SET);
         if (indexData->is32bit)
         {
-            faces->Read(&ogreFace.mIndices[0], isize, 3);
+            faces->Read(&ogreIndices[0], isize, 3);
         }
         else
         {
@@ -650,14 +649,14 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
             for (size_t ii=0; ii<3; ++ii)
             {
                 faces->Read(&iout, isize, 1);
-                ogreFace.mIndices[ii] = static_cast<unsigned int>(iout);
+                ogreIndices[ii] = static_cast<unsigned int>(iout);
             }
         }
 
         // Destination Assimp face
         aiFace &face = dest->mFaces[fi];
         face.mNumIndices = 3;
-        face.mIndices = new unsigned int[3];
+        face.mIndices = fi * 3;
 
         const size_t pos = fi * 3;
         for (size_t v=0; v<3; ++v)
@@ -665,10 +664,10 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
             const size_t newIndex = pos + v;
 
             // Write face index
-            face.mIndices[v] = newIndex;
+            dest->mIndices[face.mIndices + v] = newIndex;
 
             // Ogres vertex index to ref into the source buffers.
-            const size_t ogreVertexIndex = ogreFace.mIndices[v];
+            const size_t ogreVertexIndex = ogreIndices[v];
             src->AddVertexMapping(ogreVertexIndex, newIndex);
 
             // Position
@@ -836,7 +835,9 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 
     // Faces
     dest->mNumFaces = indexData->faceCount;
+    dest->mNumIndices = dest->mNumFaces * 3;
     dest->mFaces = new aiFace[dest->mNumFaces];
+    dest->mIndices = new unsigned int[dest->mNumIndices];
 
     // Assimp required unique vertices, we need to convert from Ogres shared indexing.
     size_t uniqueVertexCount = dest->mNumFaces * 3;
@@ -867,7 +868,7 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
         // Destination Assimp face
         aiFace &face = dest->mFaces[fi];
         face.mNumIndices = 3;
-        face.mIndices = new unsigned int[3];
+        face.mIndices = fi * 3;
 
         const size_t pos = fi * 3;
         for (size_t v=0; v<3; ++v)
@@ -875,10 +876,10 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
             const size_t newIndex = pos + v;
 
             // Write face index
-            face.mIndices[v] = newIndex;
+            dest->mIndices[face.mIndices + v] = newIndex;
 
             // Ogres vertex index to ref into the source buffers.
-            const size_t ogreVertexIndex = ogreFace.mIndices[v];
+            const size_t ogreVertexIndex = indexData->indices[v];
             src->AddVertexMapping(ogreVertexIndex, newIndex);
 
             // Position

@@ -65,6 +65,9 @@ void FindDegeneratesProcessTest::SetUp()
     mesh->mNumFaces = 1000;
     mesh->mFaces = new aiFace[1000];
 
+    mesh->mNumIndices = 5000*2;
+    mesh->mIndices = new unsigned int[5000*2];
+
     mesh->mNumVertices = 5000*2;
     mesh->mVertices = new aiVector3D[5000*2];
 
@@ -75,28 +78,29 @@ void FindDegeneratesProcessTest::SetUp()
     mesh->mPrimitiveTypes = aiPrimitiveType_LINE | aiPrimitiveType_POINT |
     aiPrimitiveType_POLYGON | aiPrimitiveType_TRIANGLE;
 
-    unsigned int numOut = 0, numFaces = 0;
+    unsigned int numOut = 0, numFaces = 0, numIndices = 0;
     for (unsigned int i = 0; i < 1000; ++i) {
         aiFace& f = mesh->mFaces[i];
-    f.mNumIndices = (i % 5)+1; // between 1 and 5
-    f.mIndices = new unsigned int[f.mNumIndices];
-    bool had = false;
-    for (unsigned int n = 0; n < f.mNumIndices;++n) {
-        // FIXME
+        f.mNumIndices = (i % 5)+1; // between 1 and 5
+        f.mIndices = numIndices;
+        numIndices += f.mNumIndices;
+        bool had = false;
+        for (unsigned int n = 0; n < f.mNumIndices;++n) {
+            // FIXME
 #if 0
-        // some duplicate indices
-        if ( n && n == (i / 200)+1) {
-            f.mIndices[n] = f.mIndices[n-1];
-            had = true;
-        }
-        // and some duplicate vertices
+            // some duplicate indices
+            if ( n && n == (i / 200)+1) {
+                mesh->mIndices[f.mIndices+n] = mesh->mIndices[f.mIndices+n-1];
+                had = true;
+            }
+            // and some duplicate vertices
 #endif
-        if (n && i % 2 && 0 == n % 2) {
-            f.mIndices[n] = f.mIndices[n-1]+5000;
-            had = true;
-        }
-        else {
-            f.mIndices[n] = numOut++;
+            if (n && i % 2 && 0 == n % 2) {
+                mesh->mIndices[f.mIndices+n] = mesh->mIndices[f.mIndices+n-1]+5000;
+                had = true;
+            }
+            else {
+                mesh->mIndices[f.mIndices+n] = numOut++;
             }
         }
         if (!had)

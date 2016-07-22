@@ -307,8 +307,8 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
         const aiFace &f = pMesh->mFaces[subMeshFaces[i]];
 
         for(unsigned int j=0;j<f.mNumIndices;j++)   {
-            if(vMap[f.mIndices[j]]==UINT_MAX)   {
-                vMap[f.mIndices[j]] = numSubVerts++;
+            if(vMap[pMesh->mIndices[f.mIndices + j]]==UINT_MAX)   {
+                vMap[pMesh->mIndices[f.mIndices + j]] = numSubVerts++;
             }
         }
     }
@@ -321,6 +321,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
     // create all the arrays for this mesh if the old mesh contained them
 
     oMesh->mNumFaces = subMeshFaces.size();
+    oMesh->mNumIndices = pMesh->mNumIndices;
     oMesh->mNumVertices = numSubVerts;
     oMesh->mVertices = new aiVector3D[numSubVerts];
     if( pMesh->HasNormals() ) {
@@ -340,20 +341,22 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
     for( size_t a = 0; pMesh->HasVertexColors( a); ++a )    {
         oMesh->mColors[a] = new aiColor4D[numSubVerts];
     }
-
     // and copy over the data, generating faces with linear indices along the way
     oMesh->mFaces = new aiFace[numSubFaces];
+    oMesh->mIndices = new unsigned int[oMesh->mNumIndices];
 
+    unsigned int curIndicesIndex = 0;
     for(unsigned int a = 0; a < numSubFaces; ++a )  {
 
         const aiFace& srcFace = pMesh->mFaces[subMeshFaces[a]];
         aiFace& dstFace = oMesh->mFaces[a];
         dstFace.mNumIndices = srcFace.mNumIndices;
-        dstFace.mIndices = new unsigned int[dstFace.mNumIndices];
+        dstFace.mIndices = curIndicesIndex;
+        curIndicesIndex += dstFace.mNumIndices;
 
         // accumulate linearly all the vertices of the source face
         for( size_t b = 0; b < dstFace.mNumIndices; ++b )   {
-            dstFace.mIndices[b] = vMap[srcFace.mIndices[b]];
+            oMesh->mIndices[dstFace.mIndices + b] = vMap[pMesh->mIndices[srcFace.mIndices + b]];
         }
     }
 

@@ -85,6 +85,8 @@ aiMesh* TempMesh::ToMesh()
     // and build up faces
     mesh->mNumFaces = static_cast<unsigned int>(vertcnt.size());
     mesh->mFaces = new aiFace[mesh->mNumFaces];
+    mesh->mNumIndices = std::accumulate(vertcnt.begin(), vertcnt.end(), 0);
+    mesh->mIndices = new unsigned int[mesh->mNumIndices];
 
     for(unsigned int i = 0,n=0, acc = 0; i < mesh->mNumFaces; ++n) {
         aiFace& f = mesh->mFaces[i];
@@ -94,9 +96,9 @@ aiMesh* TempMesh::ToMesh()
         }
 
         f.mNumIndices = vertcnt[n];
-        f.mIndices = new unsigned int[f.mNumIndices];
+        f.mIndices = acc;
         for(unsigned int a = 0; a < f.mNumIndices; ++a) {
-            f.mIndices[a] = acc++;
+            mesh->mIndices[f.mIndices + a] = acc++;
         }
 
         ++i;

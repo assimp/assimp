@@ -67,6 +67,8 @@ void TriangulateProcessTest::SetUp()
 
     pcMesh->mNumFaces = 1000;
     pcMesh->mFaces = new aiFace[1000];
+    pcMesh->mNumIndices = 10000;
+    pcMesh->mIndices = new unsigned int[10000];
     pcMesh->mVertices = new aiVector3D[10000];
 
     pcMesh->mPrimitiveTypes = aiPrimitiveType_POINT | aiPrimitiveType_LINE |
@@ -84,10 +86,10 @@ void TriangulateProcessTest::SetUp()
 
             if (10 == q)q = 4;
         }
-        face.mIndices = new unsigned int[face.mNumIndices];
+        face.mIndices = m * 10;
         for (unsigned int p = 0; p < face.mNumIndices; ++p)
         {
-            face.mIndices[p] = pcMesh->mNumVertices;
+            pcMesh->mIndices[face.mIndices + p] = pcMesh->mNumVertices;
 
         // construct fully convex input data in ccw winding, xy plane
             aiVector3D& v = pcMesh->mVertices[pcMesh->mNumVertices++];
@@ -126,7 +128,7 @@ TEST_F(TriangulateProcessTest, testTriangulation)
 
                 for (unsigned int qqq = 0; qqq < face.mNumIndices; ++qqq)
                 {
-                    ait[face.mIndices[qqq]-idx] = true;
+                    ait[pcMesh->mIndices[face.mIndices + qqq]-idx] = true;
                 }
             }
             for (std::vector<bool>::const_iterator it = ait.begin(); it != ait.end(); ++it)
@@ -143,7 +145,7 @@ TEST_F(TriangulateProcessTest, testTriangulation)
 
             for (unsigned int i = 0; i < face.mNumIndices; ++i,++idx)
             {
-                EXPECT_EQ(idx, face.mIndices[i]);
+                EXPECT_EQ(idx, pcMesh->mIndices[face.mIndices + i]);
             }
         }
     }

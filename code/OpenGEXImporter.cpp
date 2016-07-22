@@ -124,7 +124,7 @@ namespace Grammar {
         MaterialToken,
         ColorToken,
         ParamToken,
-        TextureToken, 
+        TextureToken,
         AttenToken
     };
 
@@ -235,7 +235,7 @@ OpenGEXImporter::VertexContainer::VertexContainer()
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_normals;
-    
+
     for(auto &texcoords : m_textureCoords) {
         delete [] texcoords;
     }
@@ -411,7 +411,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
             case Grammar::ColorToken:
                 handleColorNode( *it, pScene );
                 break;
-            
+
             case Grammar::ParamToken:
                 handleParamNode( *it, pScene );
                 break;
@@ -477,7 +477,7 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
         }
 
         const std::string name( val->getString() );
-        if( m_tokenType == Grammar::GeometryNodeToken || m_tokenType == Grammar::LightNodeToken  
+        if( m_tokenType == Grammar::GeometryNodeToken || m_tokenType == Grammar::LightNodeToken
                 || m_tokenType == Grammar::CameraNodeToken ) {
             m_currentNode->mName.Set( name.c_str() );
         } else if( m_tokenType == Grammar::MaterialToken ) {
@@ -513,7 +513,7 @@ void OpenGEXImporter::handleObjectRefNode( DDLNode *node, aiScene *pScene ) {
 
     std::vector<std::string> objRefNames;
     getRefNames( node, objRefNames );
-    
+
     // when we are dealing with a geometry node prepare the mesh cache
     if ( m_tokenType == Grammar::GeometryNodeToken ) {
         m_currentNode->mNumMeshes = objRefNames.size();
@@ -594,7 +594,7 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleCameraObject( ODDLParser::DDLNode *node, aiScene *pScene ) {
     // parameters will be parsed normally in the tree, so just go for it
-   
+
     handleNodes( node, pScene );
 }
 
@@ -833,6 +833,8 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     const size_t numItems( countDataArrayListItems( vaList ) );
     m_currentMesh->mNumFaces = numItems;
     m_currentMesh->mFaces = new aiFace[ numItems ];
+    m_currentMesh->mNumIndices = numItems * 3;
+    m_currentMesh->mIndices = new unsigned int[m_currentMesh->mNumIndices];
     m_currentMesh->mNumVertices = numItems * 3;
     m_currentMesh->mVertices = new aiVector3D[ m_currentMesh->mNumVertices ];
     bool hasNormalCoords( false );
@@ -850,7 +852,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     for( size_t i = 0; i < m_currentMesh->mNumFaces; i++ ) {
         aiFace &current(  m_currentMesh->mFaces[ i ] );
         current.mNumIndices = 3;
-        current.mIndices = new unsigned int[ current.mNumIndices ];
+        current.mIndices = index;
         Value *next( vaList->m_dataList );
         for( size_t indices = 0; indices < current.mNumIndices; indices++ ) {
             const int idx( next->getUnsignedInt32() );
@@ -866,7 +868,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
                 aiVector3D &tex = ( m_currentVertices.m_textureCoords[ 0 ][ idx ] );
                 m_currentMesh->mTextureCoords[ 0 ][ index ].Set( tex.x, tex.y, tex.z );
             }
-            current.mIndices[ indices ] = index;
+            m_currentMesh->mIndices[ current.mIndices + indices ] = index;
             index++;
 
             next = next->m_next;
@@ -1127,7 +1129,7 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
     if ( NULL == node ) {
         return;
     }
-        
+
     ChildInfo *info( nullptr );
     if( m_nodeStack.empty() ) {
         node->mParent = pScene->mRootNode;

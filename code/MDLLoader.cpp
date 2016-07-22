@@ -446,9 +446,11 @@ void MDLImporter::InternReadFile_Quake1( )
     pcMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
     pcMesh->mNumVertices = pcHeader->num_tris * 3;
     pcMesh->mNumFaces = pcHeader->num_tris;
+    pcMesh->mNumIndices = pcMesh->mNumFaces * 3;
     pcMesh->mVertices = new aiVector3D[pcMesh->mNumVertices];
     pcMesh->mTextureCoords[0] = new aiVector3D[pcMesh->mNumVertices];
     pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
+    pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
     pcMesh->mNormals = new aiVector3D[pcMesh->mNumVertices];
     pcMesh->mNumUVComponents[0] = 2;
 
@@ -465,13 +467,13 @@ void MDLImporter::InternReadFile_Quake1( )
     unsigned int iCurrent = 0;
     for (unsigned int i = 0; i < (unsigned int) pcHeader->num_tris;++i)
     {
-        pcMesh->mFaces[i].mIndices = new unsigned int[3];
+        pcMesh->mFaces[i].mIndices = i * 3;
         pcMesh->mFaces[i].mNumIndices = 3;
 
         unsigned int iTemp = iCurrent;
         for (unsigned int c = 0; c < 3;++c,++iCurrent)
         {
-            pcMesh->mFaces[i].mIndices[c] = iCurrent;
+            pcMesh->mIndices[pcMesh->mFaces[i].mIndices + c] = iCurrent;
 
             // read vertices
             unsigned int iIndex = pcTriangles->vertex[c];
@@ -510,9 +512,9 @@ void MDLImporter::InternReadFile_Quake1( )
             pcMesh->mTextureCoords[0][iCurrent].y = 1.0f-(t + 0.5f) / pcHeader->skinheight;
 
         }
-        pcMesh->mFaces[i].mIndices[0] = iTemp+2;
-        pcMesh->mFaces[i].mIndices[1] = iTemp+1;
-        pcMesh->mFaces[i].mIndices[2] = iTemp+0;
+        pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 0] = iTemp+2;
+        pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 1] = iTemp+1;
+        pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 2] = iTemp+0;
         pcTriangles++;
     }
     return;
@@ -642,7 +644,9 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 
     pcMesh->mNumVertices = pcHeader->num_tris * 3;
     pcMesh->mNumFaces = pcHeader->num_tris;
+    pcMesh->mNumIndices = pcMesh->mNumFaces * 3;
     pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
+    pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
 
     // there won't be more than one mesh inside the file
     pScene->mRootNode = new aiNode();
@@ -680,7 +684,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
         // now iterate through all triangles
         unsigned int iCurrent = 0;
         for (unsigned int i = 0; i < (unsigned int) pcHeader->num_tris;++i) {
-            pcMesh->mFaces[i].mIndices = new unsigned int[3];
+            pcMesh->mFaces[i].mIndices = i * 3;
             pcMesh->mFaces[i].mNumIndices = 3;
 
             unsigned int iTemp = iCurrent;
@@ -713,9 +717,9 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
                         pcTexCoords,pcTriangles->index_uv[c]);
                 }
             }
-            pcMesh->mFaces[i].mIndices[0] = iTemp+2;
-            pcMesh->mFaces[i].mIndices[1] = iTemp+1;
-            pcMesh->mFaces[i].mIndices[2] = iTemp+0;
+            pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 0] = iTemp+2;
+            pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 1] = iTemp+1;
+            pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 2] = iTemp+0;
             pcTriangles++;
         }
 
@@ -735,7 +739,7 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
         // now iterate through all triangles
         unsigned int iCurrent = 0;
         for (unsigned int i = 0; i < (unsigned int) pcHeader->num_tris;++i) {
-            pcMesh->mFaces[i].mIndices = new unsigned int[3];
+            pcMesh->mFaces[i].mIndices = i * 3;
             pcMesh->mFaces[i].mNumIndices = 3;
 
             unsigned int iTemp = iCurrent;
@@ -768,9 +772,9 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
                         pcTexCoords,pcTriangles->index_uv[c]);
                 }
             }
-            pcMesh->mFaces[i].mIndices[0] = iTemp+2;
-            pcMesh->mFaces[i].mIndices[1] = iTemp+1;
-            pcMesh->mFaces[i].mIndices[2] = iTemp+0;
+            pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 0] = iTemp+2;
+            pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 1] = iTemp+1;
+            pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 2] = iTemp+0;
             pcTriangles++;
         }
     }
@@ -1832,7 +1836,9 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
 
             // allocate output storage
             pcMesh->mNumFaces = (unsigned int)splitGroupData.aiSplit[i]->size();
+            pcMesh->mNumIndices = pcMesh->mNumFaces * 3;
             pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
+            pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
 
             pcMesh->mNumVertices = pcMesh->mNumFaces*3;
             pcMesh->mVertices = new aiVector3D[pcMesh->mNumVertices];
@@ -1851,7 +1857,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
             unsigned int iCurrent = 0;
             for (unsigned int iFace = 0; iFace < pcMesh->mNumFaces;++iFace) {
                 pcMesh->mFaces[iFace].mNumIndices = 3;
-                pcMesh->mFaces[iFace].mIndices = new unsigned int[3];
+                pcMesh->mFaces[iFace].mIndices = iFace * 3;
 
                 unsigned int iSrcFace = splitGroupData.aiSplit[i]->operator[](iFace);
                 const MDL::IntFace_MDL7& oldFace = groupData.pcFaces[iSrcFace];
@@ -1869,7 +1875,7 @@ void MDLImporter::GenerateOutputMeshes_3DGS_MDL7(
                             pcMesh->mTextureCoords[1][iCurrent] = groupData.vTextureCoords2[iIndex];
                         }
                     }
-                    pcMesh->mFaces[iFace].mIndices[c] = iCurrent++;
+                    pcMesh->mIndices[pcMesh->mFaces[iFace].mIndices + c] = iCurrent++;
                 }
             }
 

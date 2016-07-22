@@ -229,10 +229,10 @@ bool DeboneProcess::ConsiderMesh(const aiMesh* pMesh)
 
     if(isInterstitialRequired) {
         for(unsigned int i=0;i<pMesh->mNumFaces;i++) {
-            unsigned int v = vertexBones[pMesh->mFaces[i].mIndices[0]];
+            unsigned int v = vertexBones[pMesh->mIndices[pMesh->mFaces[i].mIndices + 0]];
 
             for(unsigned int j=1;j<pMesh->mFaces[i].mNumIndices;j++) {
-                unsigned int w = vertexBones[pMesh->mFaces[i].mIndices[j]];
+                unsigned int w = vertexBones[pMesh->mIndices[pMesh->mFaces[i].mIndices + j]];
 
                 if(v!=w)    {
                     if(v<pMesh->mNumBones) isBoneNecessary[v] = true;
@@ -303,10 +303,10 @@ void DeboneProcess::SplitMesh( const aiMesh* pMesh, std::vector< std::pair< aiMe
     for(unsigned int i=0;i<pMesh->mNumFaces;i++) {
         unsigned int nInterstitial = 1;
 
-        unsigned int v = vertexBones[pMesh->mFaces[i].mIndices[0]];
+        unsigned int v = vertexBones[pMesh->mIndices[pMesh->mFaces[i].mIndices + 0]];
 
         for(unsigned int j=1;j<pMesh->mFaces[i].mNumIndices;j++) {
-            unsigned int w = vertexBones[pMesh->mFaces[i].mIndices[j]];
+            unsigned int w = vertexBones[pMesh->mIndices[pMesh->mFaces[i].mIndices + j]];
 
             if(v!=w)    {
                 if(v<pMesh->mNumBones) isBoneNecessary[v] = true;

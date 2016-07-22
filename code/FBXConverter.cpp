@@ -1209,12 +1209,14 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
     // generate dummy faces
     out_mesh->mNumFaces = static_cast<unsigned int>( faces.size() );
     aiFace* fac = out_mesh->mFaces = new aiFace[ faces.size() ]();
+    out_mesh->mNumIndices = std::accumulate(faces.begin(), faces.end(), 0);
+    out_mesh->mIndices = new unsigned int[out_mesh->mNumIndices];
 
     unsigned int cursor = 0;
     for( unsigned int pcount : faces ) {
         aiFace& f = *fac++;
         f.mNumIndices = pcount;
-        f.mIndices = new unsigned int[ pcount ];
+        f.mIndices = cursor;
         switch ( pcount )
         {
         case 1:
@@ -1231,7 +1233,7 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
             break;
         }
         for ( unsigned int i = 0; i < pcount; ++i ) {
-            f.mIndices[ i ] = cursor++;
+            out_mesh->mIndices[ f.mIndices + i ] = cursor++;
         }
     }
 
@@ -1284,6 +1286,8 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
         if ( uvs.empty() ) {
             break;
         }
+        out_mesh->mNumIndices = std::accumulate(faces.begin(), faces.end(), 0);
+        out_mesh->mIndices = new unsigned int[out_mesh->mNumIndices];
 
         aiVector3D* out_uv = out_mesh->mTextureCoords[ i ] = new aiVector3D[ vertices.size() ];
         for( const aiVector2D& v : uvs ) {
@@ -1383,6 +1387,9 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
     out_mesh->mNumFaces = count_faces;
     aiFace* fac = out_mesh->mFaces = new aiFace[ count_faces ]();
 
+    out_mesh->mNumIndices = count_vertices;
+    out_mesh->mIndices = new unsigned int[ count_vertices ];
+
 
     // allocate normals
     const std::vector<aiVector3D>& normals = mesh.GetNormals();
@@ -1459,7 +1466,7 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
         aiFace& f = *fac++;
 
         f.mNumIndices = pcount;
-        f.mIndices = new unsigned int[ pcount ];
+        f.mIndices = cursor;
         switch ( pcount )
         {
         case 1:
@@ -1476,7 +1483,7 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
             break;
         }
         for ( unsigned int i = 0; i < pcount; ++i, ++cursor, ++in_cursor ) {
-            f.mIndices[ i ] = cursor;
+            out_mesh->mIndices[ f.mIndices + i ] = cursor;
 
             if ( reverseMapping.size() ) {
                 reverseMapping[ cursor ] = in_cursor;

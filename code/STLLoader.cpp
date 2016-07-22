@@ -156,12 +156,14 @@ const aiImporterDesc* STLImporter::GetInfo () const {
 void addFacesToMesh(aiMesh* pMesh)
 {
     pMesh->mFaces = new aiFace[pMesh->mNumFaces];
+    pMesh->mIndices = new unsigned int[pMesh->mNumIndices = pMesh->mNumFaces * 3];
     for (unsigned int i = 0, p = 0; i < pMesh->mNumFaces;++i)    {
 
         aiFace& face = pMesh->mFaces[i];
-        face.mIndices = new unsigned int[face.mNumIndices = 3];
+        face.mNumIndices = 3;
+        face.mIndices = i;
         for (unsigned int o = 0; o < 3;++o,++p) {
-            face.mIndices[o] = p;
+            pMesh->mIndices[face.mIndices + o] = p;
         }
     }
 }

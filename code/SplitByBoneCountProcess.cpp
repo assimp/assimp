@@ -191,12 +191,12 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 
             const aiFace& face = pMesh->mFaces[a];
             // check every vertex if its bones would still fit into the current submesh
-            for( unsigned int b = 0; b < face.mNumIndices; ++b )
+            for( size_t b = 0; b < face.mNumIndices; ++b )
             {
-                const std::vector<BoneWeight>& vb = vertexBones[face.mIndices[b]];
-                for( unsigned int c = 0; c < vb.size(); ++c)
+                const std::vector<BoneWeight>& vb = vertexBones[pMesh->mIndices[face.mIndices + b]];
+                for( size_t c = 0; c < vb.size(); ++c)
                 {
-                    unsigned int boneIndex = vb[c].first;
+                    size_t boneIndex = vb[c].first;
                     // if the bone is already used in this submesh, it's ok
                     if( isBoneUsed[boneIndex] )
                         continue;
@@ -265,20 +265,29 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 
         // and copy over the data, generating faces with linear indices along the way
         newMesh->mFaces = new aiFace[subMeshFaces.size()];
-        unsigned int nvi = 0; // next vertex index
-        std::vector<unsigned int> previousVertexIndices( numSubMeshVertices, std::numeric_limits<unsigned int>::max()); // per new vertex: its index in the source mesh
-        for( unsigned int a = 0; a < subMeshFaces.size(); ++a )
+        newMesh->mNumIndices = 0;
+        for ( size_t a = 0; a < subMeshFaces.size(); ++a )
+        {
+            newMesh->mNumIndices += pMesh->mFaces[subMeshFaces[a]].mNumIndices;
+        }
+        newMesh->mIndices = new unsigned int[newMesh->mNumIndices];
+
+        size_t nvi = 0; // next vertex index
+        std::vector<size_t> previousVertexIndices( numSubMeshVertices, std::numeric_limits<size_t>::max()); // per new vertex: its index in the source mesh
+        unsigned int nii = 0; // next indices index
+        for( size_t a = 0; a < subMeshFaces.size(); ++a )
         {
             const aiFace& srcFace = pMesh->mFaces[subMeshFaces[a]];
             aiFace& dstFace = newMesh->mFaces[a];
             dstFace.mNumIndices = srcFace.mNumIndices;
-            dstFace.mIndices = new unsigned int[dstFace.mNumIndices];
+            dstFace.mIndices = nii;
+            nii += dstFace.mNumIndices;
 
             // accumulate linearly all the vertices of the source face
-            for( unsigned int b = 0; b < dstFace.mNumIndices; ++b )
+            for( size_t b = 0; b < dstFace.mNumIndices; ++b )
             {
-                unsigned int srcIndex = srcFace.mIndices[b];
-                dstFace.mIndices[b] = nvi;
+                size_t srcIndex = pMesh->mIndices[srcFace.mIndices + b];
+                pMesh->mIndices[dstFace.mIndices + b] = nvi;
                 previousVertexIndices[nvi] = srcIndex;
 
                 newMesh->mVertices[nvi] = pMesh->mVertices[srcIndex];

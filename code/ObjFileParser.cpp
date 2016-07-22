@@ -696,6 +696,8 @@ void ObjFileParser::getGroupName()
 {
     std::string strGroupName;
 
+    // here we skip 'g ' from line
+    m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, strGroupName);
     if( isEndOfBuffer( m_DataIt, m_DataItEnd ) ) {
         return;
@@ -832,7 +834,11 @@ bool ObjFileParser::needsNewMesh( const std::string &materialName )
     bool newMat = false;
     int matIdx = getMaterialIndex( materialName );
     int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
-    if ( curMatIdx != int(ObjFile::Mesh::NoMaterial) && curMatIdx != matIdx )
+    if ( curMatIdx != int(ObjFile::Mesh::NoMaterial)
+        && curMatIdx != matIdx
+        // no need create a new mesh if no faces in current
+        // lets say 'usemtl' goes straight after 'g'
+        && m_pModel->m_pCurrentMesh->m_Faces.size() > 0 )
     {
         // New material -> only one material per mesh, so we need to create a new
         // material

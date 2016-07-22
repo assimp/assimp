@@ -408,7 +408,7 @@ void MDCImporter::InternReadFile(
 
                     // copy texture coordinates
                     pcUVCur->x = pcUVs[quak].u;
-                    pcUVCur->y = 1.0f-pcUVs[quak].v; // DX to OGL
+                    pcUVCur->y = 1.0-pcUVs[quak].v; // DX to OGL
                 }
                 pcVertCur->x += pcFrame->localOrigin[0] ;
                 pcVertCur->y += pcFrame->localOrigin[1] ;

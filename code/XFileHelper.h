@@ -82,7 +82,7 @@ struct Material
     std::string mName;
     bool mIsReference; // if true, mName holds a name by which the actual material can be found in the material list
     aiColor4D mDiffuse;
-    float mSpecularExponent;
+    ai_real mSpecularExponent;
     aiColor3D mSpecular;
     aiColor3D mEmissive;
     std::vector<TexEntry> mTextures;
@@ -100,7 +100,7 @@ struct Material
 struct BoneWeight
 {
     unsigned int mVertex;
-    float mWeight;
+    ai_real mWeight;
 };
 
 /** Helper structure to represent a bone in a mesh */

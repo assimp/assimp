@@ -7,8 +7,8 @@ Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Main.h"
 
-const char* AICMD_MSG_INFO_HELP_E = 
+const char* AICMD_MSG_INFO_HELP_E =
 "assimp info <file> [-r]\n"
 "\tPrint basic structure of a 3D model\n"
 "\t-r,--raw: No postprocessing, do a raw import\n";
@@ -150,11 +150,11 @@ void FindSpecialPoints(const aiScene* scene,const aiNode* root,aiVector3D specia
 // -----------------------------------------------------------------------------------
 void FindSpecialPoints(const aiScene* scene,aiVector3D special_points[3])
 {
-	special_points[0] = aiVector3D(1e10f,1e10f,1e10f);
-	special_points[1] = aiVector3D(-1e10f,-1e10f,-1e10f);
+	special_points[0] = aiVector3D(1e10,1e10,1e10);
+	special_points[1] = aiVector3D(-1e10,-1e10,-1e10);
 
 	FindSpecialPoints(scene,scene->mRootNode,special_points);
-	special_points[2] = 0.5f*(special_points[0]+special_points[1]);
+	special_points[2] = (special_points[0]+special_points[1])*(ai_real)0.5;
 }
 
 // -----------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ std::string FindPTypes(const aiScene* scene)
 }
 
 // -----------------------------------------------------------------------------------
-void PrintHierarchy(const aiNode* root, unsigned int maxnest, unsigned int maxline, 
+void PrintHierarchy(const aiNode* root, unsigned int maxnest, unsigned int maxline,
 					unsigned int cline, unsigned int cnest=0)
 {
 	if (cline++ >= maxline || cnest >= maxnest) {
@@ -245,7 +245,7 @@ int Assimp_Info (const char* const* params, unsigned int num)
 	globalImporter->GetMemoryRequirements(mem);
 
 
-	static const char* format_string = 
+	static const char* format_string =
 		"Memory consumption: %i B\n"
 		"Nodes:              %i\n"
 		"Maximum depth       %i\n"
@@ -349,4 +349,3 @@ int Assimp_Info (const char* const* params, unsigned int num)
 	printf("\n");
 	return 0;
 }
-

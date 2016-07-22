@@ -86,7 +86,7 @@ public:
 
 
     // setter for configMaxAngle
-    inline void SetMaxSmoothAngle(float f)
+    inline void SetMaxSmoothAngle(ai_real f)
     {
         configMaxAngle =f;
     }
@@ -104,10 +104,9 @@ public:
 private:
 
     /** Configuration option: maximum smoothing angle, in radians*/
-    float configMaxAngle;
+    ai_real configMaxAngle;
 };
 
 } // end of namespace Assimp
 
 #endif // !!AI_GENVERTEXNORMALPROCESS_H_INC
-

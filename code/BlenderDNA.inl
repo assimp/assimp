@@ -532,7 +532,7 @@ template <typename T> struct signless;
 template <> struct signless<char> {typedef unsigned char type;};
 template <> struct signless<short> {typedef unsigned short type;};
 template <> struct signless<int> {typedef unsigned int type;};
-
+template <> struct signless<unsigned char> { typedef unsigned char type; };
 template <typename T>
 struct static_cast_silent {
     template <typename V>
@@ -613,6 +613,22 @@ template <> inline void Structure :: Convert<char>   (char& dest,const FileDatab
     }
     ConvertDispatcher(dest,*this,db);
 }
+
+// ------------------------------------------------------------------------------------------------
+template <> inline void Structure::Convert<unsigned char>(unsigned char& dest, const FileDatabase& db) const
+{
+	// automatic rescaling from char to float and vice versa (seems useful for RGB colors)
+	if (name == "float") {
+		dest = static_cast<unsigned char>(db.reader->GetF4() * 255.f);
+		return;
+	}
+	else if (name == "double") {
+		dest = static_cast<unsigned char>(db.reader->GetF8() * 255.f);
+		return;
+	}
+	ConvertDispatcher(dest, *this, db);
+}
+
 
 // ------------------------------------------------------------------------------------------------
 template <> inline void Structure :: Convert<float>  (float& dest,const FileDatabase& db) const

@@ -1118,13 +1118,13 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             const aiFace& f = out->mFaces[out->mNumFaces++];
 
             aiColor4D* vo = &out->mColors[0][out->mNumVertices];
-			const float scaleZeroToOne = 1.f / 255.f;
+			const ai_real scaleZeroToOne = 1.f / 255.f;
             for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
                 const MLoopCol& col = mesh->mloopcol[v.loopstart + j];
-                vo->r = float(col.r) * scaleZeroToOne;
-                vo->g = float(col.g) * scaleZeroToOne;
-                vo->b = float(col.b) * scaleZeroToOne;
-                vo->a = float(col.a) * scaleZeroToOne;
+                vo->r = ai_real(col.r) * scaleZeroToOne;
+                vo->g = ai_real(col.g) * scaleZeroToOne;
+                vo->b = ai_real(col.b) * scaleZeroToOne;
+                vo->a = ai_real(col.a) * scaleZeroToOne;
             }
 
         }

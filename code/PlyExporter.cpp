@@ -56,11 +56,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //using namespace Assimp;
 namespace Assimp    {
 
-// make sure typeof returns consistent output across different platforms
+// make sure type_of returns consistent output across different platforms
 // also consider using: typeid(VAR).name()
-template <typename T> const char* typeof(T&) { return "unknown"; }
-template<> const char* typeof(float&) { return "float"; }
-template<> const char* typeof(double&) { return "double"; }
+template <typename T> const char* type_of(T&) { return "unknown"; }
+template<> const char* type_of(float&) { return "float"; }
+template<> const char* type_of(double&) { return "double"; }
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to PLY. Prototyped and registered in Exporter.cpp
@@ -146,7 +146,7 @@ PlyExporter::PlyExporter(const char* _filename, const aiScene* pScene, bool bina
     //       definitely not good to always write float even if we might have double precision
 
     ai_real tmp = 0.0;
-    const char * typeName = typeof(tmp);
+    const char * typeName = type_of(tmp);
 
     mOutput << "element vertex " << vertices << endl;
     mOutput << "property " << typeName << " x" << endl;

@@ -1,8 +1,10 @@
 project(assimp_qt_viewer)
+set(PROJECT_VERSION "")
 
 cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 REQUIRED)
+find_package(DevIL REQUIRED)
 
 include_directories(
 	${QT_INCLUDES}

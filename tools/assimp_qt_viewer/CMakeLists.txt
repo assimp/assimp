@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Qt4 REQUIRED)
 find_package(DevIL REQUIRED)
+find_package(OpenGL REQUIRED)
 
 include_directories(
 	${QT_INCLUDES}
@@ -12,6 +13,8 @@ include_directories(
 	${Assimp_SOURCE_DIR}/code
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}
+	${OPENGL_INCLUDE_DIR}
+	${IL_INCLUDE_DIR}
 )
 
 link_directories(${Assimp_BINARY_DIR})
@@ -22,7 +25,7 @@ qt4_wrap_ui(UISrcs mainwindow.ui)
 qt4_wrap_cpp(MOCrcs mainwindow.hpp glview.hpp)
 
 add_executable(${PROJECT_NAME} ${assimp_qt_viewer_SRCS} ${UISrcs} ${MOCrcs})
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} assimp GL GLU IL)
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${IL_LIBRARIES} ${OPENGL_LIBRARIES} assimp)
 
 if(WIN32) # Check if we are on Windows
 	if(MSVC) # Check if we are using the Visual Studio compiler

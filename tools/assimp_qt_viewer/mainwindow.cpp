@@ -35,7 +35,8 @@ QTime time_begin = QTime::currentTime();
 	}
 
 	// Try to import scene.
-	mScene = mImporter.ReadFile(pFileName.toStdString(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_ValidateDataStructure | aiProcess_GenUVCoords | aiProcess_TransformUVCoords);
+	mScene = mImporter.ReadFile(pFileName.toStdString(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_ValidateDataStructure | \
+															aiProcess_GenUVCoords | aiProcess_TransformUVCoords | aiProcess_FlipUVs);
 	if(mScene != nullptr)
 	{
 		ui->lblLoadTime->setText(QString("%1").arg(time_begin.secsTo(QTime::currentTime())));

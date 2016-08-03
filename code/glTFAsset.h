@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 #include <string>
+#include <list>
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
@@ -477,15 +478,6 @@ namespace glTF
 
         bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
 
-		/// \fn void ReplaceData(uint8_t* pBufferData_Offset, size_t pBufferData_Count, uint8_t pPrepend_Data, size_t pPrepend_Count)
-		/// Replace part of buffer data. For example: decoded/encoded data.
-		/// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
-		/// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
-		/// \param [in] pReplace_Data - pointer to array with new data for buffer.
-		/// \param [in] pReplace_Count - count of bytes in new data.
-		/// \return true - if successfully replaced, false if input arguments is out of range.
-		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
-
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
 
@@ -501,6 +493,31 @@ namespace glTF
         static const char* TranslateId(Asset& r, const char* id);
     };
 
+	/// \struct SEncodedRegion
+	/// Descriptor of encoded region in "bufferView".
+	struct SEncodedRegion
+	{
+		const size_t Offset;///< Offset from begin of "bufferView" to encoded region, in bytes.
+		const size_t EncodedData_Length;///< Size of encoded region, in bytes.
+		uint8_t* const DecodedData;///< Cached encoded data.
+		const size_t DecodedData_Length;///< Size of decoded region, in bytes.
+		const std::string ID;///< ID of the region.
+
+		/// \fn SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
+		/// Constructor.
+		/// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
+		/// \param [in] pEncodedData_Length - size of encoded region, in bytes.
+		/// \param [in] pDecodedData - pointer to decoded data array.
+		/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
+		/// \param [in] pID - ID of the region.
+		SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
+			: Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID)
+		{}
+
+		/// \fn ~SEncodedRegion()
+		/// Destructor.
+		~SEncodedRegion() { delete [] DecodedData; }
+	};
 
     //! A view into a buffer generally representing a subset of the buffer.
     struct BufferView : public Object
@@ -509,10 +526,52 @@ namespace glTF
         size_t byteOffset; //! The offset into the buffer in bytes. (required)
         size_t byteLength; //! The length of the bufferView in bytes. (default: 0)
 
+		/// \var EncodedRegion_Current
+		/// Pointer to currently active encoded region.
+		/// Why not decoding all regions at once and not to set one buffer with decoded data?
+		/// Yes, why not? Even "accessor" point to decoded data. I mean that fields "byteOffset", "byteStride" and "count" has values which describes decoded
+		/// data array. But only in range of mesh while is active parameters from "compressedData". For another mesh accessors point to decoded data too. But
+		/// offset is counted for another regions is encoded.
+		/// Example. You have two meshes. For every of it you have 4 bytes of data. That data compressed to 2 bytes. So, you have buffer with encoded data:
+		/// M1_E0, M1_E1, M2_E0, M2_E1.
+		/// After decoding you'll get:
+		/// M1_D0, M1_D1, M1_D2, M1_D3, M2_D0, M2_D1, M2_D2, M2_D3.
+		/// "accessors" must to use values that point to decoded data - obviously. So, you'll expect "accessors" like
+		/// "accessor_0" : { byteOffset: 0, byteLength: 4}, "accessor_1" : { byteOffset: 4, byteLength: 4}
+		/// but in real life you'll get:
+		/// "accessor_0" : { byteOffset: 0, byteLength: 4}, "accessor_1" : { byteOffset: 2, byteLength: 4}
+		/// Yes, accessor of next mesh has offset and length which mean: current mesh data is decoded, all other data is encoded.
+		/// And when before you start to read data of current mesh (with encoded data ofcourse) you must decode region of "bufferView", after read finished
+		/// delete encoding mark. And after that you can repeat process: decode data of mesh, read, delete decoded data.
+		SEncodedRegion* EncodedRegion_Current;
+
+		/// \var EncodedRegion_List
+		/// List of encoded regions.
+		std::list<SEncodedRegion*> EncodedRegion_List;
+
         BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
-        BufferView() {}
+		BufferView()
+			: EncodedRegion_Current(nullptr)
+		{}
+
+		~BufferView() { for(SEncodedRegion* reg : EncodedRegion_List) delete reg; }
+
         void Read(Value& obj, Asset& r);
+
+		/// \fn void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID)
+		/// Mark region of "bufferView" as encoded. When data is request from such region then "bufferView" use decoded data.
+		/// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
+		/// \param [in] pEncodedData_Length - size of encoded region, in bytes.
+		/// \param [in] pDecodedData - pointer to decoded data array.
+		/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
+		/// \param [in] pID - ID of the region.
+		void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID);
+
+		/// \fn void EncodedRegion_SetCurrent(const std::string& pID)
+		/// Select current encoded region by ID. \sa EncodedRegion_Current.
+		/// \param [in] pID - ID of the region.
+		void EncodedRegion_SetCurrent(const std::string& pID);
     };
 
 

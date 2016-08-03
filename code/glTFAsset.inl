@@ -330,26 +330,6 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
     return true;
 }
 
-inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
-{
-const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
-
-uint8_t* new_data;
-
-	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) return false;
-
-	new_data = new uint8_t[new_data_size];
-	// Copy data which place before replacing part.
-	memcpy(new_data, mData.get(), pBufferData_Offset);
-	// Copy new data.
-	memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
-	// Copy data which place after replacing part.
-	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
-	// Apply new data
-	mData.reset(new_data);
-	byteLength = new_data_size;
-}
-
 inline size_t Buffer::AppendData(uint8_t* data, size_t length)
 {
     size_t offset = this->byteLength;
@@ -367,6 +347,9 @@ inline void Buffer::Grow(size_t amount)
     byteLength += amount;
 }
 
+//
+// struct BufferView
+//
 
 inline void BufferView::Read(Value& obj, Asset& r)
 {
@@ -379,7 +362,58 @@ inline void BufferView::Read(Value& obj, Asset& r)
     byteLength = MemberOrDefault(obj, "byteLength", 0u);
 }
 
+inline void BufferView::EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID)
+{
+const size_t last = byteOffset + byteLength;
 
+	// Check pointer to data
+	if(pDecodedData == nullptr) throw DeadlyImportError("GLTF: for marking encoded region pointer to decoded data must be provided.");
+
+	// Check offset
+	if((pOffset < byteOffset) || (pOffset > last))
+	{
+		constexpr uint8_t val_size = 32;
+
+		char val[val_size];
+
+		ai_snprintf(val, val_size, "%llu", (long long)pOffset);
+		throw DeadlyImportError(std::string("GLTF: incorrect offset value (") + val + ") for marking encoded region.");
+	}
+
+	// Check length
+	if((pOffset + pEncodedData_Length) > last)
+	{
+		constexpr uint8_t val_size = 64;
+
+		char val[val_size];
+
+		ai_snprintf(val, val_size, "%llu, %llu", (long long)pOffset, (long long)pEncodedData_Length);
+		throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
+	}
+
+	// Add new region
+	EncodedRegion_List.push_back(new SEncodedRegion(pOffset, pEncodedData_Length, pDecodedData, pDecodedData_Length, pID));
+	// And set new value for "byteLength"
+	byteLength += (pDecodedData_Length - pEncodedData_Length);
+}
+
+inline void BufferView::EncodedRegion_SetCurrent(const std::string& pID)
+{
+	if((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) return;
+
+	for(SEncodedRegion* reg : EncodedRegion_List)
+	{
+		if(reg->ID == pID)
+		{
+			EncodedRegion_Current = reg;
+
+			return;
+		}
+
+	}
+
+	throw DeadlyImportError("GLTF: EncodedRegion with ID: \"" + pID + "\" not found.");
+}
 
 inline void Accessor::Read(Value& obj, Asset& r)
 {
@@ -419,7 +453,17 @@ inline uint8_t* Accessor::GetPointer()
     if (!basePtr) return 0;
 
     size_t offset = byteOffset + bufferView->byteOffset;
-    return basePtr + offset;
+
+	// Check if region is encoded.
+	if(bufferView->EncodedRegion_Current != nullptr)
+	{
+		const size_t begin = bufferView->EncodedRegion_Current->Offset;
+		const size_t end = bufferView->EncodedRegion_Current->Offset + bufferView->EncodedRegion_Current->DecodedData_Length;
+
+		if((offset >= begin) && (offset < end)) return &bufferView->EncodedRegion_Current->DecodedData[offset - begin];
+	}
+
+	return basePtr + offset;
 }
 
 namespace {
@@ -777,8 +821,8 @@ const char* mode_str;
 const char* type_str;
 ComponentType component_type;
 
-	#define MESH_READ_COMPRESSEDDATA_MEMBER(pID, pOut) \
-		if(!ReadMember(pJSON_Object_CompressedData, pID, pOut)) { throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pID + "\"."); }
+	#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut) \
+		if(!ReadMember(pJSON_Object_CompressedData, pFieldName, pOut)) { throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pFieldName + "\"."); }
 
 	MESH_READ_COMPRESSEDDATA_MEMBER("bufferView", bufview_id);
 	MESH_READ_COMPRESSEDDATA_MEMBER("byteOffset", byte_offset);
@@ -838,21 +882,12 @@ ComponentType component_type;
 	// Decode data
 	if(decoder.DecodePlayload(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC data.");
 
-	// Set/extend buffer
-	bufview->buffer->ReplaceData(byte_offset, count, output_data, output_data_size);
-	// Also correct size of current "bufferView" ...
-	bufview->byteLength = output_data_size;
-	// and offset for all other "bufferViews" which are placed after edited.
-	const size_t difference = output_data_size - count;
-
-	for(size_t idx_bv = 0; idx_bv < pAsset_Root.bufferViews.Size(); idx_bv++)
-	{
-		size_t off = pAsset_Root.bufferViews[idx_bv].byteOffset;
-
-		if(off > (byte_offset + count)) pAsset_Root.bufferViews[idx_bv].byteOffset += difference;
-	}
-
-	delete [] output_data;
+	// Set encoded region for bufferView.
+	bufview->EncodedRegion_Mark(byte_offset, count, output_data, output_data_size, name);
+	// Ans set is current
+	bufview->EncodedRegion_SetCurrent(name);
+	// No. Do not delete "output_data". After calling "EncodedRegion_Mark" bufferView is owner of "output_data".
+	// "delete [] output_data;"
 }
 
 inline void Camera::Read(Value& obj, Asset& r)

@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -294,17 +294,30 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
             }
 
             Mesh::Primitive::Attributes& attr = prim.attributes;
-            if (attr.position.size() > 0 && attr.position[0]) {
+
+			// if "bufferView" of current accessor is containing encoded data then set ID of region.
+			if(attr.position[0]->bufferView->EncodedRegion_List.size() > 0) attr.position[0]->bufferView->EncodedRegion_SetCurrent(mesh.name);
+
+			if (attr.position.size() > 0 && attr.position[0]) {
                 aim->mNumVertices = attr.position[0]->count;
                 attr.position[0]->ExtractData(aim->mVertices);
             }
 
-            if (attr.normal.size() > 0 && attr.normal[0]) {
-                attr.normal[0]->ExtractData(aim->mNormals);
+			// if "bufferView" of current accessor is containing encoded data then set ID of region.
+			if(attr.normal[0]->bufferView->EncodedRegion_List.size() > 0) attr.normal[0]->bufferView->EncodedRegion_SetCurrent(mesh.name);
+
+			if (attr.normal.size() > 0 && attr.normal[0]) {
+				attr.normal[0]->ExtractData(aim->mNormals);
             }
 
-            for (size_t tc = 0; tc < attr.texcoord.size() && tc <= AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
-                attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
+			// if "bufferView" of current accessor is containing encoded data then set ID of region.
+			if((attr.texcoord.size() > 0) && (attr.texcoord[0]->bufferView->EncodedRegion_List.size() > 0))
+			{
+				attr.texcoord[0]->bufferView->EncodedRegion_SetCurrent(mesh.name);
+			}
+
+			for (size_t tc = 0; tc < attr.texcoord.size() && tc <= AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
+				attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
                 aiVector3D* values = aim->mTextureCoords[tc];
@@ -315,7 +328,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
 
             if (prim.indices) {
-                aiFace* faces = 0;
+				// if "bufferView" of current accessor is containing encoded data then set ID of region.
+				if(prim.indices->bufferView->EncodedRegion_List.size() > 0) prim.indices->bufferView->EncodedRegion_SetCurrent(mesh.name);
+
+				aiFace* faces = 0;
                 unsigned int nFaces = 0;
 
                 unsigned int count = prim.indices->count;

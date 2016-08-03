@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -39,6 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "StringUtils.h"
+
+// Header files, Open3DGC.h,
+#include <Open3DGC/o3dgcSC3DMCDecoder.h>
 
 namespace glTF {
 
@@ -322,6 +325,26 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
         return false;
     }
     return true;
+}
+
+inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+{
+const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+
+uint8_t* new_data;
+
+	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) return false;
+
+	new_data = new uint8_t[new_data_size];
+	// Copy data which place before replacing part.
+	memcpy(new_data, mData.get(), pBufferData_Offset);
+	// Copy new data.
+	memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
+	// Copy data which place after replacing part.
+	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
+	// Apply new data
+	mData.reset(new_data);
+	byteLength = new_data_size;
 }
 
 inline size_t Buffer::AppendData(uint8_t* data, size_t length)
@@ -676,9 +699,35 @@ namespace {
     }
 }
 
-inline void Mesh::Read(Value& obj, Asset& r)
-{  
-    if (Value* primitives = FindArray(obj, "primitives")) {
+inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
+{
+	//
+	// Mesh extensions
+	//
+	// At first check for extensions. They can affect on interpretaion of mesh data.
+	Value* extensions = FindObject(pJSON_Object, "extensions");
+
+	if(extensions != nullptr)
+	{
+		// At first check if data of mesh is compressed. Because buffer data must be decoded before another get data from it.
+		// Only Open3DGC supported at now.
+		Value* o3dgc = FindObject(*extensions, "Open3DGC-compression");
+
+		if(o3dgc != nullptr)
+		{
+			// Search compressed data
+			Value* comp_data = FindObject(*o3dgc, "compressedData");
+
+			if(comp_data == nullptr) throw DeadlyImportError("GLTF: \"Open3DGC-compression\" must has \"compressedData\".");
+
+			Decode_O3DGC(*comp_data, pAsset_Root);
+		}// if(o3dgc == nullptr)
+	}// if(extensions != nullptr)
+
+	//
+	// Mesh primitives.
+	//
+	if (Value* primitives = FindArray(pJSON_Object, "primitives")) {
         this->primitives.resize(primitives->Size());
         for (unsigned int i = 0; i < primitives->Size(); ++i) {
             Value& primitive = (*primitives)[i];
@@ -698,22 +747,109 @@ inline void Mesh::Read(Value& obj, Asset& r)
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() <= idx) (*vec).resize(idx + 1);
-                        (*vec)[idx] = r.accessors.Get(it->value.GetString());
+						(*vec)[idx] = pAsset_Root.accessors.Get(it->value.GetString());
                     }
                 }
             }
 
             if (Value* indices = FindString(primitive, "indices")) {
-                prim.indices = r.accessors.Get(indices->GetString());
+				prim.indices = pAsset_Root.accessors.Get(indices->GetString());
             }
 
             if (Value* material = FindString(primitive, "material")) {
-                prim.material = r.materials.Get(material->GetString());
+				prim.material = pAsset_Root.materials.Get(material->GetString());
             }
         }
     }
 }
 
+inline void Mesh::Decode_O3DGC(Value& pJSON_Object_CompressedData, Asset& pAsset_Root)
+{
+// Compressed data contain description of part of "bufferView" which is encoded. This part must be decoded and
+// new data must replace old encoded part. In fact \"compressedData\" is similar to "accessor" structure.
+const char* bufview_id;
+uint32_t byte_offset, count, count_indices, count_vertices;
+const char* mode_str;
+const char* type_str;
+ComponentType component_type;
+
+	#define MESH_READ_COMPRESSEDDATA_MEMBER(pID, pOut) \
+		if(!ReadMember(pJSON_Object_CompressedData, pID, pOut)) { throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pID + "\"."); }
+
+	MESH_READ_COMPRESSEDDATA_MEMBER("bufferView", bufview_id);
+	MESH_READ_COMPRESSEDDATA_MEMBER("byteOffset", byte_offset);
+	MESH_READ_COMPRESSEDDATA_MEMBER("componentType", component_type);
+	MESH_READ_COMPRESSEDDATA_MEMBER("count", count);
+	MESH_READ_COMPRESSEDDATA_MEMBER("indicesCount", count_indices);
+	MESH_READ_COMPRESSEDDATA_MEMBER("verticesCount", count_vertices);
+	MESH_READ_COMPRESSEDDATA_MEMBER("mode", mode_str);
+	MESH_READ_COMPRESSEDDATA_MEMBER("type", type_str);
+
+	#undef MESH_READ_COMPRESSEDDATA_MEMBER
+
+	// Check some values
+	if(strcmp(type_str, "SCALAR")) throw DeadlyImportError("GLTF: only \"SCALAR\" type is supported for compressed data.");
+	if(component_type != ComponentType_UNSIGNED_BYTE) throw DeadlyImportError("GLTF: only \"UNSIGNED_BYTE\" component type is supported for compressed data.");
+	if((strcmp(mode_str, "binary") != 0) && (strcmp(mode_str, "ascii") != 0))
+	{
+		throw DeadlyImportError(std::string("GLTF: for compressed data supported modes is: \"ascii\", \"binary\". Not the: \"") + mode_str + "\".");
+	}
+
+	// Search for "bufferView" by ID.
+	Ref<BufferView> bufview = pAsset_Root.bufferViews.Get(bufview_id);
+
+	//
+	// Decode data. Adapted piece of code from COLLADA2GLTF converter.
+	//
+	// 	void testDecode(shared_ptr <GLTFMesh> mesh, BinaryStream &bstream)
+	o3dgc::SC3DMCDecoder<uint16_t> decoder;
+	o3dgc::IndexedFaceSet <unsigned short> ifs;
+	uint8_t* output_data;
+	size_t size_vertex, size_normal, size_texcoord, size_indices, output_data_size;
+	o3dgc::BinaryStream bstream;
+
+	// Read data from buffer and place it in BinaryStream for decoder.
+	bstream.LoadFromBuffer(&bufview->buffer->GetPointer()[bufview->byteOffset + byte_offset], count);
+
+	// After decoding header we can get size of primitives
+	if(decoder.DecodeHeader(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC header.");
+
+	size_vertex = ifs.GetNCoord() * 3 * sizeof(float);
+	size_normal = ifs.GetNNormal() * 3 * sizeof(float);
+	size_texcoord = ifs.GetNFloatAttribute(0) * 2 * sizeof(float);
+	size_indices = ifs.GetNCoordIndex() * 3 * sizeof(unsigned short);
+
+	output_data_size = size_vertex + size_normal + size_texcoord + size_indices;
+	output_data = new uint8_t[output_data_size];
+
+	float* uncompressed_vertices = (float* const)(output_data + size_indices);// size_indices => vertex offset
+
+	ifs.SetCoordIndex((uint16_t* const)output_data);
+	ifs.SetCoord((float* const)uncompressed_vertices);
+
+	if(ifs.GetNNormal() > 0) ifs.SetNormal((float* const)(output_data + size_indices + size_vertex));
+
+	if(ifs.GetNFloatAttribute(0)) ifs.SetFloatAttribute(0, (float* const)(output_data + size_indices + size_vertex + size_normal));
+
+	// Decode data
+	if(decoder.DecodePlayload(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC data.");
+
+	// Set/extend buffer
+	bufview->buffer->ReplaceData(byte_offset, count, output_data, output_data_size);
+	// Also correct size of current "bufferView" ...
+	bufview->byteLength = output_data_size;
+	// and offset for all other "bufferViews" which are placed after edited.
+	const size_t difference = output_data_size - count;
+
+	for(size_t idx_bv = 0; idx_bv < pAsset_Root.bufferViews.Size(); idx_bv++)
+	{
+		size_t off = pAsset_Root.bufferViews[idx_bv].byteOffset;
+
+		if(off > (byte_offset + count)) pAsset_Root.bufferViews[idx_bv].byteOffset += difference;
+	}
+
+	delete [] output_data;
+}
 
 inline void Camera::Read(Value& obj, Asset& r)
 {

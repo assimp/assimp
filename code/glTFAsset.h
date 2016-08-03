@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -477,6 +477,15 @@ namespace glTF
 
         bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
 
+		/// \fn void ReplaceData(uint8_t* pBufferData_Offset, size_t pBufferData_Count, uint8_t pPrepend_Data, size_t pPrepend_Count)
+		/// Replace part of buffer data. For example: decoded/encoded data.
+		/// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
+		/// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
+		/// \param [in] pReplace_Data - pointer to array with new data for buffer.
+		/// \param [in] pReplace_Count - count of bytes in new data.
+		/// \return true - if successfully replaced, false if input arguments is out of range.
+		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
+
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
 
@@ -634,7 +643,18 @@ namespace glTF
         std::vector<Primitive> primitives;
 
         Mesh() {}
-        void Read(Value& obj, Asset& r);
+
+		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
+		/// Get mesh data from JSON-object and place them to root asset.
+		/// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
+		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+		void Read(Value& pJSON_Object, Asset& pAsset_Root);
+
+		/// \fn void Decode_O3DGC(Value& pJSON_Object_CompressedData, Asset& pAsset_Root)
+		/// Decode part of "bufferView" which encoded with Open3DGC algorythm.
+		/// \param [in] pJSON_Object_CompressedData - reference to JSON-object which is "compressedData" block.
+		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+		void Decode_O3DGC(Value& pJSON_Object_CompressedData, Asset& pAsset_Root);
     };
 
     struct Node : public Object

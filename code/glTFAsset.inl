@@ -40,7 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StringUtils.h"
 
-// Header files, Open3DGC.h,
+// Header files, Assimp
+#include <assimp/DefaultLogger.hpp>
+
+// Header files, Open3DGC.
 #include <Open3DGC/o3dgcSC3DMCDecoder.h>
 
 namespace glTF {
@@ -720,6 +723,7 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 
 			if(comp_data == nullptr) throw DeadlyImportError("GLTF: \"Open3DGC-compression\" must has \"compressedData\".");
 
+			Assimp::DefaultLogger::get()->info("GLTF: Decompressing Open3DGC data.");
 			Decode_O3DGC(*comp_data, pAsset_Root);
 		}// if(o3dgc == nullptr)
 	}// if(extensions != nullptr)

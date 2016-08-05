@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2014, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -50,12 +50,10 @@ using namespace Assimp;
 class JoinVerticesTest : public ::testing::Test
 {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     JoinVerticesProcess* piProcess;
     aiMesh* pcMesh;
 };

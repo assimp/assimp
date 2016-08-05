@@ -72,7 +72,7 @@ public:
 
 public:
     /// \brief  Constructor with data array.
-    ObjFileParser(std::vector<char> &Data,const std::string &strModelName, IOSystem* io, ProgressHandler* progress);
+    ObjFileParser(std::vector<char> &Data, const std::string &strModelName, IOSystem* io, ProgressHandler* progress, const std::string &originalObjFileName);
     /// \brief  Destructor
     ~ObjFileParser();
     /// \brief  Model getter.
@@ -89,6 +89,8 @@ private:
     void getVector( std::vector<aiVector3D> &point3d_array );
     /// Stores the following 3d vector.
     void getVector3( std::vector<aiVector3D> &point3d_array );
+    /// Stores the following two 3d vectors on the line.
+    void getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b );
     /// Stores the following 3d vector.
     void getVector2(std::vector<aiVector2D> &point2d_array);
     /// Stores the following face.
@@ -119,6 +121,8 @@ private:
     bool needsNewMesh( const std::string &rMaterialName );
     /// Error report in token
     void reportErrorTokenInFace();
+    /// Get the number of components in a line.
+    size_t getNumComponentsInLine();
 
 private:
     // Copy and assignment constructor should be private
@@ -143,6 +147,8 @@ private:
     //! Pointer to progress handler
     ProgressHandler* m_progress;
     /// Path to the current model
+    // name of the obj file where the buffer comes from
+    const std::string& m_originalObjFileName;
 };
 
 }   // Namespace Assimp

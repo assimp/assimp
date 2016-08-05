@@ -557,7 +557,7 @@ public:
             flags_ |= kIntFlag;
     }
 
-#if !defined(__x86_64__)
+#if !defined(__x86_64__) && !defined(__arm64__)
     //! Constructor for size_t value.
     explicit GenericValue( size_t u ) RAPIDJSON_NOEXCEPT : data_(), flags_( kNumberUintFlag ) {
         data_.n.u64 = u;

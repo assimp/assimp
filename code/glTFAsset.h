@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <rapidjson/error/en.h>
 
 #ifdef ASSIMP_API
-#   include "boost/shared_ptr.hpp"
+#   include <memory>
 #   include "DefaultIOSystem.h"
 #   include "ByteSwapper.h"
 #else
@@ -90,7 +90,7 @@ namespace glTF
 #ifdef ASSIMP_API
     using Assimp::IOStream;
     using Assimp::IOSystem;
-    using boost::shared_ptr;
+    using std::shared_ptr;
 #else
     using std::shared_ptr;
 
@@ -211,7 +211,7 @@ namespace glTF
         ComponentType_FLOAT = 5126
     };
 
-    inline size_t ComponentTypeSize(ComponentType t)
+    inline unsigned int ComponentTypeSize(ComponentType t)
     {
         switch (t) {
             case ComponentType_SHORT:
@@ -313,13 +313,13 @@ namespace glTF
     class Ref
     {
         std::vector<T*>* vector;
-        int index;
+        unsigned int index;
 
     public:
         Ref() : vector(0), index(0) {}
-        Ref(std::vector<T*>& vec, int idx) : vector(&vec), index(idx) {}
+        Ref(std::vector<T*>& vec, unsigned int idx) : vector(&vec), index(idx) {}
 
-        inline size_t GetIndex() const
+        inline unsigned int GetIndex() const
             { return index; }
 
         operator bool() const
@@ -355,6 +355,10 @@ namespace glTF
             { return false; }
 
         virtual ~Object() {}
+
+        //! Maps special IDs to another ID, where needed. Subclasses may override it (statically)
+        static const char* TranslateId(Asset& r, const char* id)
+            { return id; }
     };
 
 
@@ -365,7 +369,7 @@ namespace glTF
 
     //! A typed view into a BufferView. A BufferView contains raw binary data.
     //! An accessor provides a typed view into a BufferView or a subset of a BufferView
-    // !similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
+    //! similar to how WebGL's vertexAttribPointer() defines an attribute in a buffer.
     struct Accessor : public Object
     {
         Ref<BufferView> bufferView;  //!< The ID of the bufferView. (required)
@@ -384,7 +388,7 @@ namespace glTF
         inline uint8_t* GetPointer();
 
         template<class T>
-        void ExtractData(T*& outData);
+        bool ExtractData(T*& outData);
 
         void WriteData(size_t count, const void* src_buffer, size_t src_stride);
 
@@ -410,6 +414,11 @@ namespace glTF
             {
                 return GetValue<unsigned int>(i);
             }
+
+            inline bool IsValid() const
+            {
+                return data != 0;
+            }
         };
 
         inline Indexer GetIndexer()
@@ -428,12 +437,12 @@ namespace glTF
         {
 
         };
-        
+
         struct Target
         {
 
         };
-        
+
         struct Sampler
         {
 
@@ -466,8 +475,8 @@ namespace glTF
 
         void Read(Value& obj, Asset& r);
 
-        void LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
-        
+        bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
+
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
 
@@ -476,9 +485,11 @@ namespace glTF
 
         void MarkAsSpecial()
             { mIsSpecial = true; }
-        
+
         bool IsSpecial() const
             { return mIsSpecial; }
+
+        static const char* TranslateId(Asset& r, const char* id);
     };
 
 
@@ -553,7 +564,7 @@ namespace glTF
 
         inline size_t GetDataLength() const
             { return mDataLength; }
-        
+
         inline const uint8_t* GetData() const
             { return mData; }
 
@@ -754,12 +765,14 @@ namespace glTF
         virtual void WriteObjects(AssetWriter& writer) = 0;
     };
 
-    //! (Stub class that is specialized in glTFAssetWriter.h)
+
     template<class T>
-    struct LazyDictWriter
-    {
-        static void Write(T& d, AssetWriter& w) {}
-    };
+    class LazyDict;
+
+    //! (Implemented in glTFAssetWriter.h)
+    template<class T>
+    void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
+    
 
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them
@@ -769,7 +782,7 @@ namespace glTF
         friend class Asset;
         friend class AssetWriter;
 
-        typedef typename std::gltf_unordered_map< std::string, size_t > Dict;
+        typedef typename std::gltf_unordered_map< std::string, unsigned int > Dict;
 
         std::vector<T*>  mObjs;      //! The read objects
         Dict             mObjsById;  //! The read objects accesible by id
@@ -782,7 +795,7 @@ namespace glTF
         void DetachFromDocument();
 
         void WriteObjects(AssetWriter& writer)
-            { LazyDictWriter< LazyDict >::Write(*this, writer); }
+            { WriteLazyDict<T>(*this, writer); }
 
         Ref<T> Add(T* obj);
 
@@ -791,14 +804,14 @@ namespace glTF
         ~LazyDict();
 
         Ref<T> Get(const char* id);
-        Ref<T> Get(size_t i);
+        Ref<T> Get(unsigned int i);
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)
             { return Create(id.c_str()); }
 
-        inline size_t Size() const
-            { return mObjs.size(); }
+        inline unsigned int Size() const
+            { return unsigned(mObjs.size()); }
 
         inline T& operator[](size_t i)
             { return *mObjs[i]; }
@@ -820,6 +833,12 @@ namespace glTF
         int version; //!< The glTF format version (should be 1)
 
         void Read(Document& doc);
+        
+        AssetMetadata()
+            : premultipliedAlpha(false)
+            , version(0)
+        {
+        }
     };
 
     //
@@ -894,6 +913,7 @@ namespace glTF
     public:
         Asset(IOSystem* io = 0)
             : mIOSystem(io)
+            , asset()
             , accessors     (*this, "accessors")
             , animations    (*this, "animations")
             , buffers       (*this, "buffers")
@@ -913,7 +933,6 @@ namespace glTF
             , lights        (*this, "lights", "KHR_materials_common")
         {
             memset(&extensionsUsed, 0, sizeof(extensionsUsed));
-            memset(&asset, 0, sizeof(asset));
         }
 
         //! Main function

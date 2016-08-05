@@ -48,9 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "TinyFormatter.h"
 #include "StreamReader.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 #include <stdint.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 // enable verbose log output. really verbose, so be careful.
@@ -61,15 +61,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // #define ASSIMP_BUILD_BLENDER_NO_STATS
 
 namespace Assimp    {
-    template <bool,bool> class StreamReader;
-    typedef StreamReader<true,true> StreamReaderAny;
 
-    namespace Blender {
-        class  FileDatabase;
-        struct FileBlockHead;
+template <bool,bool> class StreamReader;
+typedef StreamReader<true,true> StreamReaderAny;
 
-        template <template <typename> class TOUT>
-        class ObjectCache;
+namespace Blender {
+
+class  FileDatabase;
+struct FileBlockHead;
+
+template <template <typename> class TOUT>
+class ObjectCache;
 
 // -------------------------------------------------------------------------------
 /** Exception class used by the blender loader to selectively catch exceptions
@@ -78,31 +80,31 @@ namespace Assimp    {
  *  the loader itself, it will still be caught by Assimp due to its
  *  ancestry. */
 // -------------------------------------------------------------------------------
-struct Error : DeadlyImportError
-{
+struct Error : DeadlyImportError {
     Error (const std::string& s)
-        : DeadlyImportError(s)
-    {}
+    : DeadlyImportError(s) {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
 /** The only purpose of this structure is to feed a virtual dtor into its
  *  descendents. It serves as base class for all data structure fields. */
 // -------------------------------------------------------------------------------
-struct ElemBase
-{
-    virtual ~ElemBase() {}
+struct ElemBase {
+    virtual ~ElemBase() {
+        // empty
+    }
 
     /** Type name of the element. The type
      * string points is the `c_str` of the `name` attribute of the
      * corresponding `Structure`, that is, it is only valid as long
      * as the DNA is not modified. The dna_type is only set if the
-     * data type is not static, i.e. a boost::shared_ptr<ElemBase>
+     * data type is not static, i.e. a std::shared_ptr<ElemBase>
      * in the scene description would have its type resolved
      * at runtime, so this member is always set. */
     const char* dna_type;
 };
-
 
 // -------------------------------------------------------------------------------
 /** Represents a generic pointer to a memory location, which can be either 32
@@ -110,30 +112,33 @@ struct ElemBase
  *  fixed to point to the real, converted representation of the objects
  *  they used to point to.*/
 // -------------------------------------------------------------------------------
-struct Pointer
-{
-    Pointer() : val() {}
+struct Pointer {
+    Pointer()
+    : val() {
+        // empty
+    }
     uint64_t val;
 };
 
 // -------------------------------------------------------------------------------
 /** Represents a generic offset within a BLEND file */
 // -------------------------------------------------------------------------------
-struct FileOffset
-{
-    FileOffset() : val() {}
+struct FileOffset {
+    FileOffset()
+    : val() {
+        // empty
+    }
     uint64_t val;
 };
 
 // -------------------------------------------------------------------------------
 /** Dummy derivate of std::vector to be able to use it in templates simultaenously
- *  with boost::shared_ptr, which takes only one template argument
+ *  with std::shared_ptr, which takes only one template argument
  *  while std::vector takes three. Also we need to provide some special member
  *  functions of shared_ptr */
 // -------------------------------------------------------------------------------
 template <typename T>
-class vector : public std::vector<T>
-{
+class vector : public std::vector<T> {
 public:
     using std::vector<T>::resize;
     using std::vector<T>::empty;
@@ -150,8 +155,7 @@ public:
 // -------------------------------------------------------------------------------
 /** Mixed flags for use in #Field */
 // -------------------------------------------------------------------------------
-enum FieldFlags
-{
+enum FieldFlags {
     FieldFlag_Pointer = 0x1,
     FieldFlag_Array   = 0x2
 };
@@ -159,8 +163,7 @@ enum FieldFlags
 // -------------------------------------------------------------------------------
 /** Represents a single member of a data structure in a BLEND file */
 // -------------------------------------------------------------------------------
-struct Field
-{
+struct Field {
     std::string name;
     std::string type;
 
@@ -180,8 +183,7 @@ struct Field
  *  mission critical so we need them, while others can silently be default
  *  initialized and no animations are harmed. */
 // -------------------------------------------------------------------------------
-enum ErrorPolicy
-{
+enum ErrorPolicy {
     /** Substitute default value and ignore */
     ErrorPolicy_Igno,
     /** Substitute default value and write to log */
@@ -202,15 +204,14 @@ enum ErrorPolicy
  *  binary `blob` read from the file to such a structure instance with
  *  meaningful contents. */
 // -------------------------------------------------------------------------------
-class Structure
-{
+class Structure {
     template <template <typename> class> friend class ObjectCache;
 
 public:
-
     Structure()
-        :   cache_idx(-1)
-    {}
+    : cache_idx(static_cast<size_t>(-1) ){
+        // empty
+    }
 
 public:
 
@@ -260,11 +261,11 @@ public:
     // --------------------------------------------------------
     // generic converter
     template <typename T>
-    void Convert(boost::shared_ptr<ElemBase> in,const FileDatabase& db) const;
+    void Convert(std::shared_ptr<ElemBase> in,const FileDatabase& db) const;
 
     // --------------------------------------------------------
     // generic allocator
-    template <typename T> boost::shared_ptr<ElemBase> Allocate() const;
+    template <typename T> std::shared_ptr<ElemBase> Allocate() const;
 
 
 
@@ -282,7 +283,7 @@ public:
 
     // --------------------------------------------------------
     // field parsing for pointer or dynamic array types
-    // (boost::shared_ptr or boost::shared_array)
+    // (std::shared_ptr)
     // The return value indicates whether the data was already cached.
     template <int error_policy, template <typename> class TOUT, typename T>
     bool ReadFieldPtr(TOUT<T>& out, const char* name,
@@ -291,7 +292,7 @@ public:
 
     // --------------------------------------------------------
     // field parsing for static arrays of pointer or dynamic
-    // array types (boost::shared_ptr[] or boost::shared_array[])
+    // array types (std::shared_ptr[])
     // The return value indicates whether the data was already cached.
     template <int error_policy, template <typename> class TOUT, typename T, size_t N>
     bool ReadFieldPtr(TOUT<T> (&out)[N], const char* name,
@@ -318,7 +319,7 @@ private:
         const FileDatabase& db, const Field& f, bool) const;
 
     // --------------------------------------------------------
-    bool ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval,
+    bool ResolvePointer( std::shared_ptr< FileOffset >& out, const Pointer & ptrval,
         const FileDatabase& db, const Field& f, bool) const;
 
     // --------------------------------------------------------
@@ -329,8 +330,8 @@ private:
 private:
 
     // ------------------------------------------------------------------------------
-    template <typename T> T* _allocate(boost::shared_ptr<T>& out, size_t& s) const {
-        out = boost::shared_ptr<T>(new T());
+    template <typename T> T* _allocate(std::shared_ptr<T>& out, size_t& s) const {
+        out = std::shared_ptr<T>(new T());
         s = 1;
         return out.get();
     }
@@ -394,7 +395,7 @@ template <> struct Structure :: _defaultInitializer<ErrorPolicy_Fail> {
 };
 
 // -------------------------------------------------------------------------------------------------------
-template <> inline bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out,
+template <> inline bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shared_ptr<ElemBase>& out,
     const Pointer & ptrval,
     const FileDatabase& db,
     const Field& f,
@@ -413,11 +414,11 @@ class DNA
 public:
 
     typedef void (Structure::*ConvertProcPtr) (
-        boost::shared_ptr<ElemBase> in,
+        std::shared_ptr<ElemBase> in,
         const FileDatabase&
     ) const;
 
-    typedef boost::shared_ptr<ElemBase> (
+    typedef std::shared_ptr<ElemBase> (
         Structure::*AllocProcPtr) () const;
 
     typedef std::pair< AllocProcPtr, ConvertProcPtr > FactoryPair;
@@ -464,7 +465,7 @@ public:
      *  @param structure Destination structure definition
      *  @param db File database.
      *  @return A null pointer if no appropriate converter is available.*/
-    boost::shared_ptr< ElemBase > ConvertBlobToStructure(
+    std::shared_ptr< ElemBase > ConvertBlobToStructure(
         const Structure& structure,
         const FileDatabase& db
         ) const;
@@ -709,8 +710,6 @@ class FileDatabase
     template <template <typename> class TOUT> friend class ObjectCache;
 
 public:
-
-
     FileDatabase()
         : _cacheArrays(*this)
         , _cache(*this)
@@ -718,13 +717,12 @@ public:
     {}
 
 public:
-
     // publicly accessible fields
     bool i64bit;
     bool little;
 
     DNA dna;
-    boost::shared_ptr< StreamReaderAny > reader;
+    std::shared_ptr< StreamReaderAny > reader;
     vector< FileBlockHead > entries;
 
 public:
@@ -738,7 +736,7 @@ public:
     // arrays of objects are never cached because we can't easily
     // ensure their proper destruction.
     template <typename T>
-    ObjectCache<boost::shared_ptr>& cache(boost::shared_ptr<T>& /*in*/) const {
+    ObjectCache<std::shared_ptr>& cache(std::shared_ptr<T>& /*in*/) const {
         return _cache;
     }
 
@@ -755,7 +753,7 @@ private:
 #endif
 
     mutable ObjectCache<vector> _cacheArrays;
-    mutable ObjectCache<boost::shared_ptr> _cache;
+    mutable ObjectCache<std::shared_ptr> _cache;
 
     mutable size_t next_cache_idx;
 };

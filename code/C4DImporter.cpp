@@ -52,6 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "C4DImporter.h"
 #include "TinyFormatter.h"
+#include <memory>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
 
 #if defined(_M_X64) || defined(__amd64__)
 #   define __C4D_64BIT
@@ -61,10 +65,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "c4d_file.h"
 #include "default_alien_overloads.h"
 
-using namespace _melange_;
+using namespace melange;
 
 // overload this function and fill in your own unique data
-void GetWriterInfo(LONG &id, String &appname)
+void GetWriterInfo(int &id, String &appname)
 {
     id = 2424226;
     appname = "Open Asset Import Library";
@@ -131,7 +135,7 @@ void C4DImporter::SetupProperties(const Importer* /*pImp*/)
 void C4DImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     if( file.get() == NULL) {
         ThrowException("failed to open file " + pFile);
@@ -161,7 +165,7 @@ void C4DImporter::InternReadFile( const std::string& pFile,
         RecurseHierarchy(doc->GetFirstObject(), pScene->mRootNode);
     }
     catch(...) {
-        BOOST_FOREACH(aiMesh* mesh, meshes) {
+        for(aiMesh* mesh : meshes) {
             delete mesh;
         }
         BaseDocument::Free(doc);
@@ -176,7 +180,7 @@ void C4DImporter::InternReadFile( const std::string& pFile,
 
     // copy materials over, adding a default material if necessary
     unsigned int mat_count = static_cast<unsigned int>(materials.size());
-    BOOST_FOREACH(aiMesh* mesh, meshes) {
+    for(aiMesh* mesh : meshes) {
         ai_assert(mesh->mMaterialIndex <= mat_count);
         if(mesh->mMaterialIndex >= mat_count) {
             ++mat_count;
@@ -197,7 +201,7 @@ void C4DImporter::InternReadFile( const std::string& pFile,
 
 
 // ------------------------------------------------------------------------------------------------
-bool C4DImporter::ReadShader(aiMaterial* out, _melange_::BaseShader* shader)
+bool C4DImporter::ReadShader(aiMaterial* out, melange::BaseShader* shader)
 {
     // based on Melange sample code (C4DImportExport.cpp)
     while(shader) {
@@ -263,7 +267,7 @@ bool C4DImporter::ReadShader(aiMaterial* out, _melange_::BaseShader* shader)
 
 
 // ------------------------------------------------------------------------------------------------
-void C4DImporter::ReadMaterials(_melange_::BaseMaterial* mat)
+void C4DImporter::ReadMaterials(melange::BaseMaterial* mat)
 {
     // based on Melange sample code
     while (mat)
@@ -288,7 +292,7 @@ void C4DImporter::ReadMaterials(_melange_::BaseMaterial* mat)
                 mat->GetParameter(MATERIAL_COLOR_COLOR, data);
                 Vector color = data.GetVector();
                 mat->GetParameter(MATERIAL_COLOR_BRIGHTNESS, data);
-                const Real brightness = data.GetReal();
+                const Float brightness = data.GetFloat();
 
                 color *= brightness;
 
@@ -507,11 +511,13 @@ aiMesh* C4DImporter::ReadMesh(BaseObject* object)
 
         // copy normals
         if (normals_src) {
-            if(i >= normals_src->GetNormalCount()) {
+            if(i >= normals_src->GetDataCount()) {
                 LogError("unexpected number of normals, ignoring");
             }
             else {
-                const NormalStruct& nor = normals_src->GetNormals(i);
+                ConstNormalHandle normal_handle = normals_src->GetDataAddressR();
+                NormalStruct nor;
+                NormalTag::Get(normal_handle, i, nor);
                 normals->x = nor.a.x;
                 normals->y = nor.a.y;
                 normals->z = nor.a.z;

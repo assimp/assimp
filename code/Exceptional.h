@@ -58,8 +58,8 @@ class DeadlyImportError
 {
 public:
     /** Constructor with arguments */
-    explicit DeadlyImportError( const std::string& pErrorText)
-        : runtime_error(pErrorText)
+    explicit DeadlyImportError( const std::string& errorText)
+        : runtime_error(errorText)
     {
     }
 

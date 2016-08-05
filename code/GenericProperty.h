@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_GENERIC_PROPERTY_H_INCLUDED
 #define AI_GENERIC_PROPERTY_H_INCLUDED
 
-#include "./../include/assimp/Importer.hpp"
-#include "./../include/assimp/ai_assert.h"
+#include <assimp/Importer.hpp>
+#include <assimp/ai_assert.h>
 #include "Hash.h"
 #include <map>
 

@@ -48,11 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "STLLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
-
+#include <memory>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 
 using namespace Assimp;
 
@@ -145,7 +144,7 @@ bool STLImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool 
         const char* tokens[] = {"STL","solid"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,2);
     }
-    
+
     return false;
 }
 
@@ -172,7 +171,7 @@ void addFacesToMesh(aiMesh* pMesh)
 void STLImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {
@@ -190,7 +189,7 @@ void STLImporter::InternReadFile( const std::string& pFile,
     this->mBuffer = &mBuffer2[0];
 
     // the default vertex color is light gray.
-    clrColorDefault.r = clrColorDefault.g = clrColorDefault.b = clrColorDefault.a = 0.6f;
+    clrColorDefault.r = clrColorDefault.g = clrColorDefault.b = clrColorDefault.a = 0.6;
 
     // allocate a single node
     pScene->mRootNode = new aiNode();
@@ -218,13 +217,13 @@ void STLImporter::InternReadFile( const std::string& pFile,
     s.Set(AI_DEFAULT_MATERIAL_NAME);
     pcMat->AddProperty(&s, AI_MATKEY_NAME);
 
-    aiColor4D clrDiffuse(0.6f,0.6f,0.6f,1.0f);
+    aiColor4D clrDiffuse(0.6,0.6,0.6,1.0);
     if (bMatClr) {
         clrDiffuse = clrColorDefault;
     }
     pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_DIFFUSE);
     pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_SPECULAR);
-    clrDiffuse = aiColor4D(0.05f,0.05f,0.05f,1.0f);
+    clrDiffuse = aiColor4D(0.05,0.05,0.05,1.0);
     pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_AMBIENT);
 
     pScene->mNumMaterials = 1;
@@ -308,11 +307,11 @@ void STLImporter::LoadASCIIFile()
                     }
                     sz += 7;
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<float>(sz, (float&)vn->x );
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real&)vn->x );
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<float>(sz, (float&)vn->y );
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real&)vn->y );
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<float>(sz, (float&)vn->z );
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real&)vn->z );
                     normalBuffer.push_back(*vn);
                     normalBuffer.push_back(*vn);
                 }
@@ -333,11 +332,11 @@ void STLImporter::LoadASCIIFile()
                     SkipSpaces(&sz);
                     positionBuffer.push_back(aiVector3D());
                     aiVector3D* vn = &positionBuffer.back();
-                    sz = fast_atoreal_move<float>(sz, (float&)vn->x );
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real&)vn->x );
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<float>(sz, (float&)vn->y );
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real&)vn->y );
                     SkipSpaces(&sz);
-                    sz = fast_atoreal_move<float>(sz, (float&)vn->z );
+                    sz = fast_atoreal_move<ai_real>(sz, (ai_real&)vn->z );
                     faceVertexCounter++;
                 }
             }
@@ -406,7 +405,7 @@ bool STLImporter::LoadBinaryFile()
     }
     bool bIsMaterialise = false;
 
-    // search for an occurence of "COLOR=" in the header
+    // search for an occurrence of "COLOR=" in the header
     const unsigned char* sz2 = (const unsigned char*)mBuffer;
     const unsigned char* const szEnd = sz2+80;
     while (sz2 < szEnd) {
@@ -417,10 +416,10 @@ bool STLImporter::LoadBinaryFile()
             // read the default vertex color for facets
             bIsMaterialise = true;
             DefaultLogger::get()->info("STL: Taking code path for Materialise files");
-            clrColorDefault.r = (*sz2++) / 255.0f;
-            clrColorDefault.g = (*sz2++) / 255.0f;
-            clrColorDefault.b = (*sz2++) / 255.0f;
-            clrColorDefault.a = (*sz2++) / 255.0f;
+            clrColorDefault.r = (*sz2++) / 255.0;
+            clrColorDefault.g = (*sz2++) / 255.0;
+            clrColorDefault.b = (*sz2++) / 255.0;
+            clrColorDefault.a = (*sz2++) / 255.0;
             break;
         }
     }
@@ -481,18 +480,18 @@ bool STLImporter::LoadBinaryFile()
                 DefaultLogger::get()->info("STL: Mesh has vertex colors");
             }
             aiColor4D* clr = &pMesh->mColors[0][i*3];
-            clr->a = 1.0f;
+            clr->a = 1.0;
             if (bIsMaterialise) // this is reversed
             {
-                clr->r = (color & 0x31u) / 31.0f;
-                clr->g = ((color & (0x31u<<5))>>5u) / 31.0f;
-                clr->b = ((color & (0x31u<<10))>>10u) / 31.0f;
+                clr->r = (color & 0x31u) / 31.0;
+                clr->g = ((color & (0x31u<<5))>>5u) / 31.0;
+                clr->b = ((color & (0x31u<<10))>>10u) / 31.0;
             }
             else
             {
-                clr->b = (color & 0x31u) / 31.0f;
-                clr->g = ((color & (0x31u<<5))>>5u) / 31.0f;
-                clr->r = ((color & (0x31u<<10))>>10u) / 31.0f;
+                clr->b = (color & 0x31u) / 31.0;
+                clr->g = ((color & (0x31u<<5))>>5u) / 31.0;
+                clr->r = ((color & (0x31u<<10))>>10u) / 31.0;
             }
             // assign the color to all vertices of the face
             *(clr+1) = *clr;

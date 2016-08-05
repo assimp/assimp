@@ -29,3 +29,4 @@ ORIGINAL FILE;EXPECTED DUMP
 ../models-nonbsd/Ogre/OgreSDK/ninja.mesh.xml -cfull;../results/tmp/ninja.mesh.xml_2a5e7eb6/EXPECT
 ../models-nonbsd/PK3/SGDTT3.pk3 -ptv -gsn -cts -db;../results/tmp/SGDTT3.pk3_591f74f1/EXPECT
 ../models-nonbsd/PK3/SGDTT3.pk3 ;../results/tmp/SGDTT3.pk3_ad4b2ce1/EXPECT
+../models-nonbsd/PK3/SGDTT3.pk3 -cfull;../results/tmp/SGDTT3.pk3_ad4b2ce1/EXPECT

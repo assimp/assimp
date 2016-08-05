@@ -51,8 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Exporter.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
-#include <boost/foreach.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 
 using namespace Assimp;
@@ -67,14 +66,14 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 
     // we're still here - export successfully completed. Write both the main OBJ file and the material script
     {
-        boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+        std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
         if(outfile == NULL) {
             throw DeadlyExportError("could not open output .obj file: " + std::string(pFile));
         }
         outfile->Write( exporter.mOutput.str().c_str(), static_cast<size_t>(exporter.mOutput.tellp()),1);
     }
     {
-        boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(exporter.GetMaterialLibFileName(),"wt"));
+        std::unique_ptr<IOStream> outfile (pIOSystem->Open(exporter.GetMaterialLibFileName(),"wt"));
         if(outfile == NULL) {
             throw DeadlyExportError("could not open output .mtl file: " + std::string(exporter.GetMaterialLibFileName()));
         }
@@ -95,7 +94,9 @@ ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
     mOutput.imbue(l);
+    mOutput.precision(16);
     mOutputMat.imbue(l);
+    mOutputMat.precision(16);
 
     WriteGeometryFile();
     WriteMaterialFile();
@@ -166,7 +167,7 @@ void ObjExporter::WriteMaterialFile()
             mOutputMat << "Ke " << c.r << " " << c.g << " " << c.b << endl;
         }
 
-        float o;
+        ai_real o;
         if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
             mOutputMat << "d " << o << endl;
         }
@@ -217,7 +218,7 @@ void ObjExporter :: WriteGeometryFile()
     // write vertex positions
     vpMap.getVectors(vp);
     mOutput << "# " << vp.size() << " vertex positions" << endl;
-    BOOST_FOREACH(const aiVector3D& v, vp) {
+    for(const aiVector3D& v : vp) {
         mOutput << "v  " << v.x << " " << v.y << " " << v.z << endl;
     }
     mOutput << endl;
@@ -225,7 +226,7 @@ void ObjExporter :: WriteGeometryFile()
     // write uv coordinates
     vtMap.getVectors(vt);
     mOutput << "# " << vt.size() << " UV coordinates" << endl;
-    BOOST_FOREACH(const aiVector3D& v, vt) {
+    for(const aiVector3D& v : vt) {
         mOutput << "vt " << v.x << " " << v.y << " " << v.z << endl;
     }
     mOutput << endl;
@@ -233,22 +234,22 @@ void ObjExporter :: WriteGeometryFile()
     // write vertex normals
     vnMap.getVectors(vn);
     mOutput << "# " << vn.size() << " vertex normals" << endl;
-    BOOST_FOREACH(const aiVector3D& v, vn) {
+    for(const aiVector3D& v : vn) {
         mOutput << "vn " << v.x << " " << v.y << " " << v.z << endl;
     }
     mOutput << endl;
 
     // now write all mesh instances
-    BOOST_FOREACH(const MeshInstance& m, meshes) {
+    for(const MeshInstance& m : meshes) {
         mOutput << "# Mesh \'" << m.name << "\' with " << m.faces.size() << " faces" << endl;
         if (!m.name.empty()) {
             mOutput << "g " << m.name << endl;
         }
         mOutput << "usemtl " << m.matname << endl;
 
-        BOOST_FOREACH(const Face& f, m.faces) {
+        for(const Face& f : m.faces) {
             mOutput << f.kind << ' ';
-            BOOST_FOREACH(const FaceVertex& fv, f.indices) {
+            for(const FaceVertex& fv : f.indices) {
                 mOutput << ' ' << fv.vp;
 
                 if (f.kind != 'p') {

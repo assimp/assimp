@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
@@ -117,7 +117,7 @@ const aiImporterDesc* ObjFileImporter::GetInfo () const
 void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, IOSystem* pIOHandler) {
     // Read file into memory
     static const std::string mode = "rb";
-    boost::scoped_ptr<IOStream> fileStream( pIOHandler->Open( file, mode));
+    std::unique_ptr<IOStream> fileStream( pIOHandler->Open( file, mode));
     if( !fileStream.get() ) {
         throw DeadlyImportError( "Failed to open file " + file + "." );
     }
@@ -177,7 +177,7 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     m_progress->UpdateFileRead(1, 3);
 
     // parse the file into a temporary representation
-    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress);
+    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress, file);
 
     // And create the proper return structures out of it
     CreateDataFromImport(parser.GetModel(), pScene);
@@ -308,7 +308,11 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
     if( !pObjMesh ) {
         return NULL;
     }
-    ai_assert( NULL != pObjMesh );
+
+    if( pObjMesh->m_Faces.empty() ) {
+        return NULL;
+    }
+
     aiMesh* pMesh = new aiMesh;
     if( !pObjMesh->m_name.empty() ) {
         pMesh->mName.Set( pObjMesh->m_name );
@@ -412,6 +416,10 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
     if ( !pModel->m_Normals.empty() && pObjMesh->m_hasNormals )
         pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
 
+    // Allocate buffer for vertex-color vectors
+    if ( !pModel->m_VertexColors.empty() )
+        pMesh->mColors[0] = new aiColor4D[ pMesh->mNumVertices ];
+
     // Allocate buffer for texture coordinates
     if ( !pModel->m_TextureCoord.empty() && pObjMesh->m_uiUVCoordinates[0] )
     {
@@ -443,6 +451,13 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
                     throw DeadlyImportError("OBJ: vertex normal index out of range");
 
                 pMesh->mNormals[ newIndex ] = pModel->m_Normals[ normal ];
+            }
+
+            // Copy all vertex colors
+            if ( !pModel->m_VertexColors.empty())
+            {
+                const aiVector3D color = pModel->m_VertexColors[ vertex ];
+                pMesh->mColors[0][ newIndex ] = aiColor4D(color.x, color.y, color.z, 1.0);
             }
 
             // Copy all texture coordinates

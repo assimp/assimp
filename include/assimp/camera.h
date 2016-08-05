@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Defines the aiCamera data structure
  */
 
+#pragma once
 #ifndef AI_CAMERA_H_INC
 #define AI_CAMERA_H_INC
 

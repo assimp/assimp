@@ -44,15 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_COLLADAEXPORTER_H_INC
 #define AI_COLLADAEXPORTER_H_INC
 
-#include "../include/assimp/ai_assert.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/light.h"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/ai_assert.h>
+#include <assimp/material.h>
+#include <assimp/mesh.h>
+#include <assimp/light.h>
+#include <assimp/Exporter.hpp>
 #include <sstream>
 #include <vector>
 #include <map>
-#include <boost/lexical_cast.hpp>
 
 struct aiScene;
 struct aiNode;
@@ -109,13 +108,13 @@ protected:
     enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
 
     /// Writes a float array of the given type
-    void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount);
+    void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount);
 
     /// Writes the scene library
     void WriteSceneLibrary();
 
     /// Recursively writes the given node
-    void WriteNode( aiNode* pNode);
+    void WriteNode( const aiScene* scene, aiNode* pNode);
 
     /// Enters a new xml element, which increases the indentation
     void PushTag() { startstr.append( "  "); }
@@ -123,7 +122,7 @@ protected:
     void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
 
     /// Creates a mesh ID for the given mesh
-    std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + boost::lexical_cast<std::string> (pIndex); }
+    std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + std::to_string(pIndex); }
 
 public:
     /// Stringstream to write all output into
@@ -161,10 +160,10 @@ protected:
   struct Property
   {
     bool exist;
-     float value;
+     ai_real value;
      Property()
          : exist(false)
-         , value(0.0f)
+         , value(0.0)
      {}
   };
 

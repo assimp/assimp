@@ -48,9 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "PlyLoader.h"
 #include "Macros.h"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
+#include <memory>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
 
 
 using namespace Assimp;
@@ -123,11 +123,31 @@ const aiImporterDesc* PLYImporter::GetInfo () const
 }
 
 // ------------------------------------------------------------------------------------------------
+static bool isBigEndian( const char* szMe ) {
+    ai_assert( NULL != szMe );
+
+    // binary_little_endian
+    // binary_big_endian
+    bool isBigEndian( false );
+#if (defined AI_BUILD_BIG_ENDIAN)
+    if ( 'l' == *szMe || 'L' == *szMe ) {
+        isBigEndian = true;
+}
+#else
+    if ( 'b' == *szMe || 'B' == *szMe ) {
+        isBigEndian = true;
+    }
+#endif // ! AI_BUILD_BIG_ENDIAN
+
+    return isBigEndian;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Imports the given file into the given scene structure.
 void PLYImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {
@@ -151,33 +171,24 @@ void PLYImporter::InternReadFile( const std::string& pFile,
 
     // determine the format of the file data
     PLY::DOM sPlyDom;
-    if (TokenMatch(szMe,"format",6))
-    {
-        if (TokenMatch(szMe,"ascii",5))
-        {
+    if (TokenMatch(szMe,"format",6)) {
+        if (TokenMatch(szMe,"ascii",5)) {
             SkipLine(szMe,(const char**)&szMe);
             if(!PLY::DOM::ParseInstance(szMe,&sPlyDom))
                 throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#1)");
-        }
-        else if (!::strncmp(szMe,"binary_",7))
+        } else if (!::strncmp(szMe,"binary_",7))
         {
-            bool bIsBE = false;
-            szMe+=7;
-
-            // binary_little_endian
-            // binary_big_endian
-#if (defined AI_BUILD_BIG_ENDIAN)
-            if ('l' == *szMe || 'L' == *szMe)bIsBE = true;
-#else
-            if ('b' == *szMe || 'B' == *szMe)bIsBE = true;
-#endif // ! AI_BUILD_BIG_ENDIAN
+            szMe += 7;
+            const bool bIsBE( isBigEndian( szMe ) );
 
             // skip the line, parse the rest of the header and build the DOM
             SkipLine(szMe,(const char**)&szMe);
-            if(!PLY::DOM::ParseInstanceBinary(szMe,&sPlyDom,bIsBE))
-                throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#2)");
+            if ( !PLY::DOM::ParseInstanceBinary( szMe, &sPlyDom, bIsBE ) ) {
+                throw DeadlyImportError( "Invalid .ply file: Unable to build DOM (#2)" );
+            }
+        } else {
+            throw DeadlyImportError( "Invalid .ply file: Unknown file format" );
         }
-        else throw DeadlyImportError( "Invalid .ply file: Unknown file format");
     }
     else
     {
@@ -186,13 +197,14 @@ void PLYImporter::InternReadFile( const std::string& pFile,
     }
     this->pcDOM = &sPlyDom;
 
-    // now load a list of vertices. This must be sucessfull in order to procede
+    // now load a list of vertices. This must be successfully in order to procedure
     std::vector<aiVector3D> avPositions;
     this->LoadVertices(&avPositions,false);
 
-    if (avPositions.empty())
+    if ( avPositions.empty() ) {
         throw DeadlyImportError( "Invalid .ply file: No vertices found. "
-            "Unable to parse the data format of the PLY file.");
+            "Unable to parse the data format of the PLY file." );
+    }
 
     // now load a list of normals.
     std::vector<aiVector3D> avNormals;
@@ -246,28 +258,32 @@ void PLYImporter::InternReadFile( const std::string& pFile,
     ConvertMeshes(&avFaces,&avPositions,&avNormals,
         &avColors,&avTexCoords,&avMaterials,&avMeshes);
 
-    if (avMeshes.empty())
-        throw DeadlyImportError( "Invalid .ply file: Unable to extract mesh data ");
+    if ( avMeshes.empty() ) {
+        throw DeadlyImportError( "Invalid .ply file: Unable to extract mesh data " );
+    }
 
     // now generate the output scene object. Fill the material list
     pScene->mNumMaterials = (unsigned int)avMaterials.size();
     pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
-    for (unsigned int i = 0; i < pScene->mNumMaterials;++i)
-        pScene->mMaterials[i] = avMaterials[i];
+    for ( unsigned int i = 0; i < pScene->mNumMaterials; ++i ) {
+        pScene->mMaterials[ i ] = avMaterials[ i ];
+    }
 
     // fill the mesh list
     pScene->mNumMeshes = (unsigned int)avMeshes.size();
     pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-    for (unsigned int i = 0; i < pScene->mNumMeshes;++i)
-        pScene->mMeshes[i] = avMeshes[i];
+    for ( unsigned int i = 0; i < pScene->mNumMeshes; ++i ) {
+        pScene->mMeshes[ i ] = avMeshes[ i ];
+    }
 
     // generate a simple node structure
     pScene->mRootNode = new aiNode();
     pScene->mRootNode->mNumMeshes = pScene->mNumMeshes;
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
 
-    for (unsigned int i = 0; i < pScene->mRootNode->mNumMeshes;++i)
-        pScene->mRootNode->mMeshes[i] = i;
+    for ( unsigned int i = 0; i < pScene->mRootNode->mNumMeshes; ++i ) {
+        pScene->mRootNode->mMeshes[ i ] = i;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -291,7 +307,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
     for (std::vector<PLY::Face>::const_iterator i = avFaces->begin();i != avFaces->end();++i,++iNum)
         aiSplit[(*i).iMaterialIndex].push_back(iNum);
 
-    // now generate submeshes
+    // now generate sub-meshes
     for (unsigned int p = 0; p < avMaterials->size();++p)
     {
         if (aiSplit[p].size() != 0)
@@ -310,7 +326,7 @@ void PLYImporter::ConvertMeshes(std::vector<PLY::Face>* avFaces,
                 iNum += (unsigned int)(*avFaces)[aiSplit[p][i]].mIndices.size();
             }
             p_pcOut->mNumVertices = iNum;
-            if( 0 == iNum ) {     // nothing to do 
+            if( 0 == iNum ) {     // nothing to do
                 delete[] aiSplit; // cleanup
                 delete p_pcOut;
                 return;
@@ -465,13 +481,13 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
 
             if (0xFFFFFFFF != aiPositions[0])
             {
-                vOut.x = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[0]).avList.front(),aiTypes[0]);
             }
 
             if (0xFFFFFFFF != aiPositions[1])
             {
-                vOut.y = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[1]).avList.front(),aiTypes[1]);
             }
             // and add them to our nice list
@@ -486,12 +502,12 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 {
     ai_assert(NULL != pvOut);
 
-    unsigned int aiPositions[3] = {0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF};
+    ai_uint aiPositions[3] = {0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF};
     PLY::EDataType aiTypes[3] = {EDT_Char,EDT_Char,EDT_Char};
     PLY::ElementInstanceList* pcList = NULL;
     unsigned int cnt = 0;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i =  pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)
@@ -575,19 +591,19 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 
             if (0xFFFFFFFF != aiPositions[0])
             {
-                vOut.x = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.x = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[0]).avList.front(),aiTypes[0]);
             }
 
             if (0xFFFFFFFF != aiPositions[1])
             {
-                vOut.y = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.y = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[1]).avList.front(),aiTypes[1]);
             }
 
             if (0xFFFFFFFF != aiPositions[2])
             {
-                vOut.z = PLY::PropertyInstance::ConvertTo<float>(
+                vOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
                     GetProperty((*i).alProperties, aiPositions[2]).avList.front(),aiTypes[2]);
             }
 
@@ -599,7 +615,7 @@ void PLYImporter::LoadVertices(std::vector<aiVector3D>* pvOut, bool p_bNormals)
 
 // ------------------------------------------------------------------------------------------------
 // Convert a color component to [0...1]
-float PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
+ai_real PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
     PLY::EDataType eType)
 {
     switch (eType)
@@ -607,20 +623,20 @@ float PLYImporter::NormalizeColorValue (PLY::PropertyInstance::ValueUnion val,
     case EDT_Float:
         return val.fFloat;
     case EDT_Double:
-        return (float)val.fDouble;
+        return (ai_real)val.fDouble;
 
     case EDT_UChar:
-        return (float)val.iUInt / (float)0xFF;
+        return (ai_real)val.iUInt / (ai_real)0xFF;
     case EDT_Char:
-        return (float)(val.iInt+(0xFF/2)) / (float)0xFF;
+        return (ai_real)(val.iInt+(0xFF/2)) / (ai_real)0xFF;
     case EDT_UShort:
-        return (float)val.iUInt / (float)0xFFFF;
+        return (ai_real)val.iUInt / (ai_real)0xFFFF;
     case EDT_Short:
-        return (float)(val.iInt+(0xFFFF/2)) / (float)0xFFFF;
+        return (ai_real)(val.iInt+(0xFFFF/2)) / (ai_real)0xFFFF;
     case EDT_UInt:
-        return (float)val.iUInt / (float)0xFFFF;
+        return (ai_real)val.iUInt / (ai_real)0xFFFF;
     case EDT_Int:
-        return ((float)val.iInt / (float)0xFF) + 0.5f;
+        return ((ai_real)val.iInt / (ai_real)0xFF) + 0.5f;
     default: ;
     };
     return 0.0f;
@@ -711,7 +727,7 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
             }
 
             // assume 1.0 for the alpha channel ifit is not set
-            if (0xFFFFFFFF == aiPositions[3])vOut.a = 1.0f;
+            if (0xFFFFFFFF == aiPositions[3])vOut.a = 1.0;
             else
             {
                 vOut.a = NormalizeColorValue(GetProperty((*i).alProperties,
@@ -1060,14 +1076,14 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
             // handle phong power and shading mode
             int iMode;
             if (0xFFFFFFFF != iPhong)   {
-                float fSpec = PLY::PropertyInstance::ConvertTo<float>(GetProperty((*i).alProperties, iPhong).avList.front(),ePhong);
+                ai_real fSpec = PLY::PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(),ePhong);
 
                 // if shininess is 0 (and the pow() calculation would therefore always
                 // become 1, not depending on the angle), use gouraud lighting
                 if (fSpec)  {
                     // scale this with 15 ... hopefully this is correct
                     fSpec *= 15;
-                    pcHelper->AddProperty<float>(&fSpec, 1, AI_MATKEY_SHININESS);
+                    pcHelper->AddProperty<ai_real>(&fSpec, 1, AI_MATKEY_SHININESS);
 
                     iMode = (int)aiShadingMode_Phong;
                 }
@@ -1078,8 +1094,8 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 
             // handle opacity
             if (0xFFFFFFFF != iOpacity) {
-                float fOpacity = PLY::PropertyInstance::ConvertTo<float>(GetProperty((*i).alProperties, iPhong).avList.front(),eOpacity);
-                pcHelper->AddProperty<float>(&fOpacity, 1, AI_MATKEY_OPACITY);
+                ai_real fOpacity = PLY::PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(),eOpacity);
+                pcHelper->AddProperty<ai_real>(&fOpacity, 1, AI_MATKEY_OPACITY);
             }
 
             // The face order is absolutely undefined for PLY, so we have to

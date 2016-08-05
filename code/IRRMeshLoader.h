@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "IRRShared.h"
 
+#ifndef ASSIMP_BUILD_NO_IRRMESH_IMPORTER
+
 namespace Assimp    {
 
 // ---------------------------------------------------------------------------
@@ -91,5 +93,7 @@ protected:
 };
 
 } // end of namespace Assimp
+
+#endif // ASSIMP_BUILD_NO_IRRMESH_IMPORTER
 
 #endif // AI_IRRMESHIMPORTER_H_INC

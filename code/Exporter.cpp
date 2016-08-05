@@ -63,11 +63,11 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "ConvertToLHProcess.h"
 #include "Exceptional.h"
 #include "ScenePrivate.h"
-#include <boost/shared_ptr.hpp>
-#include "../include/assimp/Exporter.hpp"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/postprocess.h"
-#include "../include/assimp/scene.h"
+#include <memory>
+#include <assimp/Exporter.hpp>
+#include <assimp/mesh.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <memory>
 
 namespace Assimp {
@@ -184,7 +184,7 @@ public:
 public:
 
     aiExportDataBlob* blob;
-    boost::shared_ptr< Assimp::IOSystem > mIOSystem;
+    std::shared_ptr< Assimp::IOSystem > mIOSystem;
     bool mIsDefaultIOHandler;
 
     /** Post processing steps we can apply at the imported data. */
@@ -254,10 +254,10 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
     }
 
 
-    boost::shared_ptr<IOSystem> old = pimpl->mIOSystem;
+    std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
 
     BlobIOSystem* blobio = new BlobIOSystem();
-    pimpl->mIOSystem = boost::shared_ptr<IOSystem>( blobio );
+    pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
 
     if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName())) {
         pimpl->mIOSystem = old;
@@ -324,7 +324,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
                 aiScene* scenecopy_tmp;
                 SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
 
-                std::auto_ptr<aiScene> scenecopy(scenecopy_tmp);
+                std::unique_ptr<aiScene> scenecopy(scenecopy_tmp);
                 const ScenePrivateData* const priv = ScenePriv(pScene);
 
                 // steps that are not idempotent, i.e. we might need to run them again, usually to get back to the
@@ -491,7 +491,7 @@ const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex 
 // ------------------------------------------------------------------------------------------------
 aiReturn Exporter :: RegisterExporter(const ExportFormatEntry& desc)
 {
-    BOOST_FOREACH(const ExportFormatEntry& e, pimpl->mExporters) {
+    for(const ExportFormatEntry& e : pimpl->mExporters) {
         if (!strcmp(e.mDescription.id,desc.mDescription.id)) {
             return aiReturn_FAILURE;
         }
@@ -534,9 +534,9 @@ bool ExportProperties :: SetPropertyInteger(const char* szName, int iValue)
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property
-bool ExportProperties :: SetPropertyFloat(const char* szName, float iValue)
+bool ExportProperties :: SetPropertyFloat(const char* szName, ai_real iValue)
 {
-    return SetGenericProperty<float>(mFloatProperties, szName,iValue);
+    return SetGenericProperty<ai_real>(mFloatProperties, szName,iValue);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -563,10 +563,10 @@ int ExportProperties :: GetPropertyInteger(const char* szName,
 
 // ------------------------------------------------------------------------------------------------
 // Get a configuration property
-float ExportProperties :: GetPropertyFloat(const char* szName,
-    float iErrorReturn /*= 10e10*/) const
+ai_real ExportProperties :: GetPropertyFloat(const char* szName,
+    ai_real iErrorReturn /*= 10e10*/) const
 {
-    return GetGenericProperty<float>(mFloatProperties,szName,iErrorReturn);
+    return GetGenericProperty<ai_real>(mFloatProperties,szName,iErrorReturn);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -603,7 +603,7 @@ bool ExportProperties :: HasPropertyBool(const char* szName) const
 // Has a configuration property
 bool ExportProperties :: HasPropertyFloat(const char* szName) const
 {
-    return HasGenericProperty<float>(mFloatProperties, szName);
+    return HasGenericProperty<ai_real>(mFloatProperties, szName);
 };
 
 // ------------------------------------------------------------------------------------------------

@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "BaseProcess.h"
 
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
 
 namespace Assimp
 {
@@ -101,7 +101,7 @@ public:
     size_t mMaxBoneCount;
 
     /// Per mesh index: Array of indices of the new submeshes.
-    std::vector< std::vector<size_t> > mSubMeshIndices;
+    std::vector< std::vector<unsigned int> > mSubMeshIndices;
 };
 
 } // end of namespace Assimp

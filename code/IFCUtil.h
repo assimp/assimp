@@ -48,9 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IFCReaderGen.h"
 #include "IFCLoader.h"
 #include "STEPFile.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/material.h"
-
+#include <assimp/mesh.h>
+#include <assimp/material.h>
 
 struct aiNode;
 
@@ -120,8 +119,8 @@ struct TempOpening
     const IFC::IfcSolidModel* solid;
     IfcVector3 extrusionDir;
 
-    boost::shared_ptr<TempMesh> profileMesh;
-    boost::shared_ptr<TempMesh> profileMesh2D;
+    std::shared_ptr<TempMesh> profileMesh;
+    std::shared_ptr<TempMesh> profileMesh2D;
 
     // list of points generated for this opening. This is used to
     // create connections between two opposing holes created
@@ -140,8 +139,8 @@ struct TempOpening
 
     // ------------------------------------------------------------------------------
     TempOpening(const IFC::IfcSolidModel* solid,IfcVector3 extrusionDir,
-        boost::shared_ptr<TempMesh> profileMesh,
-        boost::shared_ptr<TempMesh> profileMesh2D)
+        std::shared_ptr<TempMesh> profileMesh,
+        std::shared_ptr<TempMesh> profileMesh2D)
         : solid(solid)
         , extrusionDir(extrusionDir)
         , profileMesh(profileMesh)

@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PlyLoader.h"
 #include "fast_atof.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/DefaultLogger.hpp>
 #include "ByteSwapper.h"
 
 
@@ -388,7 +388,7 @@ bool PLY::Element::ParseElement (const char* pCur,
 
     if (!SkipSpaces(&pCur))return false;
 
-    //parse the number of occurences of this element
+    //parse the number of occurrences of this element
     pOut->NumOccur = strtoul10(pCur,&pCur);
 
     // go to the next line
@@ -420,7 +420,10 @@ bool PLY::DOM::SkipComments (const char* pCur,
 
     if (TokenMatch(pCur,"comment",7))
     {
-        SkipLine(pCur,&pCur);
+	     if ( !IsLineEnd(pCur[-1]) )
+	     {
+	         SkipLine(pCur,&pCur);
+	     }
         SkipComments(pCur,&pCur);
         *pCurOut = pCur;
         return true;
@@ -816,15 +819,18 @@ bool PLY::PropertyInstance::ParseValue(
         break;
 
     case EDT_Float:
-
-        pCur = fast_atoreal_move<float>(pCur,out->fFloat);
+        // technically this should cast to float, but people tend to use float descriptors for double data
+        // this is the best way to not risk loosing precision on import and it doesn't hurt to do this
+        ai_real f;
+        pCur = fast_atoreal_move<ai_real>(pCur,f);
+        out->fFloat = (ai_real)f;
         break;
 
     case EDT_Double:
 
-        float f;
-        pCur = fast_atoreal_move<float>(pCur,f);
-        out->fDouble = (double)f;
+        double d;
+        pCur = fast_atoreal_move<double>(pCur,d);
+        out->fDouble = (double)d;
         break;
 
     default:
@@ -851,7 +857,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         out->iUInt = (uint32_t)*((uint32_t*)pCur);
         pCur += 4;
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap((int32_t*)&out->iUInt);
         break;
 
@@ -859,7 +865,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         uint16_t i = *((uint16_t*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap(&i);
         out->iUInt = (uint32_t)i;
         pCur += 2;
@@ -877,7 +883,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         out->iInt = *((int32_t*)pCur);
         pCur += 4;
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap(&out->iInt);
         break;
 
@@ -885,7 +891,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         int16_t i = *((int16_t*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap(&i);
         out->iInt = (int32_t)i;
         pCur += 2;
@@ -901,7 +907,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         out->fFloat = *((float*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap((int32_t*)&out->fFloat);
         pCur += 4;
         break;
@@ -910,7 +916,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         {
         out->fDouble = *((double*)pCur);
 
-        // Swap endianess
+        // Swap endianness
         if (p_bBE)ByteSwap::Swap((int64_t*)&out->fDouble);
         pCur += 8;
         break;

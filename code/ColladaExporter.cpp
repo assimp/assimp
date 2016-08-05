@@ -49,13 +49,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneCombiner.h"
 #include "DefaultIOSystem.h"
 #include "XMLTools.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
 
 #include "Exceptional.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <ctime>
 #include <set>
 
@@ -75,7 +75,7 @@ void ExportSceneCollada(const char* pFile, IOSystem* pIOSystem, const aiScene* p
     ColladaExporter iDoTheExportThing( pScene, pIOSystem, path, file);
 
     // we're still here - export successfully completed. Write result to the given IOSYstem
-    boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+    std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if(outfile == NULL) {
         throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
     }
@@ -94,6 +94,7 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
 {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
+    mOutput.precision(16);
 
     mScene = pScene;
     mSceneOwned = false;
@@ -148,7 +149,7 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-    static const float epsilon = 0.00001f;
+    static const ai_real epsilon = 0.00001;
     static const aiQuaternion x_rot(aiMatrix3x3(
         0, -1,  0,
         1,  0,  0,
@@ -175,9 +176,9 @@ void ColladaExporter::WriteHeader()
 
     bool add_root_node = false;
 
-    float scale = 1.0;
+    ai_real scale = 1.0;
     if(std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
-        scale = (float) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
+        scale = (ai_real) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
     } else {
         add_root_node = true;
     }
@@ -268,7 +269,7 @@ void ColladaExporter::WriteTextures() {
 
             std::string name = mFile + "_texture_" + (i < 1000 ? "0" : "") + (i < 100 ? "0" : "") + (i < 10 ? "0" : "") + str + "." + ((const char*) texture->achFormatHint);
 
-            boost::scoped_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
+            std::unique_ptr<IOStream> outfile(mIOSystem->Open(mPath + name, "wb"));
             if(outfile == NULL) {
                 throw DeadlyExportError("could not open output texture file: " + mPath + name);
             }
@@ -449,7 +450,7 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light){
                             srcLight->mFalloffAngle);
     */
 
-    const float fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
+    const ai_real fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
     mOutput << startstr <<"<falloff_angle sid=\"fall_off_angle\">"
                                 << fallOffAngle
                         <<"</falloff_angle>" << endstr;
@@ -530,7 +531,7 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
 // Reimplementation of isalnum(,C locale), because AppVeyor does not see standard version.
 static bool isalnum_C(char c)
 {
-  return strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c);
+  return ( nullptr != strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -636,7 +637,7 @@ void ColladaExporter::WriteMaterials()
     aiString name;
     if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
       name = "mat";
-    materials[a].name = std::string( "m") + boost::lexical_cast<std::string> (a) + name.C_Str();
+    materials[a].name = std::string( "m") + std::to_string(a) + name.C_Str();
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
       if( !isalnum_C( *it ) ) {
         *it = '_';
@@ -802,18 +803,18 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     PushTag();
 
     // Positions
-    WriteFloatArray( idstr + "-positions", FloatType_Vector, (float*) mesh->mVertices, mesh->mNumVertices);
+    WriteFloatArray( idstr + "-positions", FloatType_Vector, (ai_real*) mesh->mVertices, mesh->mNumVertices);
     // Normals, if any
     if( mesh->HasNormals() )
-        WriteFloatArray( idstr + "-normals", FloatType_Vector, (float*) mesh->mNormals, mesh->mNumVertices);
+        WriteFloatArray( idstr + "-normals", FloatType_Vector, (ai_real*) mesh->mNormals, mesh->mNumVertices);
 
     // texture coords
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
         if( mesh->HasTextureCoords( a) )
         {
-            WriteFloatArray( idstr + "-tex" + boost::lexical_cast<std::string> (a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
-                (float*) mesh->mTextureCoords[a], mesh->mNumVertices);
+            WriteFloatArray( idstr + "-tex" + std::to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
+                (ai_real*) mesh->mTextureCoords[a], mesh->mNumVertices);
         }
     }
 
@@ -821,7 +822,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
         if( mesh->HasVertexColors( a) )
-            WriteFloatArray( idstr + "-color" + boost::lexical_cast<std::string> (a), FloatType_Color, (float*) mesh->mColors[a], mesh->mNumVertices);
+            WriteFloatArray( idstr + "-color" + std::to_string(a), FloatType_Color, (ai_real*) mesh->mColors[a], mesh->mNumVertices);
     }
 
     // assemble vertex structure
@@ -872,7 +873,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "</lines>" << endstr;
     }
 
-    // triangle - dont use it, because compatibility problems
+    // triangle - don't use it, because compatibility problems
 
     // polygons
     if (countPoly)
@@ -916,7 +917,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 
 // ------------------------------------------------------------------------------------------------
 // Writes a float array of the given type
-void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount)
+void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount)
 {
     size_t floatsPerElement = 0;
     switch( pType )
@@ -1016,7 +1017,7 @@ void ColladaExporter::WriteSceneLibrary()
 
     // start recursive write at the root node
     for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
-        WriteNode( mScene->mRootNode->mChildren[a]);
+        WriteNode( mScene, mScene->mRootNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</visual_scene>" << endstr;
@@ -1025,10 +1026,25 @@ void ColladaExporter::WriteSceneLibrary()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Helper to find a bone by name in the scene
+aiBone* findBone( const aiScene* scene, const char * name) {
+    for (size_t m=0; m<scene->mNumMeshes; m++) {
+        aiMesh * mesh = scene->mMeshes[m];
+        for (size_t b=0; b<mesh->mNumBones; b++) {
+            aiBone * bone = mesh->mBones[b];
+            if (0 == strcmp(name, bone->mName.C_Str())) {
+                return bone;
+            }
+        }
+    }
+    return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void ColladaExporter::WriteNode(aiNode* pNode)
+void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 {
-    // the must have a name
+    // the node must have a name
     if (pNode->mName.length == 0)
     {
         std::stringstream ss;
@@ -1036,12 +1052,25 @@ void ColladaExporter::WriteNode(aiNode* pNode)
         pNode->mName.Set(ss.str());
     }
 
+    // If the node is associated with a bone, it is a joint node (JOINT)
+    // otherwise it is a normal node (NODE)
+    const char * node_type;
+    if (NULL == findBone(pScene, pNode->mName.C_Str())) {
+        node_type = "NODE";
+    } else {
+        node_type = "JOINT";
+    }
+
     const std::string node_name_escaped = XMLEscape(pNode->mName.data);
-    mOutput << startstr << "<node id=\"" << node_name_escaped << "\" name=\"" << node_name_escaped << "\">" << endstr;
+    mOutput << startstr
+            << "<node id=\"" << node_name_escaped
+            << "\" name=\"" << node_name_escaped
+            << "\" type=\"" << node_type
+            << "\">" << endstr;
     PushTag();
 
     // write transformation - we can directly put the matrix there
-    // TODO: (thom) decompose into scale - rot - quad to allow adressing it by animations afterwards
+    // TODO: (thom) decompose into scale - rot - quad to allow addressing it by animations afterwards
     const aiMatrix4x4& mat = pNode->mTransformation;
     mOutput << startstr << "<matrix>";
     mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
@@ -1102,7 +1131,7 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 
     // recurse into subnodes
     for( size_t a = 0; a < pNode->mNumChildren; ++a )
-        WriteNode( pNode->mChildren[a]);
+        WriteNode( pScene, pNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</node>" << endstr;

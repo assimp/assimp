@@ -231,7 +231,7 @@ void Sweep::FillAdvancingFront(SweepContext& tcx, Node& n)
 
   while (node->next) {
     double angle = HoleAngle(*node);
-    if (angle > M_PI_2 || angle < -M_PI_2) break;
+    if (angle > PI_2 || angle < -PI_2) break;
     Fill(tcx, *node);
     node = node->next;
   }
@@ -241,7 +241,7 @@ void Sweep::FillAdvancingFront(SweepContext& tcx, Node& n)
 
   while (node->prev) {
     double angle = HoleAngle(*node);
-    if (angle > M_PI_2 || angle < -M_PI_2) break;
+    if (angle > PI_2 || angle < -PI_2) break;
     Fill(tcx, *node);
     node = node->prev;
   }

@@ -18,6 +18,7 @@ assimp.pc
 revision.h
 contrib/zlib/zconf.h
 contrib/zlib/zlib.pc
+include/assimp/config.h
 
 # CMake
 CMakeCache.txt
@@ -72,3 +73,4 @@ lib64/assimp-vc120-mtd.pdb
 lib64/assimp-vc120-mtd.ilk
 lib64/assimp-vc120-mtd.exp
 lib64/assimp-vc120-mt.exp
+xcuserdata

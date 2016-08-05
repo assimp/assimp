@@ -54,11 +54,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <map>
 #include <list>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include "Exceptional.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/light.h"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/light.h>
 
 //
 #if _MSC_VER > 1500 || (defined __GNUC___)
@@ -102,7 +102,7 @@ void ExportSceneStep(const char* pFile,IOSystem* pIOSystem, const aiScene* pScen
     StepExporter iDoTheExportThing( pScene, pIOSystem, path, file, &props);
 
     // we're still here - export successfully completed. Write result to the given IOSYstem
-    boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+    std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
     if(outfile == NULL) {
         throw DeadlyExportError("could not open output .stp file: " + std::string(pFile));
     }
@@ -146,6 +146,7 @@ StepExporter::StepExporter(const aiScene* pScene, IOSystem* pIOSystem, const std
 
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
+    mOutput.precision(16);
 
     // start writing
     WriteFile();
@@ -158,7 +159,9 @@ void StepExporter::WriteFile()
     // see http://shodhganga.inflibnet.ac.in:8080/jspui/bitstream/10603/14116/11/11_chapter%203.pdf
     // note, that all realnumber values must be comma separated in x files
     mOutput.setf(std::ios::fixed);
-    mOutput.precision(16); // precission for double
+    // precission for double
+    // see http://stackoverflow.com/questions/554063/how-do-i-print-a-double-value-with-full-precision-using-cout
+    mOutput.precision(16);
 
     // standard color
     aiColor4D fColor;
@@ -365,4 +368,3 @@ void StepExporter::WriteFile()
 
 #endif
 #endif
-

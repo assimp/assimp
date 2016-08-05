@@ -19,7 +19,7 @@ env:
     - ANDROID=1
 
 language: cpp
-
+  
 compiler:
   - gcc
   - clang

@@ -49,16 +49,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MDL_IMPORTER
 
 #include "MDLLoader.h"
+#include "Macros.h"
+#include "qnan.h"
 #include "MDLDefaultColorMap.h"
 #include "MD2FileData.h"
 #include "StringUtils.h"
-#include "../include/assimp/Importer.hpp"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "Macros.h"
-#include "qnan.h"
+#include <assimp/Importer.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
+
+#include <memory>
 
 
 using namespace Assimp;
@@ -156,7 +157,7 @@ void MDLImporter::InternReadFile( const std::string& pFile,
 {
     pScene     = _pScene;
     pIOHandler = _pIOHandler;
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {
@@ -576,9 +577,13 @@ void MDLImporter::InternReadFile_3DGS_MDL345( )
 
     // current cursor position in the file
     const unsigned char* szCurrent = (const unsigned char*)(pcHeader+1);
+    const unsigned char* szEnd = mBuffer + iFileSize;
 
     // need to read all textures
     for (unsigned int i = 0; i < (unsigned int)pcHeader->num_skins;++i) {
+        if (szCurrent >= szEnd) {
+            throw DeadlyImportError( "Texture data past end of file.");
+        }
         BE_NCONST MDL::Skin* pcSkin;
         pcSkin = (BE_NCONST  MDL::Skin*)szCurrent;
         AI_SWAP4( pcSkin->group);
@@ -1286,7 +1291,7 @@ void MDLImporter::SortByMaterials_3DGS_MDL7(
                     iMatIndex2 = iNumMaterials-1;
                 }
 
-                // do a slow seach in the list ...
+                // do a slow search in the list ...
                 iNum = 0;
                 bool bFound = false;
                 for (std::vector<MDL::IntMaterial_MDL7>::iterator i =  avMats.begin();i != avMats.end();++i,++iNum){

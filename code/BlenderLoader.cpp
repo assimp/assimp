@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderModifier.h"
 #include "BlenderBMesh.h"
 #include "StringUtils.h"
-#include "../include/assimp/scene.h"
+#include <assimp/scene.h>
 #include "StringComparison.h"
 
 #include "StreamReader.h"
@@ -164,7 +164,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 #endif
 
     FileDatabase file;
-    boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
+    std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
     if (!stream) {
         ThrowException("Could not open file for reading");
     }
@@ -190,7 +190,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 
         // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
         stream->Seek(0L,aiOrigin_SET);
-        boost::shared_ptr<StreamReaderLE> reader = boost::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+        std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
 
         // build a zlib stream
         z_stream zstream;
@@ -260,9 +260,9 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ParseBlendFile(FileDatabase& out, boost::shared_ptr<IOStream> stream)
+void BlenderImporter::ParseBlendFile(FileDatabase& out, std::shared_ptr<IOStream> stream)
 {
-    out.reader = boost::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream,out.little));
+    out.reader = std::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream,out.little));
 
     DNAParser dna_reader(out);
     const DNA* dna = NULL;
@@ -305,7 +305,7 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
     const Structure& ss = file.dna.structures[(*it).second];
 
     // we need a scene somewhere to start with.
-    for_each(const FileBlockHead& bl,file.entries) {
+    for(const FileBlockHead& bl :file.entries) {
 
         // Fix: using the DNA index is more reliable to locate scenes
         //if (bl.id == "SC") {
@@ -342,7 +342,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
     // the file. This is terrible. Here, we're first looking for
     // all objects which don't have parent objects at all -
     std::deque<const Object*> no_parents;
-    for (boost::shared_ptr<Base> cur = boost::static_pointer_cast<Base> ( in.base.first ); cur; cur = cur->next) {
+    for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base> ( in.base.first ); cur; cur = cur->next) {
         if (cur->object) {
             if(!cur->object->parent) {
                 no_parents.push_back(cur->object.get());
@@ -350,7 +350,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
             else conv.objects.insert(cur->object.get());
         }
     }
-    for (boost::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
+    for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
         if (cur->object) {
             if(cur->object->parent) {
                 conv.objects.insert(cur->object.get());
@@ -554,18 +554,16 @@ void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::BuildMaterials(ConversionData& conv_data)
+void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData& conv_data)
 {
-    conv_data.materials->reserve(conv_data.materials_raw.size());
-
     // add a default material if necessary
     unsigned int index = static_cast<unsigned int>( -1 );
-    for_each( aiMesh* mesh, conv_data.meshes.get() ) {
+    for( aiMesh* mesh : conv_data.meshes.get() ) {
         if (mesh->mMaterialIndex == static_cast<unsigned int>( -1 )) {
 
             if (index == static_cast<unsigned int>( -1 )) {
                 // Setup a default material.
-                boost::shared_ptr<Material> p(new Material());
+                std::shared_ptr<Material> p(new Material());
                 ai_assert(::strlen(AI_DEFAULT_MATERIAL_NAME) < sizeof(p->id.name)-2);
                 strcpy( p->id.name+2, AI_DEFAULT_MATERIAL_NAME );
 
@@ -588,8 +586,126 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
             mesh->mMaterialIndex = index;
         }
     }
+}
 
-    for_each(boost::shared_ptr<Material> mat, conv_data.materials_raw) {
+void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
+{
+    aiColor3D diffuseColor(source->r, source->g, source->b);
+    result->AddProperty(&diffuseColor, 1, "$mat.blend.diffuse.color", 0, 0);
+
+    float diffuseIntensity = source->ref;
+    result->AddProperty(&diffuseIntensity, 1, "$mat.blend.diffuse.intensity", 0, 0);
+
+    int diffuseShader = source->diff_shader;
+    result->AddProperty(&diffuseShader, 1, "$mat.blend.diffuse.shader", 0, 0);
+
+    int diffuseRamp = 0;
+    result->AddProperty(&diffuseRamp, 1, "$mat.blend.diffuse.ramp", 0, 0);
+
+
+    aiColor3D specularColor(source->specr, source->specg, source->specb);
+    result->AddProperty(&specularColor, 1, "$mat.blend.specular.color", 0, 0);
+
+    float specularIntensity = source->spec;
+    result->AddProperty(&specularIntensity, 1, "$mat.blend.specular.intensity", 0, 0);
+
+    int specularShader = source->spec_shader;
+    result->AddProperty(&specularShader, 1, "$mat.blend.specular.shader", 0, 0);
+
+    int specularRamp = 0;
+    result->AddProperty(&specularRamp, 1, "$mat.blend.specular.ramp", 0, 0);
+
+    int specularHardness = source->har;
+    result->AddProperty(&specularHardness, 1, "$mat.blend.specular.hardness", 0, 0);
+
+
+    int transparencyUse = source->mode & MA_TRANSPARENCY ? 1 : 0;
+    result->AddProperty(&transparencyUse, 1, "$mat.blend.transparency.use", 0, 0);
+
+    int transparencyMethod = source->mode & MA_RAYTRANSP ? 2 : (source->mode & MA_ZTRANSP ? 1 : 0);
+    result->AddProperty(&transparencyMethod, 1, "$mat.blend.transparency.method", 0, 0);
+
+    float transparencyAlpha = source->alpha;
+    result->AddProperty(&transparencyAlpha, 1, "$mat.blend.transparency.alpha", 0, 0);
+
+    float transparencySpecular = source->spectra;
+    result->AddProperty(&transparencySpecular, 1, "$mat.blend.transparency.specular", 0, 0);
+
+    float transparencyFresnel = source->fresnel_tra;
+    result->AddProperty(&transparencyFresnel, 1, "$mat.blend.transparency.fresnel", 0, 0);
+
+    float transparencyBlend = source->fresnel_tra_i;
+    result->AddProperty(&transparencyBlend, 1, "$mat.blend.transparency.blend", 0, 0);
+
+    float transparencyIor = source->ang;
+    result->AddProperty(&transparencyIor, 1, "$mat.blend.transparency.ior", 0, 0);
+
+    float transparencyFilter = source->filter;
+    result->AddProperty(&transparencyFilter, 1, "$mat.blend.transparency.filter", 0, 0);
+
+    float transparencyFalloff = source->tx_falloff;
+    result->AddProperty(&transparencyFalloff, 1, "$mat.blend.transparency.falloff", 0, 0);
+
+    float transparencyLimit = source->tx_limit;
+    result->AddProperty(&transparencyLimit, 1, "$mat.blend.transparency.limit", 0, 0);
+
+    int transparencyDepth = source->ray_depth_tra;
+    result->AddProperty(&transparencyDepth, 1, "$mat.blend.transparency.depth", 0, 0);
+
+    float transparencyGlossAmount = source->gloss_tra;
+    result->AddProperty(&transparencyGlossAmount, 1, "$mat.blend.transparency.glossAmount", 0, 0);
+
+    float transparencyGlossThreshold = source->adapt_thresh_tra;
+    result->AddProperty(&transparencyGlossThreshold, 1, "$mat.blend.transparency.glossThreshold", 0, 0);
+
+    int transparencyGlossSamples = source->samp_gloss_tra;
+    result->AddProperty(&transparencyGlossSamples, 1, "$mat.blend.transparency.glossSamples", 0, 0);
+
+
+    int mirrorUse = source->mode & MA_RAYMIRROR ? 1 : 0;
+    result->AddProperty(&mirrorUse, 1, "$mat.blend.mirror.use", 0, 0);
+
+    float mirrorReflectivity = source->ray_mirror;
+    result->AddProperty(&mirrorReflectivity, 1, "$mat.blend.mirror.reflectivity", 0, 0);
+
+    aiColor3D mirrorColor(source->mirr, source->mirg, source->mirb);
+    result->AddProperty(&mirrorColor, 1, "$mat.blend.mirror.color", 0, 0);
+
+    float mirrorFresnel = source->fresnel_mir;
+    result->AddProperty(&mirrorFresnel, 1, "$mat.blend.mirror.fresnel", 0, 0);
+
+    float mirrorBlend = source->fresnel_mir_i;
+    result->AddProperty(&mirrorBlend, 1, "$mat.blend.mirror.blend", 0, 0);
+
+    int mirrorDepth = source->ray_depth;
+    result->AddProperty(&mirrorDepth, 1, "$mat.blend.mirror.depth", 0, 0);
+
+    float mirrorMaxDist = source->dist_mir;
+    result->AddProperty(&mirrorMaxDist, 1, "$mat.blend.mirror.maxDist", 0, 0);
+
+    int mirrorFadeTo = source->fadeto_mir;
+    result->AddProperty(&mirrorFadeTo, 1, "$mat.blend.mirror.fadeTo", 0, 0);
+
+    float mirrorGlossAmount = source->gloss_mir;
+    result->AddProperty(&mirrorGlossAmount, 1, "$mat.blend.mirror.glossAmount", 0, 0);
+
+    float mirrorGlossThreshold = source->adapt_thresh_mir;
+    result->AddProperty(&mirrorGlossThreshold, 1, "$mat.blend.mirror.glossThreshold", 0, 0);
+
+    int mirrorGlossSamples = source->samp_gloss_mir;
+    result->AddProperty(&mirrorGlossSamples, 1, "$mat.blend.mirror.glossSamples", 0, 0);
+
+    float mirrorGlossAnisotropic = source->aniso_gloss_mir;
+    result->AddProperty(&mirrorGlossAnisotropic, 1, "$mat.blend.mirror.glossAnisotropic", 0, 0);
+}
+
+void BlenderImporter::BuildMaterials(ConversionData& conv_data)
+{
+    conv_data.materials->reserve(conv_data.materials_raw.size());
+
+    BuildDefaultMaterial(conv_data);
+
+    for(std::shared_ptr<Material> mat : conv_data.materials_raw) {
 
         // reset per material global counters
         for (size_t i = 0; i < sizeof(conv_data.next_texture)/sizeof(conv_data.next_texture[0]);++i) {
@@ -603,7 +719,6 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
         // set material name
         aiString name = aiString(mat->id.name+2); // skip over the name prefix 'MA'
         mout->AddProperty(&name,AI_MATKEY_NAME);
-
 
         // basic material colors
         aiColor3D col(mat->r,mat->g,mat->b);
@@ -631,6 +746,12 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
         col = aiColor3D(mat->ambr,mat->ambg,mat->ambb);
         mout->AddProperty(&col,1,AI_MATKEY_COLOR_AMBIENT);
 
+        // is mirror enabled?
+        if( mat->mode & MA_RAYMIRROR ) {
+            const float ray_mirror = mat->ray_mirror;
+            mout->AddProperty(&ray_mirror,1,AI_MATKEY_REFLECTIVITY);
+        }
+
         col = aiColor3D(mat->mirr,mat->mirg,mat->mirb);
         mout->AddProperty(&col,1,AI_MATKEY_COLOR_REFLECTIVE);
 
@@ -641,6 +762,8 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
             ResolveTexture(mout,mat.get(),mat->mtex[i].get(),conv_data);
         }
+
+        AddBlendParams(mout, mat.get());
     }
 }
 
@@ -716,7 +839,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
     temp->reserve(temp->size() + per_mat.size());
 
     std::map<size_t,size_t> mat_num_to_mesh_idx;
-    for_each(MyPair& it, per_mat) {
+    for(MyPair& it : per_mat) {
 
         mat_num_to_mesh_idx[it.first] = temp->size();
         temp->push_back(new aiMesh());
@@ -743,8 +866,8 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
                 ThrowException("Material index is out of range");
             }
 
-            boost::shared_ptr<Material> mat = mesh->mat[it.first];
-            const std::deque< boost::shared_ptr<Material> >::iterator has = std::find(
+            std::shared_ptr<Material> mat = mesh->mat[it.first];
+            const std::deque< std::shared_ptr<Material> >::iterator has = std::find(
                     conv_data.materials_raw.begin(),
                     conv_data.materials_raw.end(),mat
             );
@@ -995,12 +1118,13 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             const aiFace& f = out->mFaces[out->mNumFaces++];
 
             aiColor4D* vo = &out->mColors[0][out->mNumVertices];
+			const ai_real scaleZeroToOne = 1.f/255.f;
             for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
                 const MLoopCol& col = mesh->mloopcol[v.loopstart + j];
-                vo->r = col.r;
-                vo->g = col.g;
-                vo->b = col.b;
-                vo->a = col.a;
+                vo->r = ai_real(col.r) * scaleZeroToOne;
+                vo->g = ai_real(col.g) * scaleZeroToOne;
+                vo->b = ai_real(col.b) * scaleZeroToOne;
+                vo->a = ai_real(col.a) * scaleZeroToOne;
             }
 
         }
@@ -1043,7 +1167,24 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
 
             // blender orients directional lights as facing toward -z
             out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
             break;
+
+        case Lamp::Type_Area:
+            out->mType = aiLightSource_AREA;
+
+            if (lamp->area_shape == 0) {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_size);
+            }
+            else {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_sizey);
+            }
+
+            // blender orients directional lights as facing toward -z
+            out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
+            break;
+
         default:
             break;
     }
@@ -1151,7 +1292,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
     if (children.size()) {
         node->mNumChildren = static_cast<unsigned int>(children.size());
         aiNode** nd = node->mChildren = new aiNode*[node->mNumChildren]();
-        for_each (const Object* nobj,children) {
+        for (const Object* nobj :children) {
             *nd = ConvertNode(in,nobj,conv_data,node->mTransformation * parentTransform);
             (*nd++)->mParent = node;
         }

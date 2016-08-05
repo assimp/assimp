@@ -49,13 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
-#include <boost/foreach.hpp>
 #include <deque>
 #include "./../include/assimp/material.h"
 
 struct aiTexture;
-
-#define for_each(x,y) BOOST_FOREACH(x,y)
 
 namespace Assimp {
 namespace Blender {
@@ -71,7 +68,7 @@ namespace Blender {
         }
 
         ~TempArray () {
-            for_each(T* elem, arr) {
+            for(T* elem : arr) {
                 delete elem;
             }
         }
@@ -126,7 +123,8 @@ namespace Blender {
 
     struct ObjectCompare {
         bool operator() (const Object* left, const Object* right) const {
-            return strcmp(left->id.name, right->id.name) == -1;
+            printf( "left: %s, right: %s\n", left->id.name, right->id.name );
+            return ::strncmp(left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
         }
     };
 
@@ -147,7 +145,8 @@ namespace Blender {
 
         struct ObjectCompare {
             bool operator() (const Object* left, const Object* right) const {
-                return strcmp(left->id.name, right->id.name) == -1;
+                printf( "left: %s, right: %s\n", left->id.name, right->id.name );
+                return ::strncmp( left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
             }
         };
 
@@ -160,7 +159,7 @@ namespace Blender {
         TempArray <std::vector, aiTexture> textures;
 
         // set of all materials referenced by at least one mesh in the scene
-        std::deque< boost::shared_ptr< Material > > materials_raw;
+        std::deque< std::shared_ptr< Material > > materials_raw;
 
         // counter to name sentinel textures inserted as substitutes for procedural textures.
         unsigned int sentinel_cnt;

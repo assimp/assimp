@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
 
 #include "glTFExporter.h"
+
 #include "Exceptional.h"
 #include "StringComparison.h"
 #include "ByteSwapper.h"
@@ -54,9 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-#include <boost/foreach.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "glTFAssetWriter.h"
 
@@ -94,7 +93,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     , mScene(pScene)
     , mProperties(pProperties)
 {
-    boost::scoped_ptr<Asset> asset(new glTF::Asset(pIOSystem));
+    std::unique_ptr<Asset> asset(new glTF::Asset(pIOSystem));
     mAsset = asset.get();
 
     if (isBinary) {
@@ -130,7 +129,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
 
 static void CopyValue(const aiMatrix4x4& v, glTF::mat4& o)
-{ 
+{
     o[ 0] = v.a1; o[ 1] = v.b1; o[ 2] = v.c1; o[ 3] = v.d1;
     o[ 4] = v.a2; o[ 5] = v.b2; o[ 6] = v.c2; o[ 7] = v.d2;
     o[ 8] = v.a3; o[ 9] = v.b3; o[10] = v.c3; o[11] = v.d3;
@@ -153,14 +152,14 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
     bv->buffer = buffer;
-    bv->byteOffset = 0;
+    bv->byteOffset = unsigned(offset);
     bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
     bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
 
     // accessor
     Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(meshName, "accessor"));
     acc->bufferView = bv;
-    acc->byteOffset = offset;
+    acc->byteOffset = 0;
     acc->byteStride = 0;
     acc->componentType = compType;
     acc->count = count;
@@ -188,7 +187,7 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
 
             if (path.size() > 0) {
                 if (path[0] != '*') {
-                    std::map<std::string, size_t>::iterator it = mTexturesByPath.find(path);
+                    std::map<std::string, unsigned int>::iterator it = mTexturesByPath.find(path);
                     if (it != mTexturesByPath.end()) {
                         prop.texture = mAsset->textures.Get(it->second);
                     }
@@ -233,7 +232,7 @@ void glTFExporter::ExportMaterials()
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
 
-        
+
         std::string name;
         if (mat->Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS) {
             name = aiName.C_Str();
@@ -293,7 +292,7 @@ void glTFExporter::ExportMeshes()
                     indices[i*nIndicesPerFace + j] = uint16_t(aim->mFaces[i].mIndices[j]);
                 }
             }
-            p.indices = ExportData(*mAsset, meshId, b, indices.size(), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT);
+            p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);
         }
 
         switch (aim->mPrimitiveTypes) {
@@ -309,7 +308,7 @@ void glTFExporter::ExportMeshes()
     }
 }
 
-size_t glTFExporter::ExportNode(const aiNode* n)
+unsigned int glTFExporter::ExportNode(const aiNode* n)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
 
@@ -323,7 +322,7 @@ size_t glTFExporter::ExportNode(const aiNode* n)
     }
 
     for (unsigned int i = 0; i < n->mNumChildren; ++i) {
-        size_t idx = ExportNode(n->mChildren[i]);
+        unsigned int idx = ExportNode(n->mChildren[i]);
         node->children.push_back(mAsset->nodes.Get(idx));
     }
 
@@ -338,7 +337,7 @@ void glTFExporter::ExportScene()
 
     // root node will be the first one exported (idx 0)
     if (mAsset->nodes.Size() > 0) {
-        scene->nodes.push_back(mAsset->nodes.Get(size_t(0)));
+        scene->nodes.push_back(mAsset->nodes.Get(0u));
     }
 
     // set as the default scene

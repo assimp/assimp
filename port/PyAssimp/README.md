@@ -6,8 +6,7 @@ Requires Python >= 2.6.
 
 Python 3 support is mostly here, but not well tested.
 
-Note that pyassimp is not complete. Many ASSIMP features are missing. In
-particular, only loading of models is currently supported (no export).
+Note that pyassimp is not complete. Many ASSIMP features are missing.
 
 USAGE
 -----

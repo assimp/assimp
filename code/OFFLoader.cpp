@@ -50,10 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OFFLoader.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <memory>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 
 
 using namespace Assimp;
@@ -109,7 +109,7 @@ const aiImporterDesc* OFFImporter::GetInfo () const
 void OFFImporter::InternReadFile( const std::string& pFile,
     aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {
@@ -161,9 +161,9 @@ void OFFImporter::InternReadFile( const std::string& pFile,
         aiVector3D& v = tempPositions[i];
 
         sz = line; SkipSpaces(&sz);
-        sz = fast_atoreal_move<float>(sz,(float&)v.x); SkipSpaces(&sz);
-        sz = fast_atoreal_move<float>(sz,(float&)v.y); SkipSpaces(&sz);
-        fast_atoreal_move<float>(sz,(float&)v.z);
+        sz = fast_atoreal_move<ai_real>(sz,(ai_real&)v.x); SkipSpaces(&sz);
+        sz = fast_atoreal_move<ai_real>(sz,(ai_real&)v.y); SkipSpaces(&sz);
+        fast_atoreal_move<ai_real>(sz,(ai_real&)v.z);
     }
 
 
@@ -242,7 +242,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
     pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
     aiMaterial* pcMat = new aiMaterial();
 
-    aiColor4D clr(0.6f,0.6f,0.6f,1.0f);
+    aiColor4D clr(0.6,0.6,0.6,1.0);
     pcMat->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
     pScene->mMaterials[0] = pcMat;
 

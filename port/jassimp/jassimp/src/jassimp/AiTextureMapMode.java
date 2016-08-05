@@ -44,7 +44,7 @@ package jassimp;
 /** 
  * Defines how UV coordinates outside the [0...1] range are handled.<p>
  *
- * Commonly refered to as 'wrapping mode'.
+ * Commonly referred to as 'wrapping mode'.
  */
 public enum AiTextureMapMode {
     /** 

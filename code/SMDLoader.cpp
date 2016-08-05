@@ -50,12 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SMDLoader.h"
 #include "fast_atof.h"
 #include "SkeletonMeshBuilder.h"
-#include "../include/assimp/Importer.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
-
+#include <assimp/Importer.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
+#include <memory>
 
 using namespace Assimp;
 
@@ -122,7 +121,7 @@ void SMDImporter::SetupProperties(const Importer* pImp)
 // Imports the given file into the given scene structure.
 void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
-    boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+    std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
     // Check whether we can read from the file
     if( file.get() == NULL) {

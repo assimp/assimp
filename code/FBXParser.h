@@ -44,14 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_PARSER_H
 #define INCLUDED_AI_FBX_PARSER_H
 
-#include <vector>
-#include <map>
-#include <string>
-#include <utility>
 #include <stdint.h>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <map>
+#include <memory>
 #include "LogAux.h"
 
 #include "FBXCompileConfig.h"
@@ -60,15 +55,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-    class Scope;
-    class Parser;
-    class Element;
+class Scope;
+class Parser;
+class Element;
 
-    // XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
-    typedef std::vector< Scope* > ScopeList;
-    typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
+// XXX should use C++11's unique_ptr - but assimp's need to keep working with 03
+typedef std::vector< Scope* > ScopeList;
+typedef std::fbx_unordered_multimap< std::string, Element* > ElementMap;
 
-    typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
+typedef std::pair<ElementMap::const_iterator,ElementMap::const_iterator> ElementCollection;
 
 #   define new_Scope new Scope
 #   define new_Element new Element
@@ -110,7 +105,7 @@ private:
 
     const Token& key_token;
     TokenList tokens;
-    boost::scoped_ptr<Scope> compound;
+    std::unique_ptr<Scope> compound;
 };
 
 
@@ -167,7 +162,6 @@ public:
     ~Parser();
 
 public:
-
     const Scope& GetRootScope() const {
         return *root.get();
     }
@@ -178,7 +172,6 @@ public:
     }
 
 private:
-
     friend class Scope;
     friend class Element;
 
@@ -188,14 +181,12 @@ private:
     TokenPtr CurrentToken() const;
 
 
-
 private:
-
     const TokenList& tokens;
 
     TokenPtr last, current;
     TokenList::const_iterator cursor;
-    boost::scoped_ptr<Scope> root;
+    std::unique_ptr<Scope> root;
 
     const bool is_binary;
 };

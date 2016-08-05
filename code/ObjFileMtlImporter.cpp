@@ -60,6 +60,7 @@ static const std::string AmbientTexture      = "map_Ka";
 static const std::string SpecularTexture     = "map_Ks";
 static const std::string OpacityTexture      = "map_d";
 static const std::string EmmissiveTexture    = "map_emissive";
+static const std::string EmmissiveTexture_1  = "map_Ke";
 static const std::string BumpTexture1        = "map_bump";
 static const std::string BumpTexture2        = "map_Bump";
 static const std::string BumpTexture3        = "bump";
@@ -163,7 +164,7 @@ void ObjFileMtlImporter::load()
             }
             break;
 
-        case 'd':   
+        case 'd':
             {
                 if( *(m_DataIt+1) == 'i' && *( m_DataIt + 2 ) == 's' && *( m_DataIt + 3 ) == 'p' ) {
                     // A displacement map
@@ -231,7 +232,7 @@ void ObjFileMtlImporter::getColorRGBA( aiColor3D *pColor )
 {
     ai_assert( NULL != pColor );
 
-    float r( 0.0f ), g( 0.0f ), b( 0.0f );
+    ai_real r( 0.0 ), g( 0.0 ), b( 0.0 );
     m_DataIt = getFloat<DataArrayIt>( m_DataIt, m_DataItEnd, r );
     pColor->r = r;
 
@@ -254,10 +255,10 @@ void ObjFileMtlImporter::getIlluminationModel( int &illum_model )
 
 // -------------------------------------------------------------------
 //  Loads a single float value.
-void ObjFileMtlImporter::getFloatValue( float &value )
+void ObjFileMtlImporter::getFloatValue( ai_real &value )
 {
     m_DataIt = CopyNextWord<DataArrayIt>( m_DataIt, m_DataItEnd, m_buffer, BUFFERSIZE );
-    value = (float) fast_atof(m_buffer);
+    value = (ai_real) fast_atof(m_buffer);
 }
 
 // -------------------------------------------------------------------
@@ -325,6 +326,10 @@ void ObjFileMtlImporter::getTexture() {
     } else if (!ASSIMP_strincmp( pPtr, EmmissiveTexture.c_str(), EmmissiveTexture.size())) {
         // Emissive texture
         out = & m_pModel->m_pCurrentMaterial->textureEmissive;
+        clampIndex = ObjFile::Material::TextureEmissiveType;
+    } else if ( !ASSIMP_strincmp( pPtr, EmmissiveTexture_1.c_str(), EmmissiveTexture_1.size() ) ) {
+        // Emissive texture
+        out = &m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;
     } else if ( !ASSIMP_strincmp( pPtr, BumpTexture1.c_str(), BumpTexture1.size() ) ||
                 !ASSIMP_strincmp( pPtr, BumpTexture2.c_str(), BumpTexture2.size() ) ||

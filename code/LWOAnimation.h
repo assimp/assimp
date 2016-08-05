@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_LWO_ANIMATION_INCLUDED
 #define AI_LWO_ANIMATION_INCLUDED
 
-#include "../include/assimp/anim.h"
+#include <assimp/anim.h>
 #include <vector>
 #include <list>
 

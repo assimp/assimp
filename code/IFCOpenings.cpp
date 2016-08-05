@@ -213,7 +213,7 @@ bool BoundingBoxesOverlapping( const BoundingBox &ibb, const BoundingBox &bb )
 bool IsDuplicateVertex(const IfcVector2& vv, const std::vector<IfcVector2>& temp_contour)
 {
     // sanity check for duplicate vertices
-    BOOST_FOREACH(const IfcVector2& cp, temp_contour) {
+    for(const IfcVector2& cp : temp_contour) {
         if ((cp-vv).SquareLength() < 1e-5f) {
             return true;
         }
@@ -226,7 +226,7 @@ void ExtractVerticesFromClipper(const ClipperLib::Polygon& poly, std::vector<Ifc
     bool filter_duplicates = false)
 {
     temp_contour.clear();
-    BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
+    for(const ClipperLib::IntPoint& point : poly) {
         IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
         vv = std::max(vv,IfcVector2());
         vv = std::min(vv,one_vec);
@@ -243,7 +243,7 @@ BoundingBox GetBoundingBox(const ClipperLib::Polygon& poly)
     IfcVector2 newbb_min, newbb_max;
     MinMaxChooser<IfcVector2>()(newbb_min, newbb_max);
 
-    BOOST_FOREACH(const ClipperLib::IntPoint& point, poly) {
+    for(const ClipperLib::IntPoint& point : poly) {
         IfcVector2 vv = IfcVector2( from_int64(point.X), from_int64(point.Y));
 
         // sanity rounding
@@ -391,7 +391,7 @@ void MergeWindowContours (const std::vector<IfcVector2>& a,
     ClipperLib::Clipper clipper;
     ClipperLib::Polygon clip;
 
-    BOOST_FOREACH(const IfcVector2& pip, a) {
+    for(const IfcVector2& pip : a) {
         clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
     }
 
@@ -402,7 +402,7 @@ void MergeWindowContours (const std::vector<IfcVector2>& a,
     clipper.AddPolygon(clip, ClipperLib::ptSubject);
     clip.clear();
 
-    BOOST_FOREACH(const IfcVector2& pip, b) {
+    for(const IfcVector2& pip : b) {
         clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
     }
 
@@ -425,7 +425,7 @@ void MakeDisjunctWindowContours (const std::vector<IfcVector2>& a,
     ClipperLib::Clipper clipper;
     ClipperLib::Polygon clip;
 
-    BOOST_FOREACH(const IfcVector2& pip, a) {
+    for(const IfcVector2& pip : a) {
         clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
     }
 
@@ -436,7 +436,7 @@ void MakeDisjunctWindowContours (const std::vector<IfcVector2>& a,
     clipper.AddPolygon(clip, ClipperLib::ptClip);
     clip.clear();
 
-    BOOST_FOREACH(const IfcVector2& pip, b) {
+    for(const IfcVector2& pip : b) {
         clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
     }
 
@@ -458,7 +458,7 @@ void CleanupWindowContour(ProjectedWindowContour& window)
     ClipperLib::Clipper clipper;
     ClipperLib::ExPolygons clipped;
 
-    BOOST_FOREACH(const IfcVector2& pip, contour) {
+    for(const IfcVector2& pip : contour) {
         subject.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
     }
 
@@ -488,7 +488,7 @@ void CleanupWindowContours(ContourVector& contours)
 {
     // Use PolyClipper to clean up window contours
     try {
-        BOOST_FOREACH(ProjectedWindowContour& window, contours) {
+        for(ProjectedWindowContour& window : contours) {
             CleanupWindowContour(window);
         }
     }
@@ -516,7 +516,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 
         ClipperLib::Polygon clip;
         clip.reserve(contour_flat.size());
-        BOOST_FOREACH(const IfcVector2& pip, contour_flat) {
+        for(const IfcVector2& pip : contour_flat) {
             clip.push_back(ClipperLib::IntPoint(  to_int64(pip.x), to_int64(pip.y) ));
         }
 
@@ -530,7 +530,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
         subject.reserve(4);
         size_t index = 0;
         size_t countdown = 0;
-        BOOST_FOREACH(const IfcVector3& pip, curmesh.verts) {
+        for(const IfcVector3& pip : curmesh.verts) {
             if (!countdown) {
                 countdown = curmesh.vertcnt[index++];
                 if (!countdown) {
@@ -548,9 +548,9 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
 
                 clipper.Execute(ClipperLib::ctIntersection,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
 
-                BOOST_FOREACH(const ClipperLib::ExPolygon& ex, clipped) {
+                for(const ClipperLib::ExPolygon& ex : clipped) {
                     iold.push_back(ex.outer.size());
-                    BOOST_FOREACH(const ClipperLib::IntPoint& point, ex.outer) {
+                    for(const ClipperLib::IntPoint& point : ex.outer) {
                         vold.push_back(IfcVector3(
                             from_int64(point.X),
                             from_int64(point.Y),
@@ -866,7 +866,7 @@ size_t CloseWindows(ContourVector& contours,
         OpeningRefs& refs = contours_to_openings[std::distance(contours.begin(), it)];
 
         bool has_other_side = false;
-        BOOST_FOREACH(const TempOpening* opening, refs) {
+        for(const TempOpening* opening : refs) {
             if(!opening->wallPoints.empty()) {
                 has_other_side = true;
                 break;
@@ -929,8 +929,8 @@ size_t CloseWindows(ContourVector& contours,
 
                 const IfcVector3 world_point = minv * IfcVector3(proj_point.x,proj_point.y,0.0f);
 
-                BOOST_FOREACH(const TempOpening* opening, refs) {
-                    BOOST_FOREACH(const IfcVector3& other, opening->wallPoints) {
+                for(const TempOpening* opening : refs) {
+                    for(const IfcVector3& other : opening->wallPoints) {
                         const IfcFloat sqdist = (world_point - other).SquareLength();
 
                         if (sqdist < best) {
@@ -987,7 +987,7 @@ size_t CloseWindows(ContourVector& contours,
         else {
 
             const Contour::const_iterator cbegin = (*it).contour.begin(), cend = (*it).contour.end();
-            BOOST_FOREACH(TempOpening* opening, refs) {
+            for(TempOpening* opening : refs) {
                 ai_assert(opening->wallPoints.empty());
                 opening->wallPoints.reserve(opening->wallPoints.capacity() + (*it).contour.size());
                 for (Contour::const_iterator cit = cbegin; cit != cend; ++cit) {
@@ -1023,7 +1023,7 @@ void Quadrify(const std::vector< BoundingBox >& bbs, TempMesh& curmesh)
 
     curmesh.vertcnt.resize(quads.size()/4,4);
     curmesh.verts.reserve(quads.size());
-    BOOST_FOREACH(const IfcVector2& v2, quads) {
+    for(const IfcVector2& v2 : quads) {
         curmesh.verts.push_back(IfcVector3(v2.x, v2.y, static_cast<IfcFloat>(0.0)));
     }
 }
@@ -1034,7 +1034,7 @@ void Quadrify(const ContourVector& contours, TempMesh& curmesh)
     std::vector<BoundingBox> bbs;
     bbs.reserve(contours.size());
 
-    BOOST_FOREACH(const ContourVector::value_type& val, contours) {
+    for(const ContourVector::value_type& val : contours) {
         bbs.push_back(val.bb);
     }
 
@@ -1065,7 +1065,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
     MinMaxChooser<IfcVector3>()(vmin, vmax);
 
     // Project all points into the new coordinate system, collect min/max verts on the way
-    BOOST_FOREACH(const IfcVector3& x, in_verts) {
+    for(const IfcVector3& x : in_verts) {
         const IfcVector3 vv = m * x;
         // keep Z offset in the plane coordinate system. Ignoring precision issues
         // (which  are present, of course), this should be the same value for
@@ -1089,7 +1089,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
     // [0,1] range. This gives us a consistent data range so all epsilons
     // used below can be constants.
     vmax -= vmin;
-    BOOST_FOREACH(IfcVector2& vv, out_contour) {
+    for(IfcVector2& vv : out_contour) {
         vv.x  = (vv.x - vmin.x) / vmax.x;
         vv.y  = (vv.y - vmin.y) / vmax.y;
 
@@ -1110,7 +1110,7 @@ IfcMatrix4 ProjectOntoPlane(std::vector<IfcVector2>& out_contour, const TempMesh
     // debug code to verify correctness
 #ifdef ASSIMP_BUILD_DEBUG
     std::vector<IfcVector2> out_contour2;
-    BOOST_FOREACH(const IfcVector3& x, in_verts) {
+    for(const IfcVector3& x : in_verts) {
         const IfcVector3& vv = m * x;
 
         out_contour2.push_back(IfcVector2(vv.x,vv.y));
@@ -1161,7 +1161,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
     IfcVector3 wall_extrusion_axis_norm = wall_extrusion_axis;
     wall_extrusion_axis_norm.Normalize();
 
-    BOOST_FOREACH(TempOpening& opening,openings) {
+    for(TempOpening& opening :openings) {
 
         // extrusionDir may be 0,0,0 on case where the opening mesh is not an
         // IfcExtrudedAreaSolid but something else (i.e. a brep)
@@ -1413,7 +1413,7 @@ bool GenerateOpenings(std::vector<TempOpening>& openings,
     CleanupOuterContour(contour_flat, curmesh);
 
     // Undo the projection and get back to world (or local object) space
-    BOOST_FOREACH(IfcVector3& v3, curmesh.verts) {
+    for(IfcVector3& v3 : curmesh.verts) {
         v3 = minv * v3;
     }
 
@@ -1455,7 +1455,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
     MinMaxChooser<IfcVector2>()(vmin, vmax);
 
     // Move all points into the new coordinate system, collecting min/max verts on the way
-    BOOST_FOREACH(IfcVector3& x, out) {
+    for(IfcVector3& x : out) {
         const IfcVector3 vv = m * x;
 
         // keep Z offset in the plane coordinate system. Ignoring precision issues
@@ -1498,7 +1498,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
         ClipperLib::Clipper clipper_holes;
         size_t c = 0;
 
-        BOOST_FOREACH(const TempOpening& t,openings) {
+        for(const TempOpening& t :openings) {
             const IfcVector3& outernor = nors[c++];
             const IfcFloat dot = nor * outernor;
             if (std::fabs(dot)<1.f-1e-6f) {
@@ -1512,7 +1512,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
             std::vector<IfcVector2> contour;
 
-            BOOST_FOREACH(const IfcVector3& xx, t.profileMesh->verts) {
+            for(const IfcVector3& xx : t.profileMesh->verts) {
                 IfcVector3 vv = m *  xx, vv_extr = m * (xx + t.extrusionDir);
 
                 const bool is_extruded_side = std::fabs(vv.z - coord) > std::fabs(vv_extr.z - coord);
@@ -1533,7 +1533,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
             }
 
             ClipperLib::Polygon hole;
-            BOOST_FOREACH(IfcVector2& pip, contour) {
+            for(IfcVector2& pip : contour) {
                 pip.x  = (pip.x - vmin.x) / vmax.x;
                 pip.y  = (pip.y - vmin.y) / vmax.y;
 
@@ -1566,7 +1566,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
         // to obtain the final polygon to feed into the triangulator.
         {
             ClipperLib::Polygon poly;
-            BOOST_FOREACH(IfcVector2& pip, contour_flat) {
+            for(IfcVector2& pip : contour_flat) {
                 pip.x  = (pip.x - vmin.x) / vmax.x;
                 pip.y  = (pip.y - vmin.y) / vmax.y;
 
@@ -1606,13 +1606,13 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
     if (false && do_connections) {
 
         std::vector<IfcVector3> tmpvec;
-        BOOST_FOREACH(ClipperLib::Polygon& opening, holes_union) {
+        for(ClipperLib::Polygon& opening : holes_union) {
 
             assert(ClipperLib::Orientation(opening));
 
             tmpvec.clear();
 
-            BOOST_FOREACH(ClipperLib::IntPoint& point, opening) {
+            for(ClipperLib::IntPoint& point : opening) {
 
                 tmpvec.push_back( minv * IfcVector3(
                     vmin.x + from_int64(point.X) * vmax.x,
@@ -1638,13 +1638,13 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
     }
 
     std::vector< std::vector<p2t::Point*> > contours;
-    BOOST_FOREACH(ClipperLib::ExPolygon& clip, clipped) {
+    for(ClipperLib::ExPolygon& clip : clipped) {
 
         contours.clear();
 
         // Build the outer polygon contour line for feeding into poly2tri
         std::vector<p2t::Point*> contour_points;
-        BOOST_FOREACH(ClipperLib::IntPoint& point, clip.outer) {
+        for(ClipperLib::IntPoint& point : clip.outer) {
             contour_points.push_back( new p2t::Point(from_int64(point.X), from_int64(point.Y)) );
         }
 
@@ -1664,12 +1664,12 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
 
 
         // Build the poly2tri inner contours for all holes we got from ClipperLib
-        BOOST_FOREACH(ClipperLib::Polygon& opening, clip.holes) {
+        for(ClipperLib::Polygon& opening : clip.holes) {
 
             contours.push_back(std::vector<p2t::Point*>());
             std::vector<p2t::Point*>& contour = contours.back();
 
-            BOOST_FOREACH(ClipperLib::IntPoint& point, opening) {
+            for(ClipperLib::IntPoint& point : opening) {
                 contour.push_back( new p2t::Point(from_int64(point.X), from_int64(point.Y)) );
             }
 
@@ -1689,7 +1689,7 @@ bool TryAddOpenings_Poly2Tri(const std::vector<TempOpening>& openings,const std:
         const std::vector<p2t::Triangle*> tris = cdt->GetTriangles();
 
         // Collect the triangles we just produced
-        BOOST_FOREACH(p2t::Triangle* tri, tris) {
+        for(p2t::Triangle* tri : tris) {
             for(int i = 0; i < 3; ++i) {
 
                 const IfcVector2 v = IfcVector2(

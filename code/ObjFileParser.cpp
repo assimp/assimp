@@ -61,13 +61,14 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &data,const std::string &modelName, IOSystem *io, ProgressHandler* progress ) :
+ObjFileParser::ObjFileParser(std::vector<char> &data, const std::string &modelName, IOSystem *io, ProgressHandler* progress, const std::string &originalObjFileName) :
     m_DataIt(data.begin()),
     m_DataItEnd(data.end()),
     m_pModel(NULL),
     m_uiLine(0),
     m_pIO( io ),
-    m_progress(progress)
+    m_progress(progress),
+    m_originalObjFileName(originalObjFileName)
 {
     std::fill_n(m_buffer,Buffersize,0);
 
@@ -135,8 +136,14 @@ void ObjFileParser::parseFile()
             {
                 ++m_DataIt;
                 if (*m_DataIt == ' ' || *m_DataIt == '\t') {
-                    // read in vertex definition
-                    getVector3(m_pModel->m_Vertices);
+                    size_t numComponents = getNumComponentsInLine();
+                    if (numComponents == 3) {
+                        // read in vertex definition
+                        getVector3(m_pModel->m_Vertices);
+                    } else if (numComponents == 6) {
+                        // read vertex and vertex-color
+                        getTwoVectors3(m_pModel->m_Vertices, m_pModel->m_VertexColors);
+                    }
                 } else if (*m_DataIt == 't') {
                     // read in texture coordinate ( 2D or 3D )
                                         ++m_DataIt;
@@ -256,8 +263,7 @@ void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
     pBuffer[ index ] = '\0';
 }
 
-// -------------------------------------------------------------------
-void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
+size_t ObjFileParser::getNumComponentsInLine() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
     while( !IsLineEnd( *tmp ) ) {
@@ -267,23 +273,29 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
         SkipToken( tmp );
         ++numComponents;
     }
-    float x, y, z;
+    return numComponents;
+}
+
+// -------------------------------------------------------------------
+void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
+    size_t numComponents = getNumComponentsInLine();
+    ai_real x, y, z;
     if( 2 == numComponents ) {
         copyNextWord( m_buffer, Buffersize );
-        x = ( float ) fast_atof( m_buffer );
+        x = ( ai_real ) fast_atof( m_buffer );
 
         copyNextWord( m_buffer, Buffersize );
-        y = ( float ) fast_atof( m_buffer );
+        y = ( ai_real ) fast_atof( m_buffer );
         z = 0.0;
     } else if( 3 == numComponents ) {
         copyNextWord( m_buffer, Buffersize );
-        x = ( float ) fast_atof( m_buffer );
+        x = ( ai_real ) fast_atof( m_buffer );
 
         copyNextWord( m_buffer, Buffersize );
-        y = ( float ) fast_atof( m_buffer );
+        y = ( ai_real ) fast_atof( m_buffer );
 
         copyNextWord( m_buffer, Buffersize );
-        z = ( float ) fast_atof( m_buffer );
+        z = ( ai_real ) fast_atof( m_buffer );
     } else {
         throw DeadlyImportError( "OBJ: Invalid number of components" );
     }
@@ -294,29 +306,58 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
 // -------------------------------------------------------------------
 //  Get values for a new 3D vector instance
 void ObjFileParser::getVector3( std::vector<aiVector3D> &point3d_array ) {
-    float x, y, z;
+    ai_real x, y, z;
     copyNextWord(m_buffer, Buffersize);
-    x = (float) fast_atof(m_buffer);
+    x = (ai_real) fast_atof(m_buffer);
 
     copyNextWord(m_buffer, Buffersize);
-    y = (float) fast_atof(m_buffer);
+    y = (ai_real) fast_atof(m_buffer);
 
     copyNextWord( m_buffer, Buffersize );
-    z = ( float ) fast_atof( m_buffer );
+    z = ( ai_real ) fast_atof( m_buffer );
 
     point3d_array.push_back( aiVector3D( x, y, z ) );
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------
-//  Get values for a new 2D vector instance
-void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
-    float x, y;
+//  Get values for two 3D vectors on the same line
+void ObjFileParser::getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b ) {
+    ai_real x, y, z;
     copyNextWord(m_buffer, Buffersize);
-    x = (float) fast_atof(m_buffer);
+    x = (ai_real) fast_atof(m_buffer);
 
     copyNextWord(m_buffer, Buffersize);
-    y = (float) fast_atof(m_buffer);
+    y = (ai_real) fast_atof(m_buffer);
+
+    copyNextWord( m_buffer, Buffersize );
+    z = ( ai_real ) fast_atof( m_buffer );
+
+    point3d_array_a.push_back( aiVector3D( x, y, z ) );
+
+    copyNextWord(m_buffer, Buffersize);
+    x = (ai_real) fast_atof(m_buffer);
+
+    copyNextWord(m_buffer, Buffersize);
+    y = (ai_real) fast_atof(m_buffer);
+
+    copyNextWord( m_buffer, Buffersize );
+    z = ( ai_real ) fast_atof( m_buffer );
+
+    point3d_array_b.push_back( aiVector3D( x, y, z ) );
+
+    m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+}
+
+// -------------------------------------------------------------------
+//  Get values for a new 2D vector instance
+void ObjFileParser::getVector2( std::vector<aiVector2D> &point2d_array ) {
+    ai_real x, y;
+    copyNextWord(m_buffer, Buffersize);
+    x = (ai_real) fast_atof(m_buffer);
+
+    copyNextWord(m_buffer, Buffersize);
+    y = (ai_real) fast_atof(m_buffer);
 
     point2d_array.push_back(aiVector2D(x, y));
 
@@ -573,9 +614,15 @@ void ObjFileParser::getMaterialLib()
     IOStream *pFile = m_pIO->Open( absName );
 
     if (!pFile ) {
-        DefaultLogger::get()->error( "OBJ: Unable to locate material file " + strMatName );
-        m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-        return;
+        DefaultLogger::get()->error("OBJ: Unable to locate material file " + strMatName);
+        std::string strMatFallbackName = m_originalObjFileName.substr(0, m_originalObjFileName.length() - 3) + "mtl";
+        DefaultLogger::get()->info("OBJ: Opening fallback material file " + strMatFallbackName);
+        pFile = m_pIO->Open(strMatFallbackName);
+        if (!pFile) {
+            DefaultLogger::get()->error("OBJ: Unable to locate fallback material file " + strMatName);
+            m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            return;
+        }
     }
 
     // Import material library data from file.
@@ -649,6 +696,8 @@ void ObjFileParser::getGroupName()
 {
     std::string strGroupName;
 
+    // here we skip 'g ' from line
+    m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, strGroupName);
     if( isEndOfBuffer( m_DataIt, m_DataItEnd ) ) {
         return;
@@ -785,7 +834,11 @@ bool ObjFileParser::needsNewMesh( const std::string &materialName )
     bool newMat = false;
     int matIdx = getMaterialIndex( materialName );
     int curMatIdx = m_pModel->m_pCurrentMesh->m_uiMaterialIndex;
-    if ( curMatIdx != int(ObjFile::Mesh::NoMaterial) && curMatIdx != matIdx )
+    if ( curMatIdx != int(ObjFile::Mesh::NoMaterial)
+        && curMatIdx != matIdx
+        // no need create a new mesh if no faces in current
+        // lets say 'usemtl' goes straight after 'g'
+        && m_pModel->m_pCurrentMesh->m_Faces.size() > 0 )
     {
         // New material -> only one material per mesh, so we need to create a new
         // material

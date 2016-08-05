@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include "LogAux.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 struct aiNode;
 struct aiMesh;
@@ -133,7 +133,7 @@ protected:
 
     // --------------------
     void ParseBlendFile(Blender::FileDatabase& out,
-        boost::shared_ptr<IOStream> stream
+        std::shared_ptr<IOStream> stream
     );
 
     // --------------------
@@ -179,9 +179,18 @@ private:
     );
 
     // --------------------
+    void BuildDefaultMaterial(
+        Blender::ConversionData& conv_data
+    );
+
+    void AddBlendParams(
+        aiMaterial* result,
+        const Blender::Material* source
+    );
+
     void BuildMaterials(
         Blender::ConversionData& conv_data
-    ) ;
+    );
 
     // --------------------
     void ResolveTexture(

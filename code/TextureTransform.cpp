@@ -554,7 +554,7 @@ void TextureTransformStep::Execute( aiScene* pScene)
         }
     }
 
-    // Print some detailled statistics into the log
+    // Print some detailed statistics into the log
     if (!DefaultLogger::isNullLogger()) {
 
         if (transformedChannels)    {

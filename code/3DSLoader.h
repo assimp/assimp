@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_3DSIMPORTER_H_INC
 
 #include "BaseImporter.h"
-#include "../include/assimp/types.h"
+#include <assimp/types.h>
 
 #ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
 
@@ -119,7 +119,7 @@ protected:
     * chunk behind afterwards. If no percentage chunk is found
     * QNAN is returned.
     */
-    float ParsePercentageChunk();
+    ai_real ParsePercentageChunk();
 
     // -------------------------------------------------------------------
     /** Parse a color chunk. mCurrent will point to the next
@@ -265,7 +265,7 @@ protected:
     aiColor3D mClrAmbient;
 
     /** Master scaling factor of the scene */
-    float mMasterScale;
+    ai_real mMasterScale;
 
     /** Path to the background image of the scene */
     std::string mBackgroundImage;

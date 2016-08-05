@@ -50,24 +50,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
-#include <boost/scoped_ptr.hpp>
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
 #include <cctype>
-
-
+#include <memory>
 
 using namespace Assimp;
 using namespace irr;
 using namespace irr::io;
-
 
 // zlib is needed for compressed XGL files
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_XGL
 #   ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #       include <zlib.h>
 #   else
-#       include "../contrib/zlib/zlib.h"
+#       include <contrib/zlib/zlib.h>
 #   endif
 #endif
 
@@ -153,7 +150,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 #endif
 
     scene = pScene;
-    boost::shared_ptr<IOStream> stream( pIOHandler->Open( pFile, "rb"));
+    std::shared_ptr<IOStream> stream( pIOHandler->Open( pFile, "rb"));
 
     // check whether we can read from the file
     if( stream.get() == NULL) {
@@ -165,7 +162,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 #ifdef ASSIMP_BUILD_NO_COMPRESSED_XGL
         ThrowException("Cannot read ZGL file since Assimp was built without compression support");
 #else
-        boost::scoped_ptr<StreamReaderLE> raw_reader(new StreamReaderLE(stream));
+        std::unique_ptr<StreamReaderLE> raw_reader(new StreamReaderLE(stream));
 
         // build a zlib stream
         z_stream zstream;
@@ -214,7 +211,7 @@ void XGLImporter::InternReadFile( const std::string& pFile,
 
     // construct the irrXML parser
     CIrrXML_IOStreamReader st(stream.get());
-    boost::scoped_ptr<IrrXMLReader> read( createIrrXMLReader((IFileReadCallBack*) &st) );
+    std::unique_ptr<IrrXMLReader> read( createIrrXMLReader((IFileReadCallBack*) &st) );
     reader = read.get();
 
     // parse the XML file
@@ -431,7 +428,7 @@ aiNode* XGLImporter::ReadObject(TempScope& scope, bool skipFirst, const char* cl
         }
 
     } catch(...) {
-        BOOST_FOREACH(aiNode* ch, children) {
+        for(aiNode* ch : children) {
             delete ch;
         }
         throw;
@@ -691,7 +688,7 @@ bool XGLImporter::ReadMesh(TempScope& scope)
 
     // finally extract output meshes and add them to the scope
     typedef std::pair<unsigned int, TempMaterialMesh> pairt;
-    BOOST_FOREACH(const pairt& p, bymat) {
+    for(const pairt& p : bymat) {
         aiMesh* const m  = ToOutputMesh(p.second);
         scope.meshes_linear.push_back(m);
 

@@ -50,7 +50,7 @@ namespace STEP {
     // --------------------------------------------------------------------------
     // 1) read file header and return to caller, who checks if the
     //    file is of a supported schema ..
-    DB* ReadFileHeader(boost::shared_ptr<IOStream> stream);
+    DB* ReadFileHeader(std::shared_ptr<IOStream> stream);
     // --------------------------------------------------------------------------
     // 2) read the actual file contents using a user-supplied set of
     //    conversion functions to interpret the data.

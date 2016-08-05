@@ -58,8 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include <boost/foreach.hpp>
 #include "ByteSwapper.h"
+
+#include <iostream>
 
 using namespace Assimp;
 using namespace Assimp::FBX;
@@ -206,7 +207,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 // ------------------------------------------------------------------------------------------------
 Scope::~Scope()
 {
-    BOOST_FOREACH(ElementMap::value_type& v, elements) {
+    for(ElementMap::value_type& v : elements) {
         delete v.second;
     }
 }
@@ -611,7 +612,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
 // read an array of float3 tuples
 void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
 
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
@@ -653,6 +654,13 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
                     static_cast<float>(d[1]),
                     static_cast<float>(d[2])));
             }
+            // for debugging
+            /*for ( size_t i = 0; i < out.size(); i++ ) {
+                aiVector3D vec3( out[ i ] );
+                std::stringstream stream;
+                stream << " vec3.x = " << vec3.x << " vec3.y = " << vec3.y << " vec3.z = " << vec3.z << std::endl;
+                DefaultLogger::get()->info( stream.str() );
+            }*/
         }
         else if (type == 'f') {
             const float* f = reinterpret_cast<const float*>(&buff[0]);
@@ -692,7 +700,7 @@ void ParseVectorDataArray(std::vector<aiVector3D>& out, const Element& el)
 // read an array of color4 tuples
 void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -771,7 +779,7 @@ void ParseVectorDataArray(std::vector<aiColor4D>& out, const Element& el)
 // read an array of float2 tuples
 void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -847,7 +855,7 @@ void ParseVectorDataArray(std::vector<aiVector2D>& out, const Element& el)
 // read an array of ints
 void ParseVectorDataArray(std::vector<int>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -905,7 +913,7 @@ void ParseVectorDataArray(std::vector<int>& out, const Element& el)
 // read an array of floats
 void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -967,7 +975,7 @@ void ParseVectorDataArray(std::vector<float>& out, const Element& el)
 // read an array of uints
 void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -1032,7 +1040,7 @@ void ParseVectorDataArray(std::vector<unsigned int>& out, const Element& el)
 // read an array of uint64_ts
 void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if(tok.empty()) {
         ParseError("unexpected empty element",&el);
@@ -1090,7 +1098,7 @@ void ParseVectorDataArray(std::vector<uint64_t>& out, const Element& el)
 // read an array of int64_ts
 void ParseVectorDataArray(std::vector<int64_t>& out, const Element& el)
 {
-    out.clear();
+    out.resize( 0 );
     const TokenList& tok = el.Tokens();
     if (tok.empty()) {
         ParseError("unexpected empty element", &el);

@@ -43,8 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Declares the data structures in which the imported geometry is
     returned by ASSIMP: aiMesh, aiFace and aiBone data structures.
  */
-#ifndef INCLUDED_AI_MESH_H
-#define INCLUDED_AI_MESH_H
+#pragma once
+#ifndef AI_MESH_H_INC
+#define AI_MESH_H_INC
 
 #include "types.h"
 
@@ -522,7 +523,7 @@ struct aiMesh
     * mixed primitive types (i.e. lines and triangles) may have
     * normals, but the normals for vertices that are only referenced by
     * point or line primitives are undefined and set to qNaN.  See
-    * the #mNormals member for a detailled discussion of qNaNs.
+    * the #mNormals member for a detailed discussion of qNaNs.
     * @note If the mesh contains tangents, it automatically also
     * contains bitangents.
     */
@@ -736,5 +737,5 @@ struct aiMesh
 #ifdef __cplusplus
 }
 #endif //! extern "C"
-#endif // __AI_MESH_H_INC
+#endif // AI_MESH_H_INC
 

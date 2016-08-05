@@ -125,7 +125,7 @@ public:
             mWeight = pWeight;
         }
 
-        /** Comparision operator to sort bone weights by descending weight */
+        /** Comparison operator to sort bone weights by descending weight */
         bool operator < (const Weight& pWeight) const
         {
             return mWeight > pWeight.mWeight;

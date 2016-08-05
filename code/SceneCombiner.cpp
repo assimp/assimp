@@ -54,8 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "Hash.h"
 #include "time.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 #include <stdio.h>
 #include "ScenePrivate.h"
 
@@ -1132,7 +1132,7 @@ void SceneCombiner::Copy( aiAnimation** _dest, const aiAnimation* src )
 {
     ai_assert( NULL != _dest );
     ai_assert( NULL != src );
-    
+
     aiAnimation* dest = *_dest = new aiAnimation();
 
     // get a flat copy
@@ -1211,6 +1211,11 @@ void SceneCombiner::Copy     (aiNode** _dest, const aiNode* src)
     // and reallocate all arrays
     GetArrayCopy( dest->mMeshes, dest->mNumMeshes );
     CopyPtrArray( dest->mChildren, src->mChildren,dest->mNumChildren);
+
+	// need to set the mParent fields to the created aiNode.
+	for( unsigned int i = 0; i < dest->mNumChildren; i ++ ) {
+		dest->mChildren[i]->mParent = dest;
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1240,6 +1245,9 @@ void SceneCombiner::Copy (aiMetadata** _dest, const aiMetadata* src)
             break;
         case AI_FLOAT:
             out.mData = new float(*static_cast<float*>(in.mData));
+            break;
+        case AI_DOUBLE:
+            out.mData = new double(*static_cast<double*>(in.mData));
             break;
         case AI_AISTRING:
             out.mData = new aiString(*static_cast<aiString*>(in.mData));

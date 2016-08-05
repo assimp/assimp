@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * pixels, and "compressed" textures, which are stored in a file format
  * such as PNG or TGA.
  */
-
+#pragma once
 #ifndef AI_TEXTURE_H_INC
 #define AI_TEXTURE_H_INC
 

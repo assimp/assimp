@@ -211,14 +211,14 @@ the dump is written to <tt>&lt;model&gt;-dump.txt</tt>
 <p>
 <tt>-b<br>
 </tt><br>
-Optional. If this switch is specified, the dumb is written in binary format.
+Optional. If this switch is specified, the dump is written in binary format.
 The long form of this parameter is <tt>--binary</tt>.
 </p>
 
 <p>
 <tt>-s&lt;n&gt;<br>
 </tt><br>
-Optional. If this switch is specified, the dumb is shortened to include only
+Optional. If this switch is specified, the dump is shortened to include only
 min/max values for all vertex components and animation channels. The resulting
 file is much smaller, but the original model can't be reconstructed from it. This is 
 used by Assimp's regression test suite, comparing those minidumps provides

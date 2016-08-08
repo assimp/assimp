@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (c) 2013 Khaled Mammou - Advanced Micro Devices, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -63,7 +63,7 @@ namespace o3dgc
                                                   const BinaryStream & bstream);
         const SC3DMCStats &         GetStats()    const { return m_stats;}
         unsigned long               GetIterator() const { return m_iterator;}
-        O3DGCErrorCode              SetIterator(unsigned long iterator) { m_iterator = iterator;}
+		O3DGCErrorCode              SetIterator(unsigned long iterator) { m_iterator = iterator; return O3DGC_OK; }
         
 
     private:                        

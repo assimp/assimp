@@ -543,6 +543,9 @@ namespace glTF
 		/// Yes, accessor of next mesh has offset and length which mean: current mesh data is decoded, all other data is encoded.
 		/// And when before you start to read data of current mesh (with encoded data ofcourse) you must decode region of "bufferView", after read finished
 		/// delete encoding mark. And after that you can repeat process: decode data of mesh, read, delete decoded data.
+		///
+		/// Remark. Encoding all data at once is good in world with computers which do not has RAM limitation. So, you must use step by step encoding in
+		/// exporter and importer. And, thanks to such way, there is no need to load whole file into memory.
 		SEncodedRegion* EncodedRegion_Current;
 
 		/// \var EncodedRegion_List

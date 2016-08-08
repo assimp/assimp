@@ -820,6 +820,11 @@ uint32_t byte_offset, count, count_indices, count_vertices;
 const char* mode_str;
 const char* type_str;
 ComponentType component_type;
+std::list<o3dgc::Real*> float_attributes_indices;// See above about "floatAttributesIndexes".
+
+	/**********************************************************/
+	/************** Read data from JSON-document **************/
+	/**********************************************************/
 
 	#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut) \
 		if(!ReadMember(pJSON_Object_CompressedData, pFieldName, pOut)) { throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pFieldName + "\"."); }
@@ -835,6 +840,40 @@ ComponentType component_type;
 
 	#undef MESH_READ_COMPRESSEDDATA_MEMBER
 
+	//
+	// Check for float attributes
+	//
+	// Object example:
+	// "floatAttributesIndexes": {
+	//		"accessor_1356": 0,
+	//		"accessor_1358": 1,
+	//		"accessor_1360": 2
+	//	},
+	//
+	// Find object "floatAttributesIndexes"
+	Value* float_attr_ind = FindObject(pJSON_Object_CompressedData, "floatAttributesIndexes");
+
+	if(float_attr_ind != nullptr)
+	{
+		size_t attr_num = 0;
+
+		// Walk thru children and get accessors and numbers of attributes.
+		for(Value::MemberIterator memb_it = float_attr_ind->MemberBegin(); memb_it != float_attr_ind->MemberEnd(); ++memb_it)
+		{
+			if(!memb_it->name.IsString()) throw DeadlyImportError("GLTF: name of the member of \"floatAttributesIndexes\" must be a string.");
+			if(!memb_it->value.IsUint()) throw DeadlyImportError(std::string("GLTF: value of the member (\"") + memb_it->name.GetString() + \
+																	"\") in \"floatAttributesIndexes\" must be an unsigned integer.");
+			/*if(attr_num != memb_it->value.GetUint()) throw DeadlyImportError(std::string("GLTF: invalid number of float attribute index. Member (\"") + \
+																				memb_it->name.GetString() + "\".");*/
+
+			attr_num++;
+			// Checks passed, extract data.
+			Ref<Accessor> attr_cur_acc = pAsset_Root.accessors.Get(memb_it->name.GetString());
+
+			float_attributes_indices.push_back((float*)attr_cur_acc->GetPointer());
+		}
+	}// if(float_attr_ind != nullptr)
+
 	// Check some values
 	if(strcmp(type_str, "SCALAR")) throw DeadlyImportError("GLTF: only \"SCALAR\" type is supported for compressed data.");
 	if(component_type != ComponentType_UNSIGNED_BYTE) throw DeadlyImportError("GLTF: only \"UNSIGNED_BYTE\" component type is supported for compressed data.");
@@ -842,6 +881,10 @@ ComponentType component_type;
 	{
 		throw DeadlyImportError(std::string("GLTF: for compressed data supported modes is: \"ascii\", \"binary\". Not the: \"") + mode_str + "\".");
 	}
+
+	/**********************************************************/
+	/********************* Decoding data **********************/
+	/**********************************************************/
 
 	// Search for "bufferView" by ID.
 	Ref<BufferView> bufview = pAsset_Root.bufferViews.Get(bufview_id);
@@ -851,10 +894,11 @@ ComponentType component_type;
 	//
 	// 	void testDecode(shared_ptr <GLTFMesh> mesh, BinaryStream &bstream)
 	o3dgc::SC3DMCDecoder<uint16_t> decoder;
-	o3dgc::IndexedFaceSet <unsigned short> ifs;
+	o3dgc::IndexedFaceSet<uint16_t> ifs;
 	uint8_t* output_data;
-	size_t size_vertex, size_normal, size_texcoord, size_indices, output_data_size;
+	size_t size_vertex, size_normal, size_indices, output_data_size;
 	o3dgc::BinaryStream bstream;
+	float* tarrays[6];
 
 	// Read data from buffer and place it in BinaryStream for decoder.
 	bstream.LoadFromBuffer(&bufview->buffer->GetPointer()[bufview->byteOffset + byte_offset], count);
@@ -862,12 +906,43 @@ ComponentType component_type;
 	// After decoding header we can get size of primitives
 	if(decoder.DecodeHeader(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC header.");
 
+	size_indices = ifs.GetNCoordIndex() * 3 * sizeof(unsigned short);
 	size_vertex = ifs.GetNCoord() * 3 * sizeof(float);
 	size_normal = ifs.GetNNormal() * 3 * sizeof(float);
-	size_texcoord = ifs.GetNFloatAttribute(0) * 2 * sizeof(float);
-	size_indices = ifs.GetNCoordIndex() * 3 * sizeof(unsigned short);
 
-	output_data_size = size_vertex + size_normal + size_texcoord + size_indices;
+	for(size_t idx_attr = 0, idx_attr_end = ifs.GetNumFloatAttributes(); idx_attr < idx_attr_end; idx_attr++)
+	{
+		size_t qty_attr = ifs.GetNFloatAttribute(idx_attr);
+
+		if(qty_attr == 0) continue;
+
+		tarrays[idx_attr] = new float[qty_attr * ifs.GetFloatAttributeDim(idx_attr)];
+		ifs.SetFloatAttribute(idx_attr, tarrays[idx_attr]);
+		/*
+		switch(ifs.GetFloatAttributeType(idx_attr))
+		{
+			// Unknown for Open3DGC,
+			// but not for COLLADA2GLTF - GLTF::Semantic::JOINT. What's mean "JOINT"? Good question, but lim(comments in COLLADA2GLTF) = 0.
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_UNKOWN:// 0
+				break;
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_POSITION:// 1
+				break;
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_NORMAL:// 2
+				break;
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_COLOR:// 3
+				break;
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:// 4
+				break;
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_WEIGHT:// 5
+				break;
+			default:
+				throw DeadlyImportError("GLTF: Unknown type of float attribute (" + std::to_string(idx_attr) + ") for Open3DGC encoding.");
+		}*/
+	}
+
+	//size_texcoord = ifs.GetNFloatAttribute(0) * 2 * sizeof(float);
+
+	output_data_size = size_vertex + size_normal + /*size_texcoord*/ + size_indices;
 	output_data = new uint8_t[output_data_size];
 
 	float* uncompressed_vertices = (float* const)(output_data + size_indices);// size_indices => vertex offset
@@ -877,7 +952,7 @@ ComponentType component_type;
 
 	if(ifs.GetNNormal() > 0) ifs.SetNormal((float* const)(output_data + size_indices + size_vertex));
 
-	if(ifs.GetNFloatAttribute(0)) ifs.SetFloatAttribute(0, (float* const)(output_data + size_indices + size_vertex + size_normal));
+	//if(ifs.GetNFloatAttribute(0)) ifs.SetFloatAttribute(0, (float* const)(output_data + size_indices + size_vertex + size_normal));
 
 	// Decode data
 	if(decoder.DecodePlayload(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC data.");

@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -55,9 +55,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
+// Header files, standart library.
 #include <memory>
+#include <inttypes.h>
 
 #include "glTFAssetWriter.h"
+
+// Header files, Open3DGC.
+#include <Open3DGC/o3dgcSC3DMCEncoder.h>
 
 using namespace rapidjson;
 
@@ -252,8 +257,35 @@ void glTFExporter::ExportMaterials()
 
 void glTFExporter::ExportMeshes()
 {
+// Not for
+//     using IndicesType = decltype(aiFace::mNumIndices);
+// But yes for
+//     using IndicesType = unsigned short;
+// because "ComponentType_UNSIGNED_SHORT" used for indices. And its maximal type according to glTF specification.
+using IndicesType = unsigned short;
+
+// Variables needed for compression. BEGIN.
+// Indices, not pointers - because pointer to buffer is changin while writing to it.
+size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
+size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
+std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
+size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
+bool comp_allow;// Point that data of current mesh can be compressed.
+// Variables needed for compression. END.
+
     for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
         const aiMesh* aim = mScene->mMeshes[i];
+
+		// Check if compressing requested and mesh can be encoded.
+		if((aim->mPrimitiveTypes == aiPrimitiveType_TRIANGLE) && (aim->mNumVertices > 0))///TODO: export properties if(compression is needed)
+		{
+			comp_allow = true;
+			idx_srcdata_tc.reserve(AI_MAX_NUMBER_OF_TEXTURECOORDS);
+		}
+		else
+		{
+			comp_allow = false;
+		}
 
         std::string meshId = mAsset->FindUniqueID(aim->mName.C_Str(), "mesh");
         Ref<Mesh> m = mAsset->meshes.Create(meshId);
@@ -269,31 +301,46 @@ void glTFExporter::ExportMeshes()
             b = mAsset->buffers.Create(bufferId);
         }
 
+		/******************* Vertices ********************/
+		// If compression is used then you need parameters of uncompressed region: begin and size. At this step "begin" is stored.
+		if(comp_allow) idx_srcdata_begin = b->byteLength;
+
         Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-        if (v) p.attributes.position.push_back(v);
+		if (v) p.attributes.position.push_back(v);
 
-        Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-        if (n) p.attributes.normal.push_back(n);
+		/******************** Normals ********************/
+		if(comp_allow && (aim->mNormals > 0)) idx_srcdata_normal = b->byteLength;// Store index of normals array.
 
+		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+		if (n) p.attributes.normal.push_back(n);
+
+		/************** Texture coordinates **************/
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
             if (aim->mNumUVComponents[i] > 0) {
                 AttribType::Value type = (aim->mNumUVComponents[i] == 2) ? AttribType::VEC2 : AttribType::VEC3;
-                Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, true);
-                if (tc) p.attributes.texcoord.push_back(tc);
-            }
-        }
 
-        if (aim->mNumFaces > 0) {
-            unsigned int nIndicesPerFace = aim->mFaces[0].mNumIndices;
-            std::vector<uint16_t> indices;
+				if(comp_allow) idx_srcdata_tc.push_back(b->byteLength);// Store index of texture coordinates array.
+
+				Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, true);
+				if (tc) p.attributes.texcoord.push_back(tc);
+			}
+		}
+
+		/*************** Vertices indices ****************/
+		idx_srcdata_ind = b->byteLength;// Store index of indices array.
+
+		if (aim->mNumFaces > 0) {
+			std::vector<IndicesType> indices;
+			unsigned int nIndicesPerFace = aim->mFaces[0].mNumIndices;
             indices.resize(aim->mNumFaces * nIndicesPerFace);
             for (size_t i = 0; i < aim->mNumFaces; ++i) {
                 for (size_t j = 0; j < nIndicesPerFace; ++j) {
                     indices[i*nIndicesPerFace + j] = uint16_t(aim->mFaces[i].mIndices[j]);
                 }
             }
-            p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);
-        }
+
+			p.indices = ExportData(*mAsset, meshId, b, unsigned(indices.size()), &indices[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_UNSIGNED_SHORT, true);
+		}
 
         switch (aim->mPrimitiveTypes) {
             case aiPrimitiveType_POLYGON:
@@ -305,7 +352,69 @@ void glTFExporter::ExportMeshes()
             default: // aiPrimitiveType_TRIANGLE
                 p.mode = PrimitiveMode_TRIANGLES;
         }
-    }
+
+		/****************** Compression ******************/
+		///TODO: animation: weights, joints.
+		if(comp_allow)
+		{
+			o3dgc::BinaryStream bs;
+			o3dgc::SC3DMCEncoder<IndicesType> encoder;
+			o3dgc::IndexedFaceSet<IndicesType> comp_o3dgc_ifs;
+			o3dgc::SC3DMCEncodeParams comp_o3dgc_params;
+			unsigned qcoord = 12;///TODO: dbg
+			unsigned qnormal = 10;///TODO: dbg
+			unsigned qtexCoord = 10;///TODO: dbg
+
+			o3dgc::O3DGCSC3DMCPredictionMode positionPrediction = o3dgc::O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION;///TODO: dbg
+			o3dgc::O3DGCSC3DMCPredictionMode normalPrediction = o3dgc::O3DGC_SC3DMC_SURF_NORMALS_PREDICTION;///TODO: dbg
+			o3dgc::O3DGCSC3DMCPredictionMode texcoordPrediction = o3dgc::O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION;///TODO: dbg
+
+			// IndexedFacesSet: "Crease angle", "solid", "convex" are set to default.
+			comp_o3dgc_ifs.SetCCW(true);
+			comp_o3dgc_ifs.SetIsTriangularMesh(true);
+			comp_o3dgc_ifs.SetNumFloatAttributes(0);
+			// Coordinates
+			comp_o3dgc_params.SetCoordQuantBits(qcoord);///TODO: IME
+			comp_o3dgc_params.SetCoordPredMode(positionPrediction);///TODO: IME
+			comp_o3dgc_ifs.SetNCoord(aim->mNumVertices);
+			comp_o3dgc_ifs.SetCoord((o3dgc::Real* const)&b->GetPointer()[idx_srcdata_begin]);
+			// Normals
+			if(idx_srcdata_normal != SIZE_MAX)
+			{
+				comp_o3dgc_params.SetNormalQuantBits(qnormal);///TODO: IME
+				comp_o3dgc_params.SetNormalPredMode(normalPrediction);///TODO: IME
+				comp_o3dgc_ifs.SetNNormal(aim->mNumVertices);
+				comp_o3dgc_ifs.SetNormal((o3dgc::Real* const)&b->GetPointer()[idx_srcdata_normal]);
+			}
+
+			// Texture coordinates
+			for(size_t num_tc = 0; num_tc < idx_srcdata_tc.size(); num_tc++)
+			{
+				size_t num = comp_o3dgc_ifs.GetNumFloatAttributes();
+
+				comp_o3dgc_params.SetFloatAttributeQuantBits(num, qtexCoord);///TODO: IME
+				comp_o3dgc_params.SetFloatAttributePredMode(num, texcoordPrediction);///TODO: IME
+				comp_o3dgc_ifs.SetNFloatAttribute(num, aim->mNumVertices);// number of elements.
+				comp_o3dgc_ifs.SetFloatAttributeDim(num, aim->mNumUVComponents[i]);// components per element: aiVector3D => x * float
+				comp_o3dgc_ifs.SetFloatAttributeType(num, o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD);
+				comp_o3dgc_ifs.SetFloatAttribute(num, (o3dgc::Real* const)&b->GetPointer()[idx_srcdata_tc[num_tc]]);
+				comp_o3dgc_ifs.SetNumFloatAttributes(num + 1);
+			}
+
+			// Coordinates indices
+			comp_o3dgc_ifs.SetNCoordIndex(aim->mNumFaces);
+			comp_o3dgc_ifs.SetCoordIndex((IndicesType* const)&b->GetPointer()[idx_srcdata_ind]);
+			// Prepare to enconding
+			comp_o3dgc_params.SetNumFloatAttributes(comp_o3dgc_ifs.GetNumFloatAttributes());
+			comp_o3dgc_params.SetStreamType(o3dgc::O3DGC_STREAM_TYPE_BINARY);///TODO: exporter params
+			// Encoding
+			encoder.Encode(comp_o3dgc_params, comp_o3dgc_ifs, bs);
+
+			///TODO: replace data in buffer
+		}// if(comp_allow)
+	}// for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
+
+	///TODO: export properties if(compression is used)
 }
 
 unsigned int glTFExporter::ExportNode(const aiNode* n)

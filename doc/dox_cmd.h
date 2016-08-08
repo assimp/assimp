@@ -489,7 +489,7 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
 
     <tr>
     <td><tt>-om</tt></td>
-    <td><tt>--optimize-mesh</tt></td>
+    <td><tt>--optimize-meshes</tt></td>
 	<td>Optimize mesh usage. Meshes are merged, if possible. Very effective in combination with <tt>--optimize-graph</tt></td>
   </tr>
 </table>

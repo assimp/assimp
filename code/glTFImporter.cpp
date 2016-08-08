@@ -301,14 +301,12 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 			if (attr.position.size() > 0 && attr.position[0]) {
                 aim->mNumVertices = attr.position[0]->count;
                 attr.position[0]->ExtractData(aim->mVertices);
-            }
+			}
 
 			// if "bufferView" of current accessor is containing encoded data then set ID of region.
 			if(attr.normal[0]->bufferView->EncodedRegion_List.size() > 0) attr.normal[0]->bufferView->EncodedRegion_SetCurrent(mesh.name);
 
-			if (attr.normal.size() > 0 && attr.normal[0]) {
-				attr.normal[0]->ExtractData(aim->mNormals);
-            }
+			if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
 
 			// if "bufferView" of current accessor is containing encoded data then set ID of region.
 			if((attr.texcoord.size() > 0) && (attr.texcoord[0]->bufferView->EncodedRegion_List.size() > 0))
@@ -318,7 +316,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
 			for (size_t tc = 0; tc < attr.texcoord.size() && tc <= AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
 				attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
-                aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
+				aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
                 aiVector3D* values = aim->mTextureCoords[tc];
                 for (unsigned int i = 0; i < aim->mNumVertices; ++i) {

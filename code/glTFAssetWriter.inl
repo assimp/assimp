@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ namespace glTF {
         inline Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
-            for (int i = 0; i < N; ++i) {
+			for (decltype(N) i = 0; i < N; ++i) {
                 val.PushBack(r[i], al);
             }
             return val;

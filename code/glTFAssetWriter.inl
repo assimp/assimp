@@ -219,7 +219,7 @@ namespace glTF {
 
 							// filling object "compressedData"
 							json_comp_data.SetObject();
-							json_comp_data.AddMember("bufferView", ptr_ext_comp->BufferView, w.mAl);
+							json_comp_data.AddMember("buffer", ptr_ext_comp->Buffer, w.mAl);
 							json_comp_data.AddMember("byteOffset", ptr_ext_comp->Offset, w.mAl);
 							json_comp_data.AddMember("componentType", 5121, w.mAl);
 							json_comp_data.AddMember("type", "SCALAR", w.mAl);

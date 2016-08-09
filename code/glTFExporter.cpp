@@ -426,7 +426,7 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 			Mesh::SCompression_Open3DGC* ext = new Mesh::SCompression_Open3DGC;
 
 			// Fill it.
-			ext->BufferView = p.indices->bufferView->id;
+			ext->Buffer = b->id;
 			ext->Offset = idx_srcdata_begin;
 			ext->Count = b->byteLength - idx_srcdata_begin;
 			ext->IndicesCount = comp_o3dgc_ifs.GetNCoordIndex();

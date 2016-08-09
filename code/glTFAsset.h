@@ -736,7 +736,7 @@ namespace glTF
 		{
 			using SExtension::Type;
 
-			std::string BufferView;///< Name of "bufferView" used for storing compressed data.
+			std::string Buffer;///< ID of "buffer" used for storing compressed data.
 			size_t Offset;///< Offset in "bufferView" where compressed data are stored.
 			size_t Count;///< Count of elements in compressed data. Is always equivalent to size in bytes: look comments for "Type" and "Component_Type".
 			size_t IndicesCount;///< Count of indices in mesh.

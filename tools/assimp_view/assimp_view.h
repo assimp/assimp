@@ -71,14 +71,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../code/MaterialSystem.h"   // aiMaterial class
 #include "../../code/StringComparison.h" // ASSIMP_stricmp and ASSIMP_strincmp
 
-// in order for std::min and std::max to behave properly
-/*#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#endif // max
-#ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#endif // min
-*/
 #include <time.h>
 
 // default movement speed

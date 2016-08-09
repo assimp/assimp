@@ -362,8 +362,6 @@ namespace glTF
             { return id; }
     };
 
-
-
     //
     // Classes for each glTF top-level object type
     //
@@ -477,6 +475,15 @@ namespace glTF
         void Read(Value& obj, Asset& r);
 
         bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
+
+		/// \fn bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+		/// Replace part of buffer data. For example: decoded/encoded data.
+		/// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
+		/// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
+		/// \param [in] pReplace_Data - pointer to array with new data for buffer.
+		/// \param [in] pReplace_Count - count of bytes in new data.
+		/// \return true - if successfully replaced, false if input arguments is out of range.
+		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
 
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
@@ -702,9 +709,56 @@ namespace glTF
             Ref<Material> material;
         };
 
+		/// \struct SExtension
+		/// Extension used for mesh.
+		struct SExtension
+		{
+			/// \enum EType
+			/// Type of extension.
+			enum class EType
+			{
+				Compression_Open3DGC ///< Compression of mesh data using Open3DGC algorythm.
+			};
+
+			EType Type;///< Type of extension.
+
+			/// \fn SExtension
+			/// Constructor.
+			/// \param [in] pType - type of extension.
+			SExtension(const EType pType)
+				: Type(pType)
+			{}
+		};
+
+		/// \struct SCompression_Open3DGC
+		/// Compression of mesh data using Open3DGC algorythm.
+		struct SCompression_Open3DGC final : public SExtension
+		{
+			using SExtension::Type;
+
+			std::string BufferView;///< Name of "bufferView" used for storing compressed data.
+			size_t Offset;///< Offset in "bufferView" where compressed data are stored.
+			size_t Count;///< Count of elements in compressed data. Is always equivalent to size in bytes: look comments for "Type" and "Component_Type".
+			size_t IndicesCount;///< Count of indices in mesh.
+			size_t VerticesCount;///< Count of vertices in mesh.
+			// AttribType::Value Type;///< Is always "SCALAR".
+			// ComponentType Component_Type;///< Is always "ComponentType_UNSIGNED_BYTE" (5121).
+
+			/// \fn SCompression_Open3DGC
+			/// Constructor.
+			SCompression_Open3DGC()
+				: SExtension(EType::Compression_Open3DGC)
+			{}
+		};
+
         std::vector<Primitive> primitives;
+		std::list<SExtension*> Extension;///< List of extensions used in mesh.
 
         Mesh() {}
+
+		/// \fn ~Mesh()
+		/// Destructor.
+		~Mesh() { for(auto e : Extension) { delete e; }; }
 
 		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
 		/// Get mesh data from JSON-object and place them to root asset.

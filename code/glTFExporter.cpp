@@ -357,10 +357,16 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 		///TODO: animation: weights, joints.
 		if(comp_allow)
 		{
+			// Only one type of compression supported at now - Open3DGC.
+			//
 			o3dgc::BinaryStream bs;
 			o3dgc::SC3DMCEncoder<IndicesType> encoder;
 			o3dgc::IndexedFaceSet<IndicesType> comp_o3dgc_ifs;
 			o3dgc::SC3DMCEncodeParams comp_o3dgc_params;
+
+			//
+			// Fill data for encoder.
+			//
 			unsigned qcoord = 12;///TODO: dbg
 			unsigned qnormal = 10;///TODO: dbg
 			unsigned qtexCoord = 10;///TODO: dbg
@@ -407,10 +413,26 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 			// Prepare to enconding
 			comp_o3dgc_params.SetNumFloatAttributes(comp_o3dgc_ifs.GetNumFloatAttributes());
 			comp_o3dgc_params.SetStreamType(o3dgc::O3DGC_STREAM_TYPE_BINARY);///TODO: exporter params
+			//
 			// Encoding
+			//
 			encoder.Encode(comp_o3dgc_params, comp_o3dgc_ifs, bs);
+			// Replace data in buffer.
+			b->ReplaceData(idx_srcdata_begin, b->byteLength - idx_srcdata_begin, bs.GetBuffer(), bs.GetSize());
+			//
+			// Add information about extension to mesh.
+			//
+			// Create extension structure.
+			Mesh::SCompression_Open3DGC* ext = new Mesh::SCompression_Open3DGC;
 
-			///TODO: replace data in buffer
+			// Fill it.
+			ext->BufferView = p.indices->bufferView->id;
+			ext->Offset = idx_srcdata_begin;
+			ext->Count = b->byteLength - idx_srcdata_begin;
+			ext->IndicesCount = comp_o3dgc_ifs.GetNCoordIndex();
+			ext->VerticesCount = comp_o3dgc_ifs.GetNCoord();
+			// And assign to mesh.
+			m->Extension.push_back(ext);
 		}// if(comp_allow)
 	}// for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
 

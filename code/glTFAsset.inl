@@ -330,6 +330,28 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
     return true;
 }
 
+inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+{
+const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+
+uint8_t* new_data;
+
+	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) return false;
+
+	new_data = new uint8_t[new_data_size];
+	// Copy data which place before replacing part.
+	memcpy(new_data, mData.get(), pBufferData_Offset);
+	// Copy new data.
+	memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
+	// Copy data which place after replacing part.
+	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
+	// Apply new data
+	mData.reset(new_data);
+	byteLength = new_data_size;
+
+	return true;
+}
+
 inline size_t Buffer::AppendData(uint8_t* data, size_t length)
 {
     size_t offset = this->byteLength;

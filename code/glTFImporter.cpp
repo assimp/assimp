@@ -259,7 +259,36 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
     for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
         Mesh& mesh = r.meshes[m];
 
-        meshOffsets.push_back(k);
+		// Check if mesh extensions is used
+		if(mesh.Extension.size() > 0)
+		{
+			for(Mesh::SExtension* cur_ext : mesh.Extension)
+			{
+				if(cur_ext->Type == Mesh::SExtension::EType::Compression_Open3DGC)
+				{
+					// Limitations for meshes when using Open3DGC-compression.
+					// It's a current limitation of sp... Specification have not this part still - about mesh compression. Why only one primitive?
+					// Because glTF is very flexibly. But in fact it ugly flexible. Every primitive can has own set of accessors and accessors can
+					// point to a-a-a-a-any part of buffer (thru bufferview ofcourse) and even to another buffer. We know that "Open3DGC-compression"
+					// is applicable only to part of buffer. As we can't guaranty continuity of the data for decoder, we will limit quantity of primitives.
+					// Yes indices, coordinates etc. still can br stored in different buffers, but with current specification it's a exporter problem.
+					// Also primitive can has only one of "POSITION", "NORMAL" and less then "AI_MAX_NUMBER_OF_TEXTURECOORDS" of "TEXCOORD". All accessor
+					// of primitive must point to one continuous region of the buffer.
+					if(mesh.primitives.size() > 2) throw DeadlyImportError("GLTF: When using Open3DGC compression then only one primitive per mesh are allowed.");
+
+					Mesh::SCompression_Open3DGC* o3dgc_ext = (Mesh::SCompression_Open3DGC*)cur_ext;
+					Ref<Buffer> buf = r.buffers.Get(o3dgc_ext->Buffer);
+
+					buf->EncodedRegion_SetCurrent(mesh.id);
+				}
+				else
+				{
+					throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension, only Open3DGC is supported.");
+				}
+			}
+		}// if(mesh.Extension.size() > 0)
+
+		meshOffsets.push_back(k);
         k += unsigned(mesh.primitives.size());
 
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
@@ -295,24 +324,12 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
             Mesh::Primitive::Attributes& attr = prim.attributes;
 
-			// if "bufferView" of current accessor is containing encoded data then set ID of region.
-			if(attr.position[0]->bufferView->EncodedRegion_List.size() > 0) attr.position[0]->bufferView->EncodedRegion_SetCurrent(mesh.name);
-
 			if (attr.position.size() > 0 && attr.position[0]) {
                 aim->mNumVertices = attr.position[0]->count;
                 attr.position[0]->ExtractData(aim->mVertices);
 			}
 
-			// if "bufferView" of current accessor is containing encoded data then set ID of region.
-			if(attr.normal[0]->bufferView->EncodedRegion_List.size() > 0) attr.normal[0]->bufferView->EncodedRegion_SetCurrent(mesh.name);
-
 			if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
-
-			// if "bufferView" of current accessor is containing encoded data then set ID of region.
-			if((attr.texcoord.size() > 0) && (attr.texcoord[0]->bufferView->EncodedRegion_List.size() > 0))
-			{
-				attr.texcoord[0]->bufferView->EncodedRegion_SetCurrent(mesh.name);
-			}
 
 			for (size_t tc = 0; tc < attr.texcoord.size() && tc <= AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
 				attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
@@ -326,9 +343,6 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 
 
             if (prim.indices) {
-				// if "bufferView" of current accessor is containing encoded data then set ID of region.
-				if(prim.indices->bufferView->EncodedRegion_List.size() > 0) prim.indices->bufferView->EncodedRegion_SetCurrent(mesh.name);
-
 				aiFace* faces = 0;
                 unsigned int nFaces = 0;
 

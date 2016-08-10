@@ -224,6 +224,11 @@ namespace glTF {
 							json_comp_data.AddMember("componentType", 5121, w.mAl);
 							json_comp_data.AddMember("type", "SCALAR", w.mAl);
 							json_comp_data.AddMember("count", ptr_ext_comp->Count, w.mAl);
+							if(ptr_ext_comp->Binary)
+								json_comp_data.AddMember("mode", "binary", w.mAl);
+							else
+								json_comp_data.AddMember("mode", "ascii", w.mAl);
+
 							json_comp_data.AddMember("indicesCount", ptr_ext_comp->IndicesCount, w.mAl);
 							json_comp_data.AddMember("verticesCount", ptr_ext_comp->VerticesCount, w.mAl);
 							// filling object "Open3DGC-compression"
@@ -237,7 +242,7 @@ namespace glTF {
 
 						break;
 					default:
-						throw DeadlyImportError("GLTF: Unknown mesh extension, Only Open3DGC is supported.");
+						throw DeadlyImportError("GLTF: Can not write mesh: unknown mesh extension, only Open3DGC is supported.");
 				}// switch(ptr_ext->Type)
 			}// for(Mesh::SExtension* ptr_ext : m.Extension)
 

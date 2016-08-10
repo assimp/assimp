@@ -450,88 +450,49 @@ namespace glTF
 
     //! A buffer points to binary geometry, animation, or skins.
     struct Buffer : public Object
-    {
-    public:
-
-        enum Type
-        {
-            Type_arraybuffer,
-            Type_text
-        };
-
-        //std::string uri; //!< The uri of the buffer. Can be a filepath, a data uri, etc. (required)
-        size_t byteLength; //!< The length of the buffer in bytes. (default: 0)
-        //std::string type; //!< XMLHttpRequest responseType (default: "arraybuffer")
-
-        Type type;
-
-    private:
-        shared_ptr<uint8_t> mData; //!< Pointer to the data
-        bool mIsSpecial; //!< Set to true for special cases (e.g. the body buffer)
-
-    public:
-        Buffer();
-
-        void Read(Value& obj, Asset& r);
-
-        bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
-
-		/// \fn bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
-		/// Replace part of buffer data. For example: decoded/encoded data.
-		/// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
-		/// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
-		/// \param [in] pReplace_Data - pointer to array with new data for buffer.
-		/// \param [in] pReplace_Count - count of bytes in new data.
-		/// \return true - if successfully replaced, false if input arguments is out of range.
-		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
-
-        size_t AppendData(uint8_t* data, size_t length);
-        void Grow(size_t amount);
-
-        uint8_t* GetPointer()
-            { return mData.get(); }
-
-        void MarkAsSpecial()
-            { mIsSpecial = true; }
-
-        bool IsSpecial() const
-            { return mIsSpecial; }
-
-        static const char* TranslateId(Asset& r, const char* id);
-    };
-
-	/// \struct SEncodedRegion
-	/// Descriptor of encoded region in "bufferView".
-	struct SEncodedRegion
 	{
-		const size_t Offset;///< Offset from begin of "bufferView" to encoded region, in bytes.
-		const size_t EncodedData_Length;///< Size of encoded region, in bytes.
-		uint8_t* const DecodedData;///< Cached encoded data.
-		const size_t DecodedData_Length;///< Size of decoded region, in bytes.
-		const std::string ID;///< ID of the region.
+		/********************* Types *********************/
+	public:
 
-		/// \fn SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
-		/// Constructor.
-		/// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
-		/// \param [in] pEncodedData_Length - size of encoded region, in bytes.
-		/// \param [in] pDecodedData - pointer to decoded data array.
-		/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
-		/// \param [in] pID - ID of the region.
-		SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
-			: Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID)
-		{}
+		enum Type
+		{
+			Type_arraybuffer,
+			Type_text
+		};
 
-		/// \fn ~SEncodedRegion()
-		/// Destructor.
-		~SEncodedRegion() { delete [] DecodedData; }
-	};
+		/// \struct SEncodedRegion
+		/// Descriptor of encoded region in "bufferView".
+		struct SEncodedRegion
+		{
+			const size_t Offset;///< Offset from begin of "bufferView" to encoded region, in bytes.
+			const size_t EncodedData_Length;///< Size of encoded region, in bytes.
+			uint8_t* const DecodedData;///< Cached encoded data.
+			const size_t DecodedData_Length;///< Size of decoded region, in bytes.
+			const std::string ID;///< ID of the region.
 
-    //! A view into a buffer generally representing a subset of the buffer.
-    struct BufferView : public Object
-    {
-        Ref<Buffer> buffer; //! The ID of the buffer. (required)
-        size_t byteOffset; //! The offset into the buffer in bytes. (required)
-        size_t byteLength; //! The length of the bufferView in bytes. (default: 0)
+			/// \fn SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
+			/// Constructor.
+			/// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
+			/// \param [in] pEncodedData_Length - size of encoded region, in bytes.
+			/// \param [in] pDecodedData - pointer to decoded data array.
+			/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
+			/// \param [in] pID - ID of the region.
+			SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
+				: Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID)
+			{}
+
+			/// \fn ~SEncodedRegion()
+			/// Destructor.
+			~SEncodedRegion() { delete [] DecodedData; }
+		};
+
+		/******************* Variables *******************/
+
+		//std::string uri; //!< The uri of the buffer. Can be a filepath, a data uri, etc. (required)
+		size_t byteLength; //!< The length of the buffer in bytes. (default: 0)
+		//std::string type; //!< XMLHttpRequest responseType (default: "arraybuffer")
+
+		Type type;
 
 		/// \var EncodedRegion_Current
 		/// Pointer to currently active encoded region.
@@ -555,19 +516,25 @@ namespace glTF
 		/// exporter and importer. And, thanks to such way, there is no need to load whole file into memory.
 		SEncodedRegion* EncodedRegion_Current;
 
+	private:
+
+		shared_ptr<uint8_t> mData; //!< Pointer to the data
+		bool mIsSpecial; //!< Set to true for special cases (e.g. the body buffer)
+
 		/// \var EncodedRegion_List
 		/// List of encoded regions.
 		std::list<SEncodedRegion*> EncodedRegion_List;
 
-        BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
+		/******************* Functions *******************/
 
-		BufferView()
-			: EncodedRegion_Current(nullptr)
-		{}
+	public:
 
-		~BufferView() { for(SEncodedRegion* reg : EncodedRegion_List) delete reg; }
+		Buffer();
+		~Buffer();
 
-        void Read(Value& obj, Asset& r);
+		void Read(Value& obj, Asset& r);
+
+        bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
 
 		/// \fn void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID)
 		/// Mark region of "bufferView" as encoded. When data is request from such region then "bufferView" use decoded data.
@@ -582,8 +549,42 @@ namespace glTF
 		/// Select current encoded region by ID. \sa EncodedRegion_Current.
 		/// \param [in] pID - ID of the region.
 		void EncodedRegion_SetCurrent(const std::string& pID);
+
+		/// \fn bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+		/// Replace part of buffer data. Pay attention that function work with original array of data (\ref mData) not with encoded regions.
+		/// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
+		/// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
+		/// \param [in] pReplace_Data - pointer to array with new data for buffer.
+		/// \param [in] pReplace_Count - count of bytes in new data.
+		/// \return true - if successfully replaced, false if input arguments is out of range.
+		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
+
+        size_t AppendData(uint8_t* data, size_t length);
+        void Grow(size_t amount);
+
+        uint8_t* GetPointer()
+            { return mData.get(); }
+
+        void MarkAsSpecial()
+            { mIsSpecial = true; }
+
+        bool IsSpecial() const
+            { return mIsSpecial; }
+
+        static const char* TranslateId(Asset& r, const char* id);
     };
 
+    //! A view into a buffer generally representing a subset of the buffer.
+    struct BufferView : public Object
+    {
+        Ref<Buffer> buffer; //! The ID of the buffer. (required)
+        size_t byteOffset; //! The offset into the buffer in bytes. (required)
+        size_t byteLength; //! The length of the bufferView in bytes. (default: 0)
+
+        BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
+
+        void Read(Value& obj, Asset& r);
+    };
 
     struct Camera : public Object
     {
@@ -739,6 +740,7 @@ namespace glTF
 			std::string Buffer;///< ID of "buffer" used for storing compressed data.
 			size_t Offset;///< Offset in "bufferView" where compressed data are stored.
 			size_t Count;///< Count of elements in compressed data. Is always equivalent to size in bytes: look comments for "Type" and "Component_Type".
+			bool Binary;///< If true then "binary" mode is used for coding, if false - "ascii" mode.
 			size_t IndicesCount;///< Count of indices in mesh.
 			size_t VerticesCount;///< Count of vertices in mesh.
 			// AttribType::Value Type;///< Is always "SCALAR".
@@ -766,11 +768,11 @@ namespace glTF
 		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
 		void Read(Value& pJSON_Object, Asset& pAsset_Root);
 
-		/// \fn void Decode_O3DGC(Value& pJSON_Object_CompressedData, Asset& pAsset_Root)
-		/// Decode part of "bufferView" which encoded with Open3DGC algorythm.
-		/// \param [in] pJSON_Object_CompressedData - reference to JSON-object which is "compressedData" block.
+		/// \fn void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
+		/// Decode part of "buffer" which encoded with Open3DGC algorithm.
+		/// \param [in] pCompression_Open3DGC - reference to structure which describe encoded region.
 		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
-		void Decode_O3DGC(Value& pJSON_Object_CompressedData, Asset& pAsset_Root);
+		void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root);
     };
 
     struct Node : public Object
@@ -941,6 +943,7 @@ namespace glTF
 
         Ref<T> Get(const char* id);
         Ref<T> Get(unsigned int i);
+		Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)

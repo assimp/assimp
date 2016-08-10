@@ -59,7 +59,7 @@ namespace o3dgc
         O3DGCErrorCode              DecodeHeader(IndexedFaceSet<T> & ifs,
                                                  const BinaryStream & bstream);
         //!                         
-        O3DGCErrorCode              DecodePlayload(IndexedFaceSet<T> & ifs,
+		O3DGCErrorCode              DecodePayload(IndexedFaceSet<T> & ifs,
                                                   const BinaryStream & bstream);
         const SC3DMCStats &         GetStats()    const { return m_stats;}
         unsigned long               GetIterator() const { return m_iterator;}

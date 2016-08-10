@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (c) 2013 Khaled Mammou - Advanced Micro Devices, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -136,7 +136,7 @@ namespace o3dgc
         return O3DGC_OK;
     }
     template<class T>
-    O3DGCErrorCode SC3DMCDecoder<T>::DecodePlayload(IndexedFaceSet<T> & ifs,
+	O3DGCErrorCode SC3DMCDecoder<T>::DecodePayload(IndexedFaceSet<T> & ifs,
                                                     const BinaryStream & bstream)
     {
         O3DGCErrorCode ret = O3DGC_OK;

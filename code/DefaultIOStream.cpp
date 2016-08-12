@@ -126,7 +126,7 @@ size_t DefaultIOStream::FileSize() const
         if (0 != err)
             return 0;
         cachedSize = (size_t) (fileStat.st_size);
-#elif defined __gnu_linux__
+#elif defined __gnu_linux__ || defined __APPLE__ || defined __MACH__
         struct stat fileStat;
         int err = stat(mFilename.c_str(), &fileStat );
         if (0 != err)

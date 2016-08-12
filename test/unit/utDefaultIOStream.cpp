@@ -48,7 +48,12 @@ class utDefaultIOStream : public ::testing::Test {
 class TestDefaultIOStream : public DefaultIOStream {
 public:
     TestDefaultIOStream()
-        : DefaultIOStream() {
+    : DefaultIOStream() {
+        // empty
+    }
+
+    TestDefaultIOStream( FILE* pFile, const std::string &strFilename )
+    : DefaultIOStream( pFile, strFilename ) {
         // empty
     }
 
@@ -58,7 +63,14 @@ public:
 };
 
 TEST_F( utDefaultIOStream, FileSizeTest ) {
-    TestDefaultIOStream myStream;
+    char buffer[ L_tmpnam ];
+    tmpnam( buffer );
+    std::FILE *fs( std::fopen( buffer, "w+" ) );
+    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
+    std::fflush( fs );
+
+    TestDefaultIOStream myStream( fs, buffer );
     size_t size = myStream.FileSize();
-    EXPECT_EQ( size, 0 );
+    EXPECT_EQ( size, sizeof( char ) * L_tmpnam );
+    remove( buffer );
 }

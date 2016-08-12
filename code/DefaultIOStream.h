@@ -59,11 +59,11 @@ class ASSIMP_API DefaultIOStream : public IOStream
 {
     friend class DefaultIOSystem;
 #if __ANDROID__
-#if __ANDROID_API__ > 9
-#if defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+# if __ANDROID_API__ > 9
+#  if defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
     friend class AndroidJNIIOSystem;
-#endif // defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
-#endif // __ANDROID_API__ > 9
+#  endif // defined(AI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT)
+# endif // __ANDROID_API__ > 9
 #endif // __ANDROID__
 
 protected:

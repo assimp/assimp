@@ -111,7 +111,7 @@ private:
     std::string mFilename;
 
     // Cached file size
-    mutable size_t cachedSize;
+    mutable size_t mCachedSize;
 };
 
 
@@ -119,7 +119,7 @@ private:
 inline DefaultIOStream::DefaultIOStream () :
     mFile       (NULL),
     mFilename   (""),
-    cachedSize  (SIZE_MAX)
+    mCachedSize(SIZE_MAX)
 {
     // empty
 }
@@ -130,7 +130,7 @@ inline DefaultIOStream::DefaultIOStream (FILE* pFile,
         const std::string &strFilename) :
     mFile(pFile),
     mFilename(strFilename),
-    cachedSize  (SIZE_MAX)
+    mCachedSize(SIZE_MAX)
 {
     // empty
 }

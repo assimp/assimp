@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <cstdlib>
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/rapidjson.h>
@@ -733,7 +734,7 @@ namespace glTF
 
 		/// \struct SCompression_Open3DGC
 		/// Compression of mesh data using Open3DGC algorythm.
-		struct SCompression_Open3DGC final : public SExtension
+		struct SCompression_Open3DGC : public SExtension
 		{
 			using SExtension::Type;
 

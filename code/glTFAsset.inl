@@ -343,7 +343,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 	// Check offset
 	if(pOffset > byteLength)
 	{
-		constexpr uint8_t val_size = 32;
+		const uint8_t val_size = 32;
 
 		char val[val_size];
 
@@ -354,7 +354,7 @@ inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncod
 	// Check length
 	if((pOffset + pEncodedData_Length) > byteLength)
 	{
-		constexpr uint8_t val_size = 64;
+		const uint8_t val_size = 64;
 
 		char val[val_size];
 

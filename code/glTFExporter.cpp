@@ -262,7 +262,7 @@ void glTFExporter::ExportMeshes()
 // But yes for
 //     using IndicesType = unsigned short;
 // because "ComponentType_UNSIGNED_SHORT" used for indices. And it's a maximal type according to glTF specification.
-using IndicesType = unsigned short;
+typedef unsigned short IndicesType;
 
 // Variables needed for compression. BEGIN.
 // Indices, not pointers - because pointer to buffer is changin while writing to it.

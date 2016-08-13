@@ -883,7 +883,7 @@ mr_skip_extensions:
 
 inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
 {
-using IndicesType = unsigned short;///< \sa glTFExporter::ExportMeshes.
+typedef unsigned short IndicesType;///< \sa glTFExporter::ExportMeshes.
 
 o3dgc::SC3DMCDecoder<IndicesType> decoder;
 o3dgc::IndexedFaceSet<IndicesType> ifs;

@@ -1,4 +1,4 @@
-# Open Asset Import Library (assimp)
+﻿# Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
 # Copyright (c) 2006-2016, assimp team
@@ -766,6 +766,10 @@ SET( assimp_src
 
 )
 ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
+
+if (open3dgc_SRCS)
+	SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -lrt")
+endif (open3dgc_SRCS)
 
 INCLUDE_DIRECTORIES(
   ../contrib/openddlparser/include

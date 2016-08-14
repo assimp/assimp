@@ -223,7 +223,7 @@
 
 //! Whether using 64-bit architecture
 #ifndef RAPIDJSON_64BIT
-#if defined(__LP64__) || defined(_WIN64) || defined(__EMSCRIPTEN__)
+#if defined(__LP64__) || defined(_WIN64)
 #define RAPIDJSON_64BIT 1
 #else
 #define RAPIDJSON_64BIT 0
@@ -238,13 +238,13 @@
     \param x pointer to align
 
     Some machines require strict data alignment. Currently the default uses 4 bytes
-    alignment. User can customize by defining the RAPIDJSON_ALIGN function macro.
+    alignment. User can customize by defining the RAPIDJSON_ALIGN function macro.,
 */
 #ifndef RAPIDJSON_ALIGN
 #if RAPIDJSON_64BIT == 1
-#define RAPIDJSON_ALIGN(x) (((x) + static_cast<uint64_t>(7u)) & ~static_cast<uint64_t>(7u))
+#define RAPIDJSON_ALIGN(x) ((x + 7u) & ~7u)
 #else
-#define RAPIDJSON_ALIGN(x) (((x) + 3u) & ~3u)
+#define RAPIDJSON_ALIGN(x) ((x + 3u) & ~3u)
 #endif
 #endif
 

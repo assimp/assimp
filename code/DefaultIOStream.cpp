@@ -55,6 +55,7 @@ DefaultIOStream::~DefaultIOStream()
 {
     if (mFile) {
         ::fclose(mFile);
+        mFile = nullptr;
     }
 }
 
@@ -109,9 +110,9 @@ size_t DefaultIOStream::FileSize() const
         return 0;
     }
 
-    if (SIZE_MAX == cachedSize) {
+    if (SIZE_MAX == mCachedSize ) {
 
-        // Although fseek/ftell would allow us to reuse the exising file handle here,
+        // Although fseek/ftell would allow us to reuse the existing file handle here,
         // it is generally unsafe because:
         //  - For binary streams, it is not technically well-defined
         //  - For text files the results are meaningless
@@ -124,16 +125,19 @@ size_t DefaultIOStream::FileSize() const
         int err = _stat64(  mFilename.c_str(), &fileStat );
         if (0 != err)
             return 0;
-        cachedSize = (size_t) (fileStat.st_size);
-#else
+        mCachedSize = (size_t) (fileStat.st_size);
+#elif defined __gnu_linux__ || defined __APPLE__ || defined __MACH__
         struct stat fileStat;
         int err = stat(mFilename.c_str(), &fileStat );
         if (0 != err)
             return 0;
-        cachedSize = (size_t) (fileStat.st_size);
+        const unsigned long long cachedSize = fileStat.st_size;
+        mCachedSize = static_cast< size_t >( cachedSize );
+#else
+#   error "Unknown platform"
 #endif
     }
-    return cachedSize;
+    return mCachedSize;
 }
 
 // ----------------------------------------------------------------------------------

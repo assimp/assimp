@@ -77,8 +77,8 @@ public:
     void Flush() { os_.Flush(); }
 
     // Not implemented
-    Ch Peek() const { RAPIDJSON_ASSERT(false); return 0;}
-    Ch Take() { RAPIDJSON_ASSERT(false); return 0;}
+    Ch Peek() const { RAPIDJSON_ASSERT(false); }
+    Ch Take() { RAPIDJSON_ASSERT(false);  }
     size_t Tell() const { RAPIDJSON_ASSERT(false);  return 0; }
     Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
     size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }
@@ -146,7 +146,7 @@ private:
         if (!c)
             return;
 
-        unsigned bom = static_cast<unsigned>(c[0] | (c[1] << 8) | (c[2] << 16) | (c[3] << 24));
+        unsigned bom = c[0] | (c[1] << 8) | (c[2] << 16) | (c[3] << 24);
         hasBOM_ = false;
         if (bom == 0xFFFE0000)                  { type_ = kUTF32BE; hasBOM_ = true; is_->Take(); is_->Take(); is_->Take(); is_->Take(); }
         else if (bom == 0x0000FEFF)             { type_ = kUTF32LE; hasBOM_ = true; is_->Take(); is_->Take(); is_->Take(); is_->Take(); }
@@ -227,8 +227,8 @@ public:
     void Flush() { os_->Flush(); } 
 
     // Not implemented
-    Ch Peek() const { RAPIDJSON_ASSERT(false); return 0;}
-    Ch Take() { RAPIDJSON_ASSERT(false); return 0;}
+    Ch Peek() const { RAPIDJSON_ASSERT(false); }
+    Ch Take() { RAPIDJSON_ASSERT(false); }
     size_t Tell() const { RAPIDJSON_ASSERT(false); return 0; }
     Ch* PutBegin() { RAPIDJSON_ASSERT(false); return 0; }
     size_t PutEnd(Ch*) { RAPIDJSON_ASSERT(false); return 0; }

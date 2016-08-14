@@ -714,30 +714,33 @@ public:
     // -------------------------------------------------------------------
     /** Helper function to get all parameters pertaining to a
      *  particular texture slot from a material.
-    *
-    *  This function is provided just for convenience, you could also
-    *  read the single material properties manually.
-    *  @param type Specifies the type of the texture to be retrieved (
-    *    e.g. diffuse, specular, height map ...)
-    *  @param index Index of the texture to be retrieved. The function fails
-    *    if there is no texture of that type with this index.
-    *    #GetTextureCount() can be used to determine the number of textures
-    *    per texture type.
-    *  @param path Receives the path to the texture.
-    *    NULL is a valid value.
-   *  @param mapping The texture mapping.
-   *        NULL is allowed as value.
-    *  @param uvindex Receives the UV index of the texture.
-    *    NULL is a valid value.
-    *  @param blend Receives the blend factor for the texture
-    *    NULL is a valid value.
-    *  @param op Receives the texture operation to be performed between
-    *    this texture and the previous texture. NULL is allowed as value.
-    *  @param mapmode Receives the mapping modes to be used for the texture.
-    *    The parameter may be NULL but if it is a valid pointer it MUST
-    *    point to an array of 3 aiTextureMapMode's (one for each
-    *    axis: UVW order (=XYZ)).
-    */
+     *
+     *  This function is provided just for convenience, you could also
+     *  read the single material properties manually.
+     *  @param type Specifies the type of the texture to be retrieved (
+     *    e.g. diffuse, specular, height map ...)
+     *  @param index Index of the texture to be retrieved. The function fails
+     *    if there is no texture of that type with this index.
+     *    #GetTextureCount() can be used to determine the number of textures
+     *    per texture type.
+     *  @param path Receives the path to the texture.
+     *    If the texture is embedded, receives a '*' followed by the id of
+     *    the texture (for the textures stored in the corresponding scene) which
+     *    can be converted to an int using a function like atoi.
+     *    NULL is a valid value.
+     *  @param mapping The texture mapping.
+     *    NULL is allowed as value.
+     *  @param uvindex Receives the UV index of the texture.
+     *    NULL is a valid value.
+     *  @param blend Receives the blend factor for the texture
+     *    NULL is a valid value.
+     *  @param op Receives the texture operation to be performed between
+     *    this texture and the previous texture. NULL is allowed as value.
+     *  @param mapmode Receives the mapping modes to be used for the texture.
+     *    The parameter may be NULL but if it is a valid pointer it MUST
+     *    point to an array of 3 aiTextureMapMode's (one for each
+     *    axis: UVW order (=XYZ)).
+     */
     // -------------------------------------------------------------------
     aiReturn GetTexture(aiTextureType type,
         unsigned int  index,
@@ -1506,7 +1509,10 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMa
  *     #aiGetMaterialTextureCount() can be used to determine the number of
  *     textures in a particular texture stack.
  *  @param[out] path Receives the output path
- *      This parameter must be non-null.
+ *     If the texture is embedded, receives a '*' followed by the id of
+ *     the texture (for the textures stored in the corresponding scene) which
+ *     can be converted to an int using a function like atoi.
+ *     This parameter must be non-null.
  *  @param mapping The texture mapping mode to be used.
  *      Pass NULL if you're not interested in this information.
  *  @param[out] uvindex For UV-mapped textures: receives the index of the UV

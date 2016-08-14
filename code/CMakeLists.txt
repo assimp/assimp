@@ -1,4 +1,4 @@
-﻿# Open Asset Import Library (assimp)
+# Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
 # Copyright (c) 2006-2016, assimp team

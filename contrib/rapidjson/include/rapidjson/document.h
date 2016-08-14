@@ -69,9 +69,6 @@ RAPIDJSON_NAMESPACE_BEGIN
 template <typename Encoding, typename Allocator>
 class GenericValue;
 
-template <typename Encoding, typename Allocator, typename StackAllocator>
-class GenericDocument;
-
 //! Name-value pair in a JSON object value.
 /*!
     This class was internal to GenericValue. It used to be a inner struct.
@@ -449,16 +446,6 @@ private:
     //! Copy constructor is not permitted.
     GenericValue(const GenericValue& rhs);
 
-#if RAPIDJSON_HAS_CXX11_RVALUE_REFS
-    //! Moving from a GenericDocument is not permitted.
-    template <typename StackAllocator>
-    GenericValue(GenericDocument<Encoding,Allocator,StackAllocator>&& rhs);
-
-    //! Move assignment from a GenericDocument is not permitted.
-    template <typename StackAllocator>
-    GenericValue& operator=(GenericDocument<Encoding,Allocator,StackAllocator>&& rhs);
-#endif
-
 public:
 
     //! Constructor with JSON value type.
@@ -544,28 +531,6 @@ public:
         if (!(u64 & RAPIDJSON_UINT64_C2(0xFFFFFFFF, 0x80000000)))
             flags_ |= kIntFlag;
     }
-
-#if defined(__APPLE__)
-    //! Constructor for unsigned long value.
-    explicit GenericValue(unsigned long u64) RAPIDJSON_NOEXCEPT : data_(), flags_(kNumberUint64Flag) {
-        data_.n.u64 = u64;
-        if (!(u64 & RAPIDJSON_UINT64_C2(0x80000000, 0x00000000)))
-            flags_ |= kInt64Flag;
-        if (!(u64 & RAPIDJSON_UINT64_C2(0xFFFFFFFF, 0x00000000)))
-            flags_ |= kUintFlag;
-        if (!(u64 & RAPIDJSON_UINT64_C2(0xFFFFFFFF, 0x80000000)))
-            flags_ |= kIntFlag;
-    }
-
-#if !defined(__x86_64__) && !defined(__arm64__)
-    //! Constructor for size_t value.
-    explicit GenericValue( size_t u ) RAPIDJSON_NOEXCEPT : data_(), flags_( kNumberUintFlag ) {
-        data_.n.u64 = u;
-        if ( !( u&0x80000000 ) )
-            flags_ |= kIntFlag|kInt64Flag;
-    }
-#endif
-#endif
 
     //! Constructor for double value.
     explicit GenericValue(double d) RAPIDJSON_NOEXCEPT : data_(), flags_(kNumberDoubleFlag) { data_.n.d = d; }
@@ -694,20 +659,6 @@ public:
         other.RawAssign(temp);
         return *this;
     }
-
-    //! free-standing swap function helper
-    /*!
-        Helper function to enable support for common swap implementation pattern based on \c std::swap:
-        \code
-        void swap(MyClass& a, MyClass& b) {
-            using std::swap;
-            swap(a.value, b.value);
-            // ...
-        }
-        \endcode
-        \see Swap()
-     */
-    friend inline void swap(GenericValue& a, GenericValue& b) RAPIDJSON_NOEXCEPT { a.Swap(b); }
 
     //! Prepare Value for move semantics
     /*! \return *this */
@@ -1262,31 +1213,6 @@ public:
         return pos;
     }
 
-    //! Erase a member in object by its name.
-    /*! \param name Name of member to be removed.
-        \return Whether the member existed.
-        \note Linear time complexity.
-    */
-    bool EraseMember(const Ch* name) {
-        GenericValue n(StringRef(name));
-        return EraseMember(n);
-    }
-
-#if RAPIDJSON_HAS_STDSTRING
-    bool EraseMember(const std::basic_string<Ch>& name) { return EraseMember(GenericValue(StringRef(name))); }
-#endif
-
-    template <typename SourceAllocator>
-    bool EraseMember(const GenericValue<Encoding, SourceAllocator>& name) {
-        MemberIterator m = FindMember(name);
-        if (m != MemberEnd()) {
-            EraseMember(m);
-            return true;
-        }
-        else
-            return false;
-    }
-
     //@}
 
     //!@name Array
@@ -1798,22 +1724,7 @@ public:
     typedef Allocator AllocatorType;                        //!< Allocator type from template parameter.
 
     //! Constructor
-    /*! Creates an empty document of specified type.
-        \param type             Mandatory type of object to create.
-        \param allocator        Optional allocator for allocating memory.
-        \param stackCapacity    Optional initial capacity of stack in bytes.
-        \param stackAllocator   Optional allocator for allocating memory for stack.
-    */
-    explicit GenericDocument(Type type, Allocator* allocator = 0, size_t stackCapacity = kDefaultStackCapacity, StackAllocator* stackAllocator = 0) :
-        GenericValue<Encoding, Allocator>(type),  allocator_(allocator), ownAllocator_(0), stack_(stackAllocator, stackCapacity), parseResult_()
-    {
-        if (!allocator_)
-            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator());
-    }
-
-    //! Constructor
-    /*! Creates an empty document which type is Null. 
-        \param allocator        Optional allocator for allocating memory.
+    /*! \param allocator        Optional allocator for allocating memory.
         \param stackCapacity    Optional initial capacity of stack in bytes.
         \param stackAllocator   Optional allocator for allocating memory for stack.
     */
@@ -1827,7 +1738,7 @@ public:
 #if RAPIDJSON_HAS_CXX11_RVALUE_REFS
     //! Move constructor in C++11
     GenericDocument(GenericDocument&& rhs) RAPIDJSON_NOEXCEPT
-        : ValueType(std::forward<ValueType>(rhs)), // explicit cast to avoid prohibited move from Document
+        : ValueType(std::move(rhs)),
           allocator_(rhs.allocator_),
           ownAllocator_(rhs.ownAllocator_),
           stack_(std::move(rhs.stack_)),
@@ -1867,35 +1778,6 @@ public:
     }
 #endif
 
-    //! Exchange the contents of this document with those of another.
-    /*!
-        \param other Another document.
-        \note Constant complexity.
-        \see GenericValue::Swap
-    */
-    GenericDocument& Swap(GenericDocument& rhs) RAPIDJSON_NOEXCEPT {
-        ValueType::Swap(rhs);
-        stack_.Swap(rhs.stack_);
-        internal::Swap(allocator_, rhs.allocator_);
-        internal::Swap(ownAllocator_, rhs.ownAllocator_);
-        internal::Swap(parseResult_, rhs.parseResult_);
-        return *this;
-    }
-
-    //! free-standing swap function helper
-    /*!
-        Helper function to enable support for common swap implementation pattern based on \c std::swap:
-        \code
-        void swap(MyClass& a, MyClass& b) {
-            using std::swap;
-            swap(a.doc, b.doc);
-            // ...
-        }
-        \endcode
-        \see Swap()
-     */
-    friend inline void swap(GenericDocument& a, GenericDocument& b) RAPIDJSON_NOEXCEPT { a.Swap(b); }
-
     //!@name Parse from stream
     //!@{
 
@@ -1908,13 +1790,13 @@ public:
     */
     template <unsigned parseFlags, typename SourceEncoding, typename InputStream>
     GenericDocument& ParseStream(InputStream& is) {
-        GenericReader<SourceEncoding, Encoding, StackAllocator> reader(
-            stack_.HasAllocator() ? &stack_.GetAllocator() : 0);
+        ValueType::SetNull(); // Remove existing root if exist
+        GenericReader<SourceEncoding, Encoding, StackAllocator> reader(&stack_.GetAllocator());
         ClearStackOnExit scope(*this);
         parseResult_ = reader.template Parse<parseFlags>(is, *this);
         if (parseResult_) {
             RAPIDJSON_ASSERT(stack_.GetSize() == sizeof(ValueType)); // Got one and only one root object
-            ValueType::operator=(*stack_.template Pop<ValueType>(1));// Move value from stack to document
+            this->RawAssign(*stack_.template Pop<ValueType>(1));    // Add this-> to prevent issue 13.
         }
         return *this;
     }
@@ -2011,10 +1893,7 @@ public:
     //!@}
 
     //! Get the allocator of this document.
-    Allocator& GetAllocator() {
-        RAPIDJSON_ASSERT(allocator_);
-        return *allocator_;
-    }
+    Allocator& GetAllocator() { return *allocator_; }
 
     //! Get the capacity of stack in bytes.
     size_t GetStackCapacity() const { return stack_.GetCapacity(); }
@@ -2123,7 +2002,6 @@ GenericValue<Encoding,Allocator>::GenericValue(const GenericValue<Encoding,Sourc
     default: // kNumberType, kTrueType, kFalseType, kNullType
         flags_ = rhs.flags_;
         data_  = *reinterpret_cast<const Data*>(&rhs.data_);
-        break;
     }
 }
 

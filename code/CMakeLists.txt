@@ -722,6 +722,7 @@ if (UNZIP_FOUND)
   SET (unzip_compile_SRCS "")
 else (UNZIP_FOUND)
   SET (unzip_compile_SRCS ${unzip_SRCS})
+  INCLUDE_DIRECTORIES( "../contrib/unzip/" )
 endif (UNZIP_FOUND)
 
 MESSAGE(STATUS "Enabled formats:${ASSIMP_IMPORTERS_ENABLED}")

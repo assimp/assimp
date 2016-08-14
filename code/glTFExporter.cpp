@@ -61,8 +61,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "glTFAssetWriter.h"
 
-// Header files, Open3DGC.
-#include <Open3DGC/o3dgcSC3DMCEncoder.h>
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+	// Header files, Open3DGC.
+#	include <Open3DGC/o3dgcSC3DMCEncoder.h>
+#endif
 
 using namespace rapidjson;
 
@@ -277,7 +279,12 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 		const aiMesh* aim = mScene->mMeshes[idx_mesh];
 
 		// Check if compressing requested and mesh can be encoded.
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 		comp_allow = mProperties->GetPropertyBool("extensions.Open3DGC.use", false);
+#else
+		comp_allow = false;
+#endif
+
 		if(comp_allow && (aim->mPrimitiveTypes == aiPrimitiveType_TRIANGLE) && (aim->mNumVertices > 0) && (aim->mNumFaces > 0))
 		{
 			idx_srcdata_tc.clear();
@@ -293,6 +300,7 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 				msg = "mesh must has vertices and faces.";
 
 			DefaultLogger::get()->warn("GLTF: can not use Open3DGC-compression: " + msg);
+            comp_allow = false;
 		}
 
         std::string meshId = mAsset->FindUniqueID(aim->mName.C_Str(), "mesh");
@@ -365,6 +373,7 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 		///TODO: animation: weights, joints.
 		if(comp_allow)
 		{
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 			// Only one type of compression supported at now - Open3DGC.
 			//
 			o3dgc::BinaryStream bs;
@@ -449,6 +458,7 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 			ext->VerticesCount = comp_o3dgc_ifs.GetNCoord();
 			// And assign to mesh.
 			m->Extension.push_back(ext);
+#endif
 		}// if(comp_allow)
 	}// for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
 }

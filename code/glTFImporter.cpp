@@ -264,6 +264,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 		{
 			for(Mesh::SExtension* cur_ext : mesh.Extension)
 			{
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 				if(cur_ext->Type == Mesh::SExtension::EType::Compression_Open3DGC)
 				{
 					// Limitations for meshes when using Open3DGC-compression.
@@ -282,8 +283,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 					buf->EncodedRegion_SetCurrent(mesh.id);
 				}
 				else
+#endif
 				{
-					throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension, only Open3DGC is supported.");
+					throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"" + std::to_string(cur_ext->Type) +
+											"\"), only Open3DGC is supported.");
 				}
 			}
 		}// if(mesh.Extension.size() > 0)

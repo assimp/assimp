@@ -43,8 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
 
-// Header files, Open3DGC.
-#include <Open3DGC/o3dgcSC3DMCDecoder.h>
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+	// Header files, Open3DGC.
+#	include <Open3DGC/o3dgcSC3DMCDecoder.h>
+#endif
 
 namespace glTF {
 
@@ -820,7 +822,8 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 
 	for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++)
 	{
-		if(it_memb->name.GetString() == std::string("Open3DGC-compression"))
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+        if(it_memb->name.GetString() == std::string("Open3DGC-compression"))
 		{
 			// Search for compressed data.
 			// Compressed data contain description of part of "buffer" which is encoded. This part must be decoded and
@@ -871,6 +874,7 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 			Extension.push_back(ext_o3dgc);// store info in mesh extensions list.
 		}// if(it_memb->name.GetString() == "Open3DGC-compression")
 		else
+#endif
 		{
 			throw DeadlyImportError(std::string("GLTF: Unknown mesh extension: \"") + it_memb->name.GetString() + "\".");
 		}
@@ -881,6 +885,7 @@ mr_skip_extensions:
 	return;// After label some operators must be present.
 }
 
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
 {
 typedef unsigned short IndicesType;///< \sa glTFExporter::ExportMeshes.
@@ -1038,6 +1043,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 	// No. Do not delete "output_data". After calling "EncodedRegion_Mark" bufferView is owner of "output_data".
 	// "delete [] output_data;"
 }
+#endif
 
 inline void Camera::Read(Value& obj, Asset& r)
 {

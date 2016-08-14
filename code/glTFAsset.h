@@ -716,9 +716,13 @@ namespace glTF
 		{
 			/// \enum EType
 			/// Type of extension.
-			enum class EType
+			enum EType
 			{
-				Compression_Open3DGC ///< Compression of mesh data using Open3DGC algorythm.
+				#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+					Compression_Open3DGC,///< Compression of mesh data using Open3DGC algorythm.
+				#endif
+
+				Unknown
 			};
 
 			EType Type;///< Type of extension.
@@ -731,27 +735,29 @@ namespace glTF
 			{}
 		};
 
-		/// \struct SCompression_Open3DGC
-		/// Compression of mesh data using Open3DGC algorythm.
-		struct SCompression_Open3DGC : public SExtension
-		{
-			using SExtension::Type;
+		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+			/// \struct SCompression_Open3DGC
+			/// Compression of mesh data using Open3DGC algorythm.
+			struct SCompression_Open3DGC : public SExtension
+			{
+				using SExtension::Type;
 
-			std::string Buffer;///< ID of "buffer" used for storing compressed data.
-			size_t Offset;///< Offset in "bufferView" where compressed data are stored.
-			size_t Count;///< Count of elements in compressed data. Is always equivalent to size in bytes: look comments for "Type" and "Component_Type".
-			bool Binary;///< If true then "binary" mode is used for coding, if false - "ascii" mode.
-			size_t IndicesCount;///< Count of indices in mesh.
-			size_t VerticesCount;///< Count of vertices in mesh.
-			// AttribType::Value Type;///< Is always "SCALAR".
-			// ComponentType Component_Type;///< Is always "ComponentType_UNSIGNED_BYTE" (5121).
+				std::string Buffer;///< ID of "buffer" used for storing compressed data.
+				size_t Offset;///< Offset in "bufferView" where compressed data are stored.
+				size_t Count;///< Count of elements in compressed data. Is always equivalent to size in bytes: look comments for "Type" and "Component_Type".
+				bool Binary;///< If true then "binary" mode is used for coding, if false - "ascii" mode.
+				size_t IndicesCount;///< Count of indices in mesh.
+				size_t VerticesCount;///< Count of vertices in mesh.
+				// AttribType::Value Type;///< Is always "SCALAR".
+				// ComponentType Component_Type;///< Is always "ComponentType_UNSIGNED_BYTE" (5121).
 
-			/// \fn SCompression_Open3DGC
-			/// Constructor.
-			SCompression_Open3DGC()
-				: SExtension(EType::Compression_Open3DGC)
-			{}
-		};
+				/// \fn SCompression_Open3DGC
+				/// Constructor.
+				SCompression_Open3DGC()
+				: SExtension(Compression_Open3DGC)
+				{}
+			};
+		#endif
 
         std::vector<Primitive> primitives;
 		std::list<SExtension*> Extension;///< List of extensions used in mesh.
@@ -760,7 +766,7 @@ namespace glTF
 
 		/// \fn ~Mesh()
 		/// Destructor.
-		~Mesh() { for(auto e : Extension) { delete e; }; }
+		~Mesh() { for(std::list<SExtension*>::iterator it = Extension.begin(), it_end = Extension.end(); it != it_end; it++) { delete *it; }; }
 
 		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
 		/// Get mesh data from JSON-object and place them to root asset.
@@ -768,11 +774,13 @@ namespace glTF
 		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
 		void Read(Value& pJSON_Object, Asset& pAsset_Root);
 
-		/// \fn void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
-		/// Decode part of "buffer" which encoded with Open3DGC algorithm.
-		/// \param [in] pCompression_Open3DGC - reference to structure which describe encoded region.
-		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
-		void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root);
+		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+			/// \fn void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
+			/// Decode part of "buffer" which encoded with Open3DGC algorithm.
+			/// \param [in] pCompression_Open3DGC - reference to structure which describe encoded region.
+			/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+			void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root);
+		#endif
     };
 
     struct Node : public Object

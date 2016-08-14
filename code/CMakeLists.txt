@@ -707,9 +707,25 @@ SET ( open3dgc_SRCS
   ../contrib/Open3DGC/o3dgcDynamicVectorEncoder.cpp
   ../contrib/Open3DGC/o3dgcTools.cpp
   ../contrib/Open3DGC/o3dgcTriangleFans.cpp
+  ../contrib/Open3DGC/o3dgcTimer.h
 )
 SOURCE_GROUP( open3dgc FILES ${open3dgc_SRCS})
 
+# Check dependencies for glTF importer with Open3DGC-compression.
+# RT-extensions is used in "contrib/Open3DGC/o3dgcTimer.h" for collecting statistics. Pointed file
+# has implementation for different platforms: WIN32, __MACH__ and other ("else" block).
+FIND_PACKAGE(RT QUIET)
+IF (RT_FOUND OR MSVC)
+  ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC )
+  IF (NOT RT_FOUND)
+	SET (RT_LIBRARY "")
+  ENDIF (NOT RT_FOUND)
+ELSE ()
+  SET (open3dgc_SRCS "")
+  SET (RT_LIBRARY "")
+  MESSAGE (INFO " RT-extension not found. glTF import/export will be built without Open3DGC-compression.")
+  #!TODO: off course is better to remove statistics timers from o3dgc codec. Or propose to choose what to use.
+ENDIF ()
 
 INCLUDE_DIRECTORIES( "../contrib/rapidjson/include" )
 INCLUDE_DIRECTORIES( "../contrib" )
@@ -766,10 +782,6 @@ SET( assimp_src
 
 )
 ADD_DEFINITIONS( -DOPENDDLPARSER_BUILD )
-
-if (open3dgc_SRCS)
-	SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -lrt")
-endif (open3dgc_SRCS)
 
 INCLUDE_DIRECTORIES(
   ../contrib/openddlparser/include
@@ -836,6 +848,11 @@ if (UNZIP_FOUND)
 else (UNZIP_FOUND)
   INCLUDE_DIRECTORIES("../")
 endif (UNZIP_FOUND)
+
+# Add RT-extension library for glTF importer with Open3DGC-compression.
+IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
+  TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
+ENDIF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
 
 INSTALL( TARGETS assimp
   LIBRARY DESTINATION ${ASSIMP_LIB_INSTALL_DIR}

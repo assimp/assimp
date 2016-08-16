@@ -46,7 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
 
-#include "types.h"
+#include <assimp/config.h>
+#include <assimp/types.h>
 #include "importerdesc.h"
 
 #ifdef __cplusplus

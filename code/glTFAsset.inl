@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StringUtils.h"
 
+using namespace Assimp;
+
 namespace glTF {
 
 namespace {

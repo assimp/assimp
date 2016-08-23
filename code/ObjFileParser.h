@@ -89,6 +89,8 @@ private:
     void getVector( std::vector<aiVector3D> &point3d_array );
     /// Stores the following 3d vector.
     void getVector3( std::vector<aiVector3D> &point3d_array );
+    /// Stores the following two 3d vectors on the line.
+    void getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b );
     /// Stores the following 3d vector.
     void getVector2(std::vector<aiVector2D> &point2d_array);
     /// Stores the following face.
@@ -119,6 +121,8 @@ private:
     bool needsNewMesh( const std::string &rMaterialName );
     /// Error report in token
     void reportErrorTokenInFace();
+    /// Get the number of components in a line.
+    size_t getNumComponentsInLine();
 
 private:
     // Copy and assignment constructor should be private

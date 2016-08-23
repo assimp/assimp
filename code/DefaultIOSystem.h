@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_DEFAULTIOSYSTEM_H_INC
 #define AI_DEFAULTIOSYSTEM_H_INC
 
-#include "../include/assimp/IOSystem.hpp"
+#include <assimp/IOSystem.hpp>
 
 namespace Assimp    {
 

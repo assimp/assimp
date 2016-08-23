@@ -53,10 +53,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   include "../contrib/zlib/zlib.h"
 #endif
 
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/ai_assert.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/ai_assert.h>
 #include <vector>
 #include <sstream>
 #include "StringComparison.h"
@@ -131,11 +131,11 @@ static void normalizePathName( const std::string &rPath, std::string &rNormalize
     static const unsigned int numDelimiters = 2;
     const char delimiters[ numDelimiters ] = { '/', '\\' };
     rNormalizedPath = rPath;
-    for ( unsigned int i=0; i<numDelimiters; i++ )
+    for (const char delimiter : delimiters)
     {
         for ( size_t j=0; j<rNormalizedPath.size(); j++ )
         {
-            if ( rNormalizedPath[j] == delimiters[ i ] )
+            if ( rNormalizedPath[j] == delimiter )
             {
                 rNormalizedPath[ j ] = sep[ 0 ];
             }

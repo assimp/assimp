@@ -50,12 +50,10 @@ using namespace Assimp;
 class JoinVerticesTest : public ::testing::Test
 {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 
 protected:
-
     JoinVerticesProcess* piProcess;
     aiMesh* pcMesh;
 };

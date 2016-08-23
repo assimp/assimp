@@ -6,7 +6,7 @@
 #include "ScenePrivate.h"
 
 static const unsigned int MajorVersion = 3;
-static const unsigned int MinorVersion = 2;
+static const unsigned int MinorVersion = 3;
 
 // --------------------------------------------------------------------------------
 // Legal information string - dont't remove this.
@@ -15,7 +15,7 @@ static const char* LEGAL_INFORMATION =
 "Open Asset Import Library (Assimp).\n"
 "A free C/C++ library to import various 3D file formats into applications\n\n"
 
-"(c) 2008-2010, assimp team\n"
+"(c) 2008-2016, assimp team\n"
 "License under the terms and conditions of the 3-clause BSD license\n"
 "http://assimp.sourceforge.net\n"
 ;

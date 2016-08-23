@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StringUtils.h"
 
+using namespace Assimp;
+
 namespace glTF {
 
 namespace {
@@ -288,7 +290,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength]);
-            memcmp(dataURI.data, this->mData.get(), dataURI.dataLength);
+            memcpy( this->mData.get(), dataURI.data, dataURI.dataLength );
         }
     }
     else { // Local file

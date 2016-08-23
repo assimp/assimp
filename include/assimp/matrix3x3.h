@@ -42,10 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file matrix3x3.h
  *  @brief Definition of a 3x3 matrix, including operators when compiling in C++
  */
-#ifndef AI_MATRIX3x3_H_INC
-#define AI_MATRIX3x3_H_INC
+#pragma once
+#ifndef AI_MATRIX3X3_H_INC
+#define AI_MATRIX3X3_H_INC
 
 #include "./Compiler/pushpack1.h"
+#include "defs.h"
 
 #ifdef __cplusplus
 
@@ -160,36 +162,23 @@ public:
         const aiVector3t<TReal>& to, aiMatrix3x3t& out);
 
 public:
-
-    union {
-        struct {
-            TReal a1, a2, a3;
-            TReal b1, b2, b3;
-            TReal c1, c2, c3;
-        };
-        TReal m[ 3 ][ 3 ];
-        TReal mData[ 9 ];
-    };
+    TReal a1, a2, a3;
+    TReal b1, b2, b3;
+    TReal c1, c2, c3;
 } PACK_STRUCT;
 
-typedef aiMatrix3x3t<float> aiMatrix3x3;
+typedef aiMatrix3x3t<ai_real> aiMatrix3x3;
 
 #else
 
 struct aiMatrix3x3 {
-    union {
-        struct {
-            float a1, a2, a3;
-            float b1, b2, b3;
-            float c1, c2, c3;
-        };
-        float m[ 3 ][ 3 ];
-        float mData[ 9 ];
-    };
+    ai_real a1, a2, a3;
+    ai_real b1, b2, b3;
+    ai_real c1, c2, c3;
 } PACK_STRUCT;
 
 #endif // __cplusplus
 
 #include "./Compiler/poppack1.h"
 
-#endif // AI_MATRIX3x3_H_INC
+#endif // AI_MATRIX3X3_H_INC

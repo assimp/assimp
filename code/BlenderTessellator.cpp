@@ -50,6 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderBMesh.h"
 #include "BlenderTessellator.h"
 
+#include <stddef.h>
+
 static const unsigned int BLEND_TESS_MAGIC = 0x83ed9ac3;
 
 #if ASSIMP_BLEND_WITH_GLU_TESSELLATE
@@ -372,14 +374,9 @@ void BlenderTessellatorP2T::ReferencePoints( std::vector< Blender::PointP2T >& p
 }
 
 // ------------------------------------------------------------------------------------------------
-// Yes this is filthy... but we have no choice
-#define OffsetOf( Class, Member ) ( static_cast< unsigned int >( \
-    reinterpret_cast<uint8_t*>(&( reinterpret_cast< Class* >( NULL )->*( &Class::Member ) )) - \
-    static_cast<uint8_t*>(NULL) ) )
-
 inline PointP2T& BlenderTessellatorP2T::GetActualPointStructure( p2t::Point& point ) const
 {
-    unsigned int pointOffset = OffsetOf( PointP2T, point2D );
+    unsigned int pointOffset = offsetof( PointP2T, point2D );
     PointP2T& pointStruct = *reinterpret_cast< PointP2T* >( reinterpret_cast< char* >( &point ) - pointOffset );
     if ( pointStruct.magic != static_cast<int>( BLEND_TESS_MAGIC ) )
     {
@@ -473,19 +470,19 @@ PlaneP2T BlenderTessellatorP2T::FindLLSQPlane( const std::vector< PointP2T >& po
 {
     PlaneP2T result;
 
-    aiVector3D sum( 0.0f );
+    aiVector3D sum( 0.0 );
     for ( size_t i = 0; i < points.size( ); ++i )
     {
         sum += points[ i ].point3D;
     }
-    result.centre = sum * ( 1.0f / points.size( ) );
+    result.centre = sum * (ai_real)( 1.0 / points.size( ) );
 
-    float sumXX = 0.0f;
-    float sumXY = 0.0f;
-    float sumXZ = 0.0f;
-    float sumYY = 0.0f;
-    float sumYZ = 0.0f;
-    float sumZZ = 0.0f;
+    ai_real sumXX = 0.0;
+    ai_real sumXY = 0.0;
+    ai_real sumXZ = 0.0;
+    ai_real sumYY = 0.0;
+    ai_real sumYZ = 0.0;
+    ai_real sumZZ = 0.0;
     for ( size_t i = 0; i < points.size( ); ++i )
     {
         aiVector3D offset = points[ i ].point3D - result.centre;
@@ -499,7 +496,7 @@ PlaneP2T BlenderTessellatorP2T::FindLLSQPlane( const std::vector< PointP2T >& po
 
     aiMatrix3x3 mtx( sumXX, sumXY, sumXZ, sumXY, sumYY, sumYZ, sumXZ, sumYZ, sumZZ );
 
-    const float det = mtx.Determinant( );
+    const ai_real det = mtx.Determinant( );
     if ( det == 0.0f )
     {
         result.normal = aiVector3D( 0.0f );

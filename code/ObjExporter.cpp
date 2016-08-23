@@ -94,7 +94,9 @@ ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
     mOutput.imbue(l);
+    mOutput.precision(16);
     mOutputMat.imbue(l);
+    mOutputMat.precision(16);
 
     WriteGeometryFile();
     WriteMaterialFile();
@@ -165,7 +167,7 @@ void ObjExporter::WriteMaterialFile()
             mOutputMat << "Ke " << c.r << " " << c.g << " " << c.b << endl;
         }
 
-        float o;
+        ai_real o;
         if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
             mOutputMat << "d " << o << endl;
         }

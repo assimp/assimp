@@ -11,6 +11,6 @@ else
     && sudo make install \
     && sudo ldconfig \
     && (cd test/unit; ../../bin/unit) \
-    && (cd test/regression; chmod 755 run.py; ./run.py ../../bin/assimp; \
-	   chmod 755 result_checker.py; ./result_checker.py)
+    #&& (cd test/regression; chmod 755 run.py; ./run.py ../../bin/assimp; \
+	#   chmod 755 result_checker.py; ./result_checker.py)
 fi

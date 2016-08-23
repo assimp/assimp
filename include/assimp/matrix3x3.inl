@@ -42,8 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file matrix3x3.inl
  *  @brief Inline implementation of the 3x3 matrix operators
  */
-#ifndef AI_MATRIX3x3_INL_INC
-#define AI_MATRIX3x3_INL_INC
+#pragma once
+#ifndef AI_MATRIX3X3_INL_INC
+#define AI_MATRIX3X3_INL_INC
 
 #ifdef __cplusplus
 #include "matrix3x3.h"
@@ -333,4 +334,4 @@ inline aiMatrix3x3t<TReal>& aiMatrix3x3t<TReal>::FromToMatrix(const aiVector3t<T
 
 
 #endif // __cplusplus
-#endif // AI_MATRIX3x3_INL_INC
+#endif // AI_MATRIX3X3_INL_INC

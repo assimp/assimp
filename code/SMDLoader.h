@@ -50,17 +50,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 
 // public Assimp headers
-#include "../include/assimp/types.h"
-#include "../include/assimp/texture.h"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/material.h"
+#include <assimp/types.h>
+#include <assimp/texture.h>
+#include <assimp/anim.h>
+#include <assimp/material.h>
+
 struct aiNode;
 
 // STL headers
 #include <vector>
 
 namespace Assimp    {
-
 
 namespace SMD   {
 

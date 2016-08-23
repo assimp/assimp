@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file  Exporter.hpp
 *  @brief Defines the CPP-API for the Assimp export interface
 */
+#pragma once
 #ifndef AI_EXPORT_HPP_INC
 #define AI_EXPORT_HPP_INC
 
@@ -329,7 +330,7 @@ public:
     // typedefs for our four configuration maps.
     // We don't need more, so there is no need for a generic solution
     typedef std::map<KeyType, int> IntPropertyMap;
-    typedef std::map<KeyType, float> FloatPropertyMap;
+    typedef std::map<KeyType, ai_real> FloatPropertyMap;
     typedef std::map<KeyType, std::string> StringPropertyMap;
     typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
 
@@ -379,7 +380,7 @@ public:
     /** Set a floating-point configuration property.
      * @see SetPropertyInteger()
      */
-    bool SetPropertyFloat(const char* szName, float fValue);
+    bool SetPropertyFloat(const char* szName, ai_real fValue);
 
     // -------------------------------------------------------------------
     /** Set a string configuration property.
@@ -424,8 +425,8 @@ public:
     /** Get a floating-point configuration property
      * @see GetPropertyInteger()
      */
-    float GetPropertyFloat(const char* szName,
-        float fErrorReturn = 10e10f) const;
+    ai_real GetPropertyFloat(const char* szName,
+        ai_real fErrorReturn = 10e10f) const;
 
     // -------------------------------------------------------------------
     /** Get a string configuration property

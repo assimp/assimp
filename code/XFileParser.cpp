@@ -50,7 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include "TinyFormatter.h"
 #include "ByteSwapper.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include "StringUtils.h"
+#include <assimp/DefaultLogger.hpp>
 
 
 using namespace Assimp;
@@ -1325,7 +1326,7 @@ unsigned int XFileParser::ReadInt()
 }
 
 // ------------------------------------------------------------------------------------------------
-float XFileParser::ReadFloat()
+ai_real XFileParser::ReadFloat()
 {
     if( mIsBinaryFormat)
     {
@@ -1342,7 +1343,7 @@ float XFileParser::ReadFloat()
         if( mBinaryFloatSize == 8)
         {
             if( End - P >= 8) {
-                float result = (float) (*(double*) P);
+                ai_real result = (ai_real) (*(double*) P);
                 P += 8;
                 return result;
             } else {
@@ -1352,7 +1353,7 @@ float XFileParser::ReadFloat()
         } else
         {
             if( End - P >= 4) {
-                float result = *(float*) P;
+                ai_real result = *(ai_real*) P;
                 P += 4;
                 return result;
             } else {
@@ -1371,17 +1372,17 @@ float XFileParser::ReadFloat()
     {
         P += 9;
         CheckForSeparator();
-        return 0.0f;
+        return 0.0;
     } else
     if( strncmp( P, "1.#QNAN0", 8) == 0)
     {
         P += 8;
         CheckForSeparator();
-        return 0.0f;
+        return 0.0;
     }
 
-    float result = 0.0f;
-    P = fast_atoreal_move<float>( P, result);
+    ai_real result = 0.0;
+    P = fast_atoreal_move<ai_real>( P, result);
 
     CheckForSeparator();
 

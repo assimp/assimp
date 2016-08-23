@@ -48,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDLLoader.h"
 #include "MDLDefaultColorMap.h"
 #include "StringUtils.h"
-#include "../include/assimp/texture.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/texture.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
 #include "qnan.h"
 #include "Defines.h"
 
@@ -657,7 +657,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         if (is_not_qnan(clrTexture.r)) {
             clrTemp.r *= clrTexture.a;
         }
-        pcMatOut->AddProperty<float>(&clrTemp.r,1,AI_MATKEY_OPACITY);
+        pcMatOut->AddProperty<ai_real>(&clrTemp.r,1,AI_MATKEY_OPACITY);
 
         // read phong power
         int iShadingMode = (int)aiShadingMode_Gouraud;

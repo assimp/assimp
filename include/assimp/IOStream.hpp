@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief File I/O wrappers for C++.
  */
 
+#pragma once
 #ifndef AI_IOSTREAM_H_INC
 #define AI_IOSTREAM_H_INC
 

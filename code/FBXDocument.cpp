@@ -269,8 +269,8 @@ Document::Document(const Parser& parser, const ImportSettings& settings)
 , parser(parser)
 {
     // Cannot use array default initialization syntax because vc8 fails on it
-    for (unsigned int i = 0; i < sizeof(creationTimeStamp) / sizeof(creationTimeStamp[0]); ++i) {
-        creationTimeStamp[i] = 0;
+    for (auto &timeStamp : creationTimeStamp) {
+        timeStamp = 0;
     }
 
     ReadHeader();

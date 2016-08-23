@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <string>
 #include <vector>
-#include "../include/assimp/matrix4x4.h"
+#include <assimp/matrix4x4.h>
 
 struct aiScene;
 
@@ -75,7 +75,7 @@ public:
     // typedefs for our four configuration maps.
     // We don't need more, so there is no need for a generic solution
     typedef std::map<KeyType, int> IntPropertyMap;
-    typedef std::map<KeyType, float> FloatPropertyMap;
+    typedef std::map<KeyType, ai_real> FloatPropertyMap;
     typedef std::map<KeyType, std::string> StringPropertyMap;
     typedef std::map<KeyType, aiMatrix4x4> MatrixPropertyMap;
 

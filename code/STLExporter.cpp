@@ -43,10 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(ASSIMP_BUILD_NO_EXPORT) && !defined(ASSIMP_BUILD_NO_STL_EXPORTER)
 
 #include "STLExporter.h"
-#include "../include/assimp/version.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/version.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/Exporter.hpp>
 #include <memory>
 #include "Exceptional.h"
 #include "ByteSwapper.h"
@@ -94,6 +94,7 @@ STLExporter :: STLExporter(const char* _filename, const aiScene* pScene, bool bi
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
     mOutput.imbue(l);
+    mOutput.precision(16);
     if (binary) {
         char buf[80] = {0} ;
         buf[0] = 'A'; buf[1] = 's'; buf[2] = 's'; buf[3] = 'i'; buf[4] = 'm'; buf[5] = 'p';
@@ -161,12 +162,12 @@ void STLExporter :: WriteMeshBinary(const aiMesh* m)
             }
             nor.Normalize();
         }
-        float nx = nor.x, ny = nor.y, nz = nor.z;
+        ai_real nx = nor.x, ny = nor.y, nz = nor.z;
         AI_SWAP4(nx); AI_SWAP4(ny); AI_SWAP4(nz);
         mOutput.write((char *)&nx, 4); mOutput.write((char *)&ny, 4); mOutput.write((char *)&nz, 4);
         for(unsigned int a = 0; a < f.mNumIndices; ++a) {
             const aiVector3D& v  = m->mVertices[f.mIndices[a]];
-            float vx = v.x, vy = v.y, vz = v.z;
+            ai_real vx = v.x, vy = v.y, vz = v.z;
             AI_SWAP4(vx); AI_SWAP4(vy); AI_SWAP4(vz);
             mOutput.write((char *)&vx, 4); mOutput.write((char *)&vy, 4); mOutput.write((char *)&vz, 4);
         }

@@ -41,14 +41,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include <GenVertexNormalsProcess.h>
 
-
-using namespace std;
-using namespace Assimp;
+using namespace ::std;
+using namespace ::Assimp;
 
 class GenNormalsTest : public ::testing::Test
 {
 public:
-
     virtual void SetUp();
     virtual void TearDown();
 

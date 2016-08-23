@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <numeric>
 #include <stdint.h>
-#include "../include/assimp/mesh.h"
+#include <assimp/mesh.h>
 #include "FBXProperties.h"
 #include "FBXParser.h"
 
@@ -594,23 +594,24 @@ public:
         BlendMode_BlendModeCount
     };
 
-    const Texture* getTexture() const
+    const Texture* getTexture(int index=0) const
     {
-        return texture;
-    }
+		return textures[index];
 
-    BlendMode GetBlendMode()
+    }
+	const int textureCount() const {
+		return textures.size();
+	}
+    const BlendMode GetBlendMode() const
     {
         return blendMode;
     }
-    
     float Alpha()
     {
         return alpha;
     }
-
 private:
-    const Texture* texture;
+	std::vector<const Texture*> textures;
     BlendMode blendMode;
     float alpha;
 };

@@ -16,7 +16,7 @@ following disclaimer.
 * Redistributions in binary form must reproduce the above
 copyright notice, this list of conditions and the
 following disclaimer in the documentation and/or other
-materials provided with the distribution.
+materials provided with the distribution
 
 * Neither the name of the assimp team, nor the names of its
 contributors may be used to endorse or promote products
@@ -236,8 +236,8 @@ OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_normals;
     
-    for( size_t i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; i++ ) {
-        delete [] m_textureCoords[ i ];
+    for(auto &texcoords : m_textureCoords) {
+        delete [] texcoords;
     }
 }
 
@@ -552,7 +552,6 @@ void OpenGEXImporter::handleGeometryNode( DDLNode *node, aiScene *pScene ) {
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleCameraNode( DDLNode *node, aiScene *pScene ) {
     aiCamera *camera( new aiCamera );
-    const size_t camIdx( m_cameraCache.size() );
     m_cameraCache.push_back( camera );
     m_currentCamera = camera;
 
@@ -571,7 +570,6 @@ void OpenGEXImporter::handleCameraNode( DDLNode *node, aiScene *pScene ) {
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleLightNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     aiLight *light( new aiLight );
-    const size_t lightIdx( m_lightCache.size() );
     m_lightCache.push_back( light );
     m_currentLight = light;
 
@@ -1033,7 +1031,6 @@ void OpenGEXImporter::handleAttenNode( ODDLParser::DDLNode *node, aiScene *pScen
             Value *val( node->getValue() );
             const float floatVal( val->getFloat() );
             if ( 0 == strncmp( "scale", prop->m_value->getString(), strlen( "scale" ) ) ) {
-            //if ( "scale" == prop->m_value->getString() ) {
                 m_currentLight->mAttenuationQuadratic = floatVal;
             }
         }

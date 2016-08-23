@@ -51,11 +51,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
-#include <memory>
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/light.h"
+#include "StringUtils.h"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/light.h>
 #include "TinyFormatter.h"
+
+#include <memory>
 
 
 using namespace Assimp;
@@ -126,7 +128,7 @@ bool ColladaParser::ReadBoolFromTextContent()
 
 // ------------------------------------------------------------------------------------------------
 // Read float from text contents of current element
-float ColladaParser::ReadFloatFromTextContent()
+ai_real ColladaParser::ReadFloatFromTextContent()
 {
     const char* cur = GetTextContent();
     return fast_atof(cur);
@@ -672,7 +674,7 @@ void ColladaParser::ReadController( Collada::Controller& pController)
           for( unsigned int a = 0; a < 16; a++)
           {
               // read a number
-          content = fast_atoreal_move<float>( content, pController.mBindShapeMatrix[a]);
+          content = fast_atoreal_move<ai_real>( content, pController.mBindShapeMatrix[a]);
               // skip whitespace after it
               SkipSpacesAndLineEnd( &content);
           }
@@ -1177,13 +1179,13 @@ void ColladaParser::ReadLight( Collada::Light& pLight)
                 // text content contains 3 floats
                 const char* content = GetTextContent();
 
-                content = fast_atoreal_move<float>( content, (float&)pLight.mColor.r);
+                content = fast_atoreal_move<ai_real>( content, (ai_real&)pLight.mColor.r);
                 SkipSpacesAndLineEnd( &content);
 
-                content = fast_atoreal_move<float>( content, (float&)pLight.mColor.g);
+                content = fast_atoreal_move<ai_real>( content, (ai_real&)pLight.mColor.g);
                 SkipSpacesAndLineEnd( &content);
 
-                content = fast_atoreal_move<float>( content, (float&)pLight.mColor.b);
+                content = fast_atoreal_move<ai_real>( content, (ai_real&)pLight.mColor.b);
                 SkipSpacesAndLineEnd( &content);
 
                 TestClosing( "color");
@@ -1576,16 +1578,16 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
                 // text content contains 4 floats
                 const char* content = GetTextContent();
 
-                content = fast_atoreal_move<float>( content, (float&)pColor.r);
+                content = fast_atoreal_move<ai_real>( content, (ai_real&)pColor.r);
                 SkipSpacesAndLineEnd( &content);
 
-                content = fast_atoreal_move<float>( content, (float&)pColor.g);
+                content = fast_atoreal_move<ai_real>( content, (ai_real&)pColor.g);
                 SkipSpacesAndLineEnd( &content);
 
-                content = fast_atoreal_move<float>( content, (float&)pColor.b);
+                content = fast_atoreal_move<ai_real>( content, (ai_real&)pColor.b);
                 SkipSpacesAndLineEnd( &content);
 
-                content = fast_atoreal_move<float>( content, (float&)pColor.a);
+                content = fast_atoreal_move<ai_real>( content, (ai_real&)pColor.a);
                 SkipSpacesAndLineEnd( &content);
                 TestClosing( "color");
             }
@@ -1634,7 +1636,7 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
 
 // ------------------------------------------------------------------------------------------------
 // Reads an effect entry containing a float
-void ColladaParser::ReadEffectFloat( float& pFloat)
+void ColladaParser::ReadEffectFloat( ai_real& pFloat)
 {
     while( mReader->read())
     {
@@ -1643,7 +1645,7 @@ void ColladaParser::ReadEffectFloat( float& pFloat)
             {
                 // text content contains a single floats
                 const char* content = GetTextContent();
-                content = fast_atoreal_move<float>( content, pFloat);
+                content = fast_atoreal_move<ai_real>( content, pFloat);
                 SkipSpacesAndLineEnd( &content);
 
                 TestClosing( "float");
@@ -1941,9 +1943,9 @@ void ColladaParser::ReadDataArray()
                 if( *content == 0)
                     ThrowException( "Expected more values while reading float_array contents.");
 
-                float value;
+                ai_real value;
                 // read a number
-                content = fast_atoreal_move<float>( content, value);
+                content = fast_atoreal_move<ai_real>( content, value);
                 data.mValues.push_back( value);
                 // skip whitespace after it
                 SkipSpacesAndLineEnd( &content);
@@ -2454,11 +2456,11 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
         ThrowException( format() << "Invalid data index (" << pLocalIndex << "/" << acc.mCount << ") in primitive specification" );
 
     // get a pointer to the start of the data object referred to by the accessor and the local index
-    const float* dataObject = &(acc.mData->mValues[0]) + acc.mOffset + pLocalIndex* acc.mStride;
+    const ai_real* dataObject = &(acc.mData->mValues[0]) + acc.mOffset + pLocalIndex* acc.mStride;
 
     // assemble according to the accessors component sub-offset list. We don't care, yet,
     // what kind of object exactly we're extracting here
-    float obj[4];
+    ai_real obj[4];
     for( size_t c = 0; c < 4; ++c)
         obj[c] = dataObject[acc.mSubOffset[c]];
 
@@ -2762,7 +2764,7 @@ void ColladaParser::ReadNodeTransformation( Node* pNode, TransformType pType)
     for( unsigned int a = 0; a < sNumParameters[pType]; a++)
     {
         // read a number
-        content = fast_atoreal_move<float>( content, tf.f[a]);
+        content = fast_atoreal_move<ai_real>( content, tf.f[a]);
         // skip whitespace after it
         SkipSpacesAndLineEnd( &content);
     }
@@ -3073,7 +3075,7 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
             case TF_ROTATE:
             {
                 aiMatrix4x4 rot;
-                float angle = tf.f[3] * float( AI_MATH_PI) / 180.0f;
+                ai_real angle = tf.f[3] * ai_real( AI_MATH_PI) / 180.0;
                 aiVector3D axis( tf.f[0], tf.f[1], tf.f[2]);
                 aiMatrix4x4::Rotation( angle, axis, rot);
                 res *= rot;
@@ -3115,24 +3117,29 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
 
 // ------------------------------------------------------------------------------------------------
 // Determines the input data type for the given semantic string
-Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemantic)
+Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& semantic)
 {
-    if( pSemantic == "POSITION")
+    if ( semantic.empty() ) {
+        DefaultLogger::get()->warn( format() << "Vertex input type is empty." );
+        return IT_Invalid;
+    }
+
+    if( semantic == "POSITION")
         return IT_Position;
-    else if( pSemantic == "TEXCOORD")
+    else if( semantic == "TEXCOORD")
         return IT_Texcoord;
-    else if( pSemantic == "NORMAL")
+    else if( semantic == "NORMAL")
         return IT_Normal;
-    else if( pSemantic == "COLOR")
+    else if( semantic == "COLOR")
         return IT_Color;
-    else if( pSemantic == "VERTEX")
+    else if( semantic == "VERTEX")
         return IT_Vertex;
-    else if( pSemantic == "BINORMAL" || pSemantic ==  "TEXBINORMAL")
+    else if( semantic == "BINORMAL" || semantic ==  "TEXBINORMAL")
         return IT_Bitangent;
-    else if( pSemantic == "TANGENT" || pSemantic == "TEXTANGENT")
+    else if( semantic == "TANGENT" || semantic == "TEXTANGENT")
         return IT_Tangent;
 
-    DefaultLogger::get()->warn( format() << "Unknown vertex input type \"" << pSemantic << "\". Ignoring." );
+    DefaultLogger::get()->warn( format() << "Unknown vertex input type \"" << semantic << "\". Ignoring." );
     return IT_Invalid;
 }
 

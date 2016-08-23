@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Defines the C++ getters for the material system
  */
 
+#pragma once
 #ifndef AI_MATERIAL_INL_INC
 #define AI_MATERIAL_INL_INC
 
@@ -198,6 +199,18 @@ inline aiReturn aiMaterial::AddProperty(const float* pInput,
     return AddBinaryProperty((const void*)pInput,
         pNumValues * sizeof(float),
         pKey,type,index,aiPTI_Float);
+}
+
+// ---------------------------------------------------------------------------
+inline aiReturn aiMaterial::AddProperty(const double* pInput,
+    const unsigned int pNumValues,
+    const char* pKey,
+    unsigned int type,
+    unsigned int index)
+{
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(float),
+        pKey,type,index,aiPTI_Double);
 }
 
 // ---------------------------------------------------------------------------

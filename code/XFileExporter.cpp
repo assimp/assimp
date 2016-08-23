@@ -53,11 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <memory>
 #include "Exceptional.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/light.h"
-
-
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/light.h>
 
 using namespace Assimp;
 
@@ -106,6 +104,7 @@ XFileExporter::XFileExporter(const aiScene* pScene, IOSystem* pIOSystem, const s
 {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
+    mOutput.precision(16);
 
     // start writing
     WriteFile();
@@ -531,4 +530,3 @@ void XFileExporter::writePath(aiString path)
 
 #endif
 #endif
-

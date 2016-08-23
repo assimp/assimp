@@ -378,7 +378,6 @@ int ProcessStandardArguments(
 	// -fixn   --fix normals
 	// -tri    --triangulate
 	// -fi     --find-instances
-	// -fi     --find-instances
 	// -og     --optimize-graph
 	// -om     --optimize-meshes
 	// -db     --debone

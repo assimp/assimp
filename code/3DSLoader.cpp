@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "3DSLoader.h"
 #include "Macros.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include "StringComparison.h"
 
 using namespace Assimp;
@@ -186,15 +186,14 @@ void Discreet3DSImporter::InternReadFile( const std::string& pFile,
     // internal verbose representation. Finally compute normal
     // vectors from the smoothing groups we read from the
     // file.
-    for (std::vector<D3DS::Mesh>::iterator i = mScene->mMeshes.begin(),
-         end = mScene->mMeshes.end(); i != end;++i) {
-        if ((*i).mFaces.size() > 0 && (*i).mPositions.size() == 0)  {
+    for (auto &mesh : mScene->mMeshes) {
+        if (mesh.mFaces.size() > 0 && mesh.mPositions.size() == 0)  {
             delete mScene;
             throw DeadlyImportError("3DS file contains faces but no vertices: " + pFile);
         }
-        CheckIndices(*i);
-        MakeUnique  (*i);
-        ComputeNormalsWithSmoothingsGroups<D3DS::Face>(*i);
+        CheckIndices(mesh);
+        MakeUnique  (mesh);
+        ComputeNormalsWithSmoothingsGroups<D3DS::Face>(mesh);
     }
 
     // Replace all occurrences of the default material with a
@@ -459,20 +458,20 @@ void Discreet3DSImporter::ParseChunk(const char* name, unsigned int num)
         camera->mLookAt.x = stream->GetF4() - camera->mPosition.x;
         camera->mLookAt.y = stream->GetF4() - camera->mPosition.y;
         camera->mLookAt.z = stream->GetF4() - camera->mPosition.z;
-        float len = camera->mLookAt.Length();
-        if (len < 1e-5f) {
+        ai_real len = camera->mLookAt.Length();
+        if (len < 1e-5) {
 
             // There are some files with lookat == position. Don't know why or whether it's ok or not.
             DefaultLogger::get()->error("3DS: Unable to read proper camera look-at vector");
-            camera->mLookAt = aiVector3D(0.f,1.f,0.f);
+            camera->mLookAt = aiVector3D(0.0,1.0,0.0);
 
         }
         else camera->mLookAt /= len;
 
         // And finally - the camera rotation angle, in counter clockwise direction
-        const float angle =  AI_DEG_TO_RAD( stream->GetF4() );
+        const ai_real angle =  AI_DEG_TO_RAD( stream->GetF4() );
         aiQuaternion quat(camera->mLookAt,angle);
-        camera->mUp = quat.GetMatrix() * aiVector3D(0.f,1.f,0.f);
+        camera->mUp = quat.GetMatrix() * aiVector3D(0.0,1.0,0.0);
 
         // Read the lense angle
         camera->mHorizontalFOV = AI_DEG_TO_RAD ( stream->GetF4() );
@@ -1168,13 +1167,13 @@ void Discreet3DSImporter::ParseMaterialChunk()
     case Discreet3DS::CHUNK_MAT_TRANSPARENCY:
         {
         // This is the material's transparency
-        float* pcf = &mScene->mMaterials.back().mTransparency;
+        ai_real* pcf = &mScene->mMaterials.back().mTransparency;
         *pcf = ParsePercentageChunk();
 
         // NOTE: transparency, not opacity
         if (is_qnan(*pcf))
-            *pcf = 1.0f;
-        else *pcf = 1.0f - *pcf * (float)0xFFFF / 100.0f;
+            *pcf = 1.0;
+        else *pcf = 1.0 - *pcf * (ai_real)0xFFFF / 100.0;
         }
         break;
 
@@ -1190,30 +1189,30 @@ void Discreet3DSImporter::ParseMaterialChunk()
 
     case Discreet3DS::CHUNK_MAT_SHININESS:
         { // This is the shininess of the material
-        float* pcf = &mScene->mMaterials.back().mSpecularExponent;
+        ai_real* pcf = &mScene->mMaterials.back().mSpecularExponent;
         *pcf = ParsePercentageChunk();
         if (is_qnan(*pcf))
-            *pcf = 0.0f;
-        else *pcf *= (float)0xFFFF;
+            *pcf = 0.0;
+        else *pcf *= (ai_real)0xFFFF;
         }
         break;
 
     case Discreet3DS::CHUNK_MAT_SHININESS_PERCENT:
         { // This is the shininess strength of the material
-        float* pcf = &mScene->mMaterials.back().mShininessStrength;
+        ai_real* pcf = &mScene->mMaterials.back().mShininessStrength;
         *pcf = ParsePercentageChunk();
         if (is_qnan(*pcf))
-            *pcf = 0.0f;
-        else *pcf *= (float)0xffff / 100.0f;
+            *pcf = 0.0;
+        else *pcf *= (ai_real)0xffff / 100.0;
         }
         break;
 
     case Discreet3DS::CHUNK_MAT_SELF_ILPCT:
         { // This is the self illumination strength of the material
-        float f = ParsePercentageChunk();
+        ai_real f = ParsePercentageChunk();
         if (is_qnan(f))
-            f = 0.0f;
-        else f *= (float)0xFFFF / 100.0f;
+            f = 0.0;
+        else f *= (ai_real)0xFFFF / 100.0;
         mScene->mMaterials.back().mEmissive = aiColor3D(f,f,f);
         }
         break;
@@ -1278,7 +1277,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 
     case Discreet3DS::CHUNK_PERCENTW:
         // Manually parse the blend factor
-        pcOut->mTextureBlend = (float)((uint16_t)stream->GetI2()) / 100.0f;
+        pcOut->mTextureBlend = (ai_real)((uint16_t)stream->GetI2()) / 100.0;
         break;
 
     case Discreet3DS::CHUNK_MAT_MAP_USCALE:
@@ -1337,7 +1336,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 
 // ------------------------------------------------------------------------------------------------
 // Read a percentage chunk
-float Discreet3DSImporter::ParsePercentageChunk()
+ai_real Discreet3DSImporter::ParsePercentageChunk()
 {
     Discreet3DS::Chunk chunk;
     ReadChunk(&chunk);
@@ -1345,7 +1344,7 @@ float Discreet3DSImporter::ParsePercentageChunk()
     if (Discreet3DS::CHUNK_PERCENTF == chunk.Flag)
         return stream->GetF4();
     else if (Discreet3DS::CHUNK_PERCENTW == chunk.Flag)
-        return (float)((uint16_t)stream->GetI2()) / (float)0xFFFF;
+        return (ai_real)((uint16_t)stream->GetI2()) / (ai_real)0xFFFF;
     return get_qnan();
 }
 
@@ -1357,7 +1356,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
     ai_assert(out != NULL);
 
     // error return value
-    const float qnan = get_qnan();
+    const ai_real qnan = get_qnan();
     static const aiColor3D clrError = aiColor3D(qnan,qnan,qnan);
 
     Discreet3DS::Chunk chunk;
@@ -1373,7 +1372,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
         bGamma = true;
 
     case Discreet3DS::CHUNK_RGBF:
-        if (sizeof(float) * 3 > diff)   {
+        if (sizeof(ai_real) * 3 > diff)   {
             *out = clrError;
             return;
         }
@@ -1389,9 +1388,9 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
             *out = clrError;
             return;
         }
-        out->r = (float)(uint8_t)stream->GetI1() / 255.0f;
-        out->g = (float)(uint8_t)stream->GetI1() / 255.0f;
-        out->b = (float)(uint8_t)stream->GetI1() / 255.0f;
+        out->r = (ai_real)(uint8_t)stream->GetI1() / 255.0;
+        out->g = (ai_real)(uint8_t)stream->GetI1() / 255.0;
+        out->b = (ai_real)(uint8_t)stream->GetI1() / 255.0;
         break;
 
     // Percentage chunks are accepted, too.
@@ -1405,7 +1404,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
 
     case Discreet3DS::CHUNK_PERCENTW:
         if (acceptPercent && 1 <= diff) {
-            out->g = out->b = out->r = (float)(uint8_t)stream->GetI1() / 255.0f;
+            out->g = out->b = out->r = (ai_real)(uint8_t)stream->GetI1() / 255.0;
             break;
         }
         *out = clrError;

@@ -192,7 +192,28 @@ struct aiMetadata
         }
     }
 
+	template<typename T>
+	inline void Add( const std::string& key, const T& value )
+	{
+		aiString* new_keys = new aiString[mNumProperties + 1];
+		aiMetadataEntry* new_values = new aiMetadataEntry[mNumProperties + 1];
 
+		for(unsigned int i = 0; i < mNumProperties; ++i)
+		{
+			new_keys[i] = mKeys[i];
+			new_values[i] = mValues[i];
+		}
+
+		delete mKeys;
+		delete mValues;
+
+		mKeys = new_keys;
+		mValues = new_values;
+
+		mNumProperties++;
+
+		Set(mNumProperties - 1, key, value);
+	}
 
     template<typename T>
     inline void Set( unsigned index, const std::string& key, const T& value )

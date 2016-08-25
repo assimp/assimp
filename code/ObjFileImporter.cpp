@@ -39,7 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "DefaultIOSystem.h"
@@ -51,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
-
 
 static const aiImporterDesc desc = {
     "Wavefront Object Importer",

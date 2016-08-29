@@ -46,12 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 #include <assimp/material.h>
+
 #include <sstream>
 #include <vector>
 #include <map>
-
 #include <memory>
-
 
 struct aiScene;
 struct aiNode;
@@ -89,7 +88,7 @@ namespace Assimp
 
         std::map<std::string, unsigned int> mTexturesByPath;
 
-        glTF::Asset* mAsset;
+        std::shared_ptr<glTF::Asset> mAsset;
 
         std::vector<unsigned char> mBodyData;
 

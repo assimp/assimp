@@ -7,13 +7,13 @@ The following is a non-exhaustive list of all constributors over the years.
 If you think your name should be listed here, drop us a line and we'll add you.
 
 - Alexander Gessler,
-3DS-, BLEND-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, Assimp-Viewer, assimp-cmd, -noboost, Website (Admin and Design).
+3DS-, BLEND-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, Assimp-Viewer, assimp-cmd, -noboost, Website (Design).
 
 - Thomas Schulze,
 X-, Collada-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
 
 - Kim Kulling,
-Obj-Loader, Logging system, Scons-build environment, CMake build environment, Linux build.
+Obj-, Q3BSD-, OpenGEX-Loader, Logging system, CMake-build-environment, Linux-build, Website ( Admin ), Coverity ( Admin ), Glitter ( Admin ).
 
 - R.Schmidt,
 Linux build, eclipse support.

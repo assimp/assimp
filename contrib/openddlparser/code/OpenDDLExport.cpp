@@ -280,7 +280,7 @@ bool OpenDDLExport::writeValueType( Value::ValueType type, size_t numItems, std:
         statement += "[";
         char buffer[ 256 ];
         ::memset( buffer, '\0', 256 * sizeof( char ) );
-        sprintf( buffer, "%d", numItems );
+        sprintf( buffer, "%d", int(numItems) );
         statement += buffer;
         statement += "]";
     }

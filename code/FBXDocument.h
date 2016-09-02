@@ -594,23 +594,24 @@ public:
         BlendMode_BlendModeCount
     };
 
-    const Texture* getTexture() const
+    const Texture* getTexture(int index=0) const
     {
-        return texture;
-    }
+		return textures[index];
 
-    BlendMode GetBlendMode()
+    }
+	const int textureCount() const {
+		return textures.size();
+	}
+    const BlendMode GetBlendMode() const
     {
         return blendMode;
     }
-    
     float Alpha()
     {
         return alpha;
     }
-
 private:
-    const Texture* texture;
+	std::vector<const Texture*> textures;
     BlendMode blendMode;
     float alpha;
 };

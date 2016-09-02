@@ -282,7 +282,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
             const size_t next = (i+1)%size;
 
             result.vertcnt.push_back(4);
-            const IfcVector3& base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
+            const IfcVector3 base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
 
             out.push_back(base_0);
             out.push_back(base_1);

@@ -303,7 +303,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                 attr.normal[0]->ExtractData(aim->mNormals);
             }
 
-            for (size_t tc = 0; tc < attr.texcoord.size() && tc <= AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
+            for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 

@@ -171,7 +171,7 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
     // build output vertex weights
     for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
     {
-        delete pcMesh->mBones[i]->mWeights;
+        delete [] pcMesh->mBones[i]->mWeights;
         if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
             aiVertexWeight *weightToCopy = &( newWeights[i][0] );

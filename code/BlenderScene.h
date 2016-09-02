@@ -175,7 +175,7 @@ struct MLoopUV : ElemBase {
 // -------------------------------------------------------------------------------
 // Note that red and blue are not swapped, as with MCol
 struct MLoopCol : ElemBase {
-    char r, g, b, a;
+	unsigned char r, g, b, a;
 };
 
 // -------------------------------------------------------------------------------

@@ -93,11 +93,11 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     , mScene(pScene)
     , mProperties(pProperties)
 {
-    std::unique_ptr<Asset> asset(new glTF::Asset(pIOSystem));
-    mAsset = asset.get();
+    std::unique_ptr<Asset> asset();
+    mAsset.reset( new glTF::Asset( pIOSystem ) );
 
     if (isBinary) {
-        asset->SetAsBinary();
+        mAsset->SetAsBinary();
     }
 
     ExportMetadata();

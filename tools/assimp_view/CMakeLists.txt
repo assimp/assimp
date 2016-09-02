@@ -62,6 +62,7 @@ ADD_EXECUTABLE(  assimp_viewer WIN32
   Normals.cpp
   SceneAnimator.cpp
   Shaders.cpp
+  assimp_view.h
   assimp_view.cpp
   stdafx.cpp
   assimp_view.rc

@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2015, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -160,7 +160,6 @@ DWORD WINAPI LoadThreadProc(LPVOID lpParameter)
 
     // Call ASSIMPs C-API to load the file
     g_pcAsset->pcScene = (aiScene*)aiImportFileExWithProperties(g_szFileName,
-
         ppsteps | /* configurable pp steps */
         aiProcess_GenSmoothNormals		   | // generate smooth normal vectors if not existing
         aiProcess_SplitLargeMeshes         | // split large, unrenderable meshes into submeshes

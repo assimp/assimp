@@ -123,8 +123,7 @@ namespace Blender {
 
     struct ObjectCompare {
         bool operator() (const Object* left, const Object* right) const {
-            printf( "left: %s, right: %s\n", left->id.name, right->id.name );
-            return ::strncmp(left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
+            return ::strncmp(left->id.name, right->id.name, strlen( left->id.name ) ) == -1;
         }
     };
 
@@ -145,8 +144,7 @@ namespace Blender {
 
         struct ObjectCompare {
             bool operator() (const Object* left, const Object* right) const {
-                printf( "left: %s, right: %s\n", left->id.name, right->id.name );
-                return ::strncmp( left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
+                return ::strncmp( left->id.name, right->id.name, strlen( left->id.name ) ) == -1;
             }
         };
 

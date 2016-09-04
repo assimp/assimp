@@ -437,7 +437,7 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
                         }
                     }
 
-                    unsigned int idx;
+                    unsigned int idx( 99999999 );
 
                     // Check whether we have this mapping mode already
                     std::list<MappingInfo>::iterator it = std::find (mappingStack.begin(),mappingStack.end(), info);

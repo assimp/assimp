@@ -990,7 +990,9 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 
         pcMesh->mNumVertices        = pcSurfaces->NUM_TRIANGLES*3;
         pcMesh->mNumFaces           = pcSurfaces->NUM_TRIANGLES;
+        pcMesh->mNumIndices         = pcMesh->mNumFaces * 3;
         pcMesh->mFaces              = new aiFace[pcSurfaces->NUM_TRIANGLES];
+        pcMesh->mIndices            = new unsigned int[pcMesh->mNumIndices];
         pcMesh->mNormals            = new aiVector3D[pcMesh->mNumVertices];
         pcMesh->mVertices           = new aiVector3D[pcMesh->mNumVertices];
         pcMesh->mTextureCoords[0]   = new aiVector3D[pcMesh->mNumVertices];
@@ -999,12 +1001,12 @@ void MD3Importer::InternReadFile( const std::string& pFile,
         // Fill in all triangles
         unsigned int iCurrent = 0;
         for (unsigned int i = 0; i < (unsigned int)pcSurfaces->NUM_TRIANGLES;++i)   {
-            pcMesh->mFaces[i].mIndices = new unsigned int[3];
+            pcMesh->mFaces[i].mIndices = i * 3;
             pcMesh->mFaces[i].mNumIndices = 3;
 
             //unsigned int iTemp = iCurrent;
             for (unsigned int c = 0; c < 3;++c,++iCurrent)  {
-                pcMesh->mFaces[i].mIndices[c] = iCurrent;
+                pcMesh->mIndices[pcMesh->mFaces[i].mIndices + c] = iCurrent;
 
                 // Read vertices
                 aiVector3D& vec = pcMesh->mVertices[iCurrent];
@@ -1026,7 +1028,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
             }
             // Flip face order if necessary
             if (!shader || shader->cull == Q3Shader::CULL_CW) {
-                std::swap(pcMesh->mFaces[i].mIndices[2],pcMesh->mFaces[i].mIndices[1]);
+                std::swap(pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 2], pcMesh->mIndices[pcMesh->mFaces[i].mIndices + 1]);
             }
             pcTriangles++;
         }

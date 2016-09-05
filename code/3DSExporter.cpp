@@ -488,7 +488,7 @@ void Discreet3DSExporter::WriteMeshes()
 
                 for (unsigned int j = 0; j < 3; ++j) {
                     ai_assert(f.mIndices[j] <= 0xffff);
-                    writer.PutI2(static_cast<uint16_t>(f.mIndices[j]));
+                    writer.PutI2(static_cast<uint16_t>(mesh.mIndices[f.mIndices + j]));
                 }
 
                 // Edge visibility flag

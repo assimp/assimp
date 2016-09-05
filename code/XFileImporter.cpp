@@ -301,6 +301,12 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
 
             // name
             mesh->mName.Set(sourceMesh->mName);
+            // indices
+            for (unsigned int c = 0; c < faces.size(); ++c)
+            {
+                mesh->mNumIndices += sourceMesh->mPosFaces[faces[c]].mIndices.size();
+            }
+            mesh->mIndices = new unsigned int[mesh->mNumIndices];
 
             // normals?
             if( sourceMesh->mNormals.size() > 0)
@@ -331,12 +337,12 @@ void XFileImporter::CreateMeshes( aiScene* pScene, aiNode* pNode, const std::vec
                 // create face. either triangle or triangle fan depending on the index count
                 aiFace& df = mesh->mFaces[c]; // destination face
                 df.mNumIndices = (unsigned int)pf.mIndices.size();
-                df.mIndices = new unsigned int[ df.mNumIndices];
+                df.mIndices = newIndex;
 
                 // collect vertex data for indices of this face
                 for( unsigned int d = 0; d < df.mNumIndices; d++)
                 {
-                    df.mIndices[d] = newIndex;
+                    mesh->mIndices[df.mIndices + d] = newIndex;
                     orgPoints[newIndex] = pf.mIndices[d];
 
                     // Position

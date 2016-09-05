@@ -988,12 +988,14 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
                 // convert vertices
                 p_pcOut->mNumVertices = (unsigned int)aiSplit[p].size()*3;
                 p_pcOut->mNumFaces = (unsigned int)aiSplit[p].size();
+                p_pcOut->mNumIndices = p_pcOut->mNumFaces * 3;
 
                 // receive output vertex weights
                 std::vector<std::pair<unsigned int, float> > *avOutputBones = NULL;
                 if (!mesh.mBones.empty())   {
                     avOutputBones = new std::vector<std::pair<unsigned int, float> >[mesh.mBones.size()];
                 }
+                p_pcOut->mIndices = new unsigned int[p_pcOut->mNumIndices];
 
                 // allocate enough storage for faces
                 p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
@@ -1006,7 +1008,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
 
                         iIndex = aiSplit[p][q];
 
-                        p_pcOut->mFaces[q].mIndices = new unsigned int[3];
+                        p_pcOut->mFaces[q].mIndices = q * 3;
                         p_pcOut->mFaces[q].mNumIndices = 3;
 
                         for (unsigned int t = 0; t < 3;++t, ++iBase)    {
@@ -1030,7 +1032,7 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
                                     }
                                 }
                             }
-                            p_pcOut->mFaces[q].mIndices[t] = iBase;
+                            p_pcOut->mIndices[p_pcOut->mFaces[q].mIndices + t] = iBase;
                         }
                     }
                 }
@@ -1125,10 +1127,12 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
         if (mesh.mFaces.empty() || mesh.mPositions.empty()) {
             return;
         }
+        p_pcOut->mNumIndices = p_pcOut->mNumFaces * 3;
 
         // convert vertices
         p_pcOut->mNumVertices = (unsigned int)mesh.mPositions.size();
         p_pcOut->mNumFaces = (unsigned int)mesh.mFaces.size();
+        p_pcOut->mIndices = new unsigned int[p_pcOut->mNumIndices];
 
         // allocate enough storage for faces
         p_pcOut->mFaces = new aiFace[p_pcOut->mNumFaces];
@@ -1165,12 +1169,12 @@ void ASEImporter::ConvertMeshes(ASE::Mesh& mesh, std::vector<aiMesh*>& avOutMesh
         // copy faces
         for (unsigned int iFace = 0; iFace < p_pcOut->mNumFaces;++iFace)    {
             p_pcOut->mFaces[iFace].mNumIndices = 3;
-            p_pcOut->mFaces[iFace].mIndices = new unsigned int[3];
+            p_pcOut->mFaces[iFace].mIndices = iFace * 3;
 
             // copy indices
-            p_pcOut->mFaces[iFace].mIndices[0] = mesh.mFaces[iFace].mIndices[0];
-            p_pcOut->mFaces[iFace].mIndices[1] = mesh.mFaces[iFace].mIndices[1];
-            p_pcOut->mFaces[iFace].mIndices[2] = mesh.mFaces[iFace].mIndices[2];
+            p_pcOut->mIndices[p_pcOut->mFaces[iFace].mIndices + 0] = mesh.mFaces[iFace].mIndices[0];
+            p_pcOut->mIndices[p_pcOut->mFaces[iFace].mIndices + 1] = mesh.mFaces[iFace].mIndices[1];
+            p_pcOut->mIndices[p_pcOut->mFaces[iFace].mIndices + 2] = mesh.mFaces[iFace].mIndices[2];
         }
 
         // copy vertex bones

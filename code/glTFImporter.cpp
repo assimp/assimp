@@ -214,35 +214,35 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
 }
 
 
-static inline void SetFace(aiFace& face, int a)
+static inline void SetFace(aiMesh* mesh, aiFace& face, int index, int a)
 {
     face.mNumIndices = 1;
-    face.mIndices = new unsigned int[1];
-    face.mIndices[0] = a;
+    face.mIndices = index;
+    mesh->mIndices[face.mIndices + 0] = a;
 }
 
-static inline void SetFace(aiFace& face, int a, int b)
+static inline void SetFace(aiMesh* mesh, aiFace& face, int index, int a, int b)
 {
     face.mNumIndices = 2;
-    face.mIndices = new unsigned int[2];
-    face.mIndices[0] = a;
-    face.mIndices[1] = b;
+    face.mIndices = index;
+    mesh->mIndices[face.mIndices + 0] = a;
+    mesh->mIndices[face.mIndices + 1] = b;
 }
 
-static inline void SetFace(aiFace& face, int a, int b, int c)
+static inline void SetFace(aiMesh* mesh, aiFace& face, int index, int a, int b, int c)
 {
     face.mNumIndices = 3;
-    face.mIndices = new unsigned int[3];
-    face.mIndices[0] = a;
-    face.mIndices[1] = b;
-    face.mIndices[2] = c;
+    face.mIndices = index;
+    mesh->mIndices[face.mIndices + 0] = a;
+    mesh->mIndices[face.mIndices + 1] = b;
+    mesh->mIndices[face.mIndices + 2] = c;
 }
 
-static inline bool CheckValidFacesIndices(aiFace* faces, unsigned nFaces, unsigned nVerts)
+static inline bool CheckValidFacesIndices(aiMesh* mesh, aiFace* faces, unsigned nFaces, unsigned nVerts)
 {
     for (unsigned i = 0; i < nFaces; ++i) {
         for (unsigned j = 0; j < faces[i].mNumIndices; ++j) {
-            unsigned idx = faces[i].mIndices[j];
+            unsigned idx = mesh->mIndices[faces[i].mIndices + j];
             if (idx >= nVerts)
                 return false;
         }
@@ -327,8 +327,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                     case PrimitiveMode_POINTS: {
                         nFaces = count;
                         faces = new aiFace[nFaces];
+                        aim->mNumIndices = nFaces;
+                        aim->mIndices = new unsigned int[aim->mNumIndices];
                         for (unsigned int i = 0; i < count; ++i) {
-                            SetFace(faces[i], data.GetUInt(i));
+                            SetFace(aim, faces[i], 0, data.GetUInt(i));
                         }
                         break;
                     }
@@ -336,8 +338,10 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                     case PrimitiveMode_LINES: {
                         nFaces = count / 2;
                         faces = new aiFace[nFaces];
+                        aim->mNumIndices = nFaces * 2;
+                        aim->mIndices = new unsigned int[aim->mNumIndices];
                         for (unsigned int i = 0; i < count; i += 2) {
-                            SetFace(faces[i / 2], data.GetUInt(i), data.GetUInt(i + 1));
+                            SetFace(aim, faces[i / 2], i, data.GetUInt(i), data.GetUInt(i + 1));
                         }
                         break;
                     }
@@ -346,12 +350,14 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                     case PrimitiveMode_LINE_STRIP: {
                         nFaces = count - ((prim.mode == PrimitiveMode_LINE_STRIP) ? 1 : 0);
                         faces = new aiFace[nFaces];
-                        SetFace(faces[0], data.GetUInt(0), data.GetUInt(1));
+                        aim->mNumIndices = nFaces * 2;
+                        aim->mIndices = new unsigned int[aim->mNumIndices];
+                        SetFace(aim, faces[0], 0, data.GetUInt(0), data.GetUInt(1));
                         for (unsigned int i = 2; i < count; ++i) {
-                            SetFace(faces[i - 1], faces[i - 2].mIndices[1], data.GetUInt(i));
+                            SetFace(aim, faces[i - 1], (i - 1) * 2, aim->mIndices[faces[i - 2].mIndices + 1], data.GetUInt(i));
                         }
                         if (prim.mode == PrimitiveMode_LINE_LOOP) { // close the loop
-                            SetFace(faces[count - 1], faces[count - 2].mIndices[1], faces[0].mIndices[0]);
+                            SetFace(aim, faces[count - 1], (count - 1) * 2, aim->mIndices[faces[count - 2].mIndices + 1], aim->mIndices[faces[0].mIndices + 0]);
                         }
                         break;
                     }
@@ -359,26 +365,32 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                     case PrimitiveMode_TRIANGLES: {
                         nFaces = count / 3;
                         faces = new aiFace[nFaces];
+                        aim->mNumIndices = nFaces * 3;
+                        aim->mIndices = new unsigned int[aim->mNumIndices];
                         for (unsigned int i = 0; i < count; i += 3) {
-                            SetFace(faces[i / 3], data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
+                            SetFace(aim, faces[i / 3], i, data.GetUInt(i), data.GetUInt(i + 1), data.GetUInt(i + 2));
                         }
                         break;
                     }
                     case PrimitiveMode_TRIANGLE_STRIP: {
                         nFaces = count - 2;
                         faces = new aiFace[nFaces];
-                        SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
+                        aim->mNumIndices = nFaces * 3;
+                        aim->mIndices = new unsigned int[aim->mNumIndices];
+                        SetFace(aim, faces[0], 0, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
                         for (unsigned int i = 3; i < count; ++i) {
-                            SetFace(faces[i - 2], faces[i - 1].mIndices[1], faces[i - 1].mIndices[2], data.GetUInt(i));
+                            SetFace(aim, faces[i - 2], (i - 2) * 3, aim->mIndices[faces[i - 1].mIndices + 1], aim->mIndices[faces[i - 1].mIndices + 2], data.GetUInt(i));
                         }
                         break;
                     }
                     case PrimitiveMode_TRIANGLE_FAN:
                         nFaces = count - 2;
                         faces = new aiFace[nFaces];
-                        SetFace(faces[0], data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
+                        aim->mNumIndices = nFaces * 3;
+                        aim->mIndices = new unsigned int[aim->mNumIndices];
+                        SetFace(aim, faces[0], 0, data.GetUInt(0), data.GetUInt(1), data.GetUInt(2));
                         for (unsigned int i = 3; i < count; ++i) {
-                            SetFace(faces[i - 2], faces[0].mIndices[0], faces[i - 1].mIndices[2], data.GetUInt(i));
+                            SetFace(aim, faces[i - 2], (i - 2) * 3, aim->mIndices[faces[0].mIndices + 0], aim->mIndices[faces[i - 1].mIndices + 2], data.GetUInt(i));
                         }
                         break;
                 }
@@ -386,7 +398,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                 if (faces) {
                     aim->mFaces = faces;
                     aim->mNumFaces = nFaces;
-                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
+                    ai_assert(CheckValidFacesIndices(aim, faces, nFaces, aim->mNumVertices));
                 }
             }
 

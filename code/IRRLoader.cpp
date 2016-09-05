@@ -153,15 +153,17 @@ aiMesh* IRRImporter::BuildSingleQuadMesh(const SkyboxVertex& v1,
 
     out->mPrimitiveTypes = aiPrimitiveType_POLYGON;
     out->mNumFaces = 1;
+    out->mNumIndices = 4;
 
     // build the face
     out->mFaces    = new aiFace[1];
+    out->mIndices  = new unsigned int[4];
     aiFace& face   = out->mFaces[0];
 
     face.mNumIndices = 4;
-    face.mIndices    = new unsigned int[4];
+    face.mIndices    = 0;
     for (unsigned int i = 0; i < 4;++i)
-        face.mIndices[i] = i;
+        out->mIndices[i] = i;
 
     out->mNumVertices = 4;
 

@@ -322,7 +322,7 @@ void ObjExporter::AddMesh(const aiString& name, const aiMesh* m, const aiMatrix4
         face.indices.resize(f.mNumIndices);
 
         for(unsigned int a = 0; a < f.mNumIndices; ++a) {
-            const unsigned int idx = f.mIndices[a];
+            const unsigned int idx = m->mIndices[f.mIndices + a];
 
             aiVector3D vert = mat * m->mVertices[idx];
             face.indices[a].vp = vpMap.getIndex(vert);

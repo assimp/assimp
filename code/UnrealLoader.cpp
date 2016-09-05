@@ -361,6 +361,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 
         const unsigned int num = materials[i].numFaces;
         m->mFaces            = new aiFace     [num];
+        m->mIndices          = new unsigned int [num*3];
         m->mVertices         = new aiVector3D [num*3];
         m->mTextureCoords[0] = new aiVector3D [num*3];
 
@@ -421,10 +422,12 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 
         aiMesh* mesh = pScene->mMeshes[nt-materials.begin()];
         aiFace& f    = mesh->mFaces[mesh->mNumFaces++];
-        f.mIndices   = new unsigned int[f.mNumIndices = 3];
-
+        f.mIndices   = mesh->mNumIndices;
+        f.mNumIndices = 3;
+        mesh->mNumIndices += 3;
+        
         for (unsigned int i = 0; i < 3;++i,mesh->mNumVertices++) {
-            f.mIndices[i] = mesh->mNumVertices;
+            mesh->mIndices[f.mIndices + i] = mesh->mNumVertices;
 
             mesh->mVertices[mesh->mNumVertices] = vertices[ tri.mVertex[i] ];
             mesh->mTextureCoords[0][mesh->mNumVertices] = aiVector3D( tri.mTex[i][0] / 255.f, 1.f - tri.mTex[i][1] / 255.f, 0.f);

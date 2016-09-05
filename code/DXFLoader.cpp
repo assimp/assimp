@@ -302,9 +302,11 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
         aiVector3D* verts = mesh->mVertices = new aiVector3D[cvert];
         aiColor4D* colors = mesh->mColors[0] = new aiColor4D[cvert];
         aiFace* faces = mesh->mFaces = new aiFace[cface];
+        mesh->mIndices = new unsigned int[cvert];
 
         mesh->mNumVertices = cvert;
         mesh->mNumFaces = cface;
+        mesh->mNumIndices = cvert;
 
         unsigned int prims = 0;
         unsigned int overall_indices = 0;
@@ -313,10 +315,10 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
             std::vector<unsigned int>::const_iterator it = pl->indices.begin();
             for(unsigned int facenumv : pl->counts) {
                 aiFace& face = *faces++;
-                face.mIndices = new unsigned int[face.mNumIndices = facenumv];
+                face.mIndices = overall_indices;
 
                 for (unsigned int i = 0; i < facenumv; ++i) {
-                    face.mIndices[i] = overall_indices++;
+                    mesh->mIndices[face.mIndices + i] = overall_indices++;
 
                     ai_assert(pl->positions.size() == pl->colors.size());
                     if (*it >= pl->positions.size()) {

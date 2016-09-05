@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
+VertexTriangleAdjacency::VertexTriangleAdjacency(aiMesh *pcMesh, aiFace *pcFaces,
     unsigned int iNumFaces,
     unsigned int iNumVertices /*= 0*/,
     bool bComputeNumTriangles /*= false*/)
@@ -61,9 +61,9 @@ VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
 
         for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace)   {
             ai_assert(3 == pcFace->mNumIndices);
-            iNumVertices = std::max(iNumVertices,pcFace->mIndices[0]);
-            iNumVertices = std::max(iNumVertices,pcFace->mIndices[1]);
-            iNumVertices = std::max(iNumVertices,pcFace->mIndices[2]);
+            iNumVertices = std::max(iNumVertices,pcMesh->mIndices[pcFace->mIndices + 0]);
+            iNumVertices = std::max(iNumVertices,pcMesh->mIndices[pcFace->mIndices + 1]);
+            iNumVertices = std::max(iNumVertices,pcMesh->mIndices[pcFace->mIndices + 2]);
         }
     }
 
@@ -90,9 +90,9 @@ VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
     // first pass: compute the number of faces referencing each vertex
     for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace)
     {
-        pi[pcFace->mIndices[0]]++;
-        pi[pcFace->mIndices[1]]++;
-        pi[pcFace->mIndices[2]]++;
+        pi[pcMesh->mIndices[pcFace->mIndices + 0]]++;
+        pi[pcMesh->mIndices[pcFace->mIndices + 1]]++;
+        pi[pcMesh->mIndices[pcFace->mIndices + 2]]++;
     }
 
     // second pass: compute the final offset table
@@ -111,13 +111,13 @@ VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
     iSum = 0;
     for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace,++iSum)    {
 
-        unsigned int idx = pcFace->mIndices[0];
+        unsigned int idx = pcMesh->mIndices[pcFace->mIndices + 0];
         mAdjacencyTable[pi[idx]++] = iSum;
 
-        idx = pcFace->mIndices[1];
+        idx = pcMesh->mIndices[pcFace->mIndices + 1];
         mAdjacencyTable[pi[idx]++] = iSum;
 
-        idx = pcFace->mIndices[2];
+        idx = pcMesh->mIndices[pcFace->mIndices + 2];
         mAdjacencyTable[pi[idx]++] = iSum;
     }
     // fourth pass: undo the offset computations made during the third pass

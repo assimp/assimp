@@ -128,7 +128,7 @@ void LWOImporter::LoadLWOBPolygons(unsigned int length)
 
         mCurLayer->mFaces.resize(iNumFaces);
         FaceList::iterator it = mCurLayer->mFaces.begin();
-        CopyFaceIndicesLWOB(it,cursor,end);
+        CopyFaceIndicesLWOB(it,mCurLayer->mIndices,cursor,end);
     }
 }
 
@@ -164,6 +164,7 @@ void LWOImporter::CountVertsAndFacesLWOB(unsigned int& verts, unsigned int& face
 
 // ------------------------------------------------------------------------------------------------
 void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
+    IndicesList& indices,
     LE_NCONST uint16_t*& cursor,
     const uint16_t* const end,
     unsigned int max)
@@ -180,13 +181,13 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
             {
                 break;
             }
-            face.mIndices = new unsigned int[face.mNumIndices];
+            face.mIndices = indices.size();
             for (unsigned int i = 0; i < face.mNumIndices;++i)
             {
-                unsigned int & mi = face.mIndices[i];
                 uint16_t index;
                 ::memcpy(&index, cursor++, 2);
-                mi = index;
+                indices.push_back(index);
+                unsigned int & mi = indices.back();
                 if (mi > mCurLayer->mTempPoints.size())
                 {
                     DefaultLogger::get()->warn("LWOB: face index is out of range");
@@ -206,7 +207,7 @@ void LWOImporter::CopyFaceIndicesLWOB(FaceList::iterator& it,
             ::memcpy(&numPolygons, cursor++, 2);
             if (cursor < end)
             {
-                CopyFaceIndicesLWOB(it,cursor,end,numPolygons);
+                CopyFaceIndicesLWOB(it, indices,cursor,end,numPolygons);
             }
         }
         face.surfaceIndex = surface-1;

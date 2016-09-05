@@ -129,27 +129,24 @@ struct aiFace
     //! The maximum value for this member is #AI_MAX_FACE_INDICES.
     unsigned int mNumIndices;
 
-    //! Pointer to the indices array. Size of the array is given in numIndices.
-    unsigned int* mIndices;
+    //! Index to the indices array.
+    unsigned int mIndices;
 
 #ifdef __cplusplus
 
     //! Default constructor
     aiFace()
       : mNumIndices( 0 )
-      , mIndices( NULL )
+      , mIndices( 0 )
     {
     }
 
     //! Default destructor. Delete the index array
-    ~aiFace()
-    {
-        delete [] mIndices;
-    }
+    ~aiFace() { }
 
     //! Copy constructor. Copy the index array
     aiFace( const aiFace& o)
-      : mIndices( NULL )
+      : mIndices( 0 )
     {
         *this = o;
     }
@@ -160,15 +157,8 @@ struct aiFace
         if (&o == this)
             return *this;
 
-        delete[] mIndices;
         mNumIndices = o.mNumIndices;
-        if (mNumIndices) {
-            mIndices = new unsigned int[mNumIndices];
-            ::memcpy( mIndices, o.mIndices, mNumIndices * sizeof( unsigned int));
-        }
-        else {
-            mIndices = NULL;
-        }
+        mIndices = o.mIndices;
         return *this;
     }
 
@@ -177,12 +167,7 @@ struct aiFace
     bool operator== (const aiFace& o) const
     {
         if (mIndices == o.mIndices)return true;
-        else if (mIndices && mNumIndices == o.mNumIndices)
-        {
-            for (unsigned int i = 0;i < this->mNumIndices;++i)
-                if (mIndices[i] != o.mIndices[i])return false;
-            return true;
-        }
+        else if (mNumIndices == o.mNumIndices)return true;
         return false;
     }
 
@@ -568,6 +553,16 @@ struct aiMesh
     */
     C_STRUCT aiFace* mFaces;
 
+    /** The number of indices this mesh contains.
+    */
+    unsigned int mNumIndices;
+
+    /** The indices of this mesh.
+    * The faces contain an index and length for looking up in
+    * this array.
+    */
+    unsigned int* mIndices;
+
     /** The number of bones this mesh contains.
     * Can be 0, in which case the mBones array is NULL.
     */
@@ -621,6 +616,8 @@ struct aiMesh
         , mTangents( NULL )
         , mBitangents( NULL )
         , mFaces( NULL )
+        , mNumIndices( 0 )
+        , mIndices( NULL )
         , mNumBones( 0 )
         , mBones( NULL )
         , mMaterialIndex( 0 )
@@ -667,6 +664,7 @@ struct aiMesh
         }
 
         delete [] mFaces;
+        delete [] mIndices;
     }
 
     //! Check whether the mesh contains positions. Provided no special

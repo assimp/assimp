@@ -373,7 +373,9 @@ aiNode *Q3BSPFileImporter::CreateTopology( const Q3BSP::Q3BSPModel *pModel,
     pMesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
     pMesh->mFaces = new aiFace[ numTriangles ];
+    pMesh->mIndices = new unsigned int[ numTriangles * 3 ];
     pMesh->mNumFaces = numTriangles;
+    pMesh->mNumIndices = numTriangles * 3;
 
     pMesh->mNumVertices = numVerts;
     pMesh->mVertices = new aiVector3D[ numVerts ];
@@ -429,7 +431,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
     }
 
     m_pCurrentFace->mNumIndices = 3;
-    m_pCurrentFace->mIndices = new unsigned int[ m_pCurrentFace->mNumIndices ];
+    m_pCurrentFace->mIndices = (rFaceIdx - 1) * 3;
 
     size_t idx = 0;
     for ( size_t i = 0; i < (size_t) pQ3BSPFace->iNumOfFaceVerts; i++ )
@@ -454,7 +456,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
         pMesh->mTextureCoords[ 0 ][ rVertIdx ].Set( pVertex->vTexCoord.x, pVertex->vTexCoord.y, 0.0f );
         pMesh->mTextureCoords[ 1 ][ rVertIdx ].Set( pVertex->vLightmap.x, pVertex->vLightmap.y, 0.0f );
 
-        m_pCurrentFace->mIndices[ idx ] = rVertIdx;
+        pMesh->mIndices[m_pCurrentFace->mIndices + idx ] = rVertIdx;
         rVertIdx++;
 
         idx++;
@@ -465,7 +467,7 @@ void Q3BSPFileImporter::createTriangleTopology( const Q3BSP::Q3BSPModel *pModel,
             if ( NULL != m_pCurrentFace )
             {
                 m_pCurrentFace->mNumIndices = 3;
-                m_pCurrentFace->mIndices = new unsigned int[ 3 ];
+                m_pCurrentFace->mIndices = (rFaceIdx - 1) * 3;
             }
         }
     }

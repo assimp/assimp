@@ -119,21 +119,21 @@ void FindDegeneratesProcess::ExecuteOnMesh( aiMesh* mesh)
 
             for (unsigned int t = i+1; t < limit; ++t)
             {
-                if (mesh->mVertices[face.mIndices[i]] == mesh->mVertices[face.mIndices[t]])
+                if (mesh->mVertices[mesh->mIndices[face.mIndices + i]] == mesh->mVertices[mesh->mIndices[face.mIndices + t]])
                 {
                     // we have found a matching vertex position
                     // remove the corresponding index from the array
                     --face.mNumIndices;--limit;
                     for (unsigned int m = t; m < face.mNumIndices; ++m)
                     {
-                        face.mIndices[m] = face.mIndices[m+1];
+                        mesh->mIndices[face.mIndices + m] = mesh->mIndices[face.mIndices + m+1];
                     }
                     --t;
 
                     // NOTE: we set the removed vertex index to an unique value
                     // to make sure the developer gets notified when his
                     // application attemps to access this data.
-                    face.mIndices[face.mNumIndices] = 0xdeadbeef;
+                    mesh->mIndices[face.mIndices + face.mNumIndices] = 0xdeadbeef;
 
                     if(first)
                     {
@@ -185,13 +185,12 @@ evil_jump_outside:
                 if (&face_src != &face_dest) {
                     // clear source
                     face_src.mNumIndices = 0;
-                    face_src.mIndices = NULL;
+                    face_src.mIndices = 0;
                 }
             }
             else {
                 // Otherwise delete it if we don't need this face
-                delete[] face_src.mIndices;
-                face_src.mIndices = NULL;
+                face_src.mIndices = 0;
                 face_src.mNumIndices = 0;
             }
         }

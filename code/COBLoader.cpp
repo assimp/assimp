@@ -264,13 +264,15 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
                     outmesh->mTextureCoords[0] = new aiVector3D[n];
 
                     outmesh->mFaces = new aiFace[reflist.second.size()]();
+                    outmesh->mIndices = new unsigned int[n];
                     for(Face* f : reflist.second) {
                         if (f->indices.empty()) {
                             continue;
                         }
 
                         aiFace& fout = outmesh->mFaces[outmesh->mNumFaces++];
-                        fout.mIndices = new unsigned int[f->indices.size()];
+                        fout.mIndices = outmesh->mNumIndices;
+                        outmesh->mNumIndices += f->indices.size();
 
                         for(VertexIndex& v : f->indices) {
                             if (v.pos_idx >= ndmesh.vertex_positions.size()) {
@@ -286,7 +288,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
                                 0.f
                             );
 
-                            fout.mIndices[fout.mNumIndices++] = outmesh->mNumVertices++;
+                            outmesh->mIndices[fout.mIndices + fout.mNumIndices++] = outmesh->mNumVertices++;
                         }
                     }
                     outmesh->mMaterialIndex = fill->mNumMaterials;

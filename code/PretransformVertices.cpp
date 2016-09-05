@@ -54,6 +54,7 @@ using namespace Assimp;
 // some array offsets
 #define AI_PTVS_VERTEX 0x0
 #define AI_PTVS_FACE 0x1
+#define AI_PTVS_INDICES 0x2
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
@@ -124,7 +125,7 @@ unsigned int PretransformVertices::GetMeshVFormat(aiMesh* pcMesh)
 // Count the number of vertices in the whole scene and a given
 // material index
 void PretransformVertices::CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
-    unsigned int iVFormat, unsigned int* piFaces, unsigned int* piVertices)
+    unsigned int iVFormat, unsigned int* piFaces, unsigned int* piIndices, unsigned int* piVertices)
 {
     for (unsigned int i = 0; i < pcNode->mNumMeshes;++i)
     {
@@ -133,12 +134,13 @@ void PretransformVertices::CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNo
         {
             *piVertices += pcMesh->mNumVertices;
             *piFaces += pcMesh->mNumFaces;
+            *piIndices += pcMesh->mNumIndices;
         }
     }
     for (unsigned int i = 0;i < pcNode->mNumChildren;++i)
     {
         CountVerticesAndFaces(pcScene,pcNode->mChildren[i],iMat,
-            iVFormat,piFaces,piVertices);
+            iVFormat,piFaces,piIndices,piVertices);
     }
 }
 
@@ -146,7 +148,7 @@ void PretransformVertices::CountVerticesAndFaces( aiScene* pcScene, aiNode* pcNo
 // Collect vertex/face data
 void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsigned int iMat,
     unsigned int iVFormat, aiMesh* pcMeshOut,
-    unsigned int aiCurrent[2], unsigned int* num_refs)
+    unsigned int aiCurrent[3], unsigned int* num_refs)
 {
     // No need to multiply if there's no transformation
     const bool identity = pcNode->mTransformation.IsIdentity();
@@ -165,6 +167,10 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
                 ::memcpy(pcMeshOut->mVertices + aiCurrent[AI_PTVS_VERTEX],
                     pcMesh->mVertices,
                     pcMesh->mNumVertices * sizeof(aiVector3D));
+
+                ::memcpy(pcMeshOut->mIndices + aiCurrent[AI_PTVS_INDICES],
+                    pcMesh->mIndices,
+                    pcMesh->mNumIndices * sizeof(unsigned int));
 
                 if (iVFormat & 0x2) {
                     // copy normals without modifying them
@@ -231,9 +237,7 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
                     pcMesh->mNumVertices * sizeof(aiColor4D));
                 ++p;
             }
-            // now we need to copy all faces. since we will delete the source mesh afterwards,
-            // we don't need to reallocate the array of indices except if this mesh is
-            // referenced multiple times.
+            // now we need to copy all faces. since we will delete the source mesh afterwards
             for (unsigned int planck = 0;planck < pcMesh->mNumFaces;++planck)
             {
                 aiFace& f_src = pcMesh->mFaces[planck];
@@ -243,22 +247,11 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
 
                 f_dst.mNumIndices = num_idx;
 
-                unsigned int* pi;
-                if (!num_ref) { /* if last time the mesh is referenced -> no reallocation */
-                    pi = f_dst.mIndices = f_src.mIndices;
+                unsigned int pi = f_dst.mIndices = f_src.mIndices + aiCurrent[AI_PTVS_INDICES];
 
-                    // offset all vertex indices
-                    for (unsigned int hahn = 0; hahn < num_idx;++hahn){
-                        pi[hahn] += aiCurrent[AI_PTVS_VERTEX];
-                    }
-                }
-                else {
-                    pi = f_dst.mIndices = new unsigned int[num_idx];
-
-                    // copy and offset all vertex indices
-                    for (unsigned int hahn = 0; hahn < num_idx;++hahn){
-                        pi[hahn] = f_src.mIndices[hahn] + aiCurrent[AI_PTVS_VERTEX];
-                    }
+                // copy and offset all vertex indices
+                for (unsigned int hahn = 0; hahn < num_idx;++hahn){
+                    pcMeshOut->mIndices[pi + hahn] = pcMesh->mIndices[f_src.mIndices + hahn] + aiCurrent[AI_PTVS_VERTEX];
                 }
 
                 // Update the mPrimitiveTypes member of the mesh
@@ -280,6 +273,7 @@ void PretransformVertices::CollectData( aiScene* pcScene, aiNode* pcNode, unsign
             }
             aiCurrent[AI_PTVS_VERTEX] += pcMesh->mNumVertices;
             aiCurrent[AI_PTVS_FACE]   += pcMesh->mNumFaces;
+            aiCurrent[AI_PTVS_INDICES] += pcMesh->mNumIndices;
         }
     }
 
@@ -513,15 +507,18 @@ void PretransformVertices::Execute( aiScene* pScene)
             for (std::list<unsigned int>::const_iterator j =  aiVFormats.begin();j != aiVFormats.end();++j) {
                 unsigned int iVertices = 0;
                 unsigned int iFaces = 0;
-                CountVerticesAndFaces(pScene,pScene->mRootNode,i,*j,&iFaces,&iVertices);
+                unsigned int iIndices = 0;
+                CountVerticesAndFaces(pScene,pScene->mRootNode,i,*j,&iFaces,&iIndices,&iVertices);
                 if (0 != iFaces && 0 != iVertices)
                 {
                     apcOutMeshes.push_back(new aiMesh());
                     aiMesh* pcMesh = apcOutMeshes.back();
                     pcMesh->mNumFaces = iFaces;
                     pcMesh->mNumVertices = iVertices;
+                    pcMesh->mNumIndices = iIndices;
                     pcMesh->mFaces = new aiFace[iFaces];
                     pcMesh->mVertices = new aiVector3D[iVertices];
+                    pcMesh->mIndices = new unsigned int[iIndices];
                     pcMesh->mMaterialIndex = i;
                     if ((*j) & 0x2)pcMesh->mNormals = new aiVector3D[iVertices];
                     if ((*j) & 0x4)
@@ -542,7 +539,7 @@ void PretransformVertices::Execute( aiScene* pScene)
                         pcMesh->mColors[iFaces++] = new aiColor4D[iVertices];
 
                     // fill the mesh ...
-                    unsigned int aiTemp[2] = {0,0};
+                    unsigned int aiTemp[3] = {0,0,0};
                     CollectData(pScene,pScene->mRootNode,i,*j,pcMesh,aiTemp,&s[0]);
                 }
             }
@@ -560,12 +557,6 @@ void PretransformVertices::Execute( aiScene* pScene)
                 aiMesh* mesh = pScene->mMeshes[i];
                 mesh->mNumBones = 0;
                 mesh->mBones    = NULL;
-
-                // we're reusing the face index arrays. avoid destruction
-                for (unsigned int a = 0; a < mesh->mNumFaces; ++a) {
-                    mesh->mFaces[a].mNumIndices = 0;
-                    mesh->mFaces[a].mIndices = NULL;
-                }
 
                 delete mesh;
 

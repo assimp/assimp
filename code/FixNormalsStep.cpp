@@ -172,7 +172,7 @@ bool FixInfacingNormalsProcess::ProcessMesh( aiMesh* pcMesh, unsigned int index)
         {
             aiFace& face = pcMesh->mFaces[i];
             for( unsigned int b = 0; b < face.mNumIndices / 2; b++)
-                std::swap( face.mIndices[b], face.mIndices[ face.mNumIndices - 1 - b]);
+                std::swap( pcMesh->mIndices[face.mIndices + b], pcMesh->mIndices[face.mIndices + face.mNumIndices - 1 - b]);
         }
         return true;
     }

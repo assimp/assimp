@@ -636,6 +636,7 @@ public:
     uint32_t faceCount;
 
     std::vector<aiFace> faces;
+    std::vector<unsigned int> indices;
 };
 
 /// Ogre XML SubMesh

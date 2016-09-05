@@ -386,6 +386,8 @@ void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
     // Allocate enough storage
     pcMesh->mNumFaces = (width-1) * (height-1);
     pcMesh->mFaces = new aiFace[pcMesh->mNumFaces];
+    pcMesh->mNumIndices = pcMesh->mNumFaces * 4;
+    pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
 
     pcMesh->mNumVertices   = pcMesh->mNumFaces*4;
     aiVector3D* pcVertices = new aiVector3D[pcMesh->mNumVertices];
@@ -403,7 +405,7 @@ void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
     for (unsigned int y = 0; y < height-1;++y)  {
         for (unsigned int x = 0; x < width-1;++x,++pcFaceOut)   {
             pcFaceOut->mNumIndices = 4;
-            pcFaceOut->mIndices = new unsigned int[4];
+            pcFaceOut->mIndices = ((y * (width - 1)) + x) * 4;
 
             *pcVertOut++ = pcMesh->mVertices[y*width+x];
             *pcVertOut++ = pcMesh->mVertices[(y+1)*width+x];
@@ -425,7 +427,7 @@ void HMPImporter::CreateOutputFaceList(unsigned int width,unsigned int height)
             }
 
             for (unsigned int i = 0; i < 4;++i)
-                pcFaceOut->mIndices[i] = iCurrent++;
+                pcMesh->mIndices[pcFaceOut->mIndices + i] = iCurrent++;
         }
     }
     delete[] pcMesh->mVertices;

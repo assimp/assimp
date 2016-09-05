@@ -324,7 +324,7 @@ void FlipWindingOrderProcess::ProcessMesh( aiMesh* pMesh)
     {
         aiFace& face = pMesh->mFaces[a];
         for( unsigned int b = 0; b < face.mNumIndices / 2; b++)
-            std::swap( face.mIndices[b], face.mIndices[ face.mNumIndices - 1 - b]);
+            std::swap( pMesh->mIndices[face.mIndices + b], pMesh->mIndices[face.mIndices + face.mNumIndices - 1 - b]);
     }
 }
 

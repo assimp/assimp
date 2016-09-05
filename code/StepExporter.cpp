@@ -286,9 +286,9 @@ void StepExporter::WriteFile()
 
             if (face->mNumIndices != 3) continue;
 
-            aiVector3D* v1 = &(mesh->mVertices[face->mIndices[0]]);
-            aiVector3D* v2 = &(mesh->mVertices[face->mIndices[1]]);
-            aiVector3D* v3 = &(mesh->mVertices[face->mIndices[2]]);
+            aiVector3D* v1 = &(mesh->mVertices[mesh->mIndices[face->mIndices + 0]]);
+            aiVector3D* v2 = &(mesh->mVertices[mesh->mIndices[face->mIndices + 1]]);
+            aiVector3D* v3 = &(mesh->mVertices[mesh->mIndices[face->mIndices + 2]]);
             aiVector3D dv12 = *v2 - *v1;
             aiVector3D dv23 = *v3 - *v2;
             aiVector3D dv31 = *v1 - *v3;
@@ -308,9 +308,9 @@ void StepExporter::WriteFile()
                 fColor.r = 0.0;
                 fColor.g = 0.0;
                 fColor.b = 0.0;
-                fColor += mesh->mColors[0][face->mIndices[0]];
-                fColor += mesh->mColors[0][face->mIndices[1]];
-                fColor += mesh->mColors[0][face->mIndices[2]];
+                fColor += mesh->mColors[0][mesh->mIndices[face->mIndices + 0]];
+                fColor += mesh->mColors[0][mesh->mIndices[face->mIndices + 1]];
+                fColor += mesh->mColors[0][mesh->mIndices[face->mIndices + 2]];
                 fColor /= 3.0f;
             }
 

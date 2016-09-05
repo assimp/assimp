@@ -144,13 +144,15 @@ aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
 
     out->mNumFaces = (unsigned int)positions.size() / numIndices;
     out->mFaces = new aiFace[out->mNumFaces];
+    out->mNumIndices = positions.size();
+    out->mIndices = new unsigned int[out->mNumIndices];
     for (unsigned int i = 0, a = 0; i < out->mNumFaces;++i)
     {
         aiFace& f = out->mFaces[i];
         f.mNumIndices = numIndices;
-        f.mIndices = new unsigned int[numIndices];
+        f.mIndices = numIndices * i;
         for (unsigned int i = 0; i < numIndices;++i,++a)
-            f.mIndices[i] = a;
+            out->mIndices[f.mIndices + i] = a;
     }
     out->mNumVertices = (unsigned int)positions.size();
     out->mVertices = new aiVector3D[out->mNumVertices];

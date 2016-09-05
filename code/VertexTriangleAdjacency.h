@@ -71,7 +71,7 @@ public:
      *  @param bComputeNumTriangles If you want the class to compute
      *    a list containing the number of referenced triangles per vertex
      *    per vertex - pass true.  */
-    VertexTriangleAdjacency(aiFace* pcFaces,unsigned int iNumFaces,
+    VertexTriangleAdjacency(aiMesh *pcMesh, aiFace* pcFaces,unsigned int iNumFaces,
         unsigned int iNumVertices = 0,
         bool bComputeNumTriangles = true);
 

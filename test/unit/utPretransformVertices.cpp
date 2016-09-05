@@ -99,11 +99,13 @@ void PretransformVerticesTest::SetUp()
 
         mesh->mPrimitiveTypes = aiPrimitiveType_POINT;
         mesh->mFaces = new aiFace[ mesh->mNumFaces = 10+i ];
+        mesh->mIndices = new unsigned int[mesh->mNumIndices = mesh->mNumFaces];
         mesh->mVertices = new aiVector3D[mesh->mNumVertices = mesh->mNumFaces];
         for (unsigned int a = 0; a < mesh->mNumFaces; ++a ) {
             aiFace& f = mesh->mFaces[a];
-            f.mIndices = new unsigned int [f.mNumIndices = 1];
-            f.mIndices[0] = a*3;
+            f.mNumIndices = 1;
+            f.mIndices = a;
+            mesh->mIndices[f.mIndices + 0] = a*3;
 
             mesh->mVertices[a] = aiVector3D((float)i,(float)a,0.f);
         }

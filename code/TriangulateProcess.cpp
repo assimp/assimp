@@ -136,8 +136,8 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         return false;
     }
 
-    // Find out how many output faces we'll get
-    unsigned int numOut = 0, max_out = 0;
+    // Find out how many output faces and indices we'll get
+    unsigned int numOut = 0, max_out = 0, numIndices = 0;
     bool get_normals = true;
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
@@ -146,10 +146,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         }
         if( face.mNumIndices <= 3) {
             numOut++;
-
+            numIndices += face.mNumIndices;
         }
         else {
             numOut += face.mNumIndices-2;
+            numIndices += (face.mNumIndices - 2) * 3;
             max_out = std::max(max_out,face.mNumIndices);
         }
     }
@@ -171,6 +172,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     pMesh->mPrimitiveTypes &= ~aiPrimitiveType_POLYGON;
 
     aiFace* out = new aiFace[numOut](), *curOut = out;
+    unsigned int* outIndices = new unsigned int[numIndices], curIndexOut = 0;
     std::vector<aiVector3D> temp_verts3d(max_out+2); /* temporary storage for vertices */
     std::vector<aiVector2D> temp_verts(max_out+2);
 
@@ -196,7 +198,7 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
 
-        unsigned int* idx = face.mIndices;
+        unsigned int* idx = pMesh->mIndices + face.mIndices;
         int num = (int)face.mNumIndices, ear = 0, tmp, prev = num-1, next = 0, max = num;
 
         // Apply vertex colors to represent the face winding?
@@ -215,9 +217,9 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
         {
             aiFace& nface = *curOut++;
             nface.mNumIndices = face.mNumIndices;
-            nface.mIndices    = face.mIndices;
-
-            face.mIndices = NULL;
+            nface.mIndices    = curIndexOut;
+            memcpy(outIndices + nface.mIndices, pMesh->mIndices + face.mIndices, sizeof(unsigned int) * nface.mNumIndices);
+            curIndexOut += nface.mNumIndices;
             continue;
         }
         // optimized code for quadrilaterals
@@ -228,11 +230,11 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             // it.
             unsigned int start_vertex = 0;
             for (unsigned int i = 0; i < 4; ++i) {
-                const aiVector3D& v0 = verts[face.mIndices[(i+3) % 4]];
-                const aiVector3D& v1 = verts[face.mIndices[(i+2) % 4]];
-                const aiVector3D& v2 = verts[face.mIndices[(i+1) % 4]];
+                const aiVector3D& v0 = verts[pMesh->mIndices[face.mIndices + ((i+3) % 4)]];
+                const aiVector3D& v1 = verts[pMesh->mIndices[face.mIndices + ((i+2) % 4)]];
+                const aiVector3D& v2 = verts[pMesh->mIndices[face.mIndices + ((i+1) % 4)]];
 
-                const aiVector3D& v = verts[face.mIndices[i]];
+                const aiVector3D& v = verts[pMesh->mIndices[face.mIndices + i]];
 
                 aiVector3D left = (v0-v);
                 aiVector3D diag = (v1-v);
@@ -250,26 +252,25 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                 }
             }
 
-            const unsigned int temp[] = {face.mIndices[0], face.mIndices[1], face.mIndices[2], face.mIndices[3]};
+            const unsigned int temp[] = { pMesh->mIndices[face.mIndices + 0], pMesh->mIndices[face.mIndices + 1], pMesh->mIndices[face.mIndices + 2], pMesh->mIndices[face.mIndices + 3]};
 
             aiFace& nface = *curOut++;
             nface.mNumIndices = 3;
-            nface.mIndices = face.mIndices;
+            nface.mIndices = curIndexOut;
+            curIndexOut += 3;
 
-            nface.mIndices[0] = temp[start_vertex];
-            nface.mIndices[1] = temp[(start_vertex + 1) % 4];
-            nface.mIndices[2] = temp[(start_vertex + 2) % 4];
+            outIndices[nface.mIndices + 0] = temp[start_vertex];
+            outIndices[nface.mIndices + 1] = temp[(start_vertex + 1) % 4];
+            outIndices[nface.mIndices + 2] = temp[(start_vertex + 2) % 4];
 
             aiFace& sface = *curOut++;
             sface.mNumIndices = 3;
-            sface.mIndices = new unsigned int[3];
+            sface.mIndices = curIndexOut;
+            curIndexOut += 3;
 
-            sface.mIndices[0] = temp[start_vertex];
-            sface.mIndices[1] = temp[(start_vertex + 2) % 4];
-            sface.mIndices[2] = temp[(start_vertex + 3) % 4];
-
-            // prevent double deletion of the indices field
-            face.mIndices = NULL;
+            outIndices[sface.mIndices + 0] = temp[start_vertex];
+            outIndices[sface.mIndices + 1] = temp[(start_vertex + 2) % 4];
+            outIndices[sface.mIndices + 2] = temp[(start_vertex + 3) % 4];
             continue;
         }
         else
@@ -423,12 +424,14 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                         aiFace& nface = *curOut++;
 
                         nface.mNumIndices = 3;
-                        if (!nface.mIndices)
-                            nface.mIndices = new unsigned int[3];
+                        if (!nface.mIndices) {
+                            nface.mIndices = curIndexOut;
+                            curIndexOut += 3;
+                        }
 
-                        nface.mIndices[0] = 0;
-                        nface.mIndices[1] = tmp+1;
-                        nface.mIndices[2] = tmp+2;
+                        outIndices[nface.mIndices + 0] = 0;
+                        outIndices[nface.mIndices + 1] = tmp+1;
+                        outIndices[nface.mIndices + 2] = tmp+2;
 
                     }
                     num = 0;
@@ -439,13 +442,14 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                 nface.mNumIndices = 3;
 
                 if (!nface.mIndices) {
-                    nface.mIndices = new unsigned int[3];
+                    nface.mIndices = curIndexOut;
+                    curIndexOut += 3;
                 }
 
                 // setup indices for the new triangle ...
-                nface.mIndices[0] = prev;
-                nface.mIndices[1] = ear;
-                nface.mIndices[2] = next;
+                outIndices[nface.mIndices + 0] = prev;
+                outIndices[nface.mIndices + 1] = ear;
+                outIndices[nface.mIndices + 2] = next;
 
                 // exclude the ear from most further processing
                 done[ear] = true;
@@ -456,17 +460,18 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
                 aiFace& nface = *curOut++;
                 nface.mNumIndices = 3;
                 if (!nface.mIndices) {
-                    nface.mIndices = new unsigned int[3];
+                    nface.mIndices = curIndexOut;
+                    curIndexOut += 3;
                 }
 
                 for (tmp = 0; done[tmp]; ++tmp);
-                nface.mIndices[0] = tmp;
+                outIndices[nface.mIndices + 0] = tmp;
 
                 for (++tmp; done[tmp]; ++tmp);
-                nface.mIndices[1] = tmp;
+                outIndices[nface.mIndices + 1] = tmp;
 
                 for (++tmp; done[tmp]; ++tmp);
-                nface.mIndices[2] = tmp;
+                outIndices[nface.mIndices + 2] = tmp;
 
             }
         }
@@ -484,20 +489,17 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
 #endif
 
         for(aiFace* f = last_face; f != curOut; ) {
-            unsigned int* i = f->mIndices;
+            unsigned int* i = outIndices + f->mIndices;
 
             //  drop dumb 0-area triangles
             if (std::fabs(GetArea2D(temp_verts[i[0]],temp_verts[i[1]],temp_verts[i[2]])) < 1e-5f) {
                 DefaultLogger::get()->debug("Dropping triangle with area 0");
                 --curOut;
 
-                delete[] f->mIndices;
-                f->mIndices = NULL;
-
                 for(aiFace* ff = f; ff != curOut; ++ff) {
                     ff->mNumIndices = (ff+1)->mNumIndices;
                     ff->mIndices = (ff+1)->mIndices;
-                    (ff+1)->mIndices = NULL;
+                    (ff+1)->mIndices = 0;
                 }
                 continue;
             }
@@ -507,21 +509,21 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             i[2] = idx[i[2]];
             ++f;
         }
-
-        delete[] face.mIndices;
-        face.mIndices = NULL;
     }
 
 #ifdef AI_BUILD_TRIANGULATE_DEBUG_POLYS
     fclose(fout);
 #endif
 
-    // kill the old faces
+    // kill the old faces and indices
     delete [] pMesh->mFaces;
+    delete [] pMesh->mIndices;
 
     // ... and store the new ones
     pMesh->mFaces    = out;
     pMesh->mNumFaces = (unsigned int)(curOut-out); /* not necessarily equal to numOut */
+    pMesh->mIndices    = outIndices;
+    pMesh->mNumIndices = curIndexOut;
     return true;
 }
 

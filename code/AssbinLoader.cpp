@@ -347,24 +347,29 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
     {
         // if there are less than 2^16 vertices, we can simply use 16 bit integers ...
         mesh->mFaces = new aiFace[mesh->mNumFaces];
+        std::vector<unsigned int> indices;
         for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
             aiFace& f = mesh->mFaces[i];
 
             static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES <= 0xffff");
             f.mNumIndices = Read<uint16_t>(stream);
-            f.mIndices = new unsigned int[f.mNumIndices];
+            f.mIndices = (unsigned int)indices.size();
 
             for (unsigned int a = 0; a < f.mNumIndices;++a) {
                 if (mesh->mNumVertices < (1u<<16))
                 {
-                    f.mIndices[a] = Read<uint16_t>(stream);
+                    indices.push_back(Read<uint16_t>(stream));
                 }
                 else
                 {
-                    f.mIndices[a] = Read<unsigned int>(stream);
+                    indices.push_back(Read<unsigned int>(stream));
                 }
             }
         }
+
+        mesh->mNumIndices = (unsigned int)indices.size();
+        mesh->mIndices = new unsigned int[mesh->mNumIndices];
+        std::copy(indices.begin(), indices.end(), mesh->mIndices);
     }
 
     // write bones

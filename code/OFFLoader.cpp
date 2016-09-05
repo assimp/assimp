@@ -195,6 +195,10 @@ void OFFImporter::InternReadFile( const std::string& pFile,
     std::vector<aiVector3D> verts;
     verts.reserve(mesh->mNumVertices);
 
+    // allocate storage for the output indices
+    mesh->mIndices = new unsigned int[mesh->mNumIndices = mesh->mNumVertices];
+    unsigned int indices = 0;
+
     // second: now parse all face indices
     buffer = old;
     faces = mesh->mFaces;
@@ -208,7 +212,8 @@ void OFFImporter::InternReadFile( const std::string& pFile,
         if(!(idx) || idx > 9)
             continue;
 
-        faces->mIndices = new unsigned int [faces->mNumIndices];
+        faces->mIndices = indices;
+        indices += faces->mNumIndices;
         for (unsigned int m = 0; m < faces->mNumIndices;++m)
         {
             SkipSpaces(&sz);
@@ -218,7 +223,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
                 DefaultLogger::get()->error("OFF: Vertex index is out of range");
                 idx = numVertices-1;
             }
-            faces->mIndices[m] = p++;
+            mesh->mIndices[faces->mIndices + m] = p++;
             verts.push_back(tempPositions[idx]);
         }
         ++i;

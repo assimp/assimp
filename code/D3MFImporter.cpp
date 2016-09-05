@@ -235,36 +235,35 @@ private:
     void ImportTriangles(aiMesh* mesh)
     {
          std::vector<aiFace> faces;         
+         std::vector<unsigned int> indices;
 
 
          while(ReadToEndElement(D3MF::XmlTag::triangles))
          {
              if(xmlReader->getNodeName() == D3MF::XmlTag::triangle)
              {
-                 faces.push_back(ReadTriangle());
+                 aiFace face;
+
+                 face.mNumIndices = 3;
+                 face.mIndices = static_cast<unsigned int>(indices.size());
+                 indices.push_back(static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v1.c_str()))));
+                 indices.push_back(static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v2.c_str()))));
+                 indices.push_back(static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v3.c_str()))));
+
+                 faces.push_back(face);
              }
          }
 
         mesh->mNumFaces = static_cast<unsigned int>(faces.size());
         mesh->mFaces = new aiFace[mesh->mNumFaces];
+        mesh->mNumIndices = static_cast<unsigned int>(indices.size());
+        mesh->mIndices = new unsigned int[mesh->mNumIndices];
         mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
 
         std::copy(faces.begin(), faces.end(), mesh->mFaces);
+        std::copy(indices.begin(), indices.end(), mesh->mIndices);
 
-    }
-
-    aiFace ReadTriangle()
-    {
-        aiFace face;
-
-        face.mNumIndices = 3;
-        face.mIndices = new unsigned int[face.mNumIndices];
-        face.mIndices[0] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v1.c_str())));
-        face.mIndices[1] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v2.c_str())));
-        face.mIndices[2] = static_cast<unsigned int>(std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::v3.c_str())));
-
-        return face;
     }
 
 private:

@@ -509,6 +509,7 @@ struct TempMesh
     std::vector<aiVector3D> nrm;
     std::vector<aiVector3D> uv;
     std::vector<aiFace> faces;
+    std::vector<unsigned int> indices;
 };
 
 static void ReadShape(SIB* sib, StreamReaderLE* stream)
@@ -582,11 +583,11 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
 
         aiFace face;
         face.mNumIndices = *idx++;
-        face.mIndices = new unsigned[face.mNumIndices];
+        face.mIndices = dest.indices.size();
         for (unsigned pt=0;pt<face.mNumIndices;pt++,idx+=N)
         {
             size_t vtxIdx = dest.vtx.size();
-            face.mIndices[pt] = vtxIdx;
+            dest.indices.push_back(vtxIdx);
 
             // De-index it. We don't need to validate here as
             // we did it when creating the data.
@@ -623,6 +624,8 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
         mesh->mName = name;
         mesh->mNumFaces = src.faces.size();
         mesh->mFaces = new aiFace[mesh->mNumFaces];
+        mesh->mNumIndices = src.indices.size();
+        mesh->mIndices = new unsigned int[mesh->mNumIndices];
         mesh->mNumVertices = src.vtx.size();
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
         mesh->mNormals = new aiVector3D[mesh->mNumVertices];
@@ -639,6 +642,10 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
         for (unsigned i=0;i<mesh->mNumFaces;i++)
         {
             mesh->mFaces[i] = src.faces[i];
+        }
+        for (unsigned i=0;i<mesh->mNumIndices;i++)
+        {
+            mesh->mIndices[i] = src.indices[i];
         }
 
         sib->meshes.push_back(mesh);

@@ -114,6 +114,7 @@ private:
         unsigned int iMat,
         unsigned int iVFormat,
         unsigned int* piFaces,
+        unsigned int* piIndices,
         unsigned int* piVertices);
 
     // -------------------------------------------------------------------
@@ -122,7 +123,7 @@ private:
         unsigned int iMat,
         unsigned int iVFormat,
         aiMesh* pcMeshOut,
-        unsigned int aiCurrent[2],
+        unsigned int aiCurrent[3],
         unsigned int* num_refs);
 
     // -------------------------------------------------------------------

@@ -484,6 +484,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
         m->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
         m->mFaces = new aiFace[m->mNumFaces = g.triangles.size()];
+        m->mIndices = new unsigned int[m->mNumIndices = m->mNumFaces * 3];
         m->mNumVertices = m->mNumFaces*3;
 
         // storage for vertices - verbose format, as requested by the postprocessing pipeline
@@ -502,7 +503,8 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
             }
 
             TempTriangle& t = triangles[g.triangles[i]];
-            f.mIndices = new unsigned int[f.mNumIndices=3];
+            f.mNumIndices = 3;
+            f.mIndices = n;
 
             for (unsigned int i = 0; i < 3; ++i,++n) {
                 if (t.indices[i]>vertices.size()) {
@@ -527,7 +529,7 @@ void MS3DImporter::InternReadFile( const std::string& pFile,
 
                 m->mNormals[n] = t.normals[i];
                 m->mTextureCoords[0][n] = aiVector3D(t.uv[i].x,1.f-t.uv[i].y,0.0);
-                f.mIndices[i] = n;
+                m->mIndices[f.mIndices + i] = n;
             }
         }
 

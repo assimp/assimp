@@ -579,10 +579,10 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
             {
                 aiFace face;
                 face.mNumIndices = 3;
-                face.mIndices = new unsigned int[3];
-                face.mIndices[0] = ReadAttribute<uint32_t>(anV1);
-                face.mIndices[1] = ReadAttribute<uint32_t>(anV2);
-                face.mIndices[2] = ReadAttribute<uint32_t>(anV3);
+                face.mIndices = submesh->indexData->indices.size();
+                submesh->indexData->indices.push_back(ReadAttribute<uint32_t>(anV1));
+                submesh->indexData->indices.push_back(ReadAttribute<uint32_t>(anV2));
+                submesh->indexData->indices.push_back(ReadAttribute<uint32_t>(anV3));
 
                 /// @todo Support quads if Ogre even supports them in XML (I'm not sure but I doubt it)
                 if (!quadWarned && HasAttribute(anV4)) {

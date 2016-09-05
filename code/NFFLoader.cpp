@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
 #include <memory>
+#include <numeric>
 
 
 using namespace Assimp;
@@ -1134,6 +1135,7 @@ void NFFImporter::InternReadFile( const std::string& pFile,
         aiMesh* const mesh = pScene->mMeshes[m] = new aiMesh();
         mesh->mNumVertices = (unsigned int)src.vertices.size();
         mesh->mNumFaces = (unsigned int)src.faces.size();
+        mesh->mNumIndices = (unsigned int)std::accumulate(src.faces.begin(), src.faces.end(), 0);
 
         // Generate sub nodes for named meshes
         if ( src.name[ 0 ] && NULL != ppcChildren  ) {
@@ -1200,13 +1202,15 @@ void NFFImporter::InternReadFile( const std::string& pFile,
         // generate faces
         unsigned int p = 0;
         aiFace* pFace = mesh->mFaces = new aiFace[mesh->mNumFaces];
+        mesh->mIndices = new unsigned int[mesh->mNumIndices];
         for (std::vector<unsigned int>::const_iterator it2 = src.faces.begin(),
             end2 = src.faces.end();
             it2 != end2;++it2,++pFace)
         {
-            pFace->mIndices = new unsigned int [ pFace->mNumIndices = *it2 ];
+            pFace->mNumIndices = *it2;
+            pFace->mIndices = p;
             for (unsigned int o = 0; o < pFace->mNumIndices;++o)
-                pFace->mIndices[o] = p++;
+                mesh->mIndices[pFace->mIndices + o] = p++;
         }
 
         // generate a material for the mesh

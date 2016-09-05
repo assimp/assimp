@@ -63,11 +63,14 @@ struct Face
     //! Primitive type
     aiPrimitiveType m_PrimitiveType;
     //! Vertex indices
-    IndexArray *m_pVertices;
+    unsigned int m_numVertices;
+    unsigned int m_Vertices;
     //! Normal indices
-    IndexArray *m_pNormals;
+    unsigned int m_numNormals;
+    unsigned int m_Normals;
     //! Texture coordinates indices
-    IndexArray *m_pTexturCoords;
+    unsigned int m_numTexturCoords;
+    unsigned int m_TexturCoords;
     //! Pointer to assigned material
     Material *m_pMaterial;
 
@@ -75,31 +78,27 @@ struct Face
     //! \param  pVertices   Pointer to assigned vertex indexbuffer
     //! \param  pNormals    Pointer to assigned normals indexbuffer
     //! \param  pTexCoords  Pointer to assigned texture indexbuffer
-    Face( std::vector<unsigned int> *pVertices,
-            std::vector<unsigned int> *pNormals,
-            std::vector<unsigned int> *pTexCoords,
+    Face( unsigned int numVertices,
+            unsigned int Vertices,
+            unsigned int numNormals,
+            unsigned int Normals,
+            unsigned int numTexturCoords,
+            unsigned int TexturCoords,
             aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
         m_PrimitiveType( pt ),
-        m_pVertices( pVertices ),
-        m_pNormals( pNormals ),
-        m_pTexturCoords( pTexCoords ),
+        m_numVertices(numVertices),
+        m_Vertices(Vertices),
+        m_numNormals(numNormals),
+        m_Normals(Normals),
+        m_numTexturCoords(numTexturCoords),
+        m_TexturCoords(TexturCoords),
         m_pMaterial( 0L )
     {
         // empty
     }
 
     //! \brief  Destructor
-    ~Face()
-    {
-        delete m_pVertices;
-        m_pVertices = NULL;
-
-        delete m_pNormals;
-        m_pNormals = NULL;
-
-        delete m_pTexturCoords;
-        m_pTexturCoords = NULL;
-    }
+    ~Face() {}
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -229,7 +228,13 @@ struct Mesh {
     /// The name for the mesh
     std::string m_name;
     /// Array with pointer to all stored faces
-    std::vector<Face*> m_Faces;
+    std::vector<Face> m_Faces;
+    ///	Vertex indices
+    std::vector<unsigned int> m_Vertices;
+    ///	Normal indices
+    std::vector<unsigned int> m_Normals;
+    ///	Texture coordinates indices
+    std::vector<unsigned int> m_TexturCoords;
     /// Assigned material
     Material *m_pMaterial;
     /// Number of stored indices.
@@ -254,14 +259,7 @@ struct Mesh {
     }
 
     /// Destructor
-    ~Mesh()
-    {
-        for (std::vector<Face*>::iterator it = m_Faces.begin();
-            it != m_Faces.end(); ++it)
-        {
-            delete *it;
-        }
-    }
+    ~Mesh() {}
 };
 
 // ------------------------------------------------------------------------------------------------

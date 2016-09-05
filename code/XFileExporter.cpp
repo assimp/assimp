@@ -348,7 +348,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
         //for(int b = face.mNumIndices - 1; b >= 0 ; --b)
         for(size_t b = 0; b < face.mNumIndices ; ++b)
         {
-            mOutput << face.mIndices[b];
+            mOutput << mesh->mIndices[face.mIndices + b];
             //if (b > 0)
             if (b<face.mNumIndices-1)
                 mOutput << ",";
@@ -425,7 +425,7 @@ void XFileExporter::WriteMesh(aiMesh* mesh)
             //for(int b = face.mNumIndices-1; b >= 0 ; --b)
             for(size_t b = 0; b < face.mNumIndices ; ++b)
             {
-                mOutput << face.mIndices[b];
+                mOutput << mesh->mIndices[face.mIndices + b];
                 //if (b > 0)
                 if (b<face.mNumIndices-1)
                     mOutput << ",";

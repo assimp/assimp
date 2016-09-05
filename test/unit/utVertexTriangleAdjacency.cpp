@@ -53,7 +53,7 @@ class VTAdjacencyTest : public ::testing::Test
 {
 protected:
 
-    void checkMesh(const aiMesh& mesh);
+    void checkMesh(aiMesh& mesh);
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -65,22 +65,25 @@ TEST_F(VTAdjacencyTest, largeRandomDataSet)
 
     mesh.mNumVertices = 500;
     mesh.mNumFaces = 600;
+    mesh.mNumIndices = mesh.mNumFaces * 3;
 
     mesh.mFaces = new aiFace[600];
+    mesh.mIndices = new unsigned int[mesh.mNumIndices];
+
     unsigned int iCurrent = 0;
     for (unsigned int i = 0; i < 600;++i)
     {
         aiFace& face = mesh.mFaces[i];
         face.mNumIndices = 3;
-        face.mIndices = new unsigned int[3];
+        face.mIndices = i * 3;
 
         if (499 == iCurrent)iCurrent = 0;
-        face.mIndices[0] = iCurrent++;
+        mesh.mIndices[face.mIndices+0] = iCurrent++;
 
 
-        while(face.mIndices[0] == ( face.mIndices[1] = (unsigned int)(((float)rand()/RAND_MAX)*499)));
-        while(face.mIndices[0] == ( face.mIndices[2] = (unsigned int)(((float)rand()/RAND_MAX)*499)) ||
-            face.mIndices[1] == face.mIndices[2]);
+        while(mesh.mIndices[face.mIndices+0] == ( mesh.mIndices[face.mIndices+1] = (unsigned int)(((float)rand()/RAND_MAX)*499)));
+        while(mesh.mIndices[face.mIndices+0] == ( mesh.mIndices[face.mIndices+2] = (unsigned int)(((float)rand()/RAND_MAX)*499)) ||
+            mesh.mIndices[face.mIndices + 1] == mesh.mIndices[face.mIndices + 2]);
     }
 
     checkMesh(mesh);
@@ -96,23 +99,25 @@ TEST_F(VTAdjacencyTest, smallDataSet)
 
     mesh.mNumVertices = 5;
     mesh.mNumFaces = 3;
+    mesh.mNumIndices = mesh.mNumFaces * 3;
 
     mesh.mFaces = new aiFace[3];
-    mesh.mFaces[0].mIndices = new unsigned int[3];
-    mesh.mFaces[1].mIndices = new unsigned int[3];
-    mesh.mFaces[2].mIndices = new unsigned int[3];
+    mesh.mIndices = new unsigned int[mesh.mNumIndices];
+    mesh.mFaces[0].mIndices = 0;
+    mesh.mFaces[1].mIndices = 3;
+    mesh.mFaces[2].mIndices = 6;
 
-    mesh.mFaces[0].mIndices[0] = 1;
-    mesh.mFaces[0].mIndices[1] = 3;
-    mesh.mFaces[0].mIndices[2] = 2;
+    mesh.mIndices[mesh.mFaces[0].mIndices + 0] = 1;
+    mesh.mIndices[mesh.mFaces[0].mIndices + 1] = 3;
+    mesh.mIndices[mesh.mFaces[0].mIndices + 2] = 2;
 
-    mesh.mFaces[1].mIndices[0] = 0;
-    mesh.mFaces[1].mIndices[1] = 2;
-    mesh.mFaces[1].mIndices[2] = 3;
+    mesh.mIndices[mesh.mFaces[1].mIndices + 0] = 0;
+    mesh.mIndices[mesh.mFaces[1].mIndices + 1] = 2;
+    mesh.mIndices[mesh.mFaces[1].mIndices + 2] = 3;
 
-    mesh.mFaces[2].mIndices[0] = 3;
-    mesh.mFaces[2].mIndices[1] = 0;
-    mesh.mFaces[2].mIndices[2] = 4;
+    mesh.mIndices[mesh.mFaces[2].mIndices + 0] = 3;
+    mesh.mIndices[mesh.mFaces[2].mIndices + 1] = 0;
+    mesh.mIndices[mesh.mFaces[2].mIndices + 2] = 4;
 
     checkMesh(mesh);
 }
@@ -126,38 +131,40 @@ TEST_F(VTAdjacencyTest, unreferencedVerticesSet)
 
     mesh.mNumVertices = 500;
     mesh.mNumFaces = 600;
+    mesh.mNumIndices = mesh.mNumFaces * 3;
 
     mesh.mFaces = new aiFace[600];
+    mesh.mIndices = new unsigned int[mesh.mNumIndices];
     unsigned int iCurrent = 0;
     for (unsigned int i = 0; i < 600;++i)
     {
         aiFace& face = mesh.mFaces[i];
         face.mNumIndices = 3;
-        face.mIndices = new unsigned int[3];
+        face.mIndices = i * 3;
 
         if (499 == iCurrent)iCurrent = 0;
-        face.mIndices[0] = iCurrent++;
+        mesh.mIndices[face.mIndices + 0] = iCurrent++;
 
         if (499 == iCurrent)iCurrent = 0;
-        face.mIndices[1] = iCurrent++;
+        mesh.mIndices[face.mIndices + 1] = iCurrent++;
 
         if (499 == iCurrent)iCurrent = 0;
-        face.mIndices[2] = iCurrent++;
+        mesh.mIndices[face.mIndices + 2] = iCurrent++;
 
-        if (rand() > RAND_MAX/2 && face.mIndices[0])
+        if (rand() > RAND_MAX/2 && mesh.mIndices[face.mIndices + 0])
         {
-            face.mIndices[0]--;
+            mesh.mIndices[face.mIndices + 0]--;
         }
-        else if (face.mIndices[1]) face.mIndices[1]--;
+        else if (mesh.mIndices[face.mIndices + 1]) mesh.mIndices[face.mIndices + 1]--;
     }
 
     checkMesh(mesh);
 }
 
 // ------------------------------------------------------------------------------------------------
-void VTAdjacencyTest::checkMesh(const aiMesh& mesh)
+void VTAdjacencyTest::checkMesh(aiMesh& mesh)
 {
-    VertexTriangleAdjacency adj(mesh.mFaces,mesh.mNumFaces,mesh.mNumVertices,true);
+    VertexTriangleAdjacency adj(&mesh, mesh.mFaces,mesh.mNumFaces,mesh.mNumVertices,true);
 
     unsigned int* const piNum = adj.mLiveTriangles;
 
@@ -169,7 +176,7 @@ void VTAdjacencyTest::checkMesh(const aiMesh& mesh)
         aiFace& face = mesh.mFaces[i];
         for (unsigned int qq = 0; qq < 3 ;++qq)
         {
-            const unsigned int idx = face.mIndices[qq];
+            const unsigned int idx = mesh.mIndices[face.mIndices + qq];
             const unsigned int num = piNum[idx];
 
             // go to this offset
@@ -208,7 +215,7 @@ void VTAdjacencyTest::checkMesh(const aiMesh& mesh)
         aiFace& face = mesh.mFaces[i];
         for (unsigned int qq = 0; qq < 3 ;++qq)
         {
-            const unsigned int idx = face.mIndices[qq];
+            const unsigned int idx = mesh.mIndices[face.mIndices + qq];
 
             // we should not reach 0 here ...
             EXPECT_NE(0U, piNum[idx]);

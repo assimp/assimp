@@ -133,14 +133,14 @@ void STLExporter :: WriteMesh(const aiMesh* m)
         aiVector3D nor;
         if (m->mNormals) {
             for(unsigned int a = 0; a < f.mNumIndices; ++a) {
-                nor += m->mNormals[f.mIndices[a]];
+                nor += m->mNormals[m->mIndices[f.mIndices + a]];
             }
             nor.Normalize();
         }
         mOutput << " facet normal " << nor.x << " " << nor.y << " " << nor.z << endl;
         mOutput << "  outer loop" << endl;
         for(unsigned int a = 0; a < f.mNumIndices; ++a) {
-            const aiVector3D& v  = m->mVertices[f.mIndices[a]];
+            const aiVector3D& v  = m->mVertices[m->mIndices[f.mIndices + a]];
             mOutput << "  vertex " << v.x << " " << v.y << " " << v.z << endl;
         }
 
@@ -158,7 +158,7 @@ void STLExporter :: WriteMeshBinary(const aiMesh* m)
         aiVector3D nor;
         if (m->mNormals) {
             for(unsigned int a = 0; a < f.mNumIndices; ++a) {
-                nor += m->mNormals[f.mIndices[a]];
+                nor += m->mNormals[m->mIndices[f.mIndices + a]];
             }
             nor.Normalize();
         }
@@ -166,7 +166,7 @@ void STLExporter :: WriteMeshBinary(const aiMesh* m)
         AI_SWAP4(nx); AI_SWAP4(ny); AI_SWAP4(nz);
         mOutput.write((char *)&nx, 4); mOutput.write((char *)&ny, 4); mOutput.write((char *)&nz, 4);
         for(unsigned int a = 0; a < f.mNumIndices; ++a) {
-            const aiVector3D& v  = m->mVertices[f.mIndices[a]];
+            const aiVector3D& v  = m->mVertices[m->mIndices[f.mIndices + a]];
             ai_real vx = v.x, vy = v.y, vz = v.z;
             AI_SWAP4(vx); AI_SWAP4(vy); AI_SWAP4(vz);
             mOutput.write((char *)&vx, 4); mOutput.write((char *)&vy, 4); mOutput.write((char *)&vz, 4);

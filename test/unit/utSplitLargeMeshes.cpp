@@ -92,16 +92,18 @@ TEST_F(SplitLargeMeshesTest, testVertexSplit)
 
      pcMesh1->mNumFaces = pcMesh1->mNumVertices / 3;
      pcMesh1->mFaces = new aiFace[pcMesh1->mNumFaces];
+     pcMesh1->mNumIndices = pcMesh1->mNumFaces * 3;
+     pcMesh1->mIndices = new unsigned int[pcMesh1->mNumIndices];
 
      unsigned int qq = 0;
      for (unsigned int i = 0; i < pcMesh1->mNumFaces;++i)
      {
          aiFace& face = pcMesh1->mFaces[i];
          face.mNumIndices = 3;
-         face.mIndices = new unsigned int[3];
-         face.mIndices[0] = qq++;
-         face.mIndices[1] = qq++;
-         face.mIndices[2] = qq++;
+         face.mIndices = i * 3;
+         pcMesh1->mIndices[face.mIndices + 0] = qq++;
+         pcMesh1->mIndices[face.mIndices + 1] = qq++;
+         pcMesh1->mIndices[face.mIndices + 2] = qq++;
      }
 
 
@@ -137,15 +139,17 @@ TEST_F(SplitLargeMeshesTest, testTriangleSplit)
 
     pcMesh2->mNumFaces = 10000;
     pcMesh2->mFaces = new aiFace[pcMesh2->mNumFaces];
+    pcMesh2->mNumIndices = pcMesh2->mNumFaces * 3;
+    pcMesh2->mIndices = new unsigned int[pcMesh2->mNumIndices];
 
     for (unsigned int i = 0; i < pcMesh2->mNumFaces;++i)
     {
         aiFace& face = pcMesh2->mFaces[i];
         face.mNumIndices = 3;
-        face.mIndices = new unsigned int[3];
-        face.mIndices[0] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
-        face.mIndices[1] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
-        face.mIndices[2] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
+        face.mIndices = i * 3;
+        pcMesh2->mIndices[face.mIndices + 0] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
+        pcMesh2->mIndices[face.mIndices + 1] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
+        pcMesh2->mIndices[face.mIndices + 2] = (unsigned int)((rand() / (float)RAND_MAX) * pcMesh2->mNumVertices);
     }
 
     // the number of faces shouldn't change

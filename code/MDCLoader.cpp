@@ -278,6 +278,7 @@ void MDCImporter::InternReadFile(
         aiMesh* pcMesh = pScene->mMeshes[iNum++] = new aiMesh();
 
         pcMesh->mNumFaces = pcSurface->ulNumTriangles;
+        pcMesh->mNumIndices = pcMesh->mNumFaces * 3;
         pcMesh->mNumVertices = pcMesh->mNumFaces * 3;
 
         // store the name of the surface for use as node name.
@@ -303,6 +304,8 @@ void MDCImporter::InternReadFile(
         }
         // otherwise assign a reference to the default material
         else pcMesh->mMaterialIndex = iDefaultMatIndex;
+        unsigned int pcIndicesCur = 0;
+        pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
 
         // allocate output storage for the mesh
         aiVector3D* pcVertCur   = pcMesh->mVertices         = new aiVector3D[pcMesh->mNumVertices];
@@ -378,7 +381,8 @@ void MDCImporter::InternReadFile(
         {
             const unsigned int iOutIndex = iFace*3;
             pcFaceCur->mNumIndices = 3;
-            pcFaceCur->mIndices = new unsigned int[3];
+            pcFaceCur->mIndices = pcIndicesCur;
+            pcIndicesCur += 3;
 
             for (unsigned int iIndex = 0; iIndex < 3;++iIndex,
                 ++pcVertCur,++pcUVCur,++pcNorCur)
@@ -416,9 +420,9 @@ void MDCImporter::InternReadFile(
             }
 
             // swap the face order - DX to OGL
-            pcFaceCur->mIndices[0] = iOutIndex + 2;
-            pcFaceCur->mIndices[1] = iOutIndex + 1;
-            pcFaceCur->mIndices[2] = iOutIndex + 0;
+            pcMesh->mIndices[pcFaceCur->mIndices + 0] = iOutIndex + 2;
+            pcMesh->mIndices[pcFaceCur->mIndices + 1] = iOutIndex + 1;
+            pcMesh->mIndices[pcFaceCur->mIndices + 2] = iOutIndex + 0;
         }
 
         pcSurface =  new ((int8_t*)pcSurface + pcSurface->ulOffsetEnd) MDC::Surface;

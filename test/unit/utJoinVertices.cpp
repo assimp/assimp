@@ -82,12 +82,15 @@ void JoinVerticesTest::SetUp()
     // generate faces - each vertex is referenced once
     pcMesh->mNumFaces = 300;
     pcMesh->mFaces = new aiFace[300];
+    pcMesh->mNumIndices = pcMesh->mNumFaces * 3;
+    pcMesh->mIndices = new unsigned int[pcMesh->mNumIndices];
     for (unsigned int i = 0,p = 0; i < 300;++i)
     {
         aiFace& face = pcMesh->mFaces[i];
-        face.mIndices = new unsigned int[ face.mNumIndices = 3 ];
+        face.mNumIndices = 3;
+        face.mIndices = i * 3;
         for (unsigned int a = 0; a < 3;++a)
-            face.mIndices[a] = p++;
+            pcMesh->mIndices[face.mIndices + a] = p++;
     }
 
     // generate extra members - set them to zero to make sure they're identical

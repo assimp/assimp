@@ -188,10 +188,14 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
                 iCnt += pMesh->mFaces[p].mNumIndices;
             }
             pcMesh->mNumVertices = iCnt;
+            pcMesh->mNumIndices = iCnt;
 
             // allocate storage
             if (pMesh->mVertices != NULL)
                 pcMesh->mVertices = new aiVector3D[iCnt];
+
+            if (pMesh->mIndices != NULL)
+                pcMesh->mIndices = new unsigned int[iCnt];
 
             if (pMesh->HasNormals())
                 pcMesh->mNormals = new aiVector3D[iCnt];
@@ -282,8 +286,9 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
 
                 // setup face type and number of indices
                 pcMesh->mFaces[p].mNumIndices = iNumIndices;
-                unsigned int* pi = pMesh->mFaces[iTemp].mIndices;
-                unsigned int* piOut = pcMesh->mFaces[p].mIndices = new unsigned int[iNumIndices];
+                unsigned int* pi = pMesh->mIndices + pMesh->mFaces[iTemp].mIndices;
+                pcMesh->mFaces[p].mIndices = iCurrent;
+                unsigned int* piOut = pcMesh->mIndices + pcMesh->mFaces[p].mIndices;
 
                 // need to update the output primitive types
                 switch (iNumIndices)
@@ -467,6 +472,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 
             // output vectors
             std::vector<aiFace> vFaces;
+            std::vector<unsigned int> vIndices;
 
             // reserve enough storage for most cases
             if (pMesh->HasPositions())
@@ -492,6 +498,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
                 pcMesh->mTextureCoords[c] = new aiVector3D[iOutVertexNum];
             }
             vFaces.reserve(iEstimatedSize);
+            vIndices.reserve(iEstimatedSize * 3);
 
             // (we will also need to copy the array of indices)
             while (iBase < pMesh->mNumFaces)
@@ -503,7 +510,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
                 unsigned int iNeed = 0;
                 for (unsigned int v = 0; v < iNumIndices;++v)
                 {
-                    unsigned int iIndex = pMesh->mFaces[iBase].mIndices[v];
+                    unsigned int iIndex = pMesh->mIndices[pMesh->mFaces[iBase].mIndices + v];
 
                     // check whether we do already have this vertex
                     if (0xFFFFFFFF == avWasCopied[iIndex])
@@ -522,7 +529,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
 
                 // setup face type and number of indices
                 rFace.mNumIndices = iNumIndices;
-                rFace.mIndices = new unsigned int[iNumIndices];
+                rFace.mIndices = (unsigned int)vIndices.size();
 
                 // need to update the output primitive types
                 switch (rFace.mNumIndices)
@@ -543,12 +550,12 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
                 // and copy the contents of the old array, offset by current base
                 for (unsigned int v = 0; v < iNumIndices;++v)
                 {
-                    unsigned int iIndex = pMesh->mFaces[iBase].mIndices[v];
+                    unsigned int iIndex = pMesh->mIndices[pMesh->mFaces[iBase].mIndices + v];
 
                     // check whether we do already have this vertex
                     if (0xFFFFFFFF != avWasCopied[iIndex])
                     {
-                        rFace.mIndices[v] = avWasCopied[iIndex];
+                        vIndices.push_back(avWasCopied[iIndex]);
                         continue;
                     }
 
@@ -585,7 +592,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
                         }
                     }
                     // check whether we have bone weights assigned to this vertex
-                    rFace.mIndices[v] = pcMesh->mNumVertices;
+                    vIndices.push_back(pcMesh->mNumVertices);
                     if (avPerVertexWeights)
                     {
                         VertexWeightTable& table = avPerVertexWeights[ pcMesh->mNumVertices ];

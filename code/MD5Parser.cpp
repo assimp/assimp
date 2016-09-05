@@ -319,10 +319,11 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
                         desc.mFaces.resize(idx+1);
 
                     aiFace& face = desc.mFaces[idx];
-                    face.mIndices = new unsigned int[face.mNumIndices = 3];
+                    face.mNumIndices = 3;
+                    face.mIndices = (unsigned int)desc.mIndices.size();
                     for (unsigned int i = 0; i < 3;++i) {
                         AI_MD5_SKIP_SPACES();
-                        face.mIndices[i] = strtoul10(sz,&sz);
+                        desc.mIndices.push_back(strtoul10(sz,&sz));
                     }
                 }
                 // weight attribute

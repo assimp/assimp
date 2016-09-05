@@ -507,6 +507,15 @@ outer:
         }
         else uv = NULL;
 
+        for (FaceIdxArray::const_iterator it = fidx[i].begin(), end = fidx[i].end(); it != end; ++it)
+        {
+            Mesh& m = meshes[(*it).first];
+            Face& face = m.faces[(*it).second];
+
+            mesh->mNumIndices += (unsigned int)face.indices.size();
+        }
+        mesh->mIndices = new unsigned int[mesh->mNumIndices];
+
         // Build the final array
         unsigned int cnt = 0;
         for (FaceIdxArray::const_iterator it = fidx[i].begin(),end = fidx[i].end();
@@ -515,7 +524,7 @@ outer:
             Mesh& m    = meshes[(*it).first];
             Face& face = m.faces[(*it).second];
             faces->mNumIndices = (unsigned int)face.indices.size();
-            faces->mIndices = new unsigned int [faces->mNumIndices];
+            faces->mIndices = cnt;
 
 
             aiVector3D faceNormal;
@@ -568,7 +577,7 @@ outer:
                 }
 
                 // setup the new vertex index
-                faces->mIndices[n] = cnt;
+                mesh->mIndices[faces->mIndices + n] = cnt;
             }
 
         }

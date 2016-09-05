@@ -108,7 +108,7 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld)
         float fDist = 0.0f;
         for (unsigned int c = 0; c < 3;++c)
         {
-            aiVector3D vPos = pcMesh->mVertices[pcFace->mIndices[c]];
+            aiVector3D vPos = pcMesh->mVertices[pcMesh->mIndices[pcFace->mIndices+c]];
             vPos -= vLocalCamera;
             fDist += vPos.SquareLength();
         }
@@ -129,9 +129,9 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld)
             i != smap.end();++i)
         {
             const aiFace* pcFace =  &pcMesh->mFaces[(*i).second];
-            *aiIndices++ = (uint16_t)pcFace->mIndices[0];
-            *aiIndices++ = (uint16_t)pcFace->mIndices[1];
-            *aiIndices++ = (uint16_t)pcFace->mIndices[2];
+            *aiIndices++ = (uint16_t)pcMesh->mIndices[pcFace->mIndices+0];
+            *aiIndices++ = (uint16_t)pcMesh->mIndices[pcFace->mIndices+1];
+            *aiIndices++ = (uint16_t)pcMesh->mIndices[pcFace->mIndices+2];
         }
     }
     else if (D3DFMT_INDEX32 == sDesc.Format)
@@ -144,9 +144,9 @@ int CMeshRenderer::DrawSorted(unsigned int iIndex,const aiMatrix4x4& mWorld)
             i != smap.end();++i)
         {
             const aiFace* pcFace =  &pcMesh->mFaces[(*i).second];
-            *aiIndices++ = (uint32_t)pcFace->mIndices[0];
-            *aiIndices++ = (uint32_t)pcFace->mIndices[1];
-            *aiIndices++ = (uint32_t)pcFace->mIndices[2];
+            *aiIndices++ = (uint32_t)pcMesh->mIndices[pcFace->mIndices+0];
+            *aiIndices++ = (uint32_t)pcMesh->mIndices[pcFace->mIndices+1];
+            *aiIndices++ = (uint32_t)pcMesh->mIndices[pcFace->mIndices+2];
         }
     }
     pcHelper->piIB->Unlock();

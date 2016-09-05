@@ -261,10 +261,13 @@ void NDOImporter::InternReadFile( const std::string& pFile,
 
         vertices.clear();
         vertices.reserve(4 * face_table.size()); // arbitrarily chosen
+        indices.clear();
+        indices.reserve(4 * face_table.size()); // arbitrarily chosen
         for(FaceTable::value_type& v : face_table) {
             indices.clear();
 
             aiFace& f = *faces++;
+            f.mIndices = indices.size();
 
             const unsigned int key = v.first;
             unsigned int cur_edge = v.second;
@@ -287,12 +290,14 @@ void NDOImporter::InternReadFile( const std::string& pFile,
                 }
             }
 
-            f.mIndices = new unsigned int[f.mNumIndices = indices.size()];
-            std::copy(indices.begin(),indices.end(),f.mIndices);
+            f.mNumIndices = (indices.size() - f.mIndices);
         }
 
         mesh->mVertices = new aiVector3D[mesh->mNumVertices = vertices.size()];
         std::copy(vertices.begin(),vertices.end(),mesh->mVertices);
+
+        mesh->mIndices = new unsigned int[mesh->mNumIndices = indices.size()];
+        std::copy(indices.begin(), indices.end(), mesh->mIndices);
 
         if (mesh->mNumVertices) {
             pScene->mMeshes[pScene->mNumMeshes] = mesh;

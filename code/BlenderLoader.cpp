@@ -849,8 +849,10 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         out->mNormals  = new aiVector3D[per_mat_verts[it.first]];
 
         //out->mNumFaces = 0
+        //out->mNumIndices = 0
         //out->mNumVertices = 0
         out->mFaces = new aiFace[it.second]();
+        out->mIndices = new unsigned int[per_mat_verts[it.first]];
 
         // all submeshes created from this mesh are named equally. this allows
         // curious users to recover the original adjacency.
@@ -890,7 +892,8 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
         aiFace& f = out->mFaces[out->mNumFaces++];
 
-        f.mIndices = new unsigned int[ f.mNumIndices = mf.v4?4:3 ];
+        f.mNumIndices = mf.v4 ? 4 : 3;
+        f.mIndices = out->mNumIndices;
         aiVector3D* vo = out->mVertices + out->mNumVertices;
         aiVector3D* vn = out->mNormals + out->mNumVertices;
 
@@ -910,7 +913,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         vn->x = v->no[0];
         vn->y = v->no[1];
         vn->z = v->no[2];
-        f.mIndices[0] = out->mNumVertices++;
+        out->mIndices[out->mNumIndices++] = out->mNumVertices++;
         ++vo;
         ++vn;
 
@@ -925,7 +928,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         vn->x = v->no[0];
         vn->y = v->no[1];
         vn->z = v->no[2];
-        f.mIndices[1] = out->mNumVertices++;
+        out->mIndices[out->mNumIndices++] = out->mNumVertices++;
         ++vo;
         ++vn;
 
@@ -940,7 +943,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         vn->x = v->no[0];
         vn->y = v->no[1];
         vn->z = v->no[2];
-        f.mIndices[2] = out->mNumVertices++;
+        out->mIndices[out->mNumIndices++] = out->mNumVertices++;
         ++vo;
         ++vn;
 
@@ -956,7 +959,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             vn->x = v->no[0];
             vn->y = v->no[1];
             vn->z = v->no[2];
-            f.mIndices[3] = out->mNumVertices++;
+            out->mIndices[out->mNumIndices++] = out->mNumVertices++;
             ++vo;
             ++vn;
 
@@ -976,7 +979,8 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         aiMesh* const out = temp[ mat_num_to_mesh_idx[ mf.mat_nr ] ];
         aiFace& f = out->mFaces[out->mNumFaces++];
 
-        f.mIndices = new unsigned int[ f.mNumIndices = mf.totloop ];
+        f.mNumIndices = mf.totloop;
+        f.mIndices = out->mNumIndices;
         aiVector3D* vo = out->mVertices + out->mNumVertices;
         aiVector3D* vn = out->mNormals + out->mNumVertices;
 
@@ -1001,7 +1005,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             vn->x = v.no[0];
             vn->y = v.no[1];
             vn->z = v.no[2];
-            f.mIndices[j] = out->mNumVertices++;
+            out->mIndices[out->mNumIndices++] = out->mNumVertices++;
 
             ++vo;
             ++vn;

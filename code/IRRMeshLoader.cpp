@@ -116,14 +116,14 @@ const aiImporterDesc* IRRMeshImporter::GetInfo () const
     return &desc;
 }
 
-static void releaseMaterial( aiMaterial **mat ) {
+static void releaseMaterial( aiMaterial *mat ) {
     delete mat;
-    *mat = nullptr;
+    mat = nullptr;
 }
 
-static void releaseMesh( aiMesh **mesh ) {
+static void releaseMesh( aiMesh *mesh ) {
     delete mesh;
-    *mesh = nullptr;
+    mesh = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -170,8 +170,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
                 // end of previous buffer. A material and a mesh should be there
                 if ( !curMat || !curMesh)   {
                     DefaultLogger::get()->error("IRRMESH: A buffer must contain a mesh and a material");                    
-                    releaseMaterial( &curMat );
-                    releaseMesh( &curMesh );
+                    releaseMaterial( curMat );
+                    releaseMesh( curMesh );
                 } else {
                     materials.push_back(curMat);
                     meshes.push_back(curMesh);
@@ -192,7 +192,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
             if (!ASSIMP_stricmp(reader->getNodeName(),"material"))  {
                 if (curMat) {
                     DefaultLogger::get()->warn("IRRMESH: Only one material description per buffer, please");
-                    releaseMaterial( &curMat );
+                    releaseMaterial( curMat );
                 }
                 curMat = ParseMaterial(curMatFlags);
             }
@@ -204,8 +204,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
                     // This is possible ... remove the mesh from the list and skip further reading
                     DefaultLogger::get()->warn("IRRMESH: Found mesh with zero vertices");
 
-                    releaseMaterial( &curMat );
-                    releaseMesh( &curMesh );
+                    releaseMaterial( curMat );
+                    releaseMesh( curMesh );
                     textMeaning = 0;
                     continue;
                 }
@@ -248,7 +248,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
                     vertexFormat = 2;
                 }
                 else if (ASSIMP_stricmp("standard", t)) {
-                    releaseMaterial( &curMat );
+                    releaseMaterial( curMat );
                     DefaultLogger::get()->warn("IRRMESH: Unknown vertex format");
                 }
                 else vertexFormat = 0;
@@ -256,7 +256,7 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
             }
             else if (!ASSIMP_stricmp(reader->getNodeName(),"indices"))  {
                 if (curVertices.empty() && curMat)  {
-                    releaseMaterial( &curMat );
+                    releaseMaterial( curMat );
                     throw DeadlyImportError("IRRMESH: indices must come after vertices");
                 }
 
@@ -272,10 +272,10 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
                     DefaultLogger::get()->warn("IRRMESH: Found mesh with zero indices");
 
                     // mesh - away
-                    releaseMesh( &curMesh );
+                    releaseMesh( curMesh );
 
                     // material - away
-                    releaseMaterial( &curMat );
+                    releaseMaterial( curMat );
 
                     textMeaning = 0;
                     continue;
@@ -487,8 +487,8 @@ void IRRMeshImporter::InternReadFile( const std::string& pFile,
     if (curMat || curMesh)  {
         if ( !curMat || !curMesh)   {
             DefaultLogger::get()->error("IRRMESH: A buffer must contain a mesh and a material");
-            releaseMaterial( &curMat );
-            releaseMesh( &curMesh );
+            releaseMaterial( curMat );
+            releaseMesh( curMesh );
         }
         else    {
             materials.push_back(curMat);

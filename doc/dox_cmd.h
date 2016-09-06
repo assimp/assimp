@@ -495,19 +495,9 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
     <td>Will transform uv-coordinates if possible.</td>
   </tr>
   <tr>
-    <td><tt>-guv</tt></td>
-    <td><tt>--gen-uvcoords</tt></td>
-    <td>Will generate uv-coordinates for textures if possible.</td>
-  </tr>
-  <tr>
     <td><tt>-fid</tt></td>
     <td><tt>--find-invalid-data</tt></td>
     <td>Will look for invalid data in the imported model structure.</td>
-  </tr>
-  <tr>
-    <td><tt>-fixn</tt></td>
-    <td><tt>--fix normals</tt></td>
-    <td>Imported normal vector will be fixed.</td>
   </tr>
   <tr>
     <td><tt>-db</tt></td>

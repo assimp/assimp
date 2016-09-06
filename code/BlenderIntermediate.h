@@ -123,7 +123,7 @@ namespace Blender {
 
     struct ObjectCompare {
         bool operator() (const Object* left, const Object* right) const {
-            return ::strncmp(left->id.name, right->id.name, strlen( left->id.name ) ) == -1;
+            return ::strncmp(left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
         }
     };
 
@@ -144,7 +144,7 @@ namespace Blender {
 
         struct ObjectCompare {
             bool operator() (const Object* left, const Object* right) const {
-                return ::strncmp( left->id.name, right->id.name, strlen( left->id.name ) ) == -1;
+                return ::strncmp( left->id.name, right->id.name, strlen( left->id.name ) ) == 0;
             }
         };
 

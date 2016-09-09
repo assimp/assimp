@@ -489,9 +489,10 @@ inline uint8_t* Accessor::GetPointer()
 	if(bufferView->buffer->EncodedRegion_Current != nullptr)
 	{
 		const size_t begin = bufferView->buffer->EncodedRegion_Current->Offset;
-		const size_t end = bufferView->buffer->EncodedRegion_Current->Offset + bufferView->buffer->EncodedRegion_Current->DecodedData_Length;
+		const size_t end = begin + bufferView->buffer->EncodedRegion_Current->DecodedData_Length;
 
-		if((offset >= begin) && (offset < end)) return &bufferView->buffer->EncodedRegion_Current->DecodedData[offset - begin];
+		if((offset >= begin) && (offset < end))
+			return &bufferView->buffer->EncodedRegion_Current->DecodedData[offset - begin];
 	}
 
 	return basePtr + offset;

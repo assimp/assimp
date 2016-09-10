@@ -835,7 +835,7 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 
 			if(comp_data == nullptr) throw DeadlyImportError("GLTF: \"Open3DGC-compression\" must has \"compressedData\".");
 
-			Assimp::DefaultLogger::get()->info("GLTF: Decompressing Open3DGC data.");
+			DefaultLogger::get()->info("GLTF: Decompressing Open3DGC data.");
 
 			/************** Read data from JSON-document **************/
 			#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut) \

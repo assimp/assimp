@@ -672,7 +672,7 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
 
     // TODO: it does not split the loaded vertices, should it?
     //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-    Assimp::MakeVerboseFormatProcess process;
+	MakeVerboseFormatProcess process;
     process.Execute(pScene);
     
 

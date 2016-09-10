@@ -617,6 +617,7 @@ ADD_ASSIMP_IMPORTER( 3MF
     D3MFOpcPackage.h
     D3MFOpcPackage.cpp
 )
+SOURCE_GROUP( 3MF FILES ${(3MF_SRCS})
 
 
 SET( Step_SRCS

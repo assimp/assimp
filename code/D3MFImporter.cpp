@@ -339,15 +339,12 @@ D3MFImporter::~D3MFImporter()
 bool D3MFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const
 {    
     const std::string extension = GetExtension(pFile);
-
-    if(extension == "3mf")
-    {
+    if(extension == "3mf") {
         return true;
-    }
-    else if(!extension.length() || checkSig)
-    {
-        if(!pIOHandler)
+    } else if ( !extension.length() || checkSig ) {
+        if (nullptr == pIOHandler ) {
             return true;
+        }
     }
 
     return false;
@@ -365,8 +362,6 @@ const aiImporterDesc *D3MFImporter::GetInfo() const
 
 void D3MFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler)
 {
-
-
     D3MF::D3MFOpcPackage opcPackage(pIOHandler, pFile);
 
     std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(opcPackage.RootStream()));
@@ -374,12 +369,9 @@ void D3MFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOS
 
     D3MF::XmlSerializer xmlSerializer(xmlReader.get());
 
-
     xmlSerializer.ImportXml(pScene);
-
-
 }
 
-}
+} // Namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_3MF_IMPORTER

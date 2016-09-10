@@ -105,7 +105,7 @@ namespace glTF {
                 type = "arraybuffer";
         }
 
-        obj.AddMember("byteLength", b.byteLength, w.mAl);
+        obj.AddMember("byteLength", static_cast<uint64_t>(b.byteLength), w.mAl);
         obj.AddMember("type", StringRef(type), w.mAl);
         obj.AddMember("uri", Value(dataURI, w.mAl).Move(), w.mAl);
     }
@@ -113,8 +113,8 @@ namespace glTF {
     inline void Write(Value& obj, BufferView& bv, AssetWriter& w)
     {
         obj.AddMember("buffer", Value(bv.buffer->id, w.mAl).Move(), w.mAl);
-        obj.AddMember("byteOffset", bv.byteOffset, w.mAl);
-        obj.AddMember("byteLength", bv.byteLength, w.mAl);
+        obj.AddMember("byteOffset", static_cast<uint64_t>(bv.byteOffset), w.mAl);
+        obj.AddMember("byteLength", static_cast<uint64_t>(bv.byteLength), w.mAl);
         obj.AddMember("target", int(bv.target), w.mAl);
     }
 

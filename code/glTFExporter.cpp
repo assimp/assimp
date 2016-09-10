@@ -49,6 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 #include "ByteSwapper.h"
 
+#include "SplitLargeMeshes.h"
+#include "SceneCombiner.h"
+
 #include <assimp/version.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
@@ -77,8 +80,20 @@ namespace Assimp {
     // Worker function for exporting a scene to GLTF. Prototyped and registered in Exporter.cpp
     void ExportSceneGLTF(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
     {
+        aiScene* sceneCopy_tmp;
+        SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
+        std::unique_ptr<aiScene> sceneCopy(sceneCopy_tmp);
+
+        SplitLargeMeshesProcess_Triangle tri_splitter;
+        tri_splitter.SetLimit(0xffff);
+        tri_splitter.Execute(sceneCopy.get());
+
+        SplitLargeMeshesProcess_Vertex vert_splitter;
+        vert_splitter.SetLimit(0xffff);
+        vert_splitter.Execute(sceneCopy.get());
+
         // invoke the exporter
-        glTFExporter exporter(pFile, pIOSystem, pScene, pProperties, false);
+        glTFExporter exporter(pFile, pIOSystem, sceneCopy.get(), pProperties, false);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -100,11 +115,11 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     , mScene(pScene)
     , mProperties(pProperties)
 {
-    std::unique_ptr<Asset> asset(new glTF::Asset(pIOSystem));
-    mAsset = asset.get();
+    std::unique_ptr<Asset> asset();
+    mAsset.reset( new glTF::Asset( pIOSystem ) );
 
     if (isBinary) {
-        asset->SetAsBinary();
+        mAsset->SetAsBinary();
     }
 
     ExportMetadata();

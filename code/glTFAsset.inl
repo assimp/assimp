@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <Open3DGC/o3dgcSC3DMCDecoder.h>
 #endif
 
+using namespace Assimp;
+
 namespace glTF {
 
 namespace {

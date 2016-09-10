@@ -39,7 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "DefaultIOSystem.h"
@@ -51,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
-
 
 static const aiImporterDesc desc = {
     "Wavefront Object Importer",
@@ -389,8 +387,7 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
                                         const ObjFile::Object* pCurrentObject,
                                         unsigned int uiMeshIndex,
                                         aiMesh* pMesh,
-                                        unsigned int numIndices)
-{
+                                        unsigned int numIndices) {
     // Checking preconditions
     ai_assert( NULL != pCurrentObject );
 
@@ -400,8 +397,9 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 
     // Get current mesh
     ObjFile::Mesh *pObjMesh = pModel->m_Meshes[ uiMeshIndex ];
-    if ( NULL == pObjMesh || pObjMesh->m_uiNumIndices < 1)
+    if ( NULL == pObjMesh || pObjMesh->m_uiNumIndices < 1 ) {
         return;
+    }
 
     // Copy vertices of this mesh instance
     pMesh->mNumVertices = numIndices;
@@ -429,27 +427,25 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
 
     // Copy vertices, normals and textures into aiMesh instance
     unsigned int newIndex = 0, outIndex = 0;
-    for ( size_t index=0; index < pObjMesh->m_Faces.size(); index++ )
-    {
+    for ( size_t index=0; index < pObjMesh->m_Faces.size(); index++ ) {
         // Get source face
         ObjFile::Face *pSourceFace = pObjMesh->m_Faces[ index ];
 
         // Copy all index arrays
-        for ( size_t vertexIndex = 0, outVertexIndex = 0; vertexIndex < pSourceFace->m_pVertices->size(); vertexIndex++ )
-        {
+        for ( size_t vertexIndex = 0, outVertexIndex = 0; vertexIndex < pSourceFace->m_pVertices->size(); vertexIndex++ ) {
             const unsigned int vertex = pSourceFace->m_pVertices->at( vertexIndex );
-            if ( vertex >= pModel->m_Vertices.size() )
+            if ( vertex >= pModel->m_Vertices.size() ) {
                 throw DeadlyImportError( "OBJ: vertex index out of range" );
+            }
 
             pMesh->mVertices[ newIndex ] = pModel->m_Vertices[ vertex ];
 
             // Copy all normals
-            if ( !pModel->m_Normals.empty() && vertexIndex < pSourceFace->m_pNormals->size())
-            {
+            if ( !pModel->m_Normals.empty() && vertexIndex < pSourceFace->m_pNormals->size()) {
                 const unsigned int normal = pSourceFace->m_pNormals->at( vertexIndex );
-                if ( normal >= pModel->m_Normals.size() )
-                    throw DeadlyImportError("OBJ: vertex normal index out of range");
-
+                if ( normal >= pModel->m_Normals.size() ) {
+                    throw DeadlyImportError( "OBJ: vertex normal index out of range" );
+                }
                 pMesh->mNormals[ newIndex ] = pModel->m_Normals[ normal ];
             }
 
@@ -546,20 +542,21 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 
 // ------------------------------------------------------------------------------------------------
 //   Add clamp mode property to material if necessary
-void ObjFileImporter::addTextureMappingModeProperty(aiMaterial* mat, aiTextureType type, int clampMode)
-{
-    ai_assert( NULL != mat);
-    mat->AddProperty<int>(&clampMode, 1, AI_MATKEY_MAPPINGMODE_U(type, 0));
-    mat->AddProperty<int>(&clampMode, 1, AI_MATKEY_MAPPINGMODE_V(type, 0));
+void ObjFileImporter::addTextureMappingModeProperty( aiMaterial* mat, aiTextureType type, int clampMode) {
+    if ( nullptr == mat ) {
+        return;
+    }
+
+    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_U( type, 0 ) );
+    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_V( type, 0 ) );
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Creates the material
-void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pScene )
-{
-    ai_assert( NULL != pScene );
-    if ( NULL == pScene )
+void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pScene ) {
+    if ( NULL == pScene ) {
         return;
+    }
 
     const unsigned int numMaterials = (unsigned int) pModel->m_MaterialLib.size();
     pScene->mNumMaterials = 0;

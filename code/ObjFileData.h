@@ -285,8 +285,6 @@ struct Model
     ObjFile::Material *m_pDefaultMaterial;
     //! Vector with all generated materials
     std::vector<std::string> m_MaterialLib;
-    //! Vector with all generated group
-    std::vector<std::string> m_GroupLib;
     //! Vector with all generated vertices
     std::vector<aiVector3D> m_Vertices;
     //! vector with all generated normals

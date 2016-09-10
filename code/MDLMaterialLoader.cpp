@@ -731,6 +731,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     VALIDATE_FILE_SIZE(szCurrent);
     *szCurrentOut = szCurrent;
+    if ( nullptr != pcNew ) {
+        delete pcNew;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -74,11 +74,10 @@ static int ioprintf( IOStream * io, const char *format, ... ) {
 
     static const size_t Size = 4096;
     char sz[ Size ];
-    size_t len( strlen( format ) );
     ::memset( sz, '\0', Size );
     va_list va;
     va_start( va, format );
-    int nSize = vsnprintf( sz, Size-1, format, va );
+    const unsigned int nSize = vsnprintf( sz, Size-1, format, va );
     ai_assert( nSize < Size );
     va_end( va );
 

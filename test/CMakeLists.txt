@@ -37,11 +37,13 @@
 #----------------------------------------------------------------------
 cmake_minimum_required( VERSION 2.6 )
 
-INCLUDE( AddGTest )
+#INCLUDE( AddGTest )
 
 INCLUDE_DIRECTORIES(
-  ${Assimp_SOURCE_DIR}/include
-  ${Assimp_SOURCE_DIR}/code
+	../contrib/gtest/include
+	../contrib/gtest/
+    ${Assimp_SOURCE_DIR}/include
+    ${Assimp_SOURCE_DIR}/code
 )
 
 # Add the temporary output directories to the library path to make sure the
@@ -92,22 +94,19 @@ SET( TEST_SRCS
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 
-if(AddGTest_FOUND)
-    add_executable( unit
-      unit/CCompilerTest.c
-      unit/Main.cpp
-      ../code/Version.cpp
-      ${TEST_SRCS}
-    )
+add_executable( unit
+    ../contrib/gtest/src/gtest-all.cc
+	unit/CCompilerTest.c
+    unit/Main.cpp
+    ../code/Version.cpp
+    ${TEST_SRCS}
+)
 
-    add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
+add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
     
-    SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
+SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
-    add_dependencies( unit gtest )
-    target_link_libraries( unit assimp
-      debug ${GTEST_DEBUG_LIBRARIES}
-      optimized ${GTEST_RELEASE_LIBRARIES}
-    )
-endif(AddGTest_FOUND)
+#add_dependencies( unit )
+target_link_libraries( unit assimp)
+
 add_subdirectory(headercheck)

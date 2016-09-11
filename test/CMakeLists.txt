@@ -106,7 +106,12 @@ add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
     
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
-#add_dependencies( unit )
-target_link_libraries( unit assimp)
+IF( WIN32 )
+    SET( platform_libs )
+ELSE( WIN32 )
+    SET( platform_libs pthread )
+ENDIF( WIN32 )
+
+target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)

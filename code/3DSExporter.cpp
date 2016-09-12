@@ -365,7 +365,7 @@ void Discreet3DSExporter::WriteTexture(const aiMaterial& mat, aiTextureType type
     aiTextureMapMode map_mode[2] = {
         aiTextureMapMode_Wrap, aiTextureMapMode_Wrap
     };
-    float blend = 1.0f;
+    ai_real blend = 1.0;
     if (mat.GetTexture(type, 0, &path, NULL, NULL, &blend, NULL, map_mode) != AI_SUCCESS || !path.length) {
         return;
     }
@@ -558,6 +558,12 @@ void Discreet3DSExporter::WriteColor(const aiColor3D& color) {
 void Discreet3DSExporter::WritePercentChunk(float f) {
     ChunkWriter chunk(writer, Discreet3DS::CHUNK_PERCENTF);
     writer.PutF4(f);
+}
+
+// ------------------------------------------------------------------------------------------------
+void Discreet3DSExporter::WritePercentChunk(double f) {
+    ChunkWriter chunk(writer, Discreet3DS::CHUNK_PERCENTD);
+    writer.PutF8(f);
 }
 
 

@@ -129,6 +129,7 @@ public:
 
         CHUNK_PERCENTW  = 0x0030,       // int2   percentage
         CHUNK_PERCENTF  = 0x0031,       // float4  percentage
+        CHUNK_PERCENTD  = 0x0032,       // float8  percentage
         // ********************************************************************
 
         // Prj master chunk

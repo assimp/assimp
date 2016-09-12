@@ -66,35 +66,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 
 namespace Assimp {
-
 namespace D3MF {
 
 
 namespace XmlTag {
-
-    const std::string model     = "model";
-    const std::string metadata  = "metadata";
-    const std::string resources = "resources";
-    const std::string object    = "object";
-    const std::string mesh      = "mesh";
-    const std::string vertices  = "vertices";
-    const std::string vertex    = "vertex";
-    const std::string triangles = "triangles";
-    const std::string triangle  = "triangle";
-    const std::string x         = "x";
-    const std::string y         = "y";
-    const std::string z         = "z";
-    const std::string v1        = "v1";
-    const std::string v2        = "v2";
-    const std::string v3        = "v3";
-    const std::string id        = "id";
-    const std::string name      = "name";
-    const std::string type      = "type";
-    const std::string build     = "build";
-    const std::string item      = "item";
-    const std::string objectid  = "objectid";
-    const std::string transform = "transform";
-
+    static const std::string model     = "model";
+    static const std::string metadata  = "metadata";
+    static const std::string resources = "resources";
+    static const std::string object    = "object";
+    static const std::string mesh      = "mesh";
+    static const std::string vertices  = "vertices";
+    static const std::string vertex    = "vertex";
+    static const std::string triangles = "triangles";
+    static const std::string triangle  = "triangle";
+    static const std::string x         = "x";
+    static const std::string y         = "y";
+    static const std::string z         = "z";
+    static const std::string v1        = "v1";
+    static const std::string v2        = "v2";
+    static const std::string v3        = "v3";
+    static const std::string id        = "id";
+    static const std::string name      = "name";
+    static const std::string type      = "type";
+    static const std::string build     = "build";
+    static const std::string item      = "item";
+    static const std::string objectid  = "objectid";
+    static const std::string transform = "transform";
 }
 
 
@@ -342,15 +339,12 @@ D3MFImporter::~D3MFImporter()
 bool D3MFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const
 {    
     const std::string extension = GetExtension(pFile);
-
-    if(extension == "3mf")
-    {
+    if(extension == "3mf") {
         return true;
-    }
-    else if(!extension.length() || checkSig)
-    {
-        if(!pIOHandler)
+    } else if ( !extension.length() || checkSig ) {
+        if (nullptr == pIOHandler ) {
             return true;
+        }
     }
 
     return false;
@@ -368,8 +362,6 @@ const aiImporterDesc *D3MFImporter::GetInfo() const
 
 void D3MFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOSystem *pIOHandler)
 {
-
-
     D3MF::D3MFOpcPackage opcPackage(pIOHandler, pFile);
 
     std::unique_ptr<CIrrXML_IOStreamReader> xmlStream(new CIrrXML_IOStreamReader(opcPackage.RootStream()));
@@ -377,12 +369,9 @@ void D3MFImporter::InternReadFile(const std::string &pFile, aiScene *pScene, IOS
 
     D3MF::XmlSerializer xmlSerializer(xmlReader.get());
 
-
     xmlSerializer.ImportXml(pScene);
-
-
 }
 
-}
+} // Namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_3MF_IMPORTER

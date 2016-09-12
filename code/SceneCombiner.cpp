@@ -942,7 +942,7 @@ void SceneCombiner::MergeMaterials(aiMaterial** dest,
 
 // ------------------------------------------------------------------------------------------------
 template <typename Type>
-inline void CopyPtrArray (Type**& dest, const Type* const * src, unsigned int num)
+inline void CopyPtrArray (Type**& dest, const Type* const * src, ai_uint num)
 {
     if (!num)
     {
@@ -950,14 +950,14 @@ inline void CopyPtrArray (Type**& dest, const Type* const * src, unsigned int nu
         return;
     }
     dest = new Type*[num];
-    for (unsigned int i = 0; i < num;++i) {
+    for (ai_uint i = 0; i < num;++i) {
         SceneCombiner::Copy(&dest[i],src[i]);
     }
 }
 
 // ------------------------------------------------------------------------------------------------
 template <typename Type>
-inline void GetArrayCopy (Type*& dest, unsigned int num )
+inline void GetArrayCopy (Type*& dest, ai_uint num )
 {
     if (!dest)return;
     Type* old = dest;

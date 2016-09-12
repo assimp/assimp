@@ -93,7 +93,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
-    float* pOut,
+    ai_real* pOut,
     unsigned int* pMax)
 {
     ai_assert (pOut != NULL);
@@ -105,7 +105,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
         return AI_FAILURE;
     }
 
-    // data is given in floats, simply copy it
+    // data is given in floats, convert to ai_real
     unsigned int iWrite = 0;
     if( aiPTI_Float == prop->mType || aiPTI_Buffer == prop->mType)  {
         iWrite = prop->mDataLength / sizeof(float);
@@ -113,7 +113,20 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
             iWrite = std::min(*pMax,iWrite); ;
         }
         for (unsigned int a = 0; a < iWrite;++a)    {
-            pOut[a] = static_cast<float> ( reinterpret_cast<float*>(prop->mData)[a] );
+            pOut[a] = static_cast<ai_real> ( reinterpret_cast<float*>(prop->mData)[a] );
+        }
+        if (pMax) {
+            *pMax = iWrite;
+        }
+    }
+    // data is given in doubles, convert to float
+    else if( aiPTI_Double == prop->mType)  {
+        iWrite = prop->mDataLength / sizeof(double);
+        if (pMax) {
+            iWrite = std::min(*pMax,iWrite); ;
+        }
+        for (unsigned int a = 0; a < iWrite;++a)    {
+            pOut[a] = static_cast<ai_real> ( reinterpret_cast<double*>(prop->mData)[a] );
         }
         if (pMax) {
             *pMax = iWrite;
@@ -126,7 +139,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
             iWrite = std::min(*pMax,iWrite); ;
         }
         for (unsigned int a = 0; a < iWrite;++a)    {
-            pOut[a] = static_cast<float> ( reinterpret_cast<int32_t*>(prop->mData)[a] );
+            pOut[a] = static_cast<ai_real> ( reinterpret_cast<int32_t*>(prop->mData)[a] );
         }
         if (pMax) {
             *pMax = iWrite;
@@ -141,7 +154,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
         const char* cur =  prop->mData+4;
         ai_assert(prop->mDataLength>=5 && !prop->mData[prop->mDataLength-1]);
         for (unsigned int a = 0; ;++a) {
-            cur = fast_atoreal_move<float>(cur,pOut[a]);
+            cur = fast_atoreal_move<ai_real>(cur,pOut[a]);
             if(a==iWrite-1) {
                 break;
             }
@@ -241,11 +254,11 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
     aiColor4D* pOut)
 {
     unsigned int iMax = 4;
-    const aiReturn eRet = aiGetMaterialFloatArray(pMat,pKey,type,index,(float*)pOut,&iMax);
+    const aiReturn eRet = aiGetMaterialFloatArray(pMat,pKey,type,index,(ai_real*)pOut,&iMax);
 
     // if no alpha channel is defined: set it to 1.0
     if (3 == iMax) {
-        pOut->a = 1.0f;
+        pOut->a = 1.0;
     }
 
     return eRet;
@@ -260,7 +273,7 @@ aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
     aiUVTransform* pOut)
 {
     unsigned int iMax = 4;
-    return  aiGetMaterialFloatArray(pMat,pKey,type,index,(float*)pOut,&iMax);
+    return  aiGetMaterialFloatArray(pMat,pKey,type,index,(ai_real*)pOut,&iMax);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -326,7 +339,7 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     C_STRUCT aiString* path,
     aiTextureMapping* _mapping  /*= NULL*/,
     unsigned int* uvindex       /*= NULL*/,
-    float* blend                /*= NULL*/,
+    ai_real* blend              /*= NULL*/,
     aiTextureOp* op             /*= NULL*/,
     aiTextureMapMode* mapmode   /*= NULL*/,
     unsigned int* flags         /*= NULL*/

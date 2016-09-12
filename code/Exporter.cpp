@@ -321,7 +321,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 
                 // Always create a full copy of the scene. We might optimize this one day,
                 // but for now it is the most pragmatic way.
-                aiScene* scenecopy_tmp;
+                aiScene* scenecopy_tmp = NULL;
                 SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
 
                 std::unique_ptr<aiScene> scenecopy(scenecopy_tmp);

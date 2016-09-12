@@ -792,7 +792,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
     ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
     )
 {
-    // TODO: Resolve various problems with BMesh triangluation before re-enabling.
+    // TODO: Resolve various problems with BMesh triangulation before re-enabling.
     //       See issues #400, #373, #318  #315 and #132.
 #if defined(TODO_FIX_BMESH_CONVERSION)
     BlenderBMeshConverter BMeshConverter( mesh );
@@ -854,7 +854,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         //out->mNumVertices = 0
         out->mFaces = new aiFace[it.second]();
 
-        // all submeshes created from this mesh are named equally. this allows
+        // all sub-meshes created from this mesh are named equally. this allows
         // curious users to recover the original adjacency.
         out->mName = aiString(mesh->id.name+2);
             // skip over the name prefix 'ME'
@@ -1306,5 +1306,4 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
     return node.dismiss();
 }
 
-
-#endif
+#endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

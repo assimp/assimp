@@ -25,8 +25,8 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -1463,30 +1463,29 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
                 continue;
             }
             // another mesh UV channel ...
-            if (TokenMatch(filePtr,"MESH_MAPPINGCHANNEL" ,19))
-            {
-
-                unsigned int iIndex = 0;
+            if (TokenMatch(filePtr,"MESH_MAPPINGCHANNEL" ,19)) {
+                unsigned int iIndex( 0 );
                 ParseLV4MeshLong(iIndex);
-
-                if (iIndex < 2)
-                {
-                    LogWarning("Mapping channel has an invalid index. Skipping UV channel");
+                if ( 0 == iIndex ) {
+                    LogWarning( "Mapping channel has an invalid index. Skipping UV channel" );
                     // skip it ...
                     SkipSection();
+                } else {
+                    if ( iIndex < 2 ) {
+                        LogWarning( "Mapping channel has an invalid index. Skipping UV channel" );
+                        // skip it ...
+                        SkipSection();
+                    }
+                    if ( iIndex > AI_MAX_NUMBER_OF_TEXTURECOORDS ) {
+                        LogWarning( "Too many UV channels specified. Skipping channel .." );
+                        // skip it ...
+                        SkipSection();
+                    } else {
+                        // parse the mapping channel
+                        ParseLV3MappingChannel( iIndex - 1, mesh );
+                    }
+                    continue;
                 }
-                if (iIndex > AI_MAX_NUMBER_OF_TEXTURECOORDS)
-                {
-                    LogWarning("Too many UV channels specified. Skipping channel ..");
-                    // skip it ...
-                    SkipSection();
-                }
-                else
-                {
-                    // parse the mapping channel
-                    ParseLV3MappingChannel(iIndex-1,mesh);
-                }
-                continue;
             }
             // mesh animation keyframe. Not supported
             if (TokenMatch(filePtr,"MESH_ANIMATION" ,14))

@@ -372,7 +372,7 @@ private:
     unsigned int configFrameID;
 
     /** Buffer to hold the loaded file */
-    const char* mBuffer;
+    std::vector<char> mBuffer;
 
     /** Output scene to be filled
     */

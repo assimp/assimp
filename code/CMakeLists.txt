@@ -618,7 +618,6 @@ ADD_ASSIMP_IMPORTER( 3MF
     D3MFOpcPackage.cpp
 )
 
-
 SET( Step_SRCS
   StepExporter.h
   StepExporter.cpp
@@ -660,7 +659,6 @@ SET( Clipper_SRCS
   ../contrib/clipper/clipper.cpp
 )
 SOURCE_GROUP( Clipper FILES ${Clipper_SRCS})
-
 
 SET( Poly2Tri_SRCS
   ../contrib/poly2tri/poly2tri/common/shapes.cc

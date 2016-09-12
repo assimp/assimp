@@ -692,38 +692,36 @@ int ObjFileParser::getMaterialIndex( const std::string &strMaterialName )
 
 // -------------------------------------------------------------------
 //  Getter for a group name.
-void ObjFileParser::getGroupName()
-{
-    std::string strGroupName;
+void ObjFileParser::getGroupName() {
+    std::string groupName;
 
     // here we skip 'g ' from line
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
-    m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, strGroupName);
+    m_DataIt = getName<DataArrayIt>(m_DataIt, m_DataItEnd, groupName);
     if( isEndOfBuffer( m_DataIt, m_DataItEnd ) ) {
         return;
     }
 
     // Change active group, if necessary
-    if ( m_pModel->m_strActiveGroup != strGroupName )
-    {
+    if ( m_pModel->m_strActiveGroup != groupName ) {
         // Search for already existing entry
-        ObjFile::Model::ConstGroupMapIt it = m_pModel->m_Groups.find(strGroupName);
+        ObjFile::Model::ConstGroupMapIt it = m_pModel->m_Groups.find(groupName);
 
         // We are mapping groups into the object structure
-        createObject( strGroupName );
+        createObject( groupName );
 
         // New group name, creating a new entry
         if (it == m_pModel->m_Groups.end())
         {
             std::vector<unsigned int> *pFaceIDArray = new std::vector<unsigned int>;
-            m_pModel->m_Groups[ strGroupName ] = pFaceIDArray;
+            m_pModel->m_Groups[ groupName ] = pFaceIDArray;
             m_pModel->m_pGroupFaceIDs = (pFaceIDArray);
         }
         else
         {
             m_pModel->m_pGroupFaceIDs = (*it).second;
         }
-        m_pModel->m_strActiveGroup = strGroupName;
+        m_pModel->m_strActiveGroup = groupName;
     }
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }

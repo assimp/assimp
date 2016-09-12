@@ -275,9 +275,6 @@ void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  co
         orig_object.id.name,"`");
 }
 
-
-
-
 // ------------------------------------------------------------------------------------------------
 bool BlenderModifier_Subdivision :: IsActive (const ModifierData& modin)
 {
@@ -323,4 +320,4 @@ void  BlenderModifier_Subdivision :: DoIt(aiNode& out, ConversionData& conv_data
         orig_object.id.name,"`");
 }
 
-#endif
+#endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

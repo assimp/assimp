@@ -719,7 +719,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
     }
 
     // make some more specific tests
-    float fTemp;
+    ai_real fTemp;
     int iShading;
     if (AI_SUCCESS == aiGetMaterialInteger( pMaterial,AI_MATKEY_SHADING_MODEL,&iShading))   {
         switch ((aiShadingMode)iShading)
@@ -741,7 +741,7 @@ void ValidateDSProcess::Validate( const aiMaterial* pMaterial)
         };
     }
 
-    if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp) && (!fTemp || fTemp > 1.01f)) {
+    if (AI_SUCCESS == aiGetMaterialFloat( pMaterial,AI_MATKEY_OPACITY,&fTemp) && (!fTemp || fTemp > 1.01)) {
         ReportWarning("Invalid opacity value (must be 0 < opacity < 1.0)");
     }
 

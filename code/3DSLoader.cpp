@@ -1270,6 +1270,11 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
         break;
 
 
+    case Discreet3DS::CHUNK_PERCENTD:
+        // Manually parse the blend factor
+        pcOut->mTextureBlend = stream->GetF8();
+        break;
+
     case Discreet3DS::CHUNK_PERCENTF:
         // Manually parse the blend factor
         pcOut->mTextureBlend = stream->GetF4();

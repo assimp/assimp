@@ -48,7 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-#include "types.h"
+// Public ASSIMP data structures
+#include <assimp/config.h>
+#include <assimp/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,7 +89,7 @@ ASSIMP_API size_t aiGetExportFormatCount(void);
 
 // --------------------------------------------------------------------------------
 /** Returns a description of the nth export file format. Use #aiGetExportFormatCount()
- * to learn how many export formats are supported. The description must be released by 
+ * to learn how many export formats are supported. The description must be released by
  * calling aiReleaseExportFormatDescription afterwards.
  * @param pIndex Index of the export format to retrieve information for. Valid range is
  *    0 to #aiGetExportFormatCount()
@@ -96,7 +98,7 @@ ASSIMP_API size_t aiGetExportFormatCount(void);
 ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size_t pIndex);
 
 // --------------------------------------------------------------------------------
-/** Release a description of the nth export file format. Must be returned by 
+/** Release a description of the nth export file format. Must be returned by
 * aiGetExportFormatDescription
 * @param desc Pointer to the description
 */
@@ -260,4 +262,3 @@ ASSIMP_API void aiReleaseExportBlob( const C_STRUCT aiExportDataBlob* pData );
 
 #endif // ASSIMP_BUILD_NO_EXPORT
 #endif // AI_EXPORT_H_INC
-

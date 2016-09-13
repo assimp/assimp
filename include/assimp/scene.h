@@ -111,7 +111,7 @@ struct aiNode
     /** The number of meshes of this node. */
     unsigned int mNumMeshes;
 
-    /** The meshes of this node. Each entry is an index into the 
+    /** The meshes of this node. Each entry is an index into the
       * mesh list of the #aiScene.
       */
     unsigned int* mMeshes;

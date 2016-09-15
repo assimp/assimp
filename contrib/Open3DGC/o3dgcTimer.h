@@ -27,6 +27,8 @@ THE SOFTWARE.
 #include "o3dgcCommon.h"
 
 #ifdef WIN32
+/* Thank you, Microsoft, for file WinDef.h with min/max redefinition. */
+#define NOMINMAX
 #include <windows.h>
 #elif __MACH__
 #include <mach/clock.h>

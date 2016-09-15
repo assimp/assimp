@@ -739,12 +739,8 @@ FIND_PACKAGE(RT QUIET)
 IF (RT_FOUND OR MSVC)
   SET( ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC 1 )
   ADD_DEFINITIONS( -DASSIMP_IMPORTER_GLTF_USE_OPEN3DGC=1 )
-  IF (NOT RT_FOUND)
-	SET (RT_LIBRARY "")
-  ENDIF (NOT RT_FOUND)
 ELSE ()
   SET (open3dgc_SRCS "")
-  SET (RT_LIBRARY "")
   MESSAGE (INFO " RT-extension not found. glTF import/export will be built without Open3DGC-compression.")
   #!TODO: off course is better to remove statistics timers from o3dgc codec. Or propose to choose what to use.
 ENDIF ()
@@ -874,7 +870,7 @@ endif (UNZIP_FOUND)
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
-  SET_PROPERTY(TARGET assimp APPEND PROPERTY LINK_FLAGS ${RT_LIBRARY})
+  TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
 ENDIF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
 
 INSTALL( TARGETS assimp

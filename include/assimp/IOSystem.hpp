@@ -67,7 +67,8 @@ class IOStream;
  *  to the importer library. If you implement this interface, you also want to
  *  supply a custom implementation for IOStream.
  *
- *  @see Importer::SetIOHandler() */
+ *  @see Importer::SetIOHandler() 
+ */
 class ASSIMP_API IOSystem
 #ifndef SWIG
     : public Intern::AllocateFromAssimpHeap

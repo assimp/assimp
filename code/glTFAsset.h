@@ -489,6 +489,9 @@ namespace glTF
         bool IsSpecial() const
             { return mIsSpecial; }
 
+        std::string GetURI()
+            { return std::string(this->id) + ".bin"; }
+
         static const char* TranslateId(Asset& r, const char* id);
     };
 

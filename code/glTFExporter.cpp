@@ -137,9 +137,13 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     ExportScene();
 
-
     glTF::AssetWriter writer(*mAsset);
-    writer.WriteFile(filename);
+
+    if (isBinary) {
+        writer.WriteGLBFile(filename);
+    } else {
+        writer.WriteFile(filename);
+    }
 }
 
 
@@ -267,6 +271,15 @@ void glTFExporter::ExportMaterials()
 
 void glTFExporter::ExportMeshes()
 {
+    std::string fname = std::string(mFilename);
+    std::string bufferIdPrefix = fname.substr(0, fname.find("."));
+    std::string bufferId = mAsset->FindUniqueID("", bufferIdPrefix.c_str());
+
+    Ref<Buffer> b = mAsset->GetBodyBuffer();
+    if (!b) {
+        b = mAsset->buffers.Create(bufferId);
+    }
+
     for (unsigned int i = 0; i < mScene->mNumMeshes; ++i) {
         const aiMesh* aim = mScene->mMeshes[i];
 
@@ -276,13 +289,6 @@ void glTFExporter::ExportMeshes()
         Mesh::Primitive& p = m->primitives.back();
 
         p.material = mAsset->materials.Get(aim->mMaterialIndex);
-
-        std::string bufferId = mAsset->FindUniqueID(meshId, "buffer");
-
-        Ref<Buffer> b = mAsset->GetBodyBuffer();
-        if (!b) {
-            b = mAsset->buffers.Create(bufferId);
-        }
 
         Ref<Accessor> v = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mVertices, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if (v) p.attributes.position.push_back(v);

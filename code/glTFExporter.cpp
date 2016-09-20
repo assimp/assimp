@@ -290,6 +290,13 @@ size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
 bool comp_allow;// Point that data of current mesh can be compressed.
 // Variables needed for compression. END.
 
+	std::string bufferId = mAsset->FindUniqueID("", "buffer");
+
+	Ref<Buffer> b = mAsset->GetBodyBuffer();
+	if (!b) {
+		b = mAsset->buffers.Create(bufferId);
+	}
+
 	for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
 		const aiMesh* aim = mScene->mMeshes[idx_mesh];
 
@@ -325,13 +332,6 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 
         p.material = mAsset->materials.Get(aim->mMaterialIndex);
 
-        std::string bufferId = mAsset->FindUniqueID(meshId, "buffer");
-
-        Ref<Buffer> b = mAsset->GetBodyBuffer();
-        if (!b) {
-            b = mAsset->buffers.Create(bufferId);
-        }
-
 		/******************* Vertices ********************/
 		// If compression is used then you need parameters of uncompressed region: begin and size. At this step "begin" is stored.
 		if(comp_allow) idx_srcdata_begin = b->byteLength;
@@ -347,6 +347,13 @@ bool comp_allow;// Point that data of current mesh can be compressed.
 
 		/************** Texture coordinates **************/
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+            // Flip UV y coords
+            if (aim -> mNumUVComponents[i] > 1) {
+                for (unsigned int j = 0; j < aim->mNumVertices; ++j) {
+                    aim->mTextureCoords[i][j].y = 1 - aim->mTextureCoords[i][j].y;
+                }
+            }
+
             if (aim->mNumUVComponents[i] > 0) {
                 AttribType::Value type = (aim->mNumUVComponents[i] == 2) ? AttribType::VEC2 : AttribType::VEC3;
 

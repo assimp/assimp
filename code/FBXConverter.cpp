@@ -1286,8 +1286,6 @@ unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, con
         if ( uvs.empty() ) {
             break;
         }
-        out_mesh->mNumIndices = std::accumulate(faces.begin(), faces.end(), 0);
-        out_mesh->mIndices = new unsigned int[out_mesh->mNumIndices];
 
         aiVector3D* out_uv = out_mesh->mTextureCoords[ i ] = new aiVector3D[ vertices.size() ];
         for( const aiVector2D& v : uvs ) {

@@ -40,6 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "ModelDiffer.h"
 #include <assimp/scene.h>
+#include <assimp/mesh.h>
+#include <assimp/material.h>
 #include <sstream>
 
 using namespace Assimp;
@@ -65,17 +67,42 @@ bool ModelDiffer::isEqual( aiScene *expected, aiScene *toCompare ) {
         return false;
     }
 
+    // meshes
     if ( expected->mNumMeshes != toCompare->mNumMeshes ) {
         std::stringstream stream;
         stream << "Number of meshes not equal ( expected: " << expected->mNumMeshes << ", found : " << toCompare->mNumMeshes << " )\n";
         addDiff( stream.str() );
+        return false;
     }
 
     for ( unsigned int i = 0; i < expected->mNumMeshes; i++ ) {
         aiMesh *expMesh( expected->mMeshes[ i ] );
         aiMesh *toCompMesh( toCompare->mMeshes[ i ] );
-        compareMesh( expMesh, toCompMesh );
+        if ( !compareMesh( expMesh, toCompMesh ) ) {
+            std::stringstream stream;
+            stream << "Meshes are not equal, index : " << i << "\n";
+            addDiff( stream.str() );
+        }
     }
+
+    // materials
+    if ( expected->mNumMaterials != toCompare->mNumMaterials ) {
+        std::stringstream stream;
+        stream << "Number of materials not equal ( expected: " << expected->mNumMaterials << ", found : " << toCompare->mNumMaterials << " )\n";
+        addDiff( stream.str() );
+        return false;
+    }
+    for ( unsigned int i = 0; i < expected->mNumMaterials; i++ ) {
+        aiMaterial *expectedMat( expected->mMaterials[ i ] );
+        aiMaterial *toCompareMat( expected->mMaterials[ i ] );
+        if ( !compareMaterial( expectedMat, toCompareMat ) ) {
+            std::stringstream stream;
+            stream << "Materials are not equal, index : " << i << "\n";
+            addDiff( stream.str() );
+        }
+    }
+
+    return true;
 }
 
 void ModelDiffer::showReport() {
@@ -241,7 +268,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
         aiVector3D &toCompBiTangents( toCompare->mBitangents[ i ] );
         if ( expBiTangents != toCompBiTangents ) {
             std::stringstream stream;
-            stream << "Tangents not equal ( expected: " << dumpVector3( expBiTangents ) << ", found: " << dumpVector3( toCompBiTangents ) << "\n";
+            stream << "Tangents not equal ( expected: " << dumpVector3( expBiTangents ) << ", found: " << dumpVector3( toCompBiTangents ) << " )\n";
             addDiff( stream.str() );
             tangentsEqual = false;
         }
@@ -250,5 +277,64 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
         return false;
     }
 
+    // faces
+    if ( expected->mNumFaces != toCompare->mNumFaces ) {
+        std::stringstream stream;
+        stream << "Number of faces are not equal, ( expected: " << expected->mNumFaces << ", found: " << toCompare->mNumFaces << ")\n";
+        addDiff( stream.str() );
+        return false;
+    }
+    bool facesEqual( true );
+    for ( unsigned int i = 0; i < expected->mNumFaces; i++ ) {
+        aiFace &expFace( expected->mFaces[ i ] );
+        aiFace &toCompareFace( expected->mFaces[ i ] );
+        if ( !compareFace( &expFace, &toCompareFace ) ) {
+            facesEqual = false;
+        }
+    }
+    if ( !facesEqual ) {
+        return false;
+    }
+
     return true;
+}
+
+bool ModelDiffer::compareFace( aiFace *expected, aiFace *toCompare ) {
+    if ( nullptr == expected ) {
+        return false;
+    }
+    if ( nullptr == toCompare ) {
+        return false;
+    }
+
+    // same instance
+    if ( expected == toCompare ) {
+        return true;
+    }
+
+    // using compare operator
+    if ( *expected == *toCompare ) {
+        return true;
+    }
+
+    return false;
+}
+
+bool ModelDiffer::compareMaterial( aiMaterial *expected, aiMaterial *toCompare ) {
+    if ( nullptr == expected ) {
+        return false;
+    }
+    if ( nullptr == toCompare ) {
+        return false;
+    }
+
+    // same instance
+    if ( expected == toCompare ) {
+        return true;
+    }
+
+    // todo!
+
+    return true;
+
 }

@@ -38,32 +38,44 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#pragma once
 
 #include "UnitTestPCH.h"
-#include <fast_atof.h>
-#include <vector>
-#include <string>
+#include "ModelDiffer.h"
+#include <assimp/Importer.hpp>
+using namespace Assimp;
 
-struct aiScene;
-struct aiMesh;
-struct aiMaterial;
-struct aiFace;
-
-class ModelDiffer {
-public:
-    ModelDiffer();
-    ~ModelDiffer();
-    bool isEqual( aiScene *expected, aiScene *toCompare );
-    void showReport();
-    void reset();
-
-protected:
-    void addDiff( const std::string &diff );
-    bool compareMesh( aiMesh *expected, aiMesh *toCompare );
-    bool compareFace( aiFace *expected, aiFace *toCompare );
-    bool compareMaterial( aiMaterial *expected, aiMaterial *toCompare );
-
-private:
-    std::vector<std::string> m_diffs;
+class utObjImportExport : public ::testing::Test {
+    // empty
 };
+
+static const std::string ObjModel =
+    "o 1\n"
+    "\n"
+    "# Vertex list\n"
+    "\n"
+    "v -0.5 -0.5 0.5\n"
+    "v -0.5 -0.5 -0.5\n"
+    "v -0.5  0.5 -0.5\n"
+    "v -0.5  0.5  0.5\n"
+    "v  0.5 -0.5  0.5\n"
+    "v  0.5 -0.5 -0.5\n"
+    "v  0.5  0.5 -0.5\n"
+    "v  0.5  0.5  0.5\n"
+    "\n"
+    "# Point / Line / Face list\n"
+    "\n"
+    "usemtl Default\n"
+    "f 4 3 2 1\n"
+    "f 2 6 5 1\n"
+    "f 3 7 6 2\n"
+    "f 8 7 3 4\n"
+    "f 5 8 4 1\n"
+    "f 6 7 8 5\n"
+    "\n"
+    "# End of file\n";
+
+TEST_F( utObjImportExport, obj_import_test ) {
+    Assimp::Importer im;
+    const aiScene *scene = im.ReadFileFromMemory( (void*) ObjModel.c_str(), ObjModel.size(), 0 );
+    EXPECT_NE( nullptr, scene );
+}

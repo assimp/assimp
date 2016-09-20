@@ -291,6 +291,13 @@ void glTFExporter::ExportMeshes()
         if (n) p.attributes.normal.push_back(n);
 
         for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+            // Flip UV y coords
+            if (aim -> mNumUVComponents[i] > 1) {
+                for (unsigned int j = 0; j < aim->mNumVertices; ++j) {
+                    aim->mTextureCoords[i][j].y = 1 - aim->mTextureCoords[i][j].y;
+                }
+            }
+
             if (aim->mNumUVComponents[i] > 0) {
                 AttribType::Value type = (aim->mNumUVComponents[i] == 2) ? AttribType::VEC2 : AttribType::VEC3;
                 Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, true);

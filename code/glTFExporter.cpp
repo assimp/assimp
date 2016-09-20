@@ -80,20 +80,9 @@ namespace Assimp {
     // Worker function for exporting a scene to GLTF. Prototyped and registered in Exporter.cpp
     void ExportSceneGLTF(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
     {
-        aiScene* sceneCopy_tmp;
-        SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
-        std::unique_ptr<aiScene> sceneCopy(sceneCopy_tmp);
-
-        SplitLargeMeshesProcess_Triangle tri_splitter;
-        tri_splitter.SetLimit(0xffff);
-        tri_splitter.Execute(sceneCopy.get());
-
-        SplitLargeMeshesProcess_Vertex vert_splitter;
-        vert_splitter.SetLimit(0xffff);
-        vert_splitter.Execute(sceneCopy.get());
 
         // invoke the exporter
-        glTFExporter exporter(pFile, pIOSystem, sceneCopy.get(), pProperties, false);
+        glTFExporter exporter(pFile, pIOSystem, pScene, pProperties, false);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -112,9 +101,22 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
                            const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
-    , mScene(pScene)
     , mProperties(pProperties)
 {
+    aiScene* sceneCopy_tmp;
+    SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
+    std::unique_ptr<aiScene> sceneCopy(sceneCopy_tmp);
+
+    SplitLargeMeshesProcess_Triangle tri_splitter;
+    tri_splitter.SetLimit(0xffff);
+    tri_splitter.Execute(sceneCopy.get());
+
+    SplitLargeMeshesProcess_Vertex vert_splitter;
+    vert_splitter.SetLimit(0xffff);
+    vert_splitter.Execute(sceneCopy.get());
+
+    mScene = sceneCopy.get();
+
     std::unique_ptr<Asset> asset();
     mAsset.reset( new glTF::Asset( pIOSystem ) );
 

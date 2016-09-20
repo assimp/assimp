@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -56,11 +56,11 @@ namespace glTF {
         inline Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
-            for (int i = 0; i < N; ++i) {
+			for (decltype(N) i = 0; i < N; ++i) {
                 val.PushBack(r[i], al);
             }
             return val;
-        };
+        }
 
         template<class T>
         inline void AddRefsVector(Value& obj, const char* fieldId, std::vector< Ref<T> >& v, MemoryPoolAllocator<>& al) {
@@ -72,7 +72,7 @@ namespace glTF {
                 lst.PushBack(StringRef(v[i]->id), al);
             }
             obj.AddMember(StringRef(fieldId), lst, al);
-        };
+        }
 
 
     }
@@ -199,6 +199,60 @@ namespace glTF {
 
     inline void Write(Value& obj, Mesh& m, AssetWriter& w)
     {
+		/********************* Name **********************/
+		obj.AddMember("name", m.name, w.mAl);
+
+		/**************** Mesh extensions ****************/
+		if(m.Extension.size() > 0)
+		{
+			Value json_extensions;
+
+			json_extensions.SetObject();
+			for(Mesh::SExtension* ptr_ext : m.Extension)
+			{
+				switch(ptr_ext->Type)
+				{
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+					case Mesh::SExtension::EType::Compression_Open3DGC:
+						{
+							Value json_comp_data;
+							Mesh::SCompression_Open3DGC* ptr_ext_comp = (Mesh::SCompression_Open3DGC*)ptr_ext;
+
+							// filling object "compressedData"
+							json_comp_data.SetObject();
+							json_comp_data.AddMember("buffer", ptr_ext_comp->Buffer, w.mAl);
+							json_comp_data.AddMember("byteOffset", ptr_ext_comp->Offset, w.mAl);
+							json_comp_data.AddMember("componentType", 5121, w.mAl);
+							json_comp_data.AddMember("type", "SCALAR", w.mAl);
+							json_comp_data.AddMember("count", ptr_ext_comp->Count, w.mAl);
+							if(ptr_ext_comp->Binary)
+								json_comp_data.AddMember("mode", "binary", w.mAl);
+							else
+								json_comp_data.AddMember("mode", "ascii", w.mAl);
+
+							json_comp_data.AddMember("indicesCount", ptr_ext_comp->IndicesCount, w.mAl);
+							json_comp_data.AddMember("verticesCount", ptr_ext_comp->VerticesCount, w.mAl);
+							// filling object "Open3DGC-compression"
+							Value json_o3dgc;
+
+							json_o3dgc.SetObject();
+							json_o3dgc.AddMember("compressedData", json_comp_data, w.mAl);
+							// add member to object "extensions"
+							json_extensions.AddMember("Open3DGC-compression", json_o3dgc, w.mAl);
+						}
+
+						break;
+#endif
+					default:
+						throw DeadlyImportError("GLTF: Can not write mesh: unknown mesh extension, only Open3DGC is supported.");
+				}// switch(ptr_ext->Type)
+			}// for(Mesh::SExtension* ptr_ext : m.Extension)
+
+			// Add extensions to mesh
+			obj.AddMember("extensions", json_extensions, w.mAl);
+		}// if(m.Extension.size() > 0)
+
+		/****************** Primitives *******************/
         Value primitives;
         primitives.SetArray();
         primitives.Reserve(unsigned(m.primitives.size()), w.mAl);

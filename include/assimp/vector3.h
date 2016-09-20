@@ -98,7 +98,6 @@ public:
     operator aiVector3t<TOther> () const;
 
 public:
-
     /** @brief Set the components of a vector
      *  @param pX X component
      *  @param pY Y component
@@ -108,7 +107,6 @@ public:
     /** @brief Get the squared length of the vector
      *  @return Square length */
     TReal SquareLength() const;
-
 
     /** @brief Get the length of the vector
      *  @return length */

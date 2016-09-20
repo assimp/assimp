@@ -54,7 +54,7 @@ class ModelDiffer {
 public:
     ModelDiffer();
     ~ModelDiffer();
-    bool isEqual( aiScene *expected, aiScene *toCompare );
+    bool isEqual( const aiScene *expected, const aiScene *toCompare );
     void showReport();
     void reset();
 

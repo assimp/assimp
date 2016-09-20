@@ -54,7 +54,7 @@ ModelDiffer::~ModelDiffer() {
     // empty
 }
 
-bool ModelDiffer::isEqual( aiScene *expected, aiScene *toCompare ) {
+bool ModelDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
     if ( expected == toCompare ) {
         return true;
     }
@@ -172,7 +172,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
         aiVector3D &expVert( expected->mVertices[ i ] );
         aiVector3D &toCompVert( toCompare->mVertices[ i ] );
-        if ( expVert != toCompVert ) {
+        if ( expVert.Equal( toCompVert ) ) {
             std::stringstream stream;
             stream << "Vertex not equal ( expected: " << dumpVector3( expVert ) << ", found: " << dumpVector3( toCompVert ) << "\n";
             addDiff( stream.str() );
@@ -193,7 +193,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
         aiVector3D &expNormal( expected->mNormals[ i ] );
         aiVector3D &toCompNormal( toCompare->mNormals[ i ] );
-        if ( expNormal != toCompNormal ) {
+        if ( expNormal.Equal( toCompNormal ) ) {
             std::stringstream stream;
             stream << "Normal not equal ( expected: " << dumpVector3( expNormal ) << ", found: " << dumpVector3( toCompNormal ) << "\n";
             addDiff( stream.str() );
@@ -236,7 +236,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
         for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
             aiVector3D &expTexCoord( expected->mTextureCoords[ a ][ i ] );
             aiVector3D &toCompTexCoord( toCompare->mTextureCoords[ a ][ i ] );
-            if ( expTexCoord != toCompTexCoord ) {
+            if ( expTexCoord.Equal( toCompTexCoord ) ) {
                 std::stringstream stream;
                 stream << "Texture coords not equal ( expected: " << dumpVector3( expTexCoord ) << ", found: " << dumpVector3( toCompTexCoord ) << "\n";
                 addDiff( stream.str() );
@@ -257,7 +257,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
         aiVector3D &expTangents( expected->mTangents[ i ] );
         aiVector3D &toCompTangents( toCompare->mTangents[ i ] );
-        if ( expTangents != toCompTangents ) {
+        if ( expTangents.Equal( toCompTangents ) ) {
             std::stringstream stream;
             stream << "Tangents not equal ( expected: " << dumpVector3( expTangents ) << ", found: " << dumpVector3( toCompTangents ) << "\n";
             addDiff( stream.str() );
@@ -266,7 +266,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
 
         aiVector3D &expBiTangents( expected->mBitangents[ i ] );
         aiVector3D &toCompBiTangents( toCompare->mBitangents[ i ] );
-        if ( expBiTangents != toCompBiTangents ) {
+        if ( expBiTangents.Equal( toCompBiTangents ) ) {
             std::stringstream stream;
             stream << "Tangents not equal ( expected: " << dumpVector3( expBiTangents ) << ", found: " << dumpVector3( toCompBiTangents ) << " )\n";
             addDiff( stream.str() );
@@ -336,5 +336,4 @@ bool ModelDiffer::compareMaterial( aiMaterial *expected, aiMaterial *toCompare )
     // todo!
 
     return true;
-
 }

@@ -94,9 +94,6 @@ namespace glTF {
 
     inline void Write(Value& obj, Buffer& b, AssetWriter& w)
     {
-        std::string dataURI = "data:application/octet-stream;base64,";
-        Util::EncodeBase64(b.GetPointer(), b.byteLength, dataURI);
-
         const char* type;
         switch (b.type) {
             case Buffer::Type_text:
@@ -107,7 +104,7 @@ namespace glTF {
 
         obj.AddMember("byteLength", static_cast<uint64_t>(b.byteLength), w.mAl);
         obj.AddMember("type", StringRef(type), w.mAl);
-        obj.AddMember("uri", Value(dataURI, w.mAl).Move(), w.mAl);
+        obj.AddMember("uri", Value(b.GetURI(), w.mAl).Move(), w.mAl);
     }
 
     inline void Write(Value& obj, BufferView& bv, AssetWriter& w)
@@ -382,39 +379,61 @@ namespace glTF {
 
     inline void AssetWriter::WriteFile(const char* path)
     {
-        bool isBinary = mAsset.extensionsUsed.KHR_binary_glTF;
+        std::unique_ptr<IOStream> jsonOutFile(mAsset.OpenFile(path, "wt", true));
 
-        std::unique_ptr<IOStream> outfile
-            (mAsset.OpenFile(path, isBinary ? "wb" : "wt", true));
+        if (jsonOutFile == 0) {
+            throw DeadlyExportError("Could not open output file: " + std::string(path));
+        }
+
+        StringBuffer docBuffer;
+
+        PrettyWriter<StringBuffer> writer(docBuffer);
+        mDoc.Accept(writer);
+
+        if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
+            throw DeadlyExportError("Failed to write scene data!");
+        }
+
+        // Write buffer data to separate .bin files
+        for (unsigned int i = 0; i < mAsset.buffers.Size(); ++i) {
+            Ref<Buffer> b = mAsset.buffers.Get(i);
+
+            std::string binPath = b->GetURI();
+
+            std::unique_ptr<IOStream> binOutFile(mAsset.OpenFile(binPath, "wb", true));
+
+            if (binOutFile == 0) {
+                throw DeadlyExportError("Could not open output file: " + binPath);
+            }
+
+            if (b->byteLength > 0) {
+                if (binOutFile->Write(b->GetPointer(), b->byteLength, 1) != 1) {
+                    throw DeadlyExportError("Failed to write binary file: " + binPath);
+                }
+            }
+        }
+    }
+
+    inline void AssetWriter::WriteGLBFile(const char* path)
+    {
+        std::unique_ptr<IOStream> outfile(mAsset.OpenFile(path, "wb", true));
 
         if (outfile == 0) {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
-        if (isBinary) {
-            // we will write the header later, skip its size
-            outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
-        }
+        // we will write the header later, skip its size
+        outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
 
         StringBuffer docBuffer;
-
-        bool pretty = true; 
-        if (!isBinary && pretty) {
-            PrettyWriter<StringBuffer> writer(docBuffer);
-            mDoc.Accept(writer);
-        }
-        else {
-            Writer<StringBuffer> writer(docBuffer);
-            mDoc.Accept(writer);
-        }
+        Writer<StringBuffer> writer(docBuffer);
+        mDoc.Accept(writer);
 
         if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
-            throw DeadlyExportError("Failed to write scene data!"); 
+            throw DeadlyExportError("Failed to write scene data!");
         }
 
-        if (isBinary) {
-            WriteBinaryData(outfile.get(), docBuffer.GetSize());
-        }
+        WriteBinaryData(outfile.get(), docBuffer.GetSize());
     }
 
     inline void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
@@ -438,7 +457,6 @@ namespace glTF {
                 }
             }
         }
-
 
         //
         // write the header

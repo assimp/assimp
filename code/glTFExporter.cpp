@@ -80,20 +80,9 @@ namespace Assimp {
     // Worker function for exporting a scene to GLTF. Prototyped and registered in Exporter.cpp
     void ExportSceneGLTF(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
     {
-        aiScene* sceneCopy_tmp;
-        SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
-        std::unique_ptr<aiScene> sceneCopy(sceneCopy_tmp);
-
-        SplitLargeMeshesProcess_Triangle tri_splitter;
-        tri_splitter.SetLimit(0xffff);
-        tri_splitter.Execute(sceneCopy.get());
-
-        SplitLargeMeshesProcess_Vertex vert_splitter;
-        vert_splitter.SetLimit(0xffff);
-        vert_splitter.Execute(sceneCopy.get());
 
         // invoke the exporter
-        glTFExporter exporter(pFile, pIOSystem, sceneCopy.get(), pProperties, false);
+        glTFExporter exporter(pFile, pIOSystem, pScene, pProperties, false);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -112,9 +101,22 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
                            const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
-    , mScene(pScene)
     , mProperties(pProperties)
 {
+    aiScene* sceneCopy_tmp;
+    SceneCombiner::CopyScene(&sceneCopy_tmp, pScene);
+    std::unique_ptr<aiScene> sceneCopy(sceneCopy_tmp);
+
+    SplitLargeMeshesProcess_Triangle tri_splitter;
+    tri_splitter.SetLimit(0xffff);
+    tri_splitter.Execute(sceneCopy.get());
+
+    SplitLargeMeshesProcess_Vertex vert_splitter;
+    vert_splitter.SetLimit(0xffff);
+    vert_splitter.Execute(sceneCopy.get());
+
+    mScene = sceneCopy.get();
+
     std::unique_ptr<Asset> asset();
     mAsset.reset( new glTF::Asset( pIOSystem ) );
 
@@ -144,9 +146,13 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     ExportScene();
 
-
     glTF::AssetWriter writer(*mAsset);
-    writer.WriteFile(filename);
+
+    if (isBinary) {
+        writer.WriteGLBFile(filename);
+    } else {
+        writer.WriteFile(filename);
+    }
 }
 
 
@@ -274,28 +280,30 @@ void glTFExporter::ExportMaterials()
 
 void glTFExporter::ExportMeshes()
 {
-// Not for
-//     using IndicesType = decltype(aiFace::mNumIndices);
-// But yes for
-//     using IndicesType = unsigned short;
-// because "ComponentType_UNSIGNED_SHORT" used for indices. And it's a maximal type according to glTF specification.
-typedef unsigned short IndicesType;
+    // Not for
+    //     using IndicesType = decltype(aiFace::mNumIndices);
+    // But yes for
+    //     using IndicesType = unsigned short;
+    // because "ComponentType_UNSIGNED_SHORT" used for indices. And it's a maximal type according to glTF specification.
+    typedef unsigned short IndicesType;
 
-// Variables needed for compression. BEGIN.
-// Indices, not pointers - because pointer to buffer is changin while writing to it.
-size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
-size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
-std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
-size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
-bool comp_allow;// Point that data of current mesh can be compressed.
-// Variables needed for compression. END.
+    // Variables needed for compression. BEGIN.
+    // Indices, not pointers - because pointer to buffer is changin while writing to it.
+    size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
+    size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
+    std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
+    size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
+    bool comp_allow;// Point that data of current mesh can be compressed.
+    // Variables needed for compression. END.
 
-	std::string bufferId = mAsset->FindUniqueID("", "buffer");
+    std::string fname = std::string(mFilename);
+    std::string bufferIdPrefix = fname.substr(0, fname.find("."));
+    std::string bufferId = mAsset->FindUniqueID("", bufferIdPrefix.c_str());
 
-	Ref<Buffer> b = mAsset->GetBodyBuffer();
-	if (!b) {
-		b = mAsset->buffers.Create(bufferId);
-	}
+    Ref<Buffer> b = mAsset->GetBodyBuffer();
+    if (!b) {
+       b = mAsset->buffers.Create(bufferId);
+    }
 
 	for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
 		const aiMesh* aim = mScene->mMeshes[idx_mesh];

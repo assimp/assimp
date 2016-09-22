@@ -41,11 +41,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 #include "ModelDiffer.h"
+
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+
 using namespace Assimp;
 
-class utObjImportExport : public ::testing::Test {
-    // empty
+static const float VertComponents[ 24 * 3 ] = {
+    -0.500000,  0.500000,  0.500000,
+    -0.500000,  0.500000, -0.500000,
+    -0.500000, -0.500000, -0.500000,
+    -0.500000, -0.500000,  0.500000,
+    -0.500000, -0.500000, -0.500000,
+     0.500000, -0.500000, -0.500000,
+     0.500000, -0.500000,  0.500000,
+    -0.500000, -0.500000,  0.500000,
+    -0.500000,  0.500000, -0.500000,
+     0.500000,  0.500000, -0.500000,
+     0.500000, -0.500000, -0.500000,
+    -0.500000, -0.500000, -0.500000,
+     0.500000,  0.500000,  0.500000,
+     0.500000,  0.500000, -0.500000,
+    -0.500000,  0.500000, -0.500000,
+    -0.500000,  0.500000,  0.500000,
+     0.500000, -0.500000,  0.500000,
+     0.500000,  0.500000,  0.500000,
+    -0.500000,  0.500000,  0.500000,
+    -0.500000, -0.500000,  0.500000,
+     0.500000, -0.500000, -0.500000,
+     0.500000,  0.500000, -0.500000,
+     0.500000,  0.500000,  0.500000f,
+     0.500000, -0.500000,  0.500000f
 };
 
 static const std::string ObjModel =
@@ -53,7 +79,7 @@ static const std::string ObjModel =
     "\n"
     "# Vertex list\n"
     "\n"
-    "v -0.5 -0.5 0.5\n"
+    "v -0.5 -0.5  0.5\n"
     "v -0.5 -0.5 -0.5\n"
     "v -0.5  0.5 -0.5\n"
     "v -0.5  0.5  0.5\n"
@@ -74,8 +100,45 @@ static const std::string ObjModel =
     "\n"
     "# End of file\n";
 
+class utObjImportExport : public ::testing::Test {
+protected:
+    virtual void SetUp() {
+        m_im = new Assimp::Importer;
+    }
+
+    virtual void TearDown() {
+        delete m_im;
+        m_im = nullptr;
+    }
+
+    aiScene *createScene() {
+        aiScene *expScene = new aiScene;
+        expScene->mNumMeshes = 1;
+        expScene->mMeshes = new aiMesh*[ 1 ];
+        aiMesh *mesh = new aiMesh;
+        mesh->mName.Set( "1" );
+        mesh->mNumVertices = 24;
+        mesh->mVertices = new aiVector3D[ 24 ];
+        ::memcpy( &mesh->mVertices->x, &VertComponents[ 0 ], sizeof( float ) * 24 * 3 );
+        mesh->mNumFaces = 12;
+        expScene->mMeshes[ 0 ] = mesh;
+
+        expScene->mNumMaterials = 1;
+
+        return expScene;
+    }
+
+protected:
+    Assimp::Importer *m_im;
+    aiScene *m_expectedScene;
+};
+
 TEST_F( utObjImportExport, obj_import_test ) {
-    Assimp::Importer im;
-    const aiScene *scene = im.ReadFileFromMemory( (void*) ObjModel.c_str(), ObjModel.size(), 0 );
+    const aiScene *scene = m_im->ReadFileFromMemory( (void*) ObjModel.c_str(), ObjModel.size(), 0 );
+    aiScene *expected = createScene();
     EXPECT_NE( nullptr, scene );
+
+    ModelDiffer differ;
+    EXPECT_TRUE( differ.isEqual( expected, scene ) );
+    differ.showReport();
 }

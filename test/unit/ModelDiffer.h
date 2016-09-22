@@ -1,13 +1,15 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2016, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the
-following conditions are met:
+with or without modification, are permitted provided that the following
+conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -34,57 +36,34 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
+#pragma once
 
-/** @file glTFWriter.h
- * Declares a class to write gltf/glb files
- *
- * glTF Extensions Support:
- *   KHR_binary_glTF: full
- *   KHR_materials_common: full
- */
-#ifndef glTFAssetWriter_H_INC
-#define glTFAssetWriter_H_INC
+#include "UnitTestPCH.h"
+#include <fast_atof.h>
+#include <vector>
+#include <string>
 
-#include "glTFAsset.h"
+struct aiScene;
+struct aiMesh;
+struct aiMaterial;
+struct aiFace;
 
-namespace glTF
-{
+class ModelDiffer {
+public:
+    ModelDiffer();
+    ~ModelDiffer();
+    bool isEqual( const aiScene *expected, const aiScene *toCompare );
+    void showReport();
+    void reset();
 
-using rapidjson::MemoryPoolAllocator;
-
-class AssetWriter
-{
-    template<class T>
-    friend void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
+protected:
+    void addDiff( const std::string &diff );
+    bool compareMesh( aiMesh *expected, aiMesh *toCompare );
+    bool compareFace( aiFace *expected, aiFace *toCompare );
+    bool compareMaterial( aiMaterial *expected, aiMaterial *toCompare );
 
 private:
-
-    void WriteBinaryData(IOStream* outfile, size_t sceneLength);
-
-    void WriteMetadata();
-    void WriteExtensionsUsed();
-
-    template<class T>
-    void WriteObjects(LazyDict<T>& d);
-
-public:
-    Document mDoc;
-    Asset& mAsset;
-
-    MemoryPoolAllocator<>& mAl;
-
-    AssetWriter(Asset& asset);
-
-    void WriteFile(const char* path);
-    void WriteGLBFile(const char* path);
+    std::vector<std::string> m_diffs;
 };
-
-}
-
-// Include the implementation of the methods
-#include "glTFAssetWriter.inl"
-
-#endif

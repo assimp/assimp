@@ -38,7 +38,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "ModelDiffer.h"
+#include "SceneDiffer.h"
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 #include <assimp/material.h>
@@ -46,15 +46,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-ModelDiffer::ModelDiffer() {
+SceneDiffer::SceneDiffer() {
     // empty
 }
 
-ModelDiffer::~ModelDiffer() {
+SceneDiffer::~SceneDiffer() {
     // empty
 }
 
-bool ModelDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
+bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
     if ( expected == toCompare ) {
         return true;
     }
@@ -115,7 +115,7 @@ bool ModelDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
     return true;
 }
 
-void ModelDiffer::showReport() {
+void SceneDiffer::showReport() {
     if ( m_diffs.empty() ) {
         return;
     }
@@ -127,11 +127,11 @@ void ModelDiffer::showReport() {
     std::cout << std::endl;
 }
 
-void ModelDiffer::reset() {
+void SceneDiffer::reset() {
     m_diffs.resize( 0 );
 }
 
-void ModelDiffer::addDiff( const std::string &diff ) {
+void SceneDiffer::addDiff( const std::string &diff ) {
     if ( diff.empty() ) {
         return;
     }
@@ -150,7 +150,7 @@ static std::string dumpColor4D( const aiColor4D &toDump ) {
     return stream.str();
 }
 
-bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
+bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     if ( expected == toCompare ) {
         return true;
     }
@@ -313,7 +313,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     return true;
 }
 
-bool ModelDiffer::compareFace( aiFace *expected, aiFace *toCompare ) {
+bool SceneDiffer::compareFace( aiFace *expected, aiFace *toCompare ) {
     if ( nullptr == expected ) {
         return false;
     }
@@ -334,7 +334,7 @@ bool ModelDiffer::compareFace( aiFace *expected, aiFace *toCompare ) {
     return false;
 }
 
-bool ModelDiffer::compareMaterial( aiMaterial *expected, aiMaterial *toCompare ) {
+bool SceneDiffer::compareMaterial( aiMaterial *expected, aiMaterial *toCompare ) {
     if ( nullptr == expected ) {
         return false;
     }

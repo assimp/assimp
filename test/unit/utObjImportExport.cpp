@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "ModelDiffer.h"
+#include "SceneDiffer.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -139,7 +139,7 @@ TEST_F( utObjImportExport, obj_import_test ) {
     aiScene *expected = createScene();
     EXPECT_NE( nullptr, scene );
 
-    ModelDiffer differ;
+    SceneDiffer differ;
     EXPECT_TRUE( differ.isEqual( expected, scene ) );
     differ.showReport();
 }

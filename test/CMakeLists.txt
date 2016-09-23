@@ -76,8 +76,8 @@ SET( TEST_SRCS
   unit/utMaterialSystem.cpp
   unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
-  unit/ModelDiffer.h
-  unit/ModelDiffer.cpp
+  unit/SceneDiffer.h
+  unit/SceneDiffer.cpp
   unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utRemoveComments.cpp

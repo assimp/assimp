@@ -124,6 +124,7 @@ protected:
         expScene->mMeshes[ 0 ] = mesh;
 
         expScene->mNumMaterials = 1;
+        expScene->mMaterials = new aiMaterial*[ expScene->mNumMaterials ];
 
         return expScene;
     }

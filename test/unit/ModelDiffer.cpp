@@ -94,6 +94,14 @@ bool ModelDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
         addDiff( stream.str() );
         return false;
     }
+    
+    if ( expected->mNumMaterials > 0 ) {
+        if ( nullptr == expected->mMaterials || nullptr == toCompare->mMaterials ) {
+            addDiff( "Number of materials > 0 and mat pointer is nullptr" );
+            return false;
+        }
+    }
+    
     for ( unsigned int i = 0; i < expected->mNumMaterials; i++ ) {
         aiMaterial *expectedMat( expected->mMaterials[ i ] );
         aiMaterial *toCompareMat( expected->mMaterials[ i ] );

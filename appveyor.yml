@@ -29,13 +29,21 @@ install:
 
 build_script:  
 - cmd: >-
+
     cd c:\projects\assimp
+    
     if "%platform%" equ "x64" (
+      
       cmake CMakeLists.txt -G "Visual Studio %Configuration% Win64"
+      
       msbuild /m /p:Configuration=Release /p:Platform="x64" Assimp.sln
+      
     ) else (
+      
       cmake CMakeLists.txt -G "Visual Studio %Configuration%"
+      
       msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln
+      
     ) 
 
 after_build:

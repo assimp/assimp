@@ -107,7 +107,7 @@ protected:
     const ExportProperties* mProperties;
 
     /// write a path
-    void writePath(aiString path);
+    void writePath(const aiString &path);
 
     /// The IOSystem for output
     IOSystem* mIOSystem;

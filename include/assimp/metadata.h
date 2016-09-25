@@ -105,13 +105,13 @@ struct aiMetadataEntry
   * Helper functions to get the aiType enum entry for a type
   */
  // -------------------------------------------------------------------------------
-inline aiMetadataType GetAiType( bool ) { return AI_BOOL; }
-inline aiMetadataType GetAiType( int ) { return AI_INT; }
-inline aiMetadataType GetAiType( uint64_t ) { return AI_UINT64; }
-inline aiMetadataType GetAiType( float ) { return AI_FLOAT; }
-inline aiMetadataType GetAiType( double ) { return AI_DOUBLE; }
-inline aiMetadataType GetAiType( aiString ) { return AI_AISTRING; }
-inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
+inline aiMetadataType GetAiType( const bool& ) { return AI_BOOL; }
+inline aiMetadataType GetAiType( const int& ) { return AI_INT; }
+inline aiMetadataType GetAiType( const uint64_t& ) { return AI_UINT64; }
+inline aiMetadataType GetAiType( const float& ) { return AI_FLOAT; }
+inline aiMetadataType GetAiType( const double& ) { return AI_DOUBLE; }
+inline aiMetadataType GetAiType( const aiString& ) { return AI_AISTRING; }
+inline aiMetadataType GetAiType( const aiVector3D& ) { return AI_AIVECTOR3D; }
 
 
 

@@ -269,14 +269,15 @@ void IRRImporter::CopyMaterial(std::vector<aiMaterial*>& materials,
         if (UINT_MAX == defMatIdx)
         {
             defMatIdx = (unsigned int)materials.size();
-            aiMaterial* mat = new aiMaterial();
+            //TODO: add this materials to someone?
+            /*aiMaterial* mat = new aiMaterial();
 
             aiString s;
             s.Set(AI_DEFAULT_MATERIAL_NAME);
             mat->AddProperty(&s,AI_MATKEY_NAME);
 
             aiColor3D c(0.6f,0.6f,0.6f);
-            mat->AddProperty(&c,1,AI_MATKEY_COLOR_DIFFUSE);
+            mat->AddProperty(&c,1,AI_MATKEY_COLOR_DIFFUSE);*/
         }
         mesh->mMaterialIndex = defMatIdx;
         return;

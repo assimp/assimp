@@ -150,6 +150,19 @@ static std::string dumpColor4D( const aiColor4D &toDump ) {
     return stream.str();
 }
 
+static std::string dumpFace( const aiFace &face ) {
+    std::stringstream stream;
+    for ( unsigned int i = 0; i < face.mNumIndices; i++ ) {
+        stream << face.mIndices[ i ];
+        if ( i < face.mNumIndices - 1 ) {
+            stream << ", ";
+        } else {
+            stream << "\n";
+        }
+    }
+    return stream.str();
+}
+
 bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     if ( expected == toCompare ) {
         return true;
@@ -200,11 +213,11 @@ bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
         return false;
     }
 
-    return true;
+//    return true;
     
     //ToDo!
     bool normalEqual( true );
-    for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
+/*    for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
         aiVector3D &expNormal( expected->mNormals[ i ] );
         aiVector3D &toCompNormal( toCompare->mNormals[ i ] );
         if ( expNormal.Equal( toCompNormal ) ) {
@@ -289,7 +302,7 @@ bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     }
     if ( !tangentsEqual ) {
         return false;
-    }
+    }*/
 
     // faces
     if ( expected->mNumFaces != toCompare->mNumFaces ) {
@@ -301,8 +314,11 @@ bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     bool facesEqual( true );
     for ( unsigned int i = 0; i < expected->mNumFaces; i++ ) {
         aiFace &expFace( expected->mFaces[ i ] );
-        aiFace &toCompareFace( expected->mFaces[ i ] );
+        aiFace &toCompareFace( toCompare->mFaces[ i ] );
         if ( !compareFace( &expFace, &toCompareFace ) ) {
+            addDiff( "Faces are not equal\n" );
+            addDiff( dumpFace( expFace ) );
+            addDiff( dumpFace( toCompareFace ) );
             facesEqual = false;
         }
     }

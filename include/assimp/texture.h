@@ -59,6 +59,14 @@ extern "C" {
 
 
 // --------------------------------------------------------------------------------
+
+/** \def AI_EMBEDDED_TEXNAME_PREFIX
+ * \ref AI_MAKE_EMBEDDED_TEXNAME
+ */
+#ifndef AI_EMBEDDED_TEXNAME_PREFIX
+#   define AI_EMBEDDED_TEXNAME_PREFIX	"*"
+#endif
+
 /** @def AI_MAKE_EMBEDDED_TEXNAME
  *  Used to build the reserved path name used by the material system to
  *  reference textures that are embedded into their corresponding
@@ -66,7 +74,7 @@ extern "C" {
  *  (zero-based, in the aiScene::mTextures array)
  */
 #if (!defined AI_MAKE_EMBEDDED_TEXNAME)
-#   define AI_MAKE_EMBEDDED_TEXNAME(_n_) "*" # _n_
+#   define AI_MAKE_EMBEDDED_TEXNAME(_n_) AI_EMBEDDED_TEXNAME_PREFIX # _n_
 #endif
 
 

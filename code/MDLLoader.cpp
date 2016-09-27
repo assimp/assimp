@@ -1557,7 +1557,7 @@ void MDLImporter::InternReadFile_3DGS_MDL7( )
 			} else {
 				pcNode->mName.length = ::strlen(szBuffer);
 			}
-            ::strncpy(pcNode->mName.data,szBuffer,MAXLEN);
+            ::strncpy(pcNode->mName.data,szBuffer,MAXLEN-1);
             ++p;
         }
     }

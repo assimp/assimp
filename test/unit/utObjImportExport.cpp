@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "UnitTestPCH.h"
-#include "ModelDiffer.h"
+#include "SceneDiffer.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -120,10 +120,55 @@ protected:
         mesh->mNumVertices = 24;
         mesh->mVertices = new aiVector3D[ 24 ];
         ::memcpy( &mesh->mVertices->x, &VertComponents[ 0 ], sizeof( float ) * 24 * 3 );
-        mesh->mNumFaces = 12;
+        mesh->mNumFaces = 6;
+        mesh->mFaces = new aiFace[ mesh->mNumFaces ];
+
+        mesh->mFaces[ 0 ].mNumIndices = 4;
+        mesh->mFaces[ 0 ].mIndices = new unsigned int[ mesh->mFaces[ 0 ].mNumIndices ];
+        mesh->mFaces[ 0 ].mIndices[ 0 ] = 0;
+        mesh->mFaces[ 0 ].mIndices[ 1 ] = 1;
+        mesh->mFaces[ 0 ].mIndices[ 2 ] = 2;
+        mesh->mFaces[ 0 ].mIndices[ 3 ] = 3;
+
+        mesh->mFaces[ 1 ].mNumIndices = 4;
+        mesh->mFaces[ 1 ].mIndices = new unsigned int[ mesh->mFaces[ 0 ].mNumIndices ];
+        mesh->mFaces[ 1 ].mIndices[ 0 ] = 4;
+        mesh->mFaces[ 1 ].mIndices[ 1 ] = 5;
+        mesh->mFaces[ 1 ].mIndices[ 2 ] = 6;
+        mesh->mFaces[ 1 ].mIndices[ 3 ] = 7;
+
+        mesh->mFaces[ 2 ].mNumIndices = 4;
+        mesh->mFaces[ 2 ].mIndices = new unsigned int[ mesh->mFaces[ 0 ].mNumIndices ];
+        mesh->mFaces[ 2 ].mIndices[ 0 ] = 8;
+        mesh->mFaces[ 2 ].mIndices[ 1 ] = 9;
+        mesh->mFaces[ 2 ].mIndices[ 2 ] = 10;
+        mesh->mFaces[ 2 ].mIndices[ 3 ] = 11;
+
+        mesh->mFaces[ 3 ].mNumIndices = 4;
+        mesh->mFaces[ 3 ].mIndices = new unsigned int[ mesh->mFaces[ 0 ].mNumIndices ];
+        mesh->mFaces[ 3 ].mIndices[ 0 ] = 12;
+        mesh->mFaces[ 3 ].mIndices[ 1 ] = 13;
+        mesh->mFaces[ 3 ].mIndices[ 2 ] = 14;
+        mesh->mFaces[ 3 ].mIndices[ 3 ] = 15;
+
+        mesh->mFaces[ 4 ].mNumIndices = 4;
+        mesh->mFaces[ 4 ].mIndices = new unsigned int[ mesh->mFaces[ 0 ].mNumIndices ];
+        mesh->mFaces[ 4 ].mIndices[ 0 ] = 16;
+        mesh->mFaces[ 4 ].mIndices[ 1 ] = 17;
+        mesh->mFaces[ 4 ].mIndices[ 2 ] = 18;
+        mesh->mFaces[ 4 ].mIndices[ 3 ] = 19;
+
+        mesh->mFaces[ 5 ].mNumIndices = 4;
+        mesh->mFaces[ 5 ].mIndices = new unsigned int[ mesh->mFaces[ 0 ].mNumIndices ];
+        mesh->mFaces[ 5 ].mIndices[ 0 ] = 20;
+        mesh->mFaces[ 5 ].mIndices[ 1 ] = 21;
+        mesh->mFaces[ 5 ].mIndices[ 2 ] = 22;
+        mesh->mFaces[ 5 ].mIndices[ 3 ] = 23;
+
         expScene->mMeshes[ 0 ] = mesh;
 
         expScene->mNumMaterials = 1;
+        expScene->mMaterials = new aiMaterial*[ expScene->mNumMaterials ];
 
         return expScene;
     }
@@ -138,7 +183,7 @@ TEST_F( utObjImportExport, obj_import_test ) {
     aiScene *expected = createScene();
     EXPECT_NE( nullptr, scene );
 
-    ModelDiffer differ;
+    SceneDiffer differ;
     EXPECT_TRUE( differ.isEqual( expected, scene ) );
     differ.showReport();
 }

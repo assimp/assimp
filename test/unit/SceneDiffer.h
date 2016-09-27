@@ -50,10 +50,10 @@ struct aiMesh;
 struct aiMaterial;
 struct aiFace;
 
-class ModelDiffer {
+class SceneDiffer {
 public:
-    ModelDiffer();
-    ~ModelDiffer();
+    SceneDiffer();
+    ~SceneDiffer();
     bool isEqual( const aiScene *expected, const aiScene *toCompare );
     void showReport();
     void reset();

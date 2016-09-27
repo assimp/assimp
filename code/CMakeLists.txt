@@ -433,7 +433,8 @@ ADD_ASSIMP_IMPORTER( BLEND
 ADD_ASSIMP_IMPORTER( IFC
   IFCLoader.cpp
   IFCLoader.h
-  IFCReaderGen.cpp
+  IFCReaderGen1.cpp
+  IFCReaderGen2.cpp
   IFCReaderGen.h
   IFCUtil.h
   IFCUtil.cpp

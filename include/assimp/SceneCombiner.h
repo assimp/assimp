@@ -205,7 +205,7 @@ struct SceneHelper
  * The class is currently being used by various postprocessing steps
  * and loaders (ie. LWS).
  */
-class SceneCombiner
+class ASSIMP_API SceneCombiner
 {
 public:
     SceneCombiner() {}

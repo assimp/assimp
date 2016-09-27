@@ -639,25 +639,27 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
     }
 
     // now delete all input scenes. Make sure duplicate scenes aren't
-    // deleted more than one time
-    for ( unsigned int n = 0; n < src.size();++n )  {
-        if (n != duplicates[n]) // duplicate scene?
-            continue;
+    // deleted more than one time, if the flag is set
+    if(flags & AI_INT_MERGE_SCENE_DELETE_SOURCES) {
+        for ( unsigned int n = 0; n < src.size();++n )  {
+            if (n != duplicates[n]) // duplicate scene?
+                continue;
 
-        aiScene* deleteMe = src[n].scene;
+            aiScene* deleteMe = src[n].scene;
 
-        // We need to delete the arrays before the destructor is called -
-        // we are reusing the array members
-        delete[] deleteMe->mMeshes;     deleteMe->mMeshes     = NULL;
-        delete[] deleteMe->mCameras;    deleteMe->mCameras    = NULL;
-        delete[] deleteMe->mLights;     deleteMe->mLights     = NULL;
-        delete[] deleteMe->mMaterials;  deleteMe->mMaterials  = NULL;
-        delete[] deleteMe->mAnimations; deleteMe->mAnimations = NULL;
+            // We need to delete the arrays before the destructor is called -
+            // we are reusing the array members
+            delete[] deleteMe->mMeshes;     deleteMe->mMeshes     = NULL;
+            delete[] deleteMe->mCameras;    deleteMe->mCameras    = NULL;
+            delete[] deleteMe->mLights;     deleteMe->mLights     = NULL;
+            delete[] deleteMe->mMaterials;  deleteMe->mMaterials  = NULL;
+            delete[] deleteMe->mAnimations; deleteMe->mAnimations = NULL;
 
-        deleteMe->mRootNode = NULL;
+            deleteMe->mRootNode = NULL;
 
-        // Now we can safely delete the scene
-        delete deleteMe;
+            // Now we can safely delete the scene
+            delete deleteMe;
+        }
     }
 
     // Check flags

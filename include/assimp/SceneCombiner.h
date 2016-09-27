@@ -142,6 +142,13 @@ struct NodeAttachmentInfo
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
+/** @def AI_INT_MERGE_SCENE_DELETE_SOURCES
+ * Can be combined with AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES.
+ * Unique names are generated, but only if this is absolutely
+ * required to avoid name conflicts.
+ */
+#define AI_INT_MERGE_SCENE_DELETE_SOURCES 0x20
+
 
 typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
 

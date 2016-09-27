@@ -281,7 +281,7 @@ OpenGEXImporter::OpenGEXImporter()
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::~OpenGEXImporter() {
-    m_ctx = NULL;
+    m_ctx = nullptr;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -466,13 +466,13 @@ void OpenGEXImporter::handleMetricNode( DDLNode *node, aiScene *pScene ) {
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
-    if( NULL == m_currentNode ) {
+    if( nullptr == m_currentNode ) {
         throw DeadlyImportError( "No current node for name." );
         return;
     }
 
     Value *val( node->getValue() );
-    if( NULL != val ) {
+    if( nullptr != val ) {
         if( Value::ddl_string != val->m_type ) {
             throw DeadlyImportError( "OpenGEX: invalid data type for value in node name." );
             return;
@@ -490,7 +490,7 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
 
 //------------------------------------------------------------------------------------------------
 static void getRefNames( DDLNode *node, std::vector<std::string> &names ) {
-    ai_assert( NULL != node );
+    ai_assert( nullptr != node );
 
     Reference *ref = node->getReferences();
     if( nullptr != ref ) {
@@ -1124,10 +1124,10 @@ void OpenGEXImporter::resolveReferences() {
         return;
     }
 
-    RefInfo *currentRefInfo( NULL );
+    RefInfo *currentRefInfo( nullptr );
     for( std::vector<RefInfo*>::iterator it = m_unresolvedRefStack.begin(); it != m_unresolvedRefStack.end(); ++it ) {
         currentRefInfo = *it;
-        if( NULL != currentRefInfo ) {
+        if( nullptr != currentRefInfo ) {
             aiNode *node( currentRefInfo->m_node );
             if( RefInfo::MeshRef == currentRefInfo->m_type ) {
                 for( size_t i = 0; i < currentRefInfo->m_Names.size(); i++ ) {
@@ -1166,7 +1166,7 @@ void OpenGEXImporter::createNodeTree( aiScene *pScene ) {
 void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
     ai_assert( nullptr != pScene );
 
-    if ( NULL == node ) {
+    if ( nullptr == node ) {
         return;
     }
         

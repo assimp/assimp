@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/ai_assert.h>
 #include <assimp/types.h>
-#include "Defines.h"
+//#include "Defines.h"
 #include <stddef.h>
 #include <set>
 #include <list>
@@ -200,10 +200,8 @@ struct SceneHelper
  */
 class SceneCombiner
 {
-    // class cannot be instanced
-    SceneCombiner() {}
-
 public:
+    SceneCombiner() {}
 
     // -------------------------------------------------------------------
     /** Merges two or more scenes.

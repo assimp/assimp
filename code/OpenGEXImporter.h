@@ -142,6 +142,8 @@ private:
     struct VertexContainer {
         size_t m_numVerts;
         aiVector3D *m_vertices;
+        size_t m_numColors;
+        aiColor4D *m_colors;
         size_t m_numNormals;
         aiVector3D *m_normals;
         size_t m_numUVComps[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];

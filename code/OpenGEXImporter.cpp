@@ -223,17 +223,19 @@ static void propId2StdString( Property *prop, std::string &name, std::string &ke
 OpenGEXImporter::VertexContainer::VertexContainer()
 : m_numVerts( 0 )
 , m_vertices( nullptr )
+, m_numColors( 0 )
+, m_colors( nullptr )
 , m_numNormals( 0 )
 , m_normals( nullptr )
 , m_numUVComps()
-, m_textureCoords()
- {
+, m_textureCoords() {
     // empty
 }
 
 //------------------------------------------------------------------------------------------------
 OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
+    delete[] m_colors;
     delete[] m_normals;
     
     for(auto &texcoords : m_textureCoords) {
@@ -710,6 +712,7 @@ void OpenGEXImporter::handleMeshNode( ODDLParser::DDLNode *node, aiScene *pScene
 enum MeshAttribute {
     None,
     Position,
+    Color,
     Normal,
     TexCoord
 };
@@ -718,8 +721,10 @@ enum MeshAttribute {
 static MeshAttribute getAttributeByName( const char *attribName ) {
     ai_assert( nullptr != attribName  );
 
-    if( 0 == strncmp( "position", attribName, strlen( "position" ) ) ) {
+    if ( 0 == strncmp( "position", attribName, strlen( "position" ) ) ) {
         return Position;
+    } else if ( 0 == strncmp( "color", attribName, strlen( "color" ) ) ) {
+        return Color;
     } else if( 0 == strncmp( "normal", attribName, strlen( "normal" ) ) ) {
         return Normal;
     } else if( 0 == strncmp( "texcoord", attribName, strlen( "texcoord" ) ) ) {
@@ -745,6 +750,22 @@ static void fillVector3( aiVector3D *vec3, Value *vals ) {
     }
 
     vec3->Set( x, y, z );
+}
+
+//------------------------------------------------------------------------------------------------
+static void fillColor4( aiColor4D *col4, Value *vals ) {
+    ai_assert( nullptr != col4 );
+    ai_assert( nullptr != vals );
+
+    float r( 0.0f ), g( 0.0f ), b( 0.0f ), a ( 1.0f );
+    Value *next( vals );
+    col4->r = next->getFloat();
+    next = next->m_next;
+    col4->g = next->getFloat();
+    next = next->m_next;
+    col4->b = next->getFloat();
+    next = next->m_next;
+    col4->a = next->getFloat();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -775,6 +796,14 @@ static void copyVectorArray( size_t numItems, DataArrayList *vaList, aiVector3D 
 }
 
 //------------------------------------------------------------------------------------------------
+static void copyColor4DArray( size_t numItems, DataArrayList *vaList, aiColor4D *colArray ) {
+    for ( size_t i = 0; i < numItems; i++ ) {
+        Value *next( vaList->m_dataList );
+        fillColor4( &colArray[ i ], next );
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene *pScene ) {
     if( nullptr == node ) {
         throw DeadlyImportError( "No parent node for name." );
@@ -801,6 +830,10 @@ void OpenGEXImporter::handleVertexArrayNode( ODDLParser::DDLNode *node, aiScene 
             m_currentVertices.m_numVerts = numItems;
             m_currentVertices.m_vertices = new aiVector3D[ numItems ];
             copyVectorArray( numItems, vaList, m_currentVertices.m_vertices );
+        } else if ( Color == attribType ) {
+            m_currentVertices.m_numColors = numItems;
+            m_currentVertices.m_colors = new aiColor4D[ numItems ];
+            copyColor4DArray( numItems, vaList, m_currentVertices.m_colors );
         } else if( Normal == attribType ) {
             m_currentVertices.m_numNormals = numItems;
             m_currentVertices.m_normals = new aiVector3D[ numItems ];
@@ -835,6 +868,11 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     m_currentMesh->mFaces = new aiFace[ numItems ];
     m_currentMesh->mNumVertices = numItems * 3;
     m_currentMesh->mVertices = new aiVector3D[ m_currentMesh->mNumVertices ];
+    bool hasColors( false );
+    if ( m_currentVertices.m_numColors > 0 ) {
+        m_currentMesh->mColors[0] = new aiColor4D[ m_currentVertices.m_numColors ];
+        hasColors = true;
+    }
     bool hasNormalCoords( false );
     if ( m_currentVertices.m_numNormals > 0 ) {
         m_currentMesh->mNormals = new aiVector3D[ m_currentMesh->mNumVertices ];
@@ -858,6 +896,10 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
             ai_assert( index < m_currentMesh->mNumVertices );
             aiVector3D &pos = ( m_currentVertices.m_vertices[ idx ] );
             m_currentMesh->mVertices[ index ].Set( pos.x, pos.y, pos.z );
+            if ( hasColors ) {
+                aiColor4D &col = m_currentVertices.m_colors[ idx ];
+                m_currentMesh->mColors[ 0 ][ index ] = col;
+            }
             if ( hasNormalCoords ) {
                 aiVector3D &normal = ( m_currentVertices.m_normals[ idx ] );
                 m_currentMesh->mNormals[ index ].Set( normal.x, normal.y, normal.z );

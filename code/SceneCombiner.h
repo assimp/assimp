@@ -235,7 +235,7 @@ public:
      */
     static void MergeScenes(aiScene** dest, aiScene* master,
         std::vector<AttachmentInfo>& src,
-        unsigned int flags = 0);
+        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
 
 
     // -------------------------------------------------------------------

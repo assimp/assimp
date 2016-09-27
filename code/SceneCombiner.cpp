@@ -245,7 +245,7 @@ void SceneCombiner::AttachToGraph ( aiScene* master,
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
     std::vector<AttachmentInfo>& srcList,
-    unsigned int flags)
+    unsigned int flags, std::vector<aiMatrix4x4> trans)
 {
     ai_assert(NULL != _dest);
 
@@ -507,9 +507,11 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
             node = (*cur)->mRootNode;
             OffsetNodeMeshIndices(node,offset[n]);
         }
-        if (n) // src[0] is the master node
+        if (n) { // src[0] is the master node
+            // Copy any transformation from the list provided
+            node->mTransformation = trans[n-1];
             nodes.push_back(NodeAttachmentInfo( node,srcList[n-1].attachToNode,n ));
-
+        }
         // add name prefixes?
         if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
 

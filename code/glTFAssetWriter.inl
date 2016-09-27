@@ -282,7 +282,7 @@ namespace glTF {
             }
             primitives.PushBack(prim, w.mAl);
         }
-    
+
         obj.AddMember("primitives", primitives, w.mAl);
     }
 
@@ -484,13 +484,15 @@ namespace glTF {
         }
     }
 
-    
+
     inline void AssetWriter::WriteMetadata()
     {
         Value asset;
         asset.SetObject();
         {
-            asset.AddMember("version", mAsset.asset.version, mAl);
+            char versionChar[10];
+            snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
+            asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
 
             asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
         }

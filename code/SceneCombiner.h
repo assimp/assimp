@@ -216,7 +216,7 @@ public:
      *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
      */
     static void MergeScenes(aiScene** dest,std::vector<aiScene*>& src,
-        unsigned int flags = 0);
+        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
 
 
     // -------------------------------------------------------------------

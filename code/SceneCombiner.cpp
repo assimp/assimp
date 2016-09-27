@@ -160,9 +160,9 @@ void SceneCombiner::OffsetNodeMeshIndices (aiNode* node, unsigned int offset)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Merges two scenes. Currently only used by the LWS loader.
+// Merges two scenes.
 void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
-    unsigned int flags)
+    unsigned int flags, std::vector<aiMatrix4x4> trans)
 {
     ai_assert(NULL != _dest);
 
@@ -187,6 +187,8 @@ void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
 
     std::vector<AttachmentInfo> srcList (src.size());
     for (unsigned int i = 0; i < srcList.size();++i)    {
+        if(trans.size())
+            master->mRootNode->mTransformation = trans[i];
         srcList[i] = AttachmentInfo(src[i],master->mRootNode);
     }
 
@@ -509,7 +511,8 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
         }
         if (n) { // src[0] is the master node
             // Copy any transformation from the list provided
-            node->mTransformation = trans[n-1];
+            if(trans.size())
+                node->mTransformation = trans[n-1];
             nodes.push_back(NodeAttachmentInfo( node,srcList[n-1].attachToNode,n ));
         }
         // add name prefixes?

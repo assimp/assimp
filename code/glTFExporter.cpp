@@ -207,7 +207,12 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
         for (int i = 0 ; i < count       ; i++) {
         for (int j = 0 ; j < numCompsOut ; j++) {
 
-            valueTmp = static_cast<aiVector3D*>(data)[i][j];
+            if (numCompsOut == 1) {
+              valueTmp = static_cast<unsigned short*>(data)[i];
+            } else {
+              valueTmp = static_cast<aiVector3D*>(data)[i][j];
+            }
+
             if (valueTmp < acc->min[j]) {
                 acc->min[j] = valueTmp;
             }

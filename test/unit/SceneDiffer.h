@@ -47,18 +47,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct aiScene;
 struct aiMesh;
+struct aiMaterial;
+struct aiFace;
 
-class ModelDiffer {
+class SceneDiffer {
 public:
-    ModelDiffer();
-    ~ModelDiffer();
-    bool isEqual( aiScene *expected, aiScene *toCompare );
+    SceneDiffer();
+    ~SceneDiffer();
+    bool isEqual( const aiScene *expected, const aiScene *toCompare );
     void showReport();
     void reset();
 
-private:
+protected:
     void addDiff( const std::string &diff );
     bool compareMesh( aiMesh *expected, aiMesh *toCompare );
+    bool compareFace( aiFace *expected, aiFace *toCompare );
+    bool compareMaterial( aiMaterial *expected, aiMaterial *toCompare );
 
 private:
     std::vector<std::string> m_diffs;

@@ -38,21 +38,23 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "ModelDiffer.h"
+#include "SceneDiffer.h"
 #include <assimp/scene.h>
+#include <assimp/mesh.h>
+#include <assimp/material.h>
 #include <sstream>
 
 using namespace Assimp;
 
-ModelDiffer::ModelDiffer() {
+SceneDiffer::SceneDiffer() {
     // empty
 }
 
-ModelDiffer::~ModelDiffer() {
+SceneDiffer::~SceneDiffer() {
     // empty
 }
 
-bool ModelDiffer::isEqual( aiScene *expected, aiScene *toCompare ) {
+bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
     if ( expected == toCompare ) {
         return true;
     }
@@ -65,20 +67,55 @@ bool ModelDiffer::isEqual( aiScene *expected, aiScene *toCompare ) {
         return false;
     }
 
+    // meshes
     if ( expected->mNumMeshes != toCompare->mNumMeshes ) {
         std::stringstream stream;
         stream << "Number of meshes not equal ( expected: " << expected->mNumMeshes << ", found : " << toCompare->mNumMeshes << " )\n";
         addDiff( stream.str() );
+        return false;
     }
 
     for ( unsigned int i = 0; i < expected->mNumMeshes; i++ ) {
         aiMesh *expMesh( expected->mMeshes[ i ] );
         aiMesh *toCompMesh( toCompare->mMeshes[ i ] );
-        compareMesh( expMesh, toCompMesh );
+        if ( !compareMesh( expMesh, toCompMesh ) ) {
+            std::stringstream stream;
+            stream << "Meshes are not equal, index : " << i << "\n";
+            addDiff( stream.str() );
+        }
     }
+
+    // ToDo!
+    return true;
+    // materials
+    if ( expected->mNumMaterials != toCompare->mNumMaterials ) {
+        std::stringstream stream;
+        stream << "Number of materials not equal ( expected: " << expected->mNumMaterials << ", found : " << toCompare->mNumMaterials << " )\n";
+        addDiff( stream.str() );
+        return false;
+    }
+    
+    if ( expected->mNumMaterials > 0 ) {
+        if ( nullptr == expected->mMaterials || nullptr == toCompare->mMaterials ) {
+            addDiff( "Number of materials > 0 and mat pointer is nullptr" );
+            return false;
+        }
+    }
+    
+    for ( unsigned int i = 0; i < expected->mNumMaterials; i++ ) {
+        aiMaterial *expectedMat( expected->mMaterials[ i ] );
+        aiMaterial *toCompareMat( expected->mMaterials[ i ] );
+        if ( !compareMaterial( expectedMat, toCompareMat ) ) {
+            std::stringstream stream;
+            stream << "Materials are not equal, index : " << i << "\n";
+            addDiff( stream.str() );
+        }
+    }
+
+    return true;
 }
 
-void ModelDiffer::showReport() {
+void SceneDiffer::showReport() {
     if ( m_diffs.empty() ) {
         return;
     }
@@ -90,11 +127,11 @@ void ModelDiffer::showReport() {
     std::cout << std::endl;
 }
 
-void ModelDiffer::reset() {
+void SceneDiffer::reset() {
     m_diffs.resize( 0 );
 }
 
-void ModelDiffer::addDiff( const std::string &diff ) {
+void SceneDiffer::addDiff( const std::string &diff ) {
     if ( diff.empty() ) {
         return;
     }
@@ -113,7 +150,20 @@ static std::string dumpColor4D( const aiColor4D &toDump ) {
     return stream.str();
 }
 
-bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
+static std::string dumpFace( const aiFace &face ) {
+    std::stringstream stream;
+    for ( unsigned int i = 0; i < face.mNumIndices; i++ ) {
+        stream << face.mIndices[ i ];
+        if ( i < face.mNumIndices - 1 ) {
+            stream << ", ";
+        } else {
+            stream << "\n";
+        }
+    }
+    return stream.str();
+}
+
+bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     if ( expected == toCompare ) {
         return true;
     }
@@ -145,9 +195,10 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
         aiVector3D &expVert( expected->mVertices[ i ] );
         aiVector3D &toCompVert( toCompare->mVertices[ i ] );
-        if ( expVert != toCompVert ) {
+        if ( !expVert.Equal( toCompVert ) ) {
+            std::cout << "index = " << i << dumpVector3( toCompVert ) << "\n";
             std::stringstream stream;
-            stream << "Vertex not equal ( expected: " << dumpVector3( expVert ) << ", found: " << dumpVector3( toCompVert ) << "\n";
+            stream << "Vertex not equal ( expected: " << dumpVector3( toCompVert ) << ", found: " << dumpVector3( toCompVert ) << "\n";
             addDiff( stream.str() );
             vertEqual = false;
         }
@@ -162,11 +213,14 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
         return false;
     }
 
+//    return true;
+    
+    //ToDo!
     bool normalEqual( true );
-    for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
+/*    for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
         aiVector3D &expNormal( expected->mNormals[ i ] );
         aiVector3D &toCompNormal( toCompare->mNormals[ i ] );
-        if ( expNormal != toCompNormal ) {
+        if ( expNormal.Equal( toCompNormal ) ) {
             std::stringstream stream;
             stream << "Normal not equal ( expected: " << dumpVector3( expNormal ) << ", found: " << dumpVector3( toCompNormal ) << "\n";
             addDiff( stream.str() );
@@ -209,7 +263,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
         for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
             aiVector3D &expTexCoord( expected->mTextureCoords[ a ][ i ] );
             aiVector3D &toCompTexCoord( toCompare->mTextureCoords[ a ][ i ] );
-            if ( expTexCoord != toCompTexCoord ) {
+            if ( expTexCoord.Equal( toCompTexCoord ) ) {
                 std::stringstream stream;
                 stream << "Texture coords not equal ( expected: " << dumpVector3( expTexCoord ) << ", found: " << dumpVector3( toCompTexCoord ) << "\n";
                 addDiff( stream.str() );
@@ -230,7 +284,7 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
         aiVector3D &expTangents( expected->mTangents[ i ] );
         aiVector3D &toCompTangents( toCompare->mTangents[ i ] );
-        if ( expTangents != toCompTangents ) {
+        if ( expTangents.Equal( toCompTangents ) ) {
             std::stringstream stream;
             stream << "Tangents not equal ( expected: " << dumpVector3( expTangents ) << ", found: " << dumpVector3( toCompTangents ) << "\n";
             addDiff( stream.str() );
@@ -239,16 +293,77 @@ bool ModelDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
 
         aiVector3D &expBiTangents( expected->mBitangents[ i ] );
         aiVector3D &toCompBiTangents( toCompare->mBitangents[ i ] );
-        if ( expBiTangents != toCompBiTangents ) {
+        if ( expBiTangents.Equal( toCompBiTangents ) ) {
             std::stringstream stream;
-            stream << "Tangents not equal ( expected: " << dumpVector3( expBiTangents ) << ", found: " << dumpVector3( toCompBiTangents ) << "\n";
+            stream << "Tangents not equal ( expected: " << dumpVector3( expBiTangents ) << ", found: " << dumpVector3( toCompBiTangents ) << " )\n";
             addDiff( stream.str() );
             tangentsEqual = false;
         }
     }
     if ( !tangentsEqual ) {
         return false;
+    }*/
+
+    // faces
+    if ( expected->mNumFaces != toCompare->mNumFaces ) {
+        std::stringstream stream;
+        stream << "Number of faces are not equal, ( expected: " << expected->mNumFaces << ", found: " << toCompare->mNumFaces << ")\n";
+        addDiff( stream.str() );
+        return false;
     }
+    bool facesEqual( true );
+    for ( unsigned int i = 0; i < expected->mNumFaces; i++ ) {
+        aiFace &expFace( expected->mFaces[ i ] );
+        aiFace &toCompareFace( toCompare->mFaces[ i ] );
+        if ( !compareFace( &expFace, &toCompareFace ) ) {
+            addDiff( "Faces are not equal\n" );
+            addDiff( dumpFace( expFace ) );
+            addDiff( dumpFace( toCompareFace ) );
+            facesEqual = false;
+        }
+    }
+    if ( !facesEqual ) {
+        return false;
+    }
+
+    return true;
+}
+
+bool SceneDiffer::compareFace( aiFace *expected, aiFace *toCompare ) {
+    if ( nullptr == expected ) {
+        return false;
+    }
+    if ( nullptr == toCompare ) {
+        return false;
+    }
+
+    // same instance
+    if ( expected == toCompare ) {
+        return true;
+    }
+
+    // using compare operator
+    if ( *expected == *toCompare ) {
+        return true;
+    }
+
+    return false;
+}
+
+bool SceneDiffer::compareMaterial( aiMaterial *expected, aiMaterial *toCompare ) {
+    if ( nullptr == expected ) {
+        return false;
+    }
+    if ( nullptr == toCompare ) {
+        return false;
+    }
+
+    // same instance
+    if ( expected == toCompare ) {
+        return true;
+    }
+
+    // todo!
 
     return true;
 }

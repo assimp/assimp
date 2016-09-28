@@ -377,8 +377,8 @@ namespace glTF
         ComponentType componentType; //!< The datatype of components in the attribute. (required)
         unsigned int count;          //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
-        //std::vector<float> max;    //!< Maximum value of each component in this attribute.
-        //std::vector<float> min;    //!< Minimum value of each component in this attribute.
+        std::vector<float> max;      //!< Maximum value of each component in this attribute.
+        std::vector<float> min;      //!< Minimum value of each component in this attribute.
 
         unsigned int GetNumComponents();
         unsigned int GetBytesPerComponent();

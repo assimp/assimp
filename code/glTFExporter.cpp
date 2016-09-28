@@ -193,6 +193,31 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     acc->count = count;
     acc->type = typeOut;
 
+    // calculate min and max values
+    {
+        // Allocate and initialize with large values.
+        float float_MAX = 10000000000000;
+        for (int i = 0 ; i < numCompsOut ; i++) {
+            acc->min.push_back( float_MAX);
+            acc->max.push_back(-float_MAX);
+        }
+
+        // Search and set extreme values.
+        float valueTmp;
+        for (int i = 0 ; i < count       ; i++) {
+        for (int j = 0 ; j < numCompsOut ; j++) {
+
+            valueTmp = static_cast<aiVector3D*>(data)[i][j];
+            if (valueTmp < acc->min[j]) {
+                acc->min[j] = valueTmp;
+            }
+            if (valueTmp > acc->max[j]) {
+                acc->max[j] = valueTmp;
+            }
+        }
+        }
+    }
+
     // copy the data
     acc->WriteData(count, data, numCompsIn*bytesPerComp);
 

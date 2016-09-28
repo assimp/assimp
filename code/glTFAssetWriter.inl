@@ -56,7 +56,16 @@ namespace glTF {
         inline Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
-			for (decltype(N) i = 0; i < N; ++i) {
+            for (decltype(N) i = 0; i < N; ++i) {
+                val.PushBack(r[i], al);
+            }
+            return val;
+        }
+
+        inline Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
+            val.SetArray();
+            val.Reserve(r.size(), al);
+            for (int i = 0; i < r.size(); ++i) {
                 val.PushBack(r[i], al);
             }
             return val;
@@ -85,6 +94,10 @@ namespace glTF {
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
+
+        Value vTmpMax, vTmpMin;
+        obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+        obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
     }
 
     inline void Write(Value& obj, Animation& a, AssetWriter& w)
@@ -491,7 +504,7 @@ namespace glTF {
         asset.SetObject();
         {
             char versionChar[10];
-            snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
+            ai_snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
             asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
 
             asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);

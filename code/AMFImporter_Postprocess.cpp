@@ -273,7 +273,7 @@ auto texmap_is_equal = [](const CAMFImporter_NodeElement_TexMap* pTexMap1, const
 		SComplexFace face_start = pInputList.front();
 		std::list<SComplexFace> face_list_cur;
 
-		for(std::list<SComplexFace>::const_iterator it = pInputList.cbegin(), it_end = pInputList.cend(); it != it_end;)
+		for(std::list<SComplexFace>::iterator it = pInputList.begin(), it_end = pInputList.end(); it != it_end;)
 		{
 			if(texmap_is_equal(face_start.TexMap, it->TexMap))
 			{
@@ -531,7 +531,7 @@ std::list<unsigned int> mesh_idx;
 				// Create vertices list and optimize indices. Optimisation mean following.In AMF all volumes use one big list of vertices. And one volume
 				// can use only part of vertices list, for example: vertices list contain few thousands of vertices and volume use vertices 1, 3, 10.
 				// Do you need all this thousands of garbage? Of course no. So, optimisation step transformate sparse indices set to continuous.
-				const size_t VertexCount_Max = tmesh->mNumFaces * 3;// 3 - triangles.
+				size_t VertexCount_Max = tmesh->mNumFaces * 3;// 3 - triangles.
 				std::vector<aiVector3D> vert_arr, texcoord_arr;
 				std::vector<aiColor4D> col_arr;
 
@@ -595,7 +595,9 @@ std::list<unsigned int> mesh_idx;
 					///TODO: clean unused vertices. "* 2": in certain cases - mesh full of triangle colors - vert_arr will contain duplicated vertices for
 					/// colored triangles and initial vertices (for colored vertices) which in real became unused. This part need more thinking about
 					/// optimisation.
-					bool idx_vert_used[VertexCount_Max * 2]{false};
+					bool idx_vert_used[VertexCount_Max * 2];
+
+					for(size_t i = 0, i_e = VertexCount_Max * 2; i < i_e; i++) idx_vert_used[i] = false;
 
 					// This ID's will be used when set materials ID in scene.
 					tmesh->mMaterialIndex = PostprocessHelper_GetTextureID_Or_Create(face_list_cur.front().TexMap->TextureID_R,

@@ -63,7 +63,7 @@ public:
 public:
 
 	std::string ID;///< ID of element.
-	CAMFImporter_NodeElement* Parent;///< Parrent element. If NULL then this node is root.
+	CAMFImporter_NodeElement* Parent;///< Parrent element. If nullptr then this node is root.
 	std::list<CAMFImporter_NodeElement*> Child;///< Child elements.
 
 	/***********************************************/

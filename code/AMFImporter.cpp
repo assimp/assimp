@@ -39,14 +39,14 @@ const aiImporterDesc AMFImporter::Description = {
 
 void AMFImporter::Clear()
 {
-	mNodeElement_Cur = NULL;
+	mNodeElement_Cur = nullptr;
 	mUnit.clear();
 	mMaterial_Converted.clear();
 	mTexture_Converted.clear();
 	// Delete all elements
 	if(mNodeElement_List.size())
 	{
-		for(std::list<CAMFImporter_NodeElement*>::iterator it = mNodeElement_List.begin(); it != mNodeElement_List.end(); it++) delete *it;
+		for(CAMFImporter_NodeElement* ne: mNodeElement_List) { delete ne; }
 
 		mNodeElement_List.clear();
 	}
@@ -54,7 +54,7 @@ void AMFImporter::Clear()
 
 AMFImporter::~AMFImporter()
 {
-	if(mReader != NULL) delete mReader;
+	if(mReader != nullptr) delete mReader;
 	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
 	Clear();
 }
@@ -65,15 +65,15 @@ AMFImporter::~AMFImporter()
 
 bool AMFImporter::Find_NodeElement(const std::string& pID, const CAMFImporter_NodeElement::EType pType, CAMFImporter_NodeElement** pNodeElement) const
 {
-	for(std::list<CAMFImporter_NodeElement*>::const_iterator it = mNodeElement_List.begin(); it != mNodeElement_List.end(); it++)
+	for(CAMFImporter_NodeElement* ne: mNodeElement_List)
 	{
-		if(((*it)->ID == pID) && ((*it)->Type == pType))
+		if((ne->ID == pID) && (ne->Type == pType))
 		{
-			if(pNodeElement != NULL) *pNodeElement = *it;
+			if(pNodeElement != nullptr) *pNodeElement = ne;
 
 			return true;
 		}
-	}// for(std::list<CAMFImporter_NodeElement*>::const_iterator it = mNodeElement_List.begin(); it != mNodeElement_List.end(); it++)
+	}// for(CAMFImporter_NodeElement* ne: mNodeElement_List)
 
 	return false;
 }
@@ -82,30 +82,30 @@ bool AMFImporter::Find_ConvertedNode(const std::string& pID, std::list<aiNode*>&
 {
 aiString node_name(pID.c_str());
 
-	for(std::list<aiNode*>::const_iterator it = pNodeList.begin(); it != pNodeList.end(); it++)
+	for(aiNode* node: pNodeList)
 	{
-		if((*it)->mName == node_name)
+		if(node->mName == node_name)
 		{
-			if(pNode != NULL) *pNode = *it;
+			if(pNode != nullptr) *pNode = node;
 
 			return true;
 		}
-	}// for(std::list<aiNode*>::const_iterator it = pNodeList.begin(); it != pNodeList.end(); it++)
+	}// for(aiNode* node: pNodeList)
 
 	return false;
 }
 
 bool AMFImporter::Find_ConvertedMaterial(const std::string& pID, const SPP_Material** pConvertedMaterial) const
 {
-	for(std::list<SPP_Material>::const_iterator it = mMaterial_Converted.begin(); it != mMaterial_Converted.end(); it++)
+	for(const SPP_Material& mat: mMaterial_Converted)
 	{
-		if((*it).ID == pID)
+		if(mat.ID == pID)
 		{
-			if(pConvertedMaterial != NULL) *pConvertedMaterial = (SPP_Material*)&(*it);
+			if(pConvertedMaterial != nullptr) *pConvertedMaterial = &mat;
 
 			return true;
 		}
-	}// for(std::list<SPP_Material>::const_iterator it = mMaterial_Converted.begin(); it != mMaterial_Converted.end(); it++)
+	}// for(const SPP_Material& mat: mMaterial_Converted)
 
 	return false;
 }
@@ -277,7 +277,7 @@ void AMFImporter::ParseHelper_Node_Enter(CAMFImporter_NodeElement* pNode)
 void AMFImporter::ParseHelper_Node_Exit()
 {
 	// check if we can walk up.
-	if(mNodeElement_Cur != NULL) mNodeElement_Cur = mNodeElement_Cur->Parent;
+	if(mNodeElement_Cur != nullptr) mNodeElement_Cur = mNodeElement_Cur->Parent;
 }
 
 void AMFImporter::ParseHelper_FixTruncatedFloatString(const char* pInStr, std::string& pOutString)
@@ -412,7 +412,7 @@ CAMFImporter_NodeElement* ne;
 	}
 
 	// create root node element.
-	ne = new CAMFImporter_NodeElement_Root(NULL);
+	ne = new CAMFImporter_NodeElement_Root(nullptr);
 	mNodeElement_Cur = ne;// set first "current" element
 	// and assign attribute's values
 	((CAMFImporter_NodeElement_Root*)ne)->Unit = unit;

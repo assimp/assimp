@@ -27,25 +27,12 @@ namespace Assimp
 ///
 /// Implementing features.
 ///
-/// Triangles/faces colors and texture mapping.
-///  In both cases used same method. At begin - Assimp declare that
-///  "A mesh may contain 0 to #AI_MAX_NUMBER_OF_COLOR_SETS vertex colors per vertex. NULL if not present. Each array is mNumVertices in size if present."
-///   and
-///  "A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per vertex. NULL if not present. The array is mNumVertices in size.".
-/// As you seen arrays must has mNumVertices in size. But Assimp can not check size of that arrays. So, we can create create arrays with any size.
-/// That is used. For colors importer create two arrays mColors: one for vertices colors and one for faces colors.
-/// For texture mapping used one more feature: Assimp can not store texture ID for every face. In this case importer also create two arrays mTextureCoords:
-/// one for texture coordinates of faces and one for texture IDs of faces.
-///
-/// Using \ref achFormatHint in \ref aiTexture importer set information about texture properties. For now used:
-///    Texture format description used in achFormatHint array:
-///      Byte 0
-///        Bit 0 - texture fill mode:
-///          value 0 - clamp
-///          value 1 - repeat
-///
-///
 /// Limitations.
+///
+/// 1. When for texture mapping used set of source textures (r, g, b, a) not only one then attribute "tiled" for all set will be true if it true in any of
+///    source textures.
+///    Example. Triangle use for texture mapping three textures. Two of them has "tiled" set to false and one - set to true. In scene all three textures
+///    will be tiled.
 ///
 /// Unsupported features:
 /// 1. Node <composite>, formulas in <composite> and <color>. For implementing this feature can be used expression parser "muParser" like in project
@@ -54,11 +41,7 @@ namespace Assimp
 /// 3. Curved geometry: <edge>, <normal> and children nodes of them.
 /// 4. Attributes: "unit" and "version" in <amf> read but do nothing.
 /// 5. <metadata> stored only for root node <amf>.
-/// 6. When for texture mappinf used set of source textures (r, g, b, a) not only one then attribute "tiled" for all set will be true if it true in any of
-///    source textures.
-///    Example. Triangle use for texture mapping three textures. Two of them has "tiled" set to false and one - set to true. In scene all three textures
-///    will be tiled.
-/// 7. Color averaging of vertices for which <triangle>'s set different colors.
+/// 6. Color averaging of vertices for which <triangle>'s set different colors.
 ///
 /// Supported nodes:
 ///    General:
@@ -197,16 +180,17 @@ private:
 	/// \return true - if the material is found, else - false.
 	bool Find_ConvertedMaterial(const std::string& pID, const SPP_Material** pConvertedMaterial) const;
 
-	/// \fn bool Find_ConvertedTexture(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B, const std::string& pID_A, uint32_t* pConvertedTextureIndex = NULL) const
+	/// \fn bool Find_ConvertedTexture(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B, const std::string& pID_A, uint32_t* pConvertedTextureIndex = nullptr) const
 	/// Find texture in list of converted textures. Use at postprocessing step,
 	/// \param [in] pID_R - ID of source "red" texture.
 	/// \param [in] pID_G - ID of source "green" texture.
 	/// \param [in] pID_B - ID of source "blue" texture.
 	/// \param [in] pID_A - ID of source "alpha" texture. Use empty string to find RGB-texture.
-	/// \param [out] pConvertedTextureIndex - pointer where index in list of found texture will be written. If equivalent to NULL then nothing will be written.
+	/// \param [out] pConvertedTextureIndex - pointer where index in list of found texture will be written. If equivalent to nullptr then nothing will be
+	/// written.
 	/// \return true - if the texture is found, else - false.
 	bool Find_ConvertedTexture(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B, const std::string& pID_A,
-								uint32_t* pConvertedTextureIndex = NULL) const;
+								uint32_t* pConvertedTextureIndex = nullptr) const;
 
 	/***********************************************/
 	/********* Functions: postprocess set **********/
@@ -217,7 +201,7 @@ private:
 	/// \param [in] pNodeElement - reference to node element which kept <object> data.
 	/// \param [in] pVertexCoordinateArray - reference to vertices coordinates kept in <vertices>.
 	/// \param [in] pVertexColorArray - reference to vertices colors for all <vertex's. If color for vertex is not set then corresponding member of array
-	/// contain NULL.
+	/// contain nullptr.
 	void PostprocessHelper_CreateMeshDataArray(const CAMFImporter_NodeElement_Mesh& pNodeElement, std::vector<aiVector3D>& pVertexCoordinateArray,
 												std::vector<CAMFImporter_NodeElement_Color*>& pVertexColorArray) const;
 
@@ -258,8 +242,8 @@ private:
 	/// \param [in] pNodeElement - reference to node element which kept <mesh> data.
 	/// \param [in] pVertexCoordinateArray - reference to vertices coordinates for all <volume>'s.
 	/// \param [in] pVertexColorArray - reference to vertices colors for all <volume>'s. If color for vertex is not set then corresponding member of array
-	/// contain NULL.
-	/// \param [in] pObjectColor - pointer to colors for <object>. If color is not set then argument contain NULL.
+	/// contain nullptr.
+	/// \param [in] pObjectColor - pointer to colors for <object>. If color is not set then argument contain nullptr.
 	/// \param [in] pMaterialList - reference to a list with defined materials.
 	/// \param [out] pMeshList - reference to a list with all aiMesh of the scene.
 	/// \param [out] pSceneNode - reference to aiNode which will own new aiMesh's.
@@ -503,7 +487,7 @@ public:
 	/// \fn AMFImporter()
 	/// Default constructor.
 	AMFImporter()
-		: mNodeElement_Cur(NULL), mReader(NULL)
+		: mNodeElement_Cur(nullptr), mReader(nullptr)
 	{}
 
 	/// \fn ~AMFImporter()

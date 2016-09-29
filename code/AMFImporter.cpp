@@ -13,7 +13,6 @@
 #include "DefaultIOSystem.h"
 
 // Header files, Boost.
-#include <boost/format.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // Header files, stdlib.
@@ -121,12 +120,12 @@ void AMFImporter::Throw_CloseNotFound(const std::string& pNode)
 
 void AMFImporter::Throw_IncorrectAttr(const std::string& pAttrName)
 {
-	throw DeadlyImportError(boost::str(boost::format("Node <%s> has incorrect attribute \"%s\".") % mReader->getNodeName() % pAttrName));
+	throw DeadlyImportError("Node <" + std::string(mReader->getNodeName()) + "> has incorrect attribute \"" + pAttrName + "\".");
 }
 
 void AMFImporter::Throw_IncorrectAttrValue(const std::string& pAttrName)
 {
-	throw DeadlyImportError(boost::str(boost::format("Attribute \"%s\" in node <%s> has incorrect value.") % pAttrName % mReader->getNodeName()));
+	throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
 }
 
 void AMFImporter::Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription)
@@ -136,7 +135,7 @@ void AMFImporter::Throw_MoreThanOnceDefined(const std::string& pNodeType, const 
 
 void AMFImporter::Throw_ID_NotFound(const std::string& pID) const
 {
-	throw DeadlyImportError(boost::str(boost::format("Not found node with name \"%s\".") % pID));
+	throw DeadlyImportError("Not found node with name \"" + pID + "\".");
 }
 
 /*********************************************************************************************************************************************/
@@ -185,13 +184,13 @@ size_t sk_idx;
 
 casu_cres:
 
-	if(!found) throw DeadlyImportError(boost::str(boost::format("Unknown node \"%s\" in %s.") % nn % pParentNodeName));
+	if(!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
 	if(!close_found) Throw_CloseNotFound(nn);
 
 	if(!skipped_before[sk_idx])
 	{
 		skipped_before[sk_idx] = true;
-		LogWarning(boost::str(boost::format("Skipping node \"%s\" in %s.") % nn % pParentNodeName));
+		LogWarning("Skipping node \"" + nn + "\" in " + pParentNodeName + ".");
 	}
 }
 

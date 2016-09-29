@@ -12,10 +12,8 @@
 #include "fast_atof.h"
 #include "DefaultIOSystem.h"
 
-// Header files, Boost.
-#include <boost/scoped_ptr.hpp>
-
 // Header files, stdlib.
+#include <memory>
 #include <string>
 
 namespace Assimp
@@ -364,13 +362,13 @@ uint8_t arr4[4], arr3[3];
 void AMFImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 {
 irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
-boost::scoped_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
+std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 	// Check whether we can read from the file
 	if(file.get() == NULL) throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
 
 	// generate a XML reader for it
-	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
+	std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
 	mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
 	if(!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
 	//

@@ -100,9 +100,6 @@ size_t col_idx;
 size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B,
 																const std::string& pID_A)
 {
-using CNE_Texture = CAMFImporter_NodeElement_Texture;
-using CNE = CAMFImporter_NodeElement;
-
 size_t TextureConverted_Index;
 std::string TextureConverted_ID;
 
@@ -125,20 +122,20 @@ std::string TextureConverted_ID;
 	//
 	// Converted texture not found, create it.
 	//
-	CNE_Texture* src_texture[4]{nullptr};
-	std::vector<CNE_Texture*> src_texture_4check;
+	CAMFImporter_NodeElement_Texture* src_texture[4]{nullptr};
+	std::vector<CAMFImporter_NodeElement_Texture*> src_texture_4check;
 	SPP_Texture converted_texture;
 
 	{// find all specified source textures
-		CNE* t_tex;
+		CAMFImporter_NodeElement* t_tex;
 
 		// R
 		if(!pID_R.empty())
 		{
-			if(!Find_NodeElement(pID_R, CNE::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_R);
+			if(!Find_NodeElement(pID_R, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_R);
 
-			src_texture[0] = (CNE_Texture*)t_tex;
-			src_texture_4check.push_back((CNE_Texture*)t_tex);
+			src_texture[0] = (CAMFImporter_NodeElement_Texture*)t_tex;
+			src_texture_4check.push_back((CAMFImporter_NodeElement_Texture*)t_tex);
 		}
 		else
 		{
@@ -148,10 +145,10 @@ std::string TextureConverted_ID;
 		// G
 		if(!pID_G.empty())
 		{
-			if(!Find_NodeElement(pID_G, CNE::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_G);
+			if(!Find_NodeElement(pID_G, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_G);
 
-			src_texture[1] = (CNE_Texture*)t_tex;
-			src_texture_4check.push_back((CNE_Texture*)t_tex);
+			src_texture[1] = (CAMFImporter_NodeElement_Texture*)t_tex;
+			src_texture_4check.push_back((CAMFImporter_NodeElement_Texture*)t_tex);
 		}
 		else
 		{
@@ -161,10 +158,10 @@ std::string TextureConverted_ID;
 		// B
 		if(!pID_B.empty())
 		{
-			if(!Find_NodeElement(pID_B, CNE::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_B);
+			if(!Find_NodeElement(pID_B, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_B);
 
-			src_texture[2] = (CNE_Texture*)t_tex;
-			src_texture_4check.push_back((CNE_Texture*)t_tex);
+			src_texture[2] = (CAMFImporter_NodeElement_Texture*)t_tex;
+			src_texture_4check.push_back((CAMFImporter_NodeElement_Texture*)t_tex);
 		}
 		else
 		{
@@ -174,10 +171,10 @@ std::string TextureConverted_ID;
 		// A
 		if(!pID_A.empty())
 		{
-			if(!Find_NodeElement(pID_A, CNE::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_A);
+			if(!Find_NodeElement(pID_A, CAMFImporter_NodeElement::ENET_Texture, &t_tex)) Throw_ID_NotFound(pID_A);
 
-			src_texture[3] = (CNE_Texture*)t_tex;
-			src_texture_4check.push_back((CNE_Texture*)t_tex);
+			src_texture[3] = (CAMFImporter_NodeElement_Texture*)t_tex;
+			src_texture_4check.push_back((CAMFImporter_NodeElement_Texture*)t_tex);
 		}
 		else
 		{
@@ -348,26 +345,21 @@ void AMFImporter::Postprocess_BuildMeshSet(const CAMFImporter_NodeElement_Mesh& 
 											const std::vector<CAMFImporter_NodeElement_Color*>& pVertexColorArray,
 											const CAMFImporter_NodeElement_Color* pObjectColor, std::list<aiMesh*>& pMeshList, aiNode& pSceneNode)
 {
-using CNE = CAMFImporter_NodeElement;
-using CNE_Color = CAMFImporter_NodeElement_Color;
-using CNE_TexMap = CAMFImporter_NodeElement_TexMap;
-using ComplexFaceList = std::list<SComplexFace>;
-
 std::list<unsigned int> mesh_idx;
 
 	// all data stored in "volume", search for it.
-	for(const CNE* ne_child: pNodeElement.Child)
+	for(const CAMFImporter_NodeElement* ne_child: pNodeElement.Child)
 	{
-		const CNE_Color* ne_volume_color = nullptr;
+		const CAMFImporter_NodeElement_Color* ne_volume_color = nullptr;
 		const SPP_Material* cur_mat = nullptr;
 
-		if(ne_child->Type == CNE::ENET_Volume)
+		if(ne_child->Type == CAMFImporter_NodeElement::ENET_Volume)
 		{
 			/******************* Get faces *******************/
 			const CAMFImporter_NodeElement_Volume* ne_volume = reinterpret_cast<const CAMFImporter_NodeElement_Volume*>(ne_child);
 
-			ComplexFaceList complex_faces_list;// List of the faces of the volume.
-			std::list<ComplexFaceList> complex_faces_toplist;// List of the face list for every mesh.
+			std::list<SComplexFace> complex_faces_list;// List of the faces of the volume.
+			std::list<std::list<SComplexFace> > complex_faces_toplist;// List of the face list for every mesh.
 
 			// check if volume use material
 			if(!ne_volume->MaterialID.empty())
@@ -376,14 +368,14 @@ std::list<unsigned int> mesh_idx;
 			}
 
 			// inside "volume" collect all data and place to arrays or create new objects
-			for(const CNE* ne_volume_child: ne_volume->Child)
+			for(const CAMFImporter_NodeElement* ne_volume_child: ne_volume->Child)
 			{
 				// color for volume
-				if(ne_volume_child->Type == CNE::ENET_Color)
+				if(ne_volume_child->Type == CAMFImporter_NodeElement::ENET_Color)
 				{
-					ne_volume_color = reinterpret_cast<const CNE_Color*>(ne_volume_child);
+					ne_volume_color = reinterpret_cast<const CAMFImporter_NodeElement_Color*>(ne_volume_child);
 				}
-				else if(ne_volume_child->Type == CNE::ENET_Triangle)// triangles, triangles colors
+				else if(ne_volume_child->Type == CAMFImporter_NodeElement::ENET_Triangle)// triangles, triangles colors
 				{
 					const CAMFImporter_NodeElement_Triangle& tri_al = *reinterpret_cast<const CAMFImporter_NodeElement_Triangle*>(ne_volume_child);
 
@@ -395,12 +387,12 @@ std::list<unsigned int> mesh_idx;
 					// get data from triangle children: color, texture coordinates.
 					if(tri_al.Child.size())
 					{
-						for(const CNE* ne_triangle_child: tri_al.Child)
+						for(const CAMFImporter_NodeElement* ne_triangle_child: tri_al.Child)
 						{
-							if(ne_triangle_child->Type == CNE::ENET_Color)
-								complex_face.Color = reinterpret_cast<const CNE_Color*>(ne_triangle_child);
-							else if(ne_triangle_child->Type == CNE::ENET_TexMap)
-								complex_face.TexMap = reinterpret_cast<const CNE_TexMap*>(ne_triangle_child);
+							if(ne_triangle_child->Type == CAMFImporter_NodeElement::ENET_Color)
+								complex_face.Color = reinterpret_cast<const CAMFImporter_NodeElement_Color*>(ne_triangle_child);
+							else if(ne_triangle_child->Type == CAMFImporter_NodeElement::ENET_TexMap)
+								complex_face.TexMap = reinterpret_cast<const CAMFImporter_NodeElement_TexMap*>(ne_triangle_child);
 						}
 					}// if(tri_al.Child.size())
 
@@ -412,15 +404,15 @@ std::list<unsigned int> mesh_idx;
 					complex_face.Face.mIndices[2] = tri_al.V[2];
 					complex_faces_list.push_back(complex_face);
 				}
-			}// for(const CNE* ne_volume_child: ne_volume->Child)
+			}// for(const CAMFImporter_NodeElement* ne_volume_child: ne_volume->Child)
 
 			/**** Split faces list: one list per mesh ****/
 			PostprocessHelper_SplitFacesByTextureID(complex_faces_list, complex_faces_toplist);
 
 			/***** Create mesh for every faces list ******/
-			for(ComplexFaceList& face_list_cur: complex_faces_toplist)
+			for(std::list<SComplexFace>& face_list_cur: complex_faces_toplist)
 			{
-				auto VertexIndex_GetMinimal = [](const ComplexFaceList& pFaceList, const size_t* pBiggerThan) -> size_t
+				auto VertexIndex_GetMinimal = [](const std::list<SComplexFace>& pFaceList, const size_t* pBiggerThan) -> size_t
 				{
 					size_t rv;
 
@@ -470,9 +462,9 @@ std::list<unsigned int> mesh_idx;
 					}// for(const SComplexFace& face: pFaceList)
 
 					return rv;
-				};// auto VertexIndex_GetMinimal = [](const ComplexFaceList& pFaceList, const size_t* pBiggerThan) -> size_t
+				};// auto VertexIndex_GetMinimal = [](const std::list<SComplexFace>& pFaceList, const size_t* pBiggerThan) -> size_t
 
-				auto VertexIndex_Replace = [](ComplexFaceList& pFaceList, const size_t pIdx_From, const size_t pIdx_To) -> void
+				auto VertexIndex_Replace = [](std::list<SComplexFace>& pFaceList, const size_t pIdx_From, const size_t pIdx_To) -> void
 				{
 					for(const SComplexFace& face: pFaceList)
 					{
@@ -481,7 +473,7 @@ std::list<unsigned int> mesh_idx;
 							if(face.Face.mIndices[vi] == pIdx_From) face.Face.mIndices[vi] = pIdx_To;
 						}
 					}
-				};// auto VertexIndex_Replace = [](ComplexFaceList& pFaceList, const size_t pIdx_From, const size_t pIdx_To) -> void
+				};// auto VertexIndex_Replace = [](std::list<SComplexFace>& pFaceList, const size_t pIdx_From, const size_t pIdx_To) -> void
 
 				auto Vertex_CalculateColor = [&](const size_t pIdx) -> aiColor4D
 				{
@@ -661,9 +653,9 @@ std::list<unsigned int> mesh_idx;
 				// store new aiMesh
 				mesh_idx.push_back(pMeshList.size());
 				pMeshList.push_back(tmesh);
-			}// for(const ComplexFaceList& face_list_cur: complex_faces_toplist)
+			}// for(const std::list<SComplexFace>& face_list_cur: complex_faces_toplist)
 		}// if(ne_child->Type == CAMFImporter_NodeElement::ENET_Volume)
-	}// for(const CNE* ne_child: pNodeElement.Child)
+	}// for(const CAMFImporter_NodeElement* ne_child: pNodeElement.Child)
 
 	// if meshes was created then assign new indices with current aiNode
 	if(mesh_idx.size() > 0)

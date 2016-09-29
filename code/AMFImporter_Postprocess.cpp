@@ -208,9 +208,9 @@ std::string TextureConverted_ID;
 	// Create format hint.
 	strcpy(converted_texture.FormatHint, "rgba0000");// copy initial string.
 	if(!pID_R.empty()) converted_texture.FormatHint[4] = '8';
-	if(!pID_G.empty()) converted_texture.FormatHint[4] = '8';
-	if(!pID_B.empty()) converted_texture.FormatHint[4] = '8';
-	if(!pID_A.empty()) converted_texture.FormatHint[4] = '8';
+	if(!pID_G.empty()) converted_texture.FormatHint[5] = '8';
+	if(!pID_B.empty()) converted_texture.FormatHint[6] = '8';
+	if(!pID_A.empty()) converted_texture.FormatHint[7] = '8';
 
 	//
 	// Сopy data of textures.

@@ -595,8 +595,9 @@ std::list<unsigned int> mesh_idx;
 					///TODO: clean unused vertices. "* 2": in certain cases - mesh full of triangle colors - vert_arr will contain duplicated vertices for
 					/// colored triangles and initial vertices (for colored vertices) which in real became unused. This part need more thinking about
 					/// optimisation.
-					bool idx_vert_used[VertexCount_Max * 2];
+					bool* idx_vert_used;
 
+					idx_vert_used = new bool[VertexCount_Max * 2];
 					for(size_t i = 0, i_e = VertexCount_Max * 2; i < i_e; i++) idx_vert_used[i] = false;
 
 					// This ID's will be used when set materials ID in scene.
@@ -628,6 +629,7 @@ std::list<unsigned int> mesh_idx;
 						}// for(size_t idx_ind = 0; idx_ind < face_cur.Face.mNumIndices; idx_ind++)
 					}// for(const SComplexFace& face_cur: face_list_cur)
 
+					delete [] idx_vert_used;
 					// shrink array
 					texcoord_arr.resize(idx_vert_new);
 				}// if(face_list_cur.front().TexMap != nullptr)

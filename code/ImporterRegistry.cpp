@@ -185,6 +185,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 #   include "D3MFImporter.h"
 #endif
+#ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
+#   include "X3DImporter.hpp"
+#endif
 
 namespace Assimp {
 
@@ -330,6 +333,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 #endif
 #if ( !defined ASSIMP_BUILD_NO_3MF_IMPORTER )
     out.push_back(new D3MFImporter() );
+#endif
+#ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
+    out.push_back( new X3DImporter() );
 #endif
 }
 

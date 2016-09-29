@@ -187,7 +187,7 @@ struct aiTexture
     //! @return true if the given string matches the format hint
     bool CheckFormat(const char* s) const
     {
-        return (0 == ::strncmp(achFormatHint,s,3));
+		return (0 == ::strncmp(achFormatHint, s, sizeof(achFormatHint)));
     }
 
     // Construction

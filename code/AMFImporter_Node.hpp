@@ -9,6 +9,7 @@
 // Header files, stdlib.
 #include <list>
 #include <string>
+#include <vector>
 
 // Header files, Assimp.
 #include "assimp/types.h"

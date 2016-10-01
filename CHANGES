@@ -2,6 +2,22 @@
 CHANGELOG
 ----------------------------------------------------------------------
 
+3.2.1 (2016-10-01)
+
+FEATURES:
+  - Updated glTF exporter to meet 1.0 specification.
+
+FIXES/HOUSEKEEPING:
+  - Fixed glTF Validator errors for exported glTF format.
+
+ISSUES:
+  - Hard coded sampler setting for
+    - magFilter
+    - minFilter
+  - void* in ExportData for accessor max and min.
+
+
+
 3.2.0 (2015-11-03)
 
 FEATURES:

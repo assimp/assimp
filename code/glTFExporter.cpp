@@ -235,6 +235,52 @@ namespace {
     }
 }
 
+void glTFExporter::GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop)
+{
+    std::string samplerId = mAsset->FindUniqueID("", "sampler");
+    prop.texture->sampler = mAsset->samplers.Create(samplerId);
+
+    aiTextureMapMode mapU, mapV;
+    aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0),(int*)&mapU);
+    aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0),(int*)&mapV);
+
+    switch (mapU) {
+        case aiTextureMapMode_Wrap:
+            prop.texture->sampler->wrapS = SamplerWrap_Repeat;
+            break;
+        case aiTextureMapMode_Clamp:
+            prop.texture->sampler->wrapS = SamplerWrap_Clamp_To_Edge;
+            break;
+        case aiTextureMapMode_Mirror:
+            prop.texture->sampler->wrapS = SamplerWrap_Mirrored_Repeat;
+            break;
+        case aiTextureMapMode_Decal:
+        default:
+            prop.texture->sampler->wrapS = SamplerWrap_Repeat;
+            break;
+    };
+
+    switch (mapV) {
+        case aiTextureMapMode_Wrap:
+            prop.texture->sampler->wrapT = SamplerWrap_Repeat;
+            break;
+        case aiTextureMapMode_Clamp:
+            prop.texture->sampler->wrapT = SamplerWrap_Clamp_To_Edge;
+            break;
+        case aiTextureMapMode_Mirror:
+            prop.texture->sampler->wrapT = SamplerWrap_Mirrored_Repeat;
+            break;
+        case aiTextureMapMode_Decal:
+        default:
+            prop.texture->sampler->wrapT = SamplerWrap_Repeat;
+            break;
+    };
+
+    // Hard coded Texture filtering options because I do not know where to find them in the aiMaterial.
+    prop.texture->sampler->magFilter = SamplerMagFilter_Linear;
+    prop.texture->sampler->minFilter = SamplerMinFilter_Linear;
+}
+
 void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
 {
     aiString tex;
@@ -274,6 +320,8 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
                     else {
                         prop.texture->source->uri = path;
                     }
+
+                    GetTexSampler(mat, prop);
                 }
             }
         }
@@ -283,6 +331,7 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
         prop.color[0] = col.r; prop.color[1] = col.g; prop.color[2] = col.b; prop.color[3] = col.a;
     }
 }
+
 
 void glTFExporter::ExportMaterials()
 {

@@ -236,6 +236,32 @@ namespace glTF
         BufferViewTarget_ELEMENT_ARRAY_BUFFER = 34963
     };
 
+    //! Values for the Sampler::magFilter field
+    enum SamplerMagFilter
+    {
+        SamplerMagFilter_Nearest = 9728,
+        SamplerMagFilter_Linear = 9729
+    };
+
+    //! Values for the Sampler::minFilter field
+    enum SamplerMinFilter
+    {
+        SamplerMinFilter_Nearest = 9728,
+        SamplerMinFilter_Linear = 9729,
+        SamplerMinFilter_Nearest_Mipmap_Nearest = 9984,
+        SamplerMinFilter_Linear_Mipmap_Nearest = 9985,
+        SamplerMinFilter_Nearest_Mipmap_Linear = 9986,
+        SamplerMinFilter_Linear_Mipmap_Linear = 9987
+    };
+
+    //! Values for the Sampler::wrapS and Sampler::wrapT field
+    enum SamplerWrap
+    {
+        SamplerWrap_Clamp_To_Edge = 33071,
+        SamplerWrap_Mirrored_Repeat = 33648,
+        SamplerWrap_Repeat = 10497
+    };
+
     //! Values for the Texture::format and Texture::internalFormat fields
     enum TextureFormat
     {
@@ -812,8 +838,14 @@ namespace glTF
 
     struct Sampler : public Object
     {
+        SamplerMagFilter magFilter; //!< The texture magnification filter. (required)
+        SamplerMinFilter minFilter; //!< The texture minification filter. (required)
+        SamplerWrap wrapS;          //!< The texture wrapping in the S direction. (required)
+        SamplerWrap wrapT;          //!< The texture wrapping in the T direction. (required)
+
         Sampler() {}
         void Read(Value& obj, Asset& r);
+        void SetDefaults();
     };
 
     struct Scene : public Object
@@ -860,8 +892,8 @@ namespace glTF
     //! A texture and its sampler.
     struct Texture : public Object
     {
-        //Ref<Sampler> source; //!< The ID of the sampler used by this texture. (required)
-        Ref<Image> source; //!< The ID of the image used by this texture. (required)
+        Ref<Sampler> sampler; //!< The ID of the sampler used by this texture. (required)
+        Ref<Image> source;    //!< The ID of the image used by this texture. (required)
 
         //TextureFormat format; //!< The texture's format. (default: TextureFormat_RGBA)
         //TextureFormat internalFormat; //!< The texture's internal format. (default: TextureFormat_RGBA)
@@ -921,7 +953,7 @@ namespace glTF
     //! (Implemented in glTFAssetWriter.h)
     template<class T>
     void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
-    
+
 
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them
@@ -983,7 +1015,7 @@ namespace glTF
         int version; //!< The glTF format version (should be 1)
 
         void Read(Document& doc);
-        
+
         AssetMetadata()
             : premultipliedAlpha(false)
             , version(0)
@@ -1049,7 +1081,7 @@ namespace glTF
         LazyDict<Mesh>        meshes;
         LazyDict<Node>        nodes;
         //LazyDict<Program>   programs;
-        //LazyDict<Sampler>   samplers;
+        LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
         //LazyDict<Shader>    shaders;
         //LazyDict<Skin>      skins;
@@ -1074,7 +1106,7 @@ namespace glTF
             , meshes        (*this, "meshes")
             , nodes         (*this, "nodes")
             //, programs    (*this, "programs")
-            //, samplers    (*this, "samplers")
+            , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
             //, shaders     (*this, "shaders")
             //, skins       (*this, "skins")

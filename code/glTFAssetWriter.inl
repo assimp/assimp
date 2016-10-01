@@ -333,7 +333,18 @@ namespace glTF {
 
     inline void Write(Value& obj, Sampler& b, AssetWriter& w)
     {
-
+        if (b.wrapS) {
+            obj.AddMember("wrapS", b.wrapS, w.mAl);
+        }
+        if (b.wrapT) {
+            obj.AddMember("wrapT", b.wrapT, w.mAl);
+        }
+        if (b.magFilter) {
+            obj.AddMember("magFilter", b.magFilter, w.mAl);
+        }
+        if (b.minFilter) {
+            obj.AddMember("minFilter", b.minFilter, w.mAl);
+        }
     }
 
     inline void Write(Value& scene, Scene& s, AssetWriter& w)
@@ -360,6 +371,9 @@ namespace glTF {
     {
         if (tex.source) {
             obj.AddMember("source", Value(tex.source->id, w.mAl).Move(), w.mAl);
+        }
+        if (tex.sampler) {
+            obj.AddMember("sampler", Value(tex.sampler->id, w.mAl).Move(), w.mAl);
         }
     }
 

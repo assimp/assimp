@@ -617,6 +617,7 @@ ADD_ASSIMP_IMPORTER(X3D
   X3DImporter_Geometry3D.cpp
   X3DImporter_Group.cpp
   X3DImporter_Light.cpp
+  X3DImporter_Macro.hpp
   X3DImporter_Metadata.cpp
   X3DImporter_Networking.cpp
   X3DImporter_Node.hpp

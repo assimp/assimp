@@ -167,7 +167,7 @@ void X3DImporter::Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNod
 			tvalf = 1;
 			taimat.AddProperty(&tvalf, 1, AI_MATKEY_SHININESS_STRENGTH);
 			taimat.AddProperty(&tnemat.Shininess, 1, AI_MATKEY_SHININESS);
-			tvalf = 1.0 - tnemat.Transparency;
+			tvalf = 1.0f - tnemat.Transparency;
 			taimat.AddProperty(&tvalf, 1, AI_MATKEY_OPACITY);
 		}// if((*el_it)->Type == CX3DImporter_NodeElement::ENET_Material)
 		else if((*el_it)->Type == CX3DImporter_NodeElement::ENET_ImageTexture)

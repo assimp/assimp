@@ -1,7 +1,7 @@
 /// \file X3DImporter_Macro.hpp
 /// \brief Useful macrodefines.
 /// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \author smal.root@gmail.com
 
 #ifndef X3DIMPORTER_MACRO_HPP_INCLUDED
 #define X3DIMPORTER_MACRO_HPP_INCLUDED

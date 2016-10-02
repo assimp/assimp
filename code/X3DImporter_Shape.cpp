@@ -159,10 +159,10 @@ CX3DImporter_NodeElement* ne;
 void X3DImporter::ParseNode_Shape_Material()
 {
 std::string use, def;
-float ambientIntensity = 0.2;
-float shininess = 0.2;
+float ambientIntensity = 0.2f;
+float shininess = 0.2f;
 float transparency = 0;
-aiColor3D diffuseColor(0.8, 0.8, 0.8);
+aiColor3D diffuseColor(0.8f, 0.8f, 0.8f);
 aiColor3D emissiveColor(0, 0, 0);
 aiColor3D specularColor(0, 0, 0);
 CX3DImporter_NodeElement* ne;

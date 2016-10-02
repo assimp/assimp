@@ -1,16 +1,18 @@
-/// \file X3DImporter_Node.hpp
-/// \brief Elements of scene graph.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter_Node.hpp
+/// \brief  Elements of scene graph.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
 
 #ifndef INCLUDED_AI_X3D_IMPORTER_NODE_H
 #define INCLUDED_AI_X3D_IMPORTER_NODE_H
 
+// Header files, Assimp.
+#include "assimp/scene.h"
+#include "assimp/types.h"
+
+// Header files, stdlib.
 #include <list>
 #include <string>
-
-#include "../include/assimp/types.h"
-#include "../include/assimp/scene.h"
 
 /// \class CX3DImporter_NodeElement
 /// Base class for elements of nodes.
@@ -89,7 +91,7 @@ public:
 public:
 
 	std::string ID;///< ID of the element. Can be empty. In X3D synonym for "ID" attribute.
-	CX3DImporter_NodeElement* Parent;///< Parrent element. If NULL then this node is root.
+	CX3DImporter_NodeElement* Parent;///< Parrent element. If nullptr then this node is root.
 	std::list<CX3DImporter_NodeElement*> Child;///< Child elements.
 
 	/***********************************************/

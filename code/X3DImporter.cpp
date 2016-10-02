@@ -1,18 +1,19 @@
-/// \file X3DImporter.hpp
-/// \brief X3D-format files importer for Assimp: main algorithm implementation.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter.cpp
+/// \brief  X3D-format files importer for Assimp: main algorithm implementation.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
 
-#include "fast_atof.h"
+// Header files, Assimp.
 #include "DefaultIOSystem.h"
+#include "fast_atof.h"
 
-#include <boost/format.hpp>
-#include <boost/scoped_ptr.hpp>
+// Header files, stdlib.
+#include <memory>
 #include <string>
 
 namespace Assimp
@@ -35,6 +36,7 @@ const aiImporterDesc X3DImporter::Description = {
 
 void X3DImporter::Clear()
 {
+	NodeElement_Cur = nullptr;
 	// Delete all elements
 	if(NodeElement_List.size())
 	{
@@ -46,7 +48,7 @@ void X3DImporter::Clear()
 
 X3DImporter::~X3DImporter()
 {
-	if(mReader != NULL) delete mReader;
+	if(mReader != nullptr) delete mReader;
 	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
 	Clear();
 }
@@ -61,7 +63,7 @@ bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const CX3DImp
 	{
 		if(((*it)->Type == pType) && ((*it)->ID == pID))
 		{
-			if(pElement != NULL) *pElement = *it;
+			if(pElement != nullptr) *pElement = *it;
 
 			return true;
 		}
@@ -79,7 +81,7 @@ bool found = false;// flag: true - if requested element is found.
 	if((pStartNode->Type == pType) && (pStartNode->ID == pID))
 	{
 		found = true;
-		if(pElement != NULL) *pElement = pStartNode;
+		if(pElement != nullptr) *pElement = pStartNode;
 
 		goto fne_fn_end;
 	}// if((pStartNode->Type() == pType) && (pStartNode->ID() == pID))
@@ -102,7 +104,7 @@ CX3DImporter_NodeElement* tnd = NodeElement_Cur;// temporary pointer to node.
 bool static_search = false;// flag: true if searching in static node.
 
     // At first check if we have deal with static node. Go up thru parent nodes and check flag.
-    while(tnd != NULL)
+    while(tnd != nullptr)
     {
 		if(tnd->Type == CX3DImporter_NodeElement::ENET_Group)
 		{
@@ -115,7 +117,7 @@ bool static_search = false;// flag: true if searching in static node.
 		}
 
 		tnd = tnd->Parent;// go up in graph.
-    }// while(tnd != NULL)
+    }// while(tnd != nullptr)
 
     // at now call appropriate search function.
     if(static_search)
@@ -140,23 +142,23 @@ void X3DImporter::Throw_CloseNotFound(const std::string& pNode)
 
 void X3DImporter::Throw_ConvertFail_Str2ArrF(const std::string& pAttrValue)
 {
-	throw DeadlyImportError(boost::str(boost::format("In <%s> failed to convert attribute value \"%s\" from string to array of floats.") %
-										mReader->getNodeName() % pAttrValue));
+	throw DeadlyImportError("In <" + std::string(mReader->getNodeName()) + "> failed to convert attribute value \"" + pAttrValue +
+							"\" from string to array of floats.");
 }
 
 void X3DImporter::Throw_DEF_And_USE()
 {
-	throw DeadlyImportError(boost::str(boost::format("\"DEF\" and \"USE\" can not be defined both in <%s>.") % mReader->getNodeName()));
+	throw DeadlyImportError("\"DEF\" and \"USE\" can not be defined both in <" + std::string(mReader->getNodeName()) + ">.");
 }
 
 void X3DImporter::Throw_IncorrectAttr(const std::string& pAttrName)
 {
-	throw DeadlyImportError(boost::str(boost::format("Node <%s> has incorrect attribute \"%s\".") % mReader->getNodeName() % pAttrName));
+	throw DeadlyImportError("Node <" + std::string(mReader->getNodeName()) + "> has incorrect attribute \"" + pAttrName + "\".");
 }
 
 void X3DImporter::Throw_IncorrectAttrValue(const std::string& pAttrName)
 {
-	throw DeadlyImportError(boost::str(boost::format("Attribute \"%s\" in node <%s> has incorrect value.") % pAttrName % mReader->getNodeName()));
+	throw DeadlyImportError("Attribute \"" + pAttrName + "\" in node <" + std::string(mReader->getNodeName()) + "> has incorrect value.");
 }
 
 void X3DImporter::Throw_MoreThanOnceDefined(const std::string& pNodeType, const std::string& pDescription)
@@ -171,7 +173,7 @@ void X3DImporter::Throw_TagCountIncorrect(const std::string& pNode)
 
 void X3DImporter::Throw_USE_NotFound(const std::string& pAttrValue)
 {
-	throw DeadlyImportError(boost::str(boost::format("Not found node with name \"%s\" in <%s>.") % pAttrValue % mReader->getNodeName()));
+	throw DeadlyImportError("Not found node with name \"" + pAttrValue + "\" in <" + std::string(mReader->getNodeName()) + ">.");
 }
 
 /*********************************************************************************************************************************************/
@@ -292,10 +294,10 @@ bool close_found = false;
 
 casu_cres:
 
-	if(!found) throw DeadlyImportError(boost::str(boost::format("Unknown node \"%s\" in %s.") % nn % pParentNodeName));
+	if(!found) throw DeadlyImportError("Unknown node \"" + nn + "\" in " + pParentNodeName + ".");
 
 	if(close_found)
-		LogInfo(boost::str(boost::format("Skipping node \"%s\" in %s.") % nn % pParentNodeName));
+		LogInfo("Skipping node \"" + nn + "\" in " + pParentNodeName + ".");
 	else
 		Throw_CloseNotFound(nn);
 }
@@ -441,8 +443,9 @@ const char* tstr_end = tstr + strlen(tstr);
 
 	do
 	{
-		int32_t tval32;
 		const char* ostr;
+
+		int32_t tval32;
 
 		tval32 = strtol10(tstr, &ostr);
 		if(ostr == tstr) break;
@@ -696,13 +699,13 @@ size_t tok_str_len;
 
 		// find begin of string(element of string list): "sn".
 		tbeg = strstr(tok_str, "\"");
-		if(tbeg == NULL) Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
+		if(tbeg == nullptr) Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
 
 		tbeg++;// forward pointer from '\"' symbol to next after it.
 		tok_str = tbeg;
 		// find end of string(element of string list): "sn".
 		tend = strstr(tok_str, "\"");
-		if(tend == NULL) Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
+		if(tend == nullptr) Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
 
 		tok_str = tend + 1;
 		// create storage for new string
@@ -850,10 +853,10 @@ unsigned int prim_type = 0;
 			switch(ts)
 			{
 				case 0: goto mg_m_err;
-				case 1: prim_type |= aiPrimitiveType_POINT;
-				case 2: prim_type |= aiPrimitiveType_LINE;
-				case 3: prim_type |= aiPrimitiveType_TRIANGLE;
-				default: prim_type |= aiPrimitiveType_POLYGON;
+				case 1: prim_type |= aiPrimitiveType_POINT; break;
+				case 2: prim_type |= aiPrimitiveType_LINE; break;
+				case 3: prim_type |= aiPrimitiveType_TRIANGLE; break;
+				default: prim_type |= aiPrimitiveType_POLYGON; break;
 			}
 
 			tface.mNumIndices = ts;
@@ -899,8 +902,8 @@ std::list<aiColor4D>::const_iterator col_it = pColors.begin();
 	{
 		if(pColors.size() < pMesh.mNumVertices)
 		{
-			throw DeadlyImportError(boost::str(boost::format("MeshGeometry_AddColor1. Colors count(%s) can not be less than Vertices count(%s).") %
-																pColors.size() % pMesh.mNumVertices));
+			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Vertices count(" +
+									std::to_string(pMesh.mNumVertices) +  ").");
 		}
 
 		// copy colors to mesh
@@ -911,8 +914,8 @@ std::list<aiColor4D>::const_iterator col_it = pColors.begin();
 	{
 		if(pColors.size() < pMesh.mNumFaces)
 		{
-			throw DeadlyImportError(boost::str(boost::format("MeshGeometry_AddColor1. Colors count(%s) can not be less than Faces count(%s).") %
-																pColors.size() % pMesh.mNumFaces));
+			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Faces count(" +
+									std::to_string(pMesh.mNumFaces) +  ").");
 		}
 
 		// copy colors to mesh
@@ -959,8 +962,8 @@ std::vector<aiColor4D> col_arr_copy;
 			// check indices array count.
 			if(pColorIdx.size() < pCoordIdx.size())
 			{
-				throw DeadlyImportError(boost::str(boost::format("MeshGeometry_AddColor2. Colors indices count(%s) can not be less than Coords inidces count(%s).") %
-																	pColorIdx.size() % pCoordIdx.size()));
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + std::to_string(pColorIdx.size()) +
+										") can not be less than Coords inidces count(" + std::to_string(pCoordIdx.size()) +  ").");
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
@@ -979,8 +982,8 @@ std::vector<aiColor4D> col_arr_copy;
 			// check indices array count.
 			if(pColors.size() < pMesh.mNumVertices)
 			{
-				throw DeadlyImportError(boost::str(boost::format("MeshGeometry_AddColor2. Colors count(%s) can not be less than Vertices count(%s).") %
-																	pColors.size() % pMesh.mNumVertices));
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Vertices count(" +
+										std::to_string(pMesh.mNumVertices) +  ").");
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
@@ -994,8 +997,8 @@ std::vector<aiColor4D> col_arr_copy;
 			// check indices array count.
 			if(pColorIdx.size() < pMesh.mNumFaces)
 			{
-				throw DeadlyImportError(boost::str(boost::format("MeshGeometry_AddColor2. Colors indices count(%s) can not be less than Faces count(%s).") %
-																	pColorIdx.size() % pMesh.mNumFaces));
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + std::to_string(pColorIdx.size()) +
+										") can not be less than Faces count(" + std::to_string(pMesh.mNumFaces) +  ").");
 			}
 			// create list with colors for every vertex using faces indices.
 			col_tgt_arr.resize(pMesh.mNumFaces);
@@ -1014,8 +1017,8 @@ std::vector<aiColor4D> col_arr_copy;
 			// check indices array count.
 			if(pColors.size() < pMesh.mNumFaces)
 			{
-				throw DeadlyImportError(boost::str(boost::format("MeshGeometry_AddColor2. Colors count(%s) can not be less than Faces count(%s).") %
-																	pColors.size() % pMesh.mNumFaces));
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Faces count(" +
+										std::to_string(pMesh.mNumFaces) +  ").");
 			}
 			// create list with colors for every vertex using faces indices.
 			col_tgt_arr.resize(pMesh.mNumFaces);
@@ -1067,8 +1070,8 @@ std::vector<aiVector3D> norm_arr_copy;
 		for(size_t i = 0; (i < pMesh.mNumVertices) && (i < tind.size()); i++)
 		{
 			if(tind[i] >= norm_arr_copy.size())
-				throw DeadlyImportError(boost::str(boost::format("MeshGeometry_AddNormal. Normal index(%s) is out of range. Normals count: %s.") %
-										tind[i] % norm_arr_copy.size()));
+				throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + std::to_string(tind[i]) +
+										") is out of range. Normals count: " + std::to_string(norm_arr_copy.size()) + ".");
 
 			pMesh.mNormals[i] = norm_arr_copy[tind[i]];
 		}
@@ -1162,7 +1165,7 @@ unsigned int prim_type;
 	for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++)
 	{
 		if(pMesh.mFaces[fi].mNumIndices != faces.at(fi).mNumIndices)
-			throw DeadlyImportError(boost::str(boost::format("Number of indices in texture face and mesh face must be equal. Invalid face index: %s") % fi));
+			throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: " + std::to_string(fi) + ".");
 
 		for(size_t ii = 0; ii < pMesh.mFaces[fi].mNumIndices; ii++)
 		{
@@ -1234,7 +1237,7 @@ void X3DImporter::ParseHelper_Group_Begin(const bool pStatic)
 CX3DImporter_NodeElement_Group* new_group = new CX3DImporter_NodeElement_Group(NodeElement_Cur, pStatic);// create new node with current node as parent.
 
 	// if we are adding not the root element then add new element to current element child list.
-	if(NodeElement_Cur != NULL) NodeElement_Cur->Child.push_back(new_group);
+	if(NodeElement_Cur != nullptr) NodeElement_Cur->Child.push_back(new_group);
 
 	NodeElement_List.push_back(new_group);// it's a new element - add it to list.
 	NodeElement_Cur = new_group;// switch current element to new one.
@@ -1249,7 +1252,7 @@ void X3DImporter::ParseHelper_Node_Enter(CX3DImporter_NodeElement* pNode)
 void X3DImporter::ParseHelper_Node_Exit()
 {
 	// check if we can walk up.
-	if(NodeElement_Cur != NULL) NodeElement_Cur = NodeElement_Cur->Parent;
+	if(NodeElement_Cur != nullptr) NodeElement_Cur = NodeElement_Cur->Parent;
 }
 
 void X3DImporter::ParseHelper_FixTruncatedFloatString(const char* pInStr, std::string& pOutString)
@@ -1282,12 +1285,12 @@ size_t instr_len;
 void X3DImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 {
 irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
-boost::scoped_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
+std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 	// Check whether we can read from the file
-	if(file.get() == NULL) throw DeadlyImportError("Failed to open X3D file " + pFile + ".");
+	if(file.get() == nullptr) throw DeadlyImportError("Failed to open X3D file " + pFile + ".");
 	// generate a XML reader for it
-	boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
+	std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
 	mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
 	if(!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
 	// start reading
@@ -1346,7 +1349,8 @@ bool close_found = false;// flag: true if close tag of node are found.
 				{
 					ms->Value.push_back(mReader->getAttributeValueSafe("content"));
 					NodeElement_List.push_back(ms);
-					if(NodeElement_Cur != NULL) NodeElement_Cur->Child.push_back(ms);
+					if(NodeElement_Cur != nullptr) NodeElement_Cur->Child.push_back(ms);
+
 				}
 			}// if(XML_CheckNode_NameEqual("meta"))
 		}// if(mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -1510,11 +1514,11 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 	//
 	// at first creating root node for aiScene.
 	pScene->mRootNode = new aiNode;
-	pScene->mRootNode->mParent = NULL;
-
+	pScene->mRootNode->mParent = nullptr;
+	pScene->mFlags |= AI_SCENE_FLAGS_ALLOW_SHARED;
 	//search for root node element
 	NodeElement_Cur = NodeElement_List.front();
-	while(NodeElement_Cur->Parent != NULL) NodeElement_Cur = NodeElement_Cur->Parent;
+	while(NodeElement_Cur->Parent != nullptr) NodeElement_Cur = NodeElement_Cur->Parent;
 
 	{// fill aiScene with objects.
 		std::list<aiMesh*> mesh_list;

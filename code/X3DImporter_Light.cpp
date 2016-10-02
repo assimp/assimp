@@ -1,14 +1,12 @@
-/// \file X3DImporter_Light.cpp
-/// \brief Parsing data from nodes of "Lighting" set of X3D.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter_Light.cpp
+/// \brief  Parsing data from nodes of "Lighting" set of X3D.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
-
-#include <boost/format.hpp>
 
 namespace Assimp
 {
@@ -58,7 +56,7 @@ CX3DImporter_NodeElement* ne;
 			if(!def.empty())
 				ne->ID = def;
 			else
-				ne->ID = boost::str(boost::format("DirectionalLight_%s") % (size_t)ne);// make random name
+				ne->ID = "DirectionalLight_" + std::to_string((size_t)ne);// make random name
 
 			((CX3DImporter_NodeElement_Light*)ne)->AmbientIntensity = ambientIntensity;
 			((CX3DImporter_NodeElement_Light*)ne)->Color = color;
@@ -141,7 +139,7 @@ CX3DImporter_NodeElement* ne;
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 			// make random name
-			if(ne->ID.empty()) ne->ID = boost::str(boost::format("PointLight_%s") % (size_t)ne);
+			if(ne->ID.empty()) ne->ID = "PointLight_" + std::to_string((size_t)ne);
 
 			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();
@@ -231,7 +229,7 @@ CX3DImporter_NodeElement* ne;
 			// Assimp want a node with name similar to a light. "Why? I don't no." )
 			ParseHelper_Group_Begin(false);
 			// make random name
-			if(ne->ID.empty()) ne->ID = boost::str(boost::format("SpotLight_%s") % (size_t)ne);
+			if(ne->ID.empty()) ne->ID = "SpotLight_" + std::to_string((size_t)ne);
 
 			NodeElement_Cur->ID = ne->ID;// assign name to node and return to light element.
 			ParseHelper_Node_Exit();

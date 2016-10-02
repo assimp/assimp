@@ -1,7 +1,7 @@
-/// \file X3DImporter_Rendering.cpp
-/// \brief Parsing data from nodes of "Rendering" set of X3D.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter_Rendering.cpp
+/// \brief  Parsing data from nodes of "Rendering" set of X3D.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 

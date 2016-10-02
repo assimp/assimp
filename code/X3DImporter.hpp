@@ -1,24 +1,21 @@
-/// \file X3DImporter.hpp
-/// \brief X3D-format files importer for Assimp.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter.hpp
+/// \brief  X3D-format files importer for Assimp.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
+// Thanks to acorn89 for support.
 
 #ifndef INCLUDED_AI_X3D_IMPORTER_H
 #define INCLUDED_AI_X3D_IMPORTER_H
 
-// Pay attention - you must include some files from Assimp before including BaseImporter.h.
-// magic region begin
-#include <set>
+#include "X3DImporter_Node.hpp"
 
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/importerdesc.h"
-#include "../include/assimp/ProgressHandler.hpp"
-#include "../include/assimp/types.h"
-// magic region end
+// Header files, Assimp.
+#include "assimp/DefaultLogger.hpp"
+#include "assimp/importerdesc.h"
+#include "assimp/ProgressHandler.hpp"
+#include "assimp/types.h"
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
-
-#include "X3DImporter_Node.hpp"
 
 namespace Assimp
 {
@@ -147,7 +144,7 @@ namespace Assimp
 ///		duplicates of it )).
 ///
 ///	Color for faces.
-/// That's happening when attribute "colorPerVertex" is set to "false". But Assimp do not hold how many colors has mesh and reuire
+/// That's happening when attribute "colorPerVertex" is set to "false". But Assimp do not hold how many colors has mesh and require
 /// equal length for mVertices and mColors. You will see the colors but vertices will use call which last used in "colorIdx".
 ///
 ///	That's all for now. Enjoy
@@ -264,19 +261,19 @@ private:
 	/// Create filled structure with type \ref aiMaterial from \ref CX3DImporter_NodeElement. This function itseld extract
 	/// all needed data from scene graph.
 	/// \param [in] pNodeElement - reference to material element(<Appearance>).
-	/// \param [out] pMaterial - pointer to pointer to created material. *pMaterial must be NULL.
+	/// \param [out] pMaterial - pointer to pointer to created material. *pMaterial must be nullptr.
 	void Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNodeElement, aiMaterial** pMaterial) const;
 
 	/// \fn void Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeElement, aiMesh** pMesh) const
 	/// Create filled structure with type \ref aiMaterial from \ref CX3DImporter_NodeElement. This function itseld extract
 	/// all needed data from scene graph.
 	/// \param [in] pNodeElement - reference to geometry object.
-	/// \param [out] pMesh - pointer to pointer to created mesh. *pMesh must be NULL.
+	/// \param [out] pMesh - pointer to pointer to created mesh. *pMesh must be nullptr.
 	void Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeElement, aiMesh** pMesh) const;
 
 	/// \fn void Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList, std::list<aiMaterial*>& pSceneMaterialList, std::list<aiLight*>& pSceneLightList) const
 	/// Create aiNode from CX3DImporter_NodeElement. Also function check children and make recursive call.
-	/// \param [out] pNode - pointer to pointer to created node. *pNode must be NULL.
+	/// \param [out] pNode - pointer to pointer to created node. *pNode must be nullptr.
 	/// \param [in] pNodeElement - CX3DImporter_NodeElement which read.
 	/// \param [out] pSceneNode - aiNode for filling.
 	/// \param [out] pSceneMeshList - list with aiMesh which belong to scene.
@@ -920,7 +917,7 @@ public:
 	/// \fn X3DImporter()
 	/// Default constructor.
 	X3DImporter()
-		: NodeElement_Cur(NULL), mReader(NULL)
+		: NodeElement_Cur(nullptr), mReader(nullptr)
 	{}
 
 	/// \fn ~X3DImporter()

@@ -1,7 +1,7 @@
-/// \file X3DImporter_Texturing.cpp
-/// \brief Parsing data from nodes of "Texturing" set of X3D.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter_Texturing.cpp
+/// \brief  Parsing data from nodes of "Texturing" set of X3D.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 

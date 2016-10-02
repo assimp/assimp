@@ -1,18 +1,19 @@
-/// \file X3DImporter_Postprocess.cpp
-/// \brief Convert built scenegraph and objects to Assimp scenegraph.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter_Postprocess.cpp
+/// \brief  Convert built scenegraph and objects to Assimp scenegraph.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "X3DImporter.hpp"
+
+// Header files, Assimp.
 #include "StandardShapes.h"
 
-#include <boost/format.hpp>
-#include <string>
-
+// Header files, stdlib.
 #include <algorithm>
 #include <iterator>
+#include <string>
 
 namespace Assimp
 {
@@ -25,7 +26,7 @@ aiMatrix4x4 out_matr;
 
 	// starting walk from current element to root
 	cur_node = NodeElement_Cur;
-	if(cur_node != NULL)
+	if(cur_node != nullptr)
 	{
 		do
 		{
@@ -33,7 +34,7 @@ aiMatrix4x4 out_matr;
 			if(cur_node->Type == CX3DImporter_NodeElement::ENET_Group) matr.push_back(((CX3DImporter_NodeElement_Group*)cur_node)->Transformation);
 
 			cur_node = cur_node->Parent;
-		} while(cur_node != NULL);
+		} while(cur_node != nullptr);
 	}
 
 	// multiplicate all matrices in reverse order
@@ -99,9 +100,9 @@ bool X3DImporter::PostprocessHelper_ElementIsMesh(const CX3DImporter_NodeElement
 
 void X3DImporter::Postprocess_BuildLight(const CX3DImporter_NodeElement& pNodeElement, std::list<aiLight*>& pSceneLightList) const
 {
-aiLight* new_light = new aiLight;
 const CX3DImporter_NodeElement_Light& ne = *((CX3DImporter_NodeElement_Light*)&pNodeElement);
 aiMatrix4x4 transform_matr = PostprocessHelper_Matrix_GlobalToCurrent();
+aiLight* new_light = new aiLight;
 
 	new_light->mName = ne.ID;
 	new_light->mColorAmbient = ne.Color * ne.AmbientIntensity;
@@ -134,7 +135,7 @@ aiMatrix4x4 transform_matr = PostprocessHelper_Matrix_GlobalToCurrent();
 
 			break;
 		default:
-			throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildLight. Unknown type of light: %s") % pNodeElement.Type));
+			throw DeadlyImportError("Postprocess_BuildLight. Unknown type of light: " + std::to_string(pNodeElement.Type) + ".");
 	}
 
 	pSceneLightList.push_back(new_light);
@@ -143,8 +144,8 @@ aiMatrix4x4 transform_matr = PostprocessHelper_Matrix_GlobalToCurrent();
 void X3DImporter::Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNodeElement, aiMaterial** pMaterial) const
 {
 	// check argument
-	if(pMaterial == NULL) throw DeadlyImportError("Postprocess_BuildMaterial. pMaterial is NULL.");
-	if(*pMaterial != NULL) throw DeadlyImportError("Postprocess_BuildMaterial. *pMaterial must be NULL.");
+	if(pMaterial == nullptr) throw DeadlyImportError("Postprocess_BuildMaterial. pMaterial is nullptr.");
+	if(*pMaterial != nullptr) throw DeadlyImportError("Postprocess_BuildMaterial. *pMaterial must be nullptr.");
 
 	*pMaterial = new aiMaterial;
 	aiMaterial& taimat = **pMaterial;// creating alias for convenience.
@@ -196,8 +197,8 @@ void X3DImporter::Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNod
 void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeElement, aiMesh** pMesh) const
 {
 	// check argument
-	if(pMesh == NULL) throw DeadlyImportError("Postprocess_BuildMesh. pMesh is NULL.");
-	if(*pMesh != NULL) throw DeadlyImportError("Postprocess_BuildMesh. *pMesh must be NULL.");
+	if(pMesh == nullptr) throw DeadlyImportError("Postprocess_BuildMesh. pMesh is nullptr.");
+	if(*pMesh != nullptr) throw DeadlyImportError("Postprocess_BuildMesh. *pMesh must be nullptr.");
 
 	/************************************************************************************************************************************/
 	/************************************************************ Geometry2D ************************************************************/
@@ -256,7 +257,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_TextureCoordinate)
 				MeshGeometry_AddTexCoord(**pMesh, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of ElevationGrid: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of ElevationGrid: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -293,7 +294,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_TextureCoordinate)
 				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of IndexedFaceSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedFaceSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -323,7 +324,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of IndexedLineSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedLineSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -360,8 +361,8 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_TextureCoordinate)
 				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of IndexedTriangleSet or IndexedTriangleFanSet, or \
-																	IndexedTriangleStripSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedTriangleSet or IndexedTriangleFanSet, or \
+																	IndexedTriangleStripSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -411,7 +412,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of PointSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of PointSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -440,7 +441,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of LineSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of LineSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -474,7 +475,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_TextureCoordinate)
 				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of TrianlgeFanSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TrianlgeFanSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -517,7 +518,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_TextureCoordinate)
 				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of TrianlgeSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TrianlgeSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
@@ -551,13 +552,13 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_TextureCoordinate)
 				MeshGeometry_AddTexCoord(**pMesh, tnemesh.CoordIndex, tnemesh.TexCoordIndex, ((CX3DImporter_NodeElement_TextureCoordinate*)*ch_it)->Value);
 			else
-				throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown child of TriangleStripSet: %s.") % (*ch_it)->Type));
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of TriangleStripSet: " + std::to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.
 	}// if(pNodeElement.Type == CX3DImporter_NodeElement::ENET_TriangleStripSet)
 
-	throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildMesh. Unknown mesh type: %s.") % pNodeElement.Type));
+	throw DeadlyImportError("Postprocess_BuildMesh. Unknown mesh type: " + std::to_string(pNodeElement.Type) + ".");
 }
 
 void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList,
@@ -566,7 +567,6 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 std::list<CX3DImporter_NodeElement*>::const_iterator chit_begin = pNodeElement.Child.begin();
 std::list<CX3DImporter_NodeElement*>::const_iterator chit_end = pNodeElement.Child.end();
 std::list<aiNode*> SceneNode_Child;
-std::list<aiLight*> SceneNode_Light;
 std::list<unsigned int> SceneNode_Mesh;
 
 	// At first read all metadata
@@ -620,7 +620,7 @@ std::list<unsigned int> SceneNode_Mesh;
 		}
 		else if(!PostprocessHelper_ElementIsMetadata((*it)->Type))// skip metadata
 		{
-			throw DeadlyImportError(boost::str(boost::format("Postprocess_BuildNode. Unknown type: %s.") % (*it)->Type));
+			throw DeadlyImportError("Postprocess_BuildNode. Unknown type: " + std::to_string((*it)->Type) + ".");
 		}
 	}// for(std::list<CX3DImporter_NodeElement*>::const_iterator it = chit_begin; it != chit_end; it++)
 
@@ -649,8 +649,8 @@ std::list<unsigned int> SceneNode_Mesh;
 void X3DImporter::Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
 							std::list<aiMesh*>& pSceneMeshList, std::list<aiMaterial*>& pSceneMaterialList) const
 {
-aiMaterial* tmat = NULL;
-aiMesh* tmesh = NULL;
+aiMaterial* tmat = nullptr;
+aiMesh* tmesh = nullptr;
 CX3DImporter_NodeElement::EType mesh_type = CX3DImporter_NodeElement::ENET_Invalid;
 unsigned int mat_ind = 0;
 
@@ -659,7 +659,7 @@ unsigned int mat_ind = 0;
 		if(PostprocessHelper_ElementIsMesh((*it)->Type))
 		{
 			Postprocess_BuildMesh(**it, &tmesh);
-			if(tmesh != NULL)
+			if(tmesh != nullptr)
 			{
 				// if mesh successfully built then add data about it to arrays
 				pNodeMeshInd.push_back(pSceneMeshList.size());
@@ -671,7 +671,7 @@ unsigned int mat_ind = 0;
 		else if((*it)->Type == CX3DImporter_NodeElement::ENET_Appearance)
 		{
 			Postprocess_BuildMaterial(**it, &tmat);
-			if(tmat != NULL)
+			if(tmat != nullptr)
 			{
 				// if material successfully built then add data about it to array
 				mat_ind = pSceneMaterialList.size();
@@ -681,7 +681,7 @@ unsigned int mat_ind = 0;
 	}// for(std::list<CX3DImporter_NodeElement*>::const_iterator it = pShapeNodeElement.Child.begin(); it != pShapeNodeElement.Child.end(); it++)
 
 	// associate read material with read mesh.
-	if((tmesh != NULL) && (tmat != NULL))
+	if((tmesh != nullptr) && (tmat != nullptr))
 	{
 		tmesh->mMaterialIndex = mat_ind;
 		// Check texture mapping. If material has texture but mesh has no texture coordinate then try to ask Assimp to generate texture coordinates.
@@ -709,25 +709,26 @@ unsigned int mat_ind = 0;
 
 			tmat->AddProperty(&tm, 1, AI_MATKEY_MAPPING_DIFFUSE(0));
 		}// if((tmat->GetTextureCount(aiTextureType_DIFFUSE) != 0) && !tmesh->HasTextureCoords(0))
-	}// if((tmesh != NULL) && (tmat != NULL))
+	}// if((tmesh != nullptr) && (tmat != nullptr))
 }
 
 void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode) const
 {
 std::list<CX3DImporter_NodeElement*> meta_list;
-size_t meta_idx = 0;
+size_t meta_idx;
 
 	PostprocessHelper_CollectMetadata(pNodeElement, meta_list);// find metadata in current node element.
 	if(meta_list.size() > 0)
 	{
-		if(pSceneNode.mMetaData != NULL) throw DeadlyImportError("Postprocess. MetaData member in node are not NULL. Something went wrong.");
+		if(pSceneNode.mMetaData != nullptr) throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
 
 		// copy collected metadata to output node.
 		pSceneNode.mMetaData = new aiMetadata();
 		pSceneNode.mMetaData->mNumProperties = meta_list.size();
 		pSceneNode.mMetaData->mKeys = new aiString[pSceneNode.mMetaData->mNumProperties];
 		pSceneNode.mMetaData->mValues = new aiMetadataEntry[pSceneNode.mMetaData->mNumProperties];
-		for(std::list<CX3DImporter_NodeElement*>::const_iterator it = meta_list.begin(); it != meta_list.end(); it++)
+		meta_idx = 0;
+		for(std::list<CX3DImporter_NodeElement*>::const_iterator it = meta_list.begin(); it != meta_list.end(); it++, meta_idx++)
 		{
 			CX3DImporter_NodeElement_Meta* cur_meta = (CX3DImporter_NodeElement_Meta*)*it;
 

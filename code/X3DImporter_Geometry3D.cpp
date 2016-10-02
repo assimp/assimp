@@ -1,12 +1,14 @@
-/// \file X3DImporter_Geometry3D.cpp
-/// \brief Parsing data from nodes of "Geometry3D" set of X3D.
-/// \date 2015-2016
-/// \author nevorek@gmail.com
+/// \file   X3DImporter_Geometry3D.cpp
+/// \brief  Parsing data from nodes of "Geometry3D" set of X3D.
+/// \date   2015-2016
+/// \author smal.root@gmail.com
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
 #include "X3DImporter.hpp"
 #include "X3DImporter_Macro.hpp"
+
+// Header files, Assimp.
 #include "StandardShapes.h"
 
 namespace Assimp
@@ -94,6 +96,7 @@ CX3DImporter_NodeElement* ne;
 	else
 	{
 		const unsigned int tess = 30;///TODO: IME tesselation factor thru ai_property
+
 		std::vector<aiVector3D> tvec;// temp array for vertices.
 
 		// create and if needed - define new geometry object.
@@ -166,6 +169,7 @@ CX3DImporter_NodeElement* ne;
 	else
 	{
 		const unsigned int tess = 30;///TODO: IME tesselation factor thru ai_property
+
 		std::vector<aiVector3D> tside;// temp array for vertices of side.
 		std::vector<aiVector3D> tcir;// temp array for vertices of circle.
 
@@ -419,6 +423,7 @@ size_t cur_sz = pCurve.size();
 static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx, const std::vector<aiVector3D>& pSpine, const bool pSpine_Closed)
 {
 const size_t spine_idx_last = pSpine.size() - 1;
+
 aiVector3D tvec;
 
 	if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last))// at first special cases
@@ -453,6 +458,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx
 {
 const aiVector3D zero_vec(0);
 const size_t spine_idx_last = pSpine.size() - 1;
+
 aiVector3D tvec;
 
 	// at first special cases
@@ -916,6 +922,7 @@ CX3DImporter_NodeElement* ne;
 	else
 	{
 		const unsigned int tess = 3;///TODO: IME tesselation factor thru ai_property
+
 		std::vector<aiVector3D> tlist;
 
 		// create and if needed - define new geometry object.
@@ -940,7 +947,6 @@ CX3DImporter_NodeElement* ne;
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
 }
-
 
 }// namespace Assimp
 

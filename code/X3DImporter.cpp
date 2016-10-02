@@ -23,7 +23,7 @@ namespace Assimp
 /// Conastant which hold importer description
 const aiImporterDesc X3DImporter::Description = {
 	"Extensible 3D(X3D) Importer",
-	"nevorek",
+	"smalcom",
 	"",
 	"See documentation in source code. Chapter: Limitations.",
 	aiImporterFlags_SupportTextFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,

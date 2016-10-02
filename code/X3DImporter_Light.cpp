@@ -174,9 +174,9 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
 std::string def, use;
 float ambientIntensity = 0;
 aiVector3D attenuation(1, 0, 0);
-float beamWidth = 0.7854;
+float beamWidth = 0.7854f;
 aiColor3D color(1, 1, 1);
-float cutOffAngle = 1.570796;
+float cutOffAngle = 1.570796f;
 aiVector3D direction(0, 0, -1);
 bool global = true;
 float intensity = 1;

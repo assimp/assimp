@@ -696,6 +696,7 @@ inline void Material::Read(Value& material, Asset& r)
         ReadMaterialProperty(r, *values, "diffuse", this->diffuse);
         ReadMaterialProperty(r, *values, "specular", this->specular);
 
+        ReadMember(*values, "transparency", transparency);
         ReadMember(*values, "shininess", shininess);
     }
 

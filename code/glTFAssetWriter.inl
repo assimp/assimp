@@ -171,6 +171,9 @@ namespace glTF {
             WriteColorOrTex(v, m.specular, "specular", w.mAl);
             WriteColorOrTex(v, m.emission, "emission", w.mAl);
 
+            if (m.transparent)
+                v.AddMember("transparency", m.transparency, w.mAl);
+
             v.AddMember("shininess", m.shininess, w.mAl);
         }
         obj.AddMember("values", v, w.mAl);

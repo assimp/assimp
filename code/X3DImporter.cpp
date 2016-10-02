@@ -1371,10 +1371,28 @@ bool close_found = false;// flag: true if close tag of node are found.
 
 void X3DImporter::ParseNode_Scene()
 {
+auto GroupCounter_Increase = [](size_t& pCounter, const char* pGroupName) -> void
+{
+	pCounter++;
+	if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: " + std::string(pGroupName) + ".");
+};
+
+auto GroupCounter_Decrease = [&](size_t& pCounter, const char* pGroupName) -> void
+{
+	if(pCounter == 0) Throw_TagCountIncorrect(pGroupName);
+
+	pCounter--;
+};
+
+const char* GroupName_Group = "Group";
+const char* GroupName_StaticGroup = "StaticGroup";
+const char* GroupName_Transform = "Transform";
+const char* GroupName_Switch = "Switch";
+
 bool close_found = false;
-ssize_t group_cnt = 0;
-ssize_t transform_cnt = 0;
-ssize_t sw_cnt = 0;
+size_t counter_group = 0;
+size_t counter_transform = 0;
+size_t counter_switch = 0;
 
 	// while create static node? Because objects name used deeper in "USE" attribute can be equal to some meta in <head> node.
 	ParseHelper_Group_Begin(true);
@@ -1386,30 +1404,33 @@ ssize_t sw_cnt = 0;
 			{
 				ParseNode_Shape_Shape();
 			}
-			else if(XML_CheckNode_NameEqual("Group"))
+			else if(XML_CheckNode_NameEqual(GroupName_Group))
 			{
-				group_cnt++;
+				GroupCounter_Increase(counter_group, GroupName_Group);
 				ParseNode_Grouping_Group();
-				if(mReader->isEmptyElement()) group_cnt--;// if node is empty then decrease group counter at this place.
+				// if node is empty then decrease group counter at this place.
+				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_group, GroupName_Group);
 			}
-			else if(XML_CheckNode_NameEqual("StaticGroup"))
+			else if(XML_CheckNode_NameEqual(GroupName_StaticGroup))
 			{
-				group_cnt++;
+				GroupCounter_Increase(counter_group, GroupName_StaticGroup);
 				ParseNode_Grouping_StaticGroup();
-				if(mReader->isEmptyElement()) group_cnt--;// if node is empty then decrease group counter at this place.
-
+				// if node is empty then decrease group counter at this place.
+				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_group, GroupName_StaticGroup);
 			}
-			else if(XML_CheckNode_NameEqual("Transform"))
+			else if(XML_CheckNode_NameEqual(GroupName_Transform))
 			{
-				transform_cnt++;
+				GroupCounter_Increase(counter_transform, GroupName_Transform);
 				ParseNode_Grouping_Transform();
-				if(mReader->isEmptyElement()) transform_cnt--;// if node is empty then decrease group counter at this place.
+				// if node is empty then decrease group counter at this place.
+				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_transform, GroupName_Transform);
 			}
-			else if(XML_CheckNode_NameEqual("Switch"))
+			else if(XML_CheckNode_NameEqual(GroupName_Switch))
 			{
-				sw_cnt++;
+				GroupCounter_Increase(counter_switch, GroupName_Switch);
 				ParseNode_Grouping_Switch();
-				if(mReader->isEmptyElement()) sw_cnt--;// if node is empty then decrease group counter at this place.
+				// if node is empty then decrease group counter at this place.
+				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_switch, GroupName_Switch);
 			}
 			else if(XML_CheckNode_NameEqual("DirectionalLight"))
 			{
@@ -1440,24 +1461,24 @@ ssize_t sw_cnt = 0;
 
 				break;
 			}
-			else if(XML_CheckNode_NameEqual("Group"))
+			else if(XML_CheckNode_NameEqual(GroupName_Group))
 			{
-				group_cnt--;
+				GroupCounter_Decrease(counter_group, GroupName_Group);
 				ParseNode_Grouping_GroupEnd();
 			}
-			else if(XML_CheckNode_NameEqual("StaticGroup"))
+			else if(XML_CheckNode_NameEqual(GroupName_StaticGroup))
 			{
-				group_cnt--;
+				GroupCounter_Decrease(counter_group, GroupName_StaticGroup);
 				ParseNode_Grouping_StaticGroupEnd();
 			}
-			else if(XML_CheckNode_NameEqual("Transform"))
+			else if(XML_CheckNode_NameEqual(GroupName_Transform))
 			{
-				transform_cnt--;
+				GroupCounter_Decrease(counter_transform, GroupName_Transform);
 				ParseNode_Grouping_TransformEnd();
 			}
-			else if(XML_CheckNode_NameEqual("Switch"))
+			else if(XML_CheckNode_NameEqual(GroupName_Switch))
 			{
-				sw_cnt--;
+				GroupCounter_Decrease(counter_switch, GroupName_Switch);
 				ParseNode_Grouping_SwitchEnd();
 			}
 		}// if(mReader->getNodeType() == irr::io::EXN_ELEMENT) else
@@ -1465,9 +1486,9 @@ ssize_t sw_cnt = 0;
 
 	ParseHelper_Node_Exit();
 
-	if(group_cnt) Throw_TagCountIncorrect("Group");
-	if(transform_cnt) Throw_TagCountIncorrect("Transform");
-	if(sw_cnt) Throw_TagCountIncorrect("Switch");
+	if(counter_group) Throw_TagCountIncorrect("Group");
+	if(counter_transform) Throw_TagCountIncorrect("Transform");
+	if(counter_switch) Throw_TagCountIncorrect("Switch");
 	if(!close_found) Throw_CloseNotFound("Scene");
 
 }

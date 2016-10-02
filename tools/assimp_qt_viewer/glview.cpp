@@ -164,7 +164,118 @@ std::list<aiMatrix4x4> mat_list;
 
 void CGLView::ImportTextures(const QString& pScenePath)
 {
+auto LoadTexture = [&](const QString& pFileName) -> bool ///TODO: IME texture mode, operation.
+{
 ILboolean success;
+GLuint id_ogl_texture;// OpenGL texture ID.
+
+	if(!pFileName.startsWith(AI_EMBEDDED_TEXNAME_PREFIX))
+	{
+		ILuint id_image;// DevIL image ID.
+		QString basepath = pScenePath.left(pScenePath.lastIndexOf('/') + 1);// path with '/' at the end.
+		QString fileloc = (basepath + pFileName);
+
+		fileloc.replace('\\', "/");
+		ilGenImages(1, &id_image);// Generate DevIL image ID.
+		ilBindImage(id_image);
+		success = ilLoadImage(fileloc.toLocal8Bit());
+		if(!success)
+		{
+			LogError(QString("Couldn't load Image: %1").arg(fileloc));
+
+			return false;
+		}
+
+		// Convert every colour component into unsigned byte. If your image contains alpha channel you can replace IL_RGB with IL_RGBA.
+		success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+		if(!success)
+		{
+			LogError("Couldn't convert image.");
+
+			return false;
+		}
+
+		glGenTextures(1, &id_ogl_texture);// Texture ID generation.
+		mTexture_IDMap[pFileName] = id_ogl_texture;// save texture ID for filename in map
+		glBindTexture(GL_TEXTURE_2D, id_ogl_texture);// Binding of texture ID.
+		// Redefine standard texture values
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// We will use linear interpolation for magnification filter.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// We will use linear interpolation for minifying filter.
+		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0,
+						ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData());// Texture specification.
+
+		//Cleanup
+		ilDeleteImages(1, &id_image);// Because we have already copied image data into texture data we can release memory used by image.
+	}
+	else
+	{
+		struct SPixel_Description
+		{
+			const char* FormatHint;
+			const GLint Image_InternalFormat;
+			const GLint Pixel_Format;
+		};
+
+		constexpr SPixel_Description Pixel_Description[] = {
+			{"rgba8880", GL_RGB, GL_RGB},
+			{"rgba8888", GL_RGBA, GL_RGBA}
+		};
+
+		constexpr size_t Pixel_Description_Count = sizeof(Pixel_Description) / sizeof(SPixel_Description);
+
+		size_t idx_description;
+		// Get texture index.
+		bool ok;
+		size_t idx_texture = pFileName.right(strlen(AI_EMBEDDED_TEXNAME_PREFIX)).toULong(&ok);
+
+		if(!ok)
+		{
+			LogError("Can not get index of the embedded texture from path in material.");
+
+			return false;
+		}
+
+		// Create alias for conveniance.
+		const aiTexture& als = *mScene->mTextures[idx_texture];
+
+		if(als.mHeight == 0)// Compressed texture.
+		{
+			LogError("IME: compressed embedded textures are not implemented.");
+		}
+		else
+		{
+			ok = false;
+			for(size_t idx = 0; idx < Pixel_Description_Count; idx++)
+			{
+				if(als.CheckFormat(Pixel_Description[idx].FormatHint))
+				{
+					idx_description = idx;
+					ok = true;
+					break;
+				}
+			}
+
+			if(!ok)
+			{
+				LogError(QString("Unsupported format hint for embedded texture: [%1]").arg(als.achFormatHint));
+
+				return false;
+			}
+
+			glGenTextures(1, &id_ogl_texture);// Texture ID generation.
+			mTexture_IDMap[pFileName] = id_ogl_texture;// save texture ID for filename in map
+			glBindTexture(GL_TEXTURE_2D, id_ogl_texture);// Binding of texture ID.
+			// Redefine standard texture values
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// We will use linear interpolation for magnification filter.
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// We will use linear interpolation for minifying filter.
+			// Texture specification.
+			glTexImage2D(GL_TEXTURE_2D, 0, Pixel_Description[idx_description].Image_InternalFormat, als.mWidth, als.mHeight, 0,
+							Pixel_Description[idx_description].Pixel_Format, GL_UNSIGNED_BYTE, (uint8_t*)als.pcData);
+		}// if(als.mHeight == 0) else
+	}// if(!filename.startsWith(AI_EMBEDDED_TEXNAME_PREFIX)) else
+
+	return true;
+};// auto LoadTexture = [&](const aiString& pPath)
 
 	if(mScene == nullptr)
 	{
@@ -183,12 +294,7 @@ ILboolean success;
 
 	ilInit();// Initialization of DevIL.
 	//
-	// Load embedded textures
-	//
-	if(mScene->HasTextures()) LogError("Support for meshes with embedded textures is not implemented.");
-
-	//
-	// Load textures from external files.
+	// Load textures.
 	//
 	// Get textures file names and number of textures.
 	for(size_t idx_material = 0; idx_material < mScene->mNumMaterials; idx_material++)
@@ -200,10 +306,10 @@ ILboolean success;
 		{
 			if(mScene->mMaterials[idx_material]->GetTexture(aiTextureType_DIFFUSE, idx_texture, &path) != AI_SUCCESS) break;
 
-			mTexture_IDMap[path.data] = 0;// Fill map with invalid ID's.
+			LoadTexture(QString(path.C_Str()));
 			idx_texture++;
 		} while(true);
-	}// for(size_t idx_mat = 0; idx_mat < scene->mNumMaterials; idx_mat++)
+	}// for(size_t idx_material = 0; idx_material < mScene->mNumMaterials; idx_material++)
 
 	// Textures list is empty, exit.
 	if(mTexture_IDMap.size() == 0)
@@ -212,71 +318,6 @@ ILboolean success;
 
 		return;
 	}
-
-	size_t num_textures = mTexture_IDMap.size();
-
-
-	ILuint* id_images = nullptr;// Array with DevIL image ID's.
-	GLuint* id_textures = nullptr;// Array with OpenGL textures ID's.
-
-	// Generate DevIL image IDs.
-	id_images = new ILuint[num_textures];
-	ilGenImages(num_textures, id_images);// Generation of 'num_textures' image names.
-	// Create and fill array with OpenGL texture ID's.
-	id_textures = new GLuint[num_textures];
-	///TODO: if can not load textures then will stay orphande texture ID's in OpenGL. Generate OpenGL ID's after successfull loading of image.
-	glGenTextures(num_textures, id_textures);// Texture ID's generation.
-
-	QMap<QString, GLuint>::iterator map_it = mTexture_IDMap.begin();// Get iterator
-	QString basepath = pScenePath.left(pScenePath.lastIndexOf('/') + 1);// path with '/' at the end.
-
-	for(size_t idx_texture = 0; idx_texture < num_textures; idx_texture++)
-	{
-		//save IL image ID
-		QString filename = map_it.key();// get filename
-
-		mTexture_IDMap[filename] = id_textures[idx_texture];// save texture ID for filename in map
-		map_it++;// next texture
-		ilBindImage(id_images[idx_texture]);// Binding of DevIL image name.
-
-		QString fileloc = basepath + filename;	/* Loading of image */
-
-		fileloc.replace('\\', "/");
-		success = ilLoadImage(fileloc.toLocal8Bit());
-		if(!success)
-		{
-			LogError(QString("Couldn't load Image: %1").arg(fileloc));
-			goto it_for_err;
-		}
-
-		// Convert every colour component into unsigned byte. If your image contains alpha channel you can replace IL_RGB with IL_RGBA.
-		success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-		if(!success)
-		{
-			LogError("Couldn't convert image.");
-			goto it_for_err;
-		}
-
-		glBindTexture(GL_TEXTURE_2D, id_textures[idx_texture]);// Binding of texture ID.
-		// Redefine standard texture values
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);// We will use linear interpolation for magnification filter.
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);// We will use linear interpolation for minifying filter.
-		glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT), 0,
-						ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData());// Texture specification.
-		continue;
-
-it_for_err:
-
-		LogError(QString("DevIL error: %1, [%2]").arg(ilGetError()).arg(ilGetString(ilGetError())));
-		mTexture_IDMap.remove(filename);
-	}// for(size_t idx_texture = 0; idx_texture < num_textures; i++)
-
-	// Because we have already copied image data into texture data we can release memory used by image.
-	ilDeleteImages(num_textures, id_images);
-
-	//Cleanup
-	delete [] id_images;
-	delete [] id_textures;
 }
 
 void CGLView::BBox_GetForNode(const aiNode& pNode, const aiMatrix4x4& pParent_TransformationMatrix, SBBox& pNodeBBox, bool& pFirstAssign)

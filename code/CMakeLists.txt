@@ -202,6 +202,16 @@ SET(ASSIMP_LOADER_SRCS "")
 SET(ASSIMP_IMPORTERS_ENABLED "") # list of enabled importers
 SET(ASSIMP_IMPORTERS_DISABLED "") # disabled list (used to print)
 
+ADD_ASSIMP_IMPORTER( AMF
+  AMFImporter.hpp
+  AMFImporter_Macro.hpp
+  AMFImporter_Node.hpp
+  AMFImporter.cpp
+  AMFImporter_Geometry.cpp
+  AMFImporter_Material.cpp
+  AMFImporter_Postprocess.cpp
+)
+
 ADD_ASSIMP_IMPORTER( 3DS
   3DSConverter.cpp
   3DSHelper.h

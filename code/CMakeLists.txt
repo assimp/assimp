@@ -610,6 +610,23 @@ ADD_ASSIMP_IMPORTER( X
   XFileExporter.cpp
 )
 
+ADD_ASSIMP_IMPORTER(X3D
+  X3DImporter.cpp
+  X3DImporter.hpp
+  X3DImporter_Geometry2D.cpp
+  X3DImporter_Geometry3D.cpp
+  X3DImporter_Group.cpp
+  X3DImporter_Light.cpp
+  X3DImporter_Macro.hpp
+  X3DImporter_Metadata.cpp
+  X3DImporter_Networking.cpp
+  X3DImporter_Node.hpp
+  X3DImporter_Postprocess.cpp
+  X3DImporter_Rendering.cpp
+  X3DImporter_Shape.cpp
+  X3DImporter_Texturing.cpp
+)
+
 ADD_ASSIMP_IMPORTER( GLTF
   glTFAsset.h
   glTFAsset.inl

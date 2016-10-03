@@ -1,4 +1,4 @@
-/*
+﻿/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -266,6 +266,13 @@ struct aiNode
  */
 #define AI_SCENE_FLAGS_TERRAIN 0x10
 
+ /**
+ * Specifies that the scene data can be shared between structures. For example:
+ * one vertex in few faces. \ref AI_SCENE_FLAGS_NON_VERBOSE_FORMAT can not be
+ * used for this because \ref AI_SCENE_FLAGS_NON_VERBOSE_FORMAT has internal
+ * meaning about postprocessing steps.
+ */
+#define AI_SCENE_FLAGS_ALLOW_SHARED			0x20
 
 // -------------------------------------------------------------------------------
 /** The root structure of the imported data.

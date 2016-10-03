@@ -152,9 +152,8 @@ private:
         VertexContainer();
         ~VertexContainer();
 
-    private:
-        VertexContainer( const VertexContainer & );
-        VertexContainer &operator = ( const VertexContainer & );
+        VertexContainer( const VertexContainer & ) = delete;
+        VertexContainer &operator = ( const VertexContainer & ) = delete;
     };
 
     struct RefInfo {
@@ -170,9 +169,8 @@ private:
         RefInfo( aiNode *node, Type type, std::vector<std::string> &names );
         ~RefInfo();
 
-    private:
-        RefInfo( const RefInfo & );
-        RefInfo &operator = ( const RefInfo & );
+        RefInfo( const RefInfo & ) = delete;
+        RefInfo &operator = ( const RefInfo & ) = delete;
     };
 
     struct ChildInfo {

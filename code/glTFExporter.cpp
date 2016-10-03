@@ -353,6 +353,8 @@ void glTFExporter::ExportMaterials()
         GetMatColorOrTex(mat, m->specular, AI_MATKEY_COLOR_SPECULAR, aiTextureType_SPECULAR);
         GetMatColorOrTex(mat, m->emission, AI_MATKEY_COLOR_EMISSIVE, aiTextureType_EMISSIVE);
 
+        m->transparent = mat->Get(AI_MATKEY_OPACITY, m->transparency) == aiReturn_SUCCESS && m->transparency != 1.0;
+
         GetMatScalar(mat, m->shininess, AI_MATKEY_SHININESS);
     }
 }

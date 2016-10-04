@@ -102,7 +102,57 @@ namespace glTF {
 
     inline void Write(Value& obj, Animation& a, AssetWriter& w)
     {
+        /****************** Channels *******************/
+        Value channels;
+        channels.SetArray();
+        channels.Reserve(3/*unsigned(a.Channels.size())*/, w.mAl);
 
+        for (size_t i = 0; i < 3/*a.Channels.size()*/; ++i) {
+            Animation::AnimChannel& c = a.Channels[i];
+            Value valChannel;
+            valChannel.SetObject();
+            {
+                valChannel.AddMember("sampler", c.sampler, w.mAl);
+
+                Value valTarget;
+                valTarget.SetObject();
+                {
+                    valTarget.AddMember("id", StringRef(c.target.id->id), w.mAl);
+                    valTarget.AddMember("path", c.target.path, w.mAl);
+                }
+                valChannel.AddMember("target", valTarget, w.mAl);
+            }
+            channels.PushBack(valChannel, w.mAl);
+        }
+        obj.AddMember("Channels", channels, w.mAl);
+
+        /****************** Parameters *******************/
+        Value valParameters;
+        valParameters.SetObject();
+        {
+            valParameters.AddMember("TIME", StringRef(a.Parameters.TIME->id), w.mAl);
+            valParameters.AddMember("rotation", StringRef(a.Parameters.rotation->id), w.mAl);
+            valParameters.AddMember("scale", StringRef(a.Parameters.scale->id), w.mAl);
+            valParameters.AddMember("translation", StringRef(a.Parameters.translation->id), w.mAl);
+        }
+        obj.AddMember("Parameters", valParameters, w.mAl);
+
+        /****************** Samplers *******************/
+        Value valSamplers;
+        valSamplers.SetObject();
+
+        for (size_t i = 0; i < 3/*a.Samplers.size()*/; ++i) {
+            Animation::AnimSampler& s = a.Samplers[i];
+            Value valSampler;
+            valSampler.SetObject();
+            {
+                valSampler.AddMember("input", s.input, w.mAl);
+                valSampler.AddMember("interpolation", s.interpolation, w.mAl);
+                valSampler.AddMember("output", s.output, w.mAl);
+            }
+            valSamplers.AddMember(StringRef(s.id), valSampler, w.mAl);
+        }
+        obj.AddMember("Samplers", valSamplers, w.mAl);
     }
 
     inline void Write(Value& obj, Buffer& b, AssetWriter& w)

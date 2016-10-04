@@ -80,7 +80,6 @@ namespace Assimp {
     // Worker function for exporting a scene to GLTF. Prototyped and registered in Exporter.cpp
     void ExportSceneGLTF(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
     {
-
         // invoke the exporter
         glTFExporter exporter(pFile, pIOSystem, pScene, pProperties, false);
     }
@@ -145,6 +144,8 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     }
 
     ExportScene();
+
+    ExportAnimations();
 
     glTF::AssetWriter writer(*mAsset);
 
@@ -369,7 +370,7 @@ void glTFExporter::ExportMeshes()
     typedef unsigned short IndicesType;
 
     // Variables needed for compression. BEGIN.
-    // Indices, not pointers - because pointer to buffer is changin while writing to it.
+    // Indices, not pointers - because pointer to buffer is changing while writing to it.
     size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
     size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
     std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
@@ -625,6 +626,32 @@ void glTFExporter::ExportMetadata()
 
 void glTFExporter::ExportAnimations()
 {
+    // //--------------------------
+    // // Setup to output buffer data
+    // // Not for
+    // //     using IndicesType = decltype(aiFace::mNumIndices);
+    // // But yes for
+    // //     using IndicesType = unsigned short;
+    // // because "ComponentType_UNSIGNED_SHORT" used for indices. And it's a maximal type according to glTF specification.
+    // typedef unsigned short IndicesType;
+
+    // // Variables needed for compression. BEGIN.
+    // // Indices, not pointers - because pointer to buffer is changing while writing to it.
+    // size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
+    // size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
+    // std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
+    // size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.
+    // bool comp_allow;// Point that data of current mesh can be compressed.
+    // // Variables needed for compression. END.
+
+    // std::string fname = std::string(mFilename);
+    // std::string bufferIdPrefix = fname.substr(0, fname.find("."));
+    // std::string bufferId = mAsset->FindUniqueID("", bufferIdPrefix.c_str());
+
+    // Ref<Buffer> b = mAsset->GetBodyBuffer();
+    // // Setup to output buffer data
+    // //--------------------------
+
     // aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation* anim = mScene->mAnimations[i];
@@ -637,32 +664,38 @@ void glTFExporter::ExportAnimations()
 
         Ref<Animation> animRef = mAsset->animations.Create(name);
 
-        animRef->Parameters.TIME;
-        animRef->Parameters.rotation;
-        animRef->Parameters.scale;
-        animRef->Parameters.translation;
+        // These are accessors to bufferviews to buffer data.
+
+        Ref<Accessor> acc = mAsset->accessors.Get(unsigned (0));
+
+        animRef->Parameters.TIME = acc;
+        animRef->Parameters.rotation = acc;
+        animRef->Parameters.scale = acc;
+        animRef->Parameters.translation = acc;
 
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
             const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];
 
             for (unsigned int j = 0; j < 3; ++j) {
+                std::string channelType;
                 switch (j) {
                     case 0:
-                        animRef->Channels[j].target.path = "rotation";
-                        animRef->Samplers[j].output = "rotation";
+                        channelType = "rotation";
                         break;
                     case 1:
-                        animRef->Channels[j].target.path = "scale";
-                        animRef->Samplers[j].output = "scale";
+                        channelType = "scale";
                         break;
                     case 2:
-                        animRef->Channels[j].target.path = "translation";
-                        animRef->Samplers[j].output = "translation";
+                        channelType = "translation";
                         break;
                 }
 
-                animRef->Channels[j].sampler;
-                animRef->Channels[j].target.id = mAsset->FindUniqueID(nodeChannel->mNodeName.C_Str(), "node");
+                animRef->Channels[j].sampler = name + "_" + channelType;
+                animRef->Channels[j].target.path = channelType;
+                animRef->Samplers[j].output = channelType;
+                animRef->Samplers[j].id = name + "_" + channelType;
+
+                animRef->Channels[j].target.id = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
 
                 animRef->Samplers[j].input = "TIME";
                 animRef->Samplers[j].interpolation = "LINEAR";

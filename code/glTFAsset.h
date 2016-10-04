@@ -915,35 +915,37 @@ namespace glTF
         void SetDefaults();
     };
 
-
-    struct AnimSampler {
-        std::string input;            //!< The ID of a parameter in this animation to use as key-frame input.
-        std::string interpolation;    //!< Type of interpolation algorithm to use between key-frames.
-        std::string output;           //!< The ID of a parameter in this animation to use as key-frame output.
-    };
-
-    struct AnimTarget {
-        Ref<Node> id;                 //!< The ID of the node to animate.
-        std::string path;             //!< The name of property of the node to animate ("translation", "rotation", or "scale").
-    };
-
-    struct AnimChannel {
-        Ref<AnimSampler> sampler;         //!< The ID of one of the samplers present in the containing animation's samplers property.
-        AnimTarget target;
-    };
-
-    struct AnimParameters {
-        Ref<Accessor> TIME;           //!< Accessor reference to a buffer storing a array of floating point scalar values.
-        Ref<Accessor> rotation;       //!< Accessor reference to a buffer storing a array of four-component floating-point vectors.
-        Ref<Accessor> scale;          //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
-        Ref<Accessor> translation;    //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
-    };
-
     struct Animation : public Object
     {
+        struct AnimSampler {
+            std::string id;               //!< The ID of this sampler.
+            std::string input;            //!< The ID of a parameter in this animation to use as key-frame input.
+            std::string interpolation;    //!< Type of interpolation algorithm to use between key-frames.
+            std::string output;           //!< The ID of a parameter in this animation to use as key-frame output.
+        };
+
+        struct AnimChannel {
+            std::string sampler;         //!< The ID of one sampler present in the containing animation's samplers property.
+
+            struct AnimTarget {
+                Ref<Node> id;            //!< The ID of the node to animate.
+                std::string path;        //!< The name of property of the node to animate ("translation", "rotation", or "scale").
+            } target;
+        };
+
+        struct AnimParameters {
+            Ref<Accessor> TIME;           //!< Accessor reference to a buffer storing a array of floating point scalar values.
+            Ref<Accessor> rotation;       //!< Accessor reference to a buffer storing a array of four-component floating-point vectors.
+            Ref<Accessor> scale;          //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+            Ref<Accessor> translation;    //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+        };
+
         AnimChannel Channels[3];            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
         AnimParameters Parameters;          //!< The samplers that interpolate between the key-frames.
         AnimSampler Samplers[3];            //!< The parameterized inputs representing the key-frame data.
+
+        Animation() {}
+        void Read(Value& obj, Asset& r);
     };
 
 
@@ -979,7 +981,7 @@ namespace glTF
         typedef typename std::gltf_unordered_map< std::string, unsigned int > Dict;
 
         std::vector<T*>  mObjs;      //! The read objects
-        Dict             mObjsById;  //! The read objects accesible by id
+        Dict             mObjsById;  //! The read objects accessible by id
         const char*      mDictId;    //! ID of the dictionary object
         const char*      mExtId;     //! ID of the extension defining the dictionary
         Value*           mDict;      //! JSON dictionary object

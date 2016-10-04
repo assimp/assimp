@@ -193,6 +193,36 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     acc->count = count;
     acc->type = typeOut;
 
+    // calculate min and max values
+    {
+        // Allocate and initialize with large values.
+        float float_MAX = 10000000000000;
+        for (int i = 0 ; i < numCompsOut ; i++) {
+            acc->min.push_back( float_MAX);
+            acc->max.push_back(-float_MAX);
+        }
+
+        // Search and set extreme values.
+        float valueTmp;
+        for (int i = 0 ; i < count       ; i++) {
+        for (int j = 0 ; j < numCompsOut ; j++) {
+
+            if (numCompsOut == 1) {
+              valueTmp = static_cast<unsigned short*>(data)[i];
+            } else {
+              valueTmp = static_cast<aiVector3D*>(data)[i][j];
+            }
+
+            if (valueTmp < acc->min[j]) {
+                acc->min[j] = valueTmp;
+            }
+            if (valueTmp > acc->max[j]) {
+                acc->max[j] = valueTmp;
+            }
+        }
+        }
+    }
+
     // copy the data
     acc->WriteData(count, data, numCompsIn*bytesPerComp);
 
@@ -203,6 +233,52 @@ namespace {
     void GetMatScalar(const aiMaterial* mat, float& val, const char* propName, int type, int idx) {
         if (mat->Get(propName, type, idx, val) == AI_SUCCESS) {}
     }
+}
+
+void glTFExporter::GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop)
+{
+    std::string samplerId = mAsset->FindUniqueID("", "sampler");
+    prop.texture->sampler = mAsset->samplers.Create(samplerId);
+
+    aiTextureMapMode mapU, mapV;
+    aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0),(int*)&mapU);
+    aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0),(int*)&mapV);
+
+    switch (mapU) {
+        case aiTextureMapMode_Wrap:
+            prop.texture->sampler->wrapS = SamplerWrap_Repeat;
+            break;
+        case aiTextureMapMode_Clamp:
+            prop.texture->sampler->wrapS = SamplerWrap_Clamp_To_Edge;
+            break;
+        case aiTextureMapMode_Mirror:
+            prop.texture->sampler->wrapS = SamplerWrap_Mirrored_Repeat;
+            break;
+        case aiTextureMapMode_Decal:
+        default:
+            prop.texture->sampler->wrapS = SamplerWrap_Repeat;
+            break;
+    };
+
+    switch (mapV) {
+        case aiTextureMapMode_Wrap:
+            prop.texture->sampler->wrapT = SamplerWrap_Repeat;
+            break;
+        case aiTextureMapMode_Clamp:
+            prop.texture->sampler->wrapT = SamplerWrap_Clamp_To_Edge;
+            break;
+        case aiTextureMapMode_Mirror:
+            prop.texture->sampler->wrapT = SamplerWrap_Mirrored_Repeat;
+            break;
+        case aiTextureMapMode_Decal:
+        default:
+            prop.texture->sampler->wrapT = SamplerWrap_Repeat;
+            break;
+    };
+
+    // Hard coded Texture filtering options because I do not know where to find them in the aiMaterial.
+    prop.texture->sampler->magFilter = SamplerMagFilter_Linear;
+    prop.texture->sampler->minFilter = SamplerMinFilter_Linear;
 }
 
 void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
@@ -244,6 +320,8 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
                     else {
                         prop.texture->source->uri = path;
                     }
+
+                    GetTexSampler(mat, prop);
                 }
             }
         }
@@ -253,6 +331,7 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
         prop.color[0] = col.r; prop.color[1] = col.g; prop.color[2] = col.b; prop.color[3] = col.a;
     }
 }
+
 
 void glTFExporter::ExportMaterials()
 {
@@ -369,7 +448,7 @@ void glTFExporter::ExportMeshes()
 
 				if(comp_allow) idx_srcdata_tc.push_back(b->byteLength);// Store index of texture coordinates array.
 
-				Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, true);
+				Ref<Accessor> tc = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mTextureCoords[i], AttribType::VEC3, type, ComponentType_FLOAT, false);
 				if (tc) p.attributes.texcoord.push_back(tc);
 			}
 		}

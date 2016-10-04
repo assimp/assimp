@@ -53,7 +53,7 @@ using namespace Assimp;
 namespace glTF {
 
 namespace {
-    
+
     //
     // JSON Value reading helpers
     //
@@ -62,7 +62,7 @@ namespace {
     struct ReadHelper { static bool Read(Value& val, T& out) {
         return val.IsInt() ? out = static_cast<T>(val.GetInt()), true : false;
     }};
-    
+
     template<> struct ReadHelper<bool> { static bool Read(Value& val, bool& out) {
         return val.IsBool() ? out = val.GetBool(), true : false;
     }};
@@ -70,7 +70,7 @@ namespace {
     template<> struct ReadHelper<float> { static bool Read(Value& val, float& out) {
         return val.IsNumber() ? out = static_cast<float>(val.GetDouble()), true : false;
     }};
-    
+
     template<unsigned int N> struct ReadHelper<float[N]> { static bool Read(Value& val, float (&out)[N]) {
         if (!val.IsArray() || val.Size() != N) return false;
         for (unsigned int i = 0; i < N; ++i) {
@@ -312,7 +312,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
             if (file) {
                 bool ok = LoadFromStream(*file, byteLength);
                 delete file;
-                
+
                 if (!ok)
                     throw DeadlyImportError("GLTF: error while reading referenced file \"" + std::string(uri) + "\"" );
             }
@@ -439,7 +439,7 @@ inline void BufferView::Read(Value& obj, Asset& r)
     if (bufferId) {
         buffer = r.buffers.Get(bufferId);
     }
-        
+
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
     byteLength = MemberOrDefault(obj, "byteLength", 0u);
 }
@@ -599,7 +599,7 @@ inline Image::Image()
 
 inline void Image::Read(Value& obj, Asset& r)
 {
-    // Check for extensions first (to detect binary embedded data) 
+    // Check for extensions first (to detect binary embedded data)
     if (Value* extensions = FindObject(obj, "extensions")) {
         if (r.extensionsUsed.KHR_binary_glTF) {
             if (Value* ext = FindObject(*extensions, "KHR_binary_glTF")) {
@@ -665,11 +665,34 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
     }
 }
 
+inline void Sampler::Read(Value& obj, Asset& r)
+{
+    SetDefaults();
+
+    ReadMember(obj, "magFilter", magFilter);
+    ReadMember(obj, "minFilter", minFilter);
+    ReadMember(obj, "wrapS", wrapS);
+    ReadMember(obj, "wrapT", wrapT);
+}
+
+inline void Sampler::SetDefaults()
+{
+    magFilter = SamplerMagFilter_Linear;
+    minFilter = SamplerMinFilter_Linear;
+    wrapS = SamplerWrap_Repeat;
+    wrapT = SamplerWrap_Repeat;
+}
+
 inline void Texture::Read(Value& obj, Asset& r)
 {
     const char* sourcestr;
     if (ReadMember(obj, "source", sourcestr)) {
         source = r.images.Get(sourcestr);
+    }
+
+    const char* samplerstr;
+    if (ReadMember(obj, "sampler", samplerstr)) {
+        sampler = r.samplers.Get(samplerstr);
     }
 }
 
@@ -1132,7 +1155,7 @@ inline void Node::Read(Value& obj, Asset& r)
         }
     }
 
-    
+
     if (Value* matrix = FindArray(obj, "matrix")) {
         ReadValue(*matrix, this->matrix);
     }
@@ -1408,13 +1431,13 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
         id = buffer;
         it = mUsedIds.find(id);
     }
-    
+
     return id;
 }
 
 namespace Util {
 
-    inline 
+    inline
     bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
         if ( NULL == const_uri ) {
             return false;

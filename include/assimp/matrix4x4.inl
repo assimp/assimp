@@ -299,49 +299,45 @@ inline bool aiMatrix4x4t<TReal>::Equal(const aiMatrix4x4t<TReal>& m, TReal epsil
 }
 
 // ----------------------------------------------------------------------------------------
+
+#define ASSIMP_MATRIX4_4_DECOMPOSE_PART		\
+	const aiMatrix4x4t<TReal>& _this = *this;/* Create alias for conveniance. */ \
+	\
+	/* extract translation */ \
+	pPosition.x = _this[0][3]; \
+	pPosition.y = _this[1][3]; \
+	pPosition.z = _this[2][3]; \
+	\
+	/* extract the rows of the matrix. */ \
+	aiVector3t<TReal> vRows[3] = { \
+		aiVector3t<TReal>(_this[0][0],_this[1][0],_this[2][0]), \
+		aiVector3t<TReal>(_this[0][1],_this[1][1],_this[2][1]), \
+		aiVector3t<TReal>(_this[0][2],_this[1][2],_this[2][2]) \
+	}; \
+	\
+	/* extract the scaling factors */ \
+	pScaling.x = vRows[0].Length(); \
+	pScaling.y = vRows[1].Length(); \
+	pScaling.z = vRows[2].Length(); \
+	\
+	/* and the sign of the scaling */ \
+	if (Determinant() < 0) pScaling = -pScaling; \
+	\
+	/* and remove all scaling from the matrix */ \
+	if(pScaling.x) vRows[0] /= pScaling.x; \
+	if(pScaling.y) vRows[1] /= pScaling.y; \
+	if(pScaling.z) vRows[2] /= pScaling.z; \
+	\
+	do {} while(false)
+
+
+
+
 template <typename TReal>
-inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
-    aiVector3t<TReal>& position) const
+inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& pScaling, aiQuaterniont<TReal>& pRotation,
+    aiVector3t<TReal>& pPosition) const
 {
-    const aiMatrix4x4t<TReal>& _this = *this;
-
-    // extract translation
-    position.x = _this[0][3];
-    position.y = _this[1][3];
-    position.z = _this[2][3];
-
-    // extract the rows of the matrix
-    aiVector3t<TReal> vRows[3] = {
-        aiVector3t<TReal>(_this[0][0],_this[1][0],_this[2][0]),
-        aiVector3t<TReal>(_this[0][1],_this[1][1],_this[2][1]),
-        aiVector3t<TReal>(_this[0][2],_this[1][2],_this[2][2])
-    };
-
-    // extract the scaling factors
-    scaling.x = vRows[0].Length();
-    scaling.y = vRows[1].Length();
-    scaling.z = vRows[2].Length();
-
-    // and the sign of the scaling
-    if (Determinant() < 0) {
-        scaling.x = -scaling.x;
-        scaling.y = -scaling.y;
-        scaling.z = -scaling.z;
-    }
-
-    // and remove all scaling from the matrix
-    if(scaling.x)
-    {
-        vRows[0] /= scaling.x;
-    }
-    if(scaling.y)
-    {
-        vRows[1] /= scaling.y;
-    }
-    if(scaling.z)
-    {
-        vRows[2] /= scaling.z;
-    }
+	ASSIMP_MATRIX4_4_DECOMPOSE_PART;
 
     // build a 3x3 rotation matrix
     aiMatrix3x3t<TReal> m(vRows[0].x,vRows[1].x,vRows[2].x,
@@ -349,7 +345,83 @@ inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& scaling, aiQuater
         vRows[0].z,vRows[1].z,vRows[2].z);
 
     // and generate the rotation quaternion from it
-    rotation = aiQuaterniont<TReal>(m);
+    pRotation = aiQuaterniont<TReal>(m);
+}
+
+template <typename TReal>
+inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotation, aiVector3t<TReal>& pPosition) const
+{
+	ASSIMP_MATRIX4_4_DECOMPOSE_PART;
+
+	/*
+	    |  CE      -CF      -D   0 |
+	M = | -BDE+AF   BDF+AE  -BC  0 |
+	    |  ADE+BF  -ADF+BE   AC  0 |
+	    |  0        0        0   1 |
+
+	A = cos(angle_x);
+	B = sin(angle_x);
+	C = cos(angle_y);
+	D = sin(angle_y);
+	E = cos(angle_z);
+	F = sin(angle_z);
+	*/
+
+	// Use a small epsilon to solve floating-point inaccuracies
+    constexpr TReal epsilon = 10e-3f;
+
+	pRotation.y  = -asin(_this[0][2]);// Angle around oY.
+
+	TReal C = cos(pRotation.y);
+
+	if(fabs(C) > epsilon)
+	{
+		// Finding angle around oX.
+		TReal tan_x =  _this[2][2] / C;
+		TReal tan_y = -_this[1][2] / C;
+
+		pRotation.x = atan2(tan_y, tan_x);
+		// Finding angle around oZ.
+		tan_x =  _this[0][0] / C;
+		tan_y = -_this[0][1] / C;
+		pRotation.z = atan2(tan_y, tan_x);
+	}
+	else
+	{
+		pRotation.x = 0;// Set angle around oX to 0.
+
+		// And finding angle around oZ.
+		TReal tan_x = _this[1][1];
+		TReal tan_y = _this[1][0];
+
+		pRotation.z = atan2(tan_y, tan_x);
+	}
+}
+
+#undef ASSIMP_MATRIX4_4_DECOMPOSE_PART
+
+template <typename TReal>
+inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotationAxis, TReal& pRotationAngle,
+											aiVector3t<TReal>& pPosition) const
+{
+aiQuaterniont<TReal> pRotation;
+
+	Decompose(pScaling, pRotation, pPosition);
+	pRotation.Normalize();
+
+	TReal angle_cos = pRotation.w;
+	TReal angle_sin = sqrt(1.0f - angle_cos * angle_cos);
+
+	pRotationAngle = acos(angle_cos) * 2;
+
+	// Use a small epsilon to solve floating-point inaccuracies
+    constexpr TReal epsilon = 10e-3f;
+
+	if(fabs(angle_sin) < epsilon) angle_sin = 1;
+
+	pRotationAxis.x = pRotation.x / angle_sin;
+	pRotationAxis.y = pRotation.y / angle_sin;
+	pRotationAxis.z = pRotation.z / angle_sin;
 }
 
 // ----------------------------------------------------------------------------------------

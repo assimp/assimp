@@ -139,9 +139,9 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
     Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate /*| aiProcess_SortByPType*/),
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
     Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
-        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate /*| aiProcess_SortByPType*/),
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER

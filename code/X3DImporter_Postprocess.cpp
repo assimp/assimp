@@ -1,3 +1,42 @@
+/*
+Open Asset Import Library (assimp)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2016, assimp team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
+following conditions are met:
+
+* Redistributions of source code must retain the above
+copyright notice, this list of conditions and the
+following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
 /// \file   X3DImporter_Postprocess.cpp
 /// \brief  Convert built scenegraph and objects to Assimp scenegraph.
 /// \date   2015-2016
@@ -20,9 +59,9 @@ namespace Assimp
 
 aiMatrix4x4 X3DImporter::PostprocessHelper_Matrix_GlobalToCurrent() const
 {
-CX3DImporter_NodeElement* cur_node;
-std::list<aiMatrix4x4> matr;
-aiMatrix4x4 out_matr;
+    CX3DImporter_NodeElement* cur_node;
+    std::list<aiMatrix4x4> matr;
+    aiMatrix4x4 out_matr;
 
 	// starting walk from current element to root
 	cur_node = NodeElement_Cur;
@@ -100,9 +139,9 @@ bool X3DImporter::PostprocessHelper_ElementIsMesh(const CX3DImporter_NodeElement
 
 void X3DImporter::Postprocess_BuildLight(const CX3DImporter_NodeElement& pNodeElement, std::list<aiLight*>& pSceneLightList) const
 {
-const CX3DImporter_NodeElement_Light& ne = *((CX3DImporter_NodeElement_Light*)&pNodeElement);
-aiMatrix4x4 transform_matr = PostprocessHelper_Matrix_GlobalToCurrent();
-aiLight* new_light = new aiLight;
+    const CX3DImporter_NodeElement_Light& ne = *( ( CX3DImporter_NodeElement_Light* ) &pNodeElement );
+    aiMatrix4x4 transform_matr = PostprocessHelper_Matrix_GlobalToCurrent();
+    aiLight* new_light = new aiLight;
 
 	new_light->mName = ne.ID;
 	new_light->mColorAmbient = ne.Color * ne.AmbientIntensity;
@@ -564,10 +603,10 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode, std::list<aiMesh*>& pSceneMeshList,
 										std::list<aiMaterial*>& pSceneMaterialList, std::list<aiLight*>& pSceneLightList) const
 {
-std::list<CX3DImporter_NodeElement*>::const_iterator chit_begin = pNodeElement.Child.begin();
-std::list<CX3DImporter_NodeElement*>::const_iterator chit_end = pNodeElement.Child.end();
-std::list<aiNode*> SceneNode_Child;
-std::list<unsigned int> SceneNode_Mesh;
+    std::list<CX3DImporter_NodeElement*>::const_iterator chit_begin = pNodeElement.Child.begin();
+    std::list<CX3DImporter_NodeElement*>::const_iterator chit_end = pNodeElement.Child.end();
+    std::list<aiNode*> SceneNode_Child;
+    std::list<unsigned int> SceneNode_Mesh;
 
 	// At first read all metadata
 	Postprocess_CollectMetadata(pNodeElement, pSceneNode);
@@ -649,10 +688,10 @@ std::list<unsigned int> SceneNode_Mesh;
 void X3DImporter::Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& pShapeNodeElement, std::list<unsigned int>& pNodeMeshInd,
 							std::list<aiMesh*>& pSceneMeshList, std::list<aiMaterial*>& pSceneMaterialList) const
 {
-aiMaterial* tmat = nullptr;
-aiMesh* tmesh = nullptr;
-CX3DImporter_NodeElement::EType mesh_type = CX3DImporter_NodeElement::ENET_Invalid;
-unsigned int mat_ind = 0;
+    aiMaterial* tmat = nullptr;
+    aiMesh* tmesh = nullptr;
+    CX3DImporter_NodeElement::EType mesh_type = CX3DImporter_NodeElement::ENET_Invalid;
+    unsigned int mat_ind = 0;
 
 	for(std::list<CX3DImporter_NodeElement*>::const_iterator it = pShapeNodeElement.Child.begin(); it != pShapeNodeElement.Child.end(); it++)
 	{
@@ -714,8 +753,8 @@ unsigned int mat_ind = 0;
 
 void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, aiNode& pSceneNode) const
 {
-std::list<CX3DImporter_NodeElement*> meta_list;
-size_t meta_idx;
+    std::list<CX3DImporter_NodeElement*> meta_list;
+    size_t meta_idx;
 
 	PostprocessHelper_CollectMetadata(pNodeElement, meta_list);// find metadata in current node element.
 	if(meta_list.size() > 0)

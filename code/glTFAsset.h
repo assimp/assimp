@@ -455,25 +455,6 @@ namespace glTF
         void Read(Value& obj, Asset& r);
     };
 
-
-    struct Animation : public Object
-    {
-        struct Channel
-        {
-
-        };
-
-        struct Target
-        {
-
-        };
-
-        struct Sampler
-        {
-
-        };
-    };
-
     //! A buffer points to binary geometry, animation, or skins.
     struct Buffer : public Object
 	{
@@ -934,6 +915,38 @@ namespace glTF
         void SetDefaults();
     };
 
+
+    struct AnimSampler {
+        std::string input;            //!< The ID of a parameter in this animation to use as key-frame input.
+        std::string interpolation;    //!< Type of interpolation algorithm to use between key-frames.
+        std::string output;           //!< The ID of a parameter in this animation to use as key-frame output.
+    };
+
+    struct AnimTarget {
+        Ref<Node> id;                 //!< The ID of the node to animate.
+        std::string path;             //!< The name of property of the node to animate ("translation", "rotation", or "scale").
+    };
+
+    struct AnimChannel {
+        Ref<AnimSampler> sampler;         //!< The ID of one of the samplers present in the containing animation's samplers property.
+        AnimTarget target;
+    };
+
+    struct AnimParameters {
+        Ref<Accessor> TIME;           //!< Accessor reference to a buffer storing a array of floating point scalar values.
+        Ref<Accessor> rotation;       //!< Accessor reference to a buffer storing a array of four-component floating-point vectors.
+        Ref<Accessor> scale;          //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+        Ref<Accessor> translation;    //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+    };
+
+    struct Animation : public Object
+    {
+        AnimChannel Channels[3];            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
+        AnimParameters Parameters;          //!< The samplers that interpolate between the key-frames.
+        AnimSampler Samplers[3];            //!< The parameterized inputs representing the key-frame data.
+    };
+
+
     //! Base class for LazyDict that acts as an interface
     class LazyDictBase
     {
@@ -986,7 +999,7 @@ namespace glTF
 
         Ref<T> Get(const char* id);
         Ref<T> Get(unsigned int i);
-		Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
+        Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)

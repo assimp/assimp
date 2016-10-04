@@ -623,6 +623,57 @@ void glTFExporter::ExportMetadata()
 }
 
 
+void glTFExporter::ExportAnimations()
+{
+    // aiString aiName;
+    for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
+        const aiAnimation* anim = mScene->mAnimations[i];
+
+        std::string name;
+        if (anim->mName.length > 0) {
+            name = anim->mName.C_Str();
+        }
+        name = mAsset->FindUniqueID(name, "animation");
+
+        Ref<Animation> animRef = mAsset->animations.Create(name);
+
+        animRef->Parameters.TIME;
+        animRef->Parameters.rotation;
+        animRef->Parameters.scale;
+        animRef->Parameters.translation;
+
+        for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
+            const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];
+
+            for (unsigned int j = 0; j < 3; ++j) {
+                switch (j) {
+                    case 0:
+                        animRef->Channels[j].target.path = "rotation";
+                        animRef->Samplers[j].output = "rotation";
+                        break;
+                    case 1:
+                        animRef->Channels[j].target.path = "scale";
+                        animRef->Samplers[j].output = "scale";
+                        break;
+                    case 2:
+                        animRef->Channels[j].target.path = "translation";
+                        animRef->Samplers[j].output = "translation";
+                        break;
+                }
+
+                animRef->Channels[j].sampler;
+                animRef->Channels[j].target.id = mAsset->FindUniqueID(nodeChannel->mNodeName.C_Str(), "node");
+
+                animRef->Samplers[j].input = "TIME";
+                animRef->Samplers[j].interpolation = "LINEAR";
+            }
+
+        for (unsigned int channelIndex = 0; channelIndex < anim->mNumMeshChannels; ++channelIndex) {
+            const aiMeshAnim* meshChannel = anim->mMeshChannels[channelIndex];
+        }
+    }
+  } // End: for-loop mNumAnimations
+}
 
 
 

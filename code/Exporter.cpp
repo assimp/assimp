@@ -91,6 +91,7 @@ void ExportSceneGLTF(const char*, IOSystem*, const aiScene*, const ExportPropert
 void ExportSceneGLB(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -150,6 +151,10 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
     Exporter::ExportFormatEntry( "assxml", "Assxml Document", "assxml" , &ExportSceneAssxml, 0),
+#endif
+
+#ifndef ASSIMP_BUILD_NO_X3D_EXPORTER
+	Exporter::ExportFormatEntry( "x3d", "Extensible 3D", "x3d" , &ExportSceneX3D, 0),
 #endif
 };
 

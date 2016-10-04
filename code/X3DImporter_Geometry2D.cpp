@@ -64,11 +64,11 @@ namespace Assimp
 // angle base unit has been specified). If startAngle and endAngle have the same value, a circle is specified.
 void X3DImporter::ParseNode_Geometry2D_Arc2D()
 {
-std::string def, use;
-float endAngle = AI_MATH_HALF_PI_F;
-float radius = 1;
-float startAngle = 0;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    float endAngle = AI_MATH_HALF_PI_F;
+    float radius = 1;
+    float startAngle = 0;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -125,13 +125,13 @@ CX3DImporter_NodeElement* ne;
 // viewed from the +Z-axis, the texture is mapped onto each face with the same orientation as if the image were displayed normally in 2D.
 void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 {
-std::string def, use;
-std::string closureType("PIE");
-float endAngle = AI_MATH_HALF_PI_F;
-float radius = 1;
-bool solid = false;
-float startAngle = 0;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    std::string closureType("PIE");
+    float endAngle = AI_MATH_HALF_PI_F;
+    float radius = 1;
+    bool solid = false;
+    float startAngle = 0;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -187,9 +187,9 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry2D_Circle2D()
 {
-std::string def, use;
-float radius = 1;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    float radius = 1;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -238,11 +238,11 @@ CX3DImporter_NodeElement* ne;
 // the Disk2D, when viewed from the +Z-axis, the texture is mapped onto each face with the same orientation as if the image were displayed normally in 2D.
 void X3DImporter::ParseNode_Geometry2D_Disk2D()
 {
-std::string def, use;
-float innerRadius = 0;
-float outerRadius = 1;
-bool solid = false;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    float innerRadius = 0;
+    float outerRadius = 1;
+    bool solid = false;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -328,9 +328,9 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry2D_Polyline2D()
 {
-std::string def, use;
-std::list<aiVector2D> lineSegments;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    std::list<aiVector2D> lineSegments;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -376,9 +376,9 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry2D_Polypoint2D()
 {
-std::string def, use;
-std::list<aiVector2D> point;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    std::list<aiVector2D> point;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -421,10 +421,10 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry2D_Rectangle2D()
 {
-std::string def, use;
-aiVector2D size(2, 2);
-bool solid = false;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    aiVector2D size(2, 2);
+    bool solid = false;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -473,10 +473,10 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry2D_TriangleSet2D()
 {
-std::string def, use;
-bool solid = false;
-std::list<aiVector2D> vertices;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    bool solid = false;
+    std::list<aiVector2D> vertices;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

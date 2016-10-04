@@ -65,7 +65,7 @@ namespace Assimp
 // A Group node contains children nodes without introducing a new transformation. It is equivalent to a Transform node containing an identity transform.
 void X3DImporter::ParseNode_Grouping_Group()
 {
-std::string def, use;
+    std::string def, use;
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -111,7 +111,7 @@ void X3DImporter::ParseNode_Grouping_GroupEnd()
 // contain any USE references outside the StaticGroup.
 void X3DImporter::ParseNode_Grouping_StaticGroup()
 {
-std::string def, use;
+    std::string def, use;
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -159,8 +159,8 @@ void X3DImporter::ParseNode_Grouping_StaticGroupEnd()
 // is chosen.
 void X3DImporter::ParseNode_Grouping_Switch()
 {
-std::string def, use;
-int32_t whichChoice = -1;
+    std::string def, use;
+    int32_t whichChoice = -1;
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -220,13 +220,13 @@ void X3DImporter::ParseNode_Grouping_SwitchEnd()
 //   P' = T * C * R * SR * S * -SR * -C * P
 void X3DImporter::ParseNode_Grouping_Transform()
 {
-aiVector3D center(0, 0, 0);
-float rotation[4] = {0, 0, 1, 0};
-aiVector3D scale(1, 1, 1);// A value of zero indicates that any child geometry shall not be displayed
-float scale_orientation[4] = {0, 0, 1, 0};
-aiVector3D translation(0, 0, 0);
-aiMatrix4x4 matr, tmatr;
-std::string use, def;
+    aiVector3D center(0, 0, 0);
+    float rotation[4] = {0, 0, 1, 0};
+    aiVector3D scale(1, 1, 1);// A value of zero indicates that any child geometry shall not be displayed
+    float scale_orientation[4] = {0, 0, 1, 0};
+    aiVector3D translation(0, 0, 0);
+    aiMatrix4x4 matr, tmatr;
+    std::string use, def;
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -248,11 +248,13 @@ std::string use, def;
 		if(an == "scaleOrientation")
 		{
 			std::vector<float> tvec;
-
 			XML_ReadNode_GetAttrVal_AsArrF(idx, tvec);
-			if(tvec.size() != 4) throw DeadlyImportError("<Transform>: scaleOrientation vector must have 4 elements.");
+            if ( tvec.size() != 4 )
+            {
+                throw DeadlyImportError( "<Transform>: scaleOrientation vector must have 4 elements." );
+            }
 
-			memcpy(scale_orientation, tvec.data(), sizeof(scale_orientation));
+			::memcpy(scale_orientation, tvec.data(), sizeof(scale_orientation) );
 
 			continue;
 		}
@@ -262,7 +264,7 @@ std::string use, def;
 	// if "USE" defined then find already defined element.
 	if(!use.empty())
 	{
-		CX3DImporter_NodeElement* ne;
+		CX3DImporter_NodeElement* ne( nullptr );
 
 		MACRO_USE_CHECKANDAPPLY(def, use, ENET_Group, ne);
 	}
@@ -270,12 +272,15 @@ std::string use, def;
 	{
 		ParseHelper_Group_Begin();// create new grouping element and go deeper if node has children.
 		// at this place new group mode created and made current, so we can name it.
-		if(!def.empty()) NodeElement_Cur->ID = def;
+        if ( !def.empty() )
+        {
+            NodeElement_Cur->ID = def;
+        }
 
 		//
 		// also set values specific to this type of group
 		//
-		// calculate tranformation matrix
+		// calculate transformation matrix
 		aiMatrix4x4::Translation(translation, matr);// T
 		aiMatrix4x4::Translation(center, tmatr);// C
 		matr *= tmatr;
@@ -294,7 +299,10 @@ std::string use, def;
 		// in grouping set of nodes check X3DMetadataObject is not needed, because it is done in <Scene> parser function.
 
 		// for empty element exit from node in that place
-		if(mReader->isEmptyElement()) ParseHelper_Node_Exit();
+        if ( mReader->isEmptyElement() )
+        {
+            ParseHelper_Node_Exit();
+        }
 	}// if(!use.empty()) else
 }
 

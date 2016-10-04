@@ -69,7 +69,7 @@ void X3DImporter::ParseNode_Lighting_DirectionalLight()
     bool global = false;
     float intensity = 1;
     bool on = true;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -141,7 +141,7 @@ void X3DImporter::ParseNode_Lighting_PointLight()
     aiVector3D location( 0, 0, 0 );
     bool on = true;
     float radius = 100;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -222,7 +222,7 @@ void X3DImporter::ParseNode_Lighting_SpotLight()
     aiVector3D location( 0, 0, 0 );
     bool on = true;
     float radius = 100;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

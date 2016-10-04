@@ -123,7 +123,7 @@ void X3DImporter::ParseNode_MetadataBoolean()
     std::string def, use;
     std::string name, reference;
     std::list<bool> value;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -147,7 +147,7 @@ void X3DImporter::ParseNode_MetadataDouble()
     std::string def, use;
     std::string name, reference;
     std::list<double> value;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -168,10 +168,10 @@ void X3DImporter::ParseNode_MetadataDouble()
 // />
 void X3DImporter::ParseNode_MetadataFloat()
 {
-std::string def, use;
-std::string name, reference;
-std::list<float> value;
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    std::string name, reference;
+    std::list<float> value;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -195,7 +195,7 @@ void X3DImporter::ParseNode_MetadataInteger()
     std::string def, use;
     std::string name, reference;
     std::list<int32_t> value;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -217,7 +217,7 @@ void X3DImporter::ParseNode_MetadataSet()
 {
     std::string def, use;
     std::string name, reference;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -258,7 +258,7 @@ void X3DImporter::ParseNode_MetadataString()
     std::string def, use;
     std::string name, reference;
     std::list<std::string> value;
-    CX3DImporter_NodeElement* ne;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

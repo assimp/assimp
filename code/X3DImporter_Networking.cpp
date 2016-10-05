@@ -63,9 +63,9 @@ namespace Assimp
 // />
 void X3DImporter::ParseNode_Networking_Inline()
 {
-std::string def, use;
-bool load = true;
-std::list<std::string> url;
+    std::string def, use;
+    bool load = true;
+    std::list<std::string> url;
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

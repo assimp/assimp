@@ -61,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, standart library.
 #include <memory>
 #include <inttypes.h>
+#include <iostream>
 
 #include "glTFAssetWriter.h"
 
@@ -624,6 +625,124 @@ void glTFExporter::ExportMetadata()
 }
 
 
+inline Ref<Accessor> ExportAnimationData(Asset& a, std::string& animId, Ref<Buffer>& buffer,
+    unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType)
+{
+    if (!count || !data) return Ref<Accessor>();
+
+    unsigned int numCompsIn = AttribType::GetNumComponents(typeIn);
+    unsigned int numCompsOut = AttribType::GetNumComponents(typeOut);
+    unsigned int bytesPerComp = ComponentTypeSize(compType);
+
+    size_t offset = buffer->byteLength;
+    size_t length = count * numCompsOut * bytesPerComp;
+    buffer->Grow(length);
+
+    // bufferView
+    Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(animId, "view"));
+    bv->buffer = buffer;
+    bv->byteOffset = unsigned(offset);
+    bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
+    // bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
+    bv->target = BufferViewTarget_ARRAY_BUFFER;
+
+    // accessor
+    Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(animId, "accessor"));
+    acc->bufferView = bv;
+    acc->byteOffset = 0;
+    acc->byteStride = 0;
+    acc->componentType = compType;
+    acc->count = count;
+    acc->type = typeOut;
+
+    // calculate min and max values
+    {
+        // Allocate and initialize with large values.
+        float float_MAX = 10000000000000;
+        for (int i = 0 ; i < numCompsOut ; i++) {
+            acc->min.push_back( float_MAX);
+            acc->max.push_back(-float_MAX);
+        }
+
+        // Search and set extreme values.
+        float valueTmp;
+        for (int i = 0 ; i < count       ; i++) {
+        for (int j = 0 ; j < numCompsOut ; j++) {
+
+            if (numCompsOut == 1) {
+              valueTmp = static_cast<unsigned short*>(data)[i];
+            } else {
+              valueTmp = static_cast<aiVector3D*>(data)[i][j];
+            }
+
+            if (valueTmp < acc->min[j]) {
+                acc->min[j] = valueTmp;
+            }
+            if (valueTmp > acc->max[j]) {
+                acc->max[j] = valueTmp;
+            }
+        }
+        }
+    }
+
+    // copy the data
+    acc->WriteData(count, data, numCompsIn*bytesPerComp);
+
+    return acc;
+}
+
+
+inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel)
+{
+    //-------------------------------------------------------
+    // Extract TIME parameter data.
+    // Check if the timeStamps are the same for mPositionKeys, mRotationKeys, and mScalingKeys.
+    typedef float TimeType;
+    std::vector<TimeType> timeData;
+    timeData.resize(nodeChannel->mNumPositionKeys);
+    for (size_t i = 0; i < nodeChannel->mNumPositionKeys; ++i) {
+        // timeData[i] = uint16_t(nodeChannel->mPositionKeys[i].mTime);
+        timeData[i] = nodeChannel->mPositionKeys[i].mTime;
+    }
+
+    Ref<Accessor> timeAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+    if (timeAccessor) animRef->Parameters.TIME = timeAccessor;
+
+    //-------------------------------------------------------
+    // Extract translation parameter data
+    C_STRUCT aiVector3D* translationData = new aiVector3D[nodeChannel->mNumPositionKeys];
+    for (size_t i = 0; i < nodeChannel->mNumPositionKeys; ++i) {
+        translationData[i] = nodeChannel->mPositionKeys[i].mValue;
+    }
+
+    Ref<Accessor> tranAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+    if (tranAccessor) animRef->Parameters.translation = tranAccessor;
+
+    //-------------------------------------------------------
+    // Extract scale parameter data
+    C_STRUCT aiVector3D* scaleData = new aiVector3D[nodeChannel->mNumScalingKeys];
+    for (size_t i = 0; i < nodeChannel->mNumScalingKeys; ++i) {
+        scaleData[i] = nodeChannel->mScalingKeys[i].mValue;
+    }
+
+    Ref<Accessor> scaleAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumScalingKeys, scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+    if (scaleAccessor) animRef->Parameters.scale = scaleAccessor;
+
+    //-------------------------------------------------------
+    // Extract rotation parameter data
+    C_STRUCT aiQuaternion* rotationData = new aiQuaternion[nodeChannel->mNumRotationKeys];
+    for (size_t i = 0; i < nodeChannel->mNumRotationKeys; ++i) {
+        rotationData[i] = nodeChannel->mRotationKeys[i].mValue;
+    }
+
+    Ref<Accessor> rotAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumRotationKeys, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    if (rotAccessor) animRef->Parameters.rotation = rotAccessor;
+
+}
+
+
+
+
 void glTFExporter::ExportAnimations()
 {
     // //--------------------------
@@ -649,32 +768,49 @@ void glTFExporter::ExportAnimations()
     // std::string bufferId = mAsset->FindUniqueID("", bufferIdPrefix.c_str());
 
     // Ref<Buffer> b = mAsset->GetBodyBuffer();
+    Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
+    std::cout<<"GetBodyBuffer " << bufferRef << "\n";
     // // Setup to output buffer data
     // //--------------------------
 
     // aiString aiName;
+    std::cout<<"mNumAnimations " << mScene->mNumAnimations << "\n";
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation* anim = mScene->mAnimations[i];
 
-        std::string name;
+        std::string nameAnim;
         if (anim->mName.length > 0) {
-            name = anim->mName.C_Str();
+            nameAnim = anim->mName.C_Str();
         }
-        name = mAsset->FindUniqueID(name, "animation");
 
-        Ref<Animation> animRef = mAsset->animations.Create(name);
-
-        // These are accessors to bufferviews to buffer data.
-
-        Ref<Accessor> acc = mAsset->accessors.Get(unsigned (0));
-
-        animRef->Parameters.TIME = acc;
-        animRef->Parameters.rotation = acc;
-        animRef->Parameters.scale = acc;
-        animRef->Parameters.translation = acc;
-
+        std::cout<<"mNumChannels " << anim->mNumChannels << "\n";
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
             const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];
+
+            // It appears that assimp stores this type of animation as multiple animations.
+            // where each aiNodeAnim in mChannels animates a specific node.
+            std::string name = nameAnim + "_" + std::to_string(channelIndex);
+            name = mAsset->FindUniqueID(name, "animation");
+            Ref<Animation> animRef = mAsset->animations.Create(name);
+
+            // Loop over the data and check to see if it exactly matches an existing buffer.
+            //    If yes, then reference the existing corresponding accessor.
+            //    Otherwise, add to the buffer and create a new accessor.
+
+            /******************* Parameters ********************/
+            // If compression is used then you need parameters of uncompressed region: begin and size. At this step "begin" is stored.
+            // if(comp_allow) idx_srcdata_begin = bufferRef->byteLength;
+
+            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel);
+
+            // FAKE DATA FOR NOW!!!!!
+            // These are accessors to bufferviews to buffer data.
+            // Ref<Accessor> acc = mAsset->accessors.Get(unsigned (0));
+            // animRef->Parameters.TIME = acc;
+            // animRef->Parameters.rotation = acc;
+            // animRef->Parameters.scale = acc;
+            // animRef->Parameters.translation = acc;
+
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;
@@ -700,12 +836,14 @@ void glTFExporter::ExportAnimations()
                 animRef->Samplers[j].input = "TIME";
                 animRef->Samplers[j].interpolation = "LINEAR";
             }
+        }
 
+        std::cout<<"mNumMeshChannels " << anim->mNumMeshChannels << "\n";
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumMeshChannels; ++channelIndex) {
             const aiMeshAnim* meshChannel = anim->mMeshChannels[channelIndex];
         }
-    }
-  } // End: for-loop mNumAnimations
+
+    } // End: for-loop mNumAnimations
 }
 
 

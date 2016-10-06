@@ -439,6 +439,10 @@ namespace glTF {
             obj.AddMember("bindShapeMatrix", MakeValue(val, b.bindShapeMatrix.value, w.mAl).Move(), w.mAl);
         }
 
+        if (b.inverseBindMatrices) {
+            obj.AddMember("inverseBindMatrices", Value(b.inverseBindMatrices->id, w.mAl).Move(), w.mAl);
+        }
+
     }
 
     inline void Write(Value& obj, Technique& b, AssetWriter& w)

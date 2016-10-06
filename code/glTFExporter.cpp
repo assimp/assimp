@@ -144,7 +144,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     ExportAnimations();
 
-    // ExportSkins();
+    ExportSkins();
 
     glTF::AssetWriter writer(*mAsset);
 
@@ -843,40 +843,46 @@ void glTFExporter::ExportAnimations()
 
 void glTFExporter::ExportSkins()
 {
+    Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
+
     for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
         const aiMesh* aim = mScene->mMeshes[idx_mesh];
 
-        if(!aim->HasBones()) { continue; } // skip to next mesh if no bones.
+        if(!aim->HasBones()) { continue; } // skip to next mesh if no bones exist.
 
         std::string skinName = aim->mName.C_Str();
         skinName = mAsset->FindUniqueID(skinName, "skin");
         Ref<Skin> skinRef = mAsset->skins.Create(skinName);
         skinRef->name = skinName;
 
+        mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
+
         for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
             const aiBone* aib = aim->mBones[idx_bone];
 
+            // aib->mName   =====>  skinRef->jointNames
+            // Find the node with id = mName.
             Ref<Node> nodeRef = mAsset->nodes.Get(aib->mName.C_Str());
             nodeRef->jointName = "joint_" + std::to_string(idx_bone);
-
             skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
-
             std::cout << "Node->id " << nodeRef->id << "\n";
 
-
+            // Identity Matrix   =====>  skinRef->bindShapeMatrix
+            // Temporary. Hard-coded identity matrix here
             skinRef->bindShapeMatrix.isPresent = true;
-            // CopyValue(n->mTransformation, skinRef->bindShapeMatrix.value);
-            // aiIdentityMatrix4(skinRef->bindShapeMatrix.value);
             IdentityMatrix4(skinRef->bindShapeMatrix.value);
 
-            // skinRef->bindShapeMatrix;
-            // skinRef->inverseBindMatrices;
+
+            // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
+            CopyValue(aib->mOffsetMatrix, inverseBindMatricesData[idx_bone]);
 
             // aib->mNumWeights;
-            // aib->mOffsetMatrix;
             // aib->mWeights;
 
         } // End: for-loop mNumMeshes
+
+        Ref<Accessor> invBindMatrixAccessor = ExportAnimationData(*mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+        if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
 
     } // End: for-loop mNumMeshes
 }

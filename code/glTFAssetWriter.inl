@@ -425,6 +425,12 @@ namespace glTF {
             vJointNames.PushBack(StringRef(b.jointNames[i]), w.mAl);
         }
         obj.AddMember("jointNames", vJointNames, w.mAl);
+
+        if (b.bindShapeMatrix.isPresent) {
+            Value val;
+            obj.AddMember("bindShapeMatrix", MakeValue(val, b.bindShapeMatrix.value, w.mAl).Move(), w.mAl);
+        }
+
     }
 
     inline void Write(Value& obj, Technique& b, AssetWriter& w)

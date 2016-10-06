@@ -166,6 +166,14 @@ static void CopyValue(const aiMatrix4x4& v, glTF::mat4& o)
     o[12] = v.a4; o[13] = v.b4; o[14] = v.c4; o[15] = v.d4;
 }
 
+static void IdentityMatrix4(glTF::mat4& o)
+{
+    o[ 0] = 1; o[ 1] = 0; o[ 2] = 0; o[ 3] = 0;
+    o[ 4] = 0; o[ 5] = 1; o[ 6] = 0; o[ 7] = 0;
+    o[ 8] = 0; o[ 9] = 0; o[10] = 1; o[11] = 0;
+    o[12] = 0; o[13] = 0; o[14] = 0; o[15] = 1;
+}
+
 inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& buffer,
     unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType, bool isIndices = false)
 {
@@ -857,6 +865,12 @@ void glTFExporter::ExportSkins()
             skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
 
             std::cout << "Node->id " << nodeRef->id << "\n";
+
+
+            skinRef->bindShapeMatrix.isPresent = true;
+            // CopyValue(n->mTransformation, skinRef->bindShapeMatrix.value);
+            // aiIdentityMatrix4(skinRef->bindShapeMatrix.value);
+            IdentityMatrix4(skinRef->bindShapeMatrix.value);
 
             // skinRef->bindShapeMatrix;
             // skinRef->inverseBindMatrices;

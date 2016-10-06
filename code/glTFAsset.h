@@ -128,6 +128,7 @@ namespace glTF
     struct BufferView; // here due to cross-reference
     struct Texture;
     struct Light;
+    struct Skin;
 
 
     // Vec/matrix types, as raw float arrays
@@ -806,6 +807,10 @@ namespace glTF
         Ref<Camera> camera;
         Ref<Light>  light;
 
+        std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes.
+        Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
+        std::string jointName;                    //!< Name used when this node is a joint in a skin.
+
         Node() {}
         void Read(Value& obj, Asset& r);
     };
@@ -845,6 +850,11 @@ namespace glTF
 
     struct Skin : public Object
     {
+        Nullable<mat4> bindShapeMatrix;       //!< Floating-point 4x4 transformation matrix stored in column-major order.
+        Ref<Accessor> inverseBindMatrices;    //!< The ID of the accessor containing the floating-point 4x4 inverse-bind matrices.
+        std::vector<std::string/*Ref<Node>*/> jointNames;    //!< Joint names of the joints (nodes with a jointName property) in this skin.
+        std::string name;                     //!< The user-defined name of this object.
+
         Skin() {}
         void Read(Value& obj, Asset& r);
     };
@@ -1099,7 +1109,7 @@ namespace glTF
         LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
         //LazyDict<Shader>    shaders;
-        //LazyDict<Skin>      skins;
+        LazyDict<Skin>      skins;
         //LazyDict<Technique> techniques;
         LazyDict<Texture>     textures;
 
@@ -1124,7 +1134,7 @@ namespace glTF
             , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
             //, shaders     (*this, "shaders")
-            //, skins       (*this, "skins")
+            , skins       (*this, "skins")
             //, techniques  (*this, "techniques")
             , textures      (*this, "textures")
             , lights        (*this, "lights", "KHR_materials_common")

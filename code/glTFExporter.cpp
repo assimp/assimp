@@ -126,8 +126,6 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     ExportMetadata();
 
-    //for (unsigned int i = 0; i < pScene->mNumAnimations; ++i) {}
-
     //for (unsigned int i = 0; i < pScene->mNumCameras; ++i) {}
 
     //for (unsigned int i = 0; i < pScene->mNumLights; ++i) {}
@@ -147,6 +145,8 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     ExportScene();
 
     ExportAnimations();
+
+    ExportSkins();
 
     glTF::AssetWriter writer(*mAsset);
 
@@ -701,8 +701,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     std::vector<TimeType> timeData;
     timeData.resize(nodeChannel->mNumPositionKeys);
     for (size_t i = 0; i < nodeChannel->mNumPositionKeys; ++i) {
-        // timeData[i] = uint16_t(nodeChannel->mPositionKeys[i].mTime);
-        timeData[i] = nodeChannel->mPositionKeys[i].mTime;
+        timeData[i] = nodeChannel->mPositionKeys[i].mTime;  // Check if we have to cast type here. e.g. uint16_t()
     }
 
     Ref<Accessor> timeAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
@@ -773,7 +772,6 @@ void glTFExporter::ExportAnimations()
     // // Setup to output buffer data
     // //--------------------------
 
-    // aiString aiName;
     std::cout<<"mNumAnimations " << mScene->mNumAnimations << "\n";
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation* anim = mScene->mAnimations[i];
@@ -793,24 +791,14 @@ void glTFExporter::ExportAnimations()
             name = mAsset->FindUniqueID(name, "animation");
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
-            // Loop over the data and check to see if it exactly matches an existing buffer.
-            //    If yes, then reference the existing corresponding accessor.
-            //    Otherwise, add to the buffer and create a new accessor.
-
             /******************* Parameters ********************/
             // If compression is used then you need parameters of uncompressed region: begin and size. At this step "begin" is stored.
             // if(comp_allow) idx_srcdata_begin = bufferRef->byteLength;
 
+            // Loop over the data and check to see if it exactly matches an existing buffer.
+            //    If yes, then reference the existing corresponding accessor.
+            //    Otherwise, add to the buffer and create a new accessor.
             ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel);
-
-            // FAKE DATA FOR NOW!!!!!
-            // These are accessors to bufferviews to buffer data.
-            // Ref<Accessor> acc = mAsset->accessors.Get(unsigned (0));
-            // animRef->Parameters.TIME = acc;
-            // animRef->Parameters.rotation = acc;
-            // animRef->Parameters.scale = acc;
-            // animRef->Parameters.translation = acc;
-
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;
@@ -846,6 +834,41 @@ void glTFExporter::ExportAnimations()
     } // End: for-loop mNumAnimations
 }
 
+
+
+void glTFExporter::ExportSkins()
+{
+    for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
+        const aiMesh* aim = mScene->mMeshes[idx_mesh];
+
+        if(!aim->HasBones()) { continue; } // skip to next mesh if no bones.
+
+        std::string skinName = aim->mName.C_Str();
+        skinName = mAsset->FindUniqueID(skinName, "skin");
+        Ref<Skin> skinRef = mAsset->skins.Create(skinName);
+        skinRef->name = skinName;
+
+        for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
+            const aiBone* aib = aim->mBones[idx_bone];
+
+            Ref<Node> nodeRef = mAsset->nodes.Get(aib->mName.C_Str());
+            nodeRef->jointName = "joint_" + std::to_string(idx_bone);
+
+            skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
+
+            std::cout << "Node->id " << nodeRef->id << "\n";
+
+            // skinRef->bindShapeMatrix;
+            // skinRef->inverseBindMatrices;
+
+            // aib->mNumWeights;
+            // aib->mOffsetMatrix;
+            // aib->mWeights;
+
+        } // End: for-loop mNumMeshes
+
+    } // End: for-loop mNumMeshes
+}
 
 
 

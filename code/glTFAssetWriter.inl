@@ -377,6 +377,10 @@ namespace glTF {
         AddRefsVector(obj, "children", n.children, w.mAl);
 
         AddRefsVector(obj, "meshes", n.meshes, w.mAl);
+
+        if (!n.jointName.empty()) {
+          obj.AddMember("jointName", n.jointName, w.mAl);
+        }
     }
 
     inline void Write(Value& obj, Program& b, AssetWriter& w)
@@ -412,7 +416,15 @@ namespace glTF {
 
     inline void Write(Value& obj, Skin& b, AssetWriter& w)
     {
+        /****************** jointNames *******************/
+        Value vJointNames;
+        vJointNames.SetArray();
+        vJointNames.Reserve(unsigned(b.jointNames.size()), w.mAl);
 
+        for (size_t i = 0; i < unsigned(b.jointNames.size()); ++i) {
+            vJointNames.PushBack(StringRef(b.jointNames[i]), w.mAl);
+        }
+        obj.AddMember("jointNames", vJointNames, w.mAl);
     }
 
     inline void Write(Value& obj, Technique& b, AssetWriter& w)

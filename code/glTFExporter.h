@@ -102,6 +102,7 @@ namespace Assimp
         unsigned int ExportNode(const aiNode* node);
         void ExportScene();
         void ExportAnimations();
+        void ExportSkins();
     };
 
 }

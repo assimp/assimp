@@ -365,7 +365,7 @@ inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector
 	*/
 
 	// Use a small epsilon to solve floating-point inaccuracies
-    constexpr TReal epsilon = 10e-3f;
+    const TReal epsilon = 10e-3f;
 
 	pRotation.y  = asin(vCols[2].x);// D. Angle around oY.
 
@@ -412,7 +412,7 @@ aiQuaterniont<TReal> pRotation;
 	pRotationAngle = acos(angle_cos) * 2;
 
 	// Use a small epsilon to solve floating-point inaccuracies
-    constexpr TReal epsilon = 10e-3f;
+    const TReal epsilon = 10e-3f;
 
 	if(fabs(angle_sin) < epsilon) angle_sin = 1;
 

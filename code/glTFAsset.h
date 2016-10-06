@@ -950,9 +950,13 @@ namespace glTF
             Ref<Accessor> translation;    //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
         };
 
-        AnimChannel Channels[3];            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
-        AnimParameters Parameters;          //!< The samplers that interpolate between the key-frames.
-        AnimSampler Samplers[3];            //!< The parameterized inputs representing the key-frame data.
+        // AnimChannel Channels[3];            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
+        // AnimParameters Parameters;          //!< The samplers that interpolate between the key-frames.
+        // AnimSampler Samplers[3];            //!< The parameterized inputs representing the key-frame data.
+
+        std::vector<AnimChannel> Channels;            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
+        AnimParameters Parameters;                    //!< The samplers that interpolate between the key-frames.
+        std::vector<AnimSampler> Samplers;         //!< The parameterized inputs representing the key-frame data.
 
         Animation() {}
         void Read(Value& obj, Asset& r);

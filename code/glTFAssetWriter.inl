@@ -105,9 +105,9 @@ namespace glTF {
         /****************** Channels *******************/
         Value channels;
         channels.SetArray();
-        channels.Reserve(3/*unsigned(a.Channels.size())*/, w.mAl);
+        channels.Reserve(unsigned(a.Channels.size()), w.mAl);
 
-        for (size_t i = 0; i < 3/*a.Channels.size()*/; ++i) {
+        for (size_t i = 0; i < unsigned(a.Channels.size()); ++i) {
             Animation::AnimChannel& c = a.Channels[i];
             Value valChannel;
             valChannel.SetObject();
@@ -124,24 +124,32 @@ namespace glTF {
             }
             channels.PushBack(valChannel, w.mAl);
         }
-        obj.AddMember("Channels", channels, w.mAl);
+        obj.AddMember("channels", channels, w.mAl);
 
         /****************** Parameters *******************/
         Value valParameters;
         valParameters.SetObject();
         {
-            valParameters.AddMember("TIME", StringRef(a.Parameters.TIME->id), w.mAl);
-            valParameters.AddMember("rotation", StringRef(a.Parameters.rotation->id), w.mAl);
-            valParameters.AddMember("scale", StringRef(a.Parameters.scale->id), w.mAl);
-            valParameters.AddMember("translation", StringRef(a.Parameters.translation->id), w.mAl);
+            if (a.Parameters.TIME) {
+                valParameters.AddMember("TIME", StringRef(a.Parameters.TIME->id), w.mAl);
+            }
+            if (a.Parameters.rotation) {
+                valParameters.AddMember("rotation", StringRef(a.Parameters.rotation->id), w.mAl);
+            }
+            if (a.Parameters.scale) {
+                valParameters.AddMember("scale", StringRef(a.Parameters.scale->id), w.mAl);
+            }
+            if (a.Parameters.translation) {
+                valParameters.AddMember("translation", StringRef(a.Parameters.translation->id), w.mAl);
+            }
         }
-        obj.AddMember("Parameters", valParameters, w.mAl);
+        obj.AddMember("parameters", valParameters, w.mAl);
 
         /****************** Samplers *******************/
         Value valSamplers;
         valSamplers.SetObject();
 
-        for (size_t i = 0; i < 3/*a.Samplers.size()*/; ++i) {
+        for (size_t i = 0; i < unsigned(a.Samplers.size()); ++i) {
             Animation::AnimSampler& s = a.Samplers[i];
             Value valSampler;
             valSampler.SetObject();
@@ -152,7 +160,7 @@ namespace glTF {
             }
             valSamplers.AddMember(StringRef(s.id), valSampler, w.mAl);
         }
-        obj.AddMember("Samplers", valSamplers, w.mAl);
+        obj.AddMember("samplers", valSamplers, w.mAl);
     }
 
     inline void Write(Value& obj, Buffer& b, AssetWriter& w)

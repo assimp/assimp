@@ -1,3 +1,42 @@
+/*
+Open Asset Import Library (assimp)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2016, assimp team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
+following conditions are met:
+
+* Redistributions of source code must retain the above
+copyright notice, this list of conditions and the
+following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
 /// \file   X3DImporter_Geometry3D.cpp
 /// \brief  Parsing data from nodes of "Geometry3D" set of X3D.
 /// \date   2015-2016
@@ -25,10 +64,10 @@ namespace Assimp
 // respectively and each component value shall be greater than zero.
 void X3DImporter::ParseNode_Geometry3D_Box()
 {
-std::string def, use;
-bool solid = true;
-aiVector3D size(2, 2, 2);
-CX3DImporter_NodeElement* ne;
+    std::string def, use;
+    bool solid = true;
+    aiVector3D size(2, 2, 2);
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -71,13 +110,13 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry3D_Cone()
 {
-std::string use, def;
-bool bottom = true;
-float bottomRadius = 1;
-float height = 2;
-bool side = true;
-bool solid = true;
-CX3DImporter_NodeElement* ne;
+    std::string use, def;
+    bool bottom = true;
+    float bottomRadius = 1;
+    float height = 2;
+    bool side = true;
+    bool solid = true;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -142,14 +181,14 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry3D_Cylinder()
 {
-std::string use, def;
-bool bottom = true;
-float height = 2;
-float radius = 1;
-bool side = true;
-bool solid = true;
-bool top = true;
-CX3DImporter_NodeElement* ne;
+    std::string use, def;
+    bool bottom = true;
+    float height = 2;
+    float radius = 1;
+    bool side = true;
+    bool solid = true;
+    bool top = true;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -241,18 +280,18 @@ CX3DImporter_NodeElement* ne;
 // If either the xDimension or the zDimension is less than two, the ElevationGrid contains no quadrilaterals.
 void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 {
-std::string use, def;
-bool ccw = true;
-bool colorPerVertex = true;
-float creaseAngle = 0;
-std::list<float> height;
-bool normalPerVertex = true;
-bool solid = true;
-int32_t xDimension = 0;
-float xSpacing = 1;
-int32_t zDimension = 0;
-float zSpacing = 1;
-CX3DImporter_NodeElement* ne;
+    std::string use, def;
+    bool ccw = true;
+    bool colorPerVertex = true;
+    float creaseAngle = 0;
+    std::list<float> height;
+    bool normalPerVertex = true;
+    bool solid = true;
+    int32_t xDimension = 0;
+    float xSpacing = 1;
+    int32_t zDimension = 0;
+    float zSpacing = 1;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -379,7 +418,7 @@ CX3DImporter_NodeElement* ne;
 template<typename TVector>
 static void GeometryHelper_Extrusion_CurveIsClosed(std::vector<TVector>& pCurve, const bool pDropTail, const bool pRemoveLastPoint, bool& pCurveIsClosed)
 {
-size_t cur_sz = pCurve.size();
+    size_t cur_sz = pCurve.size();
 
 	pCurveIsClosed = false;
 	// for curve with less than four points checking is have no sense,
@@ -422,9 +461,8 @@ size_t cur_sz = pCurve.size();
 
 static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx, const std::vector<aiVector3D>& pSpine, const bool pSpine_Closed)
 {
-const size_t spine_idx_last = pSpine.size() - 1;
-
-aiVector3D tvec;
+    const size_t spine_idx_last = pSpine.size() - 1;
+    aiVector3D tvec;
 
 	if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last))// at first special cases
 	{
@@ -456,10 +494,10 @@ aiVector3D tvec;
 static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx, const std::vector<aiVector3D>& pSpine, const bool pSpine_Closed,
 													const aiVector3D pVecZ_Prev)
 {
-const aiVector3D zero_vec(0);
-const size_t spine_idx_last = pSpine.size() - 1;
+    const aiVector3D zero_vec(0);
+    const size_t spine_idx_last = pSpine.size() - 1;
 
-aiVector3D tvec;
+    aiVector3D tvec;
 
 	// at first special cases
 	if(pSpine.size() < 3)// spine have not enough points for vector calculations.
@@ -533,18 +571,18 @@ aiVector3D tvec;
 // />
 void X3DImporter::ParseNode_Geometry3D_Extrusion()
 {
-std::string use, def;
-bool beginCap = true;
-bool ccw = true;
-bool convex = true;
-float creaseAngle = 0;
-std::vector<aiVector2D> crossSection;
-bool endCap = true;
-std::vector<float> orientation;
-std::vector<aiVector2D> scale;
-bool solid = true;
-std::vector<aiVector3D> spine;
-CX3DImporter_NodeElement* ne;
+    std::string use, def;
+    bool beginCap = true;
+    bool ccw = true;
+    bool convex = true;
+    float creaseAngle = 0;
+    std::vector<aiVector2D> crossSection;
+    bool endCap = true;
+    std::vector<float> orientation;
+    std::vector<aiVector2D> scale;
+    bool solid = true;
+    std::vector<aiVector3D> spine;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -816,18 +854,18 @@ CX3DImporter_NodeElement* ne;
 // </IndexedFaceSet>
 void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 {
-std::string use, def;
-bool ccw = true;
-std::list<int32_t> colorIndex;
-bool colorPerVertex = true;
-bool convex = true;
-std::list<int32_t> coordIndex;
-float creaseAngle = 0;
-std::list<int32_t> normalIndex;
-bool normalPerVertex = true;
-bool solid = true;
-std::list<int32_t> texCoordIndex;
-CX3DImporter_NodeElement* ne;
+    std::string use, def;
+    bool ccw = true;
+    std::list<int32_t> colorIndex;
+    bool colorPerVertex = true;
+    bool convex = true;
+    std::list<int32_t> coordIndex;
+    float creaseAngle = 0;
+    std::list<int32_t> normalIndex;
+    bool normalPerVertex = true;
+    bool solid = true;
+    std::list<int32_t> texCoordIndex;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -903,10 +941,10 @@ CX3DImporter_NodeElement* ne;
 // />
 void X3DImporter::ParseNode_Geometry3D_Sphere()
 {
-std::string use, def;
-float radius = 1;
-bool solid = true;
-CX3DImporter_NodeElement* ne;
+    std::string use, def;
+    float radius = 1;
+    bool solid = true;
+    CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);

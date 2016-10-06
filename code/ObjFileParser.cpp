@@ -140,6 +140,9 @@ void ObjFileParser::parseFile()
                     if (numComponents == 3) {
                         // read in vertex definition
                         getVector3(m_pModel->m_Vertices);
+                    } else if (numComponents == 4) {
+                        // read in vertex definition (homogeneous coords)
+                        getHomogeneousVector3(m_pModel->m_Vertices);
                     } else if (numComponents == 6) {
                         // read vertex and vertex-color
                         getTwoVectors3(m_pModel->m_Vertices, m_pModel->m_VertexColors);
@@ -317,6 +320,26 @@ void ObjFileParser::getVector3( std::vector<aiVector3D> &point3d_array ) {
     z = ( ai_real ) fast_atof( m_buffer );
 
     point3d_array.push_back( aiVector3D( x, y, z ) );
+    m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+}
+
+void ObjFileParser::getHomogeneousVector3( std::vector<aiVector3D> &point3d_array ) {
+    ai_real x, y, z, w;
+    copyNextWord(m_buffer, Buffersize);
+    x = (ai_real) fast_atof(m_buffer);
+
+    copyNextWord(m_buffer, Buffersize);
+    y = (ai_real) fast_atof(m_buffer);
+
+    copyNextWord( m_buffer, Buffersize );
+    z = ( ai_real ) fast_atof( m_buffer );
+
+    copyNextWord( m_buffer, Buffersize );
+    w = ( ai_real ) fast_atof( m_buffer );
+
+    ai_assert( w != 0 );
+
+    point3d_array.push_back( aiVector3D( x/w, y/w, z/w ) );
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 

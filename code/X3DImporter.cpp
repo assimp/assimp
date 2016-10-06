@@ -1,3 +1,42 @@
+/*
+Open Asset Import Library (assimp)
+----------------------------------------------------------------------
+
+Copyright (c) 2006-2016, assimp team
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
+following conditions are met:
+
+* Redistributions of source code must retain the above
+copyright notice, this list of conditions and the
+following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the
+following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+* Neither the name of the assimp team, nor the names of its
+contributors may be used to endorse or promote products
+derived from this software without specific prior
+written permission of the assimp team.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+*/
 /// \file   X3DImporter.cpp
 /// \brief  X3D-format files importer for Assimp: main algorithm implementation.
 /// \date   2015-2016
@@ -100,8 +139,8 @@ fne_fn_end:
 
 bool X3DImporter::FindNodeElement(const std::string& pID, const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement)
 {
-CX3DImporter_NodeElement* tnd = NodeElement_Cur;// temporary pointer to node.
-bool static_search = false;// flag: true if searching in static node.
+    CX3DImporter_NodeElement* tnd = NodeElement_Cur;// temporary pointer to node.
+    bool static_search = false;// flag: true if searching in static node.
 
     // At first check if we have deal with static node. Go up thru parent nodes and check flag.
     while(tnd != nullptr)
@@ -187,86 +226,86 @@ void X3DImporter::XML_CheckNode_MustBeEmpty()
 
 void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName)
 {
-const size_t Uns_Skip_Len = 189;
-const char* Uns_Skip[Uns_Skip_Len] = {
-	// CAD geometry component
-	"CADAssembly", "CADFace", "CADLayer", "CADPart", "IndexedQuadSet", "QuadSet",
-	// Core
-	"ROUTE", "ExternProtoDeclare", "ProtoDeclare", "ProtoInstance", "ProtoInterface", "WorldInfo",
-	// Distributed interactive simulation (DIS) component
-	"DISEntityManager", "DISEntityTypeMapping", "EspduTransform", "ReceiverPdu", "SignalPdu", "TransmitterPdu",
-	// Cube map environmental texturing component
-	"ComposedCubeMapTexture", "GeneratedCubeMapTexture", "ImageCubeMapTexture",
-	// Environmental effects component
-	"Background", "Fog", "FogCoordinate", "LocalFog", "TextureBackground",
-	// Environmental sensor component
-	"ProximitySensor", "TransformSensor", "VisibilitySensor",
-	// Followers component
-	"ColorChaser", "ColorDamper", "CoordinateChaser", "CoordinateDamper", "OrientationChaser", "OrientationDamper", "PositionChaser", "PositionChaser2D",
-	"PositionDamper", "PositionDamper2D", "ScalarChaser", "ScalarDamper", "TexCoordChaser2D", "TexCoordDamper2D",
-	// Geospatial component
-	"GeoCoordinate", "GeoElevationGrid", "GeoLocation", "GeoLOD", "GeoMetadata", "GeoOrigin", "GeoPositionInterpolator", "GeoProximitySensor",
-	"GeoTouchSensor", "GeoTransform", "GeoViewpoint",
-	// Humanoid Animation (H-Anim) component
-	"HAnimDisplacer", "HAnimHumanoid", "HAnimJoint", "HAnimSegment", "HAnimSite",
-	// Interpolation component
-	"ColorInterpolator", "CoordinateInterpolator", "CoordinateInterpolator2D", "EaseInEaseOut", "NormalInterpolator", "OrientationInterpolator",
-	"PositionInterpolator", "PositionInterpolator2D", "ScalarInterpolator", "SplinePositionInterpolator", "SplinePositionInterpolator2D",
-	"SplineScalarInterpolator", "SquadOrientationInterpolator",
-	// Key device sensor component
-	"KeySensor", "StringSensor"
-	// Layering component
-	"Layer", "LayerSet", "Viewport",
-	// Layout component
-	"Layout", "LayoutGroup", "LayoutLayer", "ScreenFontStyle", "ScreenGroup",
-	// Navigation component
-	"Billboard", "Collision", "LOD", "NavigationInfo", "OrthoViewpoint", "Viewpoint", "ViewpointGroup",
-	// Networking component
-	"Anchor", "LoadSensor",
-	// NURBS component
-	"Contour2D", "ContourPolyline2D", "CoordinateDouble", "NurbsCurve", "NurbsCurve2D", "NurbsOrientationInterpolator", "NurbsPatchSurface",
-	"NurbsPositionInterpolator", "NurbsSet", "NurbsSurfaceInterpolator", "NurbsSweptSurface", "NurbsSwungSurface", "NurbsTextureCoordinate",
-	"NurbsTrimmedSurface",
-	// Particle systems component
-	"BoundedPhysicsModel", "ConeEmitter", "ExplosionEmitter", "ForcePhysicsModel", "ParticleSystem", "PointEmitter", "PolylineEmitter", "SurfaceEmitter",
-	"VolumeEmitter", "WindPhysicsModel",
-	// Picking component
-	"LinePickSensor", "PickableGroup", "PointPickSensor", "PrimitivePickSensor", "VolumePickSensor",
-	// Pointing device sensor component
-	"CylinderSensor", "PlaneSensor", "SphereSensor", "TouchSensor",
-	// Rendering component
-	"ClipPlane",
-	// Rigid body physics
-	"BallJoint", "CollidableOffset", "CollidableShape", "CollisionCollection", "CollisionSensor", "CollisionSpace", "Contact", "DoubleAxisHingeJoint",
-	"MotorJoint", "RigidBody", "RigidBodyCollection", "SingleAxisHingeJoint", "SliderJoint", "UniversalJoint",
-	// Scripting component
-	"Script",
-	// Programmable shaders component
-	"ComposedShader", "FloatVertexAttribute", "Matrix3VertexAttribute", "Matrix4VertexAttribute", "PackagedShader", "ProgramShader", "ShaderPart",
-	"ShaderProgram",
-	// Shape component
-	"FillProperties", "LineProperties", "TwoSidedMaterial",
-	// Sound component
-	"AudioClip", "Sound",
-	// Text component
-	"FontStyle", "Text",
-	// Texturing3D Component
-	"ComposedTexture3D", "ImageTexture3D", "PixelTexture3D", "TextureCoordinate3D", "TextureCoordinate4D", "TextureTransformMatrix3D", "TextureTransform3D",
-	// Texturing component
-	"MovieTexture", "MultiTexture", "MultiTextureCoordinate", "MultiTextureTransform", "PixelTexture", "TextureCoordinateGenerator", "TextureProperties",
-	// Time component
-	"TimeSensor",
-	// Event Utilities component
-	"BooleanFilter", "BooleanSequencer", "BooleanToggle", "BooleanTrigger", "IntegerSequencer", "IntegerTrigger", "TimeTrigger",
-	// Volume rendering component
-	"BlendedVolumeStyle", "BoundaryEnhancementVolumeStyle", "CartoonVolumeStyle", "ComposedVolumeStyle", "EdgeEnhancementVolumeStyle", "IsoSurfaceVolumeData",
-	"OpacityMapVolumeStyle", "ProjectionVolumeStyle", "SegmentedVolumeData", "ShadedVolumeStyle", "SilhouetteEnhancementVolumeStyle", "ToneMappedVolumeStyle",
-	"VolumeData"
-};
+    const size_t Uns_Skip_Len = 189;
+    const char* Uns_Skip[ Uns_Skip_Len ] = {
+	    // CAD geometry component
+	    "CADAssembly", "CADFace", "CADLayer", "CADPart", "IndexedQuadSet", "QuadSet",
+	    // Core
+	    "ROUTE", "ExternProtoDeclare", "ProtoDeclare", "ProtoInstance", "ProtoInterface", "WorldInfo",
+	    // Distributed interactive simulation (DIS) component
+	    "DISEntityManager", "DISEntityTypeMapping", "EspduTransform", "ReceiverPdu", "SignalPdu", "TransmitterPdu",
+	    // Cube map environmental texturing component
+	    "ComposedCubeMapTexture", "GeneratedCubeMapTexture", "ImageCubeMapTexture",
+	    // Environmental effects component
+	    "Background", "Fog", "FogCoordinate", "LocalFog", "TextureBackground",
+	    // Environmental sensor component
+	    "ProximitySensor", "TransformSensor", "VisibilitySensor",
+	    // Followers component
+	    "ColorChaser", "ColorDamper", "CoordinateChaser", "CoordinateDamper", "OrientationChaser", "OrientationDamper", "PositionChaser", "PositionChaser2D",
+	    "PositionDamper", "PositionDamper2D", "ScalarChaser", "ScalarDamper", "TexCoordChaser2D", "TexCoordDamper2D",
+	    // Geospatial component
+	    "GeoCoordinate", "GeoElevationGrid", "GeoLocation", "GeoLOD", "GeoMetadata", "GeoOrigin", "GeoPositionInterpolator", "GeoProximitySensor",
+	    "GeoTouchSensor", "GeoTransform", "GeoViewpoint",
+	    // Humanoid Animation (H-Anim) component
+	    "HAnimDisplacer", "HAnimHumanoid", "HAnimJoint", "HAnimSegment", "HAnimSite",
+	    // Interpolation component
+	    "ColorInterpolator", "CoordinateInterpolator", "CoordinateInterpolator2D", "EaseInEaseOut", "NormalInterpolator", "OrientationInterpolator",
+	    "PositionInterpolator", "PositionInterpolator2D", "ScalarInterpolator", "SplinePositionInterpolator", "SplinePositionInterpolator2D",
+	    "SplineScalarInterpolator", "SquadOrientationInterpolator",
+	    // Key device sensor component
+	    "KeySensor", "StringSensor"
+	    // Layering component
+	    "Layer", "LayerSet", "Viewport",
+	    // Layout component
+	    "Layout", "LayoutGroup", "LayoutLayer", "ScreenFontStyle", "ScreenGroup",
+	    // Navigation component
+	    "Billboard", "Collision", "LOD", "NavigationInfo", "OrthoViewpoint", "Viewpoint", "ViewpointGroup",
+	    // Networking component
+	    "Anchor", "LoadSensor",
+	    // NURBS component
+	    "Contour2D", "ContourPolyline2D", "CoordinateDouble", "NurbsCurve", "NurbsCurve2D", "NurbsOrientationInterpolator", "NurbsPatchSurface",
+	    "NurbsPositionInterpolator", "NurbsSet", "NurbsSurfaceInterpolator", "NurbsSweptSurface", "NurbsSwungSurface", "NurbsTextureCoordinate",
+	    "NurbsTrimmedSurface",
+	    // Particle systems component
+	    "BoundedPhysicsModel", "ConeEmitter", "ExplosionEmitter", "ForcePhysicsModel", "ParticleSystem", "PointEmitter", "PolylineEmitter", "SurfaceEmitter",
+	    "VolumeEmitter", "WindPhysicsModel",
+	    // Picking component
+	    "LinePickSensor", "PickableGroup", "PointPickSensor", "PrimitivePickSensor", "VolumePickSensor",
+	    // Pointing device sensor component
+	    "CylinderSensor", "PlaneSensor", "SphereSensor", "TouchSensor",
+	    // Rendering component
+	    "ClipPlane",
+	    // Rigid body physics
+	    "BallJoint", "CollidableOffset", "CollidableShape", "CollisionCollection", "CollisionSensor", "CollisionSpace", "Contact", "DoubleAxisHingeJoint",
+	    "MotorJoint", "RigidBody", "RigidBodyCollection", "SingleAxisHingeJoint", "SliderJoint", "UniversalJoint",
+	    // Scripting component
+	    "Script",
+	    // Programmable shaders component
+	    "ComposedShader", "FloatVertexAttribute", "Matrix3VertexAttribute", "Matrix4VertexAttribute", "PackagedShader", "ProgramShader", "ShaderPart",
+	    "ShaderProgram",
+	    // Shape component
+	    "FillProperties", "LineProperties", "TwoSidedMaterial",
+	    // Sound component
+	    "AudioClip", "Sound",
+	    // Text component
+	    "FontStyle", "Text",
+	    // Texturing3D Component
+	    "ComposedTexture3D", "ImageTexture3D", "PixelTexture3D", "TextureCoordinate3D", "TextureCoordinate4D", "TextureTransformMatrix3D", "TextureTransform3D",
+	    // Texturing component
+	    "MovieTexture", "MultiTexture", "MultiTextureCoordinate", "MultiTextureTransform", "PixelTexture", "TextureCoordinateGenerator", "TextureProperties",
+	    // Time component
+	    "TimeSensor",
+	    // Event Utilities component
+	    "BooleanFilter", "BooleanSequencer", "BooleanToggle", "BooleanTrigger", "IntegerSequencer", "IntegerTrigger", "TimeTrigger",
+	    // Volume rendering component
+	    "BlendedVolumeStyle", "BoundaryEnhancementVolumeStyle", "CartoonVolumeStyle", "ComposedVolumeStyle", "EdgeEnhancementVolumeStyle", "IsoSurfaceVolumeData",
+	    "OpacityMapVolumeStyle", "ProjectionVolumeStyle", "SegmentedVolumeData", "ShadedVolumeStyle", "SilhouetteEnhancementVolumeStyle", "ToneMappedVolumeStyle",
+	    "VolumeData"
+    };
 
-std::string nn(mReader->getNodeName());
-bool found = false;
-bool close_found = false;
+    const std::string nn( mReader->getNodeName() );
+    bool found = false;
+    bool close_found = false;
 
 	for(size_t i = 0; i < Uns_Skip_Len; i++)
 	{
@@ -326,8 +365,8 @@ std::string val(mReader->getAttributeValue(pAttrIdx));
 
 float X3DImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx)
 {
-std::string val;
-float tvalf;
+    std::string val;
+    float tvalf;
 
 	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), val);
 	fast_atoreal_move(val.c_str(), tvalf, false);
@@ -342,8 +381,8 @@ int32_t X3DImporter::XML_ReadNode_GetAttrVal_AsI32(const int pAttrIdx)
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsCol3f(const int pAttrIdx, aiColor3D& pValue)
 {
-std::list<float> tlist;
-std::list<float>::iterator it;
+    std::list<float> tlist;
+    std::list<float>::iterator it;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);
 	if(tlist.size() != 3) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
@@ -356,8 +395,8 @@ std::list<float>::iterator it;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsVec2f(const int pAttrIdx, aiVector2D& pValue)
 {
-std::list<float> tlist;
-std::list<float>::iterator it;
+    std::list<float> tlist;
+    std::list<float>::iterator it;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);
 	if(tlist.size() != 2) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
@@ -369,8 +408,8 @@ std::list<float>::iterator it;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsVec3f(const int pAttrIdx, aiVector3D& pValue)
 {
-std::list<float> tlist;
-std::list<float>::iterator it;
+    std::list<float> tlist;
+    std::list<float>::iterator it;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);
 	if(tlist.size() != 3) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
@@ -383,15 +422,14 @@ std::list<float>::iterator it;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListB(const int pAttrIdx, std::list<bool>& pValue)
 {
-char* tok_str;
-size_t tok_str_len;
-
 	// make copy of attribute value - string with list of bool values. Also all bool values is strings.
-	tok_str_len = strlen(mReader->getAttributeValue(pAttrIdx));
-	if(!tok_str_len) Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
+	size_t tok_str_len = strlen(mReader->getAttributeValue(pAttrIdx));
+    if ( 0 == tok_str_len ) {
+        Throw_IncorrectAttrValue( mReader->getAttributeName( pAttrIdx ) );
+    }
 
 	tok_str_len++;// take in account terminating '\0'.
-	tok_str = new char[tok_str_len];
+	char *tok_str = new char[tok_str_len];
 
 	strcpy(tok_str, mReader->getAttributeValue(pAttrIdx));
 	// change all spacebars to symbol '\0'. That is needed for parsing.
@@ -425,7 +463,7 @@ size_t tok_str_len;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrB(const int pAttrIdx, std::vector<bool>& pValue)
 {
-std::list<bool> tlist;
+    std::list<bool> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListB(pAttrIdx, tlist);// read as list
 	// and copy to array
@@ -438,8 +476,8 @@ std::list<bool> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListI32(const int pAttrIdx, std::list<int32_t>& pValue)
 {
-const char* tstr = mReader->getAttributeValue(pAttrIdx);
-const char* tstr_end = tstr + strlen(tstr);
+    const char* tstr = mReader->getAttributeValue(pAttrIdx);
+    const char* tstr_end = tstr + strlen(tstr);
 
 	do
 	{
@@ -459,7 +497,7 @@ const char* tstr_end = tstr + strlen(tstr);
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrI32(const int pAttrIdx, std::vector<int32_t>& pValue)
 {
-std::list<int32_t> tlist;
+    std::list<int32_t> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListI32(pAttrIdx, tlist);// read as list
 	// and copy to array
@@ -472,7 +510,7 @@ std::list<int32_t> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListF(const int pAttrIdx, std::list<float>& pValue)
 {
-std::string str_fixed;
+    std::string str_fixed;
 
 	// at first check string values like '.xxx'.
 	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), str_fixed);
@@ -498,7 +536,7 @@ std::string str_fixed;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrF(const int pAttrIdx, std::vector<float>& pValue)
 {
-std::list<float> tlist;
+    std::list<float> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
 	// and copy to array
@@ -511,7 +549,7 @@ std::list<float> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListD(const int pAttrIdx, std::list<double>& pValue)
 {
-std::string str_fixed;
+    std::string str_fixed;
 
 	// at first check string values like '.xxx'.
 	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), str_fixed);
@@ -537,7 +575,7 @@ std::string str_fixed;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrD(const int pAttrIdx, std::vector<double>& pValue)
 {
-std::list<double> tlist;
+    std::list<double> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListD(pAttrIdx, tlist);// read as list
 	// and copy to array
@@ -550,7 +588,7 @@ std::list<double> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListCol3f(const int pAttrIdx, std::list<aiColor3D>& pValue)
 {
-std::list<float> tlist;
+    std::list<float> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
 	if(tlist.size() % 3) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
@@ -569,7 +607,7 @@ std::list<float> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol3f(const int pAttrIdx, std::vector<aiColor3D>& pValue)
 {
-std::list<aiColor3D> tlist;
+    std::list<aiColor3D> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListCol3f(pAttrIdx, tlist);// read as list
 	// and copy to array
@@ -582,7 +620,7 @@ std::list<aiColor3D> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListCol4f(const int pAttrIdx, std::list<aiColor4D>& pValue)
 {
-std::list<float> tlist;
+    std::list<float> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
 	if(tlist.size() % 4) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
@@ -602,23 +640,29 @@ std::list<float> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol4f(const int pAttrIdx, std::vector<aiColor4D>& pValue)
 {
-std::list<aiColor4D> tlist;
+    std::list<aiColor4D> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListCol4f(pAttrIdx, tlist);// read as list
 	// and copy to array
 	if(tlist.size() > 0)
 	{
 		pValue.reserve(tlist.size());
-		for(std::list<aiColor4D>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
+        for ( std::list<aiColor4D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        {
+            pValue.push_back( *it );
+        }
 	}
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListVec2f(const int pAttrIdx, std::list<aiVector2D>& pValue)
 {
-std::list<float> tlist;
+    std::list<float> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
-	if(tlist.size() % 2) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
+    if ( tlist.size() % 2 )
+    {
+        Throw_ConvertFail_Str2ArrF( mReader->getAttributeValue( pAttrIdx ) );
+    }
 
 	// copy data to array
 	for(std::list<float>::iterator it = tlist.begin(); it != tlist.end();)
@@ -633,23 +677,29 @@ std::list<float> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec2f(const int pAttrIdx, std::vector<aiVector2D>& pValue)
 {
-std::list<aiVector2D> tlist;
+    std::list<aiVector2D> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListVec2f(pAttrIdx, tlist);// read as list
 	// and copy to array
 	if(tlist.size() > 0)
 	{
 		pValue.reserve(tlist.size());
-		for(std::list<aiVector2D>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
+        for ( std::list<aiVector2D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        {
+            pValue.push_back( *it );
+        }
 	}
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListVec3f(const int pAttrIdx, std::list<aiVector3D>& pValue)
 {
-std::list<float> tlist;
+    std::list<float> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
-	if(tlist.size() % 3) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
+    if ( tlist.size() % 3 )
+    {
+        Throw_ConvertFail_Str2ArrF( mReader->getAttributeValue( pAttrIdx ) );
+    }
 
 	// copy data to array
 	for(std::list<float>::iterator it = tlist.begin(); it != tlist.end();)
@@ -665,30 +715,32 @@ std::list<float> tlist;
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec3f(const int pAttrIdx, std::vector<aiVector3D>& pValue)
 {
-std::list<aiVector3D> tlist;
+    std::list<aiVector3D> tlist;
 
 	XML_ReadNode_GetAttrVal_AsListVec3f(pAttrIdx, tlist);// read as list
 	// and copy to array
 	if(tlist.size() > 0)
 	{
 		pValue.reserve(tlist.size());
-		for(std::list<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
+        for ( std::list<aiVector3D>::iterator it = tlist.begin(); it != tlist.end(); it++ )
+        {
+            pValue.push_back( *it );
+        }
 	}
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListS(const int pAttrIdx, std::list<std::string>& pValue)
 {
-char* tok_str;
-char* tok_str_end;
-size_t tok_str_len;
-
 	// make copy of attribute value - strings list.
-	tok_str_len = strlen(mReader->getAttributeValue(pAttrIdx));
-	if(!tok_str_len) Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
+	const size_t tok_str_len = strlen(mReader->getAttributeValue(pAttrIdx));
+    if ( 0 == tok_str_len )
+    {
+        Throw_IncorrectAttrValue( mReader->getAttributeName( pAttrIdx ) );
+    }
 
 	// get pointer to begin of value.
-	tok_str = const_cast<char*>(mReader->getAttributeValue(pAttrIdx));
-	tok_str_end = tok_str + tok_str_len;
+    char *tok_str = const_cast<char*>(mReader->getAttributeValue(pAttrIdx));
+    char *tok_str_end = tok_str + tok_str_len;
 	// string list has following format: attr_name='"s1" "s2" "sn"'.
 	do
 	{
@@ -729,25 +781,33 @@ aiVector3D X3DImporter::GeometryHelper_Make_Point2D(const float pAngle, const fl
 void X3DImporter::GeometryHelper_Make_Arc2D(const float pStartAngle, const float pEndAngle, const float pRadius, size_t pNumSegments,
 												std::list<aiVector3D>& pVertices)
 {
-float angle_full, angle_step;
-
 	// check argument values ranges.
-	if((pStartAngle < -AI_MATH_TWO_PI_F) || (pStartAngle > AI_MATH_TWO_PI_F)) Throw_ArgOutOfRange("GeometryHelper_Make_Arc2D.pStartAngle");
-	if((pEndAngle < -AI_MATH_TWO_PI_F) || (pEndAngle > AI_MATH_TWO_PI_F)) Throw_ArgOutOfRange("GeometryHelper_Make_Arc2D.pEndAngle");
-	if(pRadius <= 0) Throw_ArgOutOfRange("GeometryHelper_Make_Arc2D.pRadius");
+    if ( ( pStartAngle < -AI_MATH_TWO_PI_F ) || ( pStartAngle > AI_MATH_TWO_PI_F ) )
+    {
+        Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pStartAngle" );
+    }
+    if ( ( pEndAngle < -AI_MATH_TWO_PI_F ) || ( pEndAngle > AI_MATH_TWO_PI_F ) ) 
+    {
+        Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pEndAngle" );
+    }
+    if ( pRadius <= 0 )
+    {
+        Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pRadius" );
+    }
 
 	// calculate arc angle and check type of arc
-	angle_full = fabs(pEndAngle - pStartAngle);
-	if((angle_full > AI_MATH_TWO_PI_F) || (angle_full == 0.0f)) angle_full = AI_MATH_TWO_PI_F;
+	float angle_full = fabs(pEndAngle - pStartAngle);
+    if ( ( angle_full > AI_MATH_TWO_PI_F ) || ( angle_full == 0.0f ) )
+    {
+        angle_full = AI_MATH_TWO_PI_F;
+    }
 
 	// calculate angle for one step - angle to next point of line.
-	angle_step = angle_full / (float)pNumSegments;
+	float angle_step = angle_full / (float)pNumSegments;
 	// make points
 	for(size_t pi = 0; pi <= pNumSegments; pi++)
 	{
-		float tangle;
-
-		tangle = pStartAngle + pi * angle_step;
+		float tangle = pStartAngle + pi * angle_step;
 		pVertices.push_back(GeometryHelper_Make_Point2D(tangle, pRadius));
 	}// for(size_t pi = 0; pi <= pNumSegments; pi++)
 
@@ -757,12 +817,15 @@ float angle_full, angle_step;
 
 void X3DImporter::GeometryHelper_Extend_PointToLine(const std::list<aiVector3D>& pPoint, std::list<aiVector3D>& pLine)
 {
-std::list<aiVector3D>::const_iterator pit = pPoint.begin();
-std::list<aiVector3D>::const_iterator pit_last = pPoint.end();
+    std::list<aiVector3D>::const_iterator pit = pPoint.begin();
+    std::list<aiVector3D>::const_iterator pit_last = pPoint.end();
 
 	pit_last--;
 
-	if(pPoint.size() < 2) Throw_ArgOutOfRange("GeometryHelper_Extend_PointToLine.pPoint.size() can not be less than 2.");
+    if ( pPoint.size() < 2 )
+    {
+        Throw_ArgOutOfRange( "GeometryHelper_Extend_PointToLine.pPoint.size() can not be less than 2." );
+    }
 
 	// add first point of first line.
 	pLine.push_back(*pit++);
@@ -779,7 +842,7 @@ std::list<aiVector3D>::const_iterator pit_last = pPoint.end();
 
 void X3DImporter::GeometryHelper_Extend_PolylineIdxToLineIdx(const std::list<int32_t>& pPolylineCoordIdx, std::list<int32_t>& pLineCoordIdx)
 {
-std::list<int32_t>::const_iterator plit = pPolylineCoordIdx.begin();
+    std::list<int32_t>::const_iterator plit = pPolylineCoordIdx.begin();
 
 	while(plit != pPolylineCoordIdx.end())
 	{
@@ -831,16 +894,19 @@ void X3DImporter::GeometryHelper_MakeQL_RectParallelepiped(const aiVector3D& pSi
 
 void X3DImporter::GeometryHelper_CoordIdxStr2FacesArr(const std::list<int32_t>& pCoordIdx, std::vector<aiFace>& pFaces, unsigned int& pPrimitiveTypes) const
 {
-std::list<int32_t> f_data(pCoordIdx);
-std::vector<unsigned int> inds;
-unsigned int prim_type = 0;
+    std::list<int32_t> f_data(pCoordIdx);
+    std::vector<unsigned int> inds;
+    unsigned int prim_type = 0;
 
-	if(f_data.back() != (-1)) f_data.push_back(-1);
+    if ( f_data.back() != ( -1 ) )
+    {
+        f_data.push_back( -1 );
+    }
 
 	// reserve average size.
 	pFaces.reserve(f_data.size() / 3);
 	inds.reserve(4);
-//PrintVectorSet("build. ci", pCoordIdx);
+    //PrintVectorSet("build. ci", pCoordIdx);
 	for(std::list<int32_t>::iterator it = f_data.begin(); it != f_data.end(); it++)
 	{
 		// when face is got count how many indices in it.
@@ -896,7 +962,7 @@ std::list<aiColor4D> tcol;
 
 void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D>& pColors, const bool pColorPerVertex) const
 {
-std::list<aiColor4D>::const_iterator col_it = pColors.begin();
+    std::list<aiColor4D>::const_iterator col_it = pColors.begin();
 
 	if(pColorPerVertex)
 	{
@@ -933,10 +999,13 @@ std::list<aiColor4D>::const_iterator col_it = pColors.begin();
 void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pColorIdx,
 										const std::list<aiColor3D>& pColors, const bool pColorPerVertex) const
 {
-std::list<aiColor4D> tcol;
+    std::list<aiColor4D> tcol;
 
 	// create RGBA array from RGB.
-	for(std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); it++) tcol.push_back(aiColor4D((*it).r, (*it).g, (*it).b, 1));
+    for ( std::list<aiColor3D>::const_iterator it = pColors.begin(); it != pColors.end(); it++ )
+    {
+        tcol.push_back( aiColor4D( ( *it ).r, ( *it ).g, ( *it ).b, 1 ) );
+    }
 
 	// call existing function for adding RGBA colors
 	MeshGeometry_AddColor(pMesh, pCoordIdx, pColorIdx, tcol, pColorPerVertex);
@@ -945,15 +1014,21 @@ std::list<aiColor4D> tcol;
 void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pColorIdx,
 										const std::list<aiColor4D>& pColors, const bool pColorPerVertex) const
 {
-std::vector<aiColor4D> col_tgt_arr;
-std::list<aiColor4D> col_tgt_list;
-std::vector<aiColor4D> col_arr_copy;
+    std::vector<aiColor4D> col_tgt_arr;
+    std::list<aiColor4D> col_tgt_list;
+    std::vector<aiColor4D> col_arr_copy;
 
-	if(pCoordIdx.size() == 0) throw DeadlyImportError("MeshGeometry_AddColor2. pCoordIdx can not be empty.");
+    if ( pCoordIdx.size() == 0 )
+    {
+        throw DeadlyImportError( "MeshGeometry_AddColor2. pCoordIdx can not be empty." );
+    }
 
 	// copy list to array because we are need indexed access to colors.
 	col_arr_copy.reserve(pColors.size());
-	for(std::list<aiColor4D>::const_iterator it = pColors.begin(); it != pColors.end(); it++) col_arr_copy.push_back(*it);
+    for ( std::list<aiColor4D>::const_iterator it = pColors.begin(); it != pColors.end(); it++ )
+    {
+        col_arr_copy.push_back( *it );
+    }
 
 	if(pColorPerVertex)
 	{
@@ -1036,12 +1111,15 @@ std::vector<aiColor4D> col_arr_copy;
 void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pNormalIdx,
 								const std::list<aiVector3D>& pNormals, const bool pNormalPerVertex) const
 {
-std::vector<size_t> tind;
-std::vector<aiVector3D> norm_arr_copy;
+    std::vector<size_t> tind;
+    std::vector<aiVector3D> norm_arr_copy;
 
 	// copy list to array because we are need indexed access to normals.
 	norm_arr_copy.reserve(pNormals.size());
-	for(std::list<aiVector3D>::const_iterator it = pNormals.begin(); it != pNormals.end(); it++) norm_arr_copy.push_back(*it);
+    for ( std::list<aiVector3D>::const_iterator it = pNormals.begin(); it != pNormals.end(); it++ )
+    {
+        norm_arr_copy.push_back( *it );
+    }
 
 	if(pNormalPerVertex)
 	{
@@ -1109,7 +1187,7 @@ std::vector<aiVector3D> norm_arr_copy;
 
 void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<aiVector3D>& pNormals, const bool pNormalPerVertex) const
 {
-std::list<aiVector3D>::const_iterator norm_it = pNormals.begin();
+    std::list<aiVector3D>::const_iterator norm_it = pNormals.begin();
 
 	if(pNormalPerVertex)
 	{
@@ -1138,9 +1216,9 @@ std::list<aiVector3D>::const_iterator norm_it = pNormals.begin();
 void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pTexCoordIdx,
 								const std::list<aiVector2D>& pTexCoords) const
 {
-std::vector<aiVector3D> texcoord_arr_copy;
-std::vector<aiFace> faces;
-unsigned int prim_type;
+    std::vector<aiVector3D> texcoord_arr_copy;
+    std::vector<aiFace> faces;
+    unsigned int prim_type;
 
 	// copy list to array because we are need indexed access to normals.
 	texcoord_arr_copy.reserve(pTexCoords.size());
@@ -1152,8 +1230,14 @@ unsigned int prim_type;
 	if(pTexCoordIdx.size() > 0)
 	{
 		GeometryHelper_CoordIdxStr2FacesArr(pTexCoordIdx, faces, prim_type);
-		if(!faces.size()) throw DeadlyImportError("Failed to add texture coordinates to mesh, faces list is empty.");
-		if(faces.size() != pMesh.mNumFaces) throw DeadlyImportError("Texture coordinates faces count must be equal to mesh faces count.");
+        if ( faces.empty() )
+        {
+            throw DeadlyImportError( "Failed to add texture coordinates to mesh, faces list is empty." );
+        }
+        if ( faces.size() != pMesh.mNumFaces )
+        {
+            throw DeadlyImportError( "Texture coordinates faces count must be equal to mesh faces count." );
+        }
 	}
 	else
 	{
@@ -1179,30 +1263,42 @@ unsigned int prim_type;
 
 void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVector2D>& pTexCoords) const
 {
-std::vector<aiVector3D> tc_arr_copy;
+    std::vector<aiVector3D> tc_arr_copy;
 
-	if(pTexCoords.size() != pMesh.mNumVertices) throw DeadlyImportError("MeshGeometry_AddTexCoord. Texture coordinates and vertices count must be equal.");
+    if ( pTexCoords.size() != pMesh.mNumVertices )
+    {
+        throw DeadlyImportError( "MeshGeometry_AddTexCoord. Texture coordinates and vertices count must be equal." );
+    }
 
 	// copy list to array because we are need convert aiVector2D to aiVector3D and also get indexed access as a bonus.
 	tc_arr_copy.reserve(pTexCoords.size());
-	for(std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); it++) tc_arr_copy.push_back(aiVector3D((*it).x, (*it).y, 0));
+    for ( std::list<aiVector2D>::const_iterator it = pTexCoords.begin(); it != pTexCoords.end(); it++ )
+    {
+        tc_arr_copy.push_back( aiVector3D( ( *it ).x, ( *it ).y, 0 ) );
+    }
 
 	// copy texture coordinates to mesh
 	pMesh.mTextureCoords[0] = new aiVector3D[pMesh.mNumVertices];
 	pMesh.mNumUVComponents[0] = 2;
-	for(size_t i = 0; i < pMesh.mNumVertices; i++) pMesh.mTextureCoords[0][i] = tc_arr_copy[i];
+    for ( size_t i = 0; i < pMesh.mNumVertices; i++ )
+    {
+        pMesh.mTextureCoords[ 0 ][ i ] = tc_arr_copy[ i ];
+    }
 }
 
 aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::list<int32_t>& pCoordIdx, const std::list<aiVector3D>& pVertices) const
 {
-aiMesh* tmesh;
-std::vector<aiFace> faces;
-unsigned int prim_type = 0;
-size_t ts;
+    aiMesh* tmesh( nullptr );
+    std::vector<aiFace> faces;
+    unsigned int prim_type = 0;
+    size_t ts;
 
 	// create faces array from input string with vertices indices.
 	GeometryHelper_CoordIdxStr2FacesArr(pCoordIdx, faces, prim_type);
-	if(!faces.size()) throw DeadlyImportError("Failed to create mesh, faces list is empty.");
+    if ( !faces.size() )
+    {
+        throw DeadlyImportError( "Failed to create mesh, faces list is empty." );
+    }
 
 	//
 	// Create new mesh and copy geometry data.
@@ -1220,7 +1316,10 @@ size_t ts;
 	ts = pVertices.size();
 	tmesh->mVertices = new aiVector3D[ts];
 	tmesh->mNumVertices = ts;
-	for(size_t i = 0; i < ts; i++) tmesh->mVertices[i] = *vit++;
+    for ( size_t i = 0; i < ts; i++ )
+    {
+        tmesh->mVertices[ i ] = *vit++;
+    }
 
 	// set primitives type and return result.
 	tmesh->mPrimitiveTypes = prim_type;
@@ -1234,10 +1333,13 @@ size_t ts;
 
 void X3DImporter::ParseHelper_Group_Begin(const bool pStatic)
 {
-CX3DImporter_NodeElement_Group* new_group = new CX3DImporter_NodeElement_Group(NodeElement_Cur, pStatic);// create new node with current node as parent.
+    CX3DImporter_NodeElement_Group* new_group = new CX3DImporter_NodeElement_Group(NodeElement_Cur, pStatic);// create new node with current node as parent.
 
 	// if we are adding not the root element then add new element to current element child list.
-	if(NodeElement_Cur != nullptr) NodeElement_Cur->Child.push_back(new_group);
+    if ( NodeElement_Cur != nullptr )
+    {
+        NodeElement_Cur->Child.push_back( new_group );
+    }
 
 	NodeElement_List.push_back(new_group);// it's a new element - add it to list.
 	NodeElement_Cur = new_group;// switch current element to new one.
@@ -1252,20 +1354,27 @@ void X3DImporter::ParseHelper_Node_Enter(CX3DImporter_NodeElement* pNode)
 void X3DImporter::ParseHelper_Node_Exit()
 {
 	// check if we can walk up.
-	if(NodeElement_Cur != nullptr) NodeElement_Cur = NodeElement_Cur->Parent;
+    if ( NodeElement_Cur != nullptr )
+    {
+        NodeElement_Cur = NodeElement_Cur->Parent;
+    }
 }
 
 void X3DImporter::ParseHelper_FixTruncatedFloatString(const char* pInStr, std::string& pOutString)
 {
-size_t instr_len;
-
 	pOutString.clear();
-	instr_len = strlen(pInStr);
-	if(!instr_len) return;
+    const size_t instr_len = strlen(pInStr);
+    if ( 0 == instr_len )
+    {
+        return;
+    }
 
 	pOutString.reserve(instr_len * 3 / 2);
 	// check and correct floats in format ".x". Must be "x.y".
-	if(pInStr[0] == '.') pOutString.push_back('0');
+    if ( pInStr[ 0 ] == '.' )
+    {
+        pOutString.push_back( '0' );
+    }
 
 	pOutString.push_back(pInStr[0]);
 	for(size_t ci = 1; ci < instr_len; ci++)
@@ -1284,15 +1393,21 @@ size_t instr_len;
 
 void X3DImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 {
-irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
-std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
+    irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
+    std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 	// Check whether we can read from the file
-	if(file.get() == nullptr) throw DeadlyImportError("Failed to open X3D file " + pFile + ".");
+    if ( file.get() == nullptr )
+    {
+        throw DeadlyImportError( "Failed to open X3D file " + pFile + "." );
+    }
 	// generate a XML reader for it
 	std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
 	mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
-	if(!mReader) throw DeadlyImportError("Failed to create XML reader for file" + pFile + ".");
+    if ( !mReader )
+    {
+        throw DeadlyImportError( "Failed to create XML reader for file" + pFile + "." );
+    }
 	// start reading
 	ParseNode_Root();
 
@@ -1304,13 +1419,19 @@ std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 void X3DImporter::ParseNode_Root()
 {
 	// search for root tag <X3D>
-	if(!XML_SearchNode("X3D")) throw DeadlyImportError("Root node \"X3D\" not found.");
+    if ( !XML_SearchNode( "X3D" ) )
+    {
+        throw DeadlyImportError( "Root node \"X3D\" not found." );
+    }
 
 	ParseHelper_Group_Begin();// create root node element.
 	// parse other contents
 	while(mReader->read())
 	{
-		if(mReader->getNodeType() != irr::io::EXN_ELEMENT) continue;
+        if ( mReader->getNodeType() != irr::io::EXN_ELEMENT )
+        {
+            continue;
+        }
 
 		if(XML_CheckNode_NameEqual("head"))
 			ParseNode_Head();
@@ -1326,7 +1447,7 @@ void X3DImporter::ParseNode_Root()
 
 void X3DImporter::ParseNode_Head()
 {
-bool close_found = false;// flag: true if close tag of node are found.
+    bool close_found = false;// flag: true if close tag of node are found.
 
 	while(mReader->read())
 	{
@@ -1367,10 +1488,10 @@ bool close_found = false;// flag: true if close tag of node are found.
 
 void X3DImporter::ParseNode_Scene()
 {
-auto GroupCounter_Increase = [](size_t& pCounter, const char* pGroupName) -> void
-{
-	pCounter++;
-	if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: " + std::string(pGroupName) + ".");
+    auto GroupCounter_Increase = [](size_t& pCounter, const char* pGroupName) -> void
+    {
+	    pCounter++;
+	    if(pCounter == 0) throw DeadlyImportError("Group counter overflow. Too much groups with type: " + std::string(pGroupName) + ".");
 };
 
 auto GroupCounter_Decrease = [&](size_t& pCounter, const char* pGroupName) -> void
@@ -1495,7 +1616,7 @@ size_t counter_switch = 0;
 
 bool X3DImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool pCheckSig) const
 {
-const std::string extension = GetExtension(pFile);
+    const std::string extension = GetExtension(pFile);
 
 	if(extension == "x3d") return true;
 

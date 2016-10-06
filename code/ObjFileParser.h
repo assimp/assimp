@@ -89,6 +89,8 @@ private:
     void getVector( std::vector<aiVector3D> &point3d_array );
     /// Stores the following 3d vector.
     void getVector3( std::vector<aiVector3D> &point3d_array );
+    /// Stores the following homogeneous vector as a 3D vector
+    void getHomogeneousVector3( std::vector<aiVector3D> &point3d_array );
     /// Stores the following two 3d vectors on the line.
     void getTwoVectors3( std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b );
     /// Stores the following 3d vector.

@@ -56,7 +56,16 @@ namespace glTF {
         inline Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(N, al);
-			for (decltype(N) i = 0; i < N; ++i) {
+            for (decltype(N) i = 0; i < N; ++i) {
+                val.PushBack(r[i], al);
+            }
+            return val;
+        }
+
+        inline Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
+            val.SetArray();
+            val.Reserve(r.size(), al);
+            for (int i = 0; i < r.size(); ++i) {
                 val.PushBack(r[i], al);
             }
             return val;
@@ -85,6 +94,10 @@ namespace glTF {
         obj.AddMember("componentType", int(a.componentType), w.mAl);
         obj.AddMember("count", a.count, w.mAl);
         obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
+
+        Value vTmpMax, vTmpMin;
+        obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
+        obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
     }
 
     inline void Write(Value& obj, Animation& a, AssetWriter& w)
@@ -285,7 +298,7 @@ namespace glTF {
             }
             primitives.PushBack(prim, w.mAl);
         }
-    
+
         obj.AddMember("primitives", primitives, w.mAl);
     }
 
@@ -323,7 +336,18 @@ namespace glTF {
 
     inline void Write(Value& obj, Sampler& b, AssetWriter& w)
     {
-
+        if (b.wrapS) {
+            obj.AddMember("wrapS", b.wrapS, w.mAl);
+        }
+        if (b.wrapT) {
+            obj.AddMember("wrapT", b.wrapT, w.mAl);
+        }
+        if (b.magFilter) {
+            obj.AddMember("magFilter", b.magFilter, w.mAl);
+        }
+        if (b.minFilter) {
+            obj.AddMember("minFilter", b.minFilter, w.mAl);
+        }
     }
 
     inline void Write(Value& scene, Scene& s, AssetWriter& w)
@@ -350,6 +374,9 @@ namespace glTF {
     {
         if (tex.source) {
             obj.AddMember("source", Value(tex.source->id, w.mAl).Move(), w.mAl);
+        }
+        if (tex.sampler) {
+            obj.AddMember("sampler", Value(tex.sampler->id, w.mAl).Move(), w.mAl);
         }
     }
 
@@ -487,13 +514,15 @@ namespace glTF {
         }
     }
 
-    
+
     inline void AssetWriter::WriteMetadata()
     {
         Value asset;
         asset.SetObject();
         {
-            asset.AddMember("version", mAsset.asset.version, mAl);
+            char versionChar[10];
+            ai_snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
+            asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
 
             asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
         }

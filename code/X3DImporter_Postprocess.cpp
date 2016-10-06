@@ -741,24 +741,27 @@ size_t meta_idx;
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaDouble)
 			{
-				// at this case also converting double to float.
-				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0)
+				if(((CX3DImporter_NodeElement_MetaDouble*)cur_meta)->Value.size() > 0)
 					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, (float)*(((CX3DImporter_NodeElement_MetaDouble*)cur_meta)->Value.begin()));
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaFloat)
 			{
-				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0)
+				if(((CX3DImporter_NodeElement_MetaFloat*)cur_meta)->Value.size() > 0)
 					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, *(((CX3DImporter_NodeElement_MetaFloat*)cur_meta)->Value.begin()));
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaInteger)
 			{
-				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0)
+				if(((CX3DImporter_NodeElement_MetaInteger*)cur_meta)->Value.size() > 0)
 					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, *(((CX3DImporter_NodeElement_MetaInteger*)cur_meta)->Value.begin()));
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaString)
 			{
-				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, ((CX3DImporter_NodeElement_MetaString*)cur_meta)->Value.begin()->data());
+				if(((CX3DImporter_NodeElement_MetaString*)cur_meta)->Value.size() > 0)
+				{
+					aiString tstr(((CX3DImporter_NodeElement_MetaString*)cur_meta)->Value.begin()->data());
+
+					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, tstr);
+				}
 			}
 			else
 			{

@@ -1303,13 +1303,11 @@ std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 void X3DImporter::ParseNode_Root()
 {
-LogInfo("ParseNode_Root b");
 	// search for root tag <X3D>
 	if(!XML_SearchNode("X3D")) throw DeadlyImportError("Root node \"X3D\" not found.");
 
 	ParseHelper_Group_Begin();// create root node element.
 	// parse other contents
-LogInfo("ParseNode_Root. read loop");
 	while(mReader->read())
 	{
 		if(mReader->getNodeType() != irr::io::EXN_ELEMENT) continue;
@@ -1321,11 +1319,9 @@ LogInfo("ParseNode_Root. read loop");
 		else
 			XML_CheckNode_SkipUnsupported("Root");
 	}
-LogInfo("ParseNode_Root. end loop");
 
 	// exit from root node element.
 	ParseHelper_Node_Exit();
-LogInfo("ParseNode_Root e");
 }
 
 void X3DImporter::ParseNode_Head()

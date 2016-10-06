@@ -630,74 +630,6 @@ void glTFExporter::ExportMetadata()
     asset.generator = buffer;
 }
 
-
-inline Ref<Accessor> ExportAnimationData(Asset& a, std::string& animId, Ref<Buffer>& buffer,
-    unsigned int count, void* data, AttribType::Value typeIn, AttribType::Value typeOut, ComponentType compType)
-{
-    if (!count || !data) return Ref<Accessor>();
-
-    unsigned int numCompsIn = AttribType::GetNumComponents(typeIn);
-    unsigned int numCompsOut = AttribType::GetNumComponents(typeOut);
-    unsigned int bytesPerComp = ComponentTypeSize(compType);
-
-    size_t offset = buffer->byteLength;
-    size_t length = count * numCompsOut * bytesPerComp;
-    buffer->Grow(length);
-
-    // bufferView
-    Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(animId, "view"));
-    bv->buffer = buffer;
-    bv->byteOffset = unsigned(offset);
-    bv->byteLength = length; //! The target that the WebGL buffer should be bound to.
-    // bv->target = isIndices ? BufferViewTarget_ELEMENT_ARRAY_BUFFER : BufferViewTarget_ARRAY_BUFFER;
-    bv->target = BufferViewTarget_ARRAY_BUFFER;
-
-    // accessor
-    Ref<Accessor> acc = a.accessors.Create(a.FindUniqueID(animId, "accessor"));
-    acc->bufferView = bv;
-    acc->byteOffset = 0;
-    acc->byteStride = 0;
-    acc->componentType = compType;
-    acc->count = count;
-    acc->type = typeOut;
-
-    // calculate min and max values
-    {
-        // Allocate and initialize with large values.
-        float float_MAX = 10000000000000;
-        for (int i = 0 ; i < numCompsOut ; i++) {
-            acc->min.push_back( float_MAX);
-            acc->max.push_back(-float_MAX);
-        }
-
-        // Search and set extreme values.
-        float valueTmp;
-        for (int i = 0 ; i < count       ; i++) {
-        for (int j = 0 ; j < numCompsOut ; j++) {
-
-            if (numCompsOut == 1) {
-              valueTmp = static_cast<unsigned short*>(data)[i];
-            } else {
-              valueTmp = static_cast<aiVector3D*>(data)[i][j];
-            }
-
-            if (valueTmp < acc->min[j]) {
-                acc->min[j] = valueTmp;
-            }
-            if (valueTmp > acc->max[j]) {
-                acc->max[j] = valueTmp;
-            }
-        }
-        }
-    }
-
-    // copy the data
-    acc->WriteData(count, data, numCompsIn*bytesPerComp);
-
-    return acc;
-}
-
-
 inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel)
 {
     // Loop over the data and check to see if it exactly matches an existing buffer.
@@ -716,7 +648,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             timeData[i] = nodeChannel->mPositionKeys[i].mTime;  // Check if we have to cast type here. e.g. uint16_t()
         }
 
-        Ref<Accessor> timeAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
         if (timeAccessor) animRef->Parameters.TIME = timeAccessor;
     }
 
@@ -728,7 +660,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             translationData[i] = nodeChannel->mPositionKeys[i].mValue;
         }
 
-        Ref<Accessor> tranAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if (tranAccessor) animRef->Parameters.translation = tranAccessor;
     }
 
@@ -740,7 +672,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             scaleData[i] = nodeChannel->mScalingKeys[i].mValue;
         }
 
-        Ref<Accessor> scaleAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumScalingKeys, scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumScalingKeys, scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if (scaleAccessor) animRef->Parameters.scale = scaleAccessor;
     }
 
@@ -752,7 +684,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             rotationData[i] = nodeChannel->mRotationKeys[i].mValue;
         }
 
-        Ref<Accessor> rotAccessor = ExportAnimationData(mAsset, animId, buffer, nodeChannel->mNumRotationKeys, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumRotationKeys, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
         if (rotAccessor) animRef->Parameters.rotation = rotAccessor;
     }
 }
@@ -881,7 +813,7 @@ void glTFExporter::ExportSkins()
 
         } // End: for-loop mNumMeshes
 
-        Ref<Accessor> invBindMatrixAccessor = ExportAnimationData(*mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+        Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
         if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
 
     } // End: for-loop mNumMeshes

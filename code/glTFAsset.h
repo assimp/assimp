@@ -807,7 +807,7 @@ namespace glTF
         Ref<Camera> camera;
         Ref<Light>  light;
 
-        std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes.
+        std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes. Each of which is the root of a node hierarchy.
         Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
         std::string jointName;                    //!< Name used when this node is a joint in a skin.
 

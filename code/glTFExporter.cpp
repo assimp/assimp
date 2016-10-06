@@ -144,8 +144,6 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     ExportAnimations();
 
-    ExportSkins();
-
     glTF::AssetWriter writer(*mAsset);
 
     if (isBinary) {
@@ -367,6 +365,51 @@ void glTFExporter::ExportMaterials()
     }
 }
 
+void ExportSkins(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef)
+{
+    if(!aim->HasBones()) { return; } // skip to next mesh if no bones exist.
+
+    std::string skinName = aim->mName.C_Str();
+    skinName = mAsset.FindUniqueID(skinName, "skin");
+    Ref<Skin> skinRef = mAsset.skins.Create(skinName);
+    skinRef->name = skinName;
+
+    mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
+
+    for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
+        const aiBone* aib = aim->mBones[idx_bone];
+
+        // aib->mName   =====>  skinRef->jointNames
+        // Find the node with id = mName.
+        Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
+        nodeRef->jointName = "joint_" + std::to_string(idx_bone);
+        skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
+        // std::cout << "Node->id " << nodeRef->id << "\n";
+
+        // Identity Matrix   =====>  skinRef->bindShapeMatrix
+        // Temporary. Hard-coded identity matrix here
+        skinRef->bindShapeMatrix.isPresent = true;
+        IdentityMatrix4(skinRef->bindShapeMatrix.value);
+
+        // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
+        CopyValue(aib->mOffsetMatrix, inverseBindMatricesData[idx_bone]);
+
+        // aib->mNumWeights;
+        // aib->mWeights;
+    } // End: for-loop mNumMeshes
+
+    // Create the Accessor for skinRef->inverseBindMatrices
+    Ref<Accessor> invBindMatrixAccessor = ExportData(mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+    if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
+
+    // Create the skinned mesh instance node.
+    Ref<Node> node = mAsset.nodes.Create(mAsset.FindUniqueID(skinName, "node"));
+    node->meshes.push_back(meshRef);
+    node->name = node->id;
+    node->skeletons.push_back(mAsset.nodes.Get(aim->mBones[0]->mName.C_Str()));
+    node->skin = skinRef;
+}
+
 void glTFExporter::ExportMeshes()
 {
     // Not for
@@ -487,6 +530,9 @@ void glTFExporter::ExportMeshes()
             default: // aiPrimitiveType_TRIANGLE
                 p.mode = PrimitiveMode_TRIANGLES;
         }
+
+    /*************** Skins ****************/
+    ExportSkins(*mAsset, aim, m, b);
 
 		/****************** Compression ******************/
 		///TODO: animation: weights, joints.
@@ -640,7 +686,6 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     // Extract TIME parameter data.
     // Check if the timeStamps are the same for mPositionKeys, mRotationKeys, and mScalingKeys.
     if(nodeChannel->mNumPositionKeys > 0) {
-        std::cout<< "Parameters.TIME\n";
         typedef float TimeType;
         std::vector<TimeType> timeData;
         timeData.resize(nodeChannel->mNumPositionKeys);
@@ -689,13 +734,9 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     }
 }
 
-
-
-
 void glTFExporter::ExportAnimations()
 {
     Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
-    std::cout<<"GetBodyBuffer " << bufferRef << "\n";
 
     std::cout<<"mNumAnimations " << mScene->mNumAnimations << "\n";
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
@@ -715,7 +756,6 @@ void glTFExporter::ExportAnimations()
             std::string name = nameAnim + "_" + std::to_string(channelIndex);
             name = mAsset->FindUniqueID(name, "animation");
             Ref<Animation> animRef = mAsset->animations.Create(name);
-            std::cout<<"channelName " << name << "\n";
 
             /******************* Parameters ********************/
             ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel);
@@ -740,8 +780,6 @@ void glTFExporter::ExportAnimations()
 
                 if (channelSize < 1) { continue; }
 
-                std::cout<<"channelType " << channelType << "\n";
-
                 Animation::AnimChannel tmpAnimChannel;
                 Animation::AnimSampler tmpAnimSampler;
 
@@ -750,9 +788,7 @@ void glTFExporter::ExportAnimations()
                 tmpAnimSampler.output = channelType;
                 tmpAnimSampler.id = name + "_" + channelType;
 
-                std::cout<<"nodeChannel->mNodeName.C_Str() " << nodeChannel->mNodeName.C_Str() << "\n";
                 tmpAnimChannel.target.id = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
-                std::cout<<"tmpAnimChannel.target.id " << tmpAnimChannel.target.id << "\n";
 
                 tmpAnimSampler.input = "TIME";
                 tmpAnimSampler.interpolation = "LINEAR";
@@ -763,62 +799,64 @@ void glTFExporter::ExportAnimations()
 
         }
 
-        std::cout<<"mNumMeshChannels " << anim->mNumMeshChannels << "\n";
-        for (unsigned int channelIndex = 0; channelIndex < anim->mNumMeshChannels; ++channelIndex) {
-            const aiMeshAnim* meshChannel = anim->mMeshChannels[channelIndex];
-        }
+        // std::cout<<"mNumMeshChannels " << anim->mNumMeshChannels << "\n";
+        // for (unsigned int channelIndex = 0; channelIndex < anim->mNumMeshChannels; ++channelIndex) {
+        //     const aiMeshAnim* meshChannel = anim->mMeshChannels[channelIndex];
+        // }
 
     } // End: for-loop mNumAnimations
 }
 
+// void glTFExporter::ExportSkins()
+// {
+//     Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
 
+//     for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
+//         const aiMesh* aim = mScene->mMeshes[idx_mesh];
 
-void glTFExporter::ExportSkins()
-{
-    Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
+//         if(!aim->HasBones()) { continue; } // skip to next mesh if no bones exist.
 
-    for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
-        const aiMesh* aim = mScene->mMeshes[idx_mesh];
+//         std::string skinName = aim->mName.C_Str();
+//         skinName = mAsset->FindUniqueID(skinName, "skin");
+//         Ref<Skin> skinRef = mAsset->skins.Create(skinName);
+//         skinRef->name = skinName;
 
-        if(!aim->HasBones()) { continue; } // skip to next mesh if no bones exist.
+//         mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
 
-        std::string skinName = aim->mName.C_Str();
-        skinName = mAsset->FindUniqueID(skinName, "skin");
-        Ref<Skin> skinRef = mAsset->skins.Create(skinName);
-        skinRef->name = skinName;
+//         for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
+//             const aiBone* aib = aim->mBones[idx_bone];
 
-        mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
+//             // aib->mName   =====>  skinRef->jointNames
+//             // Find the node with id = mName.
+//             Ref<Node> nodeRef = mAsset->nodes.Get(aib->mName.C_Str());
+//             nodeRef->jointName = "joint_" + std::to_string(idx_bone);
+//             skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
+//             // std::cout << "Node->id " << nodeRef->id << "\n";
 
-        for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
-            const aiBone* aib = aim->mBones[idx_bone];
+//             // Identity Matrix   =====>  skinRef->bindShapeMatrix
+//             // Temporary. Hard-coded identity matrix here
+//             skinRef->bindShapeMatrix.isPresent = true;
+//             IdentityMatrix4(skinRef->bindShapeMatrix.value);
 
-            // aib->mName   =====>  skinRef->jointNames
-            // Find the node with id = mName.
-            Ref<Node> nodeRef = mAsset->nodes.Get(aib->mName.C_Str());
-            nodeRef->jointName = "joint_" + std::to_string(idx_bone);
-            skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
-            std::cout << "Node->id " << nodeRef->id << "\n";
+//             // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
+//             CopyValue(aib->mOffsetMatrix, inverseBindMatricesData[idx_bone]);
 
-            // Identity Matrix   =====>  skinRef->bindShapeMatrix
-            // Temporary. Hard-coded identity matrix here
-            skinRef->bindShapeMatrix.isPresent = true;
-            IdentityMatrix4(skinRef->bindShapeMatrix.value);
+//             // aib->mNumWeights;
+//             // aib->mWeights;
+//         } // End: for-loop mNumMeshes
 
+//         // Create the Accessor for skinRef->inverseBindMatrices
+//         Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+//         if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
 
-            // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
-            CopyValue(aib->mOffsetMatrix, inverseBindMatricesData[idx_bone]);
-
-            // aib->mNumWeights;
-            // aib->mWeights;
-
-        } // End: for-loop mNumMeshes
-
-        Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
-        if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
-
-    } // End: for-loop mNumMeshes
-}
-
+//         // Create the skinned mesh instance node.
+//         Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(skinName, "node"));
+//         node->meshes.push_back(mAsset->meshes.Get(aim->mName.C_Str()));
+//         node->name = node->id;
+//         node->skeletons.push_back(mAsset->nodes.Get(aim->mBones[0]->mName.C_Str()));
+//         node->skin = skinRef;
+//     } // End: for-loop mNumMeshes
+// }
 
 
 

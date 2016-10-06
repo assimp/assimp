@@ -386,6 +386,12 @@ namespace glTF {
 
         AddRefsVector(obj, "meshes", n.meshes, w.mAl);
 
+        AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
+
+        if (n.skin) {
+            obj.AddMember("skin", Value(n.skin->id, w.mAl).Move(), w.mAl);
+        }
+
         if (!n.jointName.empty()) {
           obj.AddMember("jointName", n.jointName, w.mAl);
         }

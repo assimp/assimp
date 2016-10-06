@@ -39,7 +39,7 @@ namespace Assimp
 ///		Lighting component:
 ///			"DirectionalLight", "PointLight", "SpotLight"
 ///		Rendering component:
-///			"Color", "ColorRGBA", "Coordinate", "LineSet", "PointSet", "TriangleSet", "Normal"
+///			"ColorRGBA", "Coordinate", "Normal"
 ///		Shape component:
 ///			"Shape", "Appearance", "Material"
 ///		Texturing component:

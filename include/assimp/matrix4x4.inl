@@ -308,25 +308,25 @@ inline bool aiMatrix4x4t<TReal>::Equal(const aiMatrix4x4t<TReal>& m, TReal epsil
 	pPosition.y = _this[1][3]; \
 	pPosition.z = _this[2][3]; \
 	\
-	/* extract the rows of the matrix. */ \
-	aiVector3t<TReal> vRows[3] = { \
+	/* extract the columns of the matrix. */ \
+	aiVector3t<TReal> vCols[3] = { \
 		aiVector3t<TReal>(_this[0][0],_this[1][0],_this[2][0]), \
 		aiVector3t<TReal>(_this[0][1],_this[1][1],_this[2][1]), \
 		aiVector3t<TReal>(_this[0][2],_this[1][2],_this[2][2]) \
 	}; \
 	\
 	/* extract the scaling factors */ \
-	pScaling.x = vRows[0].Length(); \
-	pScaling.y = vRows[1].Length(); \
-	pScaling.z = vRows[2].Length(); \
+	pScaling.x = vCols[0].Length(); \
+	pScaling.y = vCols[1].Length(); \
+	pScaling.z = vCols[2].Length(); \
 	\
 	/* and the sign of the scaling */ \
 	if (Determinant() < 0) pScaling = -pScaling; \
 	\
 	/* and remove all scaling from the matrix */ \
-	if(pScaling.x) vRows[0] /= pScaling.x; \
-	if(pScaling.y) vRows[1] /= pScaling.y; \
-	if(pScaling.z) vRows[2] /= pScaling.z; \
+	if(pScaling.x) vCols[0] /= pScaling.x; \
+	if(pScaling.y) vCols[1] /= pScaling.y; \
+	if(pScaling.z) vCols[2] /= pScaling.z; \
 	\
 	do {} while(false)
 
@@ -340,9 +340,9 @@ inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& pScaling, aiQuate
 	ASSIMP_MATRIX4_4_DECOMPOSE_PART;
 
     // build a 3x3 rotation matrix
-    aiMatrix3x3t<TReal> m(vRows[0].x,vRows[1].x,vRows[2].x,
-        vRows[0].y,vRows[1].y,vRows[2].y,
-        vRows[0].z,vRows[1].z,vRows[2].z);
+    aiMatrix3x3t<TReal> m(vCols[0].x,vCols[1].x,vCols[2].x,
+        vCols[0].y,vCols[1].y,vCols[2].y,
+        vCols[0].z,vCols[1].z,vCols[2].z);
 
     // and generate the rotation quaternion from it
     pRotation = aiQuaterniont<TReal>(m);
@@ -354,45 +354,42 @@ inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector
 	ASSIMP_MATRIX4_4_DECOMPOSE_PART;
 
 	/*
-	    |  CE      -CF      -D   0 |
-	M = | -BDE+AF   BDF+AE  -BC  0 |
-	    |  ADE+BF  -ADF+BE   AC  0 |
-	    |  0        0        0   1 |
+	    |  CE     -CF      D   0 |
+	M = |  BDE+AF -BDF+AE -BC  0 |
+	    | -ADE+BF -ADF+BE  AC  0 |
+	    |  0       0       0   1 |
 
-	A = cos(angle_x);
-	B = sin(angle_x);
-	C = cos(angle_y);
-	D = sin(angle_y);
-	E = cos(angle_z);
-	F = sin(angle_z);
+	A = cos(angle_x), B = sin(angle_x);
+	C = cos(angle_y), D = sin(angle_y);
+	E = cos(angle_z), F = sin(angle_z);
 	*/
 
 	// Use a small epsilon to solve floating-point inaccuracies
     constexpr TReal epsilon = 10e-3f;
 
-	pRotation.y  = -asin(_this[0][2]);// Angle around oY.
+	pRotation.y  = asin(vCols[2].x);// D. Angle around oY.
 
 	TReal C = cos(pRotation.y);
 
 	if(fabs(C) > epsilon)
 	{
 		// Finding angle around oX.
-		TReal tan_x =  _this[2][2] / C;
-		TReal tan_y = -_this[1][2] / C;
+		TReal tan_x =  vCols[2].z / C;// A
+		TReal tan_y = -vCols[2].y / C;// B
 
 		pRotation.x = atan2(tan_y, tan_x);
 		// Finding angle around oZ.
-		tan_x =  _this[0][0] / C;
-		tan_y = -_this[0][1] / C;
+		tan_x =  vCols[0].x / C;// E
+		tan_y = -vCols[1].x / C;// F
 		pRotation.z = atan2(tan_y, tan_x);
 	}
 	else
-	{
-		pRotation.x = 0;// Set angle around oX to 0.
+	{// oY is fixed.
+		pRotation.x = 0;// Set angle around oX to 0. => A == 1, B == 0, C == 0, D == 1.
 
 		// And finding angle around oZ.
-		TReal tan_x = _this[1][1];
-		TReal tan_y = _this[1][0];
+		TReal tan_x = vCols[1].y;// -BDF+AE => E
+		TReal tan_y = vCols[0].y;//  BDE+AF => F
 
 		pRotation.z = atan2(tan_y, tan_x);
 	}

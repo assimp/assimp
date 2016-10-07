@@ -70,6 +70,29 @@ namespace Assimp {
 
 using namespace std;
 
+struct IOStreamBuffer {
+    BaseImporter *m_importer;
+    IOStream *m_stream;
+    size_t m_cacheSize;
+    std::vector<char> m_buffer;
+    size_t m_filesize;
+    size_t m_blockIndex;
+    IOStreamBuffer( BaseImporter *imp, IOStream *stream, size_t cache = 4096 )
+    : m_importer( imp )
+    , m_stream( stream )
+    , m_cacheSize( cache )
+    , m_buffer()
+    , m_filesize( 0 )
+    , m_blockIndex( 0 ) {
+        m_buffer.resize( m_cacheSize );
+        m_filesize = m_stream->FileSize() );
+    }
+
+    char &get( size_t index ) {
+
+    }
+};
+
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
 ObjFileImporter::ObjFileImporter() :

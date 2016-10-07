@@ -61,7 +61,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, standart library.
 #include <memory>
 #include <inttypes.h>
-#include <iostream>
 
 #include "glTFAssetWriter.h"
 
@@ -395,7 +394,6 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
         nodeRef->jointName = "joint_" + std::to_string(idx_bone);
         skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
-        // std::cout << "Node->id " << nodeRef->id << "\n";
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
         // Temporary. Hard-coded identity matrix here
@@ -560,9 +558,10 @@ void glTFExporter::ExportMeshes()
         }
 
     /*************** Skins ****************/
-    if(aim->HasBones()) {
-        ExportSkin(*mAsset, aim, m, b);
-    }
+    ///TODO: Fix skinning animation
+    // if(aim->HasBones()) {
+    //     ExportSkin(*mAsset, aim, m, b);
+    // }
 
 		/****************** Compression ******************/
 		///TODO: animation: weights, joints.
@@ -768,7 +767,6 @@ void glTFExporter::ExportAnimations()
 {
     Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
 
-    std::cout<<"mNumAnimations " << mScene->mNumAnimations << "\n";
     for (unsigned int i = 0; i < mScene->mNumAnimations; ++i) {
         const aiAnimation* anim = mScene->mAnimations[i];
 
@@ -777,7 +775,6 @@ void glTFExporter::ExportAnimations()
             nameAnim = anim->mName.C_Str();
         }
 
-        std::cout<<"mNumChannels " << anim->mNumChannels << "\n";
         for (unsigned int channelIndex = 0; channelIndex < anim->mNumChannels; ++channelIndex) {
             const aiNodeAnim* nodeChannel = anim->mChannels[channelIndex];
 
@@ -829,65 +826,13 @@ void glTFExporter::ExportAnimations()
 
         }
 
-        // std::cout<<"mNumMeshChannels " << anim->mNumMeshChannels << "\n";
+        // Assimp documentation staes this is not used (not implemented)
         // for (unsigned int channelIndex = 0; channelIndex < anim->mNumMeshChannels; ++channelIndex) {
         //     const aiMeshAnim* meshChannel = anim->mMeshChannels[channelIndex];
         // }
 
     } // End: for-loop mNumAnimations
 }
-
-// void glTFExporter::ExportSkins()
-// {
-//     Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
-
-//     for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
-//         const aiMesh* aim = mScene->mMeshes[idx_mesh];
-
-//         if(!aim->HasBones()) { continue; } // skip to next mesh if no bones exist.
-
-//         std::string skinName = aim->mName.C_Str();
-//         skinName = mAsset->FindUniqueID(skinName, "skin");
-//         Ref<Skin> skinRef = mAsset->skins.Create(skinName);
-//         skinRef->name = skinName;
-
-//         mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
-
-//         for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
-//             const aiBone* aib = aim->mBones[idx_bone];
-
-//             // aib->mName   =====>  skinRef->jointNames
-//             // Find the node with id = mName.
-//             Ref<Node> nodeRef = mAsset->nodes.Get(aib->mName.C_Str());
-//             nodeRef->jointName = "joint_" + std::to_string(idx_bone);
-//             skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
-//             // std::cout << "Node->id " << nodeRef->id << "\n";
-
-//             // Identity Matrix   =====>  skinRef->bindShapeMatrix
-//             // Temporary. Hard-coded identity matrix here
-//             skinRef->bindShapeMatrix.isPresent = true;
-//             IdentityMatrix4(skinRef->bindShapeMatrix.value);
-
-//             // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
-//             CopyValue(aib->mOffsetMatrix, inverseBindMatricesData[idx_bone]);
-
-//             // aib->mNumWeights;
-//             // aib->mWeights;
-//         } // End: for-loop mNumMeshes
-
-//         // Create the Accessor for skinRef->inverseBindMatrices
-//         Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
-//         if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
-
-//         // Create the skinned mesh instance node.
-//         Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(skinName, "node"));
-//         node->meshes.push_back(mAsset->meshes.Get(aim->mName.C_Str()));
-//         node->name = node->id;
-//         node->skeletons.push_back(mAsset->nodes.Get(aim->mBones[0]->mName.C_Str()));
-//         node->skin = skinRef;
-//     } // End: for-loop mNumMeshes
-// }
-
 
 
 #endif // ASSIMP_BUILD_NO_GLTF_EXPORTER

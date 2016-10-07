@@ -611,6 +611,8 @@ ADD_ASSIMP_IMPORTER( X
 )
 
 ADD_ASSIMP_IMPORTER(X3D
+  X3DExporter.cpp
+  X3DExporter.hpp
   X3DImporter.cpp
   X3DImporter.hpp
   X3DImporter_Geometry2D.cpp

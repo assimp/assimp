@@ -941,7 +941,6 @@ void X3DImporter::ParseNode_Rendering_Normal()
 std::string use, def;
 std::list<aiVector3D> vector;
 CX3DImporter_NodeElement* ne;
-LogInfo("TRACE: scene rendering Normal b");
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
@@ -968,7 +967,6 @@ LogInfo("TRACE: scene rendering Normal b");
 
 		NodeElement_List.push_back(ne);// add element to node element list because its a new object in graph
 	}// if(!use.empty()) else
-LogInfo("TRACE: scene rendering Normal e");
 }
 
 }// namespace Assimp

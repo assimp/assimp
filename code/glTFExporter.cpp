@@ -365,16 +365,27 @@ void glTFExporter::ExportMaterials()
     }
 }
 
-void ExportSkins(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef)
+void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef)
 {
-    if(!aim->HasBones()) { return; } // skip to next mesh if no bones exist.
-
     std::string skinName = aim->mName.C_Str();
     skinName = mAsset.FindUniqueID(skinName, "skin");
     Ref<Skin> skinRef = mAsset.skins.Create(skinName);
     skinRef->name = skinName;
 
     mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
+
+    //-------------------------------------------------------
+    // Store the vertex joint and weight data.
+    vec4* vertexJointData = new vec4[aim->mNumVertices];
+    vec4* vertexWeightData = new vec4[aim->mNumVertices];
+    unsigned int* jointsPerVertex = new unsigned int[aim->mNumVertices];
+    for (size_t i = 0; i < aim->mNumVertices; ++i) {
+        jointsPerVertex[i] = 0;
+        for (size_t j = 0; j < 4; ++j) {
+            vertexJointData[i][j] = 0;
+            vertexWeightData[i][j] = 0;
+        }
+    }
 
     for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
         const aiBone* aib = aim->mBones[idx_bone];
@@ -394,16 +405,33 @@ void ExportSkins(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffe
         // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
         CopyValue(aib->mOffsetMatrix, inverseBindMatricesData[idx_bone]);
 
-        // aib->mNumWeights;
-        // aib->mWeights;
+        // aib->mWeights   =====>  vertexWeightData
+        for (unsigned int idx_weights = 0; idx_weights < aib->mNumWeights; ++idx_weights) {
+            aiVertexWeight tmpVertWeight = aib->mWeights[idx_weights];
+            vertexJointData[tmpVertWeight.mVertexId][jointsPerVertex[tmpVertWeight.mVertexId]] = idx_bone;
+            vertexWeightData[tmpVertWeight.mVertexId][jointsPerVertex[tmpVertWeight.mVertexId]] = tmpVertWeight.mWeight;
+
+            jointsPerVertex[tmpVertWeight.mVertexId] += 1;
+        }
+
     } // End: for-loop mNumMeshes
 
     // Create the Accessor for skinRef->inverseBindMatrices
     Ref<Accessor> invBindMatrixAccessor = ExportData(mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
     if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
 
+
+    Mesh::Primitive& p = meshRef->primitives.back();
+    Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinName, bufferRef, aim->mNumVertices, vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    if (vertexJointAccessor) p.attributes.joint.push_back(vertexJointAccessor);
+
+    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinName, bufferRef, aim->mNumVertices, vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    if (vertexWeightAccessor) p.attributes.weight.push_back(vertexWeightAccessor);
+
+
     // Create the skinned mesh instance node.
     Ref<Node> node = mAsset.nodes.Create(mAsset.FindUniqueID(skinName, "node"));
+    // Ref<Node> node = mAsset.nodes.Get(aim->mBones[0]->mName.C_Str());
     node->meshes.push_back(meshRef);
     node->name = node->id;
     node->skeletons.push_back(mAsset.nodes.Get(aim->mBones[0]->mName.C_Str()));
@@ -532,7 +560,9 @@ void glTFExporter::ExportMeshes()
         }
 
     /*************** Skins ****************/
-    ExportSkins(*mAsset, aim, m, b);
+    if(aim->HasBones()) {
+        ExportSkin(*mAsset, aim, m, b);
+    }
 
 		/****************** Compression ******************/
 		///TODO: animation: weights, joints.

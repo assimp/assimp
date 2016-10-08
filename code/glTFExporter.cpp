@@ -776,9 +776,12 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     //-------------------------------------------------------
     // Extract rotation parameter data
     if(nodeChannel->mNumRotationKeys > 0) {
-        C_STRUCT aiQuaternion* rotationData = new aiQuaternion[nodeChannel->mNumRotationKeys];
+        vec4* rotationData = new vec4[nodeChannel->mNumRotationKeys];
         for (size_t i = 0; i < nodeChannel->mNumRotationKeys; ++i) {
-            rotationData[i] = nodeChannel->mRotationKeys[i].mValue;
+            rotationData[i][0] = nodeChannel->mRotationKeys[i].mValue.x;
+            rotationData[i][1] = nodeChannel->mRotationKeys[i].mValue.y;
+            rotationData[i][2] = nodeChannel->mRotationKeys[i].mValue.z;
+            rotationData[i][3] = nodeChannel->mRotationKeys[i].mValue.w;
         }
 
         Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumRotationKeys, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);

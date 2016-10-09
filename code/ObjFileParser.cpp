@@ -182,10 +182,15 @@ void ObjFileParser::parseFile()
 
         case 'm': // Parse a material library or merging group ('mg')
             {
-                if (*(m_DataIt + 1) == 'g')
+				std::string name;
+
+				getName(m_DataIt, m_DataItEnd, name);
+                if (name == "mg")
                     getGroupNumberAndResolution();
-                else
+                else if(name == "mtllib")
                     getMaterialLib();
+				else
+					goto pf_skip_line;
             }
             break;
 
@@ -209,6 +214,8 @@ void ObjFileParser::parseFile()
 
         default:
             {
+pf_skip_line:
+
                 m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
             }
             break;
@@ -625,6 +632,10 @@ void ObjFileParser::getMaterialLib()
     // Check for existence
     const std::string strMatName(pStart, &(*m_DataIt));
     std::string absName;
+
+	// Check if directive is valid.
+	if(!strMatName.length()) throw DeadlyImportError("File name of the material is absent.");
+
     if ( m_pIO->StackSize() > 0 ) {
         std::string path = m_pIO->CurrentDirectory();
         if ( '/' != *path.rbegin() ) {

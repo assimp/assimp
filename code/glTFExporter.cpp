@@ -389,6 +389,39 @@ bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
     return false;
 }
 
+/*
+ * Find the root joint of the skeleton.
+ */
+Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
+{
+    Ref<Node> candidateNodeRef;
+    Ref<Node> testNodeRef;
+
+    for (unsigned int i = 0; i < skinRef->jointNames.size(); ++i) {
+        candidateNodeRef = skinRef->jointNames[i];
+        bool candidateIsRoot = true;
+
+        for (unsigned int j = 0; j < skinRef->jointNames.size(); ++j) {
+            if (i == j) continue;
+
+            testNodeRef = skinRef->jointNames[j];
+            for (unsigned int k = 0; k < testNodeRef->children.size(); ++k) {
+                std::string childNodeRefID = testNodeRef->children[k]->id;
+
+                if (childNodeRefID.compare(candidateNodeRef->id) == 0) {
+                    candidateIsRoot = false;
+                }
+            }
+        }
+
+        if(candidateIsRoot == true) {
+            return candidateNodeRef;
+        }
+    }
+
+    return candidateNodeRef;
+}
+
 void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef)
 {
     std::string skinName = aim->mName.C_Str();
@@ -417,7 +450,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
         // Find the node with id = mName.
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
         nodeRef->jointName = "joint_" + std::to_string(idx_bone);
-        skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
+        skinRef->jointNames.push_back(nodeRef);
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
         // Temporary. Hard-coded identity matrix here
@@ -456,7 +489,8 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
     Ref<Node> meshNode;
     FindMeshNode(rootNode, meshNode, meshRef->id);
 
-    meshNode->skeletons.push_back(mAsset.nodes.Get(aim->mBones[0]->mName.C_Str()));
+    Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
+    meshNode->skeletons.push_back(rootJoint);
     meshNode->skin = skinRef;
 }
 

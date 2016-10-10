@@ -93,6 +93,9 @@ SET( TEST_SRCS
   unit/utTriangulate.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
+  unit/utColladaExportCamera.cpp
+  unit/utColladaExportLight.cpp
+  unit/utColladaExportBone.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
@@ -106,7 +109,7 @@ add_executable( unit
 )
 
 add_definitions(-DASSIMP_TEST_MODELS_DIR="${CMAKE_CURRENT_LIST_DIR}/models")
-    
+
 SET_PROPERTY( TARGET assimp PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX} )
 
 IF( WIN32 )

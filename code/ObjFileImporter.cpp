@@ -70,27 +70,76 @@ namespace Assimp {
 
 using namespace std;
 
+template<class T>
 struct IOStreamBuffer {
     BaseImporter *m_importer;
     IOStream *m_stream;
     size_t m_cacheSize;
-    std::vector<char> m_buffer;
+    std::vector<T> m_buffer;
     size_t m_filesize;
-    size_t m_blockIndex;
+    size_t c;
+	size_t m_numBlocks;
+	size_t m_sizeLastBlock;
+
     IOStreamBuffer( BaseImporter *imp, IOStream *stream, size_t cache = 4096 )
     : m_importer( imp )
     , m_stream( stream )
     , m_cacheSize( cache )
     , m_buffer()
     , m_filesize( 0 )
-    , m_blockIndex( 0 ) {
+    , m_blockIndex( 0 )
+	, m_numBlocks( 0 ) 
+	, m_sizeLastBlock( 0 ) {
         m_buffer.resize( m_cacheSize );
-        m_filesize = m_stream->FileSize() );
+        m_filesize = m_stream->FileSize();
+        m_numBlocks = m_filesize / m_cacheSize;
+        m_sizeLastBlock = m_filesize % m_cacheSize;
     }
 
-    char &get( size_t index ) {
-
+    ~IOStreamBuffer() {
+        clear();
     }
+
+    void clear() {
+        m_cacheSize = 4096;
+        m_buffer.resize( 0 );
+    }
+
+    bool mapPosToBlock( size_t pos, size_t &blockIdx, size_t &blockPos ) {
+        if ( pos > m_filesize ) {
+            return false;
+        }
+        blockIdx = pos / m_cacheSize;
+        blockPos = pos % m_cacheSize;
+
+        return true;
+    }
+
+    void loadBlock( size_t blockIdx ) {
+        size_t pos = blockIdx * m_cacheSize;
+        size_t sizeToRead( m_cacheSize );
+        if ( m_blockIdx == ( m_numBlocks - 1 ) ) {
+            sizeToRead = m_sizeLastBlock;
+        }
+
+        m_stream->Seek( pos <, aiOrigin_SET );
+        m_stream->Read( &m_buffer[ 0 ], sizeof( T ), sizeToRead );
+        m_blockIndex = blockIdx;
+
+        BaseImporter::ConvertToUTF8( m_buffer );
+    }
+
+    T &operator [] (size_t pos ) {
+        size_t blockIdx( 0 ), blockPos( 0 );
+        if ( !mapPosToBlock( pos, blockIdx, blockPos ) ) {
+            throw DeadlyImportError( "OBJ-file-access out of bounds." );
+        }
+        if ( m_blockIndex != blockIdx ) {
+            loadBlock( blockIdx );
+        }
+
+        return m_buffer[ blockPos ];
+	}
 };
 
 // ------------------------------------------------------------------------------------------------

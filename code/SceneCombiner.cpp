@@ -1237,8 +1237,8 @@ void SceneCombiner::Copy (aiMetadata** _dest, const aiMetadata* src)
         case AI_BOOL:
             out.mData = new bool(*static_cast<bool*>(in.mData));
             break;
-        case AI_INT:
-            out.mData = new int(*static_cast<int*>(in.mData));
+        case AI_INT32:
+            out.mData = new int32_t(*static_cast<int32_t*>(in.mData));
             break;
         case AI_UINT64:
             out.mData = new uint64_t(*static_cast<uint64_t*>(in.mData));

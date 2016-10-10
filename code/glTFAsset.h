@@ -128,6 +128,7 @@ namespace glTF
     struct BufferView; // here due to cross-reference
     struct Texture;
     struct Light;
+    struct Skin;
 
 
     // Vec/matrix types, as raw float arrays
@@ -453,25 +454,6 @@ namespace glTF
 
         Accessor() {}
         void Read(Value& obj, Asset& r);
-    };
-
-
-    struct Animation : public Object
-    {
-        struct Channel
-        {
-
-        };
-
-        struct Target
-        {
-
-        };
-
-        struct Sampler
-        {
-
-        };
     };
 
     //! A buffer points to binary geometry, animation, or skins.
@@ -825,6 +807,10 @@ namespace glTF
         Ref<Camera> camera;
         Ref<Light>  light;
 
+        std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes. Each of which is the root of a node hierarchy.
+        Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
+        std::string jointName;                    //!< Name used when this node is a joint in a skin.
+
         Node() {}
         void Read(Value& obj, Asset& r);
     };
@@ -864,6 +850,11 @@ namespace glTF
 
     struct Skin : public Object
     {
+        Nullable<mat4> bindShapeMatrix;       //!< Floating-point 4x4 transformation matrix stored in column-major order.
+        Ref<Accessor> inverseBindMatrices;    //!< The ID of the accessor containing the floating-point 4x4 inverse-bind matrices.
+        std::vector<std::string/*Ref<Node>*/> jointNames;    //!< Joint names of the joints (nodes with a jointName property) in this skin.
+        std::string name;                     //!< The user-defined name of this object.
+
         Skin() {}
         void Read(Value& obj, Asset& r);
     };
@@ -934,6 +925,44 @@ namespace glTF
         void SetDefaults();
     };
 
+    struct Animation : public Object
+    {
+        struct AnimSampler {
+            std::string id;               //!< The ID of this sampler.
+            std::string input;            //!< The ID of a parameter in this animation to use as key-frame input.
+            std::string interpolation;    //!< Type of interpolation algorithm to use between key-frames.
+            std::string output;           //!< The ID of a parameter in this animation to use as key-frame output.
+        };
+
+        struct AnimChannel {
+            std::string sampler;         //!< The ID of one sampler present in the containing animation's samplers property.
+
+            struct AnimTarget {
+                Ref<Node> id;            //!< The ID of the node to animate.
+                std::string path;        //!< The name of property of the node to animate ("translation", "rotation", or "scale").
+            } target;
+        };
+
+        struct AnimParameters {
+            Ref<Accessor> TIME;           //!< Accessor reference to a buffer storing a array of floating point scalar values.
+            Ref<Accessor> rotation;       //!< Accessor reference to a buffer storing a array of four-component floating-point vectors.
+            Ref<Accessor> scale;          //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+            Ref<Accessor> translation;    //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+        };
+
+        // AnimChannel Channels[3];            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
+        // AnimParameters Parameters;          //!< The samplers that interpolate between the key-frames.
+        // AnimSampler Samplers[3];            //!< The parameterized inputs representing the key-frame data.
+
+        std::vector<AnimChannel> Channels;            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
+        AnimParameters Parameters;                    //!< The samplers that interpolate between the key-frames.
+        std::vector<AnimSampler> Samplers;         //!< The parameterized inputs representing the key-frame data.
+
+        Animation() {}
+        void Read(Value& obj, Asset& r);
+    };
+
+
     //! Base class for LazyDict that acts as an interface
     class LazyDictBase
     {
@@ -966,7 +995,7 @@ namespace glTF
         typedef typename std::gltf_unordered_map< std::string, unsigned int > Dict;
 
         std::vector<T*>  mObjs;      //! The read objects
-        Dict             mObjsById;  //! The read objects accesible by id
+        Dict             mObjsById;  //! The read objects accessible by id
         const char*      mDictId;    //! ID of the dictionary object
         const char*      mExtId;     //! ID of the extension defining the dictionary
         Value*           mDict;      //! JSON dictionary object
@@ -986,7 +1015,7 @@ namespace glTF
 
         Ref<T> Get(const char* id);
         Ref<T> Get(unsigned int i);
-		Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
+        Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)
@@ -1084,7 +1113,7 @@ namespace glTF
         LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
         //LazyDict<Shader>    shaders;
-        //LazyDict<Skin>      skins;
+        LazyDict<Skin>      skins;
         //LazyDict<Technique> techniques;
         LazyDict<Texture>     textures;
 
@@ -1109,7 +1138,7 @@ namespace glTF
             , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
             //, shaders     (*this, "shaders")
-            //, skins       (*this, "skins")
+            , skins       (*this, "skins")
             //, techniques  (*this, "techniques")
             , textures      (*this, "textures")
             , lights        (*this, "lights", "KHR_materials_common")

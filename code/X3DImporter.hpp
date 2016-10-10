@@ -397,12 +397,6 @@ private:
 	/// Short variant for calling \ref DefaultLogger::get()->info()
 	void LogInfo(const std::string& pMessage) { DefaultLogger::get()->info(pMessage); }
 
-	/// Short variant for calling \ref DefaultLogger::get()->warn()
-	void LogWarning(const std::string& pMessage) { DefaultLogger::get()->warn(pMessage); }
-
-	/// Short variant for calling \ref DefaultLogger::get()->error()
-	void LogError(const std::string& pMessage) { DefaultLogger::get()->error(pMessage); }
-
 	/***********************************************/
 	/************** Functions: XML set *************/
 	/***********************************************/

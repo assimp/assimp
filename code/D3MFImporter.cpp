@@ -44,8 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
-#include <contrib/unzip/unzip.h>
-#include "irrXMLWrapper.h"
 #include "StringComparison.h"
 #include "StringUtils.h"
 
@@ -61,9 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/ai_assert.h>
 
-#include "D3MFOpcPackage.h"
-
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
+
+#include "D3MFOpcPackage.h"
+#include <contrib/unzip/unzip.h>
+#include "irrXMLWrapper.h"
 
 namespace Assimp {
 namespace D3MF {

@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "D3MFOpcPackage.h"
 #include "Exceptional.h"
 
-#include <contrib/unzip/unzip.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
@@ -56,6 +55,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdlib>
 
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
+
+#include <contrib/unzip/unzip.h>
 
 namespace Assimp {
 

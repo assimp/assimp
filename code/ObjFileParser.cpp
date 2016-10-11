@@ -61,9 +61,9 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &data, const std::string &modelName, IOSystem *io, ProgressHandler* progress, const std::string &originalObjFileName) :
-    m_DataIt(data.begin()),
-    m_DataItEnd(data.end()),
+ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem *io, ProgressHandler* progress, const std::string &originalObjFileName) :
+    m_DataIt(),
+    m_DataItEnd(),
     m_pModel(NULL),
     m_uiLine(0),
     m_pIO( io ),
@@ -83,7 +83,7 @@ ObjFileParser::ObjFileParser(std::vector<char> &data, const std::string &modelNa
     m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
 
     // Start parsing the file
-    parseFile();
+    parseFile( streamBuffer );
 }
 
 // -------------------------------------------------------------------
@@ -103,31 +103,33 @@ ObjFile::Model *ObjFileParser::GetModel() const
 
 // -------------------------------------------------------------------
 //  File parsing method.
-void ObjFileParser::parseFile()
-{
-    if (m_DataIt == m_DataItEnd)
-        return;
-
+void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
     const unsigned int updateProgressEveryBytes = 100 * 1024;
     unsigned int progressCounter = 0;
-    const unsigned int bytesToProcess = std::distance(m_DataIt, m_DataItEnd);
+    const unsigned int bytesToProcess = streamBuffer.size();
     const unsigned int progressTotal = 3 * bytesToProcess;
     const unsigned int progressOffset = bytesToProcess;
     unsigned int processed = 0;
 
-    DataArrayIt lastDataIt = m_DataIt;
+    //DataArrayIt lastDataIt = m_DataIt;
 
-    while (m_DataIt != m_DataItEnd)
-    {
+    bool endOfFile( false );
+    std::vector<char> buffer;
+
+    //while ( m_DataIt != m_DataItEnd )
+    while ( streamBuffer.getNextLine( buffer ) ) {
+        m_DataIt = buffer.begin();
+        m_DataItEnd = buffer.end();
+
         // Handle progress reporting
-        processed += std::distance(lastDataIt, m_DataIt);
+        /*processed += std::distance(lastDataIt, m_DataIt);
         lastDataIt = m_DataIt;
         if (processed > (progressCounter * updateProgressEveryBytes))
         {
             progressCounter++;
             m_progress->UpdateFileRead(progressOffset + processed*2, progressTotal);
-        }
+        }*/
 
         // parse line
         switch (*m_DataIt)
@@ -149,8 +151,8 @@ void ObjFileParser::parseFile()
                     }
                 } else if (*m_DataIt == 't') {
                     // read in texture coordinate ( 2D or 3D )
-                                        ++m_DataIt;
-                                        getVector( m_pModel->m_TextureCoord );
+                    ++m_DataIt;
+                    getVector( m_pModel->m_TextureCoord );
                 } else if (*m_DataIt == 'n') {
                     // Read in normal vector definition
                     ++m_DataIt;

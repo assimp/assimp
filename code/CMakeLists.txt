@@ -171,6 +171,7 @@ SET( Common_SRCS
   Bitmap.h
   XMLTools.h
   Version.cpp
+  IOStreamBuffer.h
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

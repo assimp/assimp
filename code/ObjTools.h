@@ -246,6 +246,20 @@ string_type trim_whitespaces(string_type str)
     return str;
 }
 
+template<class T>
+bool hasLineEnd( T it, T end ) {
+    bool hasLineEnd( false );
+    while ( !isEndOfBuffer( it, end ) ) {
+        it++;
+        if ( IsLineEnd( it ) ) {
+            hasLineEnd = true;
+            break;
+        }
+    }
+
+    return hasLineEnd;
+}
+
 } // Namespace Assimp
 
 #endif // OBJ_TOOLS_H_INC

@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
+#include "IOStreamBuffer.h"
 #include <memory>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -69,78 +70,6 @@ static const unsigned int ObjMinSize = 16;
 namespace Assimp {
 
 using namespace std;
-
-template<class T>
-struct IOStreamBuffer {
-    BaseImporter *m_importer;
-    IOStream *m_stream;
-    size_t m_cacheSize;
-    std::vector<T> m_buffer;
-    size_t m_filesize;
-    size_t c;
-	size_t m_numBlocks;
-	size_t m_sizeLastBlock;
-
-    IOStreamBuffer( BaseImporter *imp, IOStream *stream, size_t cache = 4096 )
-    : m_importer( imp )
-    , m_stream( stream )
-    , m_cacheSize( cache )
-    , m_buffer()
-    , m_filesize( 0 )
-    , m_blockIndex( 0 )
-	, m_numBlocks( 0 ) 
-	, m_sizeLastBlock( 0 ) {
-        m_buffer.resize( m_cacheSize );
-        m_filesize = m_stream->FileSize();
-        m_numBlocks = m_filesize / m_cacheSize;
-        m_sizeLastBlock = m_filesize % m_cacheSize;
-    }
-
-    ~IOStreamBuffer() {
-        clear();
-    }
-
-    void clear() {
-        m_cacheSize = 4096;
-        m_buffer.resize( 0 );
-    }
-
-    bool mapPosToBlock( size_t pos, size_t &blockIdx, size_t &blockPos ) {
-        if ( pos > m_filesize ) {
-            return false;
-        }
-        blockIdx = pos / m_cacheSize;
-        blockPos = pos % m_cacheSize;
-
-        return true;
-    }
-
-    void loadBlock( size_t blockIdx ) {
-        size_t pos = blockIdx * m_cacheSize;
-        size_t sizeToRead( m_cacheSize );
-        if ( m_blockIdx == ( m_numBlocks - 1 ) ) {
-            sizeToRead = m_sizeLastBlock;
-        }
-
-        m_stream->Seek( pos <, aiOrigin_SET );
-        m_stream->Read( &m_buffer[ 0 ], sizeof( T ), sizeToRead );
-        m_blockIndex = blockIdx;
-
-        BaseImporter::ConvertToUTF8( m_buffer );
-    }
-
-    T &operator [] (size_t pos ) {
-        size_t blockIdx( 0 ), blockPos( 0 );
-        if ( !mapPosToBlock( pos, blockIdx, blockPos ) ) {
-            throw DeadlyImportError( "OBJ-file-access out of bounds." );
-        }
-        if ( m_blockIndex != blockIdx ) {
-            loadBlock( blockIdx );
-        }
-
-        return m_buffer[ blockPos ];
-	}
-};
 
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
@@ -198,8 +127,11 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
         throw DeadlyImportError( "OBJ-file is too small.");
     }
 
+    IOStreamBuffer<char> streamedBuffer;
+    streamedBuffer.open( fileStream.get() );
+
     // Allocate buffer and read file into it
-    TextFileToBuffer( fileStream.get(),m_Buffer);
+    //TextFileToBuffer( fileStream.get(),m_Buffer);
 
     // Get the model name
     std::string  modelName, folderName;
@@ -222,7 +154,7 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     const unsigned int updateProgressEveryBytes = 100 * 1024;
     const unsigned int progressTotal = (3*m_Buffer.size()/updateProgressEveryBytes);
     // process all '\'
-    std::vector<char> ::iterator iter = m_Buffer.begin();
+    /*std::vector<char> ::iterator iter = m_Buffer.begin();
     while (iter != m_Buffer.end())
     {
         if (*iter == '\\')
@@ -241,16 +173,18 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
             m_progress->UpdateFileRead(++progress, progressTotal);
             progressCounter = 0;
         }
-    }
+    }*/
 
     // 1/3rd progress
     m_progress->UpdateFileRead(1, 3);
 
     // parse the file into a temporary representation
-    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress, file);
+    ObjFileParser parser( streamedBuffer, modelName, pIOHandler, m_progress, file);
 
     // And create the proper return structures out of it
     CreateDataFromImport(parser.GetModel(), pScene);
+
+    streamedBuffer.close();
 
     // Clean up allocated storage for the next import
     m_Buffer.clear();

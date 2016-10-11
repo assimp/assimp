@@ -811,6 +811,8 @@ namespace glTF
         Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
         std::string jointName;                    //!< Name used when this node is a joint in a skin.
 
+        Ref<Node> parent;                         //!< This is not part of the glTF specification. Used as a helper.
+
         Node() {}
         void Read(Value& obj, Asset& r);
     };

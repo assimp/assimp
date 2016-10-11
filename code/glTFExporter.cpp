@@ -132,7 +132,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     ExportMaterials();
 
     if (mScene->mRootNode) {
-        ExportNode(mScene->mRootNode);
+        ExportNodeHierarchy(mScene->mRootNode);
     }
 
     ExportMeshes();
@@ -391,39 +391,33 @@ bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
 
 /*
  * Find the root joint of the skeleton.
+ * Starts will any joint node and traces up the tree,
+ * until a parent is found that does not have a jointName.
+ * Returns the first parent Ref<Node> found that does not have a jointName.
  */
 Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
 {
-    Ref<Node> candidateNodeRef;
-    Ref<Node> testNodeRef;
+    Ref<Node> startNodeRef;
+    Ref<Node> parentNodeRef;
 
-    for (unsigned int i = 0; i < skinRef->jointNames.size(); ++i) {
-        candidateNodeRef = skinRef->jointNames[i];
-        bool candidateIsRoot = true;
+    // Arbitrarily use the first joint to start the search.
+    startNodeRef = skinRef->jointNames[0];
+    parentNodeRef = skinRef->jointNames[0];
 
-        for (unsigned int j = 0; j < skinRef->jointNames.size(); ++j) {
-            if (i == j) continue;
+    do {
+        startNodeRef = parentNodeRef;
+        parentNodeRef = startNodeRef->parent;
+    } while (!parentNodeRef->jointName.empty());
 
-            testNodeRef = skinRef->jointNames[j];
-            for (unsigned int k = 0; k < testNodeRef->children.size(); ++k) {
-                std::string childNodeRefID = testNodeRef->children[k]->id;
-
-                if (childNodeRefID.compare(candidateNodeRef->id) == 0) {
-                    candidateIsRoot = false;
-                }
-            }
-        }
-
-        if(candidateIsRoot == true) {
-            return candidateNodeRef;
-        }
-    }
-
-    return candidateNodeRef;
+    return parentNodeRef;
 }
 
 void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef)
 {
+    if (aim->mNumBones < 1) {
+        return;
+    }
+
     std::string skinName = aim->mName.C_Str();
     skinName = mAsset.FindUniqueID(skinName, "skin");
     Ref<Skin> skinRef = mAsset.skins.Create(skinName);
@@ -434,7 +428,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
     // Store the vertex joint and weight data.
     vec4* vertexJointData = new vec4[aim->mNumVertices];
     vec4* vertexWeightData = new vec4[aim->mNumVertices];
-    unsigned int* jointsPerVertex = new unsigned int[aim->mNumVertices];
+    int* jointsPerVertex = new int[aim->mNumVertices];
     for (size_t i = 0; i < aim->mNumVertices; ++i) {
         jointsPerVertex[i] = 0;
         for (size_t j = 0; j < 4; ++j) {
@@ -462,11 +456,16 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
 
         // aib->mWeights   =====>  vertexWeightData
         for (unsigned int idx_weights = 0; idx_weights < aib->mNumWeights; ++idx_weights) {
-            aiVertexWeight tmpVertWeight = aib->mWeights[idx_weights];
-            vertexJointData[tmpVertWeight.mVertexId][jointsPerVertex[tmpVertWeight.mVertexId]] = idx_bone;
-            vertexWeightData[tmpVertWeight.mVertexId][jointsPerVertex[tmpVertWeight.mVertexId]] = tmpVertWeight.mWeight;
+            unsigned int vertexId = aib->mWeights[idx_weights].mVertexId;
+            float vertWeight      = aib->mWeights[idx_weights].mWeight;
 
-            jointsPerVertex[tmpVertWeight.mVertexId] += 1;
+            // A vertex can only have at most four joint weights. Ignore all others.
+            if (jointsPerVertex[vertexId] > 3) { continue; }
+
+            vertexJointData[vertexId][jointsPerVertex[vertexId]] = idx_bone;
+            vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
+
+            jointsPerVertex[vertexId] += 1;
         }
 
     } // End: for-loop mNumMeshes
@@ -714,7 +713,8 @@ void glTFExporter::ExportMeshes()
 	}// for (unsigned int i = 0; i < mScene->mNumMeshes; ++i)
 }
 
-unsigned int glTFExporter::ExportNode(const aiNode* n)
+
+unsigned int glTFExporter::ExportNodeHierarchy(const aiNode* n)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
 
@@ -728,7 +728,31 @@ unsigned int glTFExporter::ExportNode(const aiNode* n)
     }
 
     for (unsigned int i = 0; i < n->mNumChildren; ++i) {
-        unsigned int idx = ExportNode(n->mChildren[i]);
+        unsigned int idx = ExportNode(n->mChildren[i], node);
+        node->children.push_back(mAsset->nodes.Get(idx));
+    }
+
+    return node.GetIndex();
+}
+
+
+unsigned int glTFExporter::ExportNode(const aiNode* n, Ref<Node>& parent)
+{
+    Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
+
+    node->parent = parent;
+
+    if (!n->mTransformation.IsIdentity()) {
+        node->matrix.isPresent = true;
+        CopyValue(n->mTransformation, node->matrix.value);
+    }
+
+    for (unsigned int i = 0; i < n->mNumMeshes; ++i) {
+        node->meshes.push_back(mAsset->meshes.Get(n->mMeshes[i]));
+    }
+
+    for (unsigned int i = 0; i < n->mNumChildren; ++i) {
+        unsigned int idx = ExportNode(n->mChildren[i], node);
         node->children.push_back(mAsset->nodes.Get(idx));
     }
 

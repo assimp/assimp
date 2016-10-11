@@ -713,7 +713,10 @@ void glTFExporter::ExportMeshes()
 	}// for (unsigned int i = 0; i < mScene->mNumMeshes; ++i)
 }
 
-
+/*
+ * Export the root node of the node hierarchy.
+ * Calls ExportNode for all children.
+ */
 unsigned int glTFExporter::ExportNodeHierarchy(const aiNode* n)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
@@ -735,7 +738,10 @@ unsigned int glTFExporter::ExportNodeHierarchy(const aiNode* n)
     return node.GetIndex();
 }
 
-
+/*
+ * Export node and recursively calls ExportNode for all children.
+ * Since these nodes are not the root node, we also export the parent Ref<Node>
+ */
 unsigned int glTFExporter::ExportNode(const aiNode* n, Ref<Node>& parent)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));

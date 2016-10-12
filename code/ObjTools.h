@@ -142,15 +142,15 @@ inline char_t getName( char_t it, char_t end, std::string &name )
     }
 
     char *pStart = &( *it );
-    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) ) {
+    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) && !IsSpaceOrNewLine( *it ) ) {
         ++it;
     }
 
-    while( isEndOfBuffer( it, end ) || IsLineEnd( *it ) || IsSpaceOrNewLine( *it ) ) {
+    /*while( isEndOfBuffer( it, end ) || IsLineEnd( *it ) || IsSpaceOrNewLine( *it ) ) {
         --it;
     }
     ++it;
-
+    */
     // Get name
     // if there is no name, and the previous char is a separator, come back to start
     while (&(*it) < pStart) {

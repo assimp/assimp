@@ -1022,7 +1022,7 @@ void ColladaExporter::WriteJointsTag(const size_t pIndex){
 
 void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
     typedef std::pair<unsigned int,unsigned int> vertexBoneWeightLocationMapElement_t;
-    typedef std::unordered_multimap<unsigned int,vertexBoneWeightLocationMapElement_t > vertexBoneWeightLocationMap_t;
+    typedef std::map<unsigned int,vertexBoneWeightLocationMapElement_t > vertexBoneWeightLocationMap_t;
 
     const aiMesh *const mesh = mScene->mMeshes[pIndex];
 	const std::string meshName = XMLEscape(GetMeshId(pIndex));
@@ -1046,10 +1046,9 @@ void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
 		const aiVertexWeight *const weights = bones[i]->mWeights;
 		unsigned int nWeight=bones[i]->mNumWeights;
 		for(unsigned int j=0; j<nWeight;j++){
-			vertexBoneWeightLocation.emplace(
-							weights[j].mVertexId,
-							vertexBoneWeightLocationMapElement_t(
-									i,globalWeightIndex++));
+            const unsigned int id( weights[j].mVertexId );
+            vertexBoneWeightLocationMapElement_t element( i,globalWeightIndex++ );
+            vertexBoneWeightLocation[ id ] = element;
 		}//for weight
 	}//for bones
 

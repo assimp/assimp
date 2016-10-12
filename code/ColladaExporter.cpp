@@ -389,6 +389,7 @@ void ColladaExporter::WriteLight(size_t pIndex){
             break;
         case aiLightSource_UNDEFINED:
         case _aiLightSource_Force32Bit:
+        case aiLightSource_AREA:
             break;
     }
     PopTag();
@@ -1020,8 +1021,8 @@ void ColladaExporter::WriteJointsTag(const size_t pIndex){
 
 
 void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
-    using vertexBoneWeightLocationMapElement_t = std::pair<unsigned int,unsigned int>;
-	using vertexBoneWeightLocationMap_t = std::unordered_multimap<unsigned int,vertexBoneWeightLocationMapElement_t >;
+    typedef std::pair<unsigned int,unsigned int> vertexBoneWeightLocationMapElement_t;
+    typedef std::unordered_multimap<unsigned int,vertexBoneWeightLocationMapElement_t > vertexBoneWeightLocationMap_t;
 
     const aiMesh *const mesh = mScene->mMeshes[pIndex];
 	const std::string meshName = XMLEscape(GetMeshId(pIndex));

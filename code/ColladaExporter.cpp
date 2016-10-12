@@ -286,7 +286,7 @@ void ColladaExporter::WriteTextures() {
 
             outfile->Flush();
 
-            textures.emplace(i, name);
+            textures[i] = name;
         }
     }
 }

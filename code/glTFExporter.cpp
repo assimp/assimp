@@ -152,7 +152,10 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
     }
 }
 
-
+/*
+ * Copy a 4x4 matrix from struct aiMatrix to typedef mat4.
+ * Also converts from row-major to column-major storage.
+ */
 static void CopyValue(const aiMatrix4x4& v, glTF::mat4& o)
 {
     o[ 0] = v.a1; o[ 1] = v.b1; o[ 2] = v.c1; o[ 3] = v.d1;
@@ -364,6 +367,61 @@ void glTFExporter::ExportMaterials()
     }
 }
 
+/*
+ * Search through node hierarchy and find the node containing the given meshID.
+ * Returns true on success, and false otherwise.
+ */
+bool FindMeshNode(Ref<Node>& nodeIn, Ref<Node>& meshNode, std::string meshID)
+{
+    for (unsigned int i = 0; i < nodeIn->meshes.size(); ++i) {
+        if (meshID.compare(nodeIn->meshes[i]->id) == 0) {
+          meshNode = nodeIn;
+          return true;
+        }
+    }
+
+    for (unsigned int i = 0; i < nodeIn->children.size(); ++i) {
+        if(FindMeshNode(nodeIn->children[i], meshNode, meshID)) {
+          return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+ * Find the root joint of the skeleton.
+ */
+Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
+{
+    Ref<Node> candidateNodeRef;
+    Ref<Node> testNodeRef;
+
+    for (unsigned int i = 0; i < skinRef->jointNames.size(); ++i) {
+        candidateNodeRef = skinRef->jointNames[i];
+        bool candidateIsRoot = true;
+
+        for (unsigned int j = 0; j < skinRef->jointNames.size(); ++j) {
+            if (i == j) continue;
+
+            testNodeRef = skinRef->jointNames[j];
+            for (unsigned int k = 0; k < testNodeRef->children.size(); ++k) {
+                std::string childNodeRefID = testNodeRef->children[k]->id;
+
+                if (childNodeRefID.compare(candidateNodeRef->id) == 0) {
+                    candidateIsRoot = false;
+                }
+            }
+        }
+
+        if(candidateIsRoot == true) {
+            return candidateNodeRef;
+        }
+    }
+
+    return candidateNodeRef;
+}
+
 void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef)
 {
     std::string skinName = aim->mName.C_Str();
@@ -373,7 +431,6 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
 
     mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
 
-    //-------------------------------------------------------
     // Store the vertex joint and weight data.
     vec4* vertexJointData = new vec4[aim->mNumVertices];
     vec4* vertexWeightData = new vec4[aim->mNumVertices];
@@ -393,7 +450,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
         // Find the node with id = mName.
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
         nodeRef->jointName = "joint_" + std::to_string(idx_bone);
-        skinRef->jointNames.push_back("joint_" + std::to_string(idx_bone));
+        skinRef->jointNames.push_back(nodeRef);
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
         // Temporary. Hard-coded identity matrix here
@@ -427,13 +484,14 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
     if (vertexWeightAccessor) p.attributes.weight.push_back(vertexWeightAccessor);
 
 
-    // Create the skinned mesh instance node.
-    Ref<Node> node = mAsset.nodes.Create(mAsset.FindUniqueID(skinName, "node"));
-    // Ref<Node> node = mAsset.nodes.Get(aim->mBones[0]->mName.C_Str());
-    node->meshes.push_back(meshRef);
-    node->name = node->id;
-    node->skeletons.push_back(mAsset.nodes.Get(aim->mBones[0]->mName.C_Str()));
-    node->skin = skinRef;
+    // Find node that contains this mesh and add "skeletons" and "skin" attributes to that node.
+    Ref<Node> rootNode = mAsset.nodes.Get(unsigned(0));
+    Ref<Node> meshNode;
+    FindMeshNode(rootNode, meshNode, meshRef->id);
+
+    Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
+    meshNode->skeletons.push_back(rootJoint);
+    meshNode->skin = skinRef;
 }
 
 void glTFExporter::ExportMeshes()
@@ -558,10 +616,9 @@ void glTFExporter::ExportMeshes()
         }
 
     /*************** Skins ****************/
-    ///TODO: Fix skinning animation
-    // if(aim->HasBones()) {
-    //     ExportSkin(*mAsset, aim, m, b);
-    // }
+    if(aim->HasBones()) {
+        ExportSkin(*mAsset, aim, m, b);
+    }
 
 		/****************** Compression ******************/
 		///TODO: animation: weights, joints.
@@ -753,9 +810,12 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     //-------------------------------------------------------
     // Extract rotation parameter data
     if(nodeChannel->mNumRotationKeys > 0) {
-        C_STRUCT aiQuaternion* rotationData = new aiQuaternion[nodeChannel->mNumRotationKeys];
+        vec4* rotationData = new vec4[nodeChannel->mNumRotationKeys];
         for (size_t i = 0; i < nodeChannel->mNumRotationKeys; ++i) {
-            rotationData[i] = nodeChannel->mRotationKeys[i].mValue;
+            rotationData[i][0] = nodeChannel->mRotationKeys[i].mValue.x;
+            rotationData[i][1] = nodeChannel->mRotationKeys[i].mValue.y;
+            rotationData[i][2] = nodeChannel->mRotationKeys[i].mValue.z;
+            rotationData[i][3] = nodeChannel->mRotationKeys[i].mValue.w;
         }
 
         Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumRotationKeys, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);

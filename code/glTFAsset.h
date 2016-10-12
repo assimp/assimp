@@ -852,7 +852,7 @@ namespace glTF
     {
         Nullable<mat4> bindShapeMatrix;       //!< Floating-point 4x4 transformation matrix stored in column-major order.
         Ref<Accessor> inverseBindMatrices;    //!< The ID of the accessor containing the floating-point 4x4 inverse-bind matrices.
-        std::vector<std::string/*Ref<Node>*/> jointNames;    //!< Joint names of the joints (nodes with a jointName property) in this skin.
+        std::vector<Ref<Node>> jointNames;    //!< Joint names of the joints (nodes with a jointName property) in this skin.
         std::string name;                     //!< The user-defined name of this object.
 
         Skin() {}

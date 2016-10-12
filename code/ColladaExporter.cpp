@@ -1308,12 +1308,12 @@ int getDepthOfBone(const aiNode* node, int depth)
 const aiNode* ColladaExporter::getRootOfController(const aiMesh* mesh)
 {
     aiNode* root = mScene->mRootNode;
-    std::unordered_multimap<int, aiNode*> controllerBones;
+    std::map<int, aiNode*> controllerBones;
     for (unsigned int i = 0; i < mesh->mNumBones; ++i)
     {
         aiNode* boneNode = root->FindNode(mesh->mBones[i]->mName);
         int d = getDepthOfBone(boneNode, 0);
-        controllerBones.emplace(d, boneNode);
+        controllerBones[d] = boneNode;
     }
     return controllerBones.begin()->second;
 }

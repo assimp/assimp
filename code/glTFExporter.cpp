@@ -446,10 +446,12 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
         nodeRef->jointName = nodeRef->id;  //"joint_" + std::to_string(idx_bone);
 
+        unsigned int jointNamesIndex;
         bool addJointToJointNames = true;
         for (int idx_joint = 0; idx_joint < skinRef->jointNames.size(); ++idx_joint) {
             if (skinRef->jointNames[idx_joint]->jointName.compare(nodeRef->jointName) == 0) {
                 addJointToJointNames = false;
+                jointNamesIndex = idx_joint;
             }
         }
 
@@ -460,6 +462,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
             aiMatrix4x4 tmpMatrix4;
             CopyValue(aib->mOffsetMatrix, tmpMatrix4);
             inverseBindMatricesData.push_back(tmpMatrix4);
+            jointNamesIndex = inverseBindMatricesData.size() - 1;
         }
 
         // aib->mWeights   =====>  vertexWeightData
@@ -470,7 +473,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
             // A vertex can only have at most four joint weights. Ignore all others.
             if (jointsPerVertex[vertexId] > 3) { continue; }
 
-            vertexJointData[vertexId][jointsPerVertex[vertexId]] = idx_bone;
+            vertexJointData[vertexId][jointsPerVertex[vertexId]] = jointNamesIndex;
             vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
 
             jointsPerVertex[vertexId] += 1;
@@ -726,7 +729,6 @@ void glTFExporter::ExportMeshes()
     for (int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
         CopyValue(inverseBindMatricesData[idx_joint], invBindMatrixData[idx_joint]);
     }
-
 
     Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b, inverseBindMatricesData.size(), invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
     if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;

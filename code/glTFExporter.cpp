@@ -164,6 +164,14 @@ static void CopyValue(const aiMatrix4x4& v, glTF::mat4& o)
     o[12] = v.a4; o[13] = v.b4; o[14] = v.c4; o[15] = v.d4;
 }
 
+static void CopyValue(const aiMatrix4x4& v, aiMatrix4x4& o)
+{
+    o.a1 = v.a1; o.a2 = v.a2; o.a3 = v.a3; o.a4 = v.a4;
+    o.b1 = v.b1; o.b2 = v.b2; o.b3 = v.b3; o.b4 = v.b4;
+    o.c1 = v.c1; o.c2 = v.c2; o.c3 = v.c3; o.c4 = v.c4;
+    o.d1 = v.d1; o.d2 = v.d2; o.d3 = v.d3; o.d4 = v.d4;
+}
+
 static void IdentityMatrix4(glTF::mat4& o)
 {
     o[ 0] = 1; o[ 1] = 0; o[ 2] = 0; o[ 3] = 0;
@@ -412,18 +420,11 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
     return parentNodeRef;
 }
 
-void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef)
+void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef, Ref<Skin>& skinRef, std::vector<aiMatrix4x4>& inverseBindMatricesData)
 {
     if (aim->mNumBones < 1) {
         return;
     }
-
-    std::string skinName = aim->mName.C_Str();
-    skinName = mAsset.FindUniqueID(skinName, "skin");
-    Ref<Skin> skinRef = mAsset.skins.Create(skinName);
-    skinRef->name = skinName;
-
-    mat4* inverseBindMatricesData = new mat4[aim->mNumBones];
 
     // Store the vertex joint and weight data.
     vec4* vertexJointData = new vec4[aim->mNumVertices];
@@ -443,16 +444,23 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
         // aib->mName   =====>  skinRef->jointNames
         // Find the node with id = mName.
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
-        nodeRef->jointName = "joint_" + std::to_string(idx_bone);
-        skinRef->jointNames.push_back(nodeRef);
+        nodeRef->jointName = nodeRef->id;  //"joint_" + std::to_string(idx_bone);
 
-        // Identity Matrix   =====>  skinRef->bindShapeMatrix
-        // Temporary. Hard-coded identity matrix here
-        skinRef->bindShapeMatrix.isPresent = true;
-        IdentityMatrix4(skinRef->bindShapeMatrix.value);
+        bool addJointToJointNames = true;
+        for (int idx_joint = 0; idx_joint < skinRef->jointNames.size(); ++idx_joint) {
+            if (skinRef->jointNames[idx_joint]->jointName.compare(nodeRef->jointName) == 0) {
+                addJointToJointNames = false;
+            }
+        }
 
-        // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
-        CopyValue(aib->mOffsetMatrix, inverseBindMatricesData[idx_bone]);
+        if (addJointToJointNames) {
+            skinRef->jointNames.push_back(nodeRef);
+
+            // aib->mOffsetMatrix   =====>  skinRef->inverseBindMatrices
+            aiMatrix4x4 tmpMatrix4;
+            CopyValue(aib->mOffsetMatrix, tmpMatrix4);
+            inverseBindMatricesData.push_back(tmpMatrix4);
+        }
 
         // aib->mWeights   =====>  vertexWeightData
         for (unsigned int idx_weights = 0; idx_weights < aib->mNumWeights; ++idx_weights) {
@@ -470,27 +478,12 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
 
     } // End: for-loop mNumMeshes
 
-    // Create the Accessor for skinRef->inverseBindMatrices
-    Ref<Accessor> invBindMatrixAccessor = ExportData(mAsset, skinName, bufferRef, aim->mNumBones, inverseBindMatricesData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
-    if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
-
-
     Mesh::Primitive& p = meshRef->primitives.back();
-    Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinName, bufferRef, aim->mNumVertices, vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinRef->id, bufferRef, aim->mNumVertices, vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
     if (vertexJointAccessor) p.attributes.joint.push_back(vertexJointAccessor);
 
-    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinName, bufferRef, aim->mNumVertices, vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinRef->id, bufferRef, aim->mNumVertices, vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
     if (vertexWeightAccessor) p.attributes.weight.push_back(vertexWeightAccessor);
-
-
-    // Find node that contains this mesh and add "skeletons" and "skin" attributes to that node.
-    Ref<Node> rootNode = mAsset.nodes.Get(unsigned(0));
-    Ref<Node> meshNode;
-    FindMeshNode(rootNode, meshNode, meshRef->id);
-
-    Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
-    meshNode->skeletons.push_back(rootJoint);
-    meshNode->skin = skinRef;
 }
 
 void glTFExporter::ExportMeshes()
@@ -519,6 +512,20 @@ void glTFExporter::ExportMeshes()
     if (!b) {
        b = mAsset->buffers.Create(bufferId);
     }
+
+    //----------------------------------------
+    // For the skin
+    std::string skinName = mAsset->FindUniqueID("skin", "skin");
+    Ref<Skin> skinRef = mAsset->skins.Create(skinName);
+    skinRef->name = skinName;
+    // std::vector<glTF::mat4> inverseBindMatricesData;
+    std::vector<aiMatrix4x4> inverseBindMatricesData;
+
+    // Identity Matrix   =====>  skinRef->bindShapeMatrix
+    // Temporary. Hard-coded identity matrix here
+    skinRef->bindShapeMatrix.isPresent = true;
+    IdentityMatrix4(skinRef->bindShapeMatrix.value);
+    //----------------------------------------
 
 	for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
 		const aiMesh* aim = mScene->mMeshes[idx_mesh];
@@ -616,7 +623,7 @@ void glTFExporter::ExportMeshes()
 
     /*************** Skins ****************/
     if(aim->HasBones()) {
-        ExportSkin(*mAsset, aim, m, b);
+        ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData);
     }
 
 		/****************** Compression ******************/
@@ -711,6 +718,29 @@ void glTFExporter::ExportMeshes()
 #endif
 		}// if(comp_allow)
 	}// for (unsigned int i = 0; i < mScene->mNumMeshes; ++i)
+
+    //----------------------------------------
+    // Finish the skin
+    // Create the Accessor for skinRef->inverseBindMatrices
+    mat4* invBindMatrixData = new mat4[inverseBindMatricesData.size()];
+    for (int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
+        CopyValue(inverseBindMatricesData[idx_joint], invBindMatrixData[idx_joint]);
+    }
+
+
+    Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b, inverseBindMatricesData.size(), invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+    if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
+
+    // Find node that contains this mesh and add "skeletons" and "skin" attributes to that node.
+    Ref<Node> rootNode = mAsset->nodes.Get(unsigned(0));
+    Ref<Node> meshNode;
+    std::string meshID = mAsset->meshes.Get(unsigned(0))->id;
+    FindMeshNode(rootNode, meshNode, meshID);
+
+    Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
+    meshNode->skeletons.push_back(rootJoint);
+    meshNode->skin = skinRef;
+    //----------------------------------------
 }
 
 /*

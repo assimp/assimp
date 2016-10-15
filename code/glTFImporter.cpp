@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include "glTFImporter.h"
-
 #include "StringComparison.h"
+#include "StringUtils.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -285,7 +285,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 				else
 #endif
 				{
-					throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"" + std::to_string(cur_ext->Type) +
+					throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"" + to_string(cur_ext->Type) +
 											"\"), only Open3DGC is supported.");
 				}
 			}

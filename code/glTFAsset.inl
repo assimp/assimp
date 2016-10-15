@@ -1003,8 +1003,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 	{
 		// size = number_of_elements * components_per_element * size_of_component. See float attributes note.
 		size_t tval = ifs.GetNIntAttribute(idx);
-
-		switch(ifs.GetIntAttributeType(idx))
+		switch( ifs.GetIntAttributeType( idx ) )
 		{
 			default:
 				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + std::to_string(ifs.GetIntAttributeType(idx)));

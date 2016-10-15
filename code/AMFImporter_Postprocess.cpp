@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, Assimp.
 #include "SceneCombiner.h"
 #include "StandardShapes.h"
+#include "StringUtils.h"
 
 // Header files, stdlib.
 #include <algorithm>
@@ -950,7 +951,7 @@ nl_clean_loop:
 		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 		for(const SPP_Texture& tex_convd: mTexture_Converted)
 		{
-			const aiString texture_id(AI_EMBEDDED_TEXNAME_PREFIX + std::to_string(idx));
+			const aiString texture_id(AI_EMBEDDED_TEXNAME_PREFIX + to_string(idx));
 			const int mode = aiTextureOp_Multiply;
 			const int repeat = tex_convd.Tiled ? 1 : 0;
 

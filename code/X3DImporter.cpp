@@ -795,7 +795,7 @@ void X3DImporter::GeometryHelper_Make_Arc2D(const float pStartAngle, const float
     {
         Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pStartAngle" );
     }
-    if ( ( pEndAngle < -AI_MATH_TWO_PI_F ) || ( pEndAngle > AI_MATH_TWO_PI_F ) ) 
+    if ( ( pEndAngle < -AI_MATH_TWO_PI_F ) || ( pEndAngle > AI_MATH_TWO_PI_F ) )
     {
         Throw_ArgOutOfRange( "GeometryHelper_Make_Arc2D.pEndAngle" );
     }
@@ -1078,8 +1078,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 			// check indices array count.
 			if(pColors.size() < pMesh.mNumVertices)
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Vertices count(" +
-										std::to_string(pMesh.mNumVertices) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + to_string(pColors.size()) + ") can not be less than Vertices count(" +
+										to_string(pMesh.mNumVertices) +  ").");
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
@@ -1096,8 +1096,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 			// check indices array count.
 			if(pColorIdx.size() < pMesh.mNumFaces)
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + std::to_string(pColorIdx.size()) +
-										") can not be less than Faces count(" + std::to_string(pMesh.mNumFaces) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + to_string(pColorIdx.size()) +
+										") can not be less than Faces count(" + to_string(pMesh.mNumFaces) +  ").");
 			}
 			// create list with colors for every vertex using faces indices.
 			col_tgt_arr.resize(pMesh.mNumFaces);
@@ -1116,8 +1116,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 			// check indices array count.
 			if(pColors.size() < pMesh.mNumFaces)
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Faces count(" +
-										std::to_string(pMesh.mNumFaces) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors count(" + to_string(pColors.size()) + ") can not be less than Faces count(" +
+										to_string(pMesh.mNumFaces) +  ").");
 			}
 			// create list with colors for every vertex using faces indices.
 			col_tgt_arr.resize(pMesh.mNumFaces);
@@ -1273,7 +1273,7 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<int32_
 	for(size_t fi = 0, fi_e = faces.size(); fi < fi_e; fi++)
 	{
 		if(pMesh.mFaces[fi].mNumIndices != faces.at(fi).mNumIndices)
-			throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: " + std::to_string(fi) + ".");
+			throw DeadlyImportError("Number of indices in texture face and mesh face must be equal. Invalid face index: " + to_string(fi) + ".");
 
 		for(size_t ii = 0; ii < pMesh.mFaces[fi].mNumIndices; ii++)
 		{

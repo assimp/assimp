@@ -1181,7 +1181,7 @@ void ColladaLoader::CreateAnimation( aiScene* pScene, const ColladaParser& pPars
                       const ai_real last_eval_angle = last_key_angle + (cur_key_angle - last_key_angle) * (time - last_key_time) / (cur_key_time - last_key_time);
                       const ai_real delta = std::abs(cur_key_angle - last_eval_angle);
 				      if (delta >= 180.0) {
-						const int subSampleCount = static_cast<int>(floorf(delta / 90.0));
+						const int subSampleCount = static_cast<int>(std::floor(delta / 90.0));
 						if (cur_key_time != time) {
 							const ai_real nextSampleTime = time + (cur_key_time - time) / subSampleCount;
 							nextTime = std::min(nextTime, nextSampleTime);

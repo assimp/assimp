@@ -775,7 +775,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListS(const int pAttrIdx, std::list<
 
 aiVector3D X3DImporter::GeometryHelper_Make_Point2D(const float pAngle, const float pRadius)
 {
-	return aiVector3D(pRadius * cosf(pAngle), pRadius * sinf(pAngle), 0);
+	return aiVector3D(pRadius * std::cos(pAngle), pRadius * std::sin(pAngle), 0);
 }
 
 void X3DImporter::GeometryHelper_Make_Arc2D(const float pStartAngle, const float pEndAngle, const float pRadius, size_t pNumSegments,

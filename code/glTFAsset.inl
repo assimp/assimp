@@ -292,14 +292,14 @@ inline void Buffer::Read(Value& obj, Asset& r)
             this->mData.reset(data);
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + std::to_string(statedLength) +
-                    " bytes, but found " + std::to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
+                    " bytes, but found " + to_string(dataURI.dataLength));
             }
         }
         else { // assume raw data
             if (statedLength != dataURI.dataLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + std::to_string(statedLength) +
-                                        " bytes, but found " + std::to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
+                                        " bytes, but found " + to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength]);
@@ -991,7 +991,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 
 				break;
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + std::to_string(ifs.GetFloatAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(idx)));
 		}
 
 		tval *=  ifs.GetFloatAttributeDim(idx) * sizeof(o3dgc::Real);// After checking count of objects we can get size of array.
@@ -1006,7 +1006,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 		switch( ifs.GetIntAttributeType( idx ) )
 		{
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + std::to_string(ifs.GetIntAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(idx)));
 		}
 
 		tval *= ifs.GetIntAttributeDim(idx) * sizeof(long);// See float attributes note.
@@ -1045,7 +1045,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 
 				break;
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + std::to_string(ifs.GetFloatAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(idx)));
 		}
 	}
 
@@ -1055,7 +1055,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 		{
 			// ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + std::to_string(ifs.GetIntAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(idx)));
 		}
 	}
 
@@ -1620,6 +1620,4 @@ namespace Util {
 
 }
 
-}
-
-
+} // ns glTF

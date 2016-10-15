@@ -175,7 +175,7 @@ void X3DImporter::Postprocess_BuildLight(const CX3DImporter_NodeElement& pNodeEl
 
 			break;
 		default:
-			throw DeadlyImportError("Postprocess_BuildLight. Unknown type of light: " + std::to_string(pNodeElement.Type) + ".");
+			throw DeadlyImportError("Postprocess_BuildLight. Unknown type of light: " + to_string(pNodeElement.Type) + ".");
 	}
 
 	pSceneLightList.push_back(new_light);
@@ -364,7 +364,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Coordinate)
 				{} // skip because already read when mesh created.
 			else
-				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedLineSet: " + std::to_string((*ch_it)->Type) + ".");
+				throw DeadlyImportError("Postprocess_BuildMesh. Unknown child of IndexedLineSet: " + to_string((*ch_it)->Type) + ".");
 		}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 
 		return;// mesh is build, nothing to do anymore.

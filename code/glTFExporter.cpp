@@ -204,30 +204,29 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     // calculate min and max values
     {
         // Allocate and initialize with large values.
-        float float_MAX = 10000000000000;
-        for (int i = 0 ; i < numCompsOut ; i++) {
+        float float_MAX = 10000000000000.0f;
+        for (unsigned int i = 0 ; i < numCompsOut ; i++) {
             acc->min.push_back( float_MAX);
             acc->max.push_back(-float_MAX);
         }
 
         // Search and set extreme values.
         float valueTmp;
-        for (int i = 0 ; i < count       ; i++) {
-        for (int j = 0 ; j < numCompsOut ; j++) {
+        for (unsigned int i = 0 ; i < count       ; i++) {
+            for (unsigned int j = 0 ; j < numCompsOut ; j++) {
+                if (numCompsOut == 1) {
+                  valueTmp = static_cast<unsigned short*>(data)[i];
+                } else {
+                  valueTmp = static_cast<aiVector3D*>(data)[i][j];
+                }
 
-            if (numCompsOut == 1) {
-              valueTmp = static_cast<unsigned short*>(data)[i];
-            } else {
-              valueTmp = static_cast<aiVector3D*>(data)[i][j];
+                if (valueTmp < acc->min[j]) {
+                    acc->min[j] = valueTmp;
+                }
+                if (valueTmp > acc->max[j]) {
+                    acc->max[j] = valueTmp;
+                }
             }
-
-            if (valueTmp < acc->min[j]) {
-                acc->min[j] = valueTmp;
-            }
-            if (valueTmp > acc->max[j]) {
-                acc->max[j] = valueTmp;
-            }
-        }
         }
     }
 
@@ -449,7 +448,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
         // aib->mName   =====>  skinRef->jointNames
         // Find the node with id = mName.
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
-        nodeRef->jointName = "joint_" + std::to_string(idx_bone);
+        nodeRef->jointName = "joint_" + to_string(idx_bone);
         skinRef->jointNames.push_back(nodeRef);
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix
@@ -840,7 +839,7 @@ void glTFExporter::ExportAnimations()
 
             // It appears that assimp stores this type of animation as multiple animations.
             // where each aiNodeAnim in mChannels animates a specific node.
-            std::string name = nameAnim + "_" + std::to_string(channelIndex);
+            std::string name = nameAnim + "_" + to_string(channelIndex);
             name = mAsset->FindUniqueID(name, "animation");
             Ref<Animation> animRef = mAsset->animations.Create(name);
 

@@ -56,11 +56,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <string>
 
-namespace Assimp
-{
+namespace Assimp {
 
 /// \var aiImporterDesc X3DImporter::Description
-/// Conastant which hold importer description
+/// Constant which holds the importer description
 const aiImporterDesc X3DImporter::Description = {
 	"Extensible 3D(X3D) Importer",
 	"smalcom",
@@ -88,7 +87,7 @@ void X3DImporter::Clear()
 
 X3DImporter::~X3DImporter()
 {
-	if(mReader != nullptr) delete mReader;
+    delete mReader;
 	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
 	Clear();
 }
@@ -115,13 +114,16 @@ bool X3DImporter::FindNodeElement_FromRoot(const std::string& pID, const CX3DImp
 bool X3DImporter::FindNodeElement_FromNode(CX3DImporter_NodeElement* pStartNode, const std::string& pID,
 													const CX3DImporter_NodeElement::EType pType, CX3DImporter_NodeElement** pElement)
 {
-bool found = false;// flag: true - if requested element is found.
+    bool found = false;// flag: true - if requested element is found.
 
 	// Check if pStartNode - this is the element, we are looking for.
 	if((pStartNode->Type == pType) && (pStartNode->ID == pID))
 	{
 		found = true;
-		if(pElement != nullptr) *pElement = pStartNode;
+        if ( pElement != nullptr )
+        {
+            *pElement = pStartNode;
+        }
 
 		goto fne_fn_end;
 	}// if((pStartNode->Type() == pType) && (pStartNode->ID() == pID))
@@ -130,7 +132,10 @@ bool found = false;// flag: true - if requested element is found.
 	for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = pStartNode->Child.begin(); ch_it != pStartNode->Child.end(); ch_it++)
 	{
 		found = FindNodeElement_FromNode(*ch_it, pID, pType, pElement);
-		if(found) break;
+        if ( found )
+        {
+            break;
+        }
 	}// for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = it->Child.begin(); ch_it != it->Child.end(); ch_it++)
 
 fne_fn_end:
@@ -151,7 +156,6 @@ bool X3DImporter::FindNodeElement(const std::string& pID, const CX3DImporter_Nod
 			if(((CX3DImporter_NodeElement_Group*)tnd)->Static)
 			{
 				static_search = true;// Flag found, stop walking up. Node with static flag will holded in tnd variable.
-
 				break;
 			}
 		}
@@ -160,10 +164,14 @@ bool X3DImporter::FindNodeElement(const std::string& pID, const CX3DImporter_Nod
     }// while(tnd != nullptr)
 
     // at now call appropriate search function.
-    if(static_search)
-		return FindNodeElement_FromNode(tnd, pID, pType, pElement);
-	else
-		return FindNodeElement_FromRoot(pID, pType, pElement);
+    if ( static_search )
+    {
+        return FindNodeElement_FromNode( tnd, pID, pType, pElement );
+    }
+    else
+    {
+        return FindNodeElement_FromRoot( pID, pType, pElement );
+    }
 }
 
 /*********************************************************************************************************************************************/
@@ -969,8 +977,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
 	{
 		if(pColors.size() < pMesh.mNumVertices)
 		{
-			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Vertices count(" +
-									std::to_string(pMesh.mNumVertices) +  ").");
+			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + to_string(pColors.size()) + ") can not be less than Vertices count(" +
+									to_string(pMesh.mNumVertices) +  ").");
 		}
 
 		// copy colors to mesh
@@ -981,8 +989,8 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
 	{
 		if(pColors.size() < pMesh.mNumFaces)
 		{
-			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + std::to_string(pColors.size()) + ") can not be less than Faces count(" +
-									std::to_string(pMesh.mNumFaces) +  ").");
+			throw DeadlyImportError("MeshGeometry_AddColor1. Colors count(" + to_string(pColors.size()) + ") can not be less than Faces count(" +
+									to_string(pMesh.mNumFaces) +  ").");
 		}
 
 		// copy colors to mesh
@@ -990,7 +998,10 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
 		for(size_t fi = 0; fi < pMesh.mNumFaces; fi++)
 		{
 			// apply color to all vertices of face
-			for(size_t vi = 0, vi_e = pMesh.mFaces[fi].mNumIndices; vi < vi_e; vi++) pMesh.mColors[0][pMesh.mFaces[fi].mIndices[vi]] = *col_it;
+            for ( size_t vi = 0, vi_e = pMesh.mFaces[ fi ].mNumIndices; vi < vi_e; vi++ )
+            {
+                pMesh.mColors[ 0 ][ pMesh.mFaces[ fi ].mIndices[ vi ] ] = *col_it;
+            }
 
 			col_it++;
 		}
@@ -1038,16 +1049,25 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 			// check indices array count.
 			if(pColorIdx.size() < pCoordIdx.size())
 			{
-				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + std::to_string(pColorIdx.size()) +
-										") can not be less than Coords inidces count(" + std::to_string(pCoordIdx.size()) +  ").");
+				throw DeadlyImportError("MeshGeometry_AddColor2. Colors indices count(" + to_string(pColorIdx.size()) +
+										") can not be less than Coords inidces count(" + to_string(pCoordIdx.size()) +  ").");
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
 			for(std::list<int32_t>::const_iterator colidx_it = pColorIdx.begin(), coordidx_it = pCoordIdx.begin(); colidx_it != pColorIdx.end(); colidx_it++, coordidx_it++)
 			{
-				if(*colidx_it == (-1)) continue;// skip faces delimiter
-				if((unsigned int)(*coordidx_it) > pMesh.mNumVertices) throw DeadlyImportError("MeshGeometry_AddColor2. Coordinate idx is out of range.");
-				if((unsigned int)*colidx_it > pMesh.mNumVertices) throw DeadlyImportError("MeshGeometry_AddColor2. Color idx is out of range.");
+                if ( *colidx_it == ( -1 ) )
+                {
+                    continue;// skip faces delimiter
+                }
+                if ( ( unsigned int ) ( *coordidx_it ) > pMesh.mNumVertices )
+                {
+                    throw DeadlyImportError( "MeshGeometry_AddColor2. Coordinate idx is out of range." );
+                }
+                if ( ( unsigned int ) *colidx_it > pMesh.mNumVertices )
+                {
+                    throw DeadlyImportError( "MeshGeometry_AddColor2. Color idx is out of range." );
+                }
 
 				col_tgt_arr[*coordidx_it] = col_arr_copy[*colidx_it];
 			}
@@ -1063,7 +1083,10 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
-			for(size_t i = 0; i < pMesh.mNumVertices; i++) col_tgt_arr[i] = col_arr_copy[i];
+            for ( size_t i = 0; i < pMesh.mNumVertices; i++ )
+            {
+                col_tgt_arr[ i ] = col_arr_copy[ i ];
+            }
 		}// if(pColorIdx.size() > 0) else
 	}// if(pColorPerVertex)
 	else
@@ -1149,8 +1172,8 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<int32_t>
 		for(size_t i = 0; (i < pMesh.mNumVertices) && (i < tind.size()); i++)
 		{
 			if(tind[i] >= norm_arr_copy.size())
-				throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + std::to_string(tind[i]) +
-										") is out of range. Normals count: " + std::to_string(norm_arr_copy.size()) + ".");
+				throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + to_string(tind[i]) +
+										") is out of range. Normals count: " + to_string(norm_arr_copy.size()) + ".");
 
 			pMesh.mNormals[i] = norm_arr_copy[tind[i]];
 		}
@@ -1289,10 +1312,8 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVect
 
 aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::list<int32_t>& pCoordIdx, const std::list<aiVector3D>& pVertices) const
 {
-    aiMesh* tmesh( nullptr );
     std::vector<aiFace> faces;
     unsigned int prim_type = 0;
-    size_t ts;
 
 	// create faces array from input string with vertices indices.
 	GeometryHelper_CoordIdxStr2FacesArr(pCoordIdx, faces, prim_type);
@@ -1304,8 +1325,8 @@ aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::list<int32_t>& pCoordIdx
 	//
 	// Create new mesh and copy geometry data.
 	//
-	tmesh = new aiMesh;
-	ts = faces.size();
+    aiMesh *tmesh = new aiMesh;
+    size_t ts = faces.size();
 	// faces
 	tmesh->mFaces = new aiFace[ts];
 	tmesh->mNumFaces = ts;
@@ -1458,7 +1479,7 @@ void X3DImporter::ParseNode_Head()
 			{
 				XML_CheckNode_MustBeEmpty();
 
-				// adding metada from <head> as MetaString from <Scene>
+				// adding metadata from <head> as MetaString from <Scene>
 				CX3DImporter_NodeElement_MetaString* ms = new CX3DImporter_NodeElement_MetaString(NodeElement_Cur);
 
 				ms->Name = mReader->getAttributeValueSafe("name");
@@ -1467,8 +1488,10 @@ void X3DImporter::ParseNode_Head()
 				{
 					ms->Value.push_back(mReader->getAttributeValueSafe("content"));
 					NodeElement_List.push_back(ms);
-					if(NodeElement_Cur != nullptr) NodeElement_Cur->Child.push_back(ms);
-
+                    if ( NodeElement_Cur != nullptr )
+                    {
+                        NodeElement_Cur->Child.push_back( ms );
+                    }
 				}
 			}// if(XML_CheckNode_NameEqual("meta"))
 		}// if(mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -1477,14 +1500,15 @@ void X3DImporter::ParseNode_Head()
 			if(XML_CheckNode_NameEqual("head"))
 			{
 				close_found = true;
-
 				break;
 			}
 		}// if(mReader->getNodeType() == irr::io::EXN_ELEMENT) else
 	}// while(mReader->read())
 
-	if(!close_found) Throw_CloseNotFound("head");
-
+    if ( !close_found )
+    {
+        Throw_CloseNotFound( "head" );
+    }
 }
 
 void X3DImporter::ParseNode_Scene()
@@ -1502,10 +1526,10 @@ auto GroupCounter_Decrease = [&](size_t& pCounter, const char* pGroupName) -> vo
 	pCounter--;
 };
 
-const char* GroupName_Group = "Group";
-const char* GroupName_StaticGroup = "StaticGroup";
-const char* GroupName_Transform = "Transform";
-const char* GroupName_Switch = "Switch";
+static const char* GroupName_Group = "Group";
+static const char* GroupName_StaticGroup = "StaticGroup";
+static const char* GroupName_Transform = "Transform";
+static const char* GroupName_Switch = "Switch";
 
 bool close_found = false;
 size_t counter_group = 0;
@@ -1551,7 +1575,7 @@ size_t counter_switch = 0;
 				if(mReader->isEmptyElement()) GroupCounter_Decrease(counter_switch, GroupName_Switch);
 			}
 			else if(XML_CheckNode_NameEqual("DirectionalLight"))
-			{
+		{
 				ParseNode_Lighting_DirectionalLight();
 			}
 			else if(XML_CheckNode_NameEqual("PointLight"))

@@ -420,13 +420,13 @@ void ColladaLoader::BuildCamerasForNode( const ColladaParser& pParser, const Col
             out->mHorizontalFOV = srcCamera->mHorFov;
 
             if (srcCamera->mVerFov != 10e10f && srcCamera->mAspect == 10e10f) {
-                out->mAspect = tan(AI_DEG_TO_RAD(srcCamera->mHorFov)) /
-                    tan(AI_DEG_TO_RAD(srcCamera->mVerFov));
+                out->mAspect = std::tan(AI_DEG_TO_RAD(srcCamera->mHorFov)) /
+                    std::tan(AI_DEG_TO_RAD(srcCamera->mVerFov));
             }
         }
         else if (srcCamera->mAspect != 10e10f && srcCamera->mVerFov != 10e10f)  {
-            out->mHorizontalFOV = 2.0f * AI_RAD_TO_DEG(atan(srcCamera->mAspect *
-                tan(AI_DEG_TO_RAD(srcCamera->mVerFov) * 0.5f)));
+            out->mHorizontalFOV = 2.0f * AI_RAD_TO_DEG(std::atan(srcCamera->mAspect *
+                std::tan(AI_DEG_TO_RAD(srcCamera->mVerFov) * 0.5f)));
         }
 
         // Collada uses degrees, we use radians

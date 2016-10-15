@@ -367,21 +367,21 @@ inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector
 	// Use a small epsilon to solve floating-point inaccuracies
     const TReal epsilon = 10e-3f;
 
-	pRotation.y  = asin(vCols[2].x);// D. Angle around oY.
+	pRotation.y  = std::asin(vCols[2].x);// D. Angle around oY.
 
-	TReal C = cos(pRotation.y);
+	TReal C = std::cos(pRotation.y);
 
-	if(fabs(C) > epsilon)
+	if(std::fabs(C) > epsilon)
 	{
 		// Finding angle around oX.
 		TReal tan_x =  vCols[2].z / C;// A
 		TReal tan_y = -vCols[2].y / C;// B
 
-		pRotation.x = atan2(tan_y, tan_x);
+		pRotation.x = std::atan2(tan_y, tan_x);
 		// Finding angle around oZ.
 		tan_x =  vCols[0].x / C;// E
 		tan_y = -vCols[1].x / C;// F
-		pRotation.z = atan2(tan_y, tan_x);
+		pRotation.z = std::atan2(tan_y, tan_x);
 	}
 	else
 	{// oY is fixed.
@@ -391,7 +391,7 @@ inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector
 		TReal tan_x = vCols[1].y;// -BDF+AE => E
 		TReal tan_y = vCols[0].y;//  BDE+AF => F
 
-		pRotation.z = atan2(tan_y, tan_x);
+		pRotation.z = std::atan2(tan_y, tan_x);
 	}
 }
 
@@ -407,14 +407,14 @@ aiQuaterniont<TReal> pRotation;
 	pRotation.Normalize();
 
 	TReal angle_cos = pRotation.w;
-	TReal angle_sin = sqrt(1.0f - angle_cos * angle_cos);
+	TReal angle_sin = std::sqrt(1.0f - angle_cos * angle_cos);
 
-	pRotationAngle = acos(angle_cos) * 2;
+	pRotationAngle = std::acos(angle_cos) * 2;
 
 	// Use a small epsilon to solve floating-point inaccuracies
     const TReal epsilon = 10e-3f;
 
-	if(fabs(angle_sin) < epsilon) angle_sin = 1;
+	if(std::fabs(angle_sin) < epsilon) angle_sin = 1;
 
 	pRotationAxis.x = pRotation.x / angle_sin;
 	pRotationAxis.y = pRotation.y / angle_sin;

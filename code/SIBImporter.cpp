@@ -710,8 +710,8 @@ static void ReadLightInfo(aiLight* light, StreamReaderLE* stream)
     //    OpenGL: I = cos(angle)^E
     //   Solving: angle = acos(I^(1/E))
     ai_real E = 1.0 / std::max(spotExponent, (ai_real)0.00001);
-    ai_real inner = acos(pow((ai_real)0.99, E));
-    ai_real outer = acos(pow((ai_real)0.01, E));
+    ai_real inner = std::acos(std::pow((ai_real)0.99, E));
+    ai_real outer = std::acos(std::pow((ai_real)0.01, E));
 
     // Apply the cutoff.
     outer = std::min(outer, AI_DEG_TO_RAD(spotCutoff));

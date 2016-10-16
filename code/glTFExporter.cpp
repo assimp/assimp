@@ -517,17 +517,23 @@ void glTFExporter::ExportMeshes()
     }
 
     //----------------------------------------
-    // For the skin
-    std::string skinName = mAsset->FindUniqueID("skin", "skin");
-    Ref<Skin> skinRef = mAsset->skins.Create(skinName);
-    skinRef->name = skinName;
-    // std::vector<glTF::mat4> inverseBindMatricesData;
-    std::vector<aiMatrix4x4> inverseBindMatricesData;
+    // Initialize variables for the skin
+    bool createSkin = false;
+    for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
+        const aiMesh* aim = mScene->mMeshes[idx_mesh];
+        if(aim->HasBones()) {
+            createSkin = true;
+            break;
+        }
+    }
 
-    // Identity Matrix   =====>  skinRef->bindShapeMatrix
-    // Temporary. Hard-coded identity matrix here
-    skinRef->bindShapeMatrix.isPresent = true;
-    IdentityMatrix4(skinRef->bindShapeMatrix.value);
+    Ref<Skin> skinRef;
+    std::string skinName = mAsset->FindUniqueID("skin", "skin");
+    std::vector<aiMatrix4x4> inverseBindMatricesData;
+    if(createSkin) {
+        skinRef = mAsset->skins.Create(skinName);
+        skinRef->name = skinName;
+    }
     //----------------------------------------
 
 	for (unsigned int idx_mesh = 0; idx_mesh < mScene->mNumMeshes; ++idx_mesh) {
@@ -725,24 +731,30 @@ void glTFExporter::ExportMeshes()
     //----------------------------------------
     // Finish the skin
     // Create the Accessor for skinRef->inverseBindMatrices
-    mat4* invBindMatrixData = new mat4[inverseBindMatricesData.size()];
-    for (int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
-        CopyValue(inverseBindMatricesData[idx_joint], invBindMatrixData[idx_joint]);
+    if (createSkin) {
+        mat4* invBindMatrixData = new mat4[inverseBindMatricesData.size()];
+        for (int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
+            CopyValue(inverseBindMatricesData[idx_joint], invBindMatrixData[idx_joint]);
+        }
+
+        Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b, inverseBindMatricesData.size(), invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+        if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
+
+        // Identity Matrix   =====>  skinRef->bindShapeMatrix
+        // Temporary. Hard-coded identity matrix here
+        skinRef->bindShapeMatrix.isPresent = true;
+        IdentityMatrix4(skinRef->bindShapeMatrix.value);
+
+        // Find node that contains this mesh and add "skeletons" and "skin" attributes to that node.
+        Ref<Node> rootNode = mAsset->nodes.Get(unsigned(0));
+        Ref<Node> meshNode;
+        std::string meshID = mAsset->meshes.Get(unsigned(0))->id;
+        FindMeshNode(rootNode, meshNode, meshID);
+
+        Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
+        meshNode->skeletons.push_back(rootJoint);
+        meshNode->skin = skinRef;
     }
-
-    Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b, inverseBindMatricesData.size(), invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
-    if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
-
-    // Find node that contains this mesh and add "skeletons" and "skin" attributes to that node.
-    Ref<Node> rootNode = mAsset->nodes.Get(unsigned(0));
-    Ref<Node> meshNode;
-    std::string meshID = mAsset->meshes.Get(unsigned(0))->id;
-    FindMeshNode(rootNode, meshNode, meshID);
-
-    Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
-    meshNode->skeletons.push_back(rootJoint);
-    meshNode->skin = skinRef;
-    //----------------------------------------
 }
 
 /*

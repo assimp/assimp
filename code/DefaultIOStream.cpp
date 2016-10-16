@@ -120,7 +120,7 @@ size_t DefaultIOStream::FileSize() const
         //
         // See here for details:
         // https://www.securecoding.cert.org/confluence/display/seccode/FIO19-C.+Do+not+use+fseek()+and+ftell()+to+compute+the+size+of+a+regular+file
-#if defined _WIN32 && !defined __GNUC__
+#if defined _WIN32
         struct __stat64 fileStat;
         int err = _stat64(  mFilename.c_str(), &fileStat );
         if (0 != err)

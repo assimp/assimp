@@ -10,6 +10,7 @@
 
 // Header files, Assimp.
 #include "Exceptional.h"
+#include "StringUtils.h"
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
 

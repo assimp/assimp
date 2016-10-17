@@ -58,8 +58,12 @@ struct aiMaterial;
 
 namespace glTF
 {
+    template<class T>
+    class Ref;
+
     class Asset;
     struct TexProperty;
+    struct Node;
 }
 
 namespace Assimp
@@ -98,7 +102,8 @@ namespace Assimp
         void ExportMetadata();
         void ExportMaterials();
         void ExportMeshes();
-        unsigned int ExportNode(const aiNode* node);
+        unsigned int ExportNodeHierarchy(const aiNode* n);
+        unsigned int ExportNode(const aiNode* node, glTF::Ref<glTF::Node>& parent);
         void ExportScene();
         void ExportAnimations();
     };

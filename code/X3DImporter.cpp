@@ -784,7 +784,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListS(const int pAttrIdx, std::list<
 
 aiVector3D X3DImporter::GeometryHelper_Make_Point2D(const float pAngle, const float pRadius)
 {
-	return aiVector3D(pRadius * cosf(pAngle), pRadius * sinf(pAngle), 0);
+	return aiVector3D(pRadius * std::cos(pAngle), pRadius * std::sin(pAngle), 0);
 }
 
 void X3DImporter::GeometryHelper_Make_Arc2D(const float pStartAngle, const float pEndAngle, const float pRadius, size_t pNumSegments,
@@ -805,7 +805,7 @@ void X3DImporter::GeometryHelper_Make_Arc2D(const float pStartAngle, const float
     }
 
 	// calculate arc angle and check type of arc
-	float angle_full = fabs(pEndAngle - pStartAngle);
+	float angle_full = std::fabs(pEndAngle - pStartAngle);
     if ( ( angle_full > AI_MATH_TWO_PI_F ) || ( angle_full == 0.0f ) )
     {
         angle_full = AI_MATH_TWO_PI_F;

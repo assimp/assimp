@@ -501,7 +501,7 @@ aiMatrix4x4 XGLImporter::ReadTrafo()
     up.Normalize();
 
     right = forward ^ up;
-    if (fabs(up * forward) > 1e-4) {
+    if (std::fabs(up * forward) > 1e-4) {
         // this is definitely wrong - a degenerate coordinate space ruins everything
         // so subtitute identity transform.
         LogError("<forward> and <up> vectors in <transform> are skewing, ignoring trafo");

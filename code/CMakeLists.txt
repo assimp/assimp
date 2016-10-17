@@ -128,6 +128,7 @@ SET( Common_SRCS
   DefaultIOStream.h
   DefaultIOSystem.cpp
   DefaultIOSystem.h
+  CInterfaceIOWrapper.cpp
   CInterfaceIOWrapper.h
   Hash.h
   Importer.cpp

@@ -185,7 +185,11 @@ void ObjFileParser::parseFile()
                 std::string name;
 
                 getName(m_DataIt, m_DataItEnd, name);
-                name = name.substr(0, name.find(" "));
+
+                size_t nextSpace = name.find(" ");
+                if (nextSpace != std::string::npos)
+                    name = name.substr(0, nextSpace);
+
                 if (name == "mg")
                     getGroupNumberAndResolution();
                 else if(name == "mtllib")

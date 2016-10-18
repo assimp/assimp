@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <assimp/types.h>
-
+#include <iostream>
 namespace Assimp {
 
 class IOStream;
@@ -91,31 +91,33 @@ public:
         return m_filesize;
     }
 
+    bool readNextBlock() {
+        std::cout << "readNextBlock()\n";
+        m_stream->Seek( m_filePos, aiOrigin_CUR );
+        size_t readLen = m_stream->Read( &m_cache[ 0 ], sizeof( T ), m_cacheSize );
+        if ( readLen == 0 ) {
+            return false;
+        }
+        m_filePos += m_cacheSize;
+        m_cachePos = 0;
+        return true;
+    }
+
     bool getNextLine( std::vector<T> &buffer ) {
         buffer.resize( m_cacheSize );
         ::memset( &buffer[ 0 ], ' ', m_cacheSize );
-        if ( 0 == m_filePos ) {
-            size_t readLen = m_stream->Read( &m_cache[ 0 ], sizeof( T ), m_cacheSize );
-            if ( readLen == 0 ) {
-                return false;
-            }
-            m_filePos += m_cacheSize;
-        }
 
-        size_t i=0;
+        if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
+            readNextBlock();
+        }
+        size_t i = 0;
         while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
-            if ( m_cachePos + 1 == m_cacheSize ) {
-                m_stream->Seek(m_filePos, aiOrigin_CUR );
-                size_t readLen = m_stream->Read( &m_cache[ 0 ], sizeof( T ), m_cacheSize );
-                if ( readLen == 0 ) {
-                    return false;
-                }
-                m_filePos += m_cacheSize;
-                m_cachePos = 0;
-            }
             buffer[ i ] = m_cache[ m_cachePos ];
             m_cachePos++;
             i++;
+            if ( m_cachePos >= m_cacheSize ) {
+                readNextBlock();
+            }
         }
         buffer[ i ]='\n';
         m_cachePos++;

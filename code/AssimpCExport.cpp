@@ -70,11 +70,11 @@ ASSIMP_API const aiExportFormatDesc* aiGetExportFormatDescription( size_t index)
     }
 
     aiExportFormatDesc *desc = new aiExportFormatDesc;
-    desc->description = new char[ strlen( orig->description ) + 1 ];
+    desc->description = new char[ strlen( orig->description ) + 1 ]();
     ::strncpy( (char*) desc->description, orig->description, strlen( orig->description ) );
-    desc->fileExtension = new char[ strlen( orig->fileExtension ) + 1 ];
+    desc->fileExtension = new char[ strlen( orig->fileExtension ) + 1 ]();
     ::strncpy( ( char* ) desc->fileExtension, orig->fileExtension, strlen( orig->fileExtension ) );
-    desc->id = new char[ strlen( orig->id ) + 1 ];
+    desc->id = new char[ strlen( orig->id ) + 1 ]();
     ::strncpy( ( char* ) desc->id, orig->id, strlen( orig->id ) );
 
     return desc;

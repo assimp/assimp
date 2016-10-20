@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------------------------------
 
-Copyright (c) 2006-2008, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -74,14 +74,6 @@ static const aiImporterDesc desc = {
 };
 
 namespace Assimp {
-
-/*
-static void getSupportedExtensions(std::vector<std::string> &supportedExtensions) {
-    supportedExtensions.push_back( ".jpg" );
-    supportedExtensions.push_back( ".png" );
-    supportedExtensions.push_back( ".tga" );
-}
-*/
 
 using namespace Q3BSP;
 
@@ -174,7 +166,7 @@ Q3BSPFileImporter::~Q3BSPFileImporter() {
 bool Q3BSPFileImporter::CanRead( const std::string& rFile, IOSystem* /*pIOHandler*/, bool checkSig ) const
 {
     if(!checkSig) {
-        return SimpleExtensionCheck( rFile, "pk3" );
+        return SimpleExtensionCheck( rFile, "pk3", "bsp" );
     }
     // TODO perhaps add keyword based detection
     return false;

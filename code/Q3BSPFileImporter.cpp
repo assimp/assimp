@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
 
-//#include <windows.h>
 #include "DefaultIOSystem.h"
 #include "Q3BSPFileImporter.h"
 #include "Q3BSPZipArchive.h"

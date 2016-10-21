@@ -6,7 +6,7 @@
 #pragma once
 
 // Header files, Qt.
-#include <QMainWindow>
+#include <QtWidgets>
 
 // Header files, project.
 #include "glview.hpp"

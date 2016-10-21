@@ -40,20 +40,20 @@ cmake_minimum_required( VERSION 2.8 )
 PROJECT( Assimp )
 
 # All supported options ###############################################
-OPTION( BUILD_SHARED_LIBS 
-  "Build package with shared libraries." 
+OPTION( BUILD_SHARED_LIBS
+  "Build package with shared libraries."
   ON
 )
 OPTION( ASSIMP_DOUBLE_PRECISION
   "Set to ON to enable double precision processing"
   OFF
 )
-OPTION( ASSIMP_OPT_BUILD_PACKAGES 
-  "Set to ON to generate CPack configuration files and packaging targets" 
+OPTION( ASSIMP_OPT_BUILD_PACKAGES
+  "Set to ON to generate CPack configuration files and packaging targets"
   OFF
 )
-OPTION( ASSIMP_ANDROID_JNIIOSYSTEM 
-  "Android JNI IOSystem support is active" 
+OPTION( ASSIMP_ANDROID_JNIIOSYSTEM
+  "Android JNI IOSystem support is active"
   OFF
 )
 OPTION( ASSIMP_NO_EXPORT
@@ -77,6 +77,7 @@ OPTION ( ASSIMP_BUILD_TESTS
   ON
 )
 IF(MSVC)
+  set (CMAKE_PREFIX_PATH "D:\\libs\\devil")
   OPTION( ASSIMP_INSTALL_PDB
     "Install MSVC debug files."
     ON
@@ -336,10 +337,10 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # Why here? Maybe user do not want Qt viewer and have no Qt.
   # Why assimp_qt_viewer/CMakeLists.txt still contain similar check?
   # Because viewer can be build independently of Assimp.
-  FIND_PACKAGE(Qt5 QUIET)
+  FIND_PACKAGE(Qt5Widgets QUIET)
   FIND_PACKAGE(DevIL QUIET)
   FIND_PACKAGE(OpenGL QUIET)
-  IF ( Qt5_FOUND AND IL_FOUND AND OPENGL_FOUND)
+  IF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
     ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
   ELSE()
     SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "")
@@ -356,7 +357,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
     ENDIF (NOT OPENGL_FOUND)
 
     MESSAGE (WARNING "Build of assimp_qt_viewer is disabled. Unsatisfied dendencies: ${ASSIMP_QT_VIEWER_DEPENDENCIES}")
-  ENDIF ( Qt5_FOUND AND IL_FOUND AND OPENGL_FOUND)
+  ENDIF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
 IF ( ASSIMP_BUILD_SAMPLES)

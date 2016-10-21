@@ -92,8 +92,7 @@ public:
     }
 
     bool readNextBlock() {
-        std::cout << "readNextBlock()\n";
-        m_stream->Seek( m_filePos, aiOrigin_CUR );
+        m_stream->Seek( m_filePos, aiOrigin_SET );
         size_t readLen = m_stream->Read( &m_cache[ 0 ], sizeof( T ), m_cacheSize );
         if ( readLen == 0 ) {
             return false;
@@ -108,7 +107,9 @@ public:
         ::memset( &buffer[ 0 ], ' ', m_cacheSize );
 
         if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
-            readNextBlock();
+            if ( !readNextBlock() ) {
+                return false;
+            }
         }
         size_t i = 0;
         while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
@@ -116,12 +117,13 @@ public:
             m_cachePos++;
             i++;
             if ( m_cachePos >= m_cacheSize ) {
-                readNextBlock();
+                if ( !readNextBlock() ) {
+                    return false;
+                }
             }
         }
         buffer[ i ]='\n';
         m_cachePos++;
-
         return true;
     }
 

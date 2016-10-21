@@ -297,9 +297,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 
 // ------------------------------------------------------------------------------------------------
 //  Create topology data
-aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData,
-                                         unsigned int meshIndex )
-{
+aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData, unsigned int meshIndex ) {
     // Checking preconditions
     ai_assert( NULL != pModel );
 
@@ -483,19 +481,15 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
             aiFace *pDestFace = &pMesh->mFaces[ outIndex ];
 
             const bool last = ( vertexIndex == pSourceFace->m_pVertices->size() - 1 );
-            if (pSourceFace->m_PrimitiveType != aiPrimitiveType_LINE || !last)
-            {
+            if (pSourceFace->m_PrimitiveType != aiPrimitiveType_LINE || !last) {
                 pDestFace->mIndices[ outVertexIndex ] = newIndex;
                 outVertexIndex++;
             }
 
-            if (pSourceFace->m_PrimitiveType == aiPrimitiveType_POINT)
-            {
+            if (pSourceFace->m_PrimitiveType == aiPrimitiveType_POINT) {
                 outIndex++;
                 outVertexIndex = 0;
-            }
-            else if (pSourceFace->m_PrimitiveType == aiPrimitiveType_LINE)
-            {
+            } else if (pSourceFace->m_PrimitiveType == aiPrimitiveType_LINE) {
                 outVertexIndex = 0;
 
                 if(!last)

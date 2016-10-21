@@ -162,7 +162,7 @@ private:
         node->mParent = scene->mRootNode;
         node->mName.Set(name);
 
-        unsigned long meshIdx = meshes.size();
+        size_t meshIdx = meshes.size();
 
         while(ReadToEndElement(D3MF::XmlTag::object))
         {

@@ -69,7 +69,7 @@ private:
 
 template<class T>
 inline
-IOStreamBuffer<T>::IOStreamBuffer( size_t cache = 4096 * 4096 )
+IOStreamBuffer<T>::IOStreamBuffer( size_t cache )
     : m_stream( nullptr )
     , m_filesize( 0 )
     , m_cacheSize( cache )

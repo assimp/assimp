@@ -148,13 +148,21 @@ private:
 
         std::vector<unsigned long> meshIds;
 
-        std::string name(xmlReader->getAttributeValue(D3MF::XmlTag::name.c_str()));
-        std::string type(xmlReader->getAttributeValue(D3MF::XmlTag::type.c_str()));
+        const char *attrib( nullptr );
+        std::string name, type;
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::name.c_str() );
+        if ( nullptr != attrib ) {
+            name = attrib;
+        }
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::name.c_str() );
+        if ( nullptr != attrib ) {
+            type = attrib;
+        }
 
         node->mParent = scene->mRootNode;
         node->mName.Set(name);
 
-        unsigned long meshIdx = meshes.size();
+        size_t meshIdx = meshes.size();
 
         while(ReadToEndElement(D3MF::XmlTag::object))
         {

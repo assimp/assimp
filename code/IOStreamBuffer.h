@@ -41,91 +41,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <assimp/types.h>
-#include <iostream>
-namespace Assimp {
+#include <assimp/IOStream.hpp>
 
-class IOStream;
+#include <iostream>
+
+namespace Assimp {
 
 template<class T>
 class IOStreamBuffer {
 public:
-    IOStreamBuffer( size_t cache = 4096 )
-    : m_stream( nullptr )
-    , m_filesize( 0 )
-    , m_cacheSize( cache )
-    , m_cachePos( 0 )
-    , m_filePos( 0 ) {
-        m_cache.resize( cache );
-        std::fill( m_cache.begin(), m_cache.end(), '\0' );
-    }
-
-    ~IOStreamBuffer() {
-    }
-
-    bool open( IOStream *stream ) {
-        if ( nullptr == stream ) {
-            return false;
-        }
-
-        m_stream = stream;
-        m_filesize = m_stream->FileSize();
-        if ( m_filesize == 0 ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    bool close() {
-        if ( nullptr == m_stream ) {
-            return false;
-        }
-
-        m_stream = nullptr;
-        m_filesize =0;
-
-        return true;
-    }
-
-    size_t size() const {
-        return m_filesize;
-    }
-
-    bool readNextBlock() {
-        m_stream->Seek( m_filePos, aiOrigin_SET );
-        size_t readLen = m_stream->Read( &m_cache[ 0 ], sizeof( T ), m_cacheSize );
-        if ( readLen == 0 ) {
-            return false;
-        }
-        m_filePos += m_cacheSize;
-        m_cachePos = 0;
-        return true;
-    }
-
-    bool getNextLine( std::vector<T> &buffer ) {
-        buffer.resize( m_cacheSize );
-        ::memset( &buffer[ 0 ], ' ', m_cacheSize );
-
-        if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
-            if ( !readNextBlock() ) {
-                return false;
-            }
-        }
-        size_t i = 0;
-        while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
-            buffer[ i ] = m_cache[ m_cachePos ];
-            m_cachePos++;
-            i++;
-            if ( m_cachePos >= m_cacheSize ) {
-                if ( !readNextBlock() ) {
-                    return false;
-                }
-            }
-        }
-        buffer[ i ]='\n';
-        m_cachePos++;
-        return true;
-    }
+    IOStreamBuffer( size_t cache = 4096 * 4096 );
+    ~IOStreamBuffer();
+    bool open( IOStream *stream );
+    bool close();
+    size_t size() const;
+    bool readNextBlock();
+    bool getNextLine( std::vector<T> &buffer );
 
 private:
     IOStream *m_stream;
@@ -135,5 +66,105 @@ private:
     size_t m_cachePos;
     size_t m_filePos;
 };
+
+template<class T>
+inline
+IOStreamBuffer<T>::IOStreamBuffer( size_t cache = 4096 * 4096 )
+    : m_stream( nullptr )
+    , m_filesize( 0 )
+    , m_cacheSize( cache )
+    , m_cachePos( 0 )
+    , m_filePos( 0 ) {
+    m_cache.resize( cache );
+    std::fill( m_cache.begin(), m_cache.end(), '\0' );
+}
+
+template<class T>
+inline
+IOStreamBuffer<T>::~IOStreamBuffer() {
+    // empty
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::open( IOStream *stream ) {
+    if ( nullptr == stream ) {
+        return false;
+    }
+
+    m_stream = stream;
+    m_filesize = m_stream->FileSize();
+    if ( m_filesize == 0 ) {
+        return false;
+    }
+    if ( m_filesize < m_cacheSize ) {
+        m_cacheSize = m_filesize;
+    }
+
+    return true;
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::close() {
+    if ( nullptr == m_stream ) {
+        return false;
+    }
+
+    m_stream = nullptr;
+    m_filesize = 0;
+
+    return true;
+}
+
+template<class T>
+inline
+size_t IOStreamBuffer<T>::size() const {
+    return m_filesize;
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::readNextBlock() {
+    m_stream->Seek( m_filePos, aiOrigin_SET );
+    size_t readLen = m_stream->Read( &m_cache[ 0 ], sizeof( T ), m_cacheSize );
+    if ( readLen == 0 ) {
+        return false;
+    }
+    if ( readLen < m_cacheSize ) {
+        m_cacheSize = readLen;
+    }
+    m_filePos += m_cacheSize;
+    m_cachePos = 0;
+
+    return true;
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
+    buffer.resize( m_cacheSize );
+    ::memset( &buffer[ 0 ], '\n', m_cacheSize );
+
+    if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
+        if ( !readNextBlock() ) {
+            return false;
+        }
+    }
+    size_t i = 0;
+    while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
+        buffer[ i ] = m_cache[ m_cachePos ];
+        m_cachePos++;
+        i++;
+        if ( m_cachePos >= m_cacheSize ) {
+            if ( !readNextBlock() ) {
+                return false;
+            }
+        }
+    }
+    m_cachePos++;
+
+    return true;
+}
 
 } // !ns Assimp

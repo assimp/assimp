@@ -114,7 +114,6 @@ private:
     mutable size_t mCachedSize;
 };
 
-
 // ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream () :
     mFile       (NULL),
@@ -123,7 +122,6 @@ inline DefaultIOStream::DefaultIOStream () :
 {
     // empty
 }
-
 
 // ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream (FILE* pFile,

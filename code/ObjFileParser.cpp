@@ -184,9 +184,14 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
 
         case 'm': // Parse a material library or merging group ('mg')
             {
-				std::string name;
+                std::string name;
 
-				getName(m_DataIt, m_DataItEnd, name);
+                getName(m_DataIt, m_DataItEnd, name);
+
+                size_t nextSpace = name.find(" ");
+                if (nextSpace != std::string::npos)
+                    name = name.substr(0, nextSpace);
+
                 if (name == "mg")
                     getGroupNumberAndResolution();
                 else if(name == "mtllib")

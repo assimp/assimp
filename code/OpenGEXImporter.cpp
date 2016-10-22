@@ -124,7 +124,7 @@ namespace Grammar {
         MaterialToken,
         ColorToken,
         ParamToken,
-        TextureToken, 
+        TextureToken,
         AttenToken
     };
 
@@ -237,7 +237,7 @@ OpenGEXImporter::VertexContainer::~VertexContainer() {
     delete[] m_vertices;
     delete[] m_colors;
     delete[] m_normals;
-    
+
     for(auto &texcoords : m_textureCoords) {
         delete [] texcoords;
     }
@@ -413,7 +413,7 @@ void OpenGEXImporter::handleNodes( DDLNode *node, aiScene *pScene ) {
             case Grammar::ColorToken:
                 handleColorNode( *it, pScene );
                 break;
-            
+
             case Grammar::ParamToken:
                 handleParamNode( *it, pScene );
                 break;
@@ -479,7 +479,7 @@ void OpenGEXImporter::handleNameNode( DDLNode *node, aiScene *pScene ) {
         }
 
         const std::string name( val->getString() );
-        if( m_tokenType == Grammar::GeometryNodeToken || m_tokenType == Grammar::LightNodeToken  
+        if( m_tokenType == Grammar::GeometryNodeToken || m_tokenType == Grammar::LightNodeToken
                 || m_tokenType == Grammar::CameraNodeToken ) {
             m_currentNode->mName.Set( name.c_str() );
         } else if( m_tokenType == Grammar::MaterialToken ) {
@@ -515,7 +515,7 @@ void OpenGEXImporter::handleObjectRefNode( DDLNode *node, aiScene *pScene ) {
 
     std::vector<std::string> objRefNames;
     getRefNames( node, objRefNames );
-    
+
     // when we are dealing with a geometry node prepare the mesh cache
     if ( m_tokenType == Grammar::GeometryNodeToken ) {
         m_currentNode->mNumMeshes = objRefNames.size();
@@ -596,7 +596,7 @@ void OpenGEXImporter::handleGeometryObject( DDLNode *node, aiScene *pScene ) {
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleCameraObject( ODDLParser::DDLNode *node, aiScene *pScene ) {
     // parameters will be parsed normally in the tree, so just go for it
-   
+
     handleNodes( node, pScene );
 }
 
@@ -757,7 +757,6 @@ static void fillColor4( aiColor4D *col4, Value *vals ) {
     ai_assert( nullptr != col4 );
     ai_assert( nullptr != vals );
 
-    float r( 0.0f ), g( 0.0f ), b( 0.0f ), a ( 1.0f );
     Value *next( vals );
     col4->r = next->getFloat();
     next = next->m_next;
@@ -1169,7 +1168,7 @@ void OpenGEXImporter::pushNode( aiNode *node, aiScene *pScene ) {
     if ( nullptr == node ) {
         return;
     }
-        
+
     ChildInfo *info( nullptr );
     if( m_nodeStack.empty() ) {
         node->mParent = pScene->mRootNode;

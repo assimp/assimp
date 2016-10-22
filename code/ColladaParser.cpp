@@ -300,7 +300,7 @@ void ColladaParser::ReadAnimationClipLibrary()
 				else if (indexID >= 0)
 					animName = mReader->getAttributeValue(indexID);
 				else
-					animName = std::string("animation_") + std::to_string(mAnimationClipLibrary.size());
+					animName = std::string("animation_") + to_string(mAnimationClipLibrary.size());
 
 				std::pair<std::string, std::vector<std::string> > clip;
 

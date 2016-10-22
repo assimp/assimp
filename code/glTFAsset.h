@@ -811,6 +811,8 @@ namespace glTF
         Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
         std::string jointName;                    //!< Name used when this node is a joint in a skin.
 
+        Ref<Node> parent;                         //!< This is not part of the glTF specification. Used as a helper.
+
         Node() {}
         void Read(Value& obj, Asset& r);
     };
@@ -852,7 +854,7 @@ namespace glTF
     {
         Nullable<mat4> bindShapeMatrix;       //!< Floating-point 4x4 transformation matrix stored in column-major order.
         Ref<Accessor> inverseBindMatrices;    //!< The ID of the accessor containing the floating-point 4x4 inverse-bind matrices.
-        std::vector<std::string/*Ref<Node>*/> jointNames;    //!< Joint names of the joints (nodes with a jointName property) in this skin.
+        std::vector<Ref<Node>> jointNames;    //!< Joint names of the joints (nodes with a jointName property) in this skin.
         std::string name;                     //!< The user-defined name of this object.
 
         Skin() {}

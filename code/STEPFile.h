@@ -72,7 +72,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LineSplitter.h"
 
-
 // uncomment this to have the loader evaluate all entities upon loading.
 // this is intended as stress test - by default, entities are evaluated
 // lazily and therefore not unless needed.
@@ -118,15 +117,13 @@ namespace STEP {
 
 // ********************************************************************************
 
-
 namespace STEP {
 
     // -------------------------------------------------------------------------------
     /** Exception class used by the STEP loading & parsing code. It is typically
      *  coupled with a line number. */
     // -------------------------------------------------------------------------------
-    struct SyntaxError : DeadlyImportError
-    {
+    struct SyntaxError : DeadlyImportError {
         enum {
             LINE_NOT_SPECIFIED = 0xffffffffffffffffLL
         };
@@ -253,7 +250,7 @@ namespace STEP {
         {
         public:
 
-            // This is the type that will ultimatively be used to
+            // This is the type that will cd ultimatively be used to
             // expose this data type to the user.
             typedef T Out;
 
@@ -1001,26 +998,20 @@ namespace STEP {
             refs.insert(std::make_pair(who,by_whom));
         }
 
-
-
     private:
-
         HeaderInfo header;
         ObjectMap objects;
         ObjectMapByType objects_bytype;
         RefMap refs;
         InverseWhitelist inv_whitelist;
-
         std::shared_ptr<StreamReaderLE> reader;
         LineSplitter splitter;
-
         uint64_t evaluated_count;
-
         const EXPRESS::ConversionSchema* schema;
     };
 
 }
 
-
 } // end Assimp
-#endif
+
+#endif // INCLUDED_AI_STEPFILE_H

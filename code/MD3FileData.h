@@ -298,10 +298,10 @@ inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
     {
         int a, b;
 
-        a = int(57.2957795f * ( atan2f( p_vIn[1], p_vIn[0] ) ) * (255.0f / 360.0f ));
+        a = int(57.2957795f * ( std::atan2( p_vIn[1], p_vIn[0] ) ) * (255.0f / 360.0f ));
         a &= 0xff;
 
-        b = int(57.2957795f * ( acosf( p_vIn[2] ) ) * ( 255.0f / 360.0f ));
+        b = int(57.2957795f * ( std::acos( p_vIn[2] ) ) * ( 255.0f / 360.0f ));
         b &= 0xff;
 
         ((unsigned char*)&p_iOut)[0] = b;   // longitude

@@ -157,7 +157,7 @@ void X3DImporter::ParseNode_Geometry2D_ArcClose2D()
 		// create point list of geometry object.
 		GeometryHelper_Make_Arc2D(startAngle, endAngle, radius, 10, ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices);///TODO: IME - AI_CONFIG for NumSeg
 		// add chord or two radiuses only if not a circle was defined
-		if(!((fabs(endAngle - startAngle) >= AI_MATH_TWO_PI_F) || (endAngle == startAngle)))
+		if(!((std::fabs(endAngle - startAngle) >= AI_MATH_TWO_PI_F) || (endAngle == startAngle)))
 		{
 			std::list<aiVector3D>& vlist = ((CX3DImporter_NodeElement_Geometry2D*)ne)->Vertices;// just short alias.
 

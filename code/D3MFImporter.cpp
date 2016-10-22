@@ -44,8 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
-#include <contrib/unzip/unzip.h>
-#include "irrXMLWrapper.h"
 #include "StringComparison.h"
 #include "StringUtils.h"
 
@@ -61,9 +59,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/ai_assert.h>
 
-#include "D3MFOpcPackage.h"
-
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
+
+#include "D3MFOpcPackage.h"
+#include <contrib/unzip/unzip.h>
+#include "irrXMLWrapper.h"
 
 namespace Assimp {
 namespace D3MF {
@@ -113,7 +113,7 @@ public:
         std::vector<aiNode*> children;
 
         while(ReadToEndElement(D3MF::XmlTag::model))
-        {         
+        {
 
             if(xmlReader->getNodeName() == D3MF::XmlTag::object)
             {
@@ -123,7 +123,7 @@ public:
             {
 
             }
-        }        
+        }
 
         if(scene->mRootNode->mName.length == 0)
             scene->mRootNode->mName.Set("3MF");
@@ -143,24 +143,31 @@ public:
 
 private:
     aiNode* ReadObject(aiScene* scene)
-    {        
+    {
         ScopeGuard<aiNode> node(new aiNode());
 
         std::vector<unsigned long> meshIds;
 
-        int id = std::atoi(xmlReader->getAttributeValue(D3MF::XmlTag::id.c_str()));
-        std::string name(xmlReader->getAttributeValue(D3MF::XmlTag::name.c_str()));
-        std::string type(xmlReader->getAttributeValue(D3MF::XmlTag::type.c_str()));
+        const char *attrib( nullptr );
+        std::string name, type;
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::name.c_str() );
+        if ( nullptr != attrib ) {
+            name = attrib;
+        }
+        attrib = xmlReader->getAttributeValue( D3MF::XmlTag::name.c_str() );
+        if ( nullptr != attrib ) {
+            type = attrib;
+        }
 
         node->mParent = scene->mRootNode;
-        node->mName.Set(name);        
+        node->mName.Set(name);
 
-        unsigned long meshIdx = meshes.size();
+        size_t meshIdx = meshes.size();
 
         while(ReadToEndElement(D3MF::XmlTag::object))
         {
             if(xmlReader->getNodeName() == D3MF::XmlTag::mesh)
-            {                
+            {
                 auto mesh = ReadMesh();
 
                 mesh->mName.Set(name);
@@ -186,7 +193,7 @@ private:
         aiMesh* mesh = new aiMesh();
 
         while(ReadToEndElement(D3MF::XmlTag::mesh))
-        {            
+        {
             if(xmlReader->getNodeName() == D3MF::XmlTag::vertices)
             {
                 ImportVertices(mesh);
@@ -204,12 +211,12 @@ private:
 
     void ImportVertices(aiMesh* mesh)
     {
-        std::vector<aiVector3D> vertices;        
+        std::vector<aiVector3D> vertices;
 
         while(ReadToEndElement(D3MF::XmlTag::vertices))
-        {                        
+        {
             if(xmlReader->getNodeName() == D3MF::XmlTag::vertex)
-            {                
+            {
                 vertices.push_back(ReadVertex());
             }
         }
@@ -220,7 +227,7 @@ private:
 
     }
     aiVector3D ReadVertex()
-    {        
+    {
         aiVector3D vertex;
         vertex.x = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::x.c_str()), nullptr);
         vertex.y = ai_strtof(xmlReader->getAttributeValue(D3MF::XmlTag::y.c_str()), nullptr);
@@ -231,7 +238,7 @@ private:
 
     void ImportTriangles(aiMesh* mesh)
     {
-         std::vector<aiFace> faces;         
+         std::vector<aiFace> faces;
 
 
          while(ReadToEndElement(D3MF::XmlTag::triangles))
@@ -337,7 +344,7 @@ D3MFImporter::~D3MFImporter()
 }
 
 bool D3MFImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler, bool checkSig) const
-{    
+{
     const std::string extension = GetExtension(pFile);
     if(extension == "3mf") {
         return true;

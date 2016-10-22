@@ -65,7 +65,7 @@ namespace glTF {
         inline Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
             val.SetArray();
             val.Reserve(r.size(), al);
-            for (int i = 0; i < r.size(); ++i) {
+            for (unsigned int i = 0; i < r.size(); ++i) {
                 val.PushBack(r[i], al);
             }
             return val;
@@ -436,7 +436,7 @@ namespace glTF {
         vJointNames.Reserve(unsigned(b.jointNames.size()), w.mAl);
 
         for (size_t i = 0; i < unsigned(b.jointNames.size()); ++i) {
-            vJointNames.PushBack(StringRef(b.jointNames[i]), w.mAl);
+            vJointNames.PushBack(StringRef(b.jointNames[i]->jointName), w.mAl);
         }
         obj.AddMember("jointNames", vJointNames, w.mAl);
 

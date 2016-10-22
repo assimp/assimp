@@ -325,7 +325,7 @@ void CGLView::ImportTextures(const QString& pScenePath)
 
 void CGLView::BBox_GetForNode(const aiNode& pNode, const aiMatrix4x4& pParent_TransformationMatrix, SBBox& pNodeBBox, bool& pFirstAssign)
 {
-aiMatrix4x4 mat_trans = pParent_TransformationMatrix * pNode.mTransformation;
+    aiMatrix4x4 mat_trans = pParent_TransformationMatrix * pNode.mTransformation;
 
 	// Check if node has meshes
 	for(size_t idx_idx_mesh = 0; idx_idx_mesh < pNode.mNumMeshes; idx_idx_mesh++)
@@ -437,7 +437,7 @@ void CGLView::LogError(const QString& pMessage)
 
 void CGLView::Draw_Node(const aiNode* pNode)
 {
-aiMatrix4x4 mat_node = pNode->mTransformation;
+    aiMatrix4x4 mat_node = pNode->mTransformation;
 
 	// Apply node transformation matrix.
 	mat_node.Transpose();
@@ -516,7 +516,7 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 
 void CGLView::Draw_BBox(const SBBox& pBBox)
 {
-aiVector3D vertex[8];
+    aiVector3D vertex[8];
 
 	BBox_GetVertices(pBBox, vertex);
 	// Draw
@@ -592,7 +592,7 @@ void CGLView::resizeGL(int pWidth, int pHeight)
 
 void CGLView::paintGL()
 {
-QTime time_paintbegin;
+    QTime time_paintbegin;
 
 	time_paintbegin = QTime::currentTime();
 
@@ -1015,8 +1015,8 @@ void CGLView::Lighting_DisableSource(const size_t pLightNumber)
 
 void CGLView::Camera_Set(const size_t pCameraNumber)
 {
-SHelper_Camera& hcam = mHelper_Camera;// reference with short name for conveniance.
-aiVector3D up;
+    SHelper_Camera& hcam = mHelper_Camera;// reference with short name for conveniance.
+    aiVector3D up;
 
 	if(mCamera_DefaultAdded || (pCameraNumber >= mScene->mNumCameras))// If default camera used then 'pCameraNumber' doesn't matter.
 	{

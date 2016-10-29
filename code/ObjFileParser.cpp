@@ -38,8 +38,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
-
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "ObjFileParser.h"
@@ -54,14 +52,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <cstdlib>
 
-
 namespace Assimp {
 
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem *io, ProgressHandler* progress, const std::string &originalObjFileName) :
+ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, 
+                              IOSystem *io, ProgressHandler* progress,
+                              const std::string &originalObjFileName) :
     m_DataIt(),
     m_DataItEnd(),
     m_pModel(NULL),

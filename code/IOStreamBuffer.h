@@ -47,15 +47,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 
+// ---------------------------------------------------------------------------
+/**
+ *  Implementation of a cached stream buffer.
+ */
 template<class T>
 class IOStreamBuffer {
 public:
+    /// @brief  The class constructor.
     IOStreamBuffer( size_t cache = 4096 * 4096 );
+
+    /// @brief  The class destructor.
     ~IOStreamBuffer();
+
+    /// @brief  Will open the cached access for a given stream.
+    /// @param  stream      The stream to cache.
+    /// @return true if successful.
     bool open( IOStream *stream );
+
+    /// @brief  Will close the cached access.
+    /// @return true if successful.
     bool close();
+
+    /// @brief  Returns the filesize.
+    /// @return The filesize.
     size_t size() const;
+    
+    /// @brief  Returns the cache size.
+    /// @return The cache size.
+    size_t cacheSize() const;
+
+    /// @brief  Will read the next block.
+    /// @return true if successful.
     bool readNextBlock();
+
+    /// @brief  Will read the next line.
+    /// @param  buffer      The buffer for the next line.
+    /// @return true if successful.
     bool getNextLine( std::vector<T> &buffer );
 
 private:
@@ -69,14 +97,14 @@ private:
 
 template<class T>
 inline
-IOStreamBuffer<T>::IOStreamBuffer( size_t cache = 4096 * 4096 )
-    : m_stream( nullptr )
-    , m_filesize( 0 )
-    , m_cacheSize( cache )
-    , m_cachePos( 0 )
-    , m_filePos( 0 ) {
+IOStreamBuffer<T>::IOStreamBuffer( size_t cache )
+: m_stream( nullptr )
+, m_filesize( 0 )
+, m_cacheSize( cache )
+, m_cachePos( 0 )
+, m_filePos( 0 ) {
     m_cache.resize( cache );
-    std::fill( m_cache.begin(), m_cache.end(), '\0' );
+    std::fill( m_cache.begin(), m_cache.end(), '\n' );
 }
 
 template<class T>
@@ -88,6 +116,10 @@ IOStreamBuffer<T>::~IOStreamBuffer() {
 template<class T>
 inline
 bool IOStreamBuffer<T>::open( IOStream *stream ) {
+    if ( nullptr != m_stream ) {
+        return false;
+    }
+
     if ( nullptr == stream ) {
         return false;
     }
@@ -121,6 +153,12 @@ template<class T>
 inline
 size_t IOStreamBuffer<T>::size() const {
     return m_filesize;
+}
+
+template<class T>
+inline
+size_t IOStreamBuffer<T>::cacheSize() const {
+    return m_cacheSize;
 }
 
 template<class T>

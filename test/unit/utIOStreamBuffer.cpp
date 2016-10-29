@@ -87,5 +87,23 @@ TEST_F( IOStreamBufferTest, open_close_Test ) {
 }
 
 TEST_F( IOStreamBufferTest, readlineTest ) {
+    char buffer[ L_tmpnam ];
+    tmpnam( buffer );
+    std::FILE *fs( std::fopen( buffer, "w+" ) );
+    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
+    std::fflush( fs );
+
+    IOStreamBuffer<char> myBuffer( 26 );
+    EXPECT_EQ( 26, myBuffer.cacheSize() );
+
+    TestDefaultIOStream myStream( fs, buffer );
+
+    EXPECT_TRUE( myBuffer.open( &myStream ) );
+
+    EXPECT_EQ( 10, myBuffer.getNumBlocks() );
+    EXPECT_TRUE( myBuffer.close() );
+}
+
+TEST_F( IOStreamBufferTest, accessBlockIndexTest ) {
 
 }

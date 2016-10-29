@@ -110,8 +110,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     const unsigned int progressTotal = 3 * bytesToProcess;
     const unsigned int progressOffset = bytesToProcess;
     unsigned int processed = 0;
-
-    //DataArrayIt lastDataIt = m_DataIt;
+    size_t lastFilePos( 0 );
 
     bool endOfFile( false );
     std::vector<char> buffer;
@@ -121,14 +120,14 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
 
-        // Handle progress reporting
-        /*processed += std::distance(lastDataIt, m_DataIt);
-        lastDataIt = m_DataIt;
-        if (processed > (progressCounter * updateProgressEveryBytes))
-        {
+        // Handle progress reporting        
+        const size_t filePos( streamBuffer.getFilePos() );
+        if ( lastFilePos < filePos ) {
+            processed += filePos;
+            lastFilePos = filePos;
             progressCounter++;
-            m_progress->UpdateFileRead(progressOffset + processed*2, progressTotal);
-        }*/
+            m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
+        }
 
         // parse line
         switch (*m_DataIt)

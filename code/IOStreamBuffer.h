@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/types.h>
 #include <assimp/IOStream.hpp>
+#include "ParsingUtils.h"
 
 #include <iostream>
 
@@ -81,6 +82,18 @@ public:
     /// @return true if successful.
     bool readNextBlock();
 
+    /// @brief  Returns the number of blocks to read.
+    /// @return The number of blocks.
+    size_t getNumBlocks() const;
+
+    /// @brief  Returns the current block index.
+    /// @return The current block index.
+    size_t getCurrentBlockIndex() const;
+
+    /// @brief  Returns the current file pos.
+    /// @return The current file pos.
+    size_t getFilePos() const;
+
     /// @brief  Will read the next line.
     /// @param  buffer      The buffer for the next line.
     /// @return true if successful.
@@ -90,6 +103,8 @@ private:
     IOStream *m_stream;
     size_t m_filesize;
     size_t m_cacheSize;
+    size_t m_numBlocks;
+    size_t m_blockIdx;
     std::vector<T> m_cache;
     size_t m_cachePos;
     size_t m_filePos;
@@ -101,6 +116,8 @@ IOStreamBuffer<T>::IOStreamBuffer( size_t cache )
 : m_stream( nullptr )
 , m_filesize( 0 )
 , m_cacheSize( cache )
+, m_numBlocks( 0 )
+, m_blockIdx( 0 )
 , m_cachePos( 0 )
 , m_filePos( 0 ) {
     m_cache.resize( cache );
@@ -116,10 +133,12 @@ IOStreamBuffer<T>::~IOStreamBuffer() {
 template<class T>
 inline
 bool IOStreamBuffer<T>::open( IOStream *stream ) {
+    //  file still opened!
     if ( nullptr != m_stream ) {
         return false;
     }
 
+    //  Invalid stream pointer
     if ( nullptr == stream ) {
         return false;
     }
@@ -133,6 +152,11 @@ bool IOStreamBuffer<T>::open( IOStream *stream ) {
         m_cacheSize = m_filesize;
     }
 
+    m_numBlocks = m_filesize / m_cacheSize;
+    if ( ( m_filesize % m_cacheSize ) > 0 ) {
+        m_numBlocks++;
+    }
+
     return true;
 }
 
@@ -143,8 +167,13 @@ bool IOStreamBuffer<T>::close() {
         return false;
     }
 
-    m_stream = nullptr;
-    m_filesize = 0;
+    // init counters and state vars
+    m_stream    = nullptr;
+    m_filesize  = 0;
+    m_numBlocks = 0;
+    m_blockIdx  = 0;
+    m_cachePos  = 0;
+    m_filePos   = 0;
 
     return true;
 }
@@ -174,8 +203,27 @@ bool IOStreamBuffer<T>::readNextBlock() {
     }
     m_filePos += m_cacheSize;
     m_cachePos = 0;
+    m_blockIdx++;
 
     return true;
+}
+
+template<class T>
+inline
+size_t IOStreamBuffer<T>::getNumBlocks() const {
+    return m_numBlocks;
+}
+
+template<class T>
+inline
+size_t IOStreamBuffer<T>::getCurrentBlockIndex() const {
+    return m_blockIdx;
+}
+
+template<class T>
+inline
+size_t IOStreamBuffer<T>::getFilePos() const {
+    return m_filePos;
 }
 
 template<class T>

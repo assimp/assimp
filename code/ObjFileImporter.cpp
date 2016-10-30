@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
+#include "IOStreamBuffer.h"
 #include <memory>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -126,8 +127,11 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
         throw DeadlyImportError( "OBJ-file is too small.");
     }
 
+    IOStreamBuffer<char> streamedBuffer;
+    streamedBuffer.open( fileStream.get() );
+
     // Allocate buffer and read file into it
-    TextFileToBuffer( fileStream.get(),m_Buffer);
+    //TextFileToBuffer( fileStream.get(),m_Buffer);
 
     // Get the model name
     std::string  modelName, folderName;
@@ -150,7 +154,7 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     const unsigned int updateProgressEveryBytes = 100 * 1024;
     const unsigned int progressTotal = (3*m_Buffer.size()/updateProgressEveryBytes);
     // process all '\'
-    std::vector<char> ::iterator iter = m_Buffer.begin();
+    /*std::vector<char> ::iterator iter = m_Buffer.begin();
     while (iter != m_Buffer.end())
     {
         if (*iter == '\\')
@@ -169,16 +173,18 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
             m_progress->UpdateFileRead(++progress, progressTotal);
             progressCounter = 0;
         }
-    }
+    }*/
 
     // 1/3rd progress
     m_progress->UpdateFileRead(1, 3);
 
     // parse the file into a temporary representation
-    ObjFileParser parser(m_Buffer, modelName, pIOHandler, m_progress, file);
+    ObjFileParser parser( streamedBuffer, modelName, pIOHandler, m_progress, file);
 
     // And create the proper return structures out of it
     CreateDataFromImport(parser.GetModel(), pScene);
+
+    streamedBuffer.close();
 
     // Clean up allocated storage for the next import
     m_Buffer.clear();
@@ -291,9 +297,7 @@ aiNode *ObjFileImporter::createNodes(const ObjFile::Model* pModel, const ObjFile
 
 // ------------------------------------------------------------------------------------------------
 //  Create topology data
-aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData,
-                                         unsigned int meshIndex )
-{
+aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const ObjFile::Object* pData, unsigned int meshIndex ) {
     // Checking preconditions
     ai_assert( NULL != pModel );
 
@@ -477,19 +481,15 @@ void ObjFileImporter::createVertexArray(const ObjFile::Model* pModel,
             aiFace *pDestFace = &pMesh->mFaces[ outIndex ];
 
             const bool last = ( vertexIndex == pSourceFace->m_pVertices->size() - 1 );
-            if (pSourceFace->m_PrimitiveType != aiPrimitiveType_LINE || !last)
-            {
+            if (pSourceFace->m_PrimitiveType != aiPrimitiveType_LINE || !last) {
                 pDestFace->mIndices[ outVertexIndex ] = newIndex;
                 outVertexIndex++;
             }
 
-            if (pSourceFace->m_PrimitiveType == aiPrimitiveType_POINT)
-            {
+            if (pSourceFace->m_PrimitiveType == aiPrimitiveType_POINT) {
                 outIndex++;
                 outVertexIndex = 0;
-            }
-            else if (pSourceFace->m_PrimitiveType == aiPrimitiveType_LINE)
-            {
+            } else if (pSourceFace->m_PrimitiveType == aiPrimitiveType_LINE) {
                 outVertexIndex = 0;
 
                 if(!last)

@@ -104,7 +104,7 @@ struct Face
 
 // ------------------------------------------------------------------------------------------------
 //! \struct Object
-//! \brief  Stores all objects of an objfile object definition
+//! \brief  Stores all objects of an obj-file object definition
 struct Object
 {
     enum ObjectType
@@ -160,8 +160,8 @@ struct Material
     aiString textureSpecularity;
     aiString textureOpacity;
     aiString textureDisp;
-    enum TextureType
-    {
+
+    enum TextureType {
         TextureDiffuseType = 0,
         TextureSpecularType,
         TextureAmbientType,

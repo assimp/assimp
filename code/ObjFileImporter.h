@@ -50,8 +50,8 @@ struct aiNode;
 namespace Assimp {
 
 namespace ObjFile {
-struct Object;
-struct Model;
+    struct Object;
+    struct Model;
 }
 
 // ------------------------------------------------------------------------------------------------

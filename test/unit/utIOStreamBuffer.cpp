@@ -99,6 +99,9 @@ TEST_F( IOStreamBufferTest, readlineTest ) {
     TestDefaultIOStream myStream( fs, buffer );
     size_t size( myStream.FileSize() );
     size_t numBlocks( size / myBuffer.cacheSize() );
+    if ( size % myBuffer.cacheSize() > 0 ) {
+        numBlocks++;
+    }
     EXPECT_TRUE( myBuffer.open( &myStream ) );
     EXPECT_EQ( numBlocks, myBuffer.getNumBlocks() );
     EXPECT_TRUE( myBuffer.close() );

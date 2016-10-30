@@ -51,7 +51,7 @@ public:
     }
 
     TestDefaultIOStream( FILE* pFile, const std::string &strFilename )
-        : DefaultIOStream( pFile, strFilename ) {
+    : DefaultIOStream( pFile, strFilename ) {
         // empty
     }
 

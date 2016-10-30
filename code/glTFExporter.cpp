@@ -447,7 +447,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
 
         unsigned int jointNamesIndex;
         bool addJointToJointNames = true;
-        for (int idx_joint = 0; idx_joint < skinRef->jointNames.size(); ++idx_joint) {
+        for ( unsigned int idx_joint = 0; idx_joint < skinRef->jointNames.size(); ++idx_joint) {
             if (skinRef->jointNames[idx_joint]->jointName.compare(nodeRef->jointName) == 0) {
                 addJointToJointNames = false;
                 jointNamesIndex = idx_joint;
@@ -732,7 +732,7 @@ void glTFExporter::ExportMeshes()
     // Create the Accessor for skinRef->inverseBindMatrices
     if (createSkin) {
         mat4* invBindMatrixData = new mat4[inverseBindMatricesData.size()];
-        for (int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
+        for ( unsigned int idx_joint = 0; idx_joint < inverseBindMatricesData.size(); ++idx_joint) {
             CopyValue(inverseBindMatricesData[idx_joint], invBindMatrixData[idx_joint]);
         }
 

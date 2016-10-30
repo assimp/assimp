@@ -78,14 +78,14 @@ public:
     /// Read from stream
     size_t Read(void* pvBuffer,
         size_t pSize,
-        size_t pCount);
+        size_t pCount) override;
 
 
     // -------------------------------------------------------------------
     /// Write to stream
     size_t Write(const void* pvBuffer,
         size_t pSize,
-        size_t pCount);
+        size_t pCount) override;
 
     // -------------------------------------------------------------------
     /// Seek specific position
@@ -94,18 +94,18 @@ public:
 
     // -------------------------------------------------------------------
     /// Get current seek position
-    size_t Tell() const;
+    size_t Tell() const override;
 
     // -------------------------------------------------------------------
     /// Get size of file
-    size_t FileSize() const;
+    size_t FileSize() const override;
 
     // -------------------------------------------------------------------
     /// Flush file contents
-    void Flush();
+    void Flush() override;
 
 private:
-    //  File datastructure, using clib
+    //  File data-structure, using clib
     FILE* mFile;
     //  Filename
     std::string mFilename;

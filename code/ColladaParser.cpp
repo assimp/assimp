@@ -3075,7 +3075,7 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
             case TF_ROTATE:
             {
                 aiMatrix4x4 rot;
-                ai_real angle = tf.f[3] * ai_real( AI_MATH_PI) / 180.0;
+                ai_real angle = tf.f[3] * ai_real( AI_MATH_PI) / ai_real( 180.0 );
                 aiVector3D axis( tf.f[0], tf.f[1], tf.f[2]);
                 aiMatrix4x4::Rotation( angle, axis, rot);
                 res *= rot;

@@ -201,11 +201,11 @@ struct Material
 
     //! Constructor
     Material()
-        :   diffuse (0.6,0.6,0.6)
-        ,   alpha   (1.0)
-        ,   shineness (0.0)
+        :   diffuse ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) )
+        ,   alpha   (ai_real( 1.0 ) )
+        ,   shineness ( ai_real( 0.0) )
         ,   illumination_model (1)
-        ,   ior     (1.0)
+        ,   ior     ( ai_real( 1.0 ) )
     {
         // empty
         for (size_t i = 0; i < TextureTypeCount; ++i)

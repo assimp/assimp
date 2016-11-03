@@ -709,7 +709,7 @@ static void ReadLightInfo(aiLight* light, StreamReaderLE* stream)
     // 99% and 1% percentiles.
     //    OpenGL: I = cos(angle)^E
     //   Solving: angle = acos(I^(1/E))
-    ai_real E = 1.0 / std::max(spotExponent, (ai_real)0.00001);
+    ai_real E = ai_real( 1.0 ) / std::max(spotExponent, (ai_real)0.00001);
     ai_real inner = std::acos(std::pow((ai_real)0.99, E));
     ai_real outer = std::acos(std::pow((ai_real)0.01, E));
 

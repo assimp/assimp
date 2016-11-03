@@ -52,7 +52,7 @@ namespace {
     const static aiVector3D base_axis_y(0.0,1.0,0.0);
     const static aiVector3D base_axis_x(1.0,0.0,0.0);
     const static aiVector3D base_axis_z(0.0,0.0,1.0);
-    const static ai_real angle_epsilon = 0.95;
+    const static ai_real angle_epsilon = ai_real( 0.95 );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -109,11 +109,11 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
     // much easier, but I don't know how and am currently too tired to
     // to think about a better solution.
 
-    const static ai_real LOWER_LIMIT = 0.1;
-    const static ai_real UPPER_LIMIT = 0.9;
+    const static ai_real LOWER_LIMIT = ai_real( 0.1 );
+    const static ai_real UPPER_LIMIT = ai_real( 0.9 );
 
-    const static ai_real LOWER_EPSILON = 10e-3;
-    const static ai_real UPPER_EPSILON = 1.0-10e-3;
+    const static ai_real LOWER_EPSILON = ai_real( 10e-3 );
+    const static ai_real UPPER_EPSILON = ai_real( 1.0-10e-3 );
 
     for (unsigned int fidx = 0; fidx < mesh->mNumFaces;++fidx)
     {

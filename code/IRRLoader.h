@@ -116,10 +116,10 @@ private:
 
         explicit Animator(AT t = UNKNOWN)
             : type              (t)
-            , speed             (0.001)
-            , direction         (0.0,1.0,0.0)
-            , circleRadius      (1.0)
-            , tightness         (0.5f)
+            , speed             ( ai_real( 0.001 ) )
+            , direction         ( ai_real( 0.0 ), ai_real( 1.0 ), ai_real( 0.0 ) )
+            , circleRadius      ( ai_real( 1.0) )
+            , tightness         ( ai_real( 0.5 ) )
             , loop              (true)
             , timeForWay        (100)
         {

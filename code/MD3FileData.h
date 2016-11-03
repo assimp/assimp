@@ -261,13 +261,13 @@ inline void LatLngNormalToVec3(uint16_t p_iNormal, ai_real* p_afOut)
 {
     ai_real lat = (ai_real)(( p_iNormal >> 8u ) & 0xff);
     ai_real lng = (ai_real)(( p_iNormal & 0xff ));
-    lat *= 3.141926/128.0;
-    lng *= 3.141926/128.0;
+    const ai_real invVal( ai_real( 1.0 ) / ai_real( 128.0 ) );
+    lat *= ai_real( 3.141926 ) * invVal;
+    lng *= ai_real( 3.141926 ) * invVal;
 
-    p_afOut[0] = std::cos(lat) * std::sin(lng);
-    p_afOut[1] = std::sin(lat) * std::sin(lng);
-    p_afOut[2] = std::cos(lng);
-    return;
+    p_afOut[ 0 ] = std::cos(lat) * std::sin(lng);
+    p_afOut[ 1 ] = std::sin(lat) * std::sin(lng);
+    p_afOut[ 2 ] = std::cos(lng);
 }
 
 

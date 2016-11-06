@@ -92,6 +92,7 @@ SET( TEST_SRCS
   unit/utTargetAnimation.cpp
   unit/utTextureTransform.cpp
   unit/utTriangulate.cpp
+  unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
 )

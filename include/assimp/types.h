@@ -226,7 +226,7 @@ struct aiColor3D
 
     //! Red, green and blue color values
     ai_real r, g, b;
-} PACK_STRUCT;  // !struct aiColor3D
+} /*PACK_STRUCT*/;  // !struct aiColor3D
 #include "./Compiler/poppack1.h"
 
 // ----------------------------------------------------------------------------------

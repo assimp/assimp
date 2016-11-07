@@ -150,7 +150,7 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-    static const ai_real epsilon = 0.00001;
+    static const ai_real epsilon = ai_real( 0.00001 );
     static const aiQuaternion x_rot(aiMatrix3x3(
         0, -1,  0,
         1,  0,  0,
@@ -636,9 +636,24 @@ void ColladaExporter::WriteMaterials()
     const aiMaterial* mat = mScene->mMaterials[a];
 
     aiString name;
-    if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
+    if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS ) {
       name = "mat";
-    materials[a].name = std::string( "m") + to_string(a) + name.C_Str();
+      materials[a].name = std::string( "m") + to_string(a) + name.C_Str();
+    } else {
+      // try to use the material's name if no other material has already taken it, else append #
+      std::string testName = name.C_Str();
+      size_t materialCountWithThisName = 0;
+      for( size_t i = 0; i < a; i ++ ) {
+        if( materials[i].name == testName ) {
+          materialCountWithThisName ++;
+        }
+      }
+      if( materialCountWithThisName == 0 ) {
+        materials[a].name = name.C_Str();
+      } else {
+        materials[a].name = std::string(name.C_Str()) + to_string(materialCountWithThisName);  
+      }
+    }
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
       if( !isalnum_C( *it ) ) {
         *it = '_';

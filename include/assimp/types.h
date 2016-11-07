@@ -176,11 +176,7 @@ struct aiColor3D
     /** Component-wise comparison */
     // TODO: add epsilon?
     bool operator < (const aiColor3D& other) const {
-        return r < other.r || (
-            r == other.r && (g < other.g ||
-                (g == other.g && b < other.b)
-            )
-        );
+        return r < other.r || ( r == other.r && (g < other.g || (g == other.g && b < other.b ) ) );
     }
 
     /** Component-wise addition */
@@ -210,7 +206,14 @@ struct aiColor3D
 
     /** Access a specific color component */
     ai_real& operator[](unsigned int i) {
-        return *(&r + i);
+        if ( 0 == i ) {
+            return r;
+        } else if ( 1 == i ) {
+            return g;
+        } else if ( 2 == i ) {
+            return b;
+        }
+        return r;
     }
 
     /** Check whether a color is black */
@@ -223,7 +226,7 @@ struct aiColor3D
 
     //! Red, green and blue color values
     ai_real r, g, b;
-} PACK_STRUCT;  // !struct aiColor3D
+} /*PACK_STRUCT*/;  // !struct aiColor3D
 #include "./Compiler/poppack1.h"
 
 // ----------------------------------------------------------------------------------

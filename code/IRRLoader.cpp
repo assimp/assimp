@@ -542,7 +542,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 {
                     aiVectorKey& key = anim->mPositionKeys[i];
 
-                    const ai_real dt = (i * in.speed * 0.001 );
+                    const ai_real dt = (i * in.speed * ai_real( 0.001 ) );
                     const ai_real u = dt - std::floor(dt);
                     const int idx = (int)std::floor(dt) % size;
 
@@ -556,9 +556,9 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                     const ai_real u2 = u*u;
                     const ai_real u3 = u2*2;
 
-                    const ai_real h1 = 2.0 * u3 - 3.0 * u2 + 1.0;
-                    const ai_real h2 = -2.0 * u3 + 3.0 * u3;
-                    const ai_real h3 = u3 - 2.0 * u3;
+                    const ai_real h1 = ai_real( 2.0 ) * u3 - ai_real( 3.0 ) * u2 + ai_real( 1.0 );
+                    const ai_real h2 = ai_real( -2.0 ) * u3 + ai_real( 3.0 ) * u3;
+                    const ai_real h3 = u3 - ai_real( 2.0 ) * u3;
                     const ai_real h4 = u3 - u2;
 
                     // compute the spline tangents

@@ -227,7 +227,7 @@ std::string TextureConverted_ID;
 	// check that all textures has same size
 	if(src_texture_4check.size() > 1)
 	{
-		for(uint8_t i = 0, i_e = (src_texture_4check.size() - 1); i < i_e; i++)
+		for (size_t i = 0, i_e = (src_texture_4check.size() - 1); i < i_e; i++)
 		{
 			if((src_texture_4check[i]->Width != src_texture_4check[i + 1]->Width) || (src_texture_4check[i]->Height != src_texture_4check[i + 1]->Height) ||
 				(src_texture_4check[i]->Depth != src_texture_4check[i + 1]->Depth))

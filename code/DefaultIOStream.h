@@ -105,7 +105,7 @@ public:
     void Flush();
 
 private:
-    //  File datastructure, using clib
+    //  File data-structure, using clib
     FILE* mFile;
     //  Filename
     std::string mFilename;
@@ -113,7 +113,6 @@ private:
     // Cached file size
     mutable size_t mCachedSize;
 };
-
 
 // ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream () :
@@ -123,7 +122,6 @@ inline DefaultIOStream::DefaultIOStream () :
 {
     // empty
 }
-
 
 // ----------------------------------------------------------------------------------
 inline DefaultIOStream::DefaultIOStream (FILE* pFile,

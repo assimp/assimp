@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 #include "o3dgcCommon.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 /* Thank you, Microsoft, for file WinDef.h with min/max redefinition. */
 #define NOMINMAX
 #include <windows.h>
@@ -42,7 +42,7 @@ THE SOFTWARE.
 
 namespace o3dgc
 {
-#ifdef WIN32
+#ifdef _WIN32
     class Timer
     {
     public: 

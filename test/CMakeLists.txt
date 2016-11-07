@@ -70,6 +70,7 @@ SET( TEST_SRCS
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
   unit/utIOSystem.cpp
+  unit/utIOStreamBuffer.cpp
   unit/utIssues.cpp
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
@@ -91,6 +92,7 @@ SET( TEST_SRCS
   unit/utTargetAnimation.cpp
   unit/utTextureTransform.cpp
   unit/utTriangulate.cpp
+  unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
 )

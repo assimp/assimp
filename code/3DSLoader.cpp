@@ -1166,14 +1166,15 @@ void Discreet3DSImporter::ParseMaterialChunk()
 
     case Discreet3DS::CHUNK_MAT_TRANSPARENCY:
         {
-        // This is the material's transparency
-        ai_real* pcf = &mScene->mMaterials.back().mTransparency;
-        *pcf = ParsePercentageChunk();
+            // This is the material's transparency
+            ai_real* pcf = &mScene->mMaterials.back().mTransparency;
+            *pcf = ParsePercentageChunk();
 
-        // NOTE: transparency, not opacity
-        if (is_qnan(*pcf))
-            *pcf = 1.0;
-        else *pcf = 1.0 - *pcf * (ai_real)0xFFFF / 100.0;
+            // NOTE: transparency, not opacity
+            if (is_qnan(*pcf))
+                *pcf = ai_real( 1.0 );
+            else 
+                *pcf = ai_real( 1.0 ) - *pcf * (ai_real)0xFFFF / ai_real( 100.0 );
         }
         break;
 
@@ -1199,21 +1200,23 @@ void Discreet3DSImporter::ParseMaterialChunk()
 
     case Discreet3DS::CHUNK_MAT_SHININESS_PERCENT:
         { // This is the shininess strength of the material
-        ai_real* pcf = &mScene->mMaterials.back().mShininessStrength;
-        *pcf = ParsePercentageChunk();
-        if (is_qnan(*pcf))
-            *pcf = 0.0;
-        else *pcf *= (ai_real)0xffff / 100.0;
+            ai_real* pcf = &mScene->mMaterials.back().mShininessStrength;
+            *pcf = ParsePercentageChunk();
+            if (is_qnan(*pcf))
+                *pcf = ai_real( 0.0 );
+            else 
+                *pcf *= (ai_real)0xffff / ai_real( 100.0 );
         }
         break;
 
     case Discreet3DS::CHUNK_MAT_SELF_ILPCT:
         { // This is the self illumination strength of the material
-        ai_real f = ParsePercentageChunk();
-        if (is_qnan(f))
-            f = 0.0;
-        else f *= (ai_real)0xFFFF / 100.0;
-        mScene->mMaterials.back().mEmissive = aiColor3D(f,f,f);
+            ai_real f = ParsePercentageChunk();
+            if (is_qnan(f))
+                f = ai_real( 0.0 );
+            else 
+                f *= (ai_real)0xFFFF / ai_real( 100.0 );
+            mScene->mMaterials.back().mEmissive = aiColor3D(f,f,f);
         }
         break;
 
@@ -1272,7 +1275,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 
     case Discreet3DS::CHUNK_PERCENTD:
         // Manually parse the blend factor
-        pcOut->mTextureBlend = stream->GetF8();
+        pcOut->mTextureBlend = ai_real( stream->GetF8() );
         break;
 
     case Discreet3DS::CHUNK_PERCENTF:
@@ -1282,7 +1285,7 @@ void Discreet3DSImporter::ParseTextureChunk(D3DS::Texture* pcOut)
 
     case Discreet3DS::CHUNK_PERCENTW:
         // Manually parse the blend factor
-        pcOut->mTextureBlend = (ai_real)((uint16_t)stream->GetI2()) / 100.0;
+        pcOut->mTextureBlend = (ai_real)((uint16_t)stream->GetI2()) / ai_real( 100.0 );
         break;
 
     case Discreet3DS::CHUNK_MAT_MAP_USCALE:
@@ -1355,8 +1358,7 @@ ai_real Discreet3DSImporter::ParsePercentageChunk()
 
 // ------------------------------------------------------------------------------------------------
 // Read a color chunk. If a percentage chunk is found instead it is read as a grayscale color
-void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
-    bool acceptPercent)
+void Discreet3DSImporter::ParseColorChunk( aiColor3D* out, bool acceptPercent )
 {
     ai_assert(out != NULL);
 
@@ -1389,13 +1391,16 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
     case Discreet3DS::CHUNK_LINRGBB:
         bGamma = true;
     case Discreet3DS::CHUNK_RGBB:
-        if (sizeof(char) * 3 > diff)    {
-            *out = clrError;
-            return;
+        {
+            if ( sizeof( char ) * 3 > diff ) {
+                *out = clrError;
+                return;
+            }
+            const ai_real invVal = ai_real( 1.0 ) / ai_real( 255.0 );
+            out->r = ( ai_real ) ( uint8_t ) stream->GetI1() * invVal;
+            out->g = ( ai_real ) ( uint8_t ) stream->GetI1() * invVal;
+            out->b = ( ai_real ) ( uint8_t ) stream->GetI1() * invVal;
         }
-        out->r = (ai_real)(uint8_t)stream->GetI1() / 255.0;
-        out->g = (ai_real)(uint8_t)stream->GetI1() / 255.0;
-        out->b = (ai_real)(uint8_t)stream->GetI1() / 255.0;
         break;
 
     // Percentage chunks are accepted, too.
@@ -1409,7 +1414,7 @@ void Discreet3DSImporter::ParseColorChunk(aiColor3D* out,
 
     case Discreet3DS::CHUNK_PERCENTW:
         if (acceptPercent && 1 <= diff) {
-            out->g = out->b = out->r = (ai_real)(uint8_t)stream->GetI1() / 255.0;
+            out->g = out->b = out->r = (ai_real)(uint8_t)stream->GetI1() / ai_real( 255.0 );
             break;
         }
         *out = clrError;

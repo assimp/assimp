@@ -253,7 +253,7 @@ private:
 	/********************************************************************/
 
 protected:
-
+    void drawCoordSystem();
 	/// \fn void initializeGL() override
 	/// Overrided function for initialise OpenGL.
 	void initializeGL() override;

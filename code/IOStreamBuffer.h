@@ -230,8 +230,6 @@ template<class T>
 inline
 bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
     buffer.resize( m_cacheSize );
-    ::memset( &buffer[ 0 ], '\n', m_cacheSize );
-
     if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
         if ( !readNextBlock() ) {
             return false;
@@ -248,6 +246,7 @@ bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
             }
         }
     }
+    buffer[ i ] = '\n';
     m_cachePos++;
 
     return true;

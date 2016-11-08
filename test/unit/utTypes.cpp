@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 
 using namespace Assimp;
+
 class utTypes : public ::testing::Test {
     // empty
 };

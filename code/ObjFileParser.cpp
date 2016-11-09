@@ -87,16 +87,14 @@ ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::str
 
 // -------------------------------------------------------------------
 //  Destructor
-ObjFileParser::~ObjFileParser()
-{
+ObjFileParser::~ObjFileParser() {
     delete m_pModel;
     m_pModel = NULL;
 }
 
 // -------------------------------------------------------------------
 //  Returns a pointer to the model instance.
-ObjFile::Model *ObjFileParser::GetModel() const
-{
+ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
 
@@ -403,7 +401,7 @@ static const std::string DefaultObjName = "defaultobject";
 
 // -------------------------------------------------------------------
 //  Get values for a new face instance
-void ObjFileParser::getFace(aiPrimitiveType type) {
+void ObjFileParser::getFace( aiPrimitiveType type ) {
     copyNextLine(m_buffer, Buffersize);
     char *pPtr = m_buffer;
     char *pEnd = &pPtr[Buffersize];
@@ -412,9 +410,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         return;
     }
 
-    std::vector<unsigned int> *pIndices = new std::vector<unsigned int>;
-    std::vector<unsigned int> *pTexID = new std::vector<unsigned int>;
-    std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
+    ObjFile::Face *face = new ObjFile::Face( type );
     bool hasNormal = false;
 
     const int vSize = m_pModel->m_Vertices.size();
@@ -458,45 +454,28 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 ++iStep;
             }
 
-            if ( iVal > 0 )
-            {
+            if ( iVal > 0 ) {
                 // Store parsed index
-                if ( 0 == iPos )
-                {
-                    pIndices->push_back( iVal-1 );
-                }
-                else if ( 1 == iPos )
-                {
-                    pTexID->push_back( iVal-1 );
-                }
-                else if ( 2 == iPos )
-                {
-                    pNormalID->push_back( iVal-1 );
+                if ( 0 == iPos ) {
+                    face->m_vertices.push_back( iVal - 1 );
+                } else if ( 1 == iPos ) {
+                    face->m_texturCoords.push_back( iVal - 1 );
+                } else if ( 2 == iPos ) {
+                    face->m_normals.push_back( iVal - 1 );
                     hasNormal = true;
-                }
-                else
-                {
+                } else {
                     reportErrorTokenInFace();
                 }
-            }
-            else if ( iVal < 0 )
-            {
+            } else if ( iVal < 0 ) {
                 // Store relatively index
-                if ( 0 == iPos )
-                {
-                    pIndices->push_back( vSize + iVal );
-                }
-                else if ( 1 == iPos )
-                {
-                    pTexID->push_back( vtSize + iVal );
-                }
-                else if ( 2 == iPos )
-                {
-                    pNormalID->push_back( vnSize + iVal );
+                if ( 0 == iPos ) {
+                    face->m_vertices.push_back( vSize + iVal );
+                } else if ( 1 == iPos ) {
+                    face->m_texturCoords.push_back( vtSize + iVal );
+                } else if ( 2 == iPos ) {
+                    face->m_normals.push_back( vnSize + iVal );
                     hasNormal = true;
-                }
-                else
-                {
+                } else {
                     reportErrorTokenInFace();
                 }
             }
@@ -504,18 +483,12 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
         pPtr += iStep;
     }
 
-    if ( pIndices->empty() ) {
+    if ( face->m_vertices.empty() ) {
         DefaultLogger::get()->error("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-        delete pNormalID;
-        delete pTexID;
-        delete pIndices;
-
         return;
     }
-
-    ObjFile::Face *face = new ObjFile::Face( pIndices, pNormalID, pTexID, type );
 
     // Set active material, if one set
     if( NULL != m_pModel->m_pCurrentMaterial ) {
@@ -536,8 +509,8 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
     // Store the face
     m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
-    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_pVertices->size();
-    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int)face->m_pTexturCoords[0].size();
+    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int) face->m_vertices.size();
+    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int) face->m_texturCoords.size();
     if( !m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal ) {
         m_pModel->m_pCurrentMesh->m_hasNormals = true;
     }
@@ -547,8 +520,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
 // -------------------------------------------------------------------
 //  Get values for a new material description
-void ObjFileParser::getMaterialDesc()
-{
+void ObjFileParser::getMaterialDesc() {
     // Get next data for material data
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     if (m_DataIt == m_DataItEnd) {
@@ -571,28 +543,26 @@ void ObjFileParser::getMaterialDesc()
 
     // If the current mesh has the same material, we simply ignore that 'usemtl' command
     // There is no need to create another object or even mesh here
-    if (m_pModel->m_pCurrentMaterial && m_pModel->m_pCurrentMaterial->MaterialName == aiString(strName))
+    if ( m_pModel->m_pCurrentMaterial && m_pModel->m_pCurrentMaterial->MaterialName == aiString( strName ) ) {
         skip = true;
+    }
 
-    if (!skip)
-    {
+    if (!skip) {
         // Search for material
         std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
-        if (it == m_pModel->m_MaterialMap.end())
-        {
+        if (it == m_pModel->m_MaterialMap.end()) {
             // Not found, use default material
             m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
             DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
             strName = m_pModel->m_pDefaultMaterial->MaterialName.C_Str();
-        }
-        else
-        {
+        } else {
             // Found, using detected material
             m_pModel->m_pCurrentMaterial = (*it).second;
         }
 
-        if (needsNewMesh(strName))
-            createMesh(strName);
+        if ( needsNewMesh( strName ) ) {
+            createMesh( strName );
+        }
 
         m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);
     }
@@ -603,17 +573,12 @@ void ObjFileParser::getMaterialDesc()
 
 // -------------------------------------------------------------------
 //  Get a comment, values will be skipped
-void ObjFileParser::getComment()
-{
-    while (m_DataIt != m_DataItEnd)
-    {
-        if ( '\n' == (*m_DataIt))
-        {
+void ObjFileParser::getComment() {
+    while (m_DataIt != m_DataItEnd) {
+        if ( '\n' == (*m_DataIt)) {
             ++m_DataIt;
             break;
-        }
-        else
-        {
+        } else {
             ++m_DataIt;
         }
     }
@@ -621,8 +586,7 @@ void ObjFileParser::getComment()
 
 // -------------------------------------------------------------------
 //  Get material library from file.
-void ObjFileParser::getMaterialLib()
-{
+void ObjFileParser::getMaterialLib() {
     // Translate tuple
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     if( m_DataIt == m_DataItEnd ) {

@@ -337,7 +337,7 @@ ASSIMP_API void aiReleaseImport(
  * import process. NULL if there was no error. There can't be an error if you
  * got a non-NULL #aiScene from #aiImportFile/#aiImportFileEx/#aiApplyPostProcessing.
  */
-ASSIMP_API const char* aiGetErrorString();
+ASSIMP_API const char* aiGetErrorString(void);
 
 // --------------------------------------------------------------------------------
 /** Returns whether a given file extension is supported by ASSIMP

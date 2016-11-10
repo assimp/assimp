@@ -110,10 +110,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     unsigned int processed = 0;
     size_t lastFilePos( 0 );
 
-    bool endOfFile( false );
     std::vector<char> buffer;
-
-    //while ( m_DataIt != m_DataItEnd )
     while ( streamBuffer.getNextLine( buffer ) ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
@@ -128,8 +125,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
         }
 
         // parse line
-        switch (*m_DataIt)
-        {
+        switch (*m_DataIt) {
         case 'v': // Parse a vertex texture coordinate
             {
                 ++m_DataIt;
@@ -228,8 +224,7 @@ pf_skip_line:
 
 // -------------------------------------------------------------------
 //  Copy the next word in a temporary buffer
-void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
-{
+void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     size_t index = 0;
     m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
     while( m_DataIt != m_DataItEnd && !IsSpaceOrNewLine( *m_DataIt ) ) {
@@ -245,37 +240,6 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
     pBuffer[index] = '\0';
 }
 
-// -------------------------------------------------------------------
-// Copy the next line into a temporary buffer
-void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
-{
-    size_t index = 0u;
-
-    // some OBJ files have line continuations using \ (such as in C++ et al)
-    bool continuation = false;
-    for (;m_DataIt != m_DataItEnd && index < length-1; ++m_DataIt)
-    {
-        const char c = *m_DataIt;
-        if (c == '\\') {
-            continuation = true;
-            continue;
-        }
-
-        if (c == '\n' || c == '\r') {
-            if(continuation) {
-                pBuffer[ index++ ] = ' ';
-                continue;
-            }
-            break;
-        }
-
-        continuation = false;
-        pBuffer[ index++ ] = c;
-    }
-    ai_assert(index < length);
-    pBuffer[ index ] = '\0';
-}
-
 size_t ObjFileParser::getNumComponentsInLine() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
@@ -289,7 +253,6 @@ size_t ObjFileParser::getNumComponentsInLine() {
     return numComponents;
 }
 
-// -------------------------------------------------------------------
 void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     size_t numComponents = getNumComponentsInLine();
     ai_real x, y, z;
@@ -402,11 +365,12 @@ static const std::string DefaultObjName = "defaultobject";
 // -------------------------------------------------------------------
 //  Get values for a new face instance
 void ObjFileParser::getFace( aiPrimitiveType type ) {
-    copyNextLine(m_buffer, Buffersize);
-    char *pPtr = m_buffer;
-    char *pEnd = &pPtr[Buffersize];
-    pPtr = getNextToken<char*>(pPtr, pEnd);
-    if ( pPtr == pEnd || *pPtr == '\0' ) {
+    //copyNextLine(m_buffer, Buffersize);
+    //char *pPtr = m_DataIt;
+    //char *pPtr = m_buffer;
+    //char *pEnd = &pPtr[Buffersize];
+    m_DataIt = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
+    if ( m_DataIt == m_DataItEnd || *m_DataIt == '\0' ) {
         return;
     }
 
@@ -420,14 +384,14 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
     const bool vt = (!m_pModel->m_TextureCoord.empty());
     const bool vn = (!m_pModel->m_Normals.empty());
     int iStep = 0, iPos = 0;
-    while (pPtr != pEnd) {
+    while ( m_DataIt != m_DataItEnd ) {
         iStep = 1;
 
-        if ( IsLineEnd( *pPtr ) ) {
+        if ( IsLineEnd( *m_DataIt ) ) {
             break;
         }
 
-        if (*pPtr=='/' ) {
+        if ( *m_DataIt =='/' ) {
             if (type == aiPrimitiveType_POINT) {
                 DefaultLogger::get()->error("Obj: Separator unexpected in point statement");
             }
@@ -439,11 +403,11 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
                 }
             }
             iPos++;
-        } else if( IsSpaceOrNewLine( *pPtr ) ) {
+        } else if( IsSpaceOrNewLine( *m_DataIt ) ) {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            const int iVal( ::atoi( pPtr ) );
+            const int iVal( ::atoi( & ( *m_DataIt ) ) );
 
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;
@@ -480,7 +444,7 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
                 }
             }
         }
-        pPtr += iStep;
+        m_DataIt += iStep;
     }
 
     if ( face->m_vertices.empty() ) {
@@ -642,8 +606,7 @@ void ObjFileParser::getMaterialLib() {
 
 // -------------------------------------------------------------------
 //  Set a new material definition as the current material.
-void ObjFileParser::getNewMaterial()
-{
+void ObjFileParser::getNewMaterial() {
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
     if( m_DataIt == m_DataItEnd ) {
@@ -656,17 +619,13 @@ void ObjFileParser::getNewMaterial()
         ++m_DataIt;
     }
     std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
-    if ( it == m_pModel->m_MaterialMap.end() )
-    {
+    if ( it == m_pModel->m_MaterialMap.end() ) {
         // Show a warning, if material was not found
         DefaultLogger::get()->warn("OBJ: Unsupported material requested: " + strMat);
         m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-    }
-    else
-    {
+    } else {
         // Set new material
-        if ( needsNewMesh( strMat ) )
-        {
+        if ( needsNewMesh( strMat ) ) {
             createMesh( strMat );
         }
         m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strMat );

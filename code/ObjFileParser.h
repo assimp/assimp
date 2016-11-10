@@ -85,7 +85,7 @@ private:
     /// Method to copy the new delimited word in the current line.
     void copyNextWord(char *pBuffer, size_t length);
     /// Method to copy the new line.
-    void copyNextLine(char *pBuffer, size_t length);
+//    void copyNextLine(char *pBuffer, size_t length);
     /// Stores the vector
     void getVector( std::vector<aiVector3D> &point3d_array );
     /// Stores the following 3d vector.

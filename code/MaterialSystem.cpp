@@ -386,10 +386,9 @@ static const unsigned int DefaultNumAllocated = 5;
 // ------------------------------------------------------------------------------------------------
 // Construction. Actually the one and only way to get an aiMaterial instance
 aiMaterial::aiMaterial() 
-: mNumProperties( 0 )
-, mNumAllocated( DefaultNumAllocated )
-, mProperties( NULL )
-{
+: mProperties( NULL )
+, mNumProperties( 0 )
+, mNumAllocated( DefaultNumAllocated ) {
     // Allocate 5 entries by default
     mProperties = new aiMaterialProperty*[ DefaultNumAllocated ];
 }

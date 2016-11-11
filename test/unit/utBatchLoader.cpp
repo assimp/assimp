@@ -39,41 +39,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
+#include "Importer.h"
 #include "TestIOSystem.h"
 
-#include <assimp/IOSystem.hpp>
+using namespace ::Assimp;
 
-using namespace std;
-using namespace Assimp;
-
-class IOSystemTest : public ::testing::Test {
+class BatchLoaderTest : public ::testing::Test {
 public:
-    virtual void SetUp() { 
-        pImp = new TestIOSystem(); 
+    virtual void SetUp() {
+        m_io = new TestIOSystem();
     }
-    
-    virtual void TearDown() { 
-        delete pImp; 
+
+    virtual void TearDown() {
+        delete m_io;
     }
 
 protected:
-    TestIOSystem* pImp;
+    TestIOSystem* m_io;
 };
 
-/*
-virtual bool PushDirectory( const std::string &path );
-virtual const std::string &CurrentDirectory() const;
-virtual bool PopDirectory();
-*/
+TEST_F( BatchLoaderTest, createTest ) {
+    bool ok( true );
+    try {
+        BatchLoader loader( m_io );
+    } catch ( ... ) {
+        ok = false;
+    }
+}
 
-TEST_F( IOSystemTest, accessDirectoryStackTest ) {
-    EXPECT_FALSE( pImp->PopDirectory() );
-    EXPECT_EQ( 0, pImp->StackSize() );
-    EXPECT_FALSE( pImp->PushDirectory( "" ) );
-    std::string path = "test/";
-    EXPECT_TRUE( pImp->PushDirectory( path ) );
-    EXPECT_EQ( 1, pImp->StackSize() );
-    EXPECT_EQ( path, pImp->CurrentDirectory() );
-    EXPECT_TRUE( pImp->PopDirectory() );
-    EXPECT_EQ( 0, pImp->StackSize() );
+TEST_F( BatchLoaderTest, validateAccessTest ) {
+    BatchLoader loader1( m_io );
+    EXPECT_FALSE( loader1.getValidation() );
+    loader1.setValidation( true );
+    EXPECT_TRUE( loader1.getValidation() );
+
+    BatchLoader loader2( m_io, true );
+    EXPECT_TRUE( loader2.getValidation() );
 }

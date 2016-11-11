@@ -55,7 +55,9 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+  unit/TestIOSystem.h
   unit/AssimpAPITest.cpp
+  unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp
   unit/utBlendImportMaterials.cpp

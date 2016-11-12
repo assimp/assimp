@@ -66,7 +66,7 @@ OPTION( ASSIMP_BUILD_ZLIB
 )
 option( ASSIMP_BUILD_ASSIMP_TOOLS
   "If the supplementary tools for Assimp are built in addition to the library."
-  ON
+  OFF 
 )
 option ( ASSIMP_BUILD_SAMPLES
   "If the official samples are built as well (needs Glut)."
@@ -74,7 +74,7 @@ option ( ASSIMP_BUILD_SAMPLES
 )
 OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."
-  ON
+  OFF 
 )
 IF(MSVC)
   set (CMAKE_PREFIX_PATH "D:\\libs\\devil")

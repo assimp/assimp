@@ -184,62 +184,21 @@ IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
   SOURCE_GROUP( C4D FILES ${C4D_SRCS})
 ENDIF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
 
-# This option allows to select whether to build all the importers and then
-# manually select which ones not to build (old behaviour), or if to
-# exclude all importers from build and manually select the ones to actually
-# build.
-# By default, exclude all importers and manually select which ones to use.
-# 
-# To have all importers excluded, simply do not set this option in the parent
-# CmakeLists. Then, set the option for the importer(s) needed in the parent
-# CMakeLists, e.g.:
-#    OPTION(ASSIMP_BUILD_OBJ_IMPORTER "" TRUE)
-#
-# To have assimp build all the importers, set the option to true, then manually
-# exclude which importers you don't need, e.g.:
-#    OPTION(ASSIMP_BUILD_OBJ_IMPORTER "" FALSE)
-#
-# NOTE: In order to use this method of exclusion, the tools build must be disabled;
-# their code references certain importers/exporters which would be excluded.
-# If you need the tools, either manually add the importers/exporters the code
-# references (you will see linkage errors), or just enable the build of all the
-# importers as explained above.
-OPTION(ASSIMP_BUILD_ALL_AND_EXCLUDE "Build all importers and select which ones
-			 to not build" FALSE)
-IF(ASSIMP_BUILD_ALL_AND_EXCLUDE)
-	# macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
-	# this way selective loaders can be compiled (reduces filesize + compile time)
-	MACRO(ADD_ASSIMP_IMPORTER name)
-		OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" TRUE)
-		IF(ASSIMP_BUILD_${name}_IMPORTER)
-			LIST(APPEND ASSIMP_LOADER_SRCS ${ARGN})
-			SET(ASSIMP_IMPORTERS_ENABLED "${ASSIMP_IMPORTERS_ENABLED} ${name}")
-			SET(${name}_SRCS ${ARGN})
-			SOURCE_GROUP(${name} FILES ${ARGN})
-		ELSE()
-			SET(${name}_SRC "")
-			SET(ASSIMP_IMPORTERS_DISABLED "${ASSIMP_IMPORTERS_DISABLED} ${name}")
-			add_definitions(-DASSIMP_BUILD_NO_${name}_IMPORTER)
-		ENDIF()
-	ENDMACRO()
-ELSE(ASSIMP_BUILD_ALL_AND_EXCLUDE)
-	MACRO(ADD_ASSIMP_IMPORTER name)
-		OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" FALSE)
-		MESSAGE(STATUS "Setting false for ${name}")
-		IF(ASSIMP_BUILD_${name}_IMPORTER)
-			LIST(APPEND ASSIMP_LOADER_SRCS ${ARGN})
-			SET(ASSIMP_IMPORTERS_ENABLED "${ASSIMP_IMPORTERS_ENABLED} ${name}")
-			SET(${name}_SRCS ${ARGN})
-			SOURCE_GROUP(${name} FILES ${ARGN})
-			MESSAGE(STATUS "Setting true for ${name}")
-		ELSE()
-			SET(${name}_SRC "")
-			SET(ASSIMP_IMPORTERS_DISABLED "${ASSIMP_IMPORTERS_DISABLED} ${name}")
-			add_definitions(-DASSIMP_BUILD_NO_${name}_IMPORTER)
-			MESSAGE(STATUS "Setting false for ${name}")
-		ENDIF()
-	ENDMACRO()
-ENDIF(ASSIMP_BUILD_ALL_AND_EXCLUDE)
+# macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
+# this way selective loaders can be compiled (reduces filesize + compile time)
+MACRO(ADD_ASSIMP_IMPORTER name)
+  OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" TRUE)
+  IF(ASSIMP_BUILD_${name}_IMPORTER)
+    LIST(APPEND ASSIMP_LOADER_SRCS ${ARGN})
+    SET(ASSIMP_IMPORTERS_ENABLED "${ASSIMP_IMPORTERS_ENABLED} ${name}")
+    SET(${name}_SRCS ${ARGN})
+    SOURCE_GROUP(${name} FILES ${ARGN})
+  ELSE()
+    SET(${name}_SRC "")
+    SET(ASSIMP_IMPORTERS_DISABLED "${ASSIMP_IMPORTERS_DISABLED} ${name}")
+    add_definitions(-DASSIMP_BUILD_NO_${name}_IMPORTER)
+  ENDIF()
+ENDMACRO()
 
 SET(ASSIMP_LOADER_SRCS "")
 SET(ASSIMP_IMPORTERS_ENABLED "") # list of enabled importers

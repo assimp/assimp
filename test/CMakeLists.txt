@@ -55,7 +55,9 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+  unit/TestIOSystem.h
   unit/AssimpAPITest.cpp
+  unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp
   unit/utBlendImportMaterials.cpp
@@ -70,6 +72,7 @@ SET( TEST_SRCS
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
   unit/utIOSystem.cpp
+  unit/utIOStreamBuffer.cpp
   unit/utIssues.cpp
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
@@ -91,6 +94,7 @@ SET( TEST_SRCS
   unit/utTargetAnimation.cpp
   unit/utTextureTransform.cpp
   unit/utTriangulate.cpp
+  unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
 )

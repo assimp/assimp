@@ -1,4 +1,5 @@
-/*-------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -35,17 +36,43 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
-#include <gtest/gtest.h>
+---------------------------------------------------------------------------
+*/
+
+#include "UnitTestPCH.h"
+#include "IOStreamBuffer.h"
 #include "TestIOStream.h"
 
-using namespace ::Assimp;
-
-class utDefaultIOStream : public ::testing::Test {
+class IOStreamBufferTest : public ::testing::Test {
     // empty
 };
 
-TEST_F( utDefaultIOStream, FileSizeTest ) {
+using namespace Assimp;
+
+TEST_F( IOStreamBufferTest, creationTest ) {
+    bool ok( true );
+    try {
+        IOStreamBuffer<char> myBuffer;
+    } catch ( ... ) {
+        ok = false;
+    }
+    EXPECT_TRUE( ok );
+}
+
+TEST_F( IOStreamBufferTest, accessCacheSizeTest ) {
+    IOStreamBuffer<char> myBuffer1;
+    EXPECT_NE( 0, myBuffer1.cacheSize() );
+
+    IOStreamBuffer<char> myBuffer2( 100 );
+    EXPECT_EQ( 100, myBuffer2.cacheSize() );
+}
+
+TEST_F( IOStreamBufferTest, open_close_Test ) {
+    IOStreamBuffer<char> myBuffer;
+
+    EXPECT_FALSE( myBuffer.open( nullptr ) );
+    EXPECT_FALSE( myBuffer.close() );
+
     char buffer[ L_tmpnam ];
     tmpnam( buffer );
     std::FILE *fs( std::fopen( buffer, "w+" ) );
@@ -53,7 +80,33 @@ TEST_F( utDefaultIOStream, FileSizeTest ) {
     std::fflush( fs );
 
     TestDefaultIOStream myStream( fs, buffer );
-    size_t size = myStream.FileSize();
-    EXPECT_EQ( size, sizeof( char ) * L_tmpnam );
-    remove( buffer );
+
+    EXPECT_TRUE( myBuffer.open( &myStream ) );
+    EXPECT_FALSE( myBuffer.open( &myStream ) );
+    EXPECT_TRUE( myBuffer.close() );
+}
+
+TEST_F( IOStreamBufferTest, readlineTest ) {
+    char buffer[ L_tmpnam ];
+    tmpnam( buffer );
+    std::FILE *fs( std::fopen( buffer, "w+" ) );
+    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
+    std::fflush( fs );
+
+    IOStreamBuffer<char> myBuffer( 26 );
+    EXPECT_EQ( 26, myBuffer.cacheSize() );
+
+    TestDefaultIOStream myStream( fs, buffer );
+    size_t size( myStream.FileSize() );
+    size_t numBlocks( size / myBuffer.cacheSize() );
+    if ( size % myBuffer.cacheSize() > 0 ) {
+        numBlocks++;
+    }
+    EXPECT_TRUE( myBuffer.open( &myStream ) );
+    EXPECT_EQ( numBlocks, myBuffer.getNumBlocks() );
+    EXPECT_TRUE( myBuffer.close() );
+}
+
+TEST_F( IOStreamBufferTest, accessBlockIndexTest ) {
+
 }

@@ -38,8 +38,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
-
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
 #include "ObjFileParser.h"
@@ -54,16 +52,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <cstdlib>
 
-
 namespace Assimp {
 
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser(std::vector<char> &data, const std::string &modelName, IOSystem *io, ProgressHandler* progress, const std::string &originalObjFileName) :
-    m_DataIt(data.begin()),
-    m_DataItEnd(data.end()),
+ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, 
+                              IOSystem *io, ProgressHandler* progress,
+                              const std::string &originalObjFileName) :
+    m_DataIt(),
+    m_DataItEnd(),
     m_pModel(NULL),
     m_uiLine(0),
     m_pIO( io ),
@@ -83,55 +82,50 @@ ObjFileParser::ObjFileParser(std::vector<char> &data, const std::string &modelNa
     m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
 
     // Start parsing the file
-    parseFile();
+    parseFile( streamBuffer );
 }
 
 // -------------------------------------------------------------------
 //  Destructor
-ObjFileParser::~ObjFileParser()
-{
+ObjFileParser::~ObjFileParser() {
     delete m_pModel;
     m_pModel = NULL;
 }
 
 // -------------------------------------------------------------------
 //  Returns a pointer to the model instance.
-ObjFile::Model *ObjFileParser::GetModel() const
-{
+ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
 
 // -------------------------------------------------------------------
 //  File parsing method.
-void ObjFileParser::parseFile()
-{
-    if (m_DataIt == m_DataItEnd)
-        return;
-
+void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
     const unsigned int updateProgressEveryBytes = 100 * 1024;
     unsigned int progressCounter = 0;
-    const unsigned int bytesToProcess = std::distance(m_DataIt, m_DataItEnd);
+    const unsigned int bytesToProcess = streamBuffer.size();
     const unsigned int progressTotal = 3 * bytesToProcess;
     const unsigned int progressOffset = bytesToProcess;
     unsigned int processed = 0;
+    size_t lastFilePos( 0 );
 
-    DataArrayIt lastDataIt = m_DataIt;
+    std::vector<char> buffer;
+    while ( streamBuffer.getNextLine( buffer ) ) {
+        m_DataIt = buffer.begin();
+        m_DataItEnd = buffer.end();
 
-    while (m_DataIt != m_DataItEnd)
-    {
-        // Handle progress reporting
-        processed += std::distance(lastDataIt, m_DataIt);
-        lastDataIt = m_DataIt;
-        if (processed > (progressCounter * updateProgressEveryBytes))
-        {
+        // Handle progress reporting        
+        const size_t filePos( streamBuffer.getFilePos() );
+        if ( lastFilePos < filePos ) {
+            processed += filePos;
+            lastFilePos = filePos;
             progressCounter++;
-            m_progress->UpdateFileRead(progressOffset + processed*2, progressTotal);
+            m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
         }
 
         // parse line
-        switch (*m_DataIt)
-        {
+        switch (*m_DataIt) {
         case 'v': // Parse a vertex texture coordinate
             {
                 ++m_DataIt;
@@ -149,8 +143,8 @@ void ObjFileParser::parseFile()
                     }
                 } else if (*m_DataIt == 't') {
                     // read in texture coordinate ( 2D or 3D )
-                                        ++m_DataIt;
-                                        getVector( m_pModel->m_TextureCoord );
+                    ++m_DataIt;
+                    getVector( m_pModel->m_TextureCoord );
                 } else if (*m_DataIt == 'n') {
                     // Read in normal vector definition
                     ++m_DataIt;
@@ -184,7 +178,7 @@ void ObjFileParser::parseFile()
             {
                 std::string name;
 
-                getName(m_DataIt, m_DataItEnd, name);
+                getNameNoSpace(m_DataIt, m_DataItEnd, name);
 
                 size_t nextSpace = name.find(" ");
                 if (nextSpace != std::string::npos)
@@ -230,8 +224,7 @@ pf_skip_line:
 
 // -------------------------------------------------------------------
 //  Copy the next word in a temporary buffer
-void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
-{
+void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     size_t index = 0;
     m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
     while( m_DataIt != m_DataItEnd && !IsSpaceOrNewLine( *m_DataIt ) ) {
@@ -247,37 +240,6 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length)
     pBuffer[index] = '\0';
 }
 
-// -------------------------------------------------------------------
-// Copy the next line into a temporary buffer
-void ObjFileParser::copyNextLine(char *pBuffer, size_t length)
-{
-    size_t index = 0u;
-
-    // some OBJ files have line continuations using \ (such as in C++ et al)
-    bool continuation = false;
-    for (;m_DataIt != m_DataItEnd && index < length-1; ++m_DataIt)
-    {
-        const char c = *m_DataIt;
-        if (c == '\\') {
-            continuation = true;
-            continue;
-        }
-
-        if (c == '\n' || c == '\r') {
-            if(continuation) {
-                pBuffer[ index++ ] = ' ';
-                continue;
-            }
-            break;
-        }
-
-        continuation = false;
-        pBuffer[ index++ ] = c;
-    }
-    ai_assert(index < length);
-    pBuffer[ index ] = '\0';
-}
-
 size_t ObjFileParser::getNumComponentsInLine() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
@@ -291,7 +253,6 @@ size_t ObjFileParser::getNumComponentsInLine() {
     return numComponents;
 }
 
-// -------------------------------------------------------------------
 void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     size_t numComponents = getNumComponentsInLine();
     ai_real x, y, z;
@@ -403,18 +364,17 @@ static const std::string DefaultObjName = "defaultobject";
 
 // -------------------------------------------------------------------
 //  Get values for a new face instance
-void ObjFileParser::getFace(aiPrimitiveType type) {
-    copyNextLine(m_buffer, Buffersize);
-    char *pPtr = m_buffer;
-    char *pEnd = &pPtr[Buffersize];
-    pPtr = getNextToken<char*>(pPtr, pEnd);
-    if ( pPtr == pEnd || *pPtr == '\0' ) {
+void ObjFileParser::getFace( aiPrimitiveType type ) {
+    //copyNextLine(m_buffer, Buffersize);
+    //char *pPtr = m_DataIt;
+    //char *pPtr = m_buffer;
+    //char *pEnd = &pPtr[Buffersize];
+    m_DataIt = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
+    if ( m_DataIt == m_DataItEnd || *m_DataIt == '\0' ) {
         return;
     }
 
-    std::vector<unsigned int> *pIndices = new std::vector<unsigned int>;
-    std::vector<unsigned int> *pTexID = new std::vector<unsigned int>;
-    std::vector<unsigned int> *pNormalID = new std::vector<unsigned int>;
+    ObjFile::Face *face = new ObjFile::Face( type );
     bool hasNormal = false;
 
     const int vSize = m_pModel->m_Vertices.size();
@@ -424,14 +384,14 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
     const bool vt = (!m_pModel->m_TextureCoord.empty());
     const bool vn = (!m_pModel->m_Normals.empty());
     int iStep = 0, iPos = 0;
-    while (pPtr != pEnd) {
+    while ( m_DataIt != m_DataItEnd ) {
         iStep = 1;
 
-        if ( IsLineEnd( *pPtr ) ) {
+        if ( IsLineEnd( *m_DataIt ) ) {
             break;
         }
 
-        if (*pPtr=='/' ) {
+        if ( *m_DataIt =='/' ) {
             if (type == aiPrimitiveType_POINT) {
                 DefaultLogger::get()->error("Obj: Separator unexpected in point statement");
             }
@@ -443,11 +403,11 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 }
             }
             iPos++;
-        } else if( IsSpaceOrNewLine( *pPtr ) ) {
+        } else if( IsSpaceOrNewLine( *m_DataIt ) ) {
             iPos = 0;
         } else {
             //OBJ USES 1 Base ARRAYS!!!!
-            const int iVal( ::atoi( pPtr ) );
+            const int iVal( ::atoi( & ( *m_DataIt ) ) );
 
             // increment iStep position based off of the sign and # of digits
             int tmp = iVal;
@@ -458,64 +418,41 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
                 ++iStep;
             }
 
-            if ( iVal > 0 )
-            {
+            if ( iVal > 0 ) {
                 // Store parsed index
-                if ( 0 == iPos )
-                {
-                    pIndices->push_back( iVal-1 );
-                }
-                else if ( 1 == iPos )
-                {
-                    pTexID->push_back( iVal-1 );
-                }
-                else if ( 2 == iPos )
-                {
-                    pNormalID->push_back( iVal-1 );
+                if ( 0 == iPos ) {
+                    face->m_vertices.push_back( iVal - 1 );
+                } else if ( 1 == iPos ) {
+                    face->m_texturCoords.push_back( iVal - 1 );
+                } else if ( 2 == iPos ) {
+                    face->m_normals.push_back( iVal - 1 );
                     hasNormal = true;
-                }
-                else
-                {
+                } else {
                     reportErrorTokenInFace();
                 }
-            }
-            else if ( iVal < 0 )
-            {
+            } else if ( iVal < 0 ) {
                 // Store relatively index
-                if ( 0 == iPos )
-                {
-                    pIndices->push_back( vSize + iVal );
-                }
-                else if ( 1 == iPos )
-                {
-                    pTexID->push_back( vtSize + iVal );
-                }
-                else if ( 2 == iPos )
-                {
-                    pNormalID->push_back( vnSize + iVal );
+                if ( 0 == iPos ) {
+                    face->m_vertices.push_back( vSize + iVal );
+                } else if ( 1 == iPos ) {
+                    face->m_texturCoords.push_back( vtSize + iVal );
+                } else if ( 2 == iPos ) {
+                    face->m_normals.push_back( vnSize + iVal );
                     hasNormal = true;
-                }
-                else
-                {
+                } else {
                     reportErrorTokenInFace();
                 }
             }
         }
-        pPtr += iStep;
+        m_DataIt += iStep;
     }
 
-    if ( pIndices->empty() ) {
+    if ( face->m_vertices.empty() ) {
         DefaultLogger::get()->error("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-        delete pNormalID;
-        delete pTexID;
-        delete pIndices;
-
         return;
     }
-
-    ObjFile::Face *face = new ObjFile::Face( pIndices, pNormalID, pTexID, type );
 
     // Set active material, if one set
     if( NULL != m_pModel->m_pCurrentMaterial ) {
@@ -536,8 +473,8 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
     // Store the face
     m_pModel->m_pCurrentMesh->m_Faces.push_back( face );
-    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int)face->m_pVertices->size();
-    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int)face->m_pTexturCoords[0].size();
+    m_pModel->m_pCurrentMesh->m_uiNumIndices += (unsigned int) face->m_vertices.size();
+    m_pModel->m_pCurrentMesh->m_uiUVCoordinates[ 0 ] += (unsigned int) face->m_texturCoords.size();
     if( !m_pModel->m_pCurrentMesh->m_hasNormals && hasNormal ) {
         m_pModel->m_pCurrentMesh->m_hasNormals = true;
     }
@@ -547,8 +484,7 @@ void ObjFileParser::getFace(aiPrimitiveType type) {
 
 // -------------------------------------------------------------------
 //  Get values for a new material description
-void ObjFileParser::getMaterialDesc()
-{
+void ObjFileParser::getMaterialDesc() {
     // Get next data for material data
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     if (m_DataIt == m_DataItEnd) {
@@ -571,28 +507,26 @@ void ObjFileParser::getMaterialDesc()
 
     // If the current mesh has the same material, we simply ignore that 'usemtl' command
     // There is no need to create another object or even mesh here
-    if (m_pModel->m_pCurrentMaterial && m_pModel->m_pCurrentMaterial->MaterialName == aiString(strName))
+    if ( m_pModel->m_pCurrentMaterial && m_pModel->m_pCurrentMaterial->MaterialName == aiString( strName ) ) {
         skip = true;
+    }
 
-    if (!skip)
-    {
+    if (!skip) {
         // Search for material
         std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
-        if (it == m_pModel->m_MaterialMap.end())
-        {
+        if (it == m_pModel->m_MaterialMap.end()) {
             // Not found, use default material
             m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
             DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
             strName = m_pModel->m_pDefaultMaterial->MaterialName.C_Str();
-        }
-        else
-        {
+        } else {
             // Found, using detected material
             m_pModel->m_pCurrentMaterial = (*it).second;
         }
 
-        if (needsNewMesh(strName))
-            createMesh(strName);
+        if ( needsNewMesh( strName ) ) {
+            createMesh( strName );
+        }
 
         m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex(strName);
     }
@@ -603,17 +537,12 @@ void ObjFileParser::getMaterialDesc()
 
 // -------------------------------------------------------------------
 //  Get a comment, values will be skipped
-void ObjFileParser::getComment()
-{
-    while (m_DataIt != m_DataItEnd)
-    {
-        if ( '\n' == (*m_DataIt))
-        {
+void ObjFileParser::getComment() {
+    while (m_DataIt != m_DataItEnd) {
+        if ( '\n' == (*m_DataIt)) {
             ++m_DataIt;
             break;
-        }
-        else
-        {
+        } else {
             ++m_DataIt;
         }
     }
@@ -621,8 +550,7 @@ void ObjFileParser::getComment()
 
 // -------------------------------------------------------------------
 //  Get material library from file.
-void ObjFileParser::getMaterialLib()
-{
+void ObjFileParser::getMaterialLib() {
     // Translate tuple
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     if( m_DataIt == m_DataItEnd ) {
@@ -678,8 +606,7 @@ void ObjFileParser::getMaterialLib()
 
 // -------------------------------------------------------------------
 //  Set a new material definition as the current material.
-void ObjFileParser::getNewMaterial()
-{
+void ObjFileParser::getNewMaterial() {
     m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
     m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
     if( m_DataIt == m_DataItEnd ) {
@@ -692,17 +619,13 @@ void ObjFileParser::getNewMaterial()
         ++m_DataIt;
     }
     std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
-    if ( it == m_pModel->m_MaterialMap.end() )
-    {
+    if ( it == m_pModel->m_MaterialMap.end() ) {
         // Show a warning, if material was not found
         DefaultLogger::get()->warn("OBJ: Unsupported material requested: " + strMat);
         m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-    }
-    else
-    {
+    } else {
         // Set new material
-        if ( needsNewMesh( strMat ) )
-        {
+        if ( needsNewMesh( strMat ) ) {
             createMesh( strMat );
         }
         m_pModel->m_pCurrentMesh->m_uiMaterialIndex = getMaterialIndex( strMat );

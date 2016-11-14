@@ -1,4 +1,5 @@
-/*-------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -35,25 +36,43 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
-#include <gtest/gtest.h>
-#include "TestIOStream.h"
+---------------------------------------------------------------------------
+*/
+#include "UnitTestPCH.h"
+#include "Importer.h"
+#include "TestIOSystem.h"
 
 using namespace ::Assimp;
 
-class utDefaultIOStream : public ::testing::Test {
-    // empty
+class BatchLoaderTest : public ::testing::Test {
+public:
+    virtual void SetUp() {
+        m_io = new TestIOSystem();
+    }
+
+    virtual void TearDown() {
+        delete m_io;
+    }
+
+protected:
+    TestIOSystem* m_io;
 };
 
-TEST_F( utDefaultIOStream, FileSizeTest ) {
-    char buffer[ L_tmpnam ];
-    tmpnam( buffer );
-    std::FILE *fs( std::fopen( buffer, "w+" ) );
-    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
-    std::fflush( fs );
+TEST_F( BatchLoaderTest, createTest ) {
+    bool ok( true );
+    try {
+        BatchLoader loader( m_io );
+    } catch ( ... ) {
+        ok = false;
+    }
+}
 
-    TestDefaultIOStream myStream( fs, buffer );
-    size_t size = myStream.FileSize();
-    EXPECT_EQ( size, sizeof( char ) * L_tmpnam );
-    remove( buffer );
+TEST_F( BatchLoaderTest, validateAccessTest ) {
+    BatchLoader loader1( m_io );
+    EXPECT_FALSE( loader1.getValidation() );
+    loader1.setValidation( true );
+    EXPECT_TRUE( loader1.getValidation() );
+
+    BatchLoader loader2( m_io, true );
+    EXPECT_TRUE( loader2.getValidation() );
 }

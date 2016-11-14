@@ -92,13 +92,9 @@ struct aiMetadataEntry
     void* mData;
 };
 
-
-
 #ifdef __cplusplus
 
 #include <string>
-
-
 
 // -------------------------------------------------------------------------------
 /**
@@ -113,11 +109,7 @@ inline aiMetadataType GetAiType( double ) { return AI_DOUBLE; }
 inline aiMetadataType GetAiType( aiString ) { return AI_AISTRING; }
 inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
 
-
-
-#endif
-
-
+#endif // __cplusplus
 
 // -------------------------------------------------------------------------------
 /**

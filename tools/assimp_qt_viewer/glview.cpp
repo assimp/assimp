@@ -325,7 +325,7 @@ void CGLView::ImportTextures(const QString& pScenePath)
 
 void CGLView::BBox_GetForNode(const aiNode& pNode, const aiMatrix4x4& pParent_TransformationMatrix, SBBox& pNodeBBox, bool& pFirstAssign)
 {
-aiMatrix4x4 mat_trans = pParent_TransformationMatrix * pNode.mTransformation;
+    aiMatrix4x4 mat_trans = pParent_TransformationMatrix * pNode.mTransformation;
 
 	// Check if node has meshes
 	for(size_t idx_idx_mesh = 0; idx_idx_mesh < pNode.mNumMeshes; idx_idx_mesh++)
@@ -437,7 +437,7 @@ void CGLView::LogError(const QString& pMessage)
 
 void CGLView::Draw_Node(const aiNode* pNode)
 {
-aiMatrix4x4 mat_node = pNode->mTransformation;
+    aiMatrix4x4 mat_node = pNode->mTransformation;
 
 	// Apply node transformation matrix.
 	mat_node.Transpose();
@@ -516,7 +516,7 @@ void CGLView::Draw_Mesh(const size_t pMesh_Index)
 
 void CGLView::Draw_BBox(const SBBox& pBBox)
 {
-aiVector3D vertex[8];
+    aiVector3D vertex[8];
 
 	BBox_GetVertices(pBBox, vertex);
 	// Draw
@@ -590,9 +590,27 @@ void CGLView::resizeGL(int pWidth, int pHeight)
 	gluPerspective(mCamera_FOVY, mCamera_Viewport_AspectRatio, 1.0, 100000.0);///TODO: znear/zfar depend on scene size.
 }
 
+void CGLView::drawCoordSystem() {
+    glBindTexture(GL_TEXTURE_1D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_3D, 0);
+    glEnable(GL_COLOR_MATERIAL);
+    glBegin(GL_LINES);
+    // X, -X
+    qglColor(QColor(Qt::red)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(100000.0, 0.0, 0.0);
+    qglColor(QColor(Qt::cyan)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(-100000.0, 0.0, 0.0);
+    // Y, -Y
+    qglColor(QColor(Qt::green)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 100000.0, 0.0);
+    qglColor(QColor(Qt::magenta)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, -100000.0, 0.0);
+    // Z, -Z
+    qglColor(QColor(Qt::blue)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, 100000.0);
+    qglColor(QColor(Qt::yellow)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
+    glEnd();
+}
+
 void CGLView::paintGL()
 {
-QTime time_paintbegin;
+    QTime time_paintbegin;
 
 	time_paintbegin = QTime::currentTime();
 
@@ -604,23 +622,11 @@ QTime time_paintbegin;
 	glTranslatef(-mHelper_Camera.Translation_ToScene.x, -mHelper_Camera.Translation_ToScene.y, -mHelper_Camera.Translation_ToScene.z);
 	glMultMatrixf((GLfloat*)&mHelper_Camera.Rotation_Scene);
 	// Coordinate system
-	if(mLightingEnabled) glDisable(GL_LIGHTING);///TODO: display list
+    if ( mLightingEnabled ) {
+        glDisable( GL_LIGHTING );///TODO: display list
+    }
+    drawCoordSystem();
 
-	glBindTexture(GL_TEXTURE_1D, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindTexture(GL_TEXTURE_3D, 0);
-	glEnable(GL_COLOR_MATERIAL);
-	glBegin(GL_LINES);
-		// X, -X
-		qglColor(QColor(Qt::red)),     glVertex3f(0.0, 0.0, 0.0), glVertex3f(100000.0, 0.0, 0.0);
-		qglColor(QColor(Qt::cyan)),    glVertex3f(0.0, 0.0, 0.0), glVertex3f(-100000.0, 0.0, 0.0);
-		// Y, -Y
-		qglColor(QColor(Qt::green)),   glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 100000.0, 0.0);
-		qglColor(QColor(Qt::magenta)), glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, -100000.0, 0.0);
-		// Z, -Z
-		qglColor(QColor(Qt::blue)),    glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, 100000.0);
-		qglColor(QColor(Qt::yellow)),  glVertex3f(0.0, 0.0, 0.0), glVertex3f(0.0, 0.0, -100000.0);
-	glEnd();
 	glDisable(GL_COLOR_MATERIAL);
 	if(mLightingEnabled) glEnable(GL_LIGHTING);
 
@@ -1015,8 +1021,8 @@ void CGLView::Lighting_DisableSource(const size_t pLightNumber)
 
 void CGLView::Camera_Set(const size_t pCameraNumber)
 {
-SHelper_Camera& hcam = mHelper_Camera;// reference with short name for conveniance.
-aiVector3D up;
+    SHelper_Camera& hcam = mHelper_Camera;// reference with short name for conveniance.
+    aiVector3D up;
 
 	if(mCamera_DefaultAdded || (pCameraNumber >= mScene->mNumCameras))// If default camera used then 'pCameraNumber' doesn't matter.
 	{

@@ -1,4 +1,5 @@
-/*-------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
@@ -35,25 +36,40 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
-#include <gtest/gtest.h>
-#include "TestIOStream.h"
+---------------------------------------------------------------------------
+*/
+#include "UnitTestPCH.h"
 
-using namespace ::Assimp;
+#include <assimp/types.h>
 
-class utDefaultIOStream : public ::testing::Test {
+using namespace Assimp;
+
+class utTypes : public ::testing::Test {
     // empty
 };
 
-TEST_F( utDefaultIOStream, FileSizeTest ) {
-    char buffer[ L_tmpnam ];
-    tmpnam( buffer );
-    std::FILE *fs( std::fopen( buffer, "w+" ) );
-    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
-    std::fflush( fs );
+TEST_F( utTypes, Color3dCpmpareOpTest ) {
+    aiColor3D col1( 1, 2, 3 );
+    aiColor3D col2( 4, 5, 6 );
+    aiColor3D col3( col1 );
+    
+    EXPECT_FALSE( col1 == col2 );
+    EXPECT_FALSE( col2 == col3 );
+    EXPECT_TRUE( col1 == col3 );
 
-    TestDefaultIOStream myStream( fs, buffer );
-    size_t size = myStream.FileSize();
-    EXPECT_EQ( size, sizeof( char ) * L_tmpnam );
-    remove( buffer );
+    EXPECT_TRUE( col1 != col2 );
+    EXPECT_TRUE( col2 != col3 );
+    EXPECT_FALSE( col1 != col3 );
+}
+
+TEST_F( utTypes, Color3dIndexOpTest ) {
+    aiColor3D col( 1, 2, 3 );
+    const ai_real r = col[ 0 ];
+    EXPECT_FLOAT_EQ( 1, r );
+
+    const ai_real g = col[ 1 ];
+    EXPECT_FLOAT_EQ( 2, g );
+
+    const ai_real b = col[ 2 ];
+    EXPECT_FLOAT_EQ( 3, b );
 }

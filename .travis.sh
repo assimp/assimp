@@ -7,7 +7,7 @@ if [ $ANDROID ]; then
     ant -v -Dmy.dir=${TRAVIS_BUILD_DIR} -f ${TRAVIS_BUILD_DIR}/port/jassimp/build.xml ndk-jni
 else
     generate \
-    && make \
+    && make -j4 \
     && sudo make install \
     && sudo ldconfig \
     && (cd test/unit; ../../bin/unit) \

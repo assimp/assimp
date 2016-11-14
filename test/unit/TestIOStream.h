@@ -1,14 +1,13 @@
-/*-------------------------------------------------------------------------
+/*
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Copyright (c) 2006-2016, assimp team
-
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -35,25 +34,29 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------*/
-#include <gtest/gtest.h>
-#include "TestIOStream.h"
+
+----------------------------------------------------------------------
+*/
+#pragma once
+
+#include "DefaultIOStream.h"
 
 using namespace ::Assimp;
 
-class utDefaultIOStream : public ::testing::Test {
-    // empty
+class TestDefaultIOStream : public DefaultIOStream {
+public:
+    TestDefaultIOStream()
+        : DefaultIOStream() {
+        // empty
+    }
+
+    TestDefaultIOStream( FILE* pFile, const std::string &strFilename )
+    : DefaultIOStream( pFile, strFilename ) {
+        // empty
+    }
+
+    virtual ~TestDefaultIOStream() {
+        // empty
+    }
 };
 
-TEST_F( utDefaultIOStream, FileSizeTest ) {
-    char buffer[ L_tmpnam ];
-    tmpnam( buffer );
-    std::FILE *fs( std::fopen( buffer, "w+" ) );
-    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
-    std::fflush( fs );
-
-    TestDefaultIOStream myStream( fs, buffer );
-    size_t size = myStream.FileSize();
-    EXPECT_EQ( size, sizeof( char ) * L_tmpnam );
-    remove( buffer );
-}

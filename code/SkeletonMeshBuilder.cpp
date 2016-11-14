@@ -132,7 +132,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
     {
         // if the node has no children, it's an end node. Put a little knob there instead
         aiVector3D ownpos( pNode->mTransformation.a4, pNode->mTransformation.b4, pNode->mTransformation.c4);
-        ai_real sizeEstimate = ownpos.Length() * 0.18;
+        ai_real sizeEstimate = ownpos.Length() * ai_real( 0.18 );
 
         mVertices.push_back( aiVector3D( -sizeEstimate, 0.0, 0.0));
         mVertices.push_back( aiVector3D( 0.0, sizeEstimate, 0.0));

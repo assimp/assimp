@@ -165,6 +165,47 @@ inline char_t getName( char_t it, char_t end, std::string &name )
     return it;
 }
 
+/** @brief  Get a name from the current line. Do not preserve space
+ *    in the middle, but trim it at the end.
+ *  @param  it      set to current position
+ *  @param  end     set to end of scratch buffer for readout
+ *  @param  name    Separated name
+ *  @return Current-iterator with new position
+ */
+template<class char_t>
+inline char_t getNameNoSpace( char_t it, char_t end, std::string &name )
+{
+    name = "";
+    if( isEndOfBuffer( it, end ) ) {
+        return end;
+    }
+
+    char *pStart = &( *it );
+    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it )
+          && !IsSpaceOrNewLine( *it ) ) {
+        ++it;
+    }
+
+    while( isEndOfBuffer( it, end ) || IsLineEnd( *it )
+          || IsSpaceOrNewLine( *it ) ) {
+        --it;
+    }
+    ++it;
+
+    // Get name
+    // if there is no name, and the previous char is a separator, come back to start
+    while (&(*it) < pStart) {
+        ++it;
+    }
+    std::string strName( pStart, &(*it) );
+    if ( strName.empty() )
+        return it;
+    else
+        name = strName;
+
+    return it;
+}
+
 /** @brief  Get next word from given line
  *  @param  it      set to current position
  *  @param  end     set to end of scratch buffer for readout

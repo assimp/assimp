@@ -178,7 +178,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
             {
                 std::string name;
 
-                getName(m_DataIt, m_DataItEnd, name);
+                getNameNoSpace(m_DataIt, m_DataItEnd, name);
 
                 size_t nextSpace = name.find(" ");
                 if (nextSpace != std::string::npos)

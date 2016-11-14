@@ -150,11 +150,6 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-# Workaround to be able to deal with compiler bug "Too many sections" with mingw.
-IF( CMAKE_COMPILER_IS_MINGW )
-  ADD_DEFINITIONS(-DASSIMP_BUILD_NO_IFC_IMPORTER )
-ENDIF()
-
 # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
 IF( UNIX )
   IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux

@@ -48,6 +48,8 @@ script:
 after_success:
   - cd ${TRAVIS_BUILD_DIR}
   - pwd
+  - ls
+  - cd code;ls
   - lcov --directory code/CMakeFiles/assimp.dir/ --capture --output-file coverage.info
   - lcov --remove coverage.info 'contrib/*' '/usr/*' --output-file coverage.info
   - lcov --list coverage.info

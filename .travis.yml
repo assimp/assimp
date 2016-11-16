@@ -41,6 +41,8 @@ before_script:
   - lcov --directory . --zerocounters
 
 script:
+  - export COVERALLS_SERVICE_NAME=travis-ci
+  - export COVERALLS_REPO_TOKEN=abc12345
   - . ./.travis.sh
 
 after_success:

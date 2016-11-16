@@ -103,7 +103,7 @@ SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 
 add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
-	unit/CCompilerTest.c
+    unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Version.cpp
     ${TEST_SRCS}
@@ -123,7 +123,9 @@ target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
 if (ASSIMP_COVERALLS)
-    set(COVERAGE_SRCS ${assimp_src} )
+    include(Coveralls)
+
+    set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
 
     # Create the coveralls target.
     coveralls_setup(

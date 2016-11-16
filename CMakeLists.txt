@@ -173,6 +173,12 @@ ELSEIF( CMAKE_COMPILER_IS_MINGW )
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
 ENDIF()
 
+if (COVERALLS)
+    include(Coveralls)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+endif()
+
 INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )
 

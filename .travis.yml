@@ -3,6 +3,14 @@ before_install:
   - sudo apt-get install cmake python3
   - if [ $LINUX ]; then sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; fi
   - echo -e "#ifndef A_R_H_INC\n#define A_R_H_INC\n#define GitVersion ${TRAVIS_JOB_ID}\n#define GitBranch \"${TRAVIS_BRANCH}\"\n#endif // A_R_H_INC" > revision.h
+  # install latest LCOV (1.9 was failing)
+  - cd ${TRAVIS_BUILD_DIR}
+  - wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.11.orig.tar.gz
+  - tar xf lcov_1.11.orig.tar.gz
+  - sudo make -C lcov-1.11/ install
+  - gem install coveralls-lcov
+  - lcov --version
+  - g++ --version
 
 branches:
   only:
@@ -27,5 +35,18 @@ compiler:
 install:
   - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi
 
+before_script:
+  - cd ${TRAVIS_BUILD_DIR}
+  # init coverage to 0 (optional)
+  - lcov --directory . --zerocounters
+
 script:
   - . ./.travis.sh
+
+after_success:
+  - cd ${TRAVIS_BUILD_DIR}
+  - lcov --directory . --capture --output-file coverage.info
+  - lcov --remove coverage.info 'contrib/*' '/usr/*' --output-file coverage.info
+  - lcov --list coverage.info
+  - coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info
+

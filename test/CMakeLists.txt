@@ -122,7 +122,7 @@ ENDIF( WIN32 )
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
-if (COVERALLS)
+if (ASSIMP_COVERALLS)
     set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
 
     # Create the coveralls target.

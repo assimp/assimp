@@ -122,15 +122,15 @@ ENDIF( WIN32 )
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
-if (ASSIMP_COVERALLS)
-    include(Coveralls)
-
-    set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
-
-    # Create the coveralls target.
-    coveralls_setup(
-        "${COVERAGE_SRCS}" # The source files.
-        ON                 # If we should upload.
-        "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
-endif()
+#if (ASSIMP_COVERALLS)
+#    include(Coveralls)
+#
+#    set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
+#
+#    # Create the coveralls target.
+#    coveralls_setup(
+#        "${COVERAGE_SRCS}" # The source files.
+#        ON                 # If we should upload.
+#        "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
+#endif()
 

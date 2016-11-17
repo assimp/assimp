@@ -51,7 +51,7 @@ after_success:
   #- ls
   #- cd code/CMakeFiles/;ls assimp.dir
   - lcov --directory . --capture --output-file coverage.info
-  - lcov --remove coverage.info 'contrib/*' '/usr/*' --output-file coverage.info
+  - lcov --remove coverage.info 'contrib/*' '/usr/*' '/test/*' --output-file coverage.info
   - lcov --list coverage.info
   - coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info
 

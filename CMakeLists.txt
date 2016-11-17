@@ -76,6 +76,11 @@ OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."
   ON
 )
+OPTION ( ASSIMP_COVERALLS
+   "Eańable this to measure test coverage."
+   OFF
+)
+
 IF(MSVC)
   set (CMAKE_PREFIX_PATH "D:\\libs\\devil")
   OPTION( ASSIMP_INSTALL_PDB
@@ -172,6 +177,12 @@ ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
 ENDIF()
+
+if (ASSIMP_COVERALLS)
+    include(Coveralls)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+endif()
 
 INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )

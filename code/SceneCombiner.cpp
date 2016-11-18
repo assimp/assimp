@@ -740,7 +740,7 @@ void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator 
         aiVertexWeight* avw = pc->mWeights = new aiVertexWeight[pc->mNumWeights];
 
         // And copy the final weights - adjust the vertex IDs by the
-        // face index offset of the coresponding mesh.
+        // face index offset of the corresponding mesh.
         for (std::vector< BoneSrcIndex >::const_iterator wmit = (*it).pSrcBones.begin(); wmit != wend; ++wmit)  {
             aiBone* pip = (*wmit).first;
             for (unsigned int mp = 0; mp < pip->mNumWeights;++mp,++avw) {
@@ -1237,8 +1237,8 @@ void SceneCombiner::Copy (aiMetadata** _dest, const aiMetadata* src)
         case AI_BOOL:
             out.mData = new bool(*static_cast<bool*>(in.mData));
             break;
-        case AI_INT:
-            out.mData = new int(*static_cast<int*>(in.mData));
+        case AI_INT32:
+            out.mData = new int32_t(*static_cast<int32_t*>(in.mData));
             break;
         case AI_UINT64:
             out.mData = new uint64_t(*static_cast<uint64_t*>(in.mData));

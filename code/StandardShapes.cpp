@@ -121,8 +121,7 @@ void Subdivide(std::vector<aiVector3D>& positions)
 aiMesh* StandardShapes::MakeMesh(const std::vector<aiVector3D>& positions,
     unsigned int numIndices)
 {
-    if (positions.size() & numIndices || positions.empty() || !numIndices)
-        return NULL;
+    if (positions.empty() || !numIndices) return NULL;
 
     // Determine which kinds of primitives the mesh consists of
     aiMesh* out = new aiMesh();
@@ -194,8 +193,8 @@ unsigned int StandardShapes::MakeIcosahedron(std::vector<aiVector3D>& positions)
 {
     positions.reserve(positions.size()+60);
 
-    const ai_real t = (1.0 + 2.236067977)/2.0;
-    const ai_real s = std::sqrt(1.0 + t*t);
+    const ai_real t = ( ai_real( 1.0 )+ ai_real( 2.236067977 ) ) / ai_real( 2.0 );
+    const ai_real s = std::sqrt(ai_real(1.0) + t*t);
 
     const aiVector3D v0  = aiVector3D(t,1.0, 0.0)/s;
     const aiVector3D v1  = aiVector3D(-t,1.0, 0.0)/s;
@@ -244,9 +243,9 @@ unsigned int StandardShapes::MakeDodecahedron(std::vector<aiVector3D>& positions
 {
     positions.reserve(positions.size()+108);
 
-    const ai_real a = 1.0 / 1.7320508;
-    const ai_real b = std::sqrt((3.0-2.23606797f)/6.0);
-    const ai_real c = std::sqrt((3.0+2.23606797f)/6.0);
+    const ai_real a = ai_real( 1.0 ) / ai_real(1.7320508);
+    const ai_real b = std::sqrt(( ai_real( 3.0 )- ai_real( 2.23606797))/ ai_real( 6.0) );
+    const ai_real c = std::sqrt(( ai_real( 3.0 )+ ai_real( 2.23606797f))/ ai_real( 6.0) );
 
     const aiVector3D v0  = aiVector3D(a,a,a);
     const aiVector3D v1  = aiVector3D(a,a,-a);
@@ -316,13 +315,14 @@ unsigned int StandardShapes::MakeTetrahedron(std::vector<aiVector3D>& positions)
 {
     positions.reserve(positions.size()+9);
 
-    const ai_real a = 1.41421/3.0;
-    const ai_real b = 2.4494/3.0;
+    const ai_real invThree = ai_real( 1.0 ) / ai_real( 3.0 );
+    const ai_real a = ai_real( 1.41421 ) * invThree;
+    const ai_real b = ai_real( 2.4494 ) * invThree;
 
     const aiVector3D v0  = aiVector3D(0.0,0.0,1.0);
-    const aiVector3D v1  = aiVector3D(2*a,0,-1.0/3.0);
-    const aiVector3D v2  = aiVector3D(-a,b,-1.0/3.0);
-    const aiVector3D v3  = aiVector3D(-a,-b,-1.0/3.0);
+    const aiVector3D v1  = aiVector3D(2*a,0,-invThree );
+    const aiVector3D v2  = aiVector3D(-a,b,-invThree );
+    const aiVector3D v3  = aiVector3D(-a,-b,-invThree );
 
     ADD_TRIANGLE(v0,v1,v2);
     ADD_TRIANGLE(v0,v2,v3);
@@ -337,7 +337,7 @@ unsigned int StandardShapes::MakeHexahedron(std::vector<aiVector3D>& positions,
     bool polygons /*= false*/)
 {
     positions.reserve(positions.size()+36);
-    const ai_real length = 1.0/1.73205080;
+    const ai_real length = ai_real(1.0)/ai_real(1.73205080);
 
     const aiVector3D v0  = aiVector3D(-1.0,-1.0,-1.0)*length;
     const aiVector3D v1  = aiVector3D(1.0,-1.0,-1.0)*length;
@@ -396,7 +396,7 @@ void StandardShapes::MakeCone(ai_real height,ai_real radius1,
     radius1 = std::fabs(radius1);
     radius2 = std::fabs(radius2);
 
-    ai_real halfHeight = height / 2.0;
+    ai_real halfHeight = height / ai_real(2.0);
 
     // radius1 is always the smaller one
     if (radius2 > radius1)

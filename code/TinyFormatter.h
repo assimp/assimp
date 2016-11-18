@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 
 namespace Assimp {
-    namespace Formatter {
+namespace Formatter {
 
 // ------------------------------------------------------------------------------------------------
 /** stringstream utility. Usage:
@@ -160,4 +160,5 @@ typedef basic_formatter< wchar_t > wformat;
 } // ! namespace Formatter
 
 } // ! namespace Assimp
+
 #endif

@@ -64,12 +64,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  // -------------------------------------------------------------------------------
 typedef enum aiMetadataType
 {
-    AI_BOOL = 0,
-    AI_INT = 1,
-    AI_UINT64 = 2,
-    AI_FLOAT = 3,
-    AI_DOUBLE = 4,
-    AI_AISTRING = 5,
+    AI_BOOL       = 0,
+    AI_INT32      = 1,
+    AI_UINT64     = 2,
+    AI_FLOAT      = 3,
+    AI_DOUBLE     = 4,
+    AI_AISTRING   = 5,
     AI_AIVECTOR3D = 6,
 
 #ifndef SWIG
@@ -92,32 +92,25 @@ struct aiMetadataEntry
     void* mData;
 };
 
-
-
 #ifdef __cplusplus
 
 #include <string>
-
-
 
 // -------------------------------------------------------------------------------
 /**
   * Helper functions to get the aiType enum entry for a type
   */
  // -------------------------------------------------------------------------------
-inline aiMetadataType GetAiType( const bool& ) { return AI_BOOL; }
-inline aiMetadataType GetAiType( const int& ) { return AI_INT; }
-inline aiMetadataType GetAiType( const uint64_t& ) { return AI_UINT64; }
-inline aiMetadataType GetAiType( const float& ) { return AI_FLOAT; }
-inline aiMetadataType GetAiType( const double& ) { return AI_DOUBLE; }
-inline aiMetadataType GetAiType( const aiString& ) { return AI_AISTRING; }
-inline aiMetadataType GetAiType( const aiVector3D& ) { return AI_AIVECTOR3D; }
 
+inline aiMetadataType GetAiType( bool ) { return AI_BOOL; }
+inline aiMetadataType GetAiType( int32_t ) { return AI_INT32; }
+inline aiMetadataType GetAiType( uint64_t ) { return AI_UINT64; }
+inline aiMetadataType GetAiType( float ) { return AI_FLOAT; }
+inline aiMetadataType GetAiType( double ) { return AI_DOUBLE; }
+inline aiMetadataType GetAiType( aiString ) { return AI_AISTRING; }
+inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
 
-
-#endif
-
-
+#endif // __cplusplus
 
 // -------------------------------------------------------------------------------
 /**
@@ -165,8 +158,8 @@ struct aiMetadata
                 case AI_BOOL:
                     delete static_cast<bool*>(data);
                     break;
-                case AI_INT:
-                    delete static_cast<int*>(data);
+                case AI_INT32:
+                    delete static_cast<int32_t*>(data);
                     break;
                 case AI_UINT64:
                     delete static_cast<uint64_t*>(data);
@@ -247,6 +240,22 @@ struct aiMetadata
     inline bool Get( const std::string& key, T& value ) {
         return Get(aiString(key), value);
     }
+
+	/// \fn inline bool Get(size_t pIndex, const aiString*& pKey, const aiMetadataEntry*& pEntry)
+	/// Return metadata entry for analyzing it by user.
+	/// \param [in] pIndex - index of the entry.
+	/// \param [out] pKey - pointer to the key value.
+	/// \param [out] pEntry - pointer to the entry: type and value.
+	/// \return false - if pIndex is out of range, else - true.
+	inline bool Get(size_t pIndex, const aiString*& pKey, const aiMetadataEntry*& pEntry)
+	{
+		if(pIndex >= mNumProperties) return false;
+
+		pKey = &mKeys[pIndex];
+		pEntry = &mValues[pIndex];
+
+		return true;
+	}
 
 #endif // __cplusplus
 

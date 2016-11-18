@@ -93,7 +93,7 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
     // Create materials that can be found and parsed via the IOSystem.
     for (size_t i=0, len=mesh->NumSubMeshes(); i<len; ++i)
     {
-        SubMeshXml *submesh = mesh->GetSubMesh(i);
+        SubMeshXml *submesh = mesh->GetSubMesh( static_cast<uint16_t>(i));
         if (submesh && !submesh->materialRef.empty())
         {
             aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);

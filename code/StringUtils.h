@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdarg>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sstream>
 #include <string>
 
@@ -103,7 +104,7 @@ float ai_strtof( const char *begin, const char *end ) {
         std::string token( begin, len );
         val = static_cast< float >( ::atof( token.c_str() ) );
     }
-    
+
     return val;
 }
 

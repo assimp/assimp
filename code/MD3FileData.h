@@ -261,13 +261,13 @@ inline void LatLngNormalToVec3(uint16_t p_iNormal, ai_real* p_afOut)
 {
     ai_real lat = (ai_real)(( p_iNormal >> 8u ) & 0xff);
     ai_real lng = (ai_real)(( p_iNormal & 0xff ));
-    lat *= 3.141926/128.0;
-    lng *= 3.141926/128.0;
+    const ai_real invVal( ai_real( 1.0 ) / ai_real( 128.0 ) );
+    lat *= ai_real( 3.141926 ) * invVal;
+    lng *= ai_real( 3.141926 ) * invVal;
 
-    p_afOut[0] = std::cos(lat) * std::sin(lng);
-    p_afOut[1] = std::sin(lat) * std::sin(lng);
-    p_afOut[2] = std::cos(lng);
-    return;
+    p_afOut[ 0 ] = std::cos(lat) * std::sin(lng);
+    p_afOut[ 1 ] = std::sin(lat) * std::sin(lng);
+    p_afOut[ 2 ] = std::cos(lng);
 }
 
 
@@ -298,10 +298,10 @@ inline void Vec3NormalToLatLng( const aiVector3D& p_vIn, uint16_t& p_iOut )
     {
         int a, b;
 
-        a = int(57.2957795f * ( atan2f( p_vIn[1], p_vIn[0] ) ) * (255.0f / 360.0f ));
+        a = int(57.2957795f * ( std::atan2( p_vIn[1], p_vIn[0] ) ) * (255.0f / 360.0f ));
         a &= 0xff;
 
-        b = int(57.2957795f * ( acosf( p_vIn[2] ) ) * ( 255.0f / 360.0f ));
+        b = int(57.2957795f * ( std::acos( p_vIn[2] ) ) * ( 255.0f / 360.0f ));
         b &= 0xff;
 
         ((unsigned char*)&p_iOut)[0] = b;   // longitude

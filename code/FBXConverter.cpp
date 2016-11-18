@@ -3068,9 +3068,7 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
             const KeyTimeList::value_type timeA = std::get<0>(kfl)->at( id0 );
             const KeyTimeList::value_type timeB = std::get<0>(kfl)->at( id1 );
 
-            // do the actual interpolation in double-precision arithmetics
-            // because it is a bit sensitive to rounding errors.
-            const double factor = timeB == timeA ? 0. : static_cast<double>( ( time - timeA ) / ( timeB - timeA ) );
+            const ai_real factor = timeB == timeA ? 0. : static_cast<ai_real>( ( time - timeA ) ) / ( timeB - timeA );
             const ai_real interpValue = static_cast<ai_real>( valueA + ( valueB - valueA ) * factor );
 
             result[ std::get<2>(kfl) ] = interpValue;

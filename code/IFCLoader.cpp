@@ -708,7 +708,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 
         if (!properties.empty()) {
             aiMetadata* data = new aiMetadata();
-            data->mNumProperties = properties.size();
+            data->mNumProperties = static_cast<unsigned int>(properties.size());
             data->mKeys = new aiString[data->mNumProperties]();
             data->mValues = new aiMetadataEntry[data->mNumProperties]();
 

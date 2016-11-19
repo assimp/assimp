@@ -426,7 +426,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
         }
 
         // Generate nodes to render the mesh. Store the source layer in the mParent member of the nodes
-        unsigned int num = apcMeshes.size() - meshStart;
+        unsigned int num = static_cast<unsigned int>(apcMeshes.size() - meshStart);
         if (layer.mName != "<LWODefault>" || num > 0) {
             aiNode* pcNode = new aiNode();
             apcNodes[layer.mIndex] = pcNode;

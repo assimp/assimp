@@ -583,7 +583,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
         zstream.avail_in  = comp_len;
 
-        zstream.avail_out = buff.size();
+        zstream.avail_out = static_cast<uInt>(buff.size());
         zstream.next_out = reinterpret_cast<Bytef*>(&*buff.begin());
         const int ret = inflate(&zstream, Z_FINISH);
 

@@ -92,7 +92,7 @@ public:
 
         // Remove null characters from the input sequence otherwise the parsing will utterly fail
         unsigned int size = 0;
-        unsigned int size_max = data.size();
+        unsigned int size_max = static_cast<unsigned int>(data.size());
         for(unsigned int i = 0; i < size_max; i++) {
             if(data[i] != '\0') {
                 data[size++] = data[i];
@@ -117,7 +117,7 @@ public:
             return 0;
         }
         if(t+sizeToRead>data.size()) {
-            sizeToRead = data.size()-t;
+            sizeToRead = static_cast<int>(data.size()-t);
         }
 
         memcpy(buffer,&data.front()+t,sizeToRead);

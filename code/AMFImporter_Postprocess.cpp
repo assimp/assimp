@@ -352,7 +352,7 @@ void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeEleme
 
 		for(const CAMFImporter_NodeElement_Metadata& metadata: pMetadataList)
 		{
-			pSceneNode.mMetaData->Set(meta_idx++, metadata.Type, metadata.Value.c_str());
+			pSceneNode.mMetaData->Set(meta_idx++, metadata.Type, aiString(metadata.Value));
 		}
 	}// if(pMetadataList.size() > 0)
 }

@@ -413,7 +413,7 @@ enum aiTextureFlags
  *    SourceColor * SourceBlend + DestColor * DestBlend
  *  @endcode
  *  where DestColor is the previous color in the framebuffer at this
- *  position and SourceColor is the material colro before the transparency
+ *  position and SourceColor is the material color before the transparency
  *  calculation.<br>
  *  This corresponds to the #AI_MATKEY_BLEND_FUNC property.
 */

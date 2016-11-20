@@ -383,7 +383,7 @@ namespace o3dgc
                 r     = (maxTab[d] - minTab[d]);
                 diag += r*r;
             } 
-            diag = sqrt(diag);
+            diag = static_cast<Real>(sqrt(diag));
             for(unsigned long d = 0; d < dim; ++d)
             {
                  maxTab[d] = minTab[d] + diag;

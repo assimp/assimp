@@ -274,7 +274,7 @@ void STLImporter::LoadASCIIFile()
         }
         else pScene->mRootNode->mName.Set("<STL_ASCII>");
 
-        unsigned int faceVertexCounter = 0;
+        unsigned int faceVertexCounter = 3;
         for ( ;; )
         {
             // go to the next token

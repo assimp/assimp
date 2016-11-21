@@ -325,7 +325,7 @@ bool selected = ui->lstLight->isItemSelected(ui->lstLight->currentItem());
 	mGLView->updateGL();
 }
 
-void MainWindow::on_lstCamera_clicked(__unused const QModelIndex &index)
+void MainWindow::on_lstCamera_clicked( const QModelIndex &)
 {
 	mGLView->Camera_Set(ui->lstLight->currentRow());
 	mGLView->updateGL();

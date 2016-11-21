@@ -55,7 +55,9 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+  unit/TestIOSystem.h
   unit/AssimpAPITest.cpp
+  unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp
   unit/utBlendImportMaterials.cpp
@@ -70,12 +72,16 @@ SET( TEST_SRCS
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
   unit/utIOSystem.cpp
+  unit/utIOStreamBuffer.cpp
   unit/utIssues.cpp
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
   unit/utMaterialSystem.cpp
   unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
+  unit/SceneDiffer.h
+  unit/SceneDiffer.cpp
+  unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
@@ -88,6 +94,7 @@ SET( TEST_SRCS
   unit/utTargetAnimation.cpp
   unit/utTextureTransform.cpp
   unit/utTriangulate.cpp
+  unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
 )
@@ -96,7 +103,7 @@ SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
 
 add_executable( unit
     ../contrib/gtest/src/gtest-all.cc
-	unit/CCompilerTest.c
+    unit/CCompilerTest.c
     unit/Main.cpp
     ../code/Version.cpp
     ${TEST_SRCS}
@@ -115,3 +122,15 @@ ENDIF( WIN32 )
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
+#if (ASSIMP_COVERALLS)
+#    include(Coveralls)
+#
+#    set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
+#
+#    # Create the coveralls target.
+#    coveralls_setup(
+#        "${COVERAGE_SRCS}" # The source files.
+#        ON                 # If we should upload.
+#        "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
+#endif()
+

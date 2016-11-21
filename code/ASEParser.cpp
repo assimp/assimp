@@ -618,7 +618,8 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
             if (TokenMatch(filePtr,"MATERIAL_TRANSPARENCY",21))
             {
                 ParseLV4MeshFloat(mat.mTransparency);
-                mat.mTransparency = 1.0 - mat.mTransparency;continue;
+                mat.mTransparency = ai_real( 1.0 ) - mat.mTransparency;
+                continue;
             }
             // material self illumination
             if (TokenMatch(filePtr,"MATERIAL_SELFILLUM",18))

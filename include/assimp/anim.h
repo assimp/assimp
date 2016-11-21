@@ -255,7 +255,6 @@ struct aiNodeAnim
      * scaling and one position key. */
     C_STRUCT aiQuatKey* mRotationKeys;
 
-
     /** The number of scaling keys */
     unsigned int mNumScalingKeys;
 
@@ -265,7 +264,6 @@ struct aiNodeAnim
      * If there are scaling keys, there will also be at least one
      * position and one rotation key.*/
     C_STRUCT aiVectorKey* mScalingKeys;
-
 
     /** Defines how the animation behaves before the first
      *  key is encountered.

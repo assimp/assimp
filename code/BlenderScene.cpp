@@ -806,4 +806,4 @@ void DNA::RegisterConverters() {
 }
 
 
-#endif ASSIMP_BUILD_NO_BLEND_IMPORTER
+#endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

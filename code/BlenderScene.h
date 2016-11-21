@@ -91,8 +91,17 @@ namespace Blender {
 //   value for the field.
 //
 
-#define WARN // warn if field is missing, substitute default value
-#define FAIL // fail the import if the field does not exist
+// warn if field is missing, substitute default value
+#ifdef WARN
+#  undef WARN
+#endif
+#define WARN 
+
+// fail the import if the field does not exist
+#ifdef FAIL
+#  undef FAIL
+#endif
+#define FAIL 
 
 struct Object;
 struct MTex;

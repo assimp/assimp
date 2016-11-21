@@ -105,7 +105,6 @@ public:
     BlenderImporter();
     ~BlenderImporter();
 
-
 public:
 
     // --------------------

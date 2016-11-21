@@ -77,8 +77,8 @@ void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
 void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max,
     const aiMatrix4x4& m)
 {
-    min = aiVector3D (10e10,  10e10, 10e10);
-    max = aiVector3D (-10e10,-10e10,-10e10);
+    min = aiVector3D ( ai_real( 10e10 ), ai_real( 10e10 ), ai_real( 10e10 ) );
+    max = aiVector3D ( ai_real( -10e10 ), ai_real( -10e10 ), ai_real( -10e10 ) );
     for (unsigned int i = 0;i < mesh->mNumVertices;++i)
     {
         const aiVector3D v = m * mesh->mVertices[i];
@@ -144,7 +144,7 @@ void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,
 // -------------------------------------------------------------------------------
 ai_real ComputePositionEpsilon(const aiMesh* pMesh)
 {
-    const ai_real epsilon = 1e-4;
+    const ai_real epsilon = ai_real( 1e-4 );
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec;
@@ -157,7 +157,7 @@ ai_real ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
 {
     ai_assert( NULL != pMeshes );
 
-    const ai_real epsilon = 1e-4;
+    const ai_real epsilon = ai_real( 1e-4 );
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec, mi, ma;

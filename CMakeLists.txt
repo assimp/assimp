@@ -40,20 +40,20 @@ cmake_minimum_required( VERSION 2.8 )
 PROJECT( Assimp )
 
 # All supported options ###############################################
-OPTION( BUILD_SHARED_LIBS 
-  "Build package with shared libraries." 
+OPTION( BUILD_SHARED_LIBS
+  "Build package with shared libraries."
   ON
 )
 OPTION( ASSIMP_DOUBLE_PRECISION
   "Set to ON to enable double precision processing"
   OFF
 )
-OPTION( ASSIMP_OPT_BUILD_PACKAGES 
-  "Set to ON to generate CPack configuration files and packaging targets" 
+OPTION( ASSIMP_OPT_BUILD_PACKAGES
+  "Set to ON to generate CPack configuration files and packaging targets"
   OFF
 )
-OPTION( ASSIMP_ANDROID_JNIIOSYSTEM 
-  "Android JNI IOSystem support is active" 
+OPTION( ASSIMP_ANDROID_JNIIOSYSTEM
+  "Android JNI IOSystem support is active"
   OFF
 )
 OPTION( ASSIMP_NO_EXPORT
@@ -76,7 +76,13 @@ OPTION ( ASSIMP_BUILD_TESTS
   "If the test suite for Assimp is built in addition to the library."
   ON
 )
+OPTION ( ASSIMP_COVERALLS
+   "Eańable this to measure test coverage."
+   OFF
+)
+
 IF(MSVC)
+  set (CMAKE_PREFIX_PATH "D:\\libs\\devil")
   OPTION( ASSIMP_INSTALL_PDB
     "Install MSVC debug files."
     ON
@@ -149,11 +155,6 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-# Workaround to be able to deal with compiler bug "Too many sections" with mingw.
-IF( CMAKE_COMPILER_IS_MINGW )
-  ADD_DEFINITIONS(-DASSIMP_BUILD_NO_IFC_IMPORTER )
-ENDIF()
-
 # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
 IF( UNIX )
   IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
@@ -176,6 +177,12 @@ ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
 ENDIF()
+
+if (ASSIMP_COVERALLS)
+    include(Coveralls)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+endif()
 
 INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )
@@ -320,7 +327,6 @@ ELSE (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_C4D_IMPORTER )
 ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
-
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   IF ( WIN32 )
@@ -336,10 +342,10 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # Why here? Maybe user do not want Qt viewer and have no Qt.
   # Why assimp_qt_viewer/CMakeLists.txt still contain similar check?
   # Because viewer can be build independently of Assimp.
-  FIND_PACKAGE(Qt5 QUIET)
+  FIND_PACKAGE(Qt5Widgets QUIET)
   FIND_PACKAGE(DevIL QUIET)
   FIND_PACKAGE(OpenGL QUIET)
-  IF ( Qt5_FOUND AND IL_FOUND AND OPENGL_FOUND)
+  IF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
     ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )
   ELSE()
     SET ( ASSIMP_QT_VIEWER_DEPENDENCIES "")
@@ -356,7 +362,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
     ENDIF (NOT OPENGL_FOUND)
 
     MESSAGE (WARNING "Build of assimp_qt_viewer is disabled. Unsatisfied dendencies: ${ASSIMP_QT_VIEWER_DEPENDENCIES}")
-  ENDIF ( Qt5_FOUND AND IL_FOUND AND OPENGL_FOUND)
+  ENDIF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
 ENDIF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 
 IF ( ASSIMP_BUILD_SAMPLES)

@@ -37,29 +37,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------------------*/
 #include <gtest/gtest.h>
-#include "DefaultIOStream.h"
+#include "TestIOStream.h"
 
 using namespace ::Assimp;
 
 class utDefaultIOStream : public ::testing::Test {
     // empty
-};
-
-class TestDefaultIOStream : public DefaultIOStream {
-public:
-    TestDefaultIOStream()
-    : DefaultIOStream() {
-        // empty
-    }
-
-    TestDefaultIOStream( FILE* pFile, const std::string &strFilename )
-    : DefaultIOStream( pFile, strFilename ) {
-        // empty
-    }
-
-    virtual ~TestDefaultIOStream() {
-        // empty
-    }
 };
 
 TEST_F( utDefaultIOStream, FileSizeTest ) {

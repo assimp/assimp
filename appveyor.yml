@@ -27,10 +27,12 @@ install:
 # Make compiler command line tools available
 - call c:\projects\assimp\scripts\appveyor\compiler_setup.bat
 
-build_script:
- - cd c:\projects\assimp
- - cmake CMakeLists.txt -G "Visual Studio %Configuration%"
- - msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln
+build_script:  
+- cd c:\projects\assimp
+- if "%platform%" equ "x64" (cmake CMakeLists.txt -G "Visual Studio %Configuration% Win64")
+- if "%platform%" equ "x86" (cmake CMakeLists.txt -G "Visual Studio %Configuration%")
+- if "%platform%" equ "x64" (msbuild /m /p:Configuration=Release /p:Platform="x64" Assimp.sln)
+- if "%platform%" equ "x86" (msbuild /m /p:Configuration=Release /p:Platform="Win32" Assimp.sln)
 
 after_build:
   - 7z a assimp.7z c:\projects\assimp\bin\release\* c:\projects\assimp\lib\release\*
@@ -38,3 +40,13 @@ after_build:
 artifacts:
   - path: assimp.7z
     name: assimp_lib
+
+addons:
+  coverity_scan:
+    project:
+      name: "assimp/assimp"
+      description: "<Your project description here>"
+    notification_email: kim.kulling@googlemail.com
+	build_command_prepend: cmake -G "Unix Makefiles" -DASSIMP_NO_EXPORT=$TRAVIS_NO_EXPORT -DBUILD_SHARED_LIBS=$SHARED_BUILD
+    build_command:   make< make install
+    branch_pattern: coverity_scan

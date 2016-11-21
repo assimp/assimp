@@ -270,3 +270,5 @@ TEST_F(ImporterTest, testMultipleReads)
     EXPECT_TRUE(pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/X/BCN_Epileptic.X",flags));
     //EXPECT_TRUE(pImp->ReadFile(ASSIMP_TEST_MODELS_DIR "/X/dwarf.x",flags)); # is in nonbsd
 }
+
+// ------------------------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Open Asset Import Library - SDK
-AppVerName=Open Asset Import Library - SDK (v2.0)
+AppVerName=Open Asset Import Library - SDK (v3.3.1)
 DefaultDirName={pf}\Assimp
 DefaultGroupName=Assimp
 UninstallDisplayIcon={app}\bin\x86\assimp.exe
@@ -12,9 +12,9 @@ SetupIconFile=..\..\tools\shared\assimp_tools_icon.ico
 WizardImageFile=compiler:WizModernImage-IS.BMP
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.BMP
 LicenseFile=License.rtf
-OutputBaseFileName=assimp-sdk-2.0-setup
-VersionInfoVersion=2.0.0.0
-VersionInfoTextVersion=2.0
+OutputBaseFileName=assimp-sdk-3.3.1-setup
+VersionInfoVersion=3.3.1.0
+VersionInfoTextVersion=3.3.1
 VersionInfoCompany=Assimp Development Team
 ArchitecturesInstallIn64BitMode=x64
 
@@ -38,8 +38,8 @@ Name: "assimp_net"; Description: "C#/.NET Bindings"; Types: full
 ;Name: "vc9"; Description: "VC9 project files"; Types: full
 
 [Run]
-Filename: "{app}\stub\vcredist_x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2008 SP1 redistributable package (32 Bit)"; Check: not IsWin64
-Filename: "{app}\stub\vcredist_x64.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2008 SP1 redistributable package (64 Bit)"; Check: IsWin64
+Filename: "{app}\stub\vcredist_x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2012 SP1 redistributable package (32 Bit)"; Check: not IsWin64
+Filename: "{app}\stub\vcredist_x64.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2012 SP1 redistributable package (64 Bit)"; Check: IsWin64
 
 [Files]
 

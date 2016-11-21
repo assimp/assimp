@@ -32,7 +32,6 @@ env:
     - LINUX=1 SHARED_BUILD=ON      ENABLE_COVERALLS=OFF
     - LINUX=1 SHARED_BUILD=OFF     ENABLE_COVERALLS=OFF
     - ANDROID=1
->>>>>>> master
 
 language: cpp
   

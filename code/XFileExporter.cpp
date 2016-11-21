@@ -513,7 +513,7 @@ std::string XFileExporter::toXFileString(aiString &name)
     return str;
 }
 
-void XFileExporter::writePath(aiString path)
+void XFileExporter::writePath(const aiString &path)
 {
     std::string str = std::string(path.C_Str());
     BaseImporter::ConvertUTF8toISO8859_1(str);

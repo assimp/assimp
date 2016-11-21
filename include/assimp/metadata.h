@@ -101,6 +101,7 @@ struct aiMetadataEntry
   * Helper functions to get the aiType enum entry for a type
   */
  // -------------------------------------------------------------------------------
+
 inline aiMetadataType GetAiType( bool ) { return AI_BOOL; }
 inline aiMetadataType GetAiType( int32_t ) { return AI_INT32; }
 inline aiMetadataType GetAiType( uint64_t ) { return AI_UINT64; }

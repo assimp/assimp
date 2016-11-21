@@ -1394,9 +1394,9 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
     // allocate tangents, binormals.
     const std::vector<aiVector3D>& tangents = mesh.GetTangents();
     const std::vector<aiVector3D>* binormals = &mesh.GetBinormals();
+    std::vector<aiVector3D> tempBinormals;
 
     if ( tangents.size() ) {
-        std::vector<aiVector3D> tempBinormals;
         if ( !binormals->size() ) {
             if ( normals.size() ) {
                 // XXX this computes the binormals for the entire mesh, not only

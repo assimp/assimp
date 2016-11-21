@@ -26,15 +26,16 @@ env:
     - LINUX=1 TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF
     - LINUX=1 SHARED_BUILD=ON      ENABLE_COVERALLS=OFF
     - LINUX=1 SHARED_BUILD=OFF     ENABLE_COVERALLS=OFF
-#    - ANDROID=1
+    - ANDROID=1
 
 language: cpp
   
 compiler:
   - gcc
+  - clang
 
-before_script:
-  cmake . -DASSIMP_ENABLE_BOOST_WORKAROUND=YES
+install:
+  - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi
 
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
@@ -58,6 +59,6 @@ addons:
     project:
       name: "assimp/assimp"
     notification_email: kim.kulling@googlemail.com
-    build_command_prepend: "cmake . -DASSIMP_ENABLE_BOOST_WORKAROUND=YES"
+    build_command_prepend: "cmake"
     build_command: "make"
     branch_pattern: coverity_scan

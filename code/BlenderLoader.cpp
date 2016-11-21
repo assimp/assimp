@@ -105,6 +105,8 @@ BlenderImporter::~BlenderImporter()
     delete modifier_cache;
 }
 
+static const char* Tokens[] = { "BLENDER" };
+
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
 bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
@@ -116,8 +118,7 @@ bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
     else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this won't catch compressed files
-        const char* tokens[] = {"BLENDER"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+        return SearchFileHeaderForToken(pIOHandler,pFile, Tokens,1);
     }
     return false;
 }
@@ -171,7 +172,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 
     char magic[8] = {0};
     stream->Read(magic,7,1);
-    if (strcmp(magic,"BLENDER")) {
+    if (strcmp(magic, Tokens[0] )) {
         // Check for presence of the gzip header. If yes, assume it is a
         // compressed blend file and try uncompressing it, else fail. This is to
         // avoid uncompressing random files which our loader might end up with.
@@ -346,8 +347,9 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
         if (cur->object) {
             if(!cur->object->parent) {
                 no_parents.push_back(cur->object.get());
+            } else {
+                conv.objects.insert( cur->object.get() );
             }
-            else conv.objects.insert(cur->object.get());
         }
     }
     for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
@@ -430,8 +432,9 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         // so we can extract the file extension from it.
         const size_t nlen = strlen( img->name );
         const char* s = img->name+nlen, *e = s;
-
-        while (s >= img->name && *s != '.')--s;
+        while ( s >= img->name && *s != '.' ) {
+            --s;
+        }
 
         tex->achFormatHint[0] = s+1>e ? '\0' : ::tolower( s[1] );
         tex->achFormatHint[1] = s+2>e ? '\0' : ::tolower( s[2] );
@@ -448,8 +451,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         tex->pcData = reinterpret_cast<aiTexel*>(ch);
 
         LogInfo("Reading embedded texture, original file was "+std::string(img->name));
-    }
-    else {
+    } else {
         name = aiString( img->name );
     }
 

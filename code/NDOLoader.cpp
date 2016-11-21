@@ -257,7 +257,8 @@ void NDOImporter::InternReadFile( const std::string& pFile,
         }
 
         aiMesh* mesh = new aiMesh();
-        aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces=face_table.size()];
+        mesh->mNumFaces=face_table.size();
+        aiFace* faces = mesh->mFaces = new aiFace[mesh->mNumFaces];
 
         vertices.clear();
         vertices.reserve(4 * face_table.size()); // arbitrarily chosen
@@ -298,7 +299,8 @@ void NDOImporter::InternReadFile( const std::string& pFile,
             pScene->mMeshes[pScene->mNumMeshes] = mesh;
 
             (nd->mMeshes = new unsigned int[nd->mNumMeshes=1])[0]=pScene->mNumMeshes++;
-        }
+        }else
+            delete mesh;
     }
 }
 

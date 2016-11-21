@@ -641,7 +641,7 @@ void SMDImporter::ComputeAbsoluteBoneTransformations()
         bone.mOffsetMatrix.Inverse();
     }
 }
-
+\
 // ------------------------------------------------------------------------------------------------
 // create output materials
 void SMDImporter::CreateOutputMaterials()
@@ -660,7 +660,7 @@ void SMDImporter::CreateOutputMaterials()
 
         if (aszTextures[iMat].length())
         {
-            ::strcpy(szName.data, aszTextures[iMat].c_str() );
+            ::strncpy(szName.data, aszTextures[iMat].c_str(),MAXLEN-1);
             szName.length = aszTextures[iMat].length();
             pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
         }

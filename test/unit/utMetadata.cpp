@@ -50,7 +50,7 @@ protected:
     aiMetadata *m_data;
 
     virtual void SetUp() {
-        m_data = new aiMetadata();
+        m_data = nullptr;
     }
 
     virtual void TearDown() {
@@ -69,20 +69,111 @@ TEST_F( utMetadata, creationTest ) {
     EXPECT_TRUE( ok );
 }
 
-TEST_F( utMetadata, get_set_Test ) {
-    m_data->mNumProperties = 1;
-    m_data->mKeys = new aiString[ m_data->mNumProperties ]();
-    m_data->mValues = new aiMetadataEntry[ m_data->mNumProperties ]();
+TEST_F( utMetadata, allocTest ) {
+    aiMetadata *data = aiMetadata::Alloc( 0 );
+    EXPECT_EQ( nullptr, data );
+
+    data = aiMetadata::Alloc( 1 );
+    EXPECT_NE( nullptr, data );
+    EXPECT_EQ( 1, data->mNumProperties );
+    EXPECT_NE( nullptr, data->mKeys );
+    EXPECT_NE( nullptr, data->mValues );
+}
+
+TEST_F( utMetadata, get_set_pod_Test ) {
+    m_data = aiMetadata::Alloc( 5 );
+
+    // int, 32 bit
+    unsigned int index( 0 );
+    bool success( false );
+    const std::string key_int = "test_int";
+    success = m_data->Set( index, key_int, 1 );
+    EXPECT_TRUE( success );
+    success = m_data->Set( index + 10, key_int, 1 );
+    EXPECT_FALSE( success );
+
+    // unsigned int, 64 bit
+    index++;
+    const std::string key_uint = "test_uint";
+    success = m_data->Set<uint64_t>( index, key_uint, 1UL );
+    EXPECT_TRUE( success );
+    uint64_t result_uint( 0 );
+    success = m_data->Get( key_uint, result_uint );
+    EXPECT_TRUE( success );
+    EXPECT_EQ( 1UL, result_uint );
+
+    // bool
+    index++;
+    const std::string key_bool = "test_bool";
+    success = m_data->Set( index, key_bool, true );
+    EXPECT_TRUE( success );
+    bool result_bool( false );
+    success = m_data->Get( key_bool, result_bool );
+    EXPECT_TRUE( success );
+    EXPECT_EQ( true, result_bool );
+
+    // float
+    index++;
+    const std::string key_float = "test_float";
+    float fVal = 2.0f;
+    success = m_data->Set( index, key_float, fVal );
+    EXPECT_TRUE( success );
+    float result_float( 0.0f );
+    success = m_data->Get( key_float, result_float );
+    EXPECT_TRUE( success );
+    EXPECT_FLOAT_EQ( 2.0f, result_float );
+
+    // double
+    index++;
+    const std::string key_double = "test_double";
+    double dVal = 3.0;
+    success = m_data->Set( index, key_double, dVal );
+    EXPECT_TRUE( success );
+    double result_double( 0.0 );
+    success = m_data->Get( key_double, result_double );
+    EXPECT_TRUE( success );
+    EXPECT_DOUBLE_EQ( 3.0, result_double );
+
+    // error
+    int result;
+    success = m_data->Get( "bla", result );
+    EXPECT_FALSE( success );
+}
+
+TEST_F( utMetadata, get_set_string_Test ) {
+    m_data = aiMetadata::Alloc( 1 );
+
     unsigned int index( 0 );
     bool success( false );
     const std::string key = "test";
     success = m_data->Set( index, key, aiString( std::string( "test" ) ) );
     EXPECT_TRUE( success );
 
+    success = m_data->Set( index+10, key, aiString( std::string( "test" ) ) );
+    EXPECT_FALSE( success );
+
     aiString result;
     success = m_data->Get( key, result );
+    EXPECT_EQ( aiString( std::string( "test" ) ), result );
     EXPECT_TRUE( success );
 
     success = m_data->Get( "bla", result );
     EXPECT_FALSE( success );
+}
+
+TEST_F( utMetadata, get_set_aiVector3D_Test ) {
+    m_data = aiMetadata::Alloc( 1 );
+
+    unsigned int index( 0 );
+    bool success( false );
+    const std::string key = "test";
+    aiVector3D vec( 1, 2, 3 );
+
+    success = m_data->Set( index, key, vec );
+    EXPECT_TRUE( success );
+
+    aiVector3D result( 0, 0, 0 );
+    success = m_data->Get( key, result );
+    EXPECT_EQ( vec, result );
+    EXPECT_TRUE( success );
 }

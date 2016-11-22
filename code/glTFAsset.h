@@ -744,6 +744,10 @@ namespace glTF
 			SExtension(const EType pType)
 				: Type(pType)
 			{}
+
+            virtual ~SExtension() {
+                // empty
+            }
 		};
 
 		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
@@ -765,8 +769,13 @@ namespace glTF
 				/// \fn SCompression_Open3DGC
 				/// Constructor.
 				SCompression_Open3DGC()
-				: SExtension(Compression_Open3DGC)
-				{}
+				: SExtension(Compression_Open3DGC) {
+                    // empty
+                }
+
+                virtual ~SCompression_Open3DGC() {
+                    // empty
+                }
 			};
 		#endif
 

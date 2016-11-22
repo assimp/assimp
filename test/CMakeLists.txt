@@ -79,6 +79,7 @@ SET( TEST_SRCS
   unit/utMaterialSystem.cpp
   unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
+  unit/utMetadata.cpp
   unit/SceneDiffer.h
   unit/SceneDiffer.cpp
   unit/utObjImportExport.cpp

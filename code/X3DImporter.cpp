@@ -1480,10 +1480,11 @@ void X3DImporter::ParseNode_Head()
 				XML_CheckNode_MustBeEmpty();
 
 				// adding metadata from <head> as MetaString from <Scene>
-				CX3DImporter_NodeElement_MetaString* ms = new CX3DImporter_NodeElement_MetaString(NodeElement_Cur);
+                bool added( false );
+                CX3DImporter_NodeElement_MetaString* ms = new CX3DImporter_NodeElement_MetaString(NodeElement_Cur);
 
 				ms->Name = mReader->getAttributeValueSafe("name");
-				// name can not be empty
+				// name must not be empty
 				if(!ms->Name.empty())
 				{
 					ms->Value.push_back(mReader->getAttributeValueSafe("content"));
@@ -1491,8 +1492,13 @@ void X3DImporter::ParseNode_Head()
                     if ( NodeElement_Cur != nullptr )
                     {
                         NodeElement_Cur->Child.push_back( ms );
+                        added = true;
                     }
 				}
+                // if an error has occurred, release instance
+                if ( !added ) {
+                    delete ms;
+                }
 			}// if(XML_CheckNode_NameEqual("meta"))
 		}// if(mReader->getNodeType() == irr::io::EXN_ELEMENT)
 		else if(mReader->getNodeType() == irr::io::EXN_ELEMENT_END)

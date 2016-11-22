@@ -451,6 +451,7 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
         DefaultLogger::get()->error("Obj: Ignoring empty face");
         // skip line and clean up
         m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+        delete face;
         return;
     }
 

@@ -130,37 +130,35 @@ public:
 public:
 
 	std::string ID;///< ID of the element. Can be empty. In X3D synonym for "ID" attribute.
-	CX3DImporter_NodeElement* Parent;///< Parrent element. If nullptr then this node is root.
+	CX3DImporter_NodeElement* Parent;///< Parent element. If nullptr then this node is root.
 	std::list<CX3DImporter_NodeElement*> Child;///< Child elements.
 
 	/***********************************************/
 	/****************** Functions ******************/
 	/***********************************************/
 
-private:
+    /// @brief  The destructor, virtual.
+    virtual ~CX3DImporter_NodeElement() {
+        // empty
+    }
 
-	/// \fn CX3DImporter_NodeElement(const CX3DImporter_NodeElement& pNodeElement)
+private:
 	/// Disabled copy constructor.
 	CX3DImporter_NodeElement(const CX3DImporter_NodeElement& pNodeElement);
 
-	/// \fn CX3DImporter_NodeElement& operator=(const CX3DImporter_NodeElement& pNodeElement)
 	/// Disabled assign operator.
 	CX3DImporter_NodeElement& operator=(const CX3DImporter_NodeElement& pNodeElement);
 
-	/// \fn CX3DImporter_NodeElement()
 	/// Disabled default constructor.
 	CX3DImporter_NodeElement();
 
 protected:
-
-	/// \fn CX3DImporter_NodeElement(const EType pType, CX3DImporter_NodeElement* pParent)
 	/// In constructor inheritor must set element type.
 	/// \param [in] pType - element type.
 	/// \param [in] pParent - parent element.
 	CX3DImporter_NodeElement(const EType pType, CX3DImporter_NodeElement* pParent)
 		: Type(pType), Parent(pParent)
 	{}
-
 };// class IX3DImporter_NodeElement
 
 /// \class CX3DImporter_NodeElement_Group

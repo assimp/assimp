@@ -488,6 +488,9 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     if ( vertexWeightAccessor ) {
         p.attributes.weight.push_back( vertexWeightAccessor );
     }
+    delete[] jointsPerVertex;
+    delete[] vertexWeightData;
+    delete[] vertexJointData;
 }
 
 void glTFExporter::ExportMeshes()
@@ -867,7 +870,10 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
         }
 
         Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumPositionKeys, translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-        if (tranAccessor) animRef->Parameters.translation = tranAccessor;
+        if ( tranAccessor ) {
+            animRef->Parameters.translation = tranAccessor;
+        }
+        delete[] translationData;
     }
 
     //-------------------------------------------------------
@@ -879,7 +885,10 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
         }
 
         Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumScalingKeys, scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
-        if (scaleAccessor) animRef->Parameters.scale = scaleAccessor;
+        if ( scaleAccessor ) {
+            animRef->Parameters.scale = scaleAccessor;
+        }
+        delete[] scaleData;
     }
 
     //-------------------------------------------------------
@@ -894,7 +903,10 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
         }
 
         Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, nodeChannel->mNumRotationKeys, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
-        if (rotAccessor) animRef->Parameters.rotation = rotAccessor;
+        if ( rotAccessor ) {
+            animRef->Parameters.rotation = rotAccessor;
+        }
+        delete[] rotationData;
     }
 }
 

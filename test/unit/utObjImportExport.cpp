@@ -186,4 +186,6 @@ TEST_F( utObjImportExport, obj_import_test ) {
     SceneDiffer differ;
     EXPECT_TRUE( differ.isEqual( expected, scene ) );
     differ.showReport();
+
+    m_im->FreeScene();
 }

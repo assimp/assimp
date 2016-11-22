@@ -37,9 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
-
-
-
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
 
@@ -93,8 +90,6 @@ namespace Assimp {
     }
 
 } // end of namespace Assimp
-
-
 
 glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
                            const ExportProperties* pProperties, bool isBinary)
@@ -419,17 +414,18 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
     return parentNodeRef;
 }
 
-void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef, Ref<Skin>& skinRef, std::vector<aiMatrix4x4>& inverseBindMatricesData)
+void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef, Ref<Skin>& skinRef, std::vector<aiMatrix4x4>& inverseBindMatricesData)
 {
-    if (aim->mNumBones < 1) {
+    if (aimesh->mNumBones < 1) {
         return;
     }
 
     // Store the vertex joint and weight data.
-    vec4* vertexJointData = new vec4[aim->mNumVertices];
-    vec4* vertexWeightData = new vec4[aim->mNumVertices];
-    int* jointsPerVertex = new int[aim->mNumVertices];
-    for (size_t i = 0; i < aim->mNumVertices; ++i) {
+    const size_t NumVerts( aimesh->mNumVertices );
+    vec4* vertexJointData = new vec4[ NumVerts ];
+    vec4* vertexWeightData = new vec4[ NumVerts ];
+    int* jointsPerVertex = new int[ NumVerts ];
+    for (size_t i = 0; i < NumVerts; ++i) {
         jointsPerVertex[i] = 0;
         for (size_t j = 0; j < 4; ++j) {
             vertexJointData[i][j] = 0;
@@ -437,8 +433,8 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
         }
     }
 
-    for (unsigned int idx_bone = 0; idx_bone < aim->mNumBones; ++idx_bone) {
-        const aiBone* aib = aim->mBones[idx_bone];
+    for (unsigned int idx_bone = 0; idx_bone < aimesh->mNumBones; ++idx_bone) {
+        const aiBone* aib = aimesh->mBones[idx_bone];
 
         // aib->mName   =====>  skinRef->jointNames
         // Find the node with id = mName.
@@ -470,7 +466,9 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
             float vertWeight      = aib->mWeights[idx_weights].mWeight;
 
             // A vertex can only have at most four joint weights. Ignore all others.
-            if (jointsPerVertex[vertexId] > 3) { continue; }
+            if (jointsPerVertex[vertexId] > 3) { 
+                continue; 
+            }
 
             vertexJointData[vertexId][jointsPerVertex[vertexId]] = jointNamesIndex;
             vertexWeightData[vertexId][jointsPerVertex[vertexId]] = vertWeight;
@@ -481,11 +479,15 @@ void ExportSkin(Asset& mAsset, const aiMesh* aim, Ref<Mesh>& meshRef, Ref<Buffer
     } // End: for-loop mNumMeshes
 
     Mesh::Primitive& p = meshRef->primitives.back();
-    Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinRef->id, bufferRef, aim->mNumVertices, vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
-    if (vertexJointAccessor) p.attributes.joint.push_back(vertexJointAccessor);
+    Ref<Accessor> vertexJointAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices, vertexJointData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    if ( vertexJointAccessor ) {
+        p.attributes.joint.push_back( vertexJointAccessor );
+    }
 
-    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinRef->id, bufferRef, aim->mNumVertices, vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
-    if (vertexWeightAccessor) p.attributes.weight.push_back(vertexWeightAccessor);
+    Ref<Accessor> vertexWeightAccessor = ExportData(mAsset, skinRef->id, bufferRef, aimesh->mNumVertices, vertexWeightData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+    if ( vertexWeightAccessor ) {
+        p.attributes.weight.push_back( vertexWeightAccessor );
+    }
 }
 
 void glTFExporter::ExportMeshes()

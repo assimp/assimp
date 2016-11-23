@@ -291,8 +291,10 @@ struct aiNodeAnim {
     , mNumRotationKeys( 0 )
     , mRotationKeys( NULL )
     , mNumScalingKeys( 0 )
-    , mScalingKeys( NULL ) {
-        mPreState = mPostState = aiAnimBehaviour_DEFAULT;
+    , mScalingKeys( NULL )
+    , mPreState( aiAnimBehaviour_DEFAULT )
+    , mPostState( aiAnimBehaviour_DEFAULT ) {
+         // empty
     }
 
     ~aiNodeAnim() {
@@ -372,21 +374,20 @@ struct aiAnimation {
 
 #ifdef __cplusplus
     aiAnimation()
-        : mDuration(-1.)
-        , mTicksPerSecond()
-        , mNumChannels()
-        , mChannels()
-        , mNumMeshChannels()
-        , mMeshChannels()
-    {
+    : mDuration(-1.)
+    , mTicksPerSecond(0.)
+    , mNumChannels(0)
+    , mChannels(nullptr)
+    , mNumMeshChannels(0)
+    , mMeshChannels(nullptr) {
+        // empty
     }
 
-    ~aiAnimation()
-    {
+    ~aiAnimation() {
         // DO NOT REMOVE THIS ADDITIONAL CHECK
-        if (mNumChannels && mChannels)  {
+        if ( mNumChannels && mChannels )  {
             for( unsigned int a = 0; a < mNumChannels; a++) {
-                delete mChannels[a];
+                delete mChannels[ a ];
             }
 
             delete [] mChannels;
@@ -403,6 +404,7 @@ struct aiAnimation {
 };
 
 #ifdef __cplusplus
+
 }
 
 /// @brief  Some C++ utilities for inter- and extrapolation

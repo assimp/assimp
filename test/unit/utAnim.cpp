@@ -73,3 +73,35 @@ TEST_F( utAnim, aiQuatKeyTest ) {
     EXPECT_DOUBLE_EQ( 1.0, constrWithValuesTest.mTime );
     EXPECT_EQ( q, constrWithValuesTest.mValue );
 }
+
+TEST_F( utAnim, aiNodeAnimTest ) {
+    bool ok( true );
+    try {
+        aiNodeAnim myAnim;
+        EXPECT_EQ( aiAnimBehaviour_DEFAULT, myAnim.mPreState );
+        EXPECT_EQ( aiAnimBehaviour_DEFAULT, myAnim.mPostState );
+    } catch ( ... ) {
+        ok = false;
+    }
+    EXPECT_TRUE( ok );
+}
+
+TEST_F( utAnim, aiMeshAnimTest ) {
+    bool ok( true );
+    try {
+        aiMeshAnim myMeshAnim;
+    } catch ( ... ) {
+        ok = false;
+    }
+    EXPECT_TRUE( ok );
+}
+
+TEST_F( utAnim, aiAnimationTest ) {
+    bool ok( true );
+    try {
+        aiAnimation myAnimation;
+    } catch ( ... ) {
+        ok = false;
+    }
+    EXPECT_TRUE( ok );
+}

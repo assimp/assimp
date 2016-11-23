@@ -901,11 +901,8 @@ void SIBImporter::InternReadFile(const std::string& pFile,
         // Mark instanced objects as being so.
         if (n >= firstInst)
         {
-            node->mMetaData = new aiMetadata;
-            node->mMetaData->mNumProperties = 1;
-            node->mMetaData->mKeys = new aiString[1];
-            node->mMetaData->mValues = new aiMetadataEntry[1];
-            node->mMetaData->Set(0, "IsInstance", true);
+            node->mMetaData = aiMetadata::Alloc( 1 );
+            node->mMetaData->Set( 0, "IsInstance", true );
         }
     }
 

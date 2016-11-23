@@ -1005,6 +1005,12 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 		size_t tval = ifs.GetNIntAttribute(idx);
 		switch( ifs.GetIntAttributeType( idx ) )
 		{
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
+                break;
+
 			default:
 				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(idx)));
 		}
@@ -1049,10 +1055,14 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 		}
 	}
 
-	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++)
-	{
-		switch(ifs.GetIntAttributeType(idx))
-		{
+	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++) {
+		switch(ifs.GetIntAttributeType(idx)) {
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
+                break;
+
 			// ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
 			default:
 				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(idx)));
@@ -1062,7 +1072,9 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 	//
 	// Decode data
 	//
-	if(decoder.DecodePayload(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC data.");
+    if ( decoder.DecodePayload( ifs, bstream ) != o3dgc::O3DGC_OK ) {
+        throw DeadlyImportError( "GLTF: can not decode Open3DGC data." );
+    }
 
 	// Set encoded region for "buffer".
 	buf->EncodedRegion_Mark(pCompression_Open3DGC.Offset, pCompression_Open3DGC.Count, decoded_data, decoded_data_size, id);

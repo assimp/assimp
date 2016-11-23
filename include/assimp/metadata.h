@@ -47,10 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_METADATA_H_INC
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1500)
-#include "Compiler/pstdint.h"
+#  include "Compiler/pstdint.h"
 #else
-#include <limits.h>
-#include <stdint.h>
+#  include <stdint.h>
 #endif
 
 // -------------------------------------------------------------------------------
@@ -58,8 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   * Enum used to distinguish data types
   */
  // -------------------------------------------------------------------------------
-typedef enum aiMetadataType
-{
+typedef enum aiMetadataType {
     AI_BOOL       = 0,
     AI_INT32      = 1,
     AI_UINT64     = 2,
@@ -80,8 +78,7 @@ typedef enum aiMetadataType
   * The type field uniquely identifies the underlying type of the data field
   */
  // -------------------------------------------------------------------------------
-struct aiMetadataEntry
-{
+struct aiMetadataEntry {
     aiMetadataType mType;
     void* mData;
 };
@@ -96,12 +93,12 @@ struct aiMetadataEntry
   */
  // -------------------------------------------------------------------------------
 
-inline aiMetadataType GetAiType( bool ) { return AI_BOOL; }
-inline aiMetadataType GetAiType( int32_t ) { return AI_INT32; }
-inline aiMetadataType GetAiType( uint64_t ) { return AI_UINT64; }
-inline aiMetadataType GetAiType( float ) { return AI_FLOAT; }
-inline aiMetadataType GetAiType( double ) { return AI_DOUBLE; }
-inline aiMetadataType GetAiType( aiString ) { return AI_AISTRING; }
+inline aiMetadataType GetAiType( bool )       { return AI_BOOL; }
+inline aiMetadataType GetAiType( int32_t )    { return AI_INT32; }
+inline aiMetadataType GetAiType( uint64_t )   { return AI_UINT64; }
+inline aiMetadataType GetAiType( float )      { return AI_FLOAT; }
+inline aiMetadataType GetAiType( double )     { return AI_DOUBLE; }
+inline aiMetadataType GetAiType( aiString )   { return AI_AISTRING; }
 inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
 
 #endif // __cplusplus
@@ -113,8 +110,7 @@ inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
   * Metadata is a key-value store using string keys and values.
   */
  // -------------------------------------------------------------------------------
-struct aiMetadata
-{
+struct aiMetadata {
     /** Length of the mKeys and mValues arrays, respectively */
     unsigned int mNumProperties;
 
@@ -127,28 +123,28 @@ struct aiMetadata
 
 #ifdef __cplusplus
 
-    /** Constructor */
+    /** 
+     *  @brief  The default constructor, set all members to zero by default.
+     */
     aiMetadata()
-        // set all members to zero by default
-        : mNumProperties(0)
-        , mKeys(NULL)
-        , mValues(NULL)
-    {}
+    : mNumProperties(0)
+    , mKeys(NULL)
+    , mValues(NULL) {
+        // empty
+    }
 
 
-    /** Destructor */
-    ~aiMetadata()
-    {
-        delete[] mKeys;
+    /** 
+     *  @brief The destructor.
+     */
+    ~aiMetadata() {
+        delete [] mKeys;
         mKeys = NULL;
-        if (mValues)
-        {
+        if (mValues) {
             // Delete each metadata entry
-            for (unsigned i=0; i<mNumProperties; ++i)
-            {
+            for (unsigned i=0; i<mNumProperties; ++i) {
                 void* data = mValues[i].mData;
-                switch (mValues[i].mType)
-                {
+                switch (mValues[i].mType) {
                 case AI_BOOL:
                     delete static_cast<bool*>(data);
                     break;
@@ -184,11 +180,34 @@ struct aiMetadata
         }
     }
 
+    /**
+     *  @brief Allocates property fields + keys.
+     *  @param  numProperties   Number of requested properties.
+     */
+    static inline
+    aiMetadata *Alloc( unsigned int numProperties ) {
+        if ( 0 == numProperties ) {
+            return nullptr;
+        }
+
+        aiMetadata *data = new aiMetadata;
+        data->mNumProperties = numProperties;
+        data->mKeys = new aiString[ data->mNumProperties ]();
+        data->mValues = new aiMetadataEntry[ data->mNumProperties ]();
+
+        return data;
+    }
+
     template<typename T>
-    inline  bool Set( unsigned index, const std::string& key, const T& value )
-    {
+    inline 
+    bool Set( unsigned index, const std::string& key, const T& value ) {
         // In range assertion
         if ( index >= mNumProperties ) {
+            return false;
+        }
+
+        // Ensure that we have a valid key.
+        if ( key.empty() ) {
             return false;
         }
 
@@ -204,8 +223,8 @@ struct aiMetadata
     }
 
     template<typename T>
-    inline bool Get( unsigned index, T& value )
-    {
+    inline 
+    bool Get( unsigned index, T& value ) {
         // In range assertion
         if ( index >= mNumProperties ) {
             return false;
@@ -220,17 +239,19 @@ struct aiMetadata
         // Otherwise, output the found value and
         // return true
         value = *static_cast<T*>(mValues[index].mData);
+
         return true;
     }
 
     template<typename T>
     inline 
-    bool Get( const aiString& key, T& value )
-    {
+    bool Get( const aiString& key, T& value ) {
         // Search for the given key
-        for (unsigned i=0; i<mNumProperties; ++i)
-            if (mKeys[i]==key)
-                return Get(i, value);
+        for ( unsigned int i = 0; i < mNumProperties; ++i ) {
+            if ( mKeys[ i ] == key ) {
+                return Get( i, value );
+            }
+        }
         return false;
     }
 
@@ -239,18 +260,18 @@ struct aiMetadata
         return Get(aiString(key), value);
     }
 
-	/// \fn inline bool Get(size_t pIndex, const aiString*& pKey, const aiMetadataEntry*& pEntry)
 	/// Return metadata entry for analyzing it by user.
 	/// \param [in] pIndex - index of the entry.
 	/// \param [out] pKey - pointer to the key value.
 	/// \param [out] pEntry - pointer to the entry: type and value.
 	/// \return false - if pIndex is out of range, else - true.
-	inline bool Get(size_t pIndex, const aiString*& pKey, const aiMetadataEntry*& pEntry)
-	{
-		if(pIndex >= mNumProperties) return false;
+	inline bool Get(size_t index, const aiString*& key, const aiMetadataEntry*& entry) {
+        if ( index >= mNumProperties ) {
+            return false;
+        }
 
-		pKey = &mKeys[pIndex];
-		pEntry = &mValues[pIndex];
+		key = &mKeys[index];
+		entry = &mValues[index];
 
 		return true;
 	}

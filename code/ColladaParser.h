@@ -268,8 +268,7 @@ namespace Assimp
         Collada::InputType GetTypeForSemantic( const std::string& pSemantic);
 
         /** Finds the item in the given library by its reference, throws if not found */
-        template <typename Type> const Type& ResolveLibraryReference(
-                                                                     const std::map<std::string, Type>& pLibrary, const std::string& pURL) const;
+        template <typename Type> const Type& ResolveLibraryReference( const std::map<std::string, Type>& pLibrary, const std::string& pURL) const;
 
     protected:
         /** Filename, for a verbose error message */

@@ -56,6 +56,7 @@ SOURCE_GROUP( unit FILES
 
 SET( TEST_SRCS
   unit/TestIOSystem.h
+  unit/utAnim.cpp
   unit/AssimpAPITest.cpp
   unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp

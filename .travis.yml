@@ -1,5 +1,6 @@
 before_install:
   - sudo apt-get update -qq
+  - sudo apt-get install cmake
   - sudo apt-get install cmake python3
   - if [ $LINUX ]; then sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; fi
   - echo -e "#ifndef A_R_H_INC\n#define A_R_H_INC\n#define GitVersion ${TRAVIS_JOB_ID}\n#define GitBranch \"${TRAVIS_BRANCH}\"\n#endif // A_R_H_INC" > revision.h
@@ -18,6 +19,7 @@ branches:
 
 env:
   global:
+    - secure: "lZ7pHQvl5dpZWzBQAaIMf0wqrvtcZ4wiZKeIZjf83TEsflW8+z0uTpIuN30ZV6Glth/Sq1OhLnTP5+N57fZU/1ebA5twHdvP4bS5CIUUg71/CXQZNl36xeaqvxsG/xRrdpKOsPdjAOsQ9KPTQulsX43XDLS7CasMiLvYOpqKcPc="
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
   matrix:
     - LINUX=1 TRAVIS_NO_EXPORT=YES ENABLE_COVERALLS=ON
@@ -52,3 +54,11 @@ after_success:
   - lcov --list coverage.info
   - coveralls-lcov --source-encoding=ISO-8859-1 --repo-token=${COVERALLS_TOKEN} coverage.info
 
+addons:
+  coverity_scan:
+    project:
+      name: "assimp/assimp"
+    notification_email: kim.kulling@googlemail.com
+    build_command_prepend: "cmake"
+    build_command: "make"
+    branch_pattern: coverity_scan

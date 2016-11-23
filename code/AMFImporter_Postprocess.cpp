@@ -336,25 +336,21 @@ auto texmap_is_equal = [](const CAMFImporter_NodeElement_TexMap* pTexMap1, const
 	} while(pInputList.size() > 0);
 }
 
-void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeElement_Metadata*>& pMetadataList, aiNode& pSceneNode) const
+void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeElement_Metadata*>& metadataList, aiNode& sceneNode) const
 {
-	if(pMetadataList.size() > 0)
+	if ( !metadataList.empty() )
 	{
-		if(pSceneNode.mMetaData != nullptr) throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
+		if(sceneNode.mMetaData != nullptr) throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
 
 		// copy collected metadata to output node.
-		pSceneNode.mMetaData = new aiMetadata();
-		pSceneNode.mMetaData->mNumProperties = static_cast<unsigned int>(pMetadataList.size());
-		pSceneNode.mMetaData->mKeys = new aiString[pSceneNode.mMetaData->mNumProperties];
-		pSceneNode.mMetaData->mValues = new aiMetadataEntry[pSceneNode.mMetaData->mNumProperties];
+        sceneNode.mMetaData = aiMetadata::Alloc( static_cast<unsigned int>(metadataList.size()) );
+		size_t meta_idx( 0 );
 
-		size_t meta_idx = 0;
-
-		for(const CAMFImporter_NodeElement_Metadata& metadata: pMetadataList)
+		for(const CAMFImporter_NodeElement_Metadata& metadata: metadataList)
 		{
-			pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata.Type, metadata.Value.c_str());
+			sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata.Type, aiString(metadata.Value));
 		}
-	}// if(pMetadataList.size() > 0)
+	}// if(!metadataList.empty())
 }
 
 void AMFImporter::Postprocess_BuildNodeAndObject(const CAMFImporter_NodeElement_Object& pNodeElement, std::list<aiMesh*>& pMeshList, aiNode** pSceneNode)

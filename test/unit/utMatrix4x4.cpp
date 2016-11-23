@@ -43,17 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-class utMatrix4x4Test : public ::testing::Test {
+class utMatrix4x4 : public ::testing::Test {
 
 };
 
-TEST_F( utMatrix4x4Test, badIndexOperatorTest ) {
+TEST_F( utMatrix4x4, badIndexOperatorTest ) {
     aiMatrix4x4 m;
     ai_real *a0 = m[ 4 ];
     EXPECT_EQ( NULL, a0 );
 }
 
-TEST_F( utMatrix4x4Test, indexOperatorTest ) {
+TEST_F( utMatrix4x4, indexOperatorTest ) {
     aiMatrix4x4 m;
     ai_real *a0 = m[ 0 ];
     EXPECT_FLOAT_EQ( 1.0, *a0 );

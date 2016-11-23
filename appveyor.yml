@@ -40,3 +40,4 @@ after_build:
 artifacts:
   - path: assimp.7z
     name: assimp_lib
+

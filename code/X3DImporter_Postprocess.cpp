@@ -758,15 +758,14 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pN
     size_t meta_idx;
 
 	PostprocessHelper_CollectMetadata(pNodeElement, meta_list);// find metadata in current node element.
-	if(meta_list.size() > 0)
+	if ( !meta_list.empty() )
 	{
-		if(pSceneNode.mMetaData != nullptr) throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
+        if ( pSceneNode.mMetaData != nullptr ) {
+            throw DeadlyImportError( "Postprocess. MetaData member in node are not nullptr. Something went wrong." );
+        }
 
-		// copy collected metadata to output node.
-		pSceneNode.mMetaData = new aiMetadata();
-		pSceneNode.mMetaData->mNumProperties = meta_list.size();
-		pSceneNode.mMetaData->mKeys = new aiString[pSceneNode.mMetaData->mNumProperties];
-		pSceneNode.mMetaData->mValues = new aiMetadataEntry[pSceneNode.mMetaData->mNumProperties];
+		// copy collected metadata to output node.        
+        pSceneNode.mMetaData = aiMetadata::Alloc( meta_list.size() );
 		meta_idx = 0;
 		for(std::list<CX3DImporter_NodeElement*>::const_iterator it = meta_list.begin(); it != meta_list.end(); it++, meta_idx++)
 		{
@@ -808,7 +807,7 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pN
 				throw DeadlyImportError("Postprocess. Unknown metadata type.");
 			}// if((*it)->Type == CX3DImporter_NodeElement::ENET_Meta*) else
 		}// for(std::list<CX3DImporter_NodeElement*>::const_iterator it = meta_list.begin(); it != meta_list.end(); it++)
-	}// if(meta_list.size() > 0)
+	}// if( !meta_list.empty() )
 }
 
 }// namespace Assimp

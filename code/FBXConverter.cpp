@@ -1075,10 +1075,7 @@ void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
 
     // create metadata on node
     std::size_t numStaticMetaData = 2;
-    aiMetadata* data = new aiMetadata();
-    data->mNumProperties = static_cast<unsigned int>(unparsedProperties.size() + numStaticMetaData);
-    data->mKeys = new aiString[ data->mNumProperties ]();
-    data->mValues = new aiMetadataEntry[ data->mNumProperties ]();
+    aiMetadata* data = aiMetadata::Alloc( static_cast<unsigned int>(unparsedProperties.size() + numStaticMetaData) );
     nd.mMetaData = data;
     int index = 0;
 
@@ -1089,22 +1086,22 @@ void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
 
     // add unparsed properties to the node's metadata
     for( const DirectPropertyMap::value_type& prop : unparsedProperties ) {
-
         // Interpret the property as a concrete type
-        if ( const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >() )
+        if ( const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int> >() )
+        } else if ( const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t> >() )
+        } else if ( const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >() )
+        } else if ( const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >() )
+        } else if ( const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >() ) {
             data->Set( index++, prop.first, aiString( interpreted->Value() ) );
-        else if ( const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >() )
+        } else if ( const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else
-            assert( false );
+        } else {
+            ai_assert( false );
+        }
     }
 }
 
@@ -1394,9 +1391,9 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
     // allocate tangents, binormals.
     const std::vector<aiVector3D>& tangents = mesh.GetTangents();
     const std::vector<aiVector3D>* binormals = &mesh.GetBinormals();
+    std::vector<aiVector3D> tempBinormals;
 
     if ( tangents.size() ) {
-        std::vector<aiVector3D> tempBinormals;
         if ( !binormals->size() ) {
             if ( normals.size() ) {
                 // XXX this computes the binormals for the entire mesh, not only

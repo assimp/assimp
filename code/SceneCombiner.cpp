@@ -43,11 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // possible as new fields are added to assimp structures.
 
 // ----------------------------------------------------------------------------
-/** @file Implements Assimp::SceneCombiner. This is a smart utility
- *    class that combines multiple scenes, meshes, ... into one. Currently
- *    these utilities are used by the IRR and LWS loaders and the
- *    OptimizeGraph step.
- */
+/** 
+  * @file Implements Assimp::SceneCombiner. This is a smart utility
+  *       class that combines multiple scenes, meshes, ... into one. Currently
+  *       these utilities are used by the IRR and LWS loaders and the
+  *       OptimizeGraph step.
+  */
 // ----------------------------------------------------------------------------
 #include "SceneCombiner.h"
 #include "StringUtils.h"
@@ -59,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include "ScenePrivate.h"
 
-namespace Assimp    {
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Add a prefix to a string
@@ -198,8 +199,9 @@ void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
 void SceneCombiner::AttachToGraph (aiNode* attach, std::vector<NodeAttachmentInfo>& srcList)
 {
     unsigned int cnt;
-    for (cnt = 0; cnt < attach->mNumChildren;++cnt)
-        AttachToGraph(attach->mChildren[cnt],srcList);
+    for ( cnt = 0; cnt < attach->mNumChildren; ++cnt ) {
+        AttachToGraph( attach->mChildren[ cnt ], srcList );
+    }
 
     cnt = 0;
     for (std::vector<NodeAttachmentInfo>::iterator it = srcList.begin();
@@ -1219,13 +1221,12 @@ void SceneCombiner::Copy     (aiNode** _dest, const aiNode* src)
 }
 
 // ------------------------------------------------------------------------------------------------
-void SceneCombiner::Copy (aiMetadata** _dest, const aiMetadata* src)
+void SceneCombiner::Copy(aiMetadata** _dest, const aiMetadata* src)
 {
-    ai_assert(NULL != _dest && NULL != src);
+    ai_assert( NULL != _dest );
+    ai_assert( NULL != src);
 
-    aiMetadata* dest = *_dest = new aiMetadata();
-    dest->mNumProperties = src->mNumProperties;
-    dest->mKeys = new aiString[src->mNumProperties];
+    aiMetadata* dest = *_dest = aiMetadata::Alloc( src->mNumProperties );
     std::copy(src->mKeys, src->mKeys + src->mNumProperties, dest->mKeys);
 
     dest->mValues = new aiMetadataEntry[src->mNumProperties];

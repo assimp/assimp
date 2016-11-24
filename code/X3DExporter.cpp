@@ -158,7 +158,7 @@ string tstr;
 
 	AttrHelper_FloatToString(pValue, tstr);
 	pList.push_back({pName, tstr});
-};
+}
 
 void X3DExporter::NodeHelper_OpenNode(const string& pNodeName, const size_t pTabLevel, const bool pEmptyElement, const list<SAttribute>& pAttrList)
 {

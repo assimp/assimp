@@ -602,28 +602,28 @@ bool ExportProperties :: HasPropertyInteger(const char* szName) const
 bool ExportProperties :: HasPropertyBool(const char* szName) const
 {
     return HasGenericProperty<int>(mIntProperties, szName);
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Has a configuration property
 bool ExportProperties :: HasPropertyFloat(const char* szName) const
 {
     return HasGenericProperty<ai_real>(mFloatProperties, szName);
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Has a configuration property
 bool ExportProperties :: HasPropertyString(const char* szName) const
 {
     return HasGenericProperty<std::string>(mStringProperties, szName);
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Has a configuration property
 bool ExportProperties :: HasPropertyMatrix(const char* szName) const
 {
     return HasGenericProperty<aiMatrix4x4>(mMatrixProperties, szName);
-};
+}
 
 
 #endif // !ASSIMP_BUILD_NO_EXPORT

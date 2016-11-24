@@ -83,6 +83,7 @@ SET( TEST_SRCS
   unit/utMetadata.cpp
   unit/SceneDiffer.h
   unit/SceneDiffer.cpp
+  unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utRemoveComments.cpp

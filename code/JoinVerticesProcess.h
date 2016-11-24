@@ -62,7 +62,6 @@ namespace Assimp
 class ASSIMP_API JoinVerticesProcess : public BaseProcess
 {
 public:
-
     JoinVerticesProcess();
     ~JoinVerticesProcess();
 

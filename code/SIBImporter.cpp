@@ -197,13 +197,15 @@ static aiString ReadString(StreamReaderLE* stream, uint32_t numWChars)
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-SIBImporter::SIBImporter()
-{}
+SIBImporter::SIBImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SIBImporter::~SIBImporter()
-{}
+SIBImporter::~SIBImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -508,7 +510,7 @@ struct TempMesh
     std::vector<aiVector3D> vtx;
     std::vector<aiVector3D> nrm;
     std::vector<aiVector3D> uv;
-    std::vector<aiFace> faces;
+    std::vector<aiFace>     faces;
 };
 
 static void ReadShape(SIB* sib, StreamReaderLE* stream)
@@ -546,7 +548,7 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
         stream->SetReadLimit(oldLimit);
     }
 
-    assert(smesh.faceStart.size() == smesh.mtls.size()); // sanity check
+    ai_assert(smesh.faceStart.size() == smesh.mtls.size()); // sanity check
 
     // Silo doesn't store any normals in the file - we need to compute
     // them ourselves. We can't let AssImp handle it as AssImp doesn't
@@ -792,8 +794,9 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
         stream->SetReadLimit(oldLimit);
     }
 
-    if (shapeIndex >= sib->objs.size())
-        throw DeadlyImportError("SIB: Invalid shape index.");
+    if ( shapeIndex >= sib->objs.size() ) {
+        throw DeadlyImportError( "SIB: Invalid shape index." );
+    }
 
     const SIBObject& src = sib->objs[shapeIndex];
     inst.meshIdx = src.meshIdx;
@@ -805,8 +808,9 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
 static void CheckVersion(StreamReaderLE* stream)
 {
     uint32_t version = stream->GetU4();
-    if (version != 1)
-        throw DeadlyImportError("SIB: Unsupported file version.");
+    if ( version != 1 ) {
+        throw DeadlyImportError( "SIB: Unsupported file version." );
+    }
 }
 
 static void ReadScene(SIB* sib, StreamReaderLE* stream)

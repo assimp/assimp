@@ -56,6 +56,7 @@ SOURCE_GROUP( unit FILES
 
 SET( TEST_SRCS
   unit/TestIOSystem.h
+  unit/utAnim.cpp
   unit/AssimpAPITest.cpp
   unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp
@@ -82,6 +83,7 @@ SET( TEST_SRCS
   unit/utMetadata.cpp
   unit/SceneDiffer.h
   unit/SceneDiffer.cpp
+  unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utRemoveComments.cpp

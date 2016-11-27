@@ -149,10 +149,10 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     // This next stage takes ~ 1/3th of the total readFile task
     // so should amount for 1/3th of the progress
     // only update every 100KB or it'll be too slow
-    unsigned int progress = 0;
+    /*unsigned int progress = 0;
     unsigned int progressCounter = 0;
     const unsigned int updateProgressEveryBytes = 100 * 1024;
-    const unsigned int progressTotal = static_cast<unsigned int>(3*m_Buffer.size()/updateProgressEveryBytes);
+    const unsigned int progressTotal = static_cast<unsigned int>(3*m_Buffer.size()/updateProgressEveryBytes);*/
     // process all '\'
     /*std::vector<char> ::iterator iter = m_Buffer.begin();
     while (iter != m_Buffer.end())
@@ -599,9 +599,6 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         }
 
         mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
-
-        // multiplying the specular exponent with 2 seems to yield better results
-        pCurrentMaterial->shineness *= 4.f;
 
         // Adding material colors
         mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT );

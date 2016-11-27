@@ -91,15 +91,24 @@ protected:
     // Write a camera entry
     void WriteCamera(size_t pIndex);
 
-    /// Writes the cameras library
+    /// Writes the Lights library
     void WriteLightsLibrary();
 
     // Write a camera entry
     void WriteLight(size_t pIndex);
+
     void WritePointLight(const aiLight *const light);
     void WriteDirectionalLight(const aiLight *const light);
     void WriteSpotLight(const aiLight *const light);
-    void WriteAmbienttLight(const aiLight *const light);
+    void WriteAmbientLight(const aiLight *const light);
+
+    void WriteControllerLibrary();
+    void WriteControllerForMesh(const size_t pIndex);
+    void WriteJointsNameSourceNode(const size_t pIndex);
+    void WriteJointsPoseSourceNode(const size_t pIndex);
+    void WriteJointsWeightSourceNode(const size_t pIndex);
+    void WriteJointsTag(const size_t pIndex);
+    void WriteJointsVertexWeight(const size_t pIndex);
 
     /// Writes the geometry library
     void WriteGeometryLibrary();
@@ -107,7 +116,7 @@ protected:
     /// Writes the given mesh
     void WriteGeometry( size_t pIndex);
 
-    enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
+    enum FloatDataType { FloatType_Matrix4x4, FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color, FloatType_Weight };
 
     /// Writes a float array of the given type
     void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount);
@@ -127,6 +136,8 @@ protected:
     std::string GetMeshId( size_t pIndex) const {
         return std::string( "meshId" ) + to_string(pIndex);
     }
+
+    const aiNode* getRootOfController(const aiMesh* mesh);
 
 public:
     /// Stringstream to write all output into
@@ -198,6 +209,8 @@ protected:
   void WriteTextureColorEntry( const Surface& pSurface, const std::string& pTypeName, const std::string& pImageName);
   /// Writes a scalar property
   void WriteFloatEntry( const Property& pProperty, const std::string& pTypeName);
+  /// Writes a matrix as translation + rotation + scale
+  void WriteMatrix4x4(const aiMatrix4x4 &mat);
 };
 
 }

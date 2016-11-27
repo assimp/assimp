@@ -347,8 +347,8 @@ void X3DImporter::ParseNode_Geometry3D_ElevationGrid()
 			((CX3DImporter_NodeElement_ElevationGrid*)ne)->NumIndices = 2;// will be holded as line set.
 			for(size_t i = 0, i_e = (grid_alias.Vertices.size() - 1); i < i_e; i++)
 			{
-				grid_alias.CoordIdx.push_back(i);
-				grid_alias.CoordIdx.push_back(i + 1);
+				grid_alias.CoordIdx.push_back(static_cast<int32_t>(i));
+				grid_alias.CoordIdx.push_back(static_cast<int32_t>(i + 1));
 				grid_alias.CoordIdx.push_back(-1);
 			}
 		}
@@ -758,7 +758,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 			if(beginCap)
 			{
 				// add cap as polygon. vertices of cap are places at begin, so just add numbers from zero.
-				for(size_t i = 0, i_e = crossSection.size(); i < i_e; i++) ext_alias.CoordIndex.push_back(i);
+				for(size_t i = 0, i_e = crossSection.size(); i < i_e; i++) ext_alias.CoordIndex.push_back(static_cast<int32_t>(i));
 
 				// add delimiter
 				ext_alias.CoordIndex.push_back(-1);
@@ -769,7 +769,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 				// add cap as polygon. vertices of cap are places at end, as for beginCap use just sequence of numbers but with offset.
 				size_t beg = (pointset_arr.size() - 1) * crossSection.size();
 
-				for(size_t i = beg, i_e = (beg + crossSection.size()); i < i_e; i++) ext_alias.CoordIndex.push_back(i);
+				for(size_t i = beg, i_e = (beg + crossSection.size()); i < i_e; i++) ext_alias.CoordIndex.push_back(static_cast<int32_t>(i));
 
 				// add delimiter
 				ext_alias.CoordIndex.push_back(-1);
@@ -795,14 +795,20 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 					if(cri != cr_last)
 					{
 						MACRO_FACE_ADD_QUAD(ccw, ext_alias.CoordIndex,
-											spi * cr_sz + cri, right_col * cr_sz + cri, right_col * cr_sz + cri + 1, spi * cr_sz + cri + 1);
+											static_cast<int32_t>(spi * cr_sz + cri), 
+                                            static_cast<int32_t>(right_col * cr_sz + cri), 
+                                            static_cast<int32_t>(right_col * cr_sz + cri + 1), 
+                                            static_cast<int32_t>(spi * cr_sz + cri + 1));
 						// add delimiter
 						ext_alias.CoordIndex.push_back(-1);
 					}
 					else if(cross_closed)// if cross curve is closed then one more quad is needed: between first and last points of curve.
 					{
 						MACRO_FACE_ADD_QUAD(ccw, ext_alias.CoordIndex,
-											spi * cr_sz + cri, right_col * cr_sz + cri, right_col * cr_sz + 0, spi * cr_sz + 0);
+                                            static_cast<int32_t>(spi * cr_sz + cri), 
+                                            static_cast<int32_t>(right_col * cr_sz + cri), 
+                                            static_cast<int32_t>(right_col * cr_sz + 0), 
+                                            static_cast<int32_t>(spi * cr_sz + 0));
 						// add delimiter
 						ext_alias.CoordIndex.push_back(-1);
 					}

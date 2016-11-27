@@ -104,7 +104,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
     unsigned int progressCounter = 0;
-    const unsigned int bytesToProcess = streamBuffer.size();
+    const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
     const unsigned int progressTotal = 3 * bytesToProcess;
     const unsigned int progressOffset = bytesToProcess;
     unsigned int processed = 0;
@@ -118,7 +118,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
         // Handle progress reporting        
         const size_t filePos( streamBuffer.getFilePos() );
         if ( lastFilePos < filePos ) {
-            processed += filePos;
+            processed += static_cast<unsigned int>(filePos);
             lastFilePos = filePos;
             progressCounter++;
             m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
@@ -377,9 +377,9 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
     ObjFile::Face *face = new ObjFile::Face( type );
     bool hasNormal = false;
 
-    const int vSize = m_pModel->m_Vertices.size();
-    const int vtSize = m_pModel->m_TextureCoord.size();
-    const int vnSize = m_pModel->m_Normals.size();
+    const int vSize = static_cast<unsigned int>(m_pModel->m_Vertices.size());
+    const int vtSize = static_cast<unsigned int>(m_pModel->m_TextureCoord.size());
+    const int vnSize = static_cast<unsigned int>(m_pModel->m_Normals.size());
 
     const bool vt = (!m_pModel->m_TextureCoord.empty());
     const bool vn = (!m_pModel->m_Normals.empty());
@@ -772,7 +772,7 @@ void ObjFileParser::createMesh( const std::string &meshName )
     ai_assert( NULL != m_pModel );
     m_pModel->m_pCurrentMesh = new ObjFile::Mesh( meshName );
     m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
-    unsigned int meshId = m_pModel->m_Meshes.size()-1;
+    unsigned int meshId = static_cast<unsigned int>(m_pModel->m_Meshes.size()-1);
     if ( NULL != m_pModel->m_pCurrent )
     {
         m_pModel->m_pCurrent->m_Meshes.push_back( meshId );

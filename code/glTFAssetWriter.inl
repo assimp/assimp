@@ -64,7 +64,7 @@ namespace glTF {
 
         inline Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
             val.SetArray();
-            val.Reserve(r.size(), al);
+            val.Reserve(static_cast<rapidjson::SizeType>(r.size()), al);
             for (unsigned int i = 0; i < r.size(); ++i) {
                 val.PushBack(r[i], al);
             }

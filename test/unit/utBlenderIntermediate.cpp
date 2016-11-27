@@ -40,6 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "BlenderIntermediate.h"
+#include "./../include/assimp/camera.h"
+#include "./../include/assimp/light.h"
+#include "./../include/assimp/mesh.h"
+#include "./../include/assimp/texture.h"
 
 using namespace ::Assimp;
 using namespace ::Assimp::Blender;

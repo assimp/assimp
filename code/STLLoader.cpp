@@ -245,7 +245,7 @@ void STLImporter::LoadASCIIFile()
     positionBuffer.reserve(sizeEstimate);
     normalBuffer.reserve(sizeEstimate);
 
-    while (IsAsciiSTL(sz, bufferEnd - sz))
+    while (IsAsciiSTL(sz, static_cast<unsigned int>(bufferEnd - sz)))
     {
         aiMesh* pMesh = new aiMesh();
         pMesh->mMaterialIndex = 0;
@@ -367,8 +367,8 @@ void STLImporter::LoadASCIIFile()
             pMesh->mNumFaces = 0;
             throw DeadlyImportError("Normal buffer size does not match position buffer size");
         }
-        pMesh->mNumFaces = positionBuffer.size() / 3;
-        pMesh->mNumVertices = positionBuffer.size();
+        pMesh->mNumFaces = static_cast<unsigned int>(positionBuffer.size() / 3);
+        pMesh->mNumVertices = static_cast<unsigned int>(positionBuffer.size());
         pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
         memcpy(pMesh->mVertices, &positionBuffer[0].x, pMesh->mNumVertices * sizeof(aiVector3D));
         positionBuffer.clear();

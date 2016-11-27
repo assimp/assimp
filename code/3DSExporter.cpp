@@ -87,7 +87,7 @@ namespace {
             const std::size_t chunk_size = head_pos - chunk_start_pos;
 
             writer.SetCurrentPos(chunk_start_pos + SIZE_OFFSET);
-            writer.PutU4(chunk_size);
+            writer.PutU4(static_cast<uint32_t>(chunk_size));
             writer.SetCurrentPos(head_pos);
         }
 

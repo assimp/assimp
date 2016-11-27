@@ -518,7 +518,7 @@ void OpenGEXImporter::handleObjectRefNode( DDLNode *node, aiScene *pScene ) {
 
     // when we are dealing with a geometry node prepare the mesh cache
     if ( m_tokenType == Grammar::GeometryNodeToken ) {
-        m_currentNode->mNumMeshes = objRefNames.size();
+        m_currentNode->mNumMeshes = static_cast<unsigned int>(objRefNames.size());
         m_currentNode->mMeshes = new unsigned int[ objRefNames.size() ];
         if ( !objRefNames.empty() ) {
             m_unresolvedRefStack.push_back( new RefInfo( m_currentNode, RefInfo::MeshRef, objRefNames ) );
@@ -863,9 +863,9 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
     }
 
     const size_t numItems( countDataArrayListItems( vaList ) );
-    m_currentMesh->mNumFaces = numItems;
+    m_currentMesh->mNumFaces = static_cast<unsigned int>(numItems);
     m_currentMesh->mFaces = new aiFace[ numItems ];
-    m_currentMesh->mNumVertices = numItems * 3;
+    m_currentMesh->mNumVertices = static_cast<unsigned int>(numItems * 3);
     m_currentMesh->mVertices = new aiVector3D[ m_currentMesh->mNumVertices ];
     bool hasColors( false );
     if ( m_currentVertices.m_numColors > 0 ) {
@@ -1086,7 +1086,7 @@ void OpenGEXImporter::copyMeshes( aiScene *pScene ) {
         return;
     }
 
-    pScene->mNumMeshes = m_meshCache.size();
+    pScene->mNumMeshes = static_cast<unsigned int>(m_meshCache.size());
     pScene->mMeshes = new aiMesh*[ pScene->mNumMeshes ];
     std::copy( m_meshCache.begin(), m_meshCache.end(), pScene->mMeshes );
 }
@@ -1099,7 +1099,7 @@ void OpenGEXImporter::copyCameras( aiScene *pScene ) {
         return;
     }
 
-    pScene->mNumCameras = m_cameraCache.size();
+    pScene->mNumCameras = static_cast<unsigned int>(m_cameraCache.size());
     pScene->mCameras = new aiCamera*[ pScene->mNumCameras ];
     std::copy( m_cameraCache.begin(), m_cameraCache.end(), pScene->mCameras );
 }
@@ -1112,7 +1112,7 @@ void OpenGEXImporter::copyLights( aiScene *pScene ) {
         return;
     }
 
-    pScene->mNumLights = m_lightCache.size();
+    pScene->mNumLights = static_cast<unsigned int>(m_lightCache.size());
     pScene->mLights = new aiLight*[ pScene->mNumLights ];
     std::copy( m_lightCache.begin(), m_lightCache.end(), pScene->mLights );
 }
@@ -1133,7 +1133,7 @@ void OpenGEXImporter::resolveReferences() {
                     const std::string &name( currentRefInfo->m_Names[ i ] );
                     ReferenceMap::const_iterator it( m_mesh2refMap.find( name ) );
                     if( m_mesh2refMap.end() != it ) {
-                        unsigned int meshIdx = m_mesh2refMap[ name ];
+                        unsigned int meshIdx = static_cast<unsigned int>(m_mesh2refMap[ name ]);
                         node->mMeshes[ i ] = meshIdx;
                     }
                 }
@@ -1156,7 +1156,7 @@ void OpenGEXImporter::createNodeTree( aiScene *pScene ) {
         return;
     }
 
-    pScene->mRootNode->mNumChildren = m_root->m_children.size();
+    pScene->mRootNode->mNumChildren = static_cast<unsigned int>(m_root->m_children.size());
     pScene->mRootNode->mChildren = new aiNode*[ pScene->mRootNode->mNumChildren ];
     std::copy( m_root->m_children.begin(), m_root->m_children.end(), pScene->mRootNode->mChildren );
 }

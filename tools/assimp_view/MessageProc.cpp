@@ -1537,7 +1537,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
                     SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
-                    TextOut(pcStruct->hDC,4,1,szText,strlen(szText));
+                    TextOut(pcStruct->hDC,4,1,szText, static_cast<int>(strlen(szText)));
                     bDraw = true;
                 }
                 else if(IDC_LCOLOR2 == pcStruct->CtlID)
@@ -1568,7 +1568,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
                     SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
-                    TextOut(pcStruct->hDC,4,1,szText,strlen(szText));
+                    TextOut(pcStruct->hDC,4,1,szText, static_cast<int>(strlen(szText)));
                     bDraw = true;
                 }
                 else if(IDC_LCOLOR3 == pcStruct->CtlID)
@@ -1597,7 +1597,7 @@ INT_PTR CALLBACK MessageProc(HWND hwndDlg,UINT uMsg,
 
                     SetTextColor(pcStruct->hDC,RGB(0xFF-r,0xFF-g,0xFF-b));
                     SetBkMode(pcStruct->hDC,TRANSPARENT);
-                    TextOut(pcStruct->hDC,4,1,szText,strlen(szText));
+                    TextOut(pcStruct->hDC,4,1,szText,static_cast<int>(strlen(szText)));
                     bDraw = true;
                 }
                 // draw the black border around the rects

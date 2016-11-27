@@ -59,7 +59,7 @@ void ProcessPolyLine(const IfcPolyline& def, TempMesh& meshout, ConversionData& 
         ConvertCartesianPoint(t,cp);
         meshout.verts.push_back(t);
     }
-    meshout.vertcnt.push_back(meshout.verts.size());
+    meshout.vertcnt.push_back(static_cast<unsigned int>(meshout.verts.size()));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ bool ProcessCurve(const IfcCurve& curve,  TempMesh& meshout, ConversionData& con
             IFCImporter::LogError(cv.s+ " (error occurred while processing curve)");
             return false;
         }
-        meshout.vertcnt.push_back(meshout.verts.size());
+        meshout.vertcnt.push_back(static_cast<unsigned int>(meshout.verts.size()));
         return true;
     }
 

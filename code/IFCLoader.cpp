@@ -707,7 +707,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
         }
 
         if (!properties.empty()) {
-            aiMetadata* data = aiMetadata::Alloc( properties.size() );
+            aiMetadata* data = aiMetadata::Alloc( static_cast<unsigned int>(properties.size()) );
             unsigned int index( 0 );
             for ( const Metadata::value_type& kv : properties ) {
                 data->Set( index++, kv.first, aiString( kv.second ) );

@@ -343,12 +343,12 @@ void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeEleme
 		if(sceneNode.mMetaData != nullptr) throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
 
 		// copy collected metadata to output node.
-        sceneNode.mMetaData = aiMetadata::Alloc( metadataList.size() );
+        sceneNode.mMetaData = aiMetadata::Alloc( static_cast<unsigned int>(metadataList.size()) );
 		size_t meta_idx( 0 );
 
 		for(const CAMFImporter_NodeElement_Metadata& metadata: metadataList)
 		{
-			sceneNode.mMetaData->Set(meta_idx++, metadata.Type, aiString(metadata.Value));
+			sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata.Type, aiString(metadata.Value));
 		}
 	}// if(!metadataList.empty())
 }
@@ -437,9 +437,9 @@ std::list<unsigned int> mesh_idx;
 					// create new face and store it.
 					complex_face.Face.mNumIndices = 3;
 					complex_face.Face.mIndices = new unsigned int[3];
-					complex_face.Face.mIndices[0] = tri_al.V[0];
-					complex_face.Face.mIndices[1] = tri_al.V[1];
-					complex_face.Face.mIndices[2] = tri_al.V[2];
+					complex_face.Face.mIndices[0] = static_cast<unsigned int>(tri_al.V[0]);
+					complex_face.Face.mIndices[1] = static_cast<unsigned int>(tri_al.V[1]);
+					complex_face.Face.mIndices[2] = static_cast<unsigned int>(tri_al.V[2]);
 					complex_faces_list.push_back(complex_face);
 				}
 			}// for(const CAMFImporter_NodeElement* ne_volume_child: ne_volume->Child)
@@ -508,7 +508,7 @@ std::list<unsigned int> mesh_idx;
 					{
 						for(size_t vi = 0; vi < face.Face.mNumIndices; vi++)
 						{
-							if(face.Face.mIndices[vi] == pIdx_From) face.Face.mIndices[vi] = pIdx_To;
+							if(face.Face.mIndices[vi] == pIdx_From) face.Face.mIndices[vi] = static_cast<unsigned int>(pIdx_To);
 						}
 					}
 				};// auto VertexIndex_Replace = [](std::list<SComplexFace>& pFaceList, const size_t pIdx_From, const size_t pIdx_To) -> void
@@ -563,7 +563,7 @@ std::list<unsigned int> mesh_idx;
 				// set geometry and colors (vertices)
 				//
 				// copy faces/triangles
-				tmesh->mNumFaces = face_list_cur.size();
+				tmesh->mNumFaces = static_cast<unsigned int>(face_list_cur.size());
 				tmesh->mFaces = new aiFace[tmesh->mNumFaces];
 
 				// Create vertices list and optimize indices. Optimisation mean following.In AMF all volumes use one big list of vertices. And one volume
@@ -619,7 +619,7 @@ std::list<unsigned int> mesh_idx;
 						{
 							vert_arr.push_back(vert_arr.at(face_cur.Face.mIndices[idx_ind]));
 							col_arr.push_back(face_color);
-							face_cur.Face.mIndices[idx_ind] = vert_idx_new++;
+							face_cur.Face.mIndices[idx_ind] = static_cast<unsigned int>(vert_idx_new++);
 						}
 					}// if(face_cur.Color != nullptr)
 				}// for(const SComplexFace& face_cur: face_list_cur)
@@ -639,10 +639,10 @@ std::list<unsigned int> mesh_idx;
 					for(size_t i = 0, i_e = VertexCount_Max * 2; i < i_e; i++) idx_vert_used[i] = false;
 
 					// This ID's will be used when set materials ID in scene.
-					tmesh->mMaterialIndex = PostprocessHelper_GetTextureID_Or_Create(face_list_cur.front().TexMap->TextureID_R,
+					tmesh->mMaterialIndex = static_cast<unsigned int>(PostprocessHelper_GetTextureID_Or_Create(face_list_cur.front().TexMap->TextureID_R,
 																						face_list_cur.front().TexMap->TextureID_G,
 																						face_list_cur.front().TexMap->TextureID_B,
-																						face_list_cur.front().TexMap->TextureID_A);
+																						face_list_cur.front().TexMap->TextureID_A));
 					texcoord_arr.resize(VertexCount_Max * 2);
 					for(const SComplexFace& face_cur: face_list_cur)
 					{
@@ -662,7 +662,7 @@ std::list<unsigned int> mesh_idx;
 								vert_arr.push_back(vert_arr.at(idx_vert));
 								col_arr.push_back(col_arr.at(idx_vert));
 								texcoord_arr.at(idx_vert_new) = face_cur.TexMap->TextureCoordinate[idx_ind];
-								face_cur.Face.mIndices[idx_ind] = idx_vert_new++;
+								face_cur.Face.mIndices[idx_ind] = static_cast<unsigned int>(idx_vert_new++);
 							}
 						}// for(size_t idx_ind = 0; idx_ind < face_cur.Face.mNumIndices; idx_ind++)
 					}// for(const SComplexFace& face_cur: face_list_cur)
@@ -675,7 +675,7 @@ std::list<unsigned int> mesh_idx;
 				//
 				// copy collected data to mesh
 				//
-				tmesh->mNumVertices = vert_arr.size();
+				tmesh->mNumVertices = static_cast<unsigned int>(vert_arr.size());
 				tmesh->mVertices = new aiVector3D[tmesh->mNumVertices];
 				tmesh->mColors[0] = new aiColor4D[tmesh->mNumVertices];
 				tmesh->mFaces = new aiFace[face_list_cur.size()];
@@ -693,7 +693,7 @@ std::list<unsigned int> mesh_idx;
 				for(const SComplexFace& face_cur: face_list_cur) tmesh->mFaces[idx_face++] = face_cur.Face;
 
 				// store new aiMesh
-				mesh_idx.push_back(pMeshList.size());
+				mesh_idx.push_back(static_cast<unsigned int>(pMeshList.size()));
 				pMeshList.push_back(tmesh);
 			}// for(const std::list<SComplexFace>& face_list_cur: complex_faces_toplist)
 		}// if(ne_child->Type == CAMFImporter_NodeElement::ENET_Volume)
@@ -704,7 +704,7 @@ std::list<unsigned int> mesh_idx;
 	{
 		std::list<unsigned int>::const_iterator mit = mesh_idx.begin();
 
-		pSceneNode.mNumMeshes = mesh_idx.size();
+		pSceneNode.mNumMeshes = static_cast<unsigned int>(mesh_idx.size());
 		pSceneNode.mMeshes = new unsigned int[pSceneNode.mNumMeshes];
 		for(size_t i = 0; i < pSceneNode.mNumMeshes; i++) pSceneNode.mMeshes[i] = *mit++;
 	}// if(mesh_idx.size() > 0)
@@ -779,7 +779,7 @@ std::list<aiNode*> ch_node;
 
 	size_t ch_idx = 0;
 
-	con_node->mNumChildren = ch_node.size();
+	con_node->mNumChildren = static_cast<unsigned int>(ch_node.size());
 	con_node->mChildren = new aiNode*[con_node->mNumChildren];
 	for(aiNode* node: ch_node) con_node->mChildren[ch_idx++] = node;
 
@@ -899,7 +899,7 @@ nl_clean_loop:
 	{
 		std::list<aiNode*>::const_iterator nl_it = node_list.begin();
 
-		pScene->mRootNode->mNumChildren = node_list.size();
+		pScene->mRootNode->mNumChildren = static_cast<unsigned int>(node_list.size());
 		pScene->mRootNode->mChildren = new aiNode*[pScene->mRootNode->mNumChildren];
 		for(size_t i = 0; i < pScene->mRootNode->mNumChildren; i++)
 		{
@@ -916,14 +916,14 @@ nl_clean_loop:
 	{
 		std::list<aiMesh*>::const_iterator ml_it = mesh_list.begin();
 
-		pScene->mNumMeshes = mesh_list.size();
+		pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
 		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 		for(size_t i = 0; i < pScene->mNumMeshes; i++) pScene->mMeshes[i] = *ml_it++;
 	}// if(mesh_list.size() > 0)
 
 	//
 	// Textures
-	pScene->mNumTextures = mTexture_Converted.size();
+	pScene->mNumTextures = static_cast<unsigned int>(mTexture_Converted.size());
 	if(pScene->mNumTextures > 0)
 	{
 		size_t idx;
@@ -933,8 +933,8 @@ nl_clean_loop:
 		for(const SPP_Texture& tex_convd: mTexture_Converted)
 		{
 			pScene->mTextures[idx] = new aiTexture;
-			pScene->mTextures[idx]->mWidth = tex_convd.Width;
-			pScene->mTextures[idx]->mHeight = tex_convd.Height;
+			pScene->mTextures[idx]->mWidth = static_cast<unsigned int>(tex_convd.Width);
+			pScene->mTextures[idx]->mHeight = static_cast<unsigned int>(tex_convd.Height);
 			pScene->mTextures[idx]->pcData = (aiTexel*)tex_convd.Data;
 			// texture format description.
 			strcpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint);
@@ -943,7 +943,7 @@ nl_clean_loop:
 
 		// Create materials for embedded textures.
 		idx = 0;
-		pScene->mNumMaterials = mTexture_Converted.size();
+		pScene->mNumMaterials = static_cast<unsigned int>(mTexture_Converted.size());
 		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 		for(const SPP_Texture& tex_convd: mTexture_Converted)
 		{

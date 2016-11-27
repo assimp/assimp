@@ -623,7 +623,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
             SkipCurrentNode();
     }
 
-    submesh->index = mesh->subMeshes.size();
+    submesh->index = static_cast<unsigned int>(mesh->subMeshes.size());
     mesh->subMeshes.push_back(submesh);
 }
 

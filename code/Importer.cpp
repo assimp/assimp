@@ -654,7 +654,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
         uint32_t fileSize = 0;
         if (fileIO)
         {
-            fileSize = fileIO->FileSize();
+            fileSize = static_cast<uint32_t>(fileIO->FileSize());
             pimpl->mIOHandler->Close( fileIO );
         }
 
@@ -790,7 +790,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
     for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)   {
 
         BaseProcess* process = pimpl->mPostProcessingSteps[a];
-        pimpl->mProgressHandler->UpdatePostProcess( a, pimpl->mPostProcessingSteps.size() );
+        pimpl->mProgressHandler->UpdatePostProcess(static_cast<int>(a), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
         if( process->IsActive( pFlags)) {
 
             if (profiler) {
@@ -825,7 +825,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
         }
 #endif // ! DEBUG
     }
-    pimpl->mProgressHandler->UpdatePostProcess( pimpl->mPostProcessingSteps.size(), pimpl->mPostProcessingSteps.size() );
+    pimpl->mProgressHandler->UpdatePostProcess( static_cast<int>(pimpl->mPostProcessingSteps.size()), static_cast<int>(pimpl->mPostProcessingSteps.size()) );
 
     // update private scene flags
   if( pimpl->mScene )

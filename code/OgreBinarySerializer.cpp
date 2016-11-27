@@ -483,7 +483,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh)
 
     NormalizeBoneWeights(submesh->vertexData);
 
-    submesh->index = mesh->subMeshes.size();
+    submesh->index = static_cast<unsigned int>(mesh->subMeshes.size());
     mesh->subMeshes.push_back(submesh);
 }
 

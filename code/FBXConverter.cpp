@@ -1075,7 +1075,7 @@ void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
 
     // create metadata on node
     std::size_t numStaticMetaData = 2;
-    aiMetadata* data = aiMetadata::Alloc( unparsedProperties.size() + numStaticMetaData );
+    aiMetadata* data = aiMetadata::Alloc( static_cast<unsigned int>(unparsedProperties.size() + numStaticMetaData) );
     nd.mMetaData = data;
     int index = 0;
 
@@ -2961,10 +2961,10 @@ Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const 
             //get values within the start/stop time window
             std::shared_ptr<KeyTimeList> Keys( new KeyTimeList() );
             std::shared_ptr<KeyValueList> Values( new KeyValueList() );
-            const int count = curve->GetKeys().size();
+            const size_t count = curve->GetKeys().size();
             Keys->reserve( count );
             Values->reserve( count );
-            for ( int n = 0; n < count; n++ )
+            for (size_t n = 0; n < count; n++ )
             {
                 int64_t k = curve->GetKeys().at( n );
                 if ( k >= adj_start && k <= adj_stop )
@@ -3065,7 +3065,7 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
             const KeyTimeList::value_type timeA = std::get<0>(kfl)->at( id0 );
             const KeyTimeList::value_type timeB = std::get<0>(kfl)->at( id1 );
 
-            const ai_real factor = timeB == timeA ? 0. : static_cast<ai_real>( ( time - timeA ) ) / ( timeB - timeA );
+            const ai_real factor = timeB == timeA ? ai_real(0.) : static_cast<ai_real>( ( time - timeA ) ) / ( timeB - timeA );
             const ai_real interpValue = static_cast<ai_real>( valueA + ( valueB - valueA ) * factor );
 
             result[ std::get<2>(kfl) ] = interpValue;

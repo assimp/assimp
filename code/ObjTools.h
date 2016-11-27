@@ -48,8 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include <vector>
 
-namespace Assimp
-{
+namespace Assimp {
 
 /** @brief  Returns true, if the last entry of the buffer is reached.
  *  @param  it  Iterator of current position.
@@ -57,15 +56,14 @@ namespace Assimp
  *  @return true, if the end of the buffer is reached.
  */
 template<class char_t>
-inline bool isEndOfBuffer(  char_t it, char_t end )
-{
+inline bool isEndOfBuffer(  char_t it, char_t end ) {
     if ( it == end )
     {
         return true;
     }
     else
     {
-        end--;
+        --end;
     }
     return ( it == end );
 }

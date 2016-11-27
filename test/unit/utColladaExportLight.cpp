@@ -53,18 +53,23 @@ public:
     {
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
+        im2 = new Assimp::Importer();
     }
 
     virtual void TearDown()
     {
         delete ex;
         delete im;
+        delete im2;
     }
 
 protected:
     Assimp::Exporter* ex;
     Assimp::Importer* im;
+    Assimp::Importer* im2;
 };
+
+#define FLOAT_EUQAL_TH 1e-6
 
 // ------------------------------------------------------------------------------------------------
 TEST_F(ColladaExportLight, testExportLight)
@@ -85,7 +90,7 @@ TEST_F(ColladaExportLight, testExportLight)
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
 
-    const aiScene* imported = im->ReadFile(file,0);
+    const aiScene* imported = im2->ReadFile(file,0);
 
     ASSERT_TRUE(imported!=NULL);
 
@@ -94,23 +99,24 @@ TEST_F(ColladaExportLight, testExportLight)
     for(size_t i=0; i< origNumLights; i++) {
         const aiLight *orig = &origLights[ i ];
         const aiLight *read = imported->mLights[i];
-        EXPECT_EQ( 0,strncmp(origNames[ i ].c_str(),read->mName.C_Str(), origNames[ i ].size() ) );
-        EXPECT_EQ( orig->mType,read->mType);
-        EXPECT_FLOAT_EQ(orig->mAttenuationConstant,read->mAttenuationConstant);
-        EXPECT_FLOAT_EQ(orig->mAttenuationLinear,read->mAttenuationLinear);
-        EXPECT_NEAR(orig->mAttenuationQuadratic,read->mAttenuationQuadratic, 0.001f);
 
-        EXPECT_FLOAT_EQ(orig->mColorAmbient.r,read->mColorAmbient.r);
-        EXPECT_FLOAT_EQ(orig->mColorAmbient.g,read->mColorAmbient.g);
-        EXPECT_FLOAT_EQ(orig->mColorAmbient.b,read->mColorAmbient.b);
+        EXPECT_EQ(0,strncmp(origNames[ i ].c_str(),read->mName.C_Str(), origNames[ i ].size() ) );
+        EXPECT_EQ(orig->mType,read->mType);
+        EXPECT_NEAR(orig->mAttenuationConstant,read->mAttenuationConstant,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mAttenuationLinear,read->mAttenuationLinear,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mAttenuationQuadratic,read->mAttenuationQuadratic,FLOAT_EUQAL_TH);
 
-        EXPECT_FLOAT_EQ(orig->mColorDiffuse.r,read->mColorDiffuse.r);
-        EXPECT_FLOAT_EQ(orig->mColorDiffuse.g,read->mColorDiffuse.g);
-        EXPECT_FLOAT_EQ(orig->mColorDiffuse.b,read->mColorDiffuse.b);
+        EXPECT_NEAR(orig->mColorAmbient.r,read->mColorAmbient.r,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mColorAmbient.g,read->mColorAmbient.g,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mColorAmbient.b,read->mColorAmbient.b,FLOAT_EUQAL_TH);
 
-        EXPECT_FLOAT_EQ(orig->mColorSpecular.r,read->mColorSpecular.r);
-        EXPECT_FLOAT_EQ(orig->mColorSpecular.g,read->mColorSpecular.g);
-        EXPECT_FLOAT_EQ(orig->mColorSpecular.b,read->mColorSpecular.b);
+        EXPECT_NEAR(orig->mColorDiffuse.r,read->mColorDiffuse.r,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mColorDiffuse.g,read->mColorDiffuse.g,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mColorDiffuse.b,read->mColorDiffuse.b,FLOAT_EUQAL_TH);
+
+        EXPECT_NEAR(orig->mColorSpecular.r,read->mColorSpecular.r,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mColorSpecular.g,read->mColorSpecular.g,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mColorSpecular.b,read->mColorSpecular.b,FLOAT_EUQAL_TH);
 
         EXPECT_NEAR(orig->mAngleInnerCone,read->mAngleInnerCone,0.001);
         EXPECT_NEAR(orig->mAngleOuterCone,read->mAngleOuterCone,0.001);

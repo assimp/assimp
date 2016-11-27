@@ -328,6 +328,11 @@ struct aiString
         return  (length != other.length || 0 != memcmp(data,other.data,length));
     }
 
+    /** lexical comparison */
+    bool operator<(const aiString& other) const {
+    	return strcmp(data,other.data)<0;
+    }
+
     /** Append a string to the string */
     void Append (const char* app)   {
         const size_t len = ::strlen(app);

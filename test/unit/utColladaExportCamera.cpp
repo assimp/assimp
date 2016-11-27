@@ -54,6 +54,7 @@ public:
     {
         ex = new Assimp::Exporter();
         im = new Assimp::Importer();
+        im2 = new Assimp::Importer();
 
     }
 
@@ -61,12 +62,16 @@ public:
     {
         delete ex;
         delete im;
+        delete im2;
     }
 
 protected:
     Assimp::Exporter* ex;
     Assimp::Importer* im;
+    Assimp::Importer* im2;
 };
+
+#define FLOAT_EUQAL_TH 1e-6
 
 TEST_F(ColladaExportCamera, testExportCamera)
 {
@@ -78,6 +83,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
 
 
     EXPECT_EQ(AI_SUCCESS,ex->Export(pTest,"collada",file));
+
     const unsigned int origNumCams( pTest->mNumCameras );
     std::unique_ptr<float[]> origFOV( new float[ origNumCams ] );
     std::unique_ptr<float[]> orifClipPlaneNear( new float[ origNumCams ] );
@@ -94,7 +100,7 @@ TEST_F(ColladaExportCamera, testExportCamera)
         names[ i ] = orig->mName;
         pos[ i ] = orig->mPosition;
     }
-    const aiScene* imported = im->ReadFile(file,0);
+    const aiScene* imported = im2->ReadFile(file,0);
 
     ASSERT_TRUE(imported!=NULL);
 
@@ -103,11 +109,12 @@ TEST_F(ColladaExportCamera, testExportCamera)
 
     for(size_t i=0; i< imported->mNumCameras;i++){
         const aiCamera *read = imported->mCameras[ i ];
+        const aiCamera *orig = pTest->mCameras[ i ];
 
-        EXPECT_TRUE( names[ i ] == read->mName );
-        EXPECT_NEAR( origFOV[ i ],read->mHorizontalFOV, 0.0001f );
-        EXPECT_FLOAT_EQ( orifClipPlaneNear[ i ], read->mClipPlaneNear);
-        EXPECT_FLOAT_EQ( orifClipPlaneFar[ i ], read->mClipPlaneFar);
+        EXPECT_TRUE(orig->mName==read->mName);
+        EXPECT_NEAR(orig->mHorizontalFOV,read->mHorizontalFOV,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mClipPlaneNear,read->mClipPlaneNear,FLOAT_EUQAL_TH);
+        EXPECT_NEAR(orig->mClipPlaneFar,read->mClipPlaneFar,FLOAT_EUQAL_TH);
 
         EXPECT_FLOAT_EQ( pos[ i ].x,read->mPosition.x);
         EXPECT_FLOAT_EQ( pos[ i ].y,read->mPosition.y);

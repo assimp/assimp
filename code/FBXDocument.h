@@ -600,7 +600,7 @@ public:
 
     }
 	const int textureCount() const {
-		return textures.size();
+		return static_cast<int>(textures.size());
 	}
     const BlendMode GetBlendMode() const
     {

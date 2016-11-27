@@ -2534,7 +2534,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
                 aiColor4D result(0, 0, 0, 1);
                 for (size_t i = 0; i < pInput.mResolved->mSize; ++i)
                 {
-                    result[i] = obj[pInput.mResolved->mSubOffset[i]];
+                    result[static_cast<unsigned int>(i)] = obj[pInput.mResolved->mSubOffset[i]];
                 }
                 pMesh->mColors[pInput.mIndex].push_back(result);
             } else

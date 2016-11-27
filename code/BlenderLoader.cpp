@@ -59,6 +59,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
 #include <cctype>
+#include <cstdint>
 
 
 // zlib is needed for compressed blend files
@@ -423,7 +424,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
     // check if the file contents are bundled with the BLEND file
     if (img->packedfile) {
         name.data[0] = '*';
-        name.length = 1+ ASSIMP_itoa10(name.data+1,MAXLEN-1,conv_data.textures->size());
+        name.length = 1+ ASSIMP_itoa10(name.data+1,static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
         aiTexture* tex = conv_data.textures->back();
@@ -1230,7 +1231,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
             if (conv_data.meshes->size() > old) {
                 node->mMeshes = new unsigned int[node->mNumMeshes = static_cast<unsigned int>(conv_data.meshes->size()-old)];
                 for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
-                    node->mMeshes[i] = i + old;
+                    node->mMeshes[i] = static_cast<unsigned int>(i + old);
                 }
             }}
             break;

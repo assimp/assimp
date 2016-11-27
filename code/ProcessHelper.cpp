@@ -308,7 +308,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 
         for(unsigned int j=0;j<f.mNumIndices;j++)   {
             if(vMap[f.mIndices[j]]==UINT_MAX)   {
-                vMap[f.mIndices[j]] = numSubVerts++;
+                vMap[f.mIndices[j]] = static_cast<unsigned int>(numSubVerts++);
             }
         }
     }
@@ -320,8 +320,8 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 
     // create all the arrays for this mesh if the old mesh contained them
 
-    oMesh->mNumFaces = subMeshFaces.size();
-    oMesh->mNumVertices = numSubVerts;
+    oMesh->mNumFaces = static_cast<unsigned int>(subMeshFaces.size());
+    oMesh->mNumVertices = static_cast<unsigned int>(numSubVerts);
     oMesh->mVertices = new aiVector3D[numSubVerts];
     if( pMesh->HasNormals() ) {
         oMesh->mNormals = new aiVector3D[numSubVerts];
@@ -332,12 +332,12 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
         oMesh->mBitangents = new aiVector3D[numSubVerts];
     }
 
-    for( size_t a = 0;  pMesh->HasTextureCoords( a) ; ++a ) {
+    for( size_t a = 0;  pMesh->HasTextureCoords(static_cast<unsigned int>(a)) ; ++a ) {
         oMesh->mTextureCoords[a] = new aiVector3D[numSubVerts];
         oMesh->mNumUVComponents[a] = pMesh->mNumUVComponents[a];
     }
 
-    for( size_t a = 0; pMesh->HasVertexColors( a); ++a )    {
+    for( size_t a = 0; pMesh->HasVertexColors( static_cast<unsigned int>(a)); ++a )    {
         oMesh->mColors[a] = new aiColor4D[numSubVerts];
     }
 

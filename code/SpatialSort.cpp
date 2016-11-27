@@ -108,7 +108,7 @@ void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositio
 
         // store position by index and distance
         ai_real distance = *vec * mPlaneNormal;
-        mPositions.push_back( Entry( a+initial, *vec, distance));
+        mPositions.push_back( Entry( static_cast<unsigned int>(a+initial), *vec, distance));
     }
 
     if (pFinalize) {

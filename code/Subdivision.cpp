@@ -188,7 +188,7 @@ void CatmullClarkSubdivider::Subdivide (
         }
 
         outmeshes.push_back(NULL);inmeshes.push_back(i);
-        maptbl.push_back(s);
+        maptbl.push_back(static_cast<unsigned int>(s));
     }
 
     // Do the actual subdivision on the preallocated storage. InternSubdivide

@@ -364,7 +364,7 @@ void InsertWindowContours(const ContourVector& contours,
                     }
 
                     if (const size_t d = curmesh.verts.size()-old) {
-                        curmesh.vertcnt.push_back(d);
+                        curmesh.vertcnt.push_back(static_cast<unsigned int>(d));
                         std::reverse(curmesh.verts.rbegin(),curmesh.verts.rbegin()+d);
                     }
                     if (n == very_first_hit) {
@@ -549,7 +549,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
                 clipper.Execute(ClipperLib::ctIntersection,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
 
                 for(const ClipperLib::ExPolygon& ex : clipped) {
-                    iold.push_back(ex.outer.size());
+                    iold.push_back(static_cast<unsigned int>(ex.outer.size()));
                     for(const ClipperLib::IntPoint& point : ex.outer) {
                         vold.push_back(IfcVector3(
                             from_int64(point.X),

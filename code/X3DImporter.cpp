@@ -934,7 +934,7 @@ void X3DImporter::GeometryHelper_CoordIdxStr2FacesArr(const std::list<int32_t>& 
 				default: prim_type |= aiPrimitiveType_POLYGON; break;
 			}
 
-			tface.mNumIndices = ts;
+			tface.mNumIndices = static_cast<unsigned int>(ts);
 			tface.mIndices = new unsigned int[ts];
 			memcpy(tface.mIndices, inds.data(), ts * sizeof(unsigned int));
 			pFaces.push_back(tface);
@@ -1329,7 +1329,7 @@ aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::list<int32_t>& pCoordIdx
     size_t ts = faces.size();
 	// faces
 	tmesh->mFaces = new aiFace[ts];
-	tmesh->mNumFaces = ts;
+	tmesh->mNumFaces = static_cast<unsigned int>(ts);
 	for(size_t i = 0; i < ts; i++) tmesh->mFaces[i] = faces.at(i);
 
 	// vertices
@@ -1337,7 +1337,7 @@ aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::list<int32_t>& pCoordIdx
 
 	ts = pVertices.size();
 	tmesh->mVertices = new aiVector3D[ts];
-	tmesh->mNumVertices = ts;
+	tmesh->mNumVertices = static_cast<unsigned int>(ts);
     for ( size_t i = 0; i < ts; i++ )
     {
         tmesh->mVertices[ i ] = *vit++;
@@ -1701,7 +1701,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 		{
 			std::list<aiMesh*>::const_iterator it = mesh_list.begin();
 
-			pScene->mNumMeshes = mesh_list.size();
+			pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
 			pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 			for(size_t i = 0; i < pScene->mNumMeshes; i++) pScene->mMeshes[i] = *it++;
 		}
@@ -1710,7 +1710,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 		{
 			std::list<aiMaterial*>::const_iterator it = mat_list.begin();
 
-			pScene->mNumMaterials = mat_list.size();
+			pScene->mNumMaterials = static_cast<unsigned int>(mat_list.size());
 			pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 			for(size_t i = 0; i < pScene->mNumMaterials; i++) pScene->mMaterials[i] = *it++;
 		}
@@ -1719,7 +1719,7 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 		{
 			std::list<aiLight*>::const_iterator it = light_list.begin();
 
-			pScene->mNumLights = light_list.size();
+			pScene->mNumLights = static_cast<unsigned int>(light_list.size());
 			pScene->mLights = new aiLight*[pScene->mNumLights];
 			for(size_t i = 0; i < pScene->mNumLights; i++) pScene->mLights[i] = *it++;
 		}

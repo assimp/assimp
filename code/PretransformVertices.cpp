@@ -397,7 +397,7 @@ void PretransformVertices::BuildWCSMeshes(std::vector<aiMesh*>& out, aiMesh** in
 
                 out.push_back(ntz);
 
-                node->mMeshes[i] = numIn + out.size() - 1;
+                node->mMeshes[i] = static_cast<unsigned int>(numIn + out.size() - 1);
             }
         }
     }
@@ -483,7 +483,7 @@ void PretransformVertices::Execute( aiScene* pScene)
             memcpy(npp,pScene->mMeshes,sizeof(aiMesh*)*pScene->mNumMeshes);
             memcpy(npp+pScene->mNumMeshes,&apcOutMeshes[0],sizeof(aiMesh*)*apcOutMeshes.size());
 
-            pScene->mNumMeshes  += apcOutMeshes.size();
+            pScene->mNumMeshes  += static_cast<unsigned int>(apcOutMeshes.size());
             delete[] pScene->mMeshes; pScene->mMeshes = npp;
         }
 

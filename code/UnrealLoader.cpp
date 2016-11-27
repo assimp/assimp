@@ -333,7 +333,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
         std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(),materials.end(),mat);
         if (nt == materials.end()) {
             // add material
-            tri.matIndex = materials.size();
+            tri.matIndex = static_cast<unsigned int>(materials.size());
             mat.numFaces = 1;
             materials.push_back(mat);
 

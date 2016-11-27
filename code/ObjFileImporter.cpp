@@ -152,7 +152,7 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     /*unsigned int progress = 0;
     unsigned int progressCounter = 0;
     const unsigned int updateProgressEveryBytes = 100 * 1024;
-    const unsigned int progressTotal = (3*m_Buffer.size()/updateProgressEveryBytes);*/
+    const unsigned int progressTotal = static_cast<unsigned int>(3*m_Buffer.size()/updateProgressEveryBytes);*/
     // process all '\'
     /*std::vector<char> ::iterator iter = m_Buffer.begin();
     while (iter != m_Buffer.end())
@@ -326,10 +326,10 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
         ai_assert( NULL != inp  );
 
         if (inp->m_PrimitiveType == aiPrimitiveType_LINE) {
-            pMesh->mNumFaces += inp->m_vertices.size() - 1;
+            pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
             pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
         } else if (inp->m_PrimitiveType == aiPrimitiveType_POINT) {
-            pMesh->mNumFaces += inp->m_vertices.size();
+            pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size());
             pMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
         } else {
             ++pMesh->mNumFaces;

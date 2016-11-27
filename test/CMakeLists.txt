@@ -122,6 +122,10 @@ ELSE( WIN32 )
     SET( platform_libs pthread )
 ENDIF( WIN32 )
 
+IF(MSVC)
+		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+ENDIF(MSVC)
+
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)

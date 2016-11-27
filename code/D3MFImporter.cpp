@@ -172,7 +172,7 @@ private:
 
                 mesh->mName.Set(name);
                 meshes.push_back(mesh);
-                meshIds.push_back(meshIdx);
+                meshIds.push_back(static_cast<unsigned long>(meshIdx));
                 meshIdx++;
 
             }

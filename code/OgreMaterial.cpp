@@ -77,7 +77,7 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
             aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
             if (material)
             {
-                submesh->materialIndex = materials.size();
+                submesh->materialIndex = static_cast<int>(materials.size());
                 materials.push_back(material);
             }
         }
@@ -99,7 +99,7 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
             aiMaterial *material = ReadMaterial(pFile, pIOHandler, submesh->materialRef);
             if (material)
             {
-                submesh->materialIndex = materials.size();
+                submesh->materialIndex = static_cast<int>(materials.size());
                 materials.push_back(material);
             }
         }
@@ -110,7 +110,7 @@ void OgreImporter::ReadMaterials(const std::string &pFile, Assimp::IOSystem *pIO
 
 void OgreImporter::AssignMaterials(aiScene *pScene, std::vector<aiMaterial*> &materials)
 {
-    pScene->mNumMaterials = materials.size();
+    pScene->mNumMaterials = static_cast<unsigned int>(materials.size());
     if (pScene->mNumMaterials > 0)
     {
         pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];

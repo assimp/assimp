@@ -237,7 +237,7 @@ aiNode* BVHLoader::ReadNode()
     // add the child nodes if there are any
     if( childNodes.size() > 0)
     {
-        node->mNumChildren = childNodes.size();
+        node->mNumChildren = static_cast<unsigned int>(childNodes.size());
         node->mChildren = new aiNode*[node->mNumChildren];
         std::copy( childNodes.begin(), childNodes.end(), node->mChildren);
     }
@@ -443,7 +443,7 @@ void BVHLoader::CreateAnimation( aiScene* pScene)
     anim->mDuration = double( mAnimNumFrames - 1);
 
     // now generate the tracks for all nodes
-    anim->mNumChannels = mNodes.size();
+    anim->mNumChannels = static_cast<unsigned int>(mNodes.size());
     anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
 
     // FIX: set the array elements to NULL to ensure proper deletion if an exception is thrown

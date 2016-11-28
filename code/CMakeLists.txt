@@ -642,7 +642,6 @@ ADD_ASSIMP_IMPORTER( GLTF
   glTFExporter.cpp
 )
 
-
 ADD_ASSIMP_IMPORTER( 3MF
     D3MFImporter.h
     D3MFImporter.cpp

@@ -671,9 +671,9 @@ const std::string extension = GetExtension(pFile);
 
 	if(!extension.length() || pCheckSig)
 	{
-		const char* tokens[] = { "<?xml", "<amf" };
+		const char* tokens[] = { "<amf" };
 
-		return SearchFileHeaderForToken(pIOHandler, pFile, tokens, 2);
+		return SearchFileHeaderForToken( pIOHandler, pFile, tokens, 1 );
 	}
 
 	return false;

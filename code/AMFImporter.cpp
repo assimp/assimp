@@ -188,15 +188,15 @@ void AMFImporter::XML_CheckNode_MustHaveChildren()
 
 void AMFImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName)
 {
-const size_t Uns_Skip_Len = 3;
-const char* Uns_Skip[Uns_Skip_Len] = { "composite", "edge", "normal" };
+    static const size_t Uns_Skip_Len = 3;
+    const char* Uns_Skip[Uns_Skip_Len] = { "composite", "edge", "normal" };
 
-static bool skipped_before[Uns_Skip_Len] = { false, false, false };
+    static bool skipped_before[Uns_Skip_Len] = { false, false, false };
 
-std::string nn(mReader->getNodeName());
-bool found = false;
-bool close_found = false;
-size_t sk_idx;
+    std::string nn(mReader->getNodeName());
+    bool found = false;
+    bool close_found = false;
+    size_t sk_idx;
 
 	for(sk_idx = 0; sk_idx < Uns_Skip_Len; sk_idx++)
 	{
@@ -245,7 +245,7 @@ bool AMFImporter::XML_SearchNode(const std::string& pNodeName)
 
 bool AMFImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx)
 {
-std::string val(mReader->getAttributeValue(pAttrIdx));
+    std::string val(mReader->getAttributeValue(pAttrIdx));
 
 	if((val == "false") || (val == "0"))
 		return false;
@@ -257,8 +257,8 @@ std::string val(mReader->getAttributeValue(pAttrIdx));
 
 float AMFImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx)
 {
-std::string val;
-float tvalf;
+    std::string val;
+    float tvalf;
 
 	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), val);
 	fast_atoreal_move(val.c_str(), tvalf, false);
@@ -273,8 +273,8 @@ uint32_t AMFImporter::XML_ReadNode_GetAttrVal_AsU32(const int pAttrIdx)
 
 float AMFImporter::XML_ReadNode_GetVal_AsFloat()
 {
-std::string val;
-float tvalf;
+    std::string val;
+    float tvalf;
 
 	if(!mReader->read()) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. No data, seems file is corrupt.");
 	if(mReader->getNodeType() != irr::io::EXN_TEXT) throw DeadlyImportError("XML_ReadNode_GetVal_AsFloat. Invalid type of XML element, seems file is corrupt.");
@@ -320,7 +320,7 @@ void AMFImporter::ParseHelper_Node_Exit()
 
 void AMFImporter::ParseHelper_FixTruncatedFloatString(const char* pInStr, std::string& pOutString)
 {
-size_t instr_len;
+    size_t instr_len;
 
 	pOutString.clear();
 	instr_len = strlen(pInStr);
@@ -352,12 +352,12 @@ static bool ParseHelper_Decode_Base64_IsBase64(const char pChar)
 
 void AMFImporter::ParseHelper_Decode_Base64(const std::string& pInputBase64, std::vector<uint8_t>& pOutputData) const
 {
-// With help from
-// RenИ Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
-const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    // With help from
+    // RenИ Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
+    const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-uint8_t tidx = 0;
-uint8_t arr4[4], arr3[3];
+    uint8_t tidx = 0;
+    uint8_t arr4[4], arr3[3];
 
 	// check input data
 	if(pInputBase64.size() % 4) throw DeadlyImportError("Base64-encoded data must have size multiply of four.");
@@ -402,8 +402,8 @@ uint8_t arr4[4], arr3[3];
 
 void AMFImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 {
-irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
-std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
+    irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
+    std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 	// Check whether we can read from the file
 	if(file.get() == NULL) throw DeadlyImportError("Failed to open AMF file " + pFile + ".");
@@ -434,8 +434,8 @@ std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 // Multi elements - No.
 void AMFImporter::ParseNode_Root()
 {
-std::string unit, version;
-CAMFImporter_NodeElement* ne;
+    std::string unit, version;
+    CAMFImporter_NodeElement *ne( nullptr );
 
 	// Read attributes for node <amf>.
 	MACRO_ATTRREAD_LOOPBEG;
@@ -481,8 +481,8 @@ CAMFImporter_NodeElement* ne;
 // Parent element - <amf>.
 void AMFImporter::ParseNode_Constellation()
 {
-std::string id;
-CAMFImporter_NodeElement* ne;
+    std::string id;
+    CAMFImporter_NodeElement* ne( nullptr );
 
 	// Read attributes for node <constellation>.
 	MACRO_ATTRREAD_LOOPBEG;
@@ -522,8 +522,8 @@ CAMFImporter_NodeElement* ne;
 // Parent element - <amf>.
 void AMFImporter::ParseNode_Instance()
 {
-std::string objectid;
-CAMFImporter_NodeElement* ne;
+    std::string objectid;
+    CAMFImporter_NodeElement* ne( nullptr );
 
 	// Read attributes for node <constellation>.
 	MACRO_ATTRREAD_LOOPBEG;
@@ -577,8 +577,8 @@ CAMFImporter_NodeElement* ne;
 // Parent element - <amf>.
 void AMFImporter::ParseNode_Object()
 {
-std::string id;
-CAMFImporter_NodeElement* ne;
+    std::string id;
+    CAMFImporter_NodeElement* ne( nullptr );
 
 	// Read attributes for node <object>.
 	MACRO_ATTRREAD_LOOPBEG;
@@ -642,8 +642,8 @@ CAMFImporter_NodeElement* ne;
 // "Volume" - specifies the total volume of the entity, in the entity's unit system, to be used for verification (object and volume only)
 void AMFImporter::ParseNode_Metadata()
 {
-std::string type, value;
-CAMFImporter_NodeElement* ne;
+    std::string type, value;
+    CAMFImporter_NodeElement* ne( nullptr );
 
 	// read attribute
 	MACRO_ATTRREAD_LOOPBEG;
@@ -665,9 +665,11 @@ CAMFImporter_NodeElement* ne;
 
 bool AMFImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool pCheckSig) const
 {
-const std::string extension = GetExtension(pFile);
+    const std::string extension = GetExtension(pFile);
 
-	if(extension == "amf") return true;
+    if ( extension == "amf" ) {
+        return true;
+    }
 
 	if(!extension.length() || pCheckSig)
 	{

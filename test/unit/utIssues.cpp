@@ -53,7 +53,7 @@ class utIssues : public ::testing::Test {
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
 TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
-    /*aiScene *scene( new aiScene );
+    aiScene *scene( new aiScene );
 
     scene->mNumMaterials = 1;
     scene->mMaterials = new aiMaterial*;
@@ -90,20 +90,23 @@ TEST_F( utIssues, OpacityBugWhenExporting_727 ) {
     Assimp::Importer importer;
     Assimp::Exporter exporter;
     for ( std::size_t i( 0 ); i < exporter.GetExportFormatCount(); ++i ) {
+                
         std::string path;
         const aiExportFormatDesc *desc( exporter.GetExportFormatDescription( i ) );
         EXPECT_NE( desc, nullptr );
         path.append( desc->fileExtension );
-
-        ASSERT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
-        const aiScene *newScene( importer.ReadFile( path, 0 ) );
-        ASSERT_TRUE( NULL != newScene );
-        float newOpacity;                    
-        if ( newScene->mNumMaterials > 0 ) {
-            //ASSERT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
-            //EXPECT_EQ( opacity, newOpacity );
+        if ( "dae" == path ) {
+            EXPECT_EQ( AI_SUCCESS, exporter.Export( scene, desc->id, path ) );
+            const aiScene *newScene( importer.ReadFile( path, 0 ) );
+            EXPECT_TRUE( NULL != newScene );
+            float newOpacity;
+            if ( newScene->mNumMaterials > 0 ) {
+                std::cout << "Desc = " << desc->description << "\n";
+                EXPECT_EQ( AI_SUCCESS, newScene->mMaterials[ 0 ]->Get( AI_MATKEY_OPACITY, newOpacity ) );
+                EXPECT_EQ( opacity, newOpacity );
+            }
         }
-    }*/
+    }
 }
 
 #endif // ASSIMP_BUILD_NO_EXPORT

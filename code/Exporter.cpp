@@ -163,7 +163,6 @@ Exporter::ExportFormatEntry gExporters[] =
 
 class ExporterPimpl {
 public:
-
     ExporterPimpl()
         : blob()
         , mIOSystem(new Assimp::DefaultIOSystem())
@@ -171,7 +170,7 @@ public:
     {
         GetPostProcessingStepInstanceList(mPostProcessingSteps);
 
-        // grab all builtin exporters
+        // grab all built-in exporters
         mExporters.resize(ASSIMP_NUM_EXPORTERS);
         std::copy(gExporters,gExporters+ASSIMP_NUM_EXPORTERS,mExporters.begin());
     }

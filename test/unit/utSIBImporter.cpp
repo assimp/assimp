@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include "SIBImporter.h"
+#include <assimp/Importer.hpp>
 
 using namespace ::Assimp;
 
@@ -56,4 +57,11 @@ TEST_F( utSIBImporter, createTest ) {
         ok = false;
     }
     EXPECT_TRUE( ok );
+}
+
+TEST_F( utSIBImporter, importTest ) {
+    Assimp::Importer importer;
+
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SIB/heffalump.sib", 0 );
+    EXPECT_NE( nullptr, scene );
 }

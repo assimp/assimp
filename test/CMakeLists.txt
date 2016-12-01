@@ -55,6 +55,7 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+  unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
   unit/TestModelFactory.h
   unit/utAnim.cpp
@@ -101,6 +102,7 @@ SET( TEST_SRCS
   unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
+  unit/utXImporterExporter.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )

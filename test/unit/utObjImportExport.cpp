@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 #include "SceneDiffer.h"
+#include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -100,7 +101,7 @@ static const std::string ObjModel =
     "\n"
     "# End of file\n";
 
-class utObjImportExport : public ::testing::Test {
+class utObjImportExport : public AbstractImportExportBase {
 protected:
     virtual void SetUp() {
         m_im = new Assimp::Importer;
@@ -173,10 +174,21 @@ protected:
         return expScene;
     }
 
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
+        return nullptr != scene;
+    }
+
+
 protected:
     Assimp::Importer *m_im;
     aiScene *m_expectedScene;
 };
+
+TEST_F( utObjImportExport, importObjFromFileTest ) {
+    EXPECT_TRUE( importerTest() );
+}
 
 TEST_F( utObjImportExport, obj_import_test ) {
     const aiScene *scene = m_im->ReadFileFromMemory( (void*) ObjModel.c_str(), ObjModel.size(), 0 );

@@ -38,33 +38,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
 
-#include "SIBImporter.h"
-#include <assimp/Importer.hpp>
+#include "UnitTestPCH.h"
+#include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
 
-using namespace ::Assimp;
+#include <assimp/Importer.hpp>
 
-class utSIBImporter : public AbstractImportExportBase {
+using namespace Assimp;
+
+class utXImporterExporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/SIB/heffalump.sib", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/X/test.x", 0 );
         return nullptr != scene;
     }
 };
 
-TEST_F( utSIBImporter, createTest ) {
-    bool ok( true );
-    try {
-        SIBImporter myImporter;
-    }  catch ( ... ) {
-        ok = false;
-    }
-    EXPECT_TRUE( ok );
-}
-
-TEST_F( utSIBImporter, importTest ) {
+TEST_F( utXImporterExporter, importXFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }

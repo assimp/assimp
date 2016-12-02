@@ -68,6 +68,7 @@ SET( TEST_SRCS
   unit/utColladaExportLight.cpp
   unit/utDefaultIOStream.cpp
   unit/utFastAtof.cpp
+  unit/utFBXImporterExporter.cpp
   unit/utFindDegenerates.cpp
   unit/utFindInvalidData.cpp
   unit/utFixInfacingNormals.cpp

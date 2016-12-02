@@ -71,7 +71,7 @@ using namespace Util;
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-    // XXX vc9's debugger won't step into anonymous namespaces
+// XXX vc9's debugger won't step into anonymous namespaces
 //namespace {
 
 /** Dummy class to encapsulate the conversion process */
@@ -114,10 +114,8 @@ private:
     // collect and assign child nodes
     void ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform = aiMatrix4x4() );
 
-
     // ------------------------------------------------------------------------------------------------
     void ConvertLights( const Model& model );
-
 
     // ------------------------------------------------------------------------------------------------
     void ConvertCameras( const Model& model );
@@ -188,7 +186,6 @@ private:
     // ------------------------------------------------------------------------------------------------
     static const unsigned int NO_MATERIAL_SEPARATION = /* std::numeric_limits<unsigned int>::max() */
         static_cast<unsigned int>(-1);
-
 
     // ------------------------------------------------------------------------------------------------
     /**
@@ -340,8 +337,6 @@ private:
     // key (time), value, mapto (component index)
     typedef std::tuple<std::shared_ptr<KeyTimeList>, std::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
     typedef std::vector<KeyFrameList> KeyFrameListList;
-
-
 
     // ------------------------------------------------------------------------------------------------
     KeyFrameListList GetKeyframeList( const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop );
@@ -899,7 +894,6 @@ void Converter::GetRotationMatrix( Model::RotOrder mode, const aiVector3D& rotat
     }
 }
 
-
 bool Converter::NeedsComplexTransformationChain( const Model& model )
 {
     const PropertyTable& props = model.Props();
@@ -922,7 +916,6 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
 
     return false;
 }
-
 
 std::string Converter::NameTransformationChainNode( const std::string& name, TransformationComp comp )
 {
@@ -1067,7 +1060,6 @@ void Converter::GenerateTransformationNodeChain( const Model& model,
     }
 }
 
-
 void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
 {
     const PropertyTable& props = model.Props();
@@ -1132,7 +1124,6 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
     }
 }
 
-
 std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, const Model& model,
     const aiMatrix4x4& node_global_transform )
 {
@@ -1168,7 +1159,6 @@ std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, cons
     return temp;
 }
 
-
 aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
 {
     aiMesh* const out_mesh = new aiMesh();
@@ -1187,7 +1177,6 @@ aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
 
     return out_mesh;
 }
-
 
 unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, const Model& model,
     const aiMatrix4x4& node_global_transform )
@@ -1511,7 +1500,6 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
     return static_cast<unsigned int>( meshes.size() - 1 );
 }
 
-
 void Converter::ConvertWeights( aiMesh* out, const Model& model, const MeshGeometry& geo,
     const aiMatrix4x4& node_global_transform ,
     unsigned int materialIndex,
@@ -1657,7 +1645,6 @@ void Converter::ConvertCluster( std::vector<aiBone*>& bones, const Model& /*mode
         }
     }
 }
-
 
 void Converter::ConvertMaterialForMesh( aiMesh* out, const Model& model, const MeshGeometry& geo,
     MatIndexArray::value_type materialIndex )

@@ -84,13 +84,10 @@ enum TokenType
  *  Offers iterator protocol. Tokens are immutable. */
 class Token
 {
-
 private:
-
     static const unsigned int BINARY_MARKER = static_cast<unsigned int>(-1);
 
 public:
-
     /** construct a textual token */
     Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
 
@@ -100,13 +97,11 @@ public:
     ~Token();
 
 public:
-
     std::string StringContents() const {
         return std::string(begin(),end());
     }
 
 public:
-
     bool IsBinary() const {
         return column == BINARY_MARKER;
     }

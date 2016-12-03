@@ -50,6 +50,7 @@ TEST_F( utDefaultIOStream, FileSizeTest ) {
     tmpnam( buffer );
     std::FILE *fs( std::fopen( buffer, "w+" ) );
     size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
+    EXPECT_NE( 0U, written );
     std::fflush( fs );
 
     TestDefaultIOStream myStream( fs, buffer );

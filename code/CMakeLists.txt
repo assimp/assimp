@@ -197,6 +197,7 @@ MACRO(ADD_ASSIMP_IMPORTER name)
     SET(${name}_SRC "")
     SET(ASSIMP_IMPORTERS_DISABLED "${ASSIMP_IMPORTERS_DISABLED} ${name}")
     add_definitions(-DASSIMP_BUILD_NO_${name}_IMPORTER)
+    add_definitions(-DASSIMP_BUILD_NO_${name}_EXPORTER)
   ENDIF()
 ENDMACRO()
 
@@ -462,9 +463,13 @@ ADD_ASSIMP_IMPORTER( IFC
   STEPFileEncoding.cpp
   STEPFileEncoding.h
 )
-if (MSVC AND ASSIMP_BUILD_IFC_IMPORTER)
-  set_source_files_properties(IFCReaderGen1.cpp IFCReaderGen2.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
-endif (MSVC AND ASSIMP_BUILD_IFC_IMPORTER)
+if (ASSIMP_BUILD_IFC_IMPORTER)
+  if (MSVC)
+    set_source_files_properties(IFCReaderGen1.cpp IFCReaderGen2.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+  elseif(CMAKE_COMPILER_IS_MINGW)
+    set_source_files_properties(IFCReaderGen1.cpp IFCReaderGen2.cpp PROPERTIES COMPILE_FLAGS "-O2 -Wa,-mbig-obj")
+  endif()
+endif (ASSIMP_BUILD_IFC_IMPORTER)
 
 ADD_ASSIMP_IMPORTER( XGL
   XGLLoader.cpp

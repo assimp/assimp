@@ -59,8 +59,8 @@ static const std::string DiffuseTexture      = "map_Kd";
 static const std::string AmbientTexture      = "map_Ka";
 static const std::string SpecularTexture     = "map_Ks";
 static const std::string OpacityTexture      = "map_d";
-static const std::string EmmissiveTexture    = "map_emissive";
-static const std::string EmmissiveTexture_1  = "map_Ke";
+static const std::string EmissiveTexture    = "map_emissive";
+static const std::string EmissiveTexture_1  = "map_Ke";
 static const std::string BumpTexture1        = "map_bump";
 static const std::string BumpTexture2        = "map_Bump";
 static const std::string BumpTexture3        = "bump";
@@ -323,11 +323,11 @@ void ObjFileMtlImporter::getTexture() {
         // Opacity texture
         out = & m_pModel->m_pCurrentMaterial->textureOpacity;
         clampIndex = ObjFile::Material::TextureOpacityType;
-    } else if (!ASSIMP_strincmp( pPtr, EmmissiveTexture.c_str(), static_cast<unsigned int>(EmmissiveTexture.size()) ) ) {
+    } else if (!ASSIMP_strincmp( pPtr, EmissiveTexture.c_str(), static_cast<unsigned int>(EmissiveTexture.size()) ) ) {
         // Emissive texture
         out = & m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;
-    } else if ( !ASSIMP_strincmp( pPtr, EmmissiveTexture_1.c_str(), static_cast<unsigned int>(EmmissiveTexture_1.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, EmissiveTexture_1.c_str(), static_cast<unsigned int>(EmissiveTexture_1.size()) ) ) {
         // Emissive texture
         out = &m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;

@@ -323,11 +323,11 @@ void ObjFileMtlImporter::getTexture() {
         // Opacity texture
         out = & m_pModel->m_pCurrentMaterial->textureOpacity;
         clampIndex = ObjFile::Material::TextureOpacityType;
-    } else if (!ASSIMP_strincmp( pPtr, EmmissiveTexture.c_str(), static_cast<unsigned int>(EmmissiveTexture.size()) ) ) {
+    } else if (!ASSIMP_strincmp( pPtr, EmissiveTexture.c_str(), static_cast<unsigned int>(EmissiveTexture.size()) ) ) {
         // Emissive texture
         out = & m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;
-    } else if ( !ASSIMP_strincmp( pPtr, EmmissiveTexture_1.c_str(), static_cast<unsigned int>(EmmissiveTexture_1.size()) ) ) {
+    } else if ( !ASSIMP_strincmp( pPtr, EmissiveTexture_1.c_str(), static_cast<unsigned int>(EmissiveTexture_1.size()) ) ) {
         // Emissive texture
         out = &m_pModel->m_pCurrentMaterial->textureEmissive;
         clampIndex = ObjFile::Material::TextureEmissiveType;

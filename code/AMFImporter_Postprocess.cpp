@@ -590,7 +590,7 @@ std::list<unsigned int> mesh_idx;
 					do
 					{
 						vert_idx_from = VertexIndex_GetMinimal(face_list_cur, &vert_idx_to);
-						if(vert_idx_from == vert_idx_to) break;// all indices are transfered,
+						if(vert_idx_from == vert_idx_to) break;// all indices are transferred,
 
 						vert_arr.push_back(pVertexCoordinateArray.at(vert_idx_from));
 						col_arr.push_back(Vertex_CalculateColor(vert_idx_from));
@@ -743,7 +743,7 @@ std::list<aiNode*> ch_node;
 	//  \_ aiNode for transformation (<instance> -> <delta...>, <r...>) - aiNode for pointing to object ("objectid")
 	con_node = new aiNode;
 	con_node->mName = pConstellation.ID;
-	// Walk thru children and search for instances of another objects, constellations.
+	// Walk through children and search for instances of another objects, constellations.
 	for(const CAMFImporter_NodeElement* ne: pConstellation.Child)
 	{
 		aiMatrix4x4 tmat;
@@ -815,7 +815,7 @@ std::list<CAMFImporter_NodeElement_Metadata*> meta_list;
 	// Check if root element are found.
 	if(root_el == nullptr) throw DeadlyImportError("Root(<amf>) element not found.");
 
-	// after that walk thru children of root and collect data. Five types of nodes can be placed at top level - in <amf>: <object>, <material>, <texture>,
+	// after that walk through children of root and collect data. Five types of nodes can be placed at top level - in <amf>: <object>, <material>, <texture>,
 	// <constellation> and <metadata>. But at first we must read <material> and <texture> because they will be used in <object>. <metadata> can be read
 	// at any moment.
 	//
@@ -870,7 +870,7 @@ nl_clean_loop:
 
 	if(node_list.size() > 1)
 	{
-		// walk thru all nodes
+		// walk through all nodes
 		for(std::list<aiNode*>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); nl_it++)
 		{
 			// and try to find them in another top nodes.
@@ -959,7 +959,7 @@ nl_clean_loop:
 			idx++;
 		}
 	}// if(pScene->mNumTextures > 0)
-}// END: after that walk thru children of root and collect data
+}// END: after that walk through children of root and collect data
 
 }// namespace Assimp
 

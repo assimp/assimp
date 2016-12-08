@@ -781,7 +781,7 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
     // Determine the type of the polygons
     switch (type)
     {
-        // read unsupported stuff too (although we wont process it)
+        // read unsupported stuff too (although we won't process it)
     case  AI_LWO_MBAL:
         DefaultLogger::get()->warn("LWO2: Encountered unsupported primitive chunk (METABALL)");
         break;

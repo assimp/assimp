@@ -134,7 +134,7 @@ void X3DImporter::ParseNode_Geometry3D_Cone()
 	}
 	else
 	{
-		const unsigned int tess = 30;///TODO: IME tesselation factor thru ai_property
+		const unsigned int tess = 30;///TODO: IME tesselation factor through ai_property
 
 		std::vector<aiVector3D> tvec;// temp array for vertices.
 
@@ -207,7 +207,7 @@ void X3DImporter::ParseNode_Geometry3D_Cylinder()
 	}
 	else
 	{
-		const unsigned int tess = 30;///TODO: IME tesselation factor thru ai_property
+		const unsigned int tess = 30;///TODO: IME tesselation factor through ai_property
 
 		std::vector<aiVector3D> tside;// temp array for vertices of side.
 		std::vector<aiVector3D> tcir;// temp array for vertices of circle.
@@ -516,7 +516,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx
 
 			// As said: "If the Z-axis of the first point is undefined (because the spine is not closed and the first two spine segments are collinear)
 			// then the Z-axis for the first spine point with a defined Z-axis is used."
-			// Walk thru spine and find Z.
+			// Walk through spine and find Z.
 			for(size_t next_point = 2; (next_point <= spine_idx_last) && !found; next_point++)
 			{
 				// (pSpine[2] - pSpine[1]) ^ (pSpine[0] - pSpine[1])
@@ -679,7 +679,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 		// How we done it at all?
 		// 1. At first we will calculate array of basises for every point in spine(look SCP in ISO-dic). Also "orientation" vector
 		// are applied vor every basis.
-		// 2. After that we can create array of point sets: which are scaled, transfered to basis of relative basis and at final translated to real position
+		// 2. After that we can create array of point sets: which are scaled, transferred to basis of relative basis and at final translated to real position
 		// using relative spine point.
 		// 3. Next step is creating CoordIdx array(do not forget "-1" delimiter). While creating CoordIdx also created faces for begin and end caps, if
 		// needed. While createing CootdIdx is taking in account CCW flag.
@@ -749,7 +749,7 @@ void X3DImporter::ParseNode_Geometry3D_Extrusion()
 					tcross[cri] = tvecX + tvecY + tvecZ + spine[spi];
 				}// for(size_t cri = 0, cri_e = crossSection.size(); cri < cri_e; i++)
 
-				pointset_arr[spi] = tcross;// store transfered point set
+				pointset_arr[spi] = tcross;// store transferred point set
 			}// for(size_t spi = 0, spi_e = spine.size(); spi < spi_e; i++)
 		}// END: 2. Create array of point sets.
 
@@ -965,7 +965,7 @@ void X3DImporter::ParseNode_Geometry3D_Sphere()
 	}
 	else
 	{
-		const unsigned int tess = 3;///TODO: IME tesselation factor thru ai_property
+		const unsigned int tess = 3;///TODO: IME tesselation factor through ai_property
 
 		std::vector<aiVector3D> tlist;
 

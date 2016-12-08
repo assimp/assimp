@@ -820,7 +820,7 @@ bool PLY::PropertyInstance::ParseValue(
 
     case EDT_Float:
         // technically this should cast to float, but people tend to use float descriptors for double data
-        // this is the best way to not risk loosing precision on import and it doesn't hurt to do this
+        // this is the best way to not risk losing precision on import and it doesn't hurt to do this
         ai_real f;
         pCur = fast_atoreal_move<ai_real>(pCur,f);
         out->fFloat = (ai_real)f;

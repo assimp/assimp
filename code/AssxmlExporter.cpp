@@ -72,7 +72,7 @@ static int ioprintf( IOStream * io, const char *format, ... ) {
         return -1;
     }
 
-    static const size_t Size = 4096;
+    static const int Size = 4096;
     char sz[ Size ];
     ::memset( sz, '\0', Size );
     va_list va;

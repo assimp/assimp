@@ -384,6 +384,7 @@ void ColladaExporter::WriteLight(size_t pIndex){
         case aiLightSource_SPOT:
             WriteSpotLight(light);
             break;
+        case aiLightSource_AREA:
         case aiLightSource_UNDEFINED:
         case _aiLightSource_Force32Bit:
             break;

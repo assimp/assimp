@@ -85,7 +85,7 @@ aiMatrix4x4 X3DImporter::PostprocessHelper_Matrix_GlobalToCurrent() const
 
 void X3DImporter::PostprocessHelper_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, std::list<CX3DImporter_NodeElement*>& pList) const
 {
-	// walk thru childs and find for metadata.
+	// walk through childs and find for metadata.
 	for(std::list<CX3DImporter_NodeElement*>::const_iterator el_it = pNodeElement.Child.begin(); el_it != pNodeElement.Child.end(); el_it++)
 	{
 		if(((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaBoolean) || ((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaDouble) ||
@@ -190,7 +190,7 @@ void X3DImporter::Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNod
 	*pMaterial = new aiMaterial;
 	aiMaterial& taimat = **pMaterial;// creating alias for convenience.
 
-	// at this point pNodeElement point to <Appearance> node. Walk thru childs and add all stored data.
+	// at this point pNodeElement point to <Appearance> node. Walk through childs and add all stored data.
 	for(std::list<CX3DImporter_NodeElement*>::const_iterator el_it = pNodeElement.Child.begin(); el_it != pNodeElement.Child.end(); el_it++)
 	{
 		if((*el_it)->Type == CX3DImporter_NodeElement::ENET_Material)
@@ -627,10 +627,10 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 			}
 			else
 			{
-				for(size_t i = 0; i < (size_t)tne_group.Choice; i++) chit_begin++;// forward iterator to choosed node.
+				for(size_t i = 0; i < (size_t)tne_group.Choice; i++) chit_begin++;// forward iterator to choosen node.
 
 				chit_end = chit_begin;
-				chit_end++;// point end iterator to next element after choosed.
+				chit_end++;// point end iterator to next element after choosen.
 			}
 		}// if(tne_group.UseChoice)
 	}// if(pNodeElement.Type == CX3DImporter_NodeElement::ENET_Group)
@@ -764,7 +764,7 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pN
             throw DeadlyImportError( "Postprocess. MetaData member in node are not nullptr. Something went wrong." );
         }
 
-		// copy collected metadata to output node.        
+		// copy collected metadata to output node.
         pSceneNode.mMetaData = aiMetadata::Alloc( static_cast<unsigned int>(meta_list.size()) );
 		meta_idx = 0;
 		for(std::list<CX3DImporter_NodeElement*>::const_iterator it = meta_list.begin(); it != meta_list.end(); it++, meta_idx++)

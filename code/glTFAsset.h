@@ -730,7 +730,7 @@ namespace glTF
 			enum EType
 			{
 				#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-					Compression_Open3DGC,///< Compression of mesh data using Open3DGC algorythm.
+					Compression_Open3DGC,///< Compression of mesh data using Open3DGC algorithm.
 				#endif
 
 				Unknown
@@ -752,7 +752,7 @@ namespace glTF
 
 		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 			/// \struct SCompression_Open3DGC
-			/// Compression of mesh data using Open3DGC algorythm.
+			/// Compression of mesh data using Open3DGC algorithm.
 			struct SCompression_Open3DGC : public SExtension
 			{
 				using SExtension::Type;

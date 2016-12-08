@@ -498,7 +498,7 @@ void OgreBinarySerializer::NormalizeBoneWeights(VertexData *vertexData) const
     }
 
     /** Normalize bone weights.
-        Some exporters wont care if the sum of all bone weights
+        Some exporters won't care if the sum of all bone weights
         for a single vertex equals 1 or not, so validate here. */
     const float epsilon = 0.05f;
     for (const uint32_t vertexIndex : influencedVertices)

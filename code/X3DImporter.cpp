@@ -148,7 +148,7 @@ bool X3DImporter::FindNodeElement(const std::string& pID, const CX3DImporter_Nod
     CX3DImporter_NodeElement* tnd = NodeElement_Cur;// temporary pointer to node.
     bool static_search = false;// flag: true if searching in static node.
 
-    // At first check if we have deal with static node. Go up thru parent nodes and check flag.
+    // At first check if we have deal with static node. Go up through parent nodes and check flag.
     while(tnd != nullptr)
     {
 		if(tnd->Type == CX3DImporter_NodeElement::ENET_Group)

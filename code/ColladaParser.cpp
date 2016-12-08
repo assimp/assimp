@@ -654,7 +654,7 @@ void ColladaParser::ReadController( Collada::Controller& pController)
             // two types of controllers: "skin" and "morph". Only the first one is relevant, we skip the other
             if( IsElement( "morph"))
             {
-                // should skip everything inside, so there's no danger of catching elements inbetween
+                // should skip everything inside, so there's no danger of catching elements in between
                 SkipElement();
             }
             else if( IsElement( "skin"))
@@ -2827,7 +2827,7 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 
     if( !mReader->isEmptyElement())
     {
-        // read material associations. Ignore additional elements inbetween
+        // read material associations. Ignore additional elements in between
         while( mReader->read())
         {
             if( mReader->getNodeType() == irr::io::EXN_ELEMENT)

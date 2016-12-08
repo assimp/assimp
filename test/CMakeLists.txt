@@ -67,6 +67,7 @@ SET( TEST_SRCS
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
   unit/utDefaultIOStream.cpp
+  unit/utDXFImporterExporter.cpp
   unit/utFastAtof.cpp
   unit/utFBXImporterExporter.cpp
   unit/utFindDegenerates.cpp

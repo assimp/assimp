@@ -96,6 +96,7 @@ SET( TEST_SRCS
   unit/utScenePreprocessor.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/utSMDImportExport.cpp
   unit/utSortByPType.cpp
   unit/utSplitLargeMeshes.cpp
   unit/utTargetAnimation.cpp

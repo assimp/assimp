@@ -1020,7 +1020,7 @@ void SMDImporter::ParseTriangle(const char* szCurrent,
 
     // read the texture file name
     const char* szLast = szCurrent;
-    while (!IsSpaceOrNewLine(*szCurrent++));
+    while (!IsSpaceOrNewLine(*++szCurrent));
 
     // ... and get the index that belongs to this file name
     face.iTexture = GetTextureIndex(std::string(szLast,(uintptr_t)szCurrent-(uintptr_t)szLast));

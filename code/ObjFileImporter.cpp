@@ -542,13 +542,13 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 
 // ------------------------------------------------------------------------------------------------
 //   Add clamp mode property to material if necessary
-void ObjFileImporter::addTextureMappingModeProperty( aiMaterial* mat, aiTextureType type, int clampMode) {
+void ObjFileImporter::addTextureMappingModeProperty( aiMaterial* mat, aiTextureType type, int clampMode, int index) {
     if ( nullptr == mat ) {
         return;
     }
 
-    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_U( type, 0 ) );
-    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_V( type, 0 ) );
+    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_U( type, index ) );
+    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_V( type, index ) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -668,12 +668,12 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 
             unsigned count = type == ObjFile::Material::TextureReflectionSphereType ? 1 : 6;
             for( unsigned i = 0; i < count; i++ )
+            {
                 mat->AddProperty(&pCurrentMaterial->textureReflection[i], AI_MATKEY_TEXTURE_REFLECTION(i));
 
-            if(pCurrentMaterial->clamp[type])
-                //TODO addTextureMappingModeProperty should accept an index to handle clamp option for each
-                //texture of a cubemap
-                addTextureMappingModeProperty(mat, aiTextureType_REFLECTION);
+                if(pCurrentMaterial->clamp[type])
+                    addTextureMappingModeProperty(mat, aiTextureType_REFLECTION, 1, i);
+            }
         }
 
         if ( 0 != pCurrentMaterial->textureDisp.length )

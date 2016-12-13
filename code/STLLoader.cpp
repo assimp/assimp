@@ -198,7 +198,7 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     bool bMatClr = false;
 
     if (IsBinarySTL(mBuffer, fileSize)) {
-        bMatClr = LoadBinaryFile();
+        LoadBinaryFile();
     } else if (IsAsciiSTL(mBuffer, fileSize)) {
         LoadASCIIFile();
     } else {
@@ -372,7 +372,7 @@ void STLImporter::LoadASCIIFile()
 
 // ------------------------------------------------------------------------------------------------
 // Read a binary STL file
-bool STLImporter::LoadBinaryFile()
+void STLImporter::LoadBinaryFile()
 {
     // allocate one mesh
     pScene->mNumMeshes = 1;
@@ -384,27 +384,7 @@ bool STLImporter::LoadBinaryFile()
     if (fileSize < 84) {
         throw DeadlyImportError("STL: file is too small for the header");
     }
-    bool bIsMaterialise = false;
 
-    // search for an occurrence of "COLOR=" in the header
-    const unsigned char* sz2 = (const unsigned char*)mBuffer;
-    const unsigned char* const szEnd = sz2+80;
-    while (sz2 < szEnd) {
-
-        if ('C' == *sz2++ && 'O' == *sz2++ && 'L' == *sz2++ &&
-            'O' == *sz2++ && 'R' == *sz2++ && '=' == *sz2++)    {
-
-            // read the default vertex color for facets
-            bIsMaterialise = true;
-            DefaultLogger::get()->info("STL: Taking code path for Materialise files");
-            const ai_real invByte = (ai_real)1.0 / ( ai_real )255.0;
-            clrColorDefault.r = (*sz2++) * invByte;
-            clrColorDefault.g = (*sz2++) * invByte;
-            clrColorDefault.b = (*sz2++) * invByte;
-            clrColorDefault.a = (*sz2++) * invByte;
-            break;
-        }
-    }
     const unsigned char* sz = (const unsigned char*)mBuffer + 80;
 
     // now read the number of facets
@@ -484,13 +464,6 @@ bool STLImporter::LoadBinaryFile()
 
     // now copy faces
     addFacesToMesh(pMesh);
-
-    if (bIsMaterialise && !pMesh->mColors[0])
-    {
-        // use the color as diffuse material color
-        return true;
-    }
-    return false;
 }
 
 #endif // !! ASSIMP_BUILD_NO_STL_IMPORTER

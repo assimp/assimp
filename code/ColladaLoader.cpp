@@ -1699,26 +1699,6 @@ void ColladaLoader::BuildMaterials( ColladaParser& pParser, aiScene* /*pScene*/)
         mMaterialIndexByName[matIt->first] = newMats.size();
         newMats.push_back( std::pair<Collada::Effect*, aiMaterial*>( &effect,mat) );
     }
-    // ScenePreprocessor generates a default material automatically if none is there.
-    // All further code here in this loader works well without a valid material so
-    // we can safely let it to ScenePreprocessor.
-#if 0
-    if( newMats.size() == 0)
-    {
-        aiMaterial* mat = new aiMaterial;
-        aiString name( AI_DEFAULT_MATERIAL_NAME );
-        mat->AddProperty( &name, AI_MATKEY_NAME);
-
-        const int shadeMode = aiShadingMode_Phong;
-        mat->AddProperty<int>( &shadeMode, 1, AI_MATKEY_SHADING_MODEL);
-        aiColor4D colAmbient( 0.2, 0.2, 0.2, 1.0), colDiffuse( 0.8, 0.8, 0.8, 1.0), colSpecular( 0.5, 0.5, 0.5, 0.5);
-        mat->AddProperty( &colAmbient, 1, AI_MATKEY_COLOR_AMBIENT);
-        mat->AddProperty( &colDiffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-        mat->AddProperty( &colSpecular, 1, AI_MATKEY_COLOR_SPECULAR);
-        const ai_real specExp = 5.0;
-        mat->AddProperty( &specExp, 1, AI_MATKEY_SHININESS);
-    }
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------

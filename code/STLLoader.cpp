@@ -209,26 +209,6 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
     for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
         pScene->mRootNode->mMeshes[i] = i;
-
-    // create a single default material, using a light gray diffuse color for consistency with
-    // other geometric types (e.g., PLY).
-    aiMaterial* pcMat = new aiMaterial();
-    aiString s;
-    s.Set(AI_DEFAULT_MATERIAL_NAME);
-    pcMat->AddProperty(&s, AI_MATKEY_NAME);
-
-    aiColor4D clrDiffuse(ai_real(0.6),ai_real(0.6),ai_real(0.6),ai_real(1.0));
-    if (bMatClr) {
-        clrDiffuse = clrColorDefault;
-    }
-    pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_DIFFUSE);
-    pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_SPECULAR);
-    clrDiffuse = aiColor4D( ai_real( 0.05), ai_real( 0.05), ai_real( 0.05), ai_real( 1.0));
-    pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_AMBIENT);
-
-    pScene->mNumMaterials = 1;
-    pScene->mMaterials = new aiMaterial*[1];
-    pScene->mMaterials[0] = pcMat;
 }
 // ------------------------------------------------------------------------------------------------
 // Read an ASCII STL file

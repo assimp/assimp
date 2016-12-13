@@ -97,11 +97,6 @@ ObjFileMtlImporter::ObjFileMtlImporter( std::vector<char> &buffer,
     m_uiLine( 0 )
 {
     ai_assert( NULL != m_pModel );
-    if ( NULL == m_pModel->m_pDefaultMaterial )
-    {
-        m_pModel->m_pDefaultMaterial = new ObjFile::Material;
-        m_pModel->m_pDefaultMaterial->MaterialName.Set( "default" );
-    }
     load();
 }
 

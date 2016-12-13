@@ -1034,7 +1034,10 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     // lines
     if (countLines)
     {
-        mOutput << startstr << "<lines count=\"" << countLines << "\" material=\"defaultMaterial\">" << endstr;
+        mOutput << startstr << "<lines count=\"" << countLines;
+        if (materials.size() > 0)
+            mOutput << "\" material=\"defaultMaterial";
+        mOutput << "\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
         if( mesh->HasNormals() )
@@ -1068,7 +1071,10 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     // polygons
     if (countPoly)
     {
-        mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
+        mOutput << startstr << "<polylist count=\"" << countPoly;
+        if (materials.size() > 0)
+            mOutput << "\" material=\"defaultMaterial";
+        mOutput << "\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
         if( mesh->HasNormals() )
@@ -1333,32 +1339,35 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 
             mOutput << startstr << "<skeleton>#skeleton_root</skeleton>" << endstr;
         }
-        mOutput << startstr << "<bind_material>" << endstr;
-        PushTag();
-        mOutput << startstr << "<technique_common>" << endstr;
-        PushTag();
-        mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
-        PushTag();
-        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
-        {
-            if( mesh->HasTextureCoords( static_cast<unsigned int>(a) ) )
-                // semantic       as in <texture texcoord=...>
-                // input_semantic as in <input semantic=...>
-                // input_set      as in <input set=...>
-                mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+        if (materials.size() > 0) {
+            PushTag();
+            mOutput << startstr << "<bind_material>" << endstr;
+            PushTag();
+            mOutput << startstr << "<technique_common>" << endstr;
+            PushTag();
+            mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
+            PushTag();
+            for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+            {
+                if( mesh->HasTextureCoords( static_cast<unsigned int>(a) ) )
+                    // semantic       as in <texture texcoord=...>
+                    // input_semantic as in <input semantic=...>
+                    // input_set      as in <input set=...>
+                    mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+            }
+            PopTag();
+            mOutput << startstr << "</instance_material>" << endstr;
+            PopTag();
+            mOutput << startstr << "</technique_common>" << endstr;
+            PopTag();
+            mOutput << startstr << "</bind_material>" << endstr;
+            
+            PopTag();
+            if( mesh->mNumBones == 0)
+                mOutput << startstr << "</instance_geometry>" << endstr;
+            else
+                mOutput << startstr << "</instance_controller>" << endstr;
         }
-        PopTag();
-        mOutput << startstr << "</instance_material>" << endstr;
-        PopTag();
-        mOutput << startstr << "</technique_common>" << endstr;
-        PopTag();
-        mOutput << startstr << "</bind_material>" << endstr;
-        
-        PopTag();
-        if( mesh->mNumBones == 0)
-            mOutput << startstr << "</instance_geometry>" << endstr;
-        else
-            mOutput << startstr << "</instance_controller>" << endstr;
     }
 
     // recurse into subnodes

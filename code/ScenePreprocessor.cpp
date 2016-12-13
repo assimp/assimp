@@ -64,30 +64,6 @@ void ScenePreprocessor::ProcessScene ()
     // Process all animations
     for (unsigned int i = 0; i < scene->mNumAnimations;++i)
         ProcessAnimation(scene->mAnimations[i]);
-
-    // Generate a default material if none was specified
-    if (!scene->mNumMaterials && scene->mNumMeshes) {
-        scene->mMaterials      = new aiMaterial*[2];
-        aiMaterial* helper;
-
-        aiString name;
-
-        scene->mMaterials[scene->mNumMaterials] = helper = new aiMaterial();
-        aiColor3D clr(0.6f,0.6f,0.6f);
-        helper->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
-
-        // setup the default name to make this material identifiable
-        name.Set(AI_DEFAULT_MATERIAL_NAME);
-        helper->AddProperty(&name,AI_MATKEY_NAME);
-
-        DefaultLogger::get()->debug("ScenePreprocessor: Adding default material \'" AI_DEFAULT_MATERIAL_NAME  "\'");
-
-        for (unsigned int i = 0; i < scene->mNumMeshes;++i) {
-            scene->mMeshes[i]->mMaterialIndex = scene->mNumMaterials;
-        }
-
-        scene->mNumMaterials++;
-    }
 }
 
 // ---------------------------------------------------------------------------------------------

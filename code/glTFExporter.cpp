@@ -123,7 +123,9 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     //for (unsigned int i = 0; i < pScene->mNumLights; ++i) {}
 
-    ExportMaterials();
+    if (pScene->mNumMaterials > 0) {
+        ExportMaterials();
+    }
 
     if (mScene->mRootNode) {
         ExportNodeHierarchy(mScene->mRootNode);

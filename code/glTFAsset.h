@@ -354,7 +354,7 @@ namespace glTF
             { return index; }
 
         operator bool() const
-            { return vector != 0; }
+            { return vector != 0 && (*vector).size() > 0; }
 
         T* operator->()
             { return (*vector)[index]; }

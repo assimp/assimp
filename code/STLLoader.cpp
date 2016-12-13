@@ -195,8 +195,6 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     // allocate a single node
     pScene->mRootNode = new aiNode();
 
-    bool bMatClr = false;
-
     if (IsBinarySTL(mBuffer, fileSize)) {
         LoadBinaryFile();
     } else if (IsAsciiSTL(mBuffer, fileSize)) {

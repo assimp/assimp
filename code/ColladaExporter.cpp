@@ -1361,13 +1361,13 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
             mOutput << startstr << "</technique_common>" << endstr;
             PopTag();
             mOutput << startstr << "</bind_material>" << endstr;
+	}
             
-            PopTag();
-            if( mesh->mNumBones == 0)
-                mOutput << startstr << "</instance_geometry>" << endstr;
-            else
-                mOutput << startstr << "</instance_controller>" << endstr;
-        }
+        PopTag();
+        if( mesh->mNumBones == 0)
+            mOutput << startstr << "</instance_geometry>" << endstr;
+        else
+            mOutput << startstr << "</instance_controller>" << endstr;
     }
 
     // recurse into subnodes

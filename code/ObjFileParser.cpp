@@ -85,12 +85,6 @@ ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::str
     m_pModel = new ObjFile::Model();
     m_pModel->m_ModelName = modelName;
 
-    // create default material and store it
-    m_pModel->m_pDefaultMaterial = new ObjFile::Material;
-    m_pModel->m_pDefaultMaterial->MaterialName.Set( DEFAULT_MATERIAL );
-    m_pModel->m_MaterialLib.push_back( DEFAULT_MATERIAL );
-    m_pModel->m_MaterialMap[ DEFAULT_MATERIAL ] = m_pModel->m_pDefaultMaterial;
-
     // Start parsing the file
     parseFile( streamBuffer );
 }

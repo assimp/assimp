@@ -307,11 +307,47 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
   ai_uint aiNormal[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
   PLY::EDataType aiNormalTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
 
-  unsigned int aiColors[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-  PLY::EDataType aiColorsTypes[4] = { EDT_Char, EDT_Char, EDT_Char, EDT_Char };
+    // now convert this to a list of aiMesh instances
+    std::vector<aiMesh*> avMeshes;
+    avMeshes.reserve(avMaterials.size()+1);
 
-  unsigned int aiTexcoord[2] = { 0xFFFFFFFF, 0xFFFFFFFF };
-  PLY::EDataType aiTexcoordTypes[2] = { EDT_Char, EDT_Char };
+    if (avMaterials.size() > 0) {
+        ConvertMeshes(&avFaces,&avPositions,&avNormals,
+            &avColors,&avTexCoords,&avMaterials,&avMeshes);
+    } else {
+        // There's no material, so just copy the geometry over
+        aiMesh* pMesh = new aiMesh();
+        avMeshes.push_back(pMesh);
+
+        pMesh->mNumFaces = (unsigned int) avFaces.size();
+        pMesh->mFaces = new aiFace[avFaces.size()];
+
+        pMesh->mNumVertices = avPositions.size();
+
+        pMesh->mVertices = new aiVector3D[avPositions.size()];
+
+        if (!avNormals.empty())
+            pMesh->mNormals = new aiVector3D[avPositions.size()];
+
+        for (unsigned i = 0; i < avPositions.size(); ++i)
+        {
+            pMesh->mVertices[i] = avPositions[i];
+            if (!avNormals.empty())
+                pMesh->mNormals[i] = avNormals[i];
+        }
+
+        for (unsigned i = 0; i < avFaces.size(); ++i)
+        {
+            aiFace& face = pMesh->mFaces[i];
+            face.mNumIndices = (unsigned int)avFaces[i].mIndices.size();
+            face.mIndices = new unsigned int[face.mNumIndices];
+
+            for (unsigned int j = 0; j < face.mNumIndices; ++j)
+            {
+                face.mIndices[j] = avFaces[i].mIndices[j];
+            }
+        }
+    }
 
   unsigned int cnt = 0;
 

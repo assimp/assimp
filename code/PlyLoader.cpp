@@ -251,14 +251,47 @@ void PLYImporter::InternReadFile( const std::string& pFile,
     avTexCoords.reserve(avPositions.size());
     LoadTextureCoordinates(&avTexCoords);
 
-    // now replace the default material in all faces and validate all material indices
-    ReplaceDefaultMaterial(&avFaces,&avMaterials);
-
     // now convert this to a list of aiMesh instances
     std::vector<aiMesh*> avMeshes;
     avMeshes.reserve(avMaterials.size()+1);
-    ConvertMeshes(&avFaces,&avPositions,&avNormals,
-        &avColors,&avTexCoords,&avMaterials,&avMeshes);
+
+    if (avMaterials.size() > 0) {
+        ConvertMeshes(&avFaces,&avPositions,&avNormals,
+            &avColors,&avTexCoords,&avMaterials,&avMeshes);
+    } else {
+        // There's no material, so just copy the geometry over
+        aiMesh* pMesh = new aiMesh();
+        avMeshes.push_back(pMesh);
+
+        pMesh->mNumFaces = (unsigned int) avFaces.size();
+        pMesh->mFaces = new aiFace[avFaces.size()];
+
+        pMesh->mNumVertices = avPositions.size();
+
+        pMesh->mVertices = new aiVector3D[avPositions.size()];
+
+        if (!avNormals.empty())
+            pMesh->mNormals = new aiVector3D[avPositions.size()];
+
+        for (unsigned i = 0; i < avPositions.size(); ++i)
+        {
+            pMesh->mVertices[i] = avPositions[i];
+            if (!avNormals.empty())
+                pMesh->mNormals[i] = avNormals[i];
+        }
+
+        for (unsigned i = 0; i < avFaces.size(); ++i)
+        {
+            aiFace& face = pMesh->mFaces[i];
+            face.mNumIndices = (unsigned int)avFaces[i].mIndices.size();
+            face.mIndices = new unsigned int[face.mNumIndices];
+
+            for (unsigned int j = 0; j < face.mNumIndices; ++j)
+            {
+                face.mIndices[j] = avFaces[i].mIndices[j];
+            }
+        }
+    }
 
     if ( avMeshes.empty() ) {
         throw DeadlyImportError( "Invalid .ply file: Unable to extract mesh data " );

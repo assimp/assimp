@@ -101,6 +101,20 @@ static const std::string ObjModel =
     "\n"
     "# End of file\n";
 
+static const std::string ObjModel_Issue1111 =
+    "o 1\n"
+    "\n"
+    "# Vertex list\n"
+    "\n"
+    "v -0.5 -0.5  0.5\n"
+    "v -0.5 -0.5 -0.5\n"
+    "v -0.5  0.5 -0.5\n"
+    "\n"
+    "usemtl\n"
+    "f 1 2 3\n"
+    "\n"
+    "# End of file\n";
+
 class utObjImportExport : public AbstractImportExportBase {
 protected:
     virtual void SetUp() {
@@ -180,7 +194,6 @@ protected:
         return nullptr != scene;
     }
 
-
 protected:
     Assimp::Importer *m_im;
     aiScene *m_expectedScene;
@@ -200,4 +213,9 @@ TEST_F( utObjImportExport, obj_import_test ) {
     differ.showReport();
 
     m_im->FreeScene();
+}
+
+TEST_F( utObjImportExport, issue1111_no_mat_name_Test ) {
+    const aiScene *scene = m_im->ReadFileFromMemory( ( void* ) ObjModel_Issue1111.c_str(), ObjModel_Issue1111.size(), 0 );
+    EXPECT_NE( nullptr, scene );
 }

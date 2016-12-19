@@ -568,7 +568,10 @@ void ObjFileParser::getMaterialLib() {
     std::string absName;
 
 	// Check if directive is valid.
-	if(!strMatName.length()) throw DeadlyImportError("File name of the material is absent.");
+    if ( 0 == strMatName.length() ) {
+        DefaultLogger::get()->warn( "OBJ: no name for material library specified." );
+        return;
+    }
 
     if ( m_pIO->StackSize() > 0 ) {
         std::string path = m_pIO->CurrentDirectory();

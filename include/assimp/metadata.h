@@ -98,8 +98,8 @@ inline aiMetadataType GetAiType( int32_t )    { return AI_INT32; }
 inline aiMetadataType GetAiType( uint64_t )   { return AI_UINT64; }
 inline aiMetadataType GetAiType( float )      { return AI_FLOAT; }
 inline aiMetadataType GetAiType( double )     { return AI_DOUBLE; }
-inline aiMetadataType GetAiType( aiString )   { return AI_AISTRING; }
-inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
+inline aiMetadataType GetAiType( const aiString & )   { return AI_AISTRING; }
+inline aiMetadataType GetAiType( const aiVector3D & ) { return AI_AIVECTOR3D; }
 
 #endif // __cplusplus
 

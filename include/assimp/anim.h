@@ -377,9 +377,9 @@ struct aiAnimation {
     : mDuration(-1.)
     , mTicksPerSecond(0.)
     , mNumChannels(0)
-    , mChannels(nullptr)
+    , mChannels(NULL)
     , mNumMeshChannels(0)
-    , mMeshChannels(nullptr) {
+    , mMeshChannels(NULL) {
         // empty
     }
 

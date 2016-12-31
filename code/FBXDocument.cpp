@@ -79,12 +79,6 @@ LazyObject::~LazyObject()
 }
 
 // ------------------------------------------------------------------------------------------------
-static void dumpObjectClassInfo( const char* obtype, const std::string &classtag ) {
-    DefaultLogger::get()->debug( "obtype: " + std::string(obtype ));
-    DefaultLogger::get()->debug( "Classtag: " + classtag );
-}
-
-// ------------------------------------------------------------------------------------------------
 const Object* LazyObject::Get(bool dieOnError)
 {
     if(IsBeingConstructed() || FailedToConstruct()) {

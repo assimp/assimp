@@ -145,11 +145,11 @@ static std::string dumpVector3( const aiVector3D &toDump ) {
     return stream.str();
 }
 
-static std::string dumpColor4D( const aiColor4D &toDump ) {
+/*static std::string dumpColor4D( const aiColor4D &toDump ) {
     std::stringstream stream;
     stream << "( " << toDump.r << ", " << toDump.g << ", " << toDump.b << ", " << toDump.a << ")";
     return stream.str();
-}
+}*/
 
 static std::string dumpFace( const aiFace &face ) {
     std::stringstream stream;
@@ -218,8 +218,8 @@ bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
     //    return true;
 
         //ToDo!
-    bool normalEqual( true );
-    /*    for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
+    /*bool normalEqual( true );
+        for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
             aiVector3D &expNormal( expected->mNormals[ i ] );
             aiVector3D &toCompNormal( toCompare->mNormals[ i ] );
             if ( expNormal.Equal( toCompNormal ) ) {

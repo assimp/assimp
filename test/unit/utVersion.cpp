@@ -53,17 +53,18 @@ TEST_F( utVersion, aiGetLegalStringTest ) {
 }
 
 TEST_F( utVersion, aiGetVersionMinorTest ) {
-    EXPECT_EQ( aiGetVersionMinor(), 3 );
+    EXPECT_EQ( aiGetVersionMinor(), 3U );
 }
     
 TEST_F( utVersion, aiGetVersionMajorTest ) {
-    EXPECT_EQ( aiGetVersionMajor(), 3 );
+    EXPECT_EQ( aiGetVersionMajor(), 3U );
 }
 
 TEST_F( utVersion, aiGetCompileFlagsTest ) {
-    EXPECT_NE( aiGetCompileFlags(), 0 );
+    EXPECT_NE( aiGetCompileFlags(), 0U );
 }
 
 TEST_F( utVersion, aiGetVersionRevisionTest ) {
-    EXPECT_NE( aiGetVersionRevision(), 0 );
+    EXPECT_NE( aiGetVersionRevision(), 0U );
 }
+

@@ -75,7 +75,7 @@ TEST_F( utMetadata, allocTest ) {
 
     data = aiMetadata::Alloc( 1 );
     EXPECT_NE( nullptr, data );
-    EXPECT_EQ( 1, data->mNumProperties );
+    EXPECT_EQ( 1U, data->mNumProperties );
     EXPECT_NE( nullptr, data->mKeys );
     EXPECT_NE( nullptr, data->mValues );
 }
@@ -177,3 +177,4 @@ TEST_F( utMetadata, get_set_aiVector3D_Test ) {
     EXPECT_EQ( vec, result );
     EXPECT_TRUE( success );
 }
+

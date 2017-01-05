@@ -616,6 +616,17 @@ struct Object : ElemBase  {
     std::shared_ptr<ElemBase> data FAIL;
 
     ListBase modifiers;
+
+    Object()
+    : ElemBase()
+    , type( Type_EMPTY )
+    , parent( nullptr )
+    , track()
+    , proxy()
+    , proxy_from()
+    , data() {
+        // empty
+    }
 };
 
 
@@ -624,6 +635,14 @@ struct Base : ElemBase {
     Base* prev WARN;
     std::shared_ptr<Base> next WARN;
     std::shared_ptr<Object> object WARN;
+
+    Base() 
+    : ElemBase()
+    , next()
+    , object() {
+        // empty
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -635,8 +654,15 @@ struct Scene : ElemBase {
     std::shared_ptr<Base> basact WARN;
 
     ListBase base;
-};
 
+    Scene()
+    : ElemBase()
+    , camera()
+    , world()
+    , basact() {
+        // empty
+    }
+};
 
 // -------------------------------------------------------------------------------
 struct Image : ElemBase {
@@ -664,6 +690,11 @@ struct Image : ElemBase {
     short animspeed;
 
     short gen_x, gen_y, gen_type;
+    
+    Image()
+    : ElemBase() {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -751,6 +782,12 @@ struct Tex : ElemBase {
     //VoxelData *vd;
 
     //char use_nodes;
+
+    Tex()
+    : ElemBase() {
+        // empty
+    }
+
 };
 
 // -------------------------------------------------------------------------------
@@ -839,9 +876,13 @@ struct MTex : ElemBase {
     //float lifefac, sizefac, ivelfac, pvelfac;
     //float shadowfac;
     //float zenupfac, zendownfac, blendfac;
+
+    MTex()
+    : ElemBase() {
+        // empty
+    }
 };
 
-
-    }
+}
 }
 #endif

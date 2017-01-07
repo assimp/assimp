@@ -85,6 +85,7 @@ SET( TEST_SRCS
   unit/utFixInfacingNormals.cpp
   unit/utGenNormals.cpp
   unit/utglTFImportExport.cpp
+  unit/utHMPImportExport.cpp
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
   unit/utIOSystem.cpp

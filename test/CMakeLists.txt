@@ -71,6 +71,7 @@ SET( TEST_SRCS
   unit/utBlendImportAreaLight.cpp
   unit/utBlenderImportExport.cpp
   unit/utBlendImportMaterials.cpp
+  unit/utBVHImportExport.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
   unit/utDefaultIOStream.cpp

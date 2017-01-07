@@ -84,6 +84,7 @@ SET( TEST_SRCS
   unit/utFindInvalidData.cpp
   unit/utFixInfacingNormals.cpp
   unit/utGenNormals.cpp
+  unit/utglTFImportExport.cpp
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
   unit/utIOSystem.cpp

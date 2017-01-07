@@ -58,11 +58,13 @@ SET( TEST_SRCS
   unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
   unit/TestModelFactory.h
+  unit/utACImportExport.cpp
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp
   unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp
+  unit/utBlenderImportExport.cpp
   unit/utBlendImportMaterials.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp

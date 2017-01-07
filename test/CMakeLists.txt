@@ -58,6 +58,7 @@ SET( TEST_SRCS
   unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
   unit/TestModelFactory.h
+  unit/ut3DImportExport.cpp
   unit/utACImportExport.cpp
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp

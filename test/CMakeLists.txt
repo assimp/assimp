@@ -65,6 +65,7 @@ SET( TEST_SRCS
   unit/utASEImportExport.cpp  
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp
+  unit/utB3DImportExport.cpp
   unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp

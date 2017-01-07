@@ -62,6 +62,7 @@ SET( TEST_SRCS
   unit/ut3DSImportExport.cpp
   unit/utACImportExport.cpp
   unit/utAMFImportExport.cpp
+  unit/utASEImportExport.cpp  
   unit/utAnim.cpp
   unit/AssimpAPITest.cpp
   unit/utBatchLoader.cpp

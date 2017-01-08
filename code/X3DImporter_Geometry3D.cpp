@@ -467,7 +467,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx
 	if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last))// at first special cases
 	{
 		if(pSpine_Closed)
-		{// If the spine curve is closed: The SCP for the first and last points is the same and is found using (spine[1] − spine[n − 2]) to compute the Y-axis.
+		{// If the spine curve is closed: The SCP for the first and last points is the same and is found using (spine[1] - spine[n - 2]) to compute the Y-axis.
 			// As we even for closed spine curve last and first point in pSpine are not the same: duplicates(spine[n - 1] which are equivalent to spine[0])
 			// in tail are removed.
 			// So, last point in pSpine is a spine[n - 2]
@@ -478,13 +478,13 @@ static aiVector3D GeometryHelper_Extrusion_GetNextY(const size_t pSpine_PointIdx
 			tvec = pSpine[1] - pSpine[0];
 		}
 		else
-		{// The Y-axis used for the last point it is the vector from spine[n−2] to spine[n−1]. In our case(see above about droping tail) spine[n - 1] is
+		{// The Y-axis used for the last point it is the vector from spine[n-2] to spine[n-1]. In our case(see above about droping tail) spine[n - 1] is
 			// the spine[0].
 			tvec = pSpine[spine_idx_last] - pSpine[spine_idx_last - 1];
 		}
 	}// if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last))
 	else
-	{// For all points other than the first or last: The Y-axis for spine[i] is found by normalizing the vector defined by (spine[i+1] − spine[i−1]).
+	{// For all points other than the first or last: The Y-axis for spine[i] is found by normalizing the vector defined by (spine[i+1] - spine[i-1]).
 		tvec = pSpine[pSpine_PointIdx + 1] - pSpine[pSpine_PointIdx - 1];
 	}// if((pSpine_PointIdx == 0) || (pSpine_PointIdx == spine_idx_last)) else
 
@@ -549,7 +549,7 @@ static aiVector3D GeometryHelper_Extrusion_GetNextZ(const size_t pSpine_PointIdx
 	}
 
 	// After determining the Z-axis, its dot product with the Z-axis of the previous spine point is computed. If this value is negative, the Z-axis
-	// is flipped (multiplied by −1).
+	// is flipped (multiplied by -1).
 	if((tvec * pVecZ_Prev) < 0) tvec = -tvec;
 
 	return tvec.Normalize();

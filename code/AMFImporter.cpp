@@ -353,7 +353,7 @@ static bool ParseHelper_Decode_Base64_IsBase64(const char pChar)
 void AMFImporter::ParseHelper_Decode_Base64(const std::string& pInputBase64, std::vector<uint8_t>& pOutputData) const
 {
     // With help from
-    // RenИ Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
+    // René Nyffenegger http://www.adp-gmbh.ch/cpp/common/base64.html
     const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     uint8_t tidx = 0;

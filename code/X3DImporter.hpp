@@ -566,7 +566,7 @@ private:
 	///			There shall be at least as many colours in the X3DColorNode node as there are faces.
 	/// b. If colorPerVertex is TRUE, colours are applied to each vertex, as follows:
 	///		If the colorIndex field is not empty, colours are applied to each vertex of the mesh in exactly the same manner that the coordIndex
-	///			field is used to choose coordinates for each vertex from the <Coordinate> node. The colorIndex field shall contain end-of-face markers (−1)
+	///			field is used to choose coordinates for each vertex from the <Coordinate> node. The colorIndex field shall contain end-of-face markers (-1)
 	///			in exactly the same places as the coordIndex field.
 	///		If the colorIndex field is empty, the coordIndex field is used to choose colours from the X3DColorNode node.
 	/// \param [in] pMesh - mesh for adding data.

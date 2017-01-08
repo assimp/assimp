@@ -7,7 +7,7 @@ Open Asset Import Library (assimp)
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
 </a>
-[![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)]
+[![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
 <br>
 
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.

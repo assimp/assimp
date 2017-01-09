@@ -780,7 +780,7 @@ struct CX3DImporter_NodeElement_Light : public CX3DImporter_NodeElement
 	float Intensity;///< Specifies the brightness of the direct emission from the light.
 	/// \var Attenuation
 	/// PointLight node's illumination falls off with distance as specified by three attenuation coefficients. The attenuation factor
-	/// is: "1 / max(attenuation[0] + attenuation[1] × r + attenuation[2] × r2, 1)", where r is the distance from the light to the surface being illuminated.
+	/// is: "1 / max(attenuation[0] + attenuation[1] * r + attenuation[2] * r2, 1)", where r is the distance from the light to the surface being illuminated.
 	aiVector3D Attenuation;
 	aiVector3D Location;///< Specifies a translation offset of the centre point of the light source from the light's local coordinate system origin.
 	float Radius;///< Specifies the radial extent of the solid angle and the maximum distance from location that may be illuminated by the light source.

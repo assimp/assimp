@@ -454,7 +454,7 @@ void LWOImporter::FindUVChannels(LWO::Surface& surf,
                             ++extra;
                             out[next++] = i;
                         }
-                        // B�h ... seems not to be used at all. Push to end if enough space is available.
+                        // Bah ... seems not to be used at all. Push to end if enough space is available.
                         else {
                             out[extra++] = i;
                             ++num_extra;

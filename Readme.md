@@ -20,9 +20,11 @@ The current build status is:
 Gitter chat: [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
+Please check our Wiki as well: https://github.com/assimp/assimp/wiki
+
 #### Supported file formats ####
 
-A full list [is here](http://assimp.sourceforge.net/main_features_formats.html).
+A full list [is here](http://assimp.prg/main_features_formats.html).
 __Importers__:
 
 - 3DS

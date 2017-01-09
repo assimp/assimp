@@ -2134,6 +2134,16 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
     if ( ok ) {
         out_mat->AddProperty( &ShininessExponent, 1, AI_MATKEY_SHININESS );
     }
+
+    const float BumpFactor = PropertyGet<float>(props, "BumpFactor", ok);
+    if (ok) {
+        out_mat->AddProperty(&BumpFactor, 1, AI_MATKEY_BUMPSCALING);
+    }
+
+    const float DispFactor = PropertyGet<float>(props, "DisplacementFactor", ok);
+    if (ok) {
+        out_mat->AddProperty(&DispFactor, 1, "$mat.displacementscaling", 0, 0);
+    }
 }
 
 

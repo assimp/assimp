@@ -24,7 +24,7 @@ Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
 #### Supported file formats ####
 
-A full list [is here](http://assimp.prg/main_features_formats.html).
+A full list [is here](http://assimp.org/main_features_formats.html).
 __Importers__:
 
 - 3DS

@@ -240,6 +240,9 @@ public:
     fbx_simple_property(FilmWidth, float, 1.0f)
     fbx_simple_property(FilmHeight, float, 1.0f)
 
+    fbx_simple_property(NearPlane, float, 0.1f)
+    fbx_simple_property(FarPlane, float, 100.0f)
+
     fbx_simple_property(FilmAspectRatio, float, 1.0f)
     fbx_simple_property(ApertureMode, int, 0)
 

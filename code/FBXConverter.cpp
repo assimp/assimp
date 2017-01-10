@@ -640,7 +640,7 @@ void Converter::ConvertLight( const Model& model, const Light& light )
 
     out_light->mName.Set( FixNodeName( model.Name() ) );
 
-    const float intensity = light.Intensity();
+    const float intensity = light.Intensity() / 100.0f;
     const aiVector3D& col = light.Color();
 
     out_light->mColorDiffuse = aiColor3D( col.x, col.y, col.z );
@@ -649,6 +649,11 @@ void Converter::ConvertLight( const Model& model, const Light& light )
     out_light->mColorDiffuse.b *= intensity;
 
     out_light->mColorSpecular = out_light->mColorDiffuse;
+
+    //lights are defined along negative y direction
+    out_light->mPosition = aiVector3D(0.0f);
+    out_light->mDirection = aiVector3D(0.0f, -1.0f, 0.0f);
+    out_light->mUp = aiVector3D(0.0f, 0.0f, -1.0f);
 
     switch ( light.LightType() )
     {
@@ -679,17 +684,23 @@ void Converter::ConvertLight( const Model& model, const Light& light )
         ai_assert( false );
     }
 
-    // XXX: how to best convert the near and far decay ranges?
+    float decay = light.DecayStart();
     switch ( light.DecayType() )
     {
     case Light::Decay_None:
-        out_light->mAttenuationConstant = 1.0f;
+        out_light->mAttenuationConstant = decay;
+        out_light->mAttenuationLinear = 0.0f;
+        out_light->mAttenuationQuadratic = 0.0f;
         break;
     case Light::Decay_Linear:
-        out_light->mAttenuationLinear = 1.0f;
+        out_light->mAttenuationConstant = 0.0f;
+        out_light->mAttenuationLinear = 2.0f / decay;
+        out_light->mAttenuationQuadratic = 0.0f;
         break;
     case Light::Decay_Quadratic:
-        out_light->mAttenuationQuadratic = 1.0f;
+        out_light->mAttenuationConstant = 0.0f;
+        out_light->mAttenuationLinear = 0.0f;
+        out_light->mAttenuationQuadratic = 2.0f / (decay * decay);
         break;
     case Light::Decay_Cubic:
         FBXImporter::LogWarn( "cannot represent cubic attenuation, set to Quadratic" );
@@ -708,10 +719,13 @@ void Converter::ConvertCamera( const Model& model, const Camera& cam )
     out_camera->mName.Set( FixNodeName( model.Name() ) );
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
-    out_camera->mPosition = cam.Position();
-    out_camera->mUp = cam.UpVector();
-    out_camera->mLookAt = cam.InterestPosition() - out_camera->mPosition;
+    //cameras are defined along positive x direction
+    out_camera->mPosition = aiVector3D(0.0f);
+    out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
+    out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
     out_camera->mHorizontalFOV = AI_DEG_TO_RAD( cam.FieldOfView() );
+    out_camera->mClipPlaneNear = cam.NearPlane();
+    out_camera->mClipPlaneFar = cam.FarPlane();
 }
 
 
@@ -2119,6 +2133,16 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
     const float ShininessExponent = PropertyGet<float>( props, "ShininessExponent", ok );
     if ( ok ) {
         out_mat->AddProperty( &ShininessExponent, 1, AI_MATKEY_SHININESS );
+    }
+
+    const float BumpFactor = PropertyGet<float>(props, "BumpFactor", ok);
+    if (ok) {
+        out_mat->AddProperty(&BumpFactor, 1, AI_MATKEY_BUMPSCALING);
+    }
+
+    const float DispFactor = PropertyGet<float>(props, "DisplacementFactor", ok);
+    if (ok) {
+        out_mat->AddProperty(&DispFactor, 1, "$mat.displacementscaling", 0, 0);
     }
 }
 

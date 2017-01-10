@@ -38,6 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
+
 #include "D3MFImporter.h"
 
 #include <assimp/scene.h>
@@ -58,8 +60,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include <assimp/ai_assert.h>
-
-#ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 
 #include "D3MFOpcPackage.h"
 #include <contrib/unzip/unzip.h>

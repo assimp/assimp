@@ -131,7 +131,7 @@ static SIBEdge& GetEdge(SIBMesh* mesh, uint32_t posA, uint32_t posB)
     SIBEdge edge;
     edge.creased = false;
     edge.faceA = edge.faceB = 0xffffffff;
-    mesh->edgeMap[pair] = mesh->edges.size();
+    mesh->edgeMap[pair] = static_cast<uint32_t>(mesh->edges.size());
     mesh->edges.push_back(edge);
     return mesh->edges.back();
 }
@@ -197,13 +197,15 @@ static aiString ReadString(StreamReaderLE* stream, uint32_t numWChars)
 
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
-SIBImporter::SIBImporter()
-{}
+SIBImporter::SIBImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SIBImporter::~SIBImporter()
-{}
+SIBImporter::~SIBImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -244,7 +246,7 @@ static void ReadFaces(SIBMesh* mesh, StreamReaderLE* stream)
         mesh->idx[pos-1] = numPoints;
         uint32_t *idx = &mesh->idx[pos];
 
-        mesh->faceStart.push_back(pos-1);
+        mesh->faceStart.push_back(static_cast<uint32_t>(pos-1));
         mesh->mtls.push_back(0);
 
         // Read all the position data.
@@ -385,9 +387,9 @@ static void ConnectFaces(SIBMesh* mesh)
             // This gives potentially undesirable normals when used
             // with non-2-manifold surfaces, but then so does Silo to begin with.
             if (edge.faceA == 0xffffffff)
-                edge.faceA = faceIdx;
+                edge.faceA = static_cast<uint32_t>(faceIdx);
             else
-                edge.faceB = faceIdx;
+                edge.faceB = static_cast<uint32_t>(faceIdx);
 
             prev = next;
         }
@@ -496,7 +498,7 @@ static void CalculateNormals(SIBMesh* mesh)
         {
             uint32_t pos = idx[i*N+POS];
             uint32_t nrm = idx[i*N+NRM];
-            aiVector3D vtxNorm = CalculateVertexNormal(mesh, faceIdx, pos, faceNormals);
+            aiVector3D vtxNorm = CalculateVertexNormal(mesh, static_cast<uint32_t>(faceIdx), pos, faceNormals);
             mesh->nrm[nrm] = vtxNorm;
         }
     }
@@ -508,7 +510,7 @@ struct TempMesh
     std::vector<aiVector3D> vtx;
     std::vector<aiVector3D> nrm;
     std::vector<aiVector3D> uv;
-    std::vector<aiFace> faces;
+    std::vector<aiFace>     faces;
 };
 
 static void ReadShape(SIB* sib, StreamReaderLE* stream)
@@ -546,7 +548,7 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
         stream->SetReadLimit(oldLimit);
     }
 
-    assert(smesh.faceStart.size() == smesh.mtls.size()); // sanity check
+    ai_assert(smesh.faceStart.size() == smesh.mtls.size()); // sanity check
 
     // Silo doesn't store any normals in the file - we need to compute
     // them ourselves. We can't let AssImp handle it as AssImp doesn't
@@ -586,7 +588,7 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
         for (unsigned pt=0;pt<face.mNumIndices;pt++,idx+=N)
         {
             size_t vtxIdx = dest.vtx.size();
-            face.mIndices[pt] = vtxIdx;
+            face.mIndices[pt] = static_cast<unsigned int>(vtxIdx);
 
             // De-index it. We don't need to validate here as
             // we did it when creating the data.
@@ -621,14 +623,14 @@ static void ReadShape(SIB* sib, StreamReaderLE* stream)
 
         aiMesh* mesh = new aiMesh;
         mesh->mName = name;
-        mesh->mNumFaces = src.faces.size();
+        mesh->mNumFaces = static_cast<unsigned int>(src.faces.size());
         mesh->mFaces = new aiFace[mesh->mNumFaces];
-        mesh->mNumVertices = src.vtx.size();
+        mesh->mNumVertices = static_cast<unsigned int>(src.vtx.size());
         mesh->mVertices = new aiVector3D[mesh->mNumVertices];
         mesh->mNormals = new aiVector3D[mesh->mNumVertices];
         mesh->mTextureCoords[0] = new aiVector3D[mesh->mNumVertices];
         mesh->mNumUVComponents[0] = 2;
-        mesh->mMaterialIndex = n;
+        mesh->mMaterialIndex = static_cast<unsigned int>(n);
 
         for (unsigned i=0;i<mesh->mNumVertices;i++)
         {
@@ -709,9 +711,9 @@ static void ReadLightInfo(aiLight* light, StreamReaderLE* stream)
     // 99% and 1% percentiles.
     //    OpenGL: I = cos(angle)^E
     //   Solving: angle = acos(I^(1/E))
-    ai_real E = 1.0 / std::max(spotExponent, (ai_real)0.00001);
-    ai_real inner = acos(pow((ai_real)0.99, E));
-    ai_real outer = acos(pow((ai_real)0.01, E));
+    ai_real E = ai_real( 1.0 ) / std::max(spotExponent, (ai_real)0.00001);
+    ai_real inner = std::acos(std::pow((ai_real)0.99, E));
+    ai_real outer = std::acos(std::pow((ai_real)0.01, E));
 
     // Apply the cutoff.
     outer = std::min(outer, AI_DEG_TO_RAD(spotCutoff));
@@ -792,8 +794,9 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
         stream->SetReadLimit(oldLimit);
     }
 
-    if (shapeIndex >= sib->objs.size())
-        throw DeadlyImportError("SIB: Invalid shape index.");
+    if ( shapeIndex >= sib->objs.size() ) {
+        throw DeadlyImportError( "SIB: Invalid shape index." );
+    }
 
     const SIBObject& src = sib->objs[shapeIndex];
     inst.meshIdx = src.meshIdx;
@@ -805,8 +808,9 @@ static void ReadInstance(SIB* sib, StreamReaderLE* stream)
 static void CheckVersion(StreamReaderLE* stream)
 {
     uint32_t version = stream->GetU4();
-    if (version != 1)
-        throw DeadlyImportError("SIB: Unsupported file version.");
+    if ( version != 1 ) {
+        throw DeadlyImportError( "SIB: Unsupported file version." );
+    }
 }
 
 static void ReadScene(SIB* sib, StreamReaderLE* stream)
@@ -862,9 +866,9 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     sib.insts.clear();
 
     // Transfer to the aiScene.
-    pScene->mNumMaterials = sib.mtls.size();
-    pScene->mNumMeshes = sib.meshes.size();
-    pScene->mNumLights = sib.lights.size();
+    pScene->mNumMaterials = static_cast<unsigned int>(sib.mtls.size());
+    pScene->mNumMeshes = static_cast<unsigned int>(sib.meshes.size());
+    pScene->mNumLights = static_cast<unsigned int>(sib.lights.size());
     pScene->mMaterials = pScene->mNumMaterials ? new aiMaterial*[pScene->mNumMaterials] : NULL;
     pScene->mMeshes = pScene->mNumMeshes ? new aiMesh*[pScene->mNumMeshes] : NULL;
     pScene->mLights = pScene->mNumLights ? new aiLight*[pScene->mNumLights] : NULL;
@@ -879,7 +883,7 @@ void SIBImporter::InternReadFile(const std::string& pFile,
     size_t childIdx = 0;
     aiNode *root = new aiNode();
     root->mName.Set("<SIBRoot>");
-    root->mNumChildren = sib.objs.size() + sib.lights.size();
+    root->mNumChildren = static_cast<unsigned int>(sib.objs.size() + sib.lights.size());
     root->mChildren = root->mNumChildren ? new aiNode*[root->mNumChildren] : NULL;
     pScene->mRootNode = root;
 
@@ -893,19 +897,16 @@ void SIBImporter::InternReadFile(const std::string& pFile,
         node->mParent = root;
         node->mTransformation = obj.axis;
 
-        node->mNumMeshes = obj.meshCount;
+        node->mNumMeshes = static_cast<unsigned int>(obj.meshCount);
         node->mMeshes = node->mNumMeshes ? new unsigned[node->mNumMeshes] : NULL;
         for (unsigned i=0;i<node->mNumMeshes;i++)
-            node->mMeshes[i] = obj.meshIdx + i;
+            node->mMeshes[i] = static_cast<unsigned int>(obj.meshIdx + i);
 
         // Mark instanced objects as being so.
         if (n >= firstInst)
         {
-            node->mMetaData = new aiMetadata;
-            node->mMetaData->mNumProperties = 1;
-            node->mMetaData->mKeys = new aiString[1];
-            node->mMetaData->mValues = new aiMetadataEntry[1];
-            node->mMetaData->Set(0, "IsInstance", true);
+            node->mMetaData = aiMetadata::Alloc( 1 );
+            node->mMetaData->Set( 0, "IsInstance", true );
         }
     }
 

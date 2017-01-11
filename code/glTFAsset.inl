@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -40,12 +40,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StringUtils.h"
 
+// Header files, Assimp
+#include <assimp/DefaultLogger.hpp>
+
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+	// Header files, Open3DGC.
+#	include <Open3DGC/o3dgcSC3DMCDecoder.h>
+#endif
+
 using namespace Assimp;
 
 namespace glTF {
 
 namespace {
-    
+
     //
     // JSON Value reading helpers
     //
@@ -54,7 +62,7 @@ namespace {
     struct ReadHelper { static bool Read(Value& val, T& out) {
         return val.IsInt() ? out = static_cast<T>(val.GetInt()), true : false;
     }};
-    
+
     template<> struct ReadHelper<bool> { static bool Read(Value& val, bool& out) {
         return val.IsBool() ? out = val.GetBool(), true : false;
     }};
@@ -62,7 +70,7 @@ namespace {
     template<> struct ReadHelper<float> { static bool Read(Value& val, float& out) {
         return val.IsNumber() ? out = static_cast<float>(val.GetDouble()), true : false;
     }};
-    
+
     template<unsigned int N> struct ReadHelper<float[N]> { static bool Read(Value& val, float (&out)[N]) {
         if (!val.IsArray() || val.Size() != N) return false;
         for (unsigned int i = 0; i < N; ++i) {
@@ -243,8 +251,13 @@ Ref<T> LazyDict<T>::Create(const char* id)
 
 
 inline Buffer::Buffer()
-: byteLength(0), type(Type_arraybuffer), mIsSpecial(false)
+	: byteLength(0), type(Type_arraybuffer), EncodedRegion_Current(nullptr), mIsSpecial(false)
 { }
+
+inline Buffer::~Buffer()
+{
+	for(SEncodedRegion* reg : EncodedRegion_List) delete reg;
+}
 
 inline const char* Buffer::TranslateId(Asset& r, const char* id)
 {
@@ -279,14 +292,14 @@ inline void Buffer::Read(Value& obj, Asset& r)
             this->mData.reset(data);
 
             if (statedLength > 0 && this->byteLength != statedLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + std::to_string(statedLength) +
-                    " bytes, but found " + std::to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
+                    " bytes, but found " + to_string(dataURI.dataLength));
             }
         }
         else { // assume raw data
             if (statedLength != dataURI.dataLength) {
-                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + std::to_string(statedLength) +
-                                        " bytes, but found " + std::to_string(dataURI.dataLength));
+                throw DeadlyImportError("GLTF: buffer \"" + id + "\", expected " + to_string(statedLength) +
+                                        " bytes, but found " + to_string(dataURI.dataLength));
             }
 
             this->mData.reset(new uint8_t[dataURI.dataLength]);
@@ -299,7 +312,7 @@ inline void Buffer::Read(Value& obj, Asset& r)
             if (file) {
                 bool ok = LoadFromStream(*file, byteLength);
                 delete file;
-                
+
                 if (!ok)
                     throw DeadlyImportError("GLTF: error while reading referenced file \"" + std::string(uri) + "\"" );
             }
@@ -326,6 +339,79 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
     return true;
 }
 
+inline void Buffer::EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID)
+{
+	// Check pointer to data
+	if(pDecodedData == nullptr) throw DeadlyImportError("GLTF: for marking encoded region pointer to decoded data must be provided.");
+
+	// Check offset
+	if(pOffset > byteLength)
+	{
+		const uint8_t val_size = 32;
+
+		char val[val_size];
+
+		ai_snprintf(val, val_size, "%llu", (long long)pOffset);
+		throw DeadlyImportError(std::string("GLTF: incorrect offset value (") + val + ") for marking encoded region.");
+	}
+
+	// Check length
+	if((pOffset + pEncodedData_Length) > byteLength)
+	{
+		const uint8_t val_size = 64;
+
+		char val[val_size];
+
+		ai_snprintf(val, val_size, "%llu, %llu", (long long)pOffset, (long long)pEncodedData_Length);
+		throw DeadlyImportError(std::string("GLTF: encoded region with offset/length (") + val + ") is out of range.");
+	}
+
+	// Add new region
+	EncodedRegion_List.push_back(new SEncodedRegion(pOffset, pEncodedData_Length, pDecodedData, pDecodedData_Length, pID));
+	// And set new value for "byteLength"
+	byteLength += (pDecodedData_Length - pEncodedData_Length);
+}
+
+inline void Buffer::EncodedRegion_SetCurrent(const std::string& pID)
+{
+	if((EncodedRegion_Current != nullptr) && (EncodedRegion_Current->ID == pID)) return;
+
+	for(SEncodedRegion* reg : EncodedRegion_List)
+	{
+		if(reg->ID == pID)
+		{
+			EncodedRegion_Current = reg;
+
+			return;
+		}
+
+	}
+
+	throw DeadlyImportError("GLTF: EncodedRegion with ID: \"" + pID + "\" not found.");
+}
+
+inline bool Buffer::ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+{
+const size_t new_data_size = byteLength + pReplace_Count - pBufferData_Count;
+
+uint8_t* new_data;
+
+	if((pBufferData_Count == 0) || (pReplace_Count == 0) || (pReplace_Data == nullptr)) return false;
+
+	new_data = new uint8_t[new_data_size];
+	// Copy data which place before replacing part.
+	memcpy(new_data, mData.get(), pBufferData_Offset);
+	// Copy new data.
+	memcpy(&new_data[pBufferData_Offset], pReplace_Data, pReplace_Count);
+	// Copy data which place after replacing part.
+	memcpy(&new_data[pBufferData_Offset + pReplace_Count], &mData.get()[pBufferData_Offset + pBufferData_Count], pBufferData_Offset);
+	// Apply new data
+	mData.reset(new_data);
+	byteLength = new_data_size;
+
+	return true;
+}
+
 inline size_t Buffer::AppendData(uint8_t* data, size_t length)
 {
     size_t offset = this->byteLength;
@@ -343,6 +429,9 @@ inline void Buffer::Grow(size_t amount)
     byteLength += amount;
 }
 
+//
+// struct BufferView
+//
 
 inline void BufferView::Read(Value& obj, Asset& r)
 {
@@ -350,12 +439,14 @@ inline void BufferView::Read(Value& obj, Asset& r)
     if (bufferId) {
         buffer = r.buffers.Get(bufferId);
     }
-        
+
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
     byteLength = MemberOrDefault(obj, "byteLength", 0u);
 }
 
-
+//
+// struct Accessor
+//
 
 inline void Accessor::Read(Value& obj, Asset& r)
 {
@@ -395,7 +486,18 @@ inline uint8_t* Accessor::GetPointer()
     if (!basePtr) return 0;
 
     size_t offset = byteOffset + bufferView->byteOffset;
-    return basePtr + offset;
+
+	// Check if region is encoded.
+	if(bufferView->buffer->EncodedRegion_Current != nullptr)
+	{
+		const size_t begin = bufferView->buffer->EncodedRegion_Current->Offset;
+		const size_t end = begin + bufferView->buffer->EncodedRegion_Current->DecodedData_Length;
+
+		if((offset >= begin) && (offset < end))
+			return &bufferView->buffer->EncodedRegion_Current->DecodedData[offset - begin];
+	}
+
+	return basePtr + offset;
 }
 
 namespace {
@@ -497,7 +599,7 @@ inline Image::Image()
 
 inline void Image::Read(Value& obj, Asset& r)
 {
-    // Check for extensions first (to detect binary embedded data) 
+    // Check for extensions first (to detect binary embedded data)
     if (Value* extensions = FindObject(obj, "extensions")) {
         if (r.extensionsUsed.KHR_binary_glTF) {
             if (Value* ext = FindObject(*extensions, "KHR_binary_glTF")) {
@@ -563,11 +665,34 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
     }
 }
 
+inline void Sampler::Read(Value& obj, Asset& r)
+{
+    SetDefaults();
+
+    ReadMember(obj, "magFilter", magFilter);
+    ReadMember(obj, "minFilter", minFilter);
+    ReadMember(obj, "wrapS", wrapS);
+    ReadMember(obj, "wrapT", wrapT);
+}
+
+inline void Sampler::SetDefaults()
+{
+    magFilter = SamplerMagFilter_Linear;
+    minFilter = SamplerMinFilter_Linear;
+    wrapS = SamplerWrap_Repeat;
+    wrapT = SamplerWrap_Repeat;
+}
+
 inline void Texture::Read(Value& obj, Asset& r)
 {
     const char* sourcestr;
     if (ReadMember(obj, "source", sourcestr)) {
         source = r.images.Get(sourcestr);
+    }
+
+    const char* samplerstr;
+    if (ReadMember(obj, "sampler", samplerstr)) {
+        sampler = r.samplers.Get(samplerstr);
     }
 }
 
@@ -594,6 +719,7 @@ inline void Material::Read(Value& material, Asset& r)
         ReadMaterialProperty(r, *values, "diffuse", this->diffuse);
         ReadMaterialProperty(r, *values, "specular", this->specular);
 
+        ReadMember(*values, "transparency", transparency);
         ReadMember(*values, "shininess", shininess);
     }
 
@@ -678,9 +804,10 @@ namespace {
     }
 }
 
-inline void Mesh::Read(Value& obj, Asset& r)
-{  
-    if (Value* primitives = FindArray(obj, "primitives")) {
+inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
+{
+	/****************** Mesh primitives ******************/
+	if (Value* primitives = FindArray(pJSON_Object, "primitives")) {
         this->primitives.resize(primitives->Size());
         for (unsigned int i = 0; i < primitives->Size(); ++i) {
             Value& primitive = (*primitives)[i];
@@ -700,22 +827,261 @@ inline void Mesh::Read(Value& obj, Asset& r)
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() <= idx) (*vec).resize(idx + 1);
-                        (*vec)[idx] = r.accessors.Get(it->value.GetString());
+						(*vec)[idx] = pAsset_Root.accessors.Get(it->value.GetString());
                     }
                 }
             }
 
             if (Value* indices = FindString(primitive, "indices")) {
-                prim.indices = r.accessors.Get(indices->GetString());
+				prim.indices = pAsset_Root.accessors.Get(indices->GetString());
             }
 
             if (Value* material = FindString(primitive, "material")) {
-                prim.material = r.materials.Get(material->GetString());
+				prim.material = pAsset_Root.materials.Get(material->GetString());
             }
         }
     }
+
+	/****************** Mesh extensions ******************/
+	Value* json_extensions = FindObject(pJSON_Object, "extensions");
+
+	if(json_extensions == nullptr) goto mr_skip_extensions;
+
+	for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++)
+	{
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+        if(it_memb->name.GetString() == std::string("Open3DGC-compression"))
+		{
+			// Search for compressed data.
+			// Compressed data contain description of part of "buffer" which is encoded. This part must be decoded and
+			// new data will replace old encoded part by request. In fact \"compressedData\" is kind of "accessor" structure.
+			Value* comp_data = FindObject(it_memb->value, "compressedData");
+
+			if(comp_data == nullptr) throw DeadlyImportError("GLTF: \"Open3DGC-compression\" must has \"compressedData\".");
+
+			DefaultLogger::get()->info("GLTF: Decompressing Open3DGC data.");
+
+			/************** Read data from JSON-document **************/
+			#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut) \
+				if(!ReadMember(*comp_data, pFieldName, pOut)) \
+				{ \
+					throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pFieldName + "\"."); \
+				}
+
+			const char* mode_str;
+			const char* type_str;
+			ComponentType component_type;
+			SCompression_Open3DGC* ext_o3dgc = new SCompression_Open3DGC;
+
+			MESH_READ_COMPRESSEDDATA_MEMBER("buffer", ext_o3dgc->Buffer);
+			MESH_READ_COMPRESSEDDATA_MEMBER("byteOffset", ext_o3dgc->Offset);
+			MESH_READ_COMPRESSEDDATA_MEMBER("componentType", component_type);
+			MESH_READ_COMPRESSEDDATA_MEMBER("type", type_str);
+			MESH_READ_COMPRESSEDDATA_MEMBER("count", ext_o3dgc->Count);
+			MESH_READ_COMPRESSEDDATA_MEMBER("mode", mode_str);
+			MESH_READ_COMPRESSEDDATA_MEMBER("indicesCount", ext_o3dgc->IndicesCount);
+			MESH_READ_COMPRESSEDDATA_MEMBER("verticesCount", ext_o3dgc->VerticesCount);
+
+			#undef MESH_READ_COMPRESSEDDATA_MEMBER
+
+			// Check some values
+			if(strcmp(type_str, "SCALAR")) throw DeadlyImportError("GLTF: only \"SCALAR\" type is supported for compressed data.");
+			if(component_type != ComponentType_UNSIGNED_BYTE) throw DeadlyImportError("GLTF: only \"UNSIGNED_BYTE\" component type is supported for compressed data.");
+
+			// Set read/write data mode.
+			if(strcmp(mode_str, "binary") == 0)
+				ext_o3dgc->Binary = true;
+			else if(strcmp(mode_str, "ascii") == 0)
+				ext_o3dgc->Binary = false;
+			else
+				throw DeadlyImportError(std::string("GLTF: for compressed data supported modes is: \"ascii\", \"binary\". Not the: \"") + mode_str + "\".");
+
+			/************************ Decoding ************************/
+			Decode_O3DGC(*ext_o3dgc, pAsset_Root);
+			Extension.push_back(ext_o3dgc);// store info in mesh extensions list.
+		}// if(it_memb->name.GetString() == "Open3DGC-compression")
+		else
+#endif
+		{
+			throw DeadlyImportError(std::string("GLTF: Unknown mesh extension: \"") + it_memb->name.GetString() + "\".");
+		}
+	}// for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); json_extensions++)
+
+mr_skip_extensions:
+
+	return;// After label some operators must be present.
 }
 
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
+{
+typedef unsigned short IndicesType;///< \sa glTFExporter::ExportMeshes.
+
+o3dgc::SC3DMCDecoder<IndicesType> decoder;
+o3dgc::IndexedFaceSet<IndicesType> ifs;
+o3dgc::BinaryStream bstream;
+uint8_t* decoded_data;
+size_t decoded_data_size = 0;
+Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
+
+	// Read data from buffer and place it in BinaryStream for decoder.
+	// Just "Count" because always is used type equivalent to uint8_t.
+	bstream.LoadFromBuffer(&buf->GetPointer()[pCompression_Open3DGC.Offset], static_cast<unsigned long>(pCompression_Open3DGC.Count));
+
+	// After decoding header we can get size of primitives.
+	if(decoder.DecodeHeader(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC header.");
+
+	/****************** Get sizes of arrays and check sizes ******************/
+	// Note. See "Limitations for meshes when using Open3DGC-compression".
+
+	// Indices
+	size_t size_coordindex = ifs.GetNCoordIndex() * 3;// See float attributes note.
+
+	if(primitives[0].indices->count != size_coordindex)
+		throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (" + std::to_string(size_coordindex) +
+								") not equal to uncompressed (" + std::to_string(primitives[0].indices->count) + ").");
+
+	size_coordindex *= sizeof(IndicesType);
+	// Coordinates
+	size_t size_coord = ifs.GetNCoord();// See float attributes note.
+
+	if(primitives[0].attributes.position[0]->count != size_coord)
+		throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (" + std::to_string(size_coord) +
+								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.position[0]->count) + ").");
+
+	size_coord *= 3 * sizeof(float);
+	// Normals
+	size_t size_normal = ifs.GetNNormal();// See float attributes note.
+
+	if(primitives[0].attributes.normal[0]->count != size_normal)
+		throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (" + std::to_string(size_normal) +
+								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.normal[0]->count) + ").");
+
+	size_normal *= 3 * sizeof(float);
+	// Additional attributes.
+	std::vector<size_t> size_floatattr;
+	std::vector<size_t> size_intattr;
+
+	size_floatattr.resize(ifs.GetNumFloatAttributes());
+	size_intattr.resize(ifs.GetNumIntAttributes());
+
+	decoded_data_size = size_coordindex + size_coord + size_normal;
+	for(size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++)
+	{
+		// size = number_of_elements * components_per_element * size_of_component.
+		// Note. But as you can see above, at first we are use this variable in meaning "count". After checking count of objects...
+		size_t tval = ifs.GetNFloatAttribute(static_cast<unsigned long>(idx));
+
+		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
+		{
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
+				// Check situation when encoded data contain texture coordinates but primitive not.
+				if(idx_texcoord < primitives[0].attributes.texcoord.size())
+				{
+					if(primitives[0].attributes.texcoord[idx]->count != tval)
+						throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (" + std::to_string(tval) +
+												") not equal to uncompressed (" + std::to_string(primitives[0].attributes.texcoord[idx]->count) + ").");
+
+					idx_texcoord++;
+				}
+				else
+				{
+					ifs.SetNFloatAttribute(static_cast<unsigned long>(idx), 0ul);// Disable decoding this attribute.
+				}
+
+				break;
+			default:
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+		}
+
+		tval *=  ifs.GetFloatAttributeDim(static_cast<unsigned long>(idx)) * sizeof(o3dgc::Real);// After checking count of objects we can get size of array.
+		size_floatattr[idx] = tval;
+		decoded_data_size += tval;
+	}
+
+	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++)
+	{
+		// size = number_of_elements * components_per_element * size_of_component. See float attributes note.
+		size_t tval = ifs.GetNIntAttribute(static_cast<unsigned long>(idx));
+		switch( ifs.GetIntAttributeType(static_cast<unsigned long>(idx) ) )
+		{
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
+                break;
+
+			default:
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+		}
+
+		tval *= ifs.GetIntAttributeDim(static_cast<unsigned long>(idx)) * sizeof(long);// See float attributes note.
+		size_intattr[idx] = tval;
+		decoded_data_size += tval;
+	}
+
+	// Create array for decoded data.
+	decoded_data = new uint8_t[decoded_data_size];
+
+	/****************** Set right array regions for decoder ******************/
+
+	auto get_buf_offset = [](Ref<Accessor>& pAccessor) -> size_t { return pAccessor->byteOffset + pAccessor->bufferView->byteOffset; };
+
+	// Indices
+	ifs.SetCoordIndex((IndicesType* const)(decoded_data + get_buf_offset(primitives[0].indices)));
+	// Coordinates
+	ifs.SetCoord((o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.position[0])));
+	// Normals
+	if(size_normal)
+	{
+		ifs.SetNormal((o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.normal[0])));
+	}
+
+	for(size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++)
+	{
+		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
+		{
+			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
+				if(idx_texcoord < primitives[0].attributes.texcoord.size())
+				{
+					// See above about absent attributes.
+					ifs.SetFloatAttribute(static_cast<unsigned long>(idx), (o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.texcoord[idx])));
+					idx_texcoord++;
+				}
+
+				break;
+			default:
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
+		}
+	}
+
+	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++) {
+		switch(ifs.GetIntAttributeType(static_cast<unsigned int>(idx))) {
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
+            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
+                break;
+
+			// ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
+			default:
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
+		}
+	}
+
+	//
+	// Decode data
+	//
+    if ( decoder.DecodePayload( ifs, bstream ) != o3dgc::O3DGC_OK ) {
+        throw DeadlyImportError( "GLTF: can not decode Open3DGC data." );
+    }
+
+	// Set encoded region for "buffer".
+	buf->EncodedRegion_Mark(pCompression_Open3DGC.Offset, pCompression_Open3DGC.Count, decoded_data, decoded_data_size, id);
+	// No. Do not delete "output_data". After calling "EncodedRegion_Mark" bufferView is owner of "output_data".
+	// "delete [] output_data;"
+}
+#endif
 
 inline void Camera::Read(Value& obj, Asset& r)
 {
@@ -800,7 +1166,7 @@ inline void Node::Read(Value& obj, Asset& r)
         }
     }
 
-    
+
     if (Value* matrix = FindArray(obj, "matrix")) {
         ReadValue(*matrix, this->matrix);
     }
@@ -1076,13 +1442,13 @@ inline std::string Asset::FindUniqueID(const std::string& str, const char* suffi
         id = buffer;
         it = mUsedIds.find(id);
     }
-    
+
     return id;
 }
 
 namespace Util {
 
-    inline 
+    inline
     bool ParseDataURI(const char* const_uri, size_t uriLen, DataURI& out) {
         if ( NULL == const_uri ) {
             return false;
@@ -1266,6 +1632,4 @@ namespace Util {
 
 }
 
-}
-
-
+} // ns glTF

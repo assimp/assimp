@@ -230,7 +230,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
         else nd->mChildren = NULL;
     }
 
-    nd->mNumChildren = child_nodes.size();
+    nd->mNumChildren = static_cast<unsigned int>(child_nodes.size());
 
     aiNode** tmp = nd->mChildren;
     for (std::list<aiNode*>::iterator it = child_nodes.begin(); it != child_nodes.end(); ++it) {
@@ -238,7 +238,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
         node->mParent = nd;
     }
 
-    nodes_out += child_nodes.size();
+    nodes_out += static_cast<unsigned int>(child_nodes.size());
 }
 
 // ------------------------------------------------------------------------------------------------

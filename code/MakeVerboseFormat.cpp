@@ -168,20 +168,22 @@ bool MakeVerboseFormatProcess::MakeVerboseFormat(aiMesh* pcMesh)
         }
     }
 
+
+
     // build output vertex weights
     for (unsigned int i = 0;i < pcMesh->mNumBones;++i)
     {
-        delete pcMesh->mBones[i]->mWeights;
+        delete [] pcMesh->mBones[i]->mWeights;
         if (!newWeights[i].empty()) {
             pcMesh->mBones[i]->mWeights = new aiVertexWeight[newWeights[i].size()];
             aiVertexWeight *weightToCopy = &( newWeights[i][0] );
             memcpy(pcMesh->mBones[i]->mWeights, weightToCopy,
                 sizeof(aiVertexWeight) * newWeights[i].size());
-            delete[] newWeights;
         } else {
             pcMesh->mBones[i]->mWeights = NULL;
         }
     }
+    delete[] newWeights;
 
     // delete the old members
     delete[] pcMesh->mVertices;

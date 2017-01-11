@@ -215,7 +215,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
         SkyboxVertex( l,-l,-l,  0, 0, 1,   0.0,1.0),
         SkyboxVertex( l, l,-l,  0, 0, 1,   0.0,0.0),
         SkyboxVertex(-l, l,-l,  0, 0, 1,   1.0,0.0)) );
-    meshes.back()->mMaterialIndex = materials.size()-6u;
+    meshes.back()->mMaterialIndex = static_cast<unsigned int>(materials.size()-6u);
 
     // LEFT SIDE
     meshes.push_back( BuildSingleQuadMesh(
@@ -223,7 +223,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
         SkyboxVertex( l,-l, l,  -1, 0, 0,   0.0,1.0),
         SkyboxVertex( l, l, l,  -1, 0, 0,   0.0,0.0),
         SkyboxVertex( l, l,-l,  -1, 0, 0,   1.0,0.0)) );
-    meshes.back()->mMaterialIndex = materials.size()-5u;
+    meshes.back()->mMaterialIndex = static_cast<unsigned int>(materials.size()-5u);
 
     // BACK SIDE
     meshes.push_back( BuildSingleQuadMesh(
@@ -231,7 +231,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
         SkyboxVertex(-l,-l, l,  0, 0, -1,   0.0,1.0),
         SkyboxVertex(-l, l, l,  0, 0, -1,   0.0,0.0),
         SkyboxVertex( l, l, l,  0, 0, -1,   1.0,0.0)) );
-    meshes.back()->mMaterialIndex = materials.size()-4u;
+    meshes.back()->mMaterialIndex = static_cast<unsigned int>(materials.size()-4u);
 
     // RIGHT SIDE
     meshes.push_back( BuildSingleQuadMesh(
@@ -239,7 +239,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
         SkyboxVertex(-l,-l,-l,  1, 0, 0,   0.0,1.0),
         SkyboxVertex(-l, l,-l,  1, 0, 0,   0.0,0.0),
         SkyboxVertex(-l, l, l,  1, 0, 0,   1.0,0.0)) );
-    meshes.back()->mMaterialIndex = materials.size()-3u;
+    meshes.back()->mMaterialIndex = static_cast<unsigned int>(materials.size()-3u);
 
     // TOP SIDE
     meshes.push_back( BuildSingleQuadMesh(
@@ -247,7 +247,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
         SkyboxVertex( l, l, l,  0, -1, 0,   0.0,1.0),
         SkyboxVertex(-l, l, l,  0, -1, 0,   0.0,0.0),
         SkyboxVertex(-l, l,-l,  0, -1, 0,   1.0,0.0)) );
-    meshes.back()->mMaterialIndex = materials.size()-2u;
+    meshes.back()->mMaterialIndex = static_cast<unsigned int>(materials.size()-2u);
 
     // BOTTOM SIDE
     meshes.push_back( BuildSingleQuadMesh(
@@ -255,7 +255,7 @@ void IRRImporter::BuildSkybox(std::vector<aiMesh*>& meshes, std::vector<aiMateri
         SkyboxVertex( l,-l,-l,  0,  1, 0,   1.0,0.0),
         SkyboxVertex(-l,-l,-l,  0,  1, 0,   1.0,1.0),
         SkyboxVertex(-l,-l, l,  0,  1, 0,   0.0,1.0)) );
-    meshes.back()->mMaterialIndex = materials.size()-1u;
+    meshes.back()->mMaterialIndex = static_cast<unsigned int>(materials.size()-1u);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -269,14 +269,15 @@ void IRRImporter::CopyMaterial(std::vector<aiMaterial*>& materials,
         if (UINT_MAX == defMatIdx)
         {
             defMatIdx = (unsigned int)materials.size();
-            aiMaterial* mat = new aiMaterial();
+            //TODO: add this materials to someone?
+            /*aiMaterial* mat = new aiMaterial();
 
             aiString s;
             s.Set(AI_DEFAULT_MATERIAL_NAME);
             mat->AddProperty(&s,AI_MATKEY_NAME);
 
             aiColor3D c(0.6f,0.6f,0.6f);
-            mat->AddProperty(&c,1,AI_MATKEY_COLOR_DIFFUSE);
+            mat->AddProperty(&c,1,AI_MATKEY_COLOR_DIFFUSE);*/
         }
         mesh->mMaterialIndex = defMatIdx;
         return;
@@ -542,7 +543,7 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                 {
                     aiVectorKey& key = anim->mPositionKeys[i];
 
-                    const ai_real dt = (i * in.speed * 0.001 );
+                    const ai_real dt = (i * in.speed * ai_real( 0.001 ) );
                     const ai_real u = dt - std::floor(dt);
                     const int idx = (int)std::floor(dt) % size;
 
@@ -556,9 +557,9 @@ void IRRImporter::ComputeAnimations(Node* root, aiNode* real, std::vector<aiNode
                     const ai_real u2 = u*u;
                     const ai_real u3 = u2*2;
 
-                    const ai_real h1 = 2.0 * u3 - 3.0 * u2 + 1.0;
-                    const ai_real h2 = -2.0 * u3 + 3.0 * u3;
-                    const ai_real h3 = u3 - 2.0 * u3;
+                    const ai_real h1 = ai_real( 2.0 ) * u3 - ai_real( 3.0 ) * u2 + ai_real( 1.0 );
+                    const ai_real h2 = ai_real( -2.0 ) * u3 + ai_real( 3.0 ) * u3;
+                    const ai_real h3 = u3 - ai_real( 2.0 ) * u3;
                     const ai_real h4 = u3 - u2;
 
                     // compute the spline tangents
@@ -641,7 +642,7 @@ void SetupMapping (aiMaterial* mat, aiTextureMapping mode, const aiVector3D& axi
         delete[] mat->mProperties;
         mat->mProperties = new aiMaterialProperty*[p.size()*2];
 
-        mat->mNumAllocated = p.size()*2;
+        mat->mNumAllocated = static_cast<unsigned int>(p.size()*2);
     }
     mat->mNumProperties = (unsigned int)p.size();
     ::memcpy(mat->mProperties,&p[0],sizeof(void*)*mat->mNumProperties);

@@ -52,7 +52,7 @@ namespace {
     const static aiVector3D base_axis_y(0.0,1.0,0.0);
     const static aiVector3D base_axis_x(1.0,0.0,0.0);
     const static aiVector3D base_axis_z(0.0,0.0,1.0);
-    const static ai_real angle_epsilon = 0.95;
+    const static ai_real angle_epsilon = ai_real( 0.95 );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -109,11 +109,11 @@ void RemoveUVSeams (aiMesh* mesh, aiVector3D* out)
     // much easier, but I don't know how and am currently too tired to
     // to think about a better solution.
 
-    const static ai_real LOWER_LIMIT = 0.1;
-    const static ai_real UPPER_LIMIT = 0.9;
+    const static ai_real LOWER_LIMIT = ai_real( 0.1 );
+    const static ai_real UPPER_LIMIT = ai_real( 0.9 );
 
-    const static ai_real LOWER_EPSILON = 10e-3;
-    const static ai_real UPPER_EPSILON = 1.0-10e-3;
+    const static ai_real LOWER_EPSILON = ai_real( 10e-3 );
+    const static ai_real UPPER_EPSILON = ai_real( 1.0-10e-3 );
 
     for (unsigned int fidx = 0; fidx < mesh->mNumFaces;++fidx)
     {
@@ -206,7 +206,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
         // lon  = arctan (y/x)
         for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)  {
             const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
-            out[pnt] = aiVector3D((atan2 (diff.z, diff.y) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+            out[pnt] = aiVector3D((std::atan2(diff.z, diff.y) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
                 (std::asin  (diff.x) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.0);
         }
     }
@@ -214,7 +214,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
         // ... just the same again
         for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)  {
             const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
-            out[pnt] = aiVector3D((atan2 (diff.x, diff.z) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+            out[pnt] = aiVector3D((std::atan2(diff.x, diff.z) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
                 (std::asin  (diff.y) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.0);
         }
     }
@@ -222,7 +222,7 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
         // ... just the same again
         for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)  {
             const aiVector3D diff = (mesh->mVertices[pnt]-center).Normalize();
-            out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+            out[pnt] = aiVector3D((std::atan2(diff.y, diff.x) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
                 (std::asin  (diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.0);
         }
     }
@@ -234,8 +234,8 @@ void ComputeUVMappingProcess::ComputeSphereMapping(aiMesh* mesh,const aiVector3D
         // again the same, except we're applying a transformation now
         for (unsigned int pnt = 0; pnt < mesh->mNumVertices;++pnt)  {
             const aiVector3D diff = ((mTrafo*mesh->mVertices[pnt])-center).Normalize();
-            out[pnt] = aiVector3D((atan2 (diff.y, diff.x) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
-                (asin  (diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.0);
+            out[pnt] = aiVector3D((std::atan2(diff.y, diff.x) + AI_MATH_PI_F ) / AI_MATH_TWO_PI_F,
+                (std::asin(diff.z) + AI_MATH_HALF_PI_F) / AI_MATH_PI_F, 0.0);
         }
     }
 
@@ -268,7 +268,7 @@ void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,const aiVector
             aiVector3D& uv  = out[pnt];
 
             uv.y = (pos.x - min.x) / diff;
-            uv.x = (atan2 ( pos.z - center.z, pos.y - center.y) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
+            uv.x = (std::atan2( pos.z - center.z, pos.y - center.y) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
         }
     }
     else if (axis * base_axis_y >= angle_epsilon)   {
@@ -281,7 +281,7 @@ void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,const aiVector
             aiVector3D& uv  = out[pnt];
 
             uv.y = (pos.y - min.y) / diff;
-            uv.x = (atan2 ( pos.x - center.x, pos.z - center.z) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
+            uv.x = (std::atan2( pos.x - center.x, pos.z - center.z) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
         }
     }
     else if (axis * base_axis_z >= angle_epsilon)   {
@@ -294,7 +294,7 @@ void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,const aiVector
             aiVector3D& uv  = out[pnt];
 
             uv.y = (pos.z - min.z) / diff;
-            uv.x = (atan2 ( pos.y - center.y, pos.x - center.x) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
+            uv.x = (std::atan2( pos.y - center.y, pos.x - center.x) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
         }
     }
     // slower code path in case the mapping axis is not one of the coordinate system axes
@@ -310,7 +310,7 @@ void ComputeUVMappingProcess::ComputeCylinderMapping(aiMesh* mesh,const aiVector
             aiVector3D& uv  = out[pnt];
 
             uv.y = (pos.y - min.y) / diff;
-            uv.x = (atan2 ( pos.x - center.x, pos.z - center.z) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
+            uv.x = (std::atan2( pos.x - center.x, pos.z - center.z) +(ai_real)AI_MATH_PI ) / (ai_real)AI_MATH_TWO_PI;
         }
     }
 
@@ -437,7 +437,7 @@ void ComputeUVMappingProcess::Execute( aiScene* pScene)
                         }
                     }
 
-                    unsigned int idx;
+                    unsigned int idx( 99999999 );
 
                     // Check whether we have this mapping mode already
                     std::list<MappingInfo>::iterator it = std::find (mappingStack.begin(),mappingStack.end(), info);

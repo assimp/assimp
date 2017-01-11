@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SpatialSort.h"
 #include "ProcessHelper.h"
 #include "Vertex.h"
+#include <assimp/ai_assert.h>
 #include <stdio.h>
 
 using namespace Assimp;
@@ -55,9 +56,7 @@ void mydummy() {}
 // ------------------------------------------------------------------------------------------------
 class CatmullClarkSubdivider : public Subdivider
 {
-
 public:
-
     void Subdivide (aiMesh* mesh, aiMesh*& out, unsigned int num, bool discard_input);
     void Subdivide (aiMesh** smesh, size_t nmesh,
         aiMesh** out, unsigned int num, bool discard_input);
@@ -73,8 +72,6 @@ public:
         Vertex edge_point, midpoint;
         unsigned int ref;
     };
-
-
 
     typedef std::vector<unsigned int> UIntVector;
     typedef std::map<uint64_t,Edge> EdgeMap;
@@ -99,7 +96,6 @@ public:
     unsigned int eh_tmp0__, eh_tmp1__;
 
 private:
-
     void InternSubdivide (const aiMesh* const * smesh,
         size_t nmesh,aiMesh** out, unsigned int num);
 };
@@ -128,7 +124,8 @@ void  CatmullClarkSubdivider::Subdivide (
     bool discard_input
     )
 {
-    assert(mesh != out);
+    ai_assert(mesh != out);
+    
     Subdivide(&mesh,1,&out,num,discard_input);
 }
 
@@ -142,12 +139,12 @@ void CatmullClarkSubdivider::Subdivide (
     bool discard_input
     )
 {
-    ai_assert(NULL != smesh && NULL != out);
+    ai_assert( NULL != smesh );
+    ai_assert( NULL != out );
 
     // course, both regions may not overlap
-    assert(smesh<out || smesh+nmesh>out+nmesh);
+    ai_assert(smesh<out || smesh+nmesh>out+nmesh);
     if (!num) {
-
         // No subdivision at all. Need to copy all the meshes .. argh.
         if (discard_input) {
             for (size_t s = 0; s < nmesh; ++s) {
@@ -191,7 +188,7 @@ void CatmullClarkSubdivider::Subdivide (
         }
 
         outmeshes.push_back(NULL);inmeshes.push_back(i);
-        maptbl.push_back(s);
+        maptbl.push_back(static_cast<unsigned int>(s));
     }
 
     // Do the actual subdivision on the preallocated storage. InternSubdivide
@@ -535,9 +532,7 @@ void CatmullClarkSubdivider::InternSubdivide (
 
                             ai_assert(adj[o]-moffsets[nidx].first < mp->mNumFaces);
                             const aiFace& f = mp->mFaces[adj[o]-moffsets[nidx].first];
-#               ifdef ASSIMP_BUILD_DEBUG
                             bool haveit = false;
-#               endif
 
                             // find our original point in the face
                             for (unsigned int m = 0; m < f.mNumIndices; ++m) {
@@ -558,15 +553,16 @@ void CatmullClarkSubdivider::InternSubdivide (
                                     // fixme: replace with mod face.mNumIndices?
                                     R += c0.midpoint+c1.midpoint;
 
-#                       ifdef ASSIMP_BUILD_DEBUG
                                     haveit = true;
-#                       endif
                                     break;
                                 }
                             }
 
                             // this invariant *must* hold if the vertex-to-face adjacency table is valid
                             ai_assert(haveit);
+                            if ( !haveit ) {
+                                DefaultLogger::get()->warn( "OBJ: no name for material library specified." );
+                            }
                         }
 
                         const float div = static_cast<float>(cnt), divsq = 1.f/(div*div);

@@ -70,7 +70,7 @@ bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData&
         ++cnt;
     }
 
-    meshout.vertcnt.push_back(cnt);
+    meshout.vertcnt.push_back(static_cast<unsigned int>(cnt));
 
     // zero- or one- vertex polyloops simply ignored
     if (meshout.vertcnt.back() > 1) {
@@ -180,7 +180,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
     // fill a mesh with ONLY the main polygon
     TempMesh temp;
     temp.verts.reserve(outer_polygon_size);
-    temp.vertcnt.push_back(outer_polygon_size);
+    temp.vertcnt.push_back(static_cast<unsigned int>(outer_polygon_size));
     std::copy(outer_vit, outer_vit+outer_polygon_size,
         std::back_inserter(temp.verts));
 
@@ -282,7 +282,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
             const size_t next = (i+1)%size;
 
             result.vertcnt.push_back(4);
-            const IfcVector3& base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
+            const IfcVector3 base_0 = out[base+i*4+3],base_1 = out[base+next*4+3];
 
             out.push_back(base_0);
             out.push_back(base_1);
@@ -305,8 +305,8 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
         for(size_t i = 0; i < size; ++i ) {
             out.push_back(out[i*4]);
         }
-        result.vertcnt.push_back(size);
-        result.vertcnt.push_back(size);
+        result.vertcnt.push_back(static_cast<unsigned int>(size));
+        result.vertcnt.push_back(static_cast<unsigned int>(size));
     }
 
     IfcMatrix4 trafo;
@@ -638,7 +638,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
                     out.push_back(in[i]);
             }
 
-            curmesh.vertcnt.push_back(in.size());
+            curmesh.vertcnt.push_back(static_cast<unsigned int>(in.size()));
             if( openings && in.size() > 2 ) {
                 if( GenerateOpenings(*conv.apply_openings, nors, temp, true, true, dir) ) {
                     ++sides_with_v_openings;
@@ -665,7 +665,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
 
         std::shared_ptr<TempMesh> profile2D = std::shared_ptr<TempMesh>(new TempMesh());
         profile2D->verts.insert(profile2D->verts.end(), in.begin(), in.end());
-        profile2D->vertcnt.push_back(in.size());
+        profile2D->vertcnt.push_back(static_cast<unsigned int>(in.size()));
         conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
 
         ai_assert(result.IsEmpty());
@@ -810,7 +810,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
     aiMesh* const mesh = meshtmp->ToMesh();
     if(mesh) {
         mesh->mMaterialIndex = matid;
-        mesh_indices.push_back(conv.meshes.size());
+        mesh_indices.push_back(static_cast<unsigned int>(conv.meshes.size()));
         conv.meshes.push_back(mesh);
         return true;
     }
@@ -827,9 +827,8 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
         std::sort(mesh_indices.begin(),mesh_indices.end());
         std::vector<unsigned int>::iterator it_end = std::unique(mesh_indices.begin(),mesh_indices.end());
 
-        const size_t size = std::distance(mesh_indices.begin(),it_end);
+        nd->mNumMeshes = static_cast<unsigned int>(std::distance(mesh_indices.begin(),it_end));
 
-        nd->mNumMeshes = size;
         nd->mMeshes = new unsigned int[nd->mNumMeshes];
         for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
             nd->mMeshes[i] = mesh_indices[i];

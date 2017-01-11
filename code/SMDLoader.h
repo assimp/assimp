@@ -171,7 +171,7 @@ struct Bone
 // ---------------------------------------------------------------------------
 /** Used to load Half-life 1 and 2 SMD models
 */
-class SMDImporter : public BaseImporter
+class ASSIMP_API SMDImporter : public BaseImporter
 {
 public:
     SMDImporter();
@@ -372,7 +372,7 @@ private:
     unsigned int configFrameID;
 
     /** Buffer to hold the loaded file */
-    const char* mBuffer;
+    std::vector<char> mBuffer;
 
     /** Output scene to be filled
     */

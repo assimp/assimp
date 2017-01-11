@@ -413,7 +413,7 @@ enum aiTextureFlags
  *    SourceColor * SourceBlend + DestColor * DestBlend
  *  @endcode
  *  where DestColor is the previous color in the framebuffer at this
- *  position and SourceColor is the material colro before the transparency
+ *  position and SourceColor is the material color before the transparency
  *  calculation.<br>
  *  This corresponds to the #AI_MATKEY_BLEND_FUNC property.
 */
@@ -669,7 +669,7 @@ public:
         unsigned int idx, int* pOut, unsigned int* pMax) const;
 
     aiReturn Get(const char* pKey,unsigned int type,
-        unsigned int idx, float* pOut, unsigned int* pMax) const;
+        unsigned int idx, ai_real* pOut, unsigned int* pMax) const;
 
     // -------------------------------------------------------------------
     /** @brief Retrieve a Type value with a specific key
@@ -690,7 +690,7 @@ public:
         unsigned int idx, int& pOut) const;
 
     aiReturn Get(const char* pKey,unsigned int type,
-        unsigned int idx, float& pOut) const;
+        unsigned int idx, ai_real& pOut) const;
 
     aiReturn Get(const char* pKey,unsigned int type,
         unsigned int idx, aiString& pOut) const;
@@ -747,7 +747,7 @@ public:
         C_STRUCT aiString* path,
         aiTextureMapping* mapping   = NULL,
         unsigned int* uvindex       = NULL,
-        float* blend                = NULL,
+        ai_real* blend              = NULL,
         aiTextureOp* op             = NULL,
         aiTextureMapMode* mapmode   = NULL) const;
 
@@ -1329,9 +1329,9 @@ extern "C" {
  *        structure or NULL if the key has not been found. */
 // ---------------------------------------------------------------------------
 ASSIMP_API C_ENUM aiReturn aiGetMaterialProperty(
-     const C_STRUCT aiMaterial* pMat,
+    const C_STRUCT aiMaterial* pMat,
     const char* pKey,
-     unsigned int type,
+    unsigned int type,
     unsigned int  index,
     const C_STRUCT aiMaterialProperty** pPropOut);
 
@@ -1366,7 +1366,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialFloatArray(
     const char* pKey,
     unsigned int type,
     unsigned int index,
-    float* pOut,
+    ai_real* pOut,
     unsigned int* pMax);
 
 
@@ -1395,7 +1395,7 @@ inline aiReturn aiGetMaterialFloat(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
-    float* pOut)
+    ai_real* pOut)
 {
     return aiGetMaterialFloatArray(pMat,pKey,type,index,pOut,(unsigned int*)0x0);
 }
@@ -1432,7 +1432,7 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialIntegerArray(const C_STRUCT aiMaterial* 
 inline aiReturn aiGetMaterialInteger(const C_STRUCT aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
-   unsigned int index,
+    unsigned int index,
     int* pOut)
 {
     return aiGetMaterialIntegerArray(pMat,pKey,type,index,pOut,(unsigned int*)0x0);
@@ -1537,7 +1537,7 @@ ASSIMP_API aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     aiString* path,
     aiTextureMapping* mapping   = NULL,
     unsigned int* uvindex       = NULL,
-    float* blend                = NULL,
+    ai_real* blend              = NULL,
     aiTextureOp* op             = NULL,
     aiTextureMapMode* mapmode   = NULL,
     unsigned int* flags         = NULL);
@@ -1548,7 +1548,7 @@ C_ENUM aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     C_STRUCT aiString* path,
     C_ENUM aiTextureMapping* mapping    /*= NULL*/,
     unsigned int* uvindex               /*= NULL*/,
-    float* blend                        /*= NULL*/,
+    ai_real* blend                      /*= NULL*/,
     C_ENUM aiTextureOp* op              /*= NULL*/,
     C_ENUM aiTextureMapMode* mapmode    /*= NULL*/,
     unsigned int* flags                 /*= NULL*/);

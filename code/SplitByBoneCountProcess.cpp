@@ -57,7 +57,7 @@ using namespace Assimp::Formatter;
 // Constructor
 SplitByBoneCountProcess::SplitByBoneCountProcess()
 {
-    // set default, might be overriden by importer config
+    // set default, might be overridden by importer config
     mMaxBoneCount = AI_SBBC_DEFAULT_MAX_BONES;
 }
 

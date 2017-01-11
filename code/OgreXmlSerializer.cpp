@@ -623,7 +623,7 @@ void OgreXmlSerializer::ReadSubMesh(MeshXml *mesh)
             SkipCurrentNode();
     }
 
-    submesh->index = mesh->subMeshes.size();
+    submesh->index = static_cast<unsigned int>(mesh->subMeshes.size());
     mesh->subMeshes.push_back(submesh);
 }
 
@@ -654,7 +654,7 @@ void OgreXmlSerializer::ReadBoneAssignments(VertexDataXml *dest)
     }
 
     /** Normalize bone weights.
-        Some exporters wont care if the sum of all bone weights
+        Some exporters won't care if the sum of all bone weights
         for a single vertex equals 1 or not, so validate here. */
     const float epsilon = 0.05f;
     for (const uint32_t vertexIndex : influencedVertices)

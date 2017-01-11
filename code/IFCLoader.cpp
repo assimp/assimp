@@ -707,15 +707,11 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
         }
 
         if (!properties.empty()) {
-            aiMetadata* data = new aiMetadata();
-            data->mNumProperties = properties.size();
-            data->mKeys = new aiString[data->mNumProperties]();
-            data->mValues = new aiMetadataEntry[data->mNumProperties]();
-
-            unsigned int index = 0;
-            for(const Metadata::value_type& kv : properties)
-                data->Set(index++, kv.first, aiString(kv.second));
-
+            aiMetadata* data = aiMetadata::Alloc( static_cast<unsigned int>(properties.size()) );
+            unsigned int index( 0 );
+            for ( const Metadata::value_type& kv : properties ) {
+                data->Set( index++, kv.first, aiString( kv.second ) );
+            }
             nd->mMetaData = data;
         }
     }

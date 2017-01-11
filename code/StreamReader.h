@@ -40,7 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file Defines the StreamReader class which reads data from
- *  a binary stream with a well-defined endianness. */
+ *  a binary stream with a well-defined endianness.
+ */
 
 #ifndef AI_STREAMREADER_H_INCLUDED
 #define AI_STREAMREADER_H_INCLUDED
@@ -66,9 +67,7 @@ namespace Assimp {
 template <bool SwapEndianess = false, bool RuntimeSwitch = false>
 class StreamReader
 {
-
 public:
-
     // FIXME: use these data types throughout the whole library,
     // then change them to 64 bit values :-)
 
@@ -76,8 +75,6 @@ public:
     typedef unsigned int pos;
 
 public:
-
-
     // ---------------------------------------------------------------------
     /** Construction from a given stream with a well-defined endianness.
      *
@@ -178,13 +175,11 @@ public:
     }
 
 public:
-
     // ---------------------------------------------------------------------
-    /** Get the remaining stream size (to the end of the srream) */
+    /** Get the remaining stream size (to the end of the stream) */
     unsigned int GetRemainingSize() const {
         return (unsigned int)(end - current);
     }
-
 
     // ---------------------------------------------------------------------
     /** Get the remaining stream size (to the current read limit). The
@@ -193,7 +188,6 @@ public:
     unsigned int GetRemainingSizeToLimit() const {
         return (unsigned int)(limit - current);
     }
-
 
     // ---------------------------------------------------------------------
     /** Increase the file pointer (relative seeking)  */
@@ -210,7 +204,6 @@ public:
         return current;
     }
 
-
     // ---------------------------------------------------------------------
     /** Set current file pointer (Get it from #GetPtr). This is if you
      *  prefer to do pointer arithmetics on your own or want to copy
@@ -218,7 +211,6 @@ public:
      *  @param p The new pointer, which is validated against the size
      *    limit and buffer boundaries. */
     void SetPtr(int8_t* p)  {
-
         current = p;
         if (current > limit || current < buffer) {
             throw DeadlyImportError("End of file or read limit was reached");
@@ -230,13 +222,11 @@ public:
      *  @param out Destination for copying
      *  @param bytes Number of bytes to copy */
     void CopyAndAdvance(void* out, size_t bytes)    {
-
         int8_t* ur = GetPtr();
         SetPtr(ur+bytes); // fire exception if eof
 
-        memcpy(out,ur,bytes);
+        ::memcpy(out,ur,bytes);
     }
-
 
     // ---------------------------------------------------------------------
     /** Get the current offset from the beginning of the file */
@@ -271,14 +261,14 @@ public:
 
     // ---------------------------------------------------------------------
     /** Get the current read limit in bytes. Reading over this limit
-     *  accidentially raises an exception.  */
+     *  accidentally raises an exception.  */
     unsigned int GetReadLimit() const    {
         return (unsigned int)(limit - buffer);
     }
 
     // ---------------------------------------------------------------------
     /** Skip to the read limit in bytes. Reading over this limit
-     *  accidentially raises an exception. */
+     *  accidentally raises an exception. */
     void SkipToReadLimit()  {
         current = limit;
     }
@@ -292,18 +282,17 @@ public:
     }
 
 private:
-
     // ---------------------------------------------------------------------
     /** Generic read method. ByteSwap::Swap(T*) *must* be defined */
     template <typename T>
     T Get() {
-        if (current + sizeof(T) > limit) {
+        if ( current + sizeof(T) > limit) {
             throw DeadlyImportError("End of file or stream limit was reached");
         }
 
 #ifdef __arm__
         T f;
-        memcpy (&f, current, sizeof(T));
+        ::memcpy (&f, current, sizeof(T));
 #else
         T f = *((const T*)current);
 #endif
@@ -316,7 +305,7 @@ private:
     // ---------------------------------------------------------------------
     void InternBegin() {
         if (!stream) {
-            // incase someone wonders: StreamReader is frequently invoked with
+            // in case someone wonders: StreamReader is frequently invoked with
             // no prior validation whether the input stream is valid. Since
             // no one bothers changing the error message, this message here
             // is passed down to the caller and 'unable to open file'
@@ -337,13 +326,10 @@ private:
     }
 
 private:
-
-
     std::shared_ptr<IOStream> stream;
     int8_t *buffer, *current, *end, *limit;
     bool le;
 };
-
 
 // --------------------------------------------------------------------------------------------
 // `static` StreamReaders. Their byte order is fixed and they might be a little bit faster.

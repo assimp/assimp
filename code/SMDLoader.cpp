@@ -74,20 +74,22 @@ static const aiImporterDesc desc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 SMDImporter::SMDImporter()
-    : configFrameID(),
-    mBuffer(),
-    pScene(),
-    iFileSize(),
-    iSmallestFrame(),
-    dLengthOfAnim(),
-    bHasUVs(),
-    iLineNumber()
-{}
+: configFrameID(),
+mBuffer(),
+pScene( nullptr ),
+iFileSize( 0 ),
+iSmallestFrame( -1 ),
+dLengthOfAnim( 0.0 ),
+bHasUVs(false ),
+iLineNumber(-1) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-SMDImporter::~SMDImporter()
-{}
+SMDImporter::~SMDImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -133,9 +135,8 @@ void SMDImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     // Allocate storage and copy the contents of the file to a memory buffer
     this->pScene = pScene;
 
-    std::vector<char> buff(iFileSize+1);
-    TextFileToBuffer(file.get(),buff);
-    mBuffer = &buff[0];
+    mBuffer.resize( iFileSize + 1 );
+    TextFileToBuffer(file.get(), mBuffer );
 
     iSmallestFrame = (1 << 31);
     bHasUVs = true;
@@ -640,7 +641,7 @@ void SMDImporter::ComputeAbsoluteBoneTransformations()
         bone.mOffsetMatrix.Inverse();
     }
 }
-
+\
 // ------------------------------------------------------------------------------------------------
 // create output materials
 void SMDImporter::CreateOutputMaterials()
@@ -659,7 +660,7 @@ void SMDImporter::CreateOutputMaterials()
 
         if (aszTextures[iMat].length())
         {
-            ::strcpy(szName.data, aszTextures[iMat].c_str() );
+            ::strncpy(szName.data, aszTextures[iMat].c_str(),MAXLEN-1);
             szName.length = aszTextures[iMat].length();
             pcMat->AddProperty(&szName,AI_MATKEY_TEXTURE_DIFFUSE(0));
         }
@@ -694,14 +695,14 @@ void SMDImporter::CreateOutputMaterials()
 // Parse the file
 void SMDImporter::ParseFile()
 {
-    const char* szCurrent = mBuffer;
+    const char* szCurrent = &mBuffer[0];
 
     // read line per line ...
     for ( ;; )
     {
         if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
-        // "version <n> \n", <n> should be 1 for hl and hl� SMD files
+        // "version <n> \n", <n> should be 1 for hl and hl2 SMD files
         if (TokenMatch(szCurrent,"version",7))
         {
             if(!SkipSpaces(szCurrent,&szCurrent)) break;
@@ -1019,7 +1020,7 @@ void SMDImporter::ParseTriangle(const char* szCurrent,
 
     // read the texture file name
     const char* szLast = szCurrent;
-    while (!IsSpaceOrNewLine(*szCurrent++));
+    while (!IsSpaceOrNewLine(*++szCurrent));
 
     // ... and get the index that belongs to this file name
     face.iTexture = GetTextureIndex(std::string(szLast,(uintptr_t)szCurrent-(uintptr_t)szLast));

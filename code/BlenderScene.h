@@ -64,7 +64,7 @@ namespace Blender {
 // * C++ style comments only
 //
 // * Structures may include the primitive types char, int, short,
-//   float, double. Signedness specifiers are not allowed on
+//   float, double. Signed specifiers are not allowed on
 //   integers. Enum types are allowed, but they must have been
 //   defined in this header.
 //
@@ -85,14 +85,23 @@ namespace Blender {
 //   provided they are neither pointers nor arrays.
 //
 // * One of WARN, FAIL can be appended to the declaration (
-//   prior to the semiolon to specifiy the error handling policy if
+//   prior to the semicolon to specify the error handling policy if
 //   this field is missing in the input DNA). If none of those
-//   is specified the default policy is to subtitute a default
+//   is specified the default policy is to substitute a default
 //   value for the field.
 //
 
-#define WARN // warn if field is missing, substitute default value
-#define FAIL // fail the import if the field does not exist
+// warn if field is missing, substitute default value
+#ifdef WARN
+#  undef WARN
+#endif
+#define WARN 
+
+// fail the import if the field does not exist
+#ifdef FAIL
+#  undef FAIL
+#endif
+#define FAIL 
 
 struct Object;
 struct MTex;
@@ -102,16 +111,16 @@ struct Image;
 
 #define AI_BLEND_MESH_MAX_VERTS 2000000000L
 
+static const size_t MaxNameLen = 1024;
+
 // -------------------------------------------------------------------------------
 struct ID : ElemBase {
-
-    char name[1024] WARN;
+    char name[ MaxNameLen ] WARN;
     short flag;
 };
 
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
-
     std::shared_ptr<ElemBase> first;
     std::shared_ptr<ElemBase> last;
 };
@@ -126,7 +135,6 @@ struct PackedFile : ElemBase {
 
 // -------------------------------------------------------------------------------
 struct GroupObject : ElemBase {
-
     std::shared_ptr<GroupObject> prev,next FAIL;
     std::shared_ptr<Object> ob;
 };
@@ -142,7 +150,6 @@ struct Group : ElemBase {
 // -------------------------------------------------------------------------------
 struct World : ElemBase {
     ID id FAIL;
-
 };
 
 // -------------------------------------------------------------------------------
@@ -217,7 +224,6 @@ struct TFace : ElemBase {
 
 // -------------------------------------------------------------------------------
 struct MTFace : ElemBase {
-
     float uv[4][2] FAIL;
     char flag;
     short mode;
@@ -235,7 +241,6 @@ struct MDeformWeight : ElemBase  {
 
 // -------------------------------------------------------------------------------
 struct MDeformVert : ElemBase  {
-
     vector<MDeformWeight> dw WARN;
     int totweight;
 };
@@ -263,7 +268,6 @@ struct Material : ElemBase {
     float roughness;
     float darkness;
     float refrac;
-
 
     float amb;
     float ang;
@@ -612,6 +616,17 @@ struct Object : ElemBase  {
     std::shared_ptr<ElemBase> data FAIL;
 
     ListBase modifiers;
+
+    Object()
+    : ElemBase()
+    , type( Type_EMPTY )
+    , parent( nullptr )
+    , track()
+    , proxy()
+    , proxy_from()
+    , data() {
+        // empty
+    }
 };
 
 
@@ -620,6 +635,14 @@ struct Base : ElemBase {
     Base* prev WARN;
     std::shared_ptr<Base> next WARN;
     std::shared_ptr<Object> object WARN;
+
+    Base() 
+    : ElemBase()
+    , next()
+    , object() {
+        // empty
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -631,8 +654,15 @@ struct Scene : ElemBase {
     std::shared_ptr<Base> basact WARN;
 
     ListBase base;
-};
 
+    Scene()
+    : ElemBase()
+    , camera()
+    , world()
+    , basact() {
+        // empty
+    }
+};
 
 // -------------------------------------------------------------------------------
 struct Image : ElemBase {
@@ -660,6 +690,11 @@ struct Image : ElemBase {
     short animspeed;
 
     short gen_x, gen_y, gen_type;
+    
+    Image()
+    : ElemBase() {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -747,6 +782,12 @@ struct Tex : ElemBase {
     //VoxelData *vd;
 
     //char use_nodes;
+
+    Tex()
+    : ElemBase() {
+        // empty
+    }
+
 };
 
 // -------------------------------------------------------------------------------
@@ -835,9 +876,13 @@ struct MTex : ElemBase {
     //float lifefac, sizefac, ivelfac, pvelfac;
     //float shadowfac;
     //float zenupfac, zendownfac, blendfac;
+
+    MTex()
+    : ElemBase() {
+        // empty
+    }
 };
 
-
-    }
+}
 }
 #endif

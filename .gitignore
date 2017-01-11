@@ -29,6 +29,13 @@ cmake_uninstall.cmake
 assimp-config.cmake
 assimp-config-version.cmake
 
+# MakeFile
+Makefile
+code/Makefile
+test/Makefile
+test/headercheck/Makefile
+tools/assimp_cmd/Makefile
+
 # Tests
 test/results
 

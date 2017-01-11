@@ -709,7 +709,7 @@ void MD3Importer::ConvertPath(const char* texture_name, const char* header_name,
             }
         }
         else len2 = std::min (len1, (size_t)(end2 - texture_name ));
-        if (!ASSIMP_strincmp(texture_name,header_name,len2)) {
+        if (!ASSIMP_strincmp(texture_name,header_name,static_cast<unsigned int>(len2))) {
             // Use the file name only
             out = end2+1;
             return;

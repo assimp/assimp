@@ -488,7 +488,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     unsigned int iWidth,
     unsigned int iHeight)
 {
-    aiTexture* pcNew = NULL;
+    aiTexture* pcNew = nullptr;
 
     // get the type of the skin
     unsigned int iMasked = (unsigned int)(iType & 0xF);
@@ -522,7 +522,7 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
         memcpy(pcNew->pcData,szCurrent,pcNew->mWidth);
         szCurrent += iWidth;
     }
-    if (0x7 == iMasked)
+    else if (0x7 == iMasked)
     {
         // ***** REFERENCE TO EXTERNAL FILE *****
         if (1 != iHeight)
@@ -546,6 +546,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     else if (iMasked || !iType || (iType && iWidth && iHeight))
     {
         // ***** STANDARD COLOR TEXTURE *****
+        if(pcNew!= nullptr)
+            delete pcNew;
+
         pcNew = new aiTexture();
         if (!iHeight || !iWidth)
         {
@@ -731,6 +734,9 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     VALIDATE_FILE_SIZE(szCurrent);
     *szCurrentOut = szCurrent;
+    if ( nullptr != pcNew ) {
+        delete pcNew;
+    }
 }
 
 // ------------------------------------------------------------------------------------------------

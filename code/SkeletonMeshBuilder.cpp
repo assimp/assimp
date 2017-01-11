@@ -85,7 +85,7 @@ SkeletonMeshBuilder::SkeletonMeshBuilder( aiScene* pScene, aiNode* root, bool bK
 void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
 {
     // add a joint entry for the node.
-    const unsigned int vertexStartIndex = mVertices.size();
+    const unsigned int vertexStartIndex = static_cast<unsigned int>(mVertices.size());
 
     // now build the geometry.
     if( pNode->mNumChildren > 0 && !mKnobsOnly)
@@ -108,7 +108,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
             aiVector3D front = (up ^ orth).Normalize();
             aiVector3D side = (front ^ up).Normalize();
 
-            unsigned int localVertexStart = mVertices.size();
+            unsigned int localVertexStart = static_cast<unsigned int>(mVertices.size());
             mVertices.push_back( -front * distanceToChild * (ai_real)0.1);
             mVertices.push_back( childpos);
             mVertices.push_back( -side * distanceToChild * (ai_real)0.1);
@@ -132,7 +132,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
     {
         // if the node has no children, it's an end node. Put a little knob there instead
         aiVector3D ownpos( pNode->mTransformation.a4, pNode->mTransformation.b4, pNode->mTransformation.c4);
-        ai_real sizeEstimate = ownpos.Length() * 0.18;
+        ai_real sizeEstimate = ownpos.Length() * ai_real( 0.18 );
 
         mVertices.push_back( aiVector3D( -sizeEstimate, 0.0, 0.0));
         mVertices.push_back( aiVector3D( 0.0, sizeEstimate, 0.0));
@@ -170,7 +170,7 @@ void SkeletonMeshBuilder::CreateGeometry( const aiNode* pNode)
         mFaces.push_back( Face( vertexStartIndex + 21, vertexStartIndex + 22, vertexStartIndex + 23));
     }
 
-    unsigned int numVertices = mVertices.size() - vertexStartIndex;
+    unsigned int numVertices = static_cast<unsigned int>(mVertices.size() - vertexStartIndex);
     if( numVertices > 0)
     {
         // create a bone affecting all the newly created vertices
@@ -208,14 +208,14 @@ aiMesh* SkeletonMeshBuilder::CreateMesh()
     aiMesh* mesh = new aiMesh();
 
     // add points
-    mesh->mNumVertices = mVertices.size();
+    mesh->mNumVertices = static_cast<unsigned int>(mVertices.size());
     mesh->mVertices = new aiVector3D[mesh->mNumVertices];
     std::copy( mVertices.begin(), mVertices.end(), mesh->mVertices);
 
     mesh->mNormals = new aiVector3D[mesh->mNumVertices];
 
     // add faces
-    mesh->mNumFaces = mFaces.size();
+    mesh->mNumFaces = static_cast<unsigned int>(mFaces.size());
     mesh->mFaces = new aiFace[mesh->mNumFaces];
     for( unsigned int a = 0; a < mesh->mNumFaces; a++)
     {
@@ -240,7 +240,7 @@ aiMesh* SkeletonMeshBuilder::CreateMesh()
     }
 
     // add the bones
-    mesh->mNumBones = mBones.size();
+    mesh->mNumBones = static_cast<unsigned int>(mBones.size());
     mesh->mBones = new aiBone*[mesh->mNumBones];
     std::copy( mBones.begin(), mBones.end(), mesh->mBones);
 

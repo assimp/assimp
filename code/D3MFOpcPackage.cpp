@@ -38,11 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 
 #include "D3MFOpcPackage.h"
 #include "Exceptional.h"
 
-#include <contrib/unzip/unzip.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
@@ -55,32 +55,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cassert>
 #include <cstdlib>
 
-#ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
+#include <contrib/unzip/unzip.h>
 
 namespace Assimp {
 
 namespace D3MF {
 
-
-
 namespace XmlTag {
-
-const std::string CONTENT_TYPES_ARCHIVE  = "[Content_Types].xml";
-const std::string ROOT_RELATIONSHIPS_ARCHIVE  = "_rels/.rels";
-const std::string SCHEMA_CONTENTTYPES         = "http://schemas.openxmlformats.org/package/2006/content-types";
-const std::string SCHEMA_RELATIONSHIPS        = "http://schemas.openxmlformats.org/package/2006/relationships";
-const std::string RELS_RELATIONSHIP_CONTAINER = "Relationships";
-const std::string RELS_RELATIONSHIP_NODE      = "Relationship";
-const std::string RELS_ATTRIB_TARGET         = "Target";
-const std::string RELS_ATTRIB_TYPE            = "Type";
-const std::string RELS_ATTRIB_ID              = "Id";
-const std::string PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
-const std::string PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
-const std::string PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
-const std::string PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
-const std::string PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
-
-
+    static const std::string CONTENT_TYPES_ARCHIVE  = "[Content_Types].xml";
+    static const std::string ROOT_RELATIONSHIPS_ARCHIVE  = "_rels/.rels";
+    static const std::string SCHEMA_CONTENTTYPES         = "http://schemas.openxmlformats.org/package/2006/content-types";
+    static const std::string SCHEMA_RELATIONSHIPS        = "http://schemas.openxmlformats.org/package/2006/relationships";
+    static const std::string RELS_RELATIONSHIP_CONTAINER = "Relationships";
+    static const std::string RELS_RELATIONSHIP_NODE      = "Relationship";
+    static const std::string RELS_ATTRIB_TARGET         = "Target";
+    static const std::string RELS_ATTRIB_TYPE            = "Type";
+    static const std::string RELS_ATTRIB_ID              = "Id";
+    static const std::string PACKAGE_START_PART_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel";
+    static const std::string PACKAGE_PRINT_TICKET_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/printticket";
+    static const std::string PACKAGE_TEXTURE_RELATIONSHIP_TYPE = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dtexture";
+    static const std::string PACKAGE_CORE_PROPERTIES_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties";
+    static const std::string PACKAGE_THUMBNAIL_RELATIONSHIP_TYPE = "http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail";
 }
 
 class IOSystem2Unzip {
@@ -127,19 +122,19 @@ voidpf IOSystem2Unzip::open(voidpf opaque, const char* filename, int mode) {
 uLong IOSystem2Unzip::read(voidpf /*opaque*/, voidpf stream, void* buf, uLong size) {
     IOStream* io_stream = (IOStream*) stream;
 
-    return io_stream->Read(buf, 1, size);
+    return static_cast<uLong>(io_stream->Read(buf, 1, size));
 }
 
 uLong IOSystem2Unzip::write(voidpf /*opaque*/, voidpf stream, const void* buf, uLong size) {
     IOStream* io_stream = (IOStream*) stream;
 
-    return io_stream->Write(buf, 1, size);
+    return static_cast<uLong>(io_stream->Write(buf, 1, size));
 }
 
 long IOSystem2Unzip::tell(voidpf /*opaque*/, voidpf stream) {
     IOStream* io_stream = (IOStream*) stream;
 
-    return io_stream->Tell();
+    return static_cast<long>(io_stream->Tell());
 }
 
 long IOSystem2Unzip::seek(voidpf /*opaque*/, voidpf stream, uLong offset, int origin) {
@@ -461,9 +456,8 @@ public:
                 ParseRootNode(xmlReader);
             }
         }
-
-
     }
+
     void ParseRootNode(XmlReader* xmlReader)
     {       
         ParseAttributes(xmlReader);
@@ -476,13 +470,13 @@ public:
                 ParseChildNode(xmlReader);
             }
         }
-
     }
 
     void ParseAttributes(XmlReader*)
     {
 
     }
+
     void ParseChildNode(XmlReader* xmlReader)
     {        
         OpcPackageRelationshipPtr relPtr(new OpcPackageRelationship());
@@ -494,26 +488,22 @@ public:
         m_relationShips.push_back(relPtr);
     }
     std::vector<OpcPackageRelationshipPtr> m_relationShips;
-
 };
 // ------------------------------------------------------------------------------------------------
 
 D3MFOpcPackage::D3MFOpcPackage(IOSystem* pIOHandler, const std::string& rFile)
     : m_RootStream(nullptr)
 {    
-
     zipArchive.reset(new D3MF::D3MFZipArchive( pIOHandler, rFile ));    
-    if(!zipArchive->isOpen())
+    if(!zipArchive->isOpen()) {
         throw DeadlyImportError("Failed to open file " + rFile+ ".");
+    }
 
     std::vector<std::string> fileList;
     zipArchive->getFileList(fileList);
 
     for(auto& file: fileList){
-
-        if(file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE)
-        {
-
+        if(file == D3MF::XmlTag::ROOT_RELATIONSHIPS_ARCHIVE) {
             //PkgRelationshipReader pkgRelReader(file, archive);
             ai_assert(zipArchive->Exists(file.c_str()));
 

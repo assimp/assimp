@@ -805,5 +805,5 @@ void DNA::RegisterConverters() {
     converters["Image"] = DNA::FactoryPair( &Structure::Allocate<Image>, &Structure::Convert<Image> );
 }
 
+#endif // ASSIMP_BUILD_NO_BLEND_IMPORTER
 
-#endif

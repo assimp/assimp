@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "SceneCombiner.h"
 #include "DefaultIOSystem.h"
+#include "StringUtils.h"
 #include "XMLTools.h"
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
@@ -149,7 +150,7 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-    static const ai_real epsilon = 0.00001;
+    static const ai_real epsilon = ai_real( 0.00001 );
     static const aiQuaternion x_rot(aiMatrix3x3(
         0, -1,  0,
         1,  0,  0,
@@ -383,6 +384,7 @@ void ColladaExporter::WriteLight(size_t pIndex){
         case aiLightSource_SPOT:
             WriteSpotLight(light);
             break;
+        case aiLightSource_AREA:
         case aiLightSource_UNDEFINED:
         case _aiLightSource_Force32Bit:
             break;
@@ -523,7 +525,7 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
   } else
   {
     if( pKey )
-      poSurface.exist = pSrcMat->Get( pKey, pType, pIndex, poSurface.color) == aiReturn_SUCCESS;
+      poSurface.exist = pSrcMat->Get( pKey, static_cast<unsigned int>(pType), static_cast<unsigned int>(pIndex), poSurface.color) == aiReturn_SUCCESS;
   }
 }
 
@@ -635,9 +637,24 @@ void ColladaExporter::WriteMaterials()
     const aiMaterial* mat = mScene->mMaterials[a];
 
     aiString name;
-    if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
+    if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS ) {
       name = "mat";
-    materials[a].name = std::string( "m") + std::to_string(a) + name.C_Str();
+      materials[a].name = std::string( "m") + to_string(a) + name.C_Str();
+    } else {
+      // try to use the material's name if no other material has already taken it, else append #
+      std::string testName = name.C_Str();
+      size_t materialCountWithThisName = 0;
+      for( size_t i = 0; i < a; i ++ ) {
+        if( materials[i].name == testName ) {
+          materialCountWithThisName ++;
+        }
+      }
+      if( materialCountWithThisName == 0 ) {
+        materials[a].name = name.C_Str();
+      } else {
+        materials[a].name = std::string(name.C_Str()) + to_string(materialCountWithThisName);  
+      }
+    }
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
       if( !isalnum_C( *it ) ) {
         *it = '_';
@@ -675,7 +692,7 @@ void ColladaExporter::WriteMaterials()
 
     materials[a].shininess.exist = mat->Get( AI_MATKEY_SHININESS, materials[a].shininess.value) == aiReturn_SUCCESS;
     materials[a].transparency.exist = mat->Get( AI_MATKEY_OPACITY, materials[a].transparency.value) == aiReturn_SUCCESS;
-    materials[a].transparency.value = 1 - materials[a].transparency.value;
+    materials[a].transparency.value = materials[a].transparency.value;
     materials[a].index_refraction.exist = mat->Get( AI_MATKEY_REFRACTI, materials[a].index_refraction.value) == aiReturn_SUCCESS;
   }
 
@@ -811,9 +828,9 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     // texture coords
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
-        if( mesh->HasTextureCoords( a) )
+        if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
         {
-            WriteFloatArray( idstr + "-tex" + std::to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
+            WriteFloatArray( idstr + "-tex" + to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
                 (ai_real*) mesh->mTextureCoords[a], mesh->mNumVertices);
         }
     }
@@ -821,8 +838,8 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     // vertex colors
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
-        if( mesh->HasVertexColors( a) )
-            WriteFloatArray( idstr + "-color" + std::to_string(a), FloatType_Color, (ai_real*) mesh->mColors[a], mesh->mNumVertices);
+        if( mesh->HasVertexColors(static_cast<unsigned int>(a)) )
+            WriteFloatArray( idstr + "-color" + to_string(a), FloatType_Color, (ai_real*) mesh->mColors[a], mesh->mNumVertices);
     }
 
     // assemble vertex structure
@@ -833,12 +850,12 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<input semantic=\"NORMAL\" source=\"#" << idstrEscaped << "-normals\" />" << endstr;
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
     {
-        if( mesh->HasTextureCoords( a) )
+        if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
             mOutput << startstr << "<input semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" " /*<< "set=\"" << a << "\"" */ << " />" << endstr;
     }
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
     {
-        if( mesh->HasVertexColors( a) )
+        if( mesh->HasVertexColors(static_cast<unsigned int>(a) ) )
             mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " /*<< set=\"" << a << "\"" */ << " />" << endstr;
     }
 
@@ -883,7 +900,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
         for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
         {
-            if( mesh->HasTextureCoords( a) )
+            if( mesh->HasTextureCoords(static_cast<unsigned int>(a) ) )
                 mOutput << startstr << "<input offset=\"0\" semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" set=\"" << a << "\" />" << endstr;
         }
 
@@ -1113,7 +1130,7 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     PushTag();
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
     {
-        if( mesh->HasTextureCoords( a) )
+        if( mesh->HasTextureCoords( static_cast<unsigned int>(a) ) )
             // semantic       as in <texture texcoord=...>
             // input_semantic as in <input semantic=...>
             // input_set      as in <input set=...>

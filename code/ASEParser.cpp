@@ -25,8 +25,8 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -618,7 +618,8 @@ void Parser::ParseLV2MaterialBlock(ASE::Material& mat)
             if (TokenMatch(filePtr,"MATERIAL_TRANSPARENCY",21))
             {
                 ParseLV4MeshFloat(mat.mTransparency);
-                mat.mTransparency = 1.0 - mat.mTransparency;continue;
+                mat.mTransparency = ai_real( 1.0 ) - mat.mTransparency;
+                continue;
             }
             // material self illumination
             if (TokenMatch(filePtr,"MATERIAL_SELFILLUM",18))
@@ -1134,7 +1135,7 @@ void Parser::ParseLV3ScaleAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the �dditional information for bezier's and TCBs
+            // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_SCALE_SAMPLE" ,20))
@@ -1180,7 +1181,7 @@ void Parser::ParseLV3PosAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the three floats -
-            // we ignore the �dditional information for bezier's and TCBs
+            // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_POS_SAMPLE" ,18))
@@ -1226,7 +1227,7 @@ void Parser::ParseLV3RotAnimationBlock(ASE::Animation& anim)
             bool b = false;
 
             // For the moment we're just reading the  floats -
-            // we ignore the �dditional information for bezier's and TCBs
+            // we ignore the additional information for bezier's and TCBs
 
             // simple scaling keyframe
             if (TokenMatch(filePtr,"CONTROL_ROT_SAMPLE" ,18))
@@ -1463,30 +1464,29 @@ void Parser::ParseLV2MeshBlock(ASE::Mesh& mesh)
                 continue;
             }
             // another mesh UV channel ...
-            if (TokenMatch(filePtr,"MESH_MAPPINGCHANNEL" ,19))
-            {
-
-                unsigned int iIndex = 0;
+            if (TokenMatch(filePtr,"MESH_MAPPINGCHANNEL" ,19)) {
+                unsigned int iIndex( 0 );
                 ParseLV4MeshLong(iIndex);
-
-                if (iIndex < 2)
-                {
-                    LogWarning("Mapping channel has an invalid index. Skipping UV channel");
+                if ( 0 == iIndex ) {
+                    LogWarning( "Mapping channel has an invalid index. Skipping UV channel" );
                     // skip it ...
                     SkipSection();
+                } else {
+                    if ( iIndex < 2 ) {
+                        LogWarning( "Mapping channel has an invalid index. Skipping UV channel" );
+                        // skip it ...
+                        SkipSection();
+                    }
+                    if ( iIndex > AI_MAX_NUMBER_OF_TEXTURECOORDS ) {
+                        LogWarning( "Too many UV channels specified. Skipping channel .." );
+                        // skip it ...
+                        SkipSection();
+                    } else {
+                        // parse the mapping channel
+                        ParseLV3MappingChannel( iIndex - 1, mesh );
+                    }
+                    continue;
                 }
-                if (iIndex > AI_MAX_NUMBER_OF_TEXTURECOORDS)
-                {
-                    LogWarning("Too many UV channels specified. Skipping channel ..");
-                    // skip it ...
-                    SkipSection();
-                }
-                else
-                {
-                    // parse the mapping channel
-                    ParseLV3MappingChannel(iIndex-1,mesh);
-                }
-                continue;
             }
             // mesh animation keyframe. Not supported
             if (TokenMatch(filePtr,"MESH_ANIMATION" ,14))

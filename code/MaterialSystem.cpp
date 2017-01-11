@@ -42,8 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the material system of the library
  */
 
-
-
 #include "Hash.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
@@ -71,7 +69,7 @@ aiReturn aiGetMaterialProperty(const aiMaterial* pMat,
      *  could be improved by hashing, but it's possibly
      *  no worth the effort (we're bound to C structures,
      *  thus std::map or derivates are not applicable. */
-    for (unsigned int i = 0; i < pMat->mNumProperties;++i) {
+    for ( unsigned int i = 0; i < pMat->mNumProperties; ++i ) {
         aiMaterialProperty* prop = pMat->mProperties[i];
 
         if (prop /* just for safety ... */
@@ -93,7 +91,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
     const char* pKey,
     unsigned int type,
     unsigned int index,
-    float* pOut,
+    ai_real* pOut,
     unsigned int* pMax)
 {
     ai_assert (pOut != NULL);
@@ -105,7 +103,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
         return AI_FAILURE;
     }
 
-    // data is given in floats, simply copy it
+    // data is given in floats, convert to ai_real
     unsigned int iWrite = 0;
     if( aiPTI_Float == prop->mType || aiPTI_Buffer == prop->mType)  {
         iWrite = prop->mDataLength / sizeof(float);
@@ -113,7 +111,20 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
             iWrite = std::min(*pMax,iWrite); ;
         }
         for (unsigned int a = 0; a < iWrite;++a)    {
-            pOut[a] = static_cast<float> ( reinterpret_cast<float*>(prop->mData)[a] );
+            pOut[a] = static_cast<ai_real> ( reinterpret_cast<float*>(prop->mData)[a] );
+        }
+        if (pMax) {
+            *pMax = iWrite;
+        }
+    }
+    // data is given in doubles, convert to float
+    else if( aiPTI_Double == prop->mType)  {
+        iWrite = prop->mDataLength / sizeof(double);
+        if (pMax) {
+            iWrite = std::min(*pMax,iWrite); ;
+        }
+        for (unsigned int a = 0; a < iWrite;++a)    {
+            pOut[a] = static_cast<ai_real> ( reinterpret_cast<double*>(prop->mData)[a] );
         }
         if (pMax) {
             *pMax = iWrite;
@@ -126,7 +137,7 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
             iWrite = std::min(*pMax,iWrite); ;
         }
         for (unsigned int a = 0; a < iWrite;++a)    {
-            pOut[a] = static_cast<float> ( reinterpret_cast<int32_t*>(prop->mData)[a] );
+            pOut[a] = static_cast<ai_real> ( reinterpret_cast<int32_t*>(prop->mData)[a] );
         }
         if (pMax) {
             *pMax = iWrite;
@@ -138,14 +149,15 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
             iWrite = *pMax;
         }
         // strings are zero-terminated with a 32 bit length prefix, so this is safe
-        const char* cur =  prop->mData+4;
-        ai_assert(prop->mDataLength>=5 && !prop->mData[prop->mDataLength-1]);
-        for (unsigned int a = 0; ;++a) {
-            cur = fast_atoreal_move<float>(cur,pOut[a]);
-            if(a==iWrite-1) {
+        const char *cur = prop->mData + 4;
+        ai_assert( prop->mDataLength >= 5 );
+        ai_assert( !prop->mData[ prop->mDataLength - 1 ] );
+        for ( unsigned int a = 0; ;++a) {
+            cur = fast_atoreal_move<ai_real>(cur,pOut[a]);
+            if ( a==iWrite-1 ) {
                 break;
             }
-            if(!IsSpace(*cur)) {
+            if ( !IsSpace(*cur) ) {
                 DefaultLogger::get()->error("Material property" + std::string(pKey) +
                     " is a string; failed to parse a float array out of it.");
                 return AI_FAILURE;
@@ -157,7 +169,6 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
         }
     }
     return AI_SUCCESS;
-
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -211,8 +222,9 @@ aiReturn aiGetMaterialIntegerArray(const aiMaterial* pMat,
             iWrite = *pMax;
         }
         // strings are zero-terminated with a 32 bit length prefix, so this is safe
-        const char* cur =  prop->mData+4;
-        ai_assert(prop->mDataLength>=5 && !prop->mData[prop->mDataLength-1]);
+        const char *cur =  prop->mData+4;
+        ai_assert( prop->mDataLength >= 5 );
+        ai_assert( !prop->mData[ prop->mDataLength - 1 ] );
         for (unsigned int a = 0; ;++a) {
             pOut[a] = strtol10(cur,&cur);
             if(a==iWrite-1) {
@@ -241,11 +253,11 @@ aiReturn aiGetMaterialColor(const aiMaterial* pMat,
     aiColor4D* pOut)
 {
     unsigned int iMax = 4;
-    const aiReturn eRet = aiGetMaterialFloatArray(pMat,pKey,type,index,(float*)pOut,&iMax);
+    const aiReturn eRet = aiGetMaterialFloatArray(pMat,pKey,type,index,(ai_real*)pOut,&iMax);
 
     // if no alpha channel is defined: set it to 1.0
     if (3 == iMax) {
-        pOut->a = 1.0f;
+        pOut->a = 1.0;
     }
 
     return eRet;
@@ -260,7 +272,7 @@ aiReturn aiGetMaterialUVTransform(const aiMaterial* pMat,
     aiUVTransform* pOut)
 {
     unsigned int iMax = 4;
-    return  aiGetMaterialFloatArray(pMat,pKey,type,index,(float*)pOut,&iMax);
+    return  aiGetMaterialFloatArray(pMat,pKey,type,index,(ai_real*)pOut,&iMax);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -285,7 +297,8 @@ aiReturn aiGetMaterialString(const aiMaterial* pMat,
         // The string is stored as 32 but length prefix followed by zero-terminated UTF8 data
         pOut->length = static_cast<unsigned int>(*reinterpret_cast<uint32_t*>(prop->mData));
 
-        ai_assert(pOut->length+1+4==prop->mDataLength && !prop->mData[prop->mDataLength-1]);
+        ai_assert( pOut->length+1+4==prop->mDataLength );
+        ai_assert( !prop->mData[ prop->mDataLength - 1 ] );
         memcpy(pOut->data,prop->mData+4,pOut->length+1);
     }
     else {
@@ -304,12 +317,12 @@ ASSIMP_API unsigned int aiGetMaterialTextureCount(const C_STRUCT aiMaterial* pMa
 {
     ai_assert (pMat != NULL);
 
-    /* Textures are always stored with ascending indices (ValidateDS provides a check, so we don't need to do it again) */
+    // Textures are always stored with ascending indices (ValidateDS provides a check, so we don't need to do it again)
     unsigned int max = 0;
     for (unsigned int i = 0; i < pMat->mNumProperties;++i) {
         aiMaterialProperty* prop = pMat->mProperties[i];
 
-        if (prop /* just a sanity check ... */
+        if ( prop /* just a sanity check ... */
             && 0 == strcmp( prop->mKey.data, _AI_MATKEY_TEXTURE_BASE )
             && prop->mSemantic == type) {
 
@@ -326,7 +339,7 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     C_STRUCT aiString* path,
     aiTextureMapping* _mapping  /*= NULL*/,
     unsigned int* uvindex       /*= NULL*/,
-    float* blend                /*= NULL*/,
+    ai_real* blend              /*= NULL*/,
     aiTextureOp* op             /*= NULL*/,
     aiTextureMapMode* mapmode   /*= NULL*/,
     unsigned int* flags         /*= NULL*/
@@ -368,14 +381,16 @@ aiReturn aiGetMaterialTexture(const C_STRUCT aiMaterial* mat,
     return AI_SUCCESS;
 }
 
+static const unsigned int DefaultNumAllocated = 5;
+
 // ------------------------------------------------------------------------------------------------
 // Construction. Actually the one and only way to get an aiMaterial instance
-aiMaterial::aiMaterial()
-{
+aiMaterial::aiMaterial() 
+: mProperties( NULL )
+, mNumProperties( 0 )
+, mNumAllocated( DefaultNumAllocated ) {
     // Allocate 5 entries by default
-    mNumProperties = 0;
-    mNumAllocated = 5;
-    mProperties = new aiMaterialProperty*[5];
+    mProperties = new aiMaterialProperty*[ DefaultNumAllocated ];
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -514,7 +529,7 @@ aiReturn aiMaterial::AddProperty (const aiString* pInput,
         s[1] = static_cast<uint32_t>(pInput->length);
 
         return AddBinaryProperty(s+1,
-            pInput->length+1+4,
+            static_cast<unsigned int>(pInput->length+1+4),
             pKey,
             type,
             index,
@@ -522,7 +537,7 @@ aiReturn aiMaterial::AddProperty (const aiString* pInput,
     }
     ai_assert(sizeof(size_t)==4);
     return AddBinaryProperty(pInput,
-        pInput->length+1+4,
+        static_cast<unsigned int>(pInput->length+1+4),
         pKey,
         type,
         index,
@@ -530,10 +545,10 @@ aiReturn aiMaterial::AddProperty (const aiString* pInput,
 }
 
 // ------------------------------------------------------------------------------------------------
-uint32_t Assimp :: ComputeMaterialHash(const aiMaterial* mat, bool includeMatName /*= false*/)
+uint32_t Assimp::ComputeMaterialHash(const aiMaterial* mat, bool includeMatName /*= false*/)
 {
     uint32_t hash = 1503; // magic start value, chosen to be my birthday :-)
-    for (unsigned int i = 0; i < mat->mNumProperties;++i)   {
+    for ( unsigned int i = 0; i < mat->mNumProperties; ++i ) {
         aiMaterialProperty* prop;
 
         // Exclude all properties whose first character is '?' from the hash
@@ -572,15 +587,16 @@ void aiMaterial::CopyPropertyList(aiMaterial* pcDest,
         }
     }
 
-    if(pcOld)
-    	delete[] pcOld;
+    if ( pcOld ) {
+        delete[] pcOld;
+    }
 
     for (unsigned int i = iOldNum; i< pcDest->mNumProperties;++i)   {
         aiMaterialProperty* propSrc = pcSrc->mProperties[i];
 
         // search whether we have already a property with this name -> if yes, overwrite it
         aiMaterialProperty* prop;
-        for (unsigned int q = 0; q < iOldNum;++q) {
+        for ( unsigned int q = 0; q < iOldNum; ++q ) {
             prop = pcDest->mProperties[q];
             if (prop /* just for safety */ && prop->mKey == propSrc->mKey && prop->mSemantic == propSrc->mSemantic
                 && prop->mIndex == propSrc->mIndex) {
@@ -604,5 +620,4 @@ void aiMaterial::CopyPropertyList(aiMaterial* pcDest,
         prop->mData = new char[propSrc->mDataLength];
         memcpy(prop->mData,propSrc->mData,prop->mDataLength);
     }
-    return;
 }

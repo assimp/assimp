@@ -39,47 +39,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
+#include "TestIOSystem.h"
 
 #include <assimp/IOSystem.hpp>
 
 using namespace std;
 using namespace Assimp;
 
-static const string Sep = "/";
-class TestIOSystem : public IOSystem {
-public:
-    TestIOSystem() : IOSystem() {}
-    virtual ~TestIOSystem() {}
-    virtual bool Exists( const char* ) const {
-        return true;
-    }
-    virtual char getOsSeparator() const {
-        return Sep[ 0 ];
-    }
-
-    virtual IOStream* Open(const char* pFile, const char* pMode = "rb") {
-        return NULL;
-    }
-
-    virtual void Close( IOStream* pFile) {
-        // empty
-    }
-};
-
 class IOSystemTest : public ::testing::Test {
 public:
-    virtual void SetUp() { pImp = new TestIOSystem(); }
-    virtual void TearDown() { delete pImp; }
+    virtual void SetUp() { 
+        pImp = new TestIOSystem(); 
+    }
+    
+    virtual void TearDown() { 
+        delete pImp; 
+    }
 
 protected:
     TestIOSystem* pImp;
 };
-
-/*
-virtual bool PushDirectory( const std::string &path );
-virtual const std::string &CurrentDirectory() const;
-virtual bool PopDirectory();
-*/
 
 TEST_F( IOSystemTest, accessDirectoryStackTest ) {
     EXPECT_FALSE( pImp->PopDirectory() );

@@ -223,8 +223,8 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
         unsigned int vcount = 0, icount = 0;
         for (const DXF::Block& bl : output.blocks) {
             for (std::shared_ptr<const DXF::PolyLine> pl : bl.lines) {
-                vcount += pl->positions.size();
-                icount += pl->counts.size();
+                vcount += static_cast<unsigned int>(pl->positions.size());
+                icount += static_cast<unsigned int>(pl->counts.size());
             }
         }
 
@@ -296,7 +296,7 @@ void DXFImporter::ConvertMeshes(aiScene* pScene, DXF::FileData& output)
         for(const DXF::PolyLine* pl : corr[elem.second]){
             // sum over all faces since we need to 'verbosify' them.
             cvert += std::accumulate(pl->counts.begin(),pl->counts.end(),0);
-            cface += pl->counts.size();
+            cface += static_cast<unsigned int>(pl->counts.size());
         }
 
         aiVector3D* verts = mesh->mVertices = new aiVector3D[cvert];
@@ -705,7 +705,7 @@ void DXFImporter::ParsePolyLine(DXF::LineReader& reader, DXF::FileData& output)
 
         // closed polyline?
         if (line.flags & DXF_POLYLINE_FLAG_CLOSED) {
-            line.indices.push_back(line.positions.size()-1);
+            line.indices.push_back(static_cast<unsigned int>(line.positions.size()-1));
             line.indices.push_back(0);
             line.counts.push_back(2);
         }
@@ -906,7 +906,7 @@ void DXFImporter::Parse3DFace(DXF::LineReader& reader, DXF::FileData& output)
     line.counts.push_back(cnt);
 
     for (unsigned int i = 0; i < cnt; ++i) {
-        line.indices.push_back(line.positions.size());
+        line.indices.push_back(static_cast<unsigned int>(line.positions.size()));
         line.positions.push_back(vip[i]);
         line.colors.push_back(clr);
     }

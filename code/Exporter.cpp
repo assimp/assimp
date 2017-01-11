@@ -91,6 +91,7 @@ void ExportSceneGLTF(const char*, IOSystem*, const aiScene*, const ExportPropert
 void ExportSceneGLB(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 
 // ------------------------------------------------------------------------------------------------
 // global array of all export formats which Assimp supports in its current build
@@ -100,7 +101,7 @@ Exporter::ExportFormatEntry gExporters[] =
     Exporter::ExportFormatEntry( "collada", "COLLADA - Digital Asset Exchange Schema", "dae", &ExportSceneCollada),
 #endif
 
-#ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
+#ifndef ASSIMP_BUILD_NO_X_EXPORTER
     Exporter::ExportFormatEntry( "x", "X Files", "x", &ExportSceneXFile,
         aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_FlipUVs),
 #endif
@@ -139,9 +140,9 @@ Exporter::ExportFormatEntry gExporters[] =
 
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
     Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
-        aiProcess_JoinIdenticalVertices /*| aiProcess_SortByPType*/),
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
     Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
-        aiProcess_JoinIdenticalVertices /*| aiProcess_SortByPType*/),
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
 #endif
 
 #ifndef ASSIMP_BUILD_NO_ASSBIN_EXPORTER
@@ -151,6 +152,10 @@ Exporter::ExportFormatEntry gExporters[] =
 #ifndef ASSIMP_BUILD_NO_ASSXML_EXPORTER
     Exporter::ExportFormatEntry( "assxml", "Assxml Document", "assxml" , &ExportSceneAssxml, 0),
 #endif
+
+#ifndef ASSIMP_BUILD_NO_X3D_EXPORTER
+	Exporter::ExportFormatEntry( "x3d", "Extensible 3D", "x3d" , &ExportSceneX3D, 0),
+#endif
 };
 
 #define ASSIMP_NUM_EXPORTERS (sizeof(gExporters)/sizeof(gExporters[0]))
@@ -158,7 +163,6 @@ Exporter::ExportFormatEntry gExporters[] =
 
 class ExporterPimpl {
 public:
-
     ExporterPimpl()
         : blob()
         , mIOSystem(new Assimp::DefaultIOSystem())
@@ -166,7 +170,7 @@ public:
     {
         GetPostProcessingStepInstanceList(mPostProcessingSteps);
 
-        // grab all builtin exporters
+        // grab all built-in exporters
         mExporters.resize(ASSIMP_NUM_EXPORTERS);
         std::copy(gExporters,gExporters+ASSIMP_NUM_EXPORTERS,mExporters.begin());
     }
@@ -321,7 +325,7 @@ aiReturn Exporter :: Export( const aiScene* pScene, const char* pFormatId, const
 
                 // Always create a full copy of the scene. We might optimize this one day,
                 // but for now it is the most pragmatic way.
-                aiScene* scenecopy_tmp;
+                aiScene* scenecopy_tmp = NULL;
                 SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
 
                 std::unique_ptr<aiScene> scenecopy(scenecopy_tmp);
@@ -597,28 +601,28 @@ bool ExportProperties :: HasPropertyInteger(const char* szName) const
 bool ExportProperties :: HasPropertyBool(const char* szName) const
 {
     return HasGenericProperty<int>(mIntProperties, szName);
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Has a configuration property
 bool ExportProperties :: HasPropertyFloat(const char* szName) const
 {
     return HasGenericProperty<ai_real>(mFloatProperties, szName);
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Has a configuration property
 bool ExportProperties :: HasPropertyString(const char* szName) const
 {
     return HasGenericProperty<std::string>(mStringProperties, szName);
-};
+}
 
 // ------------------------------------------------------------------------------------------------
 // Has a configuration property
 bool ExportProperties :: HasPropertyMatrix(const char* szName) const
 {
     return HasGenericProperty<aiMatrix4x4>(mMatrixProperties, szName);
-};
+}
 
 
 #endif // !ASSIMP_BUILD_NO_EXPORT

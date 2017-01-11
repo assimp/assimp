@@ -59,7 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 
-
 using namespace Assimp;
 using namespace Assimp::Collada;
 using namespace Assimp::Formatter;
@@ -300,7 +299,7 @@ void ColladaParser::ReadAnimationClipLibrary()
 				else if (indexID >= 0)
 					animName = mReader->getAttributeValue(indexID);
 				else
-					animName = std::string("animation_") + std::to_string(mAnimationClipLibrary.size());
+					animName = std::string("animation_") + to_string(mAnimationClipLibrary.size());
 
 				std::pair<std::string, std::vector<std::string> > clip;
 
@@ -655,7 +654,7 @@ void ColladaParser::ReadController( Collada::Controller& pController)
             // two types of controllers: "skin" and "morph". Only the first one is relevant, we skip the other
             if( IsElement( "morph"))
             {
-                // should skip everything inside, so there's no danger of catching elements inbetween
+                // should skip everything inside, so there's no danger of catching elements in between
                 SkipElement();
             }
             else if( IsElement( "skin"))
@@ -2535,7 +2534,7 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
                 aiColor4D result(0, 0, 0, 1);
                 for (size_t i = 0; i < pInput.mResolved->mSize; ++i)
                 {
-                    result[i] = obj[pInput.mResolved->mSubOffset[i]];
+                    result[static_cast<unsigned int>(i)] = obj[pInput.mResolved->mSubOffset[i]];
                 }
                 pMesh->mColors[pInput.mIndex].push_back(result);
             } else
@@ -2828,7 +2827,7 @@ void ColladaParser::ReadNodeGeometry( Node* pNode)
 
     if( !mReader->isEmptyElement())
     {
-        // read material associations. Ignore additional elements inbetween
+        // read material associations. Ignore additional elements in between
         while( mReader->read())
         {
             if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -3075,7 +3074,7 @@ aiMatrix4x4 ColladaParser::CalculateResultTransform( const std::vector<Transform
             case TF_ROTATE:
             {
                 aiMatrix4x4 rot;
-                ai_real angle = tf.f[3] * ai_real( AI_MATH_PI) / 180.0;
+                ai_real angle = tf.f[3] * ai_real( AI_MATH_PI) / ai_real( 180.0 );
                 aiVector3D axis( tf.f[0], tf.f[1], tf.f[2]);
                 aiMatrix4x4::Rotation( angle, axis, rot);
                 res *= rot;

@@ -48,8 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsingUtils.h"
 #include <vector>
 
-namespace Assimp
-{
+namespace Assimp {
 
 /** @brief  Returns true, if the last entry of the buffer is reached.
  *  @param  it  Iterator of current position.
@@ -57,15 +56,14 @@ namespace Assimp
  *  @return true, if the end of the buffer is reached.
  */
 template<class char_t>
-inline bool isEndOfBuffer(  char_t it, char_t end )
-{
+inline bool isEndOfBuffer(  char_t it, char_t end ) {
     if ( it == end )
     {
         return true;
     }
     else
     {
-        end--;
+        --end;
     }
     return ( it == end );
 }
@@ -142,11 +140,52 @@ inline char_t getName( char_t it, char_t end, std::string &name )
     }
 
     char *pStart = &( *it );
-    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) ) {
+    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) && !IsSpaceOrNewLine( *it ) ) {
         ++it;
     }
 
-    while( isEndOfBuffer( it, end ) || IsLineEnd( *it ) || IsSpaceOrNewLine( *it ) ) {
+    /*while( isEndOfBuffer( it, end ) || IsLineEnd( *it ) || IsSpaceOrNewLine( *it ) ) {
+        --it;
+    }
+    ++it;
+    */
+    // Get name
+    // if there is no name, and the previous char is a separator, come back to start
+    while (&(*it) < pStart) {
+        ++it;
+    }
+    std::string strName( pStart, &(*it) );
+    if ( strName.empty() )
+        return it;
+    else
+        name = strName;
+
+    return it;
+}
+
+/** @brief  Get a name from the current line. Do not preserve space
+ *    in the middle, but trim it at the end.
+ *  @param  it      set to current position
+ *  @param  end     set to end of scratch buffer for readout
+ *  @param  name    Separated name
+ *  @return Current-iterator with new position
+ */
+template<class char_t>
+inline char_t getNameNoSpace( char_t it, char_t end, std::string &name )
+{
+    name = "";
+    if( isEndOfBuffer( it, end ) ) {
+        return end;
+    }
+
+    char *pStart = &( *it );
+    while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it )
+          && !IsSpaceOrNewLine( *it ) ) {
+        ++it;
+    }
+
+    while( isEndOfBuffer( it, end ) || IsLineEnd( *it )
+          || IsSpaceOrNewLine( *it ) ) {
         --it;
     }
     ++it;
@@ -244,6 +283,20 @@ string_type trim_whitespaces(string_type str)
     while (!str.empty() && IsSpace(str[0])) str.erase(0);
     while (!str.empty() && IsSpace(str[str.length() - 1])) str.erase(str.length() - 1);
     return str;
+}
+
+template<class T>
+bool hasLineEnd( T it, T end ) {
+    bool hasLineEnd( false );
+    while ( !isEndOfBuffer( it, end ) ) {
+        it++;
+        if ( IsLineEnd( it ) ) {
+            hasLineEnd = true;
+            break;
+        }
+    }
+
+    return hasLineEnd;
 }
 
 } // Namespace Assimp

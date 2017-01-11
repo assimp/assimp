@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
+#pragma once
 #ifndef OBJ_FILEDATA_H_INC
 #define OBJ_FILEDATA_H_INC
 
@@ -56,59 +57,43 @@ struct Material;
 // ------------------------------------------------------------------------------------------------
 //! \struct Face
 //! \brief  Data structure for a simple obj-face, describes discredit,l.ation and materials
-struct Face
-{
+// ------------------------------------------------------------------------------------------------
+struct Face {
     typedef std::vector<unsigned int> IndexArray;
 
     //! Primitive type
     aiPrimitiveType m_PrimitiveType;
     //! Vertex indices
-    IndexArray *m_pVertices;
+    IndexArray m_vertices;
     //! Normal indices
-    IndexArray *m_pNormals;
+    IndexArray m_normals;
     //! Texture coordinates indices
-    IndexArray *m_pTexturCoords;
+    IndexArray m_texturCoords;
     //! Pointer to assigned material
     Material *m_pMaterial;
 
     //! \brief  Default constructor
-    //! \param  pVertices   Pointer to assigned vertex indexbuffer
-    //! \param  pNormals    Pointer to assigned normals indexbuffer
-    //! \param  pTexCoords  Pointer to assigned texture indexbuffer
-    Face( std::vector<unsigned int> *pVertices,
-            std::vector<unsigned int> *pNormals,
-            std::vector<unsigned int> *pTexCoords,
-            aiPrimitiveType pt = aiPrimitiveType_POLYGON) :
-        m_PrimitiveType( pt ),
-        m_pVertices( pVertices ),
-        m_pNormals( pNormals ),
-        m_pTexturCoords( pTexCoords ),
-        m_pMaterial( 0L )
-    {
+    Face( aiPrimitiveType pt = aiPrimitiveType_POLYGON) 
+    : m_PrimitiveType( pt )
+    , m_vertices()
+    , m_normals()
+    , m_texturCoords()
+    , m_pMaterial( 0L ) {
         // empty
     }
 
     //! \brief  Destructor
-    ~Face()
-    {
-        delete m_pVertices;
-        m_pVertices = NULL;
-
-        delete m_pNormals;
-        m_pNormals = NULL;
-
-        delete m_pTexturCoords;
-        m_pTexturCoords = NULL;
+    ~Face() {
+        // empty
     }
 };
 
 // ------------------------------------------------------------------------------------------------
 //! \struct Object
-//! \brief  Stores all objects of an objfile object definition
-struct Object
-{
-    enum ObjectType
-    {
+//! \brief  Stores all objects of an obj-file object definition
+// ------------------------------------------------------------------------------------------------
+struct Object {
+    enum ObjectType {
         ObjType,
         GroupType
     };
@@ -123,29 +108,24 @@ struct Object
     std::vector<unsigned int> m_Meshes;
 
     //! \brief  Default constructor
-    Object() :
-        m_strObjName("")
-    {
+    Object() 
+    : m_strObjName("") {
         // empty
     }
 
     //! \brief  Destructor
-    ~Object()
-    {
-        for (std::vector<Object*>::iterator it = m_SubObjects.begin();
-            it != m_SubObjects.end(); ++it)
-        {
+    ~Object() {
+        for ( std::vector<Object*>::iterator it = m_SubObjects.begin(); it != m_SubObjects.end(); ++it) {
             delete *it;
         }
-        m_SubObjects.clear();
     }
 };
 
 // ------------------------------------------------------------------------------------------------
 //! \struct Material
 //! \brief  Data structure to store all material specific data
-struct Material
-{
+// ------------------------------------------------------------------------------------------------
+struct Material {
     //! Name of material description
     aiString MaterialName;
 
@@ -160,8 +140,8 @@ struct Material
     aiString textureSpecularity;
     aiString textureOpacity;
     aiString textureDisp;
-    enum TextureType
-    {
+
+    enum TextureType {
         TextureDiffuseType = 0,
         TextureSpecularType,
         TextureAmbientType,
@@ -201,22 +181,19 @@ struct Material
 
     //! Constructor
     Material()
-        :   diffuse (0.6,0.6,0.6)
-        ,   alpha   (1.0)
-        ,   shineness (0.0)
-        ,   illumination_model (1)
-        ,   ior     (1.0)
-    {
+    :   diffuse ( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ) )
+    ,   alpha   (ai_real( 1.0 ) )
+    ,   shineness ( ai_real( 0.0) )
+    ,   illumination_model (1)
+    ,   ior     ( ai_real( 1.0 ) ) {
         // empty
-        for (size_t i = 0; i < TextureTypeCount; ++i)
-        {
-            clamp[i] = false;
+        for (size_t i = 0; i < TextureTypeCount; ++i) {
+            clamp[ i ] = false;
         }
     }
 
     // Destructor
-    ~Material()
-    {
+    ~Material() {
         // empty
     }
 };
@@ -224,6 +201,7 @@ struct Material
 // ------------------------------------------------------------------------------------------------
 //! \struct Mesh
 //! \brief  Data structure to store a mesh
+// ------------------------------------------------------------------------------------------------
 struct Mesh {
     static const unsigned int NoMaterial = ~0u;
     /// The name for the mesh
@@ -254,8 +232,7 @@ struct Mesh {
     }
 
     /// Destructor
-    ~Mesh()
-    {
+    ~Mesh() {
         for (std::vector<Face*>::iterator it = m_Faces.begin();
             it != m_Faces.end(); ++it)
         {
@@ -267,8 +244,8 @@ struct Mesh {
 // ------------------------------------------------------------------------------------------------
 //! \struct Model
 //! \brief  Data structure to store all obj-specific model datas
-struct Model
-{
+// ------------------------------------------------------------------------------------------------
+struct Model {
     typedef std::map<std::string, std::vector<unsigned int>* > GroupMap;
     typedef std::map<std::string, std::vector<unsigned int>* >::iterator GroupMapIt;
     typedef std::map<std::string, std::vector<unsigned int>* >::const_iterator ConstGroupMapIt;
@@ -285,8 +262,6 @@ struct Model
     ObjFile::Material *m_pDefaultMaterial;
     //! Vector with all generated materials
     std::vector<std::string> m_MaterialLib;
-    //! Vector with all generated group
-    std::vector<std::string> m_GroupLib;
     //! Vector with all generated vertices
     std::vector<aiVector3D> m_Vertices;
     //! vector with all generated normals
@@ -322,8 +297,7 @@ struct Model
     }
 
     //! \brief  The class destructor
-    ~Model()
-    {
+    ~Model() {
         // Clear all stored object instances
         for (std::vector<Object*>::iterator it = m_Objects.begin();
             it != m_Objects.end(); ++it) {
@@ -354,4 +328,4 @@ struct Model
 } // Namespace ObjFile
 } // Namespace Assimp
 
-#endif
+#endif // OBJ_FILEDATA_H_INC

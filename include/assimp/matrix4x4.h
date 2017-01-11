@@ -93,7 +93,15 @@ public:
 public:
 
     // array access operators
+	/** @fn TReal* operator[] (unsigned int p_iIndex)
+	 *  @param [in] p_iIndex - index of the row.
+	 *  @return pointer to pointed row.
+	 */
     TReal* operator[]       (unsigned int p_iIndex);
+
+	/** @fn const TReal* operator[] (unsigned int p_iIndex) const
+	 *  @overload TReal* operator[] (unsigned int p_iIndex)
+	 */
     const TReal* operator[] (unsigned int p_iIndex) const;
 
     // comparison operators
@@ -139,6 +147,27 @@ public:
      */
     void Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
         aiVector3t<TReal>& position) const;
+
+	// -------------------------------------------------------------------
+	/** @fn void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotation, aiVector3t<TReal>& pPosition) const
+     *  @brief Decompose a trafo matrix into its original components.
+     * Thx to good FAQ at http://www.gamedev.ru/code/articles/faq_matrix_quat
+     *  @param [out] pScaling - Receives the output scaling for the x,y,z axes.
+     *  @param [out] pRotation - Receives the output rotation as a Euler angles.
+     *  @param [out] pPosition - Receives the output position for the x,y,z axes.
+     */
+    void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotation, aiVector3t<TReal>& pPosition) const;
+
+	// -------------------------------------------------------------------
+	/** @fn void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotationAxis, TReal& pRotationAngle, aiVector3t<TReal>& pPosition) const
+     *  @brief Decompose a trafo matrix into its original components
+	 * Thx to good FAQ at http://www.gamedev.ru/code/articles/faq_matrix_quat
+     *  @param [out] pScaling - Receives the output scaling for the x,y,z axes.
+     *  @param [out] pRotationAxis - Receives the output rotation axis.
+	 *  @param [out] pRotationAngle - Receives the output rotation angle for @ref pRotationAxis.
+     *  @param [out] pPosition - Receives the output position for the x,y,z axes.
+     */
+    void Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotationAxis, TReal& pRotationAngle, aiVector3t<TReal>& pPosition) const;
 
     // -------------------------------------------------------------------
     /** @brief Decompose a trafo matrix with no scaling into its

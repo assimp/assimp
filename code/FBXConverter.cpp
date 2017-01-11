@@ -71,7 +71,7 @@ using namespace Util;
 
 #define CONVERT_FBX_TIME(time) static_cast<double>(time) / 46186158000L
 
-    // XXX vc9's debugger won't step into anonymous namespaces
+// XXX vc9's debugger won't step into anonymous namespaces
 //namespace {
 
 /** Dummy class to encapsulate the conversion process */
@@ -114,10 +114,8 @@ private:
     // collect and assign child nodes
     void ConvertNodes( uint64_t id, aiNode& parent, const aiMatrix4x4& parent_transform = aiMatrix4x4() );
 
-
     // ------------------------------------------------------------------------------------------------
     void ConvertLights( const Model& model );
-
 
     // ------------------------------------------------------------------------------------------------
     void ConvertCameras( const Model& model );
@@ -188,7 +186,6 @@ private:
     // ------------------------------------------------------------------------------------------------
     static const unsigned int NO_MATERIAL_SEPARATION = /* std::numeric_limits<unsigned int>::max() */
         static_cast<unsigned int>(-1);
-
 
     // ------------------------------------------------------------------------------------------------
     /**
@@ -340,8 +337,6 @@ private:
     // key (time), value, mapto (component index)
     typedef std::tuple<std::shared_ptr<KeyTimeList>, std::shared_ptr<KeyValueList>, unsigned int > KeyFrameList;
     typedef std::vector<KeyFrameList> KeyFrameListList;
-
-
 
     // ------------------------------------------------------------------------------------------------
     KeyFrameListList GetKeyframeList( const std::vector<const AnimationCurveNode*>& nodes, int64_t start, int64_t stop );
@@ -645,7 +640,7 @@ void Converter::ConvertLight( const Model& model, const Light& light )
 
     out_light->mName.Set( FixNodeName( model.Name() ) );
 
-    const float intensity = light.Intensity();
+    const float intensity = light.Intensity() / 100.0f;
     const aiVector3D& col = light.Color();
 
     out_light->mColorDiffuse = aiColor3D( col.x, col.y, col.z );
@@ -654,6 +649,11 @@ void Converter::ConvertLight( const Model& model, const Light& light )
     out_light->mColorDiffuse.b *= intensity;
 
     out_light->mColorSpecular = out_light->mColorDiffuse;
+
+    //lights are defined along negative y direction
+    out_light->mPosition = aiVector3D(0.0f);
+    out_light->mDirection = aiVector3D(0.0f, -1.0f, 0.0f);
+    out_light->mUp = aiVector3D(0.0f, 0.0f, -1.0f);
 
     switch ( light.LightType() )
     {
@@ -684,17 +684,23 @@ void Converter::ConvertLight( const Model& model, const Light& light )
         ai_assert( false );
     }
 
-    // XXX: how to best convert the near and far decay ranges?
+    float decay = light.DecayStart();
     switch ( light.DecayType() )
     {
     case Light::Decay_None:
-        out_light->mAttenuationConstant = 1.0f;
+        out_light->mAttenuationConstant = decay;
+        out_light->mAttenuationLinear = 0.0f;
+        out_light->mAttenuationQuadratic = 0.0f;
         break;
     case Light::Decay_Linear:
-        out_light->mAttenuationLinear = 1.0f;
+        out_light->mAttenuationConstant = 0.0f;
+        out_light->mAttenuationLinear = 2.0f / decay;
+        out_light->mAttenuationQuadratic = 0.0f;
         break;
     case Light::Decay_Quadratic:
-        out_light->mAttenuationQuadratic = 1.0f;
+        out_light->mAttenuationConstant = 0.0f;
+        out_light->mAttenuationLinear = 0.0f;
+        out_light->mAttenuationQuadratic = 2.0f / (decay * decay);
         break;
     case Light::Decay_Cubic:
         FBXImporter::LogWarn( "cannot represent cubic attenuation, set to Quadratic" );
@@ -713,10 +719,13 @@ void Converter::ConvertCamera( const Model& model, const Camera& cam )
     out_camera->mName.Set( FixNodeName( model.Name() ) );
 
     out_camera->mAspect = cam.AspectWidth() / cam.AspectHeight();
-    out_camera->mPosition = cam.Position();
-    out_camera->mUp = cam.UpVector();
-    out_camera->mLookAt = cam.InterestPosition() - out_camera->mPosition;
+    //cameras are defined along positive x direction
+    out_camera->mPosition = aiVector3D(0.0f);
+    out_camera->mLookAt = aiVector3D(1.0f, 0.0f, 0.0f);
+    out_camera->mUp = aiVector3D(0.0f, 1.0f, 0.0f);
     out_camera->mHorizontalFOV = AI_DEG_TO_RAD( cam.FieldOfView() );
+    out_camera->mClipPlaneNear = cam.NearPlane();
+    out_camera->mClipPlaneFar = cam.FarPlane();
 }
 
 
@@ -899,7 +908,6 @@ void Converter::GetRotationMatrix( Model::RotOrder mode, const aiVector3D& rotat
     }
 }
 
-
 bool Converter::NeedsComplexTransformationChain( const Model& model )
 {
     const PropertyTable& props = model.Props();
@@ -922,7 +930,6 @@ bool Converter::NeedsComplexTransformationChain( const Model& model )
 
     return false;
 }
-
 
 std::string Converter::NameTransformationChainNode( const std::string& name, TransformationComp comp )
 {
@@ -1067,7 +1074,6 @@ void Converter::GenerateTransformationNodeChain( const Model& model,
     }
 }
 
-
 void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
 {
     const PropertyTable& props = model.Props();
@@ -1075,10 +1081,7 @@ void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
 
     // create metadata on node
     std::size_t numStaticMetaData = 2;
-    aiMetadata* data = new aiMetadata();
-    data->mNumProperties = unparsedProperties.size() + numStaticMetaData;
-    data->mKeys = new aiString[ data->mNumProperties ]();
-    data->mValues = new aiMetadataEntry[ data->mNumProperties ]();
+    aiMetadata* data = aiMetadata::Alloc( static_cast<unsigned int>(unparsedProperties.size() + numStaticMetaData) );
     nd.mMetaData = data;
     int index = 0;
 
@@ -1089,22 +1092,22 @@ void Converter::SetupNodeMetadata( const Model& model, aiNode& nd )
 
     // add unparsed properties to the node's metadata
     for( const DirectPropertyMap::value_type& prop : unparsedProperties ) {
-
         // Interpret the property as a concrete type
-        if ( const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >() )
+        if ( const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int> >() )
+        } else if ( const TypedProperty<int>* interpreted = prop.second->As<TypedProperty<int> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t> >() )
+        } else if ( const TypedProperty<uint64_t>* interpreted = prop.second->As<TypedProperty<uint64_t> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >() )
+        } else if ( const TypedProperty<float>* interpreted = prop.second->As<TypedProperty<float> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else if ( const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >() )
+        } else if ( const TypedProperty<std::string>* interpreted = prop.second->As<TypedProperty<std::string> >() ) {
             data->Set( index++, prop.first, aiString( interpreted->Value() ) );
-        else if ( const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >() )
+        } else if ( const TypedProperty<aiVector3D>* interpreted = prop.second->As<TypedProperty<aiVector3D> >() ) {
             data->Set( index++, prop.first, interpreted->Value() );
-        else
-            assert( false );
+        } else {
+            ai_assert( false );
+        }
     }
 }
 
@@ -1134,7 +1137,6 @@ void Converter::ConvertModel( const Model& model, aiNode& nd, const aiMatrix4x4&
         std::swap_ranges( meshes.begin(), meshes.end(), nd.mMeshes );
     }
 }
-
 
 std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, const Model& model,
     const aiMatrix4x4& node_global_transform )
@@ -1171,7 +1173,6 @@ std::vector<unsigned int> Converter::ConvertMesh( const MeshGeometry& mesh, cons
     return temp;
 }
 
-
 aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
 {
     aiMesh* const out_mesh = new aiMesh();
@@ -1190,7 +1191,6 @@ aiMesh* Converter::SetupEmptyMesh( const MeshGeometry& mesh )
 
     return out_mesh;
 }
-
 
 unsigned int Converter::ConvertMeshSingleMaterial( const MeshGeometry& mesh, const Model& model,
     const aiMatrix4x4& node_global_transform )
@@ -1394,9 +1394,9 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
     // allocate tangents, binormals.
     const std::vector<aiVector3D>& tangents = mesh.GetTangents();
     const std::vector<aiVector3D>* binormals = &mesh.GetBinormals();
+    std::vector<aiVector3D> tempBinormals;
 
     if ( tangents.size() ) {
-        std::vector<aiVector3D> tempBinormals;
         if ( !binormals->size() ) {
             if ( normals.size() ) {
                 // XXX this computes the binormals for the entire mesh, not only
@@ -1513,7 +1513,6 @@ unsigned int Converter::ConvertMeshMultiMaterial( const MeshGeometry& mesh, cons
 
     return static_cast<unsigned int>( meshes.size() - 1 );
 }
-
 
 void Converter::ConvertWeights( aiMesh* out, const Model& model, const MeshGeometry& geo,
     const aiMatrix4x4& node_global_transform ,
@@ -1660,7 +1659,6 @@ void Converter::ConvertCluster( std::vector<aiBone*>& bones, const Model& /*mode
         }
     }
 }
-
 
 void Converter::ConvertMaterialForMesh( aiMesh* out, const Model& model, const MeshGeometry& geo,
     MatIndexArray::value_type materialIndex )
@@ -2135,6 +2133,16 @@ void Converter::SetShadingPropertiesCommon( aiMaterial* out_mat, const PropertyT
     const float ShininessExponent = PropertyGet<float>( props, "ShininessExponent", ok );
     if ( ok ) {
         out_mat->AddProperty( &ShininessExponent, 1, AI_MATKEY_SHININESS );
+    }
+
+    const float BumpFactor = PropertyGet<float>(props, "BumpFactor", ok);
+    if (ok) {
+        out_mat->AddProperty(&BumpFactor, 1, AI_MATKEY_BUMPSCALING);
+    }
+
+    const float DispFactor = PropertyGet<float>(props, "DisplacementFactor", ok);
+    if (ok) {
+        out_mat->AddProperty(&DispFactor, 1, "$mat.displacementscaling", 0, 0);
     }
 }
 
@@ -2964,10 +2972,10 @@ Converter::KeyFrameListList Converter::GetKeyframeList( const std::vector<const 
             //get values within the start/stop time window
             std::shared_ptr<KeyTimeList> Keys( new KeyTimeList() );
             std::shared_ptr<KeyValueList> Values( new KeyValueList() );
-            const int count = curve->GetKeys().size();
+            const size_t count = curve->GetKeys().size();
             Keys->reserve( count );
             Values->reserve( count );
-            for ( int n = 0; n < count; n++ )
+            for (size_t n = 0; n < count; n++ )
             {
                 int64_t k = curve->GetKeys().at( n );
                 if ( k >= adj_start && k <= adj_stop )
@@ -3068,9 +3076,7 @@ void Converter::InterpolateKeys( aiVectorKey* valOut, const KeyTimeList& keys, c
             const KeyTimeList::value_type timeA = std::get<0>(kfl)->at( id0 );
             const KeyTimeList::value_type timeB = std::get<0>(kfl)->at( id1 );
 
-            // do the actual interpolation in double-precision arithmetics
-            // because it is a bit sensitive to rounding errors.
-            const double factor = timeB == timeA ? 0. : static_cast<double>( ( time - timeA ) / ( timeB - timeA ) );
+            const ai_real factor = timeB == timeA ? ai_real(0.) : static_cast<ai_real>( ( time - timeA ) ) / ( timeB - timeA );
             const ai_real interpValue = static_cast<ai_real>( valueA + ( valueB - valueA ) * factor );
 
             result[ std::get<2>(kfl) ] = interpValue;

@@ -53,15 +53,13 @@ namespace Assimp    {
 // ---------------------------------------------------------------------------
 /** Importer class for the Nevercenter Silo SIB scene format
 */
-class SIBImporter : public BaseImporter
+class ASSIMP_API SIBImporter : public BaseImporter
 {
 public:
     SIBImporter();
     ~SIBImporter();
 
-
 public:
-
     // -------------------------------------------------------------------
     /** Returns whether the class can handle the format of the given file.
      * See BaseImporter::CanRead() for details.
@@ -70,7 +68,6 @@ public:
         bool checkSig) const;
 
 protected:
-
     // -------------------------------------------------------------------
     /** Return importer meta information.
      * See #BaseImporter::GetInfo for the details
@@ -85,7 +82,6 @@ protected:
         IOSystem* pIOHandler);
 
 private:
-
     struct MeshInformation
     {
         explicit MeshInformation(const std::string& _name)

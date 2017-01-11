@@ -1,4 +1,4 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 #include <string>
+#include <list>
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
@@ -127,6 +128,7 @@ namespace glTF
     struct BufferView; // here due to cross-reference
     struct Texture;
     struct Light;
+    struct Skin;
 
 
     // Vec/matrix types, as raw float arrays
@@ -233,6 +235,32 @@ namespace glTF
     {
         BufferViewTarget_ARRAY_BUFFER = 34962,
         BufferViewTarget_ELEMENT_ARRAY_BUFFER = 34963
+    };
+
+    //! Values for the Sampler::magFilter field
+    enum SamplerMagFilter
+    {
+        SamplerMagFilter_Nearest = 9728,
+        SamplerMagFilter_Linear = 9729
+    };
+
+    //! Values for the Sampler::minFilter field
+    enum SamplerMinFilter
+    {
+        SamplerMinFilter_Nearest = 9728,
+        SamplerMinFilter_Linear = 9729,
+        SamplerMinFilter_Nearest_Mipmap_Nearest = 9984,
+        SamplerMinFilter_Linear_Mipmap_Nearest = 9985,
+        SamplerMinFilter_Nearest_Mipmap_Linear = 9986,
+        SamplerMinFilter_Linear_Mipmap_Linear = 9987
+    };
+
+    //! Values for the Sampler::wrapS and Sampler::wrapT field
+    enum SamplerWrap
+    {
+        SamplerWrap_Clamp_To_Edge = 33071,
+        SamplerWrap_Mirrored_Repeat = 33648,
+        SamplerWrap_Repeat = 10497
     };
 
     //! Values for the Texture::format and Texture::internalFormat fields
@@ -361,8 +389,6 @@ namespace glTF
             { return id; }
     };
 
-
-
     //
     // Classes for each glTF top-level object type
     //
@@ -378,8 +404,8 @@ namespace glTF
         ComponentType componentType; //!< The datatype of components in the attribute. (required)
         unsigned int count;          //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
-        //std::vector<float> max;    //!< Maximum value of each component in this attribute.
-        //std::vector<float> min;    //!< Minimum value of each component in this attribute.
+        std::vector<float> max;      //!< Maximum value of each component in this attribute.
+        std::vector<float> min;      //!< Minimum value of each component in this attribute.
 
         unsigned int GetNumComponents();
         unsigned int GetBytesPerComponent();
@@ -430,52 +456,116 @@ namespace glTF
         void Read(Value& obj, Asset& r);
     };
 
-
-    struct Animation : public Object
-    {
-        struct Channel
-        {
-
-        };
-
-        struct Target
-        {
-
-        };
-
-        struct Sampler
-        {
-
-        };
-    };
-
     //! A buffer points to binary geometry, animation, or skins.
     struct Buffer : public Object
-    {
-    public:
+	{
+		/********************* Types *********************/
+	public:
 
-        enum Type
-        {
-            Type_arraybuffer,
-            Type_text
-        };
+		enum Type
+		{
+			Type_arraybuffer,
+			Type_text
+		};
 
-        //std::string uri; //!< The uri of the buffer. Can be a filepath, a data uri, etc. (required)
-        size_t byteLength; //!< The length of the buffer in bytes. (default: 0)
-        //std::string type; //!< XMLHttpRequest responseType (default: "arraybuffer")
+		/// \struct SEncodedRegion
+		/// Descriptor of encoded region in "bufferView".
+		struct SEncodedRegion
+		{
+			const size_t Offset;///< Offset from begin of "bufferView" to encoded region, in bytes.
+			const size_t EncodedData_Length;///< Size of encoded region, in bytes.
+			uint8_t* const DecodedData;///< Cached encoded data.
+			const size_t DecodedData_Length;///< Size of decoded region, in bytes.
+			const std::string ID;///< ID of the region.
 
-        Type type;
+			/// \fn SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
+			/// Constructor.
+			/// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
+			/// \param [in] pEncodedData_Length - size of encoded region, in bytes.
+			/// \param [in] pDecodedData - pointer to decoded data array.
+			/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
+			/// \param [in] pID - ID of the region.
+			SEncodedRegion(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string pID)
+				: Offset(pOffset), EncodedData_Length(pEncodedData_Length), DecodedData(pDecodedData), DecodedData_Length(pDecodedData_Length), ID(pID)
+			{}
 
-    private:
-        shared_ptr<uint8_t> mData; //!< Pointer to the data
-        bool mIsSpecial; //!< Set to true for special cases (e.g. the body buffer)
+			/// \fn ~SEncodedRegion()
+			/// Destructor.
+			~SEncodedRegion() { delete [] DecodedData; }
+		};
 
-    public:
-        Buffer();
+		/******************* Variables *******************/
 
-        void Read(Value& obj, Asset& r);
+		//std::string uri; //!< The uri of the buffer. Can be a filepath, a data uri, etc. (required)
+		size_t byteLength; //!< The length of the buffer in bytes. (default: 0)
+		//std::string type; //!< XMLHttpRequest responseType (default: "arraybuffer")
+
+		Type type;
+
+		/// \var EncodedRegion_Current
+		/// Pointer to currently active encoded region.
+		/// Why not decoding all regions at once and not to set one buffer with decoded data?
+		/// Yes, why not? Even "accessor" point to decoded data. I mean that fields "byteOffset", "byteStride" and "count" has values which describes decoded
+		/// data array. But only in range of mesh while is active parameters from "compressedData". For another mesh accessors point to decoded data too. But
+		/// offset is counted for another regions is encoded.
+		/// Example. You have two meshes. For every of it you have 4 bytes of data. That data compressed to 2 bytes. So, you have buffer with encoded data:
+		/// M1_E0, M1_E1, M2_E0, M2_E1.
+		/// After decoding you'll get:
+		/// M1_D0, M1_D1, M1_D2, M1_D3, M2_D0, M2_D1, M2_D2, M2_D3.
+		/// "accessors" must to use values that point to decoded data - obviously. So, you'll expect "accessors" like
+		/// "accessor_0" : { byteOffset: 0, byteLength: 4}, "accessor_1" : { byteOffset: 4, byteLength: 4}
+		/// but in real life you'll get:
+		/// "accessor_0" : { byteOffset: 0, byteLength: 4}, "accessor_1" : { byteOffset: 2, byteLength: 4}
+		/// Yes, accessor of next mesh has offset and length which mean: current mesh data is decoded, all other data is encoded.
+		/// And when before you start to read data of current mesh (with encoded data ofcourse) you must decode region of "bufferView", after read finished
+		/// delete encoding mark. And after that you can repeat process: decode data of mesh, read, delete decoded data.
+		///
+		/// Remark. Encoding all data at once is good in world with computers which do not has RAM limitation. So, you must use step by step encoding in
+		/// exporter and importer. And, thanks to such way, there is no need to load whole file into memory.
+		SEncodedRegion* EncodedRegion_Current;
+
+	private:
+
+		shared_ptr<uint8_t> mData; //!< Pointer to the data
+		bool mIsSpecial; //!< Set to true for special cases (e.g. the body buffer)
+
+		/// \var EncodedRegion_List
+		/// List of encoded regions.
+		std::list<SEncodedRegion*> EncodedRegion_List;
+
+		/******************* Functions *******************/
+
+	public:
+
+		Buffer();
+		~Buffer();
+
+		void Read(Value& obj, Asset& r);
 
         bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
+
+		/// \fn void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID)
+		/// Mark region of "bufferView" as encoded. When data is request from such region then "bufferView" use decoded data.
+		/// \param [in] pOffset - offset from begin of "bufferView" to encoded region, in bytes.
+		/// \param [in] pEncodedData_Length - size of encoded region, in bytes.
+		/// \param [in] pDecodedData - pointer to decoded data array.
+		/// \param [in] pDecodedData_Length - size of encoded region, in bytes.
+		/// \param [in] pID - ID of the region.
+		void EncodedRegion_Mark(const size_t pOffset, const size_t pEncodedData_Length, uint8_t* pDecodedData, const size_t pDecodedData_Length, const std::string& pID);
+
+		/// \fn void EncodedRegion_SetCurrent(const std::string& pID)
+		/// Select current encoded region by ID. \sa EncodedRegion_Current.
+		/// \param [in] pID - ID of the region.
+		void EncodedRegion_SetCurrent(const std::string& pID);
+
+		/// \fn bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count)
+		/// Replace part of buffer data. Pay attention that function work with original array of data (\ref mData) not with encoded regions.
+		/// \param [in] pBufferData_Offset - index of first element in buffer from which new data will be placed.
+		/// \param [in] pBufferData_Count - count of bytes in buffer which will be replaced.
+		/// \param [in] pReplace_Data - pointer to array with new data for buffer.
+		/// \param [in] pReplace_Count - count of bytes in new data.
+		/// \return true - if successfully replaced, false if input arguments is out of range.
+		bool ReplaceData(const size_t pBufferData_Offset, const size_t pBufferData_Count, const uint8_t* pReplace_Data, const size_t pReplace_Count);
 
         size_t AppendData(uint8_t* data, size_t length);
         void Grow(size_t amount);
@@ -489,9 +579,11 @@ namespace glTF
         bool IsSpecial() const
             { return mIsSpecial; }
 
+        std::string GetURI()
+            { return std::string(this->id) + ".bin"; }
+
         static const char* TranslateId(Asset& r, const char* id);
     };
-
 
     //! A view into a buffer generally representing a subset of the buffer.
     struct BufferView : public Object
@@ -502,10 +594,8 @@ namespace glTF
 
         BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
-        BufferView() {}
         void Read(Value& obj, Asset& r);
     };
-
 
     struct Camera : public Object
     {
@@ -631,10 +721,86 @@ namespace glTF
             Ref<Material> material;
         };
 
+		/// \struct SExtension
+		/// Extension used for mesh.
+		struct SExtension
+		{
+			/// \enum EType
+			/// Type of extension.
+			enum EType
+			{
+				#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+					Compression_Open3DGC,///< Compression of mesh data using Open3DGC algorithm.
+				#endif
+
+				Unknown
+			};
+
+			EType Type;///< Type of extension.
+
+			/// \fn SExtension
+			/// Constructor.
+			/// \param [in] pType - type of extension.
+			SExtension(const EType pType)
+				: Type(pType)
+			{}
+
+            virtual ~SExtension() {
+                // empty
+            }
+		};
+
+		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+			/// \struct SCompression_Open3DGC
+			/// Compression of mesh data using Open3DGC algorithm.
+			struct SCompression_Open3DGC : public SExtension
+			{
+				using SExtension::Type;
+
+				std::string Buffer;///< ID of "buffer" used for storing compressed data.
+				size_t Offset;///< Offset in "bufferView" where compressed data are stored.
+				size_t Count;///< Count of elements in compressed data. Is always equivalent to size in bytes: look comments for "Type" and "Component_Type".
+				bool Binary;///< If true then "binary" mode is used for coding, if false - "ascii" mode.
+				size_t IndicesCount;///< Count of indices in mesh.
+				size_t VerticesCount;///< Count of vertices in mesh.
+				// AttribType::Value Type;///< Is always "SCALAR".
+				// ComponentType Component_Type;///< Is always "ComponentType_UNSIGNED_BYTE" (5121).
+
+				/// \fn SCompression_Open3DGC
+				/// Constructor.
+				SCompression_Open3DGC()
+				: SExtension(Compression_Open3DGC) {
+                    // empty
+                }
+
+                virtual ~SCompression_Open3DGC() {
+                    // empty
+                }
+			};
+		#endif
+
         std::vector<Primitive> primitives;
+		std::list<SExtension*> Extension;///< List of extensions used in mesh.
 
         Mesh() {}
-        void Read(Value& obj, Asset& r);
+
+		/// \fn ~Mesh()
+		/// Destructor.
+		~Mesh() { for(std::list<SExtension*>::iterator it = Extension.begin(), it_end = Extension.end(); it != it_end; it++) { delete *it; }; }
+
+		/// \fn void Read(Value& pJSON_Object, Asset& pAsset_Root)
+		/// Get mesh data from JSON-object and place them to root asset.
+		/// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
+		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+		void Read(Value& pJSON_Object, Asset& pAsset_Root);
+
+		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+			/// \fn void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
+			/// Decode part of "buffer" which encoded with Open3DGC algorithm.
+			/// \param [in] pCompression_Open3DGC - reference to structure which describe encoded region.
+			/// \param [out] pAsset_Root - reference to root assed where data will be stored.
+			void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root);
+		#endif
     };
 
     struct Node : public Object
@@ -650,6 +816,12 @@ namespace glTF
         Ref<Camera> camera;
         Ref<Light>  light;
 
+        std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes. Each of which is the root of a node hierarchy.
+        Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
+        std::string jointName;                    //!< Name used when this node is a joint in a skin.
+
+        Ref<Node> parent;                         //!< This is not part of the glTF specification. Used as a helper.
+
         Node() {}
         void Read(Value& obj, Asset& r);
     };
@@ -663,8 +835,14 @@ namespace glTF
 
     struct Sampler : public Object
     {
+        SamplerMagFilter magFilter; //!< The texture magnification filter. (required)
+        SamplerMinFilter minFilter; //!< The texture minification filter. (required)
+        SamplerWrap wrapS;          //!< The texture wrapping in the S direction. (required)
+        SamplerWrap wrapT;          //!< The texture wrapping in the T direction. (required)
+
         Sampler() {}
         void Read(Value& obj, Asset& r);
+        void SetDefaults();
     };
 
     struct Scene : public Object
@@ -683,6 +861,11 @@ namespace glTF
 
     struct Skin : public Object
     {
+        Nullable<mat4> bindShapeMatrix;       //!< Floating-point 4x4 transformation matrix stored in column-major order.
+        Ref<Accessor> inverseBindMatrices;    //!< The ID of the accessor containing the floating-point 4x4 inverse-bind matrices.
+        std::vector<Ref<Node>> jointNames;    //!< Joint names of the joints (nodes with a jointName property) in this skin.
+        std::string name;                     //!< The user-defined name of this object.
+
         Skin() {}
         void Read(Value& obj, Asset& r);
     };
@@ -711,8 +894,8 @@ namespace glTF
     //! A texture and its sampler.
     struct Texture : public Object
     {
-        //Ref<Sampler> source; //!< The ID of the sampler used by this texture. (required)
-        Ref<Image> source; //!< The ID of the image used by this texture. (required)
+        Ref<Sampler> sampler; //!< The ID of the sampler used by this texture. (required)
+        Ref<Image> source;    //!< The ID of the image used by this texture. (required)
 
         //TextureFormat format; //!< The texture's format. (default: TextureFormat_RGBA)
         //TextureFormat internalFormat; //!< The texture's internal format. (default: TextureFormat_RGBA)
@@ -753,6 +936,44 @@ namespace glTF
         void SetDefaults();
     };
 
+    struct Animation : public Object
+    {
+        struct AnimSampler {
+            std::string id;               //!< The ID of this sampler.
+            std::string input;            //!< The ID of a parameter in this animation to use as key-frame input.
+            std::string interpolation;    //!< Type of interpolation algorithm to use between key-frames.
+            std::string output;           //!< The ID of a parameter in this animation to use as key-frame output.
+        };
+
+        struct AnimChannel {
+            std::string sampler;         //!< The ID of one sampler present in the containing animation's samplers property.
+
+            struct AnimTarget {
+                Ref<Node> id;            //!< The ID of the node to animate.
+                std::string path;        //!< The name of property of the node to animate ("translation", "rotation", or "scale").
+            } target;
+        };
+
+        struct AnimParameters {
+            Ref<Accessor> TIME;           //!< Accessor reference to a buffer storing a array of floating point scalar values.
+            Ref<Accessor> rotation;       //!< Accessor reference to a buffer storing a array of four-component floating-point vectors.
+            Ref<Accessor> scale;          //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+            Ref<Accessor> translation;    //!< Accessor reference to a buffer storing a array of three-component floating-point vectors.
+        };
+
+        // AnimChannel Channels[3];            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
+        // AnimParameters Parameters;          //!< The samplers that interpolate between the key-frames.
+        // AnimSampler Samplers[3];            //!< The parameterized inputs representing the key-frame data.
+
+        std::vector<AnimChannel> Channels;            //!< Connect the output values of the key-frame animation to a specific node in the hierarchy.
+        AnimParameters Parameters;                    //!< The samplers that interpolate between the key-frames.
+        std::vector<AnimSampler> Samplers;         //!< The parameterized inputs representing the key-frame data.
+
+        Animation() {}
+        void Read(Value& obj, Asset& r);
+    };
+
+
     //! Base class for LazyDict that acts as an interface
     class LazyDictBase
     {
@@ -772,7 +993,7 @@ namespace glTF
     //! (Implemented in glTFAssetWriter.h)
     template<class T>
     void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
-    
+
 
     //! Manages lazy loading of the glTF top-level objects, and keeps a reference to them by ID
     //! It is the owner the loaded objects, so when it is destroyed it also deletes them
@@ -785,7 +1006,7 @@ namespace glTF
         typedef typename std::gltf_unordered_map< std::string, unsigned int > Dict;
 
         std::vector<T*>  mObjs;      //! The read objects
-        Dict             mObjsById;  //! The read objects accesible by id
+        Dict             mObjsById;  //! The read objects accessible by id
         const char*      mDictId;    //! ID of the dictionary object
         const char*      mExtId;     //! ID of the extension defining the dictionary
         Value*           mDict;      //! JSON dictionary object
@@ -805,6 +1026,7 @@ namespace glTF
 
         Ref<T> Get(const char* id);
         Ref<T> Get(unsigned int i);
+        Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)
@@ -833,7 +1055,7 @@ namespace glTF
         int version; //!< The glTF format version (should be 1)
 
         void Read(Document& doc);
-        
+
         AssetMetadata()
             : premultipliedAlpha(false)
             , version(0)
@@ -899,10 +1121,10 @@ namespace glTF
         LazyDict<Mesh>        meshes;
         LazyDict<Node>        nodes;
         //LazyDict<Program>   programs;
-        //LazyDict<Sampler>   samplers;
+        LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
         //LazyDict<Shader>    shaders;
-        //LazyDict<Skin>      skins;
+        LazyDict<Skin>      skins;
         //LazyDict<Technique> techniques;
         LazyDict<Texture>     textures;
 
@@ -924,10 +1146,10 @@ namespace glTF
             , meshes        (*this, "meshes")
             , nodes         (*this, "nodes")
             //, programs    (*this, "programs")
-            //, samplers    (*this, "samplers")
+            , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
             //, shaders     (*this, "shaders")
-            //, skins       (*this, "skins")
+            , skins       (*this, "skins")
             //, techniques  (*this, "techniques")
             , textures      (*this, "textures")
             , lights        (*this, "lights", "KHR_materials_common")

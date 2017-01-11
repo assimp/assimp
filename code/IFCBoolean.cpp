@@ -109,7 +109,7 @@ void FilterPolygon(std::vector<IfcVector3>& resultpoly)
     }
 
     IfcVector3 vmin, vmax;
-    ArrayBounds(resultpoly.data(), resultpoly.size(), vmin, vmax);
+    ArrayBounds(resultpoly.data(), static_cast<unsigned int>(resultpoly.size()), vmin, vmax);
 
     // filter our IfcFloat points - those may happen if a point lies
     // directly on the intersection line or directly on the clipping plane
@@ -132,7 +132,7 @@ void WritePolygon(std::vector<IfcVector3>& resultpoly, TempMesh& result)
     if( resultpoly.size() > 2 )
     {
         result.verts.insert(result.verts.end(), resultpoly.begin(), resultpoly.end());
-        result.vertcnt.push_back(resultpoly.size());
+        result.vertcnt.push_back(static_cast<unsigned int>(resultpoly.size()));
     }
 }
 
@@ -589,7 +589,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
                 // to result mesh unchanged
                 if( !startedInside )
                 {
-                    outvertcnt.push_back(blackside.size());
+                    outvertcnt.push_back(static_cast<unsigned int>(blackside.size()));
                     outvert.insert(outvert.end(), blackside.begin(), blackside.end());
                     continue;
                 }

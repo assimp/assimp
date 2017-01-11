@@ -299,57 +299,126 @@ inline bool aiMatrix4x4t<TReal>::Equal(const aiMatrix4x4t<TReal>& m, TReal epsil
 }
 
 // ----------------------------------------------------------------------------------------
+
+#define ASSIMP_MATRIX4_4_DECOMPOSE_PART		\
+	const aiMatrix4x4t<TReal>& _this = *this;/* Create alias for conveniance. */ \
+	\
+	/* extract translation */ \
+	pPosition.x = _this[0][3]; \
+	pPosition.y = _this[1][3]; \
+	pPosition.z = _this[2][3]; \
+	\
+	/* extract the columns of the matrix. */ \
+	aiVector3t<TReal> vCols[3] = { \
+		aiVector3t<TReal>(_this[0][0],_this[1][0],_this[2][0]), \
+		aiVector3t<TReal>(_this[0][1],_this[1][1],_this[2][1]), \
+		aiVector3t<TReal>(_this[0][2],_this[1][2],_this[2][2]) \
+	}; \
+	\
+	/* extract the scaling factors */ \
+	pScaling.x = vCols[0].Length(); \
+	pScaling.y = vCols[1].Length(); \
+	pScaling.z = vCols[2].Length(); \
+	\
+	/* and the sign of the scaling */ \
+	if (Determinant() < 0) pScaling = -pScaling; \
+	\
+	/* and remove all scaling from the matrix */ \
+	if(pScaling.x) vCols[0] /= pScaling.x; \
+	if(pScaling.y) vCols[1] /= pScaling.y; \
+	if(pScaling.z) vCols[2] /= pScaling.z; \
+	\
+	do {} while(false)
+
+
+
+
 template <typename TReal>
-inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& scaling, aiQuaterniont<TReal>& rotation,
-    aiVector3t<TReal>& position) const
+inline void aiMatrix4x4t<TReal>::Decompose (aiVector3t<TReal>& pScaling, aiQuaterniont<TReal>& pRotation,
+    aiVector3t<TReal>& pPosition) const
 {
-    const aiMatrix4x4t<TReal>& _this = *this;
-
-    // extract translation
-    position.x = _this[0][3];
-    position.y = _this[1][3];
-    position.z = _this[2][3];
-
-    // extract the rows of the matrix
-    aiVector3t<TReal> vRows[3] = {
-        aiVector3t<TReal>(_this[0][0],_this[1][0],_this[2][0]),
-        aiVector3t<TReal>(_this[0][1],_this[1][1],_this[2][1]),
-        aiVector3t<TReal>(_this[0][2],_this[1][2],_this[2][2])
-    };
-
-    // extract the scaling factors
-    scaling.x = vRows[0].Length();
-    scaling.y = vRows[1].Length();
-    scaling.z = vRows[2].Length();
-
-    // and the sign of the scaling
-    if (Determinant() < 0) {
-        scaling.x = -scaling.x;
-        scaling.y = -scaling.y;
-        scaling.z = -scaling.z;
-    }
-
-    // and remove all scaling from the matrix
-    if(scaling.x)
-    {
-        vRows[0] /= scaling.x;
-    }
-    if(scaling.y)
-    {
-        vRows[1] /= scaling.y;
-    }
-    if(scaling.z)
-    {
-        vRows[2] /= scaling.z;
-    }
+	ASSIMP_MATRIX4_4_DECOMPOSE_PART;
 
     // build a 3x3 rotation matrix
-    aiMatrix3x3t<TReal> m(vRows[0].x,vRows[1].x,vRows[2].x,
-        vRows[0].y,vRows[1].y,vRows[2].y,
-        vRows[0].z,vRows[1].z,vRows[2].z);
+    aiMatrix3x3t<TReal> m(vCols[0].x,vCols[1].x,vCols[2].x,
+        vCols[0].y,vCols[1].y,vCols[2].y,
+        vCols[0].z,vCols[1].z,vCols[2].z);
 
     // and generate the rotation quaternion from it
-    rotation = aiQuaterniont<TReal>(m);
+    pRotation = aiQuaterniont<TReal>(m);
+}
+
+template <typename TReal>
+inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotation, aiVector3t<TReal>& pPosition) const
+{
+	ASSIMP_MATRIX4_4_DECOMPOSE_PART;
+
+	/*
+	    |  CE     -CF      D   0 |
+	M = |  BDE+AF -BDF+AE -BC  0 |
+	    | -ADE+BF -ADF+BE  AC  0 |
+	    |  0       0       0   1 |
+
+	A = cos(angle_x), B = sin(angle_x);
+	C = cos(angle_y), D = sin(angle_y);
+	E = cos(angle_z), F = sin(angle_z);
+	*/
+
+	// Use a small epsilon to solve floating-point inaccuracies
+    const TReal epsilon = 10e-3f;
+
+	pRotation.y  = std::asin(vCols[2].x);// D. Angle around oY.
+
+	TReal C = std::cos(pRotation.y);
+
+	if(std::fabs(C) > epsilon)
+	{
+		// Finding angle around oX.
+		TReal tan_x =  vCols[2].z / C;// A
+		TReal tan_y = -vCols[2].y / C;// B
+
+		pRotation.x = std::atan2(tan_y, tan_x);
+		// Finding angle around oZ.
+		tan_x =  vCols[0].x / C;// E
+		tan_y = -vCols[1].x / C;// F
+		pRotation.z = std::atan2(tan_y, tan_x);
+	}
+	else
+	{// oY is fixed.
+		pRotation.x = 0;// Set angle around oX to 0. => A == 1, B == 0, C == 0, D == 1.
+
+		// And finding angle around oZ.
+		TReal tan_x = vCols[1].y;// -BDF+AE => E
+		TReal tan_y = vCols[0].y;//  BDE+AF => F
+
+		pRotation.z = std::atan2(tan_y, tan_x);
+	}
+}
+
+#undef ASSIMP_MATRIX4_4_DECOMPOSE_PART
+
+template <typename TReal>
+inline void aiMatrix4x4t<TReal>::Decompose(aiVector3t<TReal>& pScaling, aiVector3t<TReal>& pRotationAxis, TReal& pRotationAngle,
+											aiVector3t<TReal>& pPosition) const
+{
+aiQuaterniont<TReal> pRotation;
+
+	Decompose(pScaling, pRotation, pPosition);
+	pRotation.Normalize();
+
+	TReal angle_cos = pRotation.w;
+	TReal angle_sin = std::sqrt(1.0f - angle_cos * angle_cos);
+
+	pRotationAngle = std::acos(angle_cos) * 2;
+
+	// Use a small epsilon to solve floating-point inaccuracies
+    const TReal epsilon = 10e-3f;
+
+	if(std::fabs(angle_sin) < epsilon) angle_sin = 1;
+
+	pRotationAxis.x = pRotation.x / angle_sin;
+	pRotationAxis.y = pRotation.y / angle_sin;
+	pRotationAxis.z = pRotation.z / angle_sin;
 }
 
 // ----------------------------------------------------------------------------------------
@@ -523,7 +592,7 @@ inline aiMatrix4x4t<TReal>& aiMatrix4x4t<TReal>::Scaling( const aiVector3t<TReal
  * "from" into another vector called "to".
  * Input : from[3], to[3] which both must be *normalized* non-zero vectors
  * Output: mtx[3][3] -- a 3x3 matrix in colum-major form
- * Authors: Tomas M�ller, John Hughes
+ * Authors: Tomas Möller, John Hughes
  *          "Efficiently Building a Matrix to Rotate One Vector to Another"
  *          Journal of Graphics Tools, 4(4):1-4, 1999
  */

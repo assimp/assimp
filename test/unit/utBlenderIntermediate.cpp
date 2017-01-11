@@ -40,6 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "BlenderIntermediate.h"
+#include "./../include/assimp/camera.h"
+#include "./../include/assimp/light.h"
+#include "./../include/assimp/mesh.h"
+#include "./../include/assimp/texture.h"
 
 using namespace ::Assimp;
 using namespace ::Assimp::Blender;
@@ -48,10 +52,13 @@ class BlenderIntermediateTest : public ::testing::Test {
     // empty
 };
 
+#define NAME_1 "name1"
+#define NAME_2 "name2"
+
 TEST_F( BlenderIntermediateTest,ConversionData_ObjectCompareTest ) {
     Object obj1, obj2;
-    strncpy( obj1.id.name, "name1", 5 );
-    strncpy( obj2.id.name, "name2", 5 );
+    strncpy( obj1.id.name, NAME_1, sizeof(NAME_1) );
+    strncpy( obj2.id.name, NAME_2, sizeof(NAME_2) );
     Blender::ObjectCompare cmp_false;
     bool res( cmp_false( &obj1, &obj2 ) );
     EXPECT_FALSE( res );

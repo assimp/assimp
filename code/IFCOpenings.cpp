@@ -364,7 +364,7 @@ void InsertWindowContours(const ContourVector& contours,
                     }
 
                     if (const size_t d = curmesh.verts.size()-old) {
-                        curmesh.vertcnt.push_back(d);
+                        curmesh.vertcnt.push_back(static_cast<unsigned int>(d));
                         std::reverse(curmesh.verts.rbegin(),curmesh.verts.rbegin()+d);
                     }
                     if (n == very_first_hit) {
@@ -549,7 +549,7 @@ void CleanupOuterContour(const std::vector<IfcVector2>& contour_flat, TempMesh& 
                 clipper.Execute(ClipperLib::ctIntersection,clipped,ClipperLib::pftNonZero,ClipperLib::pftNonZero);
 
                 for(const ClipperLib::ExPolygon& ex : clipped) {
-                    iold.push_back(ex.outer.size());
+                    iold.push_back(static_cast<unsigned int>(ex.outer.size()));
                     for(const ClipperLib::IntPoint& point : ex.outer) {
                         vold.push_back(IfcVector3(
                             from_int64(point.X),
@@ -715,14 +715,14 @@ void FindAdjacentContours(ContourVector::iterator current, const ContourVector& 
             const Contour& mcontour = (*it).contour;
 
             for (size_t n = 0; n < ncontour.size(); ++n) {
-                const IfcVector2& n0 = ncontour[n];
-                const IfcVector2& n1 = ncontour[(n+1) % ncontour.size()];
+                const IfcVector2 n0 = ncontour[n];
+                const IfcVector2 n1 = ncontour[(n+1) % ncontour.size()];
 
                 for (size_t m = 0, mend = (is_me ? n : mcontour.size()); m < mend; ++m) {
                     ai_assert(&mcontour != &ncontour || m < n);
 
-                    const IfcVector2& m0 = mcontour[m];
-                    const IfcVector2& m1 = mcontour[(m+1) % mcontour.size()];
+                    const IfcVector2 m0 = mcontour[m];
+                    const IfcVector2 m1 = mcontour[(m+1) % mcontour.size()];
 
                     IfcVector2 isect0, isect1;
                     if (IntersectingLineSegments(n0,n1, m0, m1, isect0, isect1)) {

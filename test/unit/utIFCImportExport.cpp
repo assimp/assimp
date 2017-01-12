@@ -56,6 +56,6 @@ public:
     }
 };
 
-TEST_F( utIFCImportExport, importHMPFromFileTest ) {
+TEST_F( utIFCImportExport, importIFCFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }

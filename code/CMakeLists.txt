@@ -173,6 +173,8 @@ SET( Common_SRCS
   XMLTools.h
   Version.cpp
   IOStreamBuffer.h
+  CreateAnimMesh.h
+  CreateAnimMesh.cpp
 )
 SOURCE_GROUP(Common FILES ${Common_SRCS})
 

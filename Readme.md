@@ -92,6 +92,7 @@ Take a look into the `INSTALL` file. Our build system is CMake, if you used CMak
 * [Python](port/PyAssimp/README.md)
 * [.NET](port/AssimpNET/Readme.md)
 * [Pascal](port/AssimpPascal/Readme.md)
+* [Javascript (Alpha)](https://github.com/makc/assimp2json)
 
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure is:

@@ -1,7 +1,7 @@
 Open Asset Import Library (assimp)
 ==================================
 
-[![Linux Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
+[![Linux Build Status](https://travis-ci.org/assimp/assimp.svg)](https://travis-ci.org/assimp/assimp)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
 <a href="https://scan.coverity.com/projects/5607">
   <img alt="Coverity Scan Build Status"

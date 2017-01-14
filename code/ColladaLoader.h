@@ -117,6 +117,8 @@ protected:
     /** Builds meshes for the given node and references them */
     void BuildMeshesForNode( const ColladaParser& pParser, const Collada::Node* pNode,
         aiNode* pTarget);
+		
+    aiMesh *findMesh(std::string meshid);
 
     /** Creates a mesh for the given ColladaMesh face subset and returns the newly created mesh */
     aiMesh* CreateMesh( const ColladaParser& pParser, const Collada::Mesh* pSrcMesh, const Collada::SubMesh& pSubMesh,
@@ -223,6 +225,9 @@ protected:
 
     /** Accumulated meshes for the target scene */
     std::vector<aiMesh*> mMeshes;
+	
+    /** Accumulated morph target meshes */
+    std::vector<aiMesh*> mTargetMeshes;
 
     /** Temporary material list */
     std::vector<std::pair<Collada::Effect*, aiMaterial*> > newMats;

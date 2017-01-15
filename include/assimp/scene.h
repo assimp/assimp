@@ -173,34 +173,37 @@ struct aiNode
      *  @param name Name to search for
      *  @return NULL or a valid Node if the search was successful.
      */
-    inline const aiNode* FindNode(const aiString& name) const
-    {
+    inline 
+    const aiNode* FindNode(const aiString& name) const {
+        return FindNode(name.data);
+    }
+
+    inline 
+    aiNode* FindNode(const aiString& name) {
         return FindNode(name.data);
     }
 
 
-    inline aiNode* FindNode(const aiString& name)
-    {
-        return FindNode(name.data);
-    }
-
-
-    inline const aiNode* FindNode(const char* name) const
-    {
-        if (!::strcmp( mName.data,name))return this;
-        for (unsigned int i = 0; i < mNumChildren;++i)
-        {
+    inline 
+    const aiNode* FindNode(const char* name) const {
+        if ( nullptr == name ) {
+            return nullptr;
+        }
+        if ( !::strcmp( mName.data, name ) ) {
+            return this;
+        }
+        for (unsigned int i = 0; i < mNumChildren;++i) {
             const aiNode* const p = mChildren[i]->FindNode(name);
             if (p) {
                 return p;
             }
         }
         // there is definitely no sub-node with this name
-        return NULL;
+        return nullptr;
     }
 
-    inline aiNode* FindNode(const char* name)
-    {
+    inline 
+    aiNode* FindNode(const char* name) {
         if (!::strcmp( mName.data,name))return this;
         for (unsigned int i = 0; i < mNumChildren;++i)
         {
@@ -210,9 +213,38 @@ struct aiNode
             }
         }
         // there is definitely no sub-node with this name
-        return NULL;
+        return nullptr;
     }
 
+    inline void addChildren( unsigned int numChildren, aiNode **children ) {
+        if ( nullptr == children || 0 == numChildren ) {
+            return;
+        }
+
+        for ( unsigned int i = 0; i < numChildren; i++ ) {
+            aiNode *child = children[ i ];
+            if ( nullptr != child ) {
+                child->mParent = this;
+            }
+        }
+
+        if ( mNumChildren > 0 ) {
+            aiNode **tmp( new aiNode*[ mNumChildren ] );
+            ::memcpy( tmp, mChildren, sizeof( aiNode* ) * mNumChildren );
+            delete[] mChildren;
+            mChildren = new aiNode*[ mNumChildren + numChildren ];
+            ::memcpy( mChildren, tmp, sizeof( aiNode* ) * mNumChildren );
+            ::memcpy( &mChildren[ mNumChildren ], children, sizeof( aiNode* )* numChildren );
+            mNumChildren += numChildren;
+            delete[] tmp;
+        } else {
+            mChildren = new aiNode*[ numChildren ];
+            for ( unsigned int i = 0; i < numChildren; i++ ) {
+                mChildren[ i ] = children[ i ];
+            }
+            mNumChildren = numChildren;
+        }
+    }
 #endif // __cplusplus
 };
 

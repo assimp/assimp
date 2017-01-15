@@ -1,7 +1,7 @@
 Open Asset Import Library (assimp)
 ==================================
 
-[![Linux Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
+[![Linux Build Status](https://travis-ci.org/assimp/assimp.svg)](https://travis-ci.org/assimp/assimp)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
 <a href="https://scan.coverity.com/projects/5607">
   <img alt="Coverity Scan Build Status"
@@ -92,6 +92,7 @@ Take a look into the `INSTALL` file. Our build system is CMake, if you used CMak
 * [Python](port/PyAssimp/README.md)
 * [.NET](port/AssimpNET/Readme.md)
 * [Pascal](port/AssimpPascal/Readme.md)
+* [Javascript (Alpha)](https://github.com/makc/assimp2json)
 
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure is:

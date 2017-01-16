@@ -166,10 +166,17 @@ void ObjExporter::WriteMaterialFile()
         if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_EMISSIVE,c)) {
             mOutputMat << "Ke " << c.r << " " << c.g << " " << c.b << endl;
         }
-
+        if(AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_TRANSPARENT,c)) {
+            mOutputMat << "Tf " << c.r << " " << c.g << " " << c.b << endl;
+        }
+        
+        
         ai_real o;
         if(AI_SUCCESS == mat->Get(AI_MATKEY_OPACITY,o)) {
             mOutputMat << "d " << o << endl;
+        }
+        if(AI_SUCCESS == mat->Get(AI_MATKEY_REFRACTI,o)) {
+            mOutputMat << "Ni " << o << endl;
         }
 
         if(AI_SUCCESS == mat->Get(AI_MATKEY_SHININESS,o) && o) {

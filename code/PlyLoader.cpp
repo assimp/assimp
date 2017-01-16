@@ -439,7 +439,7 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
     PLY::ElementInstanceList* pcList = NULL;
     unsigned int cnt = 0;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i = pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)

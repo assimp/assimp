@@ -746,6 +746,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
 {
     ai_assert(NULL != pvOut);
 
+    PLY::ElementInstanceList* pcList = NULL;
     bool bOne = false;
 
     // index of the vertex index list

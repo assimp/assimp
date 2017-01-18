@@ -957,7 +957,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
     unsigned int iOpacity = 0xFFFFFFFF;
     PLY::EDataType eOpacity = EDT_Char;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i =  this->pcDOM->alElements.begin();
         i != this->pcDOM->alElements.end();++i,++_i)

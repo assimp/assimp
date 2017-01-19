@@ -119,7 +119,7 @@ void aiNode::addChildren(unsigned int numChildren, aiNode **children) {
     }
 
     if (mNumChildren > 0) {
-        aiNode **tmp(new aiNode*[mNumChildren]);
+        aiNode **tmp = new aiNode*[mNumChildren];
         ::memcpy(tmp, mChildren, sizeof(aiNode*) * mNumChildren);
         delete[] mChildren;
         mChildren = new aiNode*[mNumChildren + numChildren];

@@ -1074,7 +1074,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
             pcHelper->AddProperty<aiColor4D>(&clrOut,1,AI_MATKEY_COLOR_AMBIENT);
 
             // handle phong power and shading mode
-            int iMode;
+            int iMode = (int)aiShadingMode_Gouraud;
             if (0xFFFFFFFF != iPhong)   {
                 ai_real fSpec = PLY::PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(),ePhong);
 
@@ -1087,9 +1087,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 
                     iMode = (int)aiShadingMode_Phong;
                 }
-                else iMode = (int)aiShadingMode_Gouraud;
             }
-            else iMode = (int)aiShadingMode_Gouraud;
             pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
             // handle opacity

@@ -439,7 +439,7 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
     PLY::ElementInstanceList* pcList = NULL;
     unsigned int cnt = 0;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i = pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)
@@ -752,7 +752,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
     // index of the vertex index list
     unsigned int iProperty = 0xFFFFFFFF;
     PLY::EDataType eType = EDT_Char;
-    bool bIsTristrip = false;
+    bool bIsTriStrip = false;
 
     // index of the material index property
     unsigned int iMaterialIndex = 0xFFFFFFFF;
@@ -803,7 +803,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
                 if (!(*a).bIsList)continue;
                 iProperty   = _a;
                 bOne        = true;
-                bIsTristrip = true;
+                bIsTriStrip = true;
                 eType       = (*a).eType;
                 break;
             }
@@ -813,7 +813,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
     // check whether we have at least one per-face information set
     if (pcList && bOne)
     {
-        if (!bIsTristrip)
+        if (!bIsTriStrip)
         {
             pvOut->reserve(pcList->alInstances.size());
             for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();

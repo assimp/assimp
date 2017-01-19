@@ -51,7 +51,6 @@ aiNode::aiNode()
     // empty
 }
 
-
 aiNode::aiNode(const std::string& name)
 : mName(name)
 , mParent(NULL)

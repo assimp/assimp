@@ -69,7 +69,7 @@ extern "C" {
  * the imported scene does consist of only a single root node without children.
  */
 // -------------------------------------------------------------------------------
-struct aiNode
+struct ASSIMP_API aiNode
 {
     /** The name of the node.
      *

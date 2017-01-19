@@ -124,47 +124,13 @@ struct aiNode
 
 #ifdef __cplusplus
     /** Constructor */
-    aiNode()
-        // set all members to zero by default
-        : mName("")
-        , mParent(NULL)
-        , mNumChildren(0)
-        , mChildren(NULL)
-        , mNumMeshes(0)
-        , mMeshes(NULL)
-        , mMetaData(NULL)
-    {
-    }
-
+    aiNode();
 
     /** Construction from a specific name */
-    explicit aiNode(const std::string& name)
-        // set all members to zero by default
-        : mName(name)
-        , mParent(NULL)
-        , mNumChildren(0)
-        , mChildren(NULL)
-        , mNumMeshes(0)
-        , mMeshes(NULL)
-        , mMetaData(NULL)
-    {
-    }
+    explicit aiNode(const std::string& name);
 
     /** Destructor */
-    ~aiNode()
-    {
-        // delete all children recursively
-        // to make sure we won't crash if the data is invalid ...
-        if (mChildren && mNumChildren)
-        {
-            for( unsigned int a = 0; a < mNumChildren; a++)
-                delete mChildren[a];
-        }
-        delete [] mChildren;
-        delete [] mMeshes;
-        delete mMetaData;
-    }
-
+    ~aiNode();
 
     /** Searches for a node with a specific name, beginning at this
      *  nodes. Normally you will call this method on the root node
@@ -183,68 +149,16 @@ struct aiNode
         return FindNode(name.data);
     }
 
+    const aiNode* FindNode(const char* name) const;
 
-    inline 
-    const aiNode* FindNode(const char* name) const {
-        if ( nullptr == name ) {
-            return nullptr;
-        }
-        if ( !::strcmp( mName.data, name ) ) {
-            return this;
-        }
-        for (unsigned int i = 0; i < mNumChildren;++i) {
-            const aiNode* const p = mChildren[i]->FindNode(name);
-            if (p) {
-                return p;
-            }
-        }
-        // there is definitely no sub-node with this name
-        return nullptr;
-    }
+    aiNode* FindNode(const char* name);
 
-    inline 
-    aiNode* FindNode(const char* name) {
-        if (!::strcmp( mName.data,name))return this;
-        for (unsigned int i = 0; i < mNumChildren;++i)
-        {
-            aiNode* const p = mChildren[i]->FindNode(name);
-            if (p) {
-                return p;
-            }
-        }
-        // there is definitely no sub-node with this name
-        return nullptr;
-    }
-
-    inline void addChildren( unsigned int numChildren, aiNode **children ) {
-        if ( nullptr == children || 0 == numChildren ) {
-            return;
-        }
-
-        for ( unsigned int i = 0; i < numChildren; i++ ) {
-            aiNode *child = children[ i ];
-            if ( nullptr != child ) {
-                child->mParent = this;
-            }
-        }
-
-        if ( mNumChildren > 0 ) {
-            aiNode **tmp( new aiNode*[ mNumChildren ] );
-            ::memcpy( tmp, mChildren, sizeof( aiNode* ) * mNumChildren );
-            delete[] mChildren;
-            mChildren = new aiNode*[ mNumChildren + numChildren ];
-            ::memcpy( mChildren, tmp, sizeof( aiNode* ) * mNumChildren );
-            ::memcpy( &mChildren[ mNumChildren ], children, sizeof( aiNode* )* numChildren );
-            mNumChildren += numChildren;
-            delete[] tmp;
-        } else {
-            mChildren = new aiNode*[ numChildren ];
-            for ( unsigned int i = 0; i < numChildren; i++ ) {
-                mChildren[ i ] = children[ i ];
-            }
-            mNumChildren = numChildren;
-        }
-    }
+    /**
+     * @brief   Will add new children.
+     * @param   numChildren  Number of children to add.
+     * @param   children     The array with pointers showing to the children.
+     */
+    void addChildren(unsigned int numChildren, aiNode **children);
 #endif // __cplusplus
 };
 

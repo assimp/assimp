@@ -653,7 +653,7 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
     unsigned int cnt = 0;
     PLY::ElementInstanceList* pcList = NULL;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i = pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)
@@ -758,7 +758,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
     unsigned int iMaterialIndex = 0xFFFFFFFF;
     PLY::EDataType eType2 = EDT_Char;
 
-    // serach in the DOM for a face entry
+    // search in the DOM for a face entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i =  pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)

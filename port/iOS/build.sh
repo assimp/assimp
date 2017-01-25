@@ -22,7 +22,7 @@ CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
 CPP_STD_LIB_LIST=(libc++ libstdc++)
 CPP_STD_LIB=
-CPP_STD_LIST=(c++03 c++11 c++14)
+CPP_STD_LIST=(c++11 c++14)
 CPP_STD=
 
 function join { local IFS="$1"; shift; echo "$*"; }

@@ -694,7 +694,7 @@ void ColladaParser::ReadController( Collada::Controller& pController)
                     SkipSpacesAndLineEnd( &content);
                 }
 
-            TestClosing( "bind_shape_matrix");
+                TestClosing( "bind_shape_matrix");
             }
             else if( IsElement( "source"))
             {

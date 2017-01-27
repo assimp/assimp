@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,34 +23,35 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 */
 
-/** Small helper classes to optimise finding vertizes close to a given location
+/** Small helper classes to optimize finding vertices close to a given location
  */
 #ifndef AI_D3DSSPATIALSORT_H_INC
 #define AI_D3DSSPATIALSORT_H_INC
 
+#include <assimp/types.h>
 #include <vector>
-#include "../include/assimp/types.h"
+#include <stdint.h>
 
-namespace Assimp	{
+namespace Assimp    {
 
 // ----------------------------------------------------------------------------------
 /** Specialized version of SpatialSort to support smoothing groups
- *  This is used in by the 3DS, ASE and LWO loaders. 3DS and ASE share their 
+ *  This is used in by the 3DS, ASE and LWO loaders. 3DS and ASE share their
  *  normal computation code in SmoothingGroups.inl, the LWO loader has its own
  *  implementation to handle all details of its file format correctly.
  */
@@ -59,79 +60,79 @@ class SGSpatialSort
 {
 public:
 
-	SGSpatialSort();
+    SGSpatialSort();
 
-	// -------------------------------------------------------------------
-	/** Construction from a given face array, handling smoothing groups
-	 *  properly
-	 */
-	SGSpatialSort(const std::vector<aiVector3D>& vPositions);
+    // -------------------------------------------------------------------
+    /** Construction from a given face array, handling smoothing groups
+     *  properly
+     */
+    explicit SGSpatialSort(const std::vector<aiVector3D>& vPositions);
 
-	// -------------------------------------------------------------------
-	/** Add a vertex to the spatial sort
-	 * @param vPosition Vertex position to be added
-	 * @param index Index of the vrtex
-	 * @param smoothingGroup SmoothingGroup for this vertex
-	 */
-	void Add(const aiVector3D& vPosition, unsigned int index,
-		unsigned int smoothingGroup);
+    // -------------------------------------------------------------------
+    /** Add a vertex to the spatial sort
+     * @param vPosition Vertex position to be added
+     * @param index Index of the vrtex
+     * @param smoothingGroup SmoothingGroup for this vertex
+     */
+    void Add(const aiVector3D& vPosition, unsigned int index,
+        unsigned int smoothingGroup);
 
-	// -------------------------------------------------------------------
-	/** Prepare the spatial sorter for use. This step runs in O(logn)
-	 */
-	void Prepare();
+    // -------------------------------------------------------------------
+    /** Prepare the spatial sorter for use. This step runs in O(logn)
+     */
+    void Prepare();
 
-	/** Destructor */
-	~SGSpatialSort();
+    /** Destructor */
+    ~SGSpatialSort();
 
-	// -------------------------------------------------------------------
-	/** Returns an iterator for all positions close to the given position.
-	 * @param pPosition The position to look for vertices.
-	 * @param pSG Only included vertices with at least one shared smooth group
-	 * @param pRadius Maximal distance from the position a vertex may have
-	 *   to be counted in.
-	 * @param poResults The container to store the indices of the found
-	 *   positions. Will be emptied by the call so it may contain anything.
-	 * @param exactMatch Specifies whether smoothing groups are bit masks 
-	 *   (false) or integral values (true). In the latter case, a vertex
-	 *   cannot belong to more than one smoothing group.
-	 * @return An iterator to iterate over all vertices in the given area.
-	 */
-	// -------------------------------------------------------------------
-	void FindPositions( const aiVector3D& pPosition, uint32_t pSG,
-		float pRadius, std::vector<unsigned int>& poResults, 
-		bool exactMatch = false) const;
+    // -------------------------------------------------------------------
+    /** Returns an iterator for all positions close to the given position.
+     * @param pPosition The position to look for vertices.
+     * @param pSG Only included vertices with at least one shared smooth group
+     * @param pRadius Maximal distance from the position a vertex may have
+     *   to be counted in.
+     * @param poResults The container to store the indices of the found
+     *   positions. Will be emptied by the call so it may contain anything.
+     * @param exactMatch Specifies whether smoothing groups are bit masks
+     *   (false) or integral values (true). In the latter case, a vertex
+     *   cannot belong to more than one smoothing group.
+     * @return An iterator to iterate over all vertices in the given area.
+     */
+    // -------------------------------------------------------------------
+    void FindPositions( const aiVector3D& pPosition, uint32_t pSG,
+        float pRadius, std::vector<unsigned int>& poResults,
+        bool exactMatch = false) const;
 
 protected:
-	/** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */
-	aiVector3D mPlaneNormal;
+    /** Normal of the sorting plane, normalized. The center is always at (0, 0, 0) */
+    aiVector3D mPlaneNormal;
 
-	// -------------------------------------------------------------------
-	/** An entry in a spatially sorted position array. Consists of a 
-	 *  vertex index, its position and its precalculated distance from
-	 *  the reference plane */
-	// -------------------------------------------------------------------
-	struct Entry
-	{
-		unsigned int mIndex;	///< The vertex referred by this entry
-		aiVector3D mPosition;	///< Position
-		uint32_t mSmoothGroups;
-		float mDistance;		///< Distance of this vertex to the sorting plane
+    // -------------------------------------------------------------------
+    /** An entry in a spatially sorted position array. Consists of a
+     *  vertex index, its position and its precalculated distance from
+     *  the reference plane */
+    // -------------------------------------------------------------------
+    struct Entry
+    {
+        unsigned int mIndex;    ///< The vertex referred by this entry
+        aiVector3D mPosition;   ///< Position
+        uint32_t mSmoothGroups;
+        float mDistance;        ///< Distance of this vertex to the sorting plane
 
-		Entry() { /** intentionally not initialized.*/ }
-		Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance,uint32_t pSG) 
-			: 
-			mIndex( pIndex),
-			mPosition( pPosition),
-			mSmoothGroups (pSG),
-			mDistance( pDistance)
-			{ 	}
+        Entry() { /** intentionally not initialized.*/ }
+        Entry( unsigned int pIndex, const aiVector3D& pPosition, float pDistance,uint32_t pSG)
+            :
+            mIndex( pIndex),
+            mPosition( pPosition),
+            mSmoothGroups (pSG),
+            mDistance( pDistance)
+            {   }
 
-		bool operator < (const Entry& e) const { return mDistance < e.mDistance; }
-	};
+        bool operator < (const Entry& e) const { return mDistance < e.mDistance; }
+    };
 
-	// all positions, sorted by distance to the sorting plane
-	std::vector<Entry> mPositions;
+    // all positions, sorted by distance to the sorting plane
+    std::vector<Entry> mPositions;
 };
 
 } // end of namespace Assimp

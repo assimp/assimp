@@ -568,7 +568,7 @@ class Mesh(Structure):
             # normals, but the normals for vertices that are only referenced by
             # point or line primitives are undefined and set to qNaN.  See
             # the
-            #mNormals member for a detailled discussion of qNaNs.
+            #mNormals member for a detailed discussion of qNaNs.
             # @note If the mesh contains tangents, it automatically also
             # contains bitangents (the bitangent is just the cross product of
             # tangent and normal vectors).
@@ -897,3 +897,13 @@ class Scene(Structure):
             # the scene.
             ("mCameras", POINTER(POINTER(Camera))),
         ]
+
+assimp_structs_as_tuple = (Matrix4x4,
+                           Matrix3x3,
+                           Vector2D,
+                           Vector3D,
+                           Color3D,
+                           Color4D,
+                           Quaternion,
+                           Plane,
+                           Texel)

@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,16 +25,16 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
@@ -52,59 +52,104 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_QNAN_H_INCLUDED
 #define AI_QNAN_H_INCLUDED
 
+#include <assimp/defs.h>
+#include <limits>
+#include <stdint.h>
+
 // ---------------------------------------------------------------------------
-/** Data structure to represent the bit pattern of a 32 Bit 
+/** Data structure to represent the bit pattern of a 32 Bit
  *         IEEE 754 floating-point number. */
 union _IEEESingle
 {
-	float Float;
-	struct
-	{
-		uint32_t Frac : 23;
-		uint32_t Exp  : 8;
-		uint32_t Sign : 1;
-	} IEEE;
-} ;
+    float Float;
+    struct
+    {
+        uint32_t Frac : 23;
+        uint32_t Exp  : 8;
+        uint32_t Sign : 1;
+    } IEEE;
+};
 
 // ---------------------------------------------------------------------------
-/** Check whether a given float is qNaN. 
- *  @param in Input value */
-AI_FORCE_INLINE bool is_qnan(float in)	
+/** Data structure to represent the bit pattern of a 64 Bit
+ *         IEEE 754 floating-point number. */
+union _IEEEDouble
 {
-	// the straightforward solution does not work:
-	//   return (in != in);
-	// compiler generates code like this
-	//   load <in> to <register-with-different-width>
-	//   compare <register-with-different-width> against <in>
+    double Double;
+    struct
+    {
+        uint64_t Frac : 52;
+        uint64_t Exp  : 11;
+        uint64_t Sign : 1;
+    } IEEE;
+};
 
-	// FIXME: Use <float> stuff instead? I think fpclassify needs C99
-	return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1 &&
-		reinterpret_cast<_IEEESingle*>(&in)->IEEE.Frac);
+// ---------------------------------------------------------------------------
+/** Check whether a given float is qNaN.
+ *  @param in Input value */
+AI_FORCE_INLINE bool is_qnan(float in)
+{
+    // the straightforward solution does not work:
+    //   return (in != in);
+    // compiler generates code like this
+    //   load <in> to <register-with-different-width>
+    //   compare <register-with-different-width> against <in>
+
+    // FIXME: Use <float> stuff instead? I think fpclassify needs C99
+    return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1 &&
+        reinterpret_cast<_IEEESingle*>(&in)->IEEE.Frac);
 }
 
 // ---------------------------------------------------------------------------
-/** Check whether a float is NOT qNaN. 
+/** Check whether a given double is qNaN.
  *  @param in Input value */
-AI_FORCE_INLINE bool is_not_qnan(float in)	
+AI_FORCE_INLINE bool is_qnan(double in)
 {
-	return !is_qnan(in);
+    // the straightforward solution does not work:
+    //   return (in != in);
+    // compiler generates code like this
+    //   load <in> to <register-with-different-width>
+    //   compare <register-with-different-width> against <in>
+
+    // FIXME: Use <float> stuff instead? I think fpclassify needs C99
+    return (reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Exp == (1u << 11)-1 &&
+        reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Frac);
 }
 
 // ---------------------------------------------------------------------------
-/** @brief check whether a float is either NaN or (+/-) INF. 
+/** @brief check whether a float is either NaN or (+/-) INF.
  *
  *  Denorms return false, they're treated like normal values.
  *  @param in Input value */
 AI_FORCE_INLINE bool is_special_float(float in)
 {
-	return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1);
+    return (reinterpret_cast<_IEEESingle*>(&in)->IEEE.Exp == (1u << 8)-1);
+}
+
+// ---------------------------------------------------------------------------
+/** @brief check whether a double is either NaN or (+/-) INF.
+ *
+ *  Denorms return false, they're treated like normal values.
+ *  @param in Input value */
+AI_FORCE_INLINE bool is_special_float(double in)
+{
+    return (reinterpret_cast<_IEEEDouble*>(&in)->IEEE.Exp == (1u << 11)-1);
+}
+
+// ---------------------------------------------------------------------------
+/** Check whether a float is NOT qNaN.
+ *  @param in Input value */
+template<class TReal>
+AI_FORCE_INLINE bool is_not_qnan(TReal in)
+{
+    return !is_qnan(in);
 }
 
 // ---------------------------------------------------------------------------
 /** @brief Get a fresh qnan.  */
-AI_FORCE_INLINE float get_qnan()
+AI_FORCE_INLINE ai_real get_qnan()
 {
-	return std::numeric_limits<float>::quiet_NaN();
+    return std::numeric_limits<ai_real>::quiet_NaN();
 }
 
 #endif // !! AI_QNAN_H_INCLUDED

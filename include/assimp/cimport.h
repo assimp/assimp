@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,26 +25,30 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 
-/** @file  assimp.h
- *  @brief Defines the C-API to the Open Asset Import Library. 
+/** @file  cimport.h
+ *  @brief Defines the C-API to the Open Asset Import Library.
  */
+#pragma once
 #ifndef AI_ASSIMP_H_INC
 #define AI_ASSIMP_H_INC
-#include "types.h"
+
+#include <assimp/config.h>
+#include <assimp/types.h>
+#include "importerdesc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,11 +67,11 @@ typedef void (*aiLogStreamCallback)(const char* /* message */, char* /* user */)
 // --------------------------------------------------------------------------------
 struct aiLogStream
 {
-	/** callback to be called */
-	aiLogStreamCallback callback;
+    /** callback to be called */
+    aiLogStreamCallback callback;
 
-	/** user data to be passed to the callback */
-	char* user;
+    /** user data to be passed to the callback */
+    char* user;
 };
 
 
@@ -92,135 +96,167 @@ typedef int aiBool;
 
 // --------------------------------------------------------------------------------
 /** Reads the given file and returns its content.
- * 
- * If the call succeeds, the imported data is returned in an aiScene structure. 
- * The data is intended to be read-only, it stays property of the ASSIMP 
- * library and will be stable until aiReleaseImport() is called. After you're 
- * done with it, call aiReleaseImport() to free the resources associated with 
- * this file. If the import fails, NULL is returned instead. Call 
+ *
+ * If the call succeeds, the imported data is returned in an aiScene structure.
+ * The data is intended to be read-only, it stays property of the ASSIMP
+ * library and will be stable until aiReleaseImport() is called. After you're
+ * done with it, call aiReleaseImport() to free the resources associated with
+ * this file. If the import fails, NULL is returned instead. Call
  * aiGetErrorString() to retrieve a human-readable error text.
- * @param pFile Path and filename of the file to be imported, 
+ * @param pFile Path and filename of the file to be imported,
  *   expected to be a null-terminated c-string. NULL is not a valid value.
- * @param pFlags Optional post processing steps to be executed after 
- *   a successful import. Provide a bitwise combination of the 
+ * @param pFlags Optional post processing steps to be executed after
+ *   a successful import. Provide a bitwise combination of the
  *   #aiPostProcessSteps flags.
- * @return Pointer to the imported data or NULL if the import failed. 
+ * @return Pointer to the imported data or NULL if the import failed.
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFile( 
-	const char* pFile, 
-	unsigned int pFlags);
+ASSIMP_API const C_STRUCT aiScene* aiImportFile(
+    const char* pFile,
+    unsigned int pFlags);
 
 // --------------------------------------------------------------------------------
-/** Reads the given file using user-defined I/O functions and returns 
+/** Reads the given file using user-defined I/O functions and returns
  *   its content.
- * 
- * If the call succeeds, the imported data is returned in an aiScene structure. 
- * The data is intended to be read-only, it stays property of the ASSIMP 
- * library and will be stable until aiReleaseImport() is called. After you're 
- * done with it, call aiReleaseImport() to free the resources associated with 
- * this file. If the import fails, NULL is returned instead. Call 
+ *
+ * If the call succeeds, the imported data is returned in an aiScene structure.
+ * The data is intended to be read-only, it stays property of the ASSIMP
+ * library and will be stable until aiReleaseImport() is called. After you're
+ * done with it, call aiReleaseImport() to free the resources associated with
+ * this file. If the import fails, NULL is returned instead. Call
  * aiGetErrorString() to retrieve a human-readable error text.
- * @param pFile Path and filename of the file to be imported, 
+ * @param pFile Path and filename of the file to be imported,
  *   expected to be a null-terminated c-string. NULL is not a valid value.
- * @param pFlags Optional post processing steps to be executed after 
+ * @param pFlags Optional post processing steps to be executed after
  *   a successful import. Provide a bitwise combination of the
  *   #aiPostProcessSteps flags.
  * @param pFS aiFileIO structure. Will be used to open the model file itself
  *   and any other files the loader needs to open.  Pass NULL to use the default
  *   implementation.
- * @return Pointer to the imported data or NULL if the import failed.  
+ * @return Pointer to the imported data or NULL if the import failed.
  * @note Include <aiFileIO.h> for the definition of #aiFileIO.
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileEx( 
-	const char* pFile,
-	unsigned int pFlags,
-	C_STRUCT aiFileIO* pFS);
+ASSIMP_API const C_STRUCT aiScene* aiImportFileEx(
+    const char* pFile,
+    unsigned int pFlags,
+    C_STRUCT aiFileIO* pFS);
 
 // --------------------------------------------------------------------------------
 /** Same as #aiImportFileEx, but adds an extra parameter containing importer settings.
  *
- * @param pProps #aiPropertyStore instance containing import settings. 
+ * @param pFile Path and filename of the file to be imported,
+ *   expected to be a null-terminated c-string. NULL is not a valid value.
+ * @param pFlags Optional post processing steps to be executed after
+ *   a successful import. Provide a bitwise combination of the
+ *   #aiPostProcessSteps flags.
+ * @param pFS aiFileIO structure. Will be used to open the model file itself
+ *   and any other files the loader needs to open.  Pass NULL to use the default
+ *   implementation.
+ * @param pProps #aiPropertyStore instance containing import settings.
+ * @return Pointer to the imported data or NULL if the import failed.
+ * @note Include <aiFileIO.h> for the definition of #aiFileIO.
  * @see aiImportFileEx
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileExWithProperties( 
-	const char* pFile,
-	unsigned int pFlags,
-	C_STRUCT aiFileIO* pFS,
-	const C_STRUCT aiPropertyStore* pProps);
+ASSIMP_API const C_STRUCT aiScene* aiImportFileExWithProperties(
+    const char* pFile,
+    unsigned int pFlags,
+    C_STRUCT aiFileIO* pFS,
+    const C_STRUCT aiPropertyStore* pProps);
 
 // --------------------------------------------------------------------------------
 /** Reads the given file from a given memory buffer,
- * 
+ *
  * If the call succeeds, the contents of the file are returned as a pointer to an
- * aiScene object. The returned data is intended to be read-only, the importer keeps 
- * ownership of the data and will destroy it upon destruction. If the import fails, 
+ * aiScene object. The returned data is intended to be read-only, the importer keeps
+ * ownership of the data and will destroy it upon destruction. If the import fails,
  * NULL is returned.
- * A human-readable error description can be retrieved by calling aiGetErrorString(). 
+ * A human-readable error description can be retrieved by calling aiGetErrorString().
  * @param pBuffer Pointer to the file data
  * @param pLength Length of pBuffer, in bytes
- * @param pFlags Optional post processing steps to be executed after 
- *   a successful import. Provide a bitwise combination of the 
+ * @param pFlags Optional post processing steps to be executed after
+ *   a successful import. Provide a bitwise combination of the
  *   #aiPostProcessSteps flags. If you wish to inspect the imported
  *   scene first in order to fine-tune your post-processing setup,
  *   consider to use #aiApplyPostProcessing().
  * @param pHint An additional hint to the library. If this is a non empty string,
  *   the library looks for a loader to support the file extension specified by pHint
- *   and passes the file to the first matching loader. If this loader is unable to 
+ *   and passes the file to the first matching loader. If this loader is unable to
  *   completely the request, the library continues and tries to determine the file
- *   format on its own, a task that may or may not be successful. 
+ *   format on its own, a task that may or may not be successful.
  *   Check the return value, and you'll know ...
  * @return A pointer to the imported data, NULL if the import failed.
  *
  * @note This is a straightforward way to decode models from memory
- * buffers, but it doesn't handle model formats that spread their 
+ * buffers, but it doesn't handle model formats that spread their
  * data across multiple files or even directories. Examples include
  * OBJ or MD3, which outsource parts of their material info into
  * external scripts. If you need full functionality, provide
  * a custom IOSystem to make Assimp find these files and use
  * the regular aiImportFileEx()/aiImportFileExWithProperties() API.
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemory( 
-	const char* pBuffer,
-	unsigned int pLength,
-	unsigned int pFlags,
-	const char* pHint);
+ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemory(
+    const char* pBuffer,
+    unsigned int pLength,
+    unsigned int pFlags,
+    const char* pHint);
 
 // --------------------------------------------------------------------------------
 /** Same as #aiImportFileFromMemory, but adds an extra parameter containing importer settings.
  *
- * @param pProps #aiPropertyStore instance containing import settings. 
+ * @param pBuffer Pointer to the file data
+ * @param pLength Length of pBuffer, in bytes
+ * @param pFlags Optional post processing steps to be executed after
+ *   a successful import. Provide a bitwise combination of the
+ *   #aiPostProcessSteps flags. If you wish to inspect the imported
+ *   scene first in order to fine-tune your post-processing setup,
+ *   consider to use #aiApplyPostProcessing().
+ * @param pHint An additional hint to the library. If this is a non empty string,
+ *   the library looks for a loader to support the file extension specified by pHint
+ *   and passes the file to the first matching loader. If this loader is unable to
+ *   completely the request, the library continues and tries to determine the file
+ *   format on its own, a task that may or may not be successful.
+ *   Check the return value, and you'll know ...
+ * @param pProps #aiPropertyStore instance containing import settings.
+ * @return A pointer to the imported data, NULL if the import failed.
+ *
+ * @note This is a straightforward way to decode models from memory
+ * buffers, but it doesn't handle model formats that spread their
+ * data across multiple files or even directories. Examples include
+ * OBJ or MD3, which outsource parts of their material info into
+ * external scripts. If you need full functionality, provide
+ * a custom IOSystem to make Assimp find these files and use
+ * the regular aiImportFileEx()/aiImportFileExWithProperties() API.
  * @see aiImportFileFromMemory
  */
-ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemoryWithProperties( 
-	const char* pBuffer,
-	unsigned int pLength,
-	unsigned int pFlags,
-	const char* pHint,
-	const C_STRUCT aiPropertyStore* pProps);
+ASSIMP_API const C_STRUCT aiScene* aiImportFileFromMemoryWithProperties(
+    const char* pBuffer,
+    unsigned int pLength,
+    unsigned int pFlags,
+    const char* pHint,
+    const C_STRUCT aiPropertyStore* pProps);
 
 // --------------------------------------------------------------------------------
 /** Apply post-processing to an already-imported scene.
  *
  * This is strictly equivalent to calling #aiImportFile()/#aiImportFileEx with the
- * same flags. However, you can use this separate function to inspect the imported 
- * scene first to fine-tune your post-processing setup. 
+ * same flags. However, you can use this separate function to inspect the imported
+ * scene first to fine-tune your post-processing setup.
  * @param pScene Scene to work on.
  * @param pFlags Provide a bitwise combination of the #aiPostProcessSteps flags.
  * @return A pointer to the post-processed data. Post processing is done in-place,
  *   meaning this is still the same #aiScene which you passed for pScene. However,
  *   _if_ post-processing failed, the scene could now be NULL. That's quite a rare
- *   case, post processing steps are not really designed to 'fail'. To be exact, 
- *   the #aiProcess_ValidateDS flag is currently the only post processing step 
+ *   case, post processing steps are not really designed to 'fail'. To be exact,
+ *   the #aiProcess_ValidateDataStructure flag is currently the only post processing step
  *   which can actually cause the scene to be reset to NULL.
  */
 ASSIMP_API const C_STRUCT aiScene* aiApplyPostProcessing(
-	const C_STRUCT aiScene* pScene,
-	unsigned int pFlags);
+    const C_STRUCT aiScene* pScene,
+    unsigned int pFlags);
 
 // --------------------------------------------------------------------------------
-/** Get one of the predefine log streams. This is the quick'n'easy solution to 
+/** Get one of the predefine log streams. This is the quick'n'easy solution to
  *  access Assimp's log system. Attaching a log stream can slightly reduce Assimp's
- *  overall import performance. 
+ *  overall import performance.
  *
  *  Usage is rather simple (this will stream the log to a file, named log.txt, and
  *  the stdout stream of the process:
@@ -232,27 +268,27 @@ ASSIMP_API const C_STRUCT aiScene* aiApplyPostProcessing(
  *    aiAttachLogStream(&c);
  *  @endcode
  *
- *  @param pStreams One of the #aiDefaultLogStream enumerated values. 
+ *  @param pStreams One of the #aiDefaultLogStream enumerated values.
  *  @param file Solely for the #aiDefaultLogStream_FILE flag: specifies the file to write to.
  *    Pass NULL for all other flags.
  *  @return The log stream. callback is set to NULL if something went wrong.
  */
 ASSIMP_API C_STRUCT aiLogStream aiGetPredefinedLogStream(
-	C_ENUM aiDefaultLogStream pStreams,
-	const char* file);
+    C_ENUM aiDefaultLogStream pStreams,
+    const char* file);
 
 // --------------------------------------------------------------------------------
 /** Attach a custom log stream to the libraries' logging system.
  *
  *  Attaching a log stream can slightly reduce Assimp's overall import
- *  performance. Multiple log-streams can be attached. 
+ *  performance. Multiple log-streams can be attached.
  *  @param stream Describes the new log stream.
- *  @note To ensure proepr destruction of the logging system, you need to manually
- *    call aiDetachLogStream() on every single log stream you attach. 
+ *  @note To ensure proper destruction of the logging system, you need to manually
+ *    call aiDetachLogStream() on every single log stream you attach.
  *    Alternatively (for the lazy folks) #aiDetachAllLogStreams is provided.
  */
 ASSIMP_API void aiAttachLogStream(
-	const C_STRUCT aiLogStream* stream);
+    const C_STRUCT aiLogStream* stream);
 
 // --------------------------------------------------------------------------------
 /** Enable verbose logging. Verbose logging includes debug-related stuff and
@@ -266,14 +302,14 @@ ASSIMP_API void aiEnableVerboseLogging(aiBool d);
 // --------------------------------------------------------------------------------
 /** Detach a custom log stream from the libraries' logging system.
  *
- *  This is the counterpart of #aiAttachPredefinedLogStream. If you attached a stream,
+ *  This is the counterpart of #aiAttachLogStream. If you attached a stream,
  *  don't forget to detach it again.
  *  @param stream The log stream to be detached.
  *  @return AI_SUCCESS if the log stream has been detached successfully.
  *  @see aiDetachAllLogStreams
  */
 ASSIMP_API C_ENUM aiReturn aiDetachLogStream(
-	const C_STRUCT aiLogStream* stream);
+    const C_STRUCT aiLogStream* stream);
 
 // --------------------------------------------------------------------------------
 /** Detach all active log streams from the libraries' logging system.
@@ -291,17 +327,17 @@ ASSIMP_API void aiDetachAllLogStreams(void);
  * Call this function after you're done with the imported data.
  * @param pScene The imported data to release. NULL is a valid value.
  */
-ASSIMP_API void aiReleaseImport( 
-	const C_STRUCT aiScene* pScene);
+ASSIMP_API void aiReleaseImport(
+    const C_STRUCT aiScene* pScene);
 
 // --------------------------------------------------------------------------------
-/** Returns the error text of the last failed import process. 
+/** Returns the error text of the last failed import process.
  *
  * @return A textual description of the error that occurred at the last
  * import process. NULL if there was no error. There can't be an error if you
  * got a non-NULL #aiScene from #aiImportFile/#aiImportFileEx/#aiApplyPostProcessing.
  */
-ASSIMP_API const char* aiGetErrorString();
+ASSIMP_API const char* aiGetErrorString(void);
 
 // --------------------------------------------------------------------------------
 /** Returns whether a given file extension is supported by ASSIMP
@@ -311,7 +347,7 @@ ASSIMP_API const char* aiGetErrorString();
  * @return AI_TRUE if the file extension is supported.
  */
 ASSIMP_API aiBool aiIsExtensionSupported(
-	const char* szExtension);
+    const char* szExtension);
 
 // --------------------------------------------------------------------------------
 /** Get a list of all file extensions supported by ASSIMP.
@@ -322,16 +358,16 @@ ASSIMP_API aiBool aiIsExtensionSupported(
  * Format of the list: "*.3ds;*.obj;*.dae". NULL is not a valid parameter.
  */
 ASSIMP_API void aiGetExtensionList(
-	C_STRUCT aiString* szOut);
+    C_STRUCT aiString* szOut);
 
 // --------------------------------------------------------------------------------
 /** Get the approximated storage required by an imported asset
  * @param pIn Input asset.
- * @param in Data structure to be filled. 
+ * @param in Data structure to be filled.
  */
 ASSIMP_API void aiGetMemoryRequirements(
-	const C_STRUCT aiScene* pIn,
-	C_STRUCT aiMemoryInfo* in);
+    const C_STRUCT aiScene* pIn,
+    C_STRUCT aiMemoryInfo* in);
 
 
 
@@ -350,70 +386,72 @@ ASSIMP_API C_STRUCT aiPropertyStore* aiCreatePropertyStore(void);
 ASSIMP_API void aiReleasePropertyStore(C_STRUCT aiPropertyStore* p);
 
 // --------------------------------------------------------------------------------
-/** Set an integer property. 
+/** Set an integer property.
  *
- *  This is the C-version of #Assimp::Importer::SetPropertyInteger(). In the C 
- *  interface, properties are always shared by all imports. It is not possible to 
+ *  This is the C-version of #Assimp::Importer::SetPropertyInteger(). In the C
+ *  interface, properties are always shared by all imports. It is not possible to
  *  specify them per import.
  *
- * @param szName Name of the configuration property to be set. All supported 
- *   public properties are defined in the config.h header file (#AI_CONFIG_XXX).
+ * @param store Store to modify. Use #aiCreatePropertyStore to obtain a store.
+ * @param szName Name of the configuration property to be set. All supported
+ *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyInteger(
-	C_STRUCT aiPropertyStore* store,
-	const char* szName, 
-	int value);
+    C_STRUCT aiPropertyStore* store,
+    const char* szName,
+    int value);
 
 // --------------------------------------------------------------------------------
-/** Set a floating-point property. 
+/** Set a floating-point property.
  *
- *  This is the C-version of #Assimp::Importer::SetPropertyFloat(). In the C 
- *  interface, properties are always shared by all imports. It is not possible to 
+ *  This is the C-version of #Assimp::Importer::SetPropertyFloat(). In the C
+ *  interface, properties are always shared by all imports. It is not possible to
  *  specify them per import.
  *
- * @param szName Name of the configuration property to be set. All supported 
- *   public properties are defined in the config.h header file (#AI_CONFIG_XXX).
+ * @param store Store to modify. Use #aiCreatePropertyStore to obtain a store.
+ * @param szName Name of the configuration property to be set. All supported
+ *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
  * @param value New value for the property
  */
 ASSIMP_API void aiSetImportPropertyFloat(
-	C_STRUCT aiPropertyStore* store,
-	const char* szName,
-	float value);
+    C_STRUCT aiPropertyStore* store,
+    const char* szName,
+    float value);
 
 // --------------------------------------------------------------------------------
-/** Set a string property. 
+/** Set a string property.
  *
- *  This is the C-version of #Assimp::Importer::SetPropertyString(). In the C 
- *  interface, properties are always shared by all imports. It is not possible to 
+ *  This is the C-version of #Assimp::Importer::SetPropertyString(). In the C
+ *  interface, properties are always shared by all imports. It is not possible to
  *  specify them per import.
  *
- * @param property store to modify. Use #aiCreatePropertyStore to obtain a store.
- * @param szName Name of the configuration property to be set. All supported 
- *   public properties are defined in the config.h header file (#AI_CONFIG_XXX).
- * @param value New value for the property
+ * @param store Store to modify. Use #aiCreatePropertyStore to obtain a store.
+ * @param szName Name of the configuration property to be set. All supported
+ *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
+ * @param st New value for the property
  */
 ASSIMP_API void aiSetImportPropertyString(
-	C_STRUCT aiPropertyStore* store,
-	const char* szName,
-	const C_STRUCT aiString* st);
+    C_STRUCT aiPropertyStore* store,
+    const char* szName,
+    const C_STRUCT aiString* st);
 
 // --------------------------------------------------------------------------------
-/** Set a matrix property. 
+/** Set a matrix property.
  *
- *  This is the C-version of #Assimp::Importer::SetPropertyMatrix(). In the C 
- *  interface, properties are always shared by all imports. It is not possible to 
+ *  This is the C-version of #Assimp::Importer::SetPropertyMatrix(). In the C
+ *  interface, properties are always shared by all imports. It is not possible to
  *  specify them per import.
  *
- * @param property store to modify. Use #aiCreatePropertyStore to obtain a store.
- * @param szName Name of the configuration property to be set. All supported 
- *   public properties are defined in the config.h header file (#AI_CONFIG_XXX).
- * @param value New value for the property
+ * @param store Store to modify. Use #aiCreatePropertyStore to obtain a store.
+ * @param szName Name of the configuration property to be set. All supported
+ *   public properties are defined in the config.h header file (AI_CONFIG_XXX).
+ * @param mat New value for the property
  */
 ASSIMP_API void aiSetImportPropertyMatrix(
-	C_STRUCT aiPropertyStore* store,
-	const char* szName,
-	const C_STRUCT aiMatrix4x4* mat);
+    C_STRUCT aiPropertyStore* store,
+    const char* szName,
+    const C_STRUCT aiMatrix4x4* mat);
 
 // --------------------------------------------------------------------------------
 /** Construct a quaternion from a 3x3 rotation matrix.
@@ -422,13 +460,13 @@ ASSIMP_API void aiSetImportPropertyMatrix(
  *  @see aiQuaternion(const aiMatrix3x3& pRotMatrix)
  */
 ASSIMP_API void aiCreateQuaternionFromMatrix(
-	C_STRUCT aiQuaternion* quat,
-	const C_STRUCT aiMatrix3x3* mat);
+    C_STRUCT aiQuaternion* quat,
+    const C_STRUCT aiMatrix3x3* mat);
 
 // --------------------------------------------------------------------------------
 /** Decompose a transformation matrix into its rotational, translational and
  *  scaling components.
- * 
+ *
  * @param mat Matrix to decompose
  * @param scaling Receives the scaling component
  * @param rotation Receives the rotational component
@@ -436,24 +474,24 @@ ASSIMP_API void aiCreateQuaternionFromMatrix(
  * @see aiMatrix4x4::Decompose (aiVector3D&, aiQuaternion&, aiVector3D&) const;
  */
 ASSIMP_API void aiDecomposeMatrix(
-	const C_STRUCT aiMatrix4x4* mat,
-	C_STRUCT aiVector3D* scaling, 
-	C_STRUCT aiQuaternion* rotation,
-	C_STRUCT aiVector3D* position);
+    const C_STRUCT aiMatrix4x4* mat,
+    C_STRUCT aiVector3D* scaling,
+    C_STRUCT aiQuaternion* rotation,
+    C_STRUCT aiVector3D* position);
 
 // --------------------------------------------------------------------------------
 /** Transpose a 4x4 matrix.
  *  @param mat Pointer to the matrix to be transposed
  */
 ASSIMP_API void aiTransposeMatrix4(
-	C_STRUCT aiMatrix4x4* mat);
+    C_STRUCT aiMatrix4x4* mat);
 
 // --------------------------------------------------------------------------------
 /** Transpose a 3x3 matrix.
  *  @param mat Pointer to the matrix to be transposed
  */
 ASSIMP_API void aiTransposeMatrix3(
-	C_STRUCT aiMatrix3x3* mat);
+    C_STRUCT aiMatrix3x3* mat);
 
 // --------------------------------------------------------------------------------
 /** Transform a vector by a 3x3 matrix
@@ -461,8 +499,8 @@ ASSIMP_API void aiTransposeMatrix3(
  *  @param mat Matrix to transform the vector with.
  */
 ASSIMP_API void aiTransformVecByMatrix3(
-	C_STRUCT aiVector3D* vec, 
-	const C_STRUCT aiMatrix3x3* mat);
+    C_STRUCT aiVector3D* vec,
+    const C_STRUCT aiMatrix3x3* mat);
 
 // --------------------------------------------------------------------------------
 /** Transform a vector by a 4x4 matrix
@@ -470,8 +508,8 @@ ASSIMP_API void aiTransformVecByMatrix3(
  *  @param mat Matrix to transform the vector with.
  */
 ASSIMP_API void aiTransformVecByMatrix4(
-	C_STRUCT aiVector3D* vec, 
-	const C_STRUCT aiMatrix4x4* mat);
+    C_STRUCT aiVector3D* vec,
+    const C_STRUCT aiMatrix4x4* mat);
 
 // --------------------------------------------------------------------------------
 /** Multiply two 4x4 matrices.
@@ -479,8 +517,8 @@ ASSIMP_API void aiTransformVecByMatrix4(
  *  @param src Matrix to be multiplied with 'dst'.
  */
 ASSIMP_API void aiMultiplyMatrix4(
-	C_STRUCT aiMatrix4x4* dst, 
-	const C_STRUCT aiMatrix4x4* src);
+    C_STRUCT aiMatrix4x4* dst,
+    const C_STRUCT aiMatrix4x4* src);
 
 // --------------------------------------------------------------------------------
 /** Multiply two 3x3 matrices.
@@ -488,24 +526,37 @@ ASSIMP_API void aiMultiplyMatrix4(
  *  @param src Matrix to be multiplied with 'dst'.
  */
 ASSIMP_API void aiMultiplyMatrix3(
-	C_STRUCT aiMatrix3x3* dst, 
-	const C_STRUCT aiMatrix3x3* src);
+    C_STRUCT aiMatrix3x3* dst,
+    const C_STRUCT aiMatrix3x3* src);
 
 // --------------------------------------------------------------------------------
 /** Get a 3x3 identity matrix.
  *  @param mat Matrix to receive its personal identity
  */
 ASSIMP_API void aiIdentityMatrix3(
-	C_STRUCT aiMatrix3x3* mat);
+    C_STRUCT aiMatrix3x3* mat);
 
 // --------------------------------------------------------------------------------
 /** Get a 4x4 identity matrix.
  *  @param mat Matrix to receive its personal identity
  */
 ASSIMP_API void aiIdentityMatrix4(
-	C_STRUCT aiMatrix4x4* mat);
+    C_STRUCT aiMatrix4x4* mat);
 
+// --------------------------------------------------------------------------------
+/** Returns the number of import file formats available in the current Assimp build.
+ * Use aiGetImportFormatDescription() to retrieve infos of a specific import format.
+ */
+ASSIMP_API size_t aiGetImportFormatCount(void);
 
+// --------------------------------------------------------------------------------
+/** Returns a description of the nth import file format. Use #aiGetImportFormatCount()
+ * to learn how many import formats are supported.
+ * @param pIndex Index of the import format to retrieve information for. Valid range is
+ *    0 to #aiGetImportFormatCount()
+ * @return A description of that specific import format. NULL if pIndex is out of range.
+ */
+ASSIMP_API const C_STRUCT aiImporterDesc* aiGetImportFormatDescription( size_t pIndex);
 #ifdef __cplusplus
 }
 #endif

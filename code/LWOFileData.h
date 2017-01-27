@@ -2,11 +2,11 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2016, assimp team
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the
 following conditions are met:
 
 * Redistributions of source code must retain the above
@@ -23,16 +23,16 @@ following conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Defines chunk constants used by the LWO file format
 
 The chunks are taken from the official LightWave SDK headers.
- 
+
 */
 #ifndef AI_LWO_FILEDATA_INCLUDED
 #define AI_LWO_FILEDATA_INCLUDED
@@ -52,7 +52,7 @@ The chunks are taken from the official LightWave SDK headers.
 #include <list>
 
 // public ASSIMP headers
-#include "../include/assimp/mesh.h"
+#include <assimp/mesh.h>
 
 // internal headers
 #include "IFF.h"
@@ -257,47 +257,47 @@ namespace LWO {
 /** \brief Data structure for a face in a LWO file
  *
  * \note We can't use the code in SmoothingGroups.inl here - the mesh
- *   structures of 3DS/ASE and LWO are too different. 
+ *   structures of 3DS/ASE and LWO are too different.
  */
 struct Face : public aiFace
 {
-	//! Default construction
-	Face() 
-		: surfaceIndex	(0)
-		, smoothGroup	(0)
-		, type			(AI_LWO_FACE)
-	{}
+    //! Default construction
+    Face()
+        : surfaceIndex  (0)
+        , smoothGroup   (0)
+        , type          (AI_LWO_FACE)
+    {}
 
-	//! Construction from given type
-	Face(uint32_t _type) 
-		: surfaceIndex	(0)
-		, smoothGroup	(0)
-		, type			(_type)
-	{}
+    //! Construction from given type
+    explicit Face(uint32_t _type)
+        : surfaceIndex  (0)
+        , smoothGroup   (0)
+        , type          (_type)
+    {}
 
-	//! Copy construction
-	Face(const Face& f) : aiFace() {
-		*this = f;
-	}
+    //! Copy construction
+    Face(const Face& f) : aiFace() {
+        *this = f;
+    }
 
-	//! Zero-based index into tags chunk
-	unsigned int surfaceIndex;
+    //! Zero-based index into tags chunk
+    unsigned int surfaceIndex;
 
-	//! Smooth group this face is assigned to
-	unsigned int smoothGroup;
+    //! Smooth group this face is assigned to
+    unsigned int smoothGroup;
 
-	//! Type of face
-	uint32_t type;
+    //! Type of face
+    uint32_t type;
 
 
-	//! Assignment operator
-	Face& operator=(const LWO::Face& f)	{
-		aiFace::operator =(f);
-		surfaceIndex	= f.surfaceIndex;
-		smoothGroup		= f.smoothGroup;
-		type            = f.type;
-		return *this;
-	}
+    //! Assignment operator
+    Face& operator=(const LWO::Face& f) {
+        aiFace::operator =(f);
+        surfaceIndex    = f.surfaceIndex;
+        smoothGroup     = f.smoothGroup;
+        type            = f.type;
+        return *this;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -305,29 +305,29 @@ struct Face : public aiFace
  */
 struct VMapEntry
 {
-	VMapEntry(unsigned int _dims)
-		:  dims(_dims)
-	{}
+    explicit VMapEntry(unsigned int _dims)
+        :  dims(_dims)
+    {}
 
-	virtual ~VMapEntry() {}
+    virtual ~VMapEntry() {}
 
-	//! allocates memory for the vertex map
-	virtual void Allocate(unsigned int num)
-	{
-		if (!rawData.empty())
-			return; // return if already allocated
+    //! allocates memory for the vertex map
+    virtual void Allocate(unsigned int num)
+    {
+        if (!rawData.empty())
+            return; // return if already allocated
 
-		const unsigned int m = num*dims;
-		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
-		rawData.resize(m,0.f);
-		abAssigned.resize(num,false);
-	}
+        const unsigned int m = num*dims;
+        rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
+        rawData.resize(m,0.f);
+        abAssigned.resize(num,false);
+    }
 
-	std::string name;
-	unsigned int dims;
+    std::string name;
+    unsigned int dims;
 
-	std::vector<float> rawData;
-	std::vector<bool> abAssigned;
+    std::vector<float> rawData;
+    std::vector<bool> abAssigned;
 };
 
 // ---------------------------------------------------------------------------
@@ -335,26 +335,26 @@ struct VMapEntry
  */
 struct VColorChannel : public VMapEntry
 {
-	VColorChannel()
-		: VMapEntry(4)
-	{}
+    VColorChannel()
+        : VMapEntry(4)
+    {}
 
-	//! need to overwrite this function - the alpha channel must
-	//! be initialized to 1.0 by default
-	virtual void Allocate(unsigned int num)
-	{
-		if (!rawData.empty())
-			return; // return if already allocated
+    //! need to overwrite this function - the alpha channel must
+    //! be initialized to 1.0 by default
+    virtual void Allocate(unsigned int num)
+    {
+        if (!rawData.empty())
+            return; // return if already allocated
 
-		register unsigned int m = num*dims;
-		rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
-		rawData.resize(m);
+        unsigned int m = num*dims;
+        rawData.reserve(m + (m>>2u)); // 25% as  extra storage for VMADs
+        rawData.resize(m);
 
-		for (aiColor4D* p = (aiColor4D*)&rawData[0]; p < (aiColor4D*)&rawData[m-1]; ++p)
-			p->a = 1.f;
+        for (aiColor4D* p = (aiColor4D*)&rawData[0]; p < (aiColor4D*)&rawData[m-1]; ++p)
+            p->a = 1.f;
 
-		abAssigned.resize(num,false);
-	}
+        abAssigned.resize(num,false);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -362,19 +362,19 @@ struct VColorChannel : public VMapEntry
  */
 struct UVChannel : public VMapEntry
 {
-	UVChannel()
-		: VMapEntry(2)
-	{}
+    UVChannel()
+        : VMapEntry(2)
+    {}
 };
 
 // ---------------------------------------------------------------------------
-/** \brief Represents a weight map 
+/** \brief Represents a weight map
  */
 struct WeightChannel : public VMapEntry
 {
-	WeightChannel()
-		: VMapEntry(1)
-	{}
+    WeightChannel()
+        : VMapEntry(1)
+    {}
 };
 
 // ---------------------------------------------------------------------------
@@ -382,9 +382,9 @@ struct WeightChannel : public VMapEntry
  */
 struct NormalChannel : public VMapEntry
 {
-	NormalChannel()
-		: VMapEntry(3)
-	{}
+    NormalChannel()
+        : VMapEntry(3)
+    {}
 };
 
 // ---------------------------------------------------------------------------
@@ -392,99 +392,100 @@ struct NormalChannel : public VMapEntry
  */
 struct Texture
 {
-	// we write the enum values out here to make debugging easier ...
-	enum BlendType
-	{
-		Normal			= 0,
-		Subtractive		= 1,
-		Difference		= 2,
-		Multiply		= 3,
-		Divide			= 4,
-		Alpha			= 5,
-		TextureDispl	= 6,
-		Additive		= 7
-	};
+    // we write the enum values out here to make debugging easier ...
+    enum BlendType
+    {
+        Normal          = 0,
+        Subtractive     = 1,
+        Difference      = 2,
+        Multiply        = 3,
+        Divide          = 4,
+        Alpha           = 5,
+        TextureDispl    = 6,
+        Additive        = 7
+    };
 
-	enum MappingMode
-	{
-		Planar			= 0,
-		Cylindrical		= 1,
-		Spherical		= 2,
-		Cubic			= 3,
-		FrontProjection	= 4,
-		UV				= 5
-	};
+    enum MappingMode
+    {
+        Planar          = 0,
+        Cylindrical     = 1,
+        Spherical       = 2,
+        Cubic           = 3,
+        FrontProjection = 4,
+        UV              = 5
+    };
 
-	enum Axes
-	{
-		AXIS_X			= 0,
-		AXIS_Y			= 1,
-		AXIS_Z			= 2
-	};
+    enum Axes
+    {
+        AXIS_X          = 0,
+        AXIS_Y          = 1,
+        AXIS_Z          = 2
+    };
 
-	enum Wrap
-	{
-		RESET			= 0,
-		REPEAT			= 1,
-		MIRROR			= 2,
-		EDGE			= 3
-	};
+    enum Wrap
+    {
+        RESET           = 0,
+        REPEAT          = 1,
+        MIRROR          = 2,
+        EDGE            = 3
+    };
 
-	Texture()
-		: mClipIdx(UINT_MAX)
-		, mStrength			(1.0f)
-		, mUVChannelIndex	("unknown")
-		, mRealUVIndex		(UINT_MAX)
-		, enabled			(true)
-		, blendType			(Additive)
-		, bCanUse			(true)
-		, mapMode			(UV)
-		, majorAxis			(AXIS_X)
-		, wrapAmountH		(1.0f)
-		, wrapAmountW		(1.0f)
-		, wrapModeWidth		(REPEAT)
-		, wrapModeHeight	(REPEAT)
-		, ordinal			("\x00")
-	{}
+    Texture()
+        : mClipIdx(UINT_MAX)
+        , mStrength         (1.0f)
+        , type()
+        , mUVChannelIndex   ("unknown")
+        , mRealUVIndex      (UINT_MAX)
+        , enabled           (true)
+        , blendType         (Additive)
+        , bCanUse           (true)
+        , mapMode           (UV)
+        , majorAxis         (AXIS_X)
+        , wrapAmountH       (1.0f)
+        , wrapAmountW       (1.0f)
+        , wrapModeWidth     (REPEAT)
+        , wrapModeHeight    (REPEAT)
+        , ordinal           ("\x00")
+    {}
 
-	//! File name of the texture
-	std::string mFileName;
+    //! File name of the texture
+    std::string mFileName;
 
-	//! Clip index
-	unsigned int mClipIdx;
+    //! Clip index
+    unsigned int mClipIdx;
 
-	//! Strength of the texture - blend factor
-	float mStrength;
+    //! Strength of the texture - blend factor
+    float mStrength;
 
-	uint32_t type; // type of the texture
+    uint32_t type; // type of the texture
 
-	//! Name of the corresponding UV channel
-	std::string mUVChannelIndex;
-	unsigned int mRealUVIndex;
+    //! Name of the corresponding UV channel
+    std::string mUVChannelIndex;
+    unsigned int mRealUVIndex;
 
-	//! is the texture enabled?
-	bool enabled;
+    //! is the texture enabled?
+    bool enabled;
 
-	//! blend type
-	BlendType blendType;
+    //! blend type
+    BlendType blendType;
 
-	//! are we able to use the texture?
-	bool bCanUse;
+    //! are we able to use the texture?
+    bool bCanUse;
 
-	//! mapping mode
-	MappingMode mapMode;
+    //! mapping mode
+    MappingMode mapMode;
 
-	//! major axis for planar, cylindrical, spherical projections
-	Axes majorAxis;
+    //! major axis for planar, cylindrical, spherical projections
+    Axes majorAxis;
 
-	//! wrap amount for cylindrical and spherical projections
-	float wrapAmountH,wrapAmountW;
+    //! wrap amount for cylindrical and spherical projections
+    float wrapAmountH,wrapAmountW;
 
-	//! wrapping mode for the texture
-	Wrap wrapModeWidth,wrapModeHeight;
+    //! wrapping mode for the texture
+    Wrap wrapModeWidth,wrapModeHeight;
 
-	//! ordinal string of the texture
-	std::string ordinal;
+    //! ordinal string of the texture
+    std::string ordinal;
 };
 
 // ---------------------------------------------------------------------------
@@ -492,28 +493,29 @@ struct Texture
  */
 struct Clip
 {
-	enum Type
-	{
-		 STILL, SEQ, REF, UNSUPPORTED
-	} type;
+    enum Type
+    {
+         STILL, SEQ, REF, UNSUPPORTED
+    } type;
 
-	Clip()
-		: type	 (UNSUPPORTED)
-		, idx	 (0)
-		, negate (false)
-	{}
+    Clip()
+        : type   (UNSUPPORTED)
+        , clipRef()
+        , idx    (0)
+        , negate (false)
+    {}
 
-	//! path to the base texture -
-	std::string path;
+    //! path to the base texture -
+    std::string path;
 
-	//! reference to another CLIP
-	unsigned int clipRef;
+    //! reference to another CLIP
+    unsigned int clipRef;
 
-	//! index of the clip
-	unsigned int idx;
+    //! index of the clip
+    unsigned int idx;
 
-	//! Negate the clip?
-	bool negate;
+    //! Negate the clip?
+    bool negate;
 };
 
 
@@ -524,108 +526,108 @@ struct Clip
  */
 struct Shader
 {
-	Shader()
-		:	ordinal			("\x00")
-		,	functionName	("unknown")
-		,	enabled			(true)
-	{}
+    Shader()
+        :   ordinal         ("\x00")
+        ,   functionName    ("unknown")
+        ,   enabled         (true)
+    {}
 
-	std::string ordinal;
-	std::string functionName;
-	bool enabled;
+    std::string ordinal;
+    std::string functionName;
+    bool enabled;
 };
 
-typedef std::list < Texture >		TextureList;
-typedef std::list < Shader >		ShaderList;
+typedef std::list < Texture >       TextureList;
+typedef std::list < Shader >        ShaderList;
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a LWO file surface (= material)
  */
 struct Surface
 {
-	Surface()
-		: mColor				(0.78431f,0.78431f,0.78431f)
-		, bDoubleSided			(false)
-		, mDiffuseValue			(1.f)
-		, mSpecularValue		(0.f)
-		, mTransparency			(0.f)
-		, mGlossiness			(0.4f)
-		, mLuminosity			(0.f)
-		, mColorHighlights		(0.f)
-		, mMaximumSmoothAngle	(0.f) // 0 == not specified, no smoothing
-		, mVCMap				("")
-		, mVCMapType			(AI_LWO_RGBA)
-		, mIOR					(1.f) // vakuum
-		, mBumpIntensity		(1.f)
-		, mWireframe			(false)
-		, mAdditiveTransparency (0.f)
-	{}
+    Surface()
+        : mColor                (0.78431f,0.78431f,0.78431f)
+        , bDoubleSided          (false)
+        , mDiffuseValue         (1.f)
+        , mSpecularValue        (0.f)
+        , mTransparency         (0.f)
+        , mGlossiness           (0.4f)
+        , mLuminosity           (0.f)
+        , mColorHighlights      (0.f)
+        , mMaximumSmoothAngle   (0.f) // 0 == not specified, no smoothing
+        , mVCMap                ("")
+        , mVCMapType            (AI_LWO_RGBA)
+        , mIOR                  (1.f) // vakuum
+        , mBumpIntensity        (1.f)
+        , mWireframe            (false)
+        , mAdditiveTransparency (0.f)
+    {}
 
-	//! Name of the surface
-	std::string mName;
+    //! Name of the surface
+    std::string mName;
 
-	//! Color of the surface
-	aiColor3D mColor;
+    //! Color of the surface
+    aiColor3D mColor;
 
-	//! true for two-sided materials
-	bool bDoubleSided;
+    //! true for two-sided materials
+    bool bDoubleSided;
 
-	//! Various material parameters
-	float mDiffuseValue,mSpecularValue,mTransparency,mGlossiness,mLuminosity,mColorHighlights;
+    //! Various material parameters
+    float mDiffuseValue,mSpecularValue,mTransparency,mGlossiness,mLuminosity,mColorHighlights;
 
-	//! Maximum angle between two adjacent triangles
-	//! that they can be smoothed - in degrees
-	float mMaximumSmoothAngle;
+    //! Maximum angle between two adjacent triangles
+    //! that they can be smoothed - in degrees
+    float mMaximumSmoothAngle;
 
-	//! Vertex color map to be used to color the surface
-	std::string mVCMap;
-	uint32_t mVCMapType;
+    //! Vertex color map to be used to color the surface
+    std::string mVCMap;
+    uint32_t mVCMapType;
 
-	//! Names of the special shaders to be applied to the surface
-	ShaderList mShaders;
+    //! Names of the special shaders to be applied to the surface
+    ShaderList mShaders;
 
-	//! Textures - the first entry in the list is evaluated first
-	TextureList mColorTextures, // color textures are added to both diffuse and specular texture stacks
-		mDiffuseTextures,
-		mSpecularTextures,
-		mOpacityTextures,
-		mBumpTextures,
-		mGlossinessTextures,
-		mReflectionTextures;
+    //! Textures - the first entry in the list is evaluated first
+    TextureList mColorTextures, // color textures are added to both diffuse and specular texture stacks
+        mDiffuseTextures,
+        mSpecularTextures,
+        mOpacityTextures,
+        mBumpTextures,
+        mGlossinessTextures,
+        mReflectionTextures;
 
-	//! Index of refraction
-	float mIOR;
+    //! Index of refraction
+    float mIOR;
 
-	//! Bump intensity scaling
-	float mBumpIntensity;
+    //! Bump intensity scaling
+    float mBumpIntensity;
 
-	//! Wireframe flag
-	bool mWireframe;
+    //! Wireframe flag
+    bool mWireframe;
 
-	//! Intensity of additive blending
-	float mAdditiveTransparency;
+    //! Intensity of additive blending
+    float mAdditiveTransparency;
 };
 
 // ---------------------------------------------------------------------------
 #define AI_LWO_VALIDATE_CHUNK_LENGTH(length,name,size) \
-	if (length < size) \
-	{ \
-		throw DeadlyImportError("LWO: "#name" chunk is too small"); \
-	} \
+    if (length < size) \
+    { \
+        throw DeadlyImportError("LWO: "#name" chunk is too small"); \
+    } \
 
 
 // some typedefs ... to make life with loader monsters like this easier
-typedef std::vector	<	aiVector3D		>	PointList;
-typedef std::vector	<	LWO::Face		>	FaceList;
-typedef std::vector	<	LWO::Surface	>	SurfaceList;
-typedef std::vector	<	std::string		>	TagList;
-typedef std::vector	<	unsigned int	>	TagMappingTable;
-typedef std::vector	<	unsigned int	>	ReferrerList;
-typedef std::vector	<	WeightChannel	>	WeightChannelList;
-typedef std::vector	<	VColorChannel	>	VColorChannelList;
-typedef std::vector	<	UVChannel		>	UVChannelList;
-typedef std::vector	<	Clip			>	ClipList;
-typedef std::vector	<	Envelope		>	EnvelopeList;
+typedef std::vector <   aiVector3D      >   PointList;
+typedef std::vector <   LWO::Face       >   FaceList;
+typedef std::vector <   LWO::Surface    >   SurfaceList;
+typedef std::vector <   std::string     >   TagList;
+typedef std::vector <   unsigned int    >   TagMappingTable;
+typedef std::vector <   unsigned int    >   ReferrerList;
+typedef std::vector <   WeightChannel   >   WeightChannelList;
+typedef std::vector <   VColorChannel   >   VColorChannelList;
+typedef std::vector <   UVChannel       >   UVChannelList;
+typedef std::vector <   Clip            >   ClipList;
+typedef std::vector <   Envelope        >   EnvelopeList;
 typedef std::vector <   unsigned int    >   SortedRep;
 
 // ---------------------------------------------------------------------------
@@ -633,63 +635,63 @@ typedef std::vector <   unsigned int    >   SortedRep;
  */
 struct Layer
 {
-	Layer()
-		: mFaceIDXOfs	(0)
-		, mPointIDXOfs	(0)
-		, mParent		(0x0)
-		, mIndex		(0xffff)
-		, skip			(false)
-	{}
+    Layer()
+        : mFaceIDXOfs   (0)
+        , mPointIDXOfs  (0)
+        , mParent       (0x0)
+        , mIndex        (0xffff)
+        , skip          (false)
+    {}
 
-	/** Temporary point list from the file */
-	PointList mTempPoints;
+    /** Temporary point list from the file */
+    PointList mTempPoints;
 
-	/** Lists for every point the index of another point
-	    that has been copied from *this* point or UINT_MAX if
-		no copy of the point has been made */
-	ReferrerList mPointReferrers;
+    /** Lists for every point the index of another point
+        that has been copied from *this* point or UINT_MAX if
+        no copy of the point has been made */
+    ReferrerList mPointReferrers;
 
-	/** Weight channel list from the file */
-	WeightChannelList mWeightChannels;
+    /** Weight channel list from the file */
+    WeightChannelList mWeightChannels;
 
-	/** Subdivision weight channel list from the file */
-	WeightChannelList mSWeightChannels;
+    /** Subdivision weight channel list from the file */
+    WeightChannelList mSWeightChannels;
 
-	/** Vertex color list from the file */
-	VColorChannelList mVColorChannels;
+    /** Vertex color list from the file */
+    VColorChannelList mVColorChannels;
 
-	/** UV channel list from the file */
-	UVChannelList mUVChannels;
+    /** UV channel list from the file */
+    UVChannelList mUVChannels;
 
-	/** Normal vector channel from the file */
-	NormalChannel mNormals;
+    /** Normal vector channel from the file */
+    NormalChannel mNormals;
 
-	/** Temporary face list from the file*/
-	FaceList mFaces;
+    /** Temporary face list from the file*/
+    FaceList mFaces;
 
-	/** Current face indexing offset from the beginning of the buffers*/
-	unsigned int mFaceIDXOfs;
+    /** Current face indexing offset from the beginning of the buffers*/
+    unsigned int mFaceIDXOfs;
 
-	/** Current point indexing offset from the beginning of the buffers*/
-	unsigned int mPointIDXOfs;
+    /** Current point indexing offset from the beginning of the buffers*/
+    unsigned int mPointIDXOfs;
 
-	/** Parent index */
-	uint16_t mParent;
+    /** Parent index */
+    uint16_t mParent;
 
-	/** Index of the layer */
-	uint16_t mIndex;
+    /** Index of the layer */
+    uint16_t mIndex;
 
-	/** Name of the layer */
-	std::string mName;
+    /** Name of the layer */
+    std::string mName;
 
-	/** Pivot point of the layer */
-	aiVector3D mPivot;
+    /** Pivot point of the layer */
+    aiVector3D mPivot;
 
-	/** Skip this layer? */
-	bool skip;
+    /** Skip this layer? */
+    bool skip;
 };
 
-typedef std::list<LWO::Layer>		LayerList;
+typedef std::list<LWO::Layer>       LayerList;
 
 
 }}

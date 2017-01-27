@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -291,7 +291,7 @@ const aiScene* ImportModel(
 		PrintHorBar();
 	}
 	if (!scene) {
-		printf("ERROR: Failed to load file\n");	
+		printf("ERROR: Failed to load file: %s\n", globalImporter->GetErrorString());
 		return NULL;
 	}
 
@@ -377,7 +377,6 @@ int ProcessStandardArguments(
 	// -fid    --find-invalid-data
 	// -fixn   --fix normals
 	// -tri    --triangulate
-	// -fi     --find-instances
 	// -fi     --find-instances
 	// -og     --optimize-graph
 	// -om     --optimize-meshes

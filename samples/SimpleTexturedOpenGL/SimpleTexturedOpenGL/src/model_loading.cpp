@@ -142,13 +142,13 @@ bool Import3DFromFile( const std::string& pFile)
 }
 
 // Resize And Initialize The GL Window
-void ReSizeGLScene(GLsizei width, GLsizei height)				
+void ReSizeGLScene(GLsizei width, GLsizei height)
 {
     // Prevent A Divide By Zero By
-	if (height==0)								
+	if (height==0)
 	{
         // Making Height Equal One
-        height=1;		
+        height=1;
 	}
 
 	glViewport(0, 0, width, height);					// Reset The Current Viewport
@@ -234,19 +234,19 @@ int LoadGLTextures(const aiScene* scene)
 		std::string fileloc = basepath + filename;	/* Loading of image */
 		success = ilLoadImage(fileloc.c_str());
 
-		if (success) /* If no error occured: */
+		if (success) /* If no error occurred: */
 		{
-            // Convert every colour component into unsigned byte.If your image contains 
+            // Convert every colour component into unsigned byte.If your image contains
             // alpha channel you can replace IL_RGB with IL_RGBA
             success = ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE);
 			if (!success)
 			{
-				/* Error occured */
+				/* Error occurred */
 				abortGLInit("Couldn't convert image");
 				return -1;
 			}
             // Binding of texture name
-            glBindTexture(GL_TEXTURE_2D, textureIds[i]); 
+            glBindTexture(GL_TEXTURE_2D, textureIds[i]);
 			// redefine standard texture values
             // We will use linear interpolation for magnification filter
             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -255,7 +255,7 @@ int LoadGLTextures(const aiScene* scene)
             // Texture specification
             glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH),
 				ilGetInteger(IL_IMAGE_HEIGHT), 0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE,
-				ilGetData()); 
+				ilGetData());
             // we also want to be able to deal with odd texture dimensions
             glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
             glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
@@ -264,12 +264,12 @@ int LoadGLTextures(const aiScene* scene)
 		}
 		else
 		{
-			/* Error occured */
+			/* Error occurred */
 			MessageBox(NULL, ("Couldn't load Image: " + fileloc).c_str() , "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		}
 	}
     // Because we have already copied image data into texture data  we can release memory used by image.
-	ilDeleteImages(numTextures, imageIds); 
+	ilDeleteImages(numTextures, imageIds);
 
 	// Cleanup
 	delete [] imageIds;
@@ -342,7 +342,7 @@ void apply_material(const aiMaterial *mtl)
 	aiColor4D specular;
 	aiColor4D ambient;
 	aiColor4D emission;
-	float shininess, strength;
+	ai_real shininess, strength;
 	int two_sided;
 	int wireframe;
 	unsigned int max;	// changed: to unsigned

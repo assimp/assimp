@@ -23,8 +23,16 @@ if( MSVC )
     set(MSVC_PREFIX "vc80")
   elseif( MSVC90 )
     set(MSVC_PREFIX "vc90")
-  else()
+  elseif( MSVC10 )
     set(MSVC_PREFIX "vc100")
+  elseif( MSVC11 )
+    set(MSVC_PREFIX "vc110")
+  elseif( MSVC12 )
+    set(MSVC_PREFIX "vc120")
+  elseif( MSVC14 )
+    set(MSVC_PREFIX "vc140")
+  else()
+    set(MSVC_PREFIX "vc150")
   endif()
   set(ASSIMP_LIBRARY_SUFFIX "@ASSIMP_LIBRARY_SUFFIX@-${MSVC_PREFIX}-mt" CACHE STRING "the suffix for the assimp windows library" FORCE)
 else()
@@ -40,9 +48,7 @@ set( ASSIMP_LINK_FLAGS "" )
 set( ASSIMP_LIBRARY_DIRS "${ASSIMP_ROOT_DIR}/@ASSIMP_LIB_INSTALL_DIR@")
 set( ASSIMP_INCLUDE_DIRS "${ASSIMP_ROOT_DIR}/@ASSIMP_INCLUDE_INSTALL_DIR@")
 set( ASSIMP_LIBRARIES assimp${ASSIMP_LIBRARY_SUFFIX})
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
-	set( ASSIMP_LIBRARIES ${ASSIMP_LIBRARIES}D)
-endif (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+set( ASSIMP_LIBRARIES ${ASSIMP_LIBRARIES}@CMAKE_DEBUG_POSTFIX@)
 
 # search for the boost version assimp was compiled with
 #set(Boost_USE_MULTITHREAD ON)
@@ -58,7 +64,7 @@ endif (CMAKE_BUILD_TYPE EQUAL "DEBUG")
 # the boost version assimp was compiled with
 set( ASSIMP_Boost_VERSION "@Boost_MAJOR_VERSION@.@Boost_MINOR_VERSION@")
 
-# for compatibility wiht pkg-config
+# for compatibility with pkg-config
 set(ASSIMP_CFLAGS_OTHER "${ASSIMP_CXX_FLAGS}")
 set(ASSIMP_LDFLAGS_OTHER "${ASSIMP_LINK_FLAGS}")
 

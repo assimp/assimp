@@ -3,12 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2012, assimp team
+Copyright (c) 2006-2015, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, 
-with or without modification, are permitted provided that the following 
+Redistribution and use of this software in source and binary forms,
+with or without modification, are permitted provided that the following
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -25,104 +25,104 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+#pragma once
 
-#if (!defined AV_BACKGROUND_H_INCLUDED)
-#define AV_BACKGROUND_H_INCLUDED
+namespace AssimpView
+{
 
+    class CBackgroundPainter
+    {
+        CBackgroundPainter()
+            :
+            clrColor( D3DCOLOR_ARGB( 0xFF, 100, 100, 100 ) ),
+            pcTexture( NULL ),
+            piSkyBoxEffect( NULL ),
+            eMode( SIMPLE_COLOR )
+        {}
 
-class CBackgroundPainter
-	{
-	CBackgroundPainter()
-		: 
-		clrColor(D3DCOLOR_ARGB(0xFF,100,100,100)),
-		pcTexture(NULL),
-		piSkyBoxEffect(NULL),
-		eMode(SIMPLE_COLOR)
-		{}
+    public:
 
-public:
+        // Supported background draw modi
+        enum MODE { SIMPLE_COLOR, TEXTURE_2D, TEXTURE_CUBE };
 
-	// Supported background draw modi
-	enum MODE {SIMPLE_COLOR, TEXTURE_2D, TEXTURE_CUBE};
+        // Singleton accessors
+        static CBackgroundPainter s_cInstance;
+        inline static CBackgroundPainter& Instance()
+        {
+            return s_cInstance;
+        }
 
-	// Singleton accessors
-	static CBackgroundPainter s_cInstance;
-	inline static CBackgroundPainter& Instance ()
-		{
-		return s_cInstance;
-		}
+        // set the current background color
+        // (this removes any textures loaded)
+        void SetColor( D3DCOLOR p_clrNew );
 
-	// set the current background color
-	// (this removes any textures loaded)
-	void SetColor (D3DCOLOR p_clrNew);
+        // Setup a cubemap/a 2d texture as background
+        void SetCubeMapBG( const char* p_szPath );
+        void SetTextureBG( const char* p_szPath );
 
-	// Setup a cubemap/a 2d texture as background
-	void SetCubeMapBG (const char* p_szPath);
-	void SetTextureBG (const char* p_szPath);
+        // Called by the render loop
+        void OnPreRender();
+        void OnPostRender();
 
-	// Called by the render loop
-	void OnPreRender();
-	void OnPostRender();
+        // Release any native resources associated with the instance
+        void ReleaseNativeResource();
 
-	// Release any native resources associated with the instance
-	void ReleaseNativeResource();
+        // Recreate any native resources associated with the instance
+        void RecreateNativeResource();
 
-	// Recreate any native resources associated with the instance
-	void RecreateNativeResource();
+        // Rotate the skybox
+        void RotateSB( const aiMatrix4x4* pm );
 
-	// Rotate the skybox
-	void RotateSB(const aiMatrix4x4* pm);
+        // Reset the state of the skybox
+        void ResetSB();
 
-	// Reset the state of the skybox
-	void ResetSB();
+        inline MODE GetMode() const
+        {
+            return this->eMode;
+        }
 
-	inline MODE GetMode() const
-		{
-		return this->eMode;
-		}
+        inline IDirect3DBaseTexture9* GetTexture()
+        {
+            return this->pcTexture;
+        }
 
-	inline IDirect3DBaseTexture9* GetTexture()
-		{
-		return this->pcTexture;
-		}
+        inline ID3DXBaseEffect* GetEffect()
+        {
+            return this->piSkyBoxEffect;
+        }
 
-	inline ID3DXBaseEffect* GetEffect()
-		{
-		return this->piSkyBoxEffect;
-		}
+    private:
 
-private:
+        void RemoveSBDeps();
 
-	void RemoveSBDeps();
+        // current background color
+        D3DCOLOR clrColor;
 
-	// current background color
-	D3DCOLOR clrColor;
+        // current background texture
+        IDirect3DBaseTexture9* pcTexture;
+        ID3DXEffect* piSkyBoxEffect;
 
-	// current background texture
-	IDirect3DBaseTexture9* pcTexture;
-	ID3DXEffect* piSkyBoxEffect;
+        // current background mode
+        MODE eMode;
 
-	// current background mode
-	MODE eMode;
+        // path to the texture
+        std::string szPath;
 
-	// path to the texture
-	std::string szPath;
+        // transformation matrix for the skybox
+        aiMatrix4x4 mMatrix;
+    };
 
-	// transformation matrix for the skybox
-	aiMatrix4x4 mMatrix;
-	};
-
-#endif // !! AV_BACKGROUND_H_INCLUDED
+}

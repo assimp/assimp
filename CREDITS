@@ -7,13 +7,13 @@ The following is a non-exhaustive list of all constributors over the years.
 If you think your name should be listed here, drop us a line and we'll add you.
 
 - Alexander Gessler,
-3DS-, BLEND-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, Assimp-Viewer, assimp-cmd, -noboost, Website (Admin and Design).
+3DS-, BLEND-, ASE-, DXF-, HMP-, MDL-, MD2-, MD3-, MD5-, MDC-, NFF-, PLY-, STL-, RAW-, OFF-, MS3D-, Q3D- and LWO-Loader, Assimp-Viewer, assimp-cmd, -noboost, Website (Design).
 
 - Thomas Schulze,
 X-, Collada-, BVH-Loader, Postprocessing framework. Data structure & Interface design, documentation.
 
 - Kim Kulling,
-Obj-Loader, Logging system, Scons-build environment, CMake build environment, Linux build.
+Obj-, Q3BSD-, OpenGEX-Loader, Logging system, CMake-build-environment, Linux-build, Website ( Admin ), Coverity ( Admin ), Glitter ( Admin ).
 
 - R.Schmidt,
 Linux build, eclipse support.
@@ -30,7 +30,7 @@ Ogre Loader, VC2010 fixes and CMake fixes.
 
 - Sebastian Hempel,
 PyAssimp (first version)
-Compile-Bugfixes for mingw, add enviroment for static library support in make.
+Compile-Bugfixes for mingw, add environment for static library support in make.
 
 - Jonathan Pokrass
 Supplied a bugfix concerning the scaling in the md3 loader.
@@ -114,7 +114,7 @@ Contributes a fix for the configure script environment.
 Contributed AssimpDelphi (/port/AssimpDelphi).
 
 - rdb 
-Contributes a bundle of fixes and improvments for the bsp-importer.
+Contributes a bundle of fixes and improvements for the bsp-importer.
 
 - Mick P
 For contributing the De-bone postprocessing step and filing various bug reports.
@@ -148,3 +148,13 @@ Bugfixes for uv-tanget calculation.
 
 - Jonne Nauha
 Ogre Binary format support
+
+- Filip Wasil, Tieto Poland Sp. z o.o.
+Android JNI asset extraction support
+
+- Richard Steffen
+Contributed ExportProperties interface
+Contributed X File exporter
+Contributed Step (stp) exporter
+
+

@@ -40,7 +40,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # ---------------------------------------------------------------------------
 
-"""Shared stuff for the gen_db and run scripts """
+"""Shared stuff for the gen_db and run scripts"""
 
 # -------------------------------------------------------------------------------
 def hashing(file,pp):
@@ -50,76 +50,13 @@ def hashing(file,pp):
     needs to be persistent across different python implementations
     and platforms, so we implement the hashing manually.
     """
+    file = file.lower()
+    file = file.replace('\\','/')+":"+pp
+    # SDBM hash
+    res = 0
+    for t in file:
+        res = (ord(t) + (res<<6) + (res<<16) - res) % 2**32
+    return '{:x}'.format(res)
 
-    def myhash(instring):
-        # sdbm hash
-        res = 0
-        for t in instring:
-            res = (ord(t) + (res<<6) + (res<<16) - res) % 2**32
-        return res
-
-    return hex(myhash(file.replace('\\','/')+":"+pp))
-
-
-assimp_bin_path = None
-# -------------------------------------------------------------------------------
-def find_assimp_or_die():
-    """Find assimp_cmd's binary for the current platform.
-    
-    The path to the binary is stored in assimp_bin_path, the process
-    is aborted if it can't be found.
-
-    """
-
-    import os
-    import platform
-    import sys
-
-    def locate_file(f_list):
-        for f in f_list:
-            try:
-                fl = open(f,"rb")
-            except IOError:
-                continue
-            fl.close()
-            return f
-        return None
-
-    global assimp_bin_path
-    if os.name == "nt":
-        search_x86 = [
-            os.path.join("assimp.exe"),
-            os.path.join("..","..","bin","assimpcmd_release-dll_Win32","assimp.exe"),
-            os.path.join("..","..","bin","x86","assimp"),
-            os.path.join("..","..","bin","Release","assimp.exe")
-        ]
-        if platform.machine() == "x86":
-            search = search_x86
-        else: # amd64, hopefully
-            search = [
-                os.path.join("..","..","bin","assimpcmd_release-dll_x64","assimp.exe"),
-                os.path.join("..","..","bin","x64","assimp")
-            ]
-            # x64 platform does not guarantee a x64 build. Also look for x86 as last paths.
-            search += search_x86
-        
-        assimp_bin_path = locate_file(search)
-        if assimp_bin_path is None:
-            print("Can't locate assimp_cmd binary")
-            print("Looked in", search)
-            sys.exit(-5)
-
-        print("Located assimp/assimp_cmd binary from", assimp_bin_path)
-    elif os.name == "posix":
-        #search = [os.path.join("..","..","bin","gcc","assimp"),
-        #    os.path.join("/usr","local","bin",'assimp')]
-        assimp_bin_path = "assimp"
-        print("Taking system-wide assimp binary")
-    else:
-        print("Unsupported operating system")
-        sys.exit(-5)
-
-if __name__ == '__main__':
-    find_assimp_or_die()
 
  # vim: ai ts=4 sts=4 et sw=4

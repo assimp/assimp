@@ -96,7 +96,7 @@ void SweepContext::InitTriangulation()
 
 void SweepContext::InitEdges(std::vector<Point*> polyline)
 {
-  int num_points = polyline.size();
+  int num_points = static_cast<int>(polyline.size());
   for (int i = 0; i < num_points; i++) {
     int j = i < num_points - 1 ? i + 1 : 0;
     edge_list.push_back(new Edge(*polyline[i], *polyline[j]));
@@ -164,7 +164,7 @@ void SweepContext::RemoveFromMap(Triangle* triangle)
 
 void SweepContext::MeshClean(Triangle& triangle)
 {
-  if (&triangle != NULL && !triangle.IsInterior()) {
+  if (!triangle.IsInterior()) {
     triangle.IsInterior(true);
     triangles_.push_back(&triangle);
     for (int i = 0; i < 3; i++) {

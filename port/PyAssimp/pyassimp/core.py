@@ -1,5 +1,3 @@
-#-*- coding: UTF-8 -*-
-
 """
 PyAssimp
 
@@ -10,9 +8,16 @@ import sys
 if sys.version_info < (2,6):
     raise 'pyassimp: need python 2.6 or newer'
 
+# xrange was renamed range in Python 3 and the original range from Python 2 was removed.
+# To keep compatibility with both Python 2 and 3, xrange is set to range for version 3.0 and up.
+if sys.version_info >= (3,0):
+    xrange = range
+
 import ctypes
 import os
-import numpy
+
+try: import numpy
+except: numpy = None
 
 import logging
 logger = logging.getLogger("pyassimp")
@@ -21,37 +26,49 @@ logger = logging.getLogger("pyassimp")
 logger.addHandler(logging.NullHandler())
 
 from . import structs
-from .errors import AssimpError
 from . import helper
+from . import postprocess
+from .errors import AssimpError
+from .formats import available_formats
 
-assimp_structs_as_tuple = (
-        structs.Matrix4x4, 
-        structs.Matrix3x3, 
-        structs.Vector2D, 
-        structs.Vector3D, 
-        structs.Color3D, 
-        structs.Color4D, 
-        structs.Quaternion, 
-        structs.Plane, 
-        structs.Texel)
+class AssimpLib(object):
+    """
+    Assimp-Singleton
+    """
+    load, load_mem, export, release, dll = helper.search_library()
+_assimp_lib = AssimpLib()
 
 def make_tuple(ai_obj, type = None):
     res = None
 
+    #notes:
+    # ai_obj._fields_ = [ ("attr", c_type), ... ]
+    # getattr(ai_obj, e[0]).__class__ == float
+
     if isinstance(ai_obj, structs.Matrix4x4):
-        res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((4,4))
-        #import pdb;pdb.set_trace()
+        if numpy:
+            res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((4,4))
+            #import pdb;pdb.set_trace()
+        else:
+            res = [getattr(ai_obj, e[0]) for e in ai_obj._fields_]
+            res = [res[i:i+4] for i in xrange(0,16,4)]
     elif isinstance(ai_obj, structs.Matrix3x3):
-        res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((3,3))
+        if numpy:
+            res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_]).reshape((3,3))
+        else:
+            res = [getattr(ai_obj, e[0]) for e in ai_obj._fields_]
+            res = [res[i:i+3] for i in xrange(0,9,3)]
     else:
-        res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_])
+        if numpy:
+            res = numpy.array([getattr(ai_obj, e[0]) for e in ai_obj._fields_])
+        else:
+            res = [getattr(ai_obj, e[0]) for e in ai_obj._fields_]
 
     return res
 
 # It is faster and more correct to have an init function for each assimp class
 def _init_face(aiFace):
-    aiFace.indices = [aiFace.mIndices[i] for i in xrange(aiFace.mNumIndices)]
-    
+    aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
 assimp_struct_inits =  { structs.Face : _init_face }
     
 def call_init(obj, caller = None):
@@ -112,7 +129,7 @@ def _init(self, target = None, parent = None):
         obj = getattr(self, m)
 
         # Create tuples
-        if isinstance(obj, assimp_structs_as_tuple):
+        if isinstance(obj, structs.assimp_structs_as_tuple):
             setattr(target, name, make_tuple(obj))
             logger.debug(str(self) + ": Added array " + str(getattr(target, name)) +  " as self." + name.lower())
             continue
@@ -142,10 +159,15 @@ def _init(self, target = None, parent = None):
                 
 
                 try:
-                    if obj._type_ in assimp_structs_as_tuple:
-                        setattr(target, name, numpy.array([make_tuple(obj[i]) for i in range(length)], dtype=numpy.float32))
+                    if obj._type_ in structs.assimp_structs_as_tuple:
+                        if numpy:
+                            setattr(target, name, numpy.array([make_tuple(obj[i]) for i in range(length)], dtype=numpy.float32))
 
-                        logger.debug(str(self) + ": Added an array of numpy arrays (type "+ str(type(obj)) + ") as self." + name)
+                            logger.debug(str(self) + ": Added an array of numpy arrays (type "+ str(type(obj)) + ") as self." + name)
+                        else:
+                            setattr(target, name, [make_tuple(obj[i]) for i in range(length)])
+                            
+                            logger.debug(str(self) + ": Added a list of lists (type "+ str(type(obj)) + ") as self." + name)
 
                     else:
                         setattr(target, name, [obj[i] for i in range(length)]) #TODO: maybe not necessary to recreate an array?
@@ -177,19 +199,16 @@ def _init(self, target = None, parent = None):
                                      "and quads. Try to load your mesh with"
                                      " a post-processing to triangulate your"
                                      " faces.")
-                    sys.exit(1)
+                    raise e
+                    
 
 
             else: # starts with 'm' but not iterable
-
                 setattr(target, name, obj)
                 logger.debug("Added " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
         
                 if _is_init_type(obj):
                     call_init(obj, target)
-
-
-
 
     if isinstance(self, structs.Mesh):
         _finalize_mesh(self, target)
@@ -200,14 +219,6 @@ def _init(self, target = None, parent = None):
 
     return self
 
-class AssimpLib(object):
-    """
-    Assimp-Singleton
-    """
-    load, load_mem, release, dll = helper.search_library()
-
-#the loader as singleton
-_assimp_lib = AssimpLib()
 
 def pythonize_assimp(type, obj, scene):
     """ This method modify the Assimp data structures
@@ -247,17 +258,16 @@ def recur_pythonize(node, scene):
     pythonize the assimp datastructures.
     '''
     node.meshes = pythonize_assimp("MESH", node.meshes, scene)
-    
     for mesh in node.meshes:
         mesh.material = scene.materials[mesh.materialindex]
-
     for cam in scene.cameras:
         pythonize_assimp("ADDTRANSFORMATION", cam, scene)
-
     for c in node.children:
         recur_pythonize(c, scene)
 
-def load(filename, processing=0, file_type=None):
+def load(filename, 
+         file_type  = None,
+         processing = postprocess.aiProcess_Triangulate):
     '''
     Load a model into a scene. On failure throws AssimpError.
     
@@ -267,12 +277,17 @@ def load(filename, processing=0, file_type=None):
                 If a file object is passed, file_type MUST be specified
                 Otherwise Assimp has no idea which importer to use.
                 This is named 'filename' so as to not break legacy code. 
-    processing: assimp processing parameters
-    file_type:  string, such as 'stl'
+    processing: assimp postprocessing parameters. Verbose keywords are imported
+                from postprocessing, and the parameters can be combined bitwise to
+                generate the final processing value. Note that the default value will
+                triangulate quad faces. Example of generating other possible values:
+                processing = (pyassimp.postprocess.aiProcess_Triangulate | 
+                              pyassimp.postprocess.aiProcess_OptimizeMeshes)
+    file_type:  string of file extension, such as 'stl'
         
     Returns
     ---------
-    Scene object with model-data
+    Scene object with model data
     '''
     
     if hasattr(filename, 'read'):
@@ -301,13 +316,43 @@ def load(filename, processing=0, file_type=None):
     recur_pythonize(scene.rootnode, scene)
     return scene
 
+def export(scene,
+           filename, 
+           file_type  = None,
+           processing = postprocess.aiProcess_Triangulate):
+    '''
+    Export a scene. On failure throws AssimpError.
+    
+    Arguments
+    ---------
+    scene: scene to export.
+    filename: Filename that the scene should be exported to.  
+    file_type: string of file exporter to use. For example "collada".
+    processing: assimp postprocessing parameters. Verbose keywords are imported
+                from postprocessing, and the parameters can be combined bitwise to
+                generate the final processing value. Note that the default value will
+                triangulate quad faces. Example of generating other possible values:
+                processing = (pyassimp.postprocess.aiProcess_Triangulate | 
+                              pyassimp.postprocess.aiProcess_OptimizeMeshes)
+
+    '''
+
+    from ctypes import pointer
+    exportStatus = _assimp_lib.export(pointer(scene), file_type.encode("ascii"), filename.encode("ascii"), processing)
+
+    if exportStatus != 0:
+        raise AssimpError('Could not export scene!')
+
 def release(scene):
     from ctypes import pointer
     _assimp_lib.release(pointer(scene))
 
 def _finalize_texture(tex, target):
     setattr(target, "achformathint", tex.achFormatHint)
-    data = numpy.array([make_tuple(getattr(tex, "pcData")[i]) for i in range(tex.mWidth * tex.mHeight)])
+    if numpy:
+        data = numpy.array([make_tuple(getattr(tex, "pcData")[i]) for i in range(tex.mWidth * tex.mHeight)])
+    else:
+        data = [make_tuple(getattr(tex, "pcData")[i]) for i in range(tex.mWidth * tex.mHeight)]
     setattr(target, "data", data)
 
 def _finalize_mesh(mesh, target):
@@ -323,11 +368,18 @@ def _finalize_mesh(mesh, target):
 
     def fill(name):
         mAttr = getattr(mesh, name)
-        if mAttr:
-            data = numpy.array([make_tuple(getattr(mesh, name)[i]) for i in range(nb_vertices)], dtype=numpy.float32)
-            setattr(target, name[1:].lower(), data)
+        if numpy:
+            if mAttr:
+                data = numpy.array([make_tuple(getattr(mesh, name)[i]) for i in range(nb_vertices)], dtype=numpy.float32)
+                setattr(target, name[1:].lower(), data)
+            else:
+                setattr(target, name[1:].lower(), numpy.array([], dtype="float32"))
         else:
-            setattr(target, name[1:].lower(), numpy.array([], dtype="float32"))
+            if mAttr:
+                data = [make_tuple(getattr(mesh, name)[i]) for i in range(nb_vertices)]
+                setattr(target, name[1:].lower(), data)
+            else:
+                setattr(target, name[1:].lower(), [])
 
     def fillarray(name):
         mAttr = getattr(mesh, name)
@@ -337,7 +389,10 @@ def _finalize_mesh(mesh, target):
             if mSubAttr:
                 data.append([make_tuple(getattr(mesh, name)[index][i]) for i in range(nb_vertices)])
 
-        setattr(target, name[1:].lower(), numpy.array(data, dtype=numpy.float32))
+        if numpy:
+            setattr(target, name[1:].lower(), numpy.array(data, dtype=numpy.float32))
+        else:
+            setattr(target, name[1:].lower(), data)
 
     fill("mNormals")
     fill("mTangents")
@@ -347,7 +402,10 @@ def _finalize_mesh(mesh, target):
     fillarray("mTextureCoords")
     
     # prepare faces
-    faces = numpy.array([f.indices for f in target.faces], dtype=numpy.int32)
+    if numpy:
+        faces = numpy.array([f.indices for f in target.faces], dtype=numpy.int32)
+    else:
+        faces = [f.indices for f in target.faces]
     setattr(target, 'faces', faces)
 
 

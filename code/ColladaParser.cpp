@@ -2451,6 +2451,9 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
     return numPrimitives;
 }
 
+///@note This function willn't work correctly if both PerIndex and PerVertex channels have same channels.
+///For example if TEXCOORD present in both <vertices> and <polylist> tags this function will create wrong uv coordinates.
+///It's not clear from COLLADA documentation is this allowed or not. For now only exporter fixed to avoid such behavior
 void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
     // calculate the base offset of the vertex whose attributes we ant to copy
     size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;

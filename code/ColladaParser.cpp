@@ -1634,7 +1634,7 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
             }
             else if( IsElement( "texture"))
             {
-                // get name of source textur/sampler
+                // get name of source texture/sampler
                 int attrTex = GetAttribute( "texture");
                 pSampler.mName = mReader->getAttributeValue( attrTex);
 

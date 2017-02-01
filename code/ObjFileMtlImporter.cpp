@@ -185,7 +185,7 @@ void ObjFileMtlImporter::load()
                     getFloatValue( m_pModel->m_pCurrentMaterial->alpha );
                     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
                 }
-            }width * height * 4
+            }
             break;
 
         case 'N':
@@ -302,8 +302,9 @@ void ObjFileMtlImporter::createMaterial()
         // New Material created
         m_pModel->m_pCurrentMaterial = new ObjFile::Material();
         m_pModel->m_pCurrentMaterial->MaterialName.Set( name );
-        if (m_pModel->m_pCurrentMesh)
-            m_pModel->m_pCurrentMesh->m_uiMaterialIndex = m_pModel->m_MaterialLib.size();
+        if (m_pModel->m_pCurrentMesh) {
+            m_pModel->m_pCurrentMesh->m_uiMaterialIndex = m_pModel->m_MaterialLib.size() - 1;
+        }
         m_pModel->m_MaterialLib.push_back( name );
         m_pModel->m_MaterialMap[ name ] = m_pModel->m_pCurrentMaterial;
     } else {

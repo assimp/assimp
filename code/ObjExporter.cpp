@@ -57,8 +57,7 @@ namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 // Worker function for exporting a scene to Wavefront OBJ. Prototyped and registered in Exporter.cpp
-void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
-{
+void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties) {
     // invoke the exporter
     ObjExporter exporter(pFile, pScene);
 
@@ -84,7 +83,7 @@ void ExportSceneObj(const char* pFile,IOSystem* pIOSystem, const aiScene* pScene
 static const std::string MaterialExt = ".mtl";
 
 // ------------------------------------------------------------------------------------------------
-ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
+ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
 : filename(_filename)
 , pScene(pScene)
 , endl("\n")
@@ -101,6 +100,11 @@ ObjExporter :: ObjExporter(const char* _filename, const aiScene* pScene)
 
     WriteGeometryFile();
     WriteMaterialFile();
+}
+
+// ------------------------------------------------------------------------------------------------
+ObjExporter::~ObjExporter() {
+
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -63,12 +63,10 @@ class ObjExporter {
 public:
     /// Constructor for a specific scene to export
     ObjExporter(const char* filename, const aiScene* pScene);
-
-public:
+    ~ObjExporter();
     std::string GetMaterialLibName();
     std::string GetMaterialLibFileName();
-
-public:
+    
     /// public string-streams to write all output into
     std::ostringstream mOutput, mOutputMat;
 
@@ -94,13 +92,11 @@ private:
     };
 
     struct MeshInstance {
-
         std::string name, matname;
         std::vector<Face> faces;
     };
 
     void WriteHeader(std::ostringstream& out);
-
     void WriteMaterialFile();
     void WriteGeometryFile();
 

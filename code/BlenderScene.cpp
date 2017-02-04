@@ -522,7 +522,7 @@ template <> void Structure :: Convert<MVert> (
     ReadFieldArray<ErrorPolicy_Fail>(dest.co,"co",db);
     ReadFieldArray<ErrorPolicy_Fail>(dest.no,"no",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
-    ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
+    //ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
     ReadField<ErrorPolicy_Igno>(dest.bweight,"bweight",db);
 
     db.reader->IncPtr(size);

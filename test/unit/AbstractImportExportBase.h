@@ -46,4 +46,10 @@ class AbstractImportExportBase : public ::testing::Test {
 public:
     virtual ~AbstractImportExportBase();
     virtual bool importerTest() = 0;
+    virtual bool exporterTest();
 };
+
+inline 
+bool AbstractImportExportBase::exporterTest() {
+    return true;
+}

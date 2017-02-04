@@ -42,10 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
-
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
-#include <assimp/scene.h>
 
 using namespace Assimp;
 

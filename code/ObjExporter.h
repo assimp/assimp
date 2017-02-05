@@ -53,8 +53,7 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 
-namespace Assimp
-{
+namespace Assimp {
 
 // ------------------------------------------------------------------------------------------------
 /** Helper class to export a given scene to an OBJ file. */
@@ -71,7 +70,6 @@ public:
     std::ostringstream mOutput, mOutputMat;
 
 private:
-
     // intermediate data structures
     struct FaceVertex {
         FaceVertex()

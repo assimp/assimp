@@ -261,11 +261,20 @@ std::string TextureConverted_ID;
 	size_t off_b = 0;
 
 	// Calculate size of the target array and rule how data will be copied.
-	if(!pID_R.empty()) { tex_size += src_texture[0]->Data.size(); step++, off_g++, off_b++; }
-	if(!pID_G.empty()) { tex_size += src_texture[1]->Data.size(); step++, off_b++; }
-	if(!pID_B.empty()) { tex_size += src_texture[2]->Data.size(); step++; }
-	if(!pID_A.empty()) { tex_size += src_texture[3]->Data.size(); step++; }
-
+    if ( nullptr != src_texture ) {
+        if(!pID_R.empty()) {
+            tex_size += src_texture[0]->Data.size(); step++, off_g++, off_b++;
+        }
+        if(!pID_G.empty()) {
+            tex_size += src_texture[1]->Data.size(); step++, off_b++;
+        }
+        if(!pID_B.empty()) {
+            tex_size += src_texture[2]->Data.size(); step++;
+        }
+        if(!pID_A.empty()) {
+            tex_size += src_texture[3]->Data.size(); step++;
+        }
+    }
 	// Create target array.
 	converted_texture.Data = new uint8_t[tex_size];
 	// And copy data

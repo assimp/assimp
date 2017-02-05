@@ -42,10 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 #include "SceneDiffer.h"
 #include "AbstractImportExportBase.h"
-
+#include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
-#include <assimp/scene.h>
 
 using namespace Assimp;
 
@@ -190,14 +189,14 @@ protected:
     }
 
     virtual bool importerTest() {
-        Assimp::Importer importer;
+        Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
         return nullptr != scene;
     }
 
     virtual bool exporterTest() {
-        Assimp::Importer importer;
-        Assimp::Exporter exporter;
+        Importer importer;
+        Exporter exporter;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
         EXPECT_NE( nullptr, scene );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj" ) );
@@ -206,7 +205,7 @@ protected:
     }
 
 protected:
-    Assimp::Importer *m_im;
+    Importer *m_im;
     aiScene *m_expectedScene;
 };
 
@@ -236,10 +235,10 @@ TEST_F( utObjImportExport, issue1111_no_mat_name_Test ) {
 }
 
 TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
-    Assimp::Importer importer;
+    Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors.obj", 0 );
     EXPECT_NE( nullptr, scene );
 
-    Assimp::Exporter exporter;
+    Exporter exporter;
     EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test.obj" ) );
 }

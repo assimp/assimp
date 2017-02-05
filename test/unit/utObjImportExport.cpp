@@ -189,14 +189,14 @@ protected:
     }
 
     virtual bool importerTest() {
-        Importer importer;
+        ::Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
         return nullptr != scene;
     }
 
     virtual bool exporterTest() {
-        Importer importer;
-        Exporter exporter;
+        ::Assimp::Importer importer;
+        ::Assimp::Exporter exporter;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
         EXPECT_NE( nullptr, scene );
         EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj" ) );
@@ -205,7 +205,7 @@ protected:
     }
 
 protected:
-    Importer *m_im;
+    ::Assimp::Importer *m_im;
     aiScene *m_expectedScene;
 };
 
@@ -235,10 +235,10 @@ TEST_F( utObjImportExport, issue1111_no_mat_name_Test ) {
 }
 
 TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
-    Importer importer;
+    ::Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors.obj", 0 );
     EXPECT_NE( nullptr, scene );
 
-    Exporter exporter;
+    ::Assimp::Exporter exporter;
     EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test.obj" ) );
 }

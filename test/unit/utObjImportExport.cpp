@@ -194,6 +194,8 @@ protected:
         return nullptr != scene;
     }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
     virtual bool exporterTest() {
         ::Assimp::Importer importer;
         ::Assimp::Exporter exporter;
@@ -204,6 +206,8 @@ protected:
         return true;
     }
 
+#endif // ASSIMP_BUILD_NO_EXPORT
+
 protected:
     ::Assimp::Importer *m_im;
     aiScene *m_expectedScene;
@@ -213,9 +217,13 @@ TEST_F( utObjImportExport, importObjFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
 TEST_F( utObjImportExport, exportObjFromFileTest ) {
     EXPECT_TRUE( exporterTest() );
 }
+
+#endif // ASSIMP_BUILD_NO_EXPORT
 
 TEST_F( utObjImportExport, obj_import_test ) {
     const aiScene *scene = m_im->ReadFileFromMemory( (void*) ObjModel.c_str(), ObjModel.size(), 0 );

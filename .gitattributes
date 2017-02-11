@@ -6,3 +6,4 @@
 *.txt text eol=lf
 *.cmake text eol=lf
 *.sh text eol=lf
+CHANGES text .eof=lf

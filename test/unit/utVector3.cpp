@@ -1,9 +1,8 @@
-/*
----------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 
 All rights reserved.
 
@@ -36,64 +35,35 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
-*/
-
+-------------------------------------------------------------------------*/
 #include "UnitTestPCH.h"
-#include <iostream>
+#include <assimp/vector3.h>
 
 using namespace ::Assimp;
 
-class utMatrix3x3Test : public ::testing::Test {
+class utVector3 : public ::testing::Test {
     // empty
 };
 
-TEST_F( utMatrix3x3Test, FromToMatrixTest ) {
-    aiVector3D res;
-    aiMatrix3x3 trafo;
+TEST_F(utVector3, CreationTest) {
+    aiVector3D v0;
+    aiVector3D v1( 1.0f, 2.0f, 3.0f );
+    EXPECT_FLOAT_EQ (1.0f, v1[ 0 ] );
+    EXPECT_FLOAT_EQ( 2.0f, v1[ 1 ] );
+    EXPECT_FLOAT_EQ( 3.0f, v1[ 2 ] );
+    aiVector3D v2( 1 );
+    EXPECT_FLOAT_EQ( 1.0f, v2[ 0 ] );
+    EXPECT_FLOAT_EQ( 1.0f, v2[ 1 ] );
+    EXPECT_FLOAT_EQ( 1.0f, v2[ 2 ] );
+    aiVector3D v3( v1 );
+    EXPECT_FLOAT_EQ( v1[ 0 ], v3[ 0 ] );
+    EXPECT_FLOAT_EQ( v1[ 1 ], v3[ 1 ] );
+    EXPECT_FLOAT_EQ( v1[ 2 ], v3[ 2 ] );
+}
 
-    const double PRECISION = 0.000001;
-
-    // axes test
-    aiVector3D axes[] =
-        { aiVector3D(1, 0, 0)
-        , aiVector3D(0, 1, 0)
-        , aiVector3D(0, 0, 1)
-        };
-
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            aiMatrix3x3::FromToMatrix( axes[i], axes[j], trafo );
-            res = trafo * axes[i];
-
-            ASSERT_NEAR( axes[j].x, res.x, PRECISION );
-            ASSERT_NEAR( axes[j].y, res.y, PRECISION );
-            ASSERT_NEAR( axes[j].z, res.z, PRECISION );
-        }
-    }
-
-    // random test
-    const int NUM_SAMPLES = 10000;
-
-    aiVector3D from, to;
-
-    for (int i = 0; i < NUM_SAMPLES; ++i) {
-        from = aiVector3D
-            ( 1.f * rand() / RAND_MAX
-            , 1.f * rand() / RAND_MAX
-            , 1.f * rand() / RAND_MAX
-            ).Normalize();
-        to = aiVector3D
-            ( 1.f * rand() / RAND_MAX
-            , 1.f * rand() / RAND_MAX
-            , 1.f * rand() / RAND_MAX
-            ).Normalize();
-
-        aiMatrix3x3::FromToMatrix( from, to, trafo );
-        res = trafo * from;
-
-        ASSERT_NEAR( to.x, res.x, PRECISION );
-        ASSERT_NEAR( to.y, res.y, PRECISION );
-        ASSERT_NEAR( to.z, res.z, PRECISION );
-    }
+TEST_F( utVector3, BracketOpTest ) {
+    aiVector3D v(1.0f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ( 1.0f, v[ 0 ] );
+    EXPECT_FLOAT_EQ( 2.0f, v[ 1 ] ); 
+    EXPECT_FLOAT_EQ( 3.0f, v[ 2 ] );
 }

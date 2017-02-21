@@ -125,6 +125,12 @@ public:
      *  @param o Second factor */
     const aiVector3t SymMul(const aiVector3t& o);
 
+	/*union vector3 { 
+		TReal values[3]; 
+		struct { 
+			TReal x, y, z; 
+		}; 
+	};*/
     TReal x, y, z;
 } PACK_STRUCT;
 
@@ -142,8 +148,6 @@ struct aiVector3D {
 #include "./Compiler/poppack1.h"
 
 #ifdef __cplusplus
-
-
 
 #endif // __cplusplus
 

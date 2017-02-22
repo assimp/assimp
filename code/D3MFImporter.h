@@ -41,9 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_D3MFLOADER_H_INCLUDED
 #define AI_D3MFLOADER_H_INCLUDED
 
-#include <vector>
-#include <cstdint>
-
 #include "BaseImporter.h"
 
 namespace Assimp {

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  ASSXML exporter main code
  */
 #include <stdarg.h>
-#include "./../include/assimp/version.h"
+#include <assimp/version.h>
 #include "ProcessHelper.h"
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>

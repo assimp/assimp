@@ -62,9 +62,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 #include <cctype>
-
-
 
 using namespace Assimp;
 

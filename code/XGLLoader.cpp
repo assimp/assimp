@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MemoryIOWrapper.h"
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 #include <cctype>
 #include <memory>
 

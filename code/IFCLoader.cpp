@@ -58,10 +58,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCUtil.h"
 
-#include "StreamReader.h"
 #include "MemoryIOWrapper.h"
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
+#include <assimp/importerdesc.h>
 
 
 namespace Assimp {

@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "TextureTransform.h"
 #include "ASELoader.h"
-#include "MaterialSystem.h"
 #include "fast_atof.h"
 #include <assimp/DefaultLogger.hpp>
 

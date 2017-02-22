@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include "BaseImporter.h"
 
-#include <string>
 #include <vector>
 
 struct aiNodeAnim;

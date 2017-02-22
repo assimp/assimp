@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderDNA.h"
 #include "StreamReader.h"
 #include "fast_atof.h"
+#include "TinyFormatter.h"
 
 using namespace Assimp;
 using namespace Assimp::Blender;

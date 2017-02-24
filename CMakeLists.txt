@@ -344,7 +344,11 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # Why assimp_qt_viewer/CMakeLists.txt still contain similar check?
   # Because viewer can be build independently of Assimp.
   FIND_PACKAGE(Qt5Widgets QUIET)
+  set(CMAKE_MODULE_PATH_BACKUP ${CMAKE_MODULE_PATH})
+  set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
   FIND_PACKAGE(DevIL QUIET)
+  set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+  set(CMAKE_MODULE_PATH_BACKUP ${CMAKE_MODULE_PATH})
   FIND_PACKAGE(OpenGL QUIET)
   IF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
     ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )

@@ -188,6 +188,9 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 #   include "X3DImporter.hpp"
 #endif
+#ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
+#   include "MMDImporter.h"
+#endif
 
 namespace Assimp {
 
@@ -332,10 +335,13 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
     out.push_back( new C4DImporter() );
 #endif
 #if ( !defined ASSIMP_BUILD_NO_3MF_IMPORTER )
-    out.push_back(new D3MFImporter() );
+    out.push_back( new D3MFImporter() );
 #endif
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
     out.push_back( new X3DImporter() );
+#endif
+#ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
+    out.push_back( new MMDImporter() );
 #endif
 }
 

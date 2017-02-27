@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MMDPmdParser.h"
 #include "MMDVmdParser.h"
 //#include "IOStreamBuffer.h"
+#include "ConvertToLHProcess.h"
 #include <memory>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -156,31 +157,84 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pSc
     
     std::cout << pScene->mRootNode->mName.C_Str() << std::endl;
 
-    // workaround, must be deleted
+    pScene->mRootNode->mNumMeshes = 1;
+    pScene->mRootNode->mMeshes = new unsigned int[1];
+    pScene->mRootNode->mMeshes[0] = 0;
+
+    //aiMesh *pMesh = new aiMesh;
+    aiMaterial* mat = new aiMaterial;
     pScene->mNumMeshes = 1;
     pScene->mNumMaterials = 1;
-    pScene->mRootNode->mMeshes = new unsigned int[1];
+    pScene->mMeshes = new aiMesh*[1];
+    pScene->mMaterials = new aiMaterial*[1];
+    pScene->mMeshes[0] = CreateMesh(pModel, pScene);
+    pScene->mMaterials[0] = mat;
+
+    /**
+    pMesh->mNumVertices = 3;
+    pMesh->mVertices = new aiVector3D[3];
+    pMesh->mVertices[0] = aiVector3D(1.0, 0.0, 0.0);
+    pMesh->mVertices[1] = aiVector3D(0.0, 1.0, 0.0);
+    pMesh->mVertices[2] = aiVector3D(0.0, 0.0, 1.0);
+
+    pMesh->mNumFaces= 1;
+    pMesh->mFaces = new aiFace[1];
+    pMesh->mFaces[0].mNumIndices = 3;
+    pMesh->mFaces[0].mIndices = new unsigned int[3];
+    pMesh->mFaces[0].mIndices[0] = 0;
+    pMesh->mFaces[0].mIndices[1] = 1;
+    pMesh->mFaces[0].mIndices[2] = 2;
+    **/
+ 
+    // Convert everything to OpenGL space... it's the same operation as the conversion back, so we can reuse the step directly
+    MakeLeftHandedProcess convertProcess;
+    convertProcess.Execute( pScene);
+
+    FlipWindingOrderProcess flipper;
+    flipper.Execute(pScene);
+
+}
+
+// ------------------------------------------------------------------------------------------------
+aiMesh* MMDImporter::CreateMesh(const pmx::PmxModel* pModel, aiScene* pScene)
+{
     aiMesh *pMesh = new aiMesh;
-    pScene->mRootNode->mMeshes[0] = 100;
-    // workaround
 
-/*
-    // Create nodes for the whole scene
-    std::vector<aiMesh*> MeshArray;
-    for ( size_t index = 0; index < pModel->bone_count; index++ ) {
-        createNodes( pModel, pModel->bones[i], pScene, MeshArray);
-    }
+    pMesh->mNumVertices = pModel->vertex_count;
+    std::vector<int> vertices_refID(pMesh->mNumVertices, -1);
+    vertices_refID.reserve(3*pMesh->mNumVertices);
 
-    if ( pScene->mNumMeshes > 0 ) {
-        pScene->mMeshes = new aiMesh*[ MeshArray.size() ];
-        for ( size_t index = 0; index < MeshArray.size(); index++ ) {
-            pScene->mMeshes[ index ] = MeshArray[ index ];
+    pMesh->mNumFaces = pModel->index_count / 3;
+    pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
+
+    for( unsigned int index = 0; index < pMesh->mNumFaces; index++ ) {
+        pMesh->mFaces[index].mNumIndices = 3;
+        unsigned int *indices = new unsigned int[3];
+        // here we change LH to RH coord
+        indices[0] = pModel->indices[3*index];
+        indices[1] = pModel->indices[3*index+1];
+        indices[2] = pModel->indices[3*index+2];
+        for( unsigned int j = 0; j < 3; j++ ) {
+            if(vertices_refID[indices[j]] != -1) {
+                vertices_refID.push_back(indices[j]);
+                indices[j] = vertices_refID.size() - 1;
+            }
+            else {
+                vertices_refID[indices[j]] = indices[j];
+            }
         }
+        pMesh->mFaces[index].mIndices = indices;
     }
 
-    // Create all materials
-    createMaterials( pModel, pScene );
-    */
+    pMesh->mNumVertices = vertices_refID.size();
+    pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
+
+    for( unsigned int index = 0; index < pMesh->mNumVertices; index++ ) {
+        const float* position = pModel->vertices[vertices_refID[index]].position;
+        pMesh->mVertices[index].Set(position[0], position[1], position[2]);
+    }
+
+    return pMesh;
 }
 
 // ------------------------------------------------------------------------------------------------

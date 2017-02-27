@@ -169,7 +169,7 @@ namespace pmx
 
 	void PmxVertex::Read(std::istream *stream, PmxSetting *setting)
 	{
-		stream->read((char*) this->positon, sizeof(float) * 3);
+		stream->read((char*) this->position, sizeof(float) * 3);
 		stream->read((char*) this->normal, sizeof(float) * 3);
 		stream->read((char*) this->uv, sizeof(float) * 2);
 		for (int i = 0; i < setting->uv; ++i)

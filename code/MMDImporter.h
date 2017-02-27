@@ -84,6 +84,9 @@ private:
     //! \brief  Create the data from imported content.
     void CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pScene);
 
+    //! \brief Create the mesh
+    aiMesh* CreateMesh(const pmx::PmxModel* pModel, aiScene* pScene);
+
 private:
     //! Data buffer
     std::vector<char> m_Buffer;

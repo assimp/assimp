@@ -174,7 +174,7 @@ namespace pmx
 		{
 			uv[0] = uv[1] = 0.0f;
 			for (int i = 0; i < 3; ++i) {
-				positon[i] = 0.0f;
+				position[i] = 0.0f;
 				normal[i] = 0.0f;
 			}
 			for (int i = 0; i < 4; ++i) {
@@ -185,7 +185,7 @@ namespace pmx
 		}
 
 		/// 位置
-		float positon[3];
+		float position[3];
 		/// 法線
 		float normal[3];
 		/// テクスチャ座標

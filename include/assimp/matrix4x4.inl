@@ -243,9 +243,19 @@ inline TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) {
     if (p_iIndex > 3) {
         return NULL;
     }
-
-    // XXX this is UB. Has been for years. The fact that it works now does not make it better.
-    return &this->a1 + p_iIndex * 4;
+    switch ( p_iIndex ) {
+        case 0:
+            return &a1;
+        case 1:
+            return &b1;
+        case 2:
+            return &c1;
+        case 3:
+            return &d1;
+        default:
+            break;
+    }
+    return &a1;
 }
 
 // ----------------------------------------------------------------------------------------
@@ -255,8 +265,19 @@ inline const TReal* aiMatrix4x4t<TReal>::operator[](unsigned int p_iIndex) const
         return NULL;
     }
 
-    // XXX same
-    return &this->a1 + p_iIndex * 4;
+    switch ( p_iIndex ) {
+        case 0:
+            return &a1;
+        case 1:
+            return &b1;
+        case 2:
+            return &c1;
+        case 3:
+            return &d1;
+        default:
+            break;
+    }
+    return &a1;
 }
 
 // ----------------------------------------------------------------------------------------

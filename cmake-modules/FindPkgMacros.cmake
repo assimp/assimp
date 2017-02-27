@@ -59,10 +59,13 @@ endmacro(clear_if_changed)
 
 # Try to get some hints from pkg-config, if available
 macro(use_pkgconfig PREFIX PKGNAME)
-  find_package(PkgConfig)
-  if (PKG_CONFIG_FOUND)
-    pkg_check_modules(${PREFIX} ${PKGNAME})
-  endif ()
+  # Android does not support PKG_CONFIG so we disable it
+  IF ( NOT ANDROID )
+    find_package(PkgConfig)
+    if (PKG_CONFIG_FOUND)
+      pkg_check_modules(${PREFIX} ${PKGNAME})
+    endif ()
+  ENDIF ( NOT ANDROID )
 endmacro (use_pkgconfig)
 
 # Couple a set of release AND debug libraries (or frameworks)

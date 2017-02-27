@@ -165,6 +165,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
     free_it free_it_really(dest);
 #endif
 
+
     FileDatabase file;
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
     if (!stream) {

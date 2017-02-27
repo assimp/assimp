@@ -90,14 +90,16 @@ namespace
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter()
-    : mBuffer(),
-    pcDOM()
-{}
+: mBuffer()
+, pcDOM(){
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-PLYImporter::~PLYImporter()
-{}
+PLYImporter::~PLYImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

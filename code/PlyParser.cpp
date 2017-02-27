@@ -206,29 +206,17 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOu
     else if (TokenMatch(pCur,"x",1))
     {
         eOut = PLY::EST_XCoord;
-    }
-    else if (TokenMatch(pCur,"y",1))
-    {
+    } else if (TokenMatch(pCur,"y",1)) {
         eOut = PLY::EST_YCoord;
-    }
-    else if (TokenMatch(pCur,"z",1))
-    {
+    } else if (TokenMatch(pCur,"z",1)) {
         eOut = PLY::EST_ZCoord;
-    }
-    else if (TokenMatch(pCur,"nx",2))
-    {
+    } else if (TokenMatch(pCur,"nx",2)) {
         eOut = PLY::EST_XNormal;
-    }
-    else if (TokenMatch(pCur,"ny",2))
-    {
+    } else if (TokenMatch(pCur,"ny",2)) {
         eOut = PLY::EST_YNormal;
-    }
-    else if (TokenMatch(pCur,"nz",2))
-    {
+    } else if (TokenMatch(pCur,"nz",2)) {
         eOut = PLY::EST_ZNormal;
-    }
-    else
-    {
+    } else {
         DefaultLogger::get()->info("Found unknown property semantic in file. This is ok");
         SkipLine(&pCur);
     }

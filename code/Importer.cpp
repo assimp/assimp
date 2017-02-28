@@ -65,8 +65,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "BaseProcess.h"
 
-#include "DefaultIOStream.h"
-#include "DefaultIOSystem.h"
 #include "DefaultProgressHandler.h"
 #include "GenericProperty.h"
 #include "ProcessHelper.h"
@@ -80,6 +78,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <set>
 #include <memory>
 #include <cctype>
+
+#include <assimp/DefaultIOStream.h>
+#include <assimp/DefaultIOSystem.h>
 
 #ifndef ASSIMP_BUILD_NO_VALIDATEDS_PROCESS
 #   include "ValidateDataStructure.h"

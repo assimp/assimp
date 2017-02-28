@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StandardShapes.h"
 #include "StringComparison.h"
 #include "Defines.h"
-#include <stddef.h>
 #include <assimp/mesh.h>
 
 namespace Assimp    {

@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_PROPERTIES_H
 #define INCLUDED_AI_FBX_PROPERTIES_H
 
-#include <map>
 #include "FBXCompileConfig.h"
 #include <memory>
 

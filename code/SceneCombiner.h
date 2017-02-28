@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/types.h>
 #include "Defines.h"
-#include <stddef.h>
 #include <set>
 #include <list>
 #include <stdint.h>

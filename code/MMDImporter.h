@@ -85,7 +85,7 @@ private:
     void CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pScene);
 
     //! \brief Create the mesh
-    aiMesh* CreateMesh(const pmx::PmxModel* pModel, aiScene* pScene);
+    aiMesh* CreateMesh(const pmx::PmxModel* pModel, const int indexStart, const int indexCount);
 
 private:
     //! Data buffer

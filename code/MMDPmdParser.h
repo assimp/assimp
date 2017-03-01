@@ -118,7 +118,7 @@ namespace pmd
 				sphere_filename.clear();
 			}
 			else {
-				*pstar = NULL;
+				*pstar = (char)NULL;
 				texture_filename = std::string(buffer);
 				sphere_filename = std::string(pstar+1);
 			}

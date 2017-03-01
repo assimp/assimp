@@ -147,46 +147,51 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pSc
         return;
     }
 
-    pScene->mRootNode = new aiNode;
+    aiNode *pNode = new aiNode;
     if ( !pModel->model_name.empty() ) {
-        pScene->mRootNode->mName.Set(pModel->model_name);
+        pNode->mName.Set(pModel->model_name);
     }
     else {
         ai_assert(false);
     }
     
+    pScene->mRootNode = pNode;
     std::cout << pScene->mRootNode->mName.C_Str() << std::endl;
+    std::cout << pModel->index_count << std::endl;
 
-    pScene->mRootNode->mNumMeshes = 1;
-    pScene->mRootNode->mMeshes = new unsigned int[1];
-    pScene->mRootNode->mMeshes[0] = 0;
+    // split mesh by materials
+    pNode->mNumMeshes = pModel->material_count;
+    pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
+    for( unsigned int index = 0; index < pNode->mNumMeshes; index++ ) {
+        pNode->mMeshes[index] = index;
+    }
 
-    //aiMesh *pMesh = new aiMesh;
-    aiMaterial* mat = new aiMaterial;
-    pScene->mNumMeshes = 1;
-    pScene->mNumMaterials = 1;
-    pScene->mMeshes = new aiMesh*[1];
-    pScene->mMaterials = new aiMaterial*[1];
-    pScene->mMeshes[0] = CreateMesh(pModel, pScene);
-    pScene->mMaterials[0] = mat;
+    pScene->mNumMeshes = pNode->mNumMeshes;
+    pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+    for( unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++ ) {
+        const int indexCount = pModel->materials[i].index_count;
 
-    /**
-    pMesh->mNumVertices = 3;
-    pMesh->mVertices = new aiVector3D[3];
-    pMesh->mVertices[0] = aiVector3D(1.0, 0.0, 0.0);
-    pMesh->mVertices[1] = aiVector3D(0.0, 1.0, 0.0);
-    pMesh->mVertices[2] = aiVector3D(0.0, 0.0, 1.0);
+        std::cout << pModel->materials[i].material_name << std::endl;
+        std::cout << indexStart << " " << indexCount << std::endl;
 
-    pMesh->mNumFaces= 1;
-    pMesh->mFaces = new aiFace[1];
-    pMesh->mFaces[0].mNumIndices = 3;
-    pMesh->mFaces[0].mIndices = new unsigned int[3];
-    pMesh->mFaces[0].mIndices[0] = 0;
-    pMesh->mFaces[0].mIndices[1] = 1;
-    pMesh->mFaces[0].mIndices[2] = 2;
-    **/
- 
-    // Convert everything to OpenGL space... it's the same operation as the conversion back, so we can reuse the step directly
+        pScene->mMeshes[i] = CreateMesh(pModel,  indexStart, indexCount);
+        pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
+        pScene->mMeshes[i]->mMaterialIndex = i;
+        indexStart += indexCount;
+    }
+
+    pScene->mNumMaterials = pModel->material_count;
+    pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+    for( unsigned int i = 0; i < pScene->mNumMaterials; i++ ) {
+        aiMaterial* mat = new aiMaterial;
+        pScene->mMaterials[i] = mat;
+        aiString name(pModel->materials[i].material_name);
+        mat->AddProperty(&name, AI_MATKEY_NAME);
+        aiColor3D color(0.01*i, 0.01*i, 0.01*i);
+        mat->AddProperty(&color, 1, AI_MATKEY_COLOR_DIFFUSE);
+    }
+
+    // Convert everything to OpenGL space
     MakeLeftHandedProcess convertProcess;
     convertProcess.Execute( pScene);
 
@@ -196,42 +201,49 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pSc
 }
 
 // ------------------------------------------------------------------------------------------------
-aiMesh* MMDImporter::CreateMesh(const pmx::PmxModel* pModel, aiScene* pScene)
+aiMesh* MMDImporter::CreateMesh(const pmx::PmxModel* pModel, const int indexStart, const int indexCount)
 {
     aiMesh *pMesh = new aiMesh;
 
-    pMesh->mNumVertices = pModel->vertex_count;
-    std::vector<int> vertices_refID(pMesh->mNumVertices, -1);
-    vertices_refID.reserve(3*pMesh->mNumVertices);
+    pMesh->mNumVertices = indexCount;
 
-    pMesh->mNumFaces = pModel->index_count / 3;
+    pMesh->mNumFaces = indexCount / 3;
     pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
 
     for( unsigned int index = 0; index < pMesh->mNumFaces; index++ ) {
-        pMesh->mFaces[index].mNumIndices = 3;
-        unsigned int *indices = new unsigned int[3];
-        // here we change LH to RH coord
-        indices[0] = pModel->indices[3*index];
-        indices[1] = pModel->indices[3*index+1];
-        indices[2] = pModel->indices[3*index+2];
-        for( unsigned int j = 0; j < 3; j++ ) {
-            if(vertices_refID[indices[j]] != -1) {
-                vertices_refID.push_back(indices[j]);
-                indices[j] = vertices_refID.size() - 1;
-            }
-            else {
-                vertices_refID[indices[j]] = indices[j];
-            }
-        }
+        const int numIndices = 3; // trianglular face
+        pMesh->mFaces[index].mNumIndices = numIndices;
+        unsigned int *indices = new unsigned int[numIndices];
+        indices[0] = numIndices * index;
+        indices[1] = numIndices * index + 1;
+        indices[2] = numIndices * index + 2;
         pMesh->mFaces[index].mIndices = indices;
     }
 
-    pMesh->mNumVertices = vertices_refID.size();
     pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
+    pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
+    pMesh->mTextureCoords[0] = new aiVector3D[ pMesh->mNumVertices ];
+    pMesh->mNumUVComponents[0] = 2;
 
-    for( unsigned int index = 0; index < pMesh->mNumVertices; index++ ) {
-        const float* position = pModel->vertices[vertices_refID[index]].position;
+    // additional UVs
+    for( int i = 1; i <= pModel->setting.uv; i++ ) {
+        pMesh->mTextureCoords[i] = new aiVector3D[ pMesh->mNumVertices ];
+        pMesh->mNumUVComponents[i] = 4;
+    }
+
+    for( int index = 0; index < indexCount; index++ ) {
+        const pmx::PmxVertex *v = &pModel->vertices[pModel->indices[indexStart + index]];
+        const float* position = v->position;
         pMesh->mVertices[index].Set(position[0], position[1], position[2]);
+        const float* normal = v->normal;
+        pMesh->mNormals[index].Set(normal[0], normal[1], normal[2]);
+        pMesh->mTextureCoords[0][index].x = v->uv[0];
+        pMesh->mTextureCoords[0][index].y = v->uv[1];
+        for( int i = 1; i <= pModel->setting.uv; i++ ) {
+            // TODO: wrong here? use quaternion transform?
+            pMesh->mTextureCoords[i][index].x = v->uva[i][2] - v->uva[i][0];
+            pMesh->mTextureCoords[i][index].y = v->uva[i][3] - v->uva[i][1];
+        }
     }
 
     return pMesh;

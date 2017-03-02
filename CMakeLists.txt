@@ -187,6 +187,7 @@ endif()
 
 INCLUDE_DIRECTORIES( include )
 
+INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
 # If this is an in-source build (CMAKE_SOURCE_DIR == CMAKE_BINARY_DIR),

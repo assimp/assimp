@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/ai_assert.h>
 #include <assimp/types.h>
-#include "Defines.h"
+//#include "Defines.h"
 #include <stddef.h>
 #include <set>
 #include <list>
@@ -142,6 +142,13 @@ struct NodeAttachmentInfo
  */
 #define AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES_IF_NECESSARY 0x10
 
+/** @def AI_INT_MERGE_SCENE_DELETE_SOURCES
+ * Can be combined with AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES.
+ * Unique names are generated, but only if this is absolutely
+ * required to avoid name conflicts.
+ */
+#define AI_INT_MERGE_SCENE_DELETE_SOURCES 0x20
+
 
 typedef std::pair<aiBone*,unsigned int> BoneSrcIndex;
 
@@ -200,10 +207,8 @@ struct SceneHelper
  */
 class ASSIMP_API SceneCombiner
 {
-    // class cannot be instanced
-    SceneCombiner() {}
-
 public:
+    SceneCombiner() {}
 
     // -------------------------------------------------------------------
     /** Merges two or more scenes.
@@ -216,7 +221,7 @@ public:
      *  @param flags Combination of the AI_INT_MERGE_SCENE flags defined above
      */
     static void MergeScenes(aiScene** dest,std::vector<aiScene*>& src,
-        unsigned int flags = 0);
+        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
 
 
     // -------------------------------------------------------------------
@@ -235,7 +240,7 @@ public:
      */
     static void MergeScenes(aiScene** dest, aiScene* master,
         std::vector<AttachmentInfo>& src,
-        unsigned int flags = 0);
+        unsigned int flags = 0, std::vector<aiMatrix4x4> &trans = std::vector<aiMatrix4x4>());
 
 
     // -------------------------------------------------------------------

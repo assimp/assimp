@@ -161,9 +161,9 @@ void SceneCombiner::OffsetNodeMeshIndices (aiNode* node, unsigned int offset)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Merges two scenes. Currently only used by the LWS loader.
+// Merges two scenes.
 void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
-    unsigned int flags)
+    unsigned int flags, std::vector<aiMatrix4x4> trans)
 {
     ai_assert(NULL != _dest);
 
@@ -188,6 +188,8 @@ void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src,
 
     std::vector<AttachmentInfo> srcList (src.size());
     for (unsigned int i = 0; i < srcList.size();++i)    {
+        if(trans.size())
+            master->mRootNode->mTransformation = trans[i];
         srcList[i] = AttachmentInfo(src[i],master->mRootNode);
     }
 
@@ -247,7 +249,7 @@ void SceneCombiner::AttachToGraph ( aiScene* master,
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
     std::vector<AttachmentInfo>& srcList,
-    unsigned int flags)
+    unsigned int flags, std::vector<aiMatrix4x4> trans)
 {
     ai_assert(NULL != _dest);
 
@@ -509,9 +511,12 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
             node = (*cur)->mRootNode;
             OffsetNodeMeshIndices(node,offset[n]);
         }
-        if (n) // src[0] is the master node
+        if (n) { // src[0] is the master node
+            // Copy any transformation from the list provided
+            if(trans.size())
+                node->mTransformation = trans[n-1];
             nodes.push_back(NodeAttachmentInfo( node,srcList[n-1].attachToNode,n ));
-
+        }
         // add name prefixes?
         if (flags & AI_INT_MERGE_SCENE_GEN_UNIQUE_NAMES) {
 
@@ -636,25 +641,27 @@ void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master,
     }
 
     // now delete all input scenes. Make sure duplicate scenes aren't
-    // deleted more than one time
-    for ( unsigned int n = 0; n < src.size();++n )  {
-        if (n != duplicates[n]) // duplicate scene?
-            continue;
+    // deleted more than one time, if the flag is set
+    if(flags & AI_INT_MERGE_SCENE_DELETE_SOURCES) {
+        for ( unsigned int n = 0; n < src.size();++n )  {
+            if (n != duplicates[n]) // duplicate scene?
+                continue;
 
-        aiScene* deleteMe = src[n].scene;
+            aiScene* deleteMe = src[n].scene;
 
-        // We need to delete the arrays before the destructor is called -
-        // we are reusing the array members
-        delete[] deleteMe->mMeshes;     deleteMe->mMeshes     = NULL;
-        delete[] deleteMe->mCameras;    deleteMe->mCameras    = NULL;
-        delete[] deleteMe->mLights;     deleteMe->mLights     = NULL;
-        delete[] deleteMe->mMaterials;  deleteMe->mMaterials  = NULL;
-        delete[] deleteMe->mAnimations; deleteMe->mAnimations = NULL;
+            // We need to delete the arrays before the destructor is called -
+            // we are reusing the array members
+            delete[] deleteMe->mMeshes;     deleteMe->mMeshes     = NULL;
+            delete[] deleteMe->mCameras;    deleteMe->mCameras    = NULL;
+            delete[] deleteMe->mLights;     deleteMe->mLights     = NULL;
+            delete[] deleteMe->mMaterials;  deleteMe->mMaterials  = NULL;
+            delete[] deleteMe->mAnimations; deleteMe->mAnimations = NULL;
 
-        deleteMe->mRootNode = NULL;
+            deleteMe->mRootNode = NULL;
 
-        // Now we can safely delete the scene
-        delete deleteMe;
+            // Now we can safely delete the scene
+            delete deleteMe;
+        }
     }
 
     // Check flags

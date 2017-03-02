@@ -46,16 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 struct aiMesh;
-struct aiNode;
 
 namespace Assimp {
-
-/*
-namespace MMDFile {
-    struct Object;
-    struct Model;
-}
-*/
 
 // ------------------------------------------------------------------------------------------------
 /// \class  MMDImporter
@@ -87,11 +79,12 @@ private:
     //! \brief Create the mesh
     aiMesh* CreateMesh(const pmx::PmxModel* pModel, const int indexStart, const int indexCount);
 
+    //! \brief Create the material
+    aiMaterial* CreateMaterial(const pmx::PmxMaterial* pMat, const pmx::PmxModel* pModel);
+
 private:
     //! Data buffer
     std::vector<char> m_Buffer;
-    //! Pointer to root object instance
-    //MMDFile::Object *m_pRootObject;
     //! Absolute pathname of model in file system
     std::string m_strAbsPath;
 };

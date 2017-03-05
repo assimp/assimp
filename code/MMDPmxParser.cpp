@@ -1,10 +1,7 @@
 #include <utility>
 #include "MMDPmxParser.h"
-#ifndef __unix__
-#include "EncodingHelper.h"
-#else
-#include <unicode/ucnv.h>
-#endif
+#include "Exceptional.h"
+#include "../contrib/ConvertUTF/ConvertUTF.h"
 
 namespace pmx
 {
@@ -43,58 +40,44 @@ namespace pmx
 	}
 
 	/// 文字列を読み込む
-	utfstring ReadString(std::istream *stream, uint8_t encoding)
+	std::string ReadString(std::istream *stream, uint8_t encoding)
 	{
-#ifndef __unix__
-		oguna::EncodingConverter converter = oguna::EncodingConverter();
-#endif
 		int size;
 		stream->read((char*) &size, sizeof(int));
 		std::vector<char> buffer;
 		if (size == 0)
 		{
-#ifndef __unix__
-			return utfstring(L"");
-#else
-			return utfstring("");
-#endif
+			return std::string("");
 		}
 		buffer.reserve(size);
 		stream->read((char*) buffer.data(), size);
 		if (encoding == 0)
 		{
-			// UTF16
-#ifndef __unix__
-			return utfstring((wchar_t*) buffer.data(), size / 2);
-#else
-			utfstring result;
-			std::vector<char> outbuf;
-			outbuf.reserve(size*2);
+			// UTF16 to UTF8
+			std::string result;
 
-			// Always remember to set U_ZERO_ERROR before calling ucnv_convert(),
-			// otherwise the function will fail.
-			UErrorCode err = U_ZERO_ERROR;
-			size = ucnv_convert("UTF-8", "UTF-16LE", (char*)outbuf.data(), outbuf.capacity(), buffer.data(), size, &err);
-			if(!U_SUCCESS(err)) {
-				std::cout << "oops, something wrong?" << std::endl;
-				std::cout << u_errorName(err) << std::endl;
-				exit(-1);
+			const char* sourceStart = buffer.data();
+			const unsigned int targetSize = size * 3;
+			char* targetStart = new char[targetSize]();
+			const char* targetReserved = targetStart;
+			ConversionFlags flags = ConversionFlags::lenientConversion;
+
+			ConversionResult conversionResult;
+			if( ( conversionResult = ConvertUTF16toUTF8(
+				(const UTF16**)&sourceStart, (const UTF16*)(sourceStart + size),
+				(UTF8**)&targetStart, (UTF8*)(targetStart + targetSize),
+				flags) ) != ConversionResult::conversionOK) {
+				throw DeadlyImportError( "Convert " + std::string(sourceStart) + " to UTF8 is not valid." );
 			}
-			
-			result.assign((const char*)outbuf.data(), size);
+
+			result.assign(targetReserved, targetSize);
+			delete[] targetReserved;
 			return result;
-#endif
 		}
 		else
 		{
-			// UTF8
-#ifndef __unix__
-			utfstring result;
-			converter.Utf8ToUtf16(buffer.data(), size, &result);
-			return result;
-#else
-			return utfstring((const char*)buffer.data(), size);
-#endif
+			// the name is already UTF8
+			return std::string((const char*)buffer.data(), size);
 		}
 	}
 
@@ -538,7 +521,7 @@ namespace pmx
 
 		// テクスチャ
 		stream->read((char*) &texture_count, sizeof(int));
-		this->textures = std::make_unique<utfstring []>(texture_count);
+		this->textures = std::make_unique<std::string []>(texture_count);
 		for (int i = 0; i < texture_count; i++)
 		{
 			this->textures[i] = ReadString(stream, setting.encoding);

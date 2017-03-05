@@ -667,12 +667,6 @@ ADD_ASSIMP_IMPORTER( MMD
   MMDVmdParser.h
 )
 
-# use custom FindICU.cmake
-set(CMAKE_MODULE_PATH_BACKUP ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
-find_package(ICU COMPONENTS uc io REQUIRED)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH_BACKUP})
-
 SET( Step_SRCS
   StepExporter.h
   StepExporter.cpp

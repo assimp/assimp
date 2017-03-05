@@ -57,7 +57,7 @@ namespace pmx
 			std::string result;
 
 			const char* sourceStart = buffer.data();
-			const unsigned int targetSize = size * 3;
+			const unsigned int targetSize = size * 3; // enough to encode
 			char* targetStart = new char[targetSize]();
 			const char* targetReserved = targetStart;
 			ConversionFlags flags = ConversionFlags::lenientConversion;
@@ -70,7 +70,7 @@ namespace pmx
 				throw DeadlyImportError( "Convert " + std::string(sourceStart) + " to UTF8 is not valid." );
 			}
 
-			result.assign(targetReserved, targetSize);
+			result.assign(targetReserved, targetStart - targetReserved);
 			delete[] targetReserved;
 			return result;
 		}

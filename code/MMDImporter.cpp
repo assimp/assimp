@@ -218,10 +218,13 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pSc
 
     // Convert everything to OpenGL space
     MakeLeftHandedProcess convertProcess;
-    convertProcess.Execute( pScene);
+    convertProcess.Execute(pScene);
 
-    FlipWindingOrderProcess flipper;
-    flipper.Execute(pScene);
+    FlipUVsProcess uvFlipper;
+    uvFlipper.Execute(pScene);
+
+    FlipWindingOrderProcess windingFlipper;
+    windingFlipper.Execute(pScene);
 
 }
 
@@ -263,7 +266,7 @@ aiMesh* MMDImporter::CreateMesh(const pmx::PmxModel* pModel, const int indexStar
         const float* normal = v->normal;
         pMesh->mNormals[index].Set(normal[0], normal[1], normal[2]);
         pMesh->mTextureCoords[0][index].x = v->uv[0];
-        pMesh->mTextureCoords[0][index].y = -v->uv[1];
+        pMesh->mTextureCoords[0][index].y = v->uv[1];
         for( int i = 1; i <= pModel->setting.uv; i++ ) {
             // TODO: wrong here? use quaternion transform?
             pMesh->mTextureCoords[i][index].x = v->uva[i][0];
@@ -297,9 +300,6 @@ aiMaterial* MMDImporter::CreateMaterial(const pmx::PmxMaterial* pMat, const pmx:
     mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
     int mapping_uvwsrc = 0;
     mat->AddProperty(&mapping_uvwsrc, 1, AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, 0));
-    int mapping_mode = aiTextureMapMode_Mirror;
-    mat->AddProperty(&mapping_mode, 1, AI_MATKEY_MAPPINGMODE_U(aiTextureType_DIFFUSE, 0));
-    mat->AddProperty(&mapping_mode, 1, AI_MATKEY_MAPPINGMODE_V(aiTextureType_DIFFUSE, 0));
 
     return mat;
 }

@@ -46,11 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FBXCompileConfig.h"
 #include <memory>
+#include <string>
 
 namespace Assimp {
 namespace FBX {
 
-    class Element;
+// Forward declarations
+class Element;
 
 
 /** Represents a dynamic property. Type info added by deriving classes,

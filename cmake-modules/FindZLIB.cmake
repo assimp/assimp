@@ -11,7 +11,7 @@
 # Once done, this will define
 #
 #  ZLIB_FOUND - system has ZLIB
-#  ZLIB_INCLUDE_DIRS - the ZLIB include directories 
+#  ZLIB_INCLUDE_DIRS - the ZLIB include directories
 #  ZLIB_LIBRARIES - link these to use ZLIB
 
 include(FindPkgMacros)

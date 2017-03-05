@@ -187,10 +187,16 @@ IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
   SOURCE_GROUP( C4D FILES ${C4D_SRCS})
 ENDIF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
 
+# if this variable is set to TRUE, the user can manually disable importers by setting
+# ASSIMP_BUILD_XXX_IMPORTER to FALSE for each importer
+# if this variable is set to FALSE, the user can manually enable importers by setting
+# ASSIMP_BUILD_XXX_IMPORTER to TRUE for each importer
+OPTION(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "default value of all ASSIMP_BUILD_XXX_IMPORTER value" TRUE)
+
 # macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
 # this way selective loaders can be compiled (reduces filesize + compile time)
 MACRO(ADD_ASSIMP_IMPORTER name)
-  OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" TRUE)
+  OPTION(ASSIMP_BUILD_${name}_IMPORTER "build the ${name} importer" ${ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT})
   IF(ASSIMP_BUILD_${name}_IMPORTER)
     LIST(APPEND ASSIMP_LOADER_SRCS ${ARGN})
     SET(ASSIMP_IMPORTERS_ENABLED "${ASSIMP_IMPORTERS_ENABLED} ${name}")

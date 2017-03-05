@@ -121,6 +121,7 @@ SET( TEST_SRCS
   unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
+  unit/utVector3.cpp
   unit/utXImporterExporter.cpp
 )
 

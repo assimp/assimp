@@ -185,9 +185,9 @@ if (ASSIMP_COVERALLS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
-INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )
 
+INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
 # If this is an in-source build (CMAKE_SOURCE_DIR == CMAKE_BINARY_DIR),
@@ -255,9 +255,7 @@ ENDIF(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 # Search for unzip
-IF (PKG_CONFIG_FOUND)
-  PKG_CHECK_MODULES(UNZIP minizip)
-ENDIF (PKG_CONFIG_FOUND)
+use_pkgconfig(UNZIP minizip)
 
 IF ( ASSIMP_NO_EXPORT )
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)
@@ -344,11 +342,7 @@ IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   # Why assimp_qt_viewer/CMakeLists.txt still contain similar check?
   # Because viewer can be build independently of Assimp.
   FIND_PACKAGE(Qt5Widgets QUIET)
-  set(CMAKE_MODULE_PATH_BACKUP ${CMAKE_MODULE_PATH})
-  set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
   FIND_PACKAGE(DevIL QUIET)
-  set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
-  set(CMAKE_MODULE_PATH_BACKUP ${CMAKE_MODULE_PATH})
   FIND_PACKAGE(OpenGL QUIET)
   IF ( Qt5Widgets_FOUND AND IL_FOUND AND OPENGL_FOUND)
     ADD_SUBDIRECTORY( tools/assimp_qt_viewer/ )

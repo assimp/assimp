@@ -48,7 +48,7 @@ TEST_F( utVersion, aiGetLegalStringTest ) {
     EXPECT_NE( lv, nullptr );
     std::string text( lv );
 
-    size_t pos( text.find( std::string( "2016" ) ) );
+    size_t pos( text.find( std::string( "2017" ) ) );
     EXPECT_NE( pos, std::string::npos );
 }
 

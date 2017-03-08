@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXTokenizer.h"
 
 #include "TinyFormatter.h"
+#include <string>
 
 #ifndef ASSIMP_BUILD_NO_FBX_IMPORTER
 

@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringComparison.h"
 #include "StringUtils.h"
 
-
 #include <string>
 #include <vector>
 #include <map>
@@ -62,7 +61,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 namespace D3MF {
-
 
 namespace XmlTag {
     static const std::string model     = "model";

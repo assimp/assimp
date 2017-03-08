@@ -1,5 +1,5 @@
 # File produced by Open Asset Import Library (http://www.assimp.sf.net)
-# (assimp v3.3.721346005)
+# (assimp v3.3.128220959)
 
 mtllib spider.obj.mtl
 
@@ -1780,8 +1780,8 @@ vn -0.7573840022087097 0.2233279943466187 -0.6135900020599365
 vn -0.902417004108429 0.4006629884243011 -0.1584679931402206
 vn -0.902417004108429 -0.2050659954547882 -0.3789339959621429
 
-# Mesh 'HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01' with 80 faces
-g HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01_HLeib01
+# Mesh 'HLeib01' with 80 faces
+g HLeib01
 usemtl HLeibTex
 f  1/1/1 2/2/2 3/3/3
 f  4/4/4 3/3/3 5/5/5
@@ -1864,8 +1864,8 @@ f  25/25/25 27/27/27 42/42/42
 f  35/35/35 42/42/42 34/34/34
 f  27/27/27 34/34/34 42/42/42
 
-# Mesh 'OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK' with 60 faces
-g OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK_OK
+# Mesh 'OK' with 60 faces
+g OK
 usemtl Skin
 f  43/43/43 44/44/44 45/45/45
 f  46/46/46 45/45/45 47/47/47
@@ -1928,8 +1928,8 @@ f  53/53/53 66/63/66 52/52/52
 f  78/67/78 52/52/52 66/63/66
 f  67/64/67 69/63/69 79/67/79
 
-# Mesh 'Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li' with 98 faces
-g Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li_Bein1Li
+# Mesh 'Bein1Li' with 98 faces
+g Bein1Li
 usemtl BeinTex
 f  80/68/80 81/68/80 82/68/80
 f  83/68/81 84/68/81 85/68/81
@@ -2030,8 +2030,8 @@ f  129/114/128 94/122/92 92/121/90
 f  130/115/129 125/116/130 94/122/92
 f  125/116/130 83/123/94 94/122/92
 
-# Mesh 'Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re' with 98 faces
-g Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re_Bein1Re
+# Mesh 'Bein1Re' with 98 faces
+g Bein1Re
 usemtl BeinTex
 f  131/68/131 132/68/131 133/68/131
 f  134/68/132 135/68/132 136/68/132
@@ -2132,8 +2132,8 @@ f  143/121/141 146/122/144 180/114/179
 f  146/122/144 176/116/181 181/115/180
 f  146/122/144 136/123/145 176/116/181
 
-# Mesh 'Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li' with 98 faces
-g Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li_Bein2Li
+# Mesh 'Bein2Li' with 98 faces
+g Bein2Li
 usemtl BeinTex
 f  182/68/182 183/68/182 184/68/182
 f  185/68/183 186/68/183 187/68/183
@@ -2234,8 +2234,8 @@ f  231/114/230 196/122/194 194/121/192
 f  232/115/231 227/116/232 196/122/194
 f  227/116/232 185/123/196 196/122/194
 
-# Mesh 'Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re' with 98 faces
-g Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re_Bein2Re
+# Mesh 'Bein2Re' with 98 faces
+g Bein2Re
 usemtl BeinTex
 f  233/68/233 234/68/233 235/68/233
 f  236/68/234 237/68/234 238/68/234
@@ -2336,8 +2336,8 @@ f  245/121/243 248/122/246 282/114/281
 f  248/122/246 278/116/283 283/115/282
 f  248/122/246 238/123/247 278/116/283
 
-# Mesh 'Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re' with 98 faces
-g Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re_Bein3Re
+# Mesh 'Bein3Re' with 98 faces
+g Bein3Re
 usemtl BeinTex
 f  284/68/284 285/68/284 286/68/284
 f  287/68/285 288/68/285 289/68/285
@@ -2438,8 +2438,8 @@ f  296/121/294 299/122/297 333/114/332
 f  299/122/297 329/116/334 334/115/333
 f  299/122/297 289/123/298 329/116/334
 
-# Mesh 'Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li' with 98 faces
-g Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li_Bein3Li
+# Mesh 'Bein3Li' with 98 faces
+g Bein3Li
 usemtl BeinTex
 f  335/68/335 336/68/335 337/68/335
 f  338/68/336 339/68/336 340/68/336
@@ -2540,8 +2540,8 @@ f  384/114/383 349/122/347 347/121/345
 f  385/115/384 380/116/385 349/122/347
 f  380/116/385 338/123/349 349/122/347
 
-# Mesh 'Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re' with 98 faces
-g Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re_Bein4Re
+# Mesh 'Bein4Re' with 98 faces
+g Bein4Re
 usemtl BeinTex
 f  386/68/386 387/68/386 388/68/386
 f  389/68/387 390/68/387 391/68/387
@@ -2642,8 +2642,8 @@ f  398/121/396 401/122/399 435/114/434
 f  401/122/399 431/116/436 436/115/435
 f  401/122/399 391/123/400 431/116/436
 
-# Mesh 'Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li' with 98 faces
-g Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li_Bein4Li
+# Mesh 'Bein4Li' with 98 faces
+g Bein4Li
 usemtl BeinTex
 f  437/68/437 438/68/437 439/68/437
 f  440/68/438 441/68/438 442/68/438
@@ -2744,8 +2744,8 @@ f  486/114/485 451/122/449 449/121/447
 f  487/115/486 482/116/487 451/122/449
 f  482/116/487 440/123/451 451/122/449
 
-# Mesh 'Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn' with 42 faces
-g Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn_Zahn
+# Mesh 'Zahn' with 42 faces
+g Zahn
 usemtl BeinTex
 f  488/124/488 488/124/488 488/124/488
 f  489/125/489 490/126/489 491/127/489
@@ -2790,8 +2790,8 @@ f  488/124/505 492/128/491 488/124/490
 f  503/139/506 502/138/507 492/128/491
 f  502/138/507 489/125/493 492/128/491
 
-# Mesh 'klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn' with 42 faces
-g klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn_klZahn
+# Mesh 'klZahn' with 42 faces
+g klZahn
 usemtl BeinTex
 f  504/140/488 504/140/488 504/140/488
 f  505/141/508 506/142/508 507/143/508
@@ -2836,8 +2836,8 @@ f  504/140/524 508/144/510 504/140/509
 f  519/155/525 518/154/526 508/144/510
 f  518/154/526 505/141/512 508/144/510
 
-# Mesh 'Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf' with 90 faces
-g Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf_Kopf
+# Mesh 'Kopf' with 90 faces
+g Kopf
 usemtl Skin
 f  520/68/527 521/156/528 522/157/529
 f  520/68/527 523/158/530 521/156/528
@@ -2930,8 +2930,8 @@ f  564/197/571 562/195/569 545/178/552
 f  545/178/552 552/185/559 566/199/573
 f  564/197/571 566/199/573 545/178/552
 
-# Mesh 'Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust' with 20 faces
-g Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust_Brust
+# Mesh 'Brust' with 20 faces
+g Brust
 usemtl Skin
 f  70/210/584 71/211/585 577/212/586
 f  60/120/587 577/212/586 64/213/588
@@ -2954,8 +2954,8 @@ f  70/210/584 580/217/592 69/223/599
 f  77/75/593 79/224/600 580/217/592
 f  69/223/599 580/217/592 79/224/600
 
-# Mesh 'Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2' with 90 faces
-g Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2_Kopf2
+# Mesh 'Kopf2' with 90 faces
+g Kopf2
 usemtl Skin
 f  582/225/601 583/226/602 584/123/603
 f  583/226/602 585/227/604 584/123/603
@@ -3048,8 +3048,8 @@ f  607/245/626 624/262/643 625/263/644
 f  627/265/646 614/252/633 607/245/626
 f  607/245/626 627/265/646 625/263/644
 
-# Mesh 'Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2' with 42 faces
-g Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2_Zahn2
+# Mesh 'Zahn2' with 42 faces
+g Zahn2
 usemtl BeinTex
 f  639/124/488 639/124/488 639/124/488
 f  640/127/658 641/126/658 642/125/658
@@ -3094,8 +3094,8 @@ f  639/124/661 644/128/660 639/124/674
 f  644/128/660 653/138/676 654/139/675
 f  644/128/660 642/125/662 653/138/676
 
-# Mesh 'klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2' with 42 faces
-g klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2_klZahn2
+# Mesh 'klZahn2' with 42 faces
+g klZahn2
 usemtl BeinTex
 f  655/140/488 655/140/488 655/140/488
 f  656/143/677 657/142/677 658/141/677
@@ -3140,8 +3140,8 @@ f  655/140/680 660/144/679 655/140/693
 f  660/144/679 669/154/695 670/155/694
 f  660/144/679 658/141/681 669/154/695
 
-# Mesh 'Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge' with 38 faces
-g Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge_Auge
+# Mesh 'Auge' with 38 faces
+g Auge
 usemtl Augentex
 f  671/277/696 672/278/697 673/279/698
 f  671/277/696 673/279/698 674/280/699
@@ -3182,8 +3182,8 @@ f  681/287/706 684/290/709 696/302/721
 f  689/295/714 696/302/721 688/294/713
 f  684/290/709 688/294/713 696/302/721
 
-# Mesh 'Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05' with 38 faces
-g Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05_Duplicate05
+# Mesh 'Duplicate05' with 38 faces
+g Duplicate05
 usemtl Augentex
 f  697/279/722 698/278/723 699/277/724
 f  700/280/725 697/279/722 699/277/724
@@ -3223,4 +3223,3 @@ f  710/290/735 713/294/738 712/291/737
 f  722/302/747 710/290/735 708/287/733
 f  713/294/738 722/302/747 716/295/741
 f  722/302/747 713/294/738 710/290/735
-

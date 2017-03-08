@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 #include <vector>
+#include <string>
 #include <assimp/matrix4x4.h>
 
 struct aiScene;

@@ -94,6 +94,7 @@ SET( TEST_SRCS
   unit/utIssues.cpp
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
+  unit/utLWSImportExport.cpp
   unit/utMaterialSystem.cpp
   unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
@@ -103,6 +104,7 @@ SET( TEST_SRCS
   unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
+  unit/utPLYImportExport.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp
@@ -118,6 +120,7 @@ SET( TEST_SRCS
   unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
+  unit/utVector3.cpp
   unit/utXImporterExporter.cpp
 )
 

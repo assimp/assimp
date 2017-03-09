@@ -45,17 +45,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
-class utIFCImportExport : public AbstractImportExportBase {
+
+class utLWSImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/IFC/AC14-FZK-Haus.ifc", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/LWS/move_x.lws", 0 );
         return nullptr != scene;
 
         return true;
     }
 };
 
-TEST_F( utIFCImportExport, importIFCFromFileTest ) {
+TEST_F( utLWSImportExport, importLWSFromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }

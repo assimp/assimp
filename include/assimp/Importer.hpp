@@ -58,7 +58,6 @@ namespace Assimp    {
     // =======================================================================
     // Public interface to Assimp
     class Importer;
-    class Exporter; // export.hpp
     class IOStream;
     class IOSystem;
     class ProgressHandler;
@@ -77,7 +76,6 @@ namespace Assimp    {
     // =======================================================================
     // Holy stuff, only for members of the high council of the Jedi.
     class ImporterPimpl;
-    class ExporterPimpl; // export.hpp
 } //! namespace Assimp
 
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff

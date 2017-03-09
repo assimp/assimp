@@ -1858,7 +1858,7 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
             ++filePtr;
 
             // Face entry
-            if (TokenMatch(filePtr,"MESH_CFACE" ,11))
+            if (TokenMatch(filePtr,"MESH_CFACE" ,10))
             {
                 unsigned int aiValues[3];
                 unsigned int iIndex = 0;

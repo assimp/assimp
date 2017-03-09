@@ -607,6 +607,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         mat->AddProperty( &pCurrentMaterial->emissive, 1, AI_MATKEY_COLOR_EMISSIVE );
         mat->AddProperty( &pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS );
         mat->AddProperty( &pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY );
+        mat->AddProperty( &pCurrentMaterial->transparent,1,AI_MATKEY_COLOR_TRANSPARENT);
 
         // Adding refraction index
         mat->AddProperty( &pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI );

@@ -90,14 +90,16 @@ namespace
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter()
-    : mBuffer(),
-    pcDOM()
-{}
+: mBuffer()
+, pcDOM(){
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-PLYImporter::~PLYImporter()
-{}
+PLYImporter::~PLYImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -439,7 +441,7 @@ void PLYImporter::LoadTextureCoordinates(std::vector<aiVector2D>* pvOut)
     PLY::ElementInstanceList* pcList = NULL;
     unsigned int cnt = 0;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i = pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)
@@ -653,7 +655,7 @@ void PLYImporter::LoadVertexColor(std::vector<aiColor4D>* pvOut)
     unsigned int cnt = 0;
     PLY::ElementInstanceList* pcList = NULL;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i = pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)
@@ -752,13 +754,13 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
     // index of the vertex index list
     unsigned int iProperty = 0xFFFFFFFF;
     PLY::EDataType eType = EDT_Char;
-    bool bIsTristrip = false;
+    bool bIsTriStrip = false;
 
     // index of the material index property
     unsigned int iMaterialIndex = 0xFFFFFFFF;
     PLY::EDataType eType2 = EDT_Char;
 
-    // serach in the DOM for a face entry
+    // search in the DOM for a face entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i =  pcDOM->alElements.begin();
         i != pcDOM->alElements.end();++i,++_i)
@@ -803,7 +805,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
                 if (!(*a).bIsList)continue;
                 iProperty   = _a;
                 bOne        = true;
-                bIsTristrip = true;
+                bIsTriStrip = true;
                 eType       = (*a).eType;
                 break;
             }
@@ -813,7 +815,7 @@ void PLYImporter::LoadFaces(std::vector<PLY::Face>* pvOut)
     // check whether we have at least one per-face information set
     if (pcList && bOne)
     {
-        if (!bIsTristrip)
+        if (!bIsTriStrip)
         {
             pvOut->reserve(pcList->alInstances.size());
             for (std::vector<ElementInstance>::const_iterator i =  pcList->alInstances.begin();
@@ -957,7 +959,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
     unsigned int iOpacity = 0xFFFFFFFF;
     PLY::EDataType eOpacity = EDT_Char;
 
-    // serach in the DOM for a vertex entry
+    // search in the DOM for a vertex entry
     unsigned int _i = 0;
     for (std::vector<PLY::Element>::const_iterator i =  this->pcDOM->alElements.begin();
         i != this->pcDOM->alElements.end();++i,++_i)
@@ -1074,7 +1076,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
             pcHelper->AddProperty<aiColor4D>(&clrOut,1,AI_MATKEY_COLOR_AMBIENT);
 
             // handle phong power and shading mode
-            int iMode;
+            int iMode = (int)aiShadingMode_Gouraud;
             if (0xFFFFFFFF != iPhong)   {
                 ai_real fSpec = PLY::PropertyInstance::ConvertTo<ai_real>(GetProperty((*i).alProperties, iPhong).avList.front(),ePhong);
 
@@ -1087,9 +1089,7 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut)
 
                     iMode = (int)aiShadingMode_Phong;
                 }
-                else iMode = (int)aiShadingMode_Gouraud;
             }
-            else iMode = (int)aiShadingMode_Gouraud;
             pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
             // handle opacity

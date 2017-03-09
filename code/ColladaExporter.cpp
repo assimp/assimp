@@ -652,7 +652,7 @@ void ColladaExporter::WriteMaterials()
       if( materialCountWithThisName == 0 ) {
         materials[a].name = name.C_Str();
       } else {
-        materials[a].name = std::string(name.C_Str()) + to_string(materialCountWithThisName);  
+        materials[a].name = std::string(name.C_Str()) + to_string(materialCountWithThisName);
       }
     }
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
@@ -809,8 +809,8 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     const std::string idstr = GetMeshId( pIndex);
     const std::string idstrEscaped = XMLEscape(idstr);
 
-  if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-    return;
+    if ( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+        return;
 
     // opening tag
     mOutput << startstr << "<geometry id=\"" << idstrEscaped << "\" name=\"" << idstrEscaped << "_name\" >" << endstr;
@@ -843,22 +843,10 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     }
 
     // assemble vertex structure
+    // Only write input for POSITION since we will write other as shared inputs in polygon definition
     mOutput << startstr << "<vertices id=\"" << idstrEscaped << "-vertices" << "\">" << endstr;
     PushTag();
     mOutput << startstr << "<input semantic=\"POSITION\" source=\"#" << idstrEscaped << "-positions\" />" << endstr;
-    if( mesh->HasNormals() )
-        mOutput << startstr << "<input semantic=\"NORMAL\" source=\"#" << idstrEscaped << "-normals\" />" << endstr;
-    for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
-    {
-        if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
-            mOutput << startstr << "<input semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" " /*<< "set=\"" << a << "\"" */ << " />" << endstr;
-    }
-    for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
-    {
-        if( mesh->HasVertexColors(static_cast<unsigned int>(a) ) )
-            mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " /*<< set=\"" << a << "\"" */ << " />" << endstr;
-    }
-
     PopTag();
     mOutput << startstr << "</vertices>" << endstr;
 
@@ -877,6 +865,19 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<lines count=\"" << countLines << "\" material=\"defaultMaterial\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
+        if( mesh->HasNormals() )
+            mOutput << startstr << "<input semantic=\"NORMAL\" source=\"#" << idstrEscaped << "-normals\" />" << endstr;
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+        {
+            if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
+                mOutput << startstr << "<input semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
+        }
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
+        {
+            if( mesh->HasVertexColors(static_cast<unsigned int>(a) ) )
+                mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
+        }
+
         mOutput << startstr << "<p>";
         for( size_t a = 0; a < mesh->mNumFaces; ++a )
         {
@@ -898,10 +899,17 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
+        if( mesh->HasNormals() )
+            mOutput << startstr << "<input offset=\"0\" semantic=\"NORMAL\" source=\"#" << idstrEscaped << "-normals\" />" << endstr;
         for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
         {
-            if( mesh->HasTextureCoords(static_cast<unsigned int>(a) ) )
-                mOutput << startstr << "<input offset=\"0\" semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" set=\"" << a << "\" />" << endstr;
+            if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
+                mOutput << startstr << "<input offset=\"0\" semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
+        }
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
+        {
+            if( mesh->HasVertexColors(static_cast<unsigned int>(a) ) )
+                mOutput << startstr << "<input offset=\"0\" semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
         }
 
         mOutput << startstr << "<vcount>";

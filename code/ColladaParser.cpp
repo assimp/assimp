@@ -585,6 +585,12 @@ void ColladaParser::ReadAnimationSampler( Collada::AnimationChannel& pChannel)
                     pChannel.mSourceTimes = source;
                 else if( strcmp( semantic, "OUTPUT") == 0)
                     pChannel.mSourceValues = source;
+                else if( strcmp( semantic, "IN_TANGENT") == 0)
+                    pChannel.mInTanValues = source;
+                else if( strcmp( semantic, "OUT_TANGENT") == 0)
+                    pChannel.mOutTanValues = source;
+                else if( strcmp( semantic, "INTERPOLATION") == 0)
+                    pChannel.mInterpolationValues = source;
 
                 if( !mReader->isEmptyElement())
                     SkipElement();
@@ -647,6 +653,9 @@ void ColladaParser::ReadControllerLibrary()
 // Reads a controller into the given mesh structure
 void ColladaParser::ReadController( Collada::Controller& pController)
 {
+    // initial values
+    pController.mType = Skin;
+    pController.mMethod = Normalized;
     while( mReader->read())
     {
         if( mReader->getNodeType() == irr::io::EXN_ELEMENT)
@@ -654,8 +663,15 @@ void ColladaParser::ReadController( Collada::Controller& pController)
             // two types of controllers: "skin" and "morph". Only the first one is relevant, we skip the other
             if( IsElement( "morph"))
             {
-                // should skip everything inside, so there's no danger of catching elements in between
-                SkipElement();
+                pController.mType = Morph;
+                int baseIndex = GetAttribute("source");
+                pController.mMeshId = mReader->getAttributeValue(baseIndex) + 1;
+                int methodIndex = GetAttribute("method");
+                if (methodIndex > 0) {
+                    const char *method = mReader->getAttributeValue(methodIndex);
+                    if (strcmp(method, "RELATIVE") == 0)
+                        pController.mMethod = Relative;
+                }
             }
             else if( IsElement( "skin"))
             {
@@ -667,18 +683,18 @@ void ColladaParser::ReadController( Collada::Controller& pController)
             else if( IsElement( "bind_shape_matrix"))
             {
                 // content is 16 floats to define a matrix... it seems to be important for some models
-          const char* content = GetTextContent();
+                const char* content = GetTextContent();
 
-          // read the 16 floats
-          for( unsigned int a = 0; a < 16; a++)
-          {
-              // read a number
-          content = fast_atoreal_move<ai_real>( content, pController.mBindShapeMatrix[a]);
-              // skip whitespace after it
-              SkipSpacesAndLineEnd( &content);
-          }
+                // read the 16 floats
+                for( unsigned int a = 0; a < 16; a++)
+                {
+                    // read a number
+                    content = fast_atoreal_move<ai_real>( content, pController.mBindShapeMatrix[a]);
+                    // skip whitespace after it
+                    SkipSpacesAndLineEnd( &content);
+                }
 
-        TestClosing( "bind_shape_matrix");
+                TestClosing( "bind_shape_matrix");
             }
             else if( IsElement( "source"))
             {
@@ -693,6 +709,32 @@ void ColladaParser::ReadController( Collada::Controller& pController)
             {
                 ReadControllerWeights( pController);
             }
+            else if ( IsElement( "targets" ))
+            {
+                while (mReader->read()) {
+                    if( mReader->getNodeType() == irr::io::EXN_ELEMENT) {
+                        if ( IsElement( "input")) {
+                            int semanticsIndex = GetAttribute("semantic");
+                            int sourceIndex = GetAttribute("source");
+
+                            const char *semantics = mReader->getAttributeValue(semanticsIndex);
+                            const char *source = mReader->getAttributeValue(sourceIndex);
+                            if (strcmp(semantics, "MORPH_TARGET") == 0) {
+                                pController.mMorphTarget = source + 1;
+                            }
+                            else if (strcmp(semantics, "MORPH_WEIGHT") == 0)
+                            {
+                                pController.mMorphWeight = source + 1;
+                            }
+                        }
+                    } else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END) {
+                        if( strcmp( mReader->getNodeName(), "targets") == 0)
+                            break;
+                        else
+                            ThrowException( "Expected end of <targets> element.");
+                    }
+                }
+            }
             else
             {
                 // ignore the rest
@@ -703,7 +745,7 @@ void ColladaParser::ReadController( Collada::Controller& pController)
         {
             if( strcmp( mReader->getNodeName(), "controller") == 0)
                 break;
-            else if( strcmp( mReader->getNodeName(), "skin") != 0)
+            else if( strcmp( mReader->getNodeName(), "skin") != 0 && strcmp( mReader->getNodeName(), "morph") != 0)
                 ThrowException( "Expected end of <controller> element.");
         }
     }
@@ -1592,7 +1634,7 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
             }
             else if( IsElement( "texture"))
             {
-                // get name of source textur/sampler
+                // get name of source texture/sampler
                 int attrTex = GetAttribute( "texture");
                 pSampler.mName = mReader->getAttributeValue( attrTex);
 
@@ -2311,9 +2353,9 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 		ThrowException( "Expected different index count in <p> element.");
 
 	// find the data for all sources
-  for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
+    for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
     {
-    InputChannel& input = *it;
+        InputChannel& input = *it;
         if( input.mResolved)
             continue;
 
@@ -2325,9 +2367,9 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
             acc->mData = &ResolveLibraryReference( mDataLibrary, acc->mSource);
     }
     // and the same for the per-index channels
-  for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
-  {
-    InputChannel& input = *it;
+    for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
+    {
+        InputChannel& input = *it;
         if( input.mResolved)
             continue;
 
@@ -2409,6 +2451,9 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
     return numPrimitives;
 }
 
+///@note This function willn't work correctly if both PerIndex and PerVertex channels have same channels.
+///For example if TEXCOORD present in both <vertices> and <polylist> tags this function will create wrong uv coordinates.
+///It's not clear from COLLADA documentation is this allowed or not. For now only exporter fixed to avoid such behavior
 void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
     // calculate the base offset of the vertex whose attributes we ant to copy
     size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;

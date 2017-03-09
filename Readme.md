@@ -1,7 +1,7 @@
 Open Asset Import Library (assimp)
 ==================================
 
-[![Linux Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
+[![Linux Build Status](https://travis-ci.org/assimp/assimp.svg)](https://travis-ci.org/assimp/assimp)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
 <a href="https://scan.coverity.com/projects/5607">
   <img alt="Coverity Scan Build Status"
@@ -18,6 +18,10 @@ This is the development trunk containing the latest features and bugfixes. For p
 The current build status is:
 
 Gitter chat: [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
+And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
+> /join #assetimporterlib
+
+<br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
@@ -92,6 +96,7 @@ Take a look into the `INSTALL` file. Our build system is CMake, if you used CMak
 * [Python](port/PyAssimp/README.md)
 * [.NET](port/AssimpNET/Readme.md)
 * [Pascal](port/AssimpPascal/Readme.md)
+* [Javascript (Alpha)](https://github.com/makc/assimp2json)
 
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure is:

@@ -1,9 +1,8 @@
-/*
----------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 
 All rights reserved.
 
@@ -36,26 +35,35 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
-*/
+-------------------------------------------------------------------------*/
 #include "UnitTestPCH.h"
-#include "AbstractImportExportBase.h"
+#include <assimp/vector3.h>
 
-#include <assimp/Importer.hpp>
+using namespace ::Assimp;
 
-using namespace Assimp;
-
-class utIFCImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/IFC/AC14-FZK-Haus.ifc", 0 );
-        return nullptr != scene;
-
-        return true;
-    }
+class utVector3 : public ::testing::Test {
+    // empty
 };
 
-TEST_F( utIFCImportExport, importIFCFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F(utVector3, CreationTest) {
+    aiVector3D v0;
+    aiVector3D v1( 1.0f, 2.0f, 3.0f );
+    EXPECT_FLOAT_EQ (1.0f, v1[ 0 ] );
+    EXPECT_FLOAT_EQ( 2.0f, v1[ 1 ] );
+    EXPECT_FLOAT_EQ( 3.0f, v1[ 2 ] );
+    aiVector3D v2( 1 );
+    EXPECT_FLOAT_EQ( 1.0f, v2[ 0 ] );
+    EXPECT_FLOAT_EQ( 1.0f, v2[ 1 ] );
+    EXPECT_FLOAT_EQ( 1.0f, v2[ 2 ] );
+    aiVector3D v3( v1 );
+    EXPECT_FLOAT_EQ( v1[ 0 ], v3[ 0 ] );
+    EXPECT_FLOAT_EQ( v1[ 1 ], v3[ 1 ] );
+    EXPECT_FLOAT_EQ( v1[ 2 ], v3[ 2 ] );
+}
+
+TEST_F( utVector3, BracketOpTest ) {
+    aiVector3D v(1.0f, 2.0f, 3.0f);
+    EXPECT_FLOAT_EQ( 1.0f, v[ 0 ] );
+    EXPECT_FLOAT_EQ( 2.0f, v[ 1 ] ); 
+    EXPECT_FLOAT_EQ( 3.0f, v[ 2 ] );
 }

@@ -296,8 +296,7 @@ protected:
     ExporterPimpl* pimpl;
 };
 
-class ASSIMP_API ExportProperties
-{
+class ASSIMP_API ExportProperties {
 public:
     // Data type to store the key hash
     typedef unsigned int KeyType;

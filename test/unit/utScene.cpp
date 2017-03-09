@@ -39,23 +39,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include "AbstractImportExportBase.h"
+#include <assimp/scene.h>
 
-#include <assimp/Importer.hpp>
+using namespace ::Assimp;
 
-using namespace Assimp;
-
-class utIFCImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/IFC/AC14-FZK-Haus.ifc", 0 );
-        return nullptr != scene;
-
-        return true;
-    }
+class utScene : public ::testing::Test {
+    // empty
 };
 
-TEST_F( utIFCImportExport, importIFCFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+TEST_F( utScene, aiNode_addChildrenTest ) {
+    aiNode myNode;
+
+    static const size_t NumChildren = 10;
+    aiNode **childrenPtr = new aiNode*[ NumChildren ];
+    for ( unsigned int i = 0; i < NumChildren; i++ ) {
+        childrenPtr[ i ] = new aiNode;
+    }
+    myNode.addChildren( NumChildren, childrenPtr );
+    EXPECT_EQ( NumChildren, myNode.mNumChildren );
+    for ( unsigned int i = 0; i < NumChildren; i++ ) {
+        EXPECT_EQ( childrenPtr[ i ], myNode.mChildren[ i ] );
+    }
 }
+

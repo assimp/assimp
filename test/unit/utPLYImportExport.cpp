@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 
 All rights reserved.
 
@@ -39,23 +39,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include "AbstractImportExportBase.h"
 
-using namespace Assimp;
+using namespace ::Assimp;
 
-class utIFCImportExport : public AbstractImportExportBase {
+class utPLYImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/IFC/AC14-FZK-Haus.ifc", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0 );
         return nullptr != scene;
-
-        return true;
     }
 };
 
-TEST_F( utIFCImportExport, importIFCFromFileTest ) {
+TEST_F( utPLYImportExport, importTest ) {
     EXPECT_TRUE( importerTest() );
+}
+
+TEST_F( utPLYImportExport, vertexColorTest ) {
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", 0 );
 }

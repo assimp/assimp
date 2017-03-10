@@ -107,7 +107,6 @@ public:
     {
         Settings()
             : skipSpaceRepresentations()
-            , skipCurveRepresentations()
             , useCustomTriangulation()
             , skipAnnotations()
             , conicSamplingAngle(10.f)
@@ -115,7 +114,6 @@ public:
 
 
         bool skipSpaceRepresentations;
-        bool skipCurveRepresentations;
         bool useCustomTriangulation;
         bool skipAnnotations;
         float conicSamplingAngle;

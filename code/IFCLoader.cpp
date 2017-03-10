@@ -153,10 +153,8 @@ const aiImporterDesc* IFCImporter::GetInfo () const
 void IFCImporter::SetupProperties(const Importer* pImp)
 {
     settings.skipSpaceRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_SPACE_REPRESENTATIONS,true);
-    settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
     settings.useCustomTriangulation = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION,true);
-
-    settings.conicSamplingAngle = 10.f;
+    settings.conicSamplingAngle = pImp->GetPropertyFloat(AI_CONFIG_IMPORT_IFC_CONIC_SAMPLING_ANGLE, AI_IMPORT_IFC_DEFAULT_CONIC_SAMPLING_ANGLE);
     settings.skipAnnotations = true;
 }
 

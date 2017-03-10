@@ -41,33 +41,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
 
-#include "DefaultIOSystem.h"
 #include "MMDImporter.h"
-#include "MMDPmxParser.h"
+#include "DefaultIOSystem.h"
 #include "MMDPmdParser.h"
+#include "MMDPmxParser.h"
 #include "MMDVmdParser.h"
+#include "SkeletonMeshBuilder.h"
 //#include "IOStreamBuffer.h"
 #include "ConvertToLHProcess.h"
-#include <memory>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/ai_assert.h>
+#include <assimp/scene.h>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 
-static const aiImporterDesc desc = {
-    "MMD Importer",
-    "",
-    "",
-    "surfaces supported?",
-    aiImporterFlags_SupportTextFlavour,
-    0,
-    0,
-    0,
-    0,
-    "pmx"
-};
+static const aiImporterDesc desc = {"MMD Importer",
+                                    "",
+                                    "",
+                                    "surfaces supported?",
+                                    aiImporterFlags_SupportTextFlavour,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    "pmx"};
 
 namespace Assimp {
 
@@ -75,237 +74,294 @@ using namespace std;
 
 // ------------------------------------------------------------------------------------------------
 //  Default constructor
-MMDImporter::MMDImporter() :
-    m_Buffer(),
-    //m_pRootObject( NULL ),
-    m_strAbsPath( "" )
-{
-    DefaultIOSystem io;
-    m_strAbsPath = io.getOsSeparator();
+MMDImporter::MMDImporter()
+    : m_Buffer(),
+      // m_pRootObject( NULL ),
+      m_strAbsPath("") {
+  DefaultIOSystem io;
+  m_strAbsPath = io.getOsSeparator();
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
-MMDImporter::~MMDImporter()
-{
-    //delete m_pRootObject;
-    //m_pRootObject = NULL;
+MMDImporter::~MMDImporter() {
+  // delete m_pRootObject;
+  // m_pRootObject = NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
 //  Returns true, if file is an pmx file.
-bool MMDImporter::CanRead( const std::string& pFile, IOSystem*  pIOHandler , bool checkSig ) const
-{
-    if(!checkSig) //Check File Extension
-    {
-        return SimpleExtensionCheck(pFile,"pmx");
-    }
-    else //Check file Header
-    {
-        static const char *pTokens[] = { "PMX " };
-        return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens, 1 );
-    }
+bool MMDImporter::CanRead(const std::string &pFile, IOSystem *pIOHandler,
+                          bool checkSig) const {
+  if (!checkSig) // Check File Extension
+  {
+    return SimpleExtensionCheck(pFile, "pmx");
+  } else // Check file Header
+  {
+    static const char *pTokens[] = {"PMX "};
+    return BaseImporter::SearchFileHeaderForToken(pIOHandler, pFile, pTokens,
+                                                  1);
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiImporterDesc* MMDImporter::GetInfo () const
-{
-    return &desc;
-}
+const aiImporterDesc *MMDImporter::GetInfo() const { return &desc; }
 
 // ------------------------------------------------------------------------------------------------
 //  MMD import implementation
-void MMDImporter::InternReadFile( const std::string &file, aiScene* pScene, IOSystem* pIOHandler)
-{
-    // Read file by istream
-    std::filebuf fb;
-    if( !fb.open(file, std::ios::in | std::ios::binary ) ) {
-        throw DeadlyImportError( "Failed to open file " + file + "." );
-    }
+void MMDImporter::InternReadFile(const std::string &file, aiScene *pScene,
+                                 IOSystem *pIOHandler) {
+  // Read file by istream
+  std::filebuf fb;
+  if (!fb.open(file, std::ios::in | std::ios::binary)) {
+    throw DeadlyImportError("Failed to open file " + file + ".");
+  }
 
-    std::istream fileStream( &fb );
+  std::istream fileStream(&fb);
 
-    // Get the file-size and validate it, throwing an exception when fails
-    fileStream.seekg(0, fileStream.end);
-    size_t fileSize = fileStream.tellg();
-    fileStream.seekg(0, fileStream.beg);
+  // Get the file-size and validate it, throwing an exception when fails
+  fileStream.seekg(0, fileStream.end);
+  size_t fileSize = fileStream.tellg();
+  fileStream.seekg(0, fileStream.beg);
 
-    if( fileSize < sizeof(pmx::PmxModel) ) {
-        throw DeadlyImportError( file + " is too small." );
-    }
+  if (fileSize < sizeof(pmx::PmxModel)) {
+    throw DeadlyImportError(file + " is too small.");
+  }
 
-    pmx::PmxModel model;
-    model.Read(&fileStream);
+  pmx::PmxModel model;
+  model.Read(&fileStream);
 
-    CreateDataFromImport(&model, pScene);
+  CreateDataFromImport(&model, pScene);
 }
 
 // ------------------------------------------------------------------------------------------------
-void MMDImporter::CreateDataFromImport(const pmx::PmxModel* pModel, aiScene* pScene)
-{
-    if( pModel == NULL ) {
-        return;
-    }
+void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
+                                       aiScene *pScene) {
+  if (pModel == NULL) {
+    return;
+  }
 
-    aiNode *pNode = new aiNode;
-    if ( !pModel->model_name.empty() ) {
-        pNode->mName.Set(pModel->model_name);
-    }
-    else {
-        ai_assert(false);
-    }
-    
-    pScene->mRootNode = pNode;
-    std::cout << pScene->mRootNode->mName.C_Str() << std::endl;
-    std::cout << pModel->index_count << std::endl;
+  aiNode *pNode = new aiNode;
+  if (!pModel->model_name.empty()) {
+    pNode->mName.Set(pModel->model_name);
+  } else {
+    ai_assert(false);
+  }
 
+  pScene->mRootNode = pNode;
+  std::cout << pScene->mRootNode->mName.C_Str() << std::endl;
+  std::cout << pModel->index_count << std::endl;
+
+  /*
     pNode = new aiNode;
     pScene->mRootNode->addChildren(1, &pNode);
-    pScene->mRootNode->mNumChildren = 1;
-    pNode->mParent = pScene->mRootNode;
     pNode->mName.Set(string(pModel->model_name) + string("_mesh"));
 
     // split mesh by materials
     pNode->mNumMeshes = pModel->material_count;
     pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
-    for( unsigned int index = 0; index < pNode->mNumMeshes; index++ ) {
-        pNode->mMeshes[index] = index;
+    for (unsigned int index = 0; index < pNode->mNumMeshes; index++) {
+      pNode->mMeshes[index] = index;
     }
 
     pScene->mNumMeshes = pNode->mNumMeshes;
-    pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
-    for( unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++ ) {
-        const int indexCount = pModel->materials[i].index_count;
+    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
+    for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
+      const int indexCount = pModel->materials[i].index_count;
 
-        std::cout << pModel->materials[i].material_name << std::endl;
-        std::cout << indexStart << " " << indexCount << std::endl;
+      std::cout << pModel->materials[i].material_name << std::endl;
+      std::cout << indexStart << " " << indexCount << std::endl;
 
-        pScene->mMeshes[i] = CreateMesh(pModel,  indexStart, indexCount);
-        pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
-        pScene->mMeshes[i]->mMaterialIndex = i;
-        indexStart += indexCount;
-    }
-
-    // create textures, may be dummy?
-    /*
-    pScene->mNumTextures = pModel->texture_count;
-    pScene->mTextures = new aiTexture*[pScene->mNumTextures];
-    for( unsigned int i = 0; i < pScene->mNumTextures; ++i) {
-        aiTexture *tex = new aiTexture;        
-        pScene->mTextures[i] = tex;
-        strcpy(tex->achFormatHint, "png");
-        tex->mHeight = 0;
-        ifstream file(pModel->textures[i], ios::binary | ios::ate);
-        streamsize size = file.tellg();
-        file.seekg(0, ios::beg);
-        char *buffer = new char[size];
-        file.read(buffer, size);
-        if(file.bad()) {
-            string err("PMX: Can't open texture file");
-            err.append(pModel->textures[i]);
-            throw DeadlyExportError(err);
-        }
-        tex->pcData = (aiTexel*)buffer; 
+      pScene->mMeshes[i] = CreateMesh(pModel, indexStart, indexCount);
+      pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
+      pScene->mMeshes[i]->mMaterialIndex = i;
+      indexStart += indexCount;
     }
     */
 
+  // create bones
+  aiBone *pBone = new aiBone[pModel->bone_count];
+  for (auto i = 0; i < pModel->bone_count; i++) {
+    pBone[i].mName = pModel->bones[i].bone_name;
+  }
+
+  // create node hierarchy for bone position
+  auto bone_root_index = 0; // Default root: Bone 0 "Body" / "全ての親"
+  aiNode **ppNode = new aiNode *[pModel->bone_count];
+  for (auto i = 0; i < pModel->bone_count; i++) {
+    ppNode[i] = new aiNode(pModel->bones[i].bone_name);
+  }
+
+  for (auto i = 0; i < pModel->bone_count; i++) {
+    const pmx::PmxBone &bone = pModel->bones[i];
+    std::cout << "Bone " << i << ":" << std::endl;
+    std::cout << bone.bone_name << std::endl;
+    std::cout << bone.bone_english_name << std::endl;
+    std::cout << "position " << bone.position[0] << " " << bone.position[1]
+              << " " << bone.position[2] << std::endl;
+    std::cout << "parent_index " << bone.parent_index << std::endl;
+    std::cout << "level " << bone.level << std::endl;
+    std::cout << "bone_flag " << bone.bone_flag << std::endl;
+    std::cout << "offset " << bone.offset[0] << " " << bone.offset[1] << " "
+              << bone.offset[2] << std::endl;
+    std::cout << "target_index" << bone.target_index << std::endl;
+
+    if (bone.parent_index < 0) {
+      pScene->mRootNode->addChildren(1, ppNode + i);
+      bone_root_index = i;
+    } else {
+      ppNode[bone.parent_index]->addChildren(1, ppNode + i);
+
+      aiVector3D v3 = aiVector3D(
+          bone.position[0] - pModel->bones[bone.parent_index].position[0],
+          bone.position[1] - pModel->bones[bone.parent_index].position[1],
+          bone.position[2] - pModel->bones[bone.parent_index].position[2]);
+      aiMatrix4x4::Translation(v3, ppNode[i]->mTransformation);
+      std::cout << ppNode[i]->mTransformation.a1 << ' '
+                << ppNode[i]->mTransformation.a2 << ' '
+                << ppNode[i]->mTransformation.a3 << ' '
+                << ppNode[i]->mTransformation.a4 << ' '
+                << ppNode[i]->mTransformation.b1 << ' '
+                << ppNode[i]->mTransformation.b2 << ' '
+                << ppNode[i]->mTransformation.b3 << ' '
+                << ppNode[i]->mTransformation.b4 << ' '
+                << ppNode[i]->mTransformation.c1 << ' '
+                << ppNode[i]->mTransformation.c2 << ' '
+                << ppNode[i]->mTransformation.c3 << ' '
+                << ppNode[i]->mTransformation.c4 << ' '
+                << ppNode[i]->mTransformation.d1 << ' '
+                << ppNode[i]->mTransformation.d2 << ' '
+                << ppNode[i]->mTransformation.d3 << ' '
+                << ppNode[i]->mTransformation.d4 << ' ' << std::endl;
+    }
+  }
+
+  // use SkeletonMeshBuilder to generate bone vertices
+  SkeletonMeshBuilder dummyMeshbuild(pScene, ppNode[bone_root_index]);
+
+  // create textures, may be dummy?
+  /*
+  pScene->mNumTextures = pModel->texture_count;
+  pScene->mTextures = new aiTexture*[pScene->mNumTextures];
+  for( unsigned int i = 0; i < pScene->mNumTextures; ++i) {
+      aiTexture *tex = new aiTexture;
+      pScene->mTextures[i] = tex;
+      strcpy(tex->achFormatHint, "png");
+      tex->mHeight = 0;
+      ifstream file(pModel->textures[i], ios::binary | ios::ate);
+      streamsize size = file.tellg();
+      file.seekg(0, ios::beg);
+      char *buffer = new char[size];
+      file.read(buffer, size);
+      if(file.bad()) {
+          string err("PMX: Can't open texture file");
+          err.append(pModel->textures[i]);
+          throw DeadlyExportError(err);
+      }
+      tex->pcData = (aiTexel*)buffer;
+  }
+  */
+
+  /*
     // create materials
     pScene->mNumMaterials = pModel->material_count;
-    pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
-    for( unsigned int i = 0; i < pScene->mNumMaterials; i++ ) {
-        pScene->mMaterials[i] = CreateMaterial(&pModel->materials[i], pModel);
+    pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
+    for (unsigned int i = 0; i < pScene->mNumMaterials; i++) {
+      pScene->mMaterials[i] = CreateMaterial(&pModel->materials[i], pModel);
     }
 
-    // Convert everything to OpenGL space
-    MakeLeftHandedProcess convertProcess;
-    convertProcess.Execute(pScene);
+  // Convert everything to OpenGL space
+  MakeLeftHandedProcess convertProcess;
+  convertProcess.Execute(pScene);
 
-    FlipUVsProcess uvFlipper;
-    uvFlipper.Execute(pScene);
+  FlipUVsProcess uvFlipper;
+  uvFlipper.Execute(pScene);
 
-    FlipWindingOrderProcess windingFlipper;
-    windingFlipper.Execute(pScene);
-
+  FlipWindingOrderProcess windingFlipper;
+  windingFlipper.Execute(pScene);
+    */
 }
 
 // ------------------------------------------------------------------------------------------------
-aiMesh* MMDImporter::CreateMesh(const pmx::PmxModel* pModel, const int indexStart, const int indexCount)
-{
-    aiMesh *pMesh = new aiMesh;
+aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
+                                const int indexStart, const int indexCount) {
+  aiMesh *pMesh = new aiMesh;
 
-    pMesh->mNumVertices = indexCount;
+  pMesh->mNumVertices = indexCount;
 
-    pMesh->mNumFaces = indexCount / 3;
-    pMesh->mFaces = new aiFace[ pMesh->mNumFaces ];
+  pMesh->mNumFaces = indexCount / 3;
+  pMesh->mFaces = new aiFace[pMesh->mNumFaces];
 
-    for( unsigned int index = 0; index < pMesh->mNumFaces; index++ ) {
-        const int numIndices = 3; // trianglular face
-        pMesh->mFaces[index].mNumIndices = numIndices;
-        unsigned int *indices = new unsigned int[numIndices];
-        indices[0] = numIndices * index;
-        indices[1] = numIndices * index + 1;
-        indices[2] = numIndices * index + 2;
-        pMesh->mFaces[index].mIndices = indices;
+  for (unsigned int index = 0; index < pMesh->mNumFaces; index++) {
+    const int numIndices = 3; // trianglular face
+    pMesh->mFaces[index].mNumIndices = numIndices;
+    unsigned int *indices = new unsigned int[numIndices];
+    indices[0] = numIndices * index;
+    indices[1] = numIndices * index + 1;
+    indices[2] = numIndices * index + 2;
+    pMesh->mFaces[index].mIndices = indices;
+  }
+
+  pMesh->mVertices = new aiVector3D[pMesh->mNumVertices];
+  pMesh->mNormals = new aiVector3D[pMesh->mNumVertices];
+  pMesh->mTextureCoords[0] = new aiVector3D[pMesh->mNumVertices];
+  pMesh->mNumUVComponents[0] = 2;
+
+  // additional UVs
+  for (int i = 1; i <= pModel->setting.uv; i++) {
+    pMesh->mTextureCoords[i] = new aiVector3D[pMesh->mNumVertices];
+    pMesh->mNumUVComponents[i] = 4;
+  }
+
+  for (int index = 0; index < indexCount; index++) {
+    const pmx::PmxVertex *v =
+        &pModel->vertices[pModel->indices[indexStart + index]];
+    const float *position = v->position;
+    pMesh->mVertices[index].Set(position[0], position[1], position[2]);
+    const float *normal = v->normal;
+    pMesh->mNormals[index].Set(normal[0], normal[1], normal[2]);
+    pMesh->mTextureCoords[0][index].x = v->uv[0];
+    pMesh->mTextureCoords[0][index].y = v->uv[1];
+    for (int i = 1; i <= pModel->setting.uv; i++) {
+      // TODO: wrong here? use quaternion transform?
+      pMesh->mTextureCoords[i][index].x = v->uva[i][0];
+      pMesh->mTextureCoords[i][index].y = v->uva[i][1];
     }
+  }
 
-    pMesh->mVertices = new aiVector3D[ pMesh->mNumVertices ];
-    pMesh->mNormals = new aiVector3D[ pMesh->mNumVertices ];
-    pMesh->mTextureCoords[0] = new aiVector3D[ pMesh->mNumVertices ];
-    pMesh->mNumUVComponents[0] = 2;
-
-    // additional UVs
-    for( int i = 1; i <= pModel->setting.uv; i++ ) {
-        pMesh->mTextureCoords[i] = new aiVector3D[ pMesh->mNumVertices ];
-        pMesh->mNumUVComponents[i] = 4;
-    }
-
-    for( int index = 0; index < indexCount; index++ ) {
-        const pmx::PmxVertex *v = &pModel->vertices[pModel->indices[indexStart + index]];
-        const float* position = v->position;
-        pMesh->mVertices[index].Set(position[0], position[1], position[2]);
-        const float* normal = v->normal;
-        pMesh->mNormals[index].Set(normal[0], normal[1], normal[2]);
-        pMesh->mTextureCoords[0][index].x = v->uv[0];
-        pMesh->mTextureCoords[0][index].y = v->uv[1];
-        for( int i = 1; i <= pModel->setting.uv; i++ ) {
-            // TODO: wrong here? use quaternion transform?
-            pMesh->mTextureCoords[i][index].x = v->uva[i][0];
-            pMesh->mTextureCoords[i][index].y = v->uva[i][1];
-        }
-    }
-
-    return pMesh;
+  return pMesh;
 }
 
 // ------------------------------------------------------------------------------------------------
-aiMaterial* MMDImporter::CreateMaterial(const pmx::PmxMaterial* pMat, const pmx::PmxModel* pModel)
-{
-    aiMaterial *mat = new aiMaterial();
-    aiString name(pMat->material_english_name);
-    mat->AddProperty(&name, AI_MATKEY_NAME);
+aiMaterial *MMDImporter::CreateMaterial(const pmx::PmxMaterial *pMat,
+                                        const pmx::PmxModel *pModel) {
+  aiMaterial *mat = new aiMaterial();
+  aiString name(pMat->material_english_name);
+  mat->AddProperty(&name, AI_MATKEY_NAME);
 
-    aiColor3D diffuse(pMat->diffuse[0], pMat->diffuse[1], pMat->diffuse[2]);
-    mat->AddProperty(&diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-    aiColor3D specular(pMat->specular[0], pMat->specular[1], pMat->specular[2]);
-    mat->AddProperty(&specular, 1, AI_MATKEY_COLOR_SPECULAR);
-    aiColor3D ambient(pMat->ambient[0], pMat->ambient[1], pMat->ambient[2]);
-    mat->AddProperty(&ambient, 1, AI_MATKEY_COLOR_AMBIENT);
+  aiColor3D diffuse(pMat->diffuse[0], pMat->diffuse[1], pMat->diffuse[2]);
+  mat->AddProperty(&diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
+  aiColor3D specular(pMat->specular[0], pMat->specular[1], pMat->specular[2]);
+  mat->AddProperty(&specular, 1, AI_MATKEY_COLOR_SPECULAR);
+  aiColor3D ambient(pMat->ambient[0], pMat->ambient[1], pMat->ambient[2]);
+  mat->AddProperty(&ambient, 1, AI_MATKEY_COLOR_AMBIENT);
 
-    float opacity = pMat->diffuse[3];
-    mat->AddProperty(&opacity, 1, AI_MATKEY_OPACITY);
-    float shininess = pMat->specularlity;
-    mat->AddProperty(&shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
-    
-    aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
-    mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
-    int mapping_uvwsrc = 0;
-    mat->AddProperty(&mapping_uvwsrc, 1, AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, 0));
+  float opacity = pMat->diffuse[3];
+  mat->AddProperty(&opacity, 1, AI_MATKEY_OPACITY);
+  float shininess = pMat->specularlity;
+  mat->AddProperty(&shininess, 1, AI_MATKEY_SHININESS_STRENGTH);
 
-    return mat;
+  aiString texture_path(pModel->textures[pMat->diffuse_texture_index]);
+  mat->AddProperty(&texture_path, AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0));
+  int mapping_uvwsrc = 0;
+  mat->AddProperty(&mapping_uvwsrc, 1,
+                   AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, 0));
+
+  return mat;
 }
 
 // ------------------------------------------------------------------------------------------------
 
-}   // Namespace Assimp
+} // Namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_MMD_IMPORTER

@@ -3,7 +3,7 @@
 
 #include <assimp/LogStream.hpp>
 #include <assimp/IOStream.hpp>
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 
 namespace Assimp    {
 

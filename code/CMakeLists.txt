@@ -93,6 +93,8 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/NullLogger.hpp
   ${HEADER_PATH}/cexport.h
   ${HEADER_PATH}/Exporter.hpp
+  ${HEADER_PATH}/DefaultIOStream.h
+  ${HEADER_PATH}/DefaultIOSystem.h
 )
 
 SET( Core_SRCS
@@ -125,9 +127,7 @@ SET( Common_SRCS
   ByteSwapper.h
   DefaultProgressHandler.h
   DefaultIOStream.cpp
-  DefaultIOStream.h
   DefaultIOSystem.cpp
-  DefaultIOSystem.h
   CInterfaceIOWrapper.cpp
   CInterfaceIOWrapper.h
   Hash.h

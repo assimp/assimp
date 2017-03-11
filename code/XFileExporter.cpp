@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 #include <ctime>
 #include <set>
 #include <memory>

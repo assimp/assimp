@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "SkeletonMeshBuilder.h"
-#include "Defines.h"
 #include "CreateAnimMesh.h"
 
 #include "time.h"
@@ -62,7 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <cstdint>
 #include <numeric>
-#include "Defines.h"
+#include <assimp/Defines.h>
 
 
 using namespace Assimp;

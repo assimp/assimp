@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Bitmap.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
-#include "DefaultIOSystem.h"
 #include "StringUtils.h"
 #include "XMLTools.h"
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
 #include <assimp/scene.h>

@@ -44,14 +44,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exceptional.h"
 
-#include <string>
-#include <map>
 #include <vector>
 #include <set>
 #include <assimp/types.h>
 #include <assimp/ProgressHandler.hpp>
 
 struct aiScene;
+struct aiImporterDesc;
 
 namespace Assimp    {
 

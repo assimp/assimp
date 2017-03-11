@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <openddlparser/OpenDDLParser.h>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
+#include <assimp/importerdesc.h>
 
 #include <vector>
 

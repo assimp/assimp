@@ -69,7 +69,6 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <memory>
 
 namespace Assimp {
 

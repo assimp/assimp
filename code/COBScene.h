@@ -46,12 +46,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 #include <deque>
+#include <map>
 
 #include "BaseImporter.h"
-#include "./../include/assimp/material.h"
+#include <assimp/material.h>
 
-namespace Assimp    {
-    namespace COB {
+namespace Assimp {
+namespace COB {
 
 // ------------------
 /** Represents a single vertex index in a face */

@@ -51,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   include "../contrib/zlib/zlib.h"
 #endif
 
-
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
 #include "FBXUtil.h"

@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TinyFormatter.h"
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;

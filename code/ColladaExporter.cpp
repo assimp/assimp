@@ -38,12 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-#include "ColladaExporter.h"
 
+#include "ColladaExporter.h"
 #include "Bitmap.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"

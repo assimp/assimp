@@ -43,22 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "D3MFImporter.h"
 
 #include <assimp/scene.h>
-#include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 #include "StringComparison.h"
 #include "StringUtils.h"
 
 #include <string>
-#include <sstream>
 #include <vector>
 #include <map>
-#include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <memory>
-
-#include <assimp/ai_assert.h>
 
 #include "D3MFOpcPackage.h"
 #include <contrib/unzip/unzip.h>
@@ -311,8 +306,6 @@ private:
 private:
     std::vector<aiMesh*> meshes;
     XmlReader* xmlReader;
-
-
 };
 
 } //namespace D3MF

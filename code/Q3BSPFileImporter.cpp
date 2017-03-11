@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultIOSystem.h>
+#include <assimp/importerdesc.h>
 #include <vector>
 #include <sstream>
 #include "StringComparison.h"

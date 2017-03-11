@@ -54,10 +54,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
 #include <assimp/IOSystem.hpp>
+#include <assimp/importerdesc.h>
 #include <memory>
 #include <sstream>
 #include <iomanip>
-
+#include <map>
 
 using namespace Assimp;
 

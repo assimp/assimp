@@ -49,7 +49,6 @@
 #include "ColladaHelper.h"
 #include <assimp/ai_assert.h>
 #include "TinyFormatter.h"
-#include <memory>
 
 namespace Assimp
 {

@@ -91,6 +91,7 @@ static const std::string ObjModel =
     "\n"
     "# Point / Line / Face list\n"
     "\n"
+    "g Box01\n"    
     "usemtl Default\n"
     "f 4 3 2 1\n"
     "f 2 6 5 1\n"

@@ -115,8 +115,6 @@ const size_t MAXLEN = 1024;
 #   define MAXLEN 1024
 #endif
 
-#include "./Compiler/pushpack1.h"
-
 // ----------------------------------------------------------------------------------
 /** Represents a plane in a three-dimensional, euclidean space
 */
@@ -133,7 +131,7 @@ struct aiPlane
 
     //! Plane equation
     ai_real a,b,c,d;
-} PACK_STRUCT; // !struct aiPlane
+}; // !struct aiPlane
 
 // ----------------------------------------------------------------------------------
 /** Represents a ray
@@ -151,7 +149,7 @@ struct aiRay
 
     //! Position and direction of the ray
     C_STRUCT aiVector3D pos, dir;
-} PACK_STRUCT; // !struct aiRay
+}; // !struct aiRay
 
 // ----------------------------------------------------------------------------------
 /** Represents a color in Red-Green-Blue space.
@@ -227,8 +225,7 @@ struct aiColor3D
 
     //! Red, green and blue color values
     ai_real r, g, b;
-} /*PACK_STRUCT*/;  // !struct aiColor3D
-#include "./Compiler/poppack1.h"
+};  // !struct aiColor3D
 
 // ----------------------------------------------------------------------------------
 /** Represents an UTF-8 string, zero byte terminated.

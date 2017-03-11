@@ -40,12 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_STRINGUTILS_H
 #define INCLUDED_AI_STRINGUTILS_H
 
-#include <cstdarg>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sstream>
-#include <string>
+#include <stdarg.h>
 
 ///	@fn		ai_snprintf
 ///	@brief	The portable version of the function snprintf ( C99 standard ), which works on visual studio compilers 2013 and earlier.

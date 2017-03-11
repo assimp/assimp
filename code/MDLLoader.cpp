@@ -58,9 +58,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 
 #include <memory>
-
 
 using namespace Assimp;
 

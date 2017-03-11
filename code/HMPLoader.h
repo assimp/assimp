@@ -44,11 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_HMPLOADER_H_INCLUDED
 #define AI_HMPLOADER_H_INCLUDED
 
-// public ASSIMP headers
-#include <assimp/types.h>
-#include <assimp/texture.h>
-#include <assimp/material.h>
-
 // internal headers
 #include "BaseImporter.h"
 #include "MDLLoader.h"

@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/mesh.h>
 #include <assimp/anim.h>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 #ifdef ASSIMP_BUILD_NO_OWN_ZLIB
 #   include <zlib.h>

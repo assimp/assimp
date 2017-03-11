@@ -44,8 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include "ParsingUtils.h"
 
-#include <iostream>
-
 namespace Assimp {
 
 // ---------------------------------------------------------------------------

@@ -54,8 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/material.h>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 #include "Macros.h"
-
 
 using namespace Assimp;
 using namespace irr;

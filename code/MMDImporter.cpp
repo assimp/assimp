@@ -152,37 +152,29 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   std::cout << pScene->mRootNode->mName.C_Str() << std::endl;
   std::cout << pModel->index_count << std::endl;
 
-  /*
-    pNode = new aiNode;
-    pScene->mRootNode->addChildren(1, &pNode);
-    pNode->mName.Set(string(pModel->model_name) + string("_mesh"));
+  pNode = new aiNode;
+  pScene->mRootNode->addChildren(1, &pNode);
+  pNode->mName.Set(string(pModel->model_name) + string("_mesh"));
 
-    // split mesh by materials
-    pNode->mNumMeshes = pModel->material_count;
-    pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
-    for (unsigned int index = 0; index < pNode->mNumMeshes; index++) {
-      pNode->mMeshes[index] = index;
-    }
+  // split mesh by materials
+  pNode->mNumMeshes = pModel->material_count;
+  pNode->mMeshes = new unsigned int[pNode->mNumMeshes];
+  for (unsigned int index = 0; index < pNode->mNumMeshes; index++) {
+    pNode->mMeshes[index] = index;
+  }
 
-    pScene->mNumMeshes = pNode->mNumMeshes;
-    pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
-    for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
-      const int indexCount = pModel->materials[i].index_count;
+  pScene->mNumMeshes = pModel->material_count;
+  pScene->mMeshes = new aiMesh *[pScene->mNumMeshes];
+  for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
+    const int indexCount = pModel->materials[i].index_count;
 
-      std::cout << pModel->materials[i].material_name << std::endl;
-      std::cout << indexStart << " " << indexCount << std::endl;
+    std::cout << pModel->materials[i].material_name << std::endl;
+    std::cout << indexStart << " " << indexCount << std::endl;
 
-      pScene->mMeshes[i] = CreateMesh(pModel, indexStart, indexCount);
-      pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
-      pScene->mMeshes[i]->mMaterialIndex = i;
-      indexStart += indexCount;
-    }
-    */
-
-  // create bones
-  aiBone *pBone = new aiBone[pModel->bone_count];
-  for (auto i = 0; i < pModel->bone_count; i++) {
-    pBone[i].mName = pModel->bones[i].bone_name;
+    pScene->mMeshes[i] = CreateMesh(pModel, indexStart, indexCount);
+    pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
+    pScene->mMeshes[i]->mMaterialIndex = i;
+    indexStart += indexCount;
   }
 
   // create node hierarchy for bone position
@@ -197,6 +189,7 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     std::cout << "Bone " << i << ":" << std::endl;
     std::cout << bone.bone_name << std::endl;
     std::cout << bone.bone_english_name << std::endl;
+    /**/
     std::cout << "position " << bone.position[0] << " " << bone.position[1]
               << " " << bone.position[2] << std::endl;
     std::cout << "parent_index " << bone.parent_index << std::endl;
@@ -205,6 +198,7 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
     std::cout << "offset " << bone.offset[0] << " " << bone.offset[1] << " "
               << bone.offset[2] << std::endl;
     std::cout << "target_index" << bone.target_index << std::endl;
+    /**/
 
     if (bone.parent_index < 0) {
       pScene->mRootNode->addChildren(1, ppNode + i);
@@ -217,58 +211,18 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
           bone.position[1] - pModel->bones[bone.parent_index].position[1],
           bone.position[2] - pModel->bones[bone.parent_index].position[2]);
       aiMatrix4x4::Translation(v3, ppNode[i]->mTransformation);
-      std::cout << ppNode[i]->mTransformation.a1 << ' '
-                << ppNode[i]->mTransformation.a2 << ' '
-                << ppNode[i]->mTransformation.a3 << ' '
-                << ppNode[i]->mTransformation.a4 << ' '
-                << ppNode[i]->mTransformation.b1 << ' '
-                << ppNode[i]->mTransformation.b2 << ' '
-                << ppNode[i]->mTransformation.b3 << ' '
-                << ppNode[i]->mTransformation.b4 << ' '
-                << ppNode[i]->mTransformation.c1 << ' '
-                << ppNode[i]->mTransformation.c2 << ' '
-                << ppNode[i]->mTransformation.c3 << ' '
-                << ppNode[i]->mTransformation.c4 << ' '
-                << ppNode[i]->mTransformation.d1 << ' '
-                << ppNode[i]->mTransformation.d2 << ' '
-                << ppNode[i]->mTransformation.d3 << ' '
-                << ppNode[i]->mTransformation.d4 << ' ' << std::endl;
     }
   }
 
   // use SkeletonMeshBuilder to generate bone vertices
-  SkeletonMeshBuilder dummyMeshbuild(pScene, ppNode[bone_root_index]);
+  // SkeletonMeshBuilder dummyMeshbuild(pScene, ppNode[bone_root_index]);
 
-  // create textures, may be dummy?
-  /*
-  pScene->mNumTextures = pModel->texture_count;
-  pScene->mTextures = new aiTexture*[pScene->mNumTextures];
-  for( unsigned int i = 0; i < pScene->mNumTextures; ++i) {
-      aiTexture *tex = new aiTexture;
-      pScene->mTextures[i] = tex;
-      strcpy(tex->achFormatHint, "png");
-      tex->mHeight = 0;
-      ifstream file(pModel->textures[i], ios::binary | ios::ate);
-      streamsize size = file.tellg();
-      file.seekg(0, ios::beg);
-      char *buffer = new char[size];
-      file.read(buffer, size);
-      if(file.bad()) {
-          string err("PMX: Can't open texture file");
-          err.append(pModel->textures[i]);
-          throw DeadlyExportError(err);
-      }
-      tex->pcData = (aiTexel*)buffer;
+  // create materials
+  pScene->mNumMaterials = pModel->material_count;
+  pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
+  for (unsigned int i = 0; i < pScene->mNumMaterials; i++) {
+    pScene->mMaterials[i] = CreateMaterial(&pModel->materials[i], pModel);
   }
-  */
-
-  /*
-    // create materials
-    pScene->mNumMaterials = pModel->material_count;
-    pScene->mMaterials = new aiMaterial *[pScene->mNumMaterials];
-    for (unsigned int i = 0; i < pScene->mNumMaterials; i++) {
-      pScene->mMaterials[i] = CreateMaterial(&pModel->materials[i], pModel);
-    }
 
   // Convert everything to OpenGL space
   MakeLeftHandedProcess convertProcess;
@@ -279,7 +233,6 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
 
   FlipWindingOrderProcess windingFlipper;
   windingFlipper.Execute(pScene);
-    */
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -292,8 +245,8 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
   pMesh->mNumFaces = indexCount / 3;
   pMesh->mFaces = new aiFace[pMesh->mNumFaces];
 
+  const int numIndices = 3; // trianglular face
   for (unsigned int index = 0; index < pMesh->mNumFaces; index++) {
-    const int numIndices = 3; // trianglular face
     pMesh->mFaces[index].mNumIndices = numIndices;
     unsigned int *indices = new unsigned int[numIndices];
     indices[0] = numIndices * index;
@@ -313,20 +266,94 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
     pMesh->mNumUVComponents[i] = 4;
   }
 
+  map<int, vector<aiVertexWeight>> bone_vertex_map;
+
+  // fill in contents and create bones
   for (int index = 0; index < indexCount; index++) {
     const pmx::PmxVertex *v =
         &pModel->vertices[pModel->indices[indexStart + index]];
     const float *position = v->position;
     pMesh->mVertices[index].Set(position[0], position[1], position[2]);
     const float *normal = v->normal;
+
     pMesh->mNormals[index].Set(normal[0], normal[1], normal[2]);
     pMesh->mTextureCoords[0][index].x = v->uv[0];
     pMesh->mTextureCoords[0][index].y = v->uv[1];
+
     for (int i = 1; i <= pModel->setting.uv; i++) {
       // TODO: wrong here? use quaternion transform?
       pMesh->mTextureCoords[i][index].x = v->uva[i][0];
       pMesh->mTextureCoords[i][index].y = v->uva[i][1];
     }
+
+    // handle bone map
+    const auto vsBDEF1_ptr =
+        dynamic_cast<pmx::PmxVertexSkinningBDEF1 *>(v->skinning.get());
+    const auto vsBDEF2_ptr =
+        dynamic_cast<pmx::PmxVertexSkinningBDEF2 *>(v->skinning.get());
+    const auto vsBDEF4_ptr =
+        dynamic_cast<pmx::PmxVertexSkinningBDEF4 *>(v->skinning.get());
+    const auto vsSDEF_ptr =
+        dynamic_cast<pmx::PmxVertexSkinningSDEF *>(v->skinning.get());
+    switch (v->skinning_type) {
+    case pmx::PmxVertexSkinningType::BDEF1:
+      bone_vertex_map[vsBDEF1_ptr->bone_index].push_back(
+          aiVertexWeight(index, 1.0));
+      break;
+    case pmx::PmxVertexSkinningType::BDEF2:
+      bone_vertex_map[vsBDEF2_ptr->bone_index1].push_back(
+          aiVertexWeight(index, vsBDEF2_ptr->bone_weight));
+      bone_vertex_map[vsBDEF2_ptr->bone_index2].push_back(
+          aiVertexWeight(index, 1.0 - vsBDEF2_ptr->bone_weight));
+      break;
+    case pmx::PmxVertexSkinningType::BDEF4:
+      bone_vertex_map[vsBDEF4_ptr->bone_index1].push_back(
+          aiVertexWeight(index, vsBDEF4_ptr->bone_weight1));
+      bone_vertex_map[vsBDEF4_ptr->bone_index2].push_back(
+          aiVertexWeight(index, vsBDEF4_ptr->bone_weight2));
+      bone_vertex_map[vsBDEF4_ptr->bone_index3].push_back(
+          aiVertexWeight(index, vsBDEF4_ptr->bone_weight3));
+      bone_vertex_map[vsBDEF4_ptr->bone_index4].push_back(
+          aiVertexWeight(index, vsBDEF4_ptr->bone_weight4));
+      break;
+    case pmx::PmxVertexSkinningType::SDEF: // TODO: how to use sdef_c, sdef_r0,
+                                           // sdef_r1?
+      bone_vertex_map[vsSDEF_ptr->bone_index1].push_back(
+          aiVertexWeight(index, vsSDEF_ptr->bone_weight));
+      bone_vertex_map[vsSDEF_ptr->bone_index2].push_back(
+          aiVertexWeight(index, 1.0 - vsSDEF_ptr->bone_weight));
+      break;
+    case pmx::PmxVertexSkinningType::QDEF:
+      const auto vsQDEF_ptr =
+          dynamic_cast<pmx::PmxVertexSkinningQDEF *>(v->skinning.get());
+      bone_vertex_map[vsQDEF_ptr->bone_index1].push_back(
+          aiVertexWeight(index, vsQDEF_ptr->bone_weight1));
+      bone_vertex_map[vsQDEF_ptr->bone_index2].push_back(
+          aiVertexWeight(index, vsQDEF_ptr->bone_weight2));
+      bone_vertex_map[vsQDEF_ptr->bone_index3].push_back(
+          aiVertexWeight(index, vsQDEF_ptr->bone_weight3));
+      bone_vertex_map[vsQDEF_ptr->bone_index4].push_back(
+          aiVertexWeight(index, vsQDEF_ptr->bone_weight4));
+      break;
+    }
+  }
+
+  auto bone_ptr_ptr = new aiBone *[bone_vertex_map.size()];
+  pMesh->mNumBones = bone_vertex_map.size();
+  pMesh->mBones = bone_ptr_ptr;
+  int bone_new_index = 0;
+  for (auto it = bone_vertex_map.begin(); it != bone_vertex_map.end(); ++it) {
+    auto pBone = new aiBone;
+    const auto &pmxBone = pModel->bones[it->first];
+    pBone->mName = pmxBone.bone_name;
+    pBone->mOffsetMatrix = aiMatrix4x4();
+    pBone->mNumWeights = it->second.size();
+    pBone->mWeights = new aiVertexWeight[pBone->mNumWeights];
+    pBone->mWeights = it->second.data();
+    (new vector<aiVertexWeight>())->swap(it->second);
+    // copy(it->second.begin(), it->second.end(), pBone->mWeights);
+    bone_ptr_ptr[bone_new_index] = pBone;
+    bone_new_index++;
   }
 
   return pMesh;

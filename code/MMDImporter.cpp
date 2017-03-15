@@ -149,8 +149,6 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   }
 
   pScene->mRootNode = pNode;
-  std::cout << pScene->mRootNode->mName.C_Str() << std::endl;
-  std::cout << pModel->index_count << std::endl;
 
   pNode = new aiNode;
   pScene->mRootNode->addChildren(1, &pNode);
@@ -168,9 +166,6 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   for (unsigned int i = 0, indexStart = 0; i < pScene->mNumMeshes; i++) {
     const int indexCount = pModel->materials[i].index_count;
 
-    std::cout << pModel->materials[i].material_name << std::endl;
-    std::cout << indexStart << " " << indexCount << std::endl;
-
     pScene->mMeshes[i] = CreateMesh(pModel, indexStart, indexCount);
     pScene->mMeshes[i]->mName = pModel->materials[i].material_name;
     pScene->mMeshes[i]->mMaterialIndex = i;
@@ -178,7 +173,6 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
   }
 
   // create node hierarchy for bone position
-  auto bone_root_index = 0; // Default root: Bone 0 "Body" / "全ての親"
   aiNode **ppNode = new aiNode *[pModel->bone_count];
   for (auto i = 0; i < pModel->bone_count; i++) {
     ppNode[i] = new aiNode(pModel->bones[i].bone_name);
@@ -186,23 +180,9 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
 
   for (auto i = 0; i < pModel->bone_count; i++) {
     const pmx::PmxBone &bone = pModel->bones[i];
-    std::cout << "Bone " << i << ":" << std::endl;
-    std::cout << bone.bone_name << std::endl;
-    std::cout << bone.bone_english_name << std::endl;
-    /**/
-    std::cout << "position " << bone.position[0] << " " << bone.position[1]
-              << " " << bone.position[2] << std::endl;
-    std::cout << "parent_index " << bone.parent_index << std::endl;
-    std::cout << "level " << bone.level << std::endl;
-    std::cout << "bone_flag " << bone.bone_flag << std::endl;
-    std::cout << "offset " << bone.offset[0] << " " << bone.offset[1] << " "
-              << bone.offset[2] << std::endl;
-    std::cout << "target_index" << bone.target_index << std::endl;
-    /**/
 
     if (bone.parent_index < 0) {
       pScene->mRootNode->addChildren(1, ppNode + i);
-      bone_root_index = i;
     } else {
       ppNode[bone.parent_index]->addChildren(1, ppNode + i);
 
@@ -213,9 +193,6 @@ void MMDImporter::CreateDataFromImport(const pmx::PmxModel *pModel,
       aiMatrix4x4::Translation(v3, ppNode[i]->mTransformation);
     }
   }
-
-  // use SkeletonMeshBuilder to generate bone vertices
-  // SkeletonMeshBuilder dummyMeshbuild(pScene, ppNode[bone_root_index]);
 
   // create materials
   pScene->mNumMaterials = pModel->material_count;
@@ -338,22 +315,23 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
     }
   }
 
-  auto bone_ptr_ptr = new aiBone *[bone_vertex_map.size()];
-  pMesh->mNumBones = bone_vertex_map.size();
+  // make all bones for each mesh
+  // assign bone weights to skinned bones (otherwise just initialize)
+  auto bone_ptr_ptr = new aiBone *[pModel->bone_count];
+  pMesh->mNumBones = pModel->bone_count;
   pMesh->mBones = bone_ptr_ptr;
-  int bone_new_index = 0;
-  for (auto it = bone_vertex_map.begin(); it != bone_vertex_map.end(); ++it) {
+  for (auto ii = 0; ii < pModel->bone_count; ++ii) {
     auto pBone = new aiBone;
-    const auto &pmxBone = pModel->bones[it->first];
+    const auto &pmxBone = pModel->bones[ii];
     pBone->mName = pmxBone.bone_name;
     pBone->mOffsetMatrix = aiMatrix4x4();
-    pBone->mNumWeights = it->second.size();
-    pBone->mWeights = new aiVertexWeight[pBone->mNumWeights];
-    pBone->mWeights = it->second.data();
-    (new vector<aiVertexWeight>())->swap(it->second);
-    // copy(it->second.begin(), it->second.end(), pBone->mWeights);
-    bone_ptr_ptr[bone_new_index] = pBone;
-    bone_new_index++;
+    auto it = bone_vertex_map.find(ii);
+    if (it != bone_vertex_map.end()) {
+      pBone->mNumWeights = it->second.size();
+      pBone->mWeights = it->second.data();
+      it->second.swap(*(new vector<aiVertexWeight>));
+    }
+    bone_ptr_ptr[ii] = pBone;
   }
 
   return pMesh;

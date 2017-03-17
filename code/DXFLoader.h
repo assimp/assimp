@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_DXFLOADER_H_INCLUDED
 
 #include "BaseImporter.h"
+#include <map>
 
 namespace Assimp    {
     namespace DXF {

@@ -112,6 +112,8 @@ public:
     // matrix multiplication.
     aiMatrix4x4t& operator *= (const aiMatrix4x4t& m);
     aiMatrix4x4t  operator *  (const aiMatrix4x4t& m) const;
+    aiMatrix4x4t operator * (const TReal& aFloat) const;
+    aiMatrix4x4t operator + (const aiMatrix4x4t& aMatrix) const;
 
     template <typename TOther>
     operator aiMatrix4x4t<TOther> () const;

@@ -56,7 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/anim.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 using namespace std;

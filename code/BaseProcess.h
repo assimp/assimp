@@ -43,8 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BASEPROCESS_H
 
 #include <map>
-
-#include <assimp/types.h>
 #include "GenericProperty.h"
 
 struct aiScene;

@@ -110,6 +110,7 @@ public:
             , useCustomTriangulation()
             , skipAnnotations()
             , conicSamplingAngle(10.f)
+			, cylindricalTessellation(32)
         {}
 
 
@@ -117,6 +118,7 @@ public:
         bool useCustomTriangulation;
         bool skipAnnotations;
         float conicSamplingAngle;
+		int cylindricalTessellation;
     };
 
 

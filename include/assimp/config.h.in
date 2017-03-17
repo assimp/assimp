@@ -877,18 +877,35 @@ enum aiComponent
 #define AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION "IMPORT_IFC_CUSTOM_TRIANGULATION"
 
 // ---------------------------------------------------------------------------
-/** @brief  Set the tessellation conic angle for IFC curves.
+/** @brief  Set the tessellation conic angle for IFC smoothing curves.
  *
  * This is used by the IFC importer to determine the tessellation parameter
- * for curves.
- * @note The default value is AI_IMPORT_IFC_DEFAULT_CONIC_SAMPLING_ANGLE
- * Property type: float.
+ * for smoothing curves.
+ * @note The default value is AI_IMPORT_IFC_DEFAULT_SMOOTHING_ANGLE and the
+ * accepted values are in range [5.0, 120.0].
+ * Property type: Float.
  */
-#define AI_CONFIG_IMPORT_IFC_CONIC_SAMPLING_ANGLE "IMPORT_IFC_CONIC_SAMPLING_ANGLE"
+#define AI_CONFIG_IMPORT_IFC_SMOOTHING_ANGLE "IMPORT_IFC_SMOOTHING_ANGLE"
 
-// default value for AI_CONFIG_IMPORT_IFC_CONIC_SAMPLING_ANGLE
-#if (!defined AI_IMPORT_IFC_DEFAULT_CONIC_SAMPLING_ANGLE)
-#   define AI_IMPORT_IFC_DEFAULT_CONIC_SAMPLING_ANGLE 10.0f
+// default value for AI_CONFIG_IMPORT_IFC_SMOOTHING_ANGLE
+#if (!defined AI_IMPORT_IFC_DEFAULT_SMOOTHING_ANGLE)
+#   define AI_IMPORT_IFC_DEFAULT_SMOOTHING_ANGLE 10.0f
+#endif
+
+// ---------------------------------------------------------------------------
+/** @brief  Set the tessellation for IFC cylindrical shapes.
+ *
+ * This is used by the IFC importer to determine the tessellation parameter
+ * for cylindrical shapes, i.e. the number of segments used to aproximate a circle.
+ * @note The default value is AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION and the
+ * accepted values are in range [3, 180].
+ * Property type: Integer.
+ */
+#define AI_CONFIG_IMPORT_IFC_CYLINDRICAL_TESSELLATION "IMPORT_IFC_CYLINDRICAL_TESSELLATION"
+
+// default value for AI_CONFIG_IMPORT_IFC_CYLINDRICAL_TESSELLATION
+#if (!defined AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION)
+#   define AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION 32
 #endif
 
 // ---------------------------------------------------------------------------

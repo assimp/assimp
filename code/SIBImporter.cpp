@@ -437,9 +437,9 @@ static aiVector3D CalculateVertexNormal(SIBMesh* mesh, uint32_t faceIdx, uint32_
 
                     // Move to whichever side we didn't just come from.
                     if (!edge.creased) {
-                        if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx)
+                        if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx && edge.faceA != 0xffffffff)
                             nextFaceIdx = edge.faceA;
-                        else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx)
+                        else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx && edge.faceB != 0xffffffff)
                             nextFaceIdx = edge.faceB;
                     }
                 }

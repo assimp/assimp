@@ -101,6 +101,12 @@ protected:
     void WriteSpotLight(const aiLight *const light);
     void WriteAmbienttLight(const aiLight *const light);
 
+    /// Writes the controller library
+    void WriteControllerLibrary();
+
+    /// Writes a skin controller of the given mesh
+    void WriteController( size_t pIndex);
+
     /// Writes the geometry library
     void WriteGeometryLibrary();
 

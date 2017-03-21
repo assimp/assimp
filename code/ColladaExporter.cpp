@@ -133,6 +133,7 @@ void ColladaExporter::WriteFile()
     WriteLightsLibrary();
     WriteMaterials();
     WriteGeometryLibrary();
+    WriteControllerLibrary();
 
     WriteSceneLibrary();
 
@@ -785,6 +786,85 @@ void ColladaExporter::WriteMaterials()
     PopTag();
     mOutput << startstr << "</library_materials>" << endstr;
   }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Writes the controller library
+void ColladaExporter::WriteControllerLibrary()
+{
+    mOutput << startstr << "<library_controllers>" << endstr;
+    PushTag();
+    
+    for( size_t a = 0; a < mScene->mNumMeshes; ++a)
+        WriteController( a);
+
+    PopTag();
+    mOutput << startstr << "</library_controllers>" << endstr;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Writes a skin controller of the given mesh
+void WriteController( size_t pIndex)
+{
+    const aiMesh* mesh = mScene->mMeshes[pIndex];
+    const std::string idstr = GetMeshId( pIndex);
+    const std::string idstrEscaped = XMLEscape(idstr);
+
+    if ( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+        return;
+
+    if ( mesh->mNumBones == 0 )
+        return;
+
+    mOutput << startstr << "<controller id=\"" << idstrEscaped << "-skin\" ";
+    mOutput << "name=\"skinCluster" << pIndex << "\">"<< endstr;
+    PushTag();
+
+    mOutput << startstr << "<skin source=\"#" << idstrEscaped \">" << endstr;
+    PushTag();
+
+    // bind pose matrix
+    mOutput << startstr << "<bind_shape_matrix>" << endstr;
+    PushTag();
+
+    // I think it is identity in general cases.
+    aiMatrix4x4 mat();
+    mOutput << startstr;
+    mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4;
+    mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4;
+    mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4;
+    mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
+    mOutput << endstr;
+
+    PopTag();
+    mOutput << startstr << "</bind_shape_matrix>" << endstr;
+
+    mOutput << startstr << "<Name_array id=\"" << idstrEscaped << "-skin-joints-array\" " << "count=\"" << mesh->mNumBones << "\">";
+
+    for( size_t i = 0; i < mesh->mNumBones; ++i )
+        mOutput << XMLEscape(mesh->mBones[i].mName) << " ";
+
+    mOutput << "</Name_array>" << endstr;
+
+    mOutput << startstr << "<technique_common>" << endstr;
+    PushTag();
+    
+    mOutput << startstr << "<accessor source=\"#" << idstrEscaped << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\" stride=\"" << 1 << "\">";
+    PushTag();
+
+    mOutput << startstr << "param name=\"JOINT\" type=\"Name\"></param>" << endstr;
+
+    PopTag();
+    mOutput << "</accessor>" << endstr;
+
+    PopTag();
+    mOutput << startstr << "</technique_common>" << endstr;
+
+    PopTag();
+    mOutput << startstr << "</skin>" << endstr;
+    
+    PopTag();
+    mOutput << startstr << "</controller>" << endstr;
 }
 
 // ------------------------------------------------------------------------------------------------

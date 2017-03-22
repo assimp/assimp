@@ -59,6 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <ctime>
 #include <set>
+#include <vector>
+#include <iostream>
 
 using namespace Assimp;
 
@@ -829,17 +831,18 @@ void ColladaExporter::WriteController( size_t pIndex)
 
     // I think it is identity in general cases.
     aiMatrix4x4 mat;
-    mOutput << startstr;
-    mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4;
-    mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4;
-    mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4;
-    mOutput << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4;
-    mOutput << endstr;
+    mOutput << startstr << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << endstr;
+    mOutput << startstr << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << endstr;
+    mOutput << startstr << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << endstr;
+    mOutput << startstr << mat.d1 << " " << mat.d2 << " " << mat.d3 << " " << mat.d4 << endstr;
 
     PopTag();
     mOutput << startstr << "</bind_shape_matrix>" << endstr;
 
-    mOutput << startstr << "<Name_array id=\"" << idstrEscaped << "-skin-joints-array\" " << "count=\"" << mesh->mNumBones << "\">";
+    mOutput << startstr << "<source id=\"" << idstrEscaped << "-skin-joints\" name=\"" << idstrEscaped << "-skin-joints\">" << endstr;
+    PushTag();
+
+    mOutput << startstr << "<Name_array id=\"" << idstrEscaped << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\">";
 
     for( size_t i = 0; i < mesh->mNumBones; ++i )
         mOutput << XMLEscape(mesh->mBones[i]->mName.C_Str()) << " ";
@@ -849,25 +852,107 @@ void ColladaExporter::WriteController( size_t pIndex)
     mOutput << startstr << "<technique_common>" << endstr;
     PushTag();
     
-    mOutput << startstr << "<accessor source=\"#" << idstrEscaped << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\" stride=\"" << 1 << "\">";
+    mOutput << startstr << "<accessor source=\"#" << idstrEscaped << "-skin-joints-array\" count=\"" << mesh->mNumBones << "\" stride=\"" << 1 << "\">" << endstr;
     PushTag();
 
-    mOutput << startstr << "param name=\"JOINT\" type=\"Name\"></param>" << endstr;
+    mOutput << startstr << "<param name=\"JOINT\" type=\"Name\"></param>" << endstr;
 
     PopTag();
-    mOutput << "</accessor>" << endstr;
+    mOutput << startstr << "</accessor>" << endstr;
 
     PopTag();
     mOutput << startstr << "</technique_common>" << endstr;
 
+    PopTag();
+    mOutput << startstr << "</source>" << endstr;
+
     std::vector<ai_real> bind_poses;
     bind_poses.reserve(mesh->mNumBones * 16);
-    for( size_t i = 0; i< mesh->mNumBones; ++i)
+    for( size_t i = 0; i < mesh->mNumBones; ++i)
         for( size_t j = 0; j < 4; ++j)
-            bind_poses.insert(bind_poses.end(), mesh->mBones[i]->mOffsetMatrix[0], mesh->mBones[i]->mOffsetMatrix[0] + 4);
+            bind_poses.insert(bind_poses.end(), mesh->mBones[i]->mOffsetMatrix[j], mesh->mBones[i]->mOffsetMatrix[j] + 4);
 
-    WriteFloatArray( idstr + "-skin-bind_poses", FloatType_Mat4x4, (const ai_real*) bind_poses.data(), bind_poses.size());
-   
+    WriteFloatArray( idstr + "-skin-bind_poses", FloatType_Mat4x4, (const ai_real*) bind_poses.data(), bind_poses.size() / 16);
+
+    bind_poses.clear();
+    
+    std::vector<ai_real> skin_weights;
+    skin_weights.reserve(mesh->mNumVertices * mesh->mNumBones);
+    for( size_t i = 0; i < mesh->mNumBones; ++i)
+        for( size_t j = 0; j < mesh->mBones[i]->mNumWeights; ++j)
+            skin_weights.push_back(mesh->mBones[i]->mWeights[j].mWeight);
+
+    WriteFloatArray( idstr + "-skin-weights", FloatType_Weight, (const ai_real*) skin_weights.data(), skin_weights.size());
+
+    skin_weights.clear();
+
+    mOutput << startstr << "<joints>" << endstr;
+    PushTag();
+
+    mOutput << startstr << "<input semantic=\"JOINT\" source=\"#" << idstrEscaped << "-skin-joints\"></input>" << endstr;
+    mOutput << startstr << "<input semantic=\"INV_BIND_MATRIX\" source=\"#" << idstrEscaped << "-skin-bind_poses\"></input>" << endstr;
+
+    PopTag();
+    mOutput << startstr << "</joints>" << endstr;
+
+    mOutput << startstr << "<vertex_weights count=\"" << mesh->mNumVertices << "\">" << endstr;
+    PushTag();
+
+    mOutput << startstr << "<input semantic=\"JOINT\" source=\"#" << idstrEscaped << "-skin-joints\" offset=\"0\"></input>" << endstr;
+    mOutput << startstr << "<input semantic=\"WEIGHT\" source=\"#" << idstrEscaped << "-skin-weights\" offset=\"1\"></input>" << endstr;
+
+    mOutput << startstr << "<vcount>";
+
+    std::vector<ai_uint> num_influences(mesh->mNumVertices, (ai_uint)0);
+    for( size_t i = 0; i < mesh->mNumBones; ++i)
+        for( size_t j = 0; j < mesh->mBones[i]->mNumWeights; ++j)
+            ++num_influences[mesh->mBones[i]->mWeights[j].mVertexId];
+
+    for( size_t i = 0; i < mesh->mNumVertices; ++i)
+        mOutput << num_influences[i] << " ";
+
+    mOutput << "</vcount>" << endstr;
+
+    mOutput << startstr << "<v>";
+
+    ai_uint joint_weight_indices_length = 0;
+    std::vector<ai_uint> accum_influences;
+    accum_influences.reserve(num_influences.size());
+    for( size_t i = 0; i < num_influences.size(); ++i)
+    {
+        accum_influences.push_back(joint_weight_indices_length);
+        joint_weight_indices_length += num_influences[i];
+    }
+
+    ai_uint weight_index = 0;
+    std::vector<ai_int> joint_weight_indices(2 * joint_weight_indices_length, (ai_int)-1);
+    for( size_t i = 0; i < mesh->mNumBones; ++i)
+        for( size_t j = 0; j < mesh->mBones[i]->mNumWeights; ++j)
+        {
+            unsigned int vId = mesh->mBones[i]->mWeights[j].mVertexId;
+            for( size_t k = 0; k < num_influences[vId]; ++k)
+            {
+                if (joint_weight_indices[2 * (accum_influences[vId] + k)] == -1)
+                {
+                    joint_weight_indices[2 * (accum_influences[vId] + k)] = i;
+                    joint_weight_indices[2 * (accum_influences[vId] + k) + 1] = weight_index;
+                    break;
+                }
+            }
+            ++weight_index;
+        }
+
+    for( size_t i = 0; i < joint_weight_indices.size(); ++i)
+        mOutput << joint_weight_indices[i] << " ";
+
+    num_influences.clear();
+    accum_influences.clear();
+    joint_weight_indices.clear();
+
+    mOutput << "</v>" << endstr;
+
+    PopTag();
+    mOutput << startstr << "</vertex_weights>" << endstr;
 
     PopTag();
     mOutput << startstr << "</skin>" << endstr;

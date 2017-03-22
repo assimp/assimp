@@ -86,7 +86,7 @@ public:
     IOSystem* pIOHandler
     );
   void ReadBinaryScene( IOStream * stream, aiScene* pScene );
-  void ReadBinaryNode( IOStream * stream, aiNode** mRootNode );
+  void ReadBinaryNode( IOStream * stream, aiNode** mRootNode, aiNode* parent );
   void ReadBinaryMesh( IOStream * stream, aiMesh* mesh );
   void ReadBinaryBone( IOStream * stream, aiBone* bone );
   void ReadBinaryMaterial(IOStream * stream, aiMaterial* mat);

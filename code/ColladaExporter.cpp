@@ -804,7 +804,7 @@ void ColladaExporter::WriteControllerLibrary()
 
 // ------------------------------------------------------------------------------------------------
 // Writes a skin controller of the given mesh
-void WriteController( size_t pIndex)
+void ColladaExporter::WriteController( size_t pIndex)
 {
     const aiMesh* mesh = mScene->mMeshes[pIndex];
     const std::string idstr = GetMeshId( pIndex);
@@ -820,7 +820,7 @@ void WriteController( size_t pIndex)
     mOutput << "name=\"skinCluster" << pIndex << "\">"<< endstr;
     PushTag();
 
-    mOutput << startstr << "<skin source=\"#" << idstrEscaped \">" << endstr;
+    mOutput << startstr << "<skin source=\"#" << idstrEscaped << "\">" << endstr;
     PushTag();
 
     // bind pose matrix
@@ -828,7 +828,7 @@ void WriteController( size_t pIndex)
     PushTag();
 
     // I think it is identity in general cases.
-    aiMatrix4x4 mat();
+    aiMatrix4x4 mat;
     mOutput << startstr;
     mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4;
     mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4;
@@ -842,7 +842,7 @@ void WriteController( size_t pIndex)
     mOutput << startstr << "<Name_array id=\"" << idstrEscaped << "-skin-joints-array\" " << "count=\"" << mesh->mNumBones << "\">";
 
     for( size_t i = 0; i < mesh->mNumBones; ++i )
-        mOutput << XMLEscape(mesh->mBones[i].mName) << " ";
+        mOutput << XMLEscape(mesh->mBones[i]->mName.C_Str()) << " ";
 
     mOutput << "</Name_array>" << endstr;
 

@@ -860,6 +860,15 @@ void WriteController( size_t pIndex)
     PopTag();
     mOutput << startstr << "</technique_common>" << endstr;
 
+    std::vector<ai_real> bind_poses;
+    bind_poses.reserve(mesh->mNumBones * 16);
+    for( size_t i = 0; i< mesh->mNumBones; ++i)
+        for( size_t j = 0; j < 4; ++j)
+            bind_poses.insert(bind_poses.end(), mesh->mBones[i]->mOffsetMatrix[0], mesh->mBones[i]->mOffsetMatrix[0] + 4);
+
+    WriteFloatArray( idstr + "-skin-bind_poses", FloatType_Mat4x4, (const ai_real*) bind_poses.data(), bind_poses.size());
+   
+
     PopTag();
     mOutput << startstr << "</skin>" << endstr;
     
@@ -1031,6 +1040,8 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
         case FloatType_TexCoord2: floatsPerElement = 2; break;
         case FloatType_TexCoord3: floatsPerElement = 3; break;
         case FloatType_Color: floatsPerElement = 3; break;
+        case FloatType_Mat4x4: floatsPerElement = 16; break;
+        case FloatType_Weight: floatsPerElement = 1; break;
         default:
             return;
     }
@@ -1098,6 +1109,14 @@ void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataTy
             mOutput << startstr << "<param name=\"R\" type=\"float\" />" << endstr;
             mOutput << startstr << "<param name=\"G\" type=\"float\" />" << endstr;
             mOutput << startstr << "<param name=\"B\" type=\"float\" />" << endstr;
+            break;
+
+        case FloatType_Mat4x4:
+            mOutput << startstr << "<param name=\"TRANSFORM\" type=\"float4x4\" />" << endstr;
+            break;
+
+        case FloatType_Weight:
+            mOutput << startstr << "<param name=\"WEIGHT\" type=\"float\" />" << endstr;
             break;
     }
 

@@ -1022,7 +1022,7 @@ void ColladaExporter::WriteJointsTag(const size_t pIndex){
 
 void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
     typedef std::pair<unsigned int,unsigned int> vertexBoneWeightLocationMapElement_t;
-    typedef std::map<unsigned int,vertexBoneWeightLocationMapElement_t > vertexBoneWeightLocationMap_t;
+    typedef std::multimap<unsigned int,vertexBoneWeightLocationMapElement_t > vertexBoneWeightLocationMap_t;
 
     const aiMesh *const mesh = mScene->mMeshes[pIndex];
 	const std::string meshName = XMLEscape(GetMeshId(pIndex));
@@ -1048,7 +1048,7 @@ void ColladaExporter::WriteJointsVertexWeight(const size_t pIndex){
 		for(unsigned int j=0; j<nWeight;j++){
             const unsigned int id( weights[j].mVertexId );
             vertexBoneWeightLocationMapElement_t element( i,globalWeightIndex++ );
-            vertexBoneWeightLocation[ id ] = element;
+            vertexBoneWeightLocation.insert({id,element});
 		}//for weight
 	}//for bones
 
@@ -1308,12 +1308,12 @@ int getDepthOfBone(const aiNode* node, int depth)
 const aiNode* ColladaExporter::getRootOfController(const aiMesh* mesh)
 {
     aiNode* root = mScene->mRootNode;
-    std::map<int, aiNode*> controllerBones;
+    std::multimap<int, aiNode*> controllerBones;
     for (unsigned int i = 0; i < mesh->mNumBones; ++i)
     {
         aiNode* boneNode = root->FindNode(mesh->mBones[i]->mName);
         int d = getDepthOfBone(boneNode, 0);
-        controllerBones[d] = boneNode;
+        controllerBones.insert({d,boneNode});
     }
     return controllerBones.begin()->second;
 }

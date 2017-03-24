@@ -1224,43 +1224,13 @@ void ColladaExporter::WriteSceneLibrary()
     mOutput << startstr << "<visual_scene id=\"" + scene_name_escaped + "\" name=\"" + scene_name_escaped + "\">" << endstr;
     PushTag();
 
+    // start write armature at the root node
+    for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
+        WriteNode( mScene, mScene->mRootNode->mChildren[a], true);
+
     // start recursive write at the root node
     for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
-        WriteNode( mScene, mScene->mRootNode->mChildren[a]);
-
-    for( size_t a = 0; a < mScene->mNumMeshes; ++a )
-    {
-        const aiMesh* mesh = mScene->mMeshes[a];
-        const std::string idstr = GetMeshId( a);
-        const std::string idstrEscaped = XMLEscape(idstr);
-
-        if ( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-            continue;
-
-        if ( mesh->mNumBones == 0 )
-            continue;
-
-        const std::string mesh_name_escaped = XMLEscape(mesh->mName.C_Str());
-        mOutput << startstr
-                << "<node id=\"" << mesh_name_escaped << "_armature"
-                << "\" name=\"" << mesh_name_escaped << "_armature"
-                << "\" type=\"NODE\">"
-                << endstr;
-        PushTag();
-
-        mOutput << startstr
-                << "<instance_controller url=\"#" << idstrEscaped << "-skin\">"
-                << endstr;
-        PushTag();
-
-        mOutput << startstr << "<skeleton>#skeleton_root</skeleton>" << endstr;
-
-        PopTag();
-        mOutput << startstr << "</instance_controller>" << endstr;
-
-        PopTag();
-        mOutput << startstr << "</node>" << endstr;
-    }
+        WriteNode( mScene, mScene->mRootNode->mChildren[a], false);
 
     PopTag();
     mOutput << startstr << "</visual_scene>" << endstr;
@@ -1285,7 +1255,7 @@ aiBone* findBone( const aiScene* scene, const char * name) {
 
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
+void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode, bool need_output_joint)
 {
     // the node must have a name
     if (pNode->mName.length == 0)
@@ -1309,13 +1279,20 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
             is_skeleton_root = true;
     }
 
+    if(need_output_joint ^ is_joint)
+        return;
+
     const std::string node_name_escaped = XMLEscape(pNode->mName.data);
     mOutput << startstr
             << "<node ";
     if(is_skeleton_root)
-        mOutput << "id=\"" << "#skeleton_root" << "\" "; // For now, only support one skeleton in a scene.
-    mOutput << (is_joint ? "s" : "") << "id=\"" << node_name_escaped
-            << "\" name=\"" << node_name_escaped
+        mOutput << "id=\"" << "skeleton_root"; // For now, only support one skeleton in a scene.
+    else
+        mOutput << "id=\"" << node_name_escaped;
+    if(is_joint)
+        mOutput << "\" sid=\"" << node_name_escaped;
+    //mOutput << (is_joint ? "s" : "") << "id=\"" << node_name_escaped
+    mOutput << "\" name=\"" << node_name_escaped
             << "\" type=\"" << node_type
             << "\">" << endstr;
     PushTag();
@@ -1323,7 +1300,7 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     // write transformation - we can directly put the matrix there
     // TODO: (thom) decompose into scale - rot - quad to allow addressing it by animations afterwards
     const aiMatrix4x4& mat = pNode->mTransformation;
-    mOutput << startstr << "<matrix>";
+    mOutput << startstr << "<matrix sid=\"transform\">";
     mOutput << mat.a1 << " " << mat.a2 << " " << mat.a3 << " " << mat.a4 << " ";
     mOutput << mat.b1 << " " << mat.b2 << " " << mat.b3 << " " << mat.b4 << " ";
     mOutput << mat.c1 << " " << mat.c2 << " " << mat.c3 << " " << mat.c4 << " ";
@@ -1351,38 +1328,55 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
     for( size_t a = 0; a < pNode->mNumMeshes; ++a )
     {
         const aiMesh* mesh = mScene->mMeshes[pNode->mMeshes[a]];
-    // do not instanciate mesh if empty. I wonder how this could happen
-    if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-        continue;
-    mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
-    PushTag();
-    mOutput << startstr << "<bind_material>" << endstr;
-    PushTag();
-    mOutput << startstr << "<technique_common>" << endstr;
-    PushTag();
-    mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
-    PushTag();
-    for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
-    {
-        if( mesh->HasTextureCoords( static_cast<unsigned int>(a) ) )
-            // semantic       as in <texture texcoord=...>
-            // input_semantic as in <input semantic=...>
-            // input_set      as in <input set=...>
-            mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
-    }
-    PopTag();
-    mOutput << startstr << "</instance_material>" << endstr;
-    PopTag();
-    mOutput << startstr << "</technique_common>" << endstr;
-    PopTag();
-    mOutput << startstr << "</bind_material>" << endstr;
-    PopTag();
-        mOutput << startstr << "</instance_geometry>" << endstr;
+        // do not instanciate mesh if empty. I wonder how this could happen
+        if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+            continue;
+
+        if( mesh->mNumBones == 0 )
+        {
+            mOutput << startstr << "<instance_geometry url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "\">" << endstr;
+            PushTag();
+        }
+        else
+        {
+            mOutput << startstr
+                    << "<instance_controller url=\"#" << XMLEscape(GetMeshId( pNode->mMeshes[a])) << "-skin\">"
+                    << endstr;
+            PushTag();
+
+            mOutput << startstr << "<skeleton>#skeleton_root</skeleton>" << endstr;
+        }
+        mOutput << startstr << "<bind_material>" << endstr;
+        PushTag();
+        mOutput << startstr << "<technique_common>" << endstr;
+        PushTag();
+        mOutput << startstr << "<instance_material symbol=\"defaultMaterial\" target=\"#" << XMLEscape(materials[mesh->mMaterialIndex].name) << "\">" << endstr;
+        PushTag();
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+        {
+            if( mesh->HasTextureCoords( static_cast<unsigned int>(a) ) )
+                // semantic       as in <texture texcoord=...>
+                // input_semantic as in <input semantic=...>
+                // input_set      as in <input set=...>
+                mOutput << startstr << "<bind_vertex_input semantic=\"CHANNEL" << a << "\" input_semantic=\"TEXCOORD\" input_set=\"" << a << "\"/>" << endstr;
+        }
+        PopTag();
+        mOutput << startstr << "</instance_material>" << endstr;
+        PopTag();
+        mOutput << startstr << "</technique_common>" << endstr;
+        PopTag();
+        mOutput << startstr << "</bind_material>" << endstr;
+        
+        PopTag();
+        if( mesh->mNumBones == 0)
+            mOutput << startstr << "</instance_geometry>" << endstr;
+        else
+            mOutput << startstr << "</instance_controller>" << endstr;
     }
 
     // recurse into subnodes
     for( size_t a = 0; a < pNode->mNumChildren; ++a )
-        WriteNode( pScene, pNode->mChildren[a]);
+        WriteNode( pScene, pNode->mChildren[a], need_output_joint);
 
     PopTag();
     mOutput << startstr << "</node>" << endstr;

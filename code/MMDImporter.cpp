@@ -324,8 +324,8 @@ aiMesh *MMDImporter::CreateMesh(const pmx::PmxModel *pModel,
     auto pBone = new aiBone;
     const auto &pmxBone = pModel->bones[ii];
     pBone->mName = pmxBone.bone_name;
-    aiVector3D pos(pmxBone.position[0], -pmxBone.position[1], -pmxBone.position[2]);
-    aiMatrix4x4::Translation(pos, pBone->mOffsetMatrix);
+    aiVector3D pos(pmxBone.position[0], pmxBone.position[1], pmxBone.position[2]);
+    aiMatrix4x4::Translation(-pos, pBone->mOffsetMatrix);
     auto it = bone_vertex_map.find(ii);
     if (it != bone_vertex_map.end()) {
       pBone->mNumWeights = it->second.size();

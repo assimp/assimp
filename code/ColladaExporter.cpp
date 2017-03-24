@@ -1224,13 +1224,9 @@ void ColladaExporter::WriteSceneLibrary()
     mOutput << startstr << "<visual_scene id=\"" + scene_name_escaped + "\" name=\"" + scene_name_escaped + "\">" << endstr;
     PushTag();
 
-    // start write armature at the root node
-    for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
-        WriteNode( mScene, mScene->mRootNode->mChildren[a], true);
-
     // start recursive write at the root node
     for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
-        WriteNode( mScene, mScene->mRootNode->mChildren[a], false);
+        WriteNode( mScene, mScene->mRootNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</visual_scene>" << endstr;
@@ -1255,7 +1251,7 @@ aiBone* findBone( const aiScene* scene, const char * name) {
 
 // ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode, bool need_output_joint)
+void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 {
     // the node must have a name
     if (pNode->mName.length == 0)
@@ -1279,19 +1275,12 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode, bool need
             is_skeleton_root = true;
     }
 
-    if(need_output_joint ^ is_joint)
-        return;
-
     const std::string node_name_escaped = XMLEscape(pNode->mName.data);
     mOutput << startstr
             << "<node ";
     if(is_skeleton_root)
-        mOutput << "id=\"" << "skeleton_root"; // For now, only support one skeleton in a scene.
-    else
-        mOutput << "id=\"" << node_name_escaped;
-    if(is_joint)
-        mOutput << "\" sid=\"" << node_name_escaped;
-    //mOutput << (is_joint ? "s" : "") << "id=\"" << node_name_escaped
+        mOutput << "id=\"" << "skeleton_root" << "\" "; // For now, only support one skeleton in a scene.
+    mOutput << (is_joint ? "s" : "") << "id=\"" << node_name_escaped;
     mOutput << "\" name=\"" << node_name_escaped
             << "\" type=\"" << node_type
             << "\">" << endstr;
@@ -1376,7 +1365,7 @@ void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode, bool need
 
     // recurse into subnodes
     for( size_t a = 0; a < pNode->mNumChildren; ++a )
-        WriteNode( pScene, pNode->mChildren[a], need_output_joint);
+        WriteNode( pScene, pNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</node>" << endstr;

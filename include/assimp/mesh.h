@@ -378,6 +378,9 @@ struct aiAnimMesh
      */
     unsigned int mNumVertices;
 
+/** Weight of the AnimMesh. */
+    float mWeight;
+
 #ifdef __cplusplus
 
     aiAnimMesh()
@@ -446,6 +449,27 @@ struct aiAnimMesh
 #endif
 };
 
+// ---------------------------------------------------------------------------
+/** @brief Enumerates the methods of mesh morphing supported by Assimp.
+ */
+enum aiMorphingMethod
+{
+    /** Interpolation between morph targets */
+    aiMorphingMethod_VERTEX_BLEND       = 0x1,
+
+    /** Normalized morphing between morph targets  */
+    aiMorphingMethod_MORPH_NORMALIZED   = 0x2,
+
+    /** Relative morphing between morph targets  */
+    aiMorphingMethod_MORPH_RELATIVE     = 0x3,
+
+    /** This value is not used. It is just here to force the
+     *  compiler to map this enum to a 32 Bit integer.
+     */
+#ifndef SWIG
+    _aiMorphingMethod_Force32Bit = INT_MAX
+#endif
+}; //! enum aiMorphingMethod
 
 // ---------------------------------------------------------------------------
 /** @brief A mesh represents a geometry or model with a single material.
@@ -600,15 +624,18 @@ struct aiMesh
     C_STRUCT aiString mName;
 
 
-    /** NOT CURRENTLY IN USE. The number of attachment meshes */
+    /** The number of attachment meshes. Note! Currently only works with Collada loader. */
     unsigned int mNumAnimMeshes;
 
-    /** NOT CURRENTLY IN USE. Attachment meshes for this mesh, for vertex-based animation.
+    /** Attachment meshes for this mesh, for vertex-based animation.
      *  Attachment meshes carry replacement data for some of the
-     *  mesh'es vertex components (usually positions, normals). */
+     *  mesh'es vertex components (usually positions, normals).
+     *  Note! Currently only works with Collada loader.*/
     C_STRUCT aiAnimMesh** mAnimMeshes;
 
-
+    /** Method of morphing when animeshes are specified. */
+    unsigned int mMethod;
+	
 #ifdef __cplusplus
 
     //! Default constructor. Initializes all members to 0
@@ -732,7 +759,6 @@ struct aiMesh
 
 #endif // __cplusplus
 };
-
 
 #ifdef __cplusplus
 }

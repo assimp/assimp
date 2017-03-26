@@ -54,10 +54,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
 #include <assimp/IOSystem.hpp>
+#include <assimp/importerdesc.h>
 #include <memory>
 #include <sstream>
 #include <iomanip>
-
+#include <map>
 
 using namespace Assimp;
 
@@ -426,7 +427,7 @@ void LWOImporter::InternReadFile( const std::string& pFile,
         }
 
         // Generate nodes to render the mesh. Store the source layer in the mParent member of the nodes
-        unsigned int num = apcMeshes.size() - meshStart;
+        unsigned int num = static_cast<unsigned int>(apcMeshes.size() - meshStart);
         if (layer.mName != "<LWODefault>" || num > 0) {
             aiNode* pcNode = new aiNode();
             apcNodes[layer.mIndex] = pcNode;
@@ -781,7 +782,7 @@ void LWOImporter::LoadLWO2Polygons(unsigned int length)
     // Determine the type of the polygons
     switch (type)
     {
-        // read unsupported stuff too (although we wont process it)
+        // read unsupported stuff too (although we won't process it)
     case  AI_LWO_MBAL:
         DefaultLogger::get()->warn("LWO2: Encountered unsupported primitive chunk (METABALL)");
         break;

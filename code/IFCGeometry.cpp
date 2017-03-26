@@ -70,7 +70,7 @@ bool ProcessPolyloop(const IfcPolyLoop& loop, TempMesh& meshout, ConversionData&
         ++cnt;
     }
 
-    meshout.vertcnt.push_back(cnt);
+    meshout.vertcnt.push_back(static_cast<unsigned int>(cnt));
 
     // zero- or one- vertex polyloops simply ignored
     if (meshout.vertcnt.back() > 1) {
@@ -180,7 +180,7 @@ void ProcessPolygonBoundaries(TempMesh& result, const TempMesh& inmesh, size_t m
     // fill a mesh with ONLY the main polygon
     TempMesh temp;
     temp.verts.reserve(outer_polygon_size);
-    temp.vertcnt.push_back(outer_polygon_size);
+    temp.vertcnt.push_back(static_cast<unsigned int>(outer_polygon_size));
     std::copy(outer_vit, outer_vit+outer_polygon_size,
         std::back_inserter(temp.verts));
 
@@ -258,7 +258,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
         return;
     }
 
-    const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(16 * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
+    const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(conv.settings.cylindricalTessellation * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
     const IfcFloat delta = max_angle/cnt_segments;
 
     has_area = has_area && std::fabs(max_angle) < AI_MATH_TWO_PI_F*0.99;
@@ -305,8 +305,8 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
         for(size_t i = 0; i < size; ++i ) {
             out.push_back(out[i*4]);
         }
-        result.vertcnt.push_back(size);
-        result.vertcnt.push_back(size);
+        result.vertcnt.push_back(static_cast<unsigned int>(size));
+        result.vertcnt.push_back(static_cast<unsigned int>(size));
     }
 
     IfcMatrix4 trafo;
@@ -327,7 +327,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
         return;
     }
 
-    const unsigned int cnt_segments = 16;
+    const unsigned int cnt_segments = conv.settings.cylindricalTessellation;
     const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;
 
     const size_t samples = curve->EstimateSampleCount(solid.StartParam,solid.EndParam);
@@ -638,7 +638,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
                     out.push_back(in[i]);
             }
 
-            curmesh.vertcnt.push_back(in.size());
+            curmesh.vertcnt.push_back(static_cast<unsigned int>(in.size()));
             if( openings && in.size() > 2 ) {
                 if( GenerateOpenings(*conv.apply_openings, nors, temp, true, true, dir) ) {
                     ++sides_with_v_openings;
@@ -665,7 +665,7 @@ void ProcessExtrudedArea(const IfcExtrudedAreaSolid& solid, const TempMesh& curv
 
         std::shared_ptr<TempMesh> profile2D = std::shared_ptr<TempMesh>(new TempMesh());
         profile2D->verts.insert(profile2D->verts.end(), in.begin(), in.end());
-        profile2D->vertcnt.push_back(in.size());
+        profile2D->vertcnt.push_back(static_cast<unsigned int>(in.size()));
         conv.collect_openings->push_back(TempOpening(&solid, dir, profile, profile2D));
 
         ai_assert(result.IsEmpty());
@@ -810,7 +810,7 @@ bool ProcessGeometricItem(const IfcRepresentationItem& geo, unsigned int matid, 
     aiMesh* const mesh = meshtmp->ToMesh();
     if(mesh) {
         mesh->mMaterialIndex = matid;
-        mesh_indices.push_back(conv.meshes.size());
+        mesh_indices.push_back(static_cast<unsigned int>(conv.meshes.size()));
         conv.meshes.push_back(mesh);
         return true;
     }
@@ -827,9 +827,8 @@ void AssignAddedMeshes(std::vector<unsigned int>& mesh_indices,aiNode* nd,
         std::sort(mesh_indices.begin(),mesh_indices.end());
         std::vector<unsigned int>::iterator it_end = std::unique(mesh_indices.begin(),mesh_indices.end());
 
-        const size_t size = std::distance(mesh_indices.begin(),it_end);
+        nd->mNumMeshes = static_cast<unsigned int>(std::distance(mesh_indices.begin(),it_end));
 
-        nd->mNumMeshes = size;
         nd->mMeshes = new unsigned int[nd->mNumMeshes];
         for(unsigned int i = 0; i < nd->mNumMeshes; ++i) {
             nd->mMeshes[i] = mesh_indices[i];

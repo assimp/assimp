@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 using namespace Assimp::COB;
@@ -181,7 +181,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
         if (n->type == Node::TYPE_MESH) {
             Mesh& mesh = (Mesh&)(*n.get());
             if (mesh.vertex_positions.size() && mesh.texture_coords.size()) {
-                pScene->mNumMeshes += mesh.temp_map.size();
+                pScene->mNumMeshes += static_cast<unsigned int>(mesh.temp_map.size());
             }
         }
     }

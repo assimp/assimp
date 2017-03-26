@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringUtils.h"
 
 // Header files, stdlib.
-#include <algorithm>
 #include <iterator>
 
 namespace Assimp
@@ -62,7 +61,7 @@ namespace Assimp
 
 aiColor4D AMFImporter::SPP_Material::GetColor(const float pX, const float pY, const float pZ) const
 {
-aiColor4D tcol;
+    aiColor4D tcol;
 
 	// Check if stored data are supported.
 	if(Composition.size() != 0)
@@ -93,8 +92,8 @@ aiColor4D tcol;
 void AMFImporter::PostprocessHelper_CreateMeshDataArray(const CAMFImporter_NodeElement_Mesh& pNodeElement, std::vector<aiVector3D>& pVertexCoordinateArray,
 														std::vector<CAMFImporter_NodeElement_Color*>& pVertexColorArray) const
 {
-CAMFImporter_NodeElement_Vertices* vn = nullptr;
-size_t col_idx;
+    CAMFImporter_NodeElement_Vertices* vn = nullptr;
+    size_t col_idx;
 
 	// All data stored in "vertices", search for it.
 	for(CAMFImporter_NodeElement* ne_child: pNodeElement.Child)
@@ -142,8 +141,8 @@ size_t col_idx;
 size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B,
 																const std::string& pID_A)
 {
-size_t TextureConverted_Index;
-std::string TextureConverted_ID;
+    size_t TextureConverted_Index;
+    std::string TextureConverted_ID;
 
 	// check input data
 	if(pID_R.empty() && pID_G.empty() && pID_B.empty() && pID_A.empty())
@@ -261,11 +260,20 @@ std::string TextureConverted_ID;
 	size_t off_b = 0;
 
 	// Calculate size of the target array and rule how data will be copied.
-	if(!pID_R.empty()) { tex_size += src_texture[0]->Data.size(); step++, off_g++, off_b++; }
-	if(!pID_G.empty()) { tex_size += src_texture[1]->Data.size(); step++, off_b++; }
-	if(!pID_B.empty()) { tex_size += src_texture[2]->Data.size(); step++; }
-	if(!pID_A.empty()) { tex_size += src_texture[3]->Data.size(); step++; }
-
+    if ( nullptr != src_texture ) {
+        if(!pID_R.empty()) {
+            tex_size += src_texture[0]->Data.size(); step++, off_g++, off_b++;
+        }
+        if(!pID_G.empty()) {
+            tex_size += src_texture[1]->Data.size(); step++, off_b++;
+        }
+        if(!pID_B.empty()) {
+            tex_size += src_texture[2]->Data.size(); step++;
+        }
+        if(!pID_A.empty()) {
+            tex_size += src_texture[3]->Data.size(); step++;
+        }
+    }
 	// Create target array.
 	converted_texture.Data = new uint8_t[tex_size];
 	// And copy data
@@ -293,19 +301,19 @@ std::string TextureConverted_ID;
 
 void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace>& pInputList, std::list<std::list<SComplexFace> >& pOutputList_Separated)
 {
-auto texmap_is_equal = [](const CAMFImporter_NodeElement_TexMap* pTexMap1, const CAMFImporter_NodeElement_TexMap* pTexMap2) -> bool
-{
-	if((pTexMap1 == nullptr) && (pTexMap2 == nullptr)) return true;
-	if(pTexMap1 == nullptr) return false;
-	if(pTexMap2 == nullptr) return false;
+    auto texmap_is_equal = [](const CAMFImporter_NodeElement_TexMap* pTexMap1, const CAMFImporter_NodeElement_TexMap* pTexMap2) -> bool
+    {
+	    if((pTexMap1 == nullptr) && (pTexMap2 == nullptr)) return true;
+	    if(pTexMap1 == nullptr) return false;
+	    if(pTexMap2 == nullptr) return false;
 
-	if(pTexMap1->TextureID_R != pTexMap2->TextureID_R) return false;
-	if(pTexMap1->TextureID_G != pTexMap2->TextureID_G) return false;
-	if(pTexMap1->TextureID_B != pTexMap2->TextureID_B) return false;
-	if(pTexMap1->TextureID_A != pTexMap2->TextureID_A) return false;
+	    if(pTexMap1->TextureID_R != pTexMap2->TextureID_R) return false;
+	    if(pTexMap1->TextureID_G != pTexMap2->TextureID_G) return false;
+	    if(pTexMap1->TextureID_B != pTexMap2->TextureID_B) return false;
+	    if(pTexMap1->TextureID_A != pTexMap2->TextureID_A) return false;
 
-	return true;
-};
+	    return true;
+    };
 
 	pOutputList_Separated.clear();
 	if(pInputList.size() == 0) return;
@@ -343,12 +351,12 @@ void AMFImporter::Postprocess_AddMetadata(const std::list<CAMFImporter_NodeEleme
 		if(sceneNode.mMetaData != nullptr) throw DeadlyImportError("Postprocess. MetaData member in node are not nullptr. Something went wrong.");
 
 		// copy collected metadata to output node.
-        sceneNode.mMetaData = aiMetadata::Alloc( metadataList.size() );
+        sceneNode.mMetaData = aiMetadata::Alloc( static_cast<unsigned int>(metadataList.size()) );
 		size_t meta_idx( 0 );
 
 		for(const CAMFImporter_NodeElement_Metadata& metadata: metadataList)
 		{
-			sceneNode.mMetaData->Set(meta_idx++, metadata.Type, aiString(metadata.Value));
+			sceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx++), metadata.Type, aiString(metadata.Value));
 		}
 	}// if(!metadataList.empty())
 }
@@ -437,9 +445,9 @@ std::list<unsigned int> mesh_idx;
 					// create new face and store it.
 					complex_face.Face.mNumIndices = 3;
 					complex_face.Face.mIndices = new unsigned int[3];
-					complex_face.Face.mIndices[0] = tri_al.V[0];
-					complex_face.Face.mIndices[1] = tri_al.V[1];
-					complex_face.Face.mIndices[2] = tri_al.V[2];
+					complex_face.Face.mIndices[0] = static_cast<unsigned int>(tri_al.V[0]);
+					complex_face.Face.mIndices[1] = static_cast<unsigned int>(tri_al.V[1]);
+					complex_face.Face.mIndices[2] = static_cast<unsigned int>(tri_al.V[2]);
 					complex_faces_list.push_back(complex_face);
 				}
 			}// for(const CAMFImporter_NodeElement* ne_volume_child: ne_volume->Child)
@@ -508,7 +516,7 @@ std::list<unsigned int> mesh_idx;
 					{
 						for(size_t vi = 0; vi < face.Face.mNumIndices; vi++)
 						{
-							if(face.Face.mIndices[vi] == pIdx_From) face.Face.mIndices[vi] = pIdx_To;
+							if(face.Face.mIndices[vi] == pIdx_From) face.Face.mIndices[vi] = static_cast<unsigned int>(pIdx_To);
 						}
 					}
 				};// auto VertexIndex_Replace = [](std::list<SComplexFace>& pFaceList, const size_t pIdx_From, const size_t pIdx_To) -> void
@@ -563,7 +571,7 @@ std::list<unsigned int> mesh_idx;
 				// set geometry and colors (vertices)
 				//
 				// copy faces/triangles
-				tmesh->mNumFaces = face_list_cur.size();
+				tmesh->mNumFaces = static_cast<unsigned int>(face_list_cur.size());
 				tmesh->mFaces = new aiFace[tmesh->mNumFaces];
 
 				// Create vertices list and optimize indices. Optimisation mean following.In AMF all volumes use one big list of vertices. And one volume
@@ -590,7 +598,7 @@ std::list<unsigned int> mesh_idx;
 					do
 					{
 						vert_idx_from = VertexIndex_GetMinimal(face_list_cur, &vert_idx_to);
-						if(vert_idx_from == vert_idx_to) break;// all indices are transfered,
+						if(vert_idx_from == vert_idx_to) break;// all indices are transferred,
 
 						vert_arr.push_back(pVertexCoordinateArray.at(vert_idx_from));
 						col_arr.push_back(Vertex_CalculateColor(vert_idx_from));
@@ -619,7 +627,7 @@ std::list<unsigned int> mesh_idx;
 						{
 							vert_arr.push_back(vert_arr.at(face_cur.Face.mIndices[idx_ind]));
 							col_arr.push_back(face_color);
-							face_cur.Face.mIndices[idx_ind] = vert_idx_new++;
+							face_cur.Face.mIndices[idx_ind] = static_cast<unsigned int>(vert_idx_new++);
 						}
 					}// if(face_cur.Color != nullptr)
 				}// for(const SComplexFace& face_cur: face_list_cur)
@@ -639,10 +647,10 @@ std::list<unsigned int> mesh_idx;
 					for(size_t i = 0, i_e = VertexCount_Max * 2; i < i_e; i++) idx_vert_used[i] = false;
 
 					// This ID's will be used when set materials ID in scene.
-					tmesh->mMaterialIndex = PostprocessHelper_GetTextureID_Or_Create(face_list_cur.front().TexMap->TextureID_R,
+					tmesh->mMaterialIndex = static_cast<unsigned int>(PostprocessHelper_GetTextureID_Or_Create(face_list_cur.front().TexMap->TextureID_R,
 																						face_list_cur.front().TexMap->TextureID_G,
 																						face_list_cur.front().TexMap->TextureID_B,
-																						face_list_cur.front().TexMap->TextureID_A);
+																						face_list_cur.front().TexMap->TextureID_A));
 					texcoord_arr.resize(VertexCount_Max * 2);
 					for(const SComplexFace& face_cur: face_list_cur)
 					{
@@ -662,7 +670,7 @@ std::list<unsigned int> mesh_idx;
 								vert_arr.push_back(vert_arr.at(idx_vert));
 								col_arr.push_back(col_arr.at(idx_vert));
 								texcoord_arr.at(idx_vert_new) = face_cur.TexMap->TextureCoordinate[idx_ind];
-								face_cur.Face.mIndices[idx_ind] = idx_vert_new++;
+								face_cur.Face.mIndices[idx_ind] = static_cast<unsigned int>(idx_vert_new++);
 							}
 						}// for(size_t idx_ind = 0; idx_ind < face_cur.Face.mNumIndices; idx_ind++)
 					}// for(const SComplexFace& face_cur: face_list_cur)
@@ -675,7 +683,7 @@ std::list<unsigned int> mesh_idx;
 				//
 				// copy collected data to mesh
 				//
-				tmesh->mNumVertices = vert_arr.size();
+				tmesh->mNumVertices = static_cast<unsigned int>(vert_arr.size());
 				tmesh->mVertices = new aiVector3D[tmesh->mNumVertices];
 				tmesh->mColors[0] = new aiColor4D[tmesh->mNumVertices];
 				tmesh->mFaces = new aiFace[face_list_cur.size()];
@@ -693,7 +701,7 @@ std::list<unsigned int> mesh_idx;
 				for(const SComplexFace& face_cur: face_list_cur) tmesh->mFaces[idx_face++] = face_cur.Face;
 
 				// store new aiMesh
-				mesh_idx.push_back(pMeshList.size());
+				mesh_idx.push_back(static_cast<unsigned int>(pMeshList.size()));
 				pMeshList.push_back(tmesh);
 			}// for(const std::list<SComplexFace>& face_list_cur: complex_faces_toplist)
 		}// if(ne_child->Type == CAMFImporter_NodeElement::ENET_Volume)
@@ -704,7 +712,7 @@ std::list<unsigned int> mesh_idx;
 	{
 		std::list<unsigned int>::const_iterator mit = mesh_idx.begin();
 
-		pSceneNode.mNumMeshes = mesh_idx.size();
+		pSceneNode.mNumMeshes = static_cast<unsigned int>(mesh_idx.size());
 		pSceneNode.mMeshes = new unsigned int[pSceneNode.mNumMeshes];
 		for(size_t i = 0; i < pSceneNode.mNumMeshes; i++) pSceneNode.mMeshes[i] = *mit++;
 	}// if(mesh_idx.size() > 0)
@@ -743,7 +751,7 @@ std::list<aiNode*> ch_node;
 	//  \_ aiNode for transformation (<instance> -> <delta...>, <r...>) - aiNode for pointing to object ("objectid")
 	con_node = new aiNode;
 	con_node->mName = pConstellation.ID;
-	// Walk thru children and search for instances of another objects, constellations.
+	// Walk through children and search for instances of another objects, constellations.
 	for(const CAMFImporter_NodeElement* ne: pConstellation.Child)
 	{
 		aiMatrix4x4 tmat;
@@ -779,7 +787,7 @@ std::list<aiNode*> ch_node;
 
 	size_t ch_idx = 0;
 
-	con_node->mNumChildren = ch_node.size();
+	con_node->mNumChildren = static_cast<unsigned int>(ch_node.size());
 	con_node->mChildren = new aiNode*[con_node->mNumChildren];
 	for(aiNode* node: ch_node) con_node->mChildren[ch_idx++] = node;
 
@@ -815,7 +823,7 @@ std::list<CAMFImporter_NodeElement_Metadata*> meta_list;
 	// Check if root element are found.
 	if(root_el == nullptr) throw DeadlyImportError("Root(<amf>) element not found.");
 
-	// after that walk thru children of root and collect data. Five types of nodes can be placed at top level - in <amf>: <object>, <material>, <texture>,
+	// after that walk through children of root and collect data. Five types of nodes can be placed at top level - in <amf>: <object>, <material>, <texture>,
 	// <constellation> and <metadata>. But at first we must read <material> and <texture> because they will be used in <object>. <metadata> can be read
 	// at any moment.
 	//
@@ -870,7 +878,7 @@ nl_clean_loop:
 
 	if(node_list.size() > 1)
 	{
-		// walk thru all nodes
+		// walk through all nodes
 		for(std::list<aiNode*>::iterator nl_it = node_list.begin(); nl_it != node_list.end(); nl_it++)
 		{
 			// and try to find them in another top nodes.
@@ -899,7 +907,7 @@ nl_clean_loop:
 	{
 		std::list<aiNode*>::const_iterator nl_it = node_list.begin();
 
-		pScene->mRootNode->mNumChildren = node_list.size();
+		pScene->mRootNode->mNumChildren = static_cast<unsigned int>(node_list.size());
 		pScene->mRootNode->mChildren = new aiNode*[pScene->mRootNode->mNumChildren];
 		for(size_t i = 0; i < pScene->mRootNode->mNumChildren; i++)
 		{
@@ -916,14 +924,14 @@ nl_clean_loop:
 	{
 		std::list<aiMesh*>::const_iterator ml_it = mesh_list.begin();
 
-		pScene->mNumMeshes = mesh_list.size();
+		pScene->mNumMeshes = static_cast<unsigned int>(mesh_list.size());
 		pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
 		for(size_t i = 0; i < pScene->mNumMeshes; i++) pScene->mMeshes[i] = *ml_it++;
 	}// if(mesh_list.size() > 0)
 
 	//
 	// Textures
-	pScene->mNumTextures = mTexture_Converted.size();
+	pScene->mNumTextures = static_cast<unsigned int>(mTexture_Converted.size());
 	if(pScene->mNumTextures > 0)
 	{
 		size_t idx;
@@ -933,8 +941,8 @@ nl_clean_loop:
 		for(const SPP_Texture& tex_convd: mTexture_Converted)
 		{
 			pScene->mTextures[idx] = new aiTexture;
-			pScene->mTextures[idx]->mWidth = tex_convd.Width;
-			pScene->mTextures[idx]->mHeight = tex_convd.Height;
+			pScene->mTextures[idx]->mWidth = static_cast<unsigned int>(tex_convd.Width);
+			pScene->mTextures[idx]->mHeight = static_cast<unsigned int>(tex_convd.Height);
 			pScene->mTextures[idx]->pcData = (aiTexel*)tex_convd.Data;
 			// texture format description.
 			strcpy(pScene->mTextures[idx]->achFormatHint, tex_convd.FormatHint);
@@ -943,7 +951,7 @@ nl_clean_loop:
 
 		// Create materials for embedded textures.
 		idx = 0;
-		pScene->mNumMaterials = mTexture_Converted.size();
+		pScene->mNumMaterials = static_cast<unsigned int>(mTexture_Converted.size());
 		pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
 		for(const SPP_Texture& tex_convd: mTexture_Converted)
 		{
@@ -959,7 +967,7 @@ nl_clean_loop:
 			idx++;
 		}
 	}// if(pScene->mNumTextures > 0)
-}// END: after that walk thru children of root and collect data
+}// END: after that walk through children of root and collect data
 
 }// namespace Assimp
 

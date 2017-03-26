@@ -60,12 +60,6 @@ protected:
     TestIOSystem* pImp;
 };
 
-/*
-virtual bool PushDirectory( const std::string &path );
-virtual const std::string &CurrentDirectory() const;
-virtual bool PopDirectory();
-*/
-
 TEST_F( IOSystemTest, accessDirectoryStackTest ) {
     EXPECT_FALSE( pImp->PopDirectory() );
     EXPECT_EQ( 0, pImp->StackSize() );

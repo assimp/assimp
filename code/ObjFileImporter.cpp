@@ -41,16 +41,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_OBJ_IMPORTER
 
-#include "DefaultIOSystem.h"
 #include "ObjFileImporter.h"
 #include "ObjFileParser.h"
 #include "ObjFileData.h"
 #include "IOStreamBuffer.h"
 #include <memory>
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 
 static const aiImporterDesc desc = {
     "Wavefront Object Importer",
@@ -149,10 +150,10 @@ void ObjFileImporter::InternReadFile( const std::string &file, aiScene* pScene, 
     // This next stage takes ~ 1/3th of the total readFile task
     // so should amount for 1/3th of the progress
     // only update every 100KB or it'll be too slow
-    unsigned int progress = 0;
+    /*unsigned int progress = 0;
     unsigned int progressCounter = 0;
     const unsigned int updateProgressEveryBytes = 100 * 1024;
-    const unsigned int progressTotal = (3*m_Buffer.size()/updateProgressEveryBytes);
+    const unsigned int progressTotal = static_cast<unsigned int>(3*m_Buffer.size()/updateProgressEveryBytes);*/
     // process all '\'
     /*std::vector<char> ::iterator iter = m_Buffer.begin();
     while (iter != m_Buffer.end())
@@ -326,10 +327,10 @@ aiMesh *ObjFileImporter::createTopology( const ObjFile::Model* pModel, const Obj
         ai_assert( NULL != inp  );
 
         if (inp->m_PrimitiveType == aiPrimitiveType_LINE) {
-            pMesh->mNumFaces += inp->m_vertices.size() - 1;
+            pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size() - 1);
             pMesh->mPrimitiveTypes |= aiPrimitiveType_LINE;
         } else if (inp->m_PrimitiveType == aiPrimitiveType_POINT) {
-            pMesh->mNumFaces += inp->m_vertices.size();
+            pMesh->mNumFaces += static_cast<unsigned int>(inp->m_vertices.size());
             pMesh->mPrimitiveTypes |= aiPrimitiveType_POINT;
         } else {
             ++pMesh->mNumFaces;
@@ -542,13 +543,13 @@ void ObjFileImporter::countObjects(const std::vector<ObjFile::Object*> &rObjects
 
 // ------------------------------------------------------------------------------------------------
 //   Add clamp mode property to material if necessary
-void ObjFileImporter::addTextureMappingModeProperty( aiMaterial* mat, aiTextureType type, int clampMode) {
+void ObjFileImporter::addTextureMappingModeProperty( aiMaterial* mat, aiTextureType type, int clampMode, int index) {
     if ( nullptr == mat ) {
         return;
     }
 
-    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_U( type, 0 ) );
-    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_V( type, 0 ) );
+    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_U( type, index ) );
+    mat->AddProperty<int>( &clampMode, 1, AI_MATKEY_MAPPINGMODE_V( type, index ) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -600,9 +601,6 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 
         mat->AddProperty<int>( &sm, 1, AI_MATKEY_SHADING_MODEL);
 
-        // multiplying the specular exponent with 2 seems to yield better results
-        pCurrentMaterial->shineness *= 4.f;
-
         // Adding material colors
         mat->AddProperty( &pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT );
         mat->AddProperty( &pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE );
@@ -610,6 +608,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
         mat->AddProperty( &pCurrentMaterial->emissive, 1, AI_MATKEY_COLOR_EMISSIVE );
         mat->AddProperty( &pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS );
         mat->AddProperty( &pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY );
+        mat->AddProperty( &pCurrentMaterial->transparent,1,AI_MATKEY_COLOR_TRANSPARENT);
 
         // Adding refraction index
         mat->AddProperty( &pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI );
@@ -671,12 +670,12 @@ void ObjFileImporter::createMaterials(const ObjFile::Model* pModel, aiScene* pSc
 
             unsigned count = type == ObjFile::Material::TextureReflectionSphereType ? 1 : 6;
             for( unsigned i = 0; i < count; i++ )
+            {
                 mat->AddProperty(&pCurrentMaterial->textureReflection[i], AI_MATKEY_TEXTURE_REFLECTION(i));
 
-            if(pCurrentMaterial->clamp[type])
-                //TODO addTextureMappingModeProperty should accept an index to handle clamp option for each
-                //texture of a cubemap
-                addTextureMappingModeProperty(mat, aiTextureType_REFLECTION);
+                if(pCurrentMaterial->clamp[type])
+                    addTextureMappingModeProperty(mat, aiTextureType_REFLECTION, 1, i);
+            }
         }
 
         if ( 0 != pCurrentMaterial->textureDisp.length )

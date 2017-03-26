@@ -55,20 +55,38 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+  unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
+  unit/TestModelFactory.h
+  unit/ut3DImportExport.cpp
+  unit/ut3DSImportExport.cpp
+  unit/utACImportExport.cpp
+  unit/utAMFImportExport.cpp
+  unit/utASEImportExport.cpp  
+  unit/utAnim.cpp
   unit/AssimpAPITest.cpp
+  unit/utB3DImportExport.cpp
   unit/utBatchLoader.cpp
   unit/utBlenderIntermediate.cpp
   unit/utBlendImportAreaLight.cpp
+  unit/utBlenderImportExport.cpp
   unit/utBlendImportMaterials.cpp
+  unit/utBVHImportExport.cpp
   unit/utColladaExportCamera.cpp
   unit/utColladaExportLight.cpp
+  unit/utColladaImportExport.cpp
+  unit/utCSMImportExport.cpp
   unit/utDefaultIOStream.cpp
+  unit/utDXFImporterExporter.cpp
   unit/utFastAtof.cpp
+  unit/utFBXImporterExporter.cpp
   unit/utFindDegenerates.cpp
   unit/utFindInvalidData.cpp
   unit/utFixInfacingNormals.cpp
   unit/utGenNormals.cpp
+  unit/utglTFImportExport.cpp
+  unit/utHMPImportExport.cpp
+  unit/utIFCImportExport.cpp
   unit/utImporter.cpp
   unit/utImproveCacheLocality.cpp
   unit/utIOSystem.cpp
@@ -76,20 +94,24 @@ SET( TEST_SRCS
   unit/utIssues.cpp
   unit/utJoinVertices.cpp
   unit/utLimitBoneWeights.cpp
+  unit/utLWSImportExport.cpp
   unit/utMaterialSystem.cpp
   unit/utMatrix3x3.cpp
   unit/utMatrix4x4.cpp
   unit/utMetadata.cpp
   unit/SceneDiffer.h
   unit/SceneDiffer.cpp
+  unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
+  unit/utPLYImportExport.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp
   unit/utScenePreprocessor.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
+  unit/utSMDImportExport.cpp
   unit/utSortByPType.cpp
   unit/utSplitLargeMeshes.cpp
   unit/utTargetAnimation.cpp
@@ -98,6 +120,9 @@ SET( TEST_SRCS
   unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
+  unit/utVector3.cpp
+  unit/utXImporterExporter.cpp
+  unit/utD3MFImportExport.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
@@ -119,6 +144,10 @@ IF( WIN32 )
 ELSE( WIN32 )
     SET( platform_libs pthread )
 ENDIF( WIN32 )
+
+IF(MSVC)
+		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+ENDIF(MSVC)
 
 target_link_libraries( unit assimp ${platform_libs} )
 

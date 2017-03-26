@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 
-#include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
+#include "BlenderDNA.h"
 
 using namespace Assimp;
 using namespace Assimp::Blender;
@@ -522,7 +522,7 @@ template <> void Structure :: Convert<MVert> (
     ReadFieldArray<ErrorPolicy_Fail>(dest.co,"co",db);
     ReadFieldArray<ErrorPolicy_Fail>(dest.no,"no",db);
     ReadField<ErrorPolicy_Igno>(dest.flag,"flag",db);
-    ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
+    //ReadField<ErrorPolicy_Warn>(dest.mat_nr,"mat_nr",db);
     ReadField<ErrorPolicy_Igno>(dest.bweight,"bweight",db);
 
     db.reader->IncPtr(size);

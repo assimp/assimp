@@ -524,7 +524,7 @@ void X3DImporter::ParseNode_Rendering_LineSet()
 		{
 			if(*vc_it < 2) throw DeadlyImportError("LineSet. vertexCount shall be greater than or equal to two.");
 
-			for(int32_t i = 0; i < *vc_it; i++) ne_alias.CoordIndex.push_back(coord_num++);// add vertices indices
+			for(int32_t i = 0; i < *vc_it; i++) ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num++));// add vertices indices
 
 			 ne_alias.CoordIndex.push_back(-1);// add face delimiter.
 		}
@@ -678,17 +678,17 @@ void X3DImporter::ParseNode_Rendering_TriangleFanSet()
 				{
 					// 2 1
 					//  0
-					ne_alias.CoordIndex.push_back(coord_num_first);// first vertex is a center and always is [0].
-					ne_alias.CoordIndex.push_back(coord_num_prev++);
-					ne_alias.CoordIndex.push_back(coord_num_prev);
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_first));// first vertex is a center and always is [0].
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_prev++));
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_prev));
 				}
 				else
 				{
 					// 1 2
 					//  0
-					ne_alias.CoordIndex.push_back(coord_num_first);// first vertex is a center and always is [0].
-					ne_alias.CoordIndex.push_back(coord_num_prev + 1);
-					ne_alias.CoordIndex.push_back(coord_num_prev++);
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_first));// first vertex is a center and always is [0].
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_prev + 1));
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num_prev++));
 				}// if(ccw) else
 
 				ne_alias.CoordIndex.push_back(-1);// add face delimiter.
@@ -875,17 +875,17 @@ void X3DImporter::ParseNode_Rendering_TriangleStripSet()
 				{
 					// 0 2
 					//  1
-					ne_alias.CoordIndex.push_back(coord_num0);
-					ne_alias.CoordIndex.push_back(coord_num1);
-					ne_alias.CoordIndex.push_back(coord_num2);
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num0));
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num1));
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num2));
 				}
 				else
 				{
 					// 0 1
 					//  2
-					ne_alias.CoordIndex.push_back(coord_num0);
-					ne_alias.CoordIndex.push_back(coord_num2);
-					ne_alias.CoordIndex.push_back(coord_num1);
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num0));
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num2));
+					ne_alias.CoordIndex.push_back(static_cast<int32_t>(coord_num1));
 				}// if(ccw) else
 
 				ne_alias.CoordIndex.push_back(-1);// add face delimiter.

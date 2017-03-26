@@ -27,7 +27,7 @@ install:
 # Make compiler command line tools available
 - call c:\projects\assimp\scripts\appveyor\compiler_setup.bat
 
-build_script:  
+build_script:
 - cd c:\projects\assimp
 - if "%platform%" equ "x64" (cmake CMakeLists.txt -G "Visual Studio %Configuration% Win64")
 - if "%platform%" equ "x86" (cmake CMakeLists.txt -G "Visual Studio %Configuration%")
@@ -40,4 +40,3 @@ after_build:
 artifacts:
   - path: assimp.7z
     name: assimp_lib
-

@@ -50,6 +50,8 @@ struct aiMesh;
 struct aiMaterial;
 struct aiFace;
 
+namespace Assimp {
+
 class SceneDiffer {
 public:
     SceneDiffer();
@@ -67,3 +69,5 @@ protected:
 private:
     std::vector<std::string> m_diffs;
 };
+
+} 

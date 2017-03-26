@@ -85,7 +85,7 @@ aiMatrix4x4 X3DImporter::PostprocessHelper_Matrix_GlobalToCurrent() const
 
 void X3DImporter::PostprocessHelper_CollectMetadata(const CX3DImporter_NodeElement& pNodeElement, std::list<CX3DImporter_NodeElement*>& pList) const
 {
-	// walk thru childs and find for metadata.
+	// walk through childs and find for metadata.
 	for(std::list<CX3DImporter_NodeElement*>::const_iterator el_it = pNodeElement.Child.begin(); el_it != pNodeElement.Child.end(); el_it++)
 	{
 		if(((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaBoolean) || ((*el_it)->Type == CX3DImporter_NodeElement::ENET_MetaDouble) ||
@@ -190,7 +190,7 @@ void X3DImporter::Postprocess_BuildMaterial(const CX3DImporter_NodeElement& pNod
 	*pMaterial = new aiMaterial;
 	aiMaterial& taimat = **pMaterial;// creating alias for convenience.
 
-	// at this point pNodeElement point to <Appearance> node. Walk thru childs and add all stored data.
+	// at this point pNodeElement point to <Appearance> node. Walk through childs and add all stored data.
 	for(std::list<CX3DImporter_NodeElement*>::const_iterator el_it = pNodeElement.Child.begin(); el_it != pNodeElement.Child.end(); el_it++)
 	{
 		if((*el_it)->Type == CX3DImporter_NodeElement::ENET_Material)
@@ -253,7 +253,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 
 		tarr.reserve(tnemesh.Vertices.size());
 		for(std::list<aiVector3D>::iterator it = tnemesh.Vertices.begin(); it != tnemesh.Vertices.end(); it++) tarr.push_back(*it);
-		*pMesh = StandardShapes::MakeMesh(tarr, tnemesh.NumIndices);// create mesh from vertices using Assimp help.
+		*pMesh = StandardShapes::MakeMesh(tarr, static_cast<unsigned int>(tnemesh.NumIndices));// create mesh from vertices using Assimp help.
 
 		return;// mesh is build, nothing to do anymore.
 	}
@@ -272,7 +272,7 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		tarr.reserve(tnemesh.Vertices.size());
 		for(std::list<aiVector3D>::iterator it = tnemesh.Vertices.begin(); it != tnemesh.Vertices.end(); it++) tarr.push_back(*it);
 
-		*pMesh = StandardShapes::MakeMesh(tarr, tnemesh.NumIndices);// create mesh from vertices using Assimp help.
+		*pMesh = StandardShapes::MakeMesh(tarr, static_cast<unsigned int>(tnemesh.NumIndices));// create mesh from vertices using Assimp help.
 
 		return;// mesh is build, nothing to do anymore.
 	}
@@ -627,10 +627,10 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 			}
 			else
 			{
-				for(size_t i = 0; i < (size_t)tne_group.Choice; i++) chit_begin++;// forward iterator to choosed node.
+				for(size_t i = 0; i < (size_t)tne_group.Choice; i++) chit_begin++;// forward iterator to choosen node.
 
 				chit_end = chit_begin;
-				chit_end++;// point end iterator to next element after choosed.
+				chit_end++;// point end iterator to next element after choosen.
 			}
 		}// if(tne_group.UseChoice)
 	}// if(pNodeElement.Type == CX3DImporter_NodeElement::ENET_Group)
@@ -669,7 +669,7 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 	{
 		std::list<aiNode*>::const_iterator it = SceneNode_Child.begin();
 
-		pSceneNode.mNumChildren = SceneNode_Child.size();
+		pSceneNode.mNumChildren = static_cast<unsigned int>(SceneNode_Child.size());
 		pSceneNode.mChildren = new aiNode*[pSceneNode.mNumChildren];
 		for(size_t i = 0; i < pSceneNode.mNumChildren; i++) pSceneNode.mChildren[i] = *it++;
 	}
@@ -678,7 +678,7 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 	{
 		std::list<unsigned int>::const_iterator it = SceneNode_Mesh.begin();
 
-		pSceneNode.mNumMeshes = SceneNode_Mesh.size();
+		pSceneNode.mNumMeshes = static_cast<unsigned int>(SceneNode_Mesh.size());
 		pSceneNode.mMeshes = new unsigned int[pSceneNode.mNumMeshes];
 		for(size_t i = 0; i < pSceneNode.mNumMeshes; i++) pSceneNode.mMeshes[i] = *it++;
 	}
@@ -702,7 +702,7 @@ void X3DImporter::Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& p
 			if(tmesh != nullptr)
 			{
 				// if mesh successfully built then add data about it to arrays
-				pNodeMeshInd.push_back(pSceneMeshList.size());
+				pNodeMeshInd.push_back(static_cast<unsigned int>(pSceneMeshList.size()));
 				pSceneMeshList.push_back(tmesh);
 				// keep mesh type. Need above for texture coordinate generation.
 				mesh_type = (*it)->Type;
@@ -714,7 +714,7 @@ void X3DImporter::Postprocess_BuildShape(const CX3DImporter_NodeElement_Shape& p
 			if(tmat != nullptr)
 			{
 				// if material successfully built then add data about it to array
-				mat_ind = pSceneMaterialList.size();
+				mat_ind = static_cast<unsigned int>(pSceneMaterialList.size());
 				pSceneMaterialList.push_back(tmat);
 			}
 		}
@@ -764,8 +764,8 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pN
             throw DeadlyImportError( "Postprocess. MetaData member in node are not nullptr. Something went wrong." );
         }
 
-		// copy collected metadata to output node.        
-        pSceneNode.mMetaData = aiMetadata::Alloc( meta_list.size() );
+		// copy collected metadata to output node.
+        pSceneNode.mMetaData = aiMetadata::Alloc( static_cast<unsigned int>(meta_list.size()) );
 		meta_idx = 0;
 		for(std::list<CX3DImporter_NodeElement*>::const_iterator it = meta_list.begin(); it != meta_list.end(); it++, meta_idx++)
 		{
@@ -776,22 +776,22 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pN
 			if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaBoolean)
 			{
 				if(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, *(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.begin()));
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((CX3DImporter_NodeElement_MetaBoolean*)cur_meta)->Value.begin()));
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaDouble)
 			{
 				if(((CX3DImporter_NodeElement_MetaDouble*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, (float)*(((CX3DImporter_NodeElement_MetaDouble*)cur_meta)->Value.begin()));
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, (float)*(((CX3DImporter_NodeElement_MetaDouble*)cur_meta)->Value.begin()));
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaFloat)
 			{
 				if(((CX3DImporter_NodeElement_MetaFloat*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, *(((CX3DImporter_NodeElement_MetaFloat*)cur_meta)->Value.begin()));
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((CX3DImporter_NodeElement_MetaFloat*)cur_meta)->Value.begin()));
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaInteger)
 			{
 				if(((CX3DImporter_NodeElement_MetaInteger*)cur_meta)->Value.size() > 0)
-					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, *(((CX3DImporter_NodeElement_MetaInteger*)cur_meta)->Value.begin()));
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, *(((CX3DImporter_NodeElement_MetaInteger*)cur_meta)->Value.begin()));
 			}
 			else if((*it)->Type == CX3DImporter_NodeElement::ENET_MetaString)
 			{
@@ -799,7 +799,7 @@ void X3DImporter::Postprocess_CollectMetadata(const CX3DImporter_NodeElement& pN
 				{
 					aiString tstr(((CX3DImporter_NodeElement_MetaString*)cur_meta)->Value.begin()->data());
 
-					pSceneNode.mMetaData->Set(meta_idx, cur_meta->Name, tstr);
+					pSceneNode.mMetaData->Set(static_cast<unsigned int>(meta_idx), cur_meta->Name, tstr);
 				}
 			}
 			else

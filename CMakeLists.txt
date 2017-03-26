@@ -168,14 +168,15 @@ IF((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_
      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
   ENDIF()
   # hide all not-exported symbols
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -std=c++0x" )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -Wall -std=c++0x" )
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
 ELSEIF ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
 ELSEIF( CMAKE_COMPILER_IS_MINGW )
-	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wno-long-long -pedantic -std=c++11" )
+  add_definitions( -U__STRICT_ANSI__ )
 ENDIF()
 
 if (ASSIMP_COVERALLS)
@@ -184,9 +185,9 @@ if (ASSIMP_COVERALLS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
-INCLUDE (FindPkgConfig)
 INCLUDE_DIRECTORIES( include )
 
+INCLUDE (FindPkgMacros)
 INCLUDE (PrecompiledHeader)
 
 # If this is an in-source build (CMAKE_SOURCE_DIR == CMAKE_BINARY_DIR),
@@ -254,9 +255,7 @@ ENDIF(NOT ZLIB_FOUND)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 # Search for unzip
-IF (PKG_CONFIG_FOUND)
-  PKG_CHECK_MODULES(UNZIP minizip)
-ENDIF (PKG_CONFIG_FOUND)
+use_pkgconfig(UNZIP minizip)
 
 IF ( ASSIMP_NO_EXPORT )
   ADD_DEFINITIONS( -DASSIMP_BUILD_NO_EXPORT)
@@ -329,12 +328,12 @@ ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
-  IF ( WIN32 )
+  IF ( WIN32 AND DirectX_D3DX9_LIBRARY )
     option ( ASSIMP_BUILD_ASSIMP_VIEW "If the Assimp view tool is built. (requires DirectX)" ${DirectX_FOUND} )
     IF ( ASSIMP_BUILD_ASSIMP_VIEW )
       ADD_SUBDIRECTORY( tools/assimp_view/ )
     ENDIF ( ASSIMP_BUILD_ASSIMP_VIEW )
-  ENDIF ( WIN32 )
+  ENDIF ( WIN32 AND DirectX_D3DX9_LIBRARY )
 
   ADD_SUBDIRECTORY( tools/assimp_cmd/ )
 

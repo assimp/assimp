@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/importerdesc.h>
 #include <ios>
 #include <list>
 #include <memory>
@@ -136,14 +137,17 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 }
 
 // ------------------------------------------------------------------------------------------------
-/*static*/ bool BaseImporter::SearchFileHeaderForToken(IOSystem* pIOHandler,
+/*static*/ bool BaseImporter::SearchFileHeaderForToken( IOSystem* pIOHandler,
     const std::string&  pFile,
     const char**        tokens,
     unsigned int        numTokens,
     unsigned int        searchBytes /* = 200 */,
     bool                tokensSol /* false */)
 {
-    ai_assert(NULL != tokens && 0 != numTokens && 0 != searchBytes);
+    ai_assert( NULL != tokens );
+    ai_assert( 0 != numTokens );
+    ai_assert( 0 != searchBytes);
+
     if (!pIOHandler)
         return false;
 
@@ -178,8 +182,6 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 
         for (unsigned int i = 0; i < numTokens;++i) {
             ai_assert(NULL != tokens[i]);
-
-
             const char* r = strstr(buffer,tokens[i]);
             if( !r ) {
                 continue;

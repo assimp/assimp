@@ -98,8 +98,8 @@ inline aiMetadataType GetAiType( int32_t )    { return AI_INT32; }
 inline aiMetadataType GetAiType( uint64_t )   { return AI_UINT64; }
 inline aiMetadataType GetAiType( float )      { return AI_FLOAT; }
 inline aiMetadataType GetAiType( double )     { return AI_DOUBLE; }
-inline aiMetadataType GetAiType( aiString )   { return AI_AISTRING; }
-inline aiMetadataType GetAiType( aiVector3D ) { return AI_AIVECTOR3D; }
+inline aiMetadataType GetAiType( const aiString & )   { return AI_AISTRING; }
+inline aiMetadataType GetAiType( const aiVector3D & ) { return AI_AIVECTOR3D; }
 
 #endif // __cplusplus
 
@@ -187,7 +187,7 @@ struct aiMetadata {
     static inline
     aiMetadata *Alloc( unsigned int numProperties ) {
         if ( 0 == numProperties ) {
-            return nullptr;
+            return NULL;
         }
 
         aiMetadata *data = new aiMetadata;
@@ -197,6 +197,29 @@ struct aiMetadata {
 
         return data;
     }
+
+	template<typename T>
+	inline void Add(const std::string& key, const T& value)
+	{
+		aiString* new_keys = new aiString[mNumProperties + 1];
+		aiMetadataEntry* new_values = new aiMetadataEntry[mNumProperties + 1];
+
+		for(unsigned int i = 0; i < mNumProperties; ++i)
+		{
+			new_keys[i] = mKeys[i];
+			new_values[i] = mValues[i];
+		}
+
+		delete mKeys;
+		delete mValues;
+
+		mKeys = new_keys;
+		mValues = new_values;
+
+		mNumProperties++;
+
+		Set(mNumProperties - 1, key, value);
+	}
 
     template<typename T>
     inline 

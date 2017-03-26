@@ -23,6 +23,7 @@ additional_dirs, ext_whitelist = [],[]
 if os.name=='posix':
     additional_dirs.append('./')
     additional_dirs.append('/usr/lib/')
+    additional_dirs.append('/usr/lib/x86_64-linux-gnu')
     additional_dirs.append('/usr/local/lib/')
 
     # note - this won't catch libassimp.so.N.n, but 

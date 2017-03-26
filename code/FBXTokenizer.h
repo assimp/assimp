@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_TOKENIZER_H
 #define INCLUDED_AI_FBX_TOKENIZER_H
 
-#include <memory>
 #include "FBXCompileConfig.h"
 #include <assimp/ai_assert.h>
 #include <vector>
@@ -84,13 +83,10 @@ enum TokenType
  *  Offers iterator protocol. Tokens are immutable. */
 class Token
 {
-
 private:
-
     static const unsigned int BINARY_MARKER = static_cast<unsigned int>(-1);
 
 public:
-
     /** construct a textual token */
     Token(const char* sbegin, const char* send, TokenType type, unsigned int line, unsigned int column);
 
@@ -100,13 +96,11 @@ public:
     ~Token();
 
 public:
-
     std::string StringContents() const {
         return std::string(begin(),end());
     }
 
 public:
-
     bool IsBinary() const {
         return column == BINARY_MARKER;
     }

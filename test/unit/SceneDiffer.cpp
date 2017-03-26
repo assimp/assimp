@@ -44,9 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/material.h>
 #include <sstream>
 
-using namespace Assimp;
+namespace Assimp {
 
-SceneDiffer::SceneDiffer() {
+SceneDiffer::SceneDiffer() 
+: m_diffs() {
     // empty
 }
 
@@ -94,14 +95,14 @@ bool SceneDiffer::isEqual( const aiScene *expected, const aiScene *toCompare ) {
         addDiff( stream.str() );
         return false;
     }
-    
+
     if ( expected->mNumMaterials > 0 ) {
         if ( nullptr == expected->mMaterials || nullptr == toCompare->mMaterials ) {
             addDiff( "Number of materials > 0 and mat pointer is nullptr" );
             return false;
         }
     }
-    
+
     for ( unsigned int i = 0; i < expected->mNumMaterials; i++ ) {
         aiMaterial *expectedMat( expected->mMaterials[ i ] );
         aiMaterial *toCompareMat( expected->mMaterials[ i ] );
@@ -119,7 +120,7 @@ void SceneDiffer::showReport() {
     if ( m_diffs.empty() ) {
         return;
     }
-    
+
     for ( std::vector<std::string>::iterator it = m_diffs.begin(); it != m_diffs.end(); it++ ) {
         std::cout << *it << "\n";
     }
@@ -144,11 +145,11 @@ static std::string dumpVector3( const aiVector3D &toDump ) {
     return stream.str();
 }
 
-static std::string dumpColor4D( const aiColor4D &toDump ) {
+/*static std::string dumpColor4D( const aiColor4D &toDump ) {
     std::stringstream stream;
     stream << "( " << toDump.r << ", " << toDump.g << ", " << toDump.b << ", " << toDump.a << ")";
     return stream.str();
-}
+}*/
 
 static std::string dumpFace( const aiFace &face ) {
     std::stringstream stream;
@@ -156,7 +157,8 @@ static std::string dumpFace( const aiFace &face ) {
         stream << face.mIndices[ i ];
         if ( i < face.mNumIndices - 1 ) {
             stream << ", ";
-        } else {
+        }
+        else {
             stream << "\n";
         }
     }
@@ -213,98 +215,98 @@ bool SceneDiffer::compareMesh( aiMesh *expected, aiMesh *toCompare ) {
         return false;
     }
 
-//    return true;
-    
-    //ToDo!
-    bool normalEqual( true );
-/*    for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
-        aiVector3D &expNormal( expected->mNormals[ i ] );
-        aiVector3D &toCompNormal( toCompare->mNormals[ i ] );
-        if ( expNormal.Equal( toCompNormal ) ) {
-            std::stringstream stream;
-            stream << "Normal not equal ( expected: " << dumpVector3( expNormal ) << ", found: " << dumpVector3( toCompNormal ) << "\n";
-            addDiff( stream.str() );
-            normalEqual = false;
-        }
-    }
-    if ( !normalEqual ) {
-        return false;
-    }
+    //    return true;
 
-    // vertex colors
-    bool vertColEqual( true );
-    for ( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++ ) {
-        if ( expected->HasVertexColors(a) != toCompare->HasVertexColors(a) ) {
-            addDiff( "Expected are normals, toCompare does not have any." );
-            return false;
-        }
+        //ToDo!
+    /*bool normalEqual( true );
         for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
-            aiColor4D &expColor4D( expected->mColors[ a ][ i ] );
-            aiColor4D &toCompColor4D( toCompare->mColors[ a ][ i ] );
-            if ( expColor4D != toCompColor4D ) {
+            aiVector3D &expNormal( expected->mNormals[ i ] );
+            aiVector3D &toCompNormal( toCompare->mNormals[ i ] );
+            if ( expNormal.Equal( toCompNormal ) ) {
                 std::stringstream stream;
-                stream << "Color4D not equal ( expected: " << dumpColor4D( expColor4D ) << ", found: " << dumpColor4D( toCompColor4D ) << "\n";
+                stream << "Normal not equal ( expected: " << dumpVector3( expNormal ) << ", found: " << dumpVector3( toCompNormal ) << "\n";
                 addDiff( stream.str() );
-                vertColEqual = false;
+                normalEqual = false;
             }
         }
-        if ( !vertColEqual ) {
+        if ( !normalEqual ) {
             return false;
         }
-    }
 
-    // texture coords
-    bool texCoordsEqual( true );
-    for ( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++ ) {
-        if ( expected->HasTextureCoords( a ) != toCompare->HasTextureCoords( a ) ) {
-            addDiff( "Expected are texture coords, toCompare does not have any." );
-            return false;
-        }
-        for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
-            aiVector3D &expTexCoord( expected->mTextureCoords[ a ][ i ] );
-            aiVector3D &toCompTexCoord( toCompare->mTextureCoords[ a ][ i ] );
-            if ( expTexCoord.Equal( toCompTexCoord ) ) {
-                std::stringstream stream;
-                stream << "Texture coords not equal ( expected: " << dumpVector3( expTexCoord ) << ", found: " << dumpVector3( toCompTexCoord ) << "\n";
-                addDiff( stream.str() );
-                vertColEqual = false;
+        // vertex colors
+        bool vertColEqual( true );
+        for ( unsigned int a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; a++ ) {
+            if ( expected->HasVertexColors(a) != toCompare->HasVertexColors(a) ) {
+                addDiff( "Expected are normals, toCompare does not have any." );
+                return false;
+            }
+            for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
+                aiColor4D &expColor4D( expected->mColors[ a ][ i ] );
+                aiColor4D &toCompColor4D( toCompare->mColors[ a ][ i ] );
+                if ( expColor4D != toCompColor4D ) {
+                    std::stringstream stream;
+                    stream << "Color4D not equal ( expected: " << dumpColor4D( expColor4D ) << ", found: " << dumpColor4D( toCompColor4D ) << "\n";
+                    addDiff( stream.str() );
+                    vertColEqual = false;
+                }
+            }
+            if ( !vertColEqual ) {
+                return false;
             }
         }
-        if ( !vertColEqual ) {
+
+        // texture coords
+        bool texCoordsEqual( true );
+        for ( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++ ) {
+            if ( expected->HasTextureCoords( a ) != toCompare->HasTextureCoords( a ) ) {
+                addDiff( "Expected are texture coords, toCompare does not have any." );
+                return false;
+            }
+            for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
+                aiVector3D &expTexCoord( expected->mTextureCoords[ a ][ i ] );
+                aiVector3D &toCompTexCoord( toCompare->mTextureCoords[ a ][ i ] );
+                if ( expTexCoord.Equal( toCompTexCoord ) ) {
+                    std::stringstream stream;
+                    stream << "Texture coords not equal ( expected: " << dumpVector3( expTexCoord ) << ", found: " << dumpVector3( toCompTexCoord ) << "\n";
+                    addDiff( stream.str() );
+                    vertColEqual = false;
+                }
+            }
+            if ( !vertColEqual ) {
+                return false;
+            }
+        }
+
+        // tangents and bi-tangents
+        if ( expected->HasTangentsAndBitangents() != toCompare->HasTangentsAndBitangents() ) {
+            addDiff( "Expected are tangents and bi-tangents, toCompare does not have any." );
             return false;
         }
-    }
+        bool tangentsEqual( true );
+        for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
+            aiVector3D &expTangents( expected->mTangents[ i ] );
+            aiVector3D &toCompTangents( toCompare->mTangents[ i ] );
+            if ( expTangents.Equal( toCompTangents ) ) {
+                std::stringstream stream;
+                stream << "Tangents not equal ( expected: " << dumpVector3( expTangents ) << ", found: " << dumpVector3( toCompTangents ) << "\n";
+                addDiff( stream.str() );
+                tangentsEqual = false;
+            }
 
-    // tangents and bi-tangents
-    if ( expected->HasTangentsAndBitangents() != toCompare->HasTangentsAndBitangents() ) {
-        addDiff( "Expected are tangents and bi-tangents, toCompare does not have any." );
-        return false;
-    }
-    bool tangentsEqual( true );
-    for ( unsigned int i = 0; i < expected->mNumVertices; i++ ) {
-        aiVector3D &expTangents( expected->mTangents[ i ] );
-        aiVector3D &toCompTangents( toCompare->mTangents[ i ] );
-        if ( expTangents.Equal( toCompTangents ) ) {
-            std::stringstream stream;
-            stream << "Tangents not equal ( expected: " << dumpVector3( expTangents ) << ", found: " << dumpVector3( toCompTangents ) << "\n";
-            addDiff( stream.str() );
-            tangentsEqual = false;
+            aiVector3D &expBiTangents( expected->mBitangents[ i ] );
+            aiVector3D &toCompBiTangents( toCompare->mBitangents[ i ] );
+            if ( expBiTangents.Equal( toCompBiTangents ) ) {
+                std::stringstream stream;
+                stream << "Tangents not equal ( expected: " << dumpVector3( expBiTangents ) << ", found: " << dumpVector3( toCompBiTangents ) << " )\n";
+                addDiff( stream.str() );
+                tangentsEqual = false;
+            }
         }
+        if ( !tangentsEqual ) {
+            return false;
+        }*/
 
-        aiVector3D &expBiTangents( expected->mBitangents[ i ] );
-        aiVector3D &toCompBiTangents( toCompare->mBitangents[ i ] );
-        if ( expBiTangents.Equal( toCompBiTangents ) ) {
-            std::stringstream stream;
-            stream << "Tangents not equal ( expected: " << dumpVector3( expBiTangents ) << ", found: " << dumpVector3( toCompBiTangents ) << " )\n";
-            addDiff( stream.str() );
-            tangentsEqual = false;
-        }
-    }
-    if ( !tangentsEqual ) {
-        return false;
-    }*/
-
-    // faces
+        // faces
     if ( expected->mNumFaces != toCompare->mNumFaces ) {
         std::stringstream stream;
         stream << "Number of faces are not equal, ( expected: " << expected->mNumFaces << ", found: " << toCompare->mNumFaces << ")\n";
@@ -366,4 +368,6 @@ bool SceneDiffer::compareMaterial( aiMaterial *expected, aiMaterial *toCompare )
     // todo!
 
     return true;
+}
+
 }

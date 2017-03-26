@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef D3MFOPCPACKAGE_H
 #define D3MFOPCPACKAGE_H
 
-#include <string>
 #include <memory>
 
 #include <assimp/IOSystem.hpp>

@@ -45,8 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjTools.h"
 #include "ObjFileData.h"
 #include "ParsingUtils.h"
-#include "DefaultIOSystem.h"
 #include "BaseImporter.h"
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/material.h>
 #include <assimp/Importer.hpp>
@@ -58,7 +58,7 @@ const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
 // -------------------------------------------------------------------
 //  Constructor with loaded data and directories.
-ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, 
+ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName,
                               IOSystem *io, ProgressHandler* progress,
                               const std::string &originalObjFileName) :
     m_DataIt(),
@@ -102,9 +102,9 @@ ObjFile::Model *ObjFileParser::GetModel() const {
 //  File parsing method.
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
-    const unsigned int updateProgressEveryBytes = 100 * 1024;
+    //const unsigned int updateProgressEveryBytes = 100 * 1024;
     unsigned int progressCounter = 0;
-    const unsigned int bytesToProcess = streamBuffer.size();
+    const unsigned int bytesToProcess = static_cast<unsigned int>(streamBuffer.size());
     const unsigned int progressTotal = 3 * bytesToProcess;
     const unsigned int progressOffset = bytesToProcess;
     unsigned int processed = 0;
@@ -115,10 +115,10 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
 
-        // Handle progress reporting        
+        // Handle progress reporting
         const size_t filePos( streamBuffer.getFilePos() );
         if ( lastFilePos < filePos ) {
-            processed += filePos;
+            processed += static_cast<unsigned int>(filePos);
             lastFilePos = filePos;
             progressCounter++;
             m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
@@ -377,9 +377,9 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
     ObjFile::Face *face = new ObjFile::Face( type );
     bool hasNormal = false;
 
-    const int vSize = m_pModel->m_Vertices.size();
-    const int vtSize = m_pModel->m_TextureCoord.size();
-    const int vnSize = m_pModel->m_Normals.size();
+    const int vSize = static_cast<unsigned int>(m_pModel->m_Vertices.size());
+    const int vtSize = static_cast<unsigned int>(m_pModel->m_TextureCoord.size());
+    const int vnSize = static_cast<unsigned int>(m_pModel->m_Normals.size());
 
     const bool vt = (!m_pModel->m_TextureCoord.empty());
     const bool vn = (!m_pModel->m_Normals.empty());
@@ -568,7 +568,10 @@ void ObjFileParser::getMaterialLib() {
     std::string absName;
 
 	// Check if directive is valid.
-	if(!strMatName.length()) throw DeadlyImportError("File name of the material is absent.");
+    if ( 0 == strMatName.length() ) {
+        DefaultLogger::get()->warn( "OBJ: no name for material library specified." );
+        return;
+    }
 
     if ( m_pIO->StackSize() > 0 ) {
         std::string path = m_pIO->CurrentDirectory();
@@ -587,7 +590,7 @@ void ObjFileParser::getMaterialLib() {
         DefaultLogger::get()->info("OBJ: Opening fallback material file " + strMatFallbackName);
         pFile = m_pIO->Open(strMatFallbackName);
         if (!pFile) {
-            DefaultLogger::get()->error("OBJ: Unable to locate fallback material file " + strMatName);
+            DefaultLogger::get()->error("OBJ: Unable to locate fallback material file " + strMatFallbackName);
             m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             return;
         }
@@ -772,7 +775,7 @@ void ObjFileParser::createMesh( const std::string &meshName )
     ai_assert( NULL != m_pModel );
     m_pModel->m_pCurrentMesh = new ObjFile::Mesh( meshName );
     m_pModel->m_Meshes.push_back( m_pModel->m_pCurrentMesh );
-    unsigned int meshId = m_pModel->m_Meshes.size()-1;
+    unsigned int meshId = static_cast<unsigned int>(m_pModel->m_Meshes.size()-1);
     if ( NULL != m_pModel->m_pCurrent )
     {
         m_pModel->m_pCurrent->m_Meshes.push_back( meshId );

@@ -41,9 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnitTestPCH.h"
 #include "SceneDiffer.h"
-
-#include <assimp/Importer.hpp>
+#include "AbstractImportExportBase.h"
 #include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 
 using namespace Assimp;
 
@@ -90,6 +91,7 @@ static const std::string ObjModel =
     "\n"
     "# Point / Line / Face list\n"
     "\n"
+    "g Box01\n"    
     "usemtl Default\n"
     "f 4 3 2 1\n"
     "f 2 6 5 1\n"
@@ -100,7 +102,21 @@ static const std::string ObjModel =
     "\n"
     "# End of file\n";
 
-class utObjImportExport : public ::testing::Test {
+static const std::string ObjModel_Issue1111 =
+    "o 1\n"
+    "\n"
+    "# Vertex list\n"
+    "\n"
+    "v -0.5 -0.5  0.5\n"
+    "v -0.5 -0.5 -0.5\n"
+    "v -0.5  0.5 -0.5\n"
+    "\n"
+    "usemtl\n"
+    "f 1 2 3\n"
+    "\n"
+    "# End of file\n";
+
+class utObjImportExport : public AbstractImportExportBase {
 protected:
     virtual void SetUp() {
         m_im = new Assimp::Importer;
@@ -173,10 +189,42 @@ protected:
         return expScene;
     }
 
+    virtual bool importerTest() {
+        ::Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
+        return nullptr != scene;
+    }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+    virtual bool exporterTest() {
+        ::Assimp::Importer importer;
+        ::Assimp::Exporter exporter;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
+        EXPECT_NE( nullptr, scene );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj" ) );
+        
+        return true;
+    }
+
+#endif // ASSIMP_BUILD_NO_EXPORT
+
 protected:
-    Assimp::Importer *m_im;
+    ::Assimp::Importer *m_im;
     aiScene *m_expectedScene;
 };
+
+TEST_F( utObjImportExport, importObjFromFileTest ) {
+    EXPECT_TRUE( importerTest() );
+}
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F( utObjImportExport, exportObjFromFileTest ) {
+    EXPECT_TRUE( exporterTest() );
+}
+
+#endif // ASSIMP_BUILD_NO_EXPORT
 
 TEST_F( utObjImportExport, obj_import_test ) {
     const aiScene *scene = m_im->ReadFileFromMemory( (void*) ObjModel.c_str(), ObjModel.size(), 0 );
@@ -188,4 +236,20 @@ TEST_F( utObjImportExport, obj_import_test ) {
     differ.showReport();
 
     m_im->FreeScene();
+}
+
+TEST_F( utObjImportExport, issue1111_no_mat_name_Test ) {
+    const aiScene *scene = m_im->ReadFileFromMemory( ( void* ) ObjModel_Issue1111.c_str(), ObjModel_Issue1111.size(), 0 );
+    EXPECT_NE( nullptr, scene );
+}
+
+TEST_F( utObjImportExport, issue809_vertex_color_Test ) {
+    ::Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/cube_with_vertexcolors.obj", 0 );
+    EXPECT_NE( nullptr, scene );
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    ::Assimp::Exporter exporter;
+    EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/test.obj" ) );
+#endif // ASSIMP_BUILD_NO_EXPORT
 }

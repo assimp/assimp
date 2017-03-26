@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  ASSXML exporter main code
  */
 #include <stdarg.h>
-#include "./../include/assimp/version.h"
+#include <assimp/version.h>
 #include "ProcessHelper.h"
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
@@ -72,7 +72,7 @@ static int ioprintf( IOStream * io, const char *format, ... ) {
         return -1;
     }
 
-    static const size_t Size = 4096;
+    static const int Size = 4096;
     char sz[ Size ];
     ::memset( sz, '\0', Size );
     va_list va;

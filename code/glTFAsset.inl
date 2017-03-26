@@ -926,7 +926,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 
 	// Read data from buffer and place it in BinaryStream for decoder.
 	// Just "Count" because always is used type equivalent to uint8_t.
-	bstream.LoadFromBuffer(&buf->GetPointer()[pCompression_Open3DGC.Offset], pCompression_Open3DGC.Count);
+	bstream.LoadFromBuffer(&buf->GetPointer()[pCompression_Open3DGC.Offset], static_cast<unsigned long>(pCompression_Open3DGC.Count));
 
 	// After decoding header we can get size of primitives.
 	if(decoder.DecodeHeader(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC header.");
@@ -970,9 +970,9 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 	{
 		// size = number_of_elements * components_per_element * size_of_component.
 		// Note. But as you can see above, at first we are use this variable in meaning "count". After checking count of objects...
-		size_t tval = ifs.GetNFloatAttribute(idx);
+		size_t tval = ifs.GetNFloatAttribute(static_cast<unsigned long>(idx));
 
-		switch(ifs.GetFloatAttributeType(idx))
+		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
 		{
 			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
 				// Check situation when encoded data contain texture coordinates but primitive not.
@@ -986,15 +986,15 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 				}
 				else
 				{
-					ifs.SetNFloatAttribute(idx, 0);// Disable decoding this attribute.
+					ifs.SetNFloatAttribute(static_cast<unsigned long>(idx), 0ul);// Disable decoding this attribute.
 				}
 
 				break;
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
 		}
 
-		tval *=  ifs.GetFloatAttributeDim(idx) * sizeof(o3dgc::Real);// After checking count of objects we can get size of array.
+		tval *=  ifs.GetFloatAttributeDim(static_cast<unsigned long>(idx)) * sizeof(o3dgc::Real);// After checking count of objects we can get size of array.
 		size_floatattr[idx] = tval;
 		decoded_data_size += tval;
 	}
@@ -1002,8 +1002,8 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++)
 	{
 		// size = number_of_elements * components_per_element * size_of_component. See float attributes note.
-		size_t tval = ifs.GetNIntAttribute(idx);
-		switch( ifs.GetIntAttributeType( idx ) )
+		size_t tval = ifs.GetNIntAttribute(static_cast<unsigned long>(idx));
+		switch( ifs.GetIntAttributeType(static_cast<unsigned long>(idx) ) )
 		{
             case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
             case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
@@ -1012,10 +1012,10 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
                 break;
 
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
 		}
 
-		tval *= ifs.GetIntAttributeDim(idx) * sizeof(long);// See float attributes note.
+		tval *= ifs.GetIntAttributeDim(static_cast<unsigned long>(idx)) * sizeof(long);// See float attributes note.
 		size_intattr[idx] = tval;
 		decoded_data_size += tval;
 	}
@@ -1039,24 +1039,24 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 
 	for(size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++)
 	{
-		switch(ifs.GetFloatAttributeType(idx))
+		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
 		{
 			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
 				if(idx_texcoord < primitives[0].attributes.texcoord.size())
 				{
 					// See above about absent attributes.
-					ifs.SetFloatAttribute(idx, (o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.texcoord[idx])));
+					ifs.SetFloatAttribute(static_cast<unsigned long>(idx), (o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.texcoord[idx])));
 					idx_texcoord++;
 				}
 
 				break;
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
 		}
 	}
 
 	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++) {
-		switch(ifs.GetIntAttributeType(idx)) {
+		switch(ifs.GetIntAttributeType(static_cast<unsigned int>(idx))) {
             case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
             case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
             case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
@@ -1065,7 +1065,7 @@ Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 
 			// ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
 			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(idx)));
+				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
 		}
 	}
 

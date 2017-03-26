@@ -234,7 +234,7 @@ public:
 
     // -------------------------------------------------------------------
     //! Parse a property from a string. The end of the
-    //! string is either '\n', '\r' or '\0'. Return valie is false
+    //! string is either '\n', '\r' or '\0'. Return value is false
     //! if the input string is NOT a valid property (E.g. does
     //! not start with the "property" keyword)
     static bool ParseProperty (const char* pCur, const char** pCurOut,

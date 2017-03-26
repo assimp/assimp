@@ -178,6 +178,8 @@ struct Material {
     int illumination_model;
     //! Index of refraction
     ai_real ior;
+    //! Transparency color
+    aiColor3D transparent;
 
     //! Constructor
     Material()
@@ -185,7 +187,8 @@ struct Material {
     ,   alpha   (ai_real( 1.0 ) )
     ,   shineness ( ai_real( 0.0) )
     ,   illumination_model (1)
-    ,   ior     ( ai_real( 1.0 ) ) {
+    ,   ior     ( ai_real( 1.0 ) )
+    ,   transparent( ai_real( 1.0), ai_real (1.0), ai_real(1.0)) {
         // empty
         for (size_t i = 0; i < TextureTypeCount; ++i) {
             clamp[ i ] = false;

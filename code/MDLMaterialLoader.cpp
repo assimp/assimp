@@ -52,8 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
+#include <assimp/Defines.h>
 #include "qnan.h"
-#include "Defines.h"
 
 
 using namespace Assimp;

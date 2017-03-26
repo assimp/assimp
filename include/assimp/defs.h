@@ -212,7 +212,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
 #error Currently, Borland is unsupported. Feel free to port Assimp.
 
-// "W8059 Packgr��e der Struktur ge�ndert"
+// "W8059 Packgröße der Struktur geändert"
 
 #endif
 

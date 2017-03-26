@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 #include <memory>
 
 using namespace Assimp;
@@ -702,7 +703,7 @@ void SMDImporter::ParseFile()
     {
         if(!SkipSpacesAndLineEnd(szCurrent,&szCurrent)) break;
 
-        // "version <n> \n", <n> should be 1 for hl and hl� SMD files
+        // "version <n> \n", <n> should be 1 for hl and hl2 SMD files
         if (TokenMatch(szCurrent,"version",7))
         {
             if(!SkipSpaces(szCurrent,&szCurrent)) break;
@@ -1020,7 +1021,7 @@ void SMDImporter::ParseTriangle(const char* szCurrent,
 
     // read the texture file name
     const char* szLast = szCurrent;
-    while (!IsSpaceOrNewLine(*szCurrent++));
+    while (!IsSpaceOrNewLine(*++szCurrent));
 
     // ... and get the index that belongs to this file name
     face.iTexture = GetTextureIndex(std::string(szLast,(uintptr_t)szCurrent-(uintptr_t)szLast));

@@ -46,12 +46,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_BLEND_DNA_H
 
 #include "BaseImporter.h"
-#include "TinyFormatter.h"
 #include "StreamReader.h"
 #include <assimp/DefaultLogger.hpp>
 #include <stdint.h>
 #include <memory>
-
+#include <map>
 
 // enable verbose log output. really verbose, so be careful.
 #ifdef ASSIMP_BUILD_DEBUG

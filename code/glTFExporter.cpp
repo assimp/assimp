@@ -111,7 +111,6 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     mScene = sceneCopy.get();
 
-    std::unique_ptr<Asset> asset();
     mAsset.reset( new glTF::Asset( pIOSystem ) );
 
     if (isBinary) {
@@ -457,7 +456,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
             aiMatrix4x4 tmpMatrix4;
             CopyValue(aib->mOffsetMatrix, tmpMatrix4);
             inverseBindMatricesData.push_back(tmpMatrix4);
-            jointNamesIndex = inverseBindMatricesData.size() - 1;
+            jointNamesIndex = static_cast<unsigned int>(inverseBindMatricesData.size() - 1);
         }
 
         // aib->mWeights   =====>  vertexWeightData
@@ -687,13 +686,13 @@ void glTFExporter::ExportMeshes()
 			{
 				size_t num = comp_o3dgc_ifs.GetNumFloatAttributes();
 
-				comp_o3dgc_params.SetFloatAttributeQuantBits(num, quant_texcoord);
-				comp_o3dgc_params.SetFloatAttributePredMode(num, prediction_texcoord);
-				comp_o3dgc_ifs.SetNFloatAttribute(num, aim->mNumVertices);// number of elements.
-				comp_o3dgc_ifs.SetFloatAttributeDim(num, aim->mNumUVComponents[num_tc]);// components per element: aiVector3D => x * float
-				comp_o3dgc_ifs.SetFloatAttributeType(num, o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD);
-				comp_o3dgc_ifs.SetFloatAttribute(num, (o3dgc::Real* const)&b->GetPointer()[idx_srcdata_tc[num_tc]]);
-				comp_o3dgc_ifs.SetNumFloatAttributes(num + 1);
+				comp_o3dgc_params.SetFloatAttributeQuantBits(static_cast<unsigned long>(num), quant_texcoord);
+				comp_o3dgc_params.SetFloatAttributePredMode(static_cast<unsigned long>(num), prediction_texcoord);
+				comp_o3dgc_ifs.SetNFloatAttribute(static_cast<unsigned long>(num), aim->mNumVertices);// number of elements.
+				comp_o3dgc_ifs.SetFloatAttributeDim(static_cast<unsigned long>(num), aim->mNumUVComponents[num_tc]);// components per element: aiVector3D => x * float
+				comp_o3dgc_ifs.SetFloatAttributeType(static_cast<unsigned long>(num), o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD);
+				comp_o3dgc_ifs.SetFloatAttribute(static_cast<unsigned long>(num), (o3dgc::Real* const)&b->GetPointer()[idx_srcdata_tc[num_tc]]);
+				comp_o3dgc_ifs.SetNumFloatAttributes(static_cast<unsigned long>(num + 1));
 			}
 
 			// Coordinates indices
@@ -741,7 +740,7 @@ void glTFExporter::ExportMeshes()
             CopyValue(inverseBindMatricesData[idx_joint], invBindMatrixData[idx_joint]);
         }
 
-        Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b, inverseBindMatricesData.size(), invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
+        Ref<Accessor> invBindMatrixAccessor = ExportData(*mAsset, skinName, b, static_cast<unsigned int>(inverseBindMatricesData.size()), invBindMatrixData, AttribType::MAT4, AttribType::MAT4, ComponentType_FLOAT);
         if (invBindMatrixAccessor) skinRef->inverseBindMatrices = invBindMatrixAccessor;
 
         // Identity Matrix   =====>  skinRef->bindShapeMatrix

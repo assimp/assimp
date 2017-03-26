@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
+
 #include <memory>
 
 #include "MakeVerboseFormat.h"
@@ -270,7 +272,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
 					// Limitations for meshes when using Open3DGC-compression.
 					// It's a current limitation of sp... Specification have not this part still - about mesh compression. Why only one primitive?
 					// Because glTF is very flexibly. But in fact it ugly flexible. Every primitive can has own set of accessors and accessors can
-					// point to a-a-a-a-any part of buffer (thru bufferview ofcourse) and even to another buffer. We know that "Open3DGC-compression"
+					// point to a-a-a-a-any part of buffer (through bufferview of course) and even to another buffer. We know that "Open3DGC-compression"
 					// is applicable only to part of buffer. As we can't guaranty continuity of the data for decoder, we will limit quantity of primitives.
 					// Yes indices, coordinates etc. still can br stored in different buffers, but with current specification it's a exporter problem.
 					// Also primitive can has only one of "POSITION", "NORMAL" and less then "AI_MAX_NUMBER_OF_TEXTURECOORDS" of "TEXCOORD". All accessor

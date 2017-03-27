@@ -390,7 +390,7 @@ namespace pmx
 		}
 		int vertex_index;
 		float position_offset[3];
-		void Read(std::istream *stream, PmxSetting *setting) override;
+		void Read(std::istream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphUVOffset : public PmxMorphOffset
@@ -405,7 +405,7 @@ namespace pmx
 		}
 		int vertex_index;
 		float uv_offset[4];
-		void Read(std::istream *stream, PmxSetting *setting) override;
+		void Read(std::istream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphBoneOffset : public PmxMorphOffset
@@ -424,7 +424,7 @@ namespace pmx
 		int bone_index;
 		float translation[3];
 		float rotation[4];
-		void Read(std::istream *stream, PmxSetting *setting) override;
+		void Read(std::istream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphMaterialOffset : public PmxMorphOffset
@@ -457,7 +457,7 @@ namespace pmx
 		float texture_argb[4];
 		float sphere_texture_argb[4];
 		float toon_texture_argb[4];
-		void Read(std::istream *stream, PmxSetting *setting) override;
+		void Read(std::istream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphGroupOffset : public PmxMorphOffset
@@ -469,7 +469,7 @@ namespace pmx
 		{}
 		int morph_index;
 		float morph_weight;
-		void Read(std::istream *stream, PmxSetting *setting) override;
+		void Read(std::istream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphFlipOffset : public PmxMorphOffset
@@ -481,7 +481,7 @@ namespace pmx
 		{}
 		int morph_index;
 		float morph_value;
-		void Read(std::istream *stream, PmxSetting *setting) override;
+		void Read(std::istream *stream, PmxSetting *setting); //override;
 	};
 
 	class PmxMorphImplusOffset : public PmxMorphOffset
@@ -500,7 +500,7 @@ namespace pmx
 		uint8_t is_local;
 		float velocity[3];
 		float angular_torque[3];
-		void Read(std::istream *stream, PmxSetting *setting) override;
+		void Read(std::istream *stream, PmxSetting *setting); //override;
 	};
 
 	/// モーフ

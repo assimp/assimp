@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exceptional.h"
 #include <memory>
 #include <assimp/IOStream.hpp>
-#include "Defines.h"
+#include <assimp/Defines.h>
 
 namespace Assimp {
 
@@ -243,7 +243,7 @@ public:
      *
      *  @param limit Maximum number of bytes to be read from
      *    the beginning of the file. Specifying UINT_MAX
-     *    resets the limit to the original end of the stream. 
+     *    resets the limit to the original end of the stream.
      *  Returns the previously set limit. */
     unsigned int SetReadLimit(unsigned int _limit)  {
         unsigned int prev = GetReadLimit();

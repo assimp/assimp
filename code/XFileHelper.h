@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/quaternion.h>
 #include <assimp/mesh.h>
 #include <assimp/anim.h>
-#include "Defines.h"
+#include <assimp/Defines.h>
 
 namespace Assimp
 {

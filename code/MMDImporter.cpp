@@ -42,14 +42,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
 
 #include "MMDImporter.h"
-#include "DefaultIOSystem.h"
 #include "MMDPmdParser.h"
 #include "MMDPmxParser.h"
 #include "MMDVmdParser.h"
-#include "SkeletonMeshBuilder.h"
-//#include "IOStreamBuffer.h"
 #include "ConvertToLHProcess.h"
-#include <assimp/DefaultLogger.hpp>
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/Importer.hpp>
 #include <assimp/ai_assert.h>
 #include <assimp/scene.h>

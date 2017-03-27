@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringUtils.h"
 
 // Header files, stdlib.
-#include <algorithm>
 #include <iterator>
 
 namespace Assimp
@@ -62,7 +61,7 @@ namespace Assimp
 
 aiColor4D AMFImporter::SPP_Material::GetColor(const float pX, const float pY, const float pZ) const
 {
-aiColor4D tcol;
+    aiColor4D tcol;
 
 	// Check if stored data are supported.
 	if(Composition.size() != 0)
@@ -93,8 +92,8 @@ aiColor4D tcol;
 void AMFImporter::PostprocessHelper_CreateMeshDataArray(const CAMFImporter_NodeElement_Mesh& pNodeElement, std::vector<aiVector3D>& pVertexCoordinateArray,
 														std::vector<CAMFImporter_NodeElement_Color*>& pVertexColorArray) const
 {
-CAMFImporter_NodeElement_Vertices* vn = nullptr;
-size_t col_idx;
+    CAMFImporter_NodeElement_Vertices* vn = nullptr;
+    size_t col_idx;
 
 	// All data stored in "vertices", search for it.
 	for(CAMFImporter_NodeElement* ne_child: pNodeElement.Child)
@@ -142,8 +141,8 @@ size_t col_idx;
 size_t AMFImporter::PostprocessHelper_GetTextureID_Or_Create(const std::string& pID_R, const std::string& pID_G, const std::string& pID_B,
 																const std::string& pID_A)
 {
-size_t TextureConverted_Index;
-std::string TextureConverted_ID;
+    size_t TextureConverted_Index;
+    std::string TextureConverted_ID;
 
 	// check input data
 	if(pID_R.empty() && pID_G.empty() && pID_B.empty() && pID_A.empty())
@@ -302,19 +301,19 @@ std::string TextureConverted_ID;
 
 void AMFImporter::PostprocessHelper_SplitFacesByTextureID(std::list<SComplexFace>& pInputList, std::list<std::list<SComplexFace> >& pOutputList_Separated)
 {
-auto texmap_is_equal = [](const CAMFImporter_NodeElement_TexMap* pTexMap1, const CAMFImporter_NodeElement_TexMap* pTexMap2) -> bool
-{
-	if((pTexMap1 == nullptr) && (pTexMap2 == nullptr)) return true;
-	if(pTexMap1 == nullptr) return false;
-	if(pTexMap2 == nullptr) return false;
+    auto texmap_is_equal = [](const CAMFImporter_NodeElement_TexMap* pTexMap1, const CAMFImporter_NodeElement_TexMap* pTexMap2) -> bool
+    {
+	    if((pTexMap1 == nullptr) && (pTexMap2 == nullptr)) return true;
+	    if(pTexMap1 == nullptr) return false;
+	    if(pTexMap2 == nullptr) return false;
 
-	if(pTexMap1->TextureID_R != pTexMap2->TextureID_R) return false;
-	if(pTexMap1->TextureID_G != pTexMap2->TextureID_G) return false;
-	if(pTexMap1->TextureID_B != pTexMap2->TextureID_B) return false;
-	if(pTexMap1->TextureID_A != pTexMap2->TextureID_A) return false;
+	    if(pTexMap1->TextureID_R != pTexMap2->TextureID_R) return false;
+	    if(pTexMap1->TextureID_G != pTexMap2->TextureID_G) return false;
+	    if(pTexMap1->TextureID_B != pTexMap2->TextureID_B) return false;
+	    if(pTexMap1->TextureID_A != pTexMap2->TextureID_A) return false;
 
-	return true;
-};
+	    return true;
+    };
 
 	pOutputList_Separated.clear();
 	if(pInputList.size() == 0) return;

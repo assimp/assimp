@@ -48,7 +48,7 @@ namespace Assimp    {
 
 // ---------------------------------------------------------------------------
 /** Default implementation of IOSystem using the standard C file functions */
-class DefaultIOSystem : public IOSystem
+class ASSIMP_API DefaultIOSystem : public IOSystem
 {
 public:
     /** Constructor. */

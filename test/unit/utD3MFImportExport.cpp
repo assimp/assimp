@@ -1,13 +1,15 @@
 /*
+---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 Copyright (c) 2006-2016, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the
-following conditions are met:
+with or without modification, are permitted provided that the following
+conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -34,29 +36,22 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-----------------------------------------------------------------------
+---------------------------------------------------------------------------
 */
-#pragma once
+#include "UnitTestPCH.h"
+#include "AbstractImportExportBase.h"
 
-#include <assimp/DefaultIOStream.h>
+#include <assimp/Importer.hpp>
 
-using namespace ::Assimp;
-
-class TestDefaultIOStream : public DefaultIOStream {
+class utD3MFImporterExporter : public AbstractImportExportBase {
 public:
-    TestDefaultIOStream()
-        : DefaultIOStream() {
-        // empty
-    }
-
-    TestDefaultIOStream( FILE* pFile, const std::string &strFilename )
-    : DefaultIOStream( pFile, strFilename ) {
-        // empty
-    }
-
-    virtual ~TestDefaultIOStream() {
-        // empty
+    virtual bool importerTest() {
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", 0);
+        return nullptr != scene;
     }
 };
 
+TEST_F(utD3MFImporterExporter, import3MFFromFileTest) {
+    EXPECT_TRUE(importerTest());
+}

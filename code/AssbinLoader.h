@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_ASSBINIMPORTER_H_INC
 
 #include "BaseImporter.h"
-#include <assimp/types.h>
 
 struct aiMesh;
 struct aiNode;

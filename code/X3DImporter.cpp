@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringUtils.h"
 
 // Header files, Assimp.
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 #include "fast_atof.h"
 
 // Header files, stdlib.

@@ -45,10 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_BLOBIOSYSTEM_H_INCLUDED
 #define AI_BLOBIOSYSTEM_H_INCLUDED
 
-#include "./../include/assimp/IOStream.hpp"
-#include "./../include/assimp/cexport.h"
-#include "./../include/assimp/IOSystem.hpp"
-#include "./../include/assimp/DefaultLogger.hpp"
+#include <assimp/IOStream.hpp>
+#include <assimp/cexport.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/DefaultLogger.hpp>
 #include <stdint.h>
 #include <set>
 #include <vector>

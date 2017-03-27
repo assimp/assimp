@@ -46,7 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_NULLLOGGER_H
 
 #include "Logger.hpp"
-namespace Assimp    {
+
+namespace Assimp {
+
 // ---------------------------------------------------------------------------
 /** @brief CPP-API: Empty logging implementation.
  *

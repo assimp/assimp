@@ -55,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <android/native_activity.h>
 #include <assimp/ai_assert.h>
 #include <assimp/port/AndroidJNI/AndroidJNIIOSystem.h>
-#include <code/DefaultIOStream.h>
+#include <assimp/DefaultIOStream.h>
 #include <fstream>
 
 using namespace Assimp;

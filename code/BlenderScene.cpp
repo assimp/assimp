@@ -44,9 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 
-#include "BlenderDNA.h"
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
+#include "BlenderDNA.h"
 
 using namespace Assimp;
 using namespace Assimp::Blender;

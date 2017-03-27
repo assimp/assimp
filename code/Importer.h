@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_IMPORTER_H
 
 #include <map>
-#include <string>
 #include <vector>
+#include <string>
 #include <assimp/matrix4x4.h>
 
 struct aiScene;

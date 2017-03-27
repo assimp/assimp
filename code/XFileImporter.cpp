@@ -47,16 +47,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "XFileImporter.h"
 #include "XFileParser.h"
-#include "Defines.h"
 #include "TinyFormatter.h"
 #include "ConvertToLHProcess.h"
+#include <assimp/Defines.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
+
 #include <cctype>
 #include <memory>
-
-
 
 using namespace Assimp;
 using namespace Assimp::Formatter;

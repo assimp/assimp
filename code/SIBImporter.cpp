@@ -61,6 +61,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
+
+#include <map>
 
 
 using namespace Assimp;
@@ -388,7 +391,7 @@ static void ConnectFaces(SIBMesh* mesh)
             // with non-2-manifold surfaces, but then so does Silo to begin with.
             if (edge.faceA == 0xffffffff)
                 edge.faceA = static_cast<uint32_t>(faceIdx);
-            else
+            else if (edge.faceB == 0xffffffff)
                 edge.faceB = static_cast<uint32_t>(faceIdx);
 
             prev = next;
@@ -432,12 +435,17 @@ static aiVector3D CalculateVertexNormal(SIBMesh* mesh, uint32_t faceIdx, uint32_
                 {
                     SIBEdge& edge = GetEdge(mesh, posA, posB);
 
-                    // Move to whichever side we didn't just come from.
-                    if (!edge.creased) {
-                        if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx)
-                            nextFaceIdx = edge.faceA;
-                        else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx)
-                            nextFaceIdx = edge.faceB;
+                    // Non-manifold meshes can produce faces which share
+                    // positions but have no edge entry, so check it.
+                    if (edge.faceA == faceIdx || edge.faceB == faceIdx)
+                    {
+                        // Move to whichever side we didn't just come from.
+                        if (!edge.creased) {
+                            if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx && edge.faceA != 0xffffffff)
+                                nextFaceIdx = edge.faceA;
+                            else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx && edge.faceB != 0xffffffff)
+                                nextFaceIdx = edge.faceB;
+                        }
                     }
                 }
 

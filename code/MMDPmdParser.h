@@ -454,7 +454,7 @@ namespace pmd
 		/// ファイルからPmdModelを生成する
 		static std::unique_ptr<PmdModel> LoadFromStream(std::ifstream *stream)
 		{
-			auto result = std::make_unique<PmdModel>();
+			auto result = mmd::make_unique<PmdModel>();
 			char buffer[100];
 
 			// magic

@@ -220,7 +220,7 @@ namespace vmd
 		{
 
 			char buffer[30];
-			auto result = std::make_unique<VmdMotion>();
+			auto result = mmd::make_unique<VmdMotion>();
 
 			// magic and version
 			stream->read((char*) buffer, 30);

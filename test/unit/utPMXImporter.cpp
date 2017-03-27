@@ -52,7 +52,7 @@ class utPMXImporter : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/../models-nonbsd/MMD/kawakaze.pmx", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/../models-nonbsd/MMD/Alicia_blade.pmx", 0 );
         return nullptr != scene;
     }
 };

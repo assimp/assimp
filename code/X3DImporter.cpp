@@ -73,24 +73,29 @@ const aiImporterDesc X3DImporter::Description = {
 	"x3d"
 };
 
-void X3DImporter::Clear()
-{
+X3DImporter::X3DImporter()
+: NodeElement_Cur( nullptr )
+, mReader( nullptr ) {
+    // empty
+}
+
+X3DImporter::~X3DImporter() {
+    delete mReader;
+    // Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
+    Clear();
+}
+
+void X3DImporter::Clear() {
 	NodeElement_Cur = nullptr;
 	// Delete all elements
-	if(NodeElement_List.size())
-	{
-		for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++) delete *it;
-
+	if(NodeElement_List.size()) {
+        for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++ ) {
+            delete *it;
+        }
 		NodeElement_List.clear();
 	}
 }
 
-X3DImporter::~X3DImporter()
-{
-    delete mReader;
-	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
-	Clear();
-}
 
 /*********************************************************************************************************************************************/
 /************************************************************ Functions: find set ************************************************************/

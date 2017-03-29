@@ -134,8 +134,8 @@ Contributions to assimp are highly appreciated. The easiest way to get involved 
 a pull request with your changes against the main repository's `master` branch.
 
 ### Donate ###
-If you like assimp, consider buying us a beer (or two):
-[Donate](http://sourceforge.net/donate/index.php?group_id=226462)
+You can get a patron of Asset-Importer-Lib:
+<a href="https://www.patreon.com/bePatron?u=2790590" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://cdn6.patreon.com/becomePatronButton.bundle.js"></script>
 
 ### License ###
 Our license is based on the modified, __3-clause BSD__-License.

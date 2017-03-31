@@ -140,7 +140,7 @@ configure_file(
 
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/include/assimp/config.h.in
-  ${CMAKE_CURRENT_LIST_DIR}/include/assimp/config.h
+  ${CMAKE_CURRENT_BINARY_DIR}/include/assimp/config.h
 )
 
 include_directories(

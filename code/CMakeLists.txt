@@ -938,7 +938,7 @@ if(MSVC AND ASSIMP_INSTALL_PDB)
     DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
     CONFIGURATIONS Debug
   )
-  install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp.pdb
+  install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
     DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
     CONFIGURATIONS RelWithDebInfo
   )

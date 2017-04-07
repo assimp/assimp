@@ -1,7 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-#
-# Copyright (c) 2006-2016, assimp team
+# Copyright (c) 2006-2017, assimp team
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -33,7 +32,6 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 #----------------------------------------------------------------------
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 cmake_minimum_required( VERSION 2.8 )

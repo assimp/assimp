@@ -80,8 +80,6 @@ SET( PUBLIC_HEADERS
   ${HEADER_PATH}/vector2.inl
   ${HEADER_PATH}/vector3.h
   ${HEADER_PATH}/vector3.inl
-  ${HEADER_PATH}/vector4.h
-  ${HEADER_PATH}/vector4.inl
   ${HEADER_PATH}/version.h
   ${HEADER_PATH}/cimport.h
   ${HEADER_PATH}/importerdesc.h

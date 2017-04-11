@@ -77,7 +77,7 @@ TEST_F(ExporterTest, testCExportInterface)
     for(size_t i = 0; i < aiGetExportFormatCount(); ++i) {
         const aiExportFormatDesc* const desc = aiGetExportFormatDescription(i);
         EXPECT_TRUE(desc);
-        // rest has aleady been validated by testCppExportInterface
+        // rest has already been validated by testCppExportInterface
     }
 }
 

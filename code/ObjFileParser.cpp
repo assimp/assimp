@@ -97,7 +97,30 @@ ObjFileParser::~ObjFileParser() {
 ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
-
+void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
+{
+	std::vector<char> buf(buffer);
+	auto copyPosition = buffer.begin();
+	auto curPosition = buf.cbegin();
+	do
+	{
+		while (*curPosition != '\n'&&*curPosition != '\\')
+		{
+			++curPosition;
+		}
+		if (*curPosition == '\\')
+		{
+			copyPosition = std::copy(buf.cbegin(), curPosition, copyPosition);
+			*(copyPosition++) = ' ';
+			do
+			{
+				streamBuffer.getNextLine(buf);
+			} while (buf[0] == '\n');
+			curPosition = buf.cbegin();
+		}
+	} while (*curPosition != '\n');
+	std::copy(buf.cbegin(), curPosition, copyPosition);
+}
 // -------------------------------------------------------------------
 //  File parsing method.
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
@@ -123,7 +146,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
             progressCounter++;
             m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
         }
-
+		ignoreNewLines(streamBuffer, buffer);
         // parse line
         switch (*m_DataIt) {
         case 'v': // Parse a vertex texture coordinate

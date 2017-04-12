@@ -627,10 +627,10 @@ void X3DImporter::Postprocess_BuildNode(const CX3DImporter_NodeElement& pNodeEle
 			}
 			else
 			{
-				for(size_t i = 0; i < (size_t)tne_group.Choice; i++) chit_begin++;// forward iterator to choosen node.
+				for(size_t i = 0; i < (size_t)tne_group.Choice; i++) chit_begin++;// forward iterator to chosen node.
 
 				chit_end = chit_begin;
-				chit_end++;// point end iterator to next element after choosen.
+				chit_end++;// point end iterator to next element after chosen node.
 			}
 		}// if(tne_group.UseChoice)
 	}// if(pNodeElement.Type == CX3DImporter_NodeElement::ENET_Group)

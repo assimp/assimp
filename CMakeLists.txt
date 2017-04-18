@@ -79,6 +79,12 @@ OPTION ( ASSIMP_COVERALLS
    OFF
 )
 
+OPTION ( BUILD_DOCS
+   "Build documentation using Doxygen."
+   OFF
+)
+add_subdirectory(doc)
+
 IF(MSVC)
   set (CMAKE_PREFIX_PATH "D:\\libs\\devil")
   OPTION( ASSIMP_INSTALL_PDB
@@ -159,6 +165,10 @@ IF( UNIX )
     ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
   ENDIF()
 ENDIF()
+
+IF( UNIX )
+    include(GNUInstallDirs)
+ENDIF( UNIX )
 
 IF((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
   IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required for shared libs on 64 bit

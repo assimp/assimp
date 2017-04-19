@@ -49,21 +49,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
-#include "ColladaParser.h"
+#include <assimp/importerdesc.h>
 
+#include "ColladaParser.h"
 #include "fast_atof.h"
 #include "ParsingUtils.h"
 #include "SkeletonMeshBuilder.h"
-#include "Defines.h"
 #include "CreateAnimMesh.h"
 
 #include "time.h"
 #include "math.h"
 #include <algorithm>
-#include <cstdint>
 #include <numeric>
-#include "Defines.h"
-
+#include <assimp/Defines.h>
 
 using namespace Assimp;
 using namespace Assimp::Formatter;

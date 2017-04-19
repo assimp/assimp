@@ -107,18 +107,18 @@ public:
     {
         Settings()
             : skipSpaceRepresentations()
-            , skipCurveRepresentations()
             , useCustomTriangulation()
             , skipAnnotations()
             , conicSamplingAngle(10.f)
+			, cylindricalTessellation(32)
         {}
 
 
         bool skipSpaceRepresentations;
-        bool skipCurveRepresentations;
         bool useCustomTriangulation;
         bool skipAnnotations;
         float conicSamplingAngle;
+		int cylindricalTessellation;
     };
 
 

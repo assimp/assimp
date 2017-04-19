@@ -258,7 +258,7 @@ void ProcessRevolvedAreaSolid(const IfcRevolvedAreaSolid& solid, TempMesh& resul
         return;
     }
 
-    const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(16 * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
+    const unsigned int cnt_segments = std::max(2u,static_cast<unsigned int>(conv.settings.cylindricalTessellation * std::fabs(max_angle)/AI_MATH_HALF_PI_F));
     const IfcFloat delta = max_angle/cnt_segments;
 
     has_area = has_area && std::fabs(max_angle) < AI_MATH_TWO_PI_F*0.99;
@@ -327,7 +327,7 @@ void ProcessSweptDiskSolid(const IfcSweptDiskSolid solid, TempMesh& result, Conv
         return;
     }
 
-    const unsigned int cnt_segments = 16;
+    const unsigned int cnt_segments = conv.settings.cylindricalTessellation;
     const IfcFloat deltaAngle = AI_MATH_TWO_PI/cnt_segments;
 
     const size_t samples = curve->EstimateSampleCount(solid.StartParam,solid.EndParam);

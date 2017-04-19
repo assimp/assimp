@@ -45,7 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_LOGGER_H
 
 #include "types.h"
-namespace Assimp    {
+
+namespace Assimp {
+
 class LogStream;
 
 // Maximum length of a log message. Longer messages are rejected.

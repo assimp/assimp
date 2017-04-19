@@ -53,7 +53,7 @@ struct aiNode;
 struct aiMaterial;
 struct aiMesh;
 
-namespace Assimp    {
+namespace Assimp {
 
 
 using namespace PLY;

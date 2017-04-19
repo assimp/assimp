@@ -477,6 +477,8 @@ struct aiAnimation {
                 for( unsigned int a = 0; a < mNumMorphMeshChannels; a++) {
                         delete mMorphMeshChannels[a];
                 }
+            
+            delete [] mMorphMeshChannels;
         }
     }
 #endif // __cplusplus

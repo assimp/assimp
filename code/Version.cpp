@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 
 All rights reserved.
 
@@ -41,8 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Actually just a dummy, used by the compiler to build the precompiled header.
 
-#include "./../include/assimp/version.h"
-#include "./../include/assimp/scene.h"
+#include <assimp/version.h>
+#include <assimp/scene.h>
 #include "ScenePrivate.h"
 
 static const unsigned int MajorVersion = 3;
@@ -55,7 +55,7 @@ static const char* LEGAL_INFORMATION =
 "Open Asset Import Library (Assimp).\n"
 "A free C/C++ library to import various 3D file formats into applications\n\n"
 
-"(c) 2008-2016, assimp team\n"
+"(c) 2008-2017, assimp team\n"
 "License under the terms and conditions of the 3-clause BSD license\n"
 "http://assimp.sourceforge.net\n"
 ;

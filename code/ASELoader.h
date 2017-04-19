@@ -46,9 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseImporter.h"
 #include <assimp/types.h>
+#include "ASEParser.h"
 
 struct aiNode;
-#include "ASEParser.h"
 
 namespace Assimp {
 

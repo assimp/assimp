@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LWOFileData.h"
 #include "BaseImporter.h"
 
+#include <map>
+
 struct aiTexture;
 struct aiNode;
 struct aiMaterial;

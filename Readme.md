@@ -18,6 +18,11 @@ This is the development trunk containing the latest features and bugfixes. For p
 The current build status is:
 
 Gitter chat: [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
+
+And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
+> /join #assetimporterlib
+
+<br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
@@ -129,8 +134,8 @@ Contributions to assimp are highly appreciated. The easiest way to get involved 
 a pull request with your changes against the main repository's `master` branch.
 
 ### Donate ###
-If you like assimp, consider buying us a beer (or two):
-[Donate](http://sourceforge.net/donate/index.php?group_id=226462)
+You can get a patron of Asset-Importer-Lib:
+<a href="https://www.patreon.com/bePatron?u=2790590" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://cdn6.patreon.com/becomePatronButton.bundle.js"></script>
 
 ### License ###
 Our license is based on the modified, __3-clause BSD__-License.

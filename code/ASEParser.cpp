@@ -49,7 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "TextureTransform.h"
 #include "ASELoader.h"
-#include "MaterialSystem.h"
 #include "fast_atof.h"
 #include <assimp/DefaultLogger.hpp>
 
@@ -1858,7 +1857,7 @@ void Parser::ParseLV3MeshCFaceListBlock(unsigned int iNumFaces, ASE::Mesh& mesh)
             ++filePtr;
 
             // Face entry
-            if (TokenMatch(filePtr,"MESH_CFACE" ,11))
+            if (TokenMatch(filePtr,"MESH_CFACE" ,10))
             {
                 unsigned int aiValues[3];
                 unsigned int iIndex = 0;

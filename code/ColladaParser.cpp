@@ -1634,7 +1634,7 @@ void ColladaParser::ReadEffectColor( aiColor4D& pColor, Sampler& pSampler)
             }
             else if( IsElement( "texture"))
             {
-                // get name of source textur/sampler
+                // get name of source texture/sampler
                 int attrTex = GetAttribute( "texture");
                 pSampler.mName = mReader->getAttributeValue( attrTex);
 
@@ -2353,9 +2353,9 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
 		ThrowException( "Expected different index count in <p> element.");
 
 	// find the data for all sources
-  for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
+    for( std::vector<InputChannel>::iterator it = pMesh->mPerVertexData.begin(); it != pMesh->mPerVertexData.end(); ++it)
     {
-    InputChannel& input = *it;
+        InputChannel& input = *it;
         if( input.mResolved)
             continue;
 
@@ -2367,9 +2367,9 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
             acc->mData = &ResolveLibraryReference( mDataLibrary, acc->mSource);
     }
     // and the same for the per-index channels
-  for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
-  {
-    InputChannel& input = *it;
+    for( std::vector<InputChannel>::iterator it = pPerIndexChannels.begin(); it != pPerIndexChannels.end(); ++it)
+    {
+        InputChannel& input = *it;
         if( input.mResolved)
             continue;
 
@@ -2451,6 +2451,9 @@ size_t ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pP
     return numPrimitives;
 }
 
+///@note This function willn't work correctly if both PerIndex and PerVertex channels have same channels.
+///For example if TEXCOORD present in both <vertices> and <polylist> tags this function will create wrong uv coordinates.
+///It's not clear from COLLADA documentation is this allowed or not. For now only exporter fixed to avoid such behavior
 void ColladaParser::CopyVertex(size_t currentVertex, size_t numOffsets, size_t numPoints, size_t perVertexOffset, Mesh* pMesh, std::vector<InputChannel>& pPerIndexChannels, size_t currentPrimitive, const std::vector<size_t>& indices){
     // calculate the base offset of the vertex whose attributes we ant to copy
     size_t baseOffset = currentPrimitive * numOffsets * numPoints + currentVertex * numOffsets;

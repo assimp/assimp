@@ -48,9 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderLoader.h"
 #include "BlenderDNA.h"
 #include "BlenderScene.h"
-#include "BlenderSceneGen.h"
 #include <deque>
-#include "./../include/assimp/material.h"
+#include <assimp/material.h>
 
 struct aiTexture;
 

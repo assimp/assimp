@@ -38,6 +38,8 @@
 cmake_minimum_required( VERSION 2.6 )
 
 #INCLUDE( AddGTest )
+include( CTest )
+enable_testing()
 
 INCLUDE_DIRECTORIES(
 	../contrib/gtest/include
@@ -104,6 +106,7 @@ SET( TEST_SRCS
   unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
+  unit/utPLYImportExport.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp
@@ -119,7 +122,9 @@ SET( TEST_SRCS
   unit/utTypes.cpp
   unit/utVertexTriangleAdjacency.cpp
   unit/utVersion.cpp
+  unit/utVector3.cpp
   unit/utXImporterExporter.cpp
+  unit/utD3MFImportExport.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )
@@ -149,15 +154,6 @@ ENDIF(MSVC)
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
-#if (ASSIMP_COVERALLS)
-#    include(Coveralls)
-#
-#    set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
-#
-#    # Create the coveralls target.
-#    coveralls_setup(
-#        "${COVERAGE_SRCS}" # The source files.
-#        ON                 # If we should upload.
-#        "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
-#endif()
+
+add_test( unittests unit )
 

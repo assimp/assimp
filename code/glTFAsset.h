@@ -62,7 +62,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_API
 #   include <memory>
-#   include "DefaultIOSystem.h"
+#   include <assimp/DefaultIOSystem.h>
 #   include "ByteSwapper.h"
 #else
 #   include <memory>
@@ -210,6 +210,7 @@ namespace glTF
         ComponentType_UNSIGNED_BYTE = 5121,
         ComponentType_SHORT = 5122,
         ComponentType_UNSIGNED_SHORT = 5123,
+        ComponentType_UNSIGNED_INT = 5125,
         ComponentType_FLOAT = 5126
     };
 
@@ -220,13 +221,15 @@ namespace glTF
             case ComponentType_UNSIGNED_SHORT:
                 return 2;
 
+            case ComponentType_UNSIGNED_INT:
             case ComponentType_FLOAT:
                 return 4;
 
-            //case Accessor::ComponentType_BYTE:
-            //case Accessor::ComponentType_UNSIGNED_BYTE:
-            default:
+            case ComponentType_BYTE:
+            case ComponentType_UNSIGNED_BYTE:
                 return 1;
+            default:
+                throw DeadlyImportError("GLTF: Unsupported Component Type "+t);
         }
     }
 

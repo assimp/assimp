@@ -504,8 +504,14 @@ void PretransformVertices::Execute( aiScene* pScene)
 
         std::vector<unsigned int> s(pScene->mNumMeshes,0);
         BuildMeshRefCountArray(pScene->mRootNode,&s[0]);
+        
+        int loops = pScene->mNumMaterials;
+        
+        if (loops == 0) {
+            loops = 1;
+        }
 
-        for (unsigned int i = 0; i < pScene->mNumMaterials;++i)     {
+        for (unsigned int i = 0; i < loops;++i)     {
             // get the list of all vertex formats for this material
             aiVFormats.clear();
             GetVFormatList(pScene,i,aiVFormats);

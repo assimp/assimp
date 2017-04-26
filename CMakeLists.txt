@@ -83,7 +83,6 @@ OPTION ( BUILD_DOCS
    "Build documentation using Doxygen."
    OFF
 )
-add_subdirectory(doc)
 
 IF(MSVC)
   set (CMAKE_PREFIX_PATH "D:\\libs\\devil")
@@ -159,16 +158,16 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-# Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
 IF( UNIX )
+  # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
   IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
     ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
   ENDIF()
-ENDIF()
 
-IF( UNIX )
-    include(GNUInstallDirs)
+  # Use GNUInstallDirs for Unix predefined directories
+  include(GNUInstallDirs)
 ENDIF( UNIX )
+
 
 IF((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
   IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required for shared libs on 64 bit
@@ -239,6 +238,10 @@ FIND_PACKAGE( DirectX )
 IF( CMAKE_COMPILER_IS_GNUCXX )
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ENDIF( CMAKE_COMPILER_IS_GNUCXX )
+
+IF( BUILD_DOCS )
+    add_subdirectory(doc)
+ENDIF( BUILD_DOCS )
 
 # Search for external dependencies, and build them from source if not found
 # Search for zlib

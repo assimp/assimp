@@ -1,9 +1,4 @@
-# Only test for Doxygent if BUILD_DOCS are ON
-# We will configure Doxygen output anyway in case
-# of manual generation
-if( BUILD_DOCS )
-    find_package( Doxygen REQUIRED )
-endif( BUILD_DOCS )
+find_package( Doxygen REQUIRED )
 
 set( HTML_OUTPUT "AssimpDoc_Html" CACHE STRING "Output directory for generated HTML documentation. Defaults to AssimpDoc_Html." )
 
@@ -19,7 +14,7 @@ configure_file(
     @ONLY
 )
 
-add_custom_target( 
+add_custom_target(
     docs ALL
     DEPENDS docs.done
 )
@@ -35,13 +30,13 @@ add_custom_command(
 if( DEFINED CMAKE_INSTALL_DOCDIR )
     install(
         DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${HTML_OUTPUT}
-        DESTINATION ${CMAKE_INSTALL_DOCDIR}/assimp-${PROJECT_VERSION}
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
     )
     install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/AssimpDoc_Html/AnimationOverview.png
         ${CMAKE_CURRENT_SOURCE_DIR}/AssimpDoc_Html/AnimationOverview.svg
         ${CMAKE_CURRENT_SOURCE_DIR}/AssimpDoc_Html/dragonsplash.png
-        DESTINATION ${CMAKE_INSTALL_DOCDIR}/assimp-${PROJECT_VERSION}
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}/${HTML_OUTPUT}
     )
 endif( DEFINED CMAKE_INSTALL_DOCDIR )
 

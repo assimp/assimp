@@ -174,9 +174,11 @@ IF( UNIX )
 ENDIF( UNIX )
 
 
+# Grouped compiler settings
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT CMAKE_COMPILER_IS_MINGW)
   # hide all not-exported symbols
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fvisibility=hidden -fPIC -Wall -std=c++0x" )
+  SET(LIBSTDC++_LIBRARIES -lstdc++)
 ELSEIF(MSVC)
   # enable multi-core compilation with MSVC
   add_compile_options(/MP)
@@ -236,9 +238,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake"             "${C
 
 FIND_PACKAGE( DirectX )
 
-IF( CMAKE_COMPILER_IS_GNUCXX )
-  SET(LIBSTDC++_LIBRARIES -lstdc++)
-ENDIF( CMAKE_COMPILER_IS_GNUCXX )
 
 IF( BUILD_DOCS )
     add_subdirectory(doc)

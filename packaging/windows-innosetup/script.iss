@@ -87,15 +87,15 @@ Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 Source: "..\..\port\dAssimp\*"; DestDir: "{app}\port\D"; Flags: recursesubdirs; Components: dassimp
 
 ; Assimp.NET
-Source: "..\..\port\Assimp.NET\*"; DestDir: "{app}\port\C#"; Flags: recursesubdirs; Components: assimp_net
+;Source: "..\..\port\Assimp.NET\*"; DestDir: "{app}\port\C#"; Flags: recursesubdirs; Components: assimp_net
 
 ; PyAssimp
-Source: "..\..\port\PyAssimp\*"; DestDir: "{app}\port\Python"; Excludes: "*.pyc,*.dll"; Flags: recursesubdirs; Components: pyassimp
+;Source: "..\..\port\PyAssimp\*"; DestDir: "{app}\port\Python"; Excludes: "*.pyc,*.dll"; Flags: recursesubdirs; Components: pyassimp
 
 ; Test repository
-Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdirs; Components: test
-Source: "..\..\test\regression\*"; DestDir: "{app}\test\regression"; Flags: recursesubdirs; Components: test
-Source: "..\..\test\models-nonbsd\*"; DestDir: "{app}\test\models-nonbsd"; Flags: recursesubdirs; Components: test_nonbsd
+;Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdirs; Components: test
+;Source: "..\..\test\regression\*"; DestDir: "{app}\test\regression"; Flags: recursesubdirs; Components: test
+;Source: "..\..\test\models-nonbsd\*"; DestDir: "{app}\test\models-nonbsd"; Flags: recursesubdirs; Components: test_nonbsd
 
 ; Source Code & Workspaces
 ;Source: "..\..\code\*"; Excludes: "*.o"; DestDir: "{app}\code"; Flags: recursesubdirs; Components: wsource

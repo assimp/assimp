@@ -7,6 +7,7 @@ Open Asset Import Library (assimp)
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
 </a>
+<span class="badge-patreon"><a href="https://www.patreon.com/assimp" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
 [![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
 <br>
 
@@ -132,10 +133,6 @@ And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/a
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
-
-### Donate ###
-You can get a patron of Asset-Importer-Lib:
-<a href="https://www.patreon.com/bePatron?u=2790590" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://cdn6.patreon.com/becomePatronButton.bundle.js"></script>
 
 ### License ###
 Our license is based on the modified, __3-clause BSD__-License.

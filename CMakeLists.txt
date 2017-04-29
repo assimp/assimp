@@ -1,7 +1,6 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
-#
-# Copyright (c) 2006-2016, assimp team
+# Copyright (c) 2006-2017, assimp team
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -33,7 +32,6 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 #----------------------------------------------------------------------
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 cmake_minimum_required( VERSION 2.8 )
@@ -78,6 +76,11 @@ OPTION ( ASSIMP_BUILD_TESTS
 )
 OPTION ( ASSIMP_COVERALLS
    "Eańable this to measure test coverage."
+   OFF
+)
+
+OPTION ( BUILD_DOCS
+   "Build documentation using Doxygen."
    OFF
 )
 
@@ -155,12 +158,16 @@ SET(LIBASSIMP-DEV_COMPONENT "libassimp${ASSIMP_VERSION_MAJOR}.${ASSIMP_VERSION_M
 SET(CPACK_COMPONENTS_ALL assimp-bin ${LIBASSIMP_COMPONENT} ${LIBASSIMP-DEV_COMPONENT} assimp-dev)
 SET(ASSIMP_LIBRARY_SUFFIX "" CACHE STRING "Suffix to append to library names")
 
-# Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
 IF( UNIX )
+  # Ensure that we do not run into issues like http://www.tcm.phy.cam.ac.uk/sw/inodes64.html on 32 bit linux
   IF ( CMAKE_SIZEOF_VOID_P EQUAL 4) # only necessary for 32-bit linux
     ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64 )
   ENDIF()
-ENDIF()
+
+  # Use GNUInstallDirs for Unix predefined directories
+  include(GNUInstallDirs)
+ENDIF( UNIX )
+
 
 IF((CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX) AND NOT CMAKE_COMPILER_IS_MINGW)
   IF (BUILD_SHARED_LIBS AND CMAKE_SIZEOF_VOID_P EQUAL 8) # -fPIC is only required for shared libs on 64 bit
@@ -231,6 +238,10 @@ FIND_PACKAGE( DirectX )
 IF( CMAKE_COMPILER_IS_GNUCXX )
   SET(LIBSTDC++_LIBRARIES -lstdc++)
 ENDIF( CMAKE_COMPILER_IS_GNUCXX )
+
+IF( BUILD_DOCS )
+    add_subdirectory(doc)
+ENDIF( BUILD_DOCS )
 
 # Search for external dependencies, and build them from source if not found
 # Search for zlib
@@ -429,29 +440,29 @@ IF(CMAKE_CPACK_COMMAND AND UNIX AND ASSIMP_OPT_BUILD_PACKAGES)
 ENDIF()
 
 if(WIN32)
-	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin64/")
-		SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib64/")
-	elseif()
-		SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin32/")
-		SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib32/")
-	ENDIF()
+  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin64/")
+    SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib64/")
+  elseif()
+    SET(BIN_DIR "${PROJECT_SOURCE_DIR}/bin32/")
+    SET(LIB_DIR "${PROJECT_SOURCE_DIR}/lib32/")
+  ENDIF()
 
-	if(MSVC12)
-		SET(ASSIMP_MSVC_VERSION "vc120")
-	elseif(MSVC14)
-		SET(ASSIMP_MSVC_VERSION "vc140")
-	ENDIF(MSVC12)
+  if(MSVC12)
+    SET(ASSIMP_MSVC_VERSION "vc120")
+  elseif(MSVC14)
+    SET(ASSIMP_MSVC_VERSION "vc140")
+  ENDIF(MSVC12)
 
-	if(MSVC12 OR MSVC14)
-		add_custom_target(UpdateAssimpLibsDebugSymbolsAndDLLs COMMENT "Copying Assimp Libraries ..." VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll	${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.dll VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.exp	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.exp VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.lib	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.lib VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll		${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.dll  VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.exp		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.exp VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.lib		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.lib VERBATIM)
-		add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
-	ENDIF(MSVC12 OR MSVC14)
+  if(MSVC12 OR MSVC14)
+    add_custom_target(UpdateAssimpLibsDebugSymbolsAndDLLs COMMENT "Copying Assimp Libraries ..." VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll	${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.dll VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.exp	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.exp VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.lib	${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mt.lib VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll		${BIN_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.dll  VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.exp		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.exp VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.ilk VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.lib		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.lib VERBATIM)
+    add_custom_command(TARGET UpdateAssimpLibsDebugSymbolsAndDLLs COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/code/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb		${LIB_DIR}assimp-${ASSIMP_MSVC_VERSION}-mtd.pdb VERBATIM)
+  ENDIF(MSVC12 OR MSVC14)
 ENDIF (WIN32)

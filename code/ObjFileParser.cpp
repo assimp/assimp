@@ -99,7 +99,6 @@ ObjFile::Model *ObjFileParser::GetModel() const {
 }
 void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
 {
-    static std::vector<char> tempBuf;
     auto curPosition = buffer.begin();
     do
     {
@@ -109,6 +108,7 @@ void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffe
         }
         if (*curPosition=='\\')
         {
+            std::vector<char> tempBuf;
             do
             {
                 streamBuffer.getNextLine(tempBuf);

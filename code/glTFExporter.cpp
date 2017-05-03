@@ -511,7 +511,7 @@ void glTFExporter::ExportMeshes()
     // Variables needed for compression. END.
 
     std::string fname = std::string(mFilename);
-    std::string bufferIdPrefix = fname.substr(0, fname.find("."));
+    std::string bufferIdPrefix = fname.substr(0, fname.rfind(".gltf"));
     std::string bufferId = mAsset->FindUniqueID("", bufferIdPrefix.c_str());
 
     Ref<Buffer> b = mAsset->GetBodyBuffer();

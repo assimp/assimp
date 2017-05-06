@@ -239,7 +239,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/assimp-config.cmake"             "${C
 
 FIND_PACKAGE( DirectX )
 
-
 IF( BUILD_DOCS )
     add_subdirectory(doc)
 ENDIF( BUILD_DOCS )

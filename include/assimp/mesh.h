@@ -636,7 +636,9 @@ struct aiMesh
      *  Note! Currently only works with Collada loader.*/
     C_STRUCT aiAnimMesh** mAnimMeshes;
 
-    /** Method of morphing when animeshes are specified. */
+    /** 
+     *  Method of morphing when animeshes are specified. 
+     */
     unsigned int mMethod;
 	
 #ifdef __cplusplus
@@ -656,6 +658,7 @@ struct aiMesh
         , mMaterialIndex( 0 )
         , mNumAnimMeshes( 0 )
         , mAnimMeshes( NULL )
+        , mMethod( 0 )
     {
         for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++)
         {

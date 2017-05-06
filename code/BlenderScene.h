@@ -638,6 +638,7 @@ struct Base : ElemBase {
 
     Base() 
     : ElemBase()
+    , prev( nullptr )
     , next()
     , object() {
         // empty
@@ -784,10 +785,12 @@ struct Tex : ElemBase {
     //char use_nodes;
 
     Tex()
-    : ElemBase() {
+    : ElemBase()
+    , imaflag( ImageFlags_INTERPOL )
+    , type( Type_CLOUDS )
+    , ima() {
         // empty
     }
-
 };
 
 // -------------------------------------------------------------------------------

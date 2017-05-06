@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 
 All rights reserved.
 
@@ -377,8 +377,10 @@ struct aiAnimMesh
      * from language bindings.
      */
     unsigned int mNumVertices;
-
-/** Weight of the AnimMesh. */
+    
+    /** 
+     * Weight of the AnimMesh. 
+     */
     float mWeight;
 
 #ifdef __cplusplus
@@ -389,6 +391,7 @@ struct aiAnimMesh
         , mTangents( NULL )
         , mBitangents( NULL )
         , mNumVertices( 0 )
+        , mWeight( 0.0f )
     {
         // fixme consider moving this to the ctor initializer list as well
         for( unsigned int a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; a++){

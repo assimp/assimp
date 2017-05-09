@@ -467,42 +467,29 @@ public:
 
 /// \class CX3DImporter_NodeElement_Geometry3D
 /// Three-dimensional body.
-class CX3DImporter_NodeElement_Geometry3D : public CX3DImporter_NodeElement
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
+class CX3DImporter_NodeElement_Geometry3D : public CX3DImporter_NodeElement {
 public:
+	std::list<aiVector3D> Vertices;  ///< Vertices list.
+	size_t                NumIndices;///< Number of indices in one face.
+	bool                  Solid;     ///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
 
-	std::list<aiVector3D> Vertices;///< Vertices list.
-	size_t NumIndices;///< Number of indices in one face.
-	bool Solid;///< Flag: if true then render must use back-face culling, else render must draw both sides of object.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
-
-	/// \fn CX3DImporter_NodeElement_Geometry3D(const CX3DImporter_NodeElement_Geometry3D& pNode)
-	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_Geometry3D(const CX3DImporter_NodeElement_Geometry3D& pNode);
-
-	/// \fn CX3DImporter_NodeElement_Geometry3D& operator=(const CX3DImporter_NodeElement_Geometry3D& pNode)
-	/// Disabled assign operator.
-	CX3DImporter_NodeElement_Geometry3D& operator=(const CX3DImporter_NodeElement_Geometry3D& pNode);
-
-public:
-
-	/// \fn CX3DImporter_NodeElement_Geometry3D(const EType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
 	CX3DImporter_NodeElement_Geometry3D(const EType pType, CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(pType, pParent), Solid(true)
-	{}
+	: CX3DImporter_NodeElement(pType, pParent)
+	, Vertices()
+	, NumIndices( 0 )
+	, Solid(true) {
+        // empty		
+	}
 
+private:
+	/// Disabled copy constructor.
+	CX3DImporter_NodeElement_Geometry3D(const CX3DImporter_NodeElement_Geometry3D& pNode);
+
+	/// Disabled assign operator.
+	CX3DImporter_NodeElement_Geometry3D& operator=(const CX3DImporter_NodeElement_Geometry3D& pNode);
 };// class CX3DImporter_NodeElement_Geometry3D
 
 /// \class CX3DImporter_NodeElement_ElevationGrid

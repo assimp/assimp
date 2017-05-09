@@ -675,45 +675,35 @@ struct CX3DImporter_NodeElement_Appearance : public CX3DImporter_NodeElement
 
 /// \class CX3DImporter_NodeElement_Material
 /// Material.
-class CX3DImporter_NodeElement_Material : public CX3DImporter_NodeElement
-{
-	/***********************************************/
-	/****************** Variables ******************/
-	/***********************************************/
-
+class CX3DImporter_NodeElement_Material : public CX3DImporter_NodeElement {
 public:
+	float     AmbientIntensity;///< Specifies how much ambient light from light sources this surface shall reflect.
+	aiColor3D DiffuseColor;    ///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
+	aiColor3D EmissiveColor;   ///< Models "glowing" objects. This can be useful for displaying pre-lit models.
+	float     Shininess;       ///< Lower shininess values produce soft glows, while higher values result in sharper, smaller highlights.
+	aiColor3D SpecularColor;   ///< The specularColor and shininess fields determine the specular highlights.
+	float     Transparency;    ///< Specifies how "clear" an object is, with 1.0 being completely transparent, and 0.0 completely opaque.
 
-	float AmbientIntensity;///< Specifies how much ambient light from light sources this surface shall reflect.
-	aiColor3D DiffuseColor;///< Reflects all X3D light sources depending on the angle of the surface with respect to the light source.
-	aiColor3D EmissiveColor;///< Models "glowing" objects. This can be useful for displaying pre-lit models.
-	float Shininess;///< Lower shininess values produce soft glows, while higher values result in sharper, smaller highlights.
-	aiColor3D SpecularColor;///< The specularColor and shininess fields determine the specular highlights.
-	float Transparency;///< Specifies how "clear" an object is, with 1.0 being completely transparent, and 0.0 completely opaque.
-
-	/***********************************************/
-	/****************** Functions ******************/
-	/***********************************************/
-
-private:
-
-	/// \fn CX3DImporter_NodeElement_Material(const CX3DImporter_NodeElement_Material& pNode)
-	/// Disabled copy constructor.
-	CX3DImporter_NodeElement_Material(const CX3DImporter_NodeElement_Material& pNode);
-
-	/// \fn CX3DImporter_NodeElement_Material& operator=(const CX3DImporter_NodeElement_Material& pNode)
-	/// Disabled assign operator.
-	CX3DImporter_NodeElement_Material& operator=(const CX3DImporter_NodeElement_Material& pNode);
-
-public:
-
-	/// \fn CX3DImporter_NodeElement_Material(const EType pType, CX3DImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	/// \param [in] pType - type of geometry object.
 	CX3DImporter_NodeElement_Material(CX3DImporter_NodeElement* pParent)
-		: CX3DImporter_NodeElement(ENET_Material, pParent)
-	{}
+	: CX3DImporter_NodeElement(ENET_Material, pParent)
+	, AmbientIntensity( 0.0f )
+	, DiffuseColor()
+	, EmissiveColor()
+	, Shininess( 0.0f )
+	, SpecularColor()
+	, Transparency( 1.0f ) {
+		// empty
+	}
 
+private:
+	/// Disabled copy constructor.
+	CX3DImporter_NodeElement_Material(const CX3DImporter_NodeElement_Material& pNode);
+
+	/// Disabled assign operator.
+	CX3DImporter_NodeElement_Material& operator=(const CX3DImporter_NodeElement_Material& pNode);
 };// class CX3DImporter_NodeElement_Material
 
 /// \struct CX3DImporter_NodeElement_ImageTexture

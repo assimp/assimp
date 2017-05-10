@@ -209,6 +209,8 @@ struct DLL_ODDLPARSER_EXPORT DataArrayList {
     size_t         m_numItems;  ///< The number of items in the list.
     Value         *m_dataList;  ///< The data list ( a Value ).
     DataArrayList *m_next;      ///< The next data array list ( ddl_nullptr if last ).
+    Reference     *m_refs;
+    size_t         m_numRefs;
 
     ///	@brief  The default constructor for initialization.
     DataArrayList();

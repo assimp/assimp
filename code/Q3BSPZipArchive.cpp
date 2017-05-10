@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2008, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -46,8 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include "../include/assimp/ai_assert.h"
-
+#include <assimp/ai_assert.h>
 
 namespace Assimp {
 namespace Q3BSP {
@@ -74,19 +74,19 @@ voidpf IOSystem2Unzip::open(voidpf opaque, const char* filename, int mode) {
 uLong IOSystem2Unzip::read(voidpf /*opaque*/, voidpf stream, void* buf, uLong size) {
     IOStream* io_stream = (IOStream*) stream;
 
-    return io_stream->Read(buf, 1, size);
+    return static_cast<uLong>(io_stream->Read(buf, 1, size));
 }
 
 uLong IOSystem2Unzip::write(voidpf /*opaque*/, voidpf stream, const void* buf, uLong size) {
     IOStream* io_stream = (IOStream*) stream;
 
-    return io_stream->Write(buf, 1, size);
+    return static_cast<uLong>(io_stream->Write(buf, 1, size));
 }
 
 long IOSystem2Unzip::tell(voidpf /*opaque*/, voidpf stream) {
     IOStream* io_stream = (IOStream*) stream;
 
-    return io_stream->Tell();
+    return static_cast<long>(io_stream->Tell());
 }
 
 long IOSystem2Unzip::seek(voidpf /*opaque*/, voidpf stream, uLong offset, int origin) {
@@ -195,8 +195,8 @@ Q3BSPZipArchive::Q3BSPZipArchive(IOSystem* pIOHandler, const std::string& rFile)
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
 Q3BSPZipArchive::~Q3BSPZipArchive() {
-    for( std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it ) {
-        delete it->second;
+    for(auto &file : m_ArchiveMap) {
+        delete file.second;
     }
     m_ArchiveMap.clear();
 
@@ -269,8 +269,8 @@ void Q3BSPZipArchive::Close(IOStream *pFile) {
 void Q3BSPZipArchive::getFileList(std::vector<std::string> &rFileList) {
     rFileList.clear();
 
-    for(std::map<std::string, ZipFile*>::iterator it(m_ArchiveMap.begin()), end(m_ArchiveMap.end()); it != end; ++it) {
-        rFileList.push_back(it->first);
+    for(auto &file : m_ArchiveMap) {
+        rFileList.push_back(file.first);
     }
 }
 

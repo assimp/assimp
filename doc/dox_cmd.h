@@ -211,14 +211,14 @@ the dump is written to <tt>&lt;model&gt;-dump.txt</tt>
 <p>
 <tt>-b<br>
 </tt><br>
-Optional. If this switch is specified, the dumb is written in binary format.
+Optional. If this switch is specified, the dump is written in binary format.
 The long form of this parameter is <tt>--binary</tt>.
 </p>
 
 <p>
 <tt>-s&lt;n&gt;<br>
 </tt><br>
-Optional. If this switch is specified, the dumb is shortened to include only
+Optional. If this switch is specified, the dump is shortened to include only
 min/max values for all vertex components and animation channels. The resulting
 file is much smaller, but the original model can't be reconstructed from it. This is 
 used by Assimp's regression test suite, comparing those minidumps provides
@@ -368,7 +368,6 @@ of all supported steps along with short descriptions of what they're doing. <br>
 more information can be found in the <tt>aiPostProcess.h</tt> header.
 
 <table border="1">
- 
   <tr>
     <th>Parameter</th>
     <th>Long parameter</th>
@@ -432,13 +431,13 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
 	<td>Improve the cache locality of the vertex buffer by reordering the index buffer 
 	to achieve a lower ACMR (average post-transform vertex cache miss ratio)</td>
   </tr>
-   <tr>
+  <tr>
     <td><tt>-sbpt</tt></td>
     <td><tt>--sort-by-ptype</tt></td>
 	<td>Splits meshes which consist of more than one kind of primitives (e.g. lines and triangles mixed up)
 	in 'clean' submeshes. </td>
   </tr>
-   <tr>
+  <tr>
     <td><tt>-lh</tt></td>
     <td><tt>--convert-to-lh</tt></td>
 	<td>Converts the imported data to left-handed coordinate space</td>
@@ -479,18 +478,36 @@ more information can be found in the <tt>aiPostProcess.h</tt> header.
 	<td>Search the data structure for instanced meshes and replace them by references. This can
 	reduce vertex/face counts but the postprocessing-step takes some time.</td>
   </tr>
-
-    <tr>
+  <tr>
     <td><tt>-og</tt></td>
     <td><tt>--optimize-graph</tt></td>
 	<td>Simplify and optimize the scenegraph. Use it with care, all hierarchy information could be lost.
 	Animations remain untouched. </td>
   </tr>
-
-    <tr>
+  <tr>
     <td><tt>-om</tt></td>
-    <td><tt>--optimize-mesh</tt></td>
+    <td><tt>--optimize-meshes</tt></td>
 	<td>Optimize mesh usage. Meshes are merged, if possible. Very effective in combination with <tt>--optimize-graph</tt></td>
+  </tr>
+  <tr>
+    <td><tt>-tuv</tt></td>
+    <td><tt>--transform-uv-coords</tt></td>
+    <td>Will transform uv-coordinates if possible.</td>
+  </tr>
+  <tr>
+    <td><tt>-fid</tt></td>
+    <td><tt>--find-invalid-data</tt></td>
+    <td>Will look for invalid data in the imported model structure.</td>
+  </tr>
+  <tr>
+    <td><tt>-db</tt></td>
+    <td><tt>--debone</tt></td>
+    <td>Removes nearly losslessly or according to a configured threshold bones from the model.</td>
+  </tr>
+  <tr>
+    <td><tt>-sbc</tt></td>
+    <td><tt>--split-by-bone-count</tt></td>
+    <td>Split meshes with too many bones. Necessary for our (limited) hardware skinning shader.</td>
   </tr>
 </table>
 

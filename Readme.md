@@ -1,6 +1,15 @@
 Open Asset Import Library (assimp)
 ==================================
-Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
+
+[![Linux Build Status](https://travis-ci.org/assimp/assimp.svg)](https://travis-ci.org/assimp/assimp)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
+<a href="https://scan.coverity.com/projects/5607">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/5607/badge.svg"/>
+</a>
+<span class="badge-patreon"><a href="https://www.patreon.com/assimp" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
+[![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
+<br>
 
 APIs are provided for C and C++. There are various bindings to other languages (C#, Java, Python, Delphi, D). Assimp also runs on Android and iOS.
 
@@ -9,18 +18,19 @@ Additionally, assimp features various __mesh post processing tools__: normals an
 This is the development trunk containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories.
 The current build status is:
 
-Linux [![Linux Build Status](https://travis-ci.org/assimp/assimp.png)](https://travis-ci.org/assimp/assimp)
-Windows [![Windows Build Status](https://ci.appveyor.com/api/projects/status/tmo433wax6u6cjp4?svg=true)](https://ci.appveyor.com/project/kimkulling/assimp)
-Coverity<a href="https://scan.coverity.com/projects/5607">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/5607/badge.svg"/>
-</a>
+Gitter chat: [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 
+And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
+> /join #assetimporterlib
+
+<br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
+
+Please check our Wiki as well: https://github.com/assimp/assimp/wiki
 
 #### Supported file formats ####
 
-A full list [is here](http://assimp.sourceforge.net/main_features_formats.html).
+A full list [is here](http://assimp.org/main_features_formats.html).
 __Importers__:
 
 - 3DS
@@ -60,7 +70,8 @@ __Importers__:
 - Ogre XML
 - Q3D
 - ASSBIN (Assimp custom format)
-- glTF
+- glTF (partial)
+- 3MF
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
@@ -76,7 +87,8 @@ __Exporters__:
 - 3DS
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
-- glTF
+- STEP
+- glTF (partial)
 
 ### Building ###
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.
@@ -86,6 +98,7 @@ Take a look into the `INSTALL` file. Our build system is CMake, if you used CMak
 * [Python](port/PyAssimp/README.md)
 * [.NET](port/AssimpNET/Readme.md)
 * [Pascal](port/AssimpPascal/Readme.md)
+* [Javascript (Alpha)](https://github.com/makc/assimp2json)
 
 #### Repository structure ####
 Open Asset Import Library is implemented in C++. The directory structure is:
@@ -105,7 +118,7 @@ Open Asset Import Library is implemented in C++. The directory structure is:
 
 
 ### Where to get help ###
-For more information, visit [our website](http://assimp.sourceforge.net/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.
+For more information, visit [our website](http://assimp.org/). Or check out the `./doc`- folder, which contains the official documentation in HTML format.
 (CHMs for Windows are included in some release packages and should be located right here in the root folder).
 
 If the docs don't solve your problem, ask on [StackOverflow](http://stackoverflow.com/questions/tagged/assimp?sort=newest). If you think you found a bug, please open an issue on Github.
@@ -113,16 +126,13 @@ If the docs don't solve your problem, ask on [StackOverflow](http://stackoverflo
 For development discussions, there is also a (very low-volume) mailing list, _assimp-discussions_
   [(subscribe here)]( https://lists.sourceforge.net/lists/listinfo/assimp-discussions)
 
-And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
-> /join #assetimporterlib
+Open Asset Import Library is a library to load various 3d file formats into a shared, in-memory format. It supports more than __40 file formats__ for import and a growing selection of file formats for export.
+
+And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
 
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
-
-### Donate ###
-If you like assimp, consider buying us a beer (or two):
-[Donate](http://sourceforge.net/donate/index.php?group_id=226462)
 
 ### License ###
 Our license is based on the modified, __3-clause BSD__-License.

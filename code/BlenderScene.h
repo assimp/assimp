@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -64,7 +65,7 @@ namespace Blender {
 // * C++ style comments only
 //
 // * Structures may include the primitive types char, int, short,
-//   float, double. Signedness specifiers are not allowed on
+//   float, double. Signed specifiers are not allowed on
 //   integers. Enum types are allowed, but they must have been
 //   defined in this header.
 //
@@ -85,14 +86,23 @@ namespace Blender {
 //   provided they are neither pointers nor arrays.
 //
 // * One of WARN, FAIL can be appended to the declaration (
-//   prior to the semiolon to specifiy the error handling policy if
+//   prior to the semicolon to specify the error handling policy if
 //   this field is missing in the input DNA). If none of those
-//   is specified the default policy is to subtitute a default
+//   is specified the default policy is to substitute a default
 //   value for the field.
 //
 
-#define WARN // warn if field is missing, substitute default value
-#define FAIL // fail the import if the field does not exist
+// warn if field is missing, substitute default value
+#ifdef WARN
+#  undef WARN
+#endif
+#define WARN 
+
+// fail the import if the field does not exist
+#ifdef FAIL
+#  undef FAIL
+#endif
+#define FAIL 
 
 struct Object;
 struct MTex;
@@ -102,16 +112,16 @@ struct Image;
 
 #define AI_BLEND_MESH_MAX_VERTS 2000000000L
 
+static const size_t MaxNameLen = 1024;
+
 // -------------------------------------------------------------------------------
 struct ID : ElemBase {
-
-    char name[1024] WARN;
+    char name[ MaxNameLen ] WARN;
     short flag;
 };
 
 // -------------------------------------------------------------------------------
 struct ListBase : ElemBase {
-
     std::shared_ptr<ElemBase> first;
     std::shared_ptr<ElemBase> last;
 };
@@ -126,7 +136,6 @@ struct PackedFile : ElemBase {
 
 // -------------------------------------------------------------------------------
 struct GroupObject : ElemBase {
-
     std::shared_ptr<GroupObject> prev,next FAIL;
     std::shared_ptr<Object> ob;
 };
@@ -142,7 +151,6 @@ struct Group : ElemBase {
 // -------------------------------------------------------------------------------
 struct World : ElemBase {
     ID id FAIL;
-
 };
 
 // -------------------------------------------------------------------------------
@@ -175,7 +183,7 @@ struct MLoopUV : ElemBase {
 // -------------------------------------------------------------------------------
 // Note that red and blue are not swapped, as with MCol
 struct MLoopCol : ElemBase {
-    char r, g, b, a;
+	unsigned char r, g, b, a;
 };
 
 // -------------------------------------------------------------------------------
@@ -217,7 +225,6 @@ struct TFace : ElemBase {
 
 // -------------------------------------------------------------------------------
 struct MTFace : ElemBase {
-
     float uv[4][2] FAIL;
     char flag;
     short mode;
@@ -235,13 +242,15 @@ struct MDeformWeight : ElemBase  {
 
 // -------------------------------------------------------------------------------
 struct MDeformVert : ElemBase  {
-
     vector<MDeformWeight> dw WARN;
     int totweight;
 };
 
 // -------------------------------------------------------------------------------
 #define MA_RAYMIRROR    0x40000
+#define MA_TRANSPARENCY 0x10000
+#define MA_RAYTRANSP    0x20000
+#define MA_ZTRANSP      0x00040
 
 struct Material : ElemBase {
     ID id FAIL;
@@ -260,6 +269,88 @@ struct Material : ElemBase {
     float roughness;
     float darkness;
     float refrac;
+
+    float amb;
+    float ang;
+    float spectra;
+    float spec;
+    float zoffs;
+    float add;
+    float fresnel_mir;
+    float fresnel_mir_i;
+    float fresnel_tra;
+    float fresnel_tra_i;
+    float filter;
+    float tx_limit;
+    float tx_falloff;
+    float gloss_mir;
+    float gloss_tra;
+    float adapt_thresh_mir;
+    float adapt_thresh_tra;
+    float aniso_gloss_mir;
+    float dist_mir;
+    float hasize;
+    float flaresize;
+    float subsize;
+    float flareboost;
+    float strand_sta;
+    float strand_end;
+    float strand_ease;
+    float strand_surfnor;
+    float strand_min;
+    float strand_widthfade;
+    float sbias;
+    float lbias;
+    float shad_alpha;
+    float param;
+    float rms;
+    float rampfac_col;
+    float rampfac_spec;
+    float friction;
+    float fh;
+    float reflect;
+    float fhdist;
+    float xyfrict;
+    float sss_radius;
+    float sss_col;
+    float sss_error;
+    float sss_scale;
+    float sss_ior;
+    float sss_colfac;
+    float sss_texfac;
+    float sss_front;
+    float sss_back;
+
+    short material_type;
+    short flag;
+    short ray_depth;
+    short ray_depth_tra;
+    short samp_gloss_mir;
+    short samp_gloss_tra;
+    short fadeto_mir;
+    short shade_flag;
+    short flarec;
+    short starc;
+    short linec;
+    short ringc;
+    short pr_lamp;
+    short pr_texture;
+    short ml_flag;
+    short texco;
+    short mapto;
+    short ramp_show;
+    short pad3;
+    short dynamode;
+    short pad2;
+    short sss_flag;
+    short sss_preset;
+    short shadowonly_flag;
+    short index;
+    short vcol_alpha;
+    short pad4;
+
+    char seed1;
+    char seed2;
 
     std::shared_ptr<Group> group;
 
@@ -371,8 +462,8 @@ struct Lamp : ElemBase {
 
       //short ray_samp, ray_sampy, ray_sampz;
       //short ray_samp_type;
-      //short area_shape;
-      //float area_size, area_sizey, area_sizez;
+      short area_shape;
+      float area_size, area_sizey, area_sizez;
       //float adapt_thresh;
       //short ray_samp_method;
 
@@ -526,6 +617,17 @@ struct Object : ElemBase  {
     std::shared_ptr<ElemBase> data FAIL;
 
     ListBase modifiers;
+
+    Object()
+    : ElemBase()
+    , type( Type_EMPTY )
+    , parent( nullptr )
+    , track()
+    , proxy()
+    , proxy_from()
+    , data() {
+        // empty
+    }
 };
 
 
@@ -534,6 +636,15 @@ struct Base : ElemBase {
     Base* prev WARN;
     std::shared_ptr<Base> next WARN;
     std::shared_ptr<Object> object WARN;
+
+    Base() 
+    : ElemBase()
+    , prev( nullptr )
+    , next()
+    , object() {
+        // empty
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -545,8 +656,15 @@ struct Scene : ElemBase {
     std::shared_ptr<Base> basact WARN;
 
     ListBase base;
-};
 
+    Scene()
+    : ElemBase()
+    , camera()
+    , world()
+    , basact() {
+        // empty
+    }
+};
 
 // -------------------------------------------------------------------------------
 struct Image : ElemBase {
@@ -574,6 +692,11 @@ struct Image : ElemBase {
     short animspeed;
 
     short gen_x, gen_y, gen_type;
+    
+    Image()
+    : ElemBase() {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -661,6 +784,14 @@ struct Tex : ElemBase {
     //VoxelData *vd;
 
     //char use_nodes;
+
+    Tex()
+    : ElemBase()
+    , imaflag( ImageFlags_INTERPOL )
+    , type( Type_CLOUDS )
+    , ima() {
+        // empty
+    }
 };
 
 // -------------------------------------------------------------------------------
@@ -749,9 +880,13 @@ struct MTex : ElemBase {
     //float lifefac, sizefac, ivelfac, pvelfac;
     //float shadowfac;
     //float zenupfac, zendownfac, blendfac;
+
+    MTex()
+    : ElemBase() {
+        // empty
+    }
 };
 
-
-    }
+}
 }
 #endif

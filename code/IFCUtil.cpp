@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IFCUtil.h"
 #include "PolyTools.h"
 #include "ProcessHelper.h"
-#include "Defines.h"
+#include <assimp/Defines.h>
 
 namespace Assimp {
     namespace IFC {
@@ -180,7 +181,7 @@ IfcVector3 TempMesh::ComputePolygonNormal(const IfcVector3* vtcs, size_t cnt, bo
     }
 
     IfcVector3 nor;
-    NewellNormal<3, 3, 3>(nor, cnt, &temp[0], &temp[1], &temp[2]);
+    NewellNormal<3, 3, 3>(nor, static_cast<int>(cnt), &temp[0], &temp[1], &temp[2]);
     return normalize ? nor.Normalize() : nor;
 }
 
@@ -548,7 +549,7 @@ void ConvertCartesianPoint(IfcVector3& out, const IfcCartesianPoint& in)
 {
     out = IfcVector3();
     for(size_t i = 0; i < in.Coordinates.size(); ++i) {
-        out[i] = in.Coordinates[i];
+        out[static_cast<unsigned int>(i)] = in.Coordinates[i];
     }
 }
 
@@ -564,7 +565,7 @@ void ConvertDirection(IfcVector3& out, const IfcDirection& in)
 {
     out = IfcVector3();
     for(size_t i = 0; i < in.DirectionRatios.size(); ++i) {
-        out[i] = in.DirectionRatios[i];
+        out[static_cast<unsigned int>(i)] = in.DirectionRatios[i];
     }
     const IfcFloat len = out.Length();
     if (len<1e-6) {

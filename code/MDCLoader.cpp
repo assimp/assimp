@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -48,11 +49,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MDCLoader.h"
 #include "MD3FileData.h"
 #include "MDCNormalTable.h" // shouldn't be included by other units
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/Importer.hpp"
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/scene.h"
 
 
 using namespace Assimp;
@@ -408,7 +410,7 @@ void MDCImporter::InternReadFile(
 
                     // copy texture coordinates
                     pcUVCur->x = pcUVs[quak].u;
-                    pcUVCur->y = 1.0f-pcUVs[quak].v; // DX to OGL
+                    pcUVCur->y = ai_real( 1.0 )-pcUVs[quak].v; // DX to OGL
                 }
                 pcVertCur->x += pcFrame->localOrigin[0] ;
                 pcVertCur->y += pcFrame->localOrigin[1] ;

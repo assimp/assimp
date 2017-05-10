@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_EXCEPTIONAL_H
 
 #include <stdexcept>
-#include "DefaultIOStream.h"
+#include <assimp/DefaultIOStream.h>
 using std::runtime_error;
 
 #ifdef _MSC_VER
@@ -58,8 +58,8 @@ class DeadlyImportError
 {
 public:
     /** Constructor with arguments */
-    explicit DeadlyImportError( const std::string& pErrorText)
-        : runtime_error(pErrorText)
+    explicit DeadlyImportError( const std::string& errorText)
+        : runtime_error(errorText)
     {
     }
 

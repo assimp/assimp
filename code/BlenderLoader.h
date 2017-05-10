@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -105,7 +106,6 @@ public:
     BlenderImporter();
     ~BlenderImporter();
 
-
 public:
 
     // --------------------
@@ -179,9 +179,18 @@ private:
     );
 
     // --------------------
+    void BuildDefaultMaterial(
+        Blender::ConversionData& conv_data
+    );
+
+    void AddBlendParams(
+        aiMaterial* result,
+        const Blender::Material* source
+    );
+
     void BuildMaterials(
         Blender::ConversionData& conv_data
-    ) ;
+    );
 
     // --------------------
     void ResolveTexture(

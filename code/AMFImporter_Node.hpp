@@ -378,25 +378,23 @@ struct CAMFImporter_NodeElement_Triangle : public CAMFImporter_NodeElement
 
 };// struct CAMFImporter_NodeElement_Triangle
 
-/// \struct CAMFImporter_NodeElement_Texture
 /// Structure that define texture node.
-struct CAMFImporter_NodeElement_Texture : public CAMFImporter_NodeElement
-{
-	/****************** Variables ******************/
-
+struct CAMFImporter_NodeElement_Texture : public CAMFImporter_NodeElement {
 	size_t Width, Height, Depth;///< Size of the texture.
 	std::vector<uint8_t> Data;///< Data of the texture.
 	bool Tiled;
 
-	/****************** Functions ******************/
-
-	/// \fn CAMFImporter_NodeElement_Texture(CAMFImporter_NodeElement* pParent)
 	/// Constructor.
 	/// \param [in] pParent - pointer to parent node.
 	CAMFImporter_NodeElement_Texture(CAMFImporter_NodeElement* pParent)
-		: CAMFImporter_NodeElement(ENET_Texture, pParent)
-	{}
-
+	: CAMFImporter_NodeElement(ENET_Texture, pParent)
+    , Width( 0 )
+    , Height( 0 )
+    , Depth( 0 )
+    , Data()
+    , Tiled( false ){
+        // empty
+    }
 };// struct CAMFImporter_NodeElement_Texture
 
 #endif // INCLUDED_AI_AMF_IMPORTER_NODE_H

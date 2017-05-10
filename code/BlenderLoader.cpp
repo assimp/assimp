@@ -116,7 +116,7 @@ bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
     else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this won't catch compressed files
-        const char* tokens[] = {"BLENDER"};
+        const char* tokens[] = {"blender"};
         return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
     }
     return false;

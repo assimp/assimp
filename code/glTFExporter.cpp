@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -511,7 +512,7 @@ void glTFExporter::ExportMeshes()
     // Variables needed for compression. END.
 
     std::string fname = std::string(mFilename);
-    std::string bufferIdPrefix = fname.substr(0, fname.find("."));
+    std::string bufferIdPrefix = fname.substr(0, fname.rfind(".gltf"));
     std::string bufferId = mAsset->FindUniqueID("", bufferIdPrefix.c_str());
 
     Ref<Buffer> b = mAsset->GetBodyBuffer();
@@ -582,7 +583,7 @@ void glTFExporter::ExportMeshes()
 		if (v) p.attributes.position.push_back(v);
 
 		/******************** Normals ********************/
-		if(comp_allow && (aim->mNormals > 0)) idx_srcdata_normal = b->byteLength;// Store index of normals array.
+		if(comp_allow && (aim->mNormals != 0)) idx_srcdata_normal = b->byteLength;// Store index of normals array.
 
 		Ref<Accessor> n = ExportData(*mAsset, meshId, b, aim->mNumVertices, aim->mNormals, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
 		if (n) p.attributes.normal.push_back(n);

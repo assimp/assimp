@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -97,20 +98,30 @@ public:
 
     }
 
-    void ImportXml(aiScene* scene) {
+    void ImportXml(aiScene* scene)
+    {
+
+        scene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
+
         scene->mRootNode = new aiNode();
         std::vector<aiNode*> children;
 
-        while(ReadToEndElement(D3MF::XmlTag::model)) {
-            if(xmlReader->getNodeName() == D3MF::XmlTag::object) {
+        while(ReadToEndElement(D3MF::XmlTag::model))
+        {
+
+            if(xmlReader->getNodeName() == D3MF::XmlTag::object)
+            {
                 children.push_back(ReadObject(scene));
-            } else if(xmlReader->getNodeName() == D3MF::XmlTag::build) {
-                // ???
+            }
+            else if(xmlReader->getNodeName() == D3MF::XmlTag::build)
+            {
+
             }
         }
 
         if(scene->mRootNode->mName.length == 0)
             scene->mRootNode->mName.Set("3MF");
+
 
         scene->mNumMeshes = static_cast<unsigned int>(meshes.size());
         scene->mMeshes = new aiMesh*[scene->mNumMeshes]();
@@ -237,9 +248,7 @@ private:
         mesh->mFaces = new aiFace[mesh->mNumFaces];
         mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
-
         std::copy(faces.begin(), faces.end(), mesh->mFaces);
-
     }
 
     aiFace ReadTriangle()

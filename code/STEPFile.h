@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -438,13 +439,17 @@ namespace STEP {
     // ------------------------------------------------------------------------------
     /** Base class for all concrete object instances */
     // ------------------------------------------------------------------------------
-    class Object
-    {
+    class Object {
     public:
-
-        virtual ~Object() {}
         Object(const char* classname = "unknown")
-            : classname(classname) {}
+        : id( 0 )
+        , classname(classname) {
+            // empty
+        }
+
+        virtual ~Object() {
+            // empty
+        }
 
     public:
 
@@ -459,7 +464,6 @@ namespace STEP {
             return dynamic_cast<T&>(*this);
         }
 
-
         template <typename T>
         const T* ToPtr() const {
             return dynamic_cast<const T*>(this);
@@ -471,7 +475,6 @@ namespace STEP {
         }
 
     public:
-
         uint64_t GetID() const {
             return id;
         }
@@ -488,7 +491,6 @@ namespace STEP {
         uint64_t id;
         const char* const classname;
     };
-
 
     template <typename T>
     size_t GenericFill(const STEP::DB& db, const EXPRESS::LIST& params, T* in);

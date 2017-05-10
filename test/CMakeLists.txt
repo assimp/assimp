@@ -1,7 +1,8 @@
 # Open Asset Import Library (assimp)
 # ----------------------------------------------------------------------
 #
-# Copyright (c) 2006-2016, assimp team
+# Copyright (c) 2006-2017, assimp team
+
 # All rights reserved.
 #
 # Redistribution and use of this software in source and binary forms,
@@ -38,6 +39,8 @@
 cmake_minimum_required( VERSION 2.6 )
 
 #INCLUDE( AddGTest )
+include( CTest )
+enable_testing()
 
 INCLUDE_DIRECTORIES(
 	../contrib/gtest/include
@@ -152,15 +155,6 @@ ENDIF(MSVC)
 target_link_libraries( unit assimp ${platform_libs} )
 
 add_subdirectory(headercheck)
-#if (ASSIMP_COVERALLS)
-#    include(Coveralls)
-#
-#    set(COVERAGE_SRCS ${assimp_src} ${TEST_SRCS} )
-#
-#    # Create the coveralls target.
-#    coveralls_setup(
-#        "${COVERAGE_SRCS}" # The source files.
-#        ON                 # If we should upload.
-#        "${PROJECT_SOURCE_DIR}/cmake-modules/") # (Optional) Alternate project cmake module path.
-#endif()
+
+add_test( unittests unit )
 

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -97,7 +98,27 @@ ObjFileParser::~ObjFileParser() {
 ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
-
+void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
+{
+    auto curPosition = buffer.begin();
+    do
+    {
+        while (*curPosition!='\n'&&*curPosition!='\\')
+        {
+            ++curPosition;
+        }
+        if (*curPosition=='\\')
+        {
+            std::vector<char> tempBuf;
+            do
+            {
+                streamBuffer.getNextLine(tempBuf);
+            } while (tempBuf[0]=='\n');
+            *curPosition = ' ';
+            std::copy(tempBuf.cbegin(), tempBuf.cend(), ++curPosition);
+        }
+    } while (*curPosition!='\n');
+}
 // -------------------------------------------------------------------
 //  File parsing method.
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
@@ -123,7 +144,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
             progressCounter++;
             m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
         }
-
+		ignoreNewLines(streamBuffer, buffer);
         // parse line
         switch (*m_DataIt) {
         case 'v': // Parse a vertex texture coordinate

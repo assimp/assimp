@@ -715,7 +715,7 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 		mHelper_Mesh_Quantity = mScene->mNumMeshes;
 		mHelper_Mesh = new SHelper_Mesh*[mScene->mNumMeshes];
 
-		// Walk thru the meshes and extract needed data and, also calculate BBox.
+		// Walk through the meshes and extract needed data and, also calculate BBox.
 		for(size_t idx_mesh = 0; idx_mesh < mScene->mNumMeshes; idx_mesh++)
 		{
 			aiMesh& mesh_cur = *mScene->mMeshes[idx_mesh];
@@ -793,7 +793,7 @@ void CGLView::SetScene(const aiScene *pScene, const QString& pScenePath)
 	//
 	// Scene BBox
 	//
-	// For calculating right BBox we must walk thru all nodes and apply transformation to meshes BBoxes
+	// For calculating right BBox we must walk through all nodes and apply transformation to meshes BBoxes
 	if(mHelper_Mesh_Quantity > 0)
 	{
 		bool first_assign = true;

@@ -4,7 +4,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -53,13 +54,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Subdivision.h"
 #include "Importer.h"
 #include "BaseImporter.h"
-#include "../include/assimp/Importer.hpp"
-#include "../include/assimp/light.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/material.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/config.h"
-#include "../include/assimp/IOSystem.hpp"
+#include <assimp/Importer.hpp>
+#include <assimp/light.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <assimp/config.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/importerdesc.h>
 #include <memory>
 
 using namespace Assimp;

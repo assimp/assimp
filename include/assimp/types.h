@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -42,12 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file types.h
  *  Basic data types and primitives, such as vectors or colors.
  */
+#pragma once
 #ifndef AI_TYPES_H_INC
 #define AI_TYPES_H_INC
 
 // Some runtime headers
 #include <sys/types.h>
-#include <math.h>
 #include <stddef.h>
 #include <string.h>
 #include <limits.h>
@@ -109,12 +110,11 @@ extern "C" {
 
 /** Maximum dimension for strings, ASSIMP strings are zero terminated. */
 #ifdef __cplusplus
+static 
 const size_t MAXLEN = 1024;
 #else
 #   define MAXLEN 1024
 #endif
-
-#include "./Compiler/pushpack1.h"
 
 // ----------------------------------------------------------------------------------
 /** Represents a plane in a three-dimensional, euclidean space
@@ -123,7 +123,7 @@ struct aiPlane
 {
 #ifdef __cplusplus
     aiPlane () : a(0.f), b(0.f), c(0.f), d(0.f) {}
-    aiPlane (float _a, float _b, float _c, float _d)
+    aiPlane (ai_real _a, ai_real _b, ai_real _c, ai_real _d)
         : a(_a), b(_b), c(_c), d(_d) {}
 
     aiPlane (const aiPlane& o) : a(o.a), b(o.b), c(o.c), d(o.d) {}
@@ -131,8 +131,8 @@ struct aiPlane
 #endif // !__cplusplus
 
     //! Plane equation
-    float a,b,c,d;
-} PACK_STRUCT; // !struct aiPlane
+    ai_real a,b,c,d;
+}; // !struct aiPlane
 
 // ----------------------------------------------------------------------------------
 /** Represents a ray
@@ -150,7 +150,7 @@ struct aiRay
 
     //! Position and direction of the ray
     C_STRUCT aiVector3D pos, dir;
-} PACK_STRUCT; // !struct aiRay
+}; // !struct aiRay
 
 // ----------------------------------------------------------------------------------
 /** Represents a color in Red-Green-Blue space.
@@ -159,8 +159,8 @@ struct aiColor3D
 {
 #ifdef __cplusplus
     aiColor3D () : r(0.0f), g(0.0f), b(0.0f) {}
-    aiColor3D (float _r, float _g, float _b) : r(_r), g(_g), b(_b) {}
-    explicit aiColor3D (float _r) : r(_r), g(_r), b(_r) {}
+    aiColor3D (ai_real _r, ai_real _g, ai_real _b) : r(_r), g(_g), b(_b) {}
+    explicit aiColor3D (ai_real _r) : r(_r), g(_r), b(_r) {}
     aiColor3D (const aiColor3D& o) : r(o.r), g(o.g), b(o.b) {}
 
     /** Component-wise comparison */
@@ -176,11 +176,7 @@ struct aiColor3D
     /** Component-wise comparison */
     // TODO: add epsilon?
     bool operator < (const aiColor3D& other) const {
-        return r < other.r || (
-            r == other.r && (g < other.g ||
-                (g == other.g && b < other.b)
-            )
-        );
+        return r < other.r || ( r == other.r && (g < other.g || (g == other.g && b < other.b ) ) );
     }
 
     /** Component-wise addition */
@@ -199,32 +195,38 @@ struct aiColor3D
     }
 
     /** Multiply with a scalar */
-    aiColor3D operator*(float f) const {
+    aiColor3D operator*(ai_real f) const {
         return aiColor3D(r*f,g*f,b*f);
     }
 
     /** Access a specific color component */
-    float operator[](unsigned int i) const {
+    ai_real operator[](unsigned int i) const {
         return *(&r + i);
     }
 
     /** Access a specific color component */
-    float& operator[](unsigned int i) {
-        return *(&r + i);
+    ai_real& operator[](unsigned int i) {
+        if ( 0 == i ) {
+            return r;
+        } else if ( 1 == i ) {
+            return g;
+        } else if ( 2 == i ) {
+            return b;
+        }
+        return r;
     }
 
     /** Check whether a color is black */
     bool IsBlack() const {
-        static const float epsilon = 10e-3f;
+        static const ai_real epsilon = ai_real(10e-3);
         return std::fabs( r ) < epsilon && std::fabs( g ) < epsilon && std::fabs( b ) < epsilon;
     }
 
 #endif // !__cplusplus
 
     //! Red, green and blue color values
-    float r, g, b;
-} PACK_STRUCT;  // !struct aiColor3D
-#include "./Compiler/poppack1.h"
+    ai_real r, g, b;
+};  // !struct aiColor3D
 
 // ----------------------------------------------------------------------------------
 /** Represents an UTF-8 string, zero byte terminated.
@@ -512,4 +514,5 @@ struct aiMemoryInfo
 #include "quaternion.inl"
 #include "matrix3x3.inl"
 #include "matrix4x4.inl"
-#endif
+
+#endif // AI_TYPES_H_INC

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,9 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IFCReaderGen.h"
 #include "IFCLoader.h"
 #include "STEPFile.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/material.h"
-
+#include <assimp/mesh.h>
+#include <assimp/material.h>
 
 struct aiNode;
 

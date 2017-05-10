@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_STANDARD_SHAPES_H_INC
 #define AI_STANDARD_SHAPES_H_INC
 
-#include "../include/assimp/vector3.h"
+#include <assimp/vector3.h>
 #include <vector>
 
 struct aiMesh;
@@ -174,8 +175,8 @@ public:
      *    no 'end caps'
      *  @param positions Receives output triangles
      */
-    static void MakeCone(float height,float radius1,
-        float radius2,unsigned int tess,
+    static void MakeCone(ai_real height,ai_real radius1,
+        ai_real radius2,unsigned int tess,
         std::vector<aiVector3D>& positions,bool bOpen= false);
 
 
@@ -189,7 +190,7 @@ public:
      *  @param tess Number of segments.
      *  @param positions Receives output triangles.
      */
-    static void MakeCircle(float radius, unsigned int tess,
+    static void MakeCircle(ai_real radius, unsigned int tess,
         std::vector<aiVector3D>& positions);
 
 };

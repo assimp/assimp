@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -256,7 +257,7 @@ bool CalcTangentsProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
     }
     std::vector<unsigned int> verticesFound;
 
-    const float fLimit = cosf(configMaxAngle);
+    const float fLimit = std::cos(configMaxAngle);
     std::vector<unsigned int> closeVertices;
 
     // in the second pass we now smooth out all tangents and bitangents at the same local position

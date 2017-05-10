@@ -1,9 +1,10 @@
-/*
+﻿/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -42,8 +43,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file scene.h
  *  @brief Defines the data structures in which the imported scene is returned.
  */
-#ifndef __AI_SCENE_H_INC__
-#define __AI_SCENE_H_INC__
+#pragma once
+#ifndef AI_SCENE_H_INC
+#define AI_SCENE_H_INC
 
 #include "types.h"
 #include "texture.h"
@@ -58,9 +60,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-
 // -------------------------------------------------------------------------------
-/** A node in the imported hierarchy.
+/** 
+ * A node in the imported hierarchy.
  *
  * Each node has name, a parent node (except for the root node),
  * a transformation relative to its parent and possibly several child nodes.
@@ -68,7 +70,7 @@ extern "C" {
  * the imported scene does consist of only a single root node without children.
  */
 // -------------------------------------------------------------------------------
-struct aiNode
+struct ASSIMP_API aiNode
 {
     /** The name of the node.
      *
@@ -109,7 +111,7 @@ struct aiNode
     /** The number of meshes of this node. */
     unsigned int mNumMeshes;
 
-    /** The meshes of this node. Each entry is an index into the 
+    /** The meshes of this node. Each entry is an index into the
       * mesh list of the #aiScene.
       */
     unsigned int* mMeshes;
@@ -123,47 +125,13 @@ struct aiNode
 
 #ifdef __cplusplus
     /** Constructor */
-    aiNode()
-        // set all members to zero by default
-        : mName("")
-        , mParent(NULL)
-        , mNumChildren(0)
-        , mChildren(NULL)
-        , mNumMeshes(0)
-        , mMeshes(NULL)
-        , mMetaData(NULL)
-    {
-    }
-
+    aiNode();
 
     /** Construction from a specific name */
-    explicit aiNode(const std::string& name)
-        // set all members to zero by default
-        : mName(name)
-        , mParent(NULL)
-        , mNumChildren(0)
-        , mChildren(NULL)
-        , mNumMeshes(0)
-        , mMeshes(NULL)
-        , mMetaData(NULL)
-    {
-    }
+    explicit aiNode(const std::string& name);
 
     /** Destructor */
-    ~aiNode()
-    {
-        // delete all children recursively
-        // to make sure we won't crash if the data is invalid ...
-        if (mChildren && mNumChildren)
-        {
-            for( unsigned int a = 0; a < mNumChildren; a++)
-                delete mChildren[a];
-        }
-        delete [] mChildren;
-        delete [] mMeshes;
-        delete mMetaData;
-    }
-
+    ~aiNode();
 
     /** Searches for a node with a specific name, beginning at this
      *  nodes. Normally you will call this method on the root node
@@ -172,46 +140,26 @@ struct aiNode
      *  @param name Name to search for
      *  @return NULL or a valid Node if the search was successful.
      */
-    inline const aiNode* FindNode(const aiString& name) const
-    {
+    inline 
+    const aiNode* FindNode(const aiString& name) const {
         return FindNode(name.data);
     }
 
-
-    inline aiNode* FindNode(const aiString& name)
-    {
+    inline 
+    aiNode* FindNode(const aiString& name) {
         return FindNode(name.data);
     }
 
+    const aiNode* FindNode(const char* name) const;
 
-    inline const aiNode* FindNode(const char* name) const
-    {
-        if (!::strcmp( mName.data,name))return this;
-        for (unsigned int i = 0; i < mNumChildren;++i)
-        {
-            const aiNode* const p = mChildren[i]->FindNode(name);
-            if (p) {
-                return p;
-            }
-        }
-        // there is definitely no sub-node with this name
-        return NULL;
-    }
+    aiNode* FindNode(const char* name);
 
-    inline aiNode* FindNode(const char* name)
-    {
-        if (!::strcmp( mName.data,name))return this;
-        for (unsigned int i = 0; i < mNumChildren;++i)
-        {
-            aiNode* const p = mChildren[i]->FindNode(name);
-            if (p) {
-                return p;
-            }
-        }
-        // there is definitely no sub-node with this name
-        return NULL;
-    }
-
+    /**
+     * @brief   Will add new children.
+     * @param   numChildren  Number of children to add.
+     * @param   children     The array with pointers showing to the children.
+     */
+    void addChildren(unsigned int numChildren, aiNode **children);
 #endif // __cplusplus
 };
 
@@ -264,6 +212,13 @@ struct aiNode
  */
 #define AI_SCENE_FLAGS_TERRAIN 0x10
 
+ /**
+ * Specifies that the scene data can be shared between structures. For example:
+ * one vertex in few faces. \ref AI_SCENE_FLAGS_NON_VERBOSE_FORMAT can not be
+ * used for this because \ref AI_SCENE_FLAGS_NON_VERBOSE_FORMAT has internal
+ * meaning about postprocessing steps.
+ */
+#define AI_SCENE_FLAGS_ALLOW_SHARED			0x20
 
 // -------------------------------------------------------------------------------
 /** The root structure of the imported data.
@@ -276,14 +231,12 @@ struct aiNode
 // -------------------------------------------------------------------------------
 struct aiScene
 {
-
     /** Any combination of the AI_SCENE_FLAGS_XXX flags. By default
     * this value is 0, no flags are set. Most applications will
     * want to reject all scenes with the AI_SCENE_FLAGS_INCOMPLETE
     * bit set.
     */
     unsigned int mFlags;
-
 
     /** The root node of the hierarchy.
     *
@@ -293,8 +246,6 @@ struct aiScene
     * of the imported file.
     */
     C_STRUCT aiNode* mRootNode;
-
-
 
     /** The number of meshes in the scene. */
     unsigned int mNumMeshes;
@@ -308,8 +259,6 @@ struct aiScene
     */
     C_STRUCT aiMesh** mMeshes;
 
-
-
     /** The number of materials in the scene. */
     unsigned int mNumMaterials;
 
@@ -322,8 +271,6 @@ struct aiScene
     */
     C_STRUCT aiMaterial** mMaterials;
 
-
-
     /** The number of animations in the scene. */
     unsigned int mNumAnimations;
 
@@ -333,8 +280,6 @@ struct aiScene
     * The array is mNumAnimations in size.
     */
     C_STRUCT aiAnimation** mAnimations;
-
-
 
     /** The number of textures embedded into the file */
     unsigned int mNumTextures;
@@ -347,7 +292,6 @@ struct aiScene
     */
     C_STRUCT aiTexture** mTextures;
 
-
     /** The number of light sources in the scene. Light sources
     * are fully optional, in most cases this attribute will be 0
         */
@@ -359,7 +303,6 @@ struct aiScene
     * listed here. The array is mNumLights in size.
     */
     C_STRUCT aiLight** mLights;
-
 
     /** The number of cameras in the scene. Cameras
     * are fully optional, in most cases this attribute will be 0
@@ -385,32 +328,37 @@ struct aiScene
 
     //! Check whether the scene contains meshes
     //! Unless no special scene flags are set this will always be true.
-    inline bool HasMeshes() const
-        { return mMeshes != NULL && mNumMeshes > 0; }
+    inline bool HasMeshes() const { 
+        return mMeshes != NULL && mNumMeshes > 0; 
+    }
 
     //! Check whether the scene contains materials
     //! Unless no special scene flags are set this will always be true.
-    inline bool HasMaterials() const
-        { return mMaterials != NULL && mNumMaterials > 0; }
+    inline bool HasMaterials() const { 
+        return mMaterials != NULL && mNumMaterials > 0; 
+    }
 
     //! Check whether the scene contains lights
-    inline bool HasLights() const
-        { return mLights != NULL && mNumLights > 0; }
+    inline bool HasLights() const { 
+        return mLights != NULL && mNumLights > 0; 
+    }
 
     //! Check whether the scene contains textures
-    inline bool HasTextures() const
-        { return mTextures != NULL && mNumTextures > 0; }
+    inline bool HasTextures() const {
+        return mTextures != NULL && mNumTextures > 0; 
+    }
 
     //! Check whether the scene contains cameras
-    inline bool HasCameras() const
-        { return mCameras != NULL && mNumCameras > 0; }
+    inline bool HasCameras() const {
+        return mCameras != NULL && mNumCameras > 0; 
+    }
 
     //! Check whether the scene contains animations
-    inline bool HasAnimations() const
-        { return mAnimations != NULL && mNumAnimations > 0; }
+    inline bool HasAnimations() const { 
+        return mAnimations != NULL && mNumAnimations > 0; 
+    }
 
 #endif // __cplusplus
-
 
     /**  Internal data, do not touch */
 #ifdef __cplusplus
@@ -425,4 +373,4 @@ struct aiScene
 } //! namespace Assimp
 #endif
 
-#endif // __AI_SCENE_H_INC__
+#endif // AI_SCENE_H_INC

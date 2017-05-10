@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,10 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file quaternion.h
  *  @brief Quaternion structure, including operators when compiling in C++
  */
+#pragma once
 #ifndef AI_QUATERNION_H_INC
 #define AI_QUATERNION_H_INC
 
 #ifdef __cplusplus
+
+#include "defs.h"
 
 template <typename TReal> class aiVector3t;
 template <typename TReal> class aiMatrix3x3t;
@@ -112,15 +116,14 @@ public:
     TReal w, x, y, z;
 } ;
 
-typedef aiQuaterniont<float> aiQuaternion;
+typedef aiQuaterniont<ai_real> aiQuaternion;
 
 #else
 
 struct aiQuaternion {
-    float w, x, y, z;
+    ai_real w, x, y, z;
 };
 
 #endif
-
 
 #endif // AI_QUATERNION_H_INC

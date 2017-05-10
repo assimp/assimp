@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -47,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // internal headers
 #include "3DSLoader.h"
 #include "TargetAnimation.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/DefaultLogger.hpp"
+#include <assimp/scene.h>
+#include <assimp/DefaultLogger.hpp>
 #include "StringComparison.h"
 #include <memory>
 #include <cctype>
@@ -197,7 +198,7 @@ void CopyTexture(aiMaterial& mat, D3DS::Texture& texture, aiTextureType type)
 
     // Setup the texture blend factor
     if (is_not_qnan(texture.mTextureBlend))
-        mat.AddProperty<float>( &texture.mTextureBlend, 1, AI_MATKEY_TEXBLEND(type,0));
+        mat.AddProperty<ai_real>( &texture.mTextureBlend, 1, AI_MATKEY_TEXBLEND(type,0));
 
     // Setup the texture mapping mode
     mat.AddProperty<int>((int*)&texture.mMapMode,1,AI_MATKEY_MAPPINGMODE_U(type,0));
@@ -207,14 +208,14 @@ void CopyTexture(aiMaterial& mat, D3DS::Texture& texture, aiTextureType type)
     // FIXME: this is not really correct ...
     if (texture.mMapMode == aiTextureMapMode_Mirror)
     {
-        texture.mScaleU *= 2.f;
-        texture.mScaleV *= 2.f;
-        texture.mOffsetU /= 2.f;
-        texture.mOffsetV /= 2.f;
+        texture.mScaleU *= 2.0;
+        texture.mScaleV *= 2.0;
+        texture.mOffsetU /= 2.0;
+        texture.mOffsetV /= 2.0;
     }
 
     // Setup texture UV transformations
-    mat.AddProperty<float>(&texture.mOffsetU,5,AI_MATKEY_UVTRANSFORM(type,0));
+    mat.AddProperty<ai_real>(&texture.mOffsetU,5,AI_MATKEY_UVTRANSFORM(type,0));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -265,10 +266,10 @@ void Discreet3DSImporter::ConvertMaterial(D3DS::Material& oldMat,
     }
 
     // Opacity
-    mat.AddProperty<float>( &oldMat.mTransparency,1,AI_MATKEY_OPACITY);
+    mat.AddProperty<ai_real>( &oldMat.mTransparency,1,AI_MATKEY_OPACITY);
 
     // Bump height scaling
-    mat.AddProperty<float>( &oldMat.mBumpHeight,1,AI_MATKEY_BUMPSCALING);
+    mat.AddProperty<ai_real>( &oldMat.mBumpHeight,1,AI_MATKEY_BUMPSCALING);
 
     // Two sided rendering?
     if (oldMat.mTwoSided)
@@ -690,7 +691,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
     pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
 
     // Recursively process all children
-    const unsigned int size = pcIn->mChildren.size();
+    const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
     for (unsigned int i = 0; i < size;++i)
     {
         pcOut->mChildren[i] = new aiNode();
@@ -742,7 +743,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
         DefaultLogger::get()->warn("No hierarchy information has been found in the file. ");
 
         pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes +
-            mScene->mCameras.size() + mScene->mLights.size();
+            static_cast<unsigned int>(mScene->mCameras.size() + mScene->mLights.size());
 
         pcOut->mRootNode->mChildren = new aiNode* [ pcOut->mRootNode->mNumChildren ];
         pcOut->mRootNode->mName.Set("<3DSDummyRoot>");

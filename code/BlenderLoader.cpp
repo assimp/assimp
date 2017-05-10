@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -53,11 +54,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderModifier.h"
 #include "BlenderBMesh.h"
 #include "StringUtils.h"
-#include "../include/assimp/scene.h"
-#include "StringComparison.h"
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
+#include "StringComparison.h"
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
+
 #include <cctype>
 
 
@@ -95,8 +98,9 @@ static const aiImporterDesc blenderDesc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BlenderImporter::BlenderImporter()
-: modifier_cache(new BlenderModifierShowcase())
-{}
+: modifier_cache(new BlenderModifierShowcase()) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
@@ -104,6 +108,8 @@ BlenderImporter::~BlenderImporter()
 {
     delete modifier_cache;
 }
+
+static const char* Tokens[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -116,8 +122,7 @@ bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
     else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this won't catch compressed files
-        const char* tokens[] = {"blender"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+        return SearchFileHeaderForToken(pIOHandler,pFile, Tokens,1);
     }
     return false;
 }
@@ -143,8 +148,7 @@ void BlenderImporter::SetupProperties(const Importer* /*pImp*/)
     // nothing to be done for the moment
 }
 
-struct free_it
-{
+struct free_it {
     free_it(void* free) : free(free) {}
     ~free_it() {
         ::free(this->free);
@@ -163,6 +167,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
     free_it free_it_really(dest);
 #endif
 
+
     FileDatabase file;
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
     if (!stream) {
@@ -171,7 +176,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 
     char magic[8] = {0};
     stream->Read(magic,7,1);
-    if (strcmp(magic,"BLENDER")) {
+    if (strcmp(magic, Tokens[0] )) {
         // Check for presence of the gzip header. If yes, assume it is a
         // compressed blend file and try uncompressing it, else fail. This is to
         // avoid uncompressing random files which our loader might end up with.
@@ -346,8 +351,9 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
         if (cur->object) {
             if(!cur->object->parent) {
                 no_parents.push_back(cur->object.get());
+            } else {
+                conv.objects.insert( cur->object.get() );
             }
-            else conv.objects.insert(cur->object.get());
         }
     }
     for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
@@ -404,7 +410,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
     }
 
     // acknowledge that the scene might come out incomplete
-    // by Assimps definition of `complete`: blender scenes
+    // by Assimp's definition of `complete`: blender scenes
     // can consist of thousands of cameras or lights with
     // not a single mesh between them.
     if (!out->mNumMeshes) {
@@ -421,7 +427,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
     // check if the file contents are bundled with the BLEND file
     if (img->packedfile) {
         name.data[0] = '*';
-        name.length = 1+ ASSIMP_itoa10(name.data+1,MAXLEN-1,conv_data.textures->size());
+        name.length = 1+ ASSIMP_itoa10(name.data+1,static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
         aiTexture* tex = conv_data.textures->back();
@@ -430,8 +436,9 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         // so we can extract the file extension from it.
         const size_t nlen = strlen( img->name );
         const char* s = img->name+nlen, *e = s;
-
-        while (s >= img->name && *s != '.')--s;
+        while ( s >= img->name && *s != '.' ) {
+            --s;
+        }
 
         tex->achFormatHint[0] = s+1>e ? '\0' : ::tolower( s[1] );
         tex->achFormatHint[1] = s+2>e ? '\0' : ::tolower( s[2] );
@@ -448,8 +455,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         tex->pcData = reinterpret_cast<aiTexel*>(ch);
 
         LogInfo("Reading embedded texture, original file was "+std::string(img->name));
-    }
-    else {
+    } else {
         name = aiString( img->name );
     }
 
@@ -554,10 +560,8 @@ void BlenderImporter::ResolveTexture(aiMaterial* out, const Material* mat, const
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::BuildMaterials(ConversionData& conv_data)
+void BlenderImporter::BuildDefaultMaterial(Blender::ConversionData& conv_data)
 {
-    conv_data.materials->reserve(conv_data.materials_raw.size());
-
     // add a default material if necessary
     unsigned int index = static_cast<unsigned int>( -1 );
     for( aiMesh* mesh : conv_data.meshes.get() ) {
@@ -588,6 +592,124 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
             mesh->mMaterialIndex = index;
         }
     }
+}
+
+void BlenderImporter::AddBlendParams(aiMaterial* result, const Material* source)
+{
+    aiColor3D diffuseColor(source->r, source->g, source->b);
+    result->AddProperty(&diffuseColor, 1, "$mat.blend.diffuse.color", 0, 0);
+
+    float diffuseIntensity = source->ref;
+    result->AddProperty(&diffuseIntensity, 1, "$mat.blend.diffuse.intensity", 0, 0);
+
+    int diffuseShader = source->diff_shader;
+    result->AddProperty(&diffuseShader, 1, "$mat.blend.diffuse.shader", 0, 0);
+
+    int diffuseRamp = 0;
+    result->AddProperty(&diffuseRamp, 1, "$mat.blend.diffuse.ramp", 0, 0);
+
+
+    aiColor3D specularColor(source->specr, source->specg, source->specb);
+    result->AddProperty(&specularColor, 1, "$mat.blend.specular.color", 0, 0);
+
+    float specularIntensity = source->spec;
+    result->AddProperty(&specularIntensity, 1, "$mat.blend.specular.intensity", 0, 0);
+
+    int specularShader = source->spec_shader;
+    result->AddProperty(&specularShader, 1, "$mat.blend.specular.shader", 0, 0);
+
+    int specularRamp = 0;
+    result->AddProperty(&specularRamp, 1, "$mat.blend.specular.ramp", 0, 0);
+
+    int specularHardness = source->har;
+    result->AddProperty(&specularHardness, 1, "$mat.blend.specular.hardness", 0, 0);
+
+
+    int transparencyUse = source->mode & MA_TRANSPARENCY ? 1 : 0;
+    result->AddProperty(&transparencyUse, 1, "$mat.blend.transparency.use", 0, 0);
+
+    int transparencyMethod = source->mode & MA_RAYTRANSP ? 2 : (source->mode & MA_ZTRANSP ? 1 : 0);
+    result->AddProperty(&transparencyMethod, 1, "$mat.blend.transparency.method", 0, 0);
+
+    float transparencyAlpha = source->alpha;
+    result->AddProperty(&transparencyAlpha, 1, "$mat.blend.transparency.alpha", 0, 0);
+
+    float transparencySpecular = source->spectra;
+    result->AddProperty(&transparencySpecular, 1, "$mat.blend.transparency.specular", 0, 0);
+
+    float transparencyFresnel = source->fresnel_tra;
+    result->AddProperty(&transparencyFresnel, 1, "$mat.blend.transparency.fresnel", 0, 0);
+
+    float transparencyBlend = source->fresnel_tra_i;
+    result->AddProperty(&transparencyBlend, 1, "$mat.blend.transparency.blend", 0, 0);
+
+    float transparencyIor = source->ang;
+    result->AddProperty(&transparencyIor, 1, "$mat.blend.transparency.ior", 0, 0);
+
+    float transparencyFilter = source->filter;
+    result->AddProperty(&transparencyFilter, 1, "$mat.blend.transparency.filter", 0, 0);
+
+    float transparencyFalloff = source->tx_falloff;
+    result->AddProperty(&transparencyFalloff, 1, "$mat.blend.transparency.falloff", 0, 0);
+
+    float transparencyLimit = source->tx_limit;
+    result->AddProperty(&transparencyLimit, 1, "$mat.blend.transparency.limit", 0, 0);
+
+    int transparencyDepth = source->ray_depth_tra;
+    result->AddProperty(&transparencyDepth, 1, "$mat.blend.transparency.depth", 0, 0);
+
+    float transparencyGlossAmount = source->gloss_tra;
+    result->AddProperty(&transparencyGlossAmount, 1, "$mat.blend.transparency.glossAmount", 0, 0);
+
+    float transparencyGlossThreshold = source->adapt_thresh_tra;
+    result->AddProperty(&transparencyGlossThreshold, 1, "$mat.blend.transparency.glossThreshold", 0, 0);
+
+    int transparencyGlossSamples = source->samp_gloss_tra;
+    result->AddProperty(&transparencyGlossSamples, 1, "$mat.blend.transparency.glossSamples", 0, 0);
+
+
+    int mirrorUse = source->mode & MA_RAYMIRROR ? 1 : 0;
+    result->AddProperty(&mirrorUse, 1, "$mat.blend.mirror.use", 0, 0);
+
+    float mirrorReflectivity = source->ray_mirror;
+    result->AddProperty(&mirrorReflectivity, 1, "$mat.blend.mirror.reflectivity", 0, 0);
+
+    aiColor3D mirrorColor(source->mirr, source->mirg, source->mirb);
+    result->AddProperty(&mirrorColor, 1, "$mat.blend.mirror.color", 0, 0);
+
+    float mirrorFresnel = source->fresnel_mir;
+    result->AddProperty(&mirrorFresnel, 1, "$mat.blend.mirror.fresnel", 0, 0);
+
+    float mirrorBlend = source->fresnel_mir_i;
+    result->AddProperty(&mirrorBlend, 1, "$mat.blend.mirror.blend", 0, 0);
+
+    int mirrorDepth = source->ray_depth;
+    result->AddProperty(&mirrorDepth, 1, "$mat.blend.mirror.depth", 0, 0);
+
+    float mirrorMaxDist = source->dist_mir;
+    result->AddProperty(&mirrorMaxDist, 1, "$mat.blend.mirror.maxDist", 0, 0);
+
+    int mirrorFadeTo = source->fadeto_mir;
+    result->AddProperty(&mirrorFadeTo, 1, "$mat.blend.mirror.fadeTo", 0, 0);
+
+    float mirrorGlossAmount = source->gloss_mir;
+    result->AddProperty(&mirrorGlossAmount, 1, "$mat.blend.mirror.glossAmount", 0, 0);
+
+    float mirrorGlossThreshold = source->adapt_thresh_mir;
+    result->AddProperty(&mirrorGlossThreshold, 1, "$mat.blend.mirror.glossThreshold", 0, 0);
+
+    int mirrorGlossSamples = source->samp_gloss_mir;
+    result->AddProperty(&mirrorGlossSamples, 1, "$mat.blend.mirror.glossSamples", 0, 0);
+
+    float mirrorGlossAnisotropic = source->aniso_gloss_mir;
+    result->AddProperty(&mirrorGlossAnisotropic, 1, "$mat.blend.mirror.glossAnisotropic", 0, 0);
+}
+
+void BlenderImporter::BuildMaterials(ConversionData& conv_data)
+{
+    conv_data.materials->reserve(conv_data.materials_raw.size());
+
+    BuildDefaultMaterial(conv_data);
 
     for(std::shared_ptr<Material> mat : conv_data.materials_raw) {
 
@@ -603,7 +725,6 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
         // set material name
         aiString name = aiString(mat->id.name+2); // skip over the name prefix 'MA'
         mout->AddProperty(&name,AI_MATKEY_NAME);
-
 
         // basic material colors
         aiColor3D col(mat->r,mat->g,mat->b);
@@ -647,6 +768,8 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
             ResolveTexture(mout,mat.get(),mat->mtex[i].get(),conv_data);
         }
+
+        AddBlendParams(mout, mat.get());
     }
 }
 
@@ -673,7 +796,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
     ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
     )
 {
-    // TODO: Resolve various problems with BMesh triangluation before re-enabling.
+    // TODO: Resolve various problems with BMesh triangulation before re-enabling.
     //       See issues #400, #373, #318  #315 and #132.
 #if defined(TODO_FIX_BMESH_CONVERSION)
     BlenderBMeshConverter BMeshConverter( mesh );
@@ -735,7 +858,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         //out->mNumVertices = 0
         out->mFaces = new aiFace[it.second]();
 
-        // all submeshes created from this mesh are named equally. this allows
+        // all sub-meshes created from this mesh are named equally. this allows
         // curious users to recover the original adjacency.
         out->mName = aiString(mesh->id.name+2);
             // skip over the name prefix 'ME'
@@ -1001,12 +1124,13 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
             const aiFace& f = out->mFaces[out->mNumFaces++];
 
             aiColor4D* vo = &out->mColors[0][out->mNumVertices];
+			const ai_real scaleZeroToOne = 1.f/255.f;
             for (unsigned int j = 0; j < f.mNumIndices; ++j,++vo,++out->mNumVertices) {
                 const MLoopCol& col = mesh->mloopcol[v.loopstart + j];
-                vo->r = col.r;
-                vo->g = col.g;
-                vo->b = col.b;
-                vo->a = col.a;
+                vo->r = ai_real(col.r) * scaleZeroToOne;
+                vo->g = ai_real(col.g) * scaleZeroToOne;
+                vo->b = ai_real(col.b) * scaleZeroToOne;
+                vo->a = ai_real(col.a) * scaleZeroToOne;
             }
 
         }
@@ -1025,7 +1149,7 @@ aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj,
     out->mUp = aiVector3D(0.f, 1.f, 0.f);
     out->mLookAt = aiVector3D(0.f, 0.f, -1.f);
     if (cam->sensor_x && cam->lens) {
-        out->mHorizontalFOV = atan2(cam->sensor_x,  2.f * cam->lens);
+        out->mHorizontalFOV = std::atan2(cam->sensor_x,  2.f * cam->lens);
     }
     out->mClipPlaneNear = cam->clipsta;
     out->mClipPlaneFar = cam->clipend;
@@ -1049,7 +1173,24 @@ aiLight* BlenderImporter::ConvertLight(const Scene& /*in*/, const Object* obj, c
 
             // blender orients directional lights as facing toward -z
             out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
             break;
+
+        case Lamp::Type_Area:
+            out->mType = aiLightSource_AREA;
+
+            if (lamp->area_shape == 0) {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_size);
+            }
+            else {
+                out->mSize = aiVector2D(lamp->area_size, lamp->area_sizey);
+            }
+
+            // blender orients directional lights as facing toward -z
+            out->mDirection = aiVector3D(0.f, 0.f, -1.f);
+            out->mUp = aiVector3D(0.f, 1.f, 0.f);
+            break;
+
         default:
             break;
     }
@@ -1093,7 +1234,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
             if (conv_data.meshes->size() > old) {
                 node->mMeshes = new unsigned int[node->mNumMeshes = static_cast<unsigned int>(conv_data.meshes->size()-old)];
                 for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
-                    node->mMeshes[i] = i + old;
+                    node->mMeshes[i] = static_cast<unsigned int>(i + old);
                 }
             }}
             break;
@@ -1169,5 +1310,4 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
     return node.dismiss();
 }
 
-
-#endif
+#endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

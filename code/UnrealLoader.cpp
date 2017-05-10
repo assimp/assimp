@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -60,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 #include <memory>
 
@@ -171,9 +173,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 
     // collect triangles
     std::vector<Unreal::Triangle> triangles(numTris);
-    for (std::vector<Unreal::Triangle>::iterator it = triangles.begin(), end = triangles.end();it != end; ++it) {
-        Unreal::Triangle& tri = *it;
-
+    for (auto & tri : triangles) {
         for (unsigned int i = 0; i < 3;++i) {
 
             tri.mVertex[i] = d_reader.GetI2();
@@ -222,9 +222,9 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
 
     // collect vertices
     std::vector<aiVector3D> vertices(numVert);
-    for (std::vector<aiVector3D>::iterator it = vertices.begin(), end = vertices.end(); it != end; ++it)    {
+    for (auto &vertex : vertices)    {
         int32_t val = a_reader.GetI4();
-        Unreal::DecompressVertex(*it,val);
+        Unreal::DecompressVertex(vertex ,val);
     }
 
     // list of textures.
@@ -330,13 +330,12 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
     materials.reserve(textures.size()*2+5);
 
     // find out how many output meshes and materials we'll have and build material indices
-    for (std::vector<Unreal::Triangle>::iterator it = triangles.begin(), end = triangles.end();it != end; ++it) {
-        Unreal::Triangle& tri = *it;
+	for (Unreal::Triangle &tri : triangles) {
         Unreal::TempMat mat(tri);
         std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(),materials.end(),mat);
         if (nt == materials.end()) {
             // add material
-            tri.matIndex = materials.size();
+            tri.matIndex = static_cast<unsigned int>(materials.size());
             mat.numFaces = 1;
             materials.push_back(mat);
 
@@ -418,8 +417,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
     }
 
     // fill them.
-    for (std::vector<Unreal::Triangle>::iterator it = triangles.begin(), end = triangles.end();it != end; ++it) {
-        Unreal::Triangle& tri = *it;
+    for (const Unreal::Triangle &tri : triangles) {
         Unreal::TempMat mat(tri);
         std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(),materials.end(),mat);
 

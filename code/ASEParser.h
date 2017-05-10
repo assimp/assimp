@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,9 +45,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_ASEFILEHELPER_H_INC
 
 // public ASSIMP headers
-#include "../include/assimp/types.h"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/anim.h"
+#include <assimp/types.h>
+#include <assimp/mesh.h>
+#include <assimp/anim.h>
 
 // for some helper routines like IsSpace()
 #include "ParsingUtils.h"
@@ -222,7 +223,7 @@ struct BaseNode
         mName = szTemp;
 
         // Set mTargetPosition to qnan
-        const float qnan = get_qnan();
+        const ai_real qnan = get_qnan();
         mTargetPosition.x = qnan;
     }
 
@@ -317,9 +318,9 @@ struct Light : public BaseNode
 
     LightType mLightType;
     aiColor3D mColor;
-    float mIntensity;
-    float mAngle; // in degrees
-    float mFalloff;
+    ai_real mIntensity;
+    ai_real mAngle; // in degrees
+    ai_real mFalloff;
 };
 
 // ---------------------------------------------------------------------------
@@ -342,7 +343,7 @@ struct Camera : public BaseNode
     {
     }
 
-    float mFOV, mNear, mFar;
+    ai_real mFOV, mNear, mFar;
     CameraType mCameraType;
 };
 
@@ -544,13 +545,13 @@ private:
     //! (also works for MESH_TVERT, MESH_CFACE, MESH_VERTCOL  ...)
     //! \param apOut Output buffer (3 floats)
     //! \param rIndexOut Output index
-    void ParseLV4MeshFloatTriple(float* apOut, unsigned int& rIndexOut);
+    void ParseLV4MeshFloatTriple(ai_real* apOut, unsigned int& rIndexOut);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_VERT block in a file
     //! (also works for MESH_TVERT, MESH_CFACE, MESH_VERTCOL  ...)
     //! \param apOut Output buffer (3 floats)
-    void ParseLV4MeshFloatTriple(float* apOut);
+    void ParseLV4MeshFloatTriple(ai_real* apOut);
 
     // -------------------------------------------------------------------
     //! Parse a *MESH_TFACE block in a file
@@ -568,7 +569,7 @@ private:
     // -------------------------------------------------------------------
     //! Parse a single float element
     //! \param fOut Output float
-    void ParseLV4MeshFloat(float& fOut);
+    void ParseLV4MeshFloat(ai_real& fOut);
 
     // -------------------------------------------------------------------
     //! Parse a single int element

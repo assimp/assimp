@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -38,20 +39,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-
-
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_COLLADA_EXPORTER
-#include "ColladaExporter.h"
 
+#include "ColladaExporter.h"
 #include "Bitmap.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
-#include "DefaultIOSystem.h"
+#include "StringUtils.h"
 #include "XMLTools.h"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
-#include "../include/assimp/scene.h"
+#include <assimp/DefaultIOSystem.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
 
 #include "Exceptional.h"
 
@@ -94,6 +94,7 @@ ColladaExporter::ColladaExporter( const aiScene* pScene, IOSystem* pIOSystem, co
 {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     mOutput.imbue( std::locale("C") );
+    mOutput.precision(16);
 
     mScene = pScene;
     mSceneOwned = false;
@@ -148,7 +149,7 @@ void ColladaExporter::WriteFile()
 // Writes the asset header
 void ColladaExporter::WriteHeader()
 {
-    static const float epsilon = 0.00001f;
+    static const ai_real epsilon = ai_real( 0.00001 );
     static const aiQuaternion x_rot(aiMatrix3x3(
         0, -1,  0,
         1,  0,  0,
@@ -175,9 +176,9 @@ void ColladaExporter::WriteHeader()
 
     bool add_root_node = false;
 
-    float scale = 1.0;
+    ai_real scale = 1.0;
     if(std::abs(scaling.x - scaling.y) <= epsilon && std::abs(scaling.x - scaling.z) <= epsilon && std::abs(scaling.y - scaling.z) <= epsilon) {
-        scale = (float) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
+        scale = (ai_real) ((((double) scaling.x) + ((double) scaling.y) + ((double) scaling.z)) / 3.0);
     } else {
         add_root_node = true;
     }
@@ -382,6 +383,7 @@ void ColladaExporter::WriteLight(size_t pIndex){
         case aiLightSource_SPOT:
             WriteSpotLight(light);
             break;
+        case aiLightSource_AREA:
         case aiLightSource_UNDEFINED:
         case _aiLightSource_Force32Bit:
             break;
@@ -449,7 +451,7 @@ void ColladaExporter::WriteSpotLight(const aiLight *const light){
                             srcLight->mFalloffAngle);
     */
 
-    const float fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
+    const ai_real fallOffAngle = AI_RAD_TO_DEG(light->mAngleInnerCone);
     mOutput << startstr <<"<falloff_angle sid=\"fall_off_angle\">"
                                 << fallOffAngle
                         <<"</falloff_angle>" << endstr;
@@ -522,7 +524,7 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
   } else
   {
     if( pKey )
-      poSurface.exist = pSrcMat->Get( pKey, pType, pIndex, poSurface.color) == aiReturn_SUCCESS;
+      poSurface.exist = pSrcMat->Get( pKey, static_cast<unsigned int>(pType), static_cast<unsigned int>(pIndex), poSurface.color) == aiReturn_SUCCESS;
   }
 }
 
@@ -530,7 +532,7 @@ void ColladaExporter::ReadMaterialSurface( Surface& poSurface, const aiMaterial*
 // Reimplementation of isalnum(,C locale), because AppVeyor does not see standard version.
 static bool isalnum_C(char c)
 {
-  return strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c);
+  return ( nullptr != strchr("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",c) );
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -634,9 +636,24 @@ void ColladaExporter::WriteMaterials()
     const aiMaterial* mat = mScene->mMaterials[a];
 
     aiString name;
-    if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS )
+    if( mat->Get( AI_MATKEY_NAME, name) != aiReturn_SUCCESS ) {
       name = "mat";
-    materials[a].name = std::string( "m") + std::to_string(a) + name.C_Str();
+      materials[a].name = std::string( "m") + to_string(a) + name.C_Str();
+    } else {
+      // try to use the material's name if no other material has already taken it, else append #
+      std::string testName = name.C_Str();
+      size_t materialCountWithThisName = 0;
+      for( size_t i = 0; i < a; i ++ ) {
+        if( materials[i].name == testName ) {
+          materialCountWithThisName ++;
+        }
+      }
+      if( materialCountWithThisName == 0 ) {
+        materials[a].name = name.C_Str();
+      } else {
+        materials[a].name = std::string(name.C_Str()) + to_string(materialCountWithThisName);
+      }
+    }
     for( std::string::iterator it = materials[a].name.begin(); it != materials[a].name.end(); ++it ) {
       if( !isalnum_C( *it ) ) {
         *it = '_';
@@ -674,7 +691,6 @@ void ColladaExporter::WriteMaterials()
 
     materials[a].shininess.exist = mat->Get( AI_MATKEY_SHININESS, materials[a].shininess.value) == aiReturn_SUCCESS;
     materials[a].transparency.exist = mat->Get( AI_MATKEY_OPACITY, materials[a].transparency.value) == aiReturn_SUCCESS;
-    materials[a].transparency.value = 1 - materials[a].transparency.value;
     materials[a].index_refraction.exist = mat->Get( AI_MATKEY_REFRACTI, materials[a].index_refraction.value) == aiReturn_SUCCESS;
   }
 
@@ -791,8 +807,8 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     const std::string idstr = GetMeshId( pIndex);
     const std::string idstrEscaped = XMLEscape(idstr);
 
-  if( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
-    return;
+    if ( mesh->mNumFaces == 0 || mesh->mNumVertices == 0 )
+        return;
 
     // opening tag
     mOutput << startstr << "<geometry id=\"" << idstrEscaped << "\" name=\"" << idstrEscaped << "_name\" >" << endstr;
@@ -802,45 +818,33 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
     PushTag();
 
     // Positions
-    WriteFloatArray( idstr + "-positions", FloatType_Vector, (float*) mesh->mVertices, mesh->mNumVertices);
+    WriteFloatArray( idstr + "-positions", FloatType_Vector, (ai_real*) mesh->mVertices, mesh->mNumVertices);
     // Normals, if any
     if( mesh->HasNormals() )
-        WriteFloatArray( idstr + "-normals", FloatType_Vector, (float*) mesh->mNormals, mesh->mNumVertices);
+        WriteFloatArray( idstr + "-normals", FloatType_Vector, (ai_real*) mesh->mNormals, mesh->mNumVertices);
 
     // texture coords
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
-        if( mesh->HasTextureCoords( a) )
+        if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
         {
-            WriteFloatArray( idstr + "-tex" + std::to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
-                (float*) mesh->mTextureCoords[a], mesh->mNumVertices);
+            WriteFloatArray( idstr + "-tex" + to_string(a), mesh->mNumUVComponents[a] == 3 ? FloatType_TexCoord3 : FloatType_TexCoord2,
+                (ai_real*) mesh->mTextureCoords[a], mesh->mNumVertices);
         }
     }
 
     // vertex colors
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a)
     {
-        if( mesh->HasVertexColors( a) )
-            WriteFloatArray( idstr + "-color" + std::to_string(a), FloatType_Color, (float*) mesh->mColors[a], mesh->mNumVertices);
+        if( mesh->HasVertexColors(static_cast<unsigned int>(a)) )
+            WriteFloatArray( idstr + "-color" + to_string(a), FloatType_Color, (ai_real*) mesh->mColors[a], mesh->mNumVertices);
     }
 
     // assemble vertex structure
+    // Only write input for POSITION since we will write other as shared inputs in polygon definition
     mOutput << startstr << "<vertices id=\"" << idstrEscaped << "-vertices" << "\">" << endstr;
     PushTag();
     mOutput << startstr << "<input semantic=\"POSITION\" source=\"#" << idstrEscaped << "-positions\" />" << endstr;
-    if( mesh->HasNormals() )
-        mOutput << startstr << "<input semantic=\"NORMAL\" source=\"#" << idstrEscaped << "-normals\" />" << endstr;
-    for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
-    {
-        if( mesh->HasTextureCoords( a) )
-            mOutput << startstr << "<input semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" " /*<< "set=\"" << a << "\"" */ << " />" << endstr;
-    }
-    for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
-    {
-        if( mesh->HasVertexColors( a) )
-            mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " /*<< set=\"" << a << "\"" */ << " />" << endstr;
-    }
-
     PopTag();
     mOutput << startstr << "</vertices>" << endstr;
 
@@ -859,6 +863,19 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<lines count=\"" << countLines << "\" material=\"defaultMaterial\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
+        if( mesh->HasNormals() )
+            mOutput << startstr << "<input semantic=\"NORMAL\" source=\"#" << idstrEscaped << "-normals\" />" << endstr;
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
+        {
+            if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
+                mOutput << startstr << "<input semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
+        }
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
+        {
+            if( mesh->HasVertexColors(static_cast<unsigned int>(a) ) )
+                mOutput << startstr << "<input semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
+        }
+
         mOutput << startstr << "<p>";
         for( size_t a = 0; a < mesh->mNumFaces; ++a )
         {
@@ -880,10 +897,17 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
         mOutput << startstr << "<polylist count=\"" << countPoly << "\" material=\"defaultMaterial\">" << endstr;
         PushTag();
         mOutput << startstr << "<input offset=\"0\" semantic=\"VERTEX\" source=\"#" << idstrEscaped << "-vertices\" />" << endstr;
+        if( mesh->HasNormals() )
+            mOutput << startstr << "<input offset=\"0\" semantic=\"NORMAL\" source=\"#" << idstrEscaped << "-normals\" />" << endstr;
         for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
         {
-            if( mesh->HasTextureCoords( a) )
-                mOutput << startstr << "<input offset=\"0\" semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" set=\"" << a << "\" />" << endstr;
+            if( mesh->HasTextureCoords(static_cast<unsigned int>(a)) )
+                mOutput << startstr << "<input offset=\"0\" semantic=\"TEXCOORD\" source=\"#" << idstrEscaped << "-tex" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
+        }
+        for( size_t a = 0; a < AI_MAX_NUMBER_OF_COLOR_SETS; ++a )
+        {
+            if( mesh->HasVertexColors(static_cast<unsigned int>(a) ) )
+                mOutput << startstr << "<input offset=\"0\" semantic=\"COLOR\" source=\"#" << idstrEscaped << "-color" << a << "\" " << "set=\"" << a << "\""  << " />" << endstr;
         }
 
         mOutput << startstr << "<vcount>";
@@ -916,7 +940,7 @@ void ColladaExporter::WriteGeometry( size_t pIndex)
 
 // ------------------------------------------------------------------------------------------------
 // Writes a float array of the given type
-void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataType pType, const float* pData, size_t pElementCount)
+void ColladaExporter::WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount)
 {
     size_t floatsPerElement = 0;
     switch( pType )
@@ -1016,7 +1040,7 @@ void ColladaExporter::WriteSceneLibrary()
 
     // start recursive write at the root node
     for( size_t a = 0; a < mScene->mRootNode->mNumChildren; ++a )
-        WriteNode( mScene->mRootNode->mChildren[a]);
+        WriteNode( mScene, mScene->mRootNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</visual_scene>" << endstr;
@@ -1025,10 +1049,25 @@ void ColladaExporter::WriteSceneLibrary()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Helper to find a bone by name in the scene
+aiBone* findBone( const aiScene* scene, const char * name) {
+    for (size_t m=0; m<scene->mNumMeshes; m++) {
+        aiMesh * mesh = scene->mMeshes[m];
+        for (size_t b=0; b<mesh->mNumBones; b++) {
+            aiBone * bone = mesh->mBones[b];
+            if (0 == strcmp(name, bone->mName.C_Str())) {
+                return bone;
+            }
+        }
+    }
+    return NULL;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Recursively writes the given node
-void ColladaExporter::WriteNode(aiNode* pNode)
+void ColladaExporter::WriteNode( const aiScene* pScene, aiNode* pNode)
 {
-    // the must have a name
+    // the node must have a name
     if (pNode->mName.length == 0)
     {
         std::stringstream ss;
@@ -1036,8 +1075,21 @@ void ColladaExporter::WriteNode(aiNode* pNode)
         pNode->mName.Set(ss.str());
     }
 
+    // If the node is associated with a bone, it is a joint node (JOINT)
+    // otherwise it is a normal node (NODE)
+    const char * node_type;
+    if (NULL == findBone(pScene, pNode->mName.C_Str())) {
+        node_type = "NODE";
+    } else {
+        node_type = "JOINT";
+    }
+
     const std::string node_name_escaped = XMLEscape(pNode->mName.data);
-    mOutput << startstr << "<node id=\"" << node_name_escaped << "\" name=\"" << node_name_escaped << "\">" << endstr;
+    mOutput << startstr
+            << "<node id=\"" << node_name_escaped
+            << "\" name=\"" << node_name_escaped
+            << "\" type=\"" << node_type
+            << "\">" << endstr;
     PushTag();
 
     // write transformation - we can directly put the matrix there
@@ -1084,7 +1136,7 @@ void ColladaExporter::WriteNode(aiNode* pNode)
     PushTag();
     for( size_t a = 0; a < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++a )
     {
-        if( mesh->HasTextureCoords( a) )
+        if( mesh->HasTextureCoords( static_cast<unsigned int>(a) ) )
             // semantic       as in <texture texcoord=...>
             // input_semantic as in <input semantic=...>
             // input_set      as in <input set=...>
@@ -1102,7 +1154,7 @@ void ColladaExporter::WriteNode(aiNode* pNode)
 
     // recurse into subnodes
     for( size_t a = 0; a < pNode->mNumChildren; ++a )
-        WriteNode( pNode->mChildren[a]);
+        WriteNode( pScene, pNode->mChildren[a]);
 
     PopTag();
     mOutput << startstr << "</node>" << endstr;

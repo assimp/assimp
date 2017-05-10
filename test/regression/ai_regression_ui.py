@@ -63,7 +63,7 @@ def log( sev, msg ):
         logEntry = logEntry + "[WARN]: "
     elif sev == 2:
         logEntry = logEntry + "[ERR] : "
-    logEntry = logEntry + msg
+    logEntry = logEntry + str( msg )
     print( logEntry )
 
 # -------------------------------------------------------------------------------

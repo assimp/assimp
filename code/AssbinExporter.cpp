@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,10 +42,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  ASSBIN exporter main code
  */
 #include "assbin_chunks.h"
-#include "../include/assimp/version.h"
-#include "../include/assimp/IOStream.hpp"
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/Exporter.hpp"
+#include <assimp/version.h>
+#include <assimp/IOStream.hpp>
+#include <assimp/IOSystem.hpp>
+#include <assimp/Exporter.hpp>
 #include "ProcessHelper.h"
 #include "Exceptional.h"
 
@@ -737,7 +738,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                 AssbinChunkWriter uncompressedStream( NULL, 0 );
                 WriteBinaryScene( &uncompressedStream, pScene );
 
-                uLongf uncompressedSize = uncompressedStream.Tell();
+                uLongf uncompressedSize = static_cast<uLongf>(uncompressedStream.Tell());
                 uLongf compressedSize = (uLongf)(uncompressedStream.Tell() * 1.001 + 12.);
                 uint8_t* compressedBuffer = new uint8_t[ compressedSize ];
 

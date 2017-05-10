@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tuple>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
-#   include "../contrib/unzip/unzip.h"
+#   include <contrib/unzip/unzip.h>
 #endif
 
 #include "IFCLoader.h"
@@ -58,10 +59,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IFCUtil.h"
 
-#include "StreamReader.h"
 #include "MemoryIOWrapper.h"
-#include "../include/assimp/scene.h"
-#include "../include/assimp/Importer.hpp"
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/importerdesc.h>
 
 
 namespace Assimp {
@@ -108,7 +109,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    "ifc ifczip"
+    "ifc ifczip stp"
 };
 
 
@@ -128,11 +129,9 @@ IFCImporter::~IFCImporter()
 bool IFCImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
     const std::string& extension = GetExtension(pFile);
-    if (extension == "ifc" || extension == "ifczip") {
+    if (extension == "ifc" || extension == "ifczip" || extension == "stp" ) {
         return true;
-    }
-
-    else if ((!extension.length() || checkSig) && pIOHandler)   {
+    } else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this is the common identification for STEP-encoded files, so
         // it is only unambiguous as long as we don't support any further
         // file formats with STEP as their encoding.
@@ -155,11 +154,10 @@ const aiImporterDesc* IFCImporter::GetInfo () const
 void IFCImporter::SetupProperties(const Importer* pImp)
 {
     settings.skipSpaceRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_SPACE_REPRESENTATIONS,true);
-    settings.skipCurveRepresentations = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_SKIP_CURVE_REPRESENTATIONS,true);
     settings.useCustomTriangulation = pImp->GetPropertyBool(AI_CONFIG_IMPORT_IFC_CUSTOM_TRIANGULATION,true);
-
-    settings.conicSamplingAngle = 10.f;
-    settings.skipAnnotations = true;
+    settings.conicSamplingAngle = std::min(std::max(pImp->GetPropertyFloat(AI_CONFIG_IMPORT_IFC_SMOOTHING_ANGLE, AI_IMPORT_IFC_DEFAULT_SMOOTHING_ANGLE), 5.0f), 120.0f);
+	settings.cylindricalTessellation = std::min(std::max(pImp->GetPropertyInteger(AI_CONFIG_IMPORT_IFC_CYLINDRICAL_TESSELLATION, AI_IMPORT_IFC_DEFAULT_CYLINDRICAL_TESSELLATION), 3), 180);
+	settings.skipAnnotations = true;
 }
 
 
@@ -707,15 +705,11 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
         }
 
         if (!properties.empty()) {
-            aiMetadata* data = new aiMetadata();
-            data->mNumProperties = properties.size();
-            data->mKeys = new aiString[data->mNumProperties]();
-            data->mValues = new aiMetadataEntry[data->mNumProperties]();
-
-            unsigned int index = 0;
-            for(const Metadata::value_type& kv : properties)
-                data->Set(index++, kv.first, aiString(kv.second));
-
+            aiMetadata* data = aiMetadata::Alloc( static_cast<unsigned int>(properties.size()) );
+            unsigned int index( 0 );
+            for ( const Metadata::value_type& kv : properties ) {
+                data->Set( index++, kv.first, aiString( kv.second ) );
+            }
             nd->mMetaData = data;
         }
     }

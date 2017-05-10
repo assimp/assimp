@@ -1,8 +1,9 @@
-/*
+﻿/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,18 +42,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include "glTFImporter.h"
-
 #include "StringComparison.h"
+#include "StringUtils.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/ai_assert.h>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
+
 #include <memory>
 
 #include "MakeVerboseFormat.h"
 
 #include "glTFAsset.h"
+// This is included here so WriteLazyDict<T>'s definition is found.
+#include "glTFAssetWriter.h"
 
 using namespace Assimp;
 using namespace glTF;
@@ -212,14 +217,14 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
 }
 
 
-inline void SetFace(aiFace& face, int a)
+static inline void SetFace(aiFace& face, int a)
 {
     face.mNumIndices = 1;
     face.mIndices = new unsigned int[1];
     face.mIndices[0] = a;
 }
 
-inline void SetFace(aiFace& face, int a, int b)
+static inline void SetFace(aiFace& face, int a, int b)
 {
     face.mNumIndices = 2;
     face.mIndices = new unsigned int[2];
@@ -227,13 +232,25 @@ inline void SetFace(aiFace& face, int a, int b)
     face.mIndices[1] = b;
 }
 
-inline void SetFace(aiFace& face, int a, int b, int c)
+static inline void SetFace(aiFace& face, int a, int b, int c)
 {
     face.mNumIndices = 3;
     face.mIndices = new unsigned int[3];
     face.mIndices[0] = a;
     face.mIndices[1] = b;
     face.mIndices[2] = c;
+}
+
+static inline bool CheckValidFacesIndices(aiFace* faces, unsigned nFaces, unsigned nVerts)
+{
+    for (unsigned i = 0; i < nFaces; ++i) {
+        for (unsigned j = 0; j < faces[i].mNumIndices; ++j) {
+            unsigned idx = faces[i].mIndices[j];
+            if (idx >= nVerts)
+                return false;
+        }
+    }
+    return true;
 }
 
 void glTFImporter::ImportMeshes(glTF::Asset& r)
@@ -245,7 +262,39 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
     for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
         Mesh& mesh = r.meshes[m];
 
-        meshOffsets.push_back(k);
+		// Check if mesh extensions is used
+		if(mesh.Extension.size() > 0)
+		{
+			for(Mesh::SExtension* cur_ext : mesh.Extension)
+			{
+#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
+				if(cur_ext->Type == Mesh::SExtension::EType::Compression_Open3DGC)
+				{
+					// Limitations for meshes when using Open3DGC-compression.
+					// It's a current limitation of sp... Specification have not this part still - about mesh compression. Why only one primitive?
+					// Because glTF is very flexibly. But in fact it ugly flexible. Every primitive can has own set of accessors and accessors can
+					// point to a-a-a-a-any part of buffer (through bufferview of course) and even to another buffer. We know that "Open3DGC-compression"
+					// is applicable only to part of buffer. As we can't guaranty continuity of the data for decoder, we will limit quantity of primitives.
+					// Yes indices, coordinates etc. still can br stored in different buffers, but with current specification it's a exporter problem.
+					// Also primitive can has only one of "POSITION", "NORMAL" and less then "AI_MAX_NUMBER_OF_TEXTURECOORDS" of "TEXCOORD". All accessor
+					// of primitive must point to one continuous region of the buffer.
+					if(mesh.primitives.size() > 2) throw DeadlyImportError("GLTF: When using Open3DGC compression then only one primitive per mesh are allowed.");
+
+					Mesh::SCompression_Open3DGC* o3dgc_ext = (Mesh::SCompression_Open3DGC*)cur_ext;
+					Ref<Buffer> buf = r.buffers.Get(o3dgc_ext->Buffer);
+
+					buf->EncodedRegion_SetCurrent(mesh.id);
+				}
+				else
+#endif
+				{
+					throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"" + to_string(cur_ext->Type) +
+											"\"), only Open3DGC is supported.");
+				}
+			}
+		}// if(mesh.Extension.size() > 0)
+
+		meshOffsets.push_back(k);
         k += unsigned(mesh.primitives.size());
 
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
@@ -280,29 +329,33 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
             }
 
             Mesh::Primitive::Attributes& attr = prim.attributes;
-            if (attr.position.size() > 0 && attr.position[0]) {
+
+			if (attr.position.size() > 0 && attr.position[0]) {
                 aim->mNumVertices = attr.position[0]->count;
                 attr.position[0]->ExtractData(aim->mVertices);
-            }
+			}
 
-            if (attr.normal.size() > 0 && attr.normal[0]) {
-                attr.normal[0]->ExtractData(aim->mNormals);
-            }
+			if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
 
-            for (size_t tc = 0; tc < attr.texcoord.size() && tc <= AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
+            for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
+
+                aiVector3D* values = aim->mTextureCoords[tc];
+                for (unsigned int i = 0; i < aim->mNumVertices; ++i) {
+                    values[i].y = 1 - values[i].y; // Flip Y coords
+                }
             }
 
 
             if (prim.indices) {
-                aiFace* faces = 0;
+				aiFace* faces = 0;
                 unsigned int nFaces = 0;
 
                 unsigned int count = prim.indices->count;
 
                 Accessor::Indexer data = prim.indices->GetIndexer();
-                assert(data.IsValid());
+                ai_assert(data.IsValid());
 
                 switch (prim.mode) {
                     case PrimitiveMode_POINTS: {
@@ -367,6 +420,7 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                 if (faces) {
                     aim->mFaces = faces;
                     aim->mNumFaces = nFaces;
+                    ai_assert(CheckValidFacesIndices(faces, nFaces, aim->mNumVertices));
                 }
             }
 
@@ -464,7 +518,7 @@ aiNode* ImportNode(aiScene* pScene, glTF::Asset& r, std::vector<unsigned int>& m
         }
     }
 
-    aiMatrix4x4 matrix = ainode->mTransformation;
+    aiMatrix4x4& matrix = ainode->mTransformation;
     if (node.matrix.isPresent) {
         CopyValue(node.matrix.value, matrix);
     }
@@ -621,7 +675,7 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
 
     // TODO: it does not split the loaded vertices, should it?
     //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-    Assimp::MakeVerboseFormatProcess process;
+	MakeVerboseFormatProcess process;
     process.Execute(pScene);
     
 

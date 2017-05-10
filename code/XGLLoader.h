@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -47,10 +48,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
 #include "LogAux.h"
-#include "../include/assimp/material.h"
-#include "../include/assimp/Importer.hpp"
-#include "../include/assimp/mesh.h"
-#include "../include/assimp/light.h"
+#include <assimp/material.h>
+#include <assimp/Importer.hpp>
+#include <assimp/mesh.h>
+#include <assimp/light.h>
+#include <memory>
+#include <map>
 
 struct aiNode;
 
@@ -203,12 +206,8 @@ private:
     unsigned int ResolveMaterialRef(TempScope& scope);
 
 private:
-
-
-private:
-
-    irr::io::IrrXMLReader* reader;
-    aiScene* scene;
+    std::shared_ptr<irr::io::IrrXMLReader> m_reader;
+    aiScene* m_scene;
 };
 
 } // end of namespace Assimp

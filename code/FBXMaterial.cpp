@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -227,7 +228,6 @@ Texture::~Texture()
 
 LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Document& /*doc*/, const std::string& name)
 : Object(id,element,name)
-,texture(0)
 ,blendMode(BlendMode_Modulate)
 ,alpha(1)
 {
@@ -249,7 +249,7 @@ LayeredTexture::LayeredTexture(uint64_t id, const Element& element, const Docume
 
 LayeredTexture::~LayeredTexture()
 {
-
+    
 }
 
 void LayeredTexture::fillTexture(const Document& doc)
@@ -267,7 +267,7 @@ void LayeredTexture::fillTexture(const Document& doc)
 
         const Texture* const tex = dynamic_cast<const Texture*>(ob);
 
-        texture = tex;
+        textures.push_back(tex);
     }
 }
 

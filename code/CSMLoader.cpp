@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,13 +52,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SkeletonMeshBuilder.h"
 #include "ParsingUtils.h"
 #include "fast_atof.h"
-#include "../include/assimp/Importer.hpp"
+#include <assimp/Importer.hpp>
 #include <memory>
-#include "../include/assimp/IOSystem.hpp"
-#include "../include/assimp/anim.h"
-#include "../include/assimp/DefaultLogger.hpp"
-#include "../include/assimp/scene.h"
-
+#include <assimp/IOSystem.hpp>
+#include <assimp/anim.h>
+#include <assimp/DefaultLogger.hpp>
+#include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 
@@ -179,7 +180,7 @@ void CSMImporter::InternReadFile( const std::string& pFile,
                     nda->mNodeName.length = (size_t)(ot-nda->mNodeName.data);
                 }
 
-                anim->mNumChannels = anims_temp.size();
+                anim->mNumChannels = static_cast<unsigned int>(anims_temp.size());
                 if (!anim->mNumChannels)
                     throw DeadlyImportError("CSM: Empty $order section");
 

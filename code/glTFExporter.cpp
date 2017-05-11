@@ -840,7 +840,7 @@ void glTFExporter::ExportMetadata()
     asset.generator = buffer;
 }
 
-inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel)
+inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond)
 {
     // Loop over the data and check to see if it exactly matches an existing buffer.
     //    If yes, then reference the existing corresponding accessor.
@@ -867,8 +867,9 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
         timeData.resize(numKeyframes);
         for (size_t i = 0; i < numKeyframes; ++i) {
             size_t frameIndex = i * nodeChannel->mNumPositionKeys / numKeyframes;
+            // mTime is measured in ticks, but GLTF time is measured in seconds, so convert.
             // Check if we have to cast type here. e.g. uint16_t()
-            timeData[i] = nodeChannel->mPositionKeys[frameIndex].mTime;
+            timeData[i] = nodeChannel->mPositionKeys[frameIndex].mTime / ticksPerSecond;
         }
 
         Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, numKeyframes, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
@@ -949,7 +950,7 @@ void glTFExporter::ExportAnimations()
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
             /******************* Parameters ********************/
-            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel);
+            ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, anim->mTicksPerSecond);
 
             for (unsigned int j = 0; j < 3; ++j) {
                 std::string channelType;

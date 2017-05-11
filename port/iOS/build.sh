@@ -7,16 +7,20 @@
 BUILD_DIR="./lib/iOS"
 
 IOS_SDK_VERSION=
-IOS_SDK_TARGET=6.0
+IOS_SDK_TARGET=8.0
 #(iPhoneOS iPhoneSimulator) -- determined from arch
 IOS_SDK_DEVICE=
 
 XCODE_ROOT_DIR=/Applications/Xcode.app/Contents
 TOOLCHAIN=$XCODE_ROOT_DIR//Developer/Toolchains/XcodeDefault.xctoolchain
 
-BUILD_ARCHS_DEVICE="armv7 armv7s arm64"
-BUILD_ARCHS_SIMULATOR="i386 x86_64"
-BUILD_ARCHS_ALL=(armv7 armv7s arm64 i386 x86_64)
+# BUILD_ARCHS_DEVICE="armv7 armv7s arm64"
+# BUILD_ARCHS_SIMULATOR="i386 x86_64"
+# BUILD_ARCHS_ALL=(armv7 armv7s arm64 i386 x86_64)
+
+BUILD_ARCHS_DEVICE="armv7 arm64"
+BUILD_ARCHS_SIMULATOR="x86_64"
+BUILD_ARCHS_ALL=(armv7 arm64 x86_64)
 
 CPP_DEV_TARGET_LIST=(miphoneos-version-min mios-simulator-version-min)
 CPP_DEV_TARGET=
@@ -41,18 +45,19 @@ build_arch()
         echo '[!] Target SDK set to DEVICE.'
     fi
 
-    unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS
+    unset DEVROOT SDKROOT CFLAGS LDFLAGS CPPFLAGS CXXFLAGS LDLIBS
 
     export DEVROOT=$XCODE_ROOT_DIR/Developer/Platforms/$IOS_SDK_DEVICE.platform/Developer
     export SDKROOT=$DEVROOT/SDKs/$IOS_SDK_DEVICE$IOS_SDK_VERSION.sdk
-    export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -$CPP_DEV_TARGET=$IOS_SDK_TARGET -I$SDKROOT/usr/include/"
-    export LDFLAGS="-L$SDKROOT/usr/lib/"
+    export CFLAGS="-arch $1 -pipe -no-cpp-precomp -stdlib=$CPP_STD_LIB -isysroot $SDKROOT -$CPP_DEV_TARGET=$IOS_SDK_TARGET -I$SDKROOT/usr/include/ -O2" # -fembed-bitcode
+    export LDFLAGS="-L$SDKROOT/usr/lib/ -s -w"
     export CPPFLAGS=$CFLAGS
     export CXXFLAGS="$CFLAGS -std=$CPP_STD"
 
     rm CMakeCache.txt
-
-    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DENABLE_BOOST_WORKAROUND=ON -DBUILD_SHARED_LIBS=OFF
+    rm -r CMakeFiles
+    
+    cmake  -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $1 | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DASSIMP_BUILD_FBX_IMPORTER=TRUE -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=FALSE -DENABLE_BOOST_WORKAROUND=OFF -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_NO_EXPORT=ON
 
     echo "[!] Building $1 library"
 
@@ -115,7 +120,7 @@ if [[ "$DEPLOY_FAT" -eq 1 ]]; then
     for ARCH_TARGET in $DEPLOY_ARCHS; do
         LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.a "
     done
-    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.a"
+    LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/lassimp-fat.a"
     lipo $LIPO_ARGS
     echo "[!] Done! The fat binary can be found at $BUILD_DIR"
 fi

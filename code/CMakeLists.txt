@@ -296,21 +296,25 @@ ADD_ASSIMP_IMPORTER( HMP
   HalfLifeFileData.h
 )
 
-ADD_ASSIMP_IMPORTER( IRRMESH
-  IRRMeshLoader.cpp
-  IRRMeshLoader.h
-  IRRShared.cpp
-  IRRShared.h
-)
-
-ADD_ASSIMP_IMPORTER( IRR
+ADD_ASSIMP_IMPORTER(IRR
   IRRLoader.cpp
   IRRLoader.h
-  IRRShared.cpp
-  IRRShared.h
 )
 
-ADD_ASSIMP_IMPORTER( LWO
+ADD_ASSIMP_IMPORTER(IRRMESH
+  IRRMeshLoader.cpp
+  IRRMeshLoader.h
+)
+
+if(ASSIMP_BUILD_IRR_IMPORTER OR ASSIMP_BUILD_IRRMESH_IMPORTER)
+  SET(IRRSHARED_SRCS
+    IRRShared.cpp
+    IRRShared.h
+  )
+  LIST(APPEND ASSIMP_LOADER_SRCS ${IRRSHARED_SRCS})
+endif()
+
+ADD_ASSIMP_IMPORTER(LWO
   LWOAnimation.cpp
   LWOAnimation.h
   LWOBLoader.cpp

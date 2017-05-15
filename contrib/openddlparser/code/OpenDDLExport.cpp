@@ -20,6 +20,7 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -----------------------------------------------------------------------------------------------*/
+#ifndef ASSIMP_BUILD_NO_EXPORT
 #include <openddlparser/OpenDDLExport.h>
 #include <openddlparser/DDLNode.h>
 #include <openddlparser/Value.h>
@@ -438,3 +439,4 @@ bool OpenDDLExport::writeValueArray( DataArrayList *al, std::string &statement )
 
 END_ODDLPARSER_NS
 
+#endif //!ASSIMP_BUILD_NO_EXPORT

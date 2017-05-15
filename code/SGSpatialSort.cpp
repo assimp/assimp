@@ -48,7 +48,6 @@ the 3ds loader handling smooth groups correctly  */
 
 using namespace Assimp;
 
-
 // ------------------------------------------------------------------------------------------------
 SGSpatialSort::SGSpatialSort()
 {
@@ -89,12 +88,11 @@ void SGSpatialSort::FindPositions( const aiVector3D& pPosition,
     float dist = pPosition * mPlaneNormal;
     float minDist = dist - pRadius, maxDist = dist + pRadius;
 
-    // clear the array in this strange fashion because a simple clear() would also deallocate
-    // the array which we want to avoid
-    poResults.erase( poResults.begin(), poResults.end());
+    // clear the array
+    poResults.clear();
 
     // quick check for positions outside the range
-    if( mPositions.size() == 0)
+    if( mPositions.empty() )
         return;
     if( maxDist < mPositions.front().mDistance)
         return;

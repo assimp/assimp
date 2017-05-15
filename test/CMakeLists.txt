@@ -111,6 +111,7 @@ SET( TEST_SRCS
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp
+  unit/utRemoveVCProcess.cpp
   unit/utScenePreprocessor.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp

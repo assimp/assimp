@@ -132,7 +132,6 @@ protected:
     void copyMeshes( aiScene *pScene );
     void copyCameras( aiScene *pScene );
     void copyLights( aiScene *pScene );
-
     void resolveReferences();
     void pushNode( aiNode *node, aiScene *pScene );
     aiNode *popNode();

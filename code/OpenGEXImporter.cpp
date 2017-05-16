@@ -196,7 +196,6 @@ namespace Grammar {
 
         return NoneType;
     }
-
 } // Namespace Grammar
 
 namespace Assimp {
@@ -523,6 +522,10 @@ void OpenGEXImporter::handleObjectRefNode( DDLNode *node, aiScene *pScene ) {
         if ( !objRefNames.empty() ) {
             m_unresolvedRefStack.push_back( new RefInfo( m_currentNode, RefInfo::MeshRef, objRefNames ) );
         }
+    } else if ( m_tokenType == Grammar::LightNodeToken ) {
+        // TODO!
+    } else if ( m_tokenType == Grammar::CameraNodeToken ) {
+        // TODO!
     }
 }
 
@@ -602,6 +605,13 @@ void OpenGEXImporter::handleCameraObject( ODDLParser::DDLNode *node, aiScene *pS
 
 //------------------------------------------------------------------------------------------------
 void OpenGEXImporter::handleLightObject( ODDLParser::DDLNode *node, aiScene *pScene ) {
+    aiLight *light( new aiLight );
+    m_lightCache.push_back( light );
+    std::string objName = node->getName();
+    if ( !objName.empty() ) {
+        light->mName.Set( objName );
+    }
+    m_currentLight = light;
 
     Property *prop( node->findPropertyByName( "type" ) );
     if ( nullptr != prop ) {

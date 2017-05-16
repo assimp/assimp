@@ -927,7 +927,7 @@ void OpenGEXImporter::handleIndexArrayNode( ODDLParser::DDLNode *node, aiScene *
 }
 
 //------------------------------------------------------------------------------------------------
-static void getColorRGB( aiColor3D *pColor, DataArrayList *colList ) {
+static void getColorRGB3( aiColor3D *pColor, DataArrayList *colList ) {
     if( nullptr == pColor || nullptr == colList ) {
         return;
     }
@@ -939,6 +939,23 @@ static void getColorRGB( aiColor3D *pColor, DataArrayList *colList ) {
     pColor->g = val->getFloat();
     val = val->getNext();
     pColor->b = val->getFloat();
+}
+
+//------------------------------------------------------------------------------------------------
+static void getColorRGB4( aiColor4D *pColor, DataArrayList *colList ) {
+    if ( nullptr == pColor || nullptr == colList ) {
+        return;
+    }
+
+    ai_assert( 4 == colList->m_numItems );
+    Value *val( colList->m_dataList );
+    pColor->r = val->getFloat();
+    val = val->getNext();
+    pColor->g = val->getFloat();
+    val = val->getNext();
+    pColor->b = val->getFloat();
+    val = val->getNext();
+    pColor->a = val->getFloat();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -991,7 +1008,17 @@ void OpenGEXImporter::handleColorNode( ODDLParser::DDLNode *node, aiScene *pScen
                 return;
             }
             aiColor3D col;
-            getColorRGB( &col, colList );
+            if ( 3 == colList->m_numItems ) {
+                aiColor3D col3;
+                getColorRGB3( &col3, colList );
+                col = col3;
+            } else {
+                aiColor4D col4;
+                getColorRGB4( &col4, colList );
+                col.r = col4.r;
+                col.g = col4.g;
+                col.b = col4.b;
+            }
             const ColorType colType( getColorType( prop->m_key ) );
             if( DiffuseColor == colType ) {
                 m_currentMaterial->AddProperty( &col, 1, AI_MATKEY_COLOR_DIFFUSE );

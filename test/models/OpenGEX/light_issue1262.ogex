@@ -1,0 +1,21 @@
+LightObject (type = "infinite") {
+    Param (attrib = "intensity") {
+        float { 3.0 }
+    }
+
+    Color (attrib = "light") {
+        float[3] { { 0.7, 1.0, 0.1 } }
+    }
+}
+
+LightObject (type = "point") {
+    Param (attrib = "intensity") {
+        float { 0.5 }
+    }
+}
+
+LightObject (type = "spot") {
+    Color (attrib = "light") {
+        float[4] { { 0.1, 0.0, 0.1, 1.0 } }
+    }
+}

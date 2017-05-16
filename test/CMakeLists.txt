@@ -106,11 +106,13 @@ SET( TEST_SRCS
   unit/SceneDiffer.cpp
   unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
+  unit/utOpenGEXImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utPLYImportExport.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp
+  unit/utRemoveVCProcess.cpp
   unit/utScenePreprocessor.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp

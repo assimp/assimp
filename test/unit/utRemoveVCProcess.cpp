@@ -72,6 +72,4 @@ TEST_F( utRevmoveVCProcess, issue1266_ProcessMeshTest_NoCrash ) {
     scene->mMeshes[ 0 ] = mesh;
     RemoveVCProcess *process = new RemoveVCProcess;
     process->Execute( scene );
-
-
 }

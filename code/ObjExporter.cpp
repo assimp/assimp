@@ -122,8 +122,7 @@ std::string ObjExporter :: GetMaterialLibName()
 }
 
 // ------------------------------------------------------------------------------------------------
-std::string ObjExporter :: GetMaterialLibFileName()
-{
+std::string ObjExporter::GetMaterialLibFileName() {
     // Remove existing .obj file extention so that the final material file name will be fileName.mtl and not fileName.obj.mtl
     size_t lastdot = filename.find_last_of('.');
     if (lastdot != std::string::npos)
@@ -133,8 +132,7 @@ std::string ObjExporter :: GetMaterialLibFileName()
 }
 
 // ------------------------------------------------------------------------------------------------
-void ObjExporter :: WriteHeader(std::ostringstream& out)
-{
+void ObjExporter :: WriteHeader(std::ostringstream& out) {
     out << "# File produced by Open Asset Import Library (http://www.assimp.sf.net)" << endl;
     out << "# (assimp v" << aiGetVersionMajor() << '.' << aiGetVersionMinor() << '.' << aiGetVersionRevision() << ")" << endl  << endl;
 }

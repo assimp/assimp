@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -52,8 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-static const std::string OpenGexExt = "ogex";
-
 static const aiImporterDesc desc = {
     "Open Game Engine Exchange",
     "",
@@ -64,7 +63,7 @@ static const aiImporterDesc desc = {
     0,
     0,
     0,
-    OpenGexExt.c_str()
+    "ogex"
 };
 
 namespace Grammar {
@@ -289,7 +288,7 @@ OpenGEXImporter::~OpenGEXImporter() {
 bool OpenGEXImporter::CanRead( const std::string &file, IOSystem *pIOHandler, bool checkSig ) const {
     bool canRead( false );
     if( !checkSig ) {
-        canRead = SimpleExtensionCheck( file, OpenGexExt.c_str() );
+        canRead = SimpleExtensionCheck( file, "ogex" );
     } else {
         static const char *token[] = { "Metric", "GeometryNode", "VertexArray (attrib", "IndexArray" };
         canRead = BaseImporter::SearchFileHeaderForToken( pIOHandler, file, token, 4 );

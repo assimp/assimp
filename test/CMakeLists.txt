@@ -108,6 +108,7 @@ SET( TEST_SRCS
   unit/utObjImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utPLYImportExport.cpp
+  unit/utPMXImporter.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp

@@ -66,7 +66,7 @@ static const aiImporterDesc desc = {
     "LightWave/Modo Object Importer",
     "",
     "",
-    "http://www.newtek.com/lightwave.html\nhttp://www.luxology.com/modo/",
+    "https://www.lightwave3d.com/lightwave_sdk/",
     aiImporterFlags_SupportTextFlavour,
     0,
     0,

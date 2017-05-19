@@ -730,6 +730,8 @@ need them at all.
 Normally textures used by assets are stored in separate files, however,
 there are file formats embedding their textures directly into the model file.
 Such textures are loaded into an aiTexture structure.
+For embedded textures, the value of `AI_MATKEY_TEXTURE(textureType, index)` will be `*<index>` where
+`<index>` is the index of the texture in aiScene::mTextures.
 <br>
 There are two cases:
 <br>
@@ -917,7 +919,7 @@ All material key constants start with 'AI_MATKEY' (it's an ugly macro for histor
     <td><tt>TEXTURE(t,n)</tt></td>
     <td>aiString</td>
     <td>n/a</td>
-	<td>Defines the path to the n'th texture on the stack 't', where 'n' is any value >= 0 and 't' is one of the #aiTextureType enumerated values.</td>
+	<td>Defines the path of the n'th texture on the stack 't', where 'n' is any value >= 0 and 't' is one of the #aiTextureType enumerated values. Either a filepath or `*<index>`, where `<index>` is the index of an embedded texture in aiScene::mTextures.</td>
 	<td>See the 'Textures' section above.</td>
   </tr>
 

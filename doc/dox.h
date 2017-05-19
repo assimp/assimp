@@ -453,7 +453,7 @@ by calling it as a singleton with the requested logging-type. To see how this wo
 using namespace Assimp;
 
 // Create a logger instance
-DefaultLogger::create("",Logger::VERBOSE);
+DefaultLogger::create("", Logger::VERBOSE);
 
 // Now I am ready for logging my stuff
 DefaultLogger::get()->info("this is my info-call");
@@ -472,22 +472,9 @@ Just derivate your own logger from the abstract base class LogStream and overwri
 
 @code
 // Example stream
-class myStream :
-	public LogStream
+class myStream : public LogStream
 {
 public:
-	// Constructor
-	myStream()
-	{
-		// empty
-	}
-
-	// Destructor
-	~myStream()
-	{
-		// empty
-	}
-
 	// Write womethink using your own functionality
 	void write(const char* message)
 	{
@@ -496,10 +483,10 @@ public:
 };
 
 // Select the kinds of messages you want to receive on this log stream
-const unsigned int severity = Logger::DEBUGGING|Logger::INFO|Logger::ERR|Logger::WARN;
+const unsigned int severity = Logger::Debugging|Logger::Info|Logger::Err|Logger::Warn;
 
 // Attaching it to the default logger
-Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
+Assimp::DefaultLogger::get()->attachStream( new myStream, severity );
 
 @endcode
 
@@ -512,10 +499,10 @@ flag set:
 @code
 
 unsigned int severity = 0;
-severity |= Logger::DEBUGGING;
+severity |= Logger::Debugging;
 
 // Detach debug messages from you self defined stream
-Assimp::DefaultLogger::get()->attachStream( new myStream(), severity );
+Assimp::DefaultLogger::get()->attachStream( new myStream, severity );
 
 @endcode
 

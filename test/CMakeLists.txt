@@ -106,6 +106,7 @@ SET( TEST_SRCS
   unit/SceneDiffer.cpp
   unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
+  unit/utObjTools.cpp
   unit/utPretransformVertices.cpp
   unit/utPLYImportExport.cpp
   unit/utRemoveComments.cpp

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -56,8 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
 
-namespace Assimp
-{
+namespace Assimp {
 
 /// \class X3DImporter
 /// Class that holding scene graph which include: groups, geometry, metadata etc.
@@ -199,9 +199,7 @@ public:
     /***********************************************/
 
     /// Default constructor.
-    X3DImporter()
-        : NodeElement_Cur( nullptr ), mReader( nullptr )
-    {}
+    X3DImporter();
 
     /// Default destructor.
     ~X3DImporter();
@@ -211,7 +209,7 @@ public:
     /***********************************************/
 
     /// Parse X3D file and fill scene graph. The function has no return value. Result can be found by analyzing the generated graph.
-    /// Also exception can be throwed if trouble will found.
+    /// Also exception can be thrown if trouble will found.
     /// \param [in] pFile - name of file to be parsed.
     /// \param [in] pIOHandler - pointer to IO helper object.
     void ParseFile( const std::string& pFile, IOSystem* pIOHandler );

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -202,7 +203,7 @@ protected:
         ::Assimp::Exporter exporter;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj", 0 );
         EXPECT_NE( nullptr, scene );
-        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider.obj" ) );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "obj", ASSIMP_TEST_MODELS_DIR "/OBJ/spider_test.obj" ) );
         
         return true;
     }

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -85,7 +86,7 @@ public:
     IOSystem* pIOHandler
     );
   void ReadBinaryScene( IOStream * stream, aiScene* pScene );
-  void ReadBinaryNode( IOStream * stream, aiNode** mRootNode );
+  void ReadBinaryNode( IOStream * stream, aiNode** mRootNode, aiNode* parent );
   void ReadBinaryMesh( IOStream * stream, aiMesh* mesh );
   void ReadBinaryBone( IOStream * stream, aiBone* bone );
   void ReadBinaryMaterial(IOStream * stream, aiMaterial* mat);

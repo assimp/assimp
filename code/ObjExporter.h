@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -104,7 +105,7 @@ private:
     void AddNode(const aiNode* nd, const aiMatrix4x4& mParent);
 
 private:
-    const std::string filename;
+    std::string filename;
     const aiScene* const pScene;
 
     std::vector<aiVector3D> vp, vn, vt;

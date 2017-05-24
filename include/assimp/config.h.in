@@ -323,7 +323,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @brief Set the maximum number of bones affecting a single vertex
  *
  * This is used by the #aiProcess_LimitBoneWeights PostProcess-Step.
- * @note The default value is AI_LBW_MAX_WEIGHTS
+ * @note The default value is AI_LMW_MAX_WEIGHTS
  * Property type: integer.*/
 #define AI_CONFIG_PP_LBW_MAX_WEIGHTS    \
     "PP_LBW_MAX_WEIGHTS"

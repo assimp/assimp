@@ -19,35 +19,32 @@ VersionInfoCompany=Assimp Development Team
 ArchitecturesInstallIn64BitMode=x64
 
 [Types]
-Name: "full"; Description: "Full installation"
+Name: "full";    Description: "Full installation"
 Name: "compact"; Description: "Compact installation, no test models or language bindings"
-Name: "custom"; Description: "Custom installation"; Flags: iscustom
+Name: "custom";  Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "main"; Description: "Main Files (32 and 64 Bit)"; Types: full compact custom; Flags: fixed
-Name: "tools"; Description: "Asset Viewer & Command Line Tools (32 and 64 Bit)"; Types: full compact
-Name: "help"; Description: "Help Files"; Types: full compact
-Name: "samples"; Description: "Samples"; Types: full
-;Name: "wsource"; Description: "Source Code"; Types: full
-Name: "test"; Description: "Test Models (BSD-licensed)"; Types: full
+Name: "main";        Description: "Main Files (32 and 64 Bit)"; Types: full compact custom; Flags: fixed
+Name: "tools";       Description: "Asset Viewer & Command Line Tools (32 and 64 Bit)"; Types: full compact
+Name: "help";        Description: "Help Files"; Types: full compact
+Name: "samples";     Description: "Samples"; Types: full
+Name: "test";        Description: "Test Models (BSD-licensed)"; Types: full
 Name: "test_nonbsd"; Description: "Test Models (other (free) licenses)"; Types: full
-Name: "pyassimp"; Description: "Python Bindings"; Types: full
-Name: "dassimp"; Description: "D Bindings"; Types: full
-Name: "assimp_net"; Description: "C#/.NET Bindings"; Types: full
-;Name: "vc8"; Description: "VC8 project files"; Types: full
-;Name: "vc9"; Description: "VC9 project files"; Types: full
+Name: "pyassimp";    Description: "Python Bindings"; Types: full
+Name: "dassimp";     Description: "D Bindings"; Types: full
+Name: "assimp_net";  Description: "C#/.NET Bindings"; Types: full
 
 [Run]
-Filename: "{app}\stub\vcredist_x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2012 SP1 redistributable package (32 Bit)"; Check: not IsWin64
-Filename: "{app}\stub\vcredist_x64.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2012 SP1 redistributable package (64 Bit)"; Check: IsWin64
+Filename: "{app}\stub\vc_redist.x86.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2015 redistributable package (32 Bit)"; Check: not IsWin64
+Filename: "{app}\stub\vc_redist.x64.exe"; Parameters: "/qb"; StatusMsg: "Installing VS2015 redistributable package (64 Bit)"; Check: IsWin64
 
 [Files]
 
 Source: "readme_installer.txt"; DestDir: "{app}"; Flags: isreadme
 
 ; Installer stub
-Source: "vcredist_x86.exe"; DestDir: "{app}\stub\"; Check: not IsWin64
-Source: "vcredist_x64.exe"; DestDir: "{app}\stub\"; Check: IsWin64
+Source: "vc_redist.x86.exe"; DestDir: "{app}\stub\"; Check: not IsWin64
+Source: "vc_redist.x64.exe"; DestDir: "{app}\stub\"; Check: IsWin64
 
 ; Common stuff
 Source: "..\..\CREDITS"; DestDir: "{app}"
@@ -58,18 +55,18 @@ Source: "WEB"; DestDir: "{app}"
 Source: "..\..\scripts\*"; DestDir: "{app}\scripts"; Flags: recursesubdirs
 
 ; x86 binaries
-Source: "..\..\bin\assimp_release-dll_Win32\Assimp32.dll"; DestDir: "{app}\bin\x86"
-Source: "..\..\bin\assimpview_release-dll_Win32\assimp_view.exe"; DestDir: "{app}\bin\x86"; Components: tools
-Source: "D3DCompiler_42.dll"; DestDir: "{app}\bin\x86"; Components: tools
-Source: "D3DX9_42.dll"; DestDir: "{app}\bin\x86"; Components: tools
-Source: "..\..\bin\assimpcmd_release-dll_Win32\assimp.exe"; DestDir: "{app}\bin\x86"; Components: tools
+Source: "..\..\bin\release\x86\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x86"
+Source: "..\..\bin\release\x86\assimp_viewer.exe";      DestDir: "{app}\bin\x86"; Components: tools
+Source: "D3DCompiler_42.dll";                         DestDir: "{app}\bin\x86"; Components: tools
+Source: "D3DX9_42.dll";                               DestDir: "{app}\bin\x86"; Components: tools
+Source: "..\..\bin\release\x86\assimp.exe";           DestDir: "{app}\bin\x86"; Components: tools
 
 ; x64 binaries
-Source: "..\..\bin\assimp_release-dll_x64\Assimp64.dll"; DestDir: "{app}\bin\x64"
-Source: "..\..\bin\assimpview_release-dll_x64\assimp_view.exe"; DestDir: "{app}\bin\x64"; Components: tools
-Source: "D3DCompiler_42_x64.dll"; DestDir: "{app}\bin\x64"; DestName: "D3DCompiler_42.dll"; Components: tools
-Source: "D3DX9_42_x64.dll"; DestDir: "{app}\bin\x64"; DestName: "D3DX9_42.dll"; Components: tools
-Source: "..\..\bin\assimpcmd_release-dll_x64\assimp.exe"; DestDir: "{app}\bin\x64"; Components: tools
+Source: "..\..\bin\release\x64\assimp-vc140-mt.dll";  DestDir: "{app}\bin\x64"
+Source: "..\..\bin\release\x64\assimp_viewer.exe";      DestDir: "{app}\bin\x64"; Components: tools
+Source: "D3DCompiler_42_x64.dll";                     DestDir: "{app}\bin\x64"; DestName: "D3DCompiler_42.dll"; Components: tools
+Source: "D3DX9_42_x64.dll";                           DestDir: "{app}\bin\x64"; DestName: "D3DX9_42.dll"; Components: tools
+Source: "..\..\bin\release\x64\assimp.exe";           DestDir: "{app}\bin\x64"; Components: tools
 
 ; Documentation
 Source: "..\..\doc\AssimpDoc_Html\AssimpDoc.chm"; DestDir: "{app}\doc"; Components: help
@@ -77,8 +74,8 @@ Source: "..\..\doc\AssimpCmdDoc_Html\AssimpCmdDoc.chm"; DestDir: "{app}\doc"; Co
 Source: "..\..\doc\datastructure.xml"; DestDir: "{app}\doc"; Components: help
 
 ; Import libraries
-Source: "..\..\lib\assimp_release-dll_Win32\assimp.lib"; DestDir: "{app}\lib\x86"
-Source: "..\..\lib\assimp_release-dll_x64\assimp.lib"; DestDir: "{app}\lib\x64"
+Source: "..\..\lib\release\x86\assimp.lib"; DestDir: "{app}\lib\x86"
+Source: "..\..\lib\release\x64\assimp.lib"; DestDir: "{app}\lib\x64"
 
 ; Samples
 Source: "..\..\samples\*"; DestDir: "{app}\samples"; Flags: recursesubdirs; Components: samples
@@ -90,15 +87,15 @@ Source: "..\..\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 Source: "..\..\port\dAssimp\*"; DestDir: "{app}\port\D"; Flags: recursesubdirs; Components: dassimp
 
 ; Assimp.NET
-Source: "..\..\port\Assimp.NET\*"; DestDir: "{app}\port\C#"; Flags: recursesubdirs; Components: assimp_net
+;Source: "..\..\port\Assimp.NET\*"; DestDir: "{app}\port\C#"; Flags: recursesubdirs; Components: assimp_net
 
 ; PyAssimp
-Source: "..\..\port\PyAssimp\*"; DestDir: "{app}\port\Python"; Excludes: "*.pyc,*.dll"; Flags: recursesubdirs; Components: pyassimp
+;Source: "..\..\port\PyAssimp\*"; DestDir: "{app}\port\Python"; Excludes: "*.pyc,*.dll"; Flags: recursesubdirs; Components: pyassimp
 
 ; Test repository
-Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdirs; Components: test
-Source: "..\..\test\regression\*"; DestDir: "{app}\test\regression"; Flags: recursesubdirs; Components: test
-Source: "..\..\test\models-nonbsd\*"; DestDir: "{app}\test\models-nonbsd"; Flags: recursesubdirs; Components: test_nonbsd
+;Source: "..\..\test\models\*"; DestDir: "{app}\test\models"; Flags: recursesubdirs; Components: test
+;Source: "..\..\test\regression\*"; DestDir: "{app}\test\regression"; Flags: recursesubdirs; Components: test
+;Source: "..\..\test\models-nonbsd\*"; DestDir: "{app}\test\models-nonbsd"; Flags: recursesubdirs; Components: test_nonbsd
 
 ; Source Code & Workspaces
 ;Source: "..\..\code\*"; Excludes: "*.o"; DestDir: "{app}\code"; Flags: recursesubdirs; Components: wsource

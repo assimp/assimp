@@ -61,4 +61,5 @@ TEST_F( utPLYImportExport, importTest ) {
 TEST_F( utPLYImportExport, vertexColorTest ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/float-color.ply", 0 );
+    EXPECT_NE( nullptr, scene );
 }

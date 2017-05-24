@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -197,7 +198,7 @@ template <typename T> void ReadBounds( IOStream * stream, T* /*p*/, unsigned int
     stream->Seek( sizeof(T) * n, aiOrigin_CUR );
 }
 
-void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node )
+void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node, aiNode* parent )
 {
     uint32_t chunkID = Read<uint32_t>(stream);
     ai_assert(chunkID == ASSBIN_CHUNK_AINODE);
@@ -209,6 +210,10 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node )
     (*node)->mTransformation = Read<aiMatrix4x4>(stream);
     (*node)->mNumChildren = Read<unsigned int>(stream);
     (*node)->mNumMeshes = Read<unsigned int>(stream);
+    if(parent)
+    {
+        (*node)->mParent = parent;
+    }
 
     if ((*node)->mNumMeshes)
     {
@@ -222,7 +227,7 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node )
     {
         (*node)->mChildren = new aiNode*[(*node)->mNumChildren];
         for (unsigned int i = 0; i < (*node)->mNumChildren; ++i) {
-            ReadBinaryNode( stream, &(*node)->mChildren[i] );
+            ReadBinaryNode( stream, &(*node)->mChildren[i], *node );
         }
     }
 
@@ -570,7 +575,7 @@ void AssbinImporter::ReadBinaryScene( IOStream * stream, aiScene* scene )
 
     // Read node graph
     scene->mRootNode = new aiNode[1];
-    ReadBinaryNode( stream, &scene->mRootNode );
+    ReadBinaryNode( stream, &scene->mRootNode, (aiNode*)NULL );
 
     // Read all meshes
     if (scene->mNumMeshes)

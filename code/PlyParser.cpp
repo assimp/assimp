@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -195,11 +196,11 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOu
         eOut = PLY::EST_Blue;
     }
     // NOTE: Blender3D exports texture coordinates as s,t tuples
-    else if (TokenMatch(pCur,"u",1) ||  TokenMatch(pCur,"s",1) || TokenMatch(pCur,"tx",2))
+    else if (TokenMatch(pCur,"u",1) ||  TokenMatch(pCur,"s",1) || TokenMatch(pCur,"tx",2) || TokenMatch(pCur,"texture_u",9))
     {
         eOut = PLY::EST_UTextureCoord;
     }
-    else if (TokenMatch(pCur,"v",1) ||  TokenMatch(pCur,"t",1) || TokenMatch(pCur,"ty",2))
+    else if (TokenMatch(pCur,"v",1) ||  TokenMatch(pCur,"t",1) || TokenMatch(pCur,"ty",2) || TokenMatch(pCur,"texture_v",9))
     {
         eOut = PLY::EST_VTextureCoord;
     }

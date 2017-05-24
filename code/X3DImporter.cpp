@@ -268,7 +268,7 @@ void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeNa
 	    "PositionInterpolator", "PositionInterpolator2D", "ScalarInterpolator", "SplinePositionInterpolator", "SplinePositionInterpolator2D",
 	    "SplineScalarInterpolator", "SquadOrientationInterpolator",
 	    // Key device sensor component
-	    "KeySensor", "StringSensor"
+	    "KeySensor", "StringSensor",
 	    // Layering component
 	    "Layer", "LayerSet", "Viewport",
 	    // Layout component

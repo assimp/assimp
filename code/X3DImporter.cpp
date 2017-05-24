@@ -241,7 +241,7 @@ void X3DImporter::XML_CheckNode_MustBeEmpty()
 
 void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName)
 {
-    const size_t Uns_Skip_Len = 189;
+    static const size_t Uns_Skip_Len = 190;
     const char* Uns_Skip[ Uns_Skip_Len ] = {
 	    // CAD geometry component
 	    "CADAssembly", "CADFace", "CADLayer", "CADPart", "IndexedQuadSet", "QuadSet",

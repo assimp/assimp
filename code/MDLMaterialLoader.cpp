@@ -546,10 +546,6 @@ void MDLImporter::ParseSkinLump_3DGS_MDL7(
     }
     else if (iMasked || !iType || (iType && iWidth && iHeight))
     {
-        // ***** STANDARD COLOR TEXTURE *****
-        if(pcNew!= nullptr)
-            delete pcNew;
-
         pcNew = new aiTexture();
         if (!iHeight || !iWidth)
         {

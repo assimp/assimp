@@ -46,8 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_binary_glTF: full
  *   KHR_materials_common: full
  */
-#ifndef glTFAsset_H_INC
-#define glTFAsset_H_INC
+#ifndef GLTFASSET_H_INC
+#define GLTFASSET_H_INC
+
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include <map>
 #include <string>
@@ -1187,4 +1189,6 @@ namespace glTF
 // Include the implementation of the methods
 #include "glTFAsset.inl"
 
-#endif
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+
+#endif // GLTFASSET_H_INC

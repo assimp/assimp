@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "UnitTestPCH.h"
 #include "ObjTools.h"
+#include "ObjFileParser.h"
 
 using namespace ::Assimp;
 
@@ -48,6 +49,15 @@ class utObjTools : public ::testing::Test {
     // empty
 };
 
+class TestObjFileParser : public ObjFileParser {
+public:
+    TestObjFileParser() : ObjFileParser(){}
+    ~TestObjFileParser() {}
+    void testCopyNextWord( char *pBuffer, size_t length ) {
+        copyNextWord( pBuffer, length );
+    }
+
+};
 TEST_F( utObjTools, skipDataLine_OneLine_Success ) {
     std::vector<char> buffer;
     std::string data( "v -0.5 -0.5 0.5\nend" );
@@ -60,6 +70,24 @@ TEST_F( utObjTools, skipDataLine_OneLine_Success ) {
 }
 
 TEST_F( utObjTools, skipDataLine_TwoLines_Success ) {
-    std::string data( "vn - 2.061493116917992e-15 - 0.9009688496589661 \ \n- 0.4338837265968323 " );
+    TestObjFileParser test_parser;
+    std::string data( "vn -2.061493116917992e-15 -0.9009688496589661 \\n-0.4338837265968323" );
+    std::vector<char> buffer;
+    buffer.resize( data.size() );
+    ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
+    test_parser.setBuffer( buffer );
+    static const size_t Size = 4096UL;
+    char data_buffer[ Size ];
+    
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( 0, strncmp( data_buffer, "vn", 2 ) );
 
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( data_buffer[0], '-' );
+
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( data_buffer[0], '-' );
+
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( data_buffer[ 0 ], '-' );
 }

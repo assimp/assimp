@@ -667,6 +667,16 @@ ADD_ASSIMP_IMPORTER( 3MF
     D3MFOpcPackage.cpp
 )
 
+ADD_ASSIMP_IMPORTER( MMD
+  MMDCpp14.h
+  MMDImporter.cpp
+  MMDImporter.h
+  MMDPmdParser.h
+  MMDPmxParser.h
+  MMDPmxParser.cpp
+  MMDVmdParser.h
+)
+
 SET( Step_SRCS
   StepExporter.h
   StepExporter.cpp

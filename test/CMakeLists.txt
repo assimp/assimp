@@ -38,7 +38,6 @@
 #----------------------------------------------------------------------
 cmake_minimum_required( VERSION 2.6 )
 
-#INCLUDE( AddGTest )
 include( CTest )
 enable_testing()
 
@@ -107,11 +106,14 @@ SET( TEST_SRCS
   unit/utSIBImporter.cpp
   unit/utObjImportExport.cpp
   unit/utObjTools.cpp
+  unit/utOpenGEXImportExport.cpp
   unit/utPretransformVertices.cpp
   unit/utPLYImportExport.cpp
+  unit/utPMXImporter.cpp
   unit/utRemoveComments.cpp
   unit/utRemoveComponent.cpp
   unit/utRemoveRedundantMaterials.cpp
+  unit/utRemoveVCProcess.cpp
   unit/utScenePreprocessor.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp

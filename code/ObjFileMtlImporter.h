@@ -113,4 +113,4 @@ private:
 
 } // Namespace Assimp
 
-#endif
+#endif // OBJFILEMTLIMPORTER_H_INC

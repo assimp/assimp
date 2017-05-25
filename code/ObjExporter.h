@@ -105,7 +105,7 @@ private:
     void AddNode(const aiNode* nd, const aiMatrix4x4& mParent);
 
 private:
-    const std::string filename;
+    std::string filename;
     const aiScene* const pScene;
 
     std::vector<aiVector3D> vp, vn, vt;

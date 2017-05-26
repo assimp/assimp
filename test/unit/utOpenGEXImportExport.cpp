@@ -66,5 +66,6 @@ TEST_F( utOpenGEXImportExport, importLWSFromFileTest ) {
 TEST_F( utOpenGEXImportExport, Importissue1262_NoCrash ) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/light_issue1262.ogex", 0 );
+    EXPECT_NE( nullptr, scene );
 
 }

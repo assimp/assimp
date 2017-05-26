@@ -230,7 +230,9 @@ namespace glTF
             case ComponentType_UNSIGNED_BYTE:
                 return 1;
             default:
-                throw DeadlyImportError("GLTF: Unsupported Component Type "+t);
+                std::stringstream stream;
+                stream << t;
+                throw DeadlyImportError("GLTF: Unsupported Component Type " + stream.str() );
         }
     }
 

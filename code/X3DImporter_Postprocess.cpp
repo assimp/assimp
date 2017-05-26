@@ -504,6 +504,9 @@ void X3DImporter::Postprocess_BuildMesh(const CX3DImporter_NodeElement& pNodeEle
 		// copy additional information from children
 		for(std::list<CX3DImporter_NodeElement*>::iterator ch_it = tnemesh.Child.begin(); ch_it != tnemesh.Child.end(); ch_it++)
 		{
+			if ( nullptr == *pMesh ) {
+				break;
+			}
 			if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_Color)
 				MeshGeometry_AddColor(**pMesh, ((CX3DImporter_NodeElement_Color*)*ch_it)->Value,tnemesh.ColorPerVertex);
 			else if((*ch_it)->Type == CX3DImporter_NodeElement::ENET_ColorRGBA)

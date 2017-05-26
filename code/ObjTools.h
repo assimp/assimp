@@ -79,8 +79,10 @@ inline Char_T getNextWord( Char_T pBuffer, Char_T pEnd )
 {
     while ( !isEndOfBuffer( pBuffer, pEnd ) )
     {
-        if( !IsSpaceOrNewLine( *pBuffer ) || IsLineEnd( *pBuffer ) )
-            break;
+        if ( !IsSpaceOrNewLine( *pBuffer ) || IsLineEnd( *pBuffer ) ) {
+            //if ( *pBuffer != '\\' )
+                break;
+        }
         pBuffer++;
     }
     return pBuffer;

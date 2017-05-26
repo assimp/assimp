@@ -87,11 +87,16 @@ static const std::string MaterialExt = ".mtl";
 ObjExporter::ObjExporter(const char* _filename, const aiScene* pScene)
 : filename(_filename)
 , pScene(pScene)
-, endl("\n")
 , vp()
 , vn()
 , vt()
-, vc() {
+, vc() 
+, vpMap()
+, vnMap()
+, vtMap()
+, vcMap()
+, meshes()
+, endl("\n") {
     // make sure that all formatting happens using the standard, C locale and not the user's current locale
     const std::locale& l = std::locale("C");
     mOutput.imbue(l);

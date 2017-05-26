@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_GLTFEXPORTER_H_INC
 #define AI_GLTFEXPORTER_H_INC
 
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+
 #include <assimp/types.h>
 #include <assimp/material.h>
 
@@ -111,4 +113,6 @@ namespace Assimp
 
 }
 
-#endif
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+
+#endif // AI_GLTFEXPORTER_H_INC

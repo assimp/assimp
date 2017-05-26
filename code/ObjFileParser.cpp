@@ -57,8 +57,17 @@ namespace Assimp {
 
 const std::string ObjFileParser::DEFAULT_MATERIAL = AI_DEFAULT_MATERIAL_NAME;
 
-// -------------------------------------------------------------------
-//  Constructor with loaded data and directories.
+ObjFileParser::ObjFileParser()
+: m_DataIt()
+, m_DataItEnd()
+, m_pModel( NULL )
+, m_uiLine( 0 )
+, m_pIO( nullptr )
+, m_progress( nullptr )
+, m_originalObjFileName( "" ) {
+    // empty
+}
+
 ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName,
                               IOSystem *io, ProgressHandler* progress,
                               const std::string &originalObjFileName) :
@@ -86,18 +95,20 @@ ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::str
     parseFile( streamBuffer );
 }
 
-// -------------------------------------------------------------------
-//  Destructor
 ObjFileParser::~ObjFileParser() {
     delete m_pModel;
     m_pModel = NULL;
 }
 
-// -------------------------------------------------------------------
-//  Returns a pointer to the model instance.
+void ObjFileParser::setBuffer( std::vector<char> &buffer ) {
+    m_DataIt = buffer.begin();
+    m_DataItEnd = buffer.end();
+}
+
 ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
+
 void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
 {
     auto curPosition = buffer.begin();
@@ -119,8 +130,7 @@ void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffe
         }
     } while (*curPosition!='\n');
 }
-// -------------------------------------------------------------------
-//  File parsing method.
+
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
@@ -144,7 +154,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
             progressCounter++;
             m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
         }
-		ignoreNewLines(streamBuffer, buffer);
+		//ignoreNewLines(streamBuffer, buffer);
         // parse line
         switch (*m_DataIt) {
         case 'v': // Parse a vertex texture coordinate
@@ -243,11 +253,14 @@ pf_skip_line:
     }
 }
 
-// -------------------------------------------------------------------
-//  Copy the next word in a temporary buffer
 void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     size_t index = 0;
     m_DataIt = getNextWord<DataArrayIt>(m_DataIt, m_DataItEnd);
+    if ( *m_DataIt == '\\' ) {
+        m_DataIt++;
+        m_DataIt++;
+        m_DataIt = getNextWord<DataArrayIt>( m_DataIt, m_DataItEnd );
+    }
     while( m_DataIt != m_DataItEnd && !IsSpaceOrNewLine( *m_DataIt ) ) {
         pBuffer[index] = *m_DataIt;
         index++;
@@ -264,7 +277,7 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
 size_t ObjFileParser::getNumComponentsInLine() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
-    while( !IsLineEnd( *tmp ) ) {
+    while( !IsLineEnd( *tmp ) ) {        
         if ( !SkipSpaces( &tmp ) ) {
             break;
         }
@@ -300,8 +313,6 @@ void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
-// -------------------------------------------------------------------
-//  Get values for a new 3D vector instance
 void ObjFileParser::getVector3( std::vector<aiVector3D> &point3d_array ) {
     ai_real x, y, z;
     copyNextWord(m_buffer, Buffersize);

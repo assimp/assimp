@@ -39,33 +39,55 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
 #include "UnitTestPCH.h"
-#include "AbstractImportExportBase.h"
+#include "ObjTools.h"
+#include "ObjFileParser.h"
 
-#include <assimp/Importer.hpp>
+using namespace ::Assimp;
 
-using namespace Assimp;
-
-
-class utOpenGEXImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/Example.ogex", 0 );
-        return nullptr != scene;
-
-        return true;
-    }
+class utObjTools : public ::testing::Test {
+    // empty
 };
 
-TEST_F( utOpenGEXImportExport, importLWSFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
+class TestObjFileParser : public ObjFileParser {
+public:
+    TestObjFileParser() : ObjFileParser(){}
+    ~TestObjFileParser() {}
+    void testCopyNextWord( char *pBuffer, size_t length ) {
+        copyNextWord( pBuffer, length );
+    }
+
+};
+TEST_F( utObjTools, skipDataLine_OneLine_Success ) {
+    std::vector<char> buffer;
+    std::string data( "v -0.5 -0.5 0.5\nend" );
+    buffer.resize( data.size() );
+    ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
+    std::vector<char>::iterator itBegin( buffer.begin() ), itEnd( buffer.end() );
+    unsigned int line = 0;
+    std::vector<char>::iterator current = skipLine<std::vector<char>::iterator>( itBegin, itEnd, line );
+    EXPECT_EQ( 'e', *current );
 }
 
-TEST_F( utOpenGEXImportExport, Importissue1262_NoCrash ) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/light_issue1262.ogex", 0 );
-    EXPECT_NE( nullptr, scene );
+TEST_F( utObjTools, skipDataLine_TwoLines_Success ) {
+    TestObjFileParser test_parser;
+    std::string data( "vn -2.061493116917992e-15 -0.9009688496589661 \\n-0.4338837265968323" );
+    std::vector<char> buffer;
+    buffer.resize( data.size() );
+    ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
+    test_parser.setBuffer( buffer );
+    static const size_t Size = 4096UL;
+    char data_buffer[ Size ];
+    
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( 0, strncmp( data_buffer, "vn", 2 ) );
 
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( data_buffer[0], '-' );
+
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( data_buffer[0], '-' );
+
+    test_parser.testCopyNextWord( data_buffer, Size );
+    EXPECT_EQ( data_buffer[ 0 ], '-' );
 }

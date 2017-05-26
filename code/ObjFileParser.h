@@ -65,7 +65,7 @@ class ProgressHandler;
 
 /// \class  ObjFileParser
 /// \brief  Parser for a obj waveform file
-class ObjFileParser {
+class ASSIMP_API ObjFileParser {
 public:
     static const size_t Buffersize = 4096;
     typedef std::vector<char> DataArray;
@@ -73,14 +73,18 @@ public:
     typedef std::vector<char>::const_iterator ConstDataArrayIt;
 
 public:
-    /// \brief  Constructor with data array.
-    ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &strModelName, IOSystem* io, ProgressHandler* progress, const std::string &originalObjFileName);
-    /// \brief  Destructor
+    /// @brief  The default constructor.
+    ObjFileParser();
+    /// @brief  Constructor with data array.
+    ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::string &modelName, IOSystem* io, ProgressHandler* progress, const std::string &originalObjFileName);
+    /// @brief  Destructor
     ~ObjFileParser();
-    /// \brief  Model getter.
+    /// @brief  If you want to load in-core data.
+    void setBuffer( std::vector<char> &buffer );
+    /// @brief  Model getter.
     ObjFile::Model *GetModel() const;
 
-private:
+protected:
     /// Parse the loaded file
     void parseFile( IOStreamBuffer<char> &streamBuffer );
     /// Method to copy the new delimited word in the current line.

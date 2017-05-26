@@ -66,7 +66,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 
-
 using namespace Assimp;
 
 static const aiImporterDesc desc = {
@@ -80,25 +79,26 @@ static const aiImporterDesc desc = {
     "sib"
 };
 
-struct SIBChunk
-{
+struct SIBChunk {
     uint32_t    Tag;
     uint32_t    Size;
 } PACK_STRUCT;
 
-enum { POS, NRM, UV,    N };
+enum { 
+    POS, 
+    NRM, 
+    UV,    
+    N
+};
 
 typedef std::pair<uint32_t, uint32_t> SIBPair;
-static SIBPair makePair(uint32_t a, uint32_t b) { return (a<b) ? SIBPair(a, b) : SIBPair(b, a); }
 
-struct SIBEdge
-{
+struct SIBEdge {
     uint32_t faceA, faceB;
     bool creased;
 };
 
-struct SIBMesh
-{
+struct SIBMesh {
     aiMatrix4x4 axis;
     uint32_t numPts;
     std::vector<aiVector3D> pos, nrm, uv;
@@ -109,15 +109,13 @@ struct SIBMesh
     std::map<SIBPair, uint32_t> edgeMap;
 };
 
-struct SIBObject
-{
+struct SIBObject {
     aiString name;
     aiMatrix4x4 axis;
     size_t meshIdx, meshCount;
 };
 
-struct SIB
-{
+struct SIB {
     std::vector<aiMaterial*> mtls;
     std::vector<aiMesh*> meshes;
     std::vector<aiLight*> lights;
@@ -125,8 +123,7 @@ struct SIB
 };
 
 // ------------------------------------------------------------------------------------------------
-static SIBEdge& GetEdge(SIBMesh* mesh, uint32_t posA, uint32_t posB)
-{
+static SIBEdge& GetEdge(SIBMesh* mesh, uint32_t posA, uint32_t posB) {
     SIBPair pair = (posA < posB) ? SIBPair(posA, posB) : SIBPair(posB, posA);
     std::map<SIBPair, uint32_t>::iterator it = mesh->edgeMap.find(pair);
     if (it != mesh->edgeMap.end())

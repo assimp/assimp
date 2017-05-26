@@ -55,7 +55,7 @@ protected:
     }
 
     virtual void TearDown() {
-        delete m_data;
+        aiMetadata::Dealloc( m_data );
     }
 
 };

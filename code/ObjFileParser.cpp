@@ -64,7 +64,7 @@ ObjFileParser::ObjFileParser()
 , m_uiLine( 0 )
 , m_pIO( nullptr )
 , m_progress( nullptr )
-, m_originalObjFileName( "" ) {
+, m_originalObjFileName() {
     // empty
 }
 

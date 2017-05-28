@@ -154,9 +154,8 @@ private:
     IOSystem *m_pIO;
     //! Pointer to progress handler
     ProgressHandler* m_progress;
-    /// Path to the current model
-    // name of the obj file where the buffer comes from
-    const std::string& m_originalObjFileName;
+    /// Path to the current model, name of the obj file where the buffer comes from
+    const std::string m_originalObjFileName;
 };
 
 }   // Namespace Assimp

@@ -161,7 +161,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
             {
                 ++m_DataIt;
                 if (*m_DataIt == ' ' || *m_DataIt == '\t') {
-                    size_t numComponents = getNumComponentsInLine();
+                    size_t numComponents = getNumComponentsInDataDefinition();
                     if (numComponents == 3) {
                         // read in vertex definition
                         getVector3(m_pModel->m_Vertices);
@@ -274,21 +274,40 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     pBuffer[index] = '\0';
 }
 
-size_t ObjFileParser::getNumComponentsInLine() {
+static bool isDataDefinitionEnd( const char *tmp ) {
+    if ( *tmp == '\\' ) {
+        tmp++;
+        if ( IsLineEnd( tmp ) ) {
+            return false;
+        }
+    } else {
+        return IsLineEnd( tmp );
+    }
+    return false;
+}
+
+size_t ObjFileParser::getNumComponentsInDataDefinition() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
-    while( !IsLineEnd( *tmp ) ) {        
+    while ( !isDataDefinitionEnd( tmp ) ) {
+    //while( !IsLineEnd( *tmp ) ) {        
         if ( !SkipSpaces( &tmp ) ) {
             break;
         }
+        const bool isNum( IsNumeric( *tmp ) );
         SkipToken( tmp );
-        ++numComponents;
+        if ( isNum ) {
+            ++numComponents;
+        }
+        if ( !SkipSpaces( &tmp ) ) {
+            break;
+        }
     }
     return numComponents;
 }
 
 void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
-    size_t numComponents = getNumComponentsInLine();
+    size_t numComponents = getNumComponentsInDataDefinition();
     ai_real x, y, z;
     if( 2 == numComponents ) {
         copyNextWord( m_buffer, Buffersize );

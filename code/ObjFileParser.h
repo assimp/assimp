@@ -91,6 +91,8 @@ protected:
     void copyNextWord(char *pBuffer, size_t length);
     /// Method to copy the new line.
 //    void copyNextLine(char *pBuffer, size_t length);
+    /// Get the number of components in a line.
+    size_t getNumComponentsInDataDefinition();
     /// Stores the vector
     void getVector( std::vector<aiVector3D> &point3d_array );
     /// Stores the following 3d vector.
@@ -129,8 +131,6 @@ protected:
     bool needsNewMesh( const std::string &rMaterialName );
     /// Error report in token
     void reportErrorTokenInFace();
-    /// Get the number of components in a line.
-    size_t getNumComponentsInLine();
 
 private:
     // Copy and assignment constructor should be private

@@ -81,7 +81,7 @@ TEST_F( utObjTools, skipDataLine_OneLine_Success ) {
 
 TEST_F( utObjTools, skipDataLine_TwoLines_Success ) {
     TestObjFileParser test_parser;
-    std::string data( "vn -2.061493116917992e-15 -0.9009688496589661 \\n-0.4338837265968323" );
+    std::string data( "vn -2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323" );
     std::vector<char> buffer;
     buffer.resize( data.size() );
     ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
@@ -104,7 +104,7 @@ TEST_F( utObjTools, skipDataLine_TwoLines_Success ) {
 
 TEST_F( utObjTools, countComponents_TwoLines_Success ) {
     TestObjFileParser test_parser;
-    std::string data( "-2.061493116917992e-15 -0.9009688496589661 \\n-0.4338837265968323" );
+    std::string data( "-2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323" );
     std::vector<char> buffer;
     buffer.resize( data.size() );
     ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );

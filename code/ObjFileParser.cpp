@@ -277,11 +277,10 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
 static bool isDataDefinitionEnd( const char *tmp ) {
     if ( *tmp == '\\' ) {
         tmp++;
-        if ( IsLineEnd( tmp ) ) {
-            return false;
+        if ( IsLineEnd( *tmp ) ) {
+            tmp++;
+            return true;
         }
-    } else {
-        return IsLineEnd( tmp );
     }
     return false;
 }
@@ -289,8 +288,14 @@ static bool isDataDefinitionEnd( const char *tmp ) {
 size_t ObjFileParser::getNumComponentsInDataDefinition() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
-    while ( !isDataDefinitionEnd( tmp ) ) {
-    //while( !IsLineEnd( *tmp ) ) {        
+    bool end_of_definition = false;
+    while ( !end_of_definition ) {
+    //while( !IsLineEnd( *tmp ) ) {    
+        if ( isDataDefinitionEnd( tmp ) ) {
+            tmp += 2;
+        } else if ( IsLineEnd( *tmp ) ) {
+            end_of_definition = true;
+        }
         if ( !SkipSpaces( &tmp ) ) {
             break;
         }

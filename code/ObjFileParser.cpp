@@ -109,7 +109,7 @@ ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
 
-void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
+/*void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
 {
     auto curPosition = buffer.begin();
     do
@@ -129,7 +129,7 @@ void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffe
             std::copy(tempBuf.cbegin(), tempBuf.cend(), ++curPosition);
         }
     } while (*curPosition!='\n');
-}
+}*/
 
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
@@ -141,11 +141,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     unsigned int processed = 0;
     size_t lastFilePos( 0 );
 
-    std::vector<char> buffer;
-    while ( streamBuffer.getNextLine( buffer ) ) {
-        m_DataIt = buffer.begin();
-        m_DataItEnd = buffer.end();
-
+    while ( streamBuffer.getNextLine( m_DataIt, m_DataItEnd ) ) {
         // Handle progress reporting
         const size_t filePos( streamBuffer.getFilePos() );
         if ( lastFilePos < filePos ) {
@@ -245,7 +241,6 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
         default:
             {
 pf_skip_line:
-
                 m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
             }
             break;
@@ -595,14 +590,16 @@ void ObjFileParser::getMaterialDesc() {
 // -------------------------------------------------------------------
 //  Get a comment, values will be skipped
 void ObjFileParser::getComment() {
-    while (m_DataIt != m_DataItEnd) {
+    m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
+
+/*    while (m_DataIt != m_DataItEnd) {
         if ( '\n' == (*m_DataIt)) {
             ++m_DataIt;
             break;
         } else {
             ++m_DataIt;
         }
-    }
+    }*/
 }
 
 // -------------------------------------------------------------------

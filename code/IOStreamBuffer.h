@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOStream.hpp>
 #include "ParsingUtils.h"
 
+#include <vector>
+
 namespace Assimp {
 
 // ---------------------------------------------------------------------------
@@ -54,6 +56,8 @@ namespace Assimp {
 template<class T>
 class IOStreamBuffer {
 public:
+    typedef typename std::vector<T>::iterator CacheIter;
+
     /// @brief  The class constructor.
     IOStreamBuffer( size_t cache = 4096 * 4096 );
 
@@ -69,8 +73,8 @@ public:
     /// @return true if successful.
     bool close();
 
-    /// @brief  Returns the filesize.
-    /// @return The filesize.
+    /// @brief  Returns the file-size.
+    /// @return The file-size.
     size_t size() const;
     
     /// @brief  Returns the cache size.
@@ -96,7 +100,7 @@ public:
     /// @brief  Will read the next line.
     /// @param  buffer      The buffer for the next line.
     /// @return true if successful.
-    bool getNextLine( std::vector<T> &buffer );
+    bool getNextLine( CacheIter &begin, CacheIter &end );
 
 private:
     IOStream *m_stream;
@@ -106,6 +110,7 @@ private:
     size_t m_blockIdx;
     std::vector<T> m_cache;
     size_t m_cachePos;
+    CacheIter m_it;
     size_t m_filePos;
 };
 
@@ -118,6 +123,7 @@ IOStreamBuffer<T>::IOStreamBuffer( size_t cache )
 , m_numBlocks( 0 )
 , m_blockIdx( 0 )
 , m_cachePos( 0 )
+, m_it()
 , m_filePos( 0 ) {
     m_cache.resize( cache );
     std::fill( m_cache.begin(), m_cache.end(), '\n' );
@@ -203,6 +209,7 @@ bool IOStreamBuffer<T>::readNextBlock() {
     m_filePos += m_cacheSize;
     m_cachePos = 0;
     m_blockIdx++;
+    m_it = m_cache.begin();
 
     return true;
 }
@@ -227,25 +234,32 @@ size_t IOStreamBuffer<T>::getFilePos() const {
 
 template<class T>
 inline
-bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
-    buffer.resize( m_cacheSize );
+bool IOStreamBuffer<T>::getNextLine( CacheIter &begin, CacheIter &end ) {
     if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
         if ( !readNextBlock() ) {
+            begin = m_it;
+            end = m_it;
             return false;
         }
+        m_it = m_cache.begin();
     }
-    size_t i = 0;
+
+    //size_t i = 0;
+    begin = m_it;
     while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
-        buffer[ i ] = m_cache[ m_cachePos ];
         m_cachePos++;
-        i++;
+        ++m_it;
+        //i++;
         if ( m_cachePos >= m_cacheSize ) {
             if ( !readNextBlock() ) {
+                begin = m_it;
+                end = m_it;
                 return false;
             }
         }
     }
-    buffer[ i ] = '\n';
+    ++m_it;
+    end = m_it;
     m_cachePos++;
 
     return true;

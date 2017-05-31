@@ -123,7 +123,7 @@ void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffe
             std::vector<char> tempBuf;
             do
             {
-                streamBuffer.getNextLine(tempBuf);
+                streamBuffer.getNextDataLine(tempBuf, '\\' );
             } while (tempBuf[0]=='\n');
             *curPosition = ' ';
             std::copy(tempBuf.cbegin(), tempBuf.cend(), ++curPosition);
@@ -142,7 +142,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     size_t lastFilePos( 0 );
 
     std::vector<char> buffer;
-    while ( streamBuffer.getNextLine( buffer ) ) {
+    while ( streamBuffer.getNextDataLine( buffer, '\\' ) ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
 

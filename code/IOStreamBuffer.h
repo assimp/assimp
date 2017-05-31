@@ -96,7 +96,7 @@ public:
     /// @brief  Will read the next line.
     /// @param  buffer      The buffer for the next line.
     /// @return true if successful.
-    bool getNextLine( std::vector<T> &buffer );
+    bool getNextDataLine( std::vector<T> &buffer, T continuationToken );
 
 private:
     IOStream *m_stream;
@@ -227,15 +227,35 @@ size_t IOStreamBuffer<T>::getFilePos() const {
 
 template<class T>
 inline
-bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
+bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationToken ) {
     buffer.resize( m_cacheSize );
     if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
         if ( !readNextBlock() ) {
             return false;
         }
     }
+
+    bool continuationFound( false ), endOfDataLine( false );
     size_t i = 0;
-    while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
+    while ( !endOfDataLine ) {
+        if ( continuationToken == m_cache[ m_cachePos ] ) {
+            continuationFound = true;
+        }
+        if ( IsLineEnd( m_cache[ m_cachePos ] ) ) {
+            if ( !continuationFound ) {
+                // the end of the data line
+                i++;
+                break;
+            } else {
+                // skip line end
+                while ( m_cache[m_cachePos] != '\n') {
+                    ++m_cachePos;
+                }
+                ++m_cachePos;
+                break;
+            }
+        }
+
         buffer[ i ] = m_cache[ m_cachePos ];
         m_cachePos++;
         i++;
@@ -245,6 +265,7 @@ bool IOStreamBuffer<T>::getNextLine( std::vector<T> &buffer ) {
             }
         }
     }
+    
     buffer[ i ] = '\n';
     m_cachePos++;
 

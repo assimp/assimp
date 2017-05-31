@@ -231,7 +231,6 @@ template<class T>
 inline
 bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationToken ) {
     buffer.resize( m_cacheSize );
-    //std::fill( buffer.begin(), buffer.end(), ' ' );
     if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
         if ( !readNextBlock() ) {
             return false;

@@ -115,12 +115,9 @@ template<class char_t>
 inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine ) {
     while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) ) {
         ++it;
-        if ( *it == '\n' ) {
-            ++it;
-        }
     }
-    if ( it != end )
-    {
+    
+    if ( it != end ) {
         ++it;
         ++uiLine;
     }

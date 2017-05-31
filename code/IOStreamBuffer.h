@@ -56,8 +56,6 @@ namespace Assimp {
 template<class T>
 class IOStreamBuffer {
 public:
-    typedef typename std::vector<T>::iterator CacheIter;
-
     /// @brief  The class constructor.
     IOStreamBuffer( size_t cache = 4096 * 4096 );
 
@@ -100,7 +98,7 @@ public:
     /// @brief  Will read the next line.
     /// @param  buffer      The buffer for the next line.
     /// @return true if successful.
-    bool getNextLine( CacheIter &begin, CacheIter &end );
+    bool getNextDataLine( std::vector<T> &buffer, T continuationToken );
 
 private:
     IOStream *m_stream;
@@ -110,7 +108,6 @@ private:
     size_t m_blockIdx;
     std::vector<T> m_cache;
     size_t m_cachePos;
-    CacheIter m_it;
     size_t m_filePos;
 };
 
@@ -123,7 +120,6 @@ IOStreamBuffer<T>::IOStreamBuffer( size_t cache )
 , m_numBlocks( 0 )
 , m_blockIdx( 0 )
 , m_cachePos( 0 )
-, m_it()
 , m_filePos( 0 ) {
     m_cache.resize( cache );
     std::fill( m_cache.begin(), m_cache.end(), '\n' );
@@ -209,7 +205,6 @@ bool IOStreamBuffer<T>::readNextBlock() {
     m_filePos += m_cacheSize;
     m_cachePos = 0;
     m_blockIdx++;
-    m_it = m_cache.begin();
 
     return true;
 }
@@ -234,32 +229,47 @@ size_t IOStreamBuffer<T>::getFilePos() const {
 
 template<class T>
 inline
-bool IOStreamBuffer<T>::getNextLine( CacheIter &begin, CacheIter &end ) {
+bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationToken ) {
+    buffer.resize( m_cacheSize );
+    //std::fill( buffer.begin(), buffer.end(), ' ' );
     if ( m_cachePos == m_cacheSize || 0 == m_filePos ) {
         if ( !readNextBlock() ) {
-            begin = m_it;
-            end = m_it;
             return false;
         }
-        m_it = m_cache.begin();
     }
 
-    //size_t i = 0;
-    begin = m_it;
-    while ( !IsLineEnd( m_cache[ m_cachePos ] ) ) {
+    bool continuationFound( false ), endOfDataLine( false );
+    size_t i = 0;
+    while ( !endOfDataLine ) {
+        if ( continuationToken == m_cache[ m_cachePos ] ) {
+            continuationFound = true;
+            ++m_cachePos;
+        }
+        if ( IsLineEnd( m_cache[ m_cachePos ] ) ) {
+            if ( !continuationFound ) {
+                // the end of the data line
+                break;
+            } else {
+                // skip line end
+                while ( m_cache[m_cachePos] != '\n') {
+                    ++m_cachePos;
+                }
+                ++m_cachePos;
+                continuationFound = false;
+            }
+        }
+
+        buffer[ i ] = m_cache[ m_cachePos ];
         m_cachePos++;
-        ++m_it;
-        //i++;
+        i++;
         if ( m_cachePos >= m_cacheSize ) {
             if ( !readNextBlock() ) {
-                begin = m_it;
-                end = m_it;
                 return false;
             }
         }
     }
-    ++m_it;
-    end = m_it;
+    
+    buffer[ i ] = '\n';
     m_cachePos++;
 
     return true;

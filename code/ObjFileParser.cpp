@@ -123,7 +123,7 @@ ObjFile::Model *ObjFileParser::GetModel() const {
             std::vector<char> tempBuf;
             do
             {
-                streamBuffer.getNextLine(tempBuf);
+                streamBuffer.getNextDataLine(tempBuf, '\\' );
             } while (tempBuf[0]=='\n');
             *curPosition = ' ';
             std::copy(tempBuf.cbegin(), tempBuf.cend(), ++curPosition);
@@ -141,7 +141,11 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     unsigned int processed = 0;
     size_t lastFilePos( 0 );
 
-    while ( streamBuffer.getNextLine( m_DataIt, m_DataItEnd ) ) {
+    std::vector<char> buffer;
+    while ( streamBuffer.getNextDataLine( buffer, '\\' ) ) {
+        m_DataIt = buffer.begin();
+        m_DataItEnd = buffer.end();
+
         // Handle progress reporting
         const size_t filePos( streamBuffer.getFilePos() );
         if ( lastFilePos < filePos ) {

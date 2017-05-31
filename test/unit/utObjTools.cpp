@@ -51,13 +51,23 @@ class utObjTools : public ::testing::Test {
 
 class TestObjFileParser : public ObjFileParser {
 public:
-    TestObjFileParser() : ObjFileParser(){}
-    ~TestObjFileParser() {}
+    TestObjFileParser() : ObjFileParser(){
+        // empty
+    }
+
+    ~TestObjFileParser() {
+        // empty
+    }
+    
     void testCopyNextWord( char *pBuffer, size_t length ) {
         copyNextWord( pBuffer, length );
     }
 
+    size_t testGetNumComponentsInDataDefinition() {
+        return getNumComponentsInDataDefinition();
+    }
 };
+
 TEST_F( utObjTools, skipDataLine_OneLine_Success ) {
     std::vector<char> buffer;
     std::string data( "v -0.5 -0.5 0.5\nend" );
@@ -71,7 +81,7 @@ TEST_F( utObjTools, skipDataLine_OneLine_Success ) {
 
 TEST_F( utObjTools, skipDataLine_TwoLines_Success ) {
     TestObjFileParser test_parser;
-    std::string data( "vn -2.061493116917992e-15 -0.9009688496589661 \\n-0.4338837265968323" );
+    std::string data( "vn -2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323" );
     std::vector<char> buffer;
     buffer.resize( data.size() );
     ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
@@ -90,4 +100,18 @@ TEST_F( utObjTools, skipDataLine_TwoLines_Success ) {
 
     test_parser.testCopyNextWord( data_buffer, Size );
     EXPECT_EQ( data_buffer[ 0 ], '-' );
+}
+
+TEST_F( utObjTools, countComponents_TwoLines_Success ) {
+    TestObjFileParser test_parser;
+    std::string data( "-2.061493116917992e-15 -0.9009688496589661 \\\n-0.4338837265968323" );
+    std::vector<char> buffer;
+    buffer.resize( data.size() );
+    ::memcpy( &buffer[ 0 ], &data[ 0 ], data.size() );
+    test_parser.setBuffer( buffer );
+    static const size_t Size = 4096UL;
+    char data_buffer[ Size ];
+
+    size_t numComps = test_parser.testGetNumComponentsInDataDefinition();
+    EXPECT_EQ( 3U, numComps );
 }

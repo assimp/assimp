@@ -289,7 +289,6 @@ size_t ObjFileParser::getNumComponentsInDataDefinition() {
     const char* tmp( &m_DataIt[0] );
     bool end_of_definition = false;
     while ( !end_of_definition ) {
-    //while( !IsLineEnd( *tmp ) ) {    
         if ( isDataDefinitionEnd( tmp ) ) {
             tmp += 2;
         } else if ( IsLineEnd( *tmp ) ) {
@@ -420,10 +419,6 @@ static const std::string DefaultObjName = "defaultobject";
 // -------------------------------------------------------------------
 //  Get values for a new face instance
 void ObjFileParser::getFace( aiPrimitiveType type ) {
-    //copyNextLine(m_buffer, Buffersize);
-    //char *pPtr = m_DataIt;
-    //char *pPtr = m_buffer;
-    //char *pEnd = &pPtr[Buffersize];
     m_DataIt = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
     if ( m_DataIt == m_DataItEnd || *m_DataIt == '\0' ) {
         return;
@@ -595,15 +590,6 @@ void ObjFileParser::getMaterialDesc() {
 //  Get a comment, values will be skipped
 void ObjFileParser::getComment() {
     m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
-
-/*    while (m_DataIt != m_DataItEnd) {
-        if ( '\n' == (*m_DataIt)) {
-            ++m_DataIt;
-            break;
-        } else {
-            ++m_DataIt;
-        }
-    }*/
 }
 
 // -------------------------------------------------------------------

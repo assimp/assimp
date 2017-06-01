@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "assimp_view.h"
 #include "richedit.h"
+#include <commoncontrols.h>
+#include <commdlg.h>
 
 namespace AssimpView {
 

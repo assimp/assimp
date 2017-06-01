@@ -20,7 +20,7 @@ struct VERTEX {
 
 struct Texture {
 	string type;
-	aiString path;
+	string path;
 	ID3D11ShaderResourceView *texture;
 };
 

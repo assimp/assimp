@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SceneAnimator.h"
 #include "StringUtils.h"
 
+#include <commdlg.h>
+
 namespace AssimpView {
 
 using namespace Assimp;

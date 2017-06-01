@@ -89,6 +89,10 @@ OPTION ( BUILD_DOCS
    OFF
 )
 
+if (WIN32)
+    add_definitions( -DWIN32_LEAN_AND_MEAN )
+endif()
+
 IF(MSVC)
   set (CMAKE_PREFIX_PATH "D:\\libs\\devil")
   OPTION( ASSIMP_INSTALL_PDB

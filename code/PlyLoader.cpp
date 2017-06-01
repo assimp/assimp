@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -51,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 
@@ -90,14 +91,16 @@ namespace
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 PLYImporter::PLYImporter()
-    : mBuffer(),
-    pcDOM()
-{}
+: mBuffer()
+, pcDOM(){
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
-PLYImporter::~PLYImporter()
-{}
+PLYImporter::~PLYImporter() {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.

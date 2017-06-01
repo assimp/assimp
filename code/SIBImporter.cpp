@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -61,7 +62,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
+#include <map>
 
 using namespace Assimp;
 
@@ -76,25 +79,26 @@ static const aiImporterDesc desc = {
     "sib"
 };
 
-struct SIBChunk
-{
+struct SIBChunk {
     uint32_t    Tag;
     uint32_t    Size;
 } PACK_STRUCT;
 
-enum { POS, NRM, UV,    N };
+enum { 
+    POS, 
+    NRM, 
+    UV,    
+    N
+};
 
 typedef std::pair<uint32_t, uint32_t> SIBPair;
-static SIBPair makePair(uint32_t a, uint32_t b) { return (a<b) ? SIBPair(a, b) : SIBPair(b, a); }
 
-struct SIBEdge
-{
+struct SIBEdge {
     uint32_t faceA, faceB;
     bool creased;
 };
 
-struct SIBMesh
-{
+struct SIBMesh {
     aiMatrix4x4 axis;
     uint32_t numPts;
     std::vector<aiVector3D> pos, nrm, uv;
@@ -105,15 +109,13 @@ struct SIBMesh
     std::map<SIBPair, uint32_t> edgeMap;
 };
 
-struct SIBObject
-{
+struct SIBObject {
     aiString name;
     aiMatrix4x4 axis;
     size_t meshIdx, meshCount;
 };
 
-struct SIB
-{
+struct SIB {
     std::vector<aiMaterial*> mtls;
     std::vector<aiMesh*> meshes;
     std::vector<aiLight*> lights;
@@ -121,8 +123,7 @@ struct SIB
 };
 
 // ------------------------------------------------------------------------------------------------
-static SIBEdge& GetEdge(SIBMesh* mesh, uint32_t posA, uint32_t posB)
-{
+static SIBEdge& GetEdge(SIBMesh* mesh, uint32_t posA, uint32_t posB) {
     SIBPair pair = (posA < posB) ? SIBPair(posA, posB) : SIBPair(posB, posA);
     std::map<SIBPair, uint32_t>::iterator it = mesh->edgeMap.find(pair);
     if (it != mesh->edgeMap.end())
@@ -388,7 +389,7 @@ static void ConnectFaces(SIBMesh* mesh)
             // with non-2-manifold surfaces, but then so does Silo to begin with.
             if (edge.faceA == 0xffffffff)
                 edge.faceA = static_cast<uint32_t>(faceIdx);
-            else
+            else if (edge.faceB == 0xffffffff)
                 edge.faceB = static_cast<uint32_t>(faceIdx);
 
             prev = next;
@@ -432,12 +433,17 @@ static aiVector3D CalculateVertexNormal(SIBMesh* mesh, uint32_t faceIdx, uint32_
                 {
                     SIBEdge& edge = GetEdge(mesh, posA, posB);
 
-                    // Move to whichever side we didn't just come from.
-                    if (!edge.creased) {
-                        if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx)
-                            nextFaceIdx = edge.faceA;
-                        else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx)
-                            nextFaceIdx = edge.faceB;
+                    // Non-manifold meshes can produce faces which share
+                    // positions but have no edge entry, so check it.
+                    if (edge.faceA == faceIdx || edge.faceB == faceIdx)
+                    {
+                        // Move to whichever side we didn't just come from.
+                        if (!edge.creased) {
+                            if (edge.faceA != prevFaceIdx && edge.faceA != faceIdx && edge.faceA != 0xffffffff)
+                                nextFaceIdx = edge.faceA;
+                            else if (edge.faceB != prevFaceIdx && edge.faceB != faceIdx && edge.faceB != 0xffffffff)
+                                nextFaceIdx = edge.faceB;
+                        }
                     }
                 }
 

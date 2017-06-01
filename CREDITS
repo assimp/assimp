@@ -81,7 +81,7 @@ Many bugreports, improving Assimp's portability, regular testing & feedback.
 Bugreport and fix for a obj-materialloader crash.
 
 - David Nadlinger
-D bindings, CMake install support. 
+D bindings, CMake install support.
 
 - Dario Accornero
 Contributed several patches regarding Mac OS/XCode targets, bug reports.
@@ -92,7 +92,7 @@ Contributed the 'SimpleTexturedOpenGl' sample.
 - Matthias Fauconneau
 Contributed a fix for the Q3-BSP loader.
 
-- J�rgen P. Tjern�
+- Jørgen P. Tjernø
 Contributed updated and improved xcode workspaces
 
 - drparallax
@@ -113,7 +113,7 @@ Contributes a fix for the configure script environment.
 - Ed Diana
 Contributed AssimpDelphi (/port/AssimpDelphi).
 
-- rdb 
+- rdb
 Contributes a bundle of fixes and improvements for the bsp-importer.
 
 - Mick P
@@ -137,7 +137,7 @@ GCC/Linux fixes for the SimpleOpenGL sample.
 - Brian Miller
 Bugfix for a compiler fix for iOS on arm.
 
-- S�verin Lemaignan
+- Séverin Lemaignan
 Rewrite of PyAssimp, distutils and Python3 support
 
 - albert-wang

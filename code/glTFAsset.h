@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,8 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_binary_glTF: full
  *   KHR_materials_common: full
  */
-#ifndef glTFAsset_H_INC
-#define glTFAsset_H_INC
+#ifndef GLTFASSET_H_INC
+#define GLTFASSET_H_INC
+
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include <map>
 #include <string>
@@ -62,7 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef ASSIMP_API
 #   include <memory>
-#   include "DefaultIOSystem.h"
+#   include <assimp/DefaultIOSystem.h>
 #   include "ByteSwapper.h"
 #else
 #   include <memory>
@@ -210,6 +213,7 @@ namespace glTF
         ComponentType_UNSIGNED_BYTE = 5121,
         ComponentType_SHORT = 5122,
         ComponentType_UNSIGNED_SHORT = 5123,
+        ComponentType_UNSIGNED_INT = 5125,
         ComponentType_FLOAT = 5126
     };
 
@@ -220,13 +224,15 @@ namespace glTF
             case ComponentType_UNSIGNED_SHORT:
                 return 2;
 
+            case ComponentType_UNSIGNED_INT:
             case ComponentType_FLOAT:
                 return 4;
 
-            //case Accessor::ComponentType_BYTE:
-            //case Accessor::ComponentType_UNSIGNED_BYTE:
-            default:
+            case ComponentType_BYTE:
+            case ComponentType_UNSIGNED_BYTE:
                 return 1;
+            default:
+                throw DeadlyImportError("GLTF: Unsupported Component Type "+t);
         }
     }
 
@@ -1183,4 +1189,6 @@ namespace glTF
 // Include the implementation of the methods
 #include "glTFAsset.inl"
 
-#endif
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+
+#endif // GLTFASSET_H_INC

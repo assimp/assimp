@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -44,14 +45,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_PROPERTIES_H
 #define INCLUDED_AI_FBX_PROPERTIES_H
 
-#include <map>
 #include "FBXCompileConfig.h"
 #include <memory>
+#include <string>
 
 namespace Assimp {
 namespace FBX {
 
-    class Element;
+// Forward declarations
+class Element;
 
 
 /** Represents a dynamic property. Type info added by deriving classes,

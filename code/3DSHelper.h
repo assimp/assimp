@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -48,10 +49,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SmoothingGroups.h"
 #include "StringUtils.h"
 #include "qnan.h"
-#include "./../include/assimp/material.h"
-#include "./../include/assimp/camera.h"
-#include "./../include/assimp/light.h"
-#include "./../include/assimp/anim.h"
+#include <assimp/material.h>
+#include <assimp/camera.h>
+#include <assimp/light.h>
+#include <assimp/anim.h>
 #include <stdio.h> //sprintf
 
 namespace Assimp    {

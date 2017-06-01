@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -133,7 +134,6 @@ struct aiMetadata {
         // empty
     }
 
-
     /** 
      *  @brief The destructor.
      */
@@ -197,6 +197,37 @@ struct aiMetadata {
 
         return data;
     }
+
+    /**
+     *  @brief Deallocates property fields + keys.
+     */
+    static inline
+    void Dealloc( aiMetadata *metadata ) {
+        delete metadata;
+    }
+
+	template<typename T>
+	inline void Add(const std::string& key, const T& value)
+	{
+		aiString* new_keys = new aiString[mNumProperties + 1];
+		aiMetadataEntry* new_values = new aiMetadataEntry[mNumProperties + 1];
+
+		for(unsigned int i = 0; i < mNumProperties; ++i)
+		{
+			new_keys[i] = mKeys[i];
+			new_values[i] = mValues[i];
+		}
+
+		delete mKeys;
+		delete mValues;
+
+		mKeys = new_keys;
+		mValues = new_values;
+
+		mNumProperties++;
+
+		Set(mNumProperties - 1, key, value);
+	}
 
     template<typename T>
     inline 

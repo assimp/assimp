@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -49,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringUtils.h"
 
 // Header files, Assimp.
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 #include "fast_atof.h"
 
 // Header files, stdlib.
@@ -73,24 +74,29 @@ const aiImporterDesc X3DImporter::Description = {
 	"x3d"
 };
 
-void X3DImporter::Clear()
-{
+X3DImporter::X3DImporter()
+: NodeElement_Cur( nullptr )
+, mReader( nullptr ) {
+    // empty
+}
+
+X3DImporter::~X3DImporter() {
+    delete mReader;
+    // Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
+    Clear();
+}
+
+void X3DImporter::Clear() {
 	NodeElement_Cur = nullptr;
 	// Delete all elements
-	if(NodeElement_List.size())
-	{
-		for(std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++) delete *it;
-
+	if(NodeElement_List.size()) {
+        for ( std::list<CX3DImporter_NodeElement*>::iterator it = NodeElement_List.begin(); it != NodeElement_List.end(); it++ ) {
+            delete *it;
+        }
 		NodeElement_List.clear();
 	}
 }
 
-X3DImporter::~X3DImporter()
-{
-    delete mReader;
-	// Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
-	Clear();
-}
 
 /*********************************************************************************************************************************************/
 /************************************************************ Functions: find set ************************************************************/
@@ -235,7 +241,7 @@ void X3DImporter::XML_CheckNode_MustBeEmpty()
 
 void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName)
 {
-    const size_t Uns_Skip_Len = 189;
+    static const size_t Uns_Skip_Len = 190;
     const char* Uns_Skip[ Uns_Skip_Len ] = {
 	    // CAD geometry component
 	    "CADAssembly", "CADFace", "CADLayer", "CADPart", "IndexedQuadSet", "QuadSet",
@@ -262,7 +268,7 @@ void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeNa
 	    "PositionInterpolator", "PositionInterpolator2D", "ScalarInterpolator", "SplinePositionInterpolator", "SplinePositionInterpolator2D",
 	    "SplineScalarInterpolator", "SquadOrientationInterpolator",
 	    // Key device sensor component
-	    "KeySensor", "StringSensor"
+	    "KeySensor", "StringSensor",
 	    // Layering component
 	    "Layer", "LayerSet", "Viewport",
 	    // Layout component

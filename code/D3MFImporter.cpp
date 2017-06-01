@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -43,23 +44,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "D3MFImporter.h"
 
 #include <assimp/scene.h>
-#include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 #include "StringComparison.h"
 #include "StringUtils.h"
 
-
 #include <string>
-#include <sstream>
 #include <vector>
 #include <map>
-#include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <memory>
-
-#include <assimp/ai_assert.h>
 
 #include "D3MFOpcPackage.h"
 #include <contrib/unzip/unzip.h>
@@ -67,7 +62,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Assimp {
 namespace D3MF {
-
 
 namespace XmlTag {
     static const std::string model     = "model";
@@ -254,9 +248,7 @@ private:
         mesh->mFaces = new aiFace[mesh->mNumFaces];
         mesh->mPrimitiveTypes = aiPrimitiveType_TRIANGLE;
 
-
         std::copy(faces.begin(), faces.end(), mesh->mFaces);
-
     }
 
     aiFace ReadTriangle()
@@ -313,8 +305,6 @@ private:
 private:
     std::vector<aiMesh*> meshes;
     XmlReader* xmlReader;
-
-
 };
 
 } //namespace D3MF

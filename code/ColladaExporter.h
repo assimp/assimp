@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -101,13 +102,19 @@ protected:
     void WriteSpotLight(const aiLight *const light);
     void WriteAmbienttLight(const aiLight *const light);
 
+    /// Writes the controller library
+    void WriteControllerLibrary();
+
+    /// Writes a skin controller of the given mesh
+    void WriteController( size_t pIndex);
+
     /// Writes the geometry library
     void WriteGeometryLibrary();
 
     /// Writes the given mesh
     void WriteGeometry( size_t pIndex);
 
-    enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color };
+    enum FloatDataType { FloatType_Vector, FloatType_TexCoord2, FloatType_TexCoord3, FloatType_Color, FloatType_Mat4x4, FloatType_Weight };
 
     /// Writes a float array of the given type
     void WriteFloatArray( const std::string& pIdString, FloatDataType pType, const ai_real* pData, size_t pElementCount);

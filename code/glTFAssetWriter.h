@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -45,8 +46,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_binary_glTF: full
  *   KHR_materials_common: full
  */
-#ifndef glTFAssetWriter_H_INC
-#define glTFAssetWriter_H_INC
+#ifndef GLTFASSETWRITER_H_INC
+#define GLTFASSETWRITER_H_INC
+
+#ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include "glTFAsset.h"
 
@@ -87,4 +90,6 @@ public:
 // Include the implementation of the methods
 #include "glTFAssetWriter.inl"
 
-#endif
+#endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
+
+#endif // GLTFASSETWRITER_H_INC

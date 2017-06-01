@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -46,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AI_MATRIX4X4_H_INC
 
 #include "vector3.h"
-#include "./Compiler/pushpack1.h"
 #include "defs.h"
 
 #ifdef __cplusplus
@@ -113,6 +113,8 @@ public:
     // matrix multiplication.
     aiMatrix4x4t& operator *= (const aiMatrix4x4t& m);
     aiMatrix4x4t  operator *  (const aiMatrix4x4t& m) const;
+    aiMatrix4x4t operator * (const TReal& aFloat) const;
+    aiMatrix4x4t operator + (const aiMatrix4x4t& aMatrix) const;
 
     template <typename TOther>
     operator aiMatrix4x4t<TOther> () const;
@@ -257,7 +259,7 @@ public:
     TReal b1, b2, b3, b4;
     TReal c1, c2, c3, c4;
     TReal d1, d2, d3, d4;
-} PACK_STRUCT;
+};
 
 typedef aiMatrix4x4t<ai_real> aiMatrix4x4;
 
@@ -268,11 +270,9 @@ struct aiMatrix4x4 {
     ai_real b1, b2, b3, b4;
     ai_real c1, c2, c3, c4;
     ai_real d1, d2, d3, d4;
-} PACK_STRUCT;
+};
 
 
 #endif // __cplusplus
-
-#include "./Compiler/poppack1.h"
 
 #endif // AI_MATRIX4X4_H_INC

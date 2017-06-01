@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,7 +53,6 @@ Here we implement only the C++ interface (Assimp::Exporter).
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
 
-#include "DefaultIOSystem.h"
 #include "BlobIOSystem.h"
 #include "SceneCombiner.h"
 #include "BaseProcess.h"
@@ -64,11 +64,12 @@ Here we implement only the C++ interface (Assimp::Exporter).
 #include "Exceptional.h"
 #include "ScenePrivate.h"
 #include <memory>
+
+#include <assimp/DefaultIOSystem.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <memory>
 
 namespace Assimp {
 
@@ -235,7 +236,7 @@ bool Exporter::IsDefaultIOHandler() const {
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const char* pFormatId, 
+const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const char* pFormatId,
                                                 unsigned int, const ExportProperties* pProperties ) {
     if (pimpl->blob) {
         delete pimpl->blob;

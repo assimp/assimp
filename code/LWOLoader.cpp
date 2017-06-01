@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -54,10 +55,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProcessHelper.h"
 #include "ConvertToLHProcess.h"
 #include <assimp/IOSystem.hpp>
+#include <assimp/importerdesc.h>
 #include <memory>
 #include <sstream>
 #include <iomanip>
-
+#include <map>
 
 using namespace Assimp;
 
@@ -65,7 +67,7 @@ static const aiImporterDesc desc = {
     "LightWave/Modo Object Importer",
     "",
     "",
-    "http://www.newtek.com/lightwave.html\nhttp://www.luxology.com/modo/",
+    "https://www.lightwave3d.com/lightwave_sdk/",
     aiImporterFlags_SupportTextFlavour,
     0,
     0,

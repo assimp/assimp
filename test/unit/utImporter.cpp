@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -45,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/Importer.hpp>
 #include <BaseImporter.h>
 #include "TestIOSystem.h"
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 
 using namespace ::std;
 using namespace ::Assimp;
@@ -53,12 +54,12 @@ using namespace ::Assimp;
 class ImporterTest : public ::testing::Test
 {
 public:
-    virtual void SetUp() { 
-        pImp = new Importer(); 
+    virtual void SetUp() {
+        pImp = new Importer();
     }
-    
-    virtual void TearDown() { 
-        delete pImp; 
+
+    virtual void TearDown() {
+        delete pImp;
     }
 
 protected:

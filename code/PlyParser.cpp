@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -53,9 +54,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 
 // ------------------------------------------------------------------------------------------------
-PLY::EDataType PLY::Property::ParseDataType(const char* pCur,const char** pCurOut)
-{
-    ai_assert(NULL != pCur && NULL != pCurOut);
+PLY::EDataType PLY::Property::ParseDataType(const char* pCur,const char** pCurOut) {
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+
     PLY::EDataType eOut = PLY::EDT_INVALID;
 
     if (TokenMatch(pCur,"char",4) ||
@@ -100,33 +102,25 @@ PLY::EDataType PLY::Property::ParseDataType(const char* pCur,const char** pCurOu
         DefaultLogger::get()->info("Found unknown data type in PLY file. This is OK");
     }
     *pCurOut = pCur;
+
     return eOut;
 }
 
 // ------------------------------------------------------------------------------------------------
-PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOut)
-{
-    ai_assert(NULL != pCur && NULL != pCurOut);
+PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOut) {
+    ai_assert (NULL != pCur );
+    ai_assert( NULL != pCurOut );
 
     PLY::ESemantic eOut = PLY::EST_INVALID;
-    if (TokenMatch(pCur,"red",3))
-    {
+    if (TokenMatch(pCur,"red",3)) {
         eOut = PLY::EST_Red;
-    }
-    else if (TokenMatch(pCur,"green",5))
-    {
+    } else if (TokenMatch(pCur,"green",5)) {
         eOut = PLY::EST_Green;
-    }
-    else if (TokenMatch(pCur,"blue",4))
-    {
+    } else if (TokenMatch(pCur,"blue",4)) {
         eOut = PLY::EST_Blue;
-    }
-    else if (TokenMatch(pCur,"alpha",5))
-    {
+    } else if (TokenMatch(pCur,"alpha",5)) {
         eOut = PLY::EST_Alpha;
-    }
-    else if (TokenMatch(pCur,"vertex_index",12) || TokenMatch(pCur,"vertex_indices",14))
-    {
+    } else if (TokenMatch(pCur,"vertex_index",12) || TokenMatch(pCur,"vertex_indices",14)) {
         eOut = PLY::EST_VertexIndex;
     }
     else if (TokenMatch(pCur,"material_index",14))
@@ -202,40 +196,28 @@ PLY::ESemantic PLY::Property::ParseSemantic(const char* pCur,const char** pCurOu
         eOut = PLY::EST_Blue;
     }
     // NOTE: Blender3D exports texture coordinates as s,t tuples
-    else if (TokenMatch(pCur,"u",1) ||  TokenMatch(pCur,"s",1) || TokenMatch(pCur,"tx",2))
+    else if (TokenMatch(pCur,"u",1) ||  TokenMatch(pCur,"s",1) || TokenMatch(pCur,"tx",2) || TokenMatch(pCur,"texture_u",9))
     {
         eOut = PLY::EST_UTextureCoord;
     }
-    else if (TokenMatch(pCur,"v",1) ||  TokenMatch(pCur,"t",1) || TokenMatch(pCur,"ty",2))
+    else if (TokenMatch(pCur,"v",1) ||  TokenMatch(pCur,"t",1) || TokenMatch(pCur,"ty",2) || TokenMatch(pCur,"texture_v",9))
     {
         eOut = PLY::EST_VTextureCoord;
     }
     else if (TokenMatch(pCur,"x",1))
     {
         eOut = PLY::EST_XCoord;
-    }
-    else if (TokenMatch(pCur,"y",1))
-    {
+    } else if (TokenMatch(pCur,"y",1)) {
         eOut = PLY::EST_YCoord;
-    }
-    else if (TokenMatch(pCur,"z",1))
-    {
+    } else if (TokenMatch(pCur,"z",1)) {
         eOut = PLY::EST_ZCoord;
-    }
-    else if (TokenMatch(pCur,"nx",2))
-    {
+    } else if (TokenMatch(pCur,"nx",2)) {
         eOut = PLY::EST_XNormal;
-    }
-    else if (TokenMatch(pCur,"ny",2))
-    {
+    } else if (TokenMatch(pCur,"ny",2)) {
         eOut = PLY::EST_YNormal;
-    }
-    else if (TokenMatch(pCur,"nz",2))
-    {
+    } else if (TokenMatch(pCur,"nz",2)) {
         eOut = PLY::EST_ZNormal;
-    }
-    else
-    {
+    } else {
         DefaultLogger::get()->info("Found unknown property semantic in file. This is ok");
         SkipLine(&pCur);
     }
@@ -248,7 +230,8 @@ bool PLY::Property::ParseProperty (const char* pCur,
     const char** pCurOut,
     PLY::Property* pOut)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
 
     // Forms supported:
     // "property float x"
@@ -256,7 +239,9 @@ bool PLY::Property::ParseProperty (const char* pCur,
     *pCurOut = pCur;
 
     // skip leading spaces
-    if (!SkipSpaces(pCur,&pCur))return false;
+    if (!SkipSpaces(pCur,&pCur)) {
+        return false;
+    }
 
     // skip the "property" string at the beginning
     if (!TokenMatch(pCur,"property",8))
@@ -265,7 +250,9 @@ bool PLY::Property::ParseProperty (const char* pCur,
         return false;
     }
     // get next word
-    if (!SkipSpaces(pCur,&pCur))return false;
+    if (!SkipSpaces(pCur,&pCur)) {
+        return false;
+    }
     if (TokenMatch(pCur,"list",4))
     {
         pOut->bIsList = true;
@@ -313,6 +300,7 @@ bool PLY::Property::ParseProperty (const char* pCur,
 
     SkipSpacesAndLineEnd(pCur,&pCur);
     *pCurOut = pCur;
+
     return true;
 }
 
@@ -350,6 +338,7 @@ PLY::EElementSemantic PLY::Element::ParseSemantic(const char* pCur,
         eOut = PLY::EEST_Material;
     }
     *pCurOut = pCur;
+
     return eOut;
 }
 
@@ -358,13 +347,17 @@ bool PLY::Element::ParseElement (const char* pCur,
     const char** pCurOut,
     PLY::Element* pOut)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != pOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != pOut );
 
     // Example format: "element vertex 8"
     *pCurOut = pCur;
 
     // skip leading spaces
-    if (!SkipSpaces(&pCur))return false;
+    if (!SkipSpaces(&pCur)) {
+        return false;
+    }
 
     // skip the "element" string at the beginning
     if (!TokenMatch(pCur,"element",7))
@@ -405,6 +398,7 @@ bool PLY::Element::ParseElement (const char* pCur,
         pOut->alProperties.push_back(prop);
     }
     *pCurOut = pCur;
+
     return true;
 }
 
@@ -412,30 +406,35 @@ bool PLY::Element::ParseElement (const char* pCur,
 bool PLY::DOM::SkipComments (const char* pCur,
     const char** pCurOut)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
     *pCurOut = pCur;
 
     // skip spaces
-    if (!SkipSpaces(pCur,&pCur))return false;
+    if (!SkipSpaces(pCur,&pCur)) {
+        return false;
+    }
 
     if (TokenMatch(pCur,"comment",7))
     {
-	     if ( !IsLineEnd(pCur[-1]) )
-	     {
-	         SkipLine(pCur,&pCur);
-	     }
+        if ( !IsLineEnd(pCur[-1]) )
+        {
+            SkipLine(pCur,&pCur);
+        }
         SkipComments(pCur,&pCur);
         *pCurOut = pCur;
         return true;
     }
     *pCurOut = pCur;
+
     return false;
 }
 
 // ------------------------------------------------------------------------------------------------
-bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut,bool isBinary)
-{
-    ai_assert(NULL != pCur && NULL != pCurOut);
+bool PLY::DOM::ParseHeader (const char* pCur,const char** pCurOut,bool isBinary) {
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+
     DefaultLogger::get()->debug("PLY::DOM::ParseHeader() begin");
 
     // after ply and format line
@@ -479,7 +478,8 @@ bool PLY::DOM::ParseElementInstanceLists (
     const char* pCur,
     const char** pCurOut)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
 
     DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceLists() begin");
     *pCurOut = pCur;
@@ -507,7 +507,8 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
     const char** pCurOut,
     bool p_bBE)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut);
 
     DefaultLogger::get()->debug("PLY::DOM::ParseElementInstanceListsBinary() begin");
     *pCurOut = pCur;
@@ -532,7 +533,8 @@ bool PLY::DOM::ParseElementInstanceListsBinary (
 // ------------------------------------------------------------------------------------------------
 bool PLY::DOM::ParseInstanceBinary (const char* pCur,DOM* p_pcOut,bool p_bBE)
 {
-    ai_assert(NULL != pCur && NULL != p_pcOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != p_pcOut );
 
     DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() begin");
 
@@ -580,7 +582,10 @@ bool PLY::ElementInstanceList::ParseInstanceList (
     const PLY::Element* pcElement,
     PLY::ElementInstanceList* p_pcOut)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != pcElement );
+    ai_assert( NULL != p_pcOut );
 
     if (EEST_INVALID == pcElement->eSemantic || pcElement->alProperties.empty())
     {
@@ -614,7 +619,10 @@ bool PLY::ElementInstanceList::ParseInstanceListBinary (
     PLY::ElementInstanceList* p_pcOut,
     bool p_bBE /* = false */)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != pcElement );
+    ai_assert( NULL != p_pcOut );
 
     // we can add special handling code for unknown element semantics since
     // we can't skip it as a whole block (we don't know its exact size
@@ -636,9 +644,14 @@ bool PLY::ElementInstance::ParseInstance (
     const PLY::Element* pcElement,
     PLY::ElementInstance* p_pcOut)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != pcElement );
+    ai_assert( NULL != p_pcOut );
 
-    if (!SkipSpaces(pCur, &pCur))return false;
+    if (!SkipSpaces(pCur, &pCur)) {
+        return false;
+    }
 
     // allocate enough storage
     p_pcOut->alProperties.resize(pcElement->alProperties.size());
@@ -671,7 +684,10 @@ bool PLY::ElementInstance::ParseInstanceBinary (
     PLY::ElementInstance* p_pcOut,
     bool p_bBE /* = false */)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != pcElement && NULL != p_pcOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != pcElement );
+    ai_assert( NULL != p_pcOut );
 
     // allocate enough storage
     p_pcOut->alProperties.resize(pcElement->alProperties.size());
@@ -696,12 +712,17 @@ bool PLY::ElementInstance::ParseInstanceBinary (
 bool PLY::PropertyInstance::ParseInstance (const char* pCur,const char** pCurOut,
     const PLY::Property* prop, PLY::PropertyInstance* p_pcOut)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL !=  prop && NULL != p_pcOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != prop );
+    ai_assert( NULL != p_pcOut );
 
     *pCurOut = pCur;
 
     // skip spaces at the beginning
-    if (!SkipSpaces(pCur, &pCur))return false;
+    if (!SkipSpaces(pCur, &pCur)) {
+        return false;
+    }
 
     if (prop->bIsList)
     {
@@ -741,7 +762,10 @@ bool PLY::PropertyInstance::ParseInstanceBinary (
     PLY::PropertyInstance* p_pcOut,
     bool p_bBE)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != prop && NULL != p_pcOut);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != prop );
+    ai_assert( NULL != p_pcOut );
 
     if (prop->bIsList)
     {
@@ -770,8 +794,7 @@ bool PLY::PropertyInstance::ParseInstanceBinary (
 }
 
 // ------------------------------------------------------------------------------------------------
-PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue(
-    PLY::EDataType eType)
+PLY::PropertyInstance::ValueUnion PLY::PropertyInstance::DefaultValue( PLY::EDataType eType )
 {
     PLY::PropertyInstance::ValueUnion out;
 
@@ -798,7 +821,9 @@ bool PLY::PropertyInstance::ParseValue(
     PLY::EDataType eType,
     PLY::PropertyInstance::ValueUnion* out)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != out );
 
     bool ret = true;
     *pCurOut = pCur;
@@ -827,7 +852,6 @@ bool PLY::PropertyInstance::ParseValue(
         break;
 
     case EDT_Double:
-
         double d;
         pCur = fast_atoreal_move<double>(pCur,d);
         out->fDouble = (double)d;
@@ -835,8 +859,10 @@ bool PLY::PropertyInstance::ParseValue(
 
     default:
         ret = false;
+        break;
     }
     *pCurOut = pCur;
+
     return ret;
 }
 
@@ -848,7 +874,9 @@ bool PLY::PropertyInstance::ParseValueBinary(
     PLY::PropertyInstance::ValueUnion* out,
     bool p_bBE)
 {
-    ai_assert(NULL != pCur && NULL != pCurOut && NULL != out);
+    ai_assert( NULL != pCur );
+    ai_assert( NULL != pCurOut );
+    ai_assert( NULL != out );
 
     bool ret = true;
     switch (eType)
@@ -925,6 +953,7 @@ bool PLY::PropertyInstance::ParseValueBinary(
         ret = false;
     }
     *pCurOut = pCur;
+
     return ret;
 }
 

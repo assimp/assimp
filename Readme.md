@@ -7,6 +7,7 @@ Open Asset Import Library (assimp)
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5607/badge.svg"/>
 </a>
+<span class="badge-patreon"><a href="https://www.patreon.com/assimp" title="Donate to this project using Patreon"><img src="https://img.shields.io/badge/patreon-donate-yellow.svg" alt="Patreon donate button" /></a></span>
 [![Coverage Status](https://coveralls.io/repos/github/assimp/assimp/badge.svg?branch=master)](https://coveralls.io/github/assimp/assimp?branch=master)
 <br>
 
@@ -18,6 +19,11 @@ This is the development trunk containing the latest features and bugfixes. For p
 The current build status is:
 
 Gitter chat: [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
+
+And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
+> /join #assetimporterlib
+
+<br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__
 
 Please check our Wiki as well: https://github.com/assimp/assimp/wiki
@@ -127,10 +133,6 @@ And we also have a Gitter-channel:Gitter [![Join the chat at https://gitter.im/a
 ### Contributing ###
 Contributions to assimp are highly appreciated. The easiest way to get involved is to submit
 a pull request with your changes against the main repository's `master` branch.
-
-### Donate ###
-If you like assimp, consider buying us a beer (or two):
-[Donate](http://sourceforge.net/donate/index.php?group_id=226462)
 
 ### License ###
 Our license is based on the modified, __3-clause BSD__-License.

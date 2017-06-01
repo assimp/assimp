@@ -70,7 +70,7 @@ def make_tuple(ai_obj, type = None):
 def _init_face(aiFace):
     aiFace.indices = [aiFace.mIndices[i] for i in range(aiFace.mNumIndices)]
 assimp_struct_inits =  { structs.Face : _init_face }
-    
+
 def call_init(obj, caller = None):
     if helper.hasattr_silent(obj,'contents'): #pointer
         _init(obj.contents, obj, caller)
@@ -85,12 +85,12 @@ def _is_init_type(obj):
     # so it breaks the 'is iterable' check.
     # Basically:
     # FIXME!
-    elif not bool(obj): 
+    elif not bool(obj):
         return False
     tname = obj.__class__.__name__
     return not (tname[:2] == 'c_' or tname == 'Structure' \
             or tname == 'POINTER') and not isinstance(obj,int)
-                    
+
 def _init(self, target = None, parent = None):
     """
     Custom initialize() for C structs, adds safely accessible member functionality.
@@ -100,8 +100,8 @@ def _init(self, target = None, parent = None):
     """
     if not target:
         target = self
-    
-    dirself = dir(self) 
+
+    dirself = dir(self)
     for m in dirself:
 
         if m.startswith("_"):
@@ -119,11 +119,12 @@ def _init(self, target = None, parent = None):
 
         if m == 'mName':
             obj = self.mName
-            target.name = str(obj.data.decode("utf-8"))
+            uni = unicode(obj.data, errors='ignore')
+            target.name = str( uni )
             target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + x.name + ")"
             target.__class__.__str__ = lambda x: x.name
             continue
-            
+
         name = m[1:].lower()
 
         obj = getattr(self, m)
@@ -144,7 +145,7 @@ def _init(self, target = None, parent = None):
             if helper.hasattr_silent(self, 'mNum' + m[1:]):
 
                 length =  getattr(self, 'mNum' + m[1:])
-    
+
                 # -> special case: properties are
                 # stored as a dict.
                 if m == 'mProperties':
@@ -156,7 +157,7 @@ def _init(self, target = None, parent = None):
                     setattr(target, name, [])
                     logger.debug(str(self) + ": " + name + " is an empty list.")
                     continue
-                
+
 
                 try:
                     if obj._type_ in structs.assimp_structs_as_tuple:
@@ -166,7 +167,7 @@ def _init(self, target = None, parent = None):
                             logger.debug(str(self) + ": Added an array of numpy arrays (type "+ str(type(obj)) + ") as self." + name)
                         else:
                             setattr(target, name, [make_tuple(obj[i]) for i in range(length)])
-                            
+
                             logger.debug(str(self) + ": Added a list of lists (type "+ str(type(obj)) + ") as self." + name)
 
                     else:
@@ -191,7 +192,7 @@ def _init(self, target = None, parent = None):
                     sys.exit(1)
 
                 except ValueError as e:
-                    
+
                     logger.error("In " + str(self) +  "->" + name + ": " + str(e) + ". Quitting now.")
                     if "setting an array element with a sequence" in str(e):
                         logger.error("Note that pyassimp does not currently "
@@ -200,13 +201,13 @@ def _init(self, target = None, parent = None):
                                      " a post-processing to triangulate your"
                                      " faces.")
                     raise e
-                    
+
 
 
             else: # starts with 'm' but not iterable
                 setattr(target, name, obj)
                 logger.debug("Added " + name + " as self." + name + " (type: " + str(type(obj)) + ")")
-        
+
                 if _is_init_type(obj):
                     call_init(obj, target)
 
@@ -265,34 +266,34 @@ def recur_pythonize(node, scene):
     for c in node.children:
         recur_pythonize(c, scene)
 
-def load(filename, 
+def load(filename,
          file_type  = None,
          processing = postprocess.aiProcess_Triangulate):
     '''
     Load a model into a scene. On failure throws AssimpError.
-    
+
     Arguments
     ---------
     filename:   Either a filename or a file object to load model from.
                 If a file object is passed, file_type MUST be specified
                 Otherwise Assimp has no idea which importer to use.
-                This is named 'filename' so as to not break legacy code. 
+                This is named 'filename' so as to not break legacy code.
     processing: assimp postprocessing parameters. Verbose keywords are imported
                 from postprocessing, and the parameters can be combined bitwise to
                 generate the final processing value. Note that the default value will
                 triangulate quad faces. Example of generating other possible values:
-                processing = (pyassimp.postprocess.aiProcess_Triangulate | 
+                processing = (pyassimp.postprocess.aiProcess_Triangulate |
                               pyassimp.postprocess.aiProcess_OptimizeMeshes)
     file_type:  string of file extension, such as 'stl'
-        
+
     Returns
     ---------
     Scene object with model data
     '''
-    
+
     if hasattr(filename, 'read'):
         '''
-        This is the case where a file object has been passed to load. 
+        This is the case where a file object has been passed to load.
         It is calling the following function:
         const aiScene* aiImportFileFromMemory(const char* pBuffer,
                                               unsigned int pLength,
@@ -302,14 +303,14 @@ def load(filename,
         if file_type == None:
             raise AssimpError('File type must be specified when passing file objects!')
         data  = filename.read()
-        model = _assimp_lib.load_mem(data, 
-                                     len(data), 
-                                     processing, 
+        model = _assimp_lib.load_mem(data,
+                                     len(data),
+                                     processing,
                                      file_type)
     else:
         # a filename string has been passed
         model = _assimp_lib.load(filename.encode("ascii"), processing)
-        
+
     if not model:
         raise AssimpError('Could not import file!')
     scene = _init(model.contents)
@@ -317,22 +318,22 @@ def load(filename,
     return scene
 
 def export(scene,
-           filename, 
+           filename,
            file_type  = None,
            processing = postprocess.aiProcess_Triangulate):
     '''
     Export a scene. On failure throws AssimpError.
-    
+
     Arguments
     ---------
     scene: scene to export.
-    filename: Filename that the scene should be exported to.  
+    filename: Filename that the scene should be exported to.
     file_type: string of file exporter to use. For example "collada".
     processing: assimp postprocessing parameters. Verbose keywords are imported
                 from postprocessing, and the parameters can be combined bitwise to
                 generate the final processing value. Note that the default value will
                 triangulate quad faces. Example of generating other possible values:
-                processing = (pyassimp.postprocess.aiProcess_Triangulate | 
+                processing = (pyassimp.postprocess.aiProcess_Triangulate |
                               pyassimp.postprocess.aiProcess_OptimizeMeshes)
 
     '''
@@ -400,7 +401,7 @@ def _finalize_mesh(mesh, target):
 
     fillarray("mColors")
     fillarray("mTextureCoords")
-    
+
     # prepare faces
     if numpy:
         faces = numpy.array([f.indices for f in target.faces], dtype=numpy.int32)
@@ -429,7 +430,7 @@ class PropertyGetter(dict):
             yield k[0], v
 
 
-def _get_properties(properties, length): 
+def _get_properties(properties, length):
     """
     Convenience Function to get the material properties as a dict
     and values in a python format.
@@ -439,7 +440,8 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        key = (str(p.mKey.data.decode("utf-8")).split('.')[1], p.mSemantic)
+        uni = unicode(p.mKey.data, errors='ignore')
+        key = (str(uni).split('.')[1], p.mSemantic)
 
         #the data
         from ctypes import POINTER, cast, c_int, c_float, sizeof
@@ -447,7 +449,9 @@ def _get_properties(properties, length):
             arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
-            value = cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data.decode("utf-8")
+            uni = unicode(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
+            value = uni
+
         elif p.mType == 4:
             arr = cast(p.mData, POINTER(c_int * int(p.mDataLength/sizeof(c_int)) )).contents
             value = [x for x in arr]
@@ -464,11 +468,11 @@ def _get_properties(properties, length):
 def decompose_matrix(matrix):
     if not isinstance(matrix, structs.Matrix4x4):
         raise AssimpError("pyassimp.decompose_matrix failed: Not a Matrix4x4!")
-    
+
     scaling = structs.Vector3D()
     rotation = structs.Quaternion()
     position = structs.Vector3D()
-    
+
     from ctypes import byref, pointer
     _assimp_lib.dll.aiDecomposeMatrix(pointer(matrix), byref(scaling), byref(rotation), byref(position))
     return scaling._init(), rotation._init(), position._init()

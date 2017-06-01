@@ -8,6 +8,7 @@ import os
 import ctypes
 from ctypes import POINTER
 import operator
+import sys
 
 try: import numpy
 except: numpy = None
@@ -39,7 +40,9 @@ elif os.name=='nt':
     for dir_candidate in path_dirs:
         if 'assimp' in dir_candidate.lower():
             additional_dirs.append(dir_candidate)
-            
+
+additional_dirs += sys.path
+
 #print(additional_dirs)
 def vec2tuple(x):
     """ Converts a VECTOR3D to a Tuple """

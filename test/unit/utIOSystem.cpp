@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -62,12 +63,13 @@ protected:
 
 TEST_F( IOSystemTest, accessDirectoryStackTest ) {
     EXPECT_FALSE( pImp->PopDirectory() );
-    EXPECT_EQ( 0, pImp->StackSize() );
+    EXPECT_EQ( 0U, pImp->StackSize() );
     EXPECT_FALSE( pImp->PushDirectory( "" ) );
     std::string path = "test/";
     EXPECT_TRUE( pImp->PushDirectory( path ) );
-    EXPECT_EQ( 1, pImp->StackSize() );
+    EXPECT_EQ( 1U, pImp->StackSize() );
     EXPECT_EQ( path, pImp->CurrentDirectory() );
     EXPECT_TRUE( pImp->PopDirectory() );
-    EXPECT_EQ( 0, pImp->StackSize() );
+    EXPECT_EQ( 0U, pImp->StackSize() );
 }
+

@@ -9,5 +9,7 @@ setup(name='pyassimp',
       url='https://github.com/assimp/assimp',
       packages=['pyassimp'],
       data_files=[('share/pyassimp', ['README.md']),
-                  ('share/examples/pyassimp', ['scripts/' + f for f in os.listdir('scripts/')])], requires=['numpy']
+                  ('share/examples/pyassimp', ['scripts/' + f for f in os.listdir('scripts/')]),
+                  ('lib/', [f for f in os.listdir('../../lib') if os.path.isfile(f)])],
+      requires=['numpy']
       )

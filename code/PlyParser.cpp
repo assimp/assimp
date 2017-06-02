@@ -200,11 +200,11 @@ PLY::ESemantic PLY::Property::ParseSemantic(std::vector<char> &buffer) {
   }
 
   // NOTE: Blender3D exports texture coordinates as s,t tuples
-  else if (PLY::DOM::TokenMatch(buffer, "u", 1) || PLY::DOM::TokenMatch(buffer, "s", 1) || PLY::DOM::TokenMatch(buffer, "tx", 2))
+  else if (PLY::DOM::TokenMatch(buffer, "u", 1) || PLY::DOM::TokenMatch(buffer, "s", 1) || PLY::DOM::TokenMatch(buffer, "tx", 2) || PLY::DOM::TokenMatch(buffer, "texture_u", 9))
   {
     eOut = PLY::EST_UTextureCoord;
   }
-  else if (PLY::DOM::TokenMatch(buffer, "v", 1) || PLY::DOM::TokenMatch(buffer, "t", 1) || PLY::DOM::TokenMatch(buffer, "ty", 2))
+  else if (PLY::DOM::TokenMatch(buffer, "v", 1) || PLY::DOM::TokenMatch(buffer, "t", 1) || PLY::DOM::TokenMatch(buffer, "ty", 2) || PLY::DOM::TokenMatch(buffer, "texture_v", 9))
   {
     eOut = PLY::EST_VTextureCoord;
   }
@@ -393,7 +393,7 @@ bool PLY::Element::ParseElement(IOStreamBuffer<char> &streamBuffer, std::vector<
   // now parse all properties of the element
   while (true)
   {
-    streamBuffer.getNextDataLine(buffer, '\\');
+    streamBuffer.getNextLine(buffer);
     pCur = (char*)&buffer[0];
 
     // skip all comments
@@ -530,7 +530,7 @@ bool PLY::DOM::ParseHeader(IOStreamBuffer<char> &streamBuffer, std::vector<char>
     else
     {
       // ignore unknown header elements
-      streamBuffer.getNextDataLine(buffer, '\\');
+      streamBuffer.getNextLine(buffer);
     }
   }
 
@@ -607,7 +607,7 @@ bool PLY::DOM::ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM* p_pc
   ai_assert(NULL != loader);
 
   std::vector<char> buffer;
-  streamBuffer.getNextDataLine(buffer, '\\');
+  streamBuffer.getNextLine(buffer);
 
   DefaultLogger::get()->debug("PLY::DOM::ParseInstanceBinary() begin");
 
@@ -636,7 +636,7 @@ bool PLY::DOM::ParseInstance(IOStreamBuffer<char> &streamBuffer, DOM* p_pcOut, P
   ai_assert(NULL != loader);
 
   std::vector<char> buffer;
-  streamBuffer.getNextDataLine(buffer, '\\');
+  streamBuffer.getNextLine(buffer);
 
   DefaultLogger::get()->debug("PLY::DOM::ParseInstance() begin");
 
@@ -647,7 +647,7 @@ bool PLY::DOM::ParseInstance(IOStreamBuffer<char> &streamBuffer, DOM* p_pcOut, P
   }
 
   //get next line after header
-  streamBuffer.getNextDataLine(buffer, '\\');
+  streamBuffer.getNextLine(buffer);
   if (!p_pcOut->ParseElementInstanceLists(streamBuffer, buffer, loader))
   {
     DefaultLogger::get()->debug("PLY::DOM::ParseInstance() failure");
@@ -677,7 +677,7 @@ bool PLY::ElementInstanceList::ParseInstanceList(
     {
       PLY::DOM::SkipComments(buffer);
       PLY::DOM::SkipLine(buffer);
-      streamBuffer.getNextDataLine(buffer, '\\');
+      streamBuffer.getNextLine(buffer);
       pCur = (buffer.empty()) ? NULL : (const char*)&buffer[0];
     }
   }
@@ -711,7 +711,7 @@ bool PLY::ElementInstanceList::ParseInstanceList(
         }
       }
 
-      streamBuffer.getNextDataLine(buffer, '\\');
+      streamBuffer.getNextLine(buffer);
       pCur = (buffer.empty()) ? NULL : (const char*)&buffer[0];
     }
   }

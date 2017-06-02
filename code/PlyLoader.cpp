@@ -165,7 +165,7 @@ void PLYImporter::InternReadFile(const std::string& pFile,
 
   // the beginning of the file must be PLY - magic, magic
   std::vector<char> headerCheck;
-  streamedBuffer.getNextDataLine(headerCheck, '\\');
+  streamedBuffer.getNextLine(headerCheck);
 
   if ((headerCheck.size() >= 3) && (headerCheck[0] != 'P' && headerCheck[0] != 'p') ||
     (headerCheck[1] != 'L' && headerCheck[1] != 'l') ||
@@ -176,7 +176,7 @@ void PLYImporter::InternReadFile(const std::string& pFile,
   }
 
   std::vector<char> mBuffer2;
-  streamedBuffer.getNextDataLine(mBuffer2, '\\');
+  streamedBuffer.getNextLine(mBuffer2);
   mBuffer = (unsigned char*)&mBuffer2[0];
 
   char* szMe = (char*)&this->mBuffer[0];
@@ -1019,12 +1019,13 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut, std::string &def
     int iMode = (int)aiShadingMode_Gouraud;
     pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
 
+    //generate white material most 3D engine just multiply ambient / diffuse color with actual ambient / light color
     aiColor3D clr;
-    clr.b = clr.g = clr.r = 0.6f;
+    clr.b = clr.g = clr.r = 1.0f;
     pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
     pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
 
-    clr.b = clr.g = clr.r = 0.05f;
+    clr.b = clr.g = clr.r = 1.0f;
     pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
 
     // The face order is absolutely undefined for PLY, so we have to

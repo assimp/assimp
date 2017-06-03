@@ -86,8 +86,8 @@ TEST_F(BlendImportMaterials, testImportMaterial)
 
     ASSERT_PROPERTY_EQ(aiColor3D(0.1f, 0.2f, 0.3f), "diffuse.color", diffuseColor);
     ASSERT_PROPERTY_EQ(0.4f, "diffuse.intensity", diffuseIntensity);
-    ASSERT_PROPERTY_EQ(1U, "diffuse.shader", diffuseShader);
-    ASSERT_PROPERTY_EQ(0U, "diffuse.ramp", diffuseRamp);
+    ASSERT_PROPERTY_EQ(1, "diffuse.shader", diffuseShader);
+    ASSERT_PROPERTY_EQ(0, "diffuse.ramp", diffuseRamp);
 
     ASSERT_PROPERTY_EQ(aiColor3D(0.5f, 0.6f, 0.7f), "specular.color", specularColor);
     ASSERT_PROPERTY_EQ(0.8f, "specular.intensity", specularIntensity);

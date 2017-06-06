@@ -1,10 +1,8 @@
 language: cpp
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install cmake
-  - sudo apt-get install cmake python3
-  - if [ $LINUX ]; then sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq && sudo apt-get install cmake && sudo apt-get install cmake python3 && sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; fi
+  - if [ "$TRAVIS_OS_NAME" =   "osx" ]; then brew install cmake python3 freeglut3-dev libxmu-dev libxi-dev
   - echo -e "#ifndef A_R_H_INC\n#define A_R_H_INC\n#define GitVersion ${TRAVIS_JOB_ID}\n#define GitBranch \"${TRAVIS_BRANCH}\"\n#endif // A_R_H_INC" > revision.h
   # install latest LCOV (1.9 was failing)
   - cd ${TRAVIS_BUILD_DIR}
@@ -50,7 +48,7 @@ script:
   - . ./.travis.sh
 os:
   - linux
-  #- osx
+  - osx
  
 after_success:
   - cd ${TRAVIS_BUILD_DIR}

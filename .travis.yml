@@ -1,3 +1,5 @@
+language: cpp
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install cmake
@@ -17,6 +19,8 @@ branches:
   only:
     - master
 
+osx_image: xcode8.3
+
 env:
   global:
     - secure: "lZ7pHQvl5dpZWzBQAaIMf0wqrvtcZ4wiZKeIZjf83TEsflW8+z0uTpIuN30ZV6Glth/Sq1OhLnTP5+N57fZU/1ebA5twHdvP4bS5CIUUg71/CXQZNl36xeaqvxsG/xRrdpKOsPdjAOsQ9KPTQulsX43XDLS7CasMiLvYOpqKcPc="
@@ -27,8 +31,6 @@ env:
     - LINUX=1 SHARED_BUILD=ON      ENABLE_COVERALLS=OFF
     - LINUX=1 SHARED_BUILD=OFF     ENABLE_COVERALLS=OFF
     - ANDROID=1
-
-language: cpp
   
 compiler:
   - gcc
@@ -46,7 +48,10 @@ script:
   - export COVERALLS_SERVICE_NAME=travis-ci
   - export COVERALLS_REPO_TOKEN=abc12345
   - . ./.travis.sh
-
+os:
+  - linux
+  - osx
+ 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}
   - lcov --directory . --capture --output-file coverage.info

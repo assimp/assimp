@@ -100,6 +100,16 @@ public:
     /// @return true if successful.
     bool getNextDataLine( std::vector<T> &buffer, T continuationToken );
 
+    /// @brief  Will read the next line ascii or binary end line char.
+    /// @param  buffer      The buffer for the next line.
+    /// @return true if successful.
+    bool getNextLine(std::vector<T> &buffer);
+
+    /// @brief  Will read the next block.
+    /// @param  buffer      The buffer for the next block.
+    /// @return true if successful.
+    bool getNextBlock( std::vector<T> &buffer );
+
 private:
     IOStream *m_stream;
     size_t m_filesize;
@@ -272,6 +282,58 @@ bool IOStreamBuffer<T>::getNextDataLine( std::vector<T> &buffer, T continuationT
     m_cachePos++;
 
     return true;
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::getNextLine(std::vector<T> &buffer) {
+    buffer.resize(m_cacheSize);
+    if (m_cachePos == m_cacheSize || 0 == m_filePos) {
+       if (!readNextBlock()) {
+          return false;
+       }
+      }
+
+    if (IsLineEnd(m_cache[m_cachePos])) {
+        // skip line end
+        while (m_cache[m_cachePos] != '\n') {
+            ++m_cachePos;
+        }
+        ++m_cachePos;
+    }
+
+    size_t i = 0;
+    while (!IsLineEnd(m_cache[m_cachePos])) {
+        buffer[i] = m_cache[m_cachePos];
+        m_cachePos++;
+        i++;
+        if (m_cachePos >= m_cacheSize) {
+            if (!readNextBlock()) {
+                return false;
+            }
+        }
+    }
+    buffer[i] = '\n';
+    m_cachePos++;
+
+    return true;
+}
+
+template<class T>
+inline
+bool IOStreamBuffer<T>::getNextBlock( std::vector<T> &buffer) {
+  //just return the last blockvalue if getNextLine was used before
+  if ( m_cachePos !=  0) {      
+      buffer = std::vector<T>(m_cache.begin() + m_cachePos, m_cache.end());
+      m_cachePos = 0;
+  }
+  else {
+      if ( !readNextBlock() )
+          return false;
+
+      buffer = std::vector<T>(m_cache.begin(), m_cache.end());
+  }
+  return true;
 }
 
 } // !ns Assimp

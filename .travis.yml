@@ -50,7 +50,7 @@ script:
   - . ./.travis.sh
 os:
   - linux
-  - osx
+  #- osx
  
 after_success:
   - cd ${TRAVIS_BUILD_DIR}

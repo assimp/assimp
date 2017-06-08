@@ -224,7 +224,7 @@ public:
      *  @return Reference to the output matrix
      */
     static aiMatrix4x4t& Rotation(TReal a, const aiVector3t<TReal>& axis,
-        aiMatrix4x4t& out);
+            aiMatrix4x4t& out);
 
     // -------------------------------------------------------------------
     /** @brief Returns a translation matrix
@@ -232,7 +232,8 @@ public:
      *  @param out Receives the output matrix
      *  @return Reference to the output matrix
      */
-    static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v, aiMatrix4x4t& out);
+    static aiMatrix4x4t& Translation( const aiVector3t<TReal>& v, 
+            aiMatrix4x4t& out);
 
     // -------------------------------------------------------------------
     /** @brief Returns a scaling matrix
@@ -252,7 +253,7 @@ public:
      *          Journal of Graphics Tools, 4(4):1-4, 1999
      */
     static aiMatrix4x4t& FromToMatrix(const aiVector3t<TReal>& from,
-        const aiVector3t<TReal>& to, aiMatrix4x4t& out);
+            const aiVector3t<TReal>& to, aiMatrix4x4t& out);
 
 public:
     TReal a1, a2, a3, a4;

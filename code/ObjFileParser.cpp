@@ -109,7 +109,7 @@ ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
 
-void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
+/*void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
 {
     auto curPosition = buffer.begin();
     do
@@ -123,13 +123,13 @@ void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffe
             std::vector<char> tempBuf;
             do
             {
-                streamBuffer.getNextLine(tempBuf);
+                streamBuffer.getNextDataLine(tempBuf, '\\' );
             } while (tempBuf[0]=='\n');
             *curPosition = ' ';
             std::copy(tempBuf.cbegin(), tempBuf.cend(), ++curPosition);
         }
     } while (*curPosition!='\n');
-}
+}*/
 
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
@@ -142,7 +142,7 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     size_t lastFilePos( 0 );
 
     std::vector<char> buffer;
-    while ( streamBuffer.getNextLine( buffer ) ) {
+    while ( streamBuffer.getNextDataLine( buffer, '\\' ) ) {
         m_DataIt = buffer.begin();
         m_DataItEnd = buffer.end();
 
@@ -154,14 +154,14 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
             progressCounter++;
             m_progress->UpdateFileRead( progressOffset + processed * 2, progressTotal );
         }
-		//ignoreNewLines(streamBuffer, buffer);
+
         // parse line
         switch (*m_DataIt) {
         case 'v': // Parse a vertex texture coordinate
             {
                 ++m_DataIt;
                 if (*m_DataIt == ' ' || *m_DataIt == '\t') {
-                    size_t numComponents = getNumComponentsInLine();
+                    size_t numComponents = getNumComponentsInDataDefinition();
                     if (numComponents == 3) {
                         // read in vertex definition
                         getVector3(m_pModel->m_Vertices);
@@ -245,7 +245,6 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
         default:
             {
 pf_skip_line:
-
                 m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
             }
             break;
@@ -274,21 +273,44 @@ void ObjFileParser::copyNextWord(char *pBuffer, size_t length) {
     pBuffer[index] = '\0';
 }
 
-size_t ObjFileParser::getNumComponentsInLine() {
+static bool isDataDefinitionEnd( const char *tmp ) {
+    if ( *tmp == '\\' ) {
+        tmp++;
+        if ( IsLineEnd( *tmp ) ) {
+            tmp++;
+            return true;
+        }
+    }
+    return false;
+}
+
+size_t ObjFileParser::getNumComponentsInDataDefinition() {
     size_t numComponents( 0 );
     const char* tmp( &m_DataIt[0] );
-    while( !IsLineEnd( *tmp ) ) {        
+    bool end_of_definition = false;
+    while ( !end_of_definition ) {
+        if ( isDataDefinitionEnd( tmp ) ) {
+            tmp += 2;
+        } else if ( IsLineEnd( *tmp ) ) {
+            end_of_definition = true;
+        }
         if ( !SkipSpaces( &tmp ) ) {
             break;
         }
+        const bool isNum( IsNumeric( *tmp ) );
         SkipToken( tmp );
-        ++numComponents;
+        if ( isNum ) {
+            ++numComponents;
+        }
+        if ( !SkipSpaces( &tmp ) ) {
+            break;
+        }
     }
     return numComponents;
 }
 
 void ObjFileParser::getVector( std::vector<aiVector3D> &point3d_array ) {
-    size_t numComponents = getNumComponentsInLine();
+    size_t numComponents = getNumComponentsInDataDefinition();
     ai_real x, y, z;
     if( 2 == numComponents ) {
         copyNextWord( m_buffer, Buffersize );
@@ -397,10 +419,6 @@ static const std::string DefaultObjName = "defaultobject";
 // -------------------------------------------------------------------
 //  Get values for a new face instance
 void ObjFileParser::getFace( aiPrimitiveType type ) {
-    //copyNextLine(m_buffer, Buffersize);
-    //char *pPtr = m_DataIt;
-    //char *pPtr = m_buffer;
-    //char *pEnd = &pPtr[Buffersize];
     m_DataIt = getNextToken<DataArrayIt>( m_DataIt, m_DataItEnd );
     if ( m_DataIt == m_DataItEnd || *m_DataIt == '\0' ) {
         return;
@@ -571,14 +589,7 @@ void ObjFileParser::getMaterialDesc() {
 // -------------------------------------------------------------------
 //  Get a comment, values will be skipped
 void ObjFileParser::getComment() {
-    while (m_DataIt != m_DataItEnd) {
-        if ( '\n' == (*m_DataIt)) {
-            ++m_DataIt;
-            break;
-        } else {
-            ++m_DataIt;
-        }
-    }
+    m_DataIt = skipLine<DataArrayIt>( m_DataIt, m_DataItEnd, m_uiLine );
 }
 
 // -------------------------------------------------------------------

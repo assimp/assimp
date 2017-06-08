@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 #include <windowsx.h>
+#include <commdlg.h>
+#include <timeapi.h>
 
 namespace AssimpView {
 

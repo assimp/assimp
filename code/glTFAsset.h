@@ -132,6 +132,8 @@ namespace glTF
     struct Texture;
     struct Light;
     struct Skin;
+    struct Technique;
+    struct Shader;
 
 
     // Vec/matrix types, as raw float arrays
@@ -294,6 +296,51 @@ namespace glTF
         TextureType_UNSIGNED_SHORT_5_5_5_1 = 32820
     };
 
+    enum WebGLState
+    {
+        WebGLState_BLEND = 3042,
+        WebGLState_CULL_FACE = 2884,
+        WebGLState_DEPTH_TEST = 2929,
+        WebGLState_POLYGON_OFFSET_FILL = 32823,
+        WebGLState_SAMPLE_ALPHA_TO_COVERAGE = 32926,
+        WebGLState_SCISSOR_TEST = 3089
+    };
+
+    enum ParameterType
+    {
+        ParameterType_BYTE = 5120,
+        ParameterType_UNSIGNED_BYTE = 5121,
+        ParameterType_SHORT = 5122,
+        ParameterType_UNSIGNED_SHORT = 5123,
+        ParameterType_INT = 5124,
+        ParameterType_UNSIGNED_INT = 5125,
+
+        ParameterType_FLOAT = 5126,
+        ParameterType_FLOAT_VEC2 = 35664,
+        ParameterType_FLOAT_VEC3 = 35665,
+        ParameterType_FLOAT_VEC4 = 35666,
+
+        ParameterType_INT_VEC2 = 35667,
+        ParameterType_INT_VEC3 = 35668,
+        ParameterType_INT_VEC4 = 35669,
+
+        ParameterType_BOOL = 35670,
+        ParameterType_BOOL_VEC2 = 35671,
+        ParameterType_BOOL_VEC3 = 35672,
+        ParameterType_BOOL_VEC4 = 35673,
+
+        ParameterType_FLOAT_MAT2 = 35674,
+        ParameterType_FLOAT_MAT3 = 35675,
+        ParameterType_FLOAT_MAT4 = 35676,
+
+        ParameterType_SAMPLER_2D = 35678
+    };
+
+    enum ShaderType
+    {
+        ShaderType_FRAGMENT_SHADER = 35632,
+        ShaderType_VERTEX_SHADER = 35633
+    };
 
     //! Values for the Accessor::type field (helper class)
     class AttribType
@@ -679,17 +726,14 @@ namespace glTF
     //! The material appearance of a primitive.
     struct Material : public Object
     {
-        //Ref<Sampler> source; //!< The ID of the technique.
-        //std::gltf_unordered_map<std::string, std::string> values; //!< A dictionary object of parameter values.
-
         //! Techniques defined by KHR_materials_common
-        enum Technique
+        enum MC_Technique
         {
-            Technique_undefined = 0,
-            Technique_BLINN,
-            Technique_PHONG,
-            Technique_LAMBERT,
-            Technique_CONSTANT
+            MC_Technique_undefined = 0,
+            MC_Technique_BLINN,
+            MC_Technique_PHONG,
+            MC_Technique_LAMBERT,
+            MC_Technique_CONSTANT
         };
 
         TexProperty ambient;
@@ -701,8 +745,9 @@ namespace glTF
         bool transparent;
         float transparency;
         float shininess;
+        MC_Technique commonTechnique;
 
-        Technique technique;
+        Ref<Technique> technique;
 
         Material() { SetDefaults(); }
         void Read(Value& obj, Asset& r);
@@ -834,6 +879,10 @@ namespace glTF
 
     struct Program : public Object
     {
+        std::vector<std::string> attributes;
+        Ref<Shader> fragmentShader;
+        Ref<Shader> vertexShader;
+
         Program() {}
         void Read(Value& obj, Asset& r);
     };
@@ -861,6 +910,9 @@ namespace glTF
 
     struct Shader : public Object
     {
+        std::string uri;
+        ShaderType type;
+
         Shader() {}
         void Read(Value& obj, Asset& r);
     };
@@ -878,20 +930,27 @@ namespace glTF
 
     struct Technique : public Object
     {
-        struct Parameters
+        struct Parameter
         {
-
+            std::string name;
+            std::string semantic;
+            ParameterType type;
         };
 
         struct States
         {
-
+            std::vector<WebGLState> enable;
         };
 
-        struct Functions
-        {
+        std::map<std::string, std::string> attributes;
+        std::vector<Parameter> parameters;
+        std::map<std::string, std::string> uniforms;
+        Ref<Program> program;
+        States states;
 
-        };
+        // We'll cache a JSON string of this technique with its dependencies inlined, which will itself be cached on
+        // materials that use this technique.
+        std::string json;
 
         Technique() {}
         void Read(Value& obj, Asset& r);
@@ -1126,12 +1185,12 @@ namespace glTF
         LazyDict<Material>    materials;
         LazyDict<Mesh>        meshes;
         LazyDict<Node>        nodes;
-        //LazyDict<Program>   programs;
+        LazyDict<Program>   programs;
         LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
-        //LazyDict<Shader>    shaders;
+        LazyDict<Shader>    shaders;
         LazyDict<Skin>      skins;
-        //LazyDict<Technique> techniques;
+        LazyDict<Technique> techniques;
         LazyDict<Texture>     textures;
 
         LazyDict<Light>       lights; // KHR_materials_common ext
@@ -1151,12 +1210,12 @@ namespace glTF
             , materials     (*this, "materials")
             , meshes        (*this, "meshes")
             , nodes         (*this, "nodes")
-            //, programs    (*this, "programs")
+            , programs    (*this, "programs")
             , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
-            //, shaders     (*this, "shaders")
+            , shaders     (*this, "shaders")
             , skins       (*this, "skins")
-            //, techniques  (*this, "techniques")
+            , techniques  (*this, "techniques")
             , textures      (*this, "textures")
             , lights        (*this, "lights", "KHR_materials_common")
         {

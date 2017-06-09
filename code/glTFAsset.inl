@@ -139,6 +139,12 @@ namespace {
         Value::MemberIterator it = val.FindMember(id);
         return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
     }
+
+    inline Value* FindInt(Value& val, const char* id)
+    {
+        Value::MemberIterator it = val.FindMember(id);
+        return (it != val.MemberEnd() && it->value.IsInt()) ? &it->value : 0;
+    }
 }
 
 //
@@ -666,6 +672,24 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
     }
 }
 
+inline void Program::Read(Value& obj, Asset& r)
+{
+    if (Value* attrs = FindArray(obj, "attributes")) {
+        for (size_t i = 0; i < attrs->Size(); ++i) {
+            Value& attr = (*attrs)[i];
+            if (attr.IsString())
+                attributes.push_back(attr.GetString());
+        }
+    }
+
+    if (Value* fs = FindString(obj, "fragmentShader")) {
+        if (Value* vs = FindString(obj, "vertexShader")) {
+            fragmentShader = r.shaders.Get(fs->GetString());
+            vertexShader = r.shaders.Get(vs->GetString());
+        }
+    }
+}
+
 inline void Sampler::Read(Value& obj, Asset& r)
 {
     SetDefaults();
@@ -682,6 +706,57 @@ inline void Sampler::SetDefaults()
     minFilter = SamplerMinFilter_Linear;
     wrapS = SamplerWrap_Repeat;
     wrapT = SamplerWrap_Repeat;
+}
+
+inline void Shader::Read(Value& obj, Asset& /*r*/)
+{
+    if (Value* u = FindString(obj, "uri"))
+        uri = u->GetString();
+
+    type = MemberOrDefault(obj, "type", ShaderType_FRAGMENT_SHADER);
+}
+
+inline void Technique::Read(Value& obj, Asset& r)
+{
+    if (Value* attrs = FindObject(obj, "attributes")) {
+        for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
+            if (it->value.IsString())
+                attributes[it->name.GetString()] = it->value.GetString();
+        }
+    }
+
+    if (Value* unis = FindObject(obj, "uniforms")) {
+        for (Value::MemberIterator it = unis->MemberBegin(); it != unis->MemberEnd(); ++it) {
+            if (it->value.IsString())
+                uniforms[it->name.GetString()] = it->value.GetString();
+        }
+    }
+
+    Value* programID = FindString(obj, "program");
+    if (programID)
+        program = r.programs.Get(programID->GetString());
+
+    if (Value* params = FindObject(obj, "parameters")) {
+        for (Value::MemberIterator it = params->MemberBegin(); it != params->MemberEnd(); ++it) {
+            Parameter newParam;
+            newParam.name = it->name.GetString();
+            newParam.type = MemberOrDefault(it->value, "type", ParameterType_FLOAT);
+            if (Value* sem = FindString(it->value, "semantic"))
+                newParam.semantic = sem->GetString();
+
+            parameters.push_back(newParam);
+        }
+    }
+
+    if (Value* ss = FindObject(obj, "states")) {
+        if (Value* enable = FindArray(*ss, "enable")) {
+            for (size_t i = 0; i < enable->Size(); ++i) {
+                Value& val = (*enable)[i];
+                if (val.IsInt())
+                    states.enable.push_back((WebGLState)val.GetInt());
+            }
+        }
+    }
 }
 
 inline void Texture::Read(Value& obj, Asset& r)
@@ -724,15 +799,19 @@ inline void Material::Read(Value& material, Asset& r)
         ReadMember(*values, "shininess", shininess);
     }
 
+    if (Value* tnq = FindString(material, "technique")) {
+        technique = r.techniques.Get(tnq->GetString());
+    }
+
     if (Value* extensions = FindObject(material, "extensions")) {
         if (r.extensionsUsed.KHR_materials_common) {
             if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
                 if (Value* tnq = FindString(*ext, "technique")) {
                     const char* t = tnq->GetString();
-                    if      (strcmp(t, "BLINN") == 0)    technique = Technique_BLINN;
-                    else if (strcmp(t, "PHONG") == 0)    technique = Technique_PHONG;
-                    else if (strcmp(t, "LAMBERT") == 0)  technique = Technique_LAMBERT;
-                    else if (strcmp(t, "CONSTANT") == 0) technique = Technique_CONSTANT;
+                    if      (strcmp(t, "BLINN") == 0)    commonTechnique = MC_Technique_BLINN;
+                    else if (strcmp(t, "PHONG") == 0)    commonTechnique = MC_Technique_PHONG;
+                    else if (strcmp(t, "LAMBERT") == 0)  commonTechnique = MC_Technique_LAMBERT;
+                    else if (strcmp(t, "CONSTANT") == 0) commonTechnique = MC_Technique_CONSTANT;
                 }
 
                 if (Value* values = FindObject(*ext, "values")) {
@@ -766,8 +845,6 @@ inline void Material::SetDefaults()
     transparent = false;
     transparency = 1.0;
     shininess = 0.0;
-
-    technique = Technique_undefined;
 }
 
 namespace {
@@ -808,7 +885,7 @@ namespace {
 inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 {
 	/****************** Mesh primitives ******************/
-	if (Value* primitives = FindArray(pJSON_Object, "primitives")) {
+    if (Value* primitives = FindArray(pJSON_Object, "primitives")) {
         this->primitives.resize(primitives->Size());
         for (unsigned int i = 0; i < primitives->Size(); ++i) {
             Value& primitive = (*primitives)[i];

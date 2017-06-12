@@ -948,12 +948,9 @@ namespace glTF
         Ref<Program> program;
         States states;
 
-        // We'll cache a JSON string of this technique with its dependencies inlined, which will itself be cached on
-        // materials that use this technique.
-        std::string json;
-
         Technique() {}
         void Read(Value& obj, Asset& r);
+        std::string ToJSON();
     };
 
     //! A texture and its sampler.

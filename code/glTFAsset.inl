@@ -49,6 +49,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <Open3DGC/o3dgcSC3DMCDecoder.h>
 #endif
 
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 using namespace Assimp;
 
 namespace glTF {
@@ -757,6 +760,91 @@ inline void Technique::Read(Value& obj, Asset& r)
             }
         }
     }
+}
+
+inline std::string Technique::ToJSON()
+{
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> w(buffer);
+
+    w.StartObject();
+
+    w.Key("attributes");
+    w.StartObject();
+    for (const auto& attr : attributes) {
+        w.Key(attr.first.c_str());
+        w.String(attr.second);
+    }
+    w.EndObject();
+
+    w.Key("uniforms");
+    w.StartObject();
+    for (const auto& uni: uniforms) {
+        w.Key(uni.first.c_str());
+        w.String(uni.second);
+    }
+    w.EndObject();
+
+    w.Key("parameters");
+    w.StartObject();
+    for (const Parameter& param : parameters) {
+        w.Key(param.name.c_str());
+        w.StartObject();
+        w.Key("type");
+        w.Uint(param.type);
+        if (!param.semantic.empty()) {
+            w.Key("semantic");
+            w.String(param.semantic);
+        }
+        w.EndObject();
+    }
+    w.EndObject();
+
+    if (program) {
+        w.Key("program");
+        w.StartObject();
+
+        w.Key("attributes");
+        w.StartArray();
+        for (const std::string& attr : program->attributes) {
+            w.String(attr);
+        }
+        w.EndArray();
+
+        w.Key("fragmentShader");
+        w.StartObject();
+        w.Key("uri");
+        w.String(program->fragmentShader->uri);
+        w.Key("type");
+        w.Uint(program->fragmentShader->type);
+        w.EndObject();
+
+        w.Key("vertexShader");
+        w.StartObject();
+        w.Key("uri");
+        w.String(program->vertexShader->uri);
+        w.Key("type");
+        w.Uint(program->vertexShader->type);
+        w.EndObject();
+
+        w.EndObject();
+    }
+
+    if (!states.enable.empty()) {
+        w.Key("states");
+        w.StartObject();
+        w.Key("enable");
+        w.StartArray();
+        for (WebGLState state : states.enable) {
+            w.Uint(state);
+        }
+        w.EndArray();
+        w.EndObject();
+    }
+
+    w.EndObject();
+
+    return buffer.GetString();
 }
 
 inline void Texture::Read(Value& obj, Asset& r)

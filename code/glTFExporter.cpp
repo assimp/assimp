@@ -67,6 +67,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <Open3DGC/o3dgcSC3DMCEncoder.h>
 #endif
 
+#include <rapidjson/document.h>
+
 using namespace rapidjson;
 
 using namespace Assimp;
@@ -371,6 +373,40 @@ void glTFExporter::ExportMaterials()
         m->transparent = mat->Get(AI_MATKEY_OPACITY, m->transparency) == aiReturn_SUCCESS && m->transparency != 1.0;
 
         GetMatScalar(mat, m->shininess, AI_MATKEY_SHININESS);
+
+        std::string techniqueJSON;
+        aiString ait;
+        if (mat->Get("$mat.gltf.technique", 0, 0, ait) == AI_SUCCESS) {
+            techniqueJSON = ait.C_Str();
+            std::string techniqueName = mAsset->FindUniqueID("", "technique");
+            m->technique = mAsset->techniques.Create(techniqueName);
+
+            Document techniqueDoc;
+            techniqueDoc.Parse(techniqueJSON.c_str());
+
+            m->technique->Read(techniqueDoc, *mAsset);
+
+            if (Value* programObj = FindObject(techniqueDoc, "program")) {
+                std::string programName = mAsset->FindUniqueID("", "program");
+                Ref<Program> program = mAsset->programs.Create(programName);
+                program->Read(*programObj, *mAsset);
+                m->technique->program = program;
+
+                if (Value* fsObj = FindObject(*programObj, "fragmentShader")) {
+                    std::string fsName = mAsset->FindUniqueID("", "fs");
+                    Ref<Shader> fs = mAsset->shaders.Create(fsName);
+                    fs->Read(*fsObj, *mAsset);
+                    program->fragmentShader = fs;
+                }
+
+                if (Value* vsObj = FindObject(*programObj, "vertexShader")) {
+                    std::string vsName = mAsset->FindUniqueID("", "vs");
+                    Ref<Shader> vs = mAsset->shaders.Create(vsName);
+                    vs->Read(*vsObj, *mAsset);
+                    program->vertexShader = vs;
+                }
+            }
+        }
     }
 }
 

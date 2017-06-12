@@ -198,6 +198,12 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
             aimat->AddProperty(&str, AI_MATKEY_NAME);
         }
 
+        if (mat.technique) {
+            std::string json = mat.technique->ToJSON();
+            aiString ais(json);
+            aimat->AddProperty(&ais, "$mat.gltf.technique", 0, 0);
+        }
+
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.diffuse, aimat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.specular, aimat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.ambient, aimat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);

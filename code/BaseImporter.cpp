@@ -303,10 +303,11 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
     return false;
 }
 
-#include "../contrib/ConvertUTF/ConvertUTF.h"
+//#include "../contrib/ConvertUTF/ConvertUTF.h"
+#include "../contrib/utf8cpp/source/utf8.h"
 
 // ------------------------------------------------------------------------------------------------
-void ReportResult(ConversionResult res)
+/*void ReportResult(ConversionResult res)
 {
     if(res == sourceExhausted) {
         DefaultLogger::get()->error("Source ends with incomplete character sequence, transformation to UTF-8 fails");
@@ -314,13 +315,13 @@ void ReportResult(ConversionResult res)
     else if(res == sourceIllegal) {
         DefaultLogger::get()->error("Source contains illegal character sequence, transformation to UTF-8 fails");
     }
-}
+}*/
 
 // ------------------------------------------------------------------------------------------------
 // Convert to UTF8 data
 void BaseImporter::ConvertToUTF8(std::vector<char>& data)
 {
-    ConversionResult result;
+    //ConversionResult result;
     if(data.size() < 8) {
         throw DeadlyImportError("File is too small");
     }
@@ -333,7 +334,8 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
         data.resize(data.size()-3);
         return;
     }
-
+    
+    
     // UTF 32 BE with BOM
     if(*((uint32_t*)&data.front()) == 0xFFFE0000) {
 
@@ -348,20 +350,23 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
         DefaultLogger::get()->debug("Found UTF-32 BOM ...");
 
         const uint32_t* sstart = (uint32_t*)&data.front()+1, *send = (uint32_t*)&data.back()+1;
-        char* dstart,*dend;
+//        char* dstart,*dend;
         std::vector<char> output;
-        do {
+        int *ptr = (int*)&data[ 0 ];
+        int *end = ptr + ( data.size() / sizeof(int) ) +1;
+        utf8::utf32to8( ptr, end, back_inserter(output));
+/*        do {
             output.resize(output.size()?output.size()*3/2:data.size()/2);
             dstart = &output.front(),dend = &output.back()+1;
 
-            result = ConvertUTF32toUTF8((const UTF32**)&sstart,(const UTF32*)send,(UTF8**)&dstart,(UTF8*)dend,lenientConversion);
-        } while(result == targetExhausted);
+            ///result = ConvertUTF32toUTF8((const UTF32**)&sstart,(const UTF32*)send,(UTF8**)&dstart,(UTF8*)dend,lenientConversion);
+        } while(result == targetExhausted);*/
 
-        ReportResult(result);
+    //    ReportResult(result);
 
         // copy to output buffer.
-        const size_t outlen = (size_t)(dstart-&output.front());
-        data.assign(output.begin(),output.begin()+outlen);
+//        const size_t outlen = (size_t)(dstart-&output.front());
+//        data.assign(output.begin(),output.begin()+outlen);
         return;
     }
 
@@ -379,13 +384,18 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
         DefaultLogger::get()->debug("Found UTF-16 BOM ...");
 
         const uint16_t* sstart = (uint16_t*)&data.front()+1, *send = (uint16_t*)(&data.back()+1);
-        char* dstart,*dend;
-        std::vector<char> output;
-        do {
+//        char* dstart,*dend;
+        std::vector<unsigned char> output;
+        int16_t *ptr = (int16_t*) &data[ 0 ];
+        int16_t *end = ptr + (data.size() / sizeof(int)) + 1;
+
+        utf8::utf16to8(data.begin(), data.end(), back_inserter(output));
+/*        do {
             output.resize(output.size()?output.size()*3/2:data.size()*3/4);
             dstart = &output.front(),dend = &output.back()+1;
 
-            result = ConvertUTF16toUTF8((const UTF16**)&sstart,(const UTF16*)send,(UTF8**)&dstart,(UTF8*)dend,lenientConversion);
+            utf8::utf16to8(data.begin(), data.end(), output);
+
         } while(result == targetExhausted);
 
         ReportResult(result);
@@ -393,7 +403,7 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
         // copy to output buffer.
         const size_t outlen = (size_t)(dstart-&output.front());
         data.assign(output.begin(),output.begin()+outlen);
-        return;
+        return;*/
     }
 }
 

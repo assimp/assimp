@@ -1,7 +1,7 @@
 #include <utility>
 #include "MMDPmxParser.h"
+#include "../contrib/utf8cpp/source/utf8.h"
 #include "Exceptional.h"
-#include "../contrib/ConvertUTF/ConvertUTF.h"
 
 namespace pmx
 {
@@ -60,15 +60,17 @@ namespace pmx
 			const unsigned int targetSize = size * 3; // enough to encode
 			char* targetStart = new char[targetSize]();
 			const char* targetReserved = targetStart;
-			ConversionFlags flags = ConversionFlags::lenientConversion;
+//			ConversionFlags flags = ConversionFlags::lenientConversion;
 
-			ConversionResult conversionResult;
-			if( ( conversionResult = ConvertUTF16toUTF8(
+			//ConversionResult conversionResult;
+			/*if( ( conversionResult = ConvertUTF16toUTF8(
 				(const UTF16**)&sourceStart, (const UTF16*)(sourceStart + size),
 				(UTF8**)&targetStart, (UTF8*)(targetStart + targetSize),
 				flags) ) != ConversionResult::conversionOK) {
 				throw DeadlyImportError( "Convert " + std::string(sourceStart) + " to UTF8 is not valid." );
-			}
+			}*/
+
+            utf8::utf16to8( sourceStart, sourceStart + size, targetStart );
 
 			result.assign(targetReserved, targetStart - targetReserved);
 			delete[] targetReserved;

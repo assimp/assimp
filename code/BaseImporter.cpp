@@ -303,7 +303,6 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
     return false;
 }
 
-//#include "../contrib/ConvertUTF/ConvertUTF.h"
 #include "../contrib/utf8cpp/source/utf8.h"
 
 // ------------------------------------------------------------------------------------------------

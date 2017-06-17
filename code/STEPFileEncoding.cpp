@@ -40,13 +40,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /** @file  STEPFileEncoding.cpp
- *  @brief STEP character handling, string unescaping
+ *  @brief STEP character handling, string un-escaping
  */
 #include "STEPFileEncoding.h"
 #include "fast_atof.h"
-#include "../contrib/utf8cpp/source/utf8.h"
+#include <contrib/utf8cpp/source/utf8.h>
 
-//#include "../contrib/ConvertUTF/ConvertUTF.h"
 #include <memory>
 
 using namespace Assimp;
@@ -316,9 +315,6 @@ bool STEP::StringToUTF8(std::string& s)
                 ai_assert(sizeof( unsigned char ) == 1);
 
                 utf8::utf32to8( univalp, univalp + 1, tempp );
-                /*if(ConvertUTF32toUTF8(&univalp, univalp+1, &tempp, tempp+sizeof(temp), lenientConversion) != conversionOK) {
-                    return false;
-                }*/
 
                 const size_t outcount = static_cast<size_t>(tempp-temp);
 
@@ -371,9 +367,6 @@ bool STEP::StringToUTF8(std::string& s)
                             const uint16_t* srct = src.get();
                             unsigned char* destt = dest.get();
                             utf8::utf16to8( srct, srct + count, destt );
-                            /*if(ConvertUTF16toUTF8(&srct, srct+count, &destt, destt+dcount, lenientConversion) != conversionOK) {
-                                return false;
-                            }*/
 
                             const size_t outcount = static_cast<size_t>(destt-dest.get());
 
@@ -407,9 +400,6 @@ bool STEP::StringToUTF8(std::string& s)
                             const uint32_t* srct = src.get();
                             unsigned char* destt = dest.get();
                             utf8::utf32to8( srct, srct + count, destt );
-                            /*if(ConvertUTF32toUTF8(&srct, srct+count, &destt, destt+dcount, lenientConversion) != conversionOK) {
-                                return false;
-                            }*/
 
                             const size_t outcount = static_cast<size_t>(destt-dest.get());
 

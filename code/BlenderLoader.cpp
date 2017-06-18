@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -54,10 +55,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderBMesh.h"
 #include "StringUtils.h"
 #include <assimp/scene.h>
-#include "StringComparison.h"
+#include <assimp/importerdesc.h>
 
+#include "StringComparison.h"
 #include "StreamReader.h"
 #include "MemoryIOWrapper.h"
+
 #include <cctype>
 
 
@@ -95,8 +98,9 @@ static const aiImporterDesc blenderDesc = {
 // ------------------------------------------------------------------------------------------------
 // Constructor to be privately used by Importer
 BlenderImporter::BlenderImporter()
-: modifier_cache(new BlenderModifierShowcase())
-{}
+: modifier_cache(new BlenderModifierShowcase()) {
+    // empty
+}
 
 // ------------------------------------------------------------------------------------------------
 // Destructor, private as well
@@ -104,6 +108,9 @@ BlenderImporter::~BlenderImporter()
 {
     delete modifier_cache;
 }
+
+static const char* Tokens[] = { "BLENDER" };
+static const char* TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -116,8 +123,7 @@ bool BlenderImporter::CanRead( const std::string& pFile, IOSystem* pIOHandler, b
 
     else if ((!extension.length() || checkSig) && pIOHandler)   {
         // note: this won't catch compressed files
-        const char* tokens[] = {"BLENDER"};
-        return SearchFileHeaderForToken(pIOHandler,pFile,tokens,1);
+        return SearchFileHeaderForToken(pIOHandler,pFile, TokensForSearch,1);
     }
     return false;
 }
@@ -143,8 +149,7 @@ void BlenderImporter::SetupProperties(const Importer* /*pImp*/)
     // nothing to be done for the moment
 }
 
-struct free_it
-{
+struct free_it {
     free_it(void* free) : free(free) {}
     ~free_it() {
         ::free(this->free);
@@ -163,6 +168,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
     free_it free_it_really(dest);
 #endif
 
+
     FileDatabase file;
     std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
     if (!stream) {
@@ -171,7 +177,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 
     char magic[8] = {0};
     stream->Read(magic,7,1);
-    if (strcmp(magic,"BLENDER")) {
+    if (strcmp(magic, Tokens[0] )) {
         // Check for presence of the gzip header. If yes, assume it is a
         // compressed blend file and try uncompressing it, else fail. This is to
         // avoid uncompressing random files which our loader might end up with.
@@ -346,8 +352,9 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
         if (cur->object) {
             if(!cur->object->parent) {
                 no_parents.push_back(cur->object.get());
+            } else {
+                conv.objects.insert( cur->object.get() );
             }
-            else conv.objects.insert(cur->object.get());
         }
     }
     for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
@@ -404,7 +411,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
     }
 
     // acknowledge that the scene might come out incomplete
-    // by Assimps definition of `complete`: blender scenes
+    // by Assimp's definition of `complete`: blender scenes
     // can consist of thousands of cameras or lights with
     // not a single mesh between them.
     if (!out->mNumMeshes) {
@@ -421,7 +428,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
     // check if the file contents are bundled with the BLEND file
     if (img->packedfile) {
         name.data[0] = '*';
-        name.length = 1+ ASSIMP_itoa10(name.data+1,MAXLEN-1,conv_data.textures->size());
+        name.length = 1+ ASSIMP_itoa10(name.data+1,static_cast<unsigned int>(MAXLEN-1), static_cast<int32_t>(conv_data.textures->size()));
 
         conv_data.textures->push_back(new aiTexture());
         aiTexture* tex = conv_data.textures->back();
@@ -430,8 +437,9 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         // so we can extract the file extension from it.
         const size_t nlen = strlen( img->name );
         const char* s = img->name+nlen, *e = s;
-
-        while (s >= img->name && *s != '.')--s;
+        while ( s >= img->name && *s != '.' ) {
+            --s;
+        }
 
         tex->achFormatHint[0] = s+1>e ? '\0' : ::tolower( s[1] );
         tex->achFormatHint[1] = s+2>e ? '\0' : ::tolower( s[2] );
@@ -448,8 +456,7 @@ void BlenderImporter::ResolveImage(aiMaterial* out, const Material* mat, const M
         tex->pcData = reinterpret_cast<aiTexel*>(ch);
 
         LogInfo("Reading embedded texture, original file was "+std::string(img->name));
-    }
-    else {
+    } else {
         name = aiString( img->name );
     }
 
@@ -790,7 +797,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
     ConversionData& conv_data, TempArray<std::vector,aiMesh>&  temp
     )
 {
-    // TODO: Resolve various problems with BMesh triangluation before re-enabling.
+    // TODO: Resolve various problems with BMesh triangulation before re-enabling.
     //       See issues #400, #373, #318  #315 and #132.
 #if defined(TODO_FIX_BMESH_CONVERSION)
     BlenderBMeshConverter BMeshConverter( mesh );
@@ -852,7 +859,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
         //out->mNumVertices = 0
         out->mFaces = new aiFace[it.second]();
 
-        // all submeshes created from this mesh are named equally. this allows
+        // all sub-meshes created from this mesh are named equally. this allows
         // curious users to recover the original adjacency.
         out->mName = aiString(mesh->id.name+2);
             // skip over the name prefix 'ME'
@@ -1143,7 +1150,7 @@ aiCamera* BlenderImporter::ConvertCamera(const Scene& /*in*/, const Object* obj,
     out->mUp = aiVector3D(0.f, 1.f, 0.f);
     out->mLookAt = aiVector3D(0.f, 0.f, -1.f);
     if (cam->sensor_x && cam->lens) {
-        out->mHorizontalFOV = atan2(cam->sensor_x,  2.f * cam->lens);
+        out->mHorizontalFOV = std::atan2(cam->sensor_x,  2.f * cam->lens);
     }
     out->mClipPlaneNear = cam->clipsta;
     out->mClipPlaneFar = cam->clipend;
@@ -1228,7 +1235,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
             if (conv_data.meshes->size() > old) {
                 node->mMeshes = new unsigned int[node->mNumMeshes = static_cast<unsigned int>(conv_data.meshes->size()-old)];
                 for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
-                    node->mMeshes[i] = i + old;
+                    node->mMeshes[i] = static_cast<unsigned int>(i + old);
                 }
             }}
             break;
@@ -1304,5 +1311,4 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
     return node.dismiss();
 }
 
-
-#endif
+#endif // ASSIMP_BUILD_NO_BLEND_IMPORTER

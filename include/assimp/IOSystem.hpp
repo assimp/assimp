@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -67,7 +68,8 @@ class IOStream;
  *  to the importer library. If you implement this interface, you also want to
  *  supply a custom implementation for IOStream.
  *
- *  @see Importer::SetIOHandler() */
+ *  @see Importer::SetIOHandler() 
+ */
 class ASSIMP_API IOSystem
 #ifndef SWIG
     : public Intern::AllocateFromAssimpHeap

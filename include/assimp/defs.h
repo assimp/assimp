@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -47,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 #ifndef AI_DEFINES_H_INC
 #define AI_DEFINES_H_INC
+
+#include <assimp/config.h>
 
     //////////////////////////////////////////////////////////////////////////
     /* Define ASSIMP_BUILD_NO_XX_IMPORTER to disable a specific
@@ -210,7 +213,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (defined(__BORLANDC__) || defined (__BCPLUSPLUS__))
 #error Currently, Borland is unsupported. Feel free to port Assimp.
 
-// "W8059 Packgr��e der Struktur ge�ndert"
+// "W8059 Packgröße der Struktur geändert"
 
 #endif
 
@@ -229,19 +232,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
     //////////////////////////////////////////////////////////////////////////
-    /* Define AI_DOUBLE_PRECISION to compile assimp
+    /* Define ASSIMP_DOUBLE_PRECISION to compile assimp
      * with double precision support (64-bit). */
     //////////////////////////////////////////////////////////////////////////
 
-#ifdef AI_DOUBLE_PRECISION
+#ifdef ASSIMP_DOUBLE_PRECISION
     typedef double ai_real;
     typedef signed long long int ai_int;
     typedef unsigned long long int ai_uint;
-#else // AI_DOUBLE_PRECISION
+#else // ASSIMP_DOUBLE_PRECISION
     typedef float ai_real;
     typedef signed int ai_int;
     typedef unsigned int ai_uint;
-#endif // AI_DOUBLE_PRECISION
+#endif // ASSIMP_DOUBLE_PRECISION
 
     //////////////////////////////////////////////////////////////////////////
     /* Useful constants */

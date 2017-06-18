@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -77,8 +78,8 @@ void ConvertListToStrings(const std::string& in, std::list<std::string>& out)
 void FindAABBTransformed (const aiMesh* mesh, aiVector3D& min, aiVector3D& max,
     const aiMatrix4x4& m)
 {
-    min = aiVector3D (10e10,  10e10, 10e10);
-    max = aiVector3D (-10e10,-10e10,-10e10);
+    min = aiVector3D ( ai_real( 10e10 ), ai_real( 10e10 ), ai_real( 10e10 ) );
+    max = aiVector3D ( ai_real( -10e10 ), ai_real( -10e10 ), ai_real( -10e10 ) );
     for (unsigned int i = 0;i < mesh->mNumVertices;++i)
     {
         const aiVector3D v = m * mesh->mVertices[i];
@@ -144,7 +145,7 @@ void FindMeshCenterTransformed (aiMesh* mesh, aiVector3D& out,
 // -------------------------------------------------------------------------------
 ai_real ComputePositionEpsilon(const aiMesh* pMesh)
 {
-    const ai_real epsilon = 1e-4;
+    const ai_real epsilon = ai_real( 1e-4 );
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec;
@@ -157,7 +158,7 @@ ai_real ComputePositionEpsilon(const aiMesh* const* pMeshes, size_t num)
 {
     ai_assert( NULL != pMeshes );
 
-    const ai_real epsilon = 1e-4;
+    const ai_real epsilon = ai_real( 1e-4 );
 
     // calculate the position bounds so we have a reliable epsilon to check position differences against
     aiVector3D minVec, maxVec, mi, ma;
@@ -308,7 +309,7 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 
         for(unsigned int j=0;j<f.mNumIndices;j++)   {
             if(vMap[f.mIndices[j]]==UINT_MAX)   {
-                vMap[f.mIndices[j]] = numSubVerts++;
+                vMap[f.mIndices[j]] = static_cast<unsigned int>(numSubVerts++);
             }
         }
     }
@@ -320,8 +321,8 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
 
     // create all the arrays for this mesh if the old mesh contained them
 
-    oMesh->mNumFaces = subMeshFaces.size();
-    oMesh->mNumVertices = numSubVerts;
+    oMesh->mNumFaces = static_cast<unsigned int>(subMeshFaces.size());
+    oMesh->mNumVertices = static_cast<unsigned int>(numSubVerts);
     oMesh->mVertices = new aiVector3D[numSubVerts];
     if( pMesh->HasNormals() ) {
         oMesh->mNormals = new aiVector3D[numSubVerts];
@@ -332,12 +333,12 @@ aiMesh* MakeSubmesh(const aiMesh *pMesh, const std::vector<unsigned int> &subMes
         oMesh->mBitangents = new aiVector3D[numSubVerts];
     }
 
-    for( size_t a = 0;  pMesh->HasTextureCoords( a) ; ++a ) {
+    for( size_t a = 0;  pMesh->HasTextureCoords(static_cast<unsigned int>(a)) ; ++a ) {
         oMesh->mTextureCoords[a] = new aiVector3D[numSubVerts];
         oMesh->mNumUVComponents[a] = pMesh->mNumUVComponents[a];
     }
 
-    for( size_t a = 0; pMesh->HasVertexColors( a); ++a )    {
+    for( size_t a = 0; pMesh->HasVertexColors( static_cast<unsigned int>(a)); ++a )    {
         oMesh->mColors[a] = new aiColor4D[numSubVerts];
     }
 

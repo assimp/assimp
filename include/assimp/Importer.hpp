@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -52,13 +53,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Public ASSIMP data structures
 #include <assimp/types.h>
-#include <assimp/config.h>
 
 namespace Assimp    {
     // =======================================================================
     // Public interface to Assimp
     class Importer;
-    class Exporter; // export.hpp
     class IOStream;
     class IOSystem;
     class ProgressHandler;
@@ -77,7 +76,6 @@ namespace Assimp    {
     // =======================================================================
     // Holy stuff, only for members of the high council of the Jedi.
     class ImporterPimpl;
-    class ExporterPimpl; // export.hpp
 } //! namespace Assimp
 
 #define AI_PROPERTY_WAS_NOT_EXISTING 0xffffffff
@@ -193,7 +191,6 @@ public:
      */
     aiReturn UnregisterPPStep(BaseProcess* pImp);
 
-
     // -------------------------------------------------------------------
     /** Set an integer configuration property.
      * @param szName Name of the property. All supported properties
@@ -292,10 +289,10 @@ public:
 
     // -------------------------------------------------------------------
     /** Supplies a custom IO handler to the importer to use to open and
-     * access files. If you need the importer to use custion IO logic to
+     * access files. If you need the importer to use custom IO logic to
      * access the files, you need to provide a custom implementation of
      * IOSystem and IOFile to the importer. Then create an instance of
-     * your custion IOSystem implementation and supply it by this function.
+     * your custom IOSystem implementation and supply it by this function.
      *
      * The Importer takes ownership of the object and will destroy it
      * afterwards. The previously assigned handler will be deleted.
@@ -357,7 +354,7 @@ public:
     bool IsDefaultProgressHandler() const;
 
     // -------------------------------------------------------------------
-    /** @brief Check whether a given set of postprocessing flags
+    /** @brief Check whether a given set of post-processing flags
      *  is supported.
      *
      *  Some flags are mutually exclusive, others are probably
@@ -517,9 +514,6 @@ public:
      *   It will work as well for static linkage with Assimp.*/
     aiScene* GetOrphanedScene();
 
-
-
-
     // -------------------------------------------------------------------
     /** Returns whether a given file extension is supported by ASSIMP.
      *
@@ -558,7 +552,7 @@ public:
     inline void GetExtensionList(std::string& szOut) const;
 
     // -------------------------------------------------------------------
-    /** Get the number of importrs currently registered with Assimp. */
+    /** Get the number of importers currently registered with Assimp. */
     size_t GetImporterCount() const;
 
     // -------------------------------------------------------------------
@@ -601,9 +595,6 @@ public:
     *  @return (size_t)-1 if no importer is found */
     size_t GetImporterIndex (const char* szExtension) const;
 
-
-
-
     // -------------------------------------------------------------------
     /** Returns the storage allocated by ASSIMP to hold the scene data
      * in memory.
@@ -623,7 +614,6 @@ public:
      * structure in a well-defined manner. This is a debug feature and not
      * intended for use in production environments. */
     void SetExtraVerbose(bool bDo);
-
 
     // -------------------------------------------------------------------
     /** Private, do not use. */

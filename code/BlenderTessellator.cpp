@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -412,9 +413,9 @@ float BlenderTessellatorP2T::FindLargestMatrixElem( const aiMatrix3x3& mtx ) con
 {
     float result = 0.0f;
 
-    for ( size_t x = 0; x < 3; ++x )
+    for ( unsigned int x = 0; x < 3; ++x )
     {
-        for ( size_t y = 0; y < 3; ++y )
+        for ( unsigned int y = 0; y < 3; ++y )
         {
             result = p2tMax( std::fabs( mtx[ x ][ y ] ), result );
         }
@@ -429,9 +430,9 @@ aiMatrix3x3 BlenderTessellatorP2T::ScaleMatrix( const aiMatrix3x3& mtx, float sc
 {
     aiMatrix3x3 result;
 
-    for ( size_t x = 0; x < 3; ++x )
+    for ( unsigned int x = 0; x < 3; ++x )
     {
-        for ( size_t y = 0; y < 3; ++y )
+        for ( unsigned int y = 0; y < 3; ++y )
         {
             result[ x ][ y ] = mtx[ x ][ y ] * scale;
         }

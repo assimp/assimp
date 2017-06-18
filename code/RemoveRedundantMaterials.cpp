@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -177,12 +178,14 @@ void RemoveRedundantMatsProcess::Execute( aiScene* pScene)
                     continue;
                 }
 
-                // generate new names for all modified materials
+                // generate new names for modified materials that had no names
                 const unsigned int idx = aiMappingTable[p];
                 if (ppcMaterials[idx]) {
                     aiString sz;
-                    sz.length = ::ai_snprintf(sz.data,MAXLEN,"JoinedMaterial_#%u",p);
-                    ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
+                    if( ppcMaterials[idx]->Get(AI_MATKEY_NAME, sz) != AI_SUCCESS ) {
+                        sz.length = ::ai_snprintf(sz.data,MAXLEN,"JoinedMaterial_#%u",p);
+                        ((aiMaterial*)ppcMaterials[idx])->AddProperty(&sz,AI_MATKEY_NAME);
+                    }
                 } else {
                     ppcMaterials[idx] = pScene->mMaterials[p];
                 }

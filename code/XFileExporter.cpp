@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -41,14 +42,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifndef ASSIMP_BUILD_NO_EXPORT
-#ifndef ASSIMP_BUILD_NO_XFILE_EXPORTER
+#ifndef ASSIMP_BUILD_NO_X_EXPORTER
 #include "XFileExporter.h"
 #include "ConvertToLHProcess.h"
 #include "Bitmap.h"
 #include "BaseImporter.h"
 #include "fast_atof.h"
 #include "SceneCombiner.h"
-#include "DefaultIOSystem.h"
+#include <assimp/DefaultIOSystem.h>
 #include <ctime>
 #include <set>
 #include <memory>
@@ -513,7 +514,7 @@ std::string XFileExporter::toXFileString(aiString &name)
     return str;
 }
 
-void XFileExporter::writePath(aiString path)
+void XFileExporter::writePath(const aiString &path)
 {
     std::string str = std::string(path.C_Str());
     BaseImporter::ConvertUTF8toISO8859_1(str);

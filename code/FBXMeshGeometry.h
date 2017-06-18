@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -156,21 +157,21 @@ private:
 
 private:
     // cached data arrays
-    MatIndexArray materials;
-    std::vector<aiVector3D> vertices;
-    std::vector<unsigned int> faces;
-    mutable std::vector<unsigned int> facesVertexStartIndices;
-    std::vector<aiVector3D> tangents;
-    std::vector<aiVector3D> binormals;
-    std::vector<aiVector3D> normals;
+    MatIndexArray m_materials;
+    std::vector<aiVector3D> m_vertices;
+    std::vector<unsigned int> m_faces;
+    mutable std::vector<unsigned int> m_facesVertexStartIndices;
+    std::vector<aiVector3D> m_tangents;
+    std::vector<aiVector3D> m_binormals;
+    std::vector<aiVector3D> m_normals;
 
-    std::string uvNames[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
-    std::vector<aiVector2D> uvs[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
-    std::vector<aiColor4D> colors[ AI_MAX_NUMBER_OF_COLOR_SETS ];
+    std::string m_uvNames[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+    std::vector<aiVector2D> m_uvs[ AI_MAX_NUMBER_OF_TEXTURECOORDS ];
+    std::vector<aiColor4D> m_colors[ AI_MAX_NUMBER_OF_COLOR_SETS ];
 
-    std::vector<unsigned int> mapping_counts;
-    std::vector<unsigned int> mapping_offsets;
-    std::vector<unsigned int> mappings;
+    std::vector<unsigned int> m_mapping_counts;
+    std::vector<unsigned int> m_mapping_offsets;
+    std::vector<unsigned int> m_mappings;
 };
 
 }

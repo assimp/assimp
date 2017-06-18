@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -54,7 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 
@@ -242,7 +243,7 @@ void OFFImporter::InternReadFile( const std::string& pFile,
     pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
     aiMaterial* pcMat = new aiMaterial();
 
-    aiColor4D clr(0.6,0.6,0.6,1.0);
+    aiColor4D clr( ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 0.6 ), ai_real( 1.0 ) );
     pcMat->AddProperty(&clr,1,AI_MATKEY_COLOR_DIFFUSE);
     pScene->mMaterials[0] = pcMat;
 

@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -50,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #   include "../contrib/zlib/zlib.h"
 #endif
-
 
 #include "FBXTokenizer.h"
 #include "FBXParser.h"
@@ -583,7 +583,7 @@ void ReadBinaryDataArray(char type, uint32_t count, const char*& data, const cha
         zstream.next_in   = reinterpret_cast<Bytef*>( const_cast<char*>(data) );
         zstream.avail_in  = comp_len;
 
-        zstream.avail_out = buff.size();
+        zstream.avail_out = static_cast<uInt>(buff.size());
         zstream.next_out = reinterpret_cast<Bytef*>(&*buff.begin());
         const int ret = inflate(&zstream, Z_FINISH);
 

@@ -34,17 +34,18 @@
 
 namespace p2t {
 
-SweepContext::SweepContext(std::vector<Point*> polyline)
+SweepContext::SweepContext(const std::vector<Point*>& polyline) : points_(polyline),
+  front_(0),
+  head_(0),
+  tail_(0),
+  af_head_(0),
+  af_middle_(0),
+  af_tail_(0)
 {
-  basin = Basin();
-  edge_event = EdgeEvent();
-
-  points_ = polyline;
-
   InitEdges(points_);
 }
 
-void SweepContext::AddHole(std::vector<Point*> polyline)
+void SweepContext::AddHole(const std::vector<Point*>& polyline)
 {
   InitEdges(polyline);
   for(unsigned int i = 0; i < polyline.size(); i++) {
@@ -56,12 +57,12 @@ void SweepContext::AddPoint(Point* point) {
   points_.push_back(point);
 }
 
-std::vector<Triangle*> SweepContext::GetTriangles()
+std::vector<Triangle*> &SweepContext::GetTriangles()
 {
   return triangles_;
 }
 
-std::list<Triangle*> SweepContext::GetMap()
+std::list<Triangle*> &SweepContext::GetMap()
 {
   return map_;
 }
@@ -94,16 +95,16 @@ void SweepContext::InitTriangulation()
 
 }
 
-void SweepContext::InitEdges(std::vector<Point*> polyline)
+void SweepContext::InitEdges(const std::vector<Point*>& polyline)
 {
-  int num_points = polyline.size();
-  for (int i = 0; i < num_points; i++) {
-    int j = i < num_points - 1 ? i + 1 : 0;
+  size_t num_points = polyline.size();
+  for (size_t i = 0; i < num_points; i++) {
+    size_t j = i < num_points - 1 ? i + 1 : 0;
     edge_list.push_back(new Edge(*polyline[i], *polyline[j]));
   }
 }
 
-Point* SweepContext::GetPoint(const int& index)
+Point* SweepContext::GetPoint(size_t index)
 {
   return points_[index];
 }
@@ -113,13 +114,13 @@ void SweepContext::AddToMap(Triangle* triangle)
   map_.push_back(triangle);
 }
 
-Node& SweepContext::LocateNode(Point& point)
+Node& SweepContext::LocateNode(const Point& point)
 {
   // TODO implement search tree
   return *front_->LocateNode(point.x);
 }
 
-void SweepContext::CreateAdvancingFront(std::vector<Node*> nodes)
+void SweepContext::CreateAdvancingFront(const std::vector<Node*>& nodes)
 {
 
   (void) nodes;
@@ -164,12 +165,20 @@ void SweepContext::RemoveFromMap(Triangle* triangle)
 
 void SweepContext::MeshClean(Triangle& triangle)
 {
-  if (!triangle.IsInterior()) {
-    triangle.IsInterior(true);
-    triangles_.push_back(&triangle);
-    for (int i = 0; i < 3; i++) {
-      if (!triangle.constrained_edge[i])
-        MeshClean(*triangle.GetNeighbor(i));
+  std::vector<Triangle *> triangles;
+  triangles.push_back(&triangle);
+
+  while(!triangles.empty()){
+	Triangle *t = triangles.back();
+	triangles.pop_back();
+
+    if (t != NULL && !t->IsInterior()) {
+      t->IsInterior(true);
+      triangles_.push_back(t);
+      for (int i = 0; i < 3; i++) {
+        if (!t->constrained_edge[i])
+          triangles.push_back(t->GetNeighbor(i));
+      }
     }
   }
 }

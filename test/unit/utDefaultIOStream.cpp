@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -37,7 +38,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------------------*/
 #include <gtest/gtest.h>
-#include "DefaultIOStream.h"
+#include "TestIOStream.h"
 
 using namespace ::Assimp;
 
@@ -45,20 +46,16 @@ class utDefaultIOStream : public ::testing::Test {
     // empty
 };
 
-class TestDefaultIOStream : public DefaultIOStream {
-public:
-    TestDefaultIOStream()
-        : DefaultIOStream() {
-        // empty
-    }
-
-    virtual ~TestDefaultIOStream() {
-        // empty
-    }
-};
-
 TEST_F( utDefaultIOStream, FileSizeTest ) {
-    TestDefaultIOStream myStream;
+    char buffer[ L_tmpnam ];
+    tmpnam( buffer );
+    std::FILE *fs( std::fopen( buffer, "w+" ) );
+    size_t written( std::fwrite( buffer, 1, sizeof( char ) * L_tmpnam, fs ) );
+    EXPECT_NE( 0U, written );
+    std::fflush( fs );
+
+    TestDefaultIOStream myStream( fs, buffer );
     size_t size = myStream.FileSize();
-    EXPECT_EQ( size, 0 );
+    EXPECT_EQ( size, sizeof( char ) * L_tmpnam );
+    remove( buffer );
 }

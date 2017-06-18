@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
-
+#include <assimp/importerdesc.h>
 
 using namespace Assimp;
 using namespace Assimp::COB;
@@ -181,7 +181,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
         if (n->type == Node::TYPE_MESH) {
             Mesh& mesh = (Mesh&)(*n.get());
             if (mesh.vertex_positions.size() && mesh.texture_coords.size()) {
-                pScene->mNumMeshes += mesh.temp_map.size();
+                pScene->mNumMeshes += static_cast<unsigned int>(mesh.temp_map.size());
             }
         }
     }
@@ -941,20 +941,22 @@ void COBImporter::UnsupportedChunk_Binary( StreamReaderLE& reader, const ChunkIn
 // ------------------------------------------------------------------------------------------------
 // tiny utility guard to aid me at staying within chunk boundaries.
 class chunk_guard {
-
 public:
-
     chunk_guard(const COB::ChunkInfo& nfo, StreamReaderLE& reader)
-        : nfo(nfo)
-        , reader(reader)
-        , cur(reader.GetCurrentPos())
-    {
+    : nfo(nfo)
+    , reader(reader)
+    , cur(reader.GetCurrentPos()) {
     }
 
     ~chunk_guard() {
         // don't do anything if the size is not given
         if(nfo.size != static_cast<unsigned int>(-1)) {
-            reader.IncPtr(static_cast<int>(nfo.size)-reader.GetCurrentPos()+cur);
+            try {
+                reader.IncPtr( static_cast< int >( nfo.size ) - reader.GetCurrentPos() + cur );
+            } catch ( DeadlyImportError e ) {
+                // out of limit so correct the value
+                reader.IncPtr( reader.GetReadLimit() );
+            }
         }
     }
 

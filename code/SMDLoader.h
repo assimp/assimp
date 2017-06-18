@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -171,7 +172,7 @@ struct Bone
 // ---------------------------------------------------------------------------
 /** Used to load Half-life 1 and 2 SMD models
 */
-class SMDImporter : public BaseImporter
+class ASSIMP_API SMDImporter : public BaseImporter
 {
 public:
     SMDImporter();
@@ -372,7 +373,7 @@ private:
     unsigned int configFrameID;
 
     /** Buffer to hold the loaded file */
-    const char* mBuffer;
+    std::vector<char> mBuffer;
 
     /** Output scene to be filled
     */

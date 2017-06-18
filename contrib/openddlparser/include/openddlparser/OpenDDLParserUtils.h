@@ -84,7 +84,7 @@ static const unsigned char chartype_table[ 256 ] = {
 template<class T>
 inline
 bool isNumeric( const T in ) {
-	return ( chartype_table[ in ] == 1 );
+	return ( chartype_table[ static_cast<int>( in ) ] == 1 );
 }
 
 template<class T>

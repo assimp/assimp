@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -100,8 +101,8 @@ void KeyIterator::operator ++()
     // to our current position on the time line
     double d0,d1;
 
-    d0 = objPos->at      ( std::min<unsigned int> ( nextObjPos, objPos->size()-1)             ).mTime;
-    d1 = targetObjPos->at( std::min<unsigned int> ( nextTargetObjPos, targetObjPos->size()-1) ).mTime;
+    d0 = objPos->at      ( std::min ( nextObjPos, static_cast<unsigned int>(objPos->size()-1))             ).mTime;
+    d1 = targetObjPos->at( std::min ( nextTargetObjPos, static_cast<unsigned int>(targetObjPos->size()-1)) ).mTime;
 
     // Easiest case - all are identical. In this
     // case we don't need to interpolate so we can

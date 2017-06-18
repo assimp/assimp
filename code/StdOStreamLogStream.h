@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -38,6 +39,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
+
+/** @file  StdOStreamLogStream.h
+*  @brief Implementation of StdOStreamLogStream
+*/
+
 #ifndef AI_STROSTREAMLOGSTREAM_H_INC
 #define AI_STROSTREAMLOGSTREAM_H_INC
 
@@ -50,8 +56,7 @@ namespace Assimp    {
 /** @class  StdOStreamLogStream
  *  @brief  Logs into a std::ostream
  */
-class StdOStreamLogStream : public LogStream
-{
+class StdOStreamLogStream : public LogStream {
 public:
     /** @brief  Construction from an existing std::ostream
      *  @param _ostream Output stream to be used
@@ -63,30 +68,33 @@ public:
 
     /** @brief  Writer  */
     void write(const char* message);
+
 private:
-    std::ostream& ostream;
+    std::ostream& mOstream;
 };
 
 // ---------------------------------------------------------------------------
 //  Default constructor
 inline StdOStreamLogStream::StdOStreamLogStream(std::ostream& _ostream)
-    : ostream   (_ostream)
-{}
-
-// ---------------------------------------------------------------------------
-//  Default constructor
-inline StdOStreamLogStream::~StdOStreamLogStream()
-{}
-
-// ---------------------------------------------------------------------------
-//  Write method
-inline void StdOStreamLogStream::write(const char* message)
-{
-    ostream << message;
-    ostream.flush();
+: mOstream   (_ostream){
+    // empty
 }
 
 // ---------------------------------------------------------------------------
+//  Default constructor
+inline StdOStreamLogStream::~StdOStreamLogStream() {
+    // empty
+}
+
+// ---------------------------------------------------------------------------
+//  Write method
+inline void StdOStreamLogStream::write(const char* message) {
+    mOstream << message;
+    mOstream.flush();
+}
+
+// ---------------------------------------------------------------------------
+
 }   // Namespace Assimp
 
 #endif // guard

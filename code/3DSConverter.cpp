@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -690,7 +691,7 @@ void Discreet3DSImporter::AddNodeToGraph(aiScene* pcSOut,aiNode* pcOut,
     pcOut->mChildren = new aiNode*[pcIn->mChildren.size()];
 
     // Recursively process all children
-    const unsigned int size = pcIn->mChildren.size();
+    const unsigned int size = static_cast<unsigned int>(pcIn->mChildren.size());
     for (unsigned int i = 0; i < size;++i)
     {
         pcOut->mChildren[i] = new aiNode();
@@ -742,7 +743,7 @@ void Discreet3DSImporter::GenerateNodeGraph(aiScene* pcOut)
         DefaultLogger::get()->warn("No hierarchy information has been found in the file. ");
 
         pcOut->mRootNode->mNumChildren = pcOut->mNumMeshes +
-            mScene->mCameras.size() + mScene->mLights.size();
+            static_cast<unsigned int>(mScene->mCameras.size() + mScene->mLights.size());
 
         pcOut->mRootNode->mChildren = new aiNode* [ pcOut->mRootNode->mNumChildren ];
         pcOut->mRootNode->mName.Set("<3DSDummyRoot>");

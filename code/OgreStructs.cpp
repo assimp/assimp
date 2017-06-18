@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -274,12 +275,12 @@ AssimpVertexBoneWeightList IVertexData::AssimpBoneWeights(size_t vertices)
     AssimpVertexBoneWeightList weights;
     for(size_t vi=0; vi<vertices; ++vi)
     {
-        VertexBoneAssignmentList &vertexWeights = boneAssignmentsMap[vi];
+        VertexBoneAssignmentList &vertexWeights = boneAssignmentsMap[static_cast<unsigned int>(vi)];
         for (VertexBoneAssignmentList::const_iterator iter=vertexWeights.begin(), end=vertexWeights.end();
             iter!=end; ++iter)
         {
             std::vector<aiVertexWeight> &boneWeights = weights[iter->boneIndex];
-            boneWeights.push_back(aiVertexWeight(vi, iter->weight));
+            boneWeights.push_back(aiVertexWeight(static_cast<unsigned int>(vi), iter->weight));
         }
     }
     return weights;
@@ -319,7 +320,7 @@ uint32_t VertexData::VertexSize(uint16_t source) const
     for(const auto &element : vertexElements)
     {
         if (element.source == source)
-            size += element.Size();
+            size += static_cast<uint32_t>(element.Size());
     }
     return size;
 }
@@ -460,7 +461,7 @@ void Mesh::ConvertToAssimpScene(aiScene* dest)
     }
 
     // Setup
-    dest->mNumMeshes = NumSubMeshes();
+    dest->mNumMeshes = static_cast<unsigned int>(NumSubMeshes());
     dest->mMeshes = new aiMesh*[dest->mNumMeshes];
 
     // Create root node
@@ -471,7 +472,7 @@ void Mesh::ConvertToAssimpScene(aiScene* dest)
     // Export meshes
     for(size_t i=0; i<dest->mNumMeshes; ++i) {
         dest->mMeshes[i] = subMeshes[i]->ConvertToAssimpMesh(this);
-        dest->mRootNode->mMeshes[i] = i;
+        dest->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
     }
 
     // Export skeleton
@@ -481,7 +482,7 @@ void Mesh::ConvertToAssimpScene(aiScene* dest)
         if (!skeleton->bones.empty())
         {
             BoneList rootBones = skeleton->RootBones();
-            dest->mRootNode->mNumChildren = rootBones.size();
+            dest->mRootNode->mNumChildren = static_cast<unsigned int>(rootBones.size());
             dest->mRootNode->mChildren = new aiNode*[dest->mRootNode->mNumChildren];
 
             for(size_t i=0, len=rootBones.size(); i<len; ++i)
@@ -493,7 +494,7 @@ void Mesh::ConvertToAssimpScene(aiScene* dest)
         // Animations
         if (!skeleton->animations.empty())
         {
-            dest->mNumAnimations = skeleton->animations.size();
+            dest->mNumAnimations = static_cast<unsigned int>(skeleton->animations.size());
             dest->mAnimations = new aiAnimation*[dest->mNumAnimations];
 
             for(size_t i=0, len=skeleton->animations.size(); i<len; ++i)
@@ -572,7 +573,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
 
     // Assimp required unique vertices, we need to convert from Ogres shared indexing.
     size_t uniqueVertexCount = dest->mNumFaces * 3;
-    dest->mNumVertices = uniqueVertexCount;
+    dest->mNumVertices = static_cast<unsigned int>(uniqueVertexCount);
     dest->mVertices = new aiVector3D[dest->mNumVertices];
 
     // Source streams
@@ -604,7 +605,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
     {
         if (uv1Element->type == VertexElement::VET_FLOAT2 || uv1Element->type == VertexElement::VET_FLOAT3)
         {
-            dest->mNumUVComponents[0] = uv1Element->ComponentCount();
+            dest->mNumUVComponents[0] = static_cast<unsigned int>(uv1Element->ComponentCount());
             dest->mTextureCoords[0] = new aiVector3D[dest->mNumVertices];
         }
         else
@@ -617,7 +618,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
     {
         if (uv2Element->type == VertexElement::VET_FLOAT2 || uv2Element->type == VertexElement::VET_FLOAT3)
         {
-            dest->mNumUVComponents[1] = uv2Element->ComponentCount();
+            dest->mNumUVComponents[1] = static_cast<unsigned int>(uv2Element->ComponentCount());
             dest->mTextureCoords[1] = new aiVector3D[dest->mNumVertices];
         }
         else
@@ -665,11 +666,11 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
             const size_t newIndex = pos + v;
 
             // Write face index
-            face.mIndices[v] = newIndex;
+            face.mIndices[v] = static_cast<unsigned int>(newIndex);
 
             // Ogres vertex index to ref into the source buffers.
             const size_t ogreVertexIndex = ogreFace.mIndices[v];
-            src->AddVertexMapping(ogreVertexIndex, newIndex);
+            src->AddVertexMapping(static_cast<uint32_t>(ogreVertexIndex), static_cast<uint32_t>(newIndex));
 
             // Position
             positions->Seek((vWidthPosition * ogreVertexIndex) + positionsElement->offset, aiOrigin_SET);
@@ -704,7 +705,7 @@ aiMesh *SubMesh::ConvertToAssimpMesh(Mesh *parent)
         AssimpVertexBoneWeightList weights = src->AssimpBoneWeights(dest->mNumVertices);
         std::set<uint16_t> referencedBones = src->ReferencedBonesByWeights();
 
-        dest->mNumBones = referencedBones.size();
+        dest->mNumBones = static_cast<unsigned int>(referencedBones.size());
         dest->mBones = new aiBone*[dest->mNumBones];
 
         size_t assimpBoneIndex = 0;
@@ -758,7 +759,7 @@ SubMeshXml *MeshXml::GetSubMesh(uint16_t index) const
 void MeshXml::ConvertToAssimpScene(aiScene* dest)
 {
     // Setup
-    dest->mNumMeshes = NumSubMeshes();
+    dest->mNumMeshes = static_cast<unsigned int>(NumSubMeshes());
     dest->mMeshes = new aiMesh*[dest->mNumMeshes];
 
     // Create root node
@@ -770,7 +771,7 @@ void MeshXml::ConvertToAssimpScene(aiScene* dest)
     for(size_t i=0; i<dest->mNumMeshes; ++i)
     {
         dest->mMeshes[i] = subMeshes[i]->ConvertToAssimpMesh(this);
-        dest->mRootNode->mMeshes[i] = i;
+        dest->mRootNode->mMeshes[i] = static_cast<unsigned int>(i);
     }
 
     // Export skeleton
@@ -780,7 +781,7 @@ void MeshXml::ConvertToAssimpScene(aiScene* dest)
         if (!skeleton->bones.empty())
         {
             BoneList rootBones = skeleton->RootBones();
-            dest->mRootNode->mNumChildren = rootBones.size();
+            dest->mRootNode->mNumChildren = static_cast<unsigned int>(rootBones.size());
             dest->mRootNode->mChildren = new aiNode*[dest->mRootNode->mNumChildren];
 
             for(size_t i=0, len=rootBones.size(); i<len; ++i)
@@ -792,7 +793,7 @@ void MeshXml::ConvertToAssimpScene(aiScene* dest)
         // Animations
         if (!skeleton->animations.empty())
         {
-            dest->mNumAnimations = skeleton->animations.size();
+            dest->mNumAnimations = static_cast<unsigned int>(skeleton->animations.size());
             dest->mAnimations = new aiAnimation*[dest->mNumAnimations];
 
             for(size_t i=0, len=skeleton->animations.size(); i<len; ++i)
@@ -840,7 +841,7 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
 
     // Assimp required unique vertices, we need to convert from Ogres shared indexing.
     size_t uniqueVertexCount = dest->mNumFaces * 3;
-    dest->mNumVertices = uniqueVertexCount;
+    dest->mNumVertices = static_cast<unsigned int>(uniqueVertexCount);
     dest->mVertices = new aiVector3D[dest->mNumVertices];
 
     VertexDataXml *src = (!usesSharedVertexData ? vertexData : parent->sharedVertexData);
@@ -875,11 +876,11 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
             const size_t newIndex = pos + v;
 
             // Write face index
-            face.mIndices[v] = newIndex;
+            face.mIndices[v] = static_cast<unsigned int>(newIndex);
 
             // Ogres vertex index to ref into the source buffers.
             const size_t ogreVertexIndex = ogreFace.mIndices[v];
-            src->AddVertexMapping(ogreVertexIndex, newIndex);
+            src->AddVertexMapping(static_cast<uint32_t>(ogreVertexIndex), static_cast<uint32_t>(newIndex));
 
             // Position
             dest->mVertices[newIndex] = src->positions[ogreVertexIndex];
@@ -904,7 +905,7 @@ aiMesh *SubMeshXml::ConvertToAssimpMesh(MeshXml *parent)
         AssimpVertexBoneWeightList weights = src->AssimpBoneWeights(dest->mNumVertices);
         std::set<uint16_t> referencedBones = src->ReferencedBonesByWeights();
 
-        dest->mNumBones = referencedBones.size();
+        dest->mNumBones = static_cast<unsigned int>(referencedBones.size());
         dest->mBones = new aiBone*[dest->mNumBones];
 
         size_t assimpBoneIndex = 0;
@@ -958,7 +959,7 @@ aiAnimation *Animation::ConvertToAssimpAnimation()
     // Tracks
     if (!tracks.empty())
     {
-        anim->mNumChannels = tracks.size();
+        anim->mNumChannels = static_cast<unsigned int>(tracks.size());
         anim->mChannels = new aiNodeAnim*[anim->mNumChannels];
 
         for(size_t i=0, len=tracks.size(); i<len; ++i)
@@ -1099,7 +1100,7 @@ aiNode *Bone::ConvertToAssimpNode(Skeleton *skeleton, aiNode *parentNode)
     // Children
     if (!children.empty())
     {
-        node->mNumChildren = children.size();
+        node->mNumChildren = static_cast<unsigned int>(children.size());
         node->mChildren = new aiNode*[node->mNumChildren];
 
         for(size_t i=0, len=children.size(); i<len; ++i)
@@ -1122,7 +1123,7 @@ aiBone *Bone::ConvertToAssimpBone(Skeleton * /*parent*/, const std::vector<aiVer
 
     if (!boneWeights.empty())
     {
-        bone->mNumWeights = boneWeights.size();
+        bone->mNumWeights = static_cast<unsigned int>(boneWeights.size());
         bone->mWeights = new aiVertexWeight[boneWeights.size()];
         memcpy(bone->mWeights, &boneWeights[0], boneWeights.size() * sizeof(aiVertexWeight));
     }
@@ -1158,9 +1159,9 @@ aiNodeAnim *VertexAnimationTrack::ConvertToAssimpAnimationNode(Skeleton *skeleto
     nodeAnim->mPositionKeys = new aiVectorKey[numKeyframes];
     nodeAnim->mRotationKeys = new aiQuatKey[numKeyframes];
     nodeAnim->mScalingKeys = new aiVectorKey[numKeyframes];
-    nodeAnim->mNumPositionKeys = numKeyframes;
-    nodeAnim->mNumRotationKeys = numKeyframes;
-    nodeAnim->mNumScalingKeys  = numKeyframes;
+    nodeAnim->mNumPositionKeys = static_cast<unsigned int>(numKeyframes);
+    nodeAnim->mNumRotationKeys = static_cast<unsigned int>(numKeyframes);
+    nodeAnim->mNumScalingKeys  = static_cast<unsigned int>(numKeyframes);
 
     for(size_t kfi=0; kfi<numKeyframes; ++kfi)
     {

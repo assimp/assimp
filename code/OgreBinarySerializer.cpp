@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -483,7 +484,7 @@ void OgreBinarySerializer::ReadSubMesh(Mesh *mesh)
 
     NormalizeBoneWeights(submesh->vertexData);
 
-    submesh->index = mesh->subMeshes.size();
+    submesh->index = static_cast<unsigned int>(mesh->subMeshes.size());
     mesh->subMeshes.push_back(submesh);
 }
 
@@ -498,7 +499,7 @@ void OgreBinarySerializer::NormalizeBoneWeights(VertexData *vertexData) const
     }
 
     /** Normalize bone weights.
-        Some exporters wont care if the sum of all bone weights
+        Some exporters won't care if the sum of all bone weights
         for a single vertex equals 1 or not, so validate here. */
     const float epsilon = 0.05f;
     for (const uint32_t vertexIndex : influencedVertices)

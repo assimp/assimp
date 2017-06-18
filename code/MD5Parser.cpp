@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -195,7 +196,7 @@ bool MD5Parser::ParseSection(Section& out)
 #define AI_MD5_SKIP_SPACES()  if(!SkipSpaces(&sz)) \
     MD5Parser::ReportWarning("Unexpected end of line",elem.iLineNumber);
 
-    // read a triple float in brackets: (1.0 1.0 1.0)
+	// read a triple float in brackets: (1.0 1.0 1.0)
 #define AI_MD5_READ_TRIPLE(vec) \
     AI_MD5_SKIP_SPACES(); \
     if ('(' != *sz++) \
@@ -210,7 +211,7 @@ bool MD5Parser::ParseSection(Section& out)
     if (')' != *sz++) \
         MD5Parser::ReportWarning("Unexpected token: ) was expected",elem.iLineNumber);
 
-    // parse a string, enclosed in quotation marks or not
+	// parse a string, enclosed in quotation marks or not
 #define AI_MD5_PARSE_STRING(out) \
     bool bQuota = (*sz == '\"'); \
     const char* szStart = sz; \
@@ -228,6 +229,15 @@ bool MD5Parser::ParseSection(Section& out)
     ::memcpy(out.data,szStart,out.length); \
     out.data[out.length] = '\0';
 
+	// parse a string, enclosed in quotation marks
+#define AI_MD5_PARSE_STRING_IN_QUOTATION(out) \
+	while('\"'!=*sz)++sz; \
+    const char* szStart = ++sz; \
+	while('\"'!=*sz)++sz; \
+    const char* szEnd = (sz++); \
+    out.length = (size_t)(szEnd - szStart); \
+    ::memcpy(out.data,szStart,out.length); \
+    out.data[out.length] = '\0';
 // ------------------------------------------------------------------------------------------------
 // .MD5MESH parsing function
 MD5MeshParser::MD5MeshParser(SectionList& mSections)
@@ -247,9 +257,9 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
             for (const auto & elem : (*iter).mElements){
                 mJoints.push_back(BoneDesc());
                 BoneDesc& desc = mJoints.back();
-
+				
                 const char* sz = elem.szStart;
-                AI_MD5_PARSE_STRING(desc.mName);
+				AI_MD5_PARSE_STRING_IN_QUOTATION(desc.mName);
                 AI_MD5_SKIP_SPACES();
 
                 // negative values, at least -1, is allowed here
@@ -269,7 +279,7 @@ MD5MeshParser::MD5MeshParser(SectionList& mSections)
                 // shader attribute
                 if (TokenMatch(sz,"shader",6))  {
                     AI_MD5_SKIP_SPACES();
-                    AI_MD5_PARSE_STRING(desc.mShader);
+                    AI_MD5_PARSE_STRING_IN_QUOTATION(desc.mShader);
                 }
                 // numverts attribute
                 else if (TokenMatch(sz,"numverts",8))   {
@@ -362,7 +372,7 @@ MD5AnimParser::MD5AnimParser(SectionList& mSections)
                 AnimBoneDesc& desc = mAnimatedBones.back();
 
                 const char* sz = elem.szStart;
-                AI_MD5_PARSE_STRING(desc.mName);
+                AI_MD5_PARSE_STRING_IN_QUOTATION(desc.mName);
                 AI_MD5_SKIP_SPACES();
 
                 // parent index - negative values are allowed (at least -1)

@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -108,7 +109,7 @@ void SpatialSort::Append( const aiVector3D* pPositions, unsigned int pNumPositio
 
         // store position by index and distance
         ai_real distance = *vec * mPlaneNormal;
-        mPositions.push_back( Entry( a+initial, *vec, distance));
+        mPositions.push_back( Entry( static_cast<unsigned int>(a+initial), *vec, distance));
     }
 
     if (pFinalize) {
@@ -125,9 +126,8 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
     const ai_real dist = pPosition * mPlaneNormal;
     const ai_real minDist = dist - pRadius, maxDist = dist + pRadius;
 
-    // clear the array in this strange fashion because a simple clear() would also deallocate
-    // the array which we want to avoid
-    poResults.erase( poResults.begin(), poResults.end());
+    // clear the array
+    poResults.clear();
 
     // quick check for positions outside the range
     if( mPositions.size() == 0)
@@ -245,7 +245,7 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 
     // The best way to overcome this is the unit in the last place (ULP). A precision of 2 ULPs
     //  tells us that a float does not differ more than 2 bits from the "real" value. ULPs are of
-    //  logarithmic precision - around 1, they are 1�(2^24) and around 10000, they are 0.00125.
+    //  logarithmic precision - around 1, they are 1*(2^24) and around 10000, they are 0.00125.
 
     // For standard C math, we can assume a precision of 0.5 ULPs according to IEEE 754. The
     //  incoming vertex positions might have already been transformed, probably using rather
@@ -269,7 +269,7 @@ void SpatialSort::FindIdenticalPositions( const aiVector3D& pPosition,
 
     // clear the array in this strange fashion because a simple clear() would also deallocate
     // the array which we want to avoid
-    poResults.erase( poResults.begin(), poResults.end());
+    poResults.resize( 0 );
 
     // do a binary search for the minimal distance to start the iteration there
     unsigned int index = (unsigned int)mPositions.size() / 2;

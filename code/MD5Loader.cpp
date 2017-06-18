@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -56,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
+#include <assimp/importerdesc.h>
 #include <memory>
 
 using namespace Assimp;
@@ -228,8 +230,8 @@ void MD5Importer::MakeDataUnique (MD5::MeshDesc& meshSrc)
     std::vector<bool> abHad(meshSrc.mVertices.size(),false);
 
     // allocate enough storage to keep the output structures
-    const unsigned int iNewNum = meshSrc.mFaces.size()*3;
-    unsigned int iNewIndex = meshSrc.mVertices.size();
+    const unsigned int iNewNum = static_cast<unsigned int>(meshSrc.mFaces.size()*3);
+    unsigned int iNewIndex = static_cast<unsigned int>(meshSrc.mVertices.size());
     meshSrc.mVertices.resize(iNewNum);
 
     // try to guess how much storage we'll need for new weights
@@ -719,16 +721,16 @@ void MD5Importer::LoadMD5CameraFile ()
     // every cut is written to a separate aiAnimation
     if (!cuts.size()) {
         cuts.push_back(0);
-        cuts.push_back(frames.size()-1);
+        cuts.push_back(static_cast<unsigned int>(frames.size()-1));
     }
     else {
         cuts.insert(cuts.begin(),0);
 
         if (cuts.back() < frames.size()-1)
-            cuts.push_back(frames.size()-1);
+            cuts.push_back(static_cast<unsigned int>(frames.size()-1));
     }
 
-    pScene->mNumAnimations = cuts.size()-1;
+    pScene->mNumAnimations = static_cast<unsigned int>(cuts.size()-1);
     aiAnimation** tmp = pScene->mAnimations = new aiAnimation*[pScene->mNumAnimations];
     for (std::vector<unsigned int>::const_iterator it = cuts.begin(); it != cuts.end()-1; ++it) {
 

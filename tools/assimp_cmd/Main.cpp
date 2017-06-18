@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -377,7 +378,6 @@ int ProcessStandardArguments(
 	// -fid    --find-invalid-data
 	// -fixn   --fix normals
 	// -tri    --triangulate
-	// -fi     --find-instances
 	// -fi     --find-instances
 	// -og     --optimize-graph
 	// -om     --optimize-meshes

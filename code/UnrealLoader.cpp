@@ -3,7 +3,8 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 
 All rights reserved.
 
@@ -60,6 +61,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/IOSystem.hpp>
 #include <assimp/scene.h>
+#include <assimp/importerdesc.h>
 
 #include <memory>
 
@@ -333,7 +335,7 @@ void UnrealImporter::InternReadFile( const std::string& pFile,
         std::vector<Unreal::TempMat>::iterator nt = std::find(materials.begin(),materials.end(),mat);
         if (nt == materials.end()) {
             // add material
-            tri.matIndex = materials.size();
+            tri.matIndex = static_cast<unsigned int>(materials.size());
             mat.numFaces = 1;
             materials.push_back(mat);
 

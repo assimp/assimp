@@ -2,7 +2,8 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2016, assimp team
+Copyright (c) 2006-2017, assimp team
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -57,7 +58,7 @@ using namespace Assimp::Formatter;
 // Constructor
 SplitByBoneCountProcess::SplitByBoneCountProcess()
 {
-    // set default, might be overriden by importer config
+    // set default, might be overridden by importer config
     mMaxBoneCount = AI_SBBC_DEFAULT_MAX_BONES;
 }
 

@@ -84,7 +84,7 @@ static const unsigned char chartype_table[ 256 ] = {
 template<class T>
 inline
 bool isNumeric( const T in ) {
-	return ( chartype_table[ static_cast<int>( in ) ] == 1 );
+    return ( chartype_table[ static_cast<size_t>( in ) ] == 1 );
 }
 
 template<class T>
@@ -98,7 +98,7 @@ inline
 bool isInteger( T *in, T *end ) {
     if( in != end ) {
         if( *in == '-' ) {
-            in++;
+            ++in;
         }
     }
 
@@ -108,7 +108,7 @@ bool isInteger( T *in, T *end ) {
         if( !result ) {
             break;
         }
-        in++;
+        ++in;
     }
 
     return result;
@@ -119,7 +119,7 @@ inline
 bool isFloat( T *in, T *end ) {
     if( in != end ) {
         if( *in == '-' ) {
-            in++;
+            ++in;
         }
     }
 
@@ -134,12 +134,12 @@ bool isFloat( T *in, T *end ) {
         if( !result ) {
             return false;
         }
-        in++;
+        ++in;
     }
 
     // check for 1<.>0f
     if( *in == '.' ) {
-        in++;
+        ++in;
     } else {
         return false;
     }
@@ -150,7 +150,7 @@ bool isFloat( T *in, T *end ) {
         if( !result ) {
             return false;
         }
-        in++;
+        ++in;
     }
 
     return result;
@@ -208,7 +208,7 @@ template<class T>
 inline
 static T *getNextSeparator( T *in, T *end ) {
     while( !isSeparator( *in ) || in == end ) {
-        in++;
+        ++in;
     }
     return in;
 }
@@ -243,6 +243,34 @@ bool isComment( T *in, T *end ) {
                 } else {
                     return true;
                 }
+            }
+        }
+    }
+
+    return false;
+}
+
+template<class T>
+inline
+bool isCommentOpenTag(T *in, T *end ) {
+    if (*in == '/') {
+        if (in + 1 != end) {
+            if (*(in + 1) == '*') {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+template<class T>
+inline
+bool isCommentCloseTag(T *in, T *end) {
+    if (*in == '*') {
+        if (in + 1 != end) {
+            if (*(in + 1) == '/') {
+                return true;
             }
         }
     }

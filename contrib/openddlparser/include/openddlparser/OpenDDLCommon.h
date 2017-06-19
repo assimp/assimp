@@ -148,12 +148,12 @@ struct DLL_ODDLPARSER_EXPORT Name {
     ///	@param  type    [in] The name type.
     ///	@param  id      [in] The id.
     Name( NameType type, Text *id );
-
+    Name( const Name &name );
     ///	@brief  The destructor.
     ~Name();
 
 private:
-    Name( const Name & ) ddl_no_copy;
+
     Name &operator = ( const Name& ) ddl_no_copy;
 };
 
@@ -164,7 +164,7 @@ struct DLL_ODDLPARSER_EXPORT Reference {
 
     ///	@brief  The default constructor.
     Reference();
-
+    Reference( const Reference &ref );
     ///	@brief  The constructor with an array of ref names.
     /// @param  numrefs     [in] The number of ref names.
     /// @param  names       [in] The ref names.
@@ -178,7 +178,6 @@ struct DLL_ODDLPARSER_EXPORT Reference {
     size_t sizeInBytes();
 
 private:
-    Reference( const Reference & ) ddl_no_copy;
     Reference &operator = ( const Reference & ) ddl_no_copy;
 };
 

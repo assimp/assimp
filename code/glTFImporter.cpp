@@ -206,12 +206,6 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
             aimat->AddProperty(&mat.shininess, 1, AI_MATKEY_SHININESS);
         }
     }
-
-    if (mScene->mNumMaterials == 0) {
-        mScene->mNumMaterials = 1;
-        mScene->mMaterials = new aiMaterial*[1];
-        mScene->mMaterials[0] = new aiMaterial();
-    }
 }
 
 

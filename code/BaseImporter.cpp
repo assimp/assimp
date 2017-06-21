@@ -337,7 +337,6 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     if(*((uint32_t*)&data.front()) == 0x0000FFFE) {
         DefaultLogger::get()->debug("Found UTF-32 BOM ...");
 
-        const uint32_t* sstart = (uint32_t*)&data.front()+1, *send = (uint32_t*)&data.back()+1;
         std::vector<char> output;
         int *ptr = (int*)&data[ 0 ];
         int *end = ptr + ( data.size() / sizeof(int) ) +1;
@@ -358,11 +357,8 @@ void BaseImporter::ConvertToUTF8(std::vector<char>& data)
     if(*((uint16_t*)&data.front()) == 0xFEFF) {
         DefaultLogger::get()->debug("Found UTF-16 BOM ...");
 
-        const uint16_t* sstart = (uint16_t*)&data.front()+1, *send = (uint16_t*)(&data.back()+1);
         std::vector<unsigned char> output;
         int16_t *ptr = (int16_t*) &data[ 0 ];
-        int16_t *end = ptr + (data.size() / sizeof(int)) + 1;
-
         utf8::utf16to8(data.begin(), data.end(), back_inserter(output));
         return;
     }

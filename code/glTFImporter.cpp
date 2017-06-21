@@ -179,9 +179,7 @@ inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& r
     else {
         aiColor4D col;
         CopyValue(prop.color, col);
-        if (col.r != 1.f || col.g != 1.f || col.b != 1.f || col.a != 1.f) {
-            mat->AddProperty(&col, 1, pKey, type, idx);
-        }
+        mat->AddProperty(&col, 1, pKey, type, idx);
     }
 }
 

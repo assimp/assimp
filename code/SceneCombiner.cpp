@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *       OptimizeGraph step.
   */
 // ----------------------------------------------------------------------------
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "StringUtils.h"
 #include "fast_atof.h"
 #include "Hash.h"

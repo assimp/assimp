@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Subdivision.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "SpatialSort.h"
 #include "ProcessHelper.h"
 #include "Vertex.h"

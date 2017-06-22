@@ -15,13 +15,12 @@ APIs are provided for C and C++. There are various bindings to other languages (
 
 Additionally, assimp features various __mesh post processing tools__: normals and tangent space generation, triangulation, vertex cache locality optimization, removal of degenerate primitives and duplicate vertices, sorting by primitive type, merging of redundant materials and many more.
 
-This is the development trunk containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [assimp.sf.net](http://assimp.sf.net) or from *nix package repositories.
-The current build status is:
+This is the development repo containing the latest features and bugfixes. For productive use though, we recommend one of the stable releases available from [Github Assimp Releases](https://github.com/assimp/assimp/releases).
+
+One-off donations via PayPal:
+<br>[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRJVPXC4QJM4)
 
 Gitter chat: [![Join the chat at https://gitter.im/assimp/assimp](https://badges.gitter.im/assimp/assimp.svg)](https://gitter.im/assimp/assimp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)<br>
-
-And we also have an IRC-channel at freenode: #assetimporterlib . You can easily join us via: [KiwiIRC/freenote](https://kiwiirc.com/client/irc.freenode.net), choose your nickname and type
-> /join #assetimporterlib
 
 <br>
 __[open3mod](https://github.com/acgessler/open3mod) is a powerful 3D model viewer based on Assimp's import and export abilities.__

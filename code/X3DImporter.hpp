@@ -826,6 +826,7 @@ private:
     /****************** Constants ******************/
     /***********************************************/
     static const aiImporterDesc Description;
+    static const std::string whitespace;
 
     /***********************************************/
     /****************** Variables ******************/

@@ -74,6 +74,8 @@ const aiImporterDesc X3DImporter::Description = {
 	"x3d"
 };
 
+const std::string X3DImporter::whitespace(" ,\t\n\r");
+
 X3DImporter::X3DImporter()
 : NodeElement_Cur( nullptr )
 , mReader( nullptr ) {
@@ -437,43 +439,30 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsVec3f(const int pAttrIdx, aiVector3D
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListB(const int pAttrIdx, std::list<bool>& pValue)
 {
-	// make copy of attribute value - string with list of bool values. Also all bool values is strings.
-	size_t tok_str_len = strlen(mReader->getAttributeValue(pAttrIdx));
-    if ( 0 == tok_str_len ) {
-        Throw_IncorrectAttrValue( mReader->getAttributeName( pAttrIdx ) );
-    }
+	const char *tok_cur = mReader->getAttributeValue(pAttrIdx);
+	const char *tok_end = tok_cur + strlen(tok_cur);
 
-	tok_str_len++;// take in account terminating '\0'.
-	char *tok_str = new char[tok_str_len];
-
-	strcpy(tok_str, mReader->getAttributeValue(pAttrIdx));
-	// change all spacebars to symbol '\0'. That is needed for parsing.
-	for(size_t i = 0; i < tok_str_len; i++)
+	for(;;)
 	{
-		if(tok_str[i] == ' ') tok_str[i] = 0;
-	}
+		while((tok_cur < tok_end) && (whitespace.find_first_of(*tok_cur) != std::string::npos)) tok_cur++;// skip spaces between values.
+		if (tok_cur >= tok_end)
+			break;
 
-	// at now check what current token is
-	for(char *tok_cur = tok_str, *tok_end = (tok_str + tok_str_len); tok_cur < tok_end;)
-	{
 		if(strncmp(tok_cur, "true", 4) == 0)
 		{
 			pValue.push_back(true);
-			tok_cur += 5;// five, not four. Because '\0' must be skipped too.
+			tok_cur += 4;
 		}
 		else if(strncmp(tok_cur, "false", 5) == 0)
 		{
-			pValue.push_back(true);
-			tok_cur += 6;// six, not five. Because '\0' must be skipped too.
+			pValue.push_back(false);
+			tok_cur += 5;
 		}
 		else
 		{
 			Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
 		}
-	}// for(char* tok_cur = tok_str, tok_end = (tok_str + tok_str_len); tok_cur < tok_end;)
-
-	// delete temporary string
-	delete [] tok_str;
+	}// for(;;)
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrB(const int pAttrIdx, std::vector<bool>& pValue)
@@ -500,10 +489,10 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListI32(const int pAttrIdx, std::lis
 
 		int32_t tval32;
 
+		while((tstr < tstr_end) && (whitespace.find_first_of(*tstr) != std::string::npos)) tstr++;// skip spaces between values.
+
 		tval32 = strtol10(tstr, &ostr);
 		if(ostr == tstr) break;
-
-		while((ostr < tstr_end) && (*ostr == ' ')) ostr++;// skip spaces between values.
 
 		tstr = ostr;
 		pValue.push_back(tval32);
@@ -529,7 +518,6 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListF(const int pAttrIdx, std::list<
 
 	// at first check string values like '.xxx'.
 	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), str_fixed);
-	if(!str_fixed.size()) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
 
 	// and convert all values and place it in list.
 	const char* pstr = str_fixed.c_str();
@@ -539,7 +527,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListF(const int pAttrIdx, std::list<
 	{
 		float tvalf;
 
-		while((*pstr == ' ') && (pstr < pstr_end)) pstr++;// skip spaces between values.
+		while((pstr < pstr_end) && (whitespace.find_first_of(*pstr) != std::string::npos)) pstr++;// skip spaces between values.
 
 		if(pstr < pstr_end)// additional check, because attribute value can be ended with spaces.
 		{
@@ -568,7 +556,6 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListD(const int pAttrIdx, std::list<
 
 	// at first check string values like '.xxx'.
 	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), str_fixed);
-	if(!str_fixed.size()) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
 
 	// and convert all values and place it in list.
 	const char* pstr = str_fixed.c_str();
@@ -578,7 +565,7 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsListD(const int pAttrIdx, std::list<
 	{
 		double tvald;
 
-		while((*pstr == ' ') && (pstr < pstr_end)) pstr++;// skip spaces between values.
+		while((pstr < pstr_end) && (whitespace.find_first_of(*pstr) != std::string::npos)) pstr++;// skip spaces between values.
 
 		if(pstr < pstr_end)// additional check, because attribute value can be ended with spaces.
 		{

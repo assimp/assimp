@@ -1666,8 +1666,10 @@ const aiImporterDesc* X3DImporter::GetInfo () const
 
 void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
+	mpIOHandler = pIOHandler;
+
 	Clear();// delete old graph.
-	mFileDir = DefaultIOSystem::absolutePath(pFile);
+	pIOHandler->PushDirectory(DefaultIOSystem::absolutePath(pFile));
 	ParseFile(pFile, pIOHandler);
 	//
 	// Assimp use static arrays of objects for fast speed of rendering. That's good, but need some additional operations/

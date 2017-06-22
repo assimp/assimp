@@ -833,7 +833,7 @@ private:
     /***********************************************/
     CX3DImporter_NodeElement* NodeElement_Cur;///< Current element.
     irr::io::IrrXMLReader* mReader;///< Pointer to XML-reader object
-    std::string mFileDir;
+    IOSystem *mpIOHandler;
 };// class X3DImporter
 
 }// namespace Assimp

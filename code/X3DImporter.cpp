@@ -1140,35 +1140,36 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<int32_t>
 
 	if(pNormalPerVertex)
 	{
-		const std::list<int32_t>* srcidx;
-
 		if(pNormalIdx.size() > 0)
 		{
 			// check indices array count.
 			if(pNormalIdx.size() != pCoordIdx.size()) throw DeadlyImportError("Normals and Coords inidces count must be equal.");
 
-			srcidx = &pNormalIdx;
+			tind.reserve(pNormalIdx.size());
+			for(std::list<int32_t>::const_iterator it = pNormalIdx.begin(); it != pNormalIdx.end(); it++)
+			{
+				if(*it != (-1)) tind.push_back(*it);
+			}
+
+			// copy normals to mesh
+			pMesh.mNormals = new aiVector3D[pMesh.mNumVertices];
+			for(size_t i = 0; (i < pMesh.mNumVertices) && (i < tind.size()); i++)
+			{
+				if(tind[i] >= norm_arr_copy.size())
+					throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + to_string(tind[i]) +
+											") is out of range. Normals count: " + to_string(norm_arr_copy.size()) + ".");
+
+				pMesh.mNormals[i] = norm_arr_copy[tind[i]];
+			}
 		}
 		else
 		{
-			srcidx = &pCoordIdx;
-		}
+			if(pNormals.size() != pMesh.mNumVertices) throw DeadlyImportError("MeshGeometry_AddNormal. Normals and vertices count must be equal.");
 
-		tind.reserve(srcidx->size());
-		for(std::list<int32_t>::const_iterator it = srcidx->begin(); it != srcidx->end(); it++)
-		{
-			if(*it != (-1)) tind.push_back(*it);
-		}
-
-		// copy normals to mesh
-		pMesh.mNormals = new aiVector3D[pMesh.mNumVertices];
-		for(size_t i = 0; (i < pMesh.mNumVertices) && (i < tind.size()); i++)
-		{
-			if(tind[i] >= norm_arr_copy.size())
-				throw DeadlyImportError("MeshGeometry_AddNormal. Normal index(" + to_string(tind[i]) +
-										") is out of range. Normals count: " + to_string(norm_arr_copy.size()) + ".");
-
-			pMesh.mNormals[i] = norm_arr_copy[tind[i]];
+			// copy normals to mesh
+			pMesh.mNormals = new aiVector3D[pMesh.mNumVertices];
+			std::list<aiVector3D>::const_iterator norm_it = pNormals.begin();
+			for(size_t i = 0; i < pMesh.mNumVertices; i++) pMesh.mNormals[i] = *norm_it++;
 		}
 	}// if(pNormalPerVertex)
 	else

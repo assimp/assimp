@@ -243,7 +243,7 @@ void X3DImporter::XML_CheckNode_MustBeEmpty()
 
 void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeName)
 {
-    static const size_t Uns_Skip_Len = 190;
+    static const size_t Uns_Skip_Len = 192;
     const char* Uns_Skip[ Uns_Skip_Len ] = {
 	    // CAD geometry component
 	    "CADAssembly", "CADFace", "CADLayer", "CADPart", "IndexedQuadSet", "QuadSet",
@@ -278,7 +278,7 @@ void X3DImporter::XML_CheckNode_SkipUnsupported(const std::string& pParentNodeNa
 	    // Navigation component
 	    "Billboard", "Collision", "LOD", "NavigationInfo", "OrthoViewpoint", "Viewpoint", "ViewpointGroup",
 	    // Networking component
-	    "Anchor", "LoadSensor",
+	    "EXPORT", "IMPORT", "Anchor", "LoadSensor",
 	    // NURBS component
 	    "Contour2D", "ContourPolyline2D", "CoordinateDouble", "NurbsCurve", "NurbsCurve2D", "NurbsOrientationInterpolator", "NurbsPatchSurface",
 	    "NurbsPositionInterpolator", "NurbsSet", "NurbsSurfaceInterpolator", "NurbsSweptSurface", "NurbsSwungSurface", "NurbsTextureCoordinate",

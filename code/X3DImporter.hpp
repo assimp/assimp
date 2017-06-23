@@ -101,7 +101,7 @@ namespace Assimp {
 ///		Navigation component:
 ///			"Billboard", "Collision", "LOD", "NavigationInfo", "OrthoViewpoint", "Viewpoint", "ViewpointGroup"
 ///		Networking component:
-///			"Anchor", "LoadSensor"
+///			"EXPORT", "IMPORT", "Anchor", "LoadSensor"
 ///		NURBS component:
 ///			"Contour2D", "ContourPolyline2D", "CoordinateDouble", "NurbsCurve", "NurbsCurve2D", "NurbsOrientationInterpolator", "NurbsPatchSurface",
 ///			"NurbsPositionInterpolator", "NurbsSet", "NurbsSurfaceInterpolator", "NurbsSweptSurface", "NurbsSwungSurface", "NurbsTextureCoordinate",

@@ -85,10 +85,6 @@ ObjFileParser::ObjFileParser( IOStreamBuffer<char> &streamBuffer, const std::str
     m_pModel = new ObjFile::Model();
     m_pModel->m_ModelName = modelName;
 
-    // create default material and store it
-    m_pModel->m_pDefaultMaterial = new ObjFile::Material;
-    m_pModel->m_pDefaultMaterial->MaterialName.Set( DEFAULT_MATERIAL );
-
     // Start parsing the file
     parseFile( streamBuffer );
 }
@@ -495,8 +491,6 @@ void ObjFileParser::getFace( aiPrimitiveType type ) {
     // Set active material, if one set
     if( NULL != m_pModel->m_pCurrentMaterial ) {
         face->m_pMaterial = m_pModel->m_pCurrentMaterial;
-    } else {
-        face->m_pMaterial = m_pModel->m_pDefaultMaterial;
     }
 
     // Create a default object, if nothing is there
@@ -552,13 +546,7 @@ void ObjFileParser::getMaterialDesc() {
     if (!skip) {
         // Search for material
         std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
-        if (it == m_pModel->m_MaterialMap.end()) {
-            // Not found, use default material
-            m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-            DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
-            strName = m_pModel->m_pDefaultMaterial->MaterialName.C_Str();
-        } else {
-            // Found, using detected material
+        if (it != m_pModel->m_MaterialMap.end()) {
             m_pModel->m_pCurrentMaterial = (*it).second;
         }
 
@@ -653,12 +641,7 @@ void ObjFileParser::getNewMaterial() {
         ++m_DataIt;
     }
     std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find( strMat );
-    if ( it == m_pModel->m_MaterialMap.end() ) {
-        // Show a warning, if material was not found
-        DefaultLogger::get()->warn("OBJ: Unsupported material requested: " + strMat);
-        m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-    } else {
-        // Set new material
+    if ( it != m_pModel->m_MaterialMap.end() ) {
         if ( needsNewMesh( strMat ) ) {
             createMesh( strMat );
         }

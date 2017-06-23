@@ -1182,12 +1182,12 @@ namespace glTF
         LazyDict<Material>    materials;
         LazyDict<Mesh>        meshes;
         LazyDict<Node>        nodes;
-        LazyDict<Program>   programs;
+        LazyDict<Program>     programs;
         LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
-        LazyDict<Shader>    shaders;
-        LazyDict<Skin>      skins;
-        LazyDict<Technique> techniques;
+        LazyDict<Shader>      shaders;
+        LazyDict<Skin>        skins;
+        LazyDict<Technique>   techniques;
         LazyDict<Texture>     textures;
 
         LazyDict<Light>       lights; // KHR_materials_common ext
@@ -1207,12 +1207,12 @@ namespace glTF
             , materials     (*this, "materials")
             , meshes        (*this, "meshes")
             , nodes         (*this, "nodes")
-            , programs    (*this, "programs")
+            , programs      (*this, "programs")
             , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
-            , shaders     (*this, "shaders")
-            , skins       (*this, "skins")
-            , techniques  (*this, "techniques")
+            , shaders       (*this, "shaders")
+            , skins         (*this, "skins")
+            , techniques    (*this, "techniques")
             , textures      (*this, "textures")
             , lights        (*this, "lights", "KHR_materials_common")
         {

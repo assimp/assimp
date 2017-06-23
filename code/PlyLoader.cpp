@@ -307,47 +307,11 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
   ai_uint aiNormal[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
   PLY::EDataType aiNormalTypes[3] = { EDT_Char, EDT_Char, EDT_Char };
 
-    // now convert this to a list of aiMesh instances
-    std::vector<aiMesh*> avMeshes;
-    avMeshes.reserve(avMaterials.size()+1);
+  unsigned int aiColors[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+  PLY::EDataType aiColorsTypes[4] = { EDT_Char, EDT_Char, EDT_Char, EDT_Char };
 
-    if (avMaterials.size() > 0) {
-        ConvertMeshes(&avFaces,&avPositions,&avNormals,
-            &avColors,&avTexCoords,&avMaterials,&avMeshes);
-    } else {
-        // There's no material, so just copy the geometry over
-        aiMesh* pMesh = new aiMesh();
-        avMeshes.push_back(pMesh);
-
-        pMesh->mNumFaces = (unsigned int) avFaces.size();
-        pMesh->mFaces = new aiFace[avFaces.size()];
-
-        pMesh->mNumVertices = avPositions.size();
-
-        pMesh->mVertices = new aiVector3D[avPositions.size()];
-
-        if (!avNormals.empty())
-            pMesh->mNormals = new aiVector3D[avPositions.size()];
-
-        for (unsigned i = 0; i < avPositions.size(); ++i)
-        {
-            pMesh->mVertices[i] = avPositions[i];
-            if (!avNormals.empty())
-                pMesh->mNormals[i] = avNormals[i];
-        }
-
-        for (unsigned i = 0; i < avFaces.size(); ++i)
-        {
-            aiFace& face = pMesh->mFaces[i];
-            face.mNumIndices = (unsigned int)avFaces[i].mIndices.size();
-            face.mIndices = new unsigned int[face.mNumIndices];
-
-            for (unsigned int j = 0; j < face.mNumIndices; ++j)
-            {
-                face.mIndices[j] = avFaces[i].mIndices[j];
-            }
-        }
-    }
+  unsigned int aiTexcoord[2] = { 0xFFFFFFFF, 0xFFFFFFFF };
+  PLY::EDataType aiTexcoordTypes[2] = { EDT_Char, EDT_Char };
 
   unsigned int cnt = 0;
 
@@ -482,47 +446,6 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
       nOut.z = PLY::PropertyInstance::ConvertTo<ai_real>(
         GetProperty(instElement->alProperties, aiNormal[2]).avList.front(), aiNormalTypes[2]);
       haveNormal = true;
-
-    // now convert this to a list of aiMesh instances
-    std::vector<aiMesh*> avMeshes;
-    avMeshes.reserve(avMaterials.size()+1);
-
-    if (avMaterials.size() > 0) {
-        ConvertMeshes(&avFaces,&avPositions,&avNormals,
-            &avColors,&avTexCoords,&avMaterials,&avMeshes);
-    } else {
-        // There's no material, so just copy the geometry over
-        aiMesh* pMesh = new aiMesh();
-        avMeshes.push_back(pMesh);
-
-        pMesh->mNumFaces = (unsigned int) avFaces.size();
-        pMesh->mFaces = new aiFace[avFaces.size()];
-
-        pMesh->mNumVertices = avPositions.size();
-
-        pMesh->mVertices = new aiVector3D[avPositions.size()];
-
-        if (!avNormals.empty())
-            pMesh->mNormals = new aiVector3D[avPositions.size()];
-
-        for (unsigned i = 0; i < avPositions.size(); ++i)
-        {
-            pMesh->mVertices[i] = avPositions[i];
-            if (!avNormals.empty())
-                pMesh->mNormals[i] = avNormals[i];
-        }
-
-        for (unsigned i = 0; i < avFaces.size(); ++i)
-        {
-            aiFace& face = pMesh->mFaces[i];
-            face.mNumIndices = (unsigned int)avFaces[i].mIndices.size();
-            face.mIndices = new unsigned int[face.mNumIndices];
-
-            for (unsigned int j = 0; j < face.mNumIndices; ++j)
-            {
-                face.mIndices[j] = avFaces[i].mIndices[j];
-            }
-        }
     }
 
     //Colors
@@ -1086,48 +1009,6 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut, std::string &def
       // add the newly created material instance to the list
       pvOut->push_back(pcHelper);
     }
-  }
-  else
-  {
-    // generate a default material
-    aiMaterial* pcHelper = new aiMaterial();
-
-    // fill in a default material
-    int iMode = (int)aiShadingMode_Gouraud;
-    pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
-
-    //generate white material most 3D engine just multiply ambient / diffuse color with actual ambient / light color
-    aiColor3D clr;
-    clr.b = clr.g = clr.r = 1.0f;
-    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
-    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
-
-    clr.b = clr.g = clr.r = 1.0f;
-    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
-
-    // The face order is absolutely undefined for PLY, so we have to
-    // use two-sided rendering to be sure it's ok.
-    if (!pointsOnly)
-    {
-      const int two_sided = 1;
-      pcHelper->AddProperty(&two_sided, 1, AI_MATKEY_TWOSIDED);
-    }
-
-    //default texture
-    if (!defaultTexture.empty())
-    {
-      const aiString name(defaultTexture.c_str());
-      pcHelper->AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0);
-    }
-
-    //set to wireframe, so when using this material info we can switch to points rendering
-    if (pointsOnly)
-    {
-      const int wireframe = 1;
-      pcHelper->AddProperty(&wireframe, 1, AI_MATKEY_ENABLE_WIREFRAME);
-    }
-
-    pvOut->push_back(pcHelper);
   }
 }
 

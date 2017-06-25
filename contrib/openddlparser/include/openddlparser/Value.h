@@ -28,7 +28,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 BEGIN_ODDLPARSER_NS
 
+// Forward declarations
 struct ValueAllocator;
+
+class IOStreamBase;
 
 ///------------------------------------------------------------------------------------------------
 ///	@brief  This class implements a value.
@@ -213,7 +216,7 @@ public:
     double getDouble() const;
 
     ///	@brief  Assigns a std::string to the value.
-    /// @param  value       [in] The value.
+    /// @param  str         [in] The value.
     void setString( const std::string &str );
 
     ///	@brief  Returns the std::string value.
@@ -229,7 +232,8 @@ public:
     Reference *getRef() const;
 
     ///	@brief  Dumps the value.
-    void dump();
+    /// @param  stream  [in] The stream to write in.
+    void dump( IOStreamBase &stream );
 
     ///	@brief  Assigns the next value.
     ///	@param  next        [n] The next value.
@@ -241,7 +245,7 @@ public:
 
     /// @brief  Gets the length of the array.
     /// @return The number of items in the array.
-    size_t size();
+    size_t size() const;
 
     ValueType m_type;
     size_t m_size;

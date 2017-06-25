@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnitTestPCH.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 #include "AbstractImportExportBase.h"
 
 using namespace ::Assimp;
@@ -52,11 +53,31 @@ public:
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0 );
         return nullptr != scene;
     }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    virtual bool exporterTest() {
+        Importer importer;
+        Exporter exporter;
+        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0);
+        EXPECT_NE(nullptr, scene);
+        EXPECT_EQ(aiReturn_SUCCESS, exporter.Export(scene, "ply", ASSIMP_TEST_MODELS_DIR "/PLY/cube_test.ply"));
+
+        return true;
+    }
+#endif // ASSIMP_BUILD_NO_EXPORT
 };
 
-TEST_F( utPLYImportExport, importTest ) {
+TEST_F( utPLYImportExport, importTest_Success ) {
     EXPECT_TRUE( importerTest() );
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+
+TEST_F(utPLYImportExport, exportTest_Success ) {
+    EXPECT_TRUE(exporterTest());
+}
+
+#endif // ASSIMP_BUILD_NO_EXPORT
 
 TEST_F( utPLYImportExport, vertexColorTest ) {
     Assimp::Importer importer;

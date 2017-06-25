@@ -11,7 +11,7 @@ Current coverity check status:
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/5606/badge.svg"/>
 </a>
-
+Current test coverage:[![Coverage Status](https://coveralls.io/repos/github/kimkulling/openddl-parser/badge.svg?branch=master)](https://coveralls.io/github/kimkulling/openddl-parser?branch=cpp_coveralls)
 Get the source code
 ===================
 You can get the code from our git repository, which is located at GitHub. You can clone the repository with the following command:
@@ -25,7 +25,7 @@ After installing it you can open a console and enter:
 
 > cmake CMakeLists.txt
 
-This command will generate a build environment for your installed build enrironment ( for Visual-Studio-users the project files will be generated, for gcc-users the makefiles will be generated ).
+This command will generate a build environment for your preferred build tool ( for Visual-Studio-users the project files will be generated, for gcc-users the makefiles will be generated ).
 When using an IDE open the IDE and run the build. When using GNU-make type in your console:
 
 > make

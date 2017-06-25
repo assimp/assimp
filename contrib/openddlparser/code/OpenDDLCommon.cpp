@@ -22,6 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -----------------------------------------------------------------------------------------------*/
 #include <openddlparser/OpenDDLCommon.h>
 #include <openddlparser/DDLNode.h>
+#include <openddlparser/Value.h>
 
 BEGIN_ODDLPARSER_NS
 
@@ -84,7 +85,14 @@ Name::~Name() {
     m_id = ddl_nullptr;
 }
 
-Reference::Reference()
+Name::Name( const Name &name ){
+    m_type=name.m_type;
+    m_id=new Text(name.m_id->m_buffer,name.m_id->m_len);
+}
+
+
+
+    Reference::Reference()
 : m_numRefs( 0 )
 , m_referencedName( ddl_nullptr ) {
     // empty
@@ -96,8 +104,16 @@ Reference::Reference( size_t numrefs, Name **names )
     if ( numrefs > 0 ) {
         m_referencedName = new Name *[ numrefs ];
         for ( size_t i = 0; i < numrefs; i++ ) {
-            Name *name = new Name( names[ i ]->m_type, names[ i ]->m_id );
-            m_referencedName[ i ] = name;
+            m_referencedName[ i ] = names[i];
+        }
+    }
+}
+Reference::Reference(const Reference &ref) {
+    m_numRefs=ref.m_numRefs;
+    if(m_numRefs!=0){
+        m_referencedName = new Name*[m_numRefs];
+        for ( size_t i = 0; i < m_numRefs; i++ ) {
+            m_referencedName[i] = new Name(*ref.m_referencedName[i]);
         }
     }
 }
@@ -107,6 +123,7 @@ Reference::~Reference() {
         delete m_referencedName[ i ];
     }
     m_numRefs = 0;
+    delete [] m_referencedName;
     m_referencedName = ddl_nullptr;
 }
 
@@ -135,21 +152,30 @@ Property::Property( Text *id )
 }
 
 Property::~Property() {
-    m_key = ddl_nullptr;
-    m_value = ddl_nullptr;
-    m_ref = ddl_nullptr;;
-    m_next = ddl_nullptr;;
+    delete m_key;
+    if(m_value!=ddl_nullptr)
+        delete m_value;
+    if(m_ref!=ddl_nullptr)
+        delete(m_ref);
+    if(m_next!=ddl_nullptr)
+        delete m_next;
 }
 
 DataArrayList::DataArrayList()
 : m_numItems( 0 )
 , m_dataList( ddl_nullptr )
-, m_next( ddl_nullptr ) {
+, m_next( ddl_nullptr )
+, m_refs(ddl_nullptr)
+, m_numRefs(0){
     // empty
 }
 
 DataArrayList::~DataArrayList() {
-    // empty
+    delete m_dataList;
+    if(m_next!=ddl_nullptr)
+        delete m_next;
+    if(m_refs!=ddl_nullptr)
+        delete m_refs;
 }
 
 size_t DataArrayList::size() {

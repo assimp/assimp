@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "assimp_view.h"
+#include <timeapi.h>
 #include "StringUtils.h"
 #include <map>
 

@@ -116,14 +116,16 @@ inline char_t skipLine( char_t it, char_t end, unsigned int &uiLine ) {
     while( !isEndOfBuffer( it, end ) && !IsLineEnd( *it ) ) {
         ++it;
     }
-    if ( it != end )
-    {
+    
+    if ( it != end ) {
         ++it;
         ++uiLine;
     }
     // fix .. from time to time there are spaces at the beginning of a material line
-    while ( it != end && (*it == '\t' || *it == ' ') )
+    while ( it != end && ( *it == '\t' || *it == ' ' ) ) {
         ++it;
+    }
+
     return it;
 }
 

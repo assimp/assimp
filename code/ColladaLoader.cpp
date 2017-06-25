@@ -1726,6 +1726,8 @@ void ColladaLoader::BuildMaterials( ColladaParser& pParser, aiScene* /*pScene*/)
 aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pParser,
     const Collada::Effect& pEffect, const std::string& pName)
 {
+    aiString result;
+
     // recurse through the param references until we end up at an image
     std::string name = pName;
     while( 1)
@@ -1744,11 +1746,17 @@ aiString ColladaLoader::FindFilenameForEffectTexture( const ColladaParser& pPars
     ColladaParser::ImageLibrary::const_iterator imIt = pParser.mImageLibrary.find( name);
     if( imIt == pParser.mImageLibrary.end())
     {
-        throw DeadlyImportError( format() <<
-            "Collada: Unable to resolve effect texture entry \"" << pName << "\", ended up at ID \"" << name << "\"." );
-    }
+        //missing texture should not stop the conversion
+        //throw DeadlyImportError( format() <<
+        //    "Collada: Unable to resolve effect texture entry \"" << pName << "\", ended up at ID \"" << name << "\"." );
 
-    aiString result;
+        DefaultLogger::get()->warn("Collada: Unable to resolve effect texture entry \"" + pName + "\", ended up at ID \"" + name + "\".");
+
+        //set default texture file name
+        result.Set(name + ".jpg");
+        ConvertPath(result);
+        return result;
+    }
 
     // if this is an embedded texture image setup an aiTexture for it
     if (imIt->second.mFileName.empty())

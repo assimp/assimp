@@ -48,8 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 
 #include "SplitLargeMeshes.h"
-#include "SceneCombiner.h"
 
+#include <assimp/SceneCombiner.h>
 #include <assimp/version.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/Exporter.hpp>
@@ -185,8 +185,11 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     unsigned int bytesPerComp = ComponentTypeSize(compType);
 
     size_t offset = buffer->byteLength;
+    // make sure offset is correctly byte-aligned, as required by spec
+    size_t padding = offset % bytesPerComp;
+    offset += padding;
     size_t length = count * numCompsOut * bytesPerComp;
-    buffer->Grow(length);
+    buffer->Grow(length + padding);
 
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));

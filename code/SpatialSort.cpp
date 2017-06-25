@@ -126,9 +126,8 @@ void SpatialSort::FindPositions( const aiVector3D& pPosition,
     const ai_real dist = pPosition * mPlaneNormal;
     const ai_real minDist = dist - pRadius, maxDist = dist + pRadius;
 
-    // clear the array in this strange fashion because a simple clear() would also deallocate
-    // the array which we want to avoid
-    poResults.erase( poResults.begin(), poResults.end());
+    // clear the array
+    poResults.clear();
 
     // quick check for positions outside the range
     if( mPositions.size() == 0)

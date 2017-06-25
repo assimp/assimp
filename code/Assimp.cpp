@@ -66,8 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ------------------------------------------------------------------------------------------------
 using namespace Assimp;
 
-namespace Assimp
-{
+namespace Assimp {
     // underlying structure for aiPropertyStore
     typedef BatchLoader::PropertyMap PropertyMap;
 
@@ -110,12 +109,11 @@ static std::mutex gLogStreamMutex;
 
 // ------------------------------------------------------------------------------------------------
 // Custom LogStream implementation for the C-API
-class LogToCallbackRedirector : public LogStream
-{
+class LogToCallbackRedirector : public LogStream {
 public:
     explicit LogToCallbackRedirector(const aiLogStream& s)
-        : stream (s)    {
-            ai_assert(NULL != s.callback);
+    : stream (s)    {
+        ai_assert(NULL != s.callback);
     }
 
     ~LogToCallbackRedirector()  {
@@ -146,8 +144,7 @@ private:
 };
 
 // ------------------------------------------------------------------------------------------------
-void ReportSceneNotFoundError()
-{
+void ReportSceneNotFoundError() {
     DefaultLogger::get()->error("Unable to find the Assimp::Importer for this aiScene. "
         "The C-API does not accept scenes produced by the C++ API and vice versa");
 
@@ -156,22 +153,18 @@ void ReportSceneNotFoundError()
 
 // ------------------------------------------------------------------------------------------------
 // Reads the given file and returns its content.
-const aiScene* aiImportFile( const char* pFile, unsigned int pFlags)
-{
+const aiScene* aiImportFile( const char* pFile, unsigned int pFlags) {
     return aiImportFileEx(pFile,pFlags,NULL);
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,  aiFileIO* pFS)
-{
+const aiScene* aiImportFileEx( const char* pFile, unsigned int pFlags,  aiFileIO* pFS) {
     return aiImportFileExWithProperties(pFile, pFlags, pFS, NULL);
 }
 
 // ------------------------------------------------------------------------------------------------
-const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFlags,
-    aiFileIO* pFS,
-    const aiPropertyStore* props)
-{
+const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFlags, 
+        aiFileIO* pFS, const aiPropertyStore* props) {
     ai_assert(NULL != pFile);
 
     const aiScene* scene = NULL;
@@ -190,7 +183,7 @@ const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFl
         pimpl->mMatrixProperties = pp->matrices;
     }
     // setup a custom IO system if necessary
-    if (pFS)    {
+    if (pFS) {
         imp->SetIOHandler( new CIOSystemWrapper (pFS) );
     }
 
@@ -201,8 +194,7 @@ const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFl
     if( scene)  {
         ScenePrivateData* priv = const_cast<ScenePrivateData*>( ScenePriv(scene) );
         priv->mOrigImporter = imp;
-    }
-    else    {
+    } else {
         // if failed, extract error code and destroy the import
         gLastErrorString = imp->GetErrorString();
         delete imp;
@@ -210,6 +202,7 @@ const aiScene* aiImportFileExWithProperties( const char* pFile, unsigned int pFl
 
     // return imported data. If the import failed the pointer is NULL anyways
     ASSIMP_END_EXCEPTION_REGION(const aiScene*);
+    
     return scene;
 }
 

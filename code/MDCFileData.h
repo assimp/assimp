@@ -157,7 +157,7 @@ struct Frame
 
     //! Name of the frame
     char name [ 16 ] ;
-} PACK_STRUCT;
+} /*PACK_STRUCT*/;
 
 // ---------------------------------------------------------------------------
 /** \brief Data structure for a MDC triangle

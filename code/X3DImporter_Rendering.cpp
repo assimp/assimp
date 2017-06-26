@@ -288,9 +288,46 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleFanSet()
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
-		ne_alias.CoordIndex = index;
 		ne_alias.NormalPerVertex = normalPerVertex;
 		ne_alias.Solid = solid;
+
+		ne_alias.CoordIndex.clear();
+		int counter = 0;
+		int32_t idx[3];
+		for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		{
+			idx[2] = *idx_it;
+			if (idx[2] < 0)
+			{
+				counter = 0;
+			}
+			else
+			{
+				if (counter >= 2)
+				{
+					if(ccw)
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+					}
+					else
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+					}
+					ne_alias.CoordIndex.push_back(-1);
+					idx[1] = idx[2];
+				}
+				else
+				{
+					idx[counter] = idx[2];
+				}
+				++counter;
+			}
+		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
+
         // check for child nodes
         if(!mReader->isEmptyElement())
         {
@@ -369,9 +406,34 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleSet()
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
-		ne_alias.CoordIndex = index;
 		ne_alias.NormalPerVertex = normalPerVertex;
 		ne_alias.Solid = solid;
+
+		ne_alias.CoordIndex.clear();
+		int counter = 0;
+		int32_t idx[3];
+		for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		{
+			idx[counter++] = *idx_it;
+			if (counter > 2)
+			{
+				counter = 0;
+				if(ccw)
+				{
+					ne_alias.CoordIndex.push_back(idx[0]);
+					ne_alias.CoordIndex.push_back(idx[1]);
+					ne_alias.CoordIndex.push_back(idx[2]);
+				}
+				else
+				{
+					ne_alias.CoordIndex.push_back(idx[0]);
+					ne_alias.CoordIndex.push_back(idx[2]);
+					ne_alias.CoordIndex.push_back(idx[1]);
+				}
+				ne_alias.CoordIndex.push_back(-1);
+			}
+		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
+
         // check for child nodes
         if(!mReader->isEmptyElement())
         {
@@ -450,9 +512,42 @@ void X3DImporter::ParseNode_Rendering_IndexedTriangleStripSet()
 
 		ne_alias.CCW = ccw;
 		ne_alias.ColorPerVertex = colorPerVertex;
-		ne_alias.CoordIndex = index;
 		ne_alias.NormalPerVertex = normalPerVertex;
 		ne_alias.Solid = solid;
+
+		ne_alias.CoordIndex.clear();
+		int counter = 0;
+		int32_t idx[3];
+		for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != index.end(); idx_it++)
+		{
+			idx[2] = *idx_it;
+			if (idx[2] < 0)
+			{
+				counter = 0;
+			}
+			else
+			{
+				if (counter >= 2)
+				{
+					if(ccw)
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+					}
+					else
+					{
+						ne_alias.CoordIndex.push_back(idx[0]);
+						ne_alias.CoordIndex.push_back(idx[2]);
+						ne_alias.CoordIndex.push_back(idx[1]);
+					}
+					ne_alias.CoordIndex.push_back(-1);
+				}
+				idx[counter & 1] = idx[2];
+				++counter;
+			}
+		}// for(std::list<int32_t>::const_iterator idx_it = index.begin(); idx_it != ne_alias.index.end(); idx_it++)
+
         // check for child nodes
         if(!mReader->isEmptyElement())
         {

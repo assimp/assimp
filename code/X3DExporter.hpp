@@ -134,7 +134,7 @@ private:
 
 	/// \fn void AttrHelper_FloatToAttrList(std::list<SAttribute> pList, const std::string& pName, const float pValue, const float pDefaultValue)
 	/// \overload void AttrHelper_Col3DArrToString(const aiColor3D* pArray, const size_t pArray_Size, std::string& pTargetString)
-	void AttrHelper_FloatToAttrList(std::list<SAttribute> pList, const std::string& pName, const float pValue, const float pDefaultValue);
+	void AttrHelper_FloatToAttrList(std::list<SAttribute> &pList, const std::string& pName, const float pValue, const float pDefaultValue);
 
 	/// \fn void AttrHelper_Color3ToAttrList(std::list<SAttribute> pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue)
 	/// Add attribute to list if value not equal to default.
@@ -142,7 +142,7 @@ private:
 	/// \param [in] pName - name of new attribute.
 	/// \param [in] pValue - value of the new attribute.
 	/// \param [in] pDefaultValue - default value for checking: if pValue is equal to pDefaultValue then attribute will not be added.
-	void AttrHelper_Color3ToAttrList(std::list<SAttribute> pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue);
+	void AttrHelper_Color3ToAttrList(std::list<SAttribute> &pList, const std::string& pName, const aiColor3D& pValue, const aiColor3D& pDefaultValue);
 
 	/// \fn void NodeHelper_OpenNode(const std::string& pNodeName, const size_t pTabLevel, const bool pEmptyElement, const std::list<SAttribute>& pAttrList)
 	/// Begin new XML-node element.

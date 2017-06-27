@@ -379,19 +379,44 @@ void glTFExporter::ExportMaterials()
             if (prop->mKey != aiString("$mat.gltf.technique")) {
                 continue;
             }
-            std::string techniqueName = mAsset->FindUniqueID("", "technique");
-            m->technique = mAsset->techniques.Create(techniqueName);
 
-            char jsonBlob[prop->mDataLength + 1];
-            strncpy(jsonBlob, prop->mData, prop->mDataLength);
-            jsonBlob[prop->mDataLength] = '\0';
+            std::string jsonBlob;
+            for (size_t c = 0; c < prop->mDataLength; ++c) {
+                jsonBlob += prop->mData[c];
+            }
 
             Document techniqueDoc;
-            techniqueDoc.Parse(jsonBlob);
+            techniqueDoc.Parse(jsonBlob.c_str());
+
+            if (Value* name = FindString(techniqueDoc, "name")) {
+                Ref<Technique> technique;
+                for (size_t i = 0; i < mAsset->techniques.Size(); ++i) {
+                    if (mAsset->techniques[i].name == name->GetString())
+                        technique = mAsset->techniques.Get(i);
+                }
+                if (technique) {
+                    m->technique = technique;
+                    continue;
+                }
+            }
+
+            std::string techniqueName = mAsset->FindUniqueID("", "technique");
+            m->technique = mAsset->techniques.Create(techniqueName);
 
             m->technique->Read(techniqueDoc, *mAsset);
 
             if (Value* programObj = FindObject(techniqueDoc, "program")) {
+                if (Value* name = FindString(*programObj, "name")) {
+                    Ref<Program> program;
+                    for (size_t i = 0; i < mAsset->programs.Size(); ++i) {
+                        if (mAsset->programs[i].name == name->GetString())
+                            program = mAsset->programs.Get(i);
+                    }
+                    if (program) {
+                        m->technique->program = program;
+                        continue;
+                    }
+                }
                 std::string programName = mAsset->FindUniqueID("", "program");
                 Ref<Program> program = mAsset->programs.Create(programName);
                 program->Read(*programObj, *mAsset);

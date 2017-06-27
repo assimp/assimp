@@ -677,6 +677,10 @@ inline void Image::SetData(uint8_t* data, size_t length, Asset& r)
 
 inline void Program::Read(Value& obj, Asset& r)
 {
+    if (Value* nm = FindString(obj, "name")) {
+        name = nm->GetString();
+    }
+
     if (Value* attrs = FindArray(obj, "attributes")) {
         for (size_t i = 0; i < attrs->Size(); ++i) {
             Value& attr = (*attrs)[i];
@@ -721,6 +725,10 @@ inline void Shader::Read(Value& obj, Asset& /*r*/)
 
 inline void Technique::Read(Value& obj, Asset& r)
 {
+    if (Value* nm = FindString(obj, "name")) {
+        name = nm->GetString();
+    }
+
     if (Value* attrs = FindObject(obj, "attributes")) {
         for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
             if (it->value.IsString())
@@ -769,6 +777,9 @@ inline std::string Technique::ToJSON()
 
     w.StartObject();
 
+    w.Key("name");
+    w.String(this->id);
+
     w.Key("attributes");
     w.StartObject();
     for (const auto& attr : attributes) {
@@ -804,6 +815,9 @@ inline std::string Technique::ToJSON()
         w.Key("program");
         w.StartObject();
 
+        w.Key("name");
+        w.String(program->id);
+
         w.Key("attributes");
         w.StartArray();
         for (const std::string& attr : program->attributes) {
@@ -813,6 +827,8 @@ inline std::string Technique::ToJSON()
 
         w.Key("fragmentShader");
         w.StartObject();
+        w.Key("name");
+        w.String(program->fragmentShader->id);
         w.Key("uri");
         w.String(program->fragmentShader->uri);
         w.Key("type");
@@ -821,6 +837,8 @@ inline std::string Technique::ToJSON()
 
         w.Key("vertexShader");
         w.StartObject();
+        w.Key("name");
+        w.String(program->vertexShader->id);
         w.Key("uri");
         w.String(program->vertexShader->uri);
         w.Key("type");

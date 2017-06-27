@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ColladaExporter.h"
 #include "Bitmap.h"
 #include "fast_atof.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "StringUtils.h"
 #include "XMLTools.h"
 #include <assimp/DefaultIOSystem.h>

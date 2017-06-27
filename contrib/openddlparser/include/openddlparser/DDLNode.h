@@ -53,6 +53,9 @@ public:
     /// @brief  The child-node-list type.
     typedef std::vector<DDLNode*> DllNodeList;
 
+    /// @brief  The child-node-list iterator.
+    typedef std::vector<DDLNode*>::iterator DDLNodeIt;
+
 public:
     ///	@brief  The class destructor.
     ~DDLNode();

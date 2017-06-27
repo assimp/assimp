@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "3DSExporter.h"
 #include "3DSLoader.h"
 #include "3DSHelper.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "SplitLargeMeshes.h"
 #include "StringComparison.h"
 #include <assimp/IOSystem.hpp>

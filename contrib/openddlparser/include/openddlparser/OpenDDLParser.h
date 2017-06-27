@@ -47,7 +47,7 @@ struct Property;
 template<class T>
 inline
 T *lookForNextToken( T *in, T *end ) {
-    while( ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) && ( in != end ) ) {
+    while( ( in != end ) && ( isSpace( *in ) || isNewLine( *in ) || ',' == *in ) ) {
         in++;
     }
     return in;

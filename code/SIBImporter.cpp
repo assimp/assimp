@@ -58,7 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ByteSwapper.h"
 #include "StreamReader.h"
 #include "TinyFormatter.h"
-#include "../contrib/ConvertUTF/ConvertUTF.h"
+//#include "../contrib/ConvertUTF/ConvertUTF.h"
+#include "../contrib/utf8cpp/source/utf8.h"
 #include <assimp/IOSystem.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/scene.h>
@@ -177,21 +178,33 @@ static void UnknownChunk(StreamReaderLE* stream, const SIBChunk& chunk)
 // Reads a UTF-16LE string and returns it at UTF-8.
 static aiString ReadString(StreamReaderLE* stream, uint32_t numWChars)
 {
+    if ( 0 == numWChars ) {
+        static const aiString empty;
+        return empty;
+    }
     // Allocate buffers (max expansion is 1 byte -> 4 bytes for UTF-8)
-    UTF16* temp = new UTF16[numWChars];
-    UTF8* str = new UTF8[numWChars * 4 + 1];
+    //UTF16* temp = new UTF16[numWChars];
+    std::vector<unsigned char> str;
+    str.reserve(numWChars * 4 + 1);
+    //unsigned char* str = new unsigned char[numWChars * 4 + 1];
+    uint16_t *temp = new uint16_t[numWChars];
     for (uint32_t n=0;n<numWChars;n++)
         temp[n] = stream->GetU2();
 
     // Convert it and NUL-terminate.
-    const UTF16 *start = temp, *end = temp + numWChars;
-    UTF8 *dest = str, *limit = str + numWChars*4;
-    ConvertUTF16toUTF8(&start, end, &dest, limit, lenientConversion);
-    *dest = '\0';
+    //const UTF16 *start = temp, *end = temp + numWChars;
 
+    const uint16_t *start = temp, *end = temp + numWChars;
+    utf8::utf16to8(start, end, back_inserter(str));
+
+    //UTF8 *dest = str, *limit = str + numWChars*4;
+    //ConvertUTF16toUTF8(&start, end, &dest, limit, lenientConversion);
+    //*dest = '\0';
+
+    str[str.size()-1] = '\0';
     // Return the final string.
-    aiString result = aiString((const char *)str);
-    delete[] str;
+    aiString result = aiString((const char *)&str[0]);
+    //delete[] str;
     delete[] temp;
     return result;
 }

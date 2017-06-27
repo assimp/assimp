@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include "GenericProperty.h"
 
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "StandardShapes.h"
 #include "Importer.h"
 

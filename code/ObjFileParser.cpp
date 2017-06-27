@@ -179,7 +179,18 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
 
         case 'u': // Parse a material desc. setter
             {
-                getMaterialDesc();
+                std::string name;
+
+                getNameNoSpace(m_DataIt, m_DataItEnd, name);
+
+                size_t nextSpace = name.find(" ");
+                if (nextSpace != std::string::npos)
+                    name = name.substr(0, nextSpace);
+
+                if(name == "usemtl")
+                {
+                    getMaterialDesc();
+                }
             }
             break;
 

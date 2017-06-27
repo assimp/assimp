@@ -374,15 +374,20 @@ void glTFExporter::ExportMaterials()
 
         GetMatScalar(mat, m->shininess, AI_MATKEY_SHININESS);
 
-        std::string techniqueJSON;
-        aiString ait;
-        if (mat->Get("$mat.gltf.technique", 0, 0, ait) == AI_SUCCESS) {
-            techniqueJSON = ait.C_Str();
+        for (size_t i = 0; i < mat->mNumProperties; ++i) {
+            aiMaterialProperty *prop = mat->mProperties[i];
+            if (prop->mKey != aiString("$mat.gltf.technique")) {
+                continue;
+            }
             std::string techniqueName = mAsset->FindUniqueID("", "technique");
             m->technique = mAsset->techniques.Create(techniqueName);
 
+            char jsonBlob[prop->mDataLength + 1];
+            strncpy(jsonBlob, prop->mData, prop->mDataLength);
+            jsonBlob[prop->mDataLength] = '\0';
+
             Document techniqueDoc;
-            techniqueDoc.Parse(techniqueJSON.c_str());
+            techniqueDoc.Parse(jsonBlob);
 
             m->technique->Read(techniqueDoc, *mAsset);
 

@@ -20,7 +20,7 @@ def recur_node(node,level = 0):
 
 def main(filename=None):
 
-    scene = pyassimp.load(filename, pyassimp.postprocess.aiProcess_Triangulate)
+    scene = pyassimp.load(filename, processing=pyassimp.postprocess.aiProcess_Triangulate)
     
     #the model we load
     print("MODEL:" + filename)

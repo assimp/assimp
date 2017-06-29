@@ -754,6 +754,12 @@ inline void Technique::Read(Value& obj, Asset& r)
             newParam.type = MemberOrDefault(it->value, "type", ParameterType_FLOAT);
             if (Value* sem = FindString(it->value, "semantic"))
                 newParam.semantic = sem->GetString();
+            if (Value* nd = FindString(it->value, "node"))
+                newParam.node = nd->GetString();
+            if (Value* cnt = FindInt(it->value, "count"))
+                newParam.count = cnt->GetInt();
+            else
+                newParam.count = 1;
 
             parameters.push_back(newParam);
         }
@@ -806,6 +812,14 @@ inline std::string Technique::ToJSON()
         if (!param.semantic.empty()) {
             w.Key("semantic");
             w.String(param.semantic);
+        }
+        if (param.count != 1) {
+            w.Key("count");
+            w.Uint(param.count);
+        }
+        if (!param.node.empty()) {
+            w.Key("node");
+            w.String(param.node);
         }
         w.EndObject();
     }

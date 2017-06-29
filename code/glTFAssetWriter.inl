@@ -494,6 +494,12 @@ namespace glTF {
                 if (!parameter.semantic.empty()) {
                     param.AddMember("semantic", parameter.semantic, w.mAl);
                 }
+                if (!parameter.node.empty()) {
+                    param.AddMember("node", parameter.node, w.mAl);
+                }
+                if (parameter.count != 1) {
+                    param.AddMember("count", parameter.count, w.mAl);
+                }
 
                 params.AddMember(StringRef(parameter.name), param, w.mAl);
             }

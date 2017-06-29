@@ -935,6 +935,8 @@ namespace glTF
             std::string name;
             std::string semantic;
             ParameterType type;
+            size_t count;
+            std::string node;
         };
 
         struct States

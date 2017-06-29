@@ -179,9 +179,7 @@ inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& r
     else {
         aiColor4D col;
         CopyValue(prop.color, col);
-        if (col.r != 1.f || col.g != 1.f || col.b != 1.f || col.a != 1.f) {
-            mat->AddProperty(&col, 1, pKey, type, idx);
-        }
+        mat->AddProperty(&col, 1, pKey, type, idx);
     }
 }
 
@@ -200,6 +198,11 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
             aimat->AddProperty(&str, AI_MATKEY_NAME);
         }
 
+        if (mat.technique) {
+            std::string json = mat.technique->ToJSON();
+            aimat->AddBinaryProperty(json.c_str(), json.size(), "$mat.gltf.technique", 0, 0, aiPTI_Buffer);
+        }
+
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.diffuse, aimat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.specular, aimat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
         SetMaterialColorProperty(embeddedTexIdxs, r, mat.ambient, aimat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
@@ -207,12 +210,6 @@ void glTFImporter::ImportMaterials(glTF::Asset& r)
         if (mat.shininess > 0.f) {
             aimat->AddProperty(&mat.shininess, 1, AI_MATKEY_SHININESS);
         }
-    }
-
-    if (mScene->mNumMaterials == 0) {
-        mScene->mNumMaterials = 1;
-        mScene->mMaterials = new aiMaterial*[1];
-        mScene->mMaterials[0] = new aiMaterial();
     }
 }
 

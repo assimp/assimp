@@ -195,10 +195,8 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     // allocate a single node
     pScene->mRootNode = new aiNode();
 
-    bool bMatClr = false;
-
     if (IsBinarySTL(mBuffer, fileSize)) {
-        bMatClr = LoadBinaryFile();
+        LoadBinaryFile();
     } else if (IsAsciiSTL(mBuffer, fileSize)) {
         LoadASCIIFile();
     } else {
@@ -210,26 +208,6 @@ void STLImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
     pScene->mRootNode->mMeshes = new unsigned int[pScene->mNumMeshes];
     for (unsigned int i = 0; i < pScene->mNumMeshes; i++)
         pScene->mRootNode->mMeshes[i] = i;
-
-    // create a single default material, using a white diffuse color for consistency with
-    // other geometric types (e.g., PLY).
-    aiMaterial* pcMat = new aiMaterial();
-    aiString s;
-    s.Set(AI_DEFAULT_MATERIAL_NAME);
-    pcMat->AddProperty(&s, AI_MATKEY_NAME);
-
-    aiColor4D clrDiffuse(ai_real(1.0),ai_real(1.0),ai_real(1.0),ai_real(1.0));
-    if (bMatClr) {
-        clrDiffuse = clrColorDefault;
-    }
-    pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_DIFFUSE);
-    pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_SPECULAR);
-    clrDiffuse = aiColor4D( ai_real(1.0), ai_real(1.0), ai_real(1.0), ai_real(1.0));
-    pcMat->AddProperty(&clrDiffuse,1,AI_MATKEY_COLOR_AMBIENT);
-
-    pScene->mNumMaterials = 1;
-    pScene->mMaterials = new aiMaterial*[1];
-    pScene->mMaterials[0] = pcMat;
 }
 // ------------------------------------------------------------------------------------------------
 // Read an ASCII STL file
@@ -392,7 +370,7 @@ void STLImporter::LoadASCIIFile()
 
 // ------------------------------------------------------------------------------------------------
 // Read a binary STL file
-bool STLImporter::LoadBinaryFile()
+void STLImporter::LoadBinaryFile()
 {
     // allocate one mesh
     pScene->mNumMeshes = 1;
@@ -404,27 +382,7 @@ bool STLImporter::LoadBinaryFile()
     if (fileSize < 84) {
         throw DeadlyImportError("STL: file is too small for the header");
     }
-    bool bIsMaterialise = false;
 
-    // search for an occurrence of "COLOR=" in the header
-    const unsigned char* sz2 = (const unsigned char*)mBuffer;
-    const unsigned char* const szEnd = sz2+80;
-    while (sz2 < szEnd) {
-
-        if ('C' == *sz2++ && 'O' == *sz2++ && 'L' == *sz2++ &&
-            'O' == *sz2++ && 'R' == *sz2++ && '=' == *sz2++)    {
-
-            // read the default vertex color for facets
-            bIsMaterialise = true;
-            DefaultLogger::get()->info("STL: Taking code path for Materialise files");
-            const ai_real invByte = (ai_real)1.0 / ( ai_real )255.0;
-            clrColorDefault.r = (*sz2++) * invByte;
-            clrColorDefault.g = (*sz2++) * invByte;
-            clrColorDefault.b = (*sz2++) * invByte;
-            clrColorDefault.a = (*sz2++) * invByte;
-            break;
-        }
-    }
     const unsigned char* sz = (const unsigned char*)mBuffer + 80;
 
     // now read the number of facets
@@ -481,21 +439,15 @@ bool STLImporter::LoadBinaryFile()
 
                 DefaultLogger::get()->info("STL: Mesh has vertex colors");
             }
+
             aiColor4D* clr = &pMesh->mColors[0][i*3];
             clr->a = 1.0;
             const ai_real invVal( (ai_real)1.0 / ( ai_real )31.0 );
-            if (bIsMaterialise) // this is reversed
-            {
-                clr->r = (color & 0x31u) *invVal;
-                clr->g = ((color & (0x31u<<5))>>5u) *invVal;
-                clr->b = ((color & (0x31u<<10))>>10u) *invVal;
-            }
-            else
-            {
-                clr->b = (color & 0x31u) *invVal;
-                clr->g = ((color & (0x31u<<5))>>5u) *invVal;
-                clr->r = ((color & (0x31u<<10))>>10u) *invVal;
-            }
+
+            clr->b = (color & 0x31u) *invVal;
+            clr->g = ((color & (0x31u<<5))>>5u) *invVal;
+            clr->r = ((color & (0x31u<<10))>>10u) *invVal;
+
             // assign the color to all vertices of the face
             *(clr+1) = *clr;
             *(clr+2) = *clr;
@@ -504,13 +456,6 @@ bool STLImporter::LoadBinaryFile()
 
     // now copy faces
     addFacesToMesh(pMesh);
-
-    if (bIsMaterialise && !pMesh->mColors[0])
-    {
-        // use the color as diffuse material color
-        return true;
-    }
-    return false;
 }
 
 #endif // !! ASSIMP_BUILD_NO_STL_IMPORTER

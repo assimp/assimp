@@ -1010,48 +1010,6 @@ void PLYImporter::LoadMaterial(std::vector<aiMaterial*>* pvOut, std::string &def
       pvOut->push_back(pcHelper);
     }
   }
-  else
-  {
-    // generate a default material
-    aiMaterial* pcHelper = new aiMaterial();
-
-    // fill in a default material
-    int iMode = (int)aiShadingMode_Gouraud;
-    pcHelper->AddProperty<int>(&iMode, 1, AI_MATKEY_SHADING_MODEL);
-
-    //generate white material most 3D engine just multiply ambient / diffuse color with actual ambient / light color
-    aiColor3D clr;
-    clr.b = clr.g = clr.r = 1.0f;
-    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_DIFFUSE);
-    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_SPECULAR);
-
-    clr.b = clr.g = clr.r = 1.0f;
-    pcHelper->AddProperty<aiColor3D>(&clr, 1, AI_MATKEY_COLOR_AMBIENT);
-
-    // The face order is absolutely undefined for PLY, so we have to
-    // use two-sided rendering to be sure it's ok.
-    if (!pointsOnly)
-    {
-      const int two_sided = 1;
-      pcHelper->AddProperty(&two_sided, 1, AI_MATKEY_TWOSIDED);
-    }
-
-    //default texture
-    if (!defaultTexture.empty())
-    {
-      const aiString name(defaultTexture.c_str());
-      pcHelper->AddProperty(&name, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE, 0);
-    }
-
-    //set to wireframe, so when using this material info we can switch to points rendering
-    if (pointsOnly)
-    {
-      const int wireframe = 1;
-      pcHelper->AddProperty(&wireframe, 1, AI_MATKEY_ENABLE_WIREFRAME);
-    }
-
-    pvOut->push_back(pcHelper);
-  }
 }
 
 #endif // !! ASSIMP_BUILD_NO_PLY_IMPORTER

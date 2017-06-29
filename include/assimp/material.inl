@@ -48,6 +48,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AI_MATERIAL_INL_INC
 #define AI_MATERIAL_INL_INC
 
+// ---------------------------------------------------------------------------
+inline aiPropertyTypeInfo ai_real_to_property_type_info(float)
+{
+	return aiPTI_Float;
+}
+
+inline aiPropertyTypeInfo ai_real_to_property_type_info(double)
+{
+	return aiPTI_Double;
+}
+// ---------------------------------------------------------------------------
+
 //! @cond never
 
 // ---------------------------------------------------------------------------
@@ -223,7 +235,7 @@ inline aiReturn aiMaterial::AddProperty(const aiUVTransform* pInput,
 {
     return AddBinaryProperty((const void*)pInput,
         pNumValues * sizeof(aiUVTransform),
-        pKey,type,index,aiPTI_Float); //TODO could be Double ...
+        pKey,type,index,ai_real_to_property_type_info(pInput->mRotation));
 }
 
 // ---------------------------------------------------------------------------
@@ -235,7 +247,7 @@ inline aiReturn aiMaterial::AddProperty(const aiColor4D* pInput,
 {
     return AddBinaryProperty((const void*)pInput,
         pNumValues * sizeof(aiColor4D),
-        pKey,type,index,aiPTI_Float); //TODO could be Double ...
+        pKey,type,index,ai_real_to_property_type_info(pInput->a));
 }
 
 // ---------------------------------------------------------------------------
@@ -247,7 +259,7 @@ inline aiReturn aiMaterial::AddProperty(const aiColor3D* pInput,
 {
     return AddBinaryProperty((const void*)pInput,
         pNumValues * sizeof(aiColor3D),
-        pKey,type,index,aiPTI_Float); //TODO could be Double ...
+        pKey,type,index,ai_real_to_property_type_info(pInput->b));
 }
 
 // ---------------------------------------------------------------------------
@@ -259,7 +271,7 @@ inline aiReturn aiMaterial::AddProperty(const aiVector3D* pInput,
 {
     return AddBinaryProperty((const void*)pInput,
         pNumValues * sizeof(aiVector3D),
-        pKey,type,index,aiPTI_Float); //TODO could be Double ...
+        pKey,type,index,ai_real_to_property_type_info(pInput->x));
 }
 
 // ---------------------------------------------------------------------------

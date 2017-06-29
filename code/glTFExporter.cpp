@@ -67,6 +67,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <Open3DGC/o3dgcSC3DMCEncoder.h>
 #endif
 
+#include <rapidjson/document.h>
+
 using namespace rapidjson;
 
 using namespace Assimp;
@@ -187,8 +189,11 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     unsigned int bytesPerComp = ComponentTypeSize(compType);
 
     size_t offset = buffer->byteLength;
+    // make sure offset is correctly byte-aligned, as required by spec
+    size_t padding = offset % bytesPerComp;
+    offset += padding;
     size_t length = count * numCompsOut * bytesPerComp;
-    buffer->Grow(length);
+    buffer->Grow(length + padding);
 
     // bufferView
     Ref<BufferView> bv = a.bufferViews.Create(a.FindUniqueID(meshName, "view"));
@@ -368,6 +373,70 @@ void glTFExporter::ExportMaterials()
         m->transparent = mat->Get(AI_MATKEY_OPACITY, m->transparency) == aiReturn_SUCCESS && m->transparency != 1.0;
 
         GetMatScalar(mat, m->shininess, AI_MATKEY_SHININESS);
+
+        for (size_t i = 0; i < mat->mNumProperties; ++i) {
+            aiMaterialProperty *prop = mat->mProperties[i];
+            if (prop->mKey != aiString("$mat.gltf.technique")) {
+                continue;
+            }
+
+            std::string jsonBlob;
+            for (size_t c = 0; c < prop->mDataLength; ++c) {
+                jsonBlob += prop->mData[c];
+            }
+
+            Document techniqueDoc;
+            techniqueDoc.Parse(jsonBlob.c_str());
+
+            if (Value* name = FindString(techniqueDoc, "name")) {
+                Ref<Technique> technique;
+                for (size_t i = 0; i < mAsset->techniques.Size(); ++i) {
+                    if (mAsset->techniques[i].name == name->GetString())
+                        technique = mAsset->techniques.Get(i);
+                }
+                if (technique) {
+                    m->technique = technique;
+                    continue;
+                }
+            }
+
+            std::string techniqueName = mAsset->FindUniqueID("", "technique");
+            m->technique = mAsset->techniques.Create(techniqueName);
+
+            m->technique->Read(techniqueDoc, *mAsset);
+
+            if (Value* programObj = FindObject(techniqueDoc, "program")) {
+                if (Value* name = FindString(*programObj, "name")) {
+                    Ref<Program> program;
+                    for (size_t i = 0; i < mAsset->programs.Size(); ++i) {
+                        if (mAsset->programs[i].name == name->GetString())
+                            program = mAsset->programs.Get(i);
+                    }
+                    if (program) {
+                        m->technique->program = program;
+                        continue;
+                    }
+                }
+                std::string programName = mAsset->FindUniqueID("", "program");
+                Ref<Program> program = mAsset->programs.Create(programName);
+                program->Read(*programObj, *mAsset);
+                m->technique->program = program;
+
+                if (Value* fsObj = FindObject(*programObj, "fragmentShader")) {
+                    std::string fsName = mAsset->FindUniqueID("", "fs");
+                    Ref<Shader> fs = mAsset->shaders.Create(fsName);
+                    fs->Read(*fsObj, *mAsset);
+                    program->fragmentShader = fs;
+                }
+
+                if (Value* vsObj = FindObject(*programObj, "vertexShader")) {
+                    std::string vsName = mAsset->FindUniqueID("", "vs");
+                    Ref<Shader> vs = mAsset->shaders.Create(vsName);
+                    vs->Read(*vsObj, *mAsset);
+                    program->vertexShader = vs;
+                }
+            }
+        }
     }
 }
 

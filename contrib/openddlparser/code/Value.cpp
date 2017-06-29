@@ -294,7 +294,7 @@ Reference *Value::getRef() const {
     return (Reference*) m_data;
 }
 
-void Value::dump() {
+void Value::dump( IOStreamBase &stream ) {
     switch( m_type ) {
         case ddl_none:
             std::cout << "None" << std::endl;
@@ -354,7 +354,7 @@ Value *Value::getNext() const {
     return m_next;
 }
 
-size_t Value::size(){
+size_t Value::size() const{
     size_t result=1;
     Value *n=m_next;
     while( n!=ddl_nullptr) {

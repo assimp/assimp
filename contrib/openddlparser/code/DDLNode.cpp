@@ -191,6 +191,10 @@ Reference *DDLNode::getReferences() const {
     return m_references;
 }
 
+void DDLNode::dump(IOStreamBase &stream) {
+    // Todo!    
+}
+
 DDLNode *DDLNode::create( const std::string &type, const std::string &name, DDLNode *parent ) {
     const size_t idx( s_allocatedNodes.size() );
     DDLNode *node = new DDLNode( type, name, idx, parent );

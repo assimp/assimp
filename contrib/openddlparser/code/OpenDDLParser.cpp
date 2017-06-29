@@ -327,14 +327,14 @@ char *OpenDDLParser::parseStructure( char *in, char *end ) {
 
     bool error( false );
     in = lookForNextToken( in, end );
-    if( *in == '{' ) {
+    if( *in == *Grammar::OpenBracketToken) {
         // loop over all children ( data and nodes )
         do {
             in = parseStructureBody( in, end, error );
             if(in == ddl_nullptr){
                 return ddl_nullptr;
             }
-        } while ( *in != '}' );
+        } while ( *in != *Grammar::CloseBracketToken);
         ++in;
     } else {
         ++in;
@@ -540,7 +540,11 @@ char *OpenDDLParser::parseIdentifier( char *in, char *end, Text **id ) {
     // get size of id
     size_t idLen( 0 );
     char *start( in );
-    while( !isSeparator( *in ) && !isNewLine( *in ) && ( in != end ) && *in != Grammar::OpenPropertyToken[ 0 ] && *in != Grammar::ClosePropertyToken[ 0 ] && *in != '$' ) {
+    while( !isSeparator( *in ) && 
+            !isNewLine( *in ) && ( in != end ) && 
+            *in != Grammar::OpenPropertyToken[ 0 ] &&
+            *in != Grammar::ClosePropertyToken[ 0 ] && 
+            *in != '$' ) {
         ++in;
         ++idLen;
     }
@@ -562,7 +566,7 @@ char *OpenDDLParser::parsePrimitiveDataType( char *in, char *end, Value::ValueTy
     for( unsigned int i = 0; i < Value::ddl_types_max; i++ ) {
         prim_len = strlen( Grammar::PrimitiveTypeToken[ i ] );
         if( 0 == strncmp( in, Grammar::PrimitiveTypeToken[ i ], prim_len ) ) {
-            type = ( Value::ValueType ) i;
+            type = static_cast<Value::ValueType>( i );
             break;
         }
     }

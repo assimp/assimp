@@ -231,7 +231,9 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
     out.push_back( new MDLImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_ASE_IMPORTER)
+  #if (!defined ASSIMP_BUILD_NO_3DS_IMPORTER)
     out.push_back( new ASEImporter());
+#  endif
 #endif
 #if (!defined ASSIMP_BUILD_NO_HMP_IMPORTER)
     out.push_back( new HMPImporter());

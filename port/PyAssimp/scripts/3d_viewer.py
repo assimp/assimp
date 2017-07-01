@@ -679,7 +679,7 @@ class PyAssimp3DViewer:
         logger.info("Loading model:" + path + "...")
 
         if postprocess:
-            self.scene = pyassimp.load(path, postprocess)
+            self.scene = pyassimp.load(path, processing=postprocess)
         else:
             self.scene = pyassimp.load(path)
         logger.info("Done.")

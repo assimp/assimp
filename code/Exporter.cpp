@@ -172,8 +172,10 @@ public:
         GetPostProcessingStepInstanceList(mPostProcessingSteps);
 
         // grab all built-in exporters
-        mExporters.resize(ASSIMP_NUM_EXPORTERS);
-        std::copy(gExporters,gExporters+ASSIMP_NUM_EXPORTERS,mExporters.begin());
+        if ( 0 != ( ASSIMP_NUM_EXPORTERS ) ) {
+            mExporters.resize( ASSIMP_NUM_EXPORTERS );
+            std::copy( gExporters, gExporters + ASSIMP_NUM_EXPORTERS, mExporters.begin() );
+        }
     }
 
     ~ExporterPimpl()
@@ -187,7 +189,6 @@ public:
     }
 
 public:
-
     aiExportDataBlob* blob;
     std::shared_ptr< Assimp::IOSystem > mIOSystem;
     bool mIsDefaultIOHandler;
@@ -408,6 +409,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
 
     pimpl->mError = std::string("Found no exporter to handle this file format: ") + pFormatId;
     ASSIMP_END_EXCEPTION_REGION(aiReturn);
+    
     return AI_FAILURE;
 }
 
@@ -491,7 +493,6 @@ ExportProperties::ExportProperties(const ExportProperties &other)
 , mMatrixProperties(other.mMatrixProperties) {
     // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Set a configuration property

@@ -91,11 +91,11 @@ static inline std::string &TrimLeft(std::string &s, bool newlines = true)
 {
     if (!newlines)
     {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))));
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](char c) { return !Assimp::IsSpace<char>(c); }));
     }
     else
     {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpaceOrNewLine<char>))));
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](char c) { return !Assimp::IsSpaceOrNewLine<char>(c); }));
     }
     return s;
 }
@@ -105,11 +105,11 @@ static inline std::string &TrimRight(std::string &s, bool newlines = true)
 {
     if (!newlines)
     {
-        s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun(Assimp::IsSpace<char>))).base(),s.end());
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](char c) { return !Assimp::IsSpace<char>(c); }).base(),s.end());
     }
     else
     {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun(Assimp::IsSpaceOrNewLine<char>))));
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](char c) { return !Assimp::IsSpaceOrNewLine<char>(c); }));
     }
     return s;
 }

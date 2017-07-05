@@ -357,7 +357,7 @@ void MeshGeometry::ReadVertexData(const std::string& type, int index, const Scop
         // avoids losing the material if there are more material layers
         // coming of which at least one contains actual data (did observe
         // that with one test file).
-        const size_t count_neg = std::count_if(temp_materials.begin(),temp_materials.end(),std::bind2nd(std::less<int>(),0));
+        const size_t count_neg = std::count_if(temp_materials.begin(),temp_materials.end(),[](int n) { return n < 0; });
         if(count_neg == temp_materials.size()) {
             FBXImporter::LogWarn("ignoring dummy material layer (all entries -1)");
             return;

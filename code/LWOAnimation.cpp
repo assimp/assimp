@@ -164,7 +164,7 @@ void AnimResolver::UpdateAnimRangeSetup()
                 {
                 const double start_time = delta - std::fmod(my_first-first,delta);
                 std::vector<LWO::Key>::iterator n = std::find_if((*it).keys.begin(),(*it).keys.end(),
-                    std::bind1st(std::greater<double>(),start_time)),m;
+                    [start_time](double t) { return start_time > t; }),m;
 
                 size_t ofs = 0;
                 if (n != (*it).keys.end()) {

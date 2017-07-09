@@ -159,6 +159,9 @@ void PLYImporter::InternReadFile(const std::string& pFile,
 
   // Get the file-size
   size_t fileSize = fileStream->FileSize();
+  if ( 0 == fileSize ) {
+      throw DeadlyImportError("File " + pFile + " is empty.");
+  }
 
   IOStreamBuffer<char> streamedBuffer(1024 * 1024);
   streamedBuffer.open(fileStream.get());

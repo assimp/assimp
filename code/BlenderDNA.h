@@ -253,10 +253,7 @@ public:
      *  a compiler complain is the result.
      *  @param dest Destination value to be written
      *  @param db File database, including input stream. */
-    template <typename T> inline void Convert (T& dest,
-        const FileDatabase& db) const;
-
-
+    template <typename T> inline void Convert (T& dest, const FileDatabase& db) const;
 
     // --------------------------------------------------------
     // generic converter

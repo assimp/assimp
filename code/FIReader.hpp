@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INCLUDED_AI_FI_READER_H
 
 #include <irrXML.h>
+#include <memory>
 #include <string>
 #include <vector>
 #include <cstdint>

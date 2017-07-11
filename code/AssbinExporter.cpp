@@ -325,11 +325,13 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         {
             AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AINODE );
 
+			size_t nb_metadata = (node->mMetaData != NULL ? node->mMetaData->mNumProperties : 0);
+
             Write<aiString>(&chunk,node->mName);
             Write<aiMatrix4x4>(&chunk,node->mTransformation);
             Write<unsigned int>(&chunk,node->mNumChildren);
             Write<unsigned int>(&chunk,node->mNumMeshes);
-			Write<unsigned int>(&chunk,node->mMetaData->mNumProperties);
+			Write<unsigned int>(&chunk,nb_metadata);
 
             for (unsigned int i = 0; i < node->mNumMeshes;++i) {
                 Write<unsigned int>(&chunk,node->mMeshes[i]);
@@ -339,7 +341,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
                 WriteBinaryNode( &chunk, node->mChildren[i] );
             }
 
-			for (unsigned int i = 0; i < node->mMetaData->mNumProperties; ++i) {
+			for (unsigned int i = 0; i < nb_metadata; ++i) {
 				const aiString& key = node->mMetaData->mKeys[i];
 				aiMetadataType type = node->mMetaData->mValues[i].mType;
 				void* value = node->mMetaData->mValues[i].mData;

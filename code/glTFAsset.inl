@@ -54,94 +54,6 @@ using namespace Assimp;
 
 namespace glTF {
 
-namespace {
-
-    //
-    // JSON Value reading helpers
-    //
-    /*
-    template<class T>
-    struct ReadHelper { static bool Read(Value& val, T& out) {
-        return val.IsInt() ? out = static_cast<T>(val.GetInt()), true : false;
-    }};
-
-    template<> struct ReadHelper<bool> { static bool Read(Value& val, bool& out) {
-        return val.IsBool() ? out = val.GetBool(), true : false;
-    }};
-
-    template<> struct ReadHelper<float> { static bool Read(Value& val, float& out) {
-        return val.IsNumber() ? out = static_cast<float>(val.GetDouble()), true : false;
-    }};
-
-    template<unsigned int N> struct ReadHelper<float[N]> { static bool Read(Value& val, float (&out)[N]) {
-        if (!val.IsArray() || val.Size() != N) return false;
-        for (unsigned int i = 0; i < N; ++i) {
-            if (val[i].IsNumber())
-                out[i] = static_cast<float>(val[i].GetDouble());
-        }
-        return true;
-    }};
-
-    template<> struct ReadHelper<const char*> { static bool Read(Value& val, const char*& out) {
-        return val.IsString() ? (out = val.GetString(), true) : false;
-    }};
-
-    template<> struct ReadHelper<std::string> { static bool Read(Value& val, std::string& out) {
-        return val.IsString() ? (out = std::string(val.GetString(), val.GetStringLength()), true) : false;
-    }};
-
-    template<class T> struct ReadHelper< Nullable<T> > { static bool Read(Value& val, Nullable<T>& out) {
-        return out.isPresent = ReadHelper<T>::Read(val, out.value);
-    }};
-
-    template<class T>
-    inline static bool ReadValue(Value& val, T& out)
-    {
-        return ReadHelper<T>::Read(val, out);
-    }
-
-    template<class T>
-    inline static bool ReadMember(Value& obj, const char* id, T& out)
-    {
-        Value::MemberIterator it = obj.FindMember(id);
-        if (it != obj.MemberEnd()) {
-            return ReadHelper<T>::Read(it->value, out);
-        }
-        return false;
-    }
-
-    template<class T>
-    inline static T MemberOrDefault(Value& obj, const char* id, T defaultValue)
-    {
-        T out;
-        return ReadMember(obj, id, out) ? out : defaultValue;
-    }
-
-    inline Value* FindMember(Value& val, const char* id)
-    {
-        Value::MemberIterator it = val.FindMember(id);
-        return (it != val.MemberEnd()) ? &it->value : 0;
-    }
-
-    inline Value* FindString(Value& val, const char* id)
-    {
-        Value::MemberIterator it = val.FindMember(id);
-        return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
-    }
-
-    inline Value* FindArray(Value& val, const char* id)
-    {
-        Value::MemberIterator it = val.FindMember(id);
-        return (it != val.MemberEnd() && it->value.IsArray()) ? &it->value : 0;
-    }
-
-    inline Value* FindObject(Value& val, const char* id)
-    {
-        Value::MemberIterator it = val.FindMember(id);
-        return (it != val.MemberEnd() && it->value.IsObject()) ? &it->value : 0;
-    }*/
-}
-
 //
 // LazyDict methods
 //
@@ -163,7 +75,6 @@ LazyDict<T>::~LazyDict() {
         delete mObjs[i];
     }
 }
-
 
 template<class T>
 inline 
@@ -211,7 +122,6 @@ Ref<T> LazyDict<T>::Get(const char* id) {
     }
 
     json::iterator obj = mDict->find( id );
-    //Value::MemberIterator obj = mDict->FindMember(id);
     if ( obj == mDict->end()) {
         throw DeadlyImportError("GLTF: Missing object with id \"" + std::string(id) + "\" in \"" + mDictId + "\"");
     }
@@ -254,18 +164,21 @@ Ref<T> LazyDict<T>::Create(const char* id)
 // glTF dictionary objects methods
 //
 
-
-inline Buffer::Buffer()
-	: byteLength(0), type(Type_arraybuffer), EncodedRegion_Current(nullptr), mIsSpecial(false)
-{ }
-
-inline Buffer::~Buffer()
-{
-	for(SEncodedRegion* reg : EncodedRegion_List) delete reg;
+inline 
+Buffer::Buffer()
+: byteLength(0), type(Type_arraybuffer), EncodedRegion_Current(nullptr), mIsSpecial(false) {
+    // empty
 }
 
-inline const char* Buffer::TranslateId(Asset& r, const char* id)
-{
+inline 
+Buffer::~Buffer() {
+    for ( SEncodedRegion* reg : EncodedRegion_List ) {
+        delete reg;
+    }
+}
+
+inline 
+const char* Buffer::TranslateId(Asset& r, const char* id) {
     // Compatibility with old spec
     if (r.extensionsUsed.KHR_binary_glTF && strcmp(id, "KHR_binary_glTF") == 0) {
         return "binary_glTF";
@@ -281,13 +194,9 @@ void Buffer::Read(json& obj, Asset& r) {
     if ( obj.end() != it ) {
         statedLength = obj[ "byteLength" ];
     }
-    //size_t statedLength = MemberOrDefault<size_t>(obj, "byteLength", 0);
     byteLength = statedLength;
-
     it = obj.find( "uri" );
     if ( obj.end() == it ) {
-//    Value* it = FindString(obj, "uri");
-//    if (!it) {
         if (statedLength > 0) {
             throw DeadlyImportError("GLTF: buffer with non-zero length missing the \"uri\" attribute");
         }
@@ -295,10 +204,8 @@ void Buffer::Read(json& obj, Asset& r) {
     }
 
     std::string uri = it.value().get<std::string>();
-    //const char* uri = it->GetString();
 
     Util::DataURI dataURI;
-    //if ( ParseDataURI( uri, it->GetStringLength(), dataURI ) ) {
     if (ParseDataURI(uri.c_str(), uri.size(), dataURI)) {
         if (dataURI.base64) {
             uint8_t* data = 0;
@@ -608,15 +515,9 @@ static bool ReadMatValue( json& val, glTF::mat4& out ) {
 inline 
 void BufferView::Read(json& obj, Asset& r) {
     const char *bufferId = MemberOrDefault<std::string>( obj, "buffer", nullptr ).c_str();
-//        bufferId = it.value().get<std::string>().c_str();
     if ( bufferId ) {
         buffer = r.buffers.Get( bufferId );
     }
-    /*const char* bufferId = MemberOrDefault<const char*>(obj, "buffer", 0);
-    if (bufferId) {
-        buffer = r.buffers.Get(bufferId);
-    }*/
-
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
     byteLength = MemberOrDefault(obj, "byteLength", 0u);
@@ -743,21 +644,19 @@ inline void Accessor::WriteData(size_t count, const void* src_buffer, size_t src
     CopyData(count, src, src_stride, dst, dst_stride);
 }
 
-
-
-inline Accessor::Indexer::Indexer(Accessor& acc)
-    : accessor(acc)
-    , data(acc.GetPointer())
-    , elemSize(acc.GetElementSize())
-    , stride(acc.byteStride ? acc.byteStride : elemSize)
-{
-
+inline 
+Accessor::Indexer::Indexer(Accessor& acc)
+: accessor(acc)
+, data(acc.GetPointer())
+, elemSize(acc.GetElementSize())
+, stride(acc.byteStride ? acc.byteStride : elemSize) {
+    // empty
 }
 
 //! Accesses the i-th value as defined by the accessor
 template<class T>
-T Accessor::Indexer::GetValue(int i)
-{
+inline
+T Accessor::Indexer::GetValue(int i) {
     ai_assert(data);
     ai_assert(i*stride < accessor.bufferView->byteLength);
     T value = T();
@@ -766,13 +665,13 @@ T Accessor::Indexer::GetValue(int i)
     return value;
 }
 
-inline Image::Image()
-    : width(0)
-    , height(0)
-    , mData(0)
-    , mDataLength(0)
-{
-
+inline
+Image::Image()
+: width(0)
+, height(0)
+, mData(0)
+, mDataLength(0) {
+    // empty
 }
 
 inline void Image::Read(json& obj, Asset& r)
@@ -802,7 +701,6 @@ inline void Image::Read(json& obj, Asset& r)
 
     if (!mDataLength) {
         if ( json* uri = FindString(obj, "uri")) {
-            //const char* uristr = uri->GetString();
             const char* uristr = uri->get<std::string>().c_str();
 
             Util::DataURI dataURI;
@@ -1723,12 +1621,6 @@ namespace Util {
     inline uint8_t DecodeCharBase64(char c)
     {
         return DATA<true>::tableDecodeBase64[size_t(c)]; // TODO faster with lookup table or ifs?
-        /*if (c >= 'A' && c <= 'Z') return c - 'A';
-        if (c >= 'a' && c <= 'z') return c - 'a' + 26;
-        if (c >= '0' && c <= '9') return c - '0' + 52;
-        if (c == '+') return 62;
-        if (c == '/') return 63;
-        return 64; // '-' */
     }
 
     inline size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out)

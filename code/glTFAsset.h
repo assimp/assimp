@@ -156,7 +156,6 @@ namespace glTF {
         inline bool ParseDataURI(const char* uri, size_t uriLen, DataURI& out);
     }
 
-
     //! Magic number for GLB files
     #define AI_GLB_MAGIC_NUMBER "glTF"
 

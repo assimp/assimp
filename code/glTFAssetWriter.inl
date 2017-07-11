@@ -39,19 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-//#include <rapidjson/stringbuffer.h>
-//#include <rapidjson/writer.h>
-//#include <rapidjson/prettywriter.h>
 #include <fstream>
 
 namespace glTF {
     using json = nlohmann::json;
-
-/*    using rapidjson::StringBuffer;
-    using rapidjson::PrettyWriter;
-    using rapidjson::Writer;
-    using rapidjson::StringRef;
-    using rapidjson::StringRef;*/
 
     namespace {
 
@@ -86,7 +77,6 @@ namespace glTF {
             }
             obj[ fieldId ] = lst;
         }
-
     }
 
     inline 
@@ -488,16 +478,8 @@ namespace glTF {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
-        //StringBuffer docBuffer;
-
-        //PrettyWriter<StringBuffer> writer(docBuffer);
-        //mDoc.Accept(writer);
-
         std::ofstream o( path );
         o << std::setw( 4 ) << mDoc << std::endl;
-        /*if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
-            throw DeadlyExportError("Failed to write scene data!");
-        }*/
 
         // Write buffer data to separate .bin files
         for (unsigned int i = 0; i < mAsset.buffers.Size(); ++i) {
@@ -530,12 +512,8 @@ namespace glTF {
         // we will write the header later, skip its size
         outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
 
-/*        StringBuffer docBuffer;
-        Writer<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);*/
         std::string s = mDoc.dump( 4 );
         if ( outfile->Write( s.c_str(), s.size(), 1 ) != 1 ) {
-        //if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
             throw DeadlyExportError("Failed to write scene data!");
         }
 
@@ -634,14 +612,14 @@ namespace glTF {
             }
 
             if (!(container = FindObject(*exts, d.mExtId))) {
-                //exts[ d.mExtId ] = json::object();
+                (*exts)[ d.mExtId ] = json::object();
                 container = FindObject(*exts, d.mExtId);
             }
         }
 
         json* dict;
         if (!(dict = FindObject(*container, d.mDictId))) {
-            //container[d.mDictId] = json::object();
+            (*container)[d.mDictId] = json::object();
             dict = FindObject(*container, d.mDictId);
         }
 

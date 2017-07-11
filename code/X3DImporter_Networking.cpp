@@ -51,8 +51,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, Assimp.
 #include <assimp/DefaultIOSystem.h>
 
+#include <regex>
+
 namespace Assimp
 {
+
+static std::regex pattern_parentDir(R"((^|/)[^/]+/../)");
 
 // <Inline
 // DEF=""              ID
@@ -91,9 +95,10 @@ void X3DImporter::ParseNode_Networking_Inline()
 		{
 			std::string full_path;
 
-			full_path = mpIOHandler->CurrentDirectory() + "/" + url.front();
+			full_path = std::regex_replace(mpIOHandler->CurrentDirectory() + url.front(), pattern_parentDir, "$1");
 			// Attribute "url" can contain list of strings. But we need only one - first.
-			mpIOHandler->PushDirectory(DefaultIOSystem::absolutePath(full_path));
+			std::string::size_type slashPos = full_path.find_last_of("\\/");
+			mpIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : full_path.substr(0, slashPos + 1));
 			ParseFile(full_path, mpIOHandler);
 			mpIOHandler->PopDirectory();
 		}

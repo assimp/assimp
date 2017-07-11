@@ -1610,8 +1610,10 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 	mpIOHandler = pIOHandler;
 
 	Clear();// delete old graph.
-	pIOHandler->PushDirectory(DefaultIOSystem::absolutePath(pFile));
+	std::string::size_type slashPos = pFile.find_last_of("\\/");
+	pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
 	ParseFile(pFile, pIOHandler);
+	pIOHandler->PopDirectory();
 	//
 	// Assimp use static arrays of objects for fast speed of rendering. That's good, but need some additional operations/
 	// We know that geometry objects(meshes) are stored in <Shape>, also in <Shape>-><Appearance> materials(in Assimp logical view)

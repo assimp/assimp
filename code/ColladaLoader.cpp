@@ -132,7 +132,6 @@ void ColladaLoader::SetupProperties(const Importer* pImp)
     ignoreUpDirection = pImp->GetPropertyInteger(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION,0) != 0;
 }
 
-
 // ------------------------------------------------------------------------------------------------
 // Get file extension list
 const aiImporterDesc* ColladaLoader::GetInfo () const

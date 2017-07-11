@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of the Collada parser helper
  */
 
-
 #ifndef ASSIMP_BUILD_NO_COLLADA_IMPORTER
 
 #include <sstream>
@@ -1866,7 +1865,7 @@ void ColladaParser::ReadMesh( Mesh* pMesh)
                 ReadIndexData( pMesh);
             } else
             {
-                // ignore the rest
+                // ignore the restf
                 SkipElement();
             }
         }
@@ -2216,8 +2215,9 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
             else if (IsElement("extra"))
             {
                 SkipElement("extra");
-            } else
-            {
+            } else if ( IsElement("ph")) {                
+                SkipElement("ph");
+            } else {
                 ThrowException( format() << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">" );
             }
         }

@@ -39,174 +39,169 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 */
 
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/prettywriter.h>
+//#include <rapidjson/stringbuffer.h>
+//#include <rapidjson/writer.h>
+//#include <rapidjson/prettywriter.h>
+#include <fstream>
 
 namespace glTF {
+    using json = nlohmann::json;
 
-    using rapidjson::StringBuffer;
+/*    using rapidjson::StringBuffer;
     using rapidjson::PrettyWriter;
     using rapidjson::Writer;
     using rapidjson::StringRef;
-    using rapidjson::StringRef;
+    using rapidjson::StringRef;*/
 
     namespace {
 
         template<size_t N>
-        inline Value& MakeValue(Value& val, float(&r)[N], MemoryPoolAllocator<>& al) {
-            val.SetArray();
-            val.Reserve(N, al);
+        inline 
+        json& MakeValue(json& val, float(&r)[N] ) {
+            val = json::array();
             for (decltype(N) i = 0; i < N; ++i) {
-                val.PushBack(r[i], al);
+                val.push_back(r[i] );
             }
             return val;
         }
 
-        inline Value& MakeValue(Value& val, const std::vector<float> & r, MemoryPoolAllocator<>& al) {
-            val.SetArray();
-            val.Reserve(static_cast<rapidjson::SizeType>(r.size()), al);
+        inline 
+        json& MakeValue(json& val, const std::vector<float> & r) {
+            val = json::array();
             for (unsigned int i = 0; i < r.size(); ++i) {
-                val.PushBack(r[i], al);
+                val.push_back(r[i]);
             }
             return val;
         }
 
         template<class T>
-        inline void AddRefsVector(Value& obj, const char* fieldId, std::vector< Ref<T> >& v, MemoryPoolAllocator<>& al) {
-            if (v.empty()) return;
-            Value lst;
-            lst.SetArray();
-            lst.Reserve(unsigned(v.size()), al);
-            for (size_t i = 0; i < v.size(); ++i) {
-                lst.PushBack(StringRef(v[i]->id), al);
+        inline 
+        void AddRefsVector(json& obj, const char* fieldId, std::vector< Ref<T> >& v ) {
+            if ( v.empty() ) {
+                return;
             }
-            obj.AddMember(StringRef(fieldId), lst, al);
+            json lst = json::array();
+            for (size_t i = 0; i < v.size(); ++i) {
+                lst.push_back( v[i]->id);
+            }
+            obj[ fieldId ] = lst;
         }
 
-
     }
 
-    inline void Write(Value& obj, Accessor& a, AssetWriter& w)
-    {
-        obj.AddMember("bufferView", Value(a.bufferView->id, w.mAl).Move(), w.mAl);
-        obj.AddMember("byteOffset", a.byteOffset, w.mAl);
-        obj.AddMember("byteStride", a.byteStride, w.mAl);
-        obj.AddMember("componentType", int(a.componentType), w.mAl);
-        obj.AddMember("count", a.count, w.mAl);
-        obj.AddMember("type", StringRef(AttribType::ToString(a.type)), w.mAl);
+    inline 
+    void Write(json& obj, Accessor& a, AssetWriter& w) {
+        obj["bufferView"] = a.bufferView->id;
+        obj["byteOffset"] = a.byteOffset;
+        obj["byteStride"] = a.byteStride;
+        obj["componentType"] = a.componentType;
+        obj["count"] = a.count;
+        obj["type"] = a.type;
 
-        Value vTmpMax, vTmpMin;
-        obj.AddMember("max", MakeValue(vTmpMax, a.max, w.mAl), w.mAl);
-        obj.AddMember("min", MakeValue(vTmpMin, a.min, w.mAl), w.mAl);
+        json vTmpMax, vTmpMin;
+        obj[ "max" ] = MakeValue( vTmpMax, a.max );
+        obj[ "min" ] = MakeValue( vTmpMin, a.min );
     }
 
-    inline void Write(Value& obj, Animation& a, AssetWriter& w)
-    {
+    inline
+    void Write( json& obj, Animation& a, AssetWriter& w) {
         /****************** Channels *******************/
-        Value channels;
-        channels.SetArray();
-        channels.Reserve(unsigned(a.Channels.size()), w.mAl);
+        json channels = json::array();
 
         for (size_t i = 0; i < unsigned(a.Channels.size()); ++i) {
             Animation::AnimChannel& c = a.Channels[i];
-            Value valChannel;
-            valChannel.SetObject();
+            json valChannel = json::object();
             {
-                valChannel.AddMember("sampler", c.sampler, w.mAl);
+                valChannel["sampler"] = c.sampler;
 
-                Value valTarget;
-                valTarget.SetObject();
+                json valTarget = json::object();
                 {
-                    valTarget.AddMember("id", StringRef(c.target.id->id), w.mAl);
-                    valTarget.AddMember("path", c.target.path, w.mAl);
+                    valTarget["id"] = c.target.id->id;
+                    valTarget["path"] = c.target.path;
                 }
-                valChannel.AddMember("target", valTarget, w.mAl);
+                valChannel["target"] =  valTarget;
             }
-            channels.PushBack(valChannel, w.mAl);
+            channels.push_back( valChannel );
         }
-        obj.AddMember("channels", channels, w.mAl);
+        obj["channels"] = channels;
 
         /****************** Parameters *******************/
-        Value valParameters;
-        valParameters.SetObject();
+        json valParameters = json::object();
         {
             if (a.Parameters.TIME) {
-                valParameters.AddMember("TIME", StringRef(a.Parameters.TIME->id), w.mAl);
+                valParameters["TIME"] = a.Parameters.TIME->id;
             }
             if (a.Parameters.rotation) {
-                valParameters.AddMember("rotation", StringRef(a.Parameters.rotation->id), w.mAl);
+                valParameters["rotation"] = a.Parameters.rotation->id;
             }
             if (a.Parameters.scale) {
-                valParameters.AddMember("scale", StringRef(a.Parameters.scale->id), w.mAl);
+                valParameters[ "scale"] = a.Parameters.scale->id;
             }
             if (a.Parameters.translation) {
-                valParameters.AddMember("translation", StringRef(a.Parameters.translation->id), w.mAl);
+                valParameters["translation"] = a.Parameters.translation->id;
             }
         }
-        obj.AddMember("parameters", valParameters, w.mAl);
+        obj["parameters"] = valParameters;
 
         /****************** Samplers *******************/
-        Value valSamplers;
-        valSamplers.SetObject();
+        json valSamplers = json::object();
 
         for (size_t i = 0; i < unsigned(a.Samplers.size()); ++i) {
             Animation::AnimSampler& s = a.Samplers[i];
-            Value valSampler;
-            valSampler.SetObject();
+            json valSampler = json::object();
             {
-                valSampler.AddMember("input", s.input, w.mAl);
-                valSampler.AddMember("interpolation", s.interpolation, w.mAl);
-                valSampler.AddMember("output", s.output, w.mAl);
+                valSampler["input"] = s.input;
+                valSampler["interpolation"] = s.interpolation;
+                valSampler["output"] = s.output;
             }
-            valSamplers.AddMember(StringRef(s.id), valSampler, w.mAl);
+            valSamplers[s.id] = valSampler;
         }
-        obj.AddMember("samplers", valSamplers, w.mAl);
+        obj["samplers"] = valSamplers;
     }
 
-    inline void Write(Value& obj, Buffer& b, AssetWriter& w)
-    {
+    inline 
+    void Write(json& obj, Buffer& b, AssetWriter& w) {
         const char* type;
         switch (b.type) {
             case Buffer::Type_text:
-                type = "text"; break;
+                type = "text"; 
+                break;
             default:
                 type = "arraybuffer";
+                break;
         }
 
-        obj.AddMember("byteLength", static_cast<uint64_t>(b.byteLength), w.mAl);
-        obj.AddMember("type", StringRef(type), w.mAl);
-        obj.AddMember("uri", Value(b.GetURI(), w.mAl).Move(), w.mAl);
+        obj["byteLength"] = static_cast<uint64_t>(b.byteLength);
+        obj["type"] = type;
+        obj["uri"] = b.GetURI();
     }
 
-    inline void Write(Value& obj, BufferView& bv, AssetWriter& w)
+    inline 
+    void Write(json& obj, BufferView& bv, AssetWriter& w) {
+        obj[ "buffer"] = bv.buffer->id;
+        obj[ "byteOffset"] = static_cast<uint64_t>(bv.byteOffset);
+        obj[ "byteLength"] = static_cast<uint64_t>(bv.byteLength);
+        obj[ "target" ] = int(bv.target);
+    }
+
+    inline void Write( json& obj, Camera& c, AssetWriter& w)
     {
-        obj.AddMember("buffer", Value(bv.buffer->id, w.mAl).Move(), w.mAl);
-        obj.AddMember("byteOffset", static_cast<uint64_t>(bv.byteOffset), w.mAl);
-        obj.AddMember("byteLength", static_cast<uint64_t>(bv.byteLength), w.mAl);
-        obj.AddMember("target", int(bv.target), w.mAl);
-    }
-
-    inline void Write(Value& obj, Camera& c, AssetWriter& w)
-    {
 
     }
 
-    inline void Write(Value& obj, Image& img, AssetWriter& w)
+    inline void Write( json& obj, Image& img, AssetWriter& w)
     {
         std::string uri;
         if (w.mAsset.extensionsUsed.KHR_binary_glTF && img.bufferView) {
-            Value exts, ext;
-            exts.SetObject();
-            ext.SetObject();
+            json exts = json::object(), ext = json::object();
 
-            ext.AddMember("bufferView", StringRef(img.bufferView->id), w.mAl);
+            ext["bufferView"] = img.bufferView->id;
 
             if (!img.mimeType.empty())
-                ext.AddMember("mimeType", StringRef(img.mimeType), w.mAl);
+                ext["mimeType"] = img.mimeType;
 
-            exts.AddMember("KHR_binary_glTF", ext, w.mAl);
-            obj.AddMember("extensions", exts, w.mAl);
+            exts["KHR_binary_glTF"] = ext;
+            obj["extensions"] = exts;
             return;
         }
         else if (img.HasData()) {
@@ -218,68 +213,67 @@ namespace glTF {
             uri = img.uri;
         }
 
-        obj.AddMember("uri", Value(uri, w.mAl).Move(), w.mAl);
+        obj["uri"] = uri;
     }
 
     namespace {
-        inline void WriteColorOrTex(Value& obj, TexProperty& prop, const char* propName, MemoryPoolAllocator<>& al)
-        {
+        inline 
+        void WriteColorOrTex(json& obj, TexProperty& prop, const char* propName ) {
             if (prop.texture)
-                obj.AddMember(StringRef(propName), Value(prop.texture->id, al).Move(), al);
+                obj[ propName] = prop.texture->id;
             else {
-                Value col;
-                obj.AddMember(StringRef(propName), MakeValue(col, prop.color, al), al);
+                json col;
+                obj[ propName ] = MakeValue(col, prop.color );
             }
         }
     }
 
-    inline void Write(Value& obj, Material& m, AssetWriter& w)
-    {
-        Value v;
-        v.SetObject();
+    inline 
+    void Write(json& obj, Material& m, AssetWriter& w) {
+        json v = json::object();
         {
-            WriteColorOrTex(v, m.ambient, "ambient", w.mAl);
-            WriteColorOrTex(v, m.diffuse, "diffuse", w.mAl);
-            WriteColorOrTex(v, m.specular, "specular", w.mAl);
-            WriteColorOrTex(v, m.emission, "emission", w.mAl);
+            WriteColorOrTex(v, m.ambient, "ambient" );
+            WriteColorOrTex(v, m.diffuse, "diffuse" );
+            WriteColorOrTex(v, m.specular, "specular" );
+            WriteColorOrTex(v, m.emission, "emission" );
 
-            if (m.transparent)
-                v.AddMember("transparency", m.transparency, w.mAl);
+            if ( m.transparent ) {
+                v[ "transparency" ] = m.transparency;
+            }
 
-            v.AddMember("shininess", m.shininess, w.mAl);
+            v[ "shininess" ] = m.shininess;
         }
-        obj.AddMember("values", v, w.mAl);
+        obj["values" ] = v;
     }
 
     namespace {
-        inline void WriteAttrs(AssetWriter& w, Value& attrs, Mesh::AccessorList& lst,
+        inline void WriteAttrs(AssetWriter& w, json& attrs, Mesh::AccessorList& lst,
             const char* semantic, bool forceNumber = false)
         {
-            if (lst.empty()) return;
-            if (lst.size() == 1 && !forceNumber) {
-                attrs.AddMember(StringRef(semantic), Value(lst[0]->id, w.mAl).Move(), w.mAl);
+            if ( lst.empty() ) {
+                return;
             }
-            else {
+            if (lst.size() == 1 && !forceNumber) {
+                attrs[ semantic ] = lst[0]->id;
+            } else {
                 for (size_t i = 0; i < lst.size(); ++i) {
                     char buffer[32];
                     ai_snprintf(buffer, 32, "%s_%d", semantic, int(i));
-                    attrs.AddMember(Value(buffer, w.mAl).Move(), Value(lst[i]->id, w.mAl).Move(), w.mAl);
+                    attrs[buffer] = lst[i]->id;
                 }
             }
         }
     }
 
-    inline void Write(Value& obj, Mesh& m, AssetWriter& w)
-    {
+    inline 
+    void Write(json& obj, Mesh& m, AssetWriter& w)  {
 		/********************* Name **********************/
-		obj.AddMember("name", m.name, w.mAl);
+		obj["name"]= m.name;
 
 		/**************** Mesh extensions ****************/
 		if(m.Extension.size() > 0)
 		{
-			Value json_extensions;
-
-			json_extensions.SetObject();
+			json json_extensions = json::object();
 			for(Mesh::SExtension* ptr_ext : m.Extension)
 			{
 				switch(ptr_ext->Type)
@@ -287,30 +281,29 @@ namespace glTF {
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 					case Mesh::SExtension::EType::Compression_Open3DGC:
 						{
-							Value json_comp_data;
+							json json_comp_data = json::object();
 							Mesh::SCompression_Open3DGC* ptr_ext_comp = (Mesh::SCompression_Open3DGC*)ptr_ext;
 
 							// filling object "compressedData"
-							json_comp_data.SetObject();
-							json_comp_data.AddMember("buffer", ptr_ext_comp->Buffer, w.mAl);
-							json_comp_data.AddMember("byteOffset", ptr_ext_comp->Offset, w.mAl);
-							json_comp_data.AddMember("componentType", 5121, w.mAl);
-							json_comp_data.AddMember("type", "SCALAR", w.mAl);
-							json_comp_data.AddMember("count", ptr_ext_comp->Count, w.mAl);
+							json_comp_data["buffer"] = ptr_ext_comp->Buffer;
+							json_comp_data["byteOffset"] = ptr_ext_comp->Offset;
+							json_comp_data["componentType"] =  5121;
+							json_comp_data["type"] = "SCALAR";
+							json_comp_data["count"] = ptr_ext_comp->Count;
 							if(ptr_ext_comp->Binary)
-								json_comp_data.AddMember("mode", "binary", w.mAl);
+								json_comp_data["mode"] = "binary";
 							else
-								json_comp_data.AddMember("mode", "ascii", w.mAl);
+								json_comp_data["mode"] = "ascii";
 
-							json_comp_data.AddMember("indicesCount", ptr_ext_comp->IndicesCount, w.mAl);
-							json_comp_data.AddMember("verticesCount", ptr_ext_comp->VerticesCount, w.mAl);
+							json_comp_data["indicesCount"] = ptr_ext_comp->IndicesCount;
+							json_comp_data["verticesCount"] = ptr_ext_comp->VerticesCount;
 							// filling object "Open3DGC-compression"
-							Value json_o3dgc;
+                            json json_o3dgc = json::object();
 
-							json_o3dgc.SetObject();
-							json_o3dgc.AddMember("compressedData", json_comp_data, w.mAl);
-							// add member to object "extensions"
-							json_extensions.AddMember("Open3DGC-compression", json_o3dgc, w.mAl);
+							json_o3dgc["compressedData"] = json_comp_data;
+							
+                            // add member to object "extensions"
+							json_extensions["Open3DGC-compression"] = json_o3dgc;
 						}
 
 						break;
@@ -321,29 +314,25 @@ namespace glTF {
 			}// for(Mesh::SExtension* ptr_ext : m.Extension)
 
 			// Add extensions to mesh
-			obj.AddMember("extensions", json_extensions, w.mAl);
+			obj["extensions"] = json_extensions;
 		}// if(m.Extension.size() > 0)
 
 		/****************** Primitives *******************/
-        Value primitives;
-        primitives.SetArray();
-        primitives.Reserve(unsigned(m.primitives.size()), w.mAl);
+        json primitives = json::array();
 
         for (size_t i = 0; i < m.primitives.size(); ++i) {
             Mesh::Primitive& p = m.primitives[i];
-            Value prim;
-            prim.SetObject();
+            json prim = json::object();
             {
-                prim.AddMember("mode", Value(int(p.mode)).Move(), w.mAl);
+                prim["mode"] = int(p.mode);
 
                 if (p.material)
-                    prim.AddMember("material", p.material->id, w.mAl);
+                    prim["material"] = p.material->id;
 
                 if (p.indices)
-                    prim.AddMember("indices", Value(p.indices->id, w.mAl).Move(), w.mAl);
+                    prim["indices"] = p.indices->id;
 
-                Value attrs;
-                attrs.SetObject();
+                json attrs = json::object();
                 {
                     WriteAttrs(w, attrs, p.attributes.position, "POSITION");
                     WriteAttrs(w, attrs, p.attributes.normal, "NORMAL");
@@ -353,121 +342,119 @@ namespace glTF {
                     WriteAttrs(w, attrs, p.attributes.jointmatrix, "JOINTMATRIX");
                     WriteAttrs(w, attrs, p.attributes.weight, "WEIGHT");
                 }
-                prim.AddMember("attributes", attrs, w.mAl);
+                prim["attributes"] =attrs;
             }
-            primitives.PushBack(prim, w.mAl);
+            primitives.push_back(prim);
         }
 
-        obj.AddMember("primitives", primitives, w.mAl);
+        obj["primitives"] = primitives;
     }
 
-    inline void Write(Value& obj, Node& n, AssetWriter& w)
+    inline void Write(json& obj, Node& n, AssetWriter& w)
     {
 
         if (n.matrix.isPresent) {
-            Value val;
-            obj.AddMember("matrix", MakeValue(val, n.matrix.value, w.mAl).Move(), w.mAl);
+            json val;
+            obj["matrix"] = MakeValue(val, n.matrix.value);
         }
 
         if (n.translation.isPresent) {
-            Value val;
-            obj.AddMember("translation", MakeValue(val, n.translation.value, w.mAl).Move(), w.mAl);
+            json val;
+            obj["translation"] = MakeValue(val, n.translation.value);
         }
 
         if (n.scale.isPresent) {
-            Value val;
-            obj.AddMember("scale", MakeValue(val, n.scale.value, w.mAl).Move(), w.mAl);
+            json val;
+            obj["scale"] = MakeValue(val, n.scale.value);
         }
         if (n.rotation.isPresent) {
-            Value val;
-            obj.AddMember("rotation", MakeValue(val, n.rotation.value, w.mAl).Move(), w.mAl);
+            json val;
+            obj["rotation"] = MakeValue(val, n.rotation.value);
         }
 
-        AddRefsVector(obj, "children", n.children, w.mAl);
+        AddRefsVector(obj, "children", n.children );
 
-        AddRefsVector(obj, "meshes", n.meshes, w.mAl);
+        AddRefsVector(obj, "meshes", n.meshes);
 
-        AddRefsVector(obj, "skeletons", n.skeletons, w.mAl);
+        AddRefsVector(obj, "skeletons", n.skeletons);
 
         if (n.skin) {
-            obj.AddMember("skin", Value(n.skin->id, w.mAl).Move(), w.mAl);
+            obj["skin"] = n.skin->id;
         }
 
         if (!n.jointName.empty()) {
-          obj.AddMember("jointName", n.jointName, w.mAl);
+            obj["jointName"] = n.jointName;
         }
     }
 
-    inline void Write(Value& obj, Program& b, AssetWriter& w)
+    inline void Write(json& obj, Program& b, AssetWriter& w)
     {
 
     }
 
-    inline void Write(Value& obj, Sampler& b, AssetWriter& w)
+    inline void Write(json& obj, Sampler& b, AssetWriter& w)
     {
         if (b.wrapS) {
-            obj.AddMember("wrapS", b.wrapS, w.mAl);
+            obj["wrapS"] = b.wrapS;
         }
         if (b.wrapT) {
-            obj.AddMember("wrapT", b.wrapT, w.mAl);
+            obj["wrapT"] = b.wrapT;
         }
         if (b.magFilter) {
-            obj.AddMember("magFilter", b.magFilter, w.mAl);
+            obj["magFilter" ] = b.magFilter;
         }
         if (b.minFilter) {
-            obj.AddMember("minFilter", b.minFilter, w.mAl);
+            obj["minFilter"] = b.minFilter;
         }
     }
 
-    inline void Write(Value& scene, Scene& s, AssetWriter& w)
+    inline void Write(json& scene, Scene& s, AssetWriter& w)
     {
-        AddRefsVector(scene, "nodes", s.nodes, w.mAl);
+        AddRefsVector(scene, "nodes", s.nodes);
     }
 
-    inline void Write(Value& obj, Shader& b, AssetWriter& w)
+    inline void Write(json& obj, Shader& b, AssetWriter& w)
     {
 
     }
 
-    inline void Write(Value& obj, Skin& b, AssetWriter& w)
+    inline void Write(json& obj, Skin& b, AssetWriter& w)
     {
         /****************** jointNames *******************/
-        Value vJointNames;
-        vJointNames.SetArray();
-        vJointNames.Reserve(unsigned(b.jointNames.size()), w.mAl);
+        json vJointNames = json::array();
 
         for (size_t i = 0; i < unsigned(b.jointNames.size()); ++i) {
-            vJointNames.PushBack(StringRef(b.jointNames[i]->jointName), w.mAl);
+            vJointNames.push_back( b.jointNames[i]->jointName );
         }
-        obj.AddMember("jointNames", vJointNames, w.mAl);
+        obj["jointNames"] = vJointNames;
 
         if (b.bindShapeMatrix.isPresent) {
-            Value val;
-            obj.AddMember("bindShapeMatrix", MakeValue(val, b.bindShapeMatrix.value, w.mAl).Move(), w.mAl);
+            json val;
+            obj["bindShapeMatrix"] = MakeValue(val, b.bindShapeMatrix.value);
         }
 
         if (b.inverseBindMatrices) {
-            obj.AddMember("inverseBindMatrices", Value(b.inverseBindMatrices->id, w.mAl).Move(), w.mAl);
+            obj["inverseBindMatrices"] = b.inverseBindMatrices->id;
         }
 
     }
 
-    inline void Write(Value& obj, Technique& b, AssetWriter& w)
+    inline void Write(json& obj, Technique& b, AssetWriter& w)
     {
 
     }
 
-    inline void Write(Value& obj, Texture& tex, AssetWriter& w)
+    inline void Write(json& obj, Texture& tex, AssetWriter& w)
     {
         if (tex.source) {
-            obj.AddMember("source", Value(tex.source->id, w.mAl).Move(), w.mAl);
+            obj["source"] = tex.source->id;
         }
         if (tex.sampler) {
-            obj.AddMember("sampler", Value(tex.sampler->id, w.mAl).Move(), w.mAl);
+            obj["sampler"] = tex.sampler->id;
         }
     }
 
-    inline void Write(Value& obj, Light& b, AssetWriter& w)
+    inline void Write(json& obj, Light& b, AssetWriter& w)
     {
 
     }
@@ -476,9 +463,8 @@ namespace glTF {
     inline AssetWriter::AssetWriter(Asset& a)
         : mDoc()
         , mAsset(a)
-        , mAl(mDoc.GetAllocator())
     {
-        mDoc.SetObject();
+        mDoc = json::object();
 
         WriteMetadata();
         WriteExtensionsUsed();
@@ -490,7 +476,7 @@ namespace glTF {
 
         // Add the target scene field
         if (mAsset.scene) {
-            mDoc.AddMember("scene", StringRef(mAsset.scene->id), mAl);
+            mDoc["scene"]= mAsset.scene->id;
         }
     }
 
@@ -502,14 +488,16 @@ namespace glTF {
             throw DeadlyExportError("Could not open output file: " + std::string(path));
         }
 
-        StringBuffer docBuffer;
+        //StringBuffer docBuffer;
 
-        PrettyWriter<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
+        //PrettyWriter<StringBuffer> writer(docBuffer);
+        //mDoc.Accept(writer);
 
-        if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
+        std::ofstream o( path );
+        o << std::setw( 4 ) << mDoc << std::endl;
+        /*if (jsonOutFile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
             throw DeadlyExportError("Failed to write scene data!");
-        }
+        }*/
 
         // Write buffer data to separate .bin files
         for (unsigned int i = 0; i < mAsset.buffers.Size(); ++i) {
@@ -542,15 +530,16 @@ namespace glTF {
         // we will write the header later, skip its size
         outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
 
-        StringBuffer docBuffer;
+/*        StringBuffer docBuffer;
         Writer<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
-
-        if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
+        mDoc.Accept(writer);*/
+        std::string s = mDoc.dump( 4 );
+        if ( outfile->Write( s.c_str(), s.size(), 1 ) != 1 ) {
+        //if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
             throw DeadlyExportError("Failed to write scene data!");
         }
 
-        WriteBinaryData(outfile.get(), docBuffer.GetSize());
+        WriteBinaryData(outfile.get(), s.size());
     }
 
     inline void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
@@ -604,32 +593,30 @@ namespace glTF {
 
     inline void AssetWriter::WriteMetadata()
     {
-        Value asset;
-        asset.SetObject();
+        json asset = json::object();
         {
             char versionChar[10];
             ai_snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
-            asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
+            asset["version"] = versionChar;
 
-            asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
+            asset["generator"] = mAsset.asset.generator;
         }
-        mDoc.AddMember("asset", asset, mAl);
+        mDoc["asset"] = asset;
     }
 
     inline void AssetWriter::WriteExtensionsUsed()
     {
-        Value exts;
-        exts.SetArray();
+        json exts = json::array();
         {
             if (false)
-                exts.PushBack(StringRef("KHR_binary_glTF"), mAl);
+                exts.push_back("KHR_binary_glTF");
 
             if (false)
-                exts.PushBack(StringRef("KHR_materials_common"), mAl);
+                exts.push_back("KHR_materials_common");
         }
 
-        if (!exts.Empty())
-            mDoc.AddMember("extensionsUsed", exts, mAl);
+        if (!exts.empty())
+            mDoc["extensionsUsed"] = exts;
     }
 
     template<class T>
@@ -637,40 +624,40 @@ namespace glTF {
     {
         if (d.mObjs.empty()) return;
 
-        Value* container = &mDoc;
+        json* container = &mDoc;
 
         if (d.mExtId) {
-            Value* exts = FindObject(mDoc, "extensions");
+            json* exts = FindObject(mDoc, "extensions");
             if (!exts) {
-                mDoc.AddMember("extensions", Value().SetObject().Move(), mDoc.GetAllocator());
+                mDoc["extensions"] = json::object();
                 exts = FindObject(mDoc, "extensions");
             }
 
             if (!(container = FindObject(*exts, d.mExtId))) {
-                exts->AddMember(StringRef(d.mExtId), Value().SetObject().Move(), mDoc.GetAllocator());
+                //exts[ d.mExtId ] = json::object();
                 container = FindObject(*exts, d.mExtId);
             }
         }
 
-        Value* dict;
+        json* dict;
         if (!(dict = FindObject(*container, d.mDictId))) {
-            container->AddMember(StringRef(d.mDictId), Value().SetObject().Move(), mDoc.GetAllocator());
+            //container[d.mDictId] = json::object();
             dict = FindObject(*container, d.mDictId);
         }
 
         for (size_t i = 0; i < d.mObjs.size(); ++i) {
             if (d.mObjs[i]->IsSpecial()) continue;
 
-            Value obj;
-            obj.SetObject();
+            json obj;
 
             if (!d.mObjs[i]->name.empty()) {
-                obj.AddMember("name", StringRef(d.mObjs[i]->name.c_str()), mAl);
+                obj["name"] = d.mObjs[i]->name.c_str();
             }
 
             Write(obj, *d.mObjs[i], *this);
 
-            dict->AddMember(StringRef(d.mObjs[i]->id), obj, mAl);
+            std::string id = d.mObjs[ i ]->id;
+            (*dict)[id] = obj;
         }
     }
 
@@ -681,5 +668,3 @@ namespace glTF {
     }
 
 }
-
-

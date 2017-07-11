@@ -67,7 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #	include <Open3DGC/o3dgcSC3DMCEncoder.h>
 #endif
 
-using namespace rapidjson;
+//using namespace rapidjson;
 
 using namespace Assimp;
 using namespace glTF;

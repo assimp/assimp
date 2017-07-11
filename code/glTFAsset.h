@@ -57,11 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
-
-#define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/rapidjson.h>
-#include <rapidjson/document.h>
-#include <rapidjson/error/en.h>
+#include <json/json.hpp>
 
 #ifdef ASSIMP_API
 #   include <memory>
@@ -89,8 +85,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   endif
 #endif
 
-namespace glTF
-{
+namespace glTF {
+    using json = nlohmann::json;
+
 #ifdef ASSIMP_API
     using Assimp::IOStream;
     using Assimp::IOSystem;
@@ -122,9 +119,6 @@ namespace glTF
     };
 #endif
 
-    using rapidjson::Value;
-    using rapidjson::Document;
-
     class Asset;
     class AssetWriter;
 
@@ -140,19 +134,17 @@ namespace glTF
     typedef float (mat4)[16];
 
 
-    namespace Util
-    {
+    namespace Util {
         void EncodeBase64(const uint8_t* in, size_t inLength, std::string& out);
 
         size_t DecodeBase64(const char* in, size_t inLength, uint8_t*& out);
 
-        inline size_t DecodeBase64(const char* in, uint8_t*& out)
-        {
+        inline 
+        size_t DecodeBase64(const char* in, uint8_t*& out) {
             return DecodeBase64(in, strlen(in), out);
         }
 
-        struct DataURI
-        {
+        struct DataURI {
             const char* mediaType;
             const char* charset;
             bool base64;
@@ -174,8 +166,7 @@ namespace glTF
 
     //! For the KHR_binary_glTF extension (binary .glb file)
     //! 20-byte header (+ the JSON + a "body" data section)
-    struct GLB_Header
-    {
+    struct GLB_Header {
         uint8_t magic[4];     //!< Magic number: "glTF"
         uint32_t version;     //!< Version number (always 1 as of the last update)
         uint32_t length;      //!< Total length of the Binary glTF, including header, scene, and body, in bytes
@@ -189,8 +180,7 @@ namespace glTF
 
 
     //! Values for the GLB_Header::sceneFormat field
-    enum SceneFormat
-    {
+    enum SceneFormat {
         SceneFormat_JSON = 0
     };
 
@@ -294,7 +284,6 @@ namespace glTF
         TextureType_UNSIGNED_SHORT_5_5_5_1 = 32820
     };
 
-
     //! Values for the Accessor::type field (helper class)
     class AttribType
     {
@@ -378,7 +367,7 @@ namespace glTF
     };
 
 
-    //! Base classe for all glTF top-level objects
+    //! Base class for all glTF top-level objects
     struct Object
     {
         std::string id;   //!< The globally unique ID used to reference this object
@@ -407,7 +396,7 @@ namespace glTF
         Ref<BufferView> bufferView;  //!< The ID of the bufferView. (required)
         unsigned int byteOffset;     //!< The offset relative to the start of the bufferView in bytes. (required)
         unsigned int byteStride;     //!< The stride, in bytes, between attributes referenced by this accessor. (default: 0)
-        ComponentType componentType; //!< The datatype of components in the attribute. (required)
+        ComponentType componentType; //!< The data-type of components in the attribute. (required)
         unsigned int count;          //!< The number of attributes referenced by this accessor. (required)
         AttribType::Value type;      //!< Specifies if the attribute is a scalar, vector, or matrix. (required)
         std::vector<float> max;      //!< Maximum value of each component in this attribute.
@@ -459,7 +448,7 @@ namespace glTF
         }
 
         Accessor() {}
-        void Read(Value& obj, Asset& r);
+        void Read(json& obj, Asset& r);
     };
 
     //! A buffer points to binary geometry, animation, or skins.
@@ -546,7 +535,7 @@ namespace glTF
 		Buffer();
 		~Buffer();
 
-		void Read(Value& obj, Asset& r);
+		void Read(json& obj, Asset& r);
 
         bool LoadFromStream(IOStream& stream, size_t length = 0, size_t baseOffset = 0);
 
@@ -600,7 +589,7 @@ namespace glTF
 
         BufferViewTarget target; //! The target that the WebGL buffer should be bound to.
 
-        void Read(Value& obj, Asset& r);
+        void Read(json& obj, Asset& r);
     };
 
     struct Camera : public Object
@@ -631,7 +620,7 @@ namespace glTF
         };
 
         Camera() {}
-        void Read(Value& obj, Asset& r);
+        void Read(json& obj, Asset& r);
     };
 
 
@@ -653,7 +642,7 @@ namespace glTF
     public:
 
         Image();
-        void Read(Value& obj, Asset& r);
+        void Read(json& obj, Asset& r);
 
         inline bool HasData() const
             { return mDataLength > 0; }
@@ -705,7 +694,7 @@ namespace glTF
         Technique technique;
 
         Material() { SetDefaults(); }
-        void Read(Value& obj, Asset& r);
+        void Read(json& obj, Asset& r);
         void SetDefaults();
     };
 
@@ -798,7 +787,7 @@ namespace glTF
 		/// Get mesh data from JSON-object and place them to root asset.
 		/// \param [in] pJSON_Object - reference to pJSON-object from which data are read.
 		/// \param [out] pAsset_Root - reference to root assed where data will be stored.
-		void Read(Value& pJSON_Object, Asset& pAsset_Root);
+		void Read(json& pJSON_Object, Asset& pAsset_Root);
 
 		#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 			/// \fn void Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
@@ -829,13 +818,13 @@ namespace glTF
         Ref<Node> parent;                         //!< This is not part of the glTF specification. Used as a helper.
 
         Node() {}
-        void Read(Value& obj, Asset& r);
+        void Read(json& obj, Asset& r);
     };
 
     struct Program : public Object
     {
         Program() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
     };
 
 
@@ -847,7 +836,7 @@ namespace glTF
         SamplerWrap wrapT;          //!< The texture wrapping in the T direction. (required)
 
         Sampler() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
         void SetDefaults();
     };
 
@@ -856,13 +845,13 @@ namespace glTF
         std::vector< Ref<Node> > nodes;
 
         Scene() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
     };
 
     struct Shader : public Object
     {
         Shader() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
     };
 
     struct Skin : public Object
@@ -873,7 +862,7 @@ namespace glTF
         std::string name;                     //!< The user-defined name of this object.
 
         Skin() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
     };
 
     struct Technique : public Object
@@ -894,7 +883,7 @@ namespace glTF
         };
 
         Technique() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
     };
 
     //! A texture and its sampler.
@@ -910,7 +899,7 @@ namespace glTF
         //TextureType type; //!< Texel datatype. (default: TextureType_UNSIGNED_BYTE)
 
         Texture() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
     };
 
 
@@ -937,7 +926,7 @@ namespace glTF
         float falloffExponent;
 
         Light() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
 
         void SetDefaults();
     };
@@ -976,7 +965,7 @@ namespace glTF
         std::vector<AnimSampler> Samplers;         //!< The parameterized inputs representing the key-frame data.
 
         Animation() {}
-        void Read(Value& obj, Asset& r);
+        void Read( json& obj, Asset& r);
     };
 
 
@@ -986,12 +975,11 @@ namespace glTF
     public:
         virtual ~LazyDictBase() {}
 
-        virtual void AttachToDocument(Document& doc) = 0;
+        virtual void AttachToDocument( json& doc) = 0;
         virtual void DetachFromDocument() = 0;
 
         virtual void WriteObjects(AssetWriter& writer) = 0;
     };
-
 
     template<class T>
     class LazyDict;
@@ -1015,10 +1003,10 @@ namespace glTF
         Dict             mObjsById;  //! The read objects accessible by id
         const char*      mDictId;    //! ID of the dictionary object
         const char*      mExtId;     //! ID of the extension defining the dictionary
-        Value*           mDict;      //! JSON dictionary object
+        json*            mDict;      //! JSON dictionary object
         Asset&           mAsset;     //! The asset instance
 
-        void AttachToDocument(Document& doc);
+        void AttachToDocument( json& doc);
         void DetachFromDocument();
 
         void WriteObjects(AssetWriter& writer)
@@ -1060,7 +1048,7 @@ namespace glTF
 
         int version; //!< The glTF format version (should be 1)
 
-        void Read(Document& doc);
+        void Read( json& doc);
 
         AssetMetadata()
             : premultipliedAlpha(false)
@@ -1178,7 +1166,7 @@ namespace glTF
     private:
         void ReadBinaryHeader(IOStream& stream);
 
-        void ReadExtensionsUsed(Document& doc);
+        void ReadExtensionsUsed( json& doc);
 
 
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);

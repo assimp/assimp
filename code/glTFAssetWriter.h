@@ -52,11 +52,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include "glTFAsset.h"
+#include <json/json.hpp>
 
 namespace glTF
 {
+    using json = nlohmann::json;
 
-using rapidjson::MemoryPoolAllocator;
+//using rapidjson::MemoryPoolAllocator;
 
 class AssetWriter
 {
@@ -74,13 +76,11 @@ private:
     void WriteObjects(LazyDict<T>& d);
 
 public:
-    Document mDoc;
+    json mDoc;
     Asset& mAsset;
 
-    MemoryPoolAllocator<>& mAl;
 
     AssetWriter(Asset& asset);
-
     void WriteFile(const char* path);
     void WriteGLBFile(const char* path);
 };

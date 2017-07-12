@@ -539,7 +539,6 @@ aiNode* ImportNode(aiScene* pScene, glTF::Asset& r, std::vector<unsigned int>& m
             matrix = s * matrix;
         }
 
-
         if (node.rotation.isPresent) {
             aiQuaternion rot;
             CopyValue(node.rotation.value, rot);
@@ -656,8 +655,8 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
 
     // read the asset file
     glTF::Asset asset(pIOHandler);
-    asset.Load(pFile, GetExtension(pFile) == "glb");
-
+    const bool isBinary = GetExtension(pFile) == "glb";
+    asset.Load(pFile, isBinary );
 
     //
     // Copy the data out

@@ -514,8 +514,8 @@ static bool ReadMatValue( json& val, glTF::mat4& out ) {
 
 inline 
 void BufferView::Read(json& obj, Asset& r) {
-    const char *bufferId = MemberOrDefault<std::string>( obj, "buffer", nullptr ).c_str();
-    if ( bufferId ) {
+    std::string bufferId = MemberOrDefault<std::string>( obj, "buffer", "" );
+    if ( !bufferId.empty() ) {
         buffer = r.buffers.Get( bufferId );
     }
 
@@ -529,7 +529,8 @@ void BufferView::Read(json& obj, Asset& r) {
 
 inline void Accessor::Read(json& obj, Asset& r)
 {
-    const char* bufferViewId = MemberOrDefault<std::string>(obj, "bufferView", 0).c_str();
+    std::string id = MemberOrDefault<std::string>(obj, "bufferView", "");
+    const char* bufferViewId = id.c_str();
     if (bufferViewId) {
         bufferView = r.bufferViews.Get(bufferViewId);
     }
@@ -997,14 +998,14 @@ mr_skip_extensions:
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
 {
-typedef unsigned short IndicesType;///< \sa glTFExporter::ExportMeshes.
+    typedef unsigned short IndicesType;///< \sa glTFExporter::ExportMeshes.
 
-o3dgc::SC3DMCDecoder<IndicesType> decoder;
-o3dgc::IndexedFaceSet<IndicesType> ifs;
-o3dgc::BinaryStream bstream;
-uint8_t* decoded_data;
-size_t decoded_data_size = 0;
-Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
+    o3dgc::SC3DMCDecoder<IndicesType> decoder;
+    o3dgc::IndexedFaceSet<IndicesType> ifs;
+    o3dgc::BinaryStream bstream;
+    uint8_t* decoded_data;
+    size_t decoded_data_size = 0;
+    Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
 
 	// Read data from buffer and place it in BinaryStream for decoder.
 	// Just "Count" because always is used type equivalent to uint8_t.
@@ -1315,10 +1316,12 @@ inline void AssetMetadata::Read(json& doc)
     if (json* obj = FindObject(doc, "asset")) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
-
         premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
-        statedVersion = MemberOrDefault(*obj, "version", 0);
 
+        std::string statedVersionStr = MemberOrDefault(*obj, "version", std::string(""));
+        if (!statedVersionStr.empty()) {
+            statedVersion = atoi(statedVersionStr.c_str());
+        }
         if (json* profile = FindObject(*obj, "profile")) {
             ReadMember(*profile, "api",     this->profile.api);
             ReadMember(*profile, "version", this->profile.version);
@@ -1398,9 +1401,7 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
         mBodyLength = 0;
     }
 
-
     // read the scene data
-
     std::vector<char> sceneData(mSceneLength + 1);
     sceneData[mSceneLength] = '\0';
 
@@ -1408,13 +1409,9 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
         throw DeadlyImportError("GLTF: Could not read the file contents");
     }
 
-
     // parse the JSON document
-
     json doc;
-    doc = json::parse( &sceneData[ 0 ] );
-    //doc.ParseInsitu(&sceneData[0]);
-    
+    doc = json::parse( &sceneData[ 0 ] );    
     if (doc.empty()) {
         char buffer[32];
         ai_snprintf(buffer, 32, "GLTF: JSON parse error");
@@ -1430,7 +1427,6 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
             throw DeadlyImportError("GLTF: Unable to read gltf file");
         }
     }
-
 
     // Load the metadata
     asset.Read(doc);

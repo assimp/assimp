@@ -50,7 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fast_atof.h"
 #include <memory>
 
-
 using namespace Assimp;
 namespace EXPRESS = STEP::EXPRESS;
 
@@ -62,13 +61,11 @@ std::string AddLineNumber(const std::string& s,uint64_t line /*= LINE_NOT_SPECIF
     return line == STEP::SyntaxError::LINE_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(line ",line,") ",s) );
 }
 
-
 // ------------------------------------------------------------------------------------------------
 std::string AddEntityID(const std::string& s,uint64_t entity /*= ENTITY_NOT_SPECIFIED*/, const std::string& prefix = "")
 {
     return entity == STEP::TypeError::ENTITY_NOT_SPECIFIED ? prefix+s : static_cast<std::string>( (Formatter::format(),prefix,"(entity #",entity,") ",s));
 }
-
 
 // ------------------------------------------------------------------------------------------------
 STEP::SyntaxError::SyntaxError (const std::string& s,uint64_t line /* = LINE_NOT_SPECIFIED */)
@@ -83,7 +80,6 @@ STEP::TypeError::TypeError (const std::string& s,uint64_t entity /* = ENTITY_NOT
 {
 
 }
-
 
 // ------------------------------------------------------------------------------------------------
 STEP::DB* STEP::ReadFileHeader(std::shared_ptr<IOStream> stream)

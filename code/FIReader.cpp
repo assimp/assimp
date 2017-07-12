@@ -84,8 +84,8 @@ static size_t parseMagic(const uint8_t *data, const uint8_t *dataEnd) {
         return 4;
     case 0x3c3f786d: // "<?xm"
         {
-            auto xmlDeclarationsLength = sizeof(xmlDeclarations) / sizeof(xmlDeclarations[0]);
-            for (auto i = 0; i < xmlDeclarationsLength; ++i) {
+            size_t xmlDeclarationsLength = sizeof(xmlDeclarations) / sizeof(xmlDeclarations[0]);
+            for (size_t i = 0; i < xmlDeclarationsLength; ++i) {
                 auto xmlDeclaration = xmlDeclarations[i];
                 ptrdiff_t xmlDeclarationLength = strlen(xmlDeclaration);
                 if ((dataEnd - data >= xmlDeclarationLength) && (memcmp(xmlDeclaration, data, xmlDeclarationLength) == 0)) {
@@ -127,7 +127,7 @@ static std::string parseUTF16String(const uint8_t *data, size_t len) {
 
 struct FIStringValueImpl: public FIStringValue {
     inline FIStringValueImpl(std::string &&value_) { value = std::move(value_); }
-    virtual const std::string &toString() const override { return value; }
+    virtual const std::string &toString() const /*override*/ { return value; }
 };
 
 std::shared_ptr<FIStringValue> FIStringValue::create(std::string &&value) {
@@ -138,7 +138,7 @@ struct FIHexValueImpl: public FIHexValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIHexValueImpl(std::vector<uint8_t> &&value_):  strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -158,14 +158,14 @@ struct FIBase64ValueImpl: public FIBase64Value {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIBase64ValueImpl(std::vector<uint8_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
             uint8_t c1, c2;
             int imod3 = 0;
-            auto valueSize = value.size();
-            for (auto i = 0; i < valueSize; ++i) {
+            std::vector<uint8_t>::size_type valueSize = value.size();
+            for (std::vector<uint8_t>::size_type i = 0; i < valueSize; ++i) {
                 c2 = value[i];
                 switch (imod3) {
                 case 0:
@@ -208,7 +208,7 @@ struct FIShortValueImpl: public FIShortValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIShortValueImpl(std::vector<int16_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -228,7 +228,7 @@ struct FIIntValueImpl: public FIIntValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIIntValueImpl(std::vector<int32_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -248,7 +248,7 @@ struct FILongValueImpl: public FILongValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FILongValueImpl(std::vector<int64_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -268,7 +268,7 @@ struct FIBoolValueImpl: public FIBoolValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIBoolValueImpl(std::vector<bool> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -289,7 +289,7 @@ struct FIFloatValueImpl: public FIFloatValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIFloatValueImpl(std::vector<float> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -309,7 +309,7 @@ struct FIDoubleValueImpl: public FIDoubleValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIDoubleValueImpl(std::vector<double> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
@@ -329,13 +329,13 @@ struct FIUUIDValueImpl: public FIUUIDValue {
     mutable std::string strValue;
     mutable bool strValueValid;
     inline FIUUIDValueImpl(std::vector<uint8_t> &&value_): strValueValid(false) { value = std::move(value_); }
-    virtual const std::string &toString() const override {
+    virtual const std::string &toString() const /*override*/ {
         if (!strValueValid) {
             strValueValid = true;
             std::ostringstream os;
             os << std::hex << std::uppercase << std::setfill('0');
-            auto valueSize = value.size();
-            for (auto i = 0; i < valueSize; ++i) {
+            std::vector<uint8_t>::size_type valueSize = value.size();
+            for (std::vector<uint8_t>::size_type i = 0; i < valueSize; ++i) {
                 switch (i & 15) {
                 case 0:
                     if (i > 0) {
@@ -376,7 +376,7 @@ std::shared_ptr<FIUUIDValue> FIUUIDValue::create(std::vector<uint8_t> &&value) {
 
 struct FICDATAValueImpl: public FICDATAValue {
     inline FICDATAValueImpl(std::string &&value_) { value = std::move(value_); }
-    virtual const std::string &toString() const override { return value; }
+    virtual const std::string &toString() const /*override*/ { return value; }
 };
 
 std::shared_ptr<FICDATAValue> FICDATAValue::create(std::string &&value) {
@@ -384,19 +384,19 @@ std::shared_ptr<FICDATAValue> FICDATAValue::create(std::string &&value) {
 }
 
 struct FIHexDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         return FIHexValue::create(std::vector<uint8_t>(data, data + len));
     }
 };
 
 struct FIBase64Decoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         return FIBase64Value::create(std::vector<uint8_t>(data, data + len));
     }
 };
 
 struct FIShortDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 1) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -413,7 +413,7 @@ struct FIShortDecoder: public FIDecoder {
 };
 
 struct FIIntDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 3) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -430,7 +430,7 @@ struct FIIntDecoder: public FIDecoder {
 };
 
 struct FILongDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 7) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -448,7 +448,7 @@ struct FILongDecoder: public FIDecoder {
 };
 
 struct FIBoolDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len < 1) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -470,7 +470,7 @@ struct FIBoolDecoder: public FIDecoder {
 };
 
 struct FIFloatDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 3) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -487,7 +487,7 @@ struct FIFloatDecoder: public FIDecoder {
 };
 
 struct FIDoubleDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 7) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -505,7 +505,7 @@ struct FIDoubleDecoder: public FIDecoder {
 };
 
 struct FIUUIDDecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         if (len & 15) {
             throw DeadlyImportError(parseErrorMessage);
         }
@@ -514,7 +514,7 @@ struct FIUUIDDecoder: public FIDecoder {
 };
 
 struct FICDATADecoder: public FIDecoder {
-    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) override {
+    virtual std::shared_ptr<const FIValue> decode(const uint8_t *data, size_t len) /*override*/ {
         return FICDATAValue::create(parseUTF8String(data, len));
     }
 };
@@ -529,7 +529,7 @@ public:
 
     virtual ~CFIReaderImpl() {}
 
-    virtual bool read() override {
+    virtual bool read() /*override*/ {
         if (headerPending) {
             headerPending = false;
             parseHeader();
@@ -632,29 +632,29 @@ public:
         throw DeadlyImportError(parseErrorMessage);
     }
 
-    virtual irr::io::EXML_NODE getNodeType() const override {
+    virtual irr::io::EXML_NODE getNodeType() const /*override*/ {
         return currentNodeType;
     }
 
-    virtual int getAttributeCount() const override {
+    virtual int getAttributeCount() const /*override*/ {
         return static_cast<int>(attributes.size());
     }
 
-    virtual const char* getAttributeName(int idx) const override {
+    virtual const char* getAttributeName(int idx) const /*override*/ {
         if (idx < 0 || idx >= (int)attributes.size()) {
             return nullptr;
         }
         return attributes[idx].name.c_str();
     }
 
-    virtual const char* getAttributeValue(int idx) const override {
+    virtual const char* getAttributeValue(int idx) const /*override*/ {
         if (idx < 0 || idx >= (int)attributes.size()) {
             return nullptr;
         }
         return attributes[idx].value->toString().c_str();
     }
 
-    virtual const char* getAttributeValue(const char* name) const override {
+    virtual const char* getAttributeValue(const char* name) const /*override*/ {
         const Attribute* attr = getAttributeByName(name);
         if (!attr) {
             return nullptr;
@@ -662,7 +662,7 @@ public:
         return attr->value->toString().c_str();
     }
 
-    virtual const char* getAttributeValueSafe(const char* name) const override {
+    virtual const char* getAttributeValueSafe(const char* name) const /*override*/ {
         const Attribute* attr = getAttributeByName(name);
         if (!attr) {
             return EmptyString.c_str();
@@ -670,7 +670,7 @@ public:
         return attr->value->toString().c_str();
     }
 
-    virtual int getAttributeValueAsInt(const char* name) const override {
+    virtual int getAttributeValueAsInt(const char* name) const /*override*/ {
         const Attribute* attr = getAttributeByName(name);
         if (!attr) {
             return 0;
@@ -682,7 +682,7 @@ public:
         return stoi(attr->value->toString());
     }
 
-    virtual int getAttributeValueAsInt(int idx) const override {
+    virtual int getAttributeValueAsInt(int idx) const /*override*/ {
         if (idx < 0 || idx >= (int)attributes.size()) {
             return 0;
         }
@@ -693,7 +693,7 @@ public:
         return stoi(attributes[idx].value->toString());
     }
 
-    virtual float getAttributeValueAsFloat(const char* name) const override {
+    virtual float getAttributeValueAsFloat(const char* name) const /*override*/ {
         const Attribute* attr = getAttributeByName(name);
         if (!attr) {
             return 0;
@@ -705,7 +705,7 @@ public:
         return stof(attr->value->toString());
     }
 
-    virtual float getAttributeValueAsFloat(int idx) const override {
+    virtual float getAttributeValueAsFloat(int idx) const /*override*/ {
         if (idx < 0 || idx >= (int)attributes.size()) {
             return 0;
         }
@@ -716,34 +716,34 @@ public:
         return stof(attributes[idx].value->toString());
     }
 
-    virtual const char* getNodeName() const override {
+    virtual const char* getNodeName() const /*override*/ {
         return nodeName.c_str();
     }
 
-    virtual const char* getNodeData() const override {
+    virtual const char* getNodeData() const /*override*/ {
         return nodeName.c_str();
     }
 
-    virtual bool isEmptyElement() const override {
+    virtual bool isEmptyElement() const /*override*/ {
         return emptyElement;
     }
 
-    virtual irr::io::ETEXT_FORMAT getSourceFormat() const override {
+    virtual irr::io::ETEXT_FORMAT getSourceFormat() const /*override*/ {
         return irr::io::ETF_UTF8;
     }
 
-    virtual irr::io::ETEXT_FORMAT getParserFormat() const override {
+    virtual irr::io::ETEXT_FORMAT getParserFormat() const /*override*/ {
         return irr::io::ETF_UTF8;
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const override {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const /*override*/ {
         if (idx < 0 || idx >= (int)attributes.size()) {
             return nullptr;
         }
         return attributes[idx].value;
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* name) const override {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* name) const /*override*/ {
         const Attribute* attr = getAttributeByName(name);
         if (!attr) {
             return nullptr;
@@ -751,11 +751,11 @@ public:
         return attr->value;
     }
 
-    virtual void registerDecoder(const std::string &algorithmUri, std::unique_ptr<FIDecoder> decoder) override {
+    virtual void registerDecoder(const std::string &algorithmUri, std::unique_ptr<FIDecoder> decoder) /*override*/ {
         decoderMap[algorithmUri] = std::move(decoder);
     }
 
-    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) override {
+    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) /*override*/ {
         vocabularyMap[vocabularyUri] = vocabulary;
     }
 
@@ -1706,81 +1706,81 @@ public:
 
     virtual ~CXMLReaderImpl() {}
 
-    virtual bool read() override {
+    virtual bool read() /*override*/ {
         return reader->read();
     }
 
-    virtual irr::io::EXML_NODE getNodeType() const override {
+    virtual irr::io::EXML_NODE getNodeType() const /*override*/ {
         return reader->getNodeType();
     }
 
-    virtual int getAttributeCount() const override {
+    virtual int getAttributeCount() const /*override*/ {
         return reader->getAttributeCount();
     }
 
-    virtual const char* getAttributeName(int idx) const override {
+    virtual const char* getAttributeName(int idx) const /*override*/ {
         return reader->getAttributeName(idx);
     }
 
-    virtual const char* getAttributeValue(int idx) const override {
+    virtual const char* getAttributeValue(int idx) const /*override*/ {
         return reader->getAttributeValue(idx);
     }
 
-    virtual const char* getAttributeValue(const char* name) const override {
+    virtual const char* getAttributeValue(const char* name) const /*override*/ {
         return reader->getAttributeValue(name);
     }
 
-    virtual const char* getAttributeValueSafe(const char* name) const override {
+    virtual const char* getAttributeValueSafe(const char* name) const /*override*/ {
         return reader->getAttributeValueSafe(name);
     }
 
-    virtual int getAttributeValueAsInt(const char* name) const override {
+    virtual int getAttributeValueAsInt(const char* name) const /*override*/ {
         return reader->getAttributeValueAsInt(name);
     }
 
-    virtual int getAttributeValueAsInt(int idx) const override {
+    virtual int getAttributeValueAsInt(int idx) const /*override*/ {
         return reader->getAttributeValueAsInt(idx);
     }
 
-    virtual float getAttributeValueAsFloat(const char* name) const override {
+    virtual float getAttributeValueAsFloat(const char* name) const /*override*/ {
         return reader->getAttributeValueAsFloat(name);
     }
 
-    virtual float getAttributeValueAsFloat(int idx) const override {
+    virtual float getAttributeValueAsFloat(int idx) const /*override*/ {
         return reader->getAttributeValueAsFloat(idx);
     }
 
-    virtual const char* getNodeName() const override {
+    virtual const char* getNodeName() const /*override*/ {
         return reader->getNodeName();
     }
 
-    virtual const char* getNodeData() const override {
+    virtual const char* getNodeData() const /*override*/ {
         return reader->getNodeData();
     }
 
-    virtual bool isEmptyElement() const override {
+    virtual bool isEmptyElement() const /*override*/ {
         return reader->isEmptyElement();
     }
 
-    virtual irr::io::ETEXT_FORMAT getSourceFormat() const override {
+    virtual irr::io::ETEXT_FORMAT getSourceFormat() const /*override*/ {
         return reader->getSourceFormat();
     }
 
-    virtual irr::io::ETEXT_FORMAT getParserFormat() const override {
+    virtual irr::io::ETEXT_FORMAT getParserFormat() const /*override*/ {
         return reader->getParserFormat();
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const override {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(int idx) const /*override*/ {
         return nullptr;
     }
 
-    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* name) const override {
+    virtual std::shared_ptr<const FIValue> getAttributeEncodedValue(const char* name) const /*override*/ {
         return nullptr;
     }
 
-    virtual void registerDecoder(const std::string &algorithmUri, std::unique_ptr<FIDecoder> decoder) override {}
+    virtual void registerDecoder(const std::string &algorithmUri, std::unique_ptr<FIDecoder> decoder) /*override*/ {}
 
-    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) override {}
+    virtual void registerVocabulary(const std::string &vocabularyUri, const FIVocabulary *vocabulary) /*override*/ {}
 
 private:
 

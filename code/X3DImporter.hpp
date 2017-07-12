@@ -57,7 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "irrXMLWrapper.h"
 #include "FIReader.hpp"
-#include <regex>
+//#include <regex>
 
 namespace Assimp {
 
@@ -816,8 +816,8 @@ private:
     /****************** Constants ******************/
     /***********************************************/
     static const aiImporterDesc Description;
-    static const std::regex pattern_nws;
-    static const std::regex pattern_true;
+    //static const std::regex pattern_nws;
+    //static const std::regex pattern_true;
 
 
     /***********************************************/

@@ -57,6 +57,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, stdlib.
 #include <memory>
 #include <string>
+#include <iterator>
 
 namespace Assimp {
 
@@ -75,8 +76,32 @@ const aiImporterDesc X3DImporter::Description = {
 	"x3d x3db"
 };
 
-const std::regex X3DImporter::pattern_nws(R"([^, \t\r\n]+)");
-const std::regex X3DImporter::pattern_true(R"(^\s*(?:true|1)\s*$)", std::regex::icase);
+//const std::regex X3DImporter::pattern_nws(R"([^, \t\r\n]+)");
+//const std::regex X3DImporter::pattern_true(R"(^\s*(?:true|1)\s*$)", std::regex::icase);
+
+struct WordIterator {
+    static const char *whitespace;
+    const char *start_, *end_;
+    WordIterator(const char *start, const char *end): start_(start), end_(end) {
+        start_ = start + strspn(start, whitespace);
+        if (start_ >= end_) {
+            start_ = 0;
+        }
+    }
+    WordIterator(): start_(0), end_(0) {}
+    bool operator!=(WordIterator &other) const { return start_ != other.start_; }
+    WordIterator &operator++() {
+        start_ += strcspn(start_, whitespace);
+        start_ += strspn(start_, whitespace);
+        if (start_ >= end_) {
+            start_ = 0;
+        }
+        return *this;
+    }
+    const char *operator*() const { return start_; }
+};
+
+const char *WordIterator::whitespace = ", \t\r\n";
 
 X3DImporter::X3DImporter()
 : NodeElement_Cur( nullptr )
@@ -473,10 +498,15 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrB(const int pAttrIdx, std::vector
     }
     else {
         const char *val = mReader->getAttributeValue(pAttrIdx);
-        std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
-        const std::cregex_iterator wordItEnd;
         pValue.clear();
-        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::regex_match(match.str(), pattern_true); });
+
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::regex_match(match.str(), pattern_true); });
+
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return (::tolower(match[0]) == 't') || (match[0] == '1'); });
     }
 }
 
@@ -488,10 +518,15 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrI32(const int pAttrIdx, std::vect
     }
     else {
         const char *val = mReader->getAttributeValue(pAttrIdx);
-        std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
-        const std::cregex_iterator wordItEnd;
         pValue.clear();
-        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stoi(match.str()); });
+
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stoi(match.str()); });
+
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atoi(match); });
     }
 }
 
@@ -503,10 +538,15 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrF(const int pAttrIdx, std::vector
     }
     else {
         const char *val = mReader->getAttributeValue(pAttrIdx);
-        std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
-        const std::cregex_iterator wordItEnd;
         pValue.clear();
-        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stof(match.str()); });
+
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stof(match.str()); });
+
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atof(match); });
     }
 }
 
@@ -518,10 +558,15 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrD(const int pAttrIdx, std::vector
     }
     else {
         const char *val = mReader->getAttributeValue(pAttrIdx);
-        std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
-        const std::cregex_iterator wordItEnd;
         pValue.clear();
-        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stod(match.str()); });
+
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stod(match.str()); });
+
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atof(match); });
     }
 }
 

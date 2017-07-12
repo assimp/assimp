@@ -55,12 +55,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 
+// Forward declarations
 struct aiScene;
 struct aiNode;
 struct aiMaterial;
 
-namespace glTF
-{
+namespace glTF {
     template<class T>
     class Ref;
 
@@ -69,47 +69,42 @@ namespace glTF
     struct Node;
 }
 
-namespace Assimp
-{
-    class IOSystem;
-    class IOStream;
-    class ExportProperties;
+namespace Assimp {
 
-    // ------------------------------------------------------------------------------------------------
-    /** Helper class to export a given scene to an glTF file. */
-    // ------------------------------------------------------------------------------------------------
-    class glTFExporter
-    {
-    public:
-        /// Constructor for a specific scene to export
-        glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
-            const ExportProperties* pProperties, bool binary);
+class IOSystem;
+class IOStream;
+class ExportProperties;
 
-    private:
+// ------------------------------------------------------------------------------------------------
+/** Helper class to export a given scene to an glTF file. */
+// ------------------------------------------------------------------------------------------------
+class glTFExporter {
+public:
+    /// Constructor for a specific scene to export
+    glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
+        const ExportProperties* pProperties, bool binary);
 
-        const char* mFilename;
-        IOSystem* mIOSystem;
-        const aiScene* mScene;
-        const ExportProperties* mProperties;
+private:
+    void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
+    void GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop);
+    void GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
+    void ExportMetadata();
+    void ExportMaterials();
+    void ExportMeshes();
+    unsigned int ExportNodeHierarchy(const aiNode* n);
+    unsigned int ExportNode(const aiNode* node, glTF::Ref<glTF::Node>& parent);
+    void ExportScene();
+    void ExportAnimations();
 
-        std::map<std::string, unsigned int> mTexturesByPath;
-
-        std::shared_ptr<glTF::Asset> mAsset;
-
-        std::vector<unsigned char> mBodyData;
-
-        void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
-
-        void GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop);
-        void GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
-        void ExportMetadata();
-        void ExportMaterials();
-        void ExportMeshes();
-        unsigned int ExportNodeHierarchy(const aiNode* n);
-        unsigned int ExportNode(const aiNode* node, glTF::Ref<glTF::Node>& parent);
-        void ExportScene();
-        void ExportAnimations();
-    };
+private:
+    const char* mFilename;
+    IOSystem* mIOSystem;
+    const aiScene* mScene;
+    const ExportProperties* mProperties;
+    std::map<std::string, unsigned int> mTexturesByPath;
+    std::shared_ptr<glTF::Asset> mAsset;
+    std::vector<unsigned char> mBodyData;
+};
 
 }
 

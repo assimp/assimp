@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include <assimp/DefaultIOSystem.h>
 
+//
 struct aiNode;
-
 
 namespace glTF
 {
@@ -69,13 +69,6 @@ protected:
     virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
 
 private:
-
-    std::vector<unsigned int> meshOffsets;
-
-    std::vector<int> embeddedTexIdxs;
-
-    aiScene* mScene;
-
     void ImportEmbeddedTextures(glTF::Asset& a);
     void ImportMaterials(glTF::Asset& a);
     void ImportMeshes(glTF::Asset& a);
@@ -83,6 +76,10 @@ private:
     void ImportLights(glTF::Asset& a);
     void ImportNodes(glTF::Asset& a);
 
+private:
+    std::vector<unsigned int> meshOffsets;
+    std::vector<int> embeddedTexIdxs;
+    aiScene* mScene;
 };
 
 } // Namespace assimp

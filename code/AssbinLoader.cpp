@@ -210,6 +210,8 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node, aiNode* p
     (*node)->mTransformation = Read<aiMatrix4x4>(stream);
     (*node)->mNumChildren = Read<unsigned int>(stream);
     (*node)->mNumMeshes = Read<unsigned int>(stream);
+	unsigned int nb_metadata = Read<unsigned int>(stream);
+
     if(parent)
     {
         (*node)->mParent = parent;
@@ -231,6 +233,41 @@ void AssbinImporter::ReadBinaryNode( IOStream * stream, aiNode** node, aiNode* p
         }
     }
 
+	if (nb_metadata)
+	{
+		(*node)->mMetaData = aiMetadata::Alloc(nb_metadata);
+		for (unsigned int i = 0; i < nb_metadata; ++i) {
+			(*node)->mMetaData->mKeys[i] = Read<aiString>(stream);
+			(*node)->mMetaData->mValues[i].mType = (aiMetadataType) Read<uint16_t>(stream);
+			void* data = NULL;
+
+			switch ((*node)->mMetaData->mValues[i].mType) {
+			case AI_BOOL:
+				data = new bool(Read<bool>(stream));
+				break;
+			case AI_INT32:
+				data = new int32_t(Read<int32_t>(stream));
+				break;
+			case AI_UINT64:
+				data = new uint64_t(Read<uint64_t>(stream));
+				break;
+			case AI_FLOAT:
+				data = new float(Read<float>(stream));
+				break;
+			case AI_DOUBLE:
+				data = new double(Read<double>(stream));
+				break;
+			case AI_AISTRING:
+				data = new aiString(Read<aiString>(stream));
+				break;
+			case AI_AIVECTOR3D:
+				data = new aiVector3D(Read<aiVector3D>(stream));
+				break;
+			}
+
+			(*node)->mMetaData->mValues[i].mData = data;
+		}
+	}
 }
 
 // -----------------------------------------------------------------------------------

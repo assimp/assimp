@@ -892,15 +892,17 @@ inline void Mesh::Read(json& pJSON_Object, Asset& pAsset_Root)
 
             Primitive& prim = this->primitives[i];
             prim.mode = MemberOrDefault(primitive, "mode", PrimitiveMode_TRIANGLES);
-
+            
+            
             if ( json* attrs = FindObject(primitive, "attributes")) {
                 for ( json::iterator it = attrs->begin(); it != attrs->end(); ++it ) {
                     //for ( Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it ) {
+                    
                     if ( !it.value().is_string() ) {
                         continue;
                     }
-                    
-                    const char* attr = it.key().c_str();
+                    std::string key = it.key();
+                    const char* attr = key.c_str();
                     // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 

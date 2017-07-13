@@ -424,7 +424,6 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                 }
             }
 
-
             if (prim.material) {
                 aim->mMaterialIndex = prim.material.GetIndex();
             }

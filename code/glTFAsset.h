@@ -1164,10 +1164,7 @@ namespace glTF {
 
     private:
         void ReadBinaryHeader(IOStream& stream);
-
         void ReadExtensionsUsed( json& doc);
-
-
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
     };
 

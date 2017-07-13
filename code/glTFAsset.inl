@@ -702,7 +702,8 @@ inline void Image::Read(json& obj, Asset& r)
 
     if (!mDataLength) {
         if ( json* uri = FindString(obj, "uri")) {
-            const char* uristr = uri->get<std::string>().c_str();
+            std::string uriStdStr = uri->get<std::string>();
+            const char* uristr = uriStdStr.c_str();
 
             Util::DataURI dataURI;
             if (ParseDataURI(uristr, uri->get<std::string>().size(), dataURI)) {
@@ -1320,9 +1321,16 @@ inline void AssetMetadata::Read(json& doc)
         ReadMember(*obj, "generator", generator);
         premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
 
-        std::string statedVersionStr = MemberOrDefault(*obj, "version", std::string(""));
-        if (!statedVersionStr.empty()) {
-            statedVersion = atoi(statedVersionStr.c_str());
+        json *version = FindObject( *obj, "version");
+        if ( nullptr != version ) {
+            if ( version->is_number_integer() ) {
+                statedVersion = MemberOrDefault( *obj, "version", 0 );
+            } else if ( version->is_string() ) {
+                std::string statedVersionStr = MemberOrDefault( *obj, "version", std::string( "" ) );
+                if ( !statedVersionStr.empty() ) {
+                    statedVersion = atoi( statedVersionStr.c_str() );
+                }
+            }
         }
         if (json* profile = FindObject(*obj, "profile")) {
             ReadMember(*profile, "api",     this->profile.api);

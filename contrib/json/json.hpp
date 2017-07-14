@@ -68,6 +68,10 @@ SOFTWARE.
     #endif
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define constexpr
+#endif
+
 #if !defined(HAS_NOEXCEPT)
 #if defined(__clang__)
 #if __has_feature(cxx_noexcept)
@@ -13011,6 +13015,10 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 // restore GCC/clang diagnostic settings
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
     #pragma GCC diagnostic pop
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#undef constexpr
 #endif
 
 // clean up

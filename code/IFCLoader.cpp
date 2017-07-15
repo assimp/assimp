@@ -973,6 +973,4 @@ void MakeTreeRelative(ConversionData& conv)
 
 } // !anon
 
-
-
 #endif

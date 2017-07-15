@@ -424,7 +424,6 @@ void glTFImporter::ImportMeshes(glTF::Asset& r)
                 }
             }
 
-
             if (prim.material) {
                 aim->mMaterialIndex = prim.material.GetIndex();
             }
@@ -538,7 +537,6 @@ aiNode* ImportNode(aiScene* pScene, glTF::Asset& r, std::vector<unsigned int>& m
             aiMatrix4x4::Scaling(scal, s);
             matrix = s * matrix;
         }
-
 
         if (node.rotation.isPresent) {
             aiQuaternion rot;
@@ -656,8 +654,8 @@ void glTFImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOS
 
     // read the asset file
     glTF::Asset asset(pIOHandler);
-    asset.Load(pFile, GetExtension(pFile) == "glb");
-
+    const bool isBinary = GetExtension(pFile) == "glb";
+    asset.Load(pFile, isBinary );
 
     //
     // Copy the data out

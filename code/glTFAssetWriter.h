@@ -52,40 +52,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
 #include "glTFAsset.h"
+#include <json/json.hpp>
 
-namespace glTF
-{
+namespace glTF {
+    
+using json = nlohmann::json;
 
-using rapidjson::MemoryPoolAllocator;
-
-class AssetWriter
-{
+class AssetWriter {
     template<class T>
     friend void WriteLazyDict(LazyDict<T>& d, AssetWriter& w);
 
 private:
-
     void WriteBinaryData(IOStream* outfile, size_t sceneLength);
-
     void WriteMetadata();
     void WriteExtensionsUsed();
-
     template<class T>
     void WriteObjects(LazyDict<T>& d);
 
 public:
-    Document mDoc;
+    json mDoc;
     Asset& mAsset;
-
-    MemoryPoolAllocator<>& mAl;
-
     AssetWriter(Asset& asset);
-
     void WriteFile(const char* path);
     void WriteGLBFile(const char* path);
 };
 
-}
+} // Namespace glTF
 
 // Include the implementation of the methods
 #include "glTFAssetWriter.inl"

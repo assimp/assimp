@@ -486,7 +486,6 @@ ADD_ASSIMP_IMPORTER( XGL
   XGLLoader.h
 )
 
-
 ADD_ASSIMP_IMPORTER( FBX
   FBXImporter.cpp
   FBXCompileConfig.h

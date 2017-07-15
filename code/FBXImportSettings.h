@@ -63,6 +63,7 @@ struct ImportSettings
         , readWeights(true)
         , preservePivots(true)
         , optimizeEmptyAnimationCurves(true)
+		, searchEmbeddedTextures(false)
     {}
 
 
@@ -137,6 +138,10 @@ struct ImportSettings
      *  values matching the corresponding node transformation.
      *  The default value is true. */
     bool optimizeEmptyAnimationCurves;
+
+	/** search for embedded loaded textures, where no embedded texture data is provided.
+	*  The default value is false. */
+	bool searchEmbeddedTextures;
 };
 
 

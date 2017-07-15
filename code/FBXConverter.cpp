@@ -436,6 +436,19 @@ private:
 
     aiScene* const out;
     const FBX::Document& doc;
+
+	bool FindTextureIndexByFilename(const Video& video, unsigned int& index) {
+		index = 0;
+		const char* videoFileName = video.FileName().c_str();
+		for (auto texture = textures_converted.begin(); texture != textures_converted.end(); ++texture)
+		{
+			if (!strcmp(texture->first->FileName().c_str(), videoFileName)) {
+				return true;
+			}
+			index++;
+		}
+		return false;
+	}
 };
 
 Converter::Converter( aiScene* out, const Document& doc )
@@ -1749,7 +1762,7 @@ unsigned int Converter::ConvertVideo( const Video& video )
     out_tex->mWidth = static_cast<unsigned int>( video.ContentLength() ); // total data size
     out_tex->mHeight = 0; // fixed to 0
 
-                            // steal the data from the Video to avoid an additional copy
+    // steal the data from the Video to avoid an additional copy
     out_tex->pcData = reinterpret_cast<aiTexel*>( const_cast<Video&>( video ).RelinquishContent() );
 
     // try to extract a hint from the file extension
@@ -1783,22 +1796,32 @@ void Converter::TrySetTextureProperties( aiMaterial* out_mat, const TextureMap& 
         path.Set( tex->RelativeFilename() );
 
         const Video* media = tex->Media();
-        if ( media != 0 && media->ContentLength() > 0 ) {
-            unsigned int index;
+        if (media != 0) {
+			bool textureReady = false; //tells if our texture is ready (if it was loaded or if it was found)
+			unsigned int index;
 
-            VideoMap::const_iterator it = textures_converted.find( media );
-            if ( it != textures_converted.end() ) {
-                index = ( *it ).second;
-            }
-            else {
-                index = ConvertVideo( *media );
-                textures_converted[ media ] = index;
-            }
+			VideoMap::const_iterator it = textures_converted.find(media);
+			if (it != textures_converted.end()) {
+				index = (*it).second;
+				textureReady = true;
+			}
+			else {
+				if (media->ContentLength() > 0) {
+					index = ConvertVideo(*media);
+					textures_converted[media] = index;
+					textureReady = true;
+				}
+				else if (doc.Settings().searchEmbeddedTextures) { //try to find the texture on the already-loaded textures by the filename, if the flag is on					
+					textureReady = FindTextureIndexByFilename(*media, index);
+				}
+			}
 
-            // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
-            path.data[ 0 ] = '*';
-            path.length = 1 + ASSIMP_itoa10( path.data + 1, MAXLEN - 1, index );
-        }
+			// setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture), if the texture is ready
+			if (textureReady) {
+				path.data[0] = '*';
+				path.length = 1 + ASSIMP_itoa10(path.data + 1, MAXLEN - 1, index);
+			}
+		}  
 
         out_mat->AddProperty( &path, _AI_MATKEY_TEXTURE_BASE, target, 0 );
 

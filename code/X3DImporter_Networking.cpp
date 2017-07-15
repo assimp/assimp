@@ -51,8 +51,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, Assimp.
 #include <assimp/DefaultIOSystem.h>
 
+//#include <regex>
+
 namespace Assimp
 {
+
+//static std::regex pattern_parentDir(R"((^|/)[^/]+/../)");
+static std::string parentDir("/../");
 
 // <Inline
 // DEF=""              ID
@@ -89,11 +94,28 @@ void X3DImporter::ParseNode_Networking_Inline()
 
 		if(load && (url.size() > 0))
 		{
-			std::string full_path;
+			std::string full_path = mpIOHandler->CurrentDirectory() + url.front();
 
-			full_path = mpIOHandler->CurrentDirectory() + "/" + url.front();
+			//full_path = std::regex_replace(full_path, pattern_parentDir, "$1");
+			for (std::string::size_type pos = full_path.find(parentDir); pos != std::string::npos; pos = full_path.find(parentDir, pos)) {
+				if (pos > 0) {
+					std::string::size_type pos2 = full_path.rfind('/', pos - 1);
+					if (pos2 != std::string::npos) {
+						full_path.erase(pos2, pos - pos2 + 3);
+						pos = pos2;
+					}
+					else {
+						full_path.erase(0, pos + 4);
+						pos = 0;
+					}
+				}
+				else {
+					pos += 3;
+				}
+			}
 			// Attribute "url" can contain list of strings. But we need only one - first.
-			mpIOHandler->PushDirectory(DefaultIOSystem::absolutePath(full_path));
+			std::string::size_type slashPos = full_path.find_last_of("\\/");
+			mpIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : full_path.substr(0, slashPos + 1));
 			ParseFile(full_path, mpIOHandler);
 			mpIOHandler->PopDirectory();
 		}

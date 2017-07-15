@@ -163,7 +163,10 @@ Ref<T> LazyDict<T>::Create(const char* id) {
 //
 inline 
 Buffer::Buffer()
-: byteLength(0), type(Type_arraybuffer), EncodedRegion_Current(nullptr), mIsSpecial(false) {
+: byteLength(0)
+, type(Type_arraybuffer)
+, EncodedRegion_Current(nullptr)
+, mIsSpecial(false) {
     // empty
 }
 
@@ -547,7 +550,8 @@ unsigned int Accessor::GetElementSize() {
     return GetNumComponents() * GetBytesPerComponent();
 }
 
-inline uint8_t* Accessor::GetPointer() {
+inline 
+uint8_t* Accessor::GetPointer() {
     if ( !bufferView || !bufferView->buffer ) {
         return 0;
     }
@@ -846,6 +850,7 @@ namespace {
 
     inline 
     bool GetAttribVector(Mesh::Primitive& p, const char* attr, Mesh::AccessorList*& v, int& pos) {
+        bool ok = true;
         if ((pos = Compare(attr, "POSITION"))) {
             v = &(p.attributes.position);
         } else if ((pos = Compare(attr, "NORMAL"))) {
@@ -860,8 +865,10 @@ namespace {
             v = &(p.attributes.jointmatrix);
         } else if ((pos = Compare(attr, "WEIGHT"))) {
             v = &(p.attributes.weight);
-        } 
-        return false;
+        } else {
+            ok = false;
+        }
+        return ok;
     }
 }
 
@@ -1222,7 +1229,8 @@ void Node::Read( json& obj, Asset& r) {
             json& child = (*children)[i];
             if (child.is_string()) {
                 // get/create the child node
-                Ref<Node> chn = r.nodes.Get(child.get<std::string>());
+                const std::string id = child.get<std::string>();
+                Ref<Node> chn = r.nodes.Get( id );
                 if (chn) this->children.push_back(chn);
             }
         }

@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <memory>
 #include "LogAux.h"
+#include "fast_atof.h"
 
 #include "FBXCompileConfig.h"
 #include "FBXTokenizer.h"
@@ -136,6 +137,17 @@ public:
         ElementMap::const_iterator it = elements.find(index);
         return it == elements.end() ? NULL : (*it).second;
     }
+
+	const Element* FindElementCaseInsensitive(const std::string& elementName) const {
+		const char* elementNameCStr = elementName.c_str();
+		for (auto element = elements.begin(); element != elements.end(); ++element)
+		{
+			if (!ASSIMP_strincmp(element->first.c_str(), elementNameCStr, MAXLEN)) {
+				return element->second;
+			}
+		}
+		return NULL;
+	}
 
     ElementCollection GetCollection(const std::string& index) const {
         return elements.equal_range(index);

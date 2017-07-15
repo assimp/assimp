@@ -16,7 +16,7 @@ platform:
 
 configuration:
   - 14 2015
-  - 12 2013
+  #- 12 2013
   #- MinGW
   #- 10 2010 # only works for x86
 

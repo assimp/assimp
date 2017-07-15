@@ -68,29 +68,6 @@ SOFTWARE.
     #endif
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
-#define constexpr
-#endif
-
-#if !defined(HAS_NOEXCEPT)
-#if defined(__clang__)
-#if __has_feature(cxx_noexcept)
-#define HAS_NOEXCEPT
-#endif
-#else
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) && __GNUC__ * 10 + __GNUC_MINOR__ >= 46 || \
-    defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 190023026
-#define HAS_NOEXCEPT
-#endif
-#endif
-#endif
-
-#ifdef HAS_NOEXCEPT
-#define NOEXCEPT noexcept
-#else
-#define NOEXCEPT
-#endif
-
 // disable float-equal warnings on GCC/clang
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
     #pragma GCC diagnostic push
@@ -191,7 +168,7 @@ Returns an ordering that is similar to Python:
 
 @since version 1.0.0
 */
-inline bool operator<(const value_t lhs, const value_t rhs) NOEXCEPT
+inline bool operator<(const value_t lhs, const value_t rhs) noexcept
 {
     static constexpr std::array<uint8_t, 8> order = {{
             0, // null
@@ -268,7 +245,7 @@ template<>
 struct external_constructor<value_t::boolean>
 {
     template<typename BasicJsonType>
-    static void construct(BasicJsonType& j, typename BasicJsonType::boolean_t b) NOEXCEPT
+    static void construct(BasicJsonType& j, typename BasicJsonType::boolean_t b) noexcept
     {
         j.m_type = value_t::boolean;
         j.m_value = b;
@@ -292,7 +269,7 @@ template<>
 struct external_constructor<value_t::number_float>
 {
     template<typename BasicJsonType>
-    static void construct(BasicJsonType& j, typename BasicJsonType::number_float_t val) NOEXCEPT
+    static void construct(BasicJsonType& j, typename BasicJsonType::number_float_t val) noexcept
     {
         // replace infinity and NAN by null
         if (not std::isfinite(val))
@@ -312,7 +289,7 @@ template<>
 struct external_constructor<value_t::number_unsigned>
 {
     template<typename BasicJsonType>
-    static void construct(BasicJsonType& j, typename BasicJsonType::number_unsigned_t val) NOEXCEPT
+    static void construct(BasicJsonType& j, typename BasicJsonType::number_unsigned_t val) noexcept
     {
         j.m_type = value_t::number_unsigned;
         j.m_value = val;
@@ -324,7 +301,7 @@ template<>
 struct external_constructor<value_t::number_integer>
 {
     template<typename BasicJsonType>
-    static void construct(BasicJsonType& j, typename BasicJsonType::number_integer_t val) NOEXCEPT
+    static void construct(BasicJsonType& j, typename BasicJsonType::number_integer_t val) noexcept
     {
         j.m_type = value_t::number_integer;
         j.m_value = val;
@@ -548,7 +525,7 @@ struct has_to_json
 
 template<typename BasicJsonType, typename T, enable_if_t<
              std::is_same<T, typename BasicJsonType::boolean_t>::value, int> = 0>
-void to_json(BasicJsonType& j, T b) NOEXCEPT
+void to_json(BasicJsonType& j, T b) noexcept
 {
     external_constructor<value_t::boolean>::construct(j, b);
 }
@@ -563,7 +540,7 @@ void to_json(BasicJsonType& j, const CompatibleString& s)
 
 template<typename BasicJsonType, typename FloatType,
          enable_if_t<std::is_floating_point<FloatType>::value, int> = 0>
-void to_json(BasicJsonType& j, FloatType val) NOEXCEPT
+void to_json(BasicJsonType& j, FloatType val) noexcept
 {
     external_constructor<value_t::number_float>::construct(j, static_cast<typename BasicJsonType::number_float_t>(val));
 }
@@ -572,7 +549,7 @@ template <
     typename BasicJsonType, typename CompatibleNumberUnsignedType,
     enable_if_t<is_compatible_integer_type<typename BasicJsonType::number_unsigned_t,
                 CompatibleNumberUnsignedType>::value, int> = 0 >
-void to_json(BasicJsonType& j, CompatibleNumberUnsignedType val) NOEXCEPT
+void to_json(BasicJsonType& j, CompatibleNumberUnsignedType val) noexcept
 {
     external_constructor<value_t::number_unsigned>::construct(j, static_cast<typename BasicJsonType::number_unsigned_t>(val));
 }
@@ -581,14 +558,14 @@ template <
     typename BasicJsonType, typename CompatibleNumberIntegerType,
     enable_if_t<is_compatible_integer_type<typename BasicJsonType::number_integer_t,
                 CompatibleNumberIntegerType>::value, int> = 0 >
-void to_json(BasicJsonType& j, CompatibleNumberIntegerType val) NOEXCEPT
+void to_json(BasicJsonType& j, CompatibleNumberIntegerType val) noexcept
 {
     external_constructor<value_t::number_integer>::construct(j, static_cast<typename BasicJsonType::number_integer_t>(val));
 }
 
 template<typename BasicJsonType, typename UnscopedEnumType,
          enable_if_t<is_unscoped_enum<UnscopedEnumType>::value, int> = 0>
-void to_json(BasicJsonType& j, UnscopedEnumType e) NOEXCEPT
+void to_json(BasicJsonType& j, UnscopedEnumType e) noexcept
 {
     external_constructor<value_t::number_integer>::construct(j, e);
 }
@@ -854,14 +831,14 @@ struct to_json_fn
 {
   private:
     template<typename BasicJsonType, typename T>
-    auto call(BasicJsonType& j, T&& val, priority_tag<1>) const NOEXCEPT( NOEXCEPT(to_json(j, std::forward<T>(val))))
+    auto call(BasicJsonType& j, T&& val, priority_tag<1>) const noexcept(noexcept(to_json(j, std::forward<T>(val))))
     -> decltype(to_json(j, std::forward<T>(val)), void())
     {
         return to_json(j, std::forward<T>(val));
     }
 
     template<typename BasicJsonType, typename T>
-    void call(BasicJsonType&, T&&, priority_tag<0>) const NOEXCEPT
+    void call(BasicJsonType&, T&&, priority_tag<0>) const noexcept
     {
         static_assert(sizeof(BasicJsonType) == 0,
                       "could not find to_json() method in T's namespace");
@@ -870,7 +847,7 @@ struct to_json_fn
   public:
     template<typename BasicJsonType, typename T>
     void operator()(BasicJsonType& j, T&& val) const
-    NOEXCEPT( NOEXCEPT(std::declval<to_json_fn>().call(j, std::forward<T>(val), priority_tag<1> {})))
+    noexcept(noexcept(std::declval<to_json_fn>().call(j, std::forward<T>(val), priority_tag<1> {})))
     {
         return call(j, std::forward<T>(val), priority_tag<1> {});
     }
@@ -881,14 +858,14 @@ struct from_json_fn
   private:
     template<typename BasicJsonType, typename T>
     auto call(const BasicJsonType& j, T& val, priority_tag<1>) const
-    NOEXCEPT( NOEXCEPT(from_json(j, val)))
+    noexcept(noexcept(from_json(j, val)))
     -> decltype(from_json(j, val), void())
     {
         return from_json(j, val);
     }
 
     template<typename BasicJsonType, typename T>
-    void call(const BasicJsonType&, T&, priority_tag<0>) const NOEXCEPT
+    void call(const BasicJsonType&, T&, priority_tag<0>) const noexcept
     {
         static_assert(sizeof(BasicJsonType) == 0,
                       "could not find from_json() method in T's namespace");
@@ -897,7 +874,7 @@ struct from_json_fn
   public:
     template<typename BasicJsonType, typename T>
     void operator()(const BasicJsonType& j, T& val) const
-    NOEXCEPT( NOEXCEPT(std::declval<from_json_fn>().call(j, val, priority_tag<1> {})))
+    noexcept(noexcept(std::declval<from_json_fn>().call(j, val, priority_tag<1> {})))
     {
         return call(j, val, priority_tag<1> {});
     }
@@ -943,8 +920,8 @@ struct adl_serializer
     @param[in,out] val  value to write to
     */
     template<typename BasicJsonType, typename ValueType>
-    static void from_json(BasicJsonType&& j, ValueType& val) NOEXCEPT(
-        NOEXCEPT(::nlohmann::from_json(std::forward<BasicJsonType>(j), val)))
+    static void from_json(BasicJsonType&& j, ValueType& val) noexcept(
+        noexcept(::nlohmann::from_json(std::forward<BasicJsonType>(j), val)))
     {
         ::nlohmann::from_json(std::forward<BasicJsonType>(j), val);
     }
@@ -959,8 +936,8 @@ struct adl_serializer
     @param[in] val     value to read from
     */
     template<typename BasicJsonType, typename ValueType>
-    static void to_json(BasicJsonType& j, ValueType&& val) NOEXCEPT(
-        NOEXCEPT(::nlohmann::to_json(j, std::forward<ValueType>(val))))
+    static void to_json(BasicJsonType& j, ValueType&& val) noexcept(
+        noexcept(::nlohmann::to_json(j, std::forward<ValueType>(val))))
     {
         ::nlohmann::to_json(j, std::forward<ValueType>(val));
     }
@@ -1707,13 +1684,13 @@ class basic_json
         /// default constructor (for null values)
         json_value() = default;
         /// constructor for booleans
-        json_value(boolean_t v) NOEXCEPT : boolean(v) {}
+        json_value(boolean_t v) noexcept : boolean(v) {}
         /// constructor for numbers (integer)
-        json_value(number_integer_t v) NOEXCEPT: number_integer(v) {}
+        json_value(number_integer_t v) noexcept : number_integer(v) {}
         /// constructor for numbers (unsigned)
-        json_value(number_unsigned_t v) NOEXCEPT: number_unsigned(v) {}
+        json_value(number_unsigned_t v) noexcept : number_unsigned(v) {}
         /// constructor for numbers (floating-point)
-        json_value(number_float_t v) NOEXCEPT: number_float(v) {}
+        json_value(number_float_t v) noexcept : number_float(v) {}
         /// constructor for empty values of a given type
         json_value(value_t t)
         {
@@ -1960,7 +1937,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    basic_json(std::nullptr_t = nullptr) NOEXCEPT
+    basic_json(std::nullptr_t = nullptr) noexcept
         : basic_json(value_t::null)
     {
         assert_invariant();
@@ -2026,7 +2003,7 @@ class basic_json
                                      basic_json_t, U>::value and
                                  detail::has_to_json<basic_json, U>::value,
                                  int> = 0>
-    basic_json(CompatibleType && val) NOEXCEPT( NOEXCEPT(JSONSerializer<U>::to_json(
+    basic_json(CompatibleType && val) noexcept(noexcept(JSONSerializer<U>::to_json(
                 std::declval<basic_json_t&>(), std::forward<CompatibleType>(val))))
     {
         JSONSerializer<U>::to_json(*this, std::forward<CompatibleType>(val));
@@ -2525,7 +2502,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    basic_json(basic_json&& other) NOEXCEPT
+    basic_json(basic_json&& other) noexcept
         : m_type(std::move(other.m_type)),
           m_value(std::move(other.m_value))
     {
@@ -2562,7 +2539,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    reference& operator=(basic_json other) NOEXCEPT(
+    reference& operator=(basic_json other) noexcept (
         std::is_nothrow_move_constructible<value_t>::value and
         std::is_nothrow_move_assignable<value_t>::value and
         std::is_nothrow_move_constructible<json_value>::value and
@@ -2701,7 +2678,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr value_t type() const NOEXCEPT
+    constexpr value_t type() const noexcept
     {
         return m_type;
     }
@@ -2731,7 +2708,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_primitive() const NOEXCEPT
+    constexpr bool is_primitive() const noexcept
     {
         return is_null() or is_string() or is_boolean() or is_number();
     }
@@ -2758,7 +2735,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_structured() const NOEXCEPT
+    constexpr bool is_structured() const noexcept
     {
         return is_array() or is_object();
     }
@@ -2780,7 +2757,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_null() const NOEXCEPT
+    constexpr bool is_null() const noexcept
     {
         return m_type == value_t::null;
     }
@@ -2802,7 +2779,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_boolean() const NOEXCEPT
+    constexpr bool is_boolean() const noexcept
     {
         return m_type == value_t::boolean;
     }
@@ -2832,7 +2809,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_number() const NOEXCEPT
+    constexpr bool is_number() const noexcept
     {
         return is_number_integer() or is_number_float();
     }
@@ -2861,7 +2838,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_number_integer() const NOEXCEPT
+    constexpr bool is_number_integer() const noexcept
     {
         return m_type == value_t::number_integer or m_type == value_t::number_unsigned;
     }
@@ -2889,7 +2866,7 @@ class basic_json
 
     @since version 2.0.0
     */
-    constexpr bool is_number_unsigned() const NOEXCEPT
+    constexpr bool is_number_unsigned() const noexcept
     {
         return m_type == value_t::number_unsigned;
     }
@@ -2917,7 +2894,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_number_float() const NOEXCEPT
+    constexpr bool is_number_float() const noexcept
     {
         return m_type == value_t::number_float;
     }
@@ -2939,7 +2916,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_object() const NOEXCEPT
+    constexpr bool is_object() const noexcept
     {
         return m_type == value_t::object;
     }
@@ -2961,7 +2938,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_array() const NOEXCEPT
+    constexpr bool is_array() const noexcept
     {
         return m_type == value_t::array;
     }
@@ -2983,7 +2960,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_string() const NOEXCEPT
+    constexpr bool is_string() const noexcept
     {
         return m_type == value_t::string;
     }
@@ -3010,7 +2987,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr bool is_discarded() const NOEXCEPT
+    constexpr bool is_discarded() const noexcept
     {
         return m_type == value_t::discarded;
     }
@@ -3033,7 +3010,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    constexpr operator value_t() const NOEXCEPT
+    constexpr operator value_t() const noexcept
     {
         return m_type;
     }
@@ -3057,85 +3034,85 @@ class basic_json
     }
 
     /// get a pointer to the value (object)
-    object_t* get_impl_ptr(object_t* /*unused*/) NOEXCEPT
+    object_t* get_impl_ptr(object_t* /*unused*/) noexcept
     {
         return is_object() ? m_value.object : nullptr;
     }
 
     /// get a pointer to the value (object)
-    constexpr const object_t* get_impl_ptr(const object_t* /*unused*/) const NOEXCEPT
+    constexpr const object_t* get_impl_ptr(const object_t* /*unused*/) const noexcept
     {
         return is_object() ? m_value.object : nullptr;
     }
 
     /// get a pointer to the value (array)
-    array_t* get_impl_ptr(array_t* /*unused*/) NOEXCEPT
+    array_t* get_impl_ptr(array_t* /*unused*/) noexcept
     {
         return is_array() ? m_value.array : nullptr;
     }
 
     /// get a pointer to the value (array)
-    constexpr const array_t* get_impl_ptr(const array_t* /*unused*/) const NOEXCEPT
+    constexpr const array_t* get_impl_ptr(const array_t* /*unused*/) const noexcept
     {
         return is_array() ? m_value.array : nullptr;
     }
 
     /// get a pointer to the value (string)
-    string_t* get_impl_ptr(string_t* /*unused*/) NOEXCEPT
+    string_t* get_impl_ptr(string_t* /*unused*/) noexcept
     {
         return is_string() ? m_value.string : nullptr;
     }
 
     /// get a pointer to the value (string)
-    constexpr const string_t* get_impl_ptr(const string_t* /*unused*/) const NOEXCEPT
+    constexpr const string_t* get_impl_ptr(const string_t* /*unused*/) const noexcept
     {
         return is_string() ? m_value.string : nullptr;
     }
 
     /// get a pointer to the value (boolean)
-    boolean_t* get_impl_ptr(boolean_t* /*unused*/) NOEXCEPT
+    boolean_t* get_impl_ptr(boolean_t* /*unused*/) noexcept
     {
         return is_boolean() ? &m_value.boolean : nullptr;
     }
 
     /// get a pointer to the value (boolean)
-    constexpr const boolean_t* get_impl_ptr(const boolean_t* /*unused*/) const NOEXCEPT
+    constexpr const boolean_t* get_impl_ptr(const boolean_t* /*unused*/) const noexcept
     {
         return is_boolean() ? &m_value.boolean : nullptr;
     }
 
     /// get a pointer to the value (integer number)
-    number_integer_t* get_impl_ptr(number_integer_t* /*unused*/) NOEXCEPT
+    number_integer_t* get_impl_ptr(number_integer_t* /*unused*/) noexcept
     {
         return is_number_integer() ? &m_value.number_integer : nullptr;
     }
 
     /// get a pointer to the value (integer number)
-    constexpr const number_integer_t* get_impl_ptr(const number_integer_t* /*unused*/) const NOEXCEPT
+    constexpr const number_integer_t* get_impl_ptr(const number_integer_t* /*unused*/) const noexcept
     {
         return is_number_integer() ? &m_value.number_integer : nullptr;
     }
 
     /// get a pointer to the value (unsigned number)
-    number_unsigned_t* get_impl_ptr(number_unsigned_t* /*unused*/) NOEXCEPT
+    number_unsigned_t* get_impl_ptr(number_unsigned_t* /*unused*/) noexcept
     {
         return is_number_unsigned() ? &m_value.number_unsigned : nullptr;
     }
 
     /// get a pointer to the value (unsigned number)
-    constexpr const number_unsigned_t* get_impl_ptr(const number_unsigned_t* /*unused*/) const NOEXCEPT
+    constexpr const number_unsigned_t* get_impl_ptr(const number_unsigned_t* /*unused*/) const noexcept
     {
         return is_number_unsigned() ? &m_value.number_unsigned : nullptr;
     }
 
     /// get a pointer to the value (floating-point number)
-    number_float_t* get_impl_ptr(number_float_t* /*unused*/) NOEXCEPT
+    number_float_t* get_impl_ptr(number_float_t* /*unused*/) noexcept
     {
         return is_number_float() ? &m_value.number_float : nullptr;
     }
 
     /// get a pointer to the value (floating-point number)
-    constexpr const number_float_t* get_impl_ptr(const number_float_t* /*unused*/) const NOEXCEPT
+    constexpr const number_float_t* get_impl_ptr(const number_float_t* /*unused*/) const noexcept
     {
         return is_number_float() ? &m_value.number_float : nullptr;
     }
@@ -3245,7 +3222,7 @@ class basic_json
             detail::has_from_json<basic_json_t, ValueType>::value and
             not detail::has_non_default_from_json<basic_json_t, ValueType>::value,
             int > = 0 >
-    ValueType get() const NOEXCEPT( NOEXCEPT(
+    ValueType get() const noexcept(noexcept(
                                        JSONSerializer<ValueType>::from_json(std::declval<const basic_json_t&>(), std::declval<ValueType&>())))
     {
         // we cannot static_assert on ValueTypeCV being non-const, because
@@ -3298,7 +3275,7 @@ class basic_json
         detail::enable_if_t<not std::is_same<basic_json_t, ValueType>::value and
                             detail::has_non_default_from_json<basic_json_t,
                                     ValueType>::value, int> = 0 >
-    ValueType get() const NOEXCEPT( NOEXCEPT(
+    ValueType get() const noexcept(noexcept(
                                        JSONSerializer<ValueTypeCV>::from_json(std::declval<const basic_json_t&>())))
     {
         static_assert(not std::is_reference<ValueTypeCV>::value,
@@ -3335,7 +3312,7 @@ class basic_json
     */
     template<typename PointerType, typename std::enable_if<
                  std::is_pointer<PointerType>::value, int>::type = 0>
-    PointerType get() NOEXCEPT
+    PointerType get() noexcept
     {
         // delegate the call to get_ptr
         return get_ptr<PointerType>();
@@ -3347,7 +3324,7 @@ class basic_json
     */
     template<typename PointerType, typename std::enable_if<
                  std::is_pointer<PointerType>::value, int>::type = 0>
-    constexpr const PointerType get() const NOEXCEPT
+    constexpr const PointerType get() const noexcept
     {
         // delegate the call to get_ptr
         return get_ptr<PointerType>();
@@ -3381,7 +3358,7 @@ class basic_json
     */
     template<typename PointerType, typename std::enable_if<
                  std::is_pointer<PointerType>::value, int>::type = 0>
-    PointerType get_ptr() NOEXCEPT
+    PointerType get_ptr() noexcept
     {
         // get the type of the PointerType (remove pointer and const)
         using pointee_t = typename std::remove_const<typename
@@ -3409,7 +3386,7 @@ class basic_json
     template<typename PointerType, typename std::enable_if<
                  std::is_pointer<PointerType>::value and
                  std::is_const<typename std::remove_pointer<PointerType>::type>::value, int>::type = 0>
-    constexpr const PointerType get_ptr() const NOEXCEPT
+    constexpr const PointerType get_ptr() const noexcept
     {
         // get the type of the PointerType (remove pointer and const)
         using pointee_t = typename std::remove_const<typename
@@ -4690,7 +4667,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    iterator begin() NOEXCEPT
+    iterator begin() noexcept
     {
         iterator result(this);
         result.set_begin();
@@ -4700,7 +4677,7 @@ class basic_json
     /*!
     @copydoc basic_json::cbegin()
     */
-    const_iterator begin() const NOEXCEPT
+    const_iterator begin() const noexcept
     {
         return cbegin();
     }
@@ -4730,7 +4707,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    const_iterator cbegin() const NOEXCEPT
+    const_iterator cbegin() const noexcept
     {
         const_iterator result(this);
         result.set_begin();
@@ -4761,7 +4738,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    iterator end() NOEXCEPT
+    iterator end() noexcept
     {
         iterator result(this);
         result.set_end();
@@ -4771,7 +4748,7 @@ class basic_json
     /*!
     @copydoc basic_json::cend()
     */
-    const_iterator end() const NOEXCEPT
+    const_iterator end() const noexcept
     {
         return cend();
     }
@@ -4801,7 +4778,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    const_iterator cend() const NOEXCEPT
+    const_iterator cend() const noexcept
     {
         const_iterator result(this);
         result.set_end();
@@ -4831,7 +4808,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    reverse_iterator rbegin() NOEXCEPT
+    reverse_iterator rbegin() noexcept
     {
         return reverse_iterator(end());
     }
@@ -4839,7 +4816,7 @@ class basic_json
     /*!
     @copydoc basic_json::crbegin()
     */
-    const_reverse_iterator rbegin() const NOEXCEPT
+    const_reverse_iterator rbegin() const noexcept
     {
         return crbegin();
     }
@@ -4868,7 +4845,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    reverse_iterator rend() NOEXCEPT
+    reverse_iterator rend() noexcept
     {
         return reverse_iterator(begin());
     }
@@ -4876,7 +4853,7 @@ class basic_json
     /*!
     @copydoc basic_json::crend()
     */
-    const_reverse_iterator rend() const NOEXCEPT
+    const_reverse_iterator rend() const noexcept
     {
         return crend();
     }
@@ -4905,7 +4882,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    const_reverse_iterator crbegin() const NOEXCEPT
+    const_reverse_iterator crbegin() const noexcept
     {
         return const_reverse_iterator(cend());
     }
@@ -4934,7 +4911,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    const_reverse_iterator crend() const NOEXCEPT
+    const_reverse_iterator crend() const noexcept
     {
         return const_reverse_iterator(cbegin());
     }
@@ -5015,7 +4992,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    bool empty() const NOEXCEPT
+    bool empty() const noexcept
     {
         switch (m_type)
         {
@@ -5083,7 +5060,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    size_type size() const NOEXCEPT
+    size_type size() const noexcept
     {
         switch (m_type)
         {
@@ -5149,7 +5126,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    size_type max_size() const NOEXCEPT
+    size_type max_size() const noexcept
     {
         switch (m_type)
         {
@@ -5205,7 +5182,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    void clear() NOEXCEPT
+    void clear() noexcept
     {
         switch (m_type)
         {
@@ -5758,7 +5735,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    void swap(reference other) NOEXCEPT(
+    void swap(reference other) noexcept (
         std::is_nothrow_move_constructible<value_t>::value and
         std::is_nothrow_move_assignable<value_t>::value and
         std::is_nothrow_move_constructible<json_value>::value and
@@ -5902,7 +5879,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    friend bool operator==(const_reference lhs, const_reference rhs) NOEXCEPT
+    friend bool operator==(const_reference lhs, const_reference rhs) noexcept
     {
         const auto lhs_type = lhs.type();
         const auto rhs_type = rhs.type();
@@ -5983,7 +5960,7 @@ class basic_json
     */
     template<typename ScalarType, typename std::enable_if<
                  std::is_scalar<ScalarType>::value, int>::type = 0>
-    friend bool operator==(const_reference lhs, const ScalarType rhs) NOEXCEPT
+    friend bool operator==(const_reference lhs, const ScalarType rhs) noexcept
     {
         return (lhs == basic_json(rhs));
     }
@@ -5994,7 +5971,7 @@ class basic_json
     */
     template<typename ScalarType, typename std::enable_if<
                  std::is_scalar<ScalarType>::value, int>::type = 0>
-    friend bool operator==(const ScalarType lhs, const_reference rhs) NOEXCEPT
+    friend bool operator==(const ScalarType lhs, const_reference rhs) noexcept
     {
         return (basic_json(lhs) == rhs);
     }
@@ -6015,7 +5992,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    friend bool operator!=(const_reference lhs, const_reference rhs) NOEXCEPT
+    friend bool operator!=(const_reference lhs, const_reference rhs) noexcept
     {
         return not (lhs == rhs);
     }
@@ -6026,7 +6003,7 @@ class basic_json
     */
     template<typename ScalarType, typename std::enable_if<
                  std::is_scalar<ScalarType>::value, int>::type = 0>
-    friend bool operator!=(const_reference lhs, const ScalarType rhs) NOEXCEPT
+    friend bool operator!=(const_reference lhs, const ScalarType rhs) noexcept
     {
         return (lhs != basic_json(rhs));
     }
@@ -6037,7 +6014,7 @@ class basic_json
     */
     template<typename ScalarType, typename std::enable_if<
                  std::is_scalar<ScalarType>::value, int>::type = 0>
-    friend bool operator!=(const ScalarType lhs, const_reference rhs) NOEXCEPT
+    friend bool operator!=(const ScalarType lhs, const_reference rhs) noexcept
     {
         return (basic_json(lhs) != rhs);
     }
@@ -6066,7 +6043,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    friend bool operator<(const_reference lhs, const_reference rhs) NOEXCEPT
+    friend bool operator<(const_reference lhs, const_reference rhs) noexcept
     {
         const auto lhs_type = lhs.type();
         const auto rhs_type = rhs.type();
@@ -6161,7 +6138,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    friend bool operator<=(const_reference lhs, const_reference rhs) NOEXCEPT
+    friend bool operator<=(const_reference lhs, const_reference rhs) noexcept
     {
         return not (rhs < lhs);
     }
@@ -6183,7 +6160,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    friend bool operator>(const_reference lhs, const_reference rhs) NOEXCEPT
+    friend bool operator>(const_reference lhs, const_reference rhs) noexcept
     {
         return not (lhs <= rhs);
     }
@@ -6205,7 +6182,7 @@ class basic_json
 
     @since version 1.0.0
     */
-    friend bool operator>=(const_reference lhs, const_reference rhs) NOEXCEPT
+    friend bool operator>=(const_reference lhs, const_reference rhs) noexcept
     {
         return not (lhs < rhs);
     }
@@ -8117,7 +8094,7 @@ class basic_json
 
     @complexity Linear in the length of string @a s.
     */
-    static std::size_t extra_space(const string_t& s) NOEXCEPT
+    static std::size_t extra_space(const string_t& s) noexcept
     {
         return std::accumulate(s.begin(), s.end(), size_t{},
                                [](size_t res, typename string_t::value_type c)
@@ -8597,60 +8574,60 @@ class basic_json
     {
       public:
 
-        difference_type get_value() const NOEXCEPT
+        difference_type get_value() const noexcept
         {
             return m_it;
         }
         /// set iterator to a defined beginning
-        void set_begin() NOEXCEPT
+        void set_begin() noexcept
         {
             m_it = begin_value;
         }
 
         /// set iterator to a defined past the end
-        void set_end() NOEXCEPT
+        void set_end() noexcept
         {
             m_it = end_value;
         }
 
         /// return whether the iterator can be dereferenced
-        constexpr bool is_begin() const NOEXCEPT
+        constexpr bool is_begin() const noexcept
         {
             return (m_it == begin_value);
         }
 
         /// return whether the iterator is at end
-        constexpr bool is_end() const NOEXCEPT
+        constexpr bool is_end() const noexcept
         {
             return (m_it == end_value);
         }
 
-        friend constexpr bool operator==(primitive_iterator_t lhs, primitive_iterator_t rhs) NOEXCEPT
+        friend constexpr bool operator==(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept
         {
             return lhs.m_it == rhs.m_it;
         }
 
-        friend constexpr bool operator!=(primitive_iterator_t lhs, primitive_iterator_t rhs) NOEXCEPT
+        friend constexpr bool operator!=(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept
         {
             return !(lhs == rhs);
         }
 
-        friend constexpr bool operator<(primitive_iterator_t lhs, primitive_iterator_t rhs) NOEXCEPT
+        friend constexpr bool operator<(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept
         {
             return lhs.m_it < rhs.m_it;
         }
 
-        friend constexpr bool operator<=(primitive_iterator_t lhs, primitive_iterator_t rhs) NOEXCEPT
+        friend constexpr bool operator<=(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept
         {
             return lhs.m_it <= rhs.m_it;
         }
 
-        friend constexpr bool operator>(primitive_iterator_t lhs, primitive_iterator_t rhs) NOEXCEPT
+        friend constexpr bool operator>(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept
         {
             return lhs.m_it > rhs.m_it;
         }
 
-        friend constexpr bool operator>=(primitive_iterator_t lhs, primitive_iterator_t rhs) NOEXCEPT
+        friend constexpr bool operator>=(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept
         {
             return lhs.m_it >= rhs.m_it;
         }
@@ -8662,7 +8639,7 @@ class basic_json
             return result;
         }
 
-        friend constexpr difference_type operator-(primitive_iterator_t lhs, primitive_iterator_t rhs) NOEXCEPT
+        friend constexpr difference_type operator-(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept
         {
             return lhs.m_it - rhs.m_it;
         }
@@ -8735,7 +8712,7 @@ class basic_json
         primitive_iterator_t primitive_iterator;
 
         /// create an uninitialized internal_iterator
-        internal_iterator() NOEXCEPT
+        internal_iterator() noexcept
             : object_iterator(), array_iterator(), primitive_iterator()
         {}
     };
@@ -8755,7 +8732,7 @@ class basic_json
             size_t array_index = 0;
 
           public:
-            explicit iteration_proxy_internal(IteratorType it) NOEXCEPT
+            explicit iteration_proxy_internal(IteratorType it) noexcept
                 : anchor(it)
             {}
 
@@ -8824,13 +8801,13 @@ class basic_json
         {}
 
         /// return iterator begin (needed for range-based for)
-        iteration_proxy_internal begin() NOEXCEPT
+        iteration_proxy_internal begin() noexcept
         {
             return iteration_proxy_internal(container.begin());
         }
 
         /// return iterator end (needed for range-based for)
-        iteration_proxy_internal end() NOEXCEPT
+        iteration_proxy_internal end() noexcept
         {
             return iteration_proxy_internal(container.end());
         }
@@ -8892,7 +8869,7 @@ class basic_json
         @pre object != nullptr
         @post The iterator is initialized; i.e. `m_object != nullptr`.
         */
-        explicit iter_impl(pointer object) NOEXCEPT
+        explicit iter_impl(pointer object) noexcept
             : m_object(object)
         {
             assert(m_object != nullptr);
@@ -8945,7 +8922,7 @@ class basic_json
         @param[in] other  iterator to copy from
         @note It is not checked whether @a other is initialized.
         */
-        iter_impl(const iter_impl& other) NOEXCEPT
+        iter_impl(const iter_impl& other) noexcept
             : m_object(other.m_object), m_it(other.m_it)
         {}
 
@@ -8954,7 +8931,7 @@ class basic_json
         @param[in,out] other  iterator to copy from
         @note It is not checked whether @a other is initialized.
         */
-        iter_impl& operator=(iter_impl other) NOEXCEPT(
+        iter_impl& operator=(iter_impl other) noexcept(
             std::is_nothrow_move_constructible<pointer>::value and
             std::is_nothrow_move_assignable<pointer>::value and
             std::is_nothrow_move_constructible<internal_iterator>::value and
@@ -8971,7 +8948,7 @@ class basic_json
         @brief set the iterator to the first value
         @pre The iterator is initialized; i.e. `m_object != nullptr`.
         */
-        void set_begin() NOEXCEPT
+        void set_begin() noexcept
         {
             assert(m_object != nullptr);
 
@@ -9008,7 +8985,7 @@ class basic_json
         @brief set the iterator past the last value
         @pre The iterator is initialized; i.e. `m_object != nullptr`.
         */
-        void set_end() NOEXCEPT
+        void set_end() noexcept
         {
             assert(m_object != nullptr);
 
@@ -9481,12 +9458,12 @@ class basic_json
         using reference = typename Base::reference;
 
         /// create reverse iterator from iterator
-        json_reverse_iterator(const typename base_iterator::iterator_type& it) NOEXCEPT
+        json_reverse_iterator(const typename base_iterator::iterator_type& it) noexcept
             : base_iterator(it)
         {}
 
         /// create reverse iterator from base class
-        json_reverse_iterator(const base_iterator& it) NOEXCEPT
+        json_reverse_iterator(const base_iterator& it) noexcept
             : base_iterator(it)
         {}
 
@@ -9607,7 +9584,7 @@ class basic_json
         using lexer_char_t = unsigned char;
 
         /// a lexer from a buffer with given length
-        lexer(const lexer_char_t* buff, const size_t len) NOEXCEPT
+        lexer(const lexer_char_t* buff, const size_t len) noexcept
             : m_content(buff)
         {
             assert(m_content != nullptr);
@@ -11713,7 +11690,7 @@ basic_json_parser_74:
 
         @since version 2.0.0
         */
-        std::string to_string() const NOEXCEPT
+        std::string to_string() const noexcept
         {
             return std::accumulate(reference_tokens.begin(),
                                    reference_tokens.end(), std::string{},
@@ -12249,13 +12226,13 @@ basic_json_parser_74:
 
       private:
         friend bool operator==(json_pointer const& lhs,
-                               json_pointer const& rhs) NOEXCEPT
+                               json_pointer const& rhs) noexcept
         {
             return lhs.reference_tokens == rhs.reference_tokens;
         }
 
         friend bool operator!=(json_pointer const& lhs,
-                               json_pointer const& rhs) NOEXCEPT
+                               json_pointer const& rhs) noexcept
         {
             return !(lhs == rhs);
         }
@@ -12950,7 +12927,7 @@ namespace std
 */
 template<>
 inline void swap(nlohmann::json& j1,
-                 nlohmann::json& j2) NOEXCEPT(
+                 nlohmann::json& j2) noexcept(
                      is_nothrow_move_constructible<nlohmann::json>::value and
                      is_nothrow_move_assignable<nlohmann::json>::value
                  )
@@ -13015,10 +12992,6 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 // restore GCC/clang diagnostic settings
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
     #pragma GCC diagnostic pop
-#endif
-
-#if defined(_MSC_VER) && _MSC_VER < 1900
-#undef constexpr
 #endif
 
 // clean up

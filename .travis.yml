@@ -1,5 +1,4 @@
 sudo: required
-dist: trusty
 language: cpp
 
 before_install:
@@ -20,7 +19,7 @@ env:
     - PV=r8e PLATF=linux-x86_64 NDK_HOME=${TRAVIS_BUILD_DIR}/android-ndk-${PV} PATH=${PATH}:${NDK_HOME}
   matrix:
   # Linux / gcc
- - os: linux
+  - os: linux
     compiler: gcc
     env: COMPILER=g++-4.9
     addons:

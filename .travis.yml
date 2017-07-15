@@ -13,7 +13,7 @@ branches:
   only:
     - master
 
-osx_image: xcode8.3
+#osx_image: xcode8.3
 
 env:
   global:
@@ -25,20 +25,20 @@ env:
     compiler: gcc
     env:
       - COMPILER=g++-4.9
-      - SPECIAL=valgrind
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test']
         packages: [g++-4.9, valgrind]
-
-#    - LINUX=1 TRAVIS_NO_EXPORT=YES ENABLE_COVERALLS=ON
-#    - LINUX=1 TRAVIS_NO_EXPORT=NO  ENABLE_COVERALLS=OFF
-#    - LINUX=1 SHARED_BUILD=ON      ENABLE_COVERALLS=OFF
-#    - LINUX=1 SHARED_BUILD=OFF     ENABLE_COVERALLS=OFF
-
-compiler:
-  - gcc
-  - clang
+ - os: linux
+    env:
+      - LLVM_VERSION=3.8.1
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test']
+        packages: g++-6
+    compiler: clang
+- os: osx
+    osx_image: xcode8.3
 
 install:
   - if [ $ANDROID ]; then wget -c http://dl.google.com/android/ndk/android-ndk-${PV}-${PLATF}.tar.bz2 && tar xf android-ndk-${PV}-${PLATF}.tar.bz2 ; fi

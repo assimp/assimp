@@ -52,10 +52,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, Assimp.
 #include <assimp/DefaultIOSystem.h>
 #include "fast_atof.h"
+#include "FIReader.hpp"
 
 // Header files, stdlib.
 #include <memory>
 #include <string>
+#include <iterator>
 
 namespace Assimp {
 
@@ -66,15 +68,52 @@ const aiImporterDesc X3DImporter::Description = {
 	"smalcom",
 	"",
 	"See documentation in source code. Chapter: Limitations.",
-	aiImporterFlags_SupportTextFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,
+	aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,
 	0,
 	0,
 	0,
 	0,
-	"x3d"
+	"x3d x3db"
 };
 
-const std::string X3DImporter::whitespace(" ,\t\n\r");
+//const std::regex X3DImporter::pattern_nws(R"([^, \t\r\n]+)");
+//const std::regex X3DImporter::pattern_true(R"(^\s*(?:true|1)\s*$)", std::regex::icase);
+
+struct WordIterator: public std::iterator<std::input_iterator_tag, const char*> {
+    static const char *whitespace;
+    const char *start_, *end_;
+    WordIterator(const char *start, const char *end): start_(start), end_(end) {
+        start_ = start + strspn(start, whitespace);
+        if (start_ >= end_) {
+            start_ = 0;
+        }
+    }
+    WordIterator(): start_(0), end_(0) {}
+    WordIterator(const WordIterator &other): start_(other.start_), end_(other.end_) {}
+    WordIterator &operator=(const WordIterator &other) {
+        start_ = other.start_;
+        end_ = other.end_;
+        return *this;
+    }
+    bool operator==(WordIterator &other) const { return start_ == other.start_; }
+    bool operator!=(WordIterator &other) const { return start_ != other.start_; }
+    WordIterator &operator++() {
+        start_ += strcspn(start_, whitespace);
+        start_ += strspn(start_, whitespace);
+        if (start_ >= end_) {
+            start_ = 0;
+        }
+        return *this;
+    }
+    WordIterator operator++(int) {
+        WordIterator result(*this);
+        ++(*this);
+        return result;
+    }
+    const char *operator*() const { return start_; }
+};
+
+const char *WordIterator::whitespace = ", \t\r\n";
 
 X3DImporter::X3DImporter()
 : NodeElement_Cur( nullptr )
@@ -83,7 +122,6 @@ X3DImporter::X3DImporter()
 }
 
 X3DImporter::~X3DImporter() {
-    delete mReader;
     // Clear() is accounting if data already is deleted. So, just check again if all data is deleted.
     Clear();
 }
@@ -370,38 +408,65 @@ bool X3DImporter::XML_SearchNode(const std::string& pNodeName)
 
 bool X3DImporter::XML_ReadNode_GetAttrVal_AsBool(const int pAttrIdx)
 {
-std::string val(mReader->getAttributeValue(pAttrIdx));
+    auto boolValue = std::dynamic_pointer_cast<const FIBoolValue>(mReader->getAttributeEncodedValue(pAttrIdx));
+    if (boolValue) {
+        if (boolValue->value.size() == 1) {
+            return boolValue->value.front();
+        }
+        throw DeadlyImportError("Invalid bool value");
+    }
+    else {
+        std::string val(mReader->getAttributeValue(pAttrIdx));
 
-	if(val == "false")
-		return false;
-	else if(val == "true")
-		return true;
-	else
-		throw DeadlyImportError("Bool attribute value can contain \"false\" or \"true\" not the \"" + val + "\"");
+        if(val == "false")
+            return false;
+        else if(val == "true")
+            return true;
+        else
+            throw DeadlyImportError("Bool attribute value can contain \"false\" or \"true\" not the \"" + val + "\"");
+    }
 }
 
 float X3DImporter::XML_ReadNode_GetAttrVal_AsFloat(const int pAttrIdx)
 {
-    std::string val;
-    float tvalf;
+    auto floatValue = std::dynamic_pointer_cast<const FIFloatValue>(mReader->getAttributeEncodedValue(pAttrIdx));
+    if (floatValue) {
+        if (floatValue->value.size() == 1) {
+            return floatValue->value.front();
+        }
+        throw DeadlyImportError("Invalid float value");
+    }
+    else {
+        std::string val;
+        float tvalf;
 
-	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), val);
-	fast_atoreal_move(val.c_str(), tvalf, false);
+        ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), val);
+        fast_atoreal_move(val.c_str(), tvalf, false);
 
-	return tvalf;
+        return tvalf;
+    }
 }
 
 int32_t X3DImporter::XML_ReadNode_GetAttrVal_AsI32(const int pAttrIdx)
 {
-	return strtol10(mReader->getAttributeValue(pAttrIdx));
+    auto intValue = std::dynamic_pointer_cast<const FIIntValue>(mReader->getAttributeEncodedValue(pAttrIdx));
+    if (intValue) {
+        if (intValue->value.size() == 1) {
+            return intValue->value.front();
+        }
+        throw DeadlyImportError("Invalid int value");
+    }
+    else {
+        return strtol10(mReader->getAttributeValue(pAttrIdx));
+    }
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsCol3f(const int pAttrIdx, aiColor3D& pValue)
 {
-    std::list<float> tlist;
-    std::list<float>::iterator it;
+    std::vector<float> tlist;
+    std::vector<float>::iterator it;
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);
+	XML_ReadNode_GetAttrVal_AsArrF(pAttrIdx, tlist);
 	if(tlist.size() != 3) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
 
 	it = tlist.begin();
@@ -412,10 +477,10 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsCol3f(const int pAttrIdx, aiColor3D&
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsVec2f(const int pAttrIdx, aiVector2D& pValue)
 {
-    std::list<float> tlist;
-    std::list<float>::iterator it;
+    std::vector<float> tlist;
+    std::vector<float>::iterator it;
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);
+	XML_ReadNode_GetAttrVal_AsArrF(pAttrIdx, tlist);
 	if(tlist.size() != 2) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
 
 	it = tlist.begin();
@@ -425,10 +490,10 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsVec2f(const int pAttrIdx, aiVector2D
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsVec3f(const int pAttrIdx, aiVector3D& pValue)
 {
-    std::list<float> tlist;
-    std::list<float>::iterator it;
+    std::vector<float> tlist;
+    std::vector<float>::iterator it;
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);
+	XML_ReadNode_GetAttrVal_AsArrF(pAttrIdx, tlist);
 	if(tlist.size() != 3) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
 
 	it = tlist.begin();
@@ -437,166 +502,95 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsVec3f(const int pAttrIdx, aiVector3D
 	pValue.z = *it;
 }
 
-void X3DImporter::XML_ReadNode_GetAttrVal_AsListB(const int pAttrIdx, std::list<bool>& pValue)
-{
-	const char *tok_cur = mReader->getAttributeValue(pAttrIdx);
-	const char *tok_end = tok_cur + strlen(tok_cur);
-
-	for(;;)
-	{
-		while((tok_cur < tok_end) && (whitespace.find_first_of(*tok_cur) != std::string::npos)) tok_cur++;// skip spaces between values.
-		if (tok_cur >= tok_end)
-			break;
-
-		if(strncmp(tok_cur, "true", 4) == 0)
-		{
-			pValue.push_back(true);
-			tok_cur += 4;
-		}
-		else if(strncmp(tok_cur, "false", 5) == 0)
-		{
-			pValue.push_back(false);
-			tok_cur += 5;
-		}
-		else
-		{
-			Throw_IncorrectAttrValue(mReader->getAttributeName(pAttrIdx));
-		}
-	}// for(;;)
-}
-
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrB(const int pAttrIdx, std::vector<bool>& pValue)
 {
-    std::list<bool> tlist;
+    auto boolValue = std::dynamic_pointer_cast<const FIBoolValue>(mReader->getAttributeEncodedValue(pAttrIdx));
+    if (boolValue) {
+        pValue = boolValue->value;
+    }
+    else {
+        const char *val = mReader->getAttributeValue(pAttrIdx);
+        pValue.clear();
 
-	XML_ReadNode_GetAttrVal_AsListB(pAttrIdx, tlist);// read as list
-	// and copy to array
-	if(tlist.size() > 0)
-	{
-		pValue.reserve(tlist.size());
-		for(std::list<bool>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
-	}
-}
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::regex_match(match.str(), pattern_true); });
 
-void X3DImporter::XML_ReadNode_GetAttrVal_AsListI32(const int pAttrIdx, std::list<int32_t>& pValue)
-{
-    const char* tstr = mReader->getAttributeValue(pAttrIdx);
-    const char* tstr_end = tstr + strlen(tstr);
-
-	do
-	{
-		const char* ostr;
-
-		int32_t tval32;
-
-		while((tstr < tstr_end) && (whitespace.find_first_of(*tstr) != std::string::npos)) tstr++;// skip spaces between values.
-
-		tval32 = strtol10(tstr, &ostr);
-		if(ostr == tstr) break;
-
-		tstr = ostr;
-		pValue.push_back(tval32);
-	} while(tstr < tstr_end);
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return (::tolower(match[0]) == 't') || (match[0] == '1'); });
+    }
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrI32(const int pAttrIdx, std::vector<int32_t>& pValue)
 {
-    std::list<int32_t> tlist;
+    auto intValue = std::dynamic_pointer_cast<const FIIntValue>(mReader->getAttributeEncodedValue(pAttrIdx));
+    if (intValue) {
+        pValue = intValue->value;
+    }
+    else {
+        const char *val = mReader->getAttributeValue(pAttrIdx);
+        pValue.clear();
 
-	XML_ReadNode_GetAttrVal_AsListI32(pAttrIdx, tlist);// read as list
-	// and copy to array
-	if(tlist.size() > 0)
-	{
-		pValue.reserve(tlist.size());
-		for(std::list<int32_t>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
-	}
-}
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stoi(match.str()); });
 
-void X3DImporter::XML_ReadNode_GetAttrVal_AsListF(const int pAttrIdx, std::list<float>& pValue)
-{
-    std::string str_fixed;
-
-	// at first check string values like '.xxx'.
-	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), str_fixed);
-
-	// and convert all values and place it in list.
-	const char* pstr = str_fixed.c_str();
-	const char* pstr_end = pstr + str_fixed.size();
-
-	do
-	{
-		float tvalf;
-
-		while((pstr < pstr_end) && (whitespace.find_first_of(*pstr) != std::string::npos)) pstr++;// skip spaces between values.
-
-		if(pstr < pstr_end)// additional check, because attribute value can be ended with spaces.
-		{
-			pstr = fast_atoreal_move(pstr, tvalf, false);
-			pValue.push_back(tvalf);
-		}
-	} while(pstr < pstr_end);
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atoi(match); });
+    }
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrF(const int pAttrIdx, std::vector<float>& pValue)
 {
-    std::list<float> tlist;
+    auto floatValue = std::dynamic_pointer_cast<const FIFloatValue>(mReader->getAttributeEncodedValue(pAttrIdx));
+    if (floatValue) {
+        pValue = floatValue->value;
+    }
+    else {
+        const char *val = mReader->getAttributeValue(pAttrIdx);
+        pValue.clear();
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
-	// and copy to array
-	if(tlist.size() > 0)
-	{
-		pValue.reserve(tlist.size());
-		for(std::list<float>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
-	}
-}
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stof(match.str()); });
 
-void X3DImporter::XML_ReadNode_GetAttrVal_AsListD(const int pAttrIdx, std::list<double>& pValue)
-{
-    std::string str_fixed;
-
-	// at first check string values like '.xxx'.
-	ParseHelper_FixTruncatedFloatString(mReader->getAttributeValue(pAttrIdx), str_fixed);
-
-	// and convert all values and place it in list.
-	const char* pstr = str_fixed.c_str();
-	const char* pstr_end = pstr + str_fixed.size();
-
-	do
-	{
-		double tvald;
-
-		while((pstr < pstr_end) && (whitespace.find_first_of(*pstr) != std::string::npos)) pstr++;// skip spaces between values.
-
-		if(pstr < pstr_end)// additional check, because attribute value can be ended with spaces.
-		{
-			pstr = fast_atoreal_move(pstr, tvald, false);
-			pValue.push_back(tvald);
-		}
-	} while(pstr < pstr_end);
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atof(match); });
+    }
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsArrD(const int pAttrIdx, std::vector<double>& pValue)
 {
-    std::list<double> tlist;
+    auto doubleValue = std::dynamic_pointer_cast<const FIDoubleValue>(mReader->getAttributeEncodedValue(pAttrIdx));
+    if (doubleValue) {
+        pValue = doubleValue->value;
+    }
+    else {
+        const char *val = mReader->getAttributeValue(pAttrIdx);
+        pValue.clear();
 
-	XML_ReadNode_GetAttrVal_AsListD(pAttrIdx, tlist);// read as list
-	// and copy to array
-	if(tlist.size() > 0)
-	{
-		pValue.reserve(tlist.size());
-		for(std::list<double>::iterator it = tlist.begin(); it != tlist.end(); it++) pValue.push_back(*it);
-	}
+        //std::cregex_iterator wordItBegin(val, val + strlen(val), pattern_nws);
+        //const std::cregex_iterator wordItEnd;
+        //std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const std::cmatch &match) { return std::stod(match.str()); });
+
+        WordIterator wordItBegin(val, val + strlen(val));
+        WordIterator wordItEnd;
+        std::transform(wordItBegin, wordItEnd, std::back_inserter(pValue), [](const char *match) { return atof(match); });
+    }
 }
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListCol3f(const int pAttrIdx, std::list<aiColor3D>& pValue)
 {
-    std::list<float> tlist;
+    std::vector<float> tlist;
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
+	XML_ReadNode_GetAttrVal_AsArrF(pAttrIdx, tlist);// read as list
 	if(tlist.size() % 3) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
 
 	// copy data to array
-	for(std::list<float>::iterator it = tlist.begin(); it != tlist.end();)
+	for(std::vector<float>::iterator it = tlist.begin(); it != tlist.end();)
 	{
 		aiColor3D tcol;
 
@@ -622,13 +616,13 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol3f(const int pAttrIdx, std::ve
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListCol4f(const int pAttrIdx, std::list<aiColor4D>& pValue)
 {
-    std::list<float> tlist;
+    std::vector<float> tlist;
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
+	XML_ReadNode_GetAttrVal_AsArrF(pAttrIdx, tlist);// read as list
 	if(tlist.size() % 4) Throw_ConvertFail_Str2ArrF(mReader->getAttributeValue(pAttrIdx));
 
 	// copy data to array
-	for(std::list<float>::iterator it = tlist.begin(); it != tlist.end();)
+	for(std::vector<float>::iterator it = tlist.begin(); it != tlist.end();)
 	{
 		aiColor4D tcol;
 
@@ -658,16 +652,16 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrCol4f(const int pAttrIdx, std::ve
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListVec2f(const int pAttrIdx, std::list<aiVector2D>& pValue)
 {
-    std::list<float> tlist;
+    std::vector<float> tlist;
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
+	XML_ReadNode_GetAttrVal_AsArrF(pAttrIdx, tlist);// read as list
     if ( tlist.size() % 2 )
     {
         Throw_ConvertFail_Str2ArrF( mReader->getAttributeValue( pAttrIdx ) );
     }
 
 	// copy data to array
-	for(std::list<float>::iterator it = tlist.begin(); it != tlist.end();)
+	for(std::vector<float>::iterator it = tlist.begin(); it != tlist.end();)
 	{
 		aiVector2D tvec;
 
@@ -695,16 +689,16 @@ void X3DImporter::XML_ReadNode_GetAttrVal_AsArrVec2f(const int pAttrIdx, std::ve
 
 void X3DImporter::XML_ReadNode_GetAttrVal_AsListVec3f(const int pAttrIdx, std::list<aiVector3D>& pValue)
 {
-    std::list<float> tlist;
+    std::vector<float> tlist;
 
-	XML_ReadNode_GetAttrVal_AsListF(pAttrIdx, tlist);// read as list
+	XML_ReadNode_GetAttrVal_AsArrF(pAttrIdx, tlist);// read as list
     if ( tlist.size() % 3 )
     {
         Throw_ConvertFail_Str2ArrF( mReader->getAttributeValue( pAttrIdx ) );
     }
 
 	// copy data to array
-	for(std::list<float>::iterator it = tlist.begin(); it != tlist.end();)
+	for(std::vector<float>::iterator it = tlist.begin(); it != tlist.end();)
 	{
 		aiVector3D tvec;
 
@@ -894,9 +888,9 @@ void X3DImporter::GeometryHelper_MakeQL_RectParallelepiped(const aiVector3D& pSi
 
 #undef MESH_RectParallelepiped_CREATE_VERT
 
-void X3DImporter::GeometryHelper_CoordIdxStr2FacesArr(const std::list<int32_t>& pCoordIdx, std::vector<aiFace>& pFaces, unsigned int& pPrimitiveTypes) const
+void X3DImporter::GeometryHelper_CoordIdxStr2FacesArr(const std::vector<int32_t>& pCoordIdx, std::vector<aiFace>& pFaces, unsigned int& pPrimitiveTypes) const
 {
-    std::list<int32_t> f_data(pCoordIdx);
+    std::vector<int32_t> f_data(pCoordIdx);
     std::vector<unsigned int> inds;
     unsigned int prim_type = 0;
 
@@ -909,7 +903,7 @@ void X3DImporter::GeometryHelper_CoordIdxStr2FacesArr(const std::list<int32_t>& 
 	pFaces.reserve(f_data.size() / 3);
 	inds.reserve(4);
     //PrintVectorSet("build. ci", pCoordIdx);
-	for(std::list<int32_t>::iterator it = f_data.begin(); it != f_data.end(); it++)
+	for(std::vector<int32_t>::iterator it = f_data.begin(); it != f_data.end(); it++)
 	{
 		// when face is got count how many indices in it.
 		if(*it == (-1))
@@ -1001,7 +995,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<aiColor4D
 	}// if(pColorPerVertex) else
 }
 
-void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pColorIdx,
+void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pColorIdx,
 										const std::list<aiColor3D>& pColors, const bool pColorPerVertex) const
 {
     std::list<aiColor4D> tcol;
@@ -1016,7 +1010,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 	MeshGeometry_AddColor(pMesh, pCoordIdx, pColorIdx, tcol, pColorPerVertex);
 }
 
-void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pColorIdx,
+void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pColorIdx,
 										const std::list<aiColor4D>& pColors, const bool pColorPerVertex) const
 {
     std::vector<aiColor4D> col_tgt_arr;
@@ -1047,7 +1041,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 			}
 			// create list with colors for every vertex.
 			col_tgt_arr.resize(pMesh.mNumVertices);
-			for(std::list<int32_t>::const_iterator colidx_it = pColorIdx.begin(), coordidx_it = pCoordIdx.begin(); colidx_it != pColorIdx.end(); colidx_it++, coordidx_it++)
+			for(std::vector<int32_t>::const_iterator colidx_it = pColorIdx.begin(), coordidx_it = pCoordIdx.begin(); colidx_it != pColorIdx.end(); colidx_it++, coordidx_it++)
 			{
                 if ( *colidx_it == ( -1 ) )
                 {
@@ -1095,7 +1089,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 			// create list with colors for every vertex using faces indices.
 			col_tgt_arr.resize(pMesh.mNumFaces);
 
-			std::list<int32_t>::const_iterator colidx_it = pColorIdx.begin();
+			std::vector<int32_t>::const_iterator colidx_it = pColorIdx.begin();
 			for(size_t fi = 0; fi < pMesh.mNumFaces; fi++)
 			{
 				if((unsigned int)*colidx_it > pMesh.mNumFaces) throw DeadlyImportError("MeshGeometry_AddColor2. Face idx is out of range.");
@@ -1125,7 +1119,7 @@ void X3DImporter::MeshGeometry_AddColor(aiMesh& pMesh, const std::list<int32_t>&
 	MeshGeometry_AddColor(pMesh, col_tgt_list, pColorPerVertex);
 }
 
-void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pNormalIdx,
+void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pNormalIdx,
 								const std::list<aiVector3D>& pNormals, const bool pNormalPerVertex) const
 {
     std::vector<size_t> tind;
@@ -1146,7 +1140,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<int32_t>
 			if(pNormalIdx.size() != pCoordIdx.size()) throw DeadlyImportError("Normals and Coords inidces count must be equal.");
 
 			tind.reserve(pNormalIdx.size());
-			for(std::list<int32_t>::const_iterator it = pNormalIdx.begin(); it != pNormalIdx.end(); it++)
+			for(std::vector<int32_t>::const_iterator it = pNormalIdx.begin(); it != pNormalIdx.end(); it++)
 			{
 				if(*it != (-1)) tind.push_back(*it);
 			}
@@ -1178,7 +1172,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<int32_t>
 		{
 			if(pMesh.mNumFaces != pNormalIdx.size()) throw DeadlyImportError("Normals faces count must be equal to mesh faces count.");
 
-			std::list<int32_t>::const_iterator normidx_it = pNormalIdx.begin();
+			std::vector<int32_t>::const_iterator normidx_it = pNormalIdx.begin();
 
 			tind.reserve(pNormalIdx.size());
 			for(size_t i = 0, i_e = pNormalIdx.size(); i < i_e; i++) tind.push_back(*normidx_it++);
@@ -1231,7 +1225,7 @@ void X3DImporter::MeshGeometry_AddNormal(aiMesh& pMesh, const std::list<aiVector
 	}// if(pNormalPerVertex) else
 }
 
-void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<int32_t>& pCoordIdx, const std::list<int32_t>& pTexCoordIdx,
+void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::vector<int32_t>& pCoordIdx, const std::vector<int32_t>& pTexCoordIdx,
 								const std::list<aiVector2D>& pTexCoords) const
 {
     std::vector<aiVector3D> texcoord_arr_copy;
@@ -1304,7 +1298,7 @@ void X3DImporter::MeshGeometry_AddTexCoord(aiMesh& pMesh, const std::list<aiVect
     }
 }
 
-aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::list<int32_t>& pCoordIdx, const std::list<aiVector3D>& pVertices) const
+aiMesh* X3DImporter::GeometryHelper_MakeMesh(const std::vector<int32_t>& pCoordIdx, const std::list<aiVector3D>& pVertices) const
 {
     std::vector<aiFace> faces;
     unsigned int prim_type = 0;
@@ -1407,9 +1401,12 @@ void X3DImporter::ParseHelper_FixTruncatedFloatString(const char* pInStr, std::s
 	}
 }
 
+extern FIVocabulary X3D_vocabulary_3_2;
+extern FIVocabulary X3D_vocabulary_3_3;
+
 void X3DImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
 {
-    irr::io::IrrXMLReader* OldReader = mReader;// store current XMLreader.
+    std::unique_ptr<FIReader> OldReader = std::move(mReader);// store current XMLreader.
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile, "rb"));
 
 	// Check whether we can read from the file
@@ -1417,19 +1414,18 @@ void X3DImporter::ParseFile(const std::string& pFile, IOSystem* pIOHandler)
     {
         throw DeadlyImportError( "Failed to open X3D file " + pFile + "." );
     }
-	// generate a XML reader for it
-	std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper(new CIrrXML_IOStreamReader(file.get()));
-	mReader = irr::io::createIrrXMLReader(mIOWrapper.get());
+	mReader = FIReader::create(file.get());
     if ( !mReader )
     {
         throw DeadlyImportError( "Failed to create XML reader for file" + pFile + "." );
     }
+    mReader->registerVocabulary("urn:web3d:x3d:fi-vocabulary-3.2", &X3D_vocabulary_3_2);
+    mReader->registerVocabulary("urn:web3d:x3d:fi-vocabulary-3.3", &X3D_vocabulary_3_3);
 	// start reading
 	ParseNode_Root();
 
-	delete mReader;
 	// restore old XMLreader
-	mReader = OldReader;
+	mReader = std::move(OldReader);
 }
 
 void X3DImporter::ParseNode_Root()
@@ -1643,7 +1639,7 @@ bool X3DImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool p
 {
     const std::string extension = GetExtension(pFile);
 
-	if(extension == "x3d") return true;
+	if((extension == "x3d") || (extension == "x3db")) return true;
 
 	if(!extension.length() || pCheckSig)
 	{
@@ -1658,6 +1654,7 @@ bool X3DImporter::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool p
 void X3DImporter::GetExtensionList(std::set<std::string>& pExtensionList)
 {
 	pExtensionList.insert("x3d");
+	pExtensionList.insert("x3db");
 }
 
 const aiImporterDesc* X3DImporter::GetInfo () const
@@ -1670,8 +1667,10 @@ void X3DImporter::InternReadFile(const std::string& pFile, aiScene* pScene, IOSy
 	mpIOHandler = pIOHandler;
 
 	Clear();// delete old graph.
-	pIOHandler->PushDirectory(DefaultIOSystem::absolutePath(pFile));
+	std::string::size_type slashPos = pFile.find_last_of("\\/");
+	pIOHandler->PushDirectory(slashPos == std::string::npos ? std::string() : pFile.substr(0, slashPos + 1));
 	ParseFile(pFile, pIOHandler);
+	pIOHandler->PopDirectory();
 	//
 	// Assimp use static arrays of objects for fast speed of rendering. That's good, but need some additional operations/
 	// We know that geometry objects(meshes) are stored in <Shape>, also in <Shape>-><Appearance> materials(in Assimp logical view)

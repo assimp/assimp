@@ -78,12 +78,10 @@ OPTION ( ASSIMP_COVERALLS
    "Eańable this to measure test coverage."
    OFF
 )
-
 option ( SYSTEM_IRRXML
     "Use system installed Irrlicht/IrrXML library."
     OFF
 )
-
 OPTION ( BUILD_DOCS
    "Build documentation using Doxygen."
    OFF

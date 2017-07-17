@@ -43,10 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  @brief Implementation of some blender modifiers (i.e subdivision, mirror).
  */
 
-
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
+
 #include "BlenderModifier.h"
-#include "SceneCombiner.h"
+#include <assimp/SceneCombiner.h>
 #include "Subdivision.h"
 #include <assimp/scene.h>
 #include <memory>
@@ -266,7 +266,7 @@ void  BlenderModifier_Mirror :: DoIt(aiNode& out, ConversionData& conv_data,  co
 
     std::copy(out.mMeshes,out.mMeshes+out.mNumMeshes,nind);
     std::transform(out.mMeshes,out.mMeshes+out.mNumMeshes,nind+out.mNumMeshes,
-        std::bind1st(std::plus< unsigned int >(),out.mNumMeshes));
+        [&out](unsigned int n) { return out.mNumMeshes + n; });
 
     delete[] out.mMeshes;
     out.mMeshes = nind;

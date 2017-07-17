@@ -53,7 +53,11 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/3DS/fels.3ds", 0 );
+#ifndef ASSIMP_BUILD_NO_3DS_IMPORTER
         return nullptr != scene;
+#else
+        return nullptr == scene;
+#endif // ASSIMP_BUILD_NO_3DS_IMPORTER
     }
 };
 

@@ -123,14 +123,14 @@ void X3DImporter::ParseNode_MetadataBoolean()
 {
     std::string def, use;
     std::string name, reference;
-    std::list<bool> value;
+    std::vector<bool> value;
     CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("name", name, mReader->getAttributeValue);
 		MACRO_ATTRREAD_CHECK_RET("reference", reference, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsListB);
+		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrB);
 	MACRO_ATTRREAD_LOOPEND;
 
 	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaBoolean, "MetadataBoolean", ENET_MetaBoolean);
@@ -147,14 +147,14 @@ void X3DImporter::ParseNode_MetadataDouble()
 {
     std::string def, use;
     std::string name, reference;
-    std::list<double> value;
+    std::vector<double> value;
     CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("name", name, mReader->getAttributeValue);
 		MACRO_ATTRREAD_CHECK_RET("reference", reference, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsListD);
+		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrD);
 	MACRO_ATTRREAD_LOOPEND;
 
 	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaDouble, "MetadataDouble", ENET_MetaDouble);
@@ -171,14 +171,14 @@ void X3DImporter::ParseNode_MetadataFloat()
 {
     std::string def, use;
     std::string name, reference;
-    std::list<float> value;
+    std::vector<float> value;
     CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("name", name, mReader->getAttributeValue);
 		MACRO_ATTRREAD_CHECK_RET("reference", reference, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsListF);
+		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrF);
 	MACRO_ATTRREAD_LOOPEND;
 
 	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaFloat, "MetadataFloat", ENET_MetaFloat);
@@ -195,14 +195,14 @@ void X3DImporter::ParseNode_MetadataInteger()
 {
     std::string def, use;
     std::string name, reference;
-    std::list<int32_t> value;
+    std::vector<int32_t> value;
     CX3DImporter_NodeElement* ne( nullptr );
 
 	MACRO_ATTRREAD_LOOPBEG;
 		MACRO_ATTRREAD_CHECKUSEDEF_RET(def, use);
 		MACRO_ATTRREAD_CHECK_RET("name", name, mReader->getAttributeValue);
 		MACRO_ATTRREAD_CHECK_RET("reference", reference, mReader->getAttributeValue);
-		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsListI32);
+		MACRO_ATTRREAD_CHECK_REF("value", value, XML_ReadNode_GetAttrVal_AsArrI32);
 	MACRO_ATTRREAD_LOOPEND;
 
 	MACRO_METADATA_FINDCREATE(def, use, reference, value, ne, CX3DImporter_NodeElement_MetaInteger, "MetadataInteger", ENET_MetaInteger);

@@ -935,30 +935,6 @@ bool PLY::PropertyInstance::ParseValue(const char* &pCur,
   ai_assert(NULL != out);
   
   //calc element size
-  unsigned int lsize = 0;
-  switch (eType)
-  {
-  case EDT_Char:
-  case EDT_UChar:
-    lsize = 1;
-    break;
-
-  case EDT_UShort:
-  case EDT_Short:
-    lsize = 2;
-    break;
-
-  case EDT_UInt:
-  case EDT_Int:
-  case EDT_Float:
-    lsize = 4;
-    break;
-
-  case EDT_Double:
-    lsize = 8;
-    break;
-  }
-
   bool ret = true;
   switch (eType)
   {
@@ -990,6 +966,7 @@ bool PLY::PropertyInstance::ParseValue(const char* &pCur,
     out->fDouble = (double)d;
     break;
 
+  case EDT_INVALID:
   default:
     ret = false;
     break;
@@ -1032,6 +1009,10 @@ bool PLY::PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
   case EDT_Double:
     lsize = 8;
     break;
+
+  case EDT_INVALID:
+  default:
+      break;
   }
 
   //read the next file block if needed

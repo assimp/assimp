@@ -109,28 +109,6 @@ ObjFile::Model *ObjFileParser::GetModel() const {
     return m_pModel;
 }
 
-/*void ignoreNewLines(IOStreamBuffer<char> &streamBuffer, std::vector<char> &buffer)
-{
-    auto curPosition = buffer.begin();
-    do
-    {
-        while (*curPosition!='\n'&&*curPosition!='\\')
-        {
-            ++curPosition;
-        }
-        if (*curPosition=='\\')
-        {
-            std::vector<char> tempBuf;
-            do
-            {
-                streamBuffer.getNextDataLine(tempBuf, '\\' );
-            } while (tempBuf[0]=='\n');
-            *curPosition = ' ';
-            std::copy(tempBuf.cbegin(), tempBuf.cend(), ++curPosition);
-        }
-    } while (*curPosition!='\n');
-}*/
-
 void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
     // only update every 100KB or it'll be too slow
     //const unsigned int updateProgressEveryBytes = 100 * 1024;
@@ -201,7 +179,18 @@ void ObjFileParser::parseFile( IOStreamBuffer<char> &streamBuffer ) {
 
         case 'u': // Parse a material desc. setter
             {
-                getMaterialDesc();
+                std::string name;
+
+                getNameNoSpace(m_DataIt, m_DataItEnd, name);
+
+                size_t nextSpace = name.find(" ");
+                if (nextSpace != std::string::npos)
+                    name = name.substr(0, nextSpace);
+
+                if(name == "usemtl")
+                {
+                    getMaterialDesc();
+                }
             }
             break;
 

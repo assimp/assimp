@@ -949,7 +949,7 @@ void X3DImporter::ParseNode_Geometry3D_IndexedFaceSet()
 void X3DImporter::ParseNode_Geometry3D_Sphere()
 {
     std::string use, def;
-    float radius = 1;
+    ai_real radius = 1;
     bool solid = true;
     CX3DImporter_NodeElement* ne( nullptr );
 

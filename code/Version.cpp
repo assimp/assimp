@@ -45,8 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include "ScenePrivate.h"
 
-static const unsigned int MajorVersion = 3;
-static const unsigned int MinorVersion = 3;
+static const unsigned int MajorVersion = 4;
+static const unsigned int MinorVersion = 0;
 
 // --------------------------------------------------------------------------------
 // Legal information string - dont't remove this.
@@ -114,23 +114,23 @@ ASSIMP_API unsigned int aiGetVersionRevision ()
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiScene::aiScene()
-    : mFlags(0)
-    , mRootNode(NULL)
-    , mNumMeshes(0)
-    , mMeshes(NULL)
-    , mNumMaterials(0)
-    , mMaterials(NULL)
-    , mNumAnimations(0)
-    , mAnimations(NULL)
-    , mNumTextures(0)
-    , mTextures(NULL)
-    , mNumLights(0)
-    , mLights(NULL)
-    , mNumCameras(0)
-    , mCameras(NULL)
-    , mPrivate(new Assimp::ScenePrivateData())
-    {
-    }
+: mFlags(0)
+, mRootNode(NULL)
+, mNumMeshes(0)
+, mMeshes(NULL)
+, mNumMaterials(0)
+, mMaterials(NULL)
+, mNumAnimations(0)
+, mAnimations(NULL)
+, mNumTextures(0)
+, mTextures(NULL)
+, mNumLights(0)
+, mLights(NULL)
+, mNumCameras(0)
+, mCameras(NULL)
+, mPrivate(new Assimp::ScenePrivateData()) {
+	// empty
+}
 
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiScene::~aiScene()
@@ -173,4 +173,3 @@ ASSIMP_API aiScene::~aiScene()
 
     delete static_cast<Assimp::ScenePrivateData*>( mPrivate );
 }
-

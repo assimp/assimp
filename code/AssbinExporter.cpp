@@ -350,27 +350,32 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
 				Write<uint16_t>(&chunk, type);
 				
 				switch (type) {
-				case AI_BOOL:
-					Write<bool>(&chunk, *((bool*) value));
-					break;
-				case AI_INT32:
-					Write<int32_t>(&chunk, *((int32_t*) value));
-					break;
-				case AI_UINT64:
-					Write<uint64_t>(&chunk, *((uint64_t*) value));
-					break;
-				case AI_FLOAT:
-					Write<float>(&chunk, *((float*) value));
-					break;
-				case AI_DOUBLE:
-					Write<double>(&chunk, *((double*) value));
-					break;
-				case AI_AISTRING:
-					Write<aiString>(&chunk, *((aiString*) value));
-					break;
-				case AI_AIVECTOR3D:
-					Write<aiVector3D>(&chunk, *((aiVector3D*) value));
-					break;
+                    case AI_BOOL:
+                        Write<bool>(&chunk, *((bool*) value));
+                        break;
+                    case AI_INT32:
+                        Write<int32_t>(&chunk, *((int32_t*) value));
+                        break;
+                    case AI_UINT64:
+                        Write<uint64_t>(&chunk, *((uint64_t*) value));
+                        break;
+                    case AI_FLOAT:
+                        Write<float>(&chunk, *((float*) value));
+                        break;
+                    case AI_DOUBLE:
+                        Write<double>(&chunk, *((double*) value));
+                        break;
+                    case AI_AISTRING:
+                        Write<aiString>(&chunk, *((aiString*) value));
+                        break;
+                    case AI_AIVECTOR3D:
+                        Write<aiVector3D>(&chunk, *((aiVector3D*) value));
+                        break;
+#ifdef SWIG
+                    case FORCE_32BIT:
+#endif // SWIG
+                    default:
+                        break;
 				}
 			}
         }

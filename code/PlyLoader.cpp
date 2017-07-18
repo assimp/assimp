@@ -761,7 +761,7 @@ void PLYImporter::LoadFace(const PLY::Element* pcElement, const PLY::ElementInst
         mGeneratedMesh->mFaces[pos].mIndices = new unsigned int[3];
         mGeneratedMesh->mFaces[pos].mIndices[0] = aiTable[0];
         mGeneratedMesh->mFaces[pos].mIndices[1] = aiTable[1];
-        mGeneratedMesh->mFaces[pos].mIndices[2] = aiTable[2];
+        mGeneratedMesh->mFaces[pos].mIndices[2] = p;
 
         if ((flip = !flip)) {
           std::swap(mGeneratedMesh->mFaces[pos].mIndices[0], mGeneratedMesh->mFaces[pos].mIndices[1]);

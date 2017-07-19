@@ -340,11 +340,10 @@ void ReadData(const char*& sbegin_out, const char*& send_out, const char* input,
 
 
 // ------------------------------------------------------------------------------------------------
-//TODO: Test FBX Binary files newer than the 7500 version to check if the 64 bits address behaviour is consistent
-bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor, const char* end, uint32_t const version)
+bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor, const char* end, bool const is64bits)
 {
     // the first word contains the offset at which this block ends
-	const uint64_t end_offset = version == 7500 ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
+	const uint64_t end_offset = is64bits ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
 
     // we may get 0 if reading reached the end of the file -
     // fbx files have a mysterious extra footer which I don't know
@@ -362,10 +361,10 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
     }
 
     // the second data word contains the number of properties in the scope
-	const uint64_t prop_count = version == 7500 ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
+	const uint64_t prop_count = is64bits ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
 
     // the third data word contains the length of the property list
-	const uint64_t prop_length = version == 7500 ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
+	const uint64_t prop_length = is64bits ? ReadDoubleWord(input, cursor, end) : ReadWord(input, cursor, end);
 
     // now comes the name of the scope/key
     const char* sbeg, *send;
@@ -392,7 +391,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
     // at the end of each nested block, there is a NUL record to indicate
     // that the sub-scope exists (i.e. to distinguish between P: and P : {})
     // this NUL record is 13 bytes long on 32 bit version and 25 bytes long on 64 bit.
-	const size_t sentinel_block_length = version == 7500 ? (sizeof(uint64_t)* 3 + 1) : (sizeof(uint32_t)* 3 + 1);
+	const size_t sentinel_block_length = is64bits ? (sizeof(uint64_t)* 3 + 1) : (sizeof(uint32_t)* 3 + 1);
 
     if (Offset(input, cursor) < end_offset) {
         if (end_offset - Offset(input, cursor) < sentinel_block_length) {
@@ -403,7 +402,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 
         // XXX this is vulnerable to stack overflowing ..
         while(Offset(input, cursor) < end_offset - sentinel_block_length) {
-            ReadScope(output_tokens, input, cursor, input + end_offset - sentinel_block_length, version);
+			ReadScope(output_tokens, input, cursor, input + end_offset - sentinel_block_length, is64bits);
         }
         output_tokens.push_back(new_Token(cursor, cursor + 1, TokenType_CLOSE_BRACKET, Offset(input, cursor) ));
 
@@ -426,6 +425,7 @@ bool ReadScope(TokenList& output_tokens, const char* input, const char*& cursor,
 }
 
 // ------------------------------------------------------------------------------------------------
+// TODO: Test FBX Binary files newer than the 7500 version to check if the 64 bits address behaviour is consistent
 void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int length)
 {
     ai_assert(input);
@@ -445,9 +445,10 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
 	const uint8_t unknown_4 = ReadByte(input, cursor, input + length);
 	const uint8_t unknown_5 = ReadByte(input, cursor, input + length);
 	const uint32_t version = ReadWord(input, cursor, input + length);
+	const bool is64bits = version == 7500;
     while (cursor < input + length)
     {
-		if (!ReadScope(output_tokens, input, cursor, input + length, version)) {
+		if (!ReadScope(output_tokens, input, cursor, input + length, is64bits)) {
             break;
         }
     }

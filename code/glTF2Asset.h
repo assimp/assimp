@@ -46,8 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_binary_glTF: full
  *   KHR_materials_common: full
  */
-#ifndef GLTFASSET_H_INC
-#define GLTFASSET_H_INC
+#ifndef GLTF2ASSET_H_INC
+#define GLTF2ASSET_H_INC
 
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
@@ -89,7 +89,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   endif
 #endif
 
-namespace glTF
+namespace glTF2
 {
 #ifdef ASSIMP_API
     using Assimp::IOStream;
@@ -1187,8 +1187,8 @@ namespace glTF
 }
 
 // Include the implementation of the methods
-#include "glTFAsset.inl"
+#include "glTF2Asset.inl"
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
-#endif // GLTFASSET_H_INC
+#endif // GLTF2ASSET_H_INC

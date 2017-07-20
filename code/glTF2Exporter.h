@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** @file GltfExporter.h
 * Declares the exporter class to write a scene to a gltf/glb file
 */
-#ifndef AI_GLTFEXPORTER_H_INC
-#define AI_GLTFEXPORTER_H_INC
+#ifndef AI_GLTF2EXPORTER_H_INC
+#define AI_GLTF2EXPORTER_H_INC
 
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
@@ -59,7 +59,7 @@ struct aiScene;
 struct aiNode;
 struct aiMaterial;
 
-namespace glTF
+namespace glTF2
 {
     template<class T>
     class Ref;
@@ -78,11 +78,11 @@ namespace Assimp
     // ------------------------------------------------------------------------------------------------
     /** Helper class to export a given scene to an glTF file. */
     // ------------------------------------------------------------------------------------------------
-    class glTFExporter
+    class glTF2Exporter
     {
     public:
         /// Constructor for a specific scene to export
-        glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
+        glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
             const ExportProperties* pProperties, bool binary);
 
     private:
@@ -94,19 +94,19 @@ namespace Assimp
 
         std::map<std::string, unsigned int> mTexturesByPath;
 
-        std::shared_ptr<glTF::Asset> mAsset;
+        std::shared_ptr<glTF2::Asset> mAsset;
 
         std::vector<unsigned char> mBodyData;
 
         void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
 
-        void GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop);
-        void GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
+        void GetTexSampler(const aiMaterial* mat, glTF2::TexProperty& prop);
+        void GetMatColorOrTex(const aiMaterial* mat, glTF2::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
         void ExportMetadata();
         void ExportMaterials();
         void ExportMeshes();
         unsigned int ExportNodeHierarchy(const aiNode* n);
-        unsigned int ExportNode(const aiNode* node, glTF::Ref<glTF::Node>& parent);
+        unsigned int ExportNode(const aiNode* node, glTF2::Ref<glTF2::Node>& parent);
         void ExportScene();
         void ExportAnimations();
     };
@@ -115,4 +115,4 @@ namespace Assimp
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
-#endif // AI_GLTFEXPORTER_H_INC
+#endif // AI_GLTF2EXPORTER_H_INC

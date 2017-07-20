@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_EXPORT
 #ifndef ASSIMP_BUILD_NO_GLTF_EXPORTER
 
-#include "glTFExporter.h"
+#include "glTF2Exporter.h"
 
 #include "Exceptional.h"
 #include "StringComparison.h"
@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <inttypes.h>
 
-#include "glTFAssetWriter.h"
+#include "glTF2AssetWriter.h"
 
 #ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
 	// Header files, Open3DGC.
@@ -70,29 +70,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace rapidjson;
 
 using namespace Assimp;
-using namespace glTF;
+using namespace glTF2;
 
 namespace Assimp {
 
     // ------------------------------------------------------------------------------------------------
     // Worker function for exporting a scene to GLTF. Prototyped and registered in Exporter.cpp
-    void ExportSceneGLTF(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
+    void ExportSceneGLTF2(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
     {
         // invoke the exporter
-        glTFExporter exporter(pFile, pIOSystem, pScene, pProperties, false);
-    }
-
-    // ------------------------------------------------------------------------------------------------
-    // Worker function for exporting a scene to GLB. Prototyped and registered in Exporter.cpp
-    void ExportSceneGLB(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene, const ExportProperties* pProperties)
-    {
-        // invoke the exporter
-        glTFExporter exporter(pFile, pIOSystem, pScene, pProperties, true);
+        glTF2Exporter exporter(pFile, pIOSystem, pScene, pProperties, false);
     }
 
 } // end of namespace Assimp
 
-glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
+glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const aiScene* pScene,
                            const ExportProperties* pProperties, bool isBinary)
     : mFilename(filename)
     , mIOSystem(pIOSystem)
@@ -112,7 +104,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     mScene = sceneCopy.get();
 
-    mAsset.reset( new glTF::Asset( pIOSystem ) );
+    mAsset.reset( new Asset( pIOSystem ) );
 
     if (isBinary) {
         mAsset->SetAsBinary();
@@ -138,7 +130,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
 
     ExportAnimations();
 
-    glTF::AssetWriter writer(*mAsset);
+    AssetWriter writer(*mAsset);
 
     if (isBinary) {
         writer.WriteGLBFile(filename);
@@ -151,7 +143,7 @@ glTFExporter::glTFExporter(const char* filename, IOSystem* pIOSystem, const aiSc
  * Copy a 4x4 matrix from struct aiMatrix to typedef mat4.
  * Also converts from row-major to column-major storage.
  */
-static void CopyValue(const aiMatrix4x4& v, glTF::mat4& o)
+static void CopyValue(const aiMatrix4x4& v, mat4& o)
 {
     o[ 0] = v.a1; o[ 1] = v.b1; o[ 2] = v.c1; o[ 3] = v.d1;
     o[ 4] = v.a2; o[ 5] = v.b2; o[ 6] = v.c2; o[ 7] = v.d2;
@@ -167,7 +159,7 @@ static void CopyValue(const aiMatrix4x4& v, aiMatrix4x4& o)
     o.d1 = v.d1; o.d2 = v.d2; o.d3 = v.d3; o.d4 = v.d4;
 }
 
-static void IdentityMatrix4(glTF::mat4& o)
+static void IdentityMatrix4(mat4& o)
 {
     o[ 0] = 1; o[ 1] = 0; o[ 2] = 0; o[ 3] = 0;
     o[ 4] = 0; o[ 5] = 1; o[ 6] = 0; o[ 7] = 0;
@@ -248,7 +240,7 @@ namespace {
     }
 }
 
-void glTFExporter::GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop)
+void glTF2Exporter::GetTexSampler(const aiMaterial* mat, TexProperty& prop)
 {
     std::string samplerId = mAsset->FindUniqueID("", "sampler");
     prop.texture->sampler = mAsset->samplers.Create(samplerId);
@@ -294,7 +286,7 @@ void glTFExporter::GetTexSampler(const aiMaterial* mat, glTF::TexProperty& prop)
     prop.texture->sampler->minFilter = SamplerMinFilter_Linear;
 }
 
-void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
+void glTF2Exporter::GetMatColorOrTex(const aiMaterial* mat, TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
 {
     aiString tex;
     aiColor4D col;
@@ -346,7 +338,7 @@ void glTFExporter::GetMatColorOrTex(const aiMaterial* mat, glTF::TexProperty& pr
 }
 
 
-void glTFExporter::ExportMaterials()
+void glTF2Exporter::ExportMaterials()
 {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
@@ -496,7 +488,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     delete[] vertexJointData;
 }
 
-void glTFExporter::ExportMeshes()
+void glTF2Exporter::ExportMeshes()
 {
     // Not for
     //     using IndicesType = decltype(aiFace::mNumIndices);
@@ -768,7 +760,7 @@ void glTFExporter::ExportMeshes()
  * Export the root node of the node hierarchy.
  * Calls ExportNode for all children.
  */
-unsigned int glTFExporter::ExportNodeHierarchy(const aiNode* n)
+unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode* n)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
 
@@ -793,7 +785,7 @@ unsigned int glTFExporter::ExportNodeHierarchy(const aiNode* n)
  * Export node and recursively calls ExportNode for all children.
  * Since these nodes are not the root node, we also export the parent Ref<Node>
  */
-unsigned int glTFExporter::ExportNode(const aiNode* n, Ref<Node>& parent)
+unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
 {
     Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
 
@@ -817,7 +809,7 @@ unsigned int glTFExporter::ExportNode(const aiNode* n, Ref<Node>& parent)
 }
 
 
-void glTFExporter::ExportScene()
+void glTF2Exporter::ExportScene()
 {
     const char* sceneName = "defaultScene";
     Ref<Scene> scene = mAsset->scenes.Create(sceneName);
@@ -831,9 +823,9 @@ void glTFExporter::ExportScene()
     mAsset->scene = scene;
 }
 
-void glTFExporter::ExportMetadata()
+void glTF2Exporter::ExportMetadata()
 {
-    glTF::AssetMetadata& asset = mAsset->asset;
+    AssetMetadata& asset = mAsset->asset;
     asset.version = 1;
 
     char buffer[256];
@@ -931,7 +923,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     }
 }
 
-void glTFExporter::ExportAnimations()
+void glTF2Exporter::ExportAnimations()
 {
     Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
 

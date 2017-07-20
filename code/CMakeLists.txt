@@ -661,6 +661,12 @@ ADD_ASSIMP_IMPORTER( GLTF
   glTFImporter.h
   glTFExporter.h
   glTFExporter.cpp
+  glTF2Asset.h
+  glTF2Asset.inl
+  glTF2AssetWriter.h
+  glTF2AssetWriter.inl
+  glTF2Exporter.h
+  glTF2Exporter.cpp
 )
 
 ADD_ASSIMP_IMPORTER( 3MF

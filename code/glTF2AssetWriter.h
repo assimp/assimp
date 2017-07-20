@@ -46,14 +46,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_binary_glTF: full
  *   KHR_materials_common: full
  */
-#ifndef GLTFASSETWRITER_H_INC
-#define GLTFASSETWRITER_H_INC
+#ifndef GLTF2ASSETWRITER_H_INC
+#define GLTF2ASSETWRITER_H_INC
 
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
 
-#include "glTFAsset.h"
+#include "glTF2Asset.h"
 
-namespace glTF
+namespace glTF2
 {
 
 using rapidjson::MemoryPoolAllocator;
@@ -88,8 +88,8 @@ public:
 }
 
 // Include the implementation of the methods
-#include "glTFAssetWriter.inl"
+#include "glTF2AssetWriter.inl"
 
 #endif // ASSIMP_BUILD_NO_GLTF_IMPORTER
 
-#endif // GLTFASSETWRITER_H_INC
+#endif // GLTF2ASSETWRITER_H_INC

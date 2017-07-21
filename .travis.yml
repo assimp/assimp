@@ -5,10 +5,11 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq && sudo apt-get install cmake && sudo apt-get install cmake python3 && sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca- ; fi
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ];  then
        if brew ls versions cmake > /dev/null/; then
-       else  
+         echo cmake already installed.;
+       else
          brew install cmake;
-       fi 
-       brew install python3; 
+       fi
+       brew install python3;
        brew install homebrew/x11/freeglut; 
     fi'
   - echo -e "#ifndef A_R_H_INC\n#define A_R_H_INC\n#define GitVersion ${TRAVIS_JOB_ID}\n#define GitBranch \"${TRAVIS_BRANCH}\"\n#endif // A_R_H_INC" > revision.h

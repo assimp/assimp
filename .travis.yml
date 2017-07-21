@@ -4,7 +4,7 @@ language: cpp
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq && sudo apt-get install cmake && sudo apt-get install cmake python3 && sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca- ; fi
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ];  then
-       if brew ls --versions cmake > /dev/null/; then
+       if brew ls --versions cmake > /dev/null; then
          echo cmake already installed.;
        else
          brew install cmake;

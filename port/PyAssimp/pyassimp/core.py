@@ -119,7 +119,10 @@ def _init(self, target = None, parent = None):
 
         if m == 'mName':
             obj = self.mName
-            uni = unicode(obj.data, errors='ignore')
+            try:
+                uni = unicode(obj.data, errors='ignore')
+            except:
+                uni = str(obj.data, errors='ignore')
             target.name = str( uni )
             target.__class__.__repr__ = lambda x: str(x.__class__) + "(" + x.name + ")"
             target.__class__.__str__ = lambda x: x.name
@@ -440,7 +443,10 @@ def _get_properties(properties, length):
     for p in [properties[i] for i in range(length)]:
         #the name
         p = p.contents
-        uni = unicode(p.mKey.data, errors='ignore')
+        try:
+            uni = unicode(p.mKey.data, errors='ignore')
+        except:
+            uni = str(p.mKey.data, errors='ignore')
         key = (str(uni).split('.')[1], p.mSemantic)
 
         #the data
@@ -449,7 +455,10 @@ def _get_properties(properties, length):
             arr = cast(p.mData, POINTER(c_float * int(p.mDataLength/sizeof(c_float)) )).contents
             value = [x for x in arr]
         elif p.mType == 3: #string can't be an array
-            uni = unicode(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
+            try:
+                uni = unicode(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
+            except:
+                uni = str(cast(p.mData, POINTER(structs.MaterialPropertyString)).contents.data, errors='ignore')
             value = uni
 
         elif p.mType == 4:
@@ -476,3 +485,4 @@ def decompose_matrix(matrix):
     from ctypes import byref, pointer
     _assimp_lib.dll.aiDecomposeMatrix(pointer(matrix), byref(scaling), byref(rotation), byref(position))
     return scaling._init(), rotation._init(), position._init()
+    

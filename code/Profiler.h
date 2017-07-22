@@ -84,7 +84,7 @@ public:
             return;
         }
 
-        auto elapsedSeconds = std::chrono::system_clock::now() - regions[region];
+        std::chrono::duration<double> elapsedSeconds = std::chrono::system_clock::now() - regions[region];
         DefaultLogger::get()->debug((format("END   `"),region,"`, dt= ", elapsedSeconds.count()," s"));
     }
 

@@ -129,6 +129,7 @@ SET( TEST_SRCS
   unit/utVector3.cpp
   unit/utXImporterExporter.cpp
   unit/utD3MFImportExport.cpp
+  unit/utProfiler.cpp
 )
 
 SOURCE_GROUP( tests FILES  ${TEST_SRCS} )

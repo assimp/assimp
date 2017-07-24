@@ -39,35 +39,39 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#pragma once
+#include "UnitTestPCH.h"
 
-// We need to be sure to have the same STL settings as Assimp
+#include "code/Profiler.h"
+#include <assimp/DefaultLogger.hpp>
 
-#include <assimp/cimport.h>
-#include <gtest/gtest.h>
-#include <memory>
-#include <math.h>
-#include <assimp/LogStream.hpp>
+using namespace ::Assimp;
+using namespace ::Assimp::Profiling;
 
-class UTLogStream : public Assimp::LogStream {
+class utProfiler : public ::testing::Test {
 public:
-    UTLogStream()
-    : LogStream() {
-        // empty
+    LogStream *m_stream;
+
+    virtual void SetUp() {
+        m_stream = new UTLogStream;
+        DefaultLogger::create();
+        DefaultLogger::get()->attachStream( m_stream );
     }
 
-    virtual ~UTLogStream() {
-        // empty
+    virtual void TearDown() {
+        DefaultLogger::get()->detatchStream( m_stream );
+        m_stream = nullptr;
+        DefaultLogger::kill();
     }
-
-    void write(const char* message) override {
-        if ( nullptr != message ) {
-            m_messages.push_back( std::string( message ) );
-        }
-    }
-
-    std::vector<std::string> m_messages;
 };
 
-#undef min
-#undef max
+TEST_F( utProfiler, addRegion_success ) {
+    Profiler myProfiler;
+    myProfiler.BeginRegion( "t1" );
+    for ( int i=0; i<10; i++ ) {
+        volatile int j=0;
+        j++;
+    }
+    myProfiler.EndRegion( "t1" );
+    UTLogStream *stream( (UTLogStream*) m_stream );
+    //EXPECT_FALSE( stream->m_messages.empty() );
+}

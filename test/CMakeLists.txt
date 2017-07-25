@@ -57,6 +57,7 @@ SOURCE_GROUP( unit FILES
 )
 
 SET( TEST_SRCS
+  unit/UTLogStream.h
   unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
   unit/TestModelFactory.h

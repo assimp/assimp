@@ -87,7 +87,7 @@ public:
     }
 
 private:
-    using RegionMap = std::map<std::string,std::chrono::time_point<std::chrono::system_clock>>;
+    typedef std::map<std::string,std::chrono::time_point<std::chrono::system_clock>> RegionMap;
     RegionMap regions;
 };
 

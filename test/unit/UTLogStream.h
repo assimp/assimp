@@ -53,7 +53,7 @@ public:
         // empty
     }
 
-    void write(const char* message) override {
+    virtual void write(const char* message) {
         if ( nullptr != message ) {
             m_messages.push_back( std::string( message ) );
         }

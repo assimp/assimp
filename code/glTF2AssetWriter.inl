@@ -212,17 +212,20 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Material& m, AssetWriter& w)
     {
+        if (m.transparent) {
+            obj.AddMember("alphaMode", "BLEND", w.mAl);
+        }
+
         Value v;
         v.SetObject();
         {
+            if (m.transparent && !m.diffuse.texture) {
+                m.diffuse.color[3] = m.transparency;
+            }
             WriteColorOrTex(v, m.ambient, m.ambient.texture ? "ambientTexture" : "ambientFactor", w.mAl);
             WriteColorOrTex(v, m.diffuse, m.diffuse.texture ? "diffuseTexture" : "diffuseFactor", w.mAl);
             WriteColorOrTex(v, m.specular, m.specular.texture ? "specularTexture" : "specularFactor", w.mAl);
             WriteColorOrTex(v, m.emission, m.emission.texture ? "emissionTexture" : "emissionFactor", w.mAl);
-
-            if (m.transparent)
-                v.AddMember("transparency", m.transparency, w.mAl);
-
             v.AddMember("shininessFactor", m.shininess, w.mAl);
         }
         v.AddMember("type", "commonPhong", w.mAl);

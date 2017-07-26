@@ -242,6 +242,7 @@ Ref<T> LazyDict<T>::Create(const char* id)
     }
     T* inst = new T();
     inst->id = id;
+    inst->index = mObjs.size();
     return Add(inst);
 }
 

@@ -434,7 +434,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
         // aib->mName   =====>  skinRef->jointNames
         // Find the node with id = mName.
         Ref<Node> nodeRef = mAsset.nodes.Get(aib->mName.C_Str());
-        nodeRef->jointName = nodeRef->id;
+        nodeRef->jointName = nodeRef->name;
 
         unsigned int jointNamesIndex;
         bool addJointToJointNames = true;
@@ -744,15 +744,27 @@ void glTF2Exporter::ExportMeshes()
         skinRef->bindShapeMatrix.isPresent = true;
         IdentityMatrix4(skinRef->bindShapeMatrix.value);
 
-        // Find node that contains this mesh and add "skeletons" and "skin" attributes to that node.
+        // Find nodes that contain a mesh with bones and add "skeletons" and "skin" attributes to those nodes.
         Ref<Node> rootNode = mAsset->nodes.Get(unsigned(0));
         Ref<Node> meshNode;
-        std::string meshID = mAsset->meshes.Get(unsigned(0))->id;
-        FindMeshNode(rootNode, meshNode, meshID);
-
-        Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
-        meshNode->skeletons.push_back(rootJoint);
-        meshNode->skin = skinRef;
+        for (unsigned int meshIndex = 0; meshIndex < mAsset->meshes.Size(); ++meshIndex) {
+            Ref<Mesh> mesh = mAsset->meshes.Get(meshIndex);
+            bool hasBones = false;
+            for (unsigned int i = 0; i < mesh->primitives.size(); ++i) {
+                if (!mesh->primitives[i].attributes.weight.empty()) {
+                    hasBones = true;
+                    break;
+                }
+            }
+            if (!hasBones) {
+                continue;
+            }
+            std::string meshID = mesh->id;
+            FindMeshNode(rootNode, meshNode, meshID);
+            Ref<Node> rootJoint = FindSkeletonRootJoint(skinRef);
+            meshNode->skeletons.push_back(rootJoint);
+            meshNode->skin = skinRef;
+        }
     }
 }
 
@@ -787,9 +799,11 @@ unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode* n)
  */
 unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
 {
-    Ref<Node> node = mAsset->nodes.Create(mAsset->FindUniqueID(n->mName.C_Str(), "node"));
+    std::string name = mAsset->FindUniqueID(n->mName.C_Str(), "node");
+    Ref<Node> node = mAsset->nodes.Create(name);
 
     node->parent = parent;
+    node->name = name;
 
     if (!n->mTransformation.IsIdentity()) {
         node->matrix.isPresent = true;
@@ -826,7 +840,7 @@ void glTF2Exporter::ExportScene()
 void glTF2Exporter::ExportMetadata()
 {
     AssetMetadata& asset = mAsset->asset;
-    asset.version = 1;
+    asset.version = 2;
 
     char buffer[256];
     ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",
@@ -970,12 +984,12 @@ void glTF2Exporter::ExportAnimations()
                 Animation::AnimChannel tmpAnimChannel;
                 Animation::AnimSampler tmpAnimSampler;
 
-                tmpAnimChannel.sampler = name + "_" + channelType;
+                tmpAnimChannel.sampler = animRef->Samplers.size();
                 tmpAnimChannel.target.path = channelType;
                 tmpAnimSampler.output = channelType;
                 tmpAnimSampler.id = name + "_" + channelType;
 
-                tmpAnimChannel.target.id = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
+                tmpAnimChannel.target.node = mAsset->nodes.Get(nodeChannel->mNodeName.C_Str());
 
                 tmpAnimSampler.input = "TIME";
                 tmpAnimSampler.interpolation = "LINEAR";

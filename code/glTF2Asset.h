@@ -177,7 +177,7 @@ namespace glTF2
     struct GLB_Header
     {
         uint8_t magic[4];     //!< Magic number: "glTF"
-        uint32_t version;     //!< Version number (always 1 as of the last update)
+        uint32_t version;     //!< Version number
         uint32_t length;      //!< Total length of the Binary glTF, including header, scene, and body, in bytes
         uint32_t sceneLength; //!< Length, in bytes, of the glTF scene
         uint32_t sceneFormat; //!< Specifies the format of the glTF scene (see the SceneFormat enum)
@@ -381,6 +381,7 @@ namespace glTF2
     //! Base classe for all glTF top-level objects
     struct Object
     {
+        int index;        //!< The index of this object within its property container
         std::string id;   //!< The globally unique ID used to reference this object
         std::string name; //!< The user-defined name of this object
 
@@ -952,10 +953,10 @@ namespace glTF2
         };
 
         struct AnimChannel {
-            std::string sampler;         //!< The ID of one sampler present in the containing animation's samplers property.
+            int sampler;                 //!< The index of a sampler in the containing animation's samplers property.
 
             struct AnimTarget {
-                Ref<Node> id;            //!< The ID of the node to animate.
+                Ref<Node> node;          //!< The node to animate.
                 std::string path;        //!< The name of property of the node to animate ("translation", "rotation", or "scale").
             } target;
         };
@@ -977,6 +978,20 @@ namespace glTF2
 
         Animation() {}
         void Read(Value& obj, Asset& r);
+
+        //! Get accessor given an animation parameter name.
+        Ref<Accessor> GetAccessor(std::string name) {
+            if (name == "TIME") {
+                return Parameters.TIME;
+            } else if (name == "rotation") {
+                return Parameters.rotation;
+            } else if (name == "scale") {
+                return Parameters.scale;
+            } else if (name == "translation") {
+                return Parameters.translation;
+            }
+            return Ref<Accessor>();
+        }
     };
 
 
@@ -1058,7 +1073,7 @@ namespace glTF2
             std::string version; //!< Specifies the target rendering API (default: "1.0.3")
         } profile; //!< Specifies the target rendering API and version, e.g., WebGL 1.0.3. (default: {})
 
-        int version; //!< The glTF format version (should be 1)
+        int version; //!< The glTF format version
 
         void Read(Document& doc);
 

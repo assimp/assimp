@@ -113,13 +113,12 @@ namespace glTF2 {
             Value valChannel;
             valChannel.SetObject();
             {
-                Animation::AnimSampler& s = a.Samplers[c.sampler];
-                valChannel.AddMember("sampler", s.id, w.mAl);
+                valChannel.AddMember("sampler", c.sampler, w.mAl);
 
                 Value valTarget;
                 valTarget.SetObject();
                 {
-                    valTarget.AddMember("id", StringRef(c.target.node->id), w.mAl);
+                    valTarget.AddMember("node", c.target.node->index, w.mAl);
                     valTarget.AddMember("path", c.target.path, w.mAl);
                 }
                 valChannel.AddMember("target", valTarget, w.mAl);

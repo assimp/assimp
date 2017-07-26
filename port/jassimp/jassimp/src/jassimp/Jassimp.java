@@ -301,7 +301,7 @@ public final class Jassimp {
     public static final int NATIVE_LONG_SIZE; 
 
     static {
-        System.loadLibrary("jassimp");
+//        System.loadLibrary("jassimp");
     	NATIVE_AIVEKTORKEY_SIZE = getVKeysize();
     	NATIVE_AIQUATKEY_SIZE = getQKeysize();
     	NATIVE_AIVEKTOR3D_SIZE = getV3Dsize();

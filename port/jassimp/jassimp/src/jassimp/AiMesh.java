@@ -140,17 +140,17 @@ public final class AiMesh {
     /**
      * Number of bytes per float value.
      */
-    private static final int SIZEOF_FLOAT = Jassimp.NATIVE_FLOAT_SIZE;
+    private final int SIZEOF_FLOAT = Jassimp.NATIVE_FLOAT_SIZE;
         
     /**
      * Number of bytes per int value.
      */
-    private static final int SIZEOF_INT = Jassimp.NATIVE_INT_SIZE;
+    private final int SIZEOF_INT = Jassimp.NATIVE_INT_SIZE;
 
     /**
      * Size of an AiVector3D in the native world.
      */
-    private static final int SIZEOF_V3D = Jassimp.NATIVE_AIVEKTOR3D_SIZE;
+    private final int SIZEOF_V3D = Jassimp.NATIVE_AIVEKTOR3D_SIZE;
     
     
     /**

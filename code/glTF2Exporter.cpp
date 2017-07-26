@@ -240,10 +240,10 @@ namespace {
     }
 }
 
-void glTF2Exporter::GetTexSampler(const aiMaterial* mat, TexProperty& prop)
+void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture)
 {
     std::string samplerId = mAsset->FindUniqueID("", "sampler");
-    prop.texture->sampler = mAsset->samplers.Create(samplerId);
+    texture->sampler = mAsset->samplers.Create(samplerId);
 
     aiTextureMapMode mapU, mapV;
     aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0),(int*)&mapU);
@@ -251,45 +251,44 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, TexProperty& prop)
 
     switch (mapU) {
         case aiTextureMapMode_Wrap:
-            prop.texture->sampler->wrapS = SamplerWrap_Repeat;
+            texture->sampler->wrapS = SamplerWrap_Repeat;
             break;
         case aiTextureMapMode_Clamp:
-            prop.texture->sampler->wrapS = SamplerWrap_Clamp_To_Edge;
+            texture->sampler->wrapS = SamplerWrap_Clamp_To_Edge;
             break;
         case aiTextureMapMode_Mirror:
-            prop.texture->sampler->wrapS = SamplerWrap_Mirrored_Repeat;
+            texture->sampler->wrapS = SamplerWrap_Mirrored_Repeat;
             break;
         case aiTextureMapMode_Decal:
         default:
-            prop.texture->sampler->wrapS = SamplerWrap_Repeat;
+            texture->sampler->wrapS = SamplerWrap_Repeat;
             break;
     };
 
     switch (mapV) {
         case aiTextureMapMode_Wrap:
-            prop.texture->sampler->wrapT = SamplerWrap_Repeat;
+            texture->sampler->wrapT = SamplerWrap_Repeat;
             break;
         case aiTextureMapMode_Clamp:
-            prop.texture->sampler->wrapT = SamplerWrap_Clamp_To_Edge;
+            texture->sampler->wrapT = SamplerWrap_Clamp_To_Edge;
             break;
         case aiTextureMapMode_Mirror:
-            prop.texture->sampler->wrapT = SamplerWrap_Mirrored_Repeat;
+            texture->sampler->wrapT = SamplerWrap_Mirrored_Repeat;
             break;
         case aiTextureMapMode_Decal:
         default:
-            prop.texture->sampler->wrapT = SamplerWrap_Repeat;
+            texture->sampler->wrapT = SamplerWrap_Repeat;
             break;
     };
 
     // Hard coded Texture filtering options because I do not know where to find them in the aiMaterial.
-    prop.texture->sampler->magFilter = SamplerMagFilter_Linear;
-    prop.texture->sampler->minFilter = SamplerMinFilter_Linear;
+    texture->sampler->magFilter = SamplerMagFilter_Linear;
+    texture->sampler->minFilter = SamplerMinFilter_Linear;
 }
 
-void glTF2Exporter::GetMatColorOrTex(const aiMaterial* mat, TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
+void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt)
 {
     aiString tex;
-    aiColor4D col;
     if (mat->GetTextureCount(tt) > 0) {
         if (mat->Get(AI_MATKEY_TEXTURE(tt, 0), tex) == AI_SUCCESS) {
             std::string path = tex.C_Str();
@@ -298,43 +297,48 @@ void glTF2Exporter::GetMatColorOrTex(const aiMaterial* mat, TexProperty& prop, c
                 if (path[0] != '*') {
                     std::map<std::string, unsigned int>::iterator it = mTexturesByPath.find(path);
                     if (it != mTexturesByPath.end()) {
-                        prop.texture = mAsset->textures.Get(it->second);
+                        texture = mAsset->textures.Get(it->second);
                     }
                 }
 
-                if (!prop.texture) {
+                if (!texture) {
                     std::string texId = mAsset->FindUniqueID("", "texture");
-                    prop.texture = mAsset->textures.Create(texId);
-                    mTexturesByPath[path] = prop.texture.GetIndex();
+                    texture = mAsset->textures.Create(texId);
+                    mTexturesByPath[path] = texture.GetIndex();
 
                     std::string imgId = mAsset->FindUniqueID("", "image");
-                    prop.texture->source = mAsset->images.Create(imgId);
+                    texture->source = mAsset->images.Create(imgId);
 
                     if (path[0] == '*') { // embedded
                         aiTexture* tex = mScene->mTextures[atoi(&path[1])];
 
                         uint8_t* data = reinterpret_cast<uint8_t*>(tex->pcData);
-                        prop.texture->source->SetData(data, tex->mWidth, *mAsset);
+                        texture->source->SetData(data, tex->mWidth, *mAsset);
 
                         if (tex->achFormatHint[0]) {
                             std::string mimeType = "image/";
                             mimeType += (memcmp(tex->achFormatHint, "jpg", 3) == 0) ? "jpeg" : tex->achFormatHint;
-                            prop.texture->source->mimeType = mimeType;
+                            texture->source->mimeType = mimeType;
                         }
                     }
                     else {
-                        prop.texture->source->uri = path;
+                        texture->source->uri = path;
                     }
 
-                    GetTexSampler(mat, prop);
+                    GetTexSampler(mat, texture);
                 }
             }
         }
     }
+}
 
+void glTF2Exporter::GetMatColorOrTex(const aiMaterial* mat, TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
+{
+    aiColor4D col;
     if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
         prop.color[0] = col.r; prop.color[1] = col.g; prop.color[2] = col.b; prop.color[3] = col.a;
     }
+    GetMatTex(mat, prop.texture, tt);
 }
 
 
@@ -357,6 +361,7 @@ void glTF2Exporter::ExportMaterials()
         GetMatColorOrTex(mat, m->diffuse, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_DIFFUSE);
         GetMatColorOrTex(mat, m->specular, AI_MATKEY_COLOR_SPECULAR, aiTextureType_SPECULAR);
         GetMatColorOrTex(mat, m->emission, AI_MATKEY_COLOR_EMISSIVE, aiTextureType_EMISSIVE);
+        GetMatTex(mat, m->normal, aiTextureType_NORMALS);
 
         m->transparent = mat->Get(AI_MATKEY_OPACITY, m->transparency) == aiReturn_SUCCESS && m->transparency != 1.0;
 

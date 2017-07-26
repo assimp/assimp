@@ -697,6 +697,7 @@ namespace glTF2
         TexProperty diffuse;
         TexProperty specular;
         TexProperty emission;
+        Ref<Texture> normal;
 
         bool doubleSided;
         bool transparent;

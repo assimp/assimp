@@ -196,14 +196,20 @@ namespace glTF2 {
     }
 
     namespace {
-        inline void WriteColorOrTex(Value& obj, TexProperty& prop, const char* propName, MemoryPoolAllocator<>& al)
+        inline void WriteTex(Value& obj, Ref<Texture> texture, const char* propName, MemoryPoolAllocator<>& al)
         {
-            if (prop.texture) {
+            if (texture) {
                 Value tex;
                 tex.SetObject();
-                tex.AddMember("index", prop.texture->index, al);
+                tex.AddMember("index", texture->index, al);
                 obj.AddMember(StringRef(propName), tex, al);
-            } else {
+            }
+        }
+
+        inline void WriteColorOrTex(Value& obj, TexProperty& prop, const char* propName, MemoryPoolAllocator<>& al)
+        {
+            WriteTex(obj, prop.texture, propName, al);
+            if (!prop.texture) {
                 Value col;
                 obj.AddMember(StringRef(propName), MakeValue(col, prop.color, al), al);
             }
@@ -233,6 +239,8 @@ namespace glTF2 {
         ext.SetObject();
         ext.AddMember("KHR_materials_common", v, w.mAl);
         obj.AddMember("extensions", ext, w.mAl);
+
+        WriteTex(obj, m.normal, "normalTexture", w.mAl);
     }
 
     namespace {

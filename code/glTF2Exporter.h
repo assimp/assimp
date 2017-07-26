@@ -67,6 +67,7 @@ namespace glTF2
     class Asset;
     struct TexProperty;
     struct Node;
+    struct Texture;
 }
 
 namespace Assimp
@@ -100,7 +101,8 @@ namespace Assimp
 
         void WriteBinaryData(IOStream* outfile, std::size_t sceneLength);
 
-        void GetTexSampler(const aiMaterial* mat, glTF2::TexProperty& prop);
+        void GetTexSampler(const aiMaterial* mat, glTF2::Ref<glTF2::Texture> texture);
+        void GetMatTex(const aiMaterial* mat, glTF2::Ref<glTF2::Texture>& texture, aiTextureType tt);
         void GetMatColorOrTex(const aiMaterial* mat, glTF2::TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt);
         void ExportMetadata();
         void ExportMaterials();

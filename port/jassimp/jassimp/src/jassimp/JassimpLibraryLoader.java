@@ -40,10 +40,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package jassimp;
 
+/**
+ * Library loader for the jassimp library.<p>
+ * 
+ * The default implementation uses "System.loadLibrary" to
+ * load the jassimp native library. <p>
+ * 
+ * Custom implementations should override the loadLibrary()
+ * function. 
+ *
+ */
 public class JassimpLibraryLoader
-{
-   static final JassimpLibraryLoader instance = new JassimpLibraryLoader();
-   
+{  
+   /**
+    * Function to load the native jassimp library.
+    * 
+    * Called the first time Jassimp.importFile() is 
+    * called. 
+    */
    public void loadLibrary()
    {
       System.loadLibrary("jassimp");

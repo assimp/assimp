@@ -60,7 +60,6 @@ public:
     virtual void TearDown() {
         DefaultLogger::get()->detatchStream( m_stream );
         m_stream = nullptr;
-        DefaultLogger::kill();
     }
 };
 

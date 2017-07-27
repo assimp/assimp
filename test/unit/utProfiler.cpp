@@ -51,7 +51,7 @@ class utProfiler : public ::testing::Test {
 public:
     LogStream *m_stream;
 
-    virtual void SetUp() {
+    /*virtual void SetUp() {
         m_stream = new UTLogStream;
         DefaultLogger::create();
         DefaultLogger::get()->attachStream( m_stream );
@@ -60,7 +60,7 @@ public:
     virtual void TearDown() {
         DefaultLogger::get()->detatchStream( m_stream );
         m_stream = nullptr;
-    }
+    }*/
 };
 
 TEST_F( utProfiler, addRegion_success ) {
@@ -71,6 +71,6 @@ TEST_F( utProfiler, addRegion_success ) {
         j++;
     }
     myProfiler.EndRegion( "t1" );
-    UTLogStream *stream( (UTLogStream*) m_stream );
+    //UTLogStream *stream( (UTLogStream*) m_stream );
     //EXPECT_FALSE( stream->m_messages.empty() );
 }

@@ -40,13 +40,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
-// We need to be sure to have the same STL settings as Assimp
+#include <assimp/LogStream.hpp>
 
-#include <assimp/cimport.h>
-#include <gtest/gtest.h>
-#include <memory>
-#include <math.h>
-#include "UTLogStream.h"
+class UTLogStream : public Assimp::LogStream {
+public:
+    UTLogStream()
+    : LogStream() {
+        // empty
+    }
 
-#undef min
-#undef max
+    virtual ~UTLogStream() {
+        // empty
+    }
+
+    virtual void write(const char* message) {
+        if ( nullptr != message ) {
+            m_messages.push_back( std::string( message ) );
+        }
+    }
+
+    std::vector<std::string> m_messages;
+};

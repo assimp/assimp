@@ -3,7 +3,15 @@ language: cpp
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq && sudo apt-get install cmake && sudo apt-get install cmake python3 && sudo apt-get install -qq freeglut3-dev libxmu-dev libxi-dev ; echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca- ; fi
-  - if [ "$TRAVIS_OS_NAME" =   "osx" ]; then brew install cmake python3 homebrew/x11/freeglut; fi
+  - 'if [ "$TRAVIS_OS_NAME" = "osx" ];  then
+       if brew ls --versions cmake > /dev/null; then
+         echo cmake already installed.;
+       else
+         brew install cmake;
+       fi;
+       brew install python3;
+       brew install homebrew/x11/freeglut; 
+    fi'
   - echo -e "#ifndef A_R_H_INC\n#define A_R_H_INC\n#define GitVersion ${TRAVIS_JOB_ID}\n#define GitBranch \"${TRAVIS_BRANCH}\"\n#endif // A_R_H_INC" > revision.h
   # install latest LCOV (1.9 was failing)
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cd ${TRAVIS_BUILD_DIR} && wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.11.orig.tar.gz && tar xf lcov_1.11.orig.tar.gz && sudo make -C lcov-1.11/ install && gem install coveralls-lcov && lcov --version && g++ --version ; fi

@@ -5,6 +5,7 @@ Open Asset Import Library (assimp)
 
 Copyright (c) 2006-2017, assimp team
 
+
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
@@ -38,15 +39,38 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-#pragma once
-
-// We need to be sure to have the same STL settings as Assimp
-
-#include <assimp/cimport.h>
-#include <gtest/gtest.h>
-#include <memory>
-#include <math.h>
+#include "UnitTestPCH.h"
 #include "UTLogStream.h"
+#include "code/Profiler.h"
+#include <assimp/DefaultLogger.hpp>
 
-#undef min
-#undef max
+using namespace ::Assimp;
+using namespace ::Assimp::Profiling;
+
+class utProfiler : public ::testing::Test {
+public:
+    LogStream *m_stream;
+
+    /*virtual void SetUp() {
+        m_stream = new UTLogStream;
+        DefaultLogger::create();
+        DefaultLogger::get()->attachStream( m_stream );
+    }
+
+    virtual void TearDown() {
+        DefaultLogger::get()->detatchStream( m_stream );
+        m_stream = nullptr;
+    }*/
+};
+
+TEST_F( utProfiler, addRegion_success ) {
+    Profiler myProfiler;
+    myProfiler.BeginRegion( "t1" );
+    for ( int i=0; i<10; i++ ) {
+        volatile int j=0;
+        j++;
+    }
+    myProfiler.EndRegion( "t1" );
+    //UTLogStream *stream( (UTLogStream*) m_stream );
+    //EXPECT_FALSE( stream->m_messages.empty() );
+}

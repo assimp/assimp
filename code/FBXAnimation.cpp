@@ -50,12 +50,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXDocument.h"
 #include "FBXImporter.h"
 #include "FBXDocumentUtil.h"
-#include "FBXProperties.h"
 
 namespace Assimp {
 namespace FBX {
 
-    using namespace Util;
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
 AnimationCurve::AnimationCurve(uint64_t id, const Element& element, const std::string& name, const Document& /*doc*/)

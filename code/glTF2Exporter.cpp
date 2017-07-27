@@ -283,7 +283,7 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture)
 
     // Hard coded Texture filtering options because I do not know where to find them in the aiMaterial.
     texture->sampler->magFilter = SamplerMagFilter_Linear;
-    texture->sampler->minFilter = SamplerMinFilter_Linear;
+    texture->sampler->minFilter = SamplerMinFilter_Linear_Mipmap_Linear;
 }
 
 void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt)

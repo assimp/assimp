@@ -107,8 +107,7 @@ ASSIMP_API unsigned int aiGetCompileFlags ()    {
 #include "revision.h"
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API unsigned int aiGetVersionRevision ()
-{
+ASSIMP_API unsigned int aiGetVersionRevision() {
     return GitVersion;
 }
 
@@ -133,8 +132,7 @@ ASSIMP_API aiScene::aiScene()
 }
 
 // ------------------------------------------------------------------------------------------------
-ASSIMP_API aiScene::~aiScene()
-{
+ASSIMP_API aiScene::~aiScene() {
     // delete all sub-objects recursively
     delete mRootNode;
 
@@ -173,3 +171,4 @@ ASSIMP_API aiScene::~aiScene()
 
     delete static_cast<Assimp::ScenePrivateData*>( mPrivate );
 }
+

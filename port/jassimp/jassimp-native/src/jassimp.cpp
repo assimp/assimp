@@ -471,7 +471,10 @@ public:
 	
 	    return cnt;
     };
-    size_t Write(const void* pvBuffer, size_t pSize, size_t pCount) {};
+    size_t Write(const void* pvBuffer, size_t pSize, size_t pCount) 
+    {
+        return 0;
+    };
     
     aiReturn Seek(size_t pOffset, aiOrigin pOrigin)
     {

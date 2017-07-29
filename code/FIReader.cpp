@@ -45,6 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef ASSIMP_BUILD_NO_X3D_IMPORTER
 
+// Workaround for issue #1361
+// https://github.com/assimp/assimp/issues/1361
+#ifdef __ANDROID__
+#define _GLIBCXX_USE_C99 1
+#endif
+
 #include "FIReader.hpp"
 #include "Exceptional.h"
 #include <assimp/IOStream.hpp>

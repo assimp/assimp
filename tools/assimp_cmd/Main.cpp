@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const char* AICMD_MSG_ABOUT = 
 "------------------------------------------------------ \n"
-"Open Asset Import Library (\"Assimp\", http://assimp.sourceforge.net) \n"
+"Open Asset Import Library (\"Assimp\", https://github.com/assimp/assimp) \n"
 " -- Commandline toolchain --\n"
 "------------------------------------------------------ \n\n"
 

@@ -513,7 +513,7 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
       mGeneratedMesh->mMaterialIndex = 0;
     }
 
-    if (mGeneratedMesh->mVertices == NULL)
+    if (mGeneratedMesh->HasPositions() )
     {
       mGeneratedMesh->mNumVertices = pcElement->NumOccur;
       mGeneratedMesh->mVertices = new aiVector3D[mGeneratedMesh->mNumVertices];
@@ -523,14 +523,14 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
 
     if (haveNormal)
     {
-      if (mGeneratedMesh->mNormals == NULL)
+      if (mGeneratedMesh->HasNormals() )
         mGeneratedMesh->mNormals = new aiVector3D[mGeneratedMesh->mNumVertices];
       mGeneratedMesh->mNormals[pos] = nOut;
     }
 
     if (haveColor)
     {
-      if (mGeneratedMesh->mColors[0] == NULL)
+      if (mGeneratedMesh->HasVertexColors( 0 ) )
         mGeneratedMesh->mColors[0] = new aiColor4D[mGeneratedMesh->mNumVertices];
       mGeneratedMesh->mColors[0][pos] = cOut;
     }

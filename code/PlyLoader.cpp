@@ -537,7 +537,7 @@ void PLYImporter::LoadVertex(const PLY::Element* pcElement, const PLY::ElementIn
 
     if (haveTextureCoords)
     {
-      if (mGeneratedMesh->mTextureCoords[0] == NULL)
+      if (mGeneratedMesh->HasTextureCoords(0))
       {
         mGeneratedMesh->mNumUVComponents[0] = 2;
         mGeneratedMesh->mTextureCoords[0] = new aiVector3D[mGeneratedMesh->mNumVertices];

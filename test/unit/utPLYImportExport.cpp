@@ -57,7 +57,7 @@ public:
         EXPECT_EQ( 8u, scene->mMeshes[0]->mNumVertices );
         EXPECT_EQ( 6u, scene->mMeshes[0]->mNumFaces );
         
-        return nullptr != scene;
+        return (nullptr != scene);
     }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

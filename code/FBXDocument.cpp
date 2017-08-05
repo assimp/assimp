@@ -292,11 +292,10 @@ Document::~Document()
 }
 
 // ------------------------------------------------------------------------------------------------
-static const int LowerSupportedVersion = 7100;
-static const int UpperSupportedVersion = 7400;
+static const unsigned int LowerSupportedVersion = 7100;
+static const unsigned int UpperSupportedVersion = 7400;
 
-void Document::ReadHeader()
-{
+void Document::ReadHeader() {
     // Read ID objects from "Objects" section
     const Scope& sc = parser.GetRootScope();
     const Element* const ehead = sc["FBXHeaderExtension"];

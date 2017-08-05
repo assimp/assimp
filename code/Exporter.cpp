@@ -90,6 +90,7 @@ void ExportScenePlyBinary(const char*, IOSystem*, const aiScene*, const ExportPr
 void ExportScene3DS(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLTF(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneGLB(const char*, IOSystem*, const aiScene*, const ExportProperties*);
+void ExportSceneGLTF2(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssbin(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneAssxml(const char*, IOSystem*, const aiScene*, const ExportProperties*);
 void ExportSceneX3D(const char*, IOSystem*, const aiScene*, const ExportProperties*);
@@ -143,6 +144,8 @@ Exporter::ExportFormatEntry gExporters[] =
     Exporter::ExportFormatEntry( "gltf", "GL Transmission Format", "gltf", &ExportSceneGLTF,
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
     Exporter::ExportFormatEntry( "glb", "GL Transmission Format (binary)", "glb", &ExportSceneGLB,
+        aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
+    Exporter::ExportFormatEntry( "gltf2", "GL Transmission Format v. 2", "gltf", &ExportSceneGLTF2,
         aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_SortByPType),
 #endif
 

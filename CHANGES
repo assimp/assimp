@@ -1,6 +1,18 @@
 ----------------------------------------------------------------------
 CHANGELOG
 ----------------------------------------------------------------------
+4.0.1 (2017-07-28)
+    - FIXES/HOUSEKEEPING:
+    - fix version test.
+    - Not compiling when using ASSIMP_DOUBLE_PRECISION
+    - Added support for python3
+    - Check if cmake is installed with brew
+    - Low performance in OptimizeMeshesProcess::ProcessNode with huge numbers of meshes
+    - Elapsed seconds not shown correctly
+    - StreamReader: fix out-of-range exception
+    - PPdPmdParser: fix compilation for clang
+
+
 4.0.0 (2017-07-18)
 
 FEATURES:

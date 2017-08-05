@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assimp/Importer.hpp>
 #include <assimp/Exporter.hpp>
+#include <assimp/scene.h>
 #include "AbstractImportExportBase.h"
 
 using namespace ::Assimp;
@@ -51,7 +52,12 @@ public:
     virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/PLY/cube.ply", 0 );
-        return nullptr != scene;
+        EXPECT_EQ( 1u, scene->mNumMeshes );
+        EXPECT_NE( nullptr, scene->mMeshes[0] );
+        EXPECT_EQ( 8u, scene->mMeshes[0]->mNumVertices );
+        EXPECT_EQ( 6u, scene->mMeshes[0]->mNumFaces );
+        
+        return (nullptr != scene);
     }
 
 #ifndef ASSIMP_BUILD_NO_EXPORT

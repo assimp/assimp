@@ -834,7 +834,7 @@ void glTFExporter::ExportScene()
 void glTFExporter::ExportMetadata()
 {
     glTF::AssetMetadata& asset = mAsset->asset;
-    asset.version = 1;
+    asset.version = 1.;
 
     char buffer[256];
     ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",

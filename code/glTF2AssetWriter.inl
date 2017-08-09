@@ -574,7 +574,7 @@ namespace glTF2 {
         GLB_Header header;
         memcpy(header.magic, AI_GLB_MAGIC_NUMBER, sizeof(header.magic));
 
-        header.version = 2;
+        header.version = 2.;
         AI_SWAP4(header.version);
 
         header.length = uint32_t(sizeof(header) + sceneLength + bodyLength);
@@ -600,7 +600,7 @@ namespace glTF2 {
         asset.SetObject();
         {
             char versionChar[10];
-            ai_snprintf(versionChar, sizeof(versionChar), "%d", mAsset.asset.version);
+            ai_snprintf(versionChar, sizeof(versionChar), "%.1f", mAsset.asset.version);
             asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
 
             asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);

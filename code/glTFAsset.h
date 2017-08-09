@@ -177,7 +177,7 @@ namespace glTF
     struct GLB_Header
     {
         uint8_t magic[4];     //!< Magic number: "glTF"
-        float_t version;     //!< Version number (always 1 as of the last update)
+        uint32_t version;     //!< Version number (always 1 as of the last update)
         uint32_t length;      //!< Total length of the Binary glTF, including header, scene, and body, in bytes
         uint32_t sceneLength; //!< Length, in bytes, of the glTF scene
         uint32_t sceneFormat; //!< Specifies the format of the glTF scene (see the SceneFormat enum)

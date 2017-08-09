@@ -1080,7 +1080,7 @@ namespace glTF2
 
         AssetMetadata()
             : premultipliedAlpha(false)
-            , version(0.)
+            , version(0)
         {
         }
     };

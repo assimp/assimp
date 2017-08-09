@@ -574,7 +574,7 @@ namespace glTF2 {
         GLB_Header header;
         memcpy(header.magic, AI_GLB_MAGIC_NUMBER, sizeof(header.magic));
 
-        header.version = 2.;
+        header.version = 2;
         AI_SWAP4(header.version);
 
         header.length = uint32_t(sizeof(header) + sceneLength + bodyLength);

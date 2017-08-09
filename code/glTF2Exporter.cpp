@@ -466,8 +466,8 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
             float vertWeight      = aib->mWeights[idx_weights].mWeight;
 
             // A vertex can only have at most four joint weights. Ignore all others.
-            if (jointsPerVertex[vertexId] > 3) { 
-                continue; 
+            if (jointsPerVertex[vertexId] > 3) {
+                continue;
             }
 
             vertexJointData[vertexId][jointsPerVertex[vertexId]] = jointNamesIndex;
@@ -845,7 +845,7 @@ void glTF2Exporter::ExportScene()
 void glTF2Exporter::ExportMetadata()
 {
     AssetMetadata& asset = mAsset->asset;
-    asset.version = 2.;
+    asset.version = 2;
 
     char buffer[256];
     ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%d)",

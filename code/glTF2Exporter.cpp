@@ -466,8 +466,8 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
             float vertWeight      = aib->mWeights[idx_weights].mWeight;
 
             // A vertex can only have at most four joint weights. Ignore all others.
-            if (jointsPerVertex[vertexId] > 3) { 
-                continue; 
+            if (jointsPerVertex[vertexId] > 3) {
+                continue;
             }
 
             vertexJointData[vertexId][jointsPerVertex[vertexId]] = jointNamesIndex;

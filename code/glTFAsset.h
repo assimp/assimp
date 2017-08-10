@@ -1058,7 +1058,7 @@ namespace glTF
             std::string version; //!< Specifies the target rendering API (default: "1.0.3")
         } profile; //!< Specifies the target rendering API and version, e.g., WebGL 1.0.3. (default: {})
 
-        int version; //!< The glTF format version (should be 1)
+        float version; //!< The glTF format version (should be 1.0)
 
         void Read(Document& doc);
 

@@ -1228,7 +1228,7 @@ inline void Scene::Read(Value& obj, Asset& r)
 inline void AssetMetadata::Read(Document& doc)
 {
     // read the version, etc.
-    int statedVersion = 0;
+    float statedVersion = 0;
     if (Value* obj = FindObject(doc, "asset")) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
@@ -1250,7 +1250,7 @@ inline void AssetMetadata::Read(Document& doc)
 
     if (version != 1) {
         char msg[128];
-        ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %d", version);
+        ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %.0f", version);
         throw DeadlyImportError(msg);
     }
 }

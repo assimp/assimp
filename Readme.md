@@ -89,7 +89,7 @@ __Importers__:
 
 Additionally, some formats are supported by dependency on non-free code or external SDKs (not built by default):
 
-- C4D (https://github.com/acgessler/assimp-cinema4d)
+- C4D (https://github.com/assimp/assimp/wiki/Cinema4D-&-Melange)
 
 __Exporters__:
 

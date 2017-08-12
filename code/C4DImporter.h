@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseImporter.h"
 #include "LogAux.h"
 
-#include <set>
+#include <map>
 struct aiNode;
 struct aiMesh;
 struct aiMaterial;

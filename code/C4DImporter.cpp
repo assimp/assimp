@@ -393,7 +393,7 @@ void C4DImporter::RecurseHierarchy(BaseObject* object, aiNode* parent)
 // ------------------------------------------------------------------------------------------------
 aiMesh* C4DImporter::ReadMesh(BaseObject* object)
 {
-    assert(object != NULL && object->GetType() == Opolygon);
+    ai_assert(object != NULL && object->GetType() == Opolygon);
 
     // based on Melange sample code
     PolygonObject* const polyObject = dynamic_cast<PolygonObject*>(object);
@@ -635,7 +635,7 @@ unsigned int C4DImporter::ResolveMaterial(PolygonObject* obj)
     TextureTag& ttag = dynamic_cast<TextureTag&>(*tag);
 
     BaseMaterial* const mat = ttag.GetMaterial();
-    assert(mat != NULL);
+    ai_assert(mat != NULL);
 
     const MaterialMap::const_iterator it = material_mapping.find(mat);
     if(it == material_mapping.end()) {

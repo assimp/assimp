@@ -229,7 +229,7 @@ ZipFile::~ZipFile() {
 
 size_t ZipFile::Read(void* pvBuffer, size_t pSize, size_t pCount) {
     const size_t size = pSize * pCount;
-    assert(size <= m_Size);
+    ai_assert(size <= m_Size);
 
     std::memcpy(pvBuffer, m_Buffer, size);
 

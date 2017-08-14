@@ -381,7 +381,6 @@ bool PointInPoly(const IfcVector3& p, const std::vector<IfcVector3>& boundary)
     IntersectsBoundaryProfile(p, p + IfcVector3(0.6, -0.6, 0.0), boundary, true, intersected_boundary, true);
     votes += intersected_boundary.size() % 2;
 
-//  ai_assert(votes == 3 || votes == 0);
     return votes > 1;
 }
 

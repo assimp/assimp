@@ -101,7 +101,6 @@ public:
         return std::string(begin(),end());
     }
 
-public:
     bool IsBinary() const {
         return column == BINARY_MARKER;
     }

@@ -1132,7 +1132,9 @@ bool MDLImporter::ProcessFrames_3DGS_MDL7(const MDL::IntGroupInfo_MDL7& groupInf
     const unsigned char*     szCurrent,
     const unsigned char**    szCurrentOut)
 {
-    ai_assert(NULL != szCurrent && NULL != szCurrentOut);
+    ai_assert( nullptr != szCurrent );
+    ai_assert( nullptr != szCurrentOut);
+
     const MDL::Header_MDL7 *pcHeader = (const MDL::Header_MDL7*)mBuffer;
 
     // if we have no bones we can simply skip all frames,

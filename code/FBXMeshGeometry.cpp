@@ -243,7 +243,6 @@ const unsigned int* MeshGeometry::ToOutputVertexIndex( unsigned int in_index, un
     ai_assert( m_mapping_counts.size() == m_mapping_offsets.size() );
     count = m_mapping_counts[ in_index ];
 
-//    ai_assert( count != 0 );
     ai_assert( m_mapping_offsets[ in_index ] + count <= m_mappings.size() );
 
     return &m_mappings[ m_mapping_offsets[ in_index ] ];

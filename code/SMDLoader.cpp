@@ -450,7 +450,9 @@ void SMDImporter::CreateOutputMeshes()
 // add bone child nodes
 void SMDImporter::AddBoneChildren(aiNode* pcNode, uint32_t iParent)
 {
-    ai_assert(NULL != pcNode && 0 == pcNode->mNumChildren && NULL == pcNode->mChildren);
+    ai_assert( NULL != pcNode );
+    ai_assert( 0 == pcNode->mNumChildren );
+    ai_assert( NULL == pcNode->mChildren);
 
     // first count ...
     for (unsigned int i = 0; i < asBones.size();++i)

@@ -555,10 +555,15 @@ void ObjFileParser::getMaterialDesc() {
         // Search for material
         std::map<std::string, ObjFile::Material*>::iterator it = m_pModel->m_MaterialMap.find(strName);
         if (it == m_pModel->m_MaterialMap.end()) {
-            // Not found, use default material
-            m_pModel->m_pCurrentMaterial = m_pModel->m_pDefaultMaterial;
-            DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", skipping");
-            strName = m_pModel->m_pDefaultMaterial->MaterialName.C_Str();
+			// Not found, so we don't know anything about the material except for its name.
+			// This may be the case if the material library is missing. We don't want to lose all
+			// materials if that happens, so create a new named material instead of discarding it
+			// completely.
+			DefaultLogger::get()->error("OBJ: failed to locate material " + strName + ", creating new material");
+			m_pModel->m_pCurrentMaterial = new ObjFile::Material();
+			m_pModel->m_pCurrentMaterial->MaterialName.Set(strName);
+			m_pModel->m_MaterialLib.push_back(strName);
+			m_pModel->m_MaterialMap[strName] = m_pModel->m_pCurrentMaterial;
         } else {
             // Found, using detected material
             m_pModel->m_pCurrentMaterial = (*it).second;

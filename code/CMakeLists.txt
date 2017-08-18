@@ -192,7 +192,7 @@ ENDIF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
 # ASSIMP_BUILD_XXX_IMPORTER to FALSE for each importer
 # if this variable is set to FALSE, the user can manually enable importers by setting
 # ASSIMP_BUILD_XXX_IMPORTER to TRUE for each importer
-OPTION(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "default value of all ASSIMP_BUILD_XXX_IMPORTER value" TRUE)
+OPTION(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "default value of all ASSIMP_BUILD_XXX_IMPORTER value" FALSE)
 
 # macro to add the CMake Option ADD_ASSIMP_IMPORTER_<name> which enables compile of loader
 # this way selective loaders can be compiled (reduces filesize + compile time)

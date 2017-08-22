@@ -35,6 +35,10 @@
 #----------------------------------------------------------------------
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 cmake_minimum_required( VERSION 2.8 )
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch armv7")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch armv7")
+
 PROJECT( Assimp )
 
 # All supported options ###############################################
@@ -357,6 +361,7 @@ ADD_SUBDIRECTORY(contrib)
 set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "Overrided by Cross")
 set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "Overrided by Cross")
 set(ASSIMP_BUILD_STL_IMPORTER ON CACHE BOOL "Overrided by Cross")
+
 ADD_SUBDIRECTORY( code/ )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
   IF ( WIN32 AND DirectX_D3DX9_LIBRARY )

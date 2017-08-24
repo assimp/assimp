@@ -2368,8 +2368,13 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
 
     int64_t start_time = st.LocalStart();
     int64_t stop_time = st.LocalStop();
-    double start_timeF = CONVERT_FBX_TIME( start_time );
-    double stop_timeF = CONVERT_FBX_TIME( stop_time );
+    bool has_local_startstop = start_time != 0 || stop_time != 0;
+    if ( !has_local_startstop ) {
+        // no time range given, so accept every keyframe and use the actual min/max time
+        // the +/- 20000 is a safety because GenerateNodeAnimations uses an epsilon of 10000
+        start_time = INT64_MIN + 20000;
+        stop_time = INT64_MAX - 20000;
+    }
 
     try {
         for( const NodeMap::value_type& kv : node_map ) {
@@ -2401,27 +2406,23 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
         return;
     }
 
-    //adjust relative timing for animation
-    {
-        double start_fps = start_timeF * anim_fps;
+    double start_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(start_time) * anim_fps) : min_time;
+    double stop_time_fps = has_local_startstop ? (CONVERT_FBX_TIME(stop_time) * anim_fps) : max_time;
 
-        for ( unsigned int c = 0; c < anim->mNumChannels; c++ )
-        {
-            aiNodeAnim* channel = anim->mChannels[ c ];
-            for ( uint32_t i = 0; i < channel->mNumPositionKeys; i++ )
-                channel->mPositionKeys[ i ].mTime -= start_fps;
-            for ( uint32_t i = 0; i < channel->mNumRotationKeys; i++ )
-                channel->mRotationKeys[ i ].mTime -= start_fps;
-            for ( uint32_t i = 0; i < channel->mNumScalingKeys; i++ )
-                channel->mScalingKeys[ i ].mTime -= start_fps;
-        }
-
-        max_time -= min_time;
+    // adjust relative timing for animation
+    for ( unsigned int c = 0; c < anim->mNumChannels; c++ ) {
+        aiNodeAnim* channel = anim->mChannels[ c ];
+        for ( uint32_t i = 0; i < channel->mNumPositionKeys; i++ )
+            channel->mPositionKeys[ i ].mTime -= start_time_fps;
+        for ( uint32_t i = 0; i < channel->mNumRotationKeys; i++ )
+            channel->mRotationKeys[ i ].mTime -= start_time_fps;
+        for ( uint32_t i = 0; i < channel->mNumScalingKeys; i++ )
+            channel->mScalingKeys[ i ].mTime -= start_time_fps;
     }
 
     // for some mysterious reason, mDuration is simply the maximum key -- the
     // validator always assumes animations to start at zero.
-    anim->mDuration = ( stop_timeF - start_timeF ) * anim_fps;
+    anim->mDuration = stop_time_fps - start_time_fps;
     anim->mTicksPerSecond = anim_fps;
 }
 

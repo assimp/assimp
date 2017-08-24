@@ -128,6 +128,12 @@ namespace {
         return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
     }
 
+    inline Value* FindUInt(Value& val, const char* id)
+    {
+        Value::MemberIterator it = val.FindMember(id);
+        return (it != val.MemberEnd() && it->value.IsUint()) ? &it->value : 0;
+    }
+
     inline Value* FindArray(Value& val, const char* id)
     {
         Value::MemberIterator it = val.FindMember(id);
@@ -176,7 +182,7 @@ inline void LazyDict<T>::AttachToDocument(Document& doc)
     }
 
     if (container) {
-        mDict = FindObject(*container, mDictId);
+        mDict = FindArray(*container, mDictId);
     }
 }
 
@@ -189,13 +195,8 @@ inline void LazyDict<T>::DetachFromDocument()
 template<class T>
 Ref<T> LazyDict<T>::Get(unsigned int i)
 {
-    return Ref<T>(mObjs, i);
-}
 
-template<class T>
-Ref<T> LazyDict<T>::Get(const char* id)
-{
-    id = T::TranslateId(mAsset, id);
+    std::string id = std::string(mDictId) + "[" + std::to_string(i) + "]";
 
     typename Dict::iterator it = mObjsById.find(id);
     if (it != mObjsById.end()) { // already created?
@@ -207,19 +208,21 @@ Ref<T> LazyDict<T>::Get(const char* id)
         throw DeadlyImportError("GLTF: Missing section \"" + std::string(mDictId) + "\"");
     }
 
-    Value::MemberIterator obj = mDict->FindMember(id);
-    if (obj == mDict->MemberEnd()) {
-        throw DeadlyImportError("GLTF: Missing object with id \"" + std::string(id) + "\" in \"" + mDictId + "\"");
-    }
-    if (!obj->value.IsObject()) {
-        throw DeadlyImportError("GLTF: Object with id \"" + std::string(id) + "\" is not a JSON object");
+    if (!mDict->IsArray()) {
+        throw DeadlyImportError("GLTF: Field is not an array \"" + std::string(mDictId) + "\"");
     }
 
-    // create an instance of the given type
+    Value& obj = mDict->operator[](i);
+
+    if (!obj.IsObject()) {
+        throw DeadlyImportError("GLTF: Object at index \"" + std::to_string(i) + "\" is not a JSON object");
+    }
+
     T* inst = new T();
     inst->id = id;
-    ReadMember(obj->value, "name", inst->name);
-    inst->Read(obj->value, mAsset);
+    ReadMember(obj, "name", inst->name);
+    inst->Read(obj, mAsset);
+
     return Add(inst);
 }
 
@@ -437,9 +440,9 @@ inline void Buffer::Grow(size_t amount)
 
 inline void BufferView::Read(Value& obj, Asset& r)
 {
-    const char* bufferId = MemberOrDefault<const char*>(obj, "buffer", 0);
-    if (bufferId) {
-        buffer = r.buffers.Get(bufferId);
+
+    if (Value* bufferVal = FindUInt(obj, "buffer")) {
+        buffer = r.buffers.Get(bufferVal->GetUint());
     }
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
@@ -452,9 +455,9 @@ inline void BufferView::Read(Value& obj, Asset& r)
 
 inline void Accessor::Read(Value& obj, Asset& r)
 {
-    const char* bufferViewId = MemberOrDefault<const char*>(obj, "bufferView", 0);
-    if (bufferViewId) {
-        bufferView = r.bufferViews.Get(bufferViewId);
+
+    if (Value* bufferViewVal = FindUInt(obj, "bufferView")) {
+        bufferView = r.bufferViews.Get(bufferViewVal->GetUint());
     }
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
@@ -611,9 +614,8 @@ inline void Image::Read(Value& obj, Asset& r)
 
                 ReadMember(*ext, "mimeType", mimeType);
 
-                const char* bufferViewId;
-                if (ReadMember(*ext, "bufferView", bufferViewId)) {
-                    Ref<BufferView> bv = r.bufferViews.Get(bufferViewId);
+                if (Value* bufferViewVal = FindUInt(*ext, "bufferView")) {
+                    Ref<BufferView> bv = r.bufferViews.Get(bufferViewVal->GetUint());
                     if (bv) {
                         mDataLength = bv->byteLength;
                         mData = new uint8_t[mDataLength];
@@ -687,23 +689,22 @@ inline void Sampler::SetDefaults()
 
 inline void Texture::Read(Value& obj, Asset& r)
 {
-    const char* sourcestr;
-    if (ReadMember(obj, "source", sourcestr)) {
-        source = r.images.Get(sourcestr);
+    if (Value* sourceVal = FindUInt(obj, "source")) {
+        source = r.images.Get(sourceVal->GetUint());
     }
 
-    const char* samplerstr;
-    if (ReadMember(obj, "sampler", samplerstr)) {
-        sampler = r.samplers.Get(samplerstr);
+    if (Value* samplerVal = FindUInt(obj, "sampler")) {
+        sampler = r.samplers.Get(samplerVal->GetUint());
     }
 }
 
 namespace {
     inline void ReadMaterialProperty(Asset& r, Value& vals, const char* propName, TexProperty& out)
     {
+        //@TODO: update this format
         if (Value* prop = FindMember(vals, propName)) {
-            if (prop->IsString()) {
-                out.texture = r.textures.Get(prop->GetString());
+            if (prop->IsUint()) {
+                out.texture = r.textures.Get(prop->GetUint());
             }
             else {
                 ReadValue(*prop, out.color);
@@ -824,22 +825,23 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
                     // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
+                    //@TODO: update this
                     int undPos = 0;
                     Mesh::AccessorList* vec = 0;
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() <= idx) (*vec).resize(idx + 1);
-						(*vec)[idx] = pAsset_Root.accessors.Get(it->value.GetString());
+						(*vec)[idx] = pAsset_Root.accessors.Get(it->value.GetUint());
                     }
                 }
             }
 
-            if (Value* indices = FindString(primitive, "indices")) {
-				prim.indices = pAsset_Root.accessors.Get(indices->GetString());
+            if (Value* indices = FindUInt(primitive, "indices")) {
+				prim.indices = pAsset_Root.accessors.Get(indices->GetUint());
             }
 
-            if (Value* material = FindString(primitive, "material")) {
-				prim.material = pAsset_Root.materials.Get(material->GetString());
+            if (Value* material = FindUInt(primitive, "material")) {
+				prim.material = pAsset_Root.materials.Get(material->GetUint());
             }
         }
     }
@@ -914,177 +916,6 @@ mr_skip_extensions:
 	return;// After label some operators must be present.
 }
 
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-inline void Mesh::Decode_O3DGC(const SCompression_Open3DGC& pCompression_Open3DGC, Asset& pAsset_Root)
-{
-typedef unsigned short IndicesType;///< \sa glTFExporter::ExportMeshes.
-
-o3dgc::SC3DMCDecoder<IndicesType> decoder;
-o3dgc::IndexedFaceSet<IndicesType> ifs;
-o3dgc::BinaryStream bstream;
-uint8_t* decoded_data;
-size_t decoded_data_size = 0;
-Ref<Buffer> buf = pAsset_Root.buffers.Get(pCompression_Open3DGC.Buffer);
-
-	// Read data from buffer and place it in BinaryStream for decoder.
-	// Just "Count" because always is used type equivalent to uint8_t.
-	bstream.LoadFromBuffer(&buf->GetPointer()[pCompression_Open3DGC.Offset], static_cast<unsigned long>(pCompression_Open3DGC.Count));
-
-	// After decoding header we can get size of primitives.
-	if(decoder.DecodeHeader(ifs, bstream) != o3dgc::O3DGC_OK) throw DeadlyImportError("GLTF: can not decode Open3DGC header.");
-
-	/****************** Get sizes of arrays and check sizes ******************/
-	// Note. See "Limitations for meshes when using Open3DGC-compression".
-
-	// Indices
-	size_t size_coordindex = ifs.GetNCoordIndex() * 3;// See float attributes note.
-
-	if(primitives[0].indices->count != size_coordindex)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed indices count (" + std::to_string(size_coordindex) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].indices->count) + ").");
-
-	size_coordindex *= sizeof(IndicesType);
-	// Coordinates
-	size_t size_coord = ifs.GetNCoord();// See float attributes note.
-
-	if(primitives[0].attributes.position[0]->count != size_coord)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed positions count (" + std::to_string(size_coord) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.position[0]->count) + ").");
-
-	size_coord *= 3 * sizeof(float);
-	// Normals
-	size_t size_normal = ifs.GetNNormal();// See float attributes note.
-
-	if(primitives[0].attributes.normal[0]->count != size_normal)
-		throw DeadlyImportError("GLTF: Open3DGC. Compressed normals count (" + std::to_string(size_normal) +
-								") not equal to uncompressed (" + std::to_string(primitives[0].attributes.normal[0]->count) + ").");
-
-	size_normal *= 3 * sizeof(float);
-	// Additional attributes.
-	std::vector<size_t> size_floatattr;
-	std::vector<size_t> size_intattr;
-
-	size_floatattr.resize(ifs.GetNumFloatAttributes());
-	size_intattr.resize(ifs.GetNumIntAttributes());
-
-	decoded_data_size = size_coordindex + size_coord + size_normal;
-	for(size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++)
-	{
-		// size = number_of_elements * components_per_element * size_of_component.
-		// Note. But as you can see above, at first we are use this variable in meaning "count". After checking count of objects...
-		size_t tval = ifs.GetNFloatAttribute(static_cast<unsigned long>(idx));
-
-		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
-		{
-			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
-				// Check situation when encoded data contain texture coordinates but primitive not.
-				if(idx_texcoord < primitives[0].attributes.texcoord.size())
-				{
-					if(primitives[0].attributes.texcoord[idx]->count != tval)
-						throw DeadlyImportError("GLTF: Open3DGC. Compressed texture coordinates count (" + std::to_string(tval) +
-												") not equal to uncompressed (" + std::to_string(primitives[0].attributes.texcoord[idx]->count) + ").");
-
-					idx_texcoord++;
-				}
-				else
-				{
-					ifs.SetNFloatAttribute(static_cast<unsigned long>(idx), 0ul);// Disable decoding this attribute.
-				}
-
-				break;
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
-		}
-
-		tval *=  ifs.GetFloatAttributeDim(static_cast<unsigned long>(idx)) * sizeof(o3dgc::Real);// After checking count of objects we can get size of array.
-		size_floatattr[idx] = tval;
-		decoded_data_size += tval;
-	}
-
-	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++)
-	{
-		// size = number_of_elements * components_per_element * size_of_component. See float attributes note.
-		size_t tval = ifs.GetNIntAttribute(static_cast<unsigned long>(idx));
-		switch( ifs.GetIntAttributeType(static_cast<unsigned long>(idx) ) )
-		{
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
-                break;
-
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
-		}
-
-		tval *= ifs.GetIntAttributeDim(static_cast<unsigned long>(idx)) * sizeof(long);// See float attributes note.
-		size_intattr[idx] = tval;
-		decoded_data_size += tval;
-	}
-
-	// Create array for decoded data.
-	decoded_data = new uint8_t[decoded_data_size];
-
-	/****************** Set right array regions for decoder ******************/
-
-	auto get_buf_offset = [](Ref<Accessor>& pAccessor) -> size_t { return pAccessor->byteOffset + pAccessor->bufferView->byteOffset; };
-
-	// Indices
-	ifs.SetCoordIndex((IndicesType* const)(decoded_data + get_buf_offset(primitives[0].indices)));
-	// Coordinates
-	ifs.SetCoord((o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.position[0])));
-	// Normals
-	if(size_normal)
-	{
-		ifs.SetNormal((o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.normal[0])));
-	}
-
-	for(size_t idx = 0, idx_end = size_floatattr.size(), idx_texcoord = 0; idx < idx_end; idx++)
-	{
-		switch(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx)))
-		{
-			case o3dgc::O3DGC_IFS_FLOAT_ATTRIBUTE_TYPE_TEXCOORD:
-				if(idx_texcoord < primitives[0].attributes.texcoord.size())
-				{
-					// See above about absent attributes.
-					ifs.SetFloatAttribute(static_cast<unsigned long>(idx), (o3dgc::Real* const)(decoded_data + get_buf_offset(primitives[0].attributes.texcoord[idx])));
-					idx_texcoord++;
-				}
-
-				break;
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of float attribute: " + to_string(ifs.GetFloatAttributeType(static_cast<unsigned long>(idx))));
-		}
-	}
-
-	for(size_t idx = 0, idx_end = size_intattr.size(); idx < idx_end; idx++) {
-		switch(ifs.GetIntAttributeType(static_cast<unsigned int>(idx))) {
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_UNKOWN:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID:
-            case o3dgc::O3DGC_IFS_INT_ATTRIBUTE_TYPE_INDEX_BUFFER_ID:
-                break;
-
-			// ifs.SetIntAttribute(idx, (long* const)(decoded_data + get_buf_offset(primitives[0].attributes.joint)));
-			default:
-				throw DeadlyImportError("GLTF: Open3DGC. Unsupported type of int attribute: " + to_string(ifs.GetIntAttributeType(static_cast<unsigned long>(idx))));
-		}
-	}
-
-	//
-	// Decode data
-	//
-    if ( decoder.DecodePayload( ifs, bstream ) != o3dgc::O3DGC_OK ) {
-        throw DeadlyImportError( "GLTF: can not decode Open3DGC data." );
-    }
-
-	// Set encoded region for "buffer".
-	buf->EncodedRegion_Mark(pCompression_Open3DGC.Offset, pCompression_Open3DGC.Count, decoded_data, decoded_data_size, id);
-	// No. Do not delete "output_data". After calling "EncodedRegion_Mark" bufferView is owner of "output_data".
-	// "delete [] output_data;"
-}
-#endif
-
 inline void Camera::Read(Value& obj, Asset& r)
 {
     type = MemberOrDefault(obj, "type", Camera::Perspective);
@@ -1095,16 +926,16 @@ inline void Camera::Read(Value& obj, Asset& r)
     if (!it) throw DeadlyImportError("GLTF: Camera missing its parameters");
 
     if (type == Camera::Perspective) {
-        perspective.aspectRatio = MemberOrDefault(*it, "aspectRatio", 0.f);
-        perspective.yfov        = MemberOrDefault(*it, "yfov", 3.1415f/2.f);
-        perspective.zfar        = MemberOrDefault(*it, "zfar", 100.f);
-        perspective.znear       = MemberOrDefault(*it, "znear", 0.01f);
+        cameraProperties.perspective.aspectRatio = MemberOrDefault(*it, "aspectRatio", 0.f);
+        cameraProperties.perspective.yfov        = MemberOrDefault(*it, "yfov", 3.1415f/2.f);
+        cameraProperties.perspective.zfar        = MemberOrDefault(*it, "zfar", 100.f);
+        cameraProperties.perspective.znear       = MemberOrDefault(*it, "znear", 0.01f);
     }
     else {
-        ortographic.xmag  = MemberOrDefault(obj, "xmag", 1.f);
-        ortographic.ymag  = MemberOrDefault(obj, "ymag", 1.f);
-        ortographic.zfar  = MemberOrDefault(obj, "zfar", 100.f);
-        ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
+        cameraProperties.ortographic.xmag  = MemberOrDefault(obj, "xmag", 1.f);
+        cameraProperties.ortographic.ymag  = MemberOrDefault(obj, "ymag", 1.f);
+        cameraProperties.ortographic.zfar  = MemberOrDefault(obj, "zfar", 100.f);
+        cameraProperties.ortographic.znear = MemberOrDefault(obj, "znear", 0.01f);
     }
 }
 
@@ -1156,13 +987,14 @@ inline void Light::SetDefaults()
 
 inline void Node::Read(Value& obj, Asset& r)
 {
+
     if (Value* children = FindArray(obj, "children")) {
         this->children.reserve(children->Size());
         for (unsigned int i = 0; i < children->Size(); ++i) {
             Value& child = (*children)[i];
-            if (child.IsString()) {
+            if (child.IsNumber()) {
                 // get/create the child node
-                Ref<Node> chn = r.nodes.Get(child.GetString());
+                Ref<Node> chn = r.nodes.Get(child.GetUint());
                 if (chn) this->children.push_back(chn);
             }
         }
@@ -1185,15 +1017,15 @@ inline void Node::Read(Value& obj, Asset& r)
 
         this->meshes.reserve(numMeshes);
         for (unsigned i = 0; i < numMeshes; ++i) {
-            if ((*meshes)[i].IsString()) {
-                Ref<Mesh> mesh = r.meshes.Get((*meshes)[i].GetString());
+            if ((*meshes)[i].IsNumber()) {
+                Ref<Mesh> mesh = r.meshes.Get((*meshes)[i].GetUint());
                 if (mesh) this->meshes.push_back(mesh);
             }
         }
     }
 
-    if (Value* camera = FindString(obj, "camera")) {
-        this->camera = r.cameras.Get(camera->GetString());
+    if (Value* camera = FindUInt(obj, "camera")) {
+        this->camera = r.cameras.Get(camera->GetUint());
         if (this->camera)
             this->camera->id = this->id;
     }
@@ -1204,8 +1036,8 @@ inline void Node::Read(Value& obj, Asset& r)
         if (r.extensionsUsed.KHR_materials_common) {
 
             if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
-                if (Value* light = FindString(*ext, "light")) {
-                    this->light = r.lights.Get(light->GetString());
+                if (Value* light = FindUInt(*ext, "light")) {
+                    this->light = r.lights.Get(light->GetUint());
                 }
             }
 
@@ -1217,8 +1049,8 @@ inline void Scene::Read(Value& obj, Asset& r)
 {
     if (Value* array = FindArray(obj, "nodes")) {
         for (unsigned int i = 0; i < array->Size(); ++i) {
-            if (!(*array)[i].IsString()) continue;
-            Ref<Node> node = r.nodes.Get((*array)[i].GetString());
+            if (!(*array)[i].IsNumber()) continue;
+            Ref<Node> node = r.nodes.Get((*array)[i].GetUint());
             if (node)
                 this->nodes.push_back(node);
         }
@@ -1229,13 +1061,14 @@ inline void Scene::Read(Value& obj, Asset& r)
 inline void AssetMetadata::Read(Document& doc)
 {
     // read the version, etc.
-    float statedVersion = 0;
+    std::string statedVersion;
+
     if (Value* obj = FindObject(doc, "asset")) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
 
         premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
-        statedVersion = MemberOrDefault(*obj, "version", 0);
+        statedVersion = MemberOrDefault(*obj, "version", "0.0");
 
         if (Value* profile = FindObject(*obj, "profile")) {
             ReadMember(*profile, "api",     this->profile.api);
@@ -1243,14 +1076,16 @@ inline void AssetMetadata::Read(Document& doc)
         }
     }
 
-    version = std::max(statedVersion, version);
+    float statedFloatVersion = std::strtof(statedVersion.c_str(), 0);
+
+    version = std::max(statedFloatVersion, version);
 
     if (version == 0) {
-        // if missing version, we'll assume version 1.0...
-        version = 1;
+        // if missing version, we'll assume version 2.0...
+        version = 2;
     }
 
-    if (version != 1) {
+    if (version != 2) {
         char msg[128];
         ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %.1f", version);
         throw DeadlyImportError(msg);
@@ -1361,12 +1196,14 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
         mDicts[i]->AttachToDocument(doc);
     }
 
-
-
     // Read the "scene" property, which specifies which scene to load
     // and recursively load everything referenced by it
-    if (Value* scene = FindString(doc, "scene")) {
-        this->scene = scenes.Get(scene->GetString());
+    if (Value* scene = FindUInt(doc, "scene")) {
+        unsigned int sceneIndex = scene->GetUint();
+
+        Ref<Scene> s = scenes.Get(sceneIndex);
+
+        this->scene = s;
     }
 
     // Clean up

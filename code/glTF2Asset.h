@@ -232,7 +232,7 @@ namespace glTF2
             case ComponentType_UNSIGNED_BYTE:
                 return 1;
             default:
-                throw DeadlyImportError("GLTF: Unsupported Component Type "+t);
+                throw DeadlyImportError("GLTF: Unsupported Component Type " + std::to_string(t));
         }
     }
 
@@ -629,7 +629,7 @@ namespace glTF2
                 float zfar;  //! The floating-point distance to the far clipping plane. (required)
                 float znear; //! The floating-point distance to the near clipping plane. (required)
             } ortographic;
-        };
+        } cameraProperties;
 
         Camera() {}
         void Read(Value& obj, Asset& r);
@@ -1146,7 +1146,7 @@ namespace glTF2
         LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
         //LazyDict<Shader>    shaders;
-        LazyDict<Skin>      skins;
+        LazyDict<Skin>        skins;
         //LazyDict<Technique> techniques;
         LazyDict<Texture>     textures;
 

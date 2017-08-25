@@ -61,8 +61,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <vector>
 
-#include <stdint.h>
-
 namespace Assimp {
 namespace FBX {
 
@@ -2373,9 +2371,9 @@ void Converter::ConvertAnimationStack( const AnimationStack& st )
     bool has_local_startstop = start_time != 0 || stop_time != 0;
     if ( !has_local_startstop ) {
         // no time range given, so accept every keyframe and use the actual min/max time
-        // the 20000 is for safety because GenerateNodeAnimations uses an epsilon of 10000
-        start_time = INT64_MIN + 20000;
-        stop_time = INT64_MAX - 20000;
+        // the numbers are INT64_MIN/MAX, the 20000 is for safety because GenerateNodeAnimations uses an epsilon of 10000
+        start_time = -9223372036854775807ll + 20000;
+        stop_time = 9223372036854775807ll - 20000;
     }
 
     try {

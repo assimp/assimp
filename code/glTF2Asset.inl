@@ -733,6 +733,12 @@ inline void Material::Read(Value& material, Asset& r)
         ReadMember(*values, "shininess", shininess);
     }
 
+    if (Value* values = FindObject(material, "pbrMetallicRoughness")) {
+        ReadMaterialProperty(r, *values, "baseColorFactor", this->diffuse);
+    }
+
+    ReadMember(material, "doubleSided", doubleSided);
+
     if (Value* extensions = FindObject(material, "extensions")) {
         if (r.extensionsUsed.KHR_materials_common) {
             if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {

@@ -1046,9 +1046,9 @@ namespace glTF2
         LazyDict(Asset& asset, const char* dictId, const char* extId = 0);
         ~LazyDict();
 
-        Ref<T> Get(const char* id);
+        Ref<T> Retrieve(unsigned int i);
+
         Ref<T> Get(unsigned int i);
-        Ref<T> Get(const std::string& pID) { return Get(pID.c_str()); }
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)

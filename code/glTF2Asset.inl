@@ -196,6 +196,14 @@ template<class T>
 Ref<T> LazyDict<T>::Get(unsigned int i)
 {
 
+    return Ref<T>(mObjs, i);
+
+}
+
+template<class T>
+Ref<T> LazyDict<T>::Retrieve(unsigned int i)
+{
+
     std::string id = std::string(mDictId) + "[" + std::to_string(i) + "]";
 
     typename Dict::iterator it = mObjsById.find(id);
@@ -442,7 +450,7 @@ inline void BufferView::Read(Value& obj, Asset& r)
 {
 
     if (Value* bufferVal = FindUInt(obj, "buffer")) {
-        buffer = r.buffers.Get(bufferVal->GetUint());
+        buffer = r.buffers.Retrieve(bufferVal->GetUint());
     }
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
@@ -457,7 +465,7 @@ inline void Accessor::Read(Value& obj, Asset& r)
 {
 
     if (Value* bufferViewVal = FindUInt(obj, "bufferView")) {
-        bufferView = r.bufferViews.Get(bufferViewVal->GetUint());
+        bufferView = r.bufferViews.Retrieve(bufferViewVal->GetUint());
     }
 
     byteOffset = MemberOrDefault(obj, "byteOffset", 0u);
@@ -615,7 +623,7 @@ inline void Image::Read(Value& obj, Asset& r)
                 ReadMember(*ext, "mimeType", mimeType);
 
                 if (Value* bufferViewVal = FindUInt(*ext, "bufferView")) {
-                    Ref<BufferView> bv = r.bufferViews.Get(bufferViewVal->GetUint());
+                    Ref<BufferView> bv = r.bufferViews.Retrieve(bufferViewVal->GetUint());
                     if (bv) {
                         mDataLength = bv->byteLength;
                         mData = new uint8_t[mDataLength];
@@ -690,11 +698,11 @@ inline void Sampler::SetDefaults()
 inline void Texture::Read(Value& obj, Asset& r)
 {
     if (Value* sourceVal = FindUInt(obj, "source")) {
-        source = r.images.Get(sourceVal->GetUint());
+        source = r.images.Retrieve(sourceVal->GetUint());
     }
 
     if (Value* samplerVal = FindUInt(obj, "sampler")) {
-        sampler = r.samplers.Get(samplerVal->GetUint());
+        sampler = r.samplers.Retrieve(samplerVal->GetUint());
     }
 }
 
@@ -704,7 +712,7 @@ namespace {
         //@TODO: update this format
         if (Value* prop = FindMember(vals, propName)) {
             if (prop->IsUint()) {
-                out.texture = r.textures.Get(prop->GetUint());
+                out.texture = r.textures.Retrieve(prop->GetUint());
             }
             else {
                 ReadValue(*prop, out.color);
@@ -820,7 +828,7 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 
             if (Value* attrs = FindObject(primitive, "attributes")) {
                 for (Value::MemberIterator it = attrs->MemberBegin(); it != attrs->MemberEnd(); ++it) {
-                    if (!it->value.IsString()) continue;
+                    if (!it->value.IsUint()) continue;
                     const char* attr = it->name.GetString();
                     // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
@@ -831,17 +839,17 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
                     if (GetAttribVector(prim, attr, vec, undPos)) {
                         size_t idx = (attr[undPos] == '_') ? atoi(attr + undPos + 1) : 0;
                         if ((*vec).size() <= idx) (*vec).resize(idx + 1);
-						(*vec)[idx] = pAsset_Root.accessors.Get(it->value.GetUint());
+						(*vec)[idx] = pAsset_Root.accessors.Retrieve(it->value.GetUint());
                     }
                 }
             }
 
             if (Value* indices = FindUInt(primitive, "indices")) {
-				prim.indices = pAsset_Root.accessors.Get(indices->GetUint());
+				prim.indices = pAsset_Root.accessors.Retrieve(indices->GetUint());
             }
 
             if (Value* material = FindUInt(primitive, "material")) {
-				prim.material = pAsset_Root.materials.Get(material->GetUint());
+				prim.material = pAsset_Root.materials.Retrieve(material->GetUint());
             }
         }
     }
@@ -992,9 +1000,9 @@ inline void Node::Read(Value& obj, Asset& r)
         this->children.reserve(children->Size());
         for (unsigned int i = 0; i < children->Size(); ++i) {
             Value& child = (*children)[i];
-            if (child.IsNumber()) {
+            if (child.IsUint()) {
                 // get/create the child node
-                Ref<Node> chn = r.nodes.Get(child.GetUint());
+                Ref<Node> chn = r.nodes.Retrieve(child.GetUint());
                 if (chn) this->children.push_back(chn);
             }
         }
@@ -1010,22 +1018,21 @@ inline void Node::Read(Value& obj, Asset& r)
         ReadMember(obj, "rotation", rotation);
     }
 
-    if (Value* meshes = FindArray(obj, "meshes")) {
-        unsigned numMeshes = (unsigned)meshes->Size();
+    if (Value* mesh = FindUInt(obj, "mesh")) {
+        //unsigned numMeshes = (unsigned)meshes->Size();
+        unsigned numMeshes = 1;
 
-        std::vector<unsigned int> meshList;
+        //std::vector<unsigned int> meshList;
 
         this->meshes.reserve(numMeshes);
-        for (unsigned i = 0; i < numMeshes; ++i) {
-            if ((*meshes)[i].IsNumber()) {
-                Ref<Mesh> mesh = r.meshes.Get((*meshes)[i].GetUint());
-                if (mesh) this->meshes.push_back(mesh);
-            }
-        }
+
+        Ref<Mesh> meshRef = r.meshes.Retrieve((*mesh).GetUint());
+
+        if (meshRef) this->meshes.push_back(meshRef);
     }
 
     if (Value* camera = FindUInt(obj, "camera")) {
-        this->camera = r.cameras.Get(camera->GetUint());
+        this->camera = r.cameras.Retrieve(camera->GetUint());
         if (this->camera)
             this->camera->id = this->id;
     }
@@ -1037,7 +1044,7 @@ inline void Node::Read(Value& obj, Asset& r)
 
             if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
                 if (Value* light = FindUInt(*ext, "light")) {
-                    this->light = r.lights.Get(light->GetUint());
+                    this->light = r.lights.Retrieve(light->GetUint());
                 }
             }
 
@@ -1049,8 +1056,8 @@ inline void Scene::Read(Value& obj, Asset& r)
 {
     if (Value* array = FindArray(obj, "nodes")) {
         for (unsigned int i = 0; i < array->Size(); ++i) {
-            if (!(*array)[i].IsNumber()) continue;
-            Ref<Node> node = r.nodes.Get((*array)[i].GetUint());
+            if (!(*array)[i].IsUint()) continue;
+            Ref<Node> node = r.nodes.Retrieve((*array)[i].GetUint());
             if (node)
                 this->nodes.push_back(node);
         }
@@ -1201,7 +1208,7 @@ inline void Asset::Load(const std::string& pFile, bool isBinary)
     if (Value* scene = FindUInt(doc, "scene")) {
         unsigned int sceneIndex = scene->GetUint();
 
-        Ref<Scene> s = scenes.Get(sceneIndex);
+        Ref<Scene> s = scenes.Retrieve(sceneIndex);
 
         this->scene = s;
     }

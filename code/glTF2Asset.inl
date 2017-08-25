@@ -204,10 +204,8 @@ template<class T>
 Ref<T> LazyDict<T>::Retrieve(unsigned int i)
 {
 
-    std::string id = std::string(mDictId) + "[" + std::to_string(i) + "]";
-
-    typename Dict::iterator it = mObjsById.find(id);
-    if (it != mObjsById.end()) { // already created?
+    typename Dict::iterator it = mObjsByOIndex.find(i);
+    if (it != mObjsByOIndex.end()) {// already created?
         return Ref<T>(mObjs, it->second);
     }
 
@@ -227,7 +225,8 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
     }
 
     T* inst = new T();
-    inst->id = id;
+    inst->id = std::string(mDictId) + "[" + std::to_string(i) + "]";
+    inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
 
@@ -239,7 +238,7 @@ Ref<T> LazyDict<T>::Add(T* obj)
 {
     unsigned int idx = unsigned(mObjs.size());
     mObjs.push_back(obj);
-    mObjsById[obj->id] = idx;
+    mObjsByOIndex[obj->oIndex] = idx;
     mAsset.mUsedIds[obj->id] = true;
     return Ref<T>(mObjs, idx);
 }

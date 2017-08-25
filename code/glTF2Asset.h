@@ -382,6 +382,7 @@ namespace glTF2
     struct Object
     {
         int index;        //!< The index of this object within its property container
+        int oIndex;       //!< The original index of this object defined in the JSON
         std::string id;   //!< The globally unique ID used to reference this object
         std::string name; //!< The user-defined name of this object
 
@@ -1025,14 +1026,14 @@ namespace glTF2
         friend class Asset;
         friend class AssetWriter;
 
-        typedef typename std::gltf_unordered_map< std::string, unsigned int > Dict;
+        typedef typename std::gltf_unordered_map< unsigned int, unsigned int > Dict;
 
-        std::vector<T*>  mObjs;      //! The read objects
-        Dict             mObjsById;  //! The read objects accessible by id
-        const char*      mDictId;    //! ID of the dictionary object
-        const char*      mExtId;     //! ID of the extension defining the dictionary
-        Value*           mDict;      //! JSON dictionary object
-        Asset&           mAsset;     //! The asset instance
+        std::vector<T*>     mObjs;         //! The read objects
+        Dict                mObjsByOIndex; //! The read objects accessible by original index
+        const char*         mDictId;       //! ID of the dictionary object
+        const char*         mExtId;        //! ID of the extension defining the dictionary
+        Value*              mDict;         //! JSON dictionary object
+        Asset&              mAsset;        //! The asset instance
 
         void AttachToDocument(Document& doc);
         void DetachFromDocument();

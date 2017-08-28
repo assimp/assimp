@@ -128,7 +128,7 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     ExportScene();
 
-    ExportAnimations();
+    //ExportAnimations();
 
     AssetWriter writer(*mAsset);
 
@@ -414,7 +414,7 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
     return parentNodeRef;
 }
 
-void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef, Ref<Skin>& skinRef, std::vector<aiMatrix4x4>& inverseBindMatricesData)
+/*void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef, Ref<Skin>& skinRef, std::vector<aiMatrix4x4>& inverseBindMatricesData)
 {
     if (aimesh->mNumBones < 1) {
         return;
@@ -491,7 +491,7 @@ void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buf
     delete[] jointsPerVertex;
     delete[] vertexWeightData;
     delete[] vertexJointData;
-}
+}*/
 
 void glTF2Exporter::ExportMeshes()
 {
@@ -634,10 +634,10 @@ void glTF2Exporter::ExportMeshes()
                 p.mode = PrimitiveMode_TRIANGLES;
         }
 
-    /*************** Skins ****************/
-    if(aim->HasBones()) {
-        ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData);
-    }
+        /*************** Skins ****************/
+        /*if(aim->HasBones()) {
+            ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData);
+        }*/
 
 		/****************** Compression ******************/
 		///TODO: animation: weights, joints.
@@ -942,7 +942,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     }
 }
 
-void glTF2Exporter::ExportAnimations()
+/* void glTF2Exporter::ExportAnimations()
 {
     Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
 
@@ -963,7 +963,7 @@ void glTF2Exporter::ExportAnimations()
             name = mAsset->FindUniqueID(name, "animation");
             Ref<Animation> animRef = mAsset->animations.Create(name);
 
-            /******************* Parameters ********************/
+            // Parameters
             ExtractAnimationData(*mAsset, name, animRef, bufferRef, nodeChannel, anim->mTicksPerSecond);
 
             for (unsigned int j = 0; j < 3; ++j) {
@@ -1011,7 +1011,7 @@ void glTF2Exporter::ExportAnimations()
         // }
 
     } // End: for-loop mNumAnimations
-}
+} */
 
 
 #endif // ASSIMP_BUILD_NO_GLTF_EXPORTER

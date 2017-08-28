@@ -671,11 +671,18 @@ namespace glTF2
         inline void SetData(uint8_t* data, size_t length, Asset& r);
     };
 
-    //! Holds a material property that can be a texture or a color
-    struct TexProperty
+    struct ColorProperty
+    {
+        union {
+            vec4, vec3
+        } color;
+    }
+
+    //! Holds a material property that can be a texture or a color (fallback for glTF 1)
+    struct FallbackTexProperty
     {
         Ref<Texture> texture;
-        vec4 color;
+        ColorProperty color;
     };
 
     //! The material appearance of a primitive.
@@ -694,16 +701,27 @@ namespace glTF2
             Technique_CONSTANT
         };
 
-        TexProperty ambient;
-        TexProperty diffuse;
-        TexProperty specular;
-        TexProperty emission;
-        Ref<Texture> normal;
+        //PBR metallic roughness properties
+        ColorProperty baseColor;
+        Ref<Texture> baseColorTexture;
+        Ref<Texture> metallicRoughnessTexture;
+        float metallicFactor;
+        float roughnessFactor;
 
+        //other basic material properties
+        Ref<Texture> normalTexture;
+        Ref<Texture> occlusionTexture;
+        Ref<Texture> emissiveTexture;
+        ColorProperty emissiveFactor;
+        std::string alphaMode;
+        float alphaCutoff;
         bool doubleSided;
-        bool transparent;
-        float transparency;
-        float shininess;
+
+        //fallback material properties (compatible with non-pbr defintions)
+        FallbackTexProperty diffuse;
+        FallbackTexProperty emissive;
+        FallbackTexProperty specular;
+        Ref<Texture> normal;
 
         Technique technique;
 

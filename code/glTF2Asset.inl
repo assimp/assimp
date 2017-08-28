@@ -725,17 +725,28 @@ inline void Material::Read(Value& material, Asset& r)
     SetDefaults();
 
     if (Value* values = FindObject(material, "values")) {
-        ReadMaterialProperty(r, *values, "ambient", this->ambient);
-        ReadMaterialProperty(r, *values, "diffuse", this->diffuse);
-        ReadMaterialProperty(r, *values, "specular", this->specular);
+
 
         ReadMember(*values, "transparency", transparency);
-        ReadMember(*values, "shininess", shininess);
     }
 
     if (Value* values = FindObject(material, "pbrMetallicRoughness")) {
+        //pbr
+        ReadMaterialProperty(r, *values, "baseColorFactor", this->baseColor);
+        ReadMaterialProperty(r, *values, "baseColorTexture", this->baseColorTexture);
+
+        //non-pbr fallback
         ReadMaterialProperty(r, *values, "baseColorFactor", this->diffuse);
+        ReadMaterialProperty(r, *values, "baseColorTexture", this->diffuse);
+
+        ReadMember(*values, "metallicFactor", metallicFactor);
     }
+
+    ReadMaterialProperty(r, *values, "normalTexture", this->normalTexture);
+    ReadMaterialProperty(r, *values, "normalTexture", this->normal);
+    ReadMaterialProperty(r, *values, "occlusionTexture", this->occlusionTexture);
+    ReadMaterialProperty(r, *values, "emissiveTexture", this->emissiveTexture);
+    ReadMember(*values, "metallicFactor", emissiveFactor);
 
     ReadMember(material, "doubleSided", doubleSided);
 

@@ -445,7 +445,7 @@ void TokenizeBinary(TokenList& output_tokens, const char* input, unsigned int le
 	const uint8_t unknown_4 = ReadByte(input, cursor, input + length);
 	const uint8_t unknown_5 = ReadByte(input, cursor, input + length);
 	const uint32_t version = ReadWord(input, cursor, input + length);
-	const bool is64bits = version == 7500;
+	const bool is64bits = version >= 7500;
     while (cursor < input + length)
     {
 		if (!ReadScope(output_tokens, input, cursor, input + length, is64bits)) {

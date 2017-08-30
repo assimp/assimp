@@ -234,12 +234,6 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     return acc;
 }
 
-namespace {
-    void GetMatScalar(const aiMaterial* mat, float& val, const char* propName, int type, int idx) {
-        if (mat->Get(propName, type, idx, val) == AI_SUCCESS) {}
-    }
-}
-
 void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture)
 {
     std::string samplerId = mAsset->FindUniqueID("", "sampler");
@@ -286,11 +280,11 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture)
     texture->sampler->minFilter = SamplerMinFilter_Linear_Mipmap_Linear;
 }
 
-void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt)
+void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt, unsigned int slot = 0)
 {
     aiString tex;
     if (mat->GetTextureCount(tt) > 0) {
-        if (mat->Get(AI_MATKEY_TEXTURE(tt, 0), tex) == AI_SUCCESS) {
+        if (mat->Get(AI_MATKEY_TEXTURE(tt, slot), tex) == AI_SUCCESS) {
             std::string path = tex.C_Str();
 
             if (path.size() > 0) {
@@ -332,22 +326,27 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
     }
 }
 
-void glTF2Exporter::GetMatColorOrTex(const aiMaterial* mat, TexProperty& prop, const char* propName, int type, int idx, aiTextureType tt)
+void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const char* propName, int type, int idx)
 {
     aiColor4D col;
     if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
-        prop.color[0] = col.r; prop.color[1] = col.g; prop.color[2] = col.b; prop.color[3] = col.a;
+        prop[0] = col.r; prop[1] = col.g; prop[2] = col.b; prop[3] = col.a;
     }
-    GetMatTex(mat, prop.texture, tt);
 }
 
+void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* propName, int type, int idx)
+{
+    aiColor3D col;
+    if (mat->Get(propName, type, idx, col) == AI_SUCCESS) {
+        prop[0] = col.r; prop[1] = col.g; prop[2] = col.b;
+    }
+}
 
 void glTF2Exporter::ExportMaterials()
 {
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
-
 
         std::string name;
         if (mat->Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS) {
@@ -357,15 +356,20 @@ void glTF2Exporter::ExportMaterials()
 
         Ref<Material> m = mAsset->materials.Create(name);
 
-        GetMatColorOrTex(mat, m->ambient, AI_MATKEY_COLOR_AMBIENT, aiTextureType_AMBIENT);
-        GetMatColorOrTex(mat, m->diffuse, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_DIFFUSE);
-        GetMatColorOrTex(mat, m->specular, AI_MATKEY_COLOR_SPECULAR, aiTextureType_SPECULAR);
-        GetMatColorOrTex(mat, m->emission, AI_MATKEY_COLOR_EMISSIVE, aiTextureType_EMISSIVE);
-        GetMatTex(mat, m->normal, aiTextureType_NORMALS);
+        GetMatTex(mat, m->baseColorTexture.texture, aiTextureType_DIFFUSE);
+        GetMatTex(mat, m->metallicRoughnessTexture.texture, aiTextureType_UNKNOWN, 0);//get unknown slot
+        GetMatTex(mat, m->emissiveTexture.texture, aiTextureType_EMISSIVE);
+        GetMatTex(mat, m->normalTexture.texture, aiTextureType_NORMALS);
+        GetMatTex(mat, m->occlusionTexture.texture, aiTextureType_LIGHTMAP);
 
-        m->transparent = mat->Get(AI_MATKEY_OPACITY, m->transparency) == aiReturn_SUCCESS && m->transparency != 1.0;
+        GetMatColor(mat, m->baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+        GetMatColor(mat, m->emissiveFactor, AI_MATKEY_COLOR_EMISSIVE);
 
-        GetMatScalar(mat, m->shininess, AI_MATKEY_SHININESS);
+        mat->Get(AI_MATKEY_TWOSIDED, m->doubleSided);
+        mat->Get("$mat.gltf.alphaCutoff", 0, 0, m->alphaCutoff);
+        mat->Get("$mat.gltf.metallicFactor", 0, 0, m->metallicFactor);
+        mat->Get("$mat.gltf.roughnessFactor", 0, 0, m->roughnessFactor);
+        mat->Get("$mat.gltf.alphaMode", 0, 0, m->alphaMode);
     }
 }
 
@@ -566,12 +570,16 @@ void glTF2Exporter::ExportMeshes()
 
 			DefaultLogger::get()->warn("GLTF: can not use Open3DGC-compression: " + msg);
             comp_allow = false;
-		}
+        }
 
-        std::string meshId = mAsset->FindUniqueID(aim->mName.C_Str(), "mesh");
+        std::string name = aim->mName.C_Str();
+
+        std::string meshId = mAsset->FindUniqueID(name, "mesh");
         Ref<Mesh> m = mAsset->meshes.Create(meshId);
         m->primitives.resize(1);
         Mesh::Primitive& p = m->primitives.back();
+
+        m->name = name;
 
         p.material = mAsset->materials.Get(aim->mMaterialIndex);
 

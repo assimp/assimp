@@ -72,6 +72,12 @@ namespace glTF2 {
             return val;
         }
 
+        inline Value& MakeValue(Value& val, float r, MemoryPoolAllocator<>& al) {
+            val.SetDouble(r);
+
+            return val;
+        }
+
         template<class T>
         inline void AddRefsVector(Value& obj, const char* fieldId, std::vector< Ref<T> >& v, MemoryPoolAllocator<>& al) {
             if (v.empty()) return;
@@ -196,51 +202,148 @@ namespace glTF2 {
     }
 
     namespace {
-        inline void WriteTex(Value& obj, Ref<Texture> texture, const char* propName, MemoryPoolAllocator<>& al)
+        inline void SetTexBasic(TextureInfo t, Value& tex, MemoryPoolAllocator<>& al)
         {
-            if (texture) {
+            tex.SetObject();
+            tex.AddMember("index", t.texture->index, al);
+
+            if (t.texCoord != 0) {
+                tex.AddMember("texCoord", t.texCoord, al);
+            }
+        }
+
+        inline void WriteTex(Value& obj, TextureInfo t, const char* propName, MemoryPoolAllocator<>& al)
+        {
+
+            if (t.texture) {
                 Value tex;
-                tex.SetObject();
-                tex.AddMember("index", texture->index, al);
+
+                SetTexBasic(t, tex, al);
+
                 obj.AddMember(StringRef(propName), tex, al);
             }
         }
 
-        inline void WriteColorOrTex(Value& obj, TexProperty& prop, const char* propName, MemoryPoolAllocator<>& al)
+        inline void WriteTex(Value& obj, NormalTextureInfo t, const char* propName, MemoryPoolAllocator<>& al)
         {
-            WriteTex(obj, prop.texture, propName, al);
-            if (!prop.texture) {
-                Value col;
-                obj.AddMember(StringRef(propName), MakeValue(col, prop.color, al), al);
+
+            if (t.texture) {
+                Value tex;
+
+                SetTexBasic(t, tex, al);
+
+                if (t.scale != 1) {
+                    tex.AddMember("scale", t.scale, al);
+                }
+
+                obj.AddMember(StringRef(propName), tex, al);
             }
+        }
+
+        inline void WriteTex(Value& obj, OcclusionTextureInfo t, const char* propName, MemoryPoolAllocator<>& al)
+        {
+
+            if (t.texture) {
+                Value tex;
+
+                SetTexBasic(t, tex, al);
+
+                if (t.strength != 1) {
+                    tex.AddMember("strength", t.strength, al);
+                }
+
+                obj.AddMember(StringRef(propName), tex, al);
+            }
+        }
+
+        template<size_t N>
+        inline void WriteVec(Value& obj, float(&prop)[N], const char* propName, MemoryPoolAllocator<>& al)
+        {
+            Value arr;
+            obj.AddMember(StringRef(propName), MakeValue(arr, prop, al), al);
+        }
+
+        template<size_t N>
+        inline void WriteVec(Value& obj, float(&prop)[N], const char* propName, float(&defaultVal)[N], MemoryPoolAllocator<>& al)
+        {
+            if (!std::equal(std::begin(prop), std::end(prop), std::begin(defaultVal))) {
+                WriteVec(obj, prop, propName, al);
+            }
+        }
+
+        inline void WriteFloat(Value& obj, float prop, const char* propName, MemoryPoolAllocator<>& al)
+        {
+            Value num;
+            obj.AddMember(StringRef(propName), MakeValue(num, prop, al), al);
         }
     }
 
     inline void Write(Value& obj, Material& m, AssetWriter& w)
     {
-        if (m.transparent) {
-            obj.AddMember("alphaMode", "BLEND", w.mAl);
+        if (!m.name.empty()) {
+            obj.AddMember("name", m.name, w.mAl);
         }
 
-        Value v;
+        Value pbrMetallicRoughness;
+        pbrMetallicRoughness.SetObject();
+        {
+            WriteTex(pbrMetallicRoughness, m.baseColorTexture, "baseColorTexture", w.mAl);
+            WriteTex(pbrMetallicRoughness, m.metallicRoughnessTexture, "metallicRoughnessTexture", w.mAl);
+
+            //@TODO: define this as a constant?
+            vec4 defaultEmissiveFactor = {1, 1, 1, 1};
+            WriteVec(pbrMetallicRoughness, m.baseColorFactor, "baseColorFactor", defaultEmissiveFactor, w.mAl);
+
+            if (m.metallicFactor != 1) {
+                WriteFloat(pbrMetallicRoughness, m.metallicFactor, "metallicFactor", w.mAl);
+            }
+
+            if (m.roughnessFactor != 1) {
+                WriteFloat(pbrMetallicRoughness, m.roughnessFactor, "roughnessFactor", w.mAl);
+            }
+        }
+
+        if (pbrMetallicRoughness.MemberCount() > 0) {
+            obj.AddMember("pbrMetallicRoughness", pbrMetallicRoughness, w.mAl);
+        }
+
+        WriteTex(obj, m.normalTexture, "normalTexture", w.mAl);
+        WriteTex(obj, m.emissiveTexture, "emissiveTexture", w.mAl);
+        WriteTex(obj, m.occlusionTexture, "occlusionTexture", w.mAl);
+
+        //@TODO: define this as a constant?
+        vec3 defaultEmissiveFactor = {0, 0, 0};
+        WriteVec(obj, m.emissiveFactor, "emissiveFactor", defaultEmissiveFactor, w.mAl);
+
+        if (m.alphaCutoff != 0.5) {
+            WriteFloat(obj, m.alphaCutoff, "alphaCutoff", w.mAl);
+        }
+
+        if (m.alphaMode != "OPAQUE") {
+            obj.AddMember("alphaMode", m.alphaMode, w.mAl);
+        }
+
+        if (m.doubleSided) {
+            obj.AddMember("doubleSided", m.doubleSided, w.mAl);
+        }
+
+        /*Value v;
         v.SetObject();
         {
             if (m.transparent && !m.diffuse.texture) {
                 m.diffuse.color[3] = m.transparency;
             }
-            WriteColorOrTex(v, m.ambient, m.ambient.texture ? "ambientTexture" : "ambientFactor", w.mAl);
-            WriteColorOrTex(v, m.diffuse, m.diffuse.texture ? "diffuseTexture" : "diffuseFactor", w.mAl);
-            WriteColorOrTex(v, m.specular, m.specular.texture ? "specularTexture" : "specularFactor", w.mAl);
-            WriteColorOrTex(v, m.emission, m.emission.texture ? "emissionTexture" : "emissionFactor", w.mAl);
+            WriteVecOrTex(v, m.ambient, m.ambient.texture ? "ambientTexture" : "ambientFactor", w.mAl);
+            WriteVecOrTex(v, m.diffuse, m.diffuse.texture ? "diffuseTexture" : "diffuseFactor", w.mAl);
+            WriteVecOrTex(v, m.specular, m.specular.texture ? "specularTexture" : "specularFactor", w.mAl);
+            WriteVecOrTex(v, m.emission, m.emission.texture ? "emissionTexture" : "emissionFactor", w.mAl);
             v.AddMember("shininessFactor", m.shininess, w.mAl);
         }
         v.AddMember("type", "commonPhong", w.mAl);
         Value ext;
         ext.SetObject();
         ext.AddMember("KHR_materials_common", v, w.mAl);
-        obj.AddMember("extensions", ext, w.mAl);
-
-        WriteTex(obj, m.normal, "normalTexture", w.mAl);
+        obj.AddMember("extensions", ext, w.mAl);*/
     }
 
     namespace {
@@ -263,8 +366,6 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Mesh& m, AssetWriter& w)
     {
-		/********************* Name **********************/
-		obj.AddMember("name", m.name, w.mAl);
 
 		/**************** Mesh extensions ****************/
 		if(m.Extension.size() > 0)
@@ -617,7 +718,7 @@ namespace glTF2 {
                 exts.PushBack(StringRef("KHR_binary_glTF"), mAl);
 
             // This is used to export common materials with GLTF 2.
-            exts.PushBack(StringRef("KHR_materials_common"), mAl);
+            //exts.PushBack(StringRef("KHR_materials_common"), mAl);
         }
 
         if (!exts.Empty())

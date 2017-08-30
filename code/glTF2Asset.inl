@@ -128,6 +128,12 @@ namespace {
         return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
     }
 
+    inline Value* FindNumber(Value& val, const char* id)
+    {
+        Value::MemberIterator it = val.FindMember(id);
+        return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
+    }
+
     inline Value* FindUInt(Value& val, const char* id)
     {
         Value::MemberIterator it = val.FindMember(id);
@@ -225,7 +231,7 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
     }
 
     T* inst = new T();
-    inst->id = std::string(mDictId) + "[" + std::to_string(i) + "]";
+    inst->id = std::string(mDictId) + "_" + std::to_string(i);
     inst->oIndex = i;
     ReadMember(obj, "name", inst->name);
     inst->Read(obj, mAsset);
@@ -706,15 +712,42 @@ inline void Texture::Read(Value& obj, Asset& r)
 }
 
 namespace {
-    inline void ReadMaterialProperty(Asset& r, Value& vals, const char* propName, TexProperty& out)
+    inline void SetTextureProperties(Asset& r, Value* prop, TextureInfo& out)
     {
-        //@TODO: update this format
+        if (Value* index = FindUInt(*prop, "index")) {
+            out.texture = r.textures.Retrieve(index->GetUint());
+        }
+
+        if (Value* texcoord = FindUInt(*prop, "texCoord")) {
+            out.texCoord = texcoord->GetUint();
+        }
+    }
+
+    inline void ReadTextureProperty(Asset& r, Value& vals, const char* propName, TextureInfo& out)
+    {
         if (Value* prop = FindMember(vals, propName)) {
-            if (prop->IsUint()) {
-                out.texture = r.textures.Retrieve(prop->GetUint());
+            SetTextureProperties(r, prop, out);
+        }
+    }
+
+    inline void ReadTextureProperty(Asset& r, Value& vals, const char* propName, NormalTextureInfo& out)
+    {
+        if (Value* prop = FindMember(vals, propName)) {
+            SetTextureProperties(r, prop, out);
+
+            if (Value* scale = FindNumber(*prop, "scale")) {
+                out.scale = scale->GetDouble();
             }
-            else {
-                ReadValue(*prop, out.color);
+        }
+    }
+
+    inline void ReadTextureProperty(Asset& r, Value& vals, const char* propName, OcclusionTextureInfo& out)
+    {
+        if (Value* prop = FindMember(vals, propName)) {
+            SetTextureProperties(r, prop, out);
+
+            if (Value* strength = FindNumber(*prop, "strength")) {
+                out.strength = strength->GetDouble();
             }
         }
     }
@@ -724,33 +757,24 @@ inline void Material::Read(Value& material, Asset& r)
 {
     SetDefaults();
 
-    if (Value* values = FindObject(material, "values")) {
-
-
-        ReadMember(*values, "transparency", transparency);
-    }
-
     if (Value* values = FindObject(material, "pbrMetallicRoughness")) {
-        //pbr
-        ReadMaterialProperty(r, *values, "baseColorFactor", this->baseColor);
-        ReadMaterialProperty(r, *values, "baseColorTexture", this->baseColorTexture);
-
-        //non-pbr fallback
-        ReadMaterialProperty(r, *values, "baseColorFactor", this->diffuse);
-        ReadMaterialProperty(r, *values, "baseColorTexture", this->diffuse);
-
-        ReadMember(*values, "metallicFactor", metallicFactor);
+        ReadMember(*values, "baseColorFactor", this->baseColorFactor);
+        ReadTextureProperty(r, *values, "baseColorTexture", this->baseColorTexture);
+        ReadTextureProperty(r, *values, "metallicRoughnessTexture", this->metallicRoughnessTexture);
+        ReadMember(*values, "metallicFactor", this->metallicFactor);
+        ReadMember(*values, "roughnessFactor", this->roughnessFactor);
     }
 
-    ReadMaterialProperty(r, *values, "normalTexture", this->normalTexture);
-    ReadMaterialProperty(r, *values, "normalTexture", this->normal);
-    ReadMaterialProperty(r, *values, "occlusionTexture", this->occlusionTexture);
-    ReadMaterialProperty(r, *values, "emissiveTexture", this->emissiveTexture);
-    ReadMember(*values, "metallicFactor", emissiveFactor);
+    ReadTextureProperty(r, material, "normalTexture", this->normalTexture);
+    ReadTextureProperty(r, material, "occlusionTexture", this->occlusionTexture);
+    ReadTextureProperty(r, material, "emissiveTexture", this->emissiveTexture);
+    ReadMember(material, "emissiveFactor", this->emissiveFactor);
 
-    ReadMember(material, "doubleSided", doubleSided);
+    ReadMember(material, "doubleSided", this->doubleSided);
+    ReadMember(material, "alphaMode", this->alphaMode);
+    ReadMember(material, "alphaCutoff", this->alphaCutoff);
 
-    if (Value* extensions = FindObject(material, "extensions")) {
+    /* if (Value* extensions = FindObject(material, "extensions")) {
         if (r.extensionsUsed.KHR_materials_common) {
             if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
                 if (Value* tnq = FindString(*ext, "technique")) {
@@ -762,9 +786,9 @@ inline void Material::Read(Value& material, Asset& r)
                 }
 
                 if (Value* values = FindObject(*ext, "values")) {
-                    ReadMaterialProperty(r, *values, "ambient", this->ambient);
-                    ReadMaterialProperty(r, *values, "diffuse", this->diffuse);
-                    ReadMaterialProperty(r, *values, "specular", this->specular);
+                    ReadTextureProperty(r, *values, "ambient", this->ambient);
+                    ReadTextureProperty(r, *values, "diffuse", this->diffuse);
+                    ReadTextureProperty(r, *values, "specular", this->specular);
 
                     ReadMember(*values, "doubleSided", doubleSided);
                     ReadMember(*values, "transparent", transparent);
@@ -773,25 +797,28 @@ inline void Material::Read(Value& material, Asset& r)
                 }
             }
         }
-    }
+    } */
 }
 
 namespace {
     void SetVector(vec4& v, float x, float y, float z, float w)
         { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
+
+    void SetVector(vec3& v, float x, float y, float z)
+        { v[0] = x; v[1] = y; v[2] = z; }
 }
 
 inline void Material::SetDefaults()
 {
-    SetVector(ambient.color, 0, 0, 0, 1);
-    SetVector(diffuse.color, 0, 0, 0, 1);
-    SetVector(specular.color, 0, 0, 0, 1);
-    SetVector(emission.color, 0, 0, 0, 1);
+    //pbr materials
+    SetVector(baseColorFactor, 1, 1, 1, 1);
+    SetVector(emissiveFactor, 0, 0, 0);
+    metallicFactor = 1.0;
+    roughnessFactor = 1.0;
 
+    alphaMode = "OPAQUE";
+    alphaCutoff = 0.5;
     doubleSided = false;
-    transparent = false;
-    transparency = 1.0;
-    shininess = 0.0;
 
     technique = Technique_undefined;
 }
@@ -833,6 +860,10 @@ namespace {
 
 inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
 {
+    if (Value* name = FindMember(pJSON_Object, "name")) {
+        this->name = name->GetString();
+    }
+
 	/****************** Mesh primitives ******************/
 	if (Value* primitives = FindArray(pJSON_Object, "primitives")) {
         this->primitives.resize(primitives->Size());
@@ -1055,7 +1086,7 @@ inline void Node::Read(Value& obj, Asset& r)
 
     // TODO load "skeletons", "skin", "jointName"
 
-    if (Value* extensions = FindObject(obj, "extensions")) {
+    /*if (Value* extensions = FindObject(obj, "extensions")) {
         if (r.extensionsUsed.KHR_materials_common) {
 
             if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
@@ -1065,7 +1096,7 @@ inline void Node::Read(Value& obj, Asset& r)
             }
 
         }
-    }
+    }*/
 }
 
 inline void Scene::Read(Value& obj, Asset& r)

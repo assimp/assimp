@@ -141,6 +141,11 @@ static void CopyValue(const glTF2::vec4& v, aiColor3D& out)
     out.r = v[0]; out.g = v[1]; out.b = v[2];
 }
 
+static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
+{
+    out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = 1.0;
+}
+
 static void CopyValue(const glTF2::vec3& v, aiVector3D& out)
 {
     out.x = v[0]; out.y = v[1]; out.z = v[2];
@@ -159,28 +164,56 @@ static void CopyValue(const glTF2::mat4& v, aiMatrix4x4& o)
     o.a4 = v[12]; o.b4 = v[13]; o.c4 = v[14]; o.d4 = v[15];
 }
 
-inline void SetMaterialColorProperty(std::vector<int>& embeddedTexIdxs, Asset& r, glTF2::TexProperty prop, aiMaterial* mat,
-    aiTextureType texType, const char* pKey, unsigned int type, unsigned int idx)
+inline void SetMaterialColorProperty(Asset& r, vec4& prop, aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx)
 {
-    if (prop.texture) {
-        if (prop.texture->source) {
-            aiString uri(prop.texture->source->uri);
+    aiColor4D col;
+    CopyValue(prop, col);
+    mat->AddProperty(&col, 1, pKey, type, idx);
+}
 
-            int texIdx = embeddedTexIdxs[prop.texture->source.GetIndex()];
-            if (texIdx != -1) { // embedded
-                // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
-                uri.data[0] = '*';
-                uri.length = 1 + ASSIMP_itoa10(uri.data + 1, MAXLEN - 1, texIdx);
-            }
+inline void SetMaterialColorProperty(Asset& r, vec3& prop, aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx)
+{
+    vec4 prop4;
 
+    prop4[0] = prop[0];
+    prop4[1] = prop[1];
+    prop4[2] = prop[2];
+    prop4[3] = 1;
+
+    return SetMaterialColorProperty(r, prop4, mat, pKey, type, idx);
+}
+
+inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset& r, glTF2::TextureInfo prop, aiMaterial* mat, aiTextureType texType, int texSlot)
+{
+    if (prop.texture && prop.texture->source) {
+        aiString uri(prop.texture->source->uri);
+
+        int texIdx = embeddedTexIdxs[prop.texture->source.GetIndex()];
+        if (texIdx != -1) { // embedded
+            // setup texture reference string (copied from ColladaLoader::FindFilenameForEffectTexture)
+            uri.data[0] = '*';
+            uri.length = 1 + ASSIMP_itoa10(uri.data + 1, MAXLEN - 1, texIdx);
+        }
+
+        if (texSlot < 0) {
             mat->AddProperty(&uri, _AI_MATKEY_TEXTURE_BASE, texType, 0);
         }
+        else {
+            mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType,
+                texSlot));
+        }
     }
-    else {
-        aiColor4D col;
-        CopyValue(prop.color, col);
-        mat->AddProperty(&col, 1, pKey, type, idx);
-    }
+}
+
+//import textures that are only supported in pbr contexts
+inline void SetMaterialPBRTextureProperty(std::vector<int>& embeddedTexIdxs, Asset& r, glTF2::TextureInfo prop, aiMaterial* mat, unsigned int texSlot)
+{
+    return SetMaterialTextureProperty(embeddedTexIdxs, r, prop, mat, aiTextureType_UNKNOWN, texSlot);
+}
+
+inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset& r, glTF2::TextureInfo prop, aiMaterial* mat, aiTextureType texType)
+{
+    return SetMaterialTextureProperty(embeddedTexIdxs, r, prop, mat, texType, -1);
 }
 
 void glTF2Importer::ImportMaterials(glTF2::Asset& r)
@@ -193,18 +226,23 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
 
         Material& mat = r.materials[i];
 
-        /*if (!mat.name.empty())*/ {
-            aiString str(mat.id /*mat.name*/);
-            aimat->AddProperty(&str, AI_MATKEY_NAME);
-        }
+        aiString str(mat.id);
+        aimat->AddProperty(&str, AI_MATKEY_NAME);
 
-        SetMaterialColorProperty(embeddedTexIdxs, r, mat.diffuse, aimat, aiTextureType_DIFFUSE, AI_MATKEY_COLOR_DIFFUSE);
-        SetMaterialColorProperty(embeddedTexIdxs, r, mat.specular, aimat, aiTextureType_SPECULAR, AI_MATKEY_COLOR_SPECULAR);
-        SetMaterialColorProperty(embeddedTexIdxs, r, mat.ambient, aimat, aiTextureType_AMBIENT, AI_MATKEY_COLOR_AMBIENT);
+        SetMaterialColorProperty(r, mat.baseColorFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.baseColorTexture, aimat, aiTextureType_DIFFUSE);
+        SetMaterialPBRTextureProperty(embeddedTexIdxs, r, mat.metallicRoughnessTexture, aimat, 0);
+        aimat->AddProperty(&mat.metallicFactor, 1, "$mat.gltf.metallicFactor");
+        aimat->AddProperty(&mat.roughnessFactor, 1, "$mat.gltf.roughnessFactor");
 
-        if (mat.shininess > 0.f) {
-            aimat->AddProperty(&mat.shininess, 1, AI_MATKEY_SHININESS);
-        }
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.normalTexture, aimat, aiTextureType_NORMALS);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.occlusionTexture, aimat, aiTextureType_LIGHTMAP);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.emissiveTexture, aimat, aiTextureType_EMISSIVE);
+        SetMaterialColorProperty(r, mat.emissiveFactor, aimat, AI_MATKEY_COLOR_EMISSIVE);
+
+        aimat->AddProperty(&mat.doubleSided, 1, AI_MATKEY_TWOSIDED);
+        aimat->AddProperty(&mat.alphaMode, 1, "$mat.gltf.alphaMode");
+        aimat->AddProperty(&mat.alphaCutoff, 1, "$mat.gltf.alphaCutoff");
     }
 }
 
@@ -295,7 +333,8 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
             aiMesh* aim = new aiMesh();
             meshes.push_back(aim);
 
-            aim->mName = mesh.id;
+            aim->mName = mesh.name.empty() ? mesh.id : mesh.name;
+
             if (mesh.primitives.size() > 1) {
                 size_t& len = aim->mName.length;
                 aim->mName.data[len] = '-';

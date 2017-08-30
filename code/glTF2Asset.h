@@ -133,7 +133,6 @@ namespace glTF2
     struct Light;
     struct Skin;
 
-
     // Vec/matrix types, as raw float arrays
     typedef float (vec3)[3];
     typedef float (vec4)[4];
@@ -671,19 +670,29 @@ namespace glTF2
         inline void SetData(uint8_t* data, size_t length, Asset& r);
     };
 
-    struct ColorProperty
-    {
-        union {
-            vec4, vec3
-        } color;
-    }
-
-    //! Holds a material property that can be a texture or a color (fallback for glTF 1)
-    struct FallbackTexProperty
+    struct TextureInfo
     {
         Ref<Texture> texture;
-        ColorProperty color;
+        unsigned int index;
+        unsigned int texCoord = 0;
     };
+
+    struct NormalTextureInfo : TextureInfo
+    {
+        float scale = 1;
+    };
+
+    struct OcclusionTextureInfo : TextureInfo
+    {
+        float strength = 1;
+    };
+
+    //! Holds a material property that can be a texture or a color (fallback for glTF 1)
+    /*struct FallbackTexProperty
+    {
+        Ref<Texture> texture;
+        vec4 color;
+    };*/
 
     //! The material appearance of a primitive.
     struct Material : public Object
@@ -702,26 +711,26 @@ namespace glTF2
         };
 
         //PBR metallic roughness properties
-        ColorProperty baseColor;
-        Ref<Texture> baseColorTexture;
-        Ref<Texture> metallicRoughnessTexture;
+        vec4 baseColorFactor;
+        TextureInfo baseColorTexture;
+        TextureInfo metallicRoughnessTexture;
         float metallicFactor;
         float roughnessFactor;
 
         //other basic material properties
-        Ref<Texture> normalTexture;
-        Ref<Texture> occlusionTexture;
-        Ref<Texture> emissiveTexture;
-        ColorProperty emissiveFactor;
+        NormalTextureInfo normalTexture;
+        OcclusionTextureInfo occlusionTexture;
+        TextureInfo emissiveTexture;
+        vec3 emissiveFactor;
         std::string alphaMode;
         float alphaCutoff;
         bool doubleSided;
 
         //fallback material properties (compatible with non-pbr defintions)
-        FallbackTexProperty diffuse;
-        FallbackTexProperty emissive;
+        /*FallbackTexProperty diffuse;
+        FallbackTexProperty emission;
         FallbackTexProperty specular;
-        Ref<Texture> normal;
+        Ref<Texture> normal;*/
 
         Technique technique;
 

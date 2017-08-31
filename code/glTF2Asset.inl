@@ -758,11 +758,11 @@ inline void Material::Read(Value& material, Asset& r)
     SetDefaults();
 
     if (Value* pbrMetallicRoughness = FindObject(material, "pbrMetallicRoughness")) {
-        ReadMember(*pbrMetallicRoughness, "baseColorFactor", this->baseColorFactor);
-        ReadTextureProperty(r, *pbrMetallicRoughness, "baseColorTexture", this->baseColorTexture);
-        ReadTextureProperty(r, *pbrMetallicRoughness, "metallicRoughnessTexture", this->metallicRoughnessTexture);
-        ReadMember(*pbrMetallicRoughness, "metallicFactor", this->metallicFactor);
-        ReadMember(*pbrMetallicRoughness, "roughnessFactor", this->roughnessFactor);
+        ReadMember(*pbrMetallicRoughness, "baseColorFactor", this->pbrMetallicRoughness.baseColorFactor);
+        ReadTextureProperty(r, *pbrMetallicRoughness, "baseColorTexture", this->pbrMetallicRoughness.baseColorTexture);
+        ReadTextureProperty(r, *pbrMetallicRoughness, "metallicRoughnessTexture", this->pbrMetallicRoughness.metallicRoughnessTexture);
+        ReadMember(*pbrMetallicRoughness, "metallicFactor", this->pbrMetallicRoughness.metallicFactor);
+        ReadMember(*pbrMetallicRoughness, "roughnessFactor", this->pbrMetallicRoughness.roughnessFactor);
     }
 
     ReadTextureProperty(r, material, "normalTexture", this->normalTexture);
@@ -777,11 +777,13 @@ inline void Material::Read(Value& material, Asset& r)
     if (Value* extensions = FindObject(material, "extensions")) {
         if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
             if (Value* pbrSpecularGlossiness = FindObject(*extensions, "KHR_materials_pbrSpecularGlossiness")) {
-                ReadMember(*pbrSpecularGlossiness, "diffuseFactor", this->diffuseFactor);
-                ReadTextureProperty(r, *pbrSpecularGlossiness, "diffuseTexture", this->diffuseTexture);
-                ReadTextureProperty(r, *pbrSpecularGlossiness, "specularGlossinessTexture", this->specularGlossinessTexture);
-                ReadMember(*pbrSpecularGlossiness, "specularFactor", this->specularFactor);
-                ReadMember(*pbrSpecularGlossiness, "glossinessFactor", this->glossinessFactor);
+                this->pbrSpecularGlossiness.on = true;
+
+                ReadMember(*pbrSpecularGlossiness, "diffuseFactor", this->pbrSpecularGlossiness.diffuseFactor);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "diffuseTexture", this->pbrSpecularGlossiness.diffuseTexture);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "specularGlossinessTexture", this->pbrSpecularGlossiness.specularGlossinessTexture);
+                ReadMember(*pbrSpecularGlossiness, "specularFactor", this->pbrSpecularGlossiness.specularFactor);
+                ReadMember(*pbrSpecularGlossiness, "glossinessFactor", this->pbrSpecularGlossiness.glossinessFactor);
             }
         }
     }
@@ -798,19 +800,19 @@ namespace {
 inline void Material::SetDefaults()
 {
     //pbr materials
-    SetVector(baseColorFactor, 1, 1, 1, 1);
-    SetVector(emissiveFactor, 0, 0, 0);
-    metallicFactor = 1.0;
-    roughnessFactor = 1.0;
+    SetVector(pbrMetallicRoughness.baseColorFactor, 1, 1, 1, 1);
+    pbrMetallicRoughness.metallicFactor = 1.0;
+    pbrMetallicRoughness.roughnessFactor = 1.0;
 
+    SetVector(emissiveFactor, 0, 0, 0);
     alphaMode = "OPAQUE";
     alphaCutoff = 0.5;
     doubleSided = false;
 
     //pbrSpecularGlossiness properties
-    SetVector(diffuseFactor, 1, 1, 1, 1);
-    SetVector(specularFactor, 1, 1, 1);
-    glossinessFactor = 1.0;
+    SetVector(pbrSpecularGlossiness.diffuseFactor, 1, 1, 1, 1);
+    SetVector(pbrSpecularGlossiness.specularFactor, 1, 1, 1);
+    pbrSpecularGlossiness.glossinessFactor = 1.0;
 }
 
 namespace {

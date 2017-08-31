@@ -112,9 +112,9 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     ExportMetadata();
 
-    //for (unsigned int i = 0; i < pScene->mNumCameras; ++i) {}
-
-    //for (unsigned int i = 0; i < pScene->mNumLights; ++i) {}
+    if (mScene->mRootNode) {
+        ExportExtensions(mScene->mRootNode);
+    }
 
     ExportMaterials();
 
@@ -123,8 +123,6 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
     }
 
     ExportMeshes();
-
-    //for (unsigned int i = 0; i < pScene->mNumTextures; ++i) {}
 
     ExportScene();
 
@@ -280,10 +278,26 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture)
     texture->sampler->minFilter = SamplerMinFilter_Linear_Mipmap_Linear;
 }
 
+void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int slot)
+{
+    const char* key = (std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName).c_str();
+
+    mat->Get(key, tt, slot, prop);
+}
+
+void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, float& prop, const char* propName, aiTextureType tt, unsigned int slot)
+{
+    const char* key = (std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName).c_str();
+
+    mat->Get(key, tt, slot, prop);
+}
+
 void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt, unsigned int slot = 0)
 {
-    aiString tex;
+
     if (mat->GetTextureCount(tt) > 0) {
+        aiString tex;
+
         if (mat->Get(AI_MATKEY_TEXTURE(tt, slot), tex) == AI_SUCCESS) {
             std::string path = tex.C_Str();
 
@@ -326,6 +340,41 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
     }
 }
 
+void glTF2Exporter::GetMatTex(const aiMaterial* mat, TextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
+{
+    Ref<Texture>& texture = prop.texture;
+
+    GetMatTex(mat, texture, tt, slot);
+
+    if (texture) {
+        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+    }
+}
+
+void glTF2Exporter::GetMatTex(const aiMaterial* mat, NormalTextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
+{
+    Ref<Texture>& texture = prop.texture;
+
+    GetMatTex(mat, texture, tt, slot);
+
+    if (texture) {
+        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+        GetMatTexProp(mat, prop.scale, "scale", tt, slot);
+    }
+}
+
+void glTF2Exporter::GetMatTex(const aiMaterial* mat, OcclusionTextureInfo& prop, aiTextureType tt, unsigned int slot = 0)
+{
+    Ref<Texture>& texture = prop.texture;
+
+    GetMatTex(mat, texture, tt, slot);
+
+    if (texture) {
+        GetMatTexProp(mat, prop.texCoord, "texCoord", tt, slot);
+        GetMatTexProp(mat, prop.strength, "strength", tt, slot);
+    }
+}
+
 void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec4& prop, const char* propName, int type, int idx)
 {
     aiColor4D col;
@@ -344,6 +393,8 @@ void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* p
 
 void glTF2Exporter::ExportMaterials()
 {
+    bool& KHR_materials_pbrSpecularGlossiness = mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness;
+
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
@@ -356,20 +407,36 @@ void glTF2Exporter::ExportMaterials()
 
         Ref<Material> m = mAsset->materials.Create(name);
 
-        GetMatTex(mat, m->baseColorTexture.texture, aiTextureType_DIFFUSE);
-        GetMatTex(mat, m->metallicRoughnessTexture.texture, aiTextureType_UNKNOWN, 0);//get unknown slot
-        GetMatTex(mat, m->emissiveTexture.texture, aiTextureType_EMISSIVE);
-        GetMatTex(mat, m->normalTexture.texture, aiTextureType_NORMALS);
-        GetMatTex(mat, m->occlusionTexture.texture, aiTextureType_LIGHTMAP);
+        GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
+        GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, aiTextureType_UNKNOWN, 0);//get unknown slot
+        GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
 
-        GetMatColor(mat, m->baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+        GetMatTex(mat, m->normalTexture, aiTextureType_NORMALS);
+        GetMatTex(mat, m->occlusionTexture, aiTextureType_LIGHTMAP);
+        GetMatTex(mat, m->emissiveTexture, aiTextureType_EMISSIVE);
         GetMatColor(mat, m->emissiveFactor, AI_MATKEY_COLOR_EMISSIVE);
 
         mat->Get(AI_MATKEY_TWOSIDED, m->doubleSided);
         mat->Get("$mat.gltf.alphaCutoff", 0, 0, m->alphaCutoff);
-        mat->Get("$mat.gltf.metallicFactor", 0, 0, m->metallicFactor);
-        mat->Get("$mat.gltf.roughnessFactor", 0, 0, m->roughnessFactor);
+        mat->Get("$mat.gltf.metallicFactor", 0, 0, m->pbrMetallicRoughness.metallicFactor);
+        mat->Get("$mat.gltf.roughnessFactor", 0, 0, m->pbrMetallicRoughness.roughnessFactor);
         mat->Get("$mat.gltf.alphaMode", 0, 0, m->alphaMode);
+
+        bool hasPbrSpecularGlossiness;
+        mat->Get("$mat.gltf.pbrSpecularGlossiness.on", 0, 0, hasPbrSpecularGlossiness);
+
+        if (hasPbrSpecularGlossiness) {
+
+            if (!KHR_materials_pbrSpecularGlossiness) {
+                KHR_materials_pbrSpecularGlossiness = true;
+            }
+
+            GetMatColor(mat, m->pbrSpecularGlossiness.diffuseFactor, "$clr.diffuse", 0, 1);
+            GetMatColor(mat, m->pbrSpecularGlossiness.specularFactor, "$clr.specular", 0, 1);
+            mat->Get("$mat.gltf.glossinessFactor", 0, 0, m->pbrSpecularGlossiness.glossinessFactor);
+            GetMatTex(mat, m->pbrSpecularGlossiness.diffuseTexture, aiTextureType_DIFFUSE, 1);
+            GetMatTex(mat, m->pbrSpecularGlossiness.specularGlossinessTexture, aiTextureType_UNKNOWN, 1);
+        }
     }
 }
 
@@ -860,6 +927,20 @@ void glTF2Exporter::ExportMetadata()
         aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
 
     asset.generator = buffer;
+}
+
+void glTF2Exporter::ExportExtensions(const aiNode* n)
+{
+    aiMetadata* mMetaData = n->mMetaData;
+
+    if (mMetaData != nullptr) {
+        bool pbrSpecularGlossiness;
+
+        if (mMetaData->Get("extensionsUsed.pbrSpecularGlossiness", pbrSpecularGlossiness)) {
+            mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = pbrSpecularGlossiness;
+        }
+    }
+
 }
 
 inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond)

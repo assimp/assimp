@@ -692,15 +692,30 @@ namespace glTF2
         vec4 color;
     };*/
 
-    //! The material appearance of a primitive.
-    struct Material : public Object
+    struct PbrMetallicRoughness
     {
-        //PBR metallic roughness properties
         vec4 baseColorFactor;
         TextureInfo baseColorTexture;
         TextureInfo metallicRoughnessTexture;
         float metallicFactor;
         float roughnessFactor;
+    };
+
+    struct PbrSpecularGlossiness
+    {
+        bool on = false;
+        vec4 diffuseFactor;
+        vec3 specularFactor;
+        float glossinessFactor;
+        TextureInfo diffuseTexture;
+        TextureInfo specularGlossinessTexture;
+    };
+
+    //! The material appearance of a primitive.
+    struct Material : public Object
+    {
+        //PBR metallic roughness properties
+        PbrMetallicRoughness pbrMetallicRoughness;
 
         //other basic material properties
         NormalTextureInfo normalTexture;
@@ -712,11 +727,7 @@ namespace glTF2
         bool doubleSided;
 
         //extension: KHR_materials_pbrSpecularGlossiness
-        vec4 diffuseFactor;
-        vec3 specularFactor;
-        float glossinessFactor;
-        TextureInfo diffuseTexture;
-        TextureInfo specularGlossinessTexture;
+        PbrSpecularGlossiness pbrSpecularGlossiness;
 
         Material() { SetDefaults(); }
         void Read(Value& obj, Asset& r);

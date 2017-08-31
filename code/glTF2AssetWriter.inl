@@ -287,19 +287,19 @@ namespace glTF2 {
         Value pbrMetallicRoughness;
         pbrMetallicRoughness.SetObject();
         {
-            WriteTex(pbrMetallicRoughness, m.baseColorTexture, "baseColorTexture", w.mAl);
-            WriteTex(pbrMetallicRoughness, m.metallicRoughnessTexture, "metallicRoughnessTexture", w.mAl);
+            WriteTex(pbrMetallicRoughness, m.pbrMetallicRoughness.baseColorTexture, "baseColorTexture", w.mAl);
+            WriteTex(pbrMetallicRoughness, m.pbrMetallicRoughness.metallicRoughnessTexture, "metallicRoughnessTexture", w.mAl);
 
             //@TODO: define this as a constant?
             vec4 defaultEmissiveFactor = {1, 1, 1, 1};
-            WriteVec(pbrMetallicRoughness, m.baseColorFactor, "baseColorFactor", defaultEmissiveFactor, w.mAl);
+            WriteVec(pbrMetallicRoughness, m.pbrMetallicRoughness.baseColorFactor, "baseColorFactor", defaultEmissiveFactor, w.mAl);
 
-            if (m.metallicFactor != 1) {
-                WriteFloat(pbrMetallicRoughness, m.metallicFactor, "metallicFactor", w.mAl);
+            if (m.pbrMetallicRoughness.metallicFactor != 1) {
+                WriteFloat(pbrMetallicRoughness, m.pbrMetallicRoughness.metallicFactor, "metallicFactor", w.mAl);
             }
 
-            if (m.roughnessFactor != 1) {
-                WriteFloat(pbrMetallicRoughness, m.roughnessFactor, "roughnessFactor", w.mAl);
+            if (m.pbrMetallicRoughness.roughnessFactor != 1) {
+                WriteFloat(pbrMetallicRoughness, m.pbrMetallicRoughness.roughnessFactor, "roughnessFactor", w.mAl);
             }
         }
 
@@ -327,34 +327,36 @@ namespace glTF2 {
             obj.AddMember("doubleSided", m.doubleSided, w.mAl);
         }
 
-        Value pbrSpecularGlossiness;
-        pbrSpecularGlossiness.SetObject();
-        {
-            //pbrSpecularGlossiness
+        Value exts;
+        exts.SetObject();
 
-            vec4 defaultDiffuseFactor = {1, 1, 1, 1};
-            WriteVec(pbrSpecularGlossiness, m.diffuseFactor, "diffuseFactor", defaultDiffuseFactor, w.mAl);
+        if (m.pbrSpecularGlossiness.on) {
+            Value pbrSpecularGlossiness;
+            pbrSpecularGlossiness.SetObject();
+            {
+                //pbrSpecularGlossiness
 
-            vec3 defaultSpecularFactor = {1, 1, 1};
-            WriteVec(pbrSpecularGlossiness, m.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
+                vec4 defaultDiffuseFactor = {1, 1, 1, 1};
+                WriteVec(pbrSpecularGlossiness, m.pbrSpecularGlossiness.diffuseFactor, "diffuseFactor", defaultDiffuseFactor, w.mAl);
 
-            if (m.glossinessFactor != 1) {
-                WriteFloat(obj, m.glossinessFactor, "glossinessFactor", w.mAl);
+                vec3 defaultSpecularFactor = {1, 1, 1};
+                WriteVec(pbrSpecularGlossiness, m.pbrSpecularGlossiness.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
+
+                if (m.pbrSpecularGlossiness.glossinessFactor != 1) {
+                    WriteFloat(obj, m.pbrSpecularGlossiness.glossinessFactor, "glossinessFactor", w.mAl);
+                }
+
+                WriteTex(obj, m.pbrSpecularGlossiness.diffuseTexture, "diffuseTexture", w.mAl);
+                WriteTex(obj, m.pbrSpecularGlossiness.specularGlossinessTexture, "specularGlossinessTexture", w.mAl);
             }
 
-            WriteTex(obj, m.diffuseTexture, "diffuseTexture", w.mAl);
-            WriteTex(obj, m.specularGlossinessTexture, "specularGlossinessTexture", w.mAl);
+            if (!pbrSpecularGlossiness.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_pbrSpecularGlossiness", pbrSpecularGlossiness, w.mAl);
+            }
         }
 
-        Value ext;
-        ext.SetObject();
-
-        if (!pbrSpecularGlossiness.ObjectEmpty()) {
-            ext.AddMember("KHR_materials_pbrSpecularGlossiness", pbrSpecularGlossiness, w.mAl);
-        }
-
-        if (!ext.ObjectEmpty()) {
-            obj.AddMember("extensions", ext, w.mAl);
+        if (!exts.ObjectEmpty()) {
+            obj.AddMember("extensions", exts, w.mAl);
         }
     }
 
@@ -719,8 +721,10 @@ namespace glTF2 {
             //if (false)
             //    exts.PushBack(StringRef("KHR_binary_glTF"), mAl);
 
-            // This is used to export common materials with GLTF 2.
-            //exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);
+            // This is used to export pbrSpecularGlossiness materials with GLTF 2.
+            if (this->mAsset.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+                exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);
+            }
         }
 
         if (!exts.Empty())

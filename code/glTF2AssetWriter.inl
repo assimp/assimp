@@ -303,7 +303,7 @@ namespace glTF2 {
             }
         }
 
-        if (pbrMetallicRoughness.MemberCount() > 0) {
+        if (!pbrMetallicRoughness.ObjectEmpty()) {
             obj.AddMember("pbrMetallicRoughness", pbrMetallicRoughness, w.mAl);
         }
 

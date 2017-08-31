@@ -130,6 +130,7 @@ SET( TEST_SRCS
   unit/utVector3.cpp
   unit/utXImporterExporter.cpp
   unit/utD3MFImportExport.cpp
+  unit/utQ3DImportExport.cpp
   unit/utProfiler.cpp
 )
 

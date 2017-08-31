@@ -557,11 +557,6 @@ namespace glTF2 {
 
     }
 
-    inline void Write(Value& obj, Technique& b, AssetWriter& w)
-    {
-
-    }
-
     inline void Write(Value& obj, Texture& tex, AssetWriter& w)
     {
         if (tex.source) {
@@ -570,11 +565,6 @@ namespace glTF2 {
         if (tex.sampler) {
             obj.AddMember("sampler", tex.sampler->index, w.mAl);
         }
-    }
-
-    inline void Write(Value& obj, Light& b, AssetWriter& w)
-    {
-
     }
 
 

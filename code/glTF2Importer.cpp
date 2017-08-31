@@ -493,46 +493,6 @@ void glTF2Importer::ImportCameras(glTF2::Asset& r)
     }
 }
 
-void glTF2Importer::ImportLights(glTF2::Asset& r)
-{
-    if (!r.lights.Size()) return;
-
-    mScene->mNumLights = r.lights.Size();
-    mScene->mLights = new aiLight*[r.lights.Size()];
-
-    for (size_t i = 0; i < r.lights.Size(); ++i) {
-        Light& l = r.lights[i];
-
-        aiLight* ail = mScene->mLights[i] = new aiLight();
-
-        switch (l.type) {
-            case Light::Type_directional:
-                ail->mType = aiLightSource_DIRECTIONAL; break;
-
-            case Light::Type_spot:
-                ail->mType = aiLightSource_SPOT; break;
-
-            case Light::Type_ambient:
-                ail->mType = aiLightSource_AMBIENT; break;
-
-            default: // Light::Type_point
-                ail->mType = aiLightSource_POINT; break;
-        }
-
-        CopyValue(l.color, ail->mColorAmbient);
-        CopyValue(l.color, ail->mColorDiffuse);
-        CopyValue(l.color, ail->mColorSpecular);
-
-        ail->mAngleOuterCone = l.falloffAngle;
-        ail->mAngleInnerCone = l.falloffExponent; // TODO fix this, it does not look right at all
-
-        ail->mAttenuationConstant  = l.constantAttenuation;
-        ail->mAttenuationLinear    = l.linearAttenuation;
-        ail->mAttenuationQuadratic = l.quadraticAttenuation;
-    }
-}
-
-
 aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& meshOffsets, glTF2::Ref<glTF2::Node>& ptr)
 {
     Node& node = *ptr;
@@ -600,10 +560,6 @@ aiNode* ImportNode(aiScene* pScene, glTF2::Asset& r, std::vector<unsigned int>& 
 
     if (node.camera) {
         pScene->mCameras[node.camera.GetIndex()]->mName = ainode->mName;
-    }
-
-    if (node.light) {
-        pScene->mLights[node.light.GetIndex()]->mName = ainode->mName;
     }
 
     return ainode;
@@ -695,13 +651,14 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
     // Copy the data out
     //
 
+
+
     ImportEmbeddedTextures(asset);
     ImportMaterials(asset);
 
     ImportMeshes(asset);
 
     ImportCameras(asset);
-    ImportLights(asset);
 
     ImportNodes(asset);
 

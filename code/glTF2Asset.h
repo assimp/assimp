@@ -129,7 +129,6 @@ namespace glTF2
 
     struct BufferView; // here due to cross-reference
     struct Texture;
-    struct Light;
     struct Skin;
 
     // Vec/matrix types, as raw float arrays
@@ -835,7 +834,6 @@ namespace glTF2
         Nullable<vec3> scale;
 
         Ref<Camera> camera;
-        Ref<Light>  light;
 
         std::vector< Ref<Node> > skeletons;       //!< The ID of skeleton nodes. Each of which is the root of a node hierarchy.
         Ref<Skin>  skin;                          //!< The ID of the skin referenced by this node.
@@ -888,27 +886,6 @@ namespace glTF2
         std::string name;                     //!< The user-defined name of this object.
 
         Skin() {}
-        void Read(Value& obj, Asset& r);
-    };
-
-    struct Technique : public Object
-    {
-        struct Parameters
-        {
-
-        };
-
-        struct States
-        {
-
-        };
-
-        struct Functions
-        {
-
-        };
-
-        Technique() {}
         void Read(Value& obj, Asset& r);
     };
 

@@ -984,52 +984,6 @@ inline void Camera::Read(Value& obj, Asset& r)
     }
 }
 
-inline void Light::Read(Value& obj, Asset& r)
-{
-    SetDefaults();
-
-    if (Value* type = FindString(obj, "type")) {
-        const char* t = type->GetString();
-        if      (strcmp(t, "ambient") == 0)     this->type = Type_ambient;
-        else if (strcmp(t, "directional") == 0) this->type = Type_directional;
-        else if (strcmp(t, "point") == 0)       this->type = Type_point;
-        else if (strcmp(t, "spot") == 0)        this->type = Type_spot;
-
-        if (this->type != Type_undefined) {
-            if (Value* vals = FindString(obj, t)) {
-                ReadMember(*vals, "color", color);
-
-                ReadMember(*vals, "constantAttenuation", constantAttenuation);
-                ReadMember(*vals, "linearAttenuation", linearAttenuation);
-                ReadMember(*vals, "quadraticAttenuation", quadraticAttenuation);
-                ReadMember(*vals, "distance", distance);
-
-                ReadMember(*vals, "falloffAngle", falloffAngle);
-                ReadMember(*vals, "falloffExponent", falloffExponent);
-            }
-        }
-    }
-}
-
-inline void Light::SetDefaults()
-{
-    #ifndef M_PI
-        const float M_PI = 3.14159265358979323846f;
-    #endif
-
-    type = Type_undefined;
-
-    SetVector(color, 0.f, 0.f, 0.f, 1.f);
-
-    constantAttenuation = 0.f;
-    linearAttenuation = 1.f;
-    quadraticAttenuation = 1.f;
-    distance = 0.f;
-
-    falloffAngle = static_cast<float>(M_PI / 2.f);
-    falloffExponent = 0.f;
-}
-
 inline void Node::Read(Value& obj, Asset& r)
 {
 

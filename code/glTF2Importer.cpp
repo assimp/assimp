@@ -205,12 +205,6 @@ inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset&
     }
 }
 
-//import textures that are only supported in pbr contexts
-inline void SetMaterialPBRTextureProperty(std::vector<int>& embeddedTexIdxs, Asset& r, glTF2::TextureInfo prop, aiMaterial* mat, unsigned int texSlot)
-{
-    return SetMaterialTextureProperty(embeddedTexIdxs, r, prop, mat, aiTextureType_UNKNOWN, texSlot);
-}
-
 inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset& r, glTF2::TextureInfo prop, aiMaterial* mat, aiTextureType texType)
 {
     return SetMaterialTextureProperty(embeddedTexIdxs, r, prop, mat, texType, -1);
@@ -231,7 +225,7 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
 
         SetMaterialColorProperty(r, mat.baseColorFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.baseColorTexture, aimat, aiTextureType_DIFFUSE);
-        SetMaterialPBRTextureProperty(embeddedTexIdxs, r, mat.metallicRoughnessTexture, aimat, 0);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.metallicRoughnessTexture, aimat, aiTextureType_UNKNOWN, 0);
         aimat->AddProperty(&mat.metallicFactor, 1, "$mat.gltf.metallicFactor");
         aimat->AddProperty(&mat.roughnessFactor, 1, "$mat.gltf.roughnessFactor");
 

@@ -757,12 +757,12 @@ inline void Material::Read(Value& material, Asset& r)
 {
     SetDefaults();
 
-    if (Value* values = FindObject(material, "pbrMetallicRoughness")) {
-        ReadMember(*values, "baseColorFactor", this->baseColorFactor);
-        ReadTextureProperty(r, *values, "baseColorTexture", this->baseColorTexture);
-        ReadTextureProperty(r, *values, "metallicRoughnessTexture", this->metallicRoughnessTexture);
-        ReadMember(*values, "metallicFactor", this->metallicFactor);
-        ReadMember(*values, "roughnessFactor", this->roughnessFactor);
+    if (Value* pbrMetallicRoughness = FindObject(material, "pbrMetallicRoughness")) {
+        ReadMember(*pbrMetallicRoughness, "baseColorFactor", this->baseColorFactor);
+        ReadTextureProperty(r, *pbrMetallicRoughness, "baseColorTexture", this->baseColorTexture);
+        ReadTextureProperty(r, *pbrMetallicRoughness, "metallicRoughnessTexture", this->metallicRoughnessTexture);
+        ReadMember(*pbrMetallicRoughness, "metallicFactor", this->metallicFactor);
+        ReadMember(*pbrMetallicRoughness, "roughnessFactor", this->roughnessFactor);
     }
 
     ReadTextureProperty(r, material, "normalTexture", this->normalTexture);
@@ -774,30 +774,17 @@ inline void Material::Read(Value& material, Asset& r)
     ReadMember(material, "alphaMode", this->alphaMode);
     ReadMember(material, "alphaCutoff", this->alphaCutoff);
 
-    /* if (Value* extensions = FindObject(material, "extensions")) {
-        if (r.extensionsUsed.KHR_materials_common) {
-            if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
-                if (Value* tnq = FindString(*ext, "technique")) {
-                    const char* t = tnq->GetString();
-                    if      (strcmp(t, "BLINN") == 0)    technique = Technique_BLINN;
-                    else if (strcmp(t, "PHONG") == 0)    technique = Technique_PHONG;
-                    else if (strcmp(t, "LAMBERT") == 0)  technique = Technique_LAMBERT;
-                    else if (strcmp(t, "CONSTANT") == 0) technique = Technique_CONSTANT;
-                }
-
-                if (Value* values = FindObject(*ext, "values")) {
-                    ReadTextureProperty(r, *values, "ambient", this->ambient);
-                    ReadTextureProperty(r, *values, "diffuse", this->diffuse);
-                    ReadTextureProperty(r, *values, "specular", this->specular);
-
-                    ReadMember(*values, "doubleSided", doubleSided);
-                    ReadMember(*values, "transparent", transparent);
-                    ReadMember(*values, "transparency", transparency);
-                    ReadMember(*values, "shininess", shininess);
-                }
+    if (Value* extensions = FindObject(material, "extensions")) {
+        if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+            if (Value* pbrSpecularGlossiness = FindObject(*extensions, "KHR_materials_pbrSpecularGlossiness")) {
+                ReadMember(*pbrSpecularGlossiness, "diffuseFactor", this->diffuseFactor);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "diffuseTexture", this->diffuseTexture);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "specularGlossinessTexture", this->specularGlossinessTexture);
+                ReadMember(*pbrSpecularGlossiness, "specularFactor", this->specularFactor);
+                ReadMember(*pbrSpecularGlossiness, "glossinessFactor", this->glossinessFactor);
             }
         }
-    } */
+    }
 }
 
 namespace {
@@ -820,7 +807,10 @@ inline void Material::SetDefaults()
     alphaCutoff = 0.5;
     doubleSided = false;
 
-    technique = Technique_undefined;
+    //pbrSpecularGlossiness properties
+    SetVector(diffuseFactor, 1, 1, 1, 1);
+    SetVector(specularFactor, 1, 1, 1);
+    glossinessFactor = 1.0;
 }
 
 namespace {
@@ -1083,20 +1073,6 @@ inline void Node::Read(Value& obj, Asset& r)
         if (this->camera)
             this->camera->id = this->id;
     }
-
-    // TODO load "skeletons", "skin", "jointName"
-
-    /*if (Value* extensions = FindObject(obj, "extensions")) {
-        if (r.extensionsUsed.KHR_materials_common) {
-
-            if (Value* ext = FindObject(*extensions, "KHR_materials_common")) {
-                if (Value* light = FindUInt(*ext, "light")) {
-                    this->light = r.lights.Retrieve(light->GetUint());
-                }
-            }
-
-        }
-    }*/
 }
 
 inline void Scene::Read(Value& obj, Asset& r)
@@ -1293,7 +1269,7 @@ inline void Asset::ReadExtensionsUsed(Document& doc)
         if (exts.find(#EXT) != exts.end()) extensionsUsed.EXT = true;
 
     CHECK_EXT(KHR_binary_glTF);
-    CHECK_EXT(KHR_materials_common);
+    CHECK_EXT(KHR_materials_pbrSpecularGlossiness);
 
     #undef CHECK_EXT
 }

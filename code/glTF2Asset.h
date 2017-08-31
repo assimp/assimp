@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * glTF Extensions Support:
  *   KHR_binary_glTF: full
- *   KHR_materials_common: full
  */
 #ifndef GLTF2ASSET_H_INC
 #define GLTF2ASSET_H_INC
@@ -697,19 +696,6 @@ namespace glTF2
     //! The material appearance of a primitive.
     struct Material : public Object
     {
-        //Ref<Sampler> source; //!< The ID of the technique.
-        //std::gltf_unordered_map<std::string, std::string> values; //!< A dictionary object of parameter values.
-
-        //! Techniques defined by KHR_materials_common
-        enum Technique
-        {
-            Technique_undefined = 0,
-            Technique_BLINN,
-            Technique_PHONG,
-            Technique_LAMBERT,
-            Technique_CONSTANT
-        };
-
         //PBR metallic roughness properties
         vec4 baseColorFactor;
         TextureInfo baseColorTexture;
@@ -726,13 +712,12 @@ namespace glTF2
         float alphaCutoff;
         bool doubleSided;
 
-        //fallback material properties (compatible with non-pbr defintions)
-        /*FallbackTexProperty diffuse;
-        FallbackTexProperty emission;
-        FallbackTexProperty specular;
-        Ref<Texture> normal;*/
-
-        Technique technique;
+        //extension: KHR_materials_pbrSpecularGlossiness
+        vec4 diffuseFactor;
+        vec3 specularFactor;
+        float glossinessFactor;
+        TextureInfo diffuseTexture;
+        TextureInfo specularGlossinessTexture;
 
         Material() { SetDefaults(); }
         void Read(Value& obj, Asset& r);
@@ -943,35 +928,6 @@ namespace glTF2
         void Read(Value& obj, Asset& r);
     };
 
-
-    //! A light (from KHR_materials_common extension)
-    struct Light : public Object
-    {
-        enum Type
-        {
-            Type_undefined,
-            Type_ambient,
-            Type_directional,
-            Type_point,
-            Type_spot
-        };
-
-        Type type;
-
-        vec4 color;
-        float distance;
-        float constantAttenuation;
-        float linearAttenuation;
-        float quadraticAttenuation;
-        float falloffAngle;
-        float falloffExponent;
-
-        Light() {}
-        void Read(Value& obj, Asset& r);
-
-        void SetDefaults();
-    };
-
     struct Animation : public Object
     {
         struct AnimSampler {
@@ -1152,7 +1108,7 @@ namespace glTF2
         struct Extensions
         {
             bool KHR_binary_glTF;
-            bool KHR_materials_common;
+            bool KHR_materials_pbrSpecularGlossiness;
 
         } extensionsUsed;
 
@@ -1170,15 +1126,10 @@ namespace glTF2
         LazyDict<Material>    materials;
         LazyDict<Mesh>        meshes;
         LazyDict<Node>        nodes;
-        //LazyDict<Program>   programs;
         LazyDict<Sampler>     samplers;
         LazyDict<Scene>       scenes;
-        //LazyDict<Shader>    shaders;
         LazyDict<Skin>        skins;
-        //LazyDict<Technique> techniques;
         LazyDict<Texture>     textures;
-
-        LazyDict<Light>       lights; // KHR_materials_common ext
 
         Ref<Scene> scene;
 
@@ -1195,14 +1146,10 @@ namespace glTF2
             , materials     (*this, "materials")
             , meshes        (*this, "meshes")
             , nodes         (*this, "nodes")
-            //, programs    (*this, "programs")
             , samplers      (*this, "samplers")
             , scenes        (*this, "scenes")
-            //, shaders     (*this, "shaders")
-            , skins       (*this, "skins")
-            //, techniques  (*this, "techniques")
+            , skins         (*this, "skins")
             , textures      (*this, "textures")
-            , lights        (*this, "lights", "KHR_materials_common")
         {
             memset(&extensionsUsed, 0, sizeof(extensionsUsed));
         }

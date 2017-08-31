@@ -327,23 +327,35 @@ namespace glTF2 {
             obj.AddMember("doubleSided", m.doubleSided, w.mAl);
         }
 
-        /*Value v;
-        v.SetObject();
+        Value pbrSpecularGlossiness;
+        pbrSpecularGlossiness.SetObject();
         {
-            if (m.transparent && !m.diffuse.texture) {
-                m.diffuse.color[3] = m.transparency;
+            //pbrSpecularGlossiness
+
+            vec4 defaultDiffuseFactor = {1, 1, 1, 1};
+            WriteVec(pbrSpecularGlossiness, m.diffuseFactor, "diffuseFactor", defaultDiffuseFactor, w.mAl);
+
+            vec3 defaultSpecularFactor = {1, 1, 1};
+            WriteVec(pbrSpecularGlossiness, m.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
+
+            if (m.glossinessFactor != 1) {
+                WriteFloat(obj, m.glossinessFactor, "glossinessFactor", w.mAl);
             }
-            WriteVecOrTex(v, m.ambient, m.ambient.texture ? "ambientTexture" : "ambientFactor", w.mAl);
-            WriteVecOrTex(v, m.diffuse, m.diffuse.texture ? "diffuseTexture" : "diffuseFactor", w.mAl);
-            WriteVecOrTex(v, m.specular, m.specular.texture ? "specularTexture" : "specularFactor", w.mAl);
-            WriteVecOrTex(v, m.emission, m.emission.texture ? "emissionTexture" : "emissionFactor", w.mAl);
-            v.AddMember("shininessFactor", m.shininess, w.mAl);
+
+            WriteTex(obj, m.diffuseTexture, "diffuseTexture", w.mAl);
+            WriteTex(obj, m.specularGlossinessTexture, "specularGlossinessTexture", w.mAl);
         }
-        v.AddMember("type", "commonPhong", w.mAl);
+
         Value ext;
         ext.SetObject();
-        ext.AddMember("KHR_materials_common", v, w.mAl);
-        obj.AddMember("extensions", ext, w.mAl);*/
+
+        if (!pbrSpecularGlossiness.ObjectEmpty()) {
+            ext.AddMember("KHR_materials_pbrSpecularGlossiness", pbrSpecularGlossiness, w.mAl);
+        }
+
+        if (!ext.ObjectEmpty()) {
+            obj.AddMember("extensions", ext, w.mAl);
+        }
     }
 
     namespace {
@@ -714,11 +726,11 @@ namespace glTF2 {
         Value exts;
         exts.SetArray();
         {
-            if (false)
-                exts.PushBack(StringRef("KHR_binary_glTF"), mAl);
+            //if (false)
+            //    exts.PushBack(StringRef("KHR_binary_glTF"), mAl);
 
             // This is used to export common materials with GLTF 2.
-            //exts.PushBack(StringRef("KHR_materials_common"), mAl);
+            //exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);
         }
 
         if (!exts.Empty())

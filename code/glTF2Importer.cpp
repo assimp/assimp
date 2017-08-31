@@ -237,6 +237,13 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
         aimat->AddProperty(&mat.doubleSided, 1, AI_MATKEY_TWOSIDED);
         aimat->AddProperty(&mat.alphaMode, 1, "$mat.gltf.alphaMode");
         aimat->AddProperty(&mat.alphaCutoff, 1, "$mat.gltf.alphaCutoff");
+
+        //pbrSpecularGlossiness
+        SetMaterialColorProperty(r, mat.diffuseFactor, aimat, "$clr.diffuse", 0, 1);
+        SetMaterialColorProperty(r, mat.specularFactor, aimat, "$clr.specular", 0, 1);
+        aimat->AddProperty(&mat.glossinessFactor, 1, "$mat.gltf.glossinessFactor");
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.diffuseTexture, aimat, aiTextureType_DIFFUSE, 1);
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.specularGlossinessTexture, aimat, aiTextureType_UNKNOWN, 1);
     }
 }
 

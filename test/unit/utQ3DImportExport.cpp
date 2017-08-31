@@ -49,9 +49,9 @@ using namespace Assimp;
 
 class utQ3DImportExport : public AbstractImportExportBase {
 public:
-    bool importerTest() override {
+    virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/Q3D/earth.q3o", 0);
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/Q3D/earth.q3o", 0 );
         return nullptr != scene;
     }
 };

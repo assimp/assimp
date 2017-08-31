@@ -57,5 +57,5 @@ public:
 };
 
 TEST_F(utQ3DImportExport, importTest) {
-    EXPECT_TRUE(importerTest());
+    EXPECT_TRUE( importerTest() );
 }

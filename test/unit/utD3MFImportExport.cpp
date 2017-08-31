@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class utD3MFImporterExporter : public AbstractImportExportBase {
 public:
-    bool importerTest() override {
+    virtual bool importerTest() {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(ASSIMP_TEST_MODELS_DIR "/3MF/box.3mf", 0);
         EXPECT_EQ( 1u, scene->mNumMeshes );

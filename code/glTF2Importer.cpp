@@ -288,38 +288,6 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
     for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
         Mesh& mesh = r.meshes[m];
 
-		// Check if mesh extensions is used
-		if(mesh.Extension.size() > 0)
-		{
-			for(Mesh::SExtension* cur_ext : mesh.Extension)
-			{
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-				if(cur_ext->Type == Mesh::SExtension::EType::Compression_Open3DGC)
-				{
-					// Limitations for meshes when using Open3DGC-compression.
-					// It's a current limitation of sp... Specification have not this part still - about mesh compression. Why only one primitive?
-					// Because glTF is very flexibly. But in fact it ugly flexible. Every primitive can has own set of accessors and accessors can
-					// point to a-a-a-a-any part of buffer (through bufferview of course) and even to another buffer. We know that "Open3DGC-compression"
-					// is applicable only to part of buffer. As we can't guaranty continuity of the data for decoder, we will limit quantity of primitives.
-					// Yes indices, coordinates etc. still can br stored in different buffers, but with current specification it's a exporter problem.
-					// Also primitive can has only one of "POSITION", "NORMAL" and less then "AI_MAX_NUMBER_OF_TEXTURECOORDS" of "TEXCOORD". All accessor
-					// of primitive must point to one continuous region of the buffer.
-					if(mesh.primitives.size() > 2) throw DeadlyImportError("GLTF: When using Open3DGC compression then only one primitive per mesh are allowed.");
-
-					Mesh::SCompression_Open3DGC* o3dgc_ext = (Mesh::SCompression_Open3DGC*)cur_ext;
-					Ref<Buffer> buf = r.buffers.Get(o3dgc_ext->Buffer);
-
-					buf->EncodedRegion_SetCurrent(mesh.id);
-				}
-				else
-#endif
-				{
-					throw DeadlyImportError("GLTF: Can not import mesh: unknown mesh extension (code: \"" + to_string(cur_ext->Type) +
-											"\"), only Open3DGC is supported.");
-				}
-			}
-		}// if(mesh.Extension.size() > 0)
-
 		meshOffsets.push_back(k);
         k += unsigned(mesh.primitives.size());
 

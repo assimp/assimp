@@ -44,11 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
 
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-	// Header files, Open3DGC.
-#	include <Open3DGC/o3dgcSC3DMCDecoder.h>
-#endif
-
 using namespace Assimp;
 
 namespace glTF2 {
@@ -892,75 +887,6 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
             }
         }
     }
-
-	/****************** Mesh extensions ******************/
-	Value* json_extensions = FindObject(pJSON_Object, "extensions");
-
-	if(json_extensions == nullptr) goto mr_skip_extensions;
-
-	for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); it_memb++)
-	{
-#ifdef ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC
-        if(it_memb->name.GetString() == std::string("Open3DGC-compression"))
-		{
-			// Search for compressed data.
-			// Compressed data contain description of part of "buffer" which is encoded. This part must be decoded and
-			// new data will replace old encoded part by request. In fact \"compressedData\" is kind of "accessor" structure.
-			Value* comp_data = FindObject(it_memb->value, "compressedData");
-
-			if(comp_data == nullptr) throw DeadlyImportError("GLTF: \"Open3DGC-compression\" must has \"compressedData\".");
-
-			DefaultLogger::get()->info("GLTF: Decompressing Open3DGC data.");
-
-			/************** Read data from JSON-document **************/
-			#define MESH_READ_COMPRESSEDDATA_MEMBER(pFieldName, pOut) \
-				if(!ReadMember(*comp_data, pFieldName, pOut)) \
-				{ \
-					throw DeadlyImportError(std::string("GLTF: \"compressedData\" must has \"") + pFieldName + "\"."); \
-				}
-
-			const char* mode_str;
-			const char* type_str;
-			ComponentType component_type;
-			SCompression_Open3DGC* ext_o3dgc = new SCompression_Open3DGC;
-
-			MESH_READ_COMPRESSEDDATA_MEMBER("buffer", ext_o3dgc->Buffer);
-			MESH_READ_COMPRESSEDDATA_MEMBER("byteOffset", ext_o3dgc->Offset);
-			MESH_READ_COMPRESSEDDATA_MEMBER("componentType", component_type);
-			MESH_READ_COMPRESSEDDATA_MEMBER("type", type_str);
-			MESH_READ_COMPRESSEDDATA_MEMBER("count", ext_o3dgc->Count);
-			MESH_READ_COMPRESSEDDATA_MEMBER("mode", mode_str);
-			MESH_READ_COMPRESSEDDATA_MEMBER("indicesCount", ext_o3dgc->IndicesCount);
-			MESH_READ_COMPRESSEDDATA_MEMBER("verticesCount", ext_o3dgc->VerticesCount);
-
-			#undef MESH_READ_COMPRESSEDDATA_MEMBER
-
-			// Check some values
-			if(strcmp(type_str, "SCALAR")) throw DeadlyImportError("GLTF: only \"SCALAR\" type is supported for compressed data.");
-			if(component_type != ComponentType_UNSIGNED_BYTE) throw DeadlyImportError("GLTF: only \"UNSIGNED_BYTE\" component type is supported for compressed data.");
-
-			// Set read/write data mode.
-			if(strcmp(mode_str, "binary") == 0)
-				ext_o3dgc->Binary = true;
-			else if(strcmp(mode_str, "ascii") == 0)
-				ext_o3dgc->Binary = false;
-			else
-				throw DeadlyImportError(std::string("GLTF: for compressed data supported modes is: \"ascii\", \"binary\". Not the: \"") + mode_str + "\".");
-
-			/************************ Decoding ************************/
-			Decode_O3DGC(*ext_o3dgc, pAsset_Root);
-			Extension.push_back(ext_o3dgc);// store info in mesh extensions list.
-		}// if(it_memb->name.GetString() == "Open3DGC-compression")
-		else
-#endif
-		{
-			throw DeadlyImportError(std::string("GLTF: Unknown mesh extension: \"") + it_memb->name.GetString() + "\".");
-		}
-	}// for(Value::MemberIterator it_memb = json_extensions->MemberBegin(); it_memb != json_extensions->MemberEnd(); json_extensions++)
-
-mr_skip_extensions:
-
-	return;// After label some operators must be present.
 }
 
 inline void Camera::Read(Value& obj, Asset& r)

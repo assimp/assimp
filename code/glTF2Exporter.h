@@ -118,7 +118,6 @@ namespace Assimp
         void GetMatColor(const aiMaterial* mat, glTF2::vec4& prop, const char* propName, int type, int idx);
         void GetMatColor(const aiMaterial* mat, glTF2::vec3& prop, const char* propName, int type, int idx);
         void ExportMetadata();
-        void ExportExtensions(const aiNode* n);
         void ExportMaterials();
         void ExportMeshes();
         unsigned int ExportNodeHierarchy(const aiNode* n);

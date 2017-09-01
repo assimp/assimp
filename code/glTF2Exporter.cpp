@@ -107,10 +107,6 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     ExportMetadata();
 
-    if (mScene->mRootNode) {
-        ExportExtensions(mScene->mRootNode);
-    }
-
     ExportMaterials();
 
     if (mScene->mRootNode) {
@@ -787,20 +783,6 @@ void glTF2Exporter::ExportMetadata()
         aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
 
     asset.generator = buffer;
-}
-
-void glTF2Exporter::ExportExtensions(const aiNode* n)
-{
-    aiMetadata* mMetaData = n->mMetaData;
-
-    if (mMetaData != nullptr) {
-        bool pbrSpecularGlossiness;
-
-        if (mMetaData->Get("extensionsUsed.pbrSpecularGlossiness", pbrSpecularGlossiness)) {
-            mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = pbrSpecularGlossiness;
-        }
-    }
-
 }
 
 inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animation>& animRef, Ref<Buffer>& buffer, const aiNodeAnim* nodeChannel, float ticksPerSecond)

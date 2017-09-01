@@ -546,13 +546,6 @@ void glTF2Importer::ImportNodes(glTF2::Asset& r)
     //if (!mScene->mRootNode) {
     //  mScene->mRootNode = new aiNode("EMPTY");
     //}
-
-    //initialize mMetaData;
-    aiMetadata* mMetaData = new aiMetadata();
-
-    //store used glTF extensions on the root node, for a lack of a better place.
-    mMetaData->Add("extensionsUsed.pbrSpecularGlossiness", r.extensionsUsed.KHR_materials_pbrSpecularGlossiness);
-    mScene->mRootNode->mMetaData = mMetaData;
 }
 
 void glTF2Importer::ImportEmbeddedTextures(glTF2::Asset& r)

@@ -767,7 +767,7 @@ namespace glTF2
     struct Node : public Object
     {
         std::vector< Ref<Node> > children;
-        std::vector< Ref<Mesh> > meshes;
+        Ref<Mesh> mesh;
 
         Nullable<mat4> matrix;
         Nullable<vec3> translation;

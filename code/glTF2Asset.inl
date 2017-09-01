@@ -1,4 +1,4 @@
-﻿/*
+/*
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
@@ -194,14 +194,6 @@ inline void LazyDict<T>::DetachFromDocument()
 }
 
 template<class T>
-Ref<T> LazyDict<T>::Get(unsigned int i)
-{
-
-    return Ref<T>(mObjs, i);
-
-}
-
-template<class T>
 Ref<T> LazyDict<T>::Retrieve(unsigned int i)
 {
 
@@ -235,11 +227,33 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
 }
 
 template<class T>
+Ref<T> LazyDict<T>::Get(unsigned int i)
+{
+
+    return Ref<T>(mObjs, i);
+
+}
+
+template<class T>
+Ref<T> LazyDict<T>::Get(const char* id)
+{
+    id = T::TranslateId(mAsset, id);
+
+    typename IdDict::iterator it = mObjsById.find(id);
+    if (it != mObjsById.end()) { // already created?
+        return Ref<T>(mObjs, it->second);
+    }
+
+    throw std::out_of_range("id \"" + std::string(id) + "\" Doesn't exist");
+}
+
+template<class T>
 Ref<T> LazyDict<T>::Add(T* obj)
 {
     unsigned int idx = unsigned(mObjs.size());
     mObjs.push_back(obj);
     mObjsByOIndex[obj->oIndex] = idx;
+    mObjsById[obj->id] = idx;
     mAsset.mUsedIds[obj->id] = true;
     return Ref<T>(mObjs, idx);
 }
@@ -252,8 +266,10 @@ Ref<T> LazyDict<T>::Create(const char* id)
         throw DeadlyImportError("GLTF: two objects with the same ID exist");
     }
     T* inst = new T();
+    unsigned int idx = unsigned(mObjs.size());
     inst->id = id;
-    inst->index = static_cast<int>(mObjs.size());
+    inst->index = idx;
+    inst->oIndex = idx;
     return Add(inst);
 }
 

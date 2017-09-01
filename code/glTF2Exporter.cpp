@@ -121,7 +121,7 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     ExportScene();
 
-    //ExportAnimations();
+    ExportAnimations();
 
     AssetWriter writer(*mAsset);
 
@@ -481,7 +481,7 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
     return parentNodeRef;
 }
 
-/*void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef, Ref<Skin>& skinRef, std::vector<aiMatrix4x4>& inverseBindMatricesData)
+void ExportSkin(Asset& mAsset, const aiMesh* aimesh, Ref<Mesh>& meshRef, Ref<Buffer>& bufferRef, Ref<Skin>& skinRef, std::vector<aiMatrix4x4>& inverseBindMatricesData)
 {
     if (aimesh->mNumBones < 1) {
         return;
@@ -558,7 +558,7 @@ Ref<Node> FindSkeletonRootJoint(Ref<Skin>& skinRef)
     delete[] jointsPerVertex;
     delete[] vertexWeightData;
     delete[] vertexJointData;
-}*/
+}
 
 void glTF2Exporter::ExportMeshes()
 {
@@ -663,9 +663,9 @@ void glTF2Exporter::ExportMeshes()
         }
 
         /*************** Skins ****************/
-        /*if(aim->HasBones()) {
+        if(aim->HasBones()) {
             ExportSkin(*mAsset, aim, m, b, skinRef, inverseBindMatricesData);
-        }*/
+        }
     }
 
     //----------------------------------------
@@ -892,7 +892,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
     }
 }
 
-/* void glTF2Exporter::ExportAnimations()
+void glTF2Exporter::ExportAnimations()
 {
     Ref<Buffer> bufferRef = mAsset->buffers.Get(unsigned (0));
 
@@ -961,7 +961,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
         // }
 
     } // End: for-loop mNumAnimations
-} */
+}
 
 
 #endif // ASSIMP_BUILD_NO_GLTF_EXPORTER

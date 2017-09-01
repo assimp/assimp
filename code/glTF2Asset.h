@@ -928,9 +928,11 @@ namespace glTF2
         friend class AssetWriter;
 
         typedef typename std::gltf_unordered_map< unsigned int, unsigned int > Dict;
+        typedef typename std::gltf_unordered_map< std::string, unsigned int > IdDict;
 
         std::vector<T*>     mObjs;         //! The read objects
         Dict                mObjsByOIndex; //! The read objects accessible by original index
+        IdDict              mObjsById;     //! The read objects accessible by id
         const char*         mDictId;       //! ID of the dictionary object
         const char*         mExtId;        //! ID of the extension defining the dictionary
         Value*              mDict;         //! JSON dictionary object
@@ -951,6 +953,7 @@ namespace glTF2
         Ref<T> Retrieve(unsigned int i);
 
         Ref<T> Get(unsigned int i);
+        Ref<T> Get(const char* id);
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)

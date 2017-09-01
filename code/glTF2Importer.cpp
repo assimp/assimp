@@ -136,10 +136,10 @@ static void CopyValue(const glTF2::vec4& v, aiColor4D& out)
     out.r = v[0]; out.g = v[1]; out.b = v[2]; out.a = v[3];
 }
 
-static void CopyValue(const glTF2::vec4& v, aiColor3D& out)
+/*static void CopyValue(const glTF2::vec4& v, aiColor3D& out)
 {
     out.r = v[0]; out.g = v[1]; out.b = v[2];
-}
+}*/
 
 static void CopyValue(const glTF2::vec3& v, aiColor4D& out)
 {
@@ -173,14 +173,9 @@ inline void SetMaterialColorProperty(Asset& r, vec4& prop, aiMaterial* mat, cons
 
 inline void SetMaterialColorProperty(Asset& r, vec3& prop, aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx)
 {
-    vec4 prop4;
-
-    prop4[0] = prop[0];
-    prop4[1] = prop[1];
-    prop4[2] = prop[2];
-    prop4[3] = 1;
-
-    return SetMaterialColorProperty(r, prop4, mat, pKey, type, idx);
+    aiColor4D col;
+    CopyValue(prop, col);
+    mat->AddProperty(&col, 1, pKey, type, idx);
 }
 
 inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset& r, glTF2::TextureInfo prop, aiMaterial* mat, aiTextureType texType, unsigned int texSlot = 0)

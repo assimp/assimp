@@ -346,8 +346,8 @@ namespace glTF2 {
                     WriteFloat(obj, m.pbrSpecularGlossiness.glossinessFactor, "glossinessFactor", w.mAl);
                 }
 
-                WriteTex(obj, m.pbrSpecularGlossiness.diffuseTexture, "diffuseTexture", w.mAl);
-                WriteTex(obj, m.pbrSpecularGlossiness.specularGlossinessTexture, "specularGlossinessTexture", w.mAl);
+                WriteTex(pbrSpecularGlossiness, m.pbrSpecularGlossiness.diffuseTexture, "diffuseTexture", w.mAl);
+                WriteTex(pbrSpecularGlossiness, m.pbrSpecularGlossiness.specularGlossinessTexture, "specularGlossinessTexture", w.mAl);
             }
 
             if (!pbrSpecularGlossiness.ObjectEmpty()) {

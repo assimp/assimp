@@ -467,17 +467,24 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Sampler& b, AssetWriter& w)
     {
-        if (b.wrapS) {
-            obj.AddMember("wrapS", b.wrapS, w.mAl);
+        if (!b.name.empty()) {
+            obj.AddMember("name", b.name, w.mAl);
         }
-        if (b.wrapT) {
-            obj.AddMember("wrapT", b.wrapT, w.mAl);
+
+        if (b.wrapS != SamplerWrap::UNSET && b.wrapS != SamplerWrap::Repeat) {
+            obj.AddMember("wrapS", static_cast<unsigned int>(b.wrapS), w.mAl);
         }
-        if (b.magFilter) {
-            obj.AddMember("magFilter", b.magFilter, w.mAl);
+
+        if (b.wrapT != SamplerWrap::UNSET && b.wrapT != SamplerWrap::Repeat) {
+            obj.AddMember("wrapT", static_cast<unsigned int>(b.wrapT), w.mAl);
         }
-        if (b.minFilter) {
-            obj.AddMember("minFilter", b.minFilter, w.mAl);
+
+        if (b.magFilter != SamplerMagFilter::UNSET) {
+            obj.AddMember("magFilter", static_cast<unsigned int>(b.magFilter), w.mAl);
+        }
+
+        if (b.minFilter != SamplerMinFilter::UNSET) {
+            obj.AddMember("minFilter", static_cast<unsigned int>(b.minFilter), w.mAl);
         }
     }
 

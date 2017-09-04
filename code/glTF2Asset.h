@@ -242,15 +242,17 @@ namespace glTF2
     };
 
     //! Values for the Sampler::magFilter field
-    enum SamplerMagFilter
+    enum class SamplerMagFilter: unsigned int
     {
+        UNSET = 0,
         SamplerMagFilter_Nearest = 9728,
         SamplerMagFilter_Linear = 9729
     };
 
     //! Values for the Sampler::minFilter field
-    enum SamplerMinFilter
+    enum class SamplerMinFilter: unsigned int
     {
+        UNSET = 0,
         SamplerMinFilter_Nearest = 9728,
         SamplerMinFilter_Linear = 9729,
         SamplerMinFilter_Nearest_Mipmap_Nearest = 9984,
@@ -260,11 +262,12 @@ namespace glTF2
     };
 
     //! Values for the Sampler::wrapS and Sampler::wrapT field
-    enum SamplerWrap
+    enum class SamplerWrap: unsigned int
     {
-        SamplerWrap_Clamp_To_Edge = 33071,
-        SamplerWrap_Mirrored_Repeat = 33648,
-        SamplerWrap_Repeat = 10497
+        UNSET = 0,
+        Clamp_To_Edge = 33071,
+        Mirrored_Repeat = 33648,
+        Repeat = 10497
     };
 
     //! Values for the Texture::format and Texture::internalFormat fields
@@ -795,10 +798,10 @@ namespace glTF2
 
     struct Sampler : public Object
     {
-        SamplerMagFilter magFilter; //!< The texture magnification filter. (required)
-        SamplerMinFilter minFilter; //!< The texture minification filter. (required)
-        SamplerWrap wrapS;          //!< The texture wrapping in the S direction. (required)
-        SamplerWrap wrapT;          //!< The texture wrapping in the T direction. (required)
+        SamplerMagFilter magFilter; //!< The texture magnification filter.
+        SamplerMinFilter minFilter; //!< The texture minification filter.
+        SamplerWrap wrapS;          //!< The texture wrapping in the S direction.
+        SamplerWrap wrapT;          //!< The texture wrapping in the T direction.
 
         Sampler() { SetDefaults(); }
         void Read(Value& obj, Asset& r);
@@ -954,6 +957,8 @@ namespace glTF2
 
         Ref<T> Get(unsigned int i);
         Ref<T> Get(const char* id);
+
+        bool Has(const char* id);
 
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)

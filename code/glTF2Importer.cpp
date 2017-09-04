@@ -194,6 +194,27 @@ inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset&
 
         const char *texCoordName = (std::string(_AI_MATKEY_TEXTURE_BASE) + ".texCoord").c_str();
         mat->AddProperty(&prop.texCoord, 1, texCoordName, texType, texSlot);
+
+        if (prop.texture->sampler) {
+            Ref<Sampler> sampler = prop.texture->sampler;
+
+            aiString name(sampler->name);
+            aiString id(sampler->id);
+
+            mat->AddProperty(&name, (std::string(_AI_MATKEY_MAPPING_BASE) + "name").c_str(), texType, texSlot);
+            mat->AddProperty(&id, (std::string(_AI_MATKEY_MAPPING_BASE) + "id").c_str(), texType, texSlot);
+
+            mat->AddProperty(&sampler->wrapS, 1, AI_MATKEY_MAPPINGMODE_U(texType, texSlot));
+            mat->AddProperty(&sampler->wrapT, 1, AI_MATKEY_MAPPINGMODE_V(texType, texSlot));
+
+            if (sampler->magFilter != SamplerMagFilter::UNSET) {
+                mat->AddProperty(&sampler->magFilter, 1, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermag").c_str(), texType, texSlot);
+            }
+
+            if (sampler->minFilter != SamplerMinFilter::UNSET) {
+                mat->AddProperty(&sampler->minFilter, 1, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermin").c_str(), texType, texSlot);
+            }
+        }
     }
 }
 

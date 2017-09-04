@@ -223,50 +223,63 @@ inline Ref<Accessor> ExportData(Asset& a, std::string& meshName, Ref<Buffer>& bu
     return acc;
 }
 
-void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture)
+inline void SetSamplerWrap(SamplerWrap& wrap, aiTextureMapMode map)
 {
-    std::string samplerId = mAsset->FindUniqueID("", "sampler");
-    texture->sampler = mAsset->samplers.Create(samplerId);
-
-    aiTextureMapMode mapU, mapV;
-    aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_U_DIFFUSE(0),(int*)&mapU);
-    aiGetMaterialInteger(mat,AI_MATKEY_MAPPINGMODE_V_DIFFUSE(0),(int*)&mapV);
-
-    switch (mapU) {
-        case aiTextureMapMode_Wrap:
-            texture->sampler->wrapS = SamplerWrap_Repeat;
-            break;
+    switch (map) {
         case aiTextureMapMode_Clamp:
-            texture->sampler->wrapS = SamplerWrap_Clamp_To_Edge;
+            wrap = SamplerWrap::Clamp_To_Edge;
             break;
         case aiTextureMapMode_Mirror:
-            texture->sampler->wrapS = SamplerWrap_Mirrored_Repeat;
+            wrap = SamplerWrap::Mirrored_Repeat;
             break;
-        case aiTextureMapMode_Decal:
-        default:
-            texture->sampler->wrapS = SamplerWrap_Repeat;
-            break;
-    };
-
-    switch (mapV) {
         case aiTextureMapMode_Wrap:
-            texture->sampler->wrapT = SamplerWrap_Repeat;
-            break;
-        case aiTextureMapMode_Clamp:
-            texture->sampler->wrapT = SamplerWrap_Clamp_To_Edge;
-            break;
-        case aiTextureMapMode_Mirror:
-            texture->sampler->wrapT = SamplerWrap_Mirrored_Repeat;
-            break;
         case aiTextureMapMode_Decal:
         default:
-            texture->sampler->wrapT = SamplerWrap_Repeat;
+            wrap = SamplerWrap::Repeat;
             break;
     };
+}
 
-    // Hard coded Texture filtering options because I do not know where to find them in the aiMaterial.
-    texture->sampler->magFilter = SamplerMagFilter_Linear;
-    texture->sampler->minFilter = SamplerMinFilter_Linear_Mipmap_Linear;
+void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture, aiTextureType tt, unsigned int slot)
+{
+    aiString aId;
+    std::string id;
+    if (aiGetMaterialString(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "id").c_str(), tt, slot, &aId) == AI_SUCCESS) {
+        id = aId.C_Str();
+    }
+
+    if (mAsset->samplers.Has(id.c_str())) {
+        texture->sampler = mAsset->samplers.Get(id.c_str());
+    } else {
+        id = mAsset->FindUniqueID(id, "sampler");
+
+        texture->sampler = mAsset->samplers.Create(id.c_str());
+
+        aiTextureMapMode mapU, mapV;
+        SamplerMagFilter filterMag;
+        SamplerMinFilter filterMin;
+
+        if (aiGetMaterialInteger(mat, AI_MATKEY_MAPPINGMODE_U(tt, slot), (int*)&mapU) == AI_SUCCESS) {
+            SetSamplerWrap(texture->sampler->wrapS, mapU);
+        }
+
+        if (aiGetMaterialInteger(mat, AI_MATKEY_MAPPINGMODE_V(tt, slot), (int*)&mapV) == AI_SUCCESS) {
+            SetSamplerWrap(texture->sampler->wrapT, mapV);
+        }
+
+        if (aiGetMaterialInteger(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermag").c_str(), tt, slot, (int*)&filterMag) == AI_SUCCESS) {
+            texture->sampler->magFilter = filterMag;
+        }
+
+        if (aiGetMaterialInteger(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermin").c_str(), tt, slot, (int*)&filterMin) == AI_SUCCESS) {
+            texture->sampler->minFilter = filterMin;
+        }
+
+        aiString name;
+        if (aiGetMaterialString(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "name").c_str(), tt, slot, &name) == AI_SUCCESS) {
+            texture->sampler->name = name.C_Str();
+        }
+    }
 }
 
 void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int slot)
@@ -324,7 +337,7 @@ void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTe
                         texture->source->uri = path;
                     }
 
-                    GetTexSampler(mat, texture);
+                    GetTexSampler(mat, texture, tt, slot);
                 }
             }
         }
@@ -390,17 +403,23 @@ void glTF2Exporter::ExportMaterials()
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
 
+        std::string id = "material_" + std::to_string(i);
+
+        Ref<Material> m = mAsset->materials.Create(id);
+
         std::string name;
         if (mat->Get(AI_MATKEY_NAME, aiName) == AI_SUCCESS) {
             name = aiName.C_Str();
         }
         name = mAsset->FindUniqueID(name, "material");
 
-        Ref<Material> m = mAsset->materials.Create(name);
+        m->name = name;
 
         GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
         GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, aiTextureType_UNKNOWN, 0);//get unknown slot
         GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
+        mat->Get("$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0, m->pbrMetallicRoughness.metallicFactor);
+        mat->Get("$mat.gltf.pbrMetallicRoughness.roughnessFactor", 0, 0, m->pbrMetallicRoughness.roughnessFactor);
 
         GetMatTex(mat, m->normalTexture, aiTextureType_NORMALS);
         GetMatTex(mat, m->occlusionTexture, aiTextureType_LIGHTMAP);
@@ -409,8 +428,6 @@ void glTF2Exporter::ExportMaterials()
 
         mat->Get(AI_MATKEY_TWOSIDED, m->doubleSided);
         mat->Get("$mat.gltf.alphaCutoff", 0, 0, m->alphaCutoff);
-        mat->Get("$mat.gltf.metallicFactor", 0, 0, m->pbrMetallicRoughness.metallicFactor);
-        mat->Get("$mat.gltf.roughnessFactor", 0, 0, m->pbrMetallicRoughness.roughnessFactor);
         mat->Get("$mat.gltf.alphaMode", 0, 0, m->alphaMode);
 
         bool hasPbrSpecularGlossiness;

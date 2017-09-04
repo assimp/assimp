@@ -244,7 +244,17 @@ Ref<T> LazyDict<T>::Get(const char* id)
         return Ref<T>(mObjs, it->second);
     }
 
-    throw std::out_of_range("id \"" + std::string(id) + "\" Doesn't exist");
+    return Create(id);
+}
+
+template<class T>
+bool LazyDict<T>::Has(const char* id)
+{
+    id = T::TranslateId(mAsset, id);
+
+    typename IdDict::iterator it = mObjsById.find(id);
+
+    return it != mObjsById.end();
 }
 
 template<class T>
@@ -697,6 +707,7 @@ inline void Sampler::Read(Value& obj, Asset& r)
 {
     SetDefaults();
 
+    ReadMember(obj, "name", name);
     ReadMember(obj, "magFilter", magFilter);
     ReadMember(obj, "minFilter", minFilter);
     ReadMember(obj, "wrapS", wrapS);
@@ -705,10 +716,11 @@ inline void Sampler::Read(Value& obj, Asset& r)
 
 inline void Sampler::SetDefaults()
 {
-    magFilter = SamplerMagFilter_Linear;
-    minFilter = SamplerMinFilter_Linear;
-    wrapS = SamplerWrap_Repeat;
-    wrapT = SamplerWrap_Repeat;
+    //only wrapping modes have defaults
+    wrapS = SamplerWrap::Repeat;
+    wrapT = SamplerWrap::Repeat;
+    magFilter = SamplerMagFilter::UNSET;
+    minFilter = SamplerMinFilter::UNSET;
 }
 
 inline void Texture::Read(Value& obj, Asset& r)
@@ -883,7 +895,6 @@ inline void Mesh::Read(Value& pJSON_Object, Asset& pAsset_Root)
                     // Valid attribute semantics include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX,
                     // and WEIGHT.Attribute semantics can be of the form[semantic]_[set_index], e.g., TEXCOORD_0, TEXCOORD_1, etc.
 
-                    //@TODO: update this
                     int undPos = 0;
                     Mesh::AccessorList* vec = 0;
                     if (GetAttribVector(prim, attr, vec, undPos)) {
@@ -943,7 +954,6 @@ inline void Node::Read(Value& obj, Asset& r)
         }
     }
 
-
     if (Value* matrix = FindArray(obj, "matrix")) {
         ReadValue(*matrix, this->matrix);
     }
@@ -978,7 +988,6 @@ inline void Scene::Read(Value& obj, Asset& r)
     }
 }
 
-
 inline void AssetMetadata::Read(Document& doc)
 {
     // read the version, etc.
@@ -1012,8 +1021,6 @@ inline void AssetMetadata::Read(Document& doc)
         throw DeadlyImportError(msg);
     }
 }
-
-
 
 //
 // Asset methods implementation
@@ -1141,7 +1148,6 @@ inline void Asset::SetAsBinary()
         mBodyBuffer->MarkAsSpecial();
     }
 }
-
 
 inline void Asset::ReadExtensionsUsed(Document& doc)
 {

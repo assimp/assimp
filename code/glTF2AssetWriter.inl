@@ -284,10 +284,6 @@ namespace glTF2 {
 
     inline void Write(Value& obj, Material& m, AssetWriter& w)
     {
-        if (!m.name.empty()) {
-            obj.AddMember("name", m.name, w.mAl);
-        }
-
         Value pbrMetallicRoughness;
         pbrMetallicRoughness.SetObject();
         {

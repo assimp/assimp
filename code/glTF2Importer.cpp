@@ -125,7 +125,6 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
 }
 
 
-
 //static void CopyValue(const glTF2::vec3& v, aiColor3D& out)
 //{
 //    out.r = v[0]; out.g = v[1]; out.b = v[2];
@@ -228,8 +227,11 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
 
         Material& mat = r.materials[i];
 
-        aiString str(mat.id);
-        aimat->AddProperty(&str, AI_MATKEY_NAME);
+        if (!mat.name.empty()) {
+            aiString str(mat.name);
+
+            aimat->AddProperty(&str, AI_MATKEY_NAME);
+        }
 
         SetMaterialColorProperty(r, mat.pbrMetallicRoughness.baseColorFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.baseColorTexture, aimat, aiTextureType_DIFFUSE);

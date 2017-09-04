@@ -800,7 +800,7 @@ namespace glTF2
         SamplerWrap wrapS;          //!< The texture wrapping in the S direction. (required)
         SamplerWrap wrapT;          //!< The texture wrapping in the T direction. (required)
 
-        Sampler() {}
+        Sampler() { SetDefaults(); }
         void Read(Value& obj, Asset& r);
         void SetDefaults();
     };

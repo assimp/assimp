@@ -190,9 +190,7 @@ inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset&
         }
 
         mat->AddProperty(&uri, AI_MATKEY_TEXTURE(texType, texSlot));
-
-        const char *texCoordName = (std::string(_AI_MATKEY_TEXTURE_BASE) + ".texCoord").c_str();
-        mat->AddProperty(&prop.texCoord, 1, texCoordName, texType, texSlot);
+        mat->AddProperty(&prop.texCoord, 1, _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, texType, texSlot);
 
         if (prop.texture->sampler) {
             Ref<Sampler> sampler = prop.texture->sampler;
@@ -200,18 +198,18 @@ inline void SetMaterialTextureProperty(std::vector<int>& embeddedTexIdxs, Asset&
             aiString name(sampler->name);
             aiString id(sampler->id);
 
-            mat->AddProperty(&name, (std::string(_AI_MATKEY_MAPPING_BASE) + "name").c_str(), texType, texSlot);
-            mat->AddProperty(&id, (std::string(_AI_MATKEY_MAPPING_BASE) + "id").c_str(), texType, texSlot);
+            mat->AddProperty(&name, AI_MATKEY_GLTF_MAPPINGNAME(texType, texSlot));
+            mat->AddProperty(&id, AI_MATKEY_GLTF_MAPPINGID(texType, texSlot));
 
             mat->AddProperty(&sampler->wrapS, 1, AI_MATKEY_MAPPINGMODE_U(texType, texSlot));
             mat->AddProperty(&sampler->wrapT, 1, AI_MATKEY_MAPPINGMODE_V(texType, texSlot));
 
             if (sampler->magFilter != SamplerMagFilter::UNSET) {
-                mat->AddProperty(&sampler->magFilter, 1, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermag").c_str(), texType, texSlot);
+                mat->AddProperty(&sampler->magFilter, 1, AI_MATKEY_GLTF_MAPPINGFILTER_MAG(texType, texSlot));
             }
 
             if (sampler->minFilter != SamplerMinFilter::UNSET) {
-                mat->AddProperty(&sampler->minFilter, 1, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermin").c_str(), texType, texSlot);
+                mat->AddProperty(&sampler->minFilter, 1, AI_MATKEY_GLTF_MAPPINGFILTER_MIN(texType, texSlot));
             }
         }
     }
@@ -235,9 +233,9 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
 
         SetMaterialColorProperty(r, mat.pbrMetallicRoughness.baseColorFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.baseColorTexture, aimat, aiTextureType_DIFFUSE);
-        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.metallicRoughnessTexture, aimat, aiTextureType_UNKNOWN);
-        aimat->AddProperty(&mat.pbrMetallicRoughness.metallicFactor, 1, "$mat.gltf.pbrMetallicRoughness.metallicFactor");
-        aimat->AddProperty(&mat.pbrMetallicRoughness.roughnessFactor, 1, "$mat.gltf.pbrMetallicRoughness.roughnessFactor");
+        SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrMetallicRoughness.metallicRoughnessTexture, aimat, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
+        aimat->AddProperty(&mat.pbrMetallicRoughness.metallicFactor, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR);
+        aimat->AddProperty(&mat.pbrMetallicRoughness.roughnessFactor, 1, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR);
 
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.normalTexture, aimat, aiTextureType_NORMALS);
         SetMaterialTextureProperty(embeddedTexIdxs, r, mat.occlusionTexture, aimat, aiTextureType_LIGHTMAP);
@@ -245,17 +243,19 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
         SetMaterialColorProperty(r, mat.emissiveFactor, aimat, AI_MATKEY_COLOR_EMISSIVE);
 
         aimat->AddProperty(&mat.doubleSided, 1, AI_MATKEY_TWOSIDED);
-        aimat->AddProperty(&mat.alphaMode, 1, "$mat.gltf.alphaMode");
-        aimat->AddProperty(&mat.alphaCutoff, 1, "$mat.gltf.alphaCutoff");
+        aimat->AddProperty(&mat.alphaMode, 1, AI_MATKEY_GLTF_ALPHAMODE);
+        aimat->AddProperty(&mat.alphaCutoff, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
 
         //pbrSpecularGlossiness
         if (mat.pbrSpecularGlossiness.isPresent) {
-            aimat->AddProperty(&mat.pbrSpecularGlossiness.isPresent, 1, "$mat.gltf.pbrSpecularGlossiness.on");
-            SetMaterialColorProperty(r, mat.pbrSpecularGlossiness.value.diffuseFactor, aimat, "$clr.diffuse", 0, 1);
-            SetMaterialColorProperty(r, mat.pbrSpecularGlossiness.value.specularFactor, aimat, "$clr.specular", 0, 1);
-            aimat->AddProperty(&mat.pbrSpecularGlossiness.value.glossinessFactor, 1, "$mat.gltf.pbrSpecularGlossiness.glossinessFactor");
-            SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrSpecularGlossiness.value.diffuseTexture, aimat, aiTextureType_DIFFUSE, 1);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrSpecularGlossiness.value.specularGlossinessTexture, aimat, aiTextureType_UNKNOWN, 1);
+            PbrSpecularGlossiness &pbrSG = mat.pbrSpecularGlossiness.value;
+
+            aimat->AddProperty(&mat.pbrSpecularGlossiness.isPresent, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS);
+            SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_FACTOR);
+            SetMaterialColorProperty(r, pbrSG.specularFactor, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULAR_FACTOR);
+            aimat->AddProperty(&pbrSG.glossinessFactor, 1, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.diffuseTexture, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_TEXTURE);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.specularGlossinessTexture, aimat, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULARGLOSSINESS_TEXTURE);
         }
     }
 }

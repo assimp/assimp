@@ -163,7 +163,31 @@ namespace glTF2
 
 
     //! Magic number for GLB files
-    #define AI_GLB_MAGIC_NUMBER "glTF"
+	#define AI_GLB_MAGIC_NUMBER "glTF"
+
+	#define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR "$mat.gltf.pbrMetallicRoughness.metallicFactor", 0,0
+	#define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR "$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0
+	#define AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE aiTextureType_UNKNOWN, 0
+	#define AI_MATKEY_GLTF_ALPHAMODE "$mat.gltf.alphaMode", 0, 0
+	#define AI_MATKEY_GLTF_ALPHACUTOFF "$mat.gltf.alphaCutoff", 0, 0
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS "$mat.gltf.pbrSpecularGlossiness", 0, 0
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_FACTOR "$clr.diffuse", 0, 1
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULAR_FACTOR "$clr.specular", 0, 1
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR "$mat.gltf.pbrMetallicRoughness.glossinessFactor", 0,0
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_TEXTURE aiTextureType_DIFFUSE, 1
+	#define AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULARGLOSSINESS_TEXTURE aiTextureType_UNKNOWN, 1
+
+	#define _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE (std::string(_AI_MATKEY_TEXTURE_BASE) + ".texCoord").c_str()
+	#define _AI_MATKEY_GLTF_MAPPINGNAME_BASE (std::string(_AI_MATKEY_MAPPING_BASE) + "name").c_str()
+	#define _AI_MATKEY_GLTF_MAPPINGID_BASE  (std::string(_AI_MATKEY_MAPPING_BASE) + "id").c_str()
+	#define _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermag").c_str()
+	#define _AI_MATKEY_GLTF_MAPPINGFILTER_MIN_BASE (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermin").c_str()
+
+	#define AI_MATKEY_GLTF_TEXTURE_TEXCOORD _AI_MATKEY_GLTF_TEXTURE_TEXCOORD_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGNAME(type, N) _AI_MATKEY_GLTF_MAPPINGNAME_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGID(type, N) _AI_MATKEY_GLTF_MAPPINGID_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGFILTER_MAG(type, N) _AI_MATKEY_GLTF_MAPPINGFILTER_MAG_BASE, type, N
+	#define AI_MATKEY_GLTF_MAPPINGFILTER_MIN(type, N) _AI_MATKEY_GLTF_MAPPINGFILTER_MIN_BASE, type, N
 
     #ifdef ASSIMP_API
         #include "./../include/assimp/Compiler/pushpack1.h"

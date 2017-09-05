@@ -244,7 +244,7 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture, a
 {
     aiString aId;
     std::string id;
-    if (aiGetMaterialString(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "id").c_str(), tt, slot, &aId) == AI_SUCCESS) {
+    if (aiGetMaterialString(mat, AI_MATKEY_GLTF_MAPPINGID(tt, slot), &aId) == AI_SUCCESS) {
         id = aId.C_Str();
     }
 
@@ -267,16 +267,16 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture, a
             SetSamplerWrap(texture->sampler->wrapT, mapV);
         }
 
-        if (aiGetMaterialInteger(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermag").c_str(), tt, slot, (int*)&filterMag) == AI_SUCCESS) {
+        if (aiGetMaterialInteger(mat, AI_MATKEY_GLTF_MAPPINGFILTER_MAG(tt, slot), (int*)&filterMag) == AI_SUCCESS) {
             texture->sampler->magFilter = filterMag;
         }
 
-        if (aiGetMaterialInteger(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "filtermin").c_str(), tt, slot, (int*)&filterMin) == AI_SUCCESS) {
+        if (aiGetMaterialInteger(mat, AI_MATKEY_GLTF_MAPPINGFILTER_MIN(tt, slot), (int*)&filterMin) == AI_SUCCESS) {
             texture->sampler->minFilter = filterMin;
         }
 
         aiString name;
-        if (aiGetMaterialString(mat, (std::string(_AI_MATKEY_MAPPING_BASE) + "name").c_str(), tt, slot, &name) == AI_SUCCESS) {
+        if (aiGetMaterialString(mat, AI_MATKEY_GLTF_MAPPINGNAME(tt, slot), &name) == AI_SUCCESS) {
             texture->sampler->name = name.C_Str();
         }
     }
@@ -416,10 +416,10 @@ void glTF2Exporter::ExportMaterials()
         m->name = name;
 
         GetMatTex(mat, m->pbrMetallicRoughness.baseColorTexture, aiTextureType_DIFFUSE);
-        GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, aiTextureType_UNKNOWN, 0);//get unknown slot
+        GetMatTex(mat, m->pbrMetallicRoughness.metallicRoughnessTexture, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE);
         GetMatColor(mat, m->pbrMetallicRoughness.baseColorFactor, AI_MATKEY_COLOR_DIFFUSE);
-        mat->Get("$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0, m->pbrMetallicRoughness.metallicFactor);
-        mat->Get("$mat.gltf.pbrMetallicRoughness.roughnessFactor", 0, 0, m->pbrMetallicRoughness.roughnessFactor);
+        mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, m->pbrMetallicRoughness.metallicFactor);
+        mat->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, m->pbrMetallicRoughness.roughnessFactor);
 
         GetMatTex(mat, m->normalTexture, aiTextureType_NORMALS);
         GetMatTex(mat, m->occlusionTexture, aiTextureType_LIGHTMAP);
@@ -427,11 +427,11 @@ void glTF2Exporter::ExportMaterials()
         GetMatColor(mat, m->emissiveFactor, AI_MATKEY_COLOR_EMISSIVE);
 
         mat->Get(AI_MATKEY_TWOSIDED, m->doubleSided);
-        mat->Get("$mat.gltf.alphaCutoff", 0, 0, m->alphaCutoff);
-        mat->Get("$mat.gltf.alphaMode", 0, 0, m->alphaMode);
+        mat->Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
+        mat->Get(AI_MATKEY_GLTF_ALPHAMODE, m->alphaMode);
 
         bool hasPbrSpecularGlossiness;
-        mat->Get("$mat.gltf.pbrSpecularGlossiness.on", 0, 0, hasPbrSpecularGlossiness);
+        mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, hasPbrSpecularGlossiness);
 
         if (hasPbrSpecularGlossiness) {
 
@@ -441,11 +441,11 @@ void glTF2Exporter::ExportMaterials()
 
             PbrSpecularGlossiness pbrSG;
 
-            GetMatColor(mat, pbrSG.diffuseFactor, "$clr.diffuse", 0, 1);
-            GetMatColor(mat, pbrSG.specularFactor, "$clr.specular", 0, 1);
-            mat->Get("$mat.gltf.glossinessFactor", 0, 0, pbrSG.glossinessFactor);
-            GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE, 1);
-            GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_UNKNOWN, 1);
+            GetMatColor(mat, pbrSG.diffuseFactor, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_FACTOR);
+            GetMatColor(mat, pbrSG.specularFactor, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULAR_FACTOR);
+            mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_GLOSSINESS_FACTOR, pbrSG.glossinessFactor);
+            GetMatTex(mat, pbrSG.diffuseTexture, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_DIFFUSE_TEXTURE);
+            GetMatTex(mat, pbrSG.specularGlossinessTexture, AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS_SPECULARGLOSSINESS_TEXTURE);
 
             m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
         }

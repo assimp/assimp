@@ -268,7 +268,7 @@ namespace glTF2 {
         }
 
         template<size_t N>
-        inline void WriteVec(Value& obj, float(&prop)[N], const char* propName, float(&defaultVal)[N], MemoryPoolAllocator<>& al)
+        inline void WriteVec(Value& obj, float(&prop)[N], const char* propName, const float(&defaultVal)[N], MemoryPoolAllocator<>& al)
         {
             if (!std::equal(std::begin(prop), std::end(prop), std::begin(defaultVal))) {
                 WriteVec(obj, prop, propName, al);
@@ -289,10 +289,7 @@ namespace glTF2 {
         {
             WriteTex(pbrMetallicRoughness, m.pbrMetallicRoughness.baseColorTexture, "baseColorTexture", w.mAl);
             WriteTex(pbrMetallicRoughness, m.pbrMetallicRoughness.metallicRoughnessTexture, "metallicRoughnessTexture", w.mAl);
-
-            //@TODO: define this as a constant?
-            vec4 defaultEmissiveFactor = {1, 1, 1, 1};
-            WriteVec(pbrMetallicRoughness, m.pbrMetallicRoughness.baseColorFactor, "baseColorFactor", defaultEmissiveFactor, w.mAl);
+            WriteVec(pbrMetallicRoughness, m.pbrMetallicRoughness.baseColorFactor, "baseColorFactor", defaultBaseColor, w.mAl);
 
             if (m.pbrMetallicRoughness.metallicFactor != 1) {
                 WriteFloat(pbrMetallicRoughness, m.pbrMetallicRoughness.metallicFactor, "metallicFactor", w.mAl);
@@ -310,9 +307,6 @@ namespace glTF2 {
         WriteTex(obj, m.normalTexture, "normalTexture", w.mAl);
         WriteTex(obj, m.emissiveTexture, "emissiveTexture", w.mAl);
         WriteTex(obj, m.occlusionTexture, "occlusionTexture", w.mAl);
-
-        //@TODO: define this as a constant?
-        vec3 defaultEmissiveFactor = {0, 0, 0};
         WriteVec(obj, m.emissiveFactor, "emissiveFactor", defaultEmissiveFactor, w.mAl);
 
         if (m.alphaCutoff != 0.5) {
@@ -335,11 +329,7 @@ namespace glTF2 {
             pbrSpecularGlossiness.SetObject();
             {
                 //pbrSpecularGlossiness
-
-                vec4 defaultDiffuseFactor = {1, 1, 1, 1};
                 WriteVec(pbrSpecularGlossiness, m.pbrSpecularGlossiness.diffuseFactor, "diffuseFactor", defaultDiffuseFactor, w.mAl);
-
-                vec3 defaultSpecularFactor = {1, 1, 1};
                 WriteVec(pbrSpecularGlossiness, m.pbrSpecularGlossiness.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
 
                 if (m.pbrSpecularGlossiness.glossinessFactor != 1) {

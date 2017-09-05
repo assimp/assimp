@@ -135,8 +135,7 @@ namespace glTF2
     // Vec/matrix types, as raw float arrays
     typedef float (vec3)[3];
     typedef float (vec4)[4];
-    typedef float (mat4)[16];
-
+	typedef float (mat4)[16];
 
     namespace Util
     {
@@ -670,7 +669,12 @@ namespace glTF2
         inline uint8_t* StealData();
 
         inline void SetData(uint8_t* data, size_t length, Asset& r);
-    };
+	};
+
+	const vec4 defaultBaseColor = {1, 1, 1, 1};
+	const vec3 defaultEmissiveFactor = {0, 0, 0};
+	const vec4 defaultDiffuseFactor = {1, 1, 1, 1};
+	const vec3 defaultSpecularFactor = {1, 1, 1};
 
     struct TextureInfo
     {

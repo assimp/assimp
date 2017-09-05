@@ -803,28 +803,28 @@ inline void Material::Read(Value& material, Asset& r)
 }
 
 namespace {
-    void SetVector(vec4& v, float x, float y, float z, float w)
-        { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
+    void SetVector(vec4& v, const float(&in)[4])
+        { v[0] = in[0]; v[1] = in[1]; v[2] = in[2]; v[3] = in[3]; }
 
-    void SetVector(vec3& v, float x, float y, float z)
-        { v[0] = x; v[1] = y; v[2] = z; }
+    void SetVector(vec3& v, const float(&in)[3])
+        { v[0] = in[0]; v[1] = in[1]; v[2] = in[2]; }
 }
 
 inline void Material::SetDefaults()
 {
     //pbr materials
-    SetVector(pbrMetallicRoughness.baseColorFactor, 1, 1, 1, 1);
+    SetVector(pbrMetallicRoughness.baseColorFactor, defaultBaseColor);
     pbrMetallicRoughness.metallicFactor = 1.0;
     pbrMetallicRoughness.roughnessFactor = 1.0;
 
-    SetVector(emissiveFactor, 0, 0, 0);
+    SetVector(emissiveFactor, defaultEmissiveFactor);
     alphaMode = "OPAQUE";
     alphaCutoff = 0.5;
     doubleSided = false;
 
     //pbrSpecularGlossiness properties
-    SetVector(pbrSpecularGlossiness.diffuseFactor, 1, 1, 1, 1);
-    SetVector(pbrSpecularGlossiness.specularFactor, 1, 1, 1);
+    SetVector(pbrSpecularGlossiness.diffuseFactor, defaultDiffuseFactor);
+    SetVector(pbrSpecularGlossiness.specularFactor, defaultSpecularFactor);
     pbrSpecularGlossiness.glossinessFactor = 1.0;
 }
 

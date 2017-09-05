@@ -211,7 +211,7 @@ Ref<T> LazyDict<T>::Retrieve(unsigned int i)
         throw DeadlyImportError("GLTF: Field is not an array \"" + std::string(mDictId) + "\"");
     }
 
-    Value& obj = mDict->operator[](i);
+    Value &obj = (*mDict)[i];
 
     if (!obj.IsObject()) {
         throw DeadlyImportError("GLTF: Object at index \"" + std::to_string(i) + "\" is not a JSON object");

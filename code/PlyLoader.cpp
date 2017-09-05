@@ -538,7 +538,7 @@ void PLYImporter::LoadFace(const PLY::Element* pcElement, const PLY::ElementInst
   ai_assert(NULL != instElement);
 
   if (mGeneratedMesh == NULL)
-    throw DeadlyImportError("Invalid .ply file: Vertices shoud be declared before faces");
+    throw DeadlyImportError("Invalid .ply file: Vertices should be declared before faces");
 
   bool bOne = false;
 

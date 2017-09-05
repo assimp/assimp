@@ -439,12 +439,15 @@ void glTF2Exporter::ExportMaterials()
                 KHR_materials_pbrSpecularGlossiness = true;
             }
 
-            m->pbrSpecularGlossiness.on = true;
-            GetMatColor(mat, m->pbrSpecularGlossiness.diffuseFactor, "$clr.diffuse", 0, 1);
-            GetMatColor(mat, m->pbrSpecularGlossiness.specularFactor, "$clr.specular", 0, 1);
-            mat->Get("$mat.gltf.glossinessFactor", 0, 0, m->pbrSpecularGlossiness.glossinessFactor);
-            GetMatTex(mat, m->pbrSpecularGlossiness.diffuseTexture, aiTextureType_DIFFUSE, 1);
-            GetMatTex(mat, m->pbrSpecularGlossiness.specularGlossinessTexture, aiTextureType_UNKNOWN, 1);
+            PbrSpecularGlossiness pbrSG;
+
+            GetMatColor(mat, pbrSG.diffuseFactor, "$clr.diffuse", 0, 1);
+            GetMatColor(mat, pbrSG.specularFactor, "$clr.specular", 0, 1);
+            mat->Get("$mat.gltf.glossinessFactor", 0, 0, pbrSG.glossinessFactor);
+            GetMatTex(mat, pbrSG.diffuseTexture, aiTextureType_DIFFUSE, 1);
+            GetMatTex(mat, pbrSG.specularGlossinessTexture, aiTextureType_UNKNOWN, 1);
+
+            m->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
         }
     }
 }

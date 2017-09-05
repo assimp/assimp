@@ -790,13 +790,15 @@ inline void Material::Read(Value& material, Asset& r)
     if (Value* extensions = FindObject(material, "extensions")) {
         if (r.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
             if (Value* pbrSpecularGlossiness = FindObject(*extensions, "KHR_materials_pbrSpecularGlossiness")) {
-                this->pbrSpecularGlossiness.on = true;
+                PbrSpecularGlossiness pbrSG;
 
-                ReadMember(*pbrSpecularGlossiness, "diffuseFactor", this->pbrSpecularGlossiness.diffuseFactor);
-                ReadTextureProperty(r, *pbrSpecularGlossiness, "diffuseTexture", this->pbrSpecularGlossiness.diffuseTexture);
-                ReadTextureProperty(r, *pbrSpecularGlossiness, "specularGlossinessTexture", this->pbrSpecularGlossiness.specularGlossinessTexture);
-                ReadMember(*pbrSpecularGlossiness, "specularFactor", this->pbrSpecularGlossiness.specularFactor);
-                ReadMember(*pbrSpecularGlossiness, "glossinessFactor", this->pbrSpecularGlossiness.glossinessFactor);
+                ReadMember(*pbrSpecularGlossiness, "diffuseFactor", pbrSG.diffuseFactor);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "diffuseTexture", pbrSG.diffuseTexture);
+                ReadTextureProperty(r, *pbrSpecularGlossiness, "specularGlossinessTexture", pbrSG.specularGlossinessTexture);
+                ReadMember(*pbrSpecularGlossiness, "specularFactor", pbrSG.specularFactor);
+                ReadMember(*pbrSpecularGlossiness, "glossinessFactor", pbrSG.glossinessFactor);
+
+                this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
         }
     }
@@ -821,11 +823,14 @@ inline void Material::SetDefaults()
     alphaMode = "OPAQUE";
     alphaCutoff = 0.5;
     doubleSided = false;
+}
 
+inline void PbrSpecularGlossiness::SetDefaults()
+{
     //pbrSpecularGlossiness properties
-    SetVector(pbrSpecularGlossiness.diffuseFactor, defaultDiffuseFactor);
-    SetVector(pbrSpecularGlossiness.specularFactor, defaultSpecularFactor);
-    pbrSpecularGlossiness.glossinessFactor = 1.0;
+    SetVector(diffuseFactor, defaultDiffuseFactor);
+    SetVector(specularFactor, defaultSpecularFactor);
+    glossinessFactor = 1.0;
 }
 
 namespace {

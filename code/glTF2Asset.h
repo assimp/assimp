@@ -711,12 +711,14 @@ namespace glTF2
 
     struct PbrSpecularGlossiness
     {
-        bool on = false;
         vec4 diffuseFactor;
         vec3 specularFactor;
         float glossinessFactor;
         TextureInfo diffuseTexture;
-        TextureInfo specularGlossinessTexture;
+		TextureInfo specularGlossinessTexture;
+
+		PbrSpecularGlossiness() { SetDefaults(); }
+		void SetDefaults();
     };
 
     //! The material appearance of a primitive.
@@ -735,7 +737,7 @@ namespace glTF2
         bool doubleSided;
 
         //extension: KHR_materials_pbrSpecularGlossiness
-        PbrSpecularGlossiness pbrSpecularGlossiness;
+        Nullable<PbrSpecularGlossiness> pbrSpecularGlossiness;
 
         Material() { SetDefaults(); }
         void Read(Value& obj, Asset& r);

@@ -249,13 +249,13 @@ void glTF2Importer::ImportMaterials(glTF2::Asset& r)
         aimat->AddProperty(&mat.alphaCutoff, 1, "$mat.gltf.alphaCutoff");
 
         //pbrSpecularGlossiness
-        if (mat.pbrSpecularGlossiness.on) {
-            aimat->AddProperty(&mat.pbrSpecularGlossiness.on, 1, "$mat.gltf.pbrSpecularGlossiness.on");
-            SetMaterialColorProperty(r, mat.pbrSpecularGlossiness.diffuseFactor, aimat, "$clr.diffuse", 0, 1);
-            SetMaterialColorProperty(r, mat.pbrSpecularGlossiness.specularFactor, aimat, "$clr.specular", 0, 1);
-            aimat->AddProperty(&mat.pbrSpecularGlossiness.glossinessFactor, 1, "$mat.gltf.pbrSpecularGlossiness.glossinessFactor");
-            SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrSpecularGlossiness.diffuseTexture, aimat, aiTextureType_DIFFUSE, 1);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrSpecularGlossiness.specularGlossinessTexture, aimat, aiTextureType_UNKNOWN, 1);
+        if (mat.pbrSpecularGlossiness.isPresent) {
+            aimat->AddProperty(&mat.pbrSpecularGlossiness.isPresent, 1, "$mat.gltf.pbrSpecularGlossiness.on");
+            SetMaterialColorProperty(r, mat.pbrSpecularGlossiness.value.diffuseFactor, aimat, "$clr.diffuse", 0, 1);
+            SetMaterialColorProperty(r, mat.pbrSpecularGlossiness.value.specularFactor, aimat, "$clr.specular", 0, 1);
+            aimat->AddProperty(&mat.pbrSpecularGlossiness.value.glossinessFactor, 1, "$mat.gltf.pbrSpecularGlossiness.glossinessFactor");
+            SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrSpecularGlossiness.value.diffuseTexture, aimat, aiTextureType_DIFFUSE, 1);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, mat.pbrSpecularGlossiness.value.specularGlossinessTexture, aimat, aiTextureType_UNKNOWN, 1);
         }
     }
 }

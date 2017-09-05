@@ -324,21 +324,22 @@ namespace glTF2 {
         Value exts;
         exts.SetObject();
 
-        if (m.pbrSpecularGlossiness.on) {
+        if (m.pbrSpecularGlossiness.isPresent) {
             Value pbrSpecularGlossiness;
             pbrSpecularGlossiness.SetObject();
-            {
-                //pbrSpecularGlossiness
-                WriteVec(pbrSpecularGlossiness, m.pbrSpecularGlossiness.diffuseFactor, "diffuseFactor", defaultDiffuseFactor, w.mAl);
-                WriteVec(pbrSpecularGlossiness, m.pbrSpecularGlossiness.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
 
-                if (m.pbrSpecularGlossiness.glossinessFactor != 1) {
-                    WriteFloat(obj, m.pbrSpecularGlossiness.glossinessFactor, "glossinessFactor", w.mAl);
-                }
+            PbrSpecularGlossiness &pbrSG = m.pbrSpecularGlossiness.value;
 
-                WriteTex(pbrSpecularGlossiness, m.pbrSpecularGlossiness.diffuseTexture, "diffuseTexture", w.mAl);
-                WriteTex(pbrSpecularGlossiness, m.pbrSpecularGlossiness.specularGlossinessTexture, "specularGlossinessTexture", w.mAl);
+            //pbrSpecularGlossiness
+            WriteVec(pbrSpecularGlossiness, pbrSG.diffuseFactor, "diffuseFactor", defaultDiffuseFactor, w.mAl);
+            WriteVec(pbrSpecularGlossiness, pbrSG.specularFactor, "specularFactor", defaultSpecularFactor, w.mAl);
+
+            if (pbrSG.glossinessFactor != 1) {
+                WriteFloat(obj, pbrSG.glossinessFactor, "glossinessFactor", w.mAl);
             }
+
+            WriteTex(pbrSpecularGlossiness, pbrSG.diffuseTexture, "diffuseTexture", w.mAl);
+            WriteTex(pbrSpecularGlossiness, pbrSG.specularGlossinessTexture, "specularGlossinessTexture", w.mAl);
 
             if (!pbrSpecularGlossiness.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_pbrSpecularGlossiness", pbrSpecularGlossiness, w.mAl);

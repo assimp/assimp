@@ -306,7 +306,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
     for (unsigned int m = 0; m < r.meshes.Size(); ++m) {
         Mesh& mesh = r.meshes[m];
 
-		meshOffsets.push_back(k);
+        meshOffsets.push_back(k);
         k += unsigned(mesh.primitives.size());
 
         for (unsigned int p = 0; p < mesh.primitives.size(); ++p) {
@@ -339,16 +339,17 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
                 case PrimitiveMode_TRIANGLE_FAN:
                     aim->mPrimitiveTypes |= aiPrimitiveType_TRIANGLE;
                     break;
+
             }
 
             Mesh::Primitive::Attributes& attr = prim.attributes;
 
-			if (attr.position.size() > 0 && attr.position[0]) {
+            if (attr.position.size() > 0 && attr.position[0]) {
                 aim->mNumVertices = attr.position[0]->count;
                 attr.position[0]->ExtractData(aim->mVertices);
-			}
+            }
 
-			if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
+            if (attr.normal.size() > 0 && attr.normal[0]) attr.normal[0]->ExtractData(aim->mNormals);
 
             for (size_t tc = 0; tc < attr.texcoord.size() && tc < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++tc) {
                 attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
@@ -362,7 +363,7 @@ void glTF2Importer::ImportMeshes(glTF2::Asset& r)
 
 
             if (prim.indices) {
-				aiFace* faces = 0;
+                aiFace* faces = 0;
                 unsigned int nFaces = 0;
 
                 unsigned int count = prim.indices->count;
@@ -638,7 +639,7 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
 
     // TODO: it does not split the loaded vertices, should it?
     //pScene->mFlags |= AI_SCENE_FLAGS_NON_VERBOSE_FORMAT;
-	MakeVerboseFormatProcess process;
+    MakeVerboseFormatProcess process;
     process.Execute(pScene);
 
 

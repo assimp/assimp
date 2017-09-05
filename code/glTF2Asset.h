@@ -958,8 +958,6 @@ namespace glTF2
         Ref<T> Get(unsigned int i);
         Ref<T> Get(const char* id);
 
-        bool Has(const char* id);
-
         Ref<T> Create(const char* id);
         Ref<T> Create(const std::string& id)
             { return Create(id.c_str()); }

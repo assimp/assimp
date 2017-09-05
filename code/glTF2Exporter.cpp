@@ -248,8 +248,8 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture, a
         id = aId.C_Str();
     }
 
-    if (mAsset->samplers.Has(id.c_str())) {
-        texture->sampler = mAsset->samplers.Get(id.c_str());
+    if (Ref<Sampler> ref = mAsset->samplers.Get(id.c_str())) {
+        texture->sampler = ref;
     } else {
         id = mAsset->FindUniqueID(id, "sampler");
 

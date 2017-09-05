@@ -244,17 +244,7 @@ Ref<T> LazyDict<T>::Get(const char* id)
         return Ref<T>(mObjs, it->second);
     }
 
-    return Create(id);
-}
-
-template<class T>
-bool LazyDict<T>::Has(const char* id)
-{
-    id = T::TranslateId(mAsset, id);
-
-    typename IdDict::iterator it = mObjsById.find(id);
-
-    return it != mObjsById.end();
+    return Ref<T>();
 }
 
 template<class T>

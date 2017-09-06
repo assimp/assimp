@@ -433,7 +433,17 @@ void glTF2Exporter::ExportMaterials()
 
         mat->Get(AI_MATKEY_TWOSIDED, m->doubleSided);
         mat->Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
-        mat->Get(AI_MATKEY_GLTF_ALPHAMODE, m->alphaMode);
+
+        if (mat->Get(AI_MATKEY_GLTF_ALPHAMODE, m->alphaMode) != AI_SUCCESS) {
+            float opacity;
+
+            if (mat->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
+                if (opacity < 1) {
+                    m->alphaMode = "MASK";
+                    m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
+                }
+            }
+        }
 
         bool hasPbrSpecularGlossiness;
         mat->Get(AI_MATKEY_GLTF_PBRSPECULARGLOSSINESS, hasPbrSpecularGlossiness);

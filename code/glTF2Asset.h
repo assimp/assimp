@@ -717,13 +717,6 @@ namespace glTF2
         float strength = 1;
     };
 
-    //! Holds a material property that can be a texture or a color (fallback for glTF 1)
-    /*struct FallbackTexProperty
-    {
-        Ref<Texture> texture;
-        vec4 color;
-    };*/
-
     struct PbrMetallicRoughness
     {
         vec4 baseColorFactor;

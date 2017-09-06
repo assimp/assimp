@@ -181,6 +181,7 @@ corresponding preprocessor flag to selectively disable formats.
 #   include "AssbinLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_GLTF_IMPORTER
+#   include "glTFImporter.h"
 #   include "glTF2Importer.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_C4D_IMPORTER
@@ -335,6 +336,7 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
     out.push_back( new AssbinImporter() );
 #endif
 #if ( !defined ASSIMP_BUILD_NO_GLTF_IMPORTER )
+    out.push_back( new glTFImporter() );
     out.push_back( new glTF2Importer() );
 #endif
 #if ( !defined ASSIMP_BUILD_NO_C4D_IMPORTER )

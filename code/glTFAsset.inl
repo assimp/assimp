@@ -1243,10 +1243,6 @@ inline void AssetMetadata::Read(Document& doc)
     }
 
     version = std::max(statedVersion, version);
-    if (version == 0) {
-        // if missing version, we'll assume version 1...
-        version = 1;
-    }
 
     if (version != 1) {
         char msg[128];

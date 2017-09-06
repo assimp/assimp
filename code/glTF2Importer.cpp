@@ -58,6 +58,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "glTF2Asset.h"
 // This is included here so WriteLazyDict<T>'s definition is found.
 #include "glTF2AssetWriter.h"
+#include <rapidjson/document.h>
+#include <rapidjson/rapidjson.h>
 
 using namespace Assimp;
 using namespace glTF2;
@@ -100,24 +102,18 @@ const aiImporterDesc* glTF2Importer::GetInfo() const
 
 bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool checkSig) const
 {
-    const std::string& extension = GetExtension(pFile);
+    const std::string &extension = GetExtension(pFile);
 
-    if (extension == "gltf" || extension == "glb")
-        return true;
+    if (extension != "gltf") // We currently can't read glTF2 binary files (.glb)
+        return false;
 
-    if ((checkSig || !extension.length()) && pIOHandler) {
-        char buffer[4];
-
-        std::unique_ptr<IOStream> pStream(pIOHandler->Open(pFile));
-        if (pStream && pStream->Read(buffer, sizeof(buffer), 1) == 1) {
-            if (memcmp(buffer, AI_GLB_MAGIC_NUMBER, sizeof(buffer)) == 0) {
-                return true; // Has GLB header
-            }
-            else if (memcmp(buffer, "{\r\n ", sizeof(buffer)) == 0
-                    || memcmp(buffer, "{\n  ", sizeof(buffer)) == 0) {
-                // seems a JSON file, and we're the only format that can read them
-                return true;
-            }
+    if (checkSig && pIOHandler) {
+        glTF2::Asset asset(pIOHandler);
+        try {
+            asset.Load(pFile, extension == "glb");
+            return asset.asset.version >= 2;
+        } catch (...) {
+            return false;
         }
     }
 

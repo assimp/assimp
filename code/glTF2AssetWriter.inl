@@ -652,13 +652,8 @@ namespace glTF2 {
     {
         Value asset;
         asset.SetObject();
-        {
-            char versionChar[10];
-            ai_snprintf(versionChar, sizeof(versionChar), "%.1f", mAsset.asset.version);
-            asset.AddMember("version", Value(versionChar, mAl).Move(), mAl);
-
-            asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
-        }
+        asset.AddMember("version", Value(mAsset.asset.version, mAl).Move(), mAl);
+        asset.AddMember("generator", Value(mAsset.asset.generator, mAl).Move(), mAl);
         mDoc.AddMember("asset", asset, mAl);
     }
 

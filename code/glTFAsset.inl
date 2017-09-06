@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "StringUtils.h"
+#include <iomanip>
 
 // Header files, Assimp
 #include <assimp/DefaultLogger.hpp>
@@ -126,6 +127,12 @@ namespace {
     {
         Value::MemberIterator it = val.FindMember(id);
         return (it != val.MemberEnd() && it->value.IsString()) ? &it->value : 0;
+    }
+
+    inline Value* FindNumber(Value& val, const char* id)
+    {
+        Value::MemberIterator it = val.FindMember(id);
+        return (it != val.MemberEnd() && it->value.IsNumber()) ? &it->value : 0;
     }
 
     inline Value* FindArray(Value& val, const char* id)
@@ -1228,13 +1235,21 @@ inline void Scene::Read(Value& obj, Asset& r)
 inline void AssetMetadata::Read(Document& doc)
 {
     // read the version, etc.
-    float statedVersion = 0;
     if (Value* obj = FindObject(doc, "asset")) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
 
         premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
-        statedVersion = MemberOrDefault(*obj, "version", 0);
+
+        if (Value* versionString = FindString(*obj, "version")) {
+            version = versionString->GetString();
+        } else if (Value* versionNumber = FindNumber (*obj, "version")) {
+            char buf[4];
+
+            ai_snprintf(buf, 4, "%.1f", versionNumber->GetDouble());
+
+            version = buf;
+        }
 
         if (Value* profile = FindObject(*obj, "profile")) {
             ReadMember(*profile, "api",     this->profile.api);
@@ -1242,12 +1257,8 @@ inline void AssetMetadata::Read(Document& doc)
         }
     }
 
-    version = std::max(statedVersion, version);
-
-    if (version != 1) {
-        char msg[128];
-        ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %.0f", version);
-        throw DeadlyImportError(msg);
+    if (version.empty() || version[0] != '1') {
+        throw DeadlyImportError("GLTF: Unsupported glTF version: " + version);
     }
 }
 
@@ -1269,7 +1280,7 @@ inline void Asset::ReadBinaryHeader(IOStream& stream)
     }
 
     AI_SWAP4(header.version);
-    asset.version = header.version;
+    asset.version = std::to_string(header.version);
     if (header.version != 1) {
         throw DeadlyImportError("GLTF: Unsupported binary glTF version");
     }

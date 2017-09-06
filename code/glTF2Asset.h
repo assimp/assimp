@@ -1005,13 +1005,13 @@ namespace glTF2
             std::string version; //!< Specifies the target rendering API (default: "1.0.3")
         } profile; //!< Specifies the target rendering API and version, e.g., WebGL 1.0.3. (default: {})
 
-        float version; //!< The glTF format version
+        std::string version; //!< The glTF format version
 
         void Read(Document& doc);
 
         AssetMetadata()
             : premultipliedAlpha(false)
-            , version(0)
+            , version("")
         {
         }
     };

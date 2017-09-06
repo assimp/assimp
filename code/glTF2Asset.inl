@@ -985,15 +985,21 @@ inline void Scene::Read(Value& obj, Asset& r)
 
 inline void AssetMetadata::Read(Document& doc)
 {
-    // read the version, etc.
-    std::string statedVersion;
-
     if (Value* obj = FindObject(doc, "asset")) {
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
 
         premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
-        statedVersion = MemberOrDefault(*obj, "version", "0.0");
+
+        if (Value* versionString = FindString(*obj, "version")) {
+            version = versionString->GetString();
+        } else if (Value* versionNumber = FindNumber (*obj, "version")) {
+            char buf[4];
+
+            ai_snprintf(buf, 4, "%.1f", versionNumber->GetDouble());
+
+            version = buf;
+        }
 
         if (Value* profile = FindObject(*obj, "profile")) {
             ReadMember(*profile, "api",     this->profile.api);
@@ -1001,19 +1007,8 @@ inline void AssetMetadata::Read(Document& doc)
         }
     }
 
-    float statedFloatVersion = std::strtof(statedVersion.c_str(), 0);
-
-    version = std::max(statedFloatVersion, version);
-
-    if (version == 0) {
-        // if missing version, we'll assume version 2.0...
-        version = 2;
-    }
-
-    if (version != 2) {
-        char msg[128];
-        ai_snprintf(msg, 128, "GLTF: Unsupported glTF version: %.1f", version);
-        throw DeadlyImportError(msg);
+    if (version.empty() || version[0] != '2') {
+        throw DeadlyImportError("GLTF: Unsupported glTF version: " + version);
     }
 }
 

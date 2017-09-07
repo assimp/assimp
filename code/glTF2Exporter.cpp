@@ -101,10 +101,6 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     mAsset.reset( new Asset( pIOSystem ) );
 
-    if (isBinary) {
-        mAsset->SetAsBinary();
-    }
-
     ExportMetadata();
 
     ExportMaterials();
@@ -121,11 +117,7 @@ glTF2Exporter::glTF2Exporter(const char* filename, IOSystem* pIOSystem, const ai
 
     AssetWriter writer(*mAsset);
 
-    if (isBinary) {
-        writer.WriteGLBFile(filename);
-    } else {
-        writer.WriteFile(filename);
-    }
+    writer.WriteFile(filename);
 }
 
 /*

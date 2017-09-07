@@ -179,21 +179,7 @@ namespace glTF2 {
     inline void Write(Value& obj, Image& img, AssetWriter& w)
     {
         std::string uri;
-        if (w.mAsset.extensionsUsed.KHR_binary_glTF && img.bufferView) {
-            Value exts, ext;
-            exts.SetObject();
-            ext.SetObject();
-
-            ext.AddMember("bufferView", img.bufferView->index, w.mAl);
-
-            if (!img.mimeType.empty())
-                ext.AddMember("mimeType", StringRef(img.mimeType), w.mAl);
-
-            exts.AddMember("KHR_binary_glTF", ext, w.mAl);
-            obj.AddMember("extensions", exts, w.mAl);
-            return;
-        }
-        else if (img.HasData()) {
+        if (img.HasData()) {
             uri = "data:" + (img.mimeType.empty() ? "application/octet-stream" : img.mimeType);
             uri += ";base64,";
             Util::EncodeBase64(img.GetData(), img.GetDataLength(), uri);
@@ -577,77 +563,6 @@ namespace glTF2 {
         }
     }
 
-    inline void AssetWriter::WriteGLBFile(const char* path)
-    {
-        std::unique_ptr<IOStream> outfile(mAsset.OpenFile(path, "wb", true));
-
-        if (outfile == 0) {
-            throw DeadlyExportError("Could not open output file: " + std::string(path));
-        }
-
-        // we will write the header later, skip its size
-        outfile->Seek(sizeof(GLB_Header), aiOrigin_SET);
-
-        StringBuffer docBuffer;
-        Writer<StringBuffer> writer(docBuffer);
-        mDoc.Accept(writer);
-
-        if (outfile->Write(docBuffer.GetString(), docBuffer.GetSize(), 1) != 1) {
-            throw DeadlyExportError("Failed to write scene data!");
-        }
-
-        WriteBinaryData(outfile.get(), docBuffer.GetSize());
-    }
-
-    inline void AssetWriter::WriteBinaryData(IOStream* outfile, size_t sceneLength)
-    {
-        //
-        // write the body data
-        //
-
-        size_t bodyLength = 0;
-        if (Ref<Buffer> b = mAsset.GetBodyBuffer()) {
-            bodyLength = b->byteLength;
-
-            if (bodyLength > 0) {
-                size_t bodyOffset = sizeof(GLB_Header) + sceneLength;
-                bodyOffset = (bodyOffset + 3) & ~3; // Round up to next multiple of 4
-
-                outfile->Seek(bodyOffset, aiOrigin_SET);
-
-                if (outfile->Write(b->GetPointer(), b->byteLength, 1) != 1) {
-                    throw DeadlyExportError("Failed to write body data!");
-                }
-            }
-        }
-
-        //
-        // write the header
-        //
-
-        GLB_Header header;
-        memcpy(header.magic, AI_GLB_MAGIC_NUMBER, sizeof(header.magic));
-
-        header.version = 2;
-        AI_SWAP4(header.version);
-
-        header.length = uint32_t(sizeof(header) + sceneLength + bodyLength);
-        AI_SWAP4(header.length);
-
-        header.sceneLength = uint32_t(sceneLength);
-        AI_SWAP4(header.sceneLength);
-
-        header.sceneFormat = SceneFormat_JSON;
-        AI_SWAP4(header.sceneFormat);
-
-        outfile->Seek(0, aiOrigin_SET);
-
-        if (outfile->Write(&header, 1, sizeof(header)) != sizeof(header)) {
-            throw DeadlyExportError("Failed to write the header!");
-        }
-    }
-
-
     inline void AssetWriter::WriteMetadata()
     {
         Value asset;
@@ -662,9 +577,6 @@ namespace glTF2 {
         Value exts;
         exts.SetArray();
         {
-            //if (false)
-            //    exts.PushBack(StringRef("KHR_binary_glTF"), mAl);
-
             // This is used to export pbrSpecularGlossiness materials with GLTF 2.
             if (this->mAsset.extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
                 exts.PushBack(StringRef("KHR_materials_pbrSpecularGlossiness"), mAl);

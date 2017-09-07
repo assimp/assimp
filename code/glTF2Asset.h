@@ -43,7 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Declares a glTF class to handle gltf/glb files
  *
  * glTF Extensions Support:
- *   KHR_binary_glTF: full
  *   KHR_materials_pbrSpecularGlossiness full
  */
 #ifndef GLTF2ASSET_H_INC
@@ -192,17 +191,6 @@ namespace glTF2
     #ifdef ASSIMP_API
         #include "./../include/assimp/Compiler/pushpack1.h"
     #endif
-
-    //! For the KHR_binary_glTF extension (binary .glb file)
-    //! 20-byte header (+ the JSON + a "body" data section)
-    struct GLB_Header
-    {
-        uint8_t magic[4];     //!< Magic number: "glTF"
-        uint32_t version;     //!< Version number
-        uint32_t length;      //!< Total length of the Binary glTF, including header, scene, and body, in bytes
-        uint32_t sceneLength; //!< Length, in bytes, of the glTF scene
-        uint32_t sceneFormat; //!< Specifies the format of the glTF scene (see the SceneFormat enum)
-    } PACK_STRUCT;
 
     #ifdef ASSIMP_API
         #include "./../include/assimp/Compiler/poppack1.h"
@@ -1049,7 +1037,6 @@ namespace glTF2
         //! Keeps info about the enabled extensions
         struct Extensions
         {
-            bool KHR_binary_glTF;
             bool KHR_materials_pbrSpecularGlossiness;
 
         } extensionsUsed;
@@ -1097,10 +1084,7 @@ namespace glTF2
         }
 
         //! Main function
-        void Load(const std::string& file, bool isBinary = false);
-
-        //! Enables the "KHR_binary_glTF" extension on the asset
-        void SetAsBinary();
+        void Load(const std::string& file);
 
         //! Search for an available name, starting from the given strings
         std::string FindUniqueID(const std::string& str, const char* suffix);
@@ -1109,10 +1093,7 @@ namespace glTF2
             { return mBodyBuffer; }
 
     private:
-        void ReadBinaryHeader(IOStream& stream);
-
         void ReadExtensionsUsed(Document& doc);
-
 
         IOStream* OpenFile(std::string path, const char* mode, bool absolute = false);
     };

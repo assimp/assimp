@@ -74,7 +74,7 @@ static const aiImporterDesc desc = {
     "",
     "",
     "",
-    aiImporterFlags_SupportTextFlavour | aiImporterFlags_SupportBinaryFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,
+    aiImporterFlags_SupportTextFlavour | aiImporterFlags_LimitedSupport | aiImporterFlags_Experimental,
     0,
     0,
     0,
@@ -103,13 +103,13 @@ bool glTF2Importer::CanRead(const std::string& pFile, IOSystem* pIOHandler, bool
 {
     const std::string &extension = GetExtension(pFile);
 
-    if (extension != "gltf") // We currently can't read glTF2 binary files (.glb)
+    if (extension != "gltf") // We currently can't read glTF2 binary files (.glb), yet
         return false;
 
     if (checkSig && pIOHandler) {
         glTF2::Asset asset(pIOHandler);
         try {
-            asset.Load(pFile, extension == "glb");
+            asset.Load(pFile);
             std::string version = asset.asset.version;
             return !version.empty() && version[0] == '2';
         } catch (...) {
@@ -615,14 +615,11 @@ void glTF2Importer::InternReadFile(const std::string& pFile, aiScene* pScene, IO
 
     // read the asset file
     glTF2::Asset asset(pIOHandler);
-    asset.Load(pFile, GetExtension(pFile) == "glb");
-
+    asset.Load(pFile);
 
     //
     // Copy the data out
     //
-
-
 
     ImportEmbeddedTextures(asset);
     ImportMaterials(asset);

@@ -998,7 +998,6 @@ namespace glTF2
     {
         std::string copyright; //!< A copyright message suitable for display to credit the content creator.
         std::string generator; //!< Tool that generated this glTF model.Useful for debugging.
-        bool premultipliedAlpha; //!< Specifies if the shaders were generated with premultiplied alpha. (default: false)
 
         struct {
             std::string api;     //!< Specifies the target rendering API (default: "WebGL")
@@ -1009,11 +1008,7 @@ namespace glTF2
 
         void Read(Document& doc);
 
-        AssetMetadata()
-            : premultipliedAlpha(false)
-            , version("")
-        {
-        }
+        AssetMetadata() : version("") {}
     };
 
     //

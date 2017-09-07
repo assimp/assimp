@@ -989,8 +989,6 @@ inline void AssetMetadata::Read(Document& doc)
         ReadMember(*obj, "copyright", copyright);
         ReadMember(*obj, "generator", generator);
 
-        premultipliedAlpha = MemberOrDefault(*obj, "premultipliedAlpha", false);
-
         if (Value* versionString = FindString(*obj, "version")) {
             version = versionString->GetString();
         } else if (Value* versionNumber = FindNumber (*obj, "version")) {

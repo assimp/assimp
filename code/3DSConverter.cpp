@@ -56,18 +56,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Assimp;
 
+static const unsigned int NotSet = 0xcdcdcdcd;
+
 // ------------------------------------------------------------------------------------------------
 // Setup final material indices, generae a default material if necessary
 void Discreet3DSImporter::ReplaceDefaultMaterial()
 {
-
     // Try to find an existing material that matches the
     // typical default material setting:
     // - no textures
     // - diffuse color (in grey!)
     // NOTE: This is here to workaround the fact that some
     // exporters are writing a default material, too.
-    unsigned int idx = 0xcdcdcdcd;
+    unsigned int idx( NotSet );
     for (unsigned int i = 0; i < mScene->mMaterials.size();++i)
     {
         std::string s = mScene->mMaterials[i].mName;
@@ -93,7 +94,9 @@ void Discreet3DSImporter::ReplaceDefaultMaterial()
         }
         idx = i;
     }
-    if (0xcdcdcdcd == idx)idx = (unsigned int)mScene->mMaterials.size();
+    if ( NotSet == idx ) {
+        idx = ( unsigned int )mScene->mMaterials.size();
+    }
 
     // now iterate through all meshes and through all faces and
     // find all faces that are using the default material

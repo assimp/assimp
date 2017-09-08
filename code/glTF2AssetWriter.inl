@@ -380,10 +380,10 @@ namespace glTF2 {
                 {
                     WriteAttrs(w, attrs, p.attributes.position, "POSITION");
                     WriteAttrs(w, attrs, p.attributes.normal, "NORMAL");
-                    WriteAttrs(w, attrs, p.attributes.texcoord, "TEXCOORD_0", true);
-                    WriteAttrs(w, attrs, p.attributes.color, "COLOR_0");
-                    WriteAttrs(w, attrs, p.attributes.joint, "JOINTS_0");
-                    WriteAttrs(w, attrs, p.attributes.weight, "WEIGHTS_0");
+                    WriteAttrs(w, attrs, p.attributes.texcoord, "TEXCOORD", true);
+                    WriteAttrs(w, attrs, p.attributes.color, "COLOR", true);
+                    WriteAttrs(w, attrs, p.attributes.joint, "JOINTS", true);
+                    WriteAttrs(w, attrs, p.attributes.weight, "WEIGHTS", true);
                 }
                 prim.AddMember("attributes", attrs, w.mAl);
             }

@@ -389,8 +389,6 @@ void glTF2Exporter::GetMatColor(const aiMaterial* mat, vec3& prop, const char* p
 
 void glTF2Exporter::ExportMaterials()
 {
-    bool& KHR_materials_pbrSpecularGlossiness = mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness;
-
     aiString aiName;
     for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
         const aiMaterial* mat = mScene->mMaterials[i];
@@ -442,8 +440,8 @@ void glTF2Exporter::ExportMaterials()
 
         if (hasPbrSpecularGlossiness) {
 
-            if (!KHR_materials_pbrSpecularGlossiness) {
-                KHR_materials_pbrSpecularGlossiness = true;
+            if (!mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness) {
+                mAsset->extensionsUsed.KHR_materials_pbrSpecularGlossiness = true;
             }
 
             PbrSpecularGlossiness pbrSG;

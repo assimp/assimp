@@ -618,7 +618,7 @@ bool PLY::DOM::ParseInstanceBinary(IOStreamBuffer<char> &streamBuffer, DOM* p_pc
   }
 
   streamBuffer.getNextBlock(buffer);
-  unsigned int bufferSize = buffer.size();
+  unsigned int bufferSize = static_cast<unsigned int>(buffer.size());
   const char* pCur = (char*)&buffer[0];
   if (!p_pcOut->ParseElementInstanceListsBinary(streamBuffer, buffer, pCur, bufferSize, loader, p_bBE))
   {
@@ -1025,7 +1025,7 @@ bool PLY::PropertyInstance::ParseValueBinary(IOStreamBuffer<char> &streamBuffer,
       buffer = std::vector<char>(buffer.end() - bufferSize, buffer.end());
       buffer.insert(buffer.end(), nbuffer.begin(), nbuffer.end());
       nbuffer.clear();
-      bufferSize = buffer.size();
+      bufferSize = static_cast<unsigned int>(buffer.size());
       pCur = (char*)&buffer[0];
     }
     else

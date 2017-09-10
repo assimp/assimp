@@ -325,7 +325,7 @@ inline size_t WriteArray(IOStream * stream, const T* in, unsigned int size)
         {
             AssbinChunkWriter chunk( container, ASSBIN_CHUNK_AINODE );
 
-			size_t nb_metadata = (node->mMetaData != NULL ? node->mMetaData->mNumProperties : 0);
+			unsigned int nb_metadata = (node->mMetaData != NULL ? node->mMetaData->mNumProperties : 0);
 
             Write<aiString>(&chunk,node->mName);
             Write<aiMatrix4x4>(&chunk,node->mTransformation);

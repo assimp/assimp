@@ -886,7 +886,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             timeData[i] = nodeChannel->mPositionKeys[frameIndex].mTime / ticksPerSecond;
         }
 
-        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, numKeyframes, &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
+        Ref<Accessor> timeAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), &timeData[0], AttribType::SCALAR, AttribType::SCALAR, ComponentType_FLOAT);
         if (timeAccessor) animRef->Parameters.TIME = timeAccessor;
     }
 
@@ -899,7 +899,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             translationData[i] = nodeChannel->mPositionKeys[frameIndex].mValue;
         }
 
-        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, numKeyframes, translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> tranAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), translationData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if ( tranAccessor ) {
             animRef->Parameters.translation = tranAccessor;
         }
@@ -915,7 +915,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             scaleData[i] = nodeChannel->mScalingKeys[frameIndex].mValue;
         }
 
-        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, numKeyframes, scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
+        Ref<Accessor> scaleAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), scaleData, AttribType::VEC3, AttribType::VEC3, ComponentType_FLOAT);
         if ( scaleAccessor ) {
             animRef->Parameters.scale = scaleAccessor;
         }
@@ -934,7 +934,7 @@ inline void ExtractAnimationData(Asset& mAsset, std::string& animId, Ref<Animati
             rotationData[i][3] = nodeChannel->mRotationKeys[frameIndex].mValue.w;
         }
 
-        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, numKeyframes, rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
+        Ref<Accessor> rotAccessor = ExportData(mAsset, animId, buffer, static_cast<unsigned int>(numKeyframes), rotationData, AttribType::VEC4, AttribType::VEC4, ComponentType_FLOAT);
         if ( rotAccessor ) {
             animRef->Parameters.rotation = rotAccessor;
         }
@@ -989,7 +989,7 @@ void glTF2Exporter::ExportAnimations()
                 Animation::AnimChannel tmpAnimChannel;
                 Animation::AnimSampler tmpAnimSampler;
 
-                tmpAnimChannel.sampler = animRef->Samplers.size();
+                tmpAnimChannel.sampler = static_cast<int>(animRef->Samplers.size());
                 tmpAnimChannel.target.path = channelType;
                 tmpAnimSampler.output = channelType;
                 tmpAnimSampler.id = name + "_" + channelType;

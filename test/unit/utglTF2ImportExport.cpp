@@ -55,6 +55,7 @@ public:
         return nullptr != scene;
     }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
     virtual bool exporterTest() {
         Assimp::Importer importer;
         Assimp::Exporter exporter;
@@ -64,12 +65,16 @@ public:
 
         return true;
     }
+#endif // ASSIMP_BUILD_NO_EXPORT
+
 };
 
 TEST_F( utglTF2ImportExport, importglTF2FromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
 
+#ifndef ASSIMP_BUILD_NO_EXPORT
 TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
     EXPECT_TRUE( exporterTest() );
 }
+#endif // ASSIMP_BUILD_NO_EXPORT

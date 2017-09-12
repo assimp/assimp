@@ -45,7 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace pmx
 {
-	/// インデックス値を読み込む
 	int ReadIndex(std::istream *stream, int size)
 	{
 		switch (size)
@@ -79,7 +78,6 @@ namespace pmx
 		}
 	}
 
-	/// 文字列を読み込む
 	std::string ReadString(std::istream *stream, uint8_t encoding)
 	{
 		int size;
@@ -607,7 +605,6 @@ namespace pmx
 			this->joints[i].Read(stream, &setting);
 		}
 
-		//// ソフトボディ
 		//if (this->version == 2.1f)
 		//{
 		//	stream->read((char*) &this->soft_body_count, sizeof(int));

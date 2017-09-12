@@ -300,7 +300,7 @@ namespace glTF2 {
         }
 
         if (m.alphaMode != "OPAQUE") {
-            obj.AddMember("alphaMode", m.alphaMode, w.mAl);
+            obj.AddMember("alphaMode", Value(m.alphaMode, w.mAl).Move(), w.mAl);
         }
 
         if (m.doubleSided) {

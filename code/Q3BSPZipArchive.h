@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <contrib/unzip/unzip.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
-#include <string>
 #include <vector>
 #include <map>
 #include <cassert>

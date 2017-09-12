@@ -116,6 +116,7 @@ SET( TEST_SRCS
   unit/utRemoveRedundantMaterials.cpp
   unit/utRemoveVCProcess.cpp
   unit/utScenePreprocessor.cpp
+  unit/utSceneCombiner.cpp
   unit/utSharedPPData.cpp
   unit/utStringUtils.cpp
   unit/utSMDImportExport.cpp
@@ -130,6 +131,7 @@ SET( TEST_SRCS
   unit/utVector3.cpp
   unit/utXImporterExporter.cpp
   unit/utD3MFImportExport.cpp
+  unit/utQ3DImportExport.cpp
   unit/utProfiler.cpp
 )
 

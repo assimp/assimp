@@ -39,31 +39,32 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
 #include "UnitTestPCH.h"
-#include "AbstractImportExportBase.h"
+#include <assimp/SceneCombiner.h>
+#include <assimp/mesh.h>
 
-#include <assimp/Importer.hpp>
+using namespace ::Assimp;
 
-using namespace Assimp;
-
-
-class utOpenGEXImportExport : public AbstractImportExportBase {
-public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/Example.ogex", 0 );
-        return nullptr != scene;
-    }
+class utSceneCombiner : public ::testing::Test {
+    // empty
 };
 
-TEST_F( utOpenGEXImportExport, importLWSFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
-}
+TEST_F( utSceneCombiner, MergeMeshes_ValidNames_Test ) {
+    std::vector<aiMesh*> merge_list;
+    aiMesh *mesh1 = new aiMesh;
+    mesh1->mName.Set( "mesh_1" );
+    merge_list.push_back( mesh1 );
 
-TEST_F( utOpenGEXImportExport, Importissue1262_NoCrash ) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/light_issue1262.ogex", 0 );
-    EXPECT_NE( nullptr, scene );
+    aiMesh *mesh2 = new aiMesh;
+    mesh2->mName.Set( "mesh_2" );
+    merge_list.push_back( mesh2 );
 
+    aiMesh *mesh3 = new aiMesh;
+    mesh3->mName.Set( "mesh_3" );
+    merge_list.push_back( mesh3 );
+
+    aiMesh *out( nullptr );
+    SceneCombiner::MergeMeshes( &out, 0, merge_list.begin(), merge_list.end() );
+    std::string outName = out->mName.C_Str();
+    EXPECT_EQ( "mesh_1.mesh_2.mesh_3", outName );
 }

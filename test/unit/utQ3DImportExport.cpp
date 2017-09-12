@@ -39,31 +39,23 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-
 #include "UnitTestPCH.h"
+
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
 
 using namespace Assimp;
 
-
-class utOpenGEXImportExport : public AbstractImportExportBase {
+class utQ3DImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/Example.ogex", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/Q3D/earth.q3o", 0 );
         return nullptr != scene;
     }
 };
 
-TEST_F( utOpenGEXImportExport, importLWSFromFileTest ) {
+TEST_F(utQ3DImportExport, importTest) {
     EXPECT_TRUE( importerTest() );
-}
-
-TEST_F( utOpenGEXImportExport, Importissue1262_NoCrash ) {
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/OpenGEX/light_issue1262.ogex", 0 );
-    EXPECT_NE( nullptr, scene );
-
 }

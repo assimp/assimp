@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace Assimp {
 namespace FBX {
 
-    using namespace Util;
+using namespace Util;
 
 // ------------------------------------------------------------------------------------------------
 NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document& doc, const std::string& name)
@@ -75,7 +75,7 @@ NodeAttribute::NodeAttribute(uint64_t id, const Element& element, const Document
 // ------------------------------------------------------------------------------------------------
 NodeAttribute::~NodeAttribute()
 {
-
+    // empty
 }
 
 
@@ -101,33 +101,30 @@ CameraSwitcher::CameraSwitcher(uint64_t id, const Element& element, const Docume
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 CameraSwitcher::~CameraSwitcher()
 {
-
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Camera::Camera(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : NodeAttribute(id,element,doc,name)
 {
-
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Camera::~Camera()
 {
+    // empty
 }
-
 
 // ------------------------------------------------------------------------------------------------
 Light::Light(uint64_t id, const Element& element, const Document& doc, const std::string& name)
 : NodeAttribute(id,element,doc,name)
 {
-
+    // empty
 }
 
 

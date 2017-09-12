@@ -276,16 +276,16 @@ void glTF2Exporter::GetTexSampler(const aiMaterial* mat, Ref<Texture> texture, a
 
 void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, unsigned int& prop, const char* propName, aiTextureType tt, unsigned int slot)
 {
-    const char* key = (std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName).c_str();
+    std::string textureKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName;
 
-    mat->Get(key, tt, slot, prop);
+    mat->Get(textureKey.c_str(), tt, slot, prop);
 }
 
 void glTF2Exporter::GetMatTexProp(const aiMaterial* mat, float& prop, const char* propName, aiTextureType tt, unsigned int slot)
 {
-    const char* key = (std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName).c_str();
+    std::string textureKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + propName;
 
-    mat->Get(key, tt, slot, prop);
+    mat->Get(textureKey.c_str(), tt, slot, prop);
 }
 
 void glTF2Exporter::GetMatTex(const aiMaterial* mat, Ref<Texture>& texture, aiTextureType tt, unsigned int slot = 0)

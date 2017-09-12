@@ -82,6 +82,10 @@ OPTION ( ASSIMP_WERROR
   "Treat warnings as errors."
   OFF
 )
+OPTION ( ASSIMP_ASAN
+  "Enable AddressSanitizer."
+  OFF
+)
 OPTION ( SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
@@ -221,6 +225,11 @@ endif()
 if (ASSIMP_WERROR)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+endif()
+
+if (ASSIMP_ASAN)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
 endif()
 
 INCLUDE (FindPkgMacros)

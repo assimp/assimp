@@ -52,7 +52,8 @@ __Importers__:
 - DXF
 - ENFF
 - FBX
-- GLB/GLTF
+- glTF 1.0 + GLB
+- glTF 2.0
 - HMB
 - IFC-STEP
 - IRR / IRRMESH
@@ -106,8 +107,8 @@ __Exporters__:
 - JSON (for WebGl, via https://github.com/acgessler/assimp2json)
 - ASSBIN
 - STEP
-- glTF (partial)
-- glTF2.0
+- glTF 1.0 (partial)
+- glTF 2.0 (partial)
 
 ### Building ###
 Take a look into the `INSTALL` file. Our build system is CMake, if you used CMake before there is a good chance you know what to do.

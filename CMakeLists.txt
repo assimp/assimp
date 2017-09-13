@@ -78,10 +78,6 @@ OPTION ( ASSIMP_COVERALLS
   "Enable this to measure test coverage."
   OFF
 )
-OPTION ( ASSIMP_ASAN
-  "Enable AddressSanitizer."
-  OFF
-)
 OPTION ( SYSTEM_IRRXML
   "Use system installed Irrlicht/IrrXML library."
   OFF
@@ -214,11 +210,6 @@ if (ASSIMP_COVERALLS)
     INCLUDE(Coveralls)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-endif()
-
-if (ASSIMP_ASAN)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
 endif()
 
 INCLUDE (FindPkgMacros)

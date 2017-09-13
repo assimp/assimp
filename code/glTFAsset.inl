@@ -341,7 +341,7 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
         stream.Seek(baseOffset, aiOrigin_SET);
     }
 
-    mData.reset(new uint8_t[byteLength], std::default_delete<uint8_t[]>());
+    mData.reset(new uint8_t[byteLength]);
 
     if (stream.Read(mData.get(), byteLength, 1) != 1) {
         return false;

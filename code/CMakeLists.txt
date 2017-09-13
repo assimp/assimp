@@ -666,6 +666,8 @@ ADD_ASSIMP_IMPORTER( GLTF
   glTF2Asset.inl
   glTF2AssetWriter.h
   glTF2AssetWriter.inl
+  glTF2Importer.cpp
+  glTF2Importer.h
   glTF2Exporter.h
   glTF2Exporter.cpp
 )

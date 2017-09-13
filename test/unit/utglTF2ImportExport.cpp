@@ -43,18 +43,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractImportExportBase.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/Exporter.hpp>
 
 using namespace Assimp;
 
-class utglTFImportExport : public AbstractImportExportBase {
+class utglTF2ImportExport : public AbstractImportExportBase {
 public:
     virtual bool importerTest() {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", 0 );
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", 0);
         return nullptr != scene;
     }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+    virtual bool exporterTest() {
+        Assimp::Importer importer;
+        Assimp::Exporter exporter;
+        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured.gltf", 0 );
+        EXPECT_NE( nullptr, scene );
+        EXPECT_EQ( aiReturn_SUCCESS, exporter.Export( scene, "gltf2", ASSIMP_TEST_MODELS_DIR "/glTF2/BoxTextured-glTF/BoxTextured_out.gltf" ) );
+
+        return true;
+    }
+#endif // ASSIMP_BUILD_NO_EXPORT
+
 };
 
-TEST_F( utglTFImportExport, importglTFFromFileTest ) {
+TEST_F( utglTF2ImportExport, importglTF2FromFileTest ) {
     EXPECT_TRUE( importerTest() );
 }
+
+#ifndef ASSIMP_BUILD_NO_EXPORT
+TEST_F( utglTF2ImportExport, exportglTF2FromFileTest ) {
+    EXPECT_TRUE( exporterTest() );
+}
+#endif // ASSIMP_BUILD_NO_EXPORT

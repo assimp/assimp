@@ -1,16 +1,14 @@
 /*
----------------------------------------------------------------------------
 Open Asset Import Library (assimp)
----------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Copyright (c) 2006-2017, assimp team
-
 
 All rights reserved.
 
 Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
-conditions are met:
+with or without modification, are permitted provided that the
+following conditions are met:
 
 * Redistributions of source code must retain the above
 copyright notice, this list of conditions and the
@@ -37,24 +35,57 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
----------------------------------------------------------------------------
+
+----------------------------------------------------------------------
 */
-#include "UnitTestPCH.h"
-#include "AbstractImportExportBase.h"
+#ifndef AI_GLTF2IMPORTER_H_INC
+#define AI_GLTF2IMPORTER_H_INC
 
-#include <assimp/Importer.hpp>
+#include "BaseImporter.h"
+#include <assimp/DefaultIOSystem.h>
 
-using namespace Assimp;
+struct aiNode;
 
-class utglTFImportExport : public AbstractImportExportBase {
+
+namespace glTF2
+{
+    class Asset;
+}
+
+namespace Assimp {
+
+/**
+ * Load the glTF2 format.
+ * https://github.com/KhronosGroup/glTF/tree/master/specification
+ */
+class glTF2Importer : public BaseImporter{
 public:
-    virtual bool importerTest() {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile( ASSIMP_TEST_MODELS_DIR "/glTF/TwoBoxes/TwoBoxes.gltf", 0 );
-        return nullptr != scene;
-    }
+    glTF2Importer();
+    virtual ~glTF2Importer();
+    virtual bool CanRead( const std::string& pFile, IOSystem* pIOHandler, bool checkSig ) const;
+
+protected:
+    virtual const aiImporterDesc* GetInfo() const;
+    virtual void InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler );
+
+private:
+
+    std::vector<unsigned int> meshOffsets;
+
+    std::vector<int> embeddedTexIdxs;
+
+    aiScene* mScene;
+
+    void ImportEmbeddedTextures(glTF2::Asset& a);
+    void ImportMaterials(glTF2::Asset& a);
+    void ImportMeshes(glTF2::Asset& a);
+    void ImportCameras(glTF2::Asset& a);
+    void ImportLights(glTF2::Asset& a);
+    void ImportNodes(glTF2::Asset& a);
+
 };
 
-TEST_F( utglTFImportExport, importglTFFromFileTest ) {
-    EXPECT_TRUE( importerTest() );
-}
+} // Namespace assimp
+
+#endif // AI_GLTF2IMPORTER_H_INC
+

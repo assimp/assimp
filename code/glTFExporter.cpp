@@ -507,7 +507,7 @@ void glTFExporter::ExportMeshes()
 
     // Variables needed for compression. BEGIN.
     // Indices, not pointers - because pointer to buffer is changing while writing to it.
-    size_t idx_srcdata_begin;// Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
+    size_t idx_srcdata_begin = 0; // Index of buffer before writing mesh data. Also, index of begin of coordinates array in buffer.
     size_t idx_srcdata_normal = SIZE_MAX;// Index of begin of normals array in buffer. SIZE_MAX - mean that mesh has no normals.
     std::vector<size_t> idx_srcdata_tc;// Array of indices. Every index point to begin of texture coordinates array in buffer.
     size_t idx_srcdata_ind;// Index of begin of coordinates indices array in buffer.

@@ -1381,7 +1381,7 @@ void Discreet3DSImporter::ParseColorChunk( aiColor3D* out, bool acceptPercent )
         bGamma = true;
 
     case Discreet3DS::CHUNK_RGBF:
-        if (sizeof(ai_real) * 3 > diff)   {
+        if (sizeof(float) * 3 > diff)   {
             *out = clrError;
             return;
         }

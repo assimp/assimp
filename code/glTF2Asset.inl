@@ -357,7 +357,7 @@ inline bool Buffer::LoadFromStream(IOStream& stream, size_t length, size_t baseO
         stream.Seek(baseOffset, aiOrigin_SET);
     }
 
-    mData.reset(new uint8_t[byteLength]);
+    mData.reset(new uint8_t[byteLength], std::default_delete<uint8_t[]>());
 
     if (stream.Read(mData.get(), byteLength, 1) != 1) {
         return false;
@@ -451,7 +451,7 @@ inline void Buffer::Grow(size_t amount)
     if (amount <= 0) return;
     uint8_t* b = new uint8_t[byteLength + amount];
     if (mData) memcpy(b, mData.get(), byteLength);
-    mData.reset(b);
+    mData.reset(b, std::default_delete<uint8_t[]>());
     byteLength += amount;
 }
 

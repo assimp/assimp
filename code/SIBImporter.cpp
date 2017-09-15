@@ -201,7 +201,7 @@ static aiString ReadString(StreamReaderLE* stream, uint32_t numWChars)
     //ConvertUTF16toUTF8(&start, end, &dest, limit, lenientConversion);
     //*dest = '\0';
 
-    str[str.size()-1] = '\0';
+    str[str.size()] = '\0';
     // Return the final string.
     aiString result = aiString((const char *)&str[0]);
     //delete[] str;
